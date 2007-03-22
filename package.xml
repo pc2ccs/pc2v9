@@ -1,0 +1,128 @@
+<?xml version="1.0"?>
+<!-- $Id: package.xml 898 2006-12-14 06:44:37Z laned $ -->
+<!-- $HeadURL: http://pc2.ecs.csus.edu/repos/v9wip/trunk/package.xml $ -->
+<project name="package-pc2v9" default="gzip" basedir=".">
+    <!-- import build.xml instead of duplicating properties -->
+    <import file="build.xml"/>
+
+    <tstamp>
+        <format
+            property="date.english"
+            pattern="EEEE, MMMM d yyyy"
+            timezone="UTC" />
+    </tstamp>
+    <tstamp>
+        <format
+            property="time.english"
+            pattern="HH:mm z"
+            timezone="UTC" />
+    </tstamp>
+    <property
+        name="timestamp.english"
+        value="${date.english} ${time.english}" />
+
+    <!-- version is set in build.xml and can be overriden
+           on ant cmdline w/ -Dversion=9_0 -->
+    <property name="release" value="${name}-${version}"/>
+
+    <property name="build.unpack.dir" value="${build.dir}/unpack"/>
+
+    <property name="zip.name" value="${release}.zip"/>
+    <property name="zip.path" value="${dist.dir}/${zip.name}"/>
+    <property name="gzip.name" value="${release}.tar.gz"/>
+    <property name="gzip.path" value="${dist.dir}/${gzip.name}"/>
+    <property name="version.path" value="${build.dir}/VERSION"/>
+
+    <target name="zip" depends="jar">
+        <delete file="${version.path}"/>
+        <echo message="CSUS Programming Contest Control System${line.separator}" file="${version.path}"/>
+        <echo message="Version ${version} ${date} ${repo.version} (${timestamp.english})${line.separator}" file="${version.path}" append="true"/>
+
+        <zip destfile="${zip.path}">
+            <zipfileset dir="${basedir}" filemode="644" prefix="${release}">
+                <include name="README"/>
+                <include name="LICENSE"/>
+                <include name="${version.path}"/>
+                <include name="pc2v9.ini"/>
+            </zipfileset>
+            <zipfileset dir="${build.dir}" filemode="644" prefix="${release}">
+                <include name="VERSION"/>
+            </zipfileset>
+            <zipfileset dir="${scripts.dir}" filemode="755" prefix="${release}/bin">
+                <include name="pc2"/>
+                <include name="pc2.bat"/>
+                <include name="pc2admin"/>
+                <include name="pc2admin.bat"/>
+                <include name="pc2board"/>
+                <include name="pc2board.bat"/>
+                <include name="pc2judge"/>
+                <include name="pc2judge.bat"/>
+                <include name="pc2team"/>
+                <include name="pc2team.bat"/>
+                <include name="pc2server"/>
+                <include name="pc2server.bat"/>
+                <include name="pc2zip"/>
+                <include name="pc2zip.bat"/>
+                <include name="pc2reset"/>
+                <include name="pc2reset.bat"/>
+                <include name="pc2ver"/>
+                <include name="pc2ver.bat"/>
+            </zipfileset>
+            <zipfileset dir="${dist.dir}" filemode="644" includes="${jar.name}" 
+                                                 prefix="${release}/lib"/>
+            <zipfileset dir="${vendor.lib.dir}" filemode="644" prefix="${release}/lib">
+                <include name="mclb.jar"/>
+            </zipfileset>
+            <zipfileset dir="${samps.dir}" filemode="644" prefix="${release}/samps">
+                <exclude name="compile*"/>
+                <exclude name="sleep.exe"/>
+            </zipfileset>
+            <zipfileset dir="${samps.dir}" filemode="755" prefix="${release}/samps">
+                <include name="compile*"/>
+                <include name="sleep.exe"/>
+            </zipfileset>
+ 
+        </zip>
+        <checksum file="${zip.path}" algorithm="MD5" fileext=".md5.txt"/>
+        <checksum file="${zip.path}" algorithm="SHA" fileext=".sha1.txt"/>
+    </target>
+
+    <target name="gzip" depends="zip">
+        <delete  dir="${build.unpack.dir}" />
+        <mkdir dir="${build.unpack.dir}" />
+        <unzip src="${zip.path}" dest="${build.unpack.dir}"/>
+        <tar destfile="${gzip.path}" basedir="${build.unpack.dir}" compression="gzip" excludes="${release}/bin/**,${release}/samps/**">
+             <tarfileset mode="755" dir="${build.unpack.dir}">
+                 <include name="${release}/bin/**"/>
+                 <include name="${release}/samps/**"/>
+        <!-- grr, there should be an easier way to do this -->
+        <exclude name="${release}/samps/*.c"/>
+        <exclude name="${release}/samps/*.cpp"/>
+        <exclude name="${release}/samps/*.dpr"/>
+        <exclude name="${release}/samps/*.f"/>
+        <exclude name="${release}/samps/*.java"/>
+        <exclude name="${release}/samps/*.pas"/>
+        <exclude name="${release}/samps/*.st"/>
+        <exclude name="${release}/samps/*.ans"/>
+        <exclude name="${release}/samps/*.dat"/>
+        <exclude name="${release}/samps/*.in"/>
+        <exclude name="${release}/samps/*.ini"/>
+             </tarfileset>
+             <tarfileset mode="644" dir="${build.unpack.dir}">
+        <include name="${release}/samps/*.c"/>
+        <include name="${release}/samps/*.cpp"/>
+        <include name="${release}/samps/*.dpr"/>
+        <include name="${release}/samps/*.f"/>
+        <include name="${release}/samps/*.java"/>
+        <include name="${release}/samps/*.pas"/>
+        <include name="${release}/samps/*.st"/>
+        <include name="${release}/samps/*.ans"/>
+        <include name="${release}/samps/*.dat"/>
+        <include name="${release}/samps/*.in"/>
+        <include name="${release}/samps/*.ini"/>
+             </tarfileset>
+        </tar>
+        <checksum file="${gzip.path}" algorithm="MD5" fileext=".md5.txt"/>
+        <checksum file="${gzip.path}" algorithm="SHA" fileext=".sha1.txt"/>
+    </target>
+</project>

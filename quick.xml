@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!-- $Id: package.xml 898 2006-12-14 06:44:37Z laned $ -->
+<!-- $HeadURL: http://pc2.ecs.csus.edu/repos/v9wip/trunk/package.xml $ -->
+<project name="pc2v9quickBuild" default="jaronly" basedir=".">
+    <!-- import build.xml instead of duplicating properties -->
+    <import file="build.xml"/>
+    <property name="repo.version" value="7xx" />
+
+    <!-- this is the jar target from build.xml with a defirrent name/depends -->
+    <target name="jaronly" depends="compile" description="creates a jar of our classes no testing">
+        <mkdir dir="${dist.dir}" />
+
+        <!-- consider doing the manifest in a separate target
+             then the Version can be ommitted if not set -->
+        <jar jarfile="${jar.path}" basedir="${build.prod.dir}">
+            <manifest>
+                <attribute name="Version" value="${version}"/>
+                <attribute name="Package-Title" value="CSUS Programming Contest Control System"/>
+                <attribute name="Package-Version" value="${repo.version}"/>
+            </manifest>
+        </jar>
+    </target>
+
+</project>
