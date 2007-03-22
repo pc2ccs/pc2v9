@@ -1,4 +1,4 @@
-package src.edu.csus.ecs.pc2.logging;
+package edu.csus.ecs.pc2.logging;
 
 /**
  * 

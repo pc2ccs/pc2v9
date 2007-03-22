@@ -1,7 +1,7 @@
 package edu.csus.ecs.pc2;
 
-import src.edu.csus.ecs.pc2.logging.Log;
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.logging.Log;
 
 /**
  * System Version Information.
