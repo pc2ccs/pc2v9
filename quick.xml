@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<!-- $Id: package.xml 898 2006-12-14 06:44:37Z laned $ -->
-<!-- $HeadURL: http://pc2.ecs.csus.edu/repos/v9wip/trunk/package.xml $ -->
+<!-- $Id$ -->
+<!-- $HeadURL$ -->
 <project name="pc2v9quickBuild" default="jaronly" basedir=".">
     <!-- import build.xml instead of duplicating properties -->
     <import file="build.xml"/>

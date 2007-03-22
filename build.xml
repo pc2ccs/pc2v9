@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<!-- $Id: build.xml 937 2007-03-22 21:22:42Z boudreat $ -->
-<!-- $HeadURL: http://pc2.ecs.csus.edu/repos/v9wip/trunk/build.xml $ -->
+<!-- $Id$ -->
+<!-- $HeadURL$ -->
 <project name="pc2v9" default="jar" basedir=".">
 	<description>
          simple v9 build file
