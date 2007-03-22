@@ -17,10 +17,10 @@ import java.util.Vector;
  * @author pc2@ecs.csus.edu
  */
 
-// $HeadURL: http://pc2.ecs.csus.edu/repos/v9wip/trunk/src/edu/csus/ecs/pc2/core/Utilities.java $
+// $HeadURL$
 public final class Utilities {
 
-    public static final String SVN_ID = "$Id: Utilities.java 882 2006-12-09 20:07:56Z boudreat $";
+    public static final String SVN_ID = "$Id$";
 
     /**
      * Constructor is private as this is a utility class which
