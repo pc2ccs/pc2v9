@@ -1,0 +1,9 @@
+#!/bin/sh
+#
+# Purpose: print version number
+# Author : pc2@ecs.csus.edu
+#
+
+java -Djava.security.policy=policy.ini edu.csus.ecs.pc2.VersionInfo
+
+# eof $Id$ 
