@@ -53,6 +53,8 @@ import edu.csus.ecs.pc2.transport.TransmissionIfier;
 // $HeadURL$
 public class Starter {
 
+    public static final String SVN_ID = "$Id$";
+
     protected Starter() {
         // this constructor required by CheckStyle.
 

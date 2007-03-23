@@ -18,9 +18,14 @@ import edu.csus.ecs.pc2.core.RunListener;
  * 
  * @author pc2@ecs.csus.edu
  */
+
+//$HeadURL$
 public class ServerView extends JFrame {
 
+    public static final String SVN_ID = "$Id$";
+
     private IModel serverModel = null;
+
     private IController serverController = null;
 
     /**
@@ -78,7 +83,7 @@ public class ServerView extends JFrame {
     /**
      * 
      * @author pc2@ecs.csus.edu
-     *      
+     * 
      */
     private class RunListenerImplementation implements RunListener {
 

@@ -6,6 +6,11 @@ import edu.csus.ecs.pc2.core.IController;
  * 
  * @author pc2@ecs.csus.edu
  */
+
+//$HeadURL$
 public interface IServerController extends IController {
+
+    public static final String SVN_ID = "$Id$";
+
 
 }

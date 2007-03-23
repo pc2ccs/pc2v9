@@ -13,7 +13,11 @@ import edu.csus.ecs.pc2.core.RunEvent.Action;
  * 
  * @author pc2@ecs.csus.edu
  */
+
+//$HeadURL$
 public class ServerModel implements IModel {
+
+    public static final String SVN_ID = "$Id$";
 
     private int runNumber = 0;
 

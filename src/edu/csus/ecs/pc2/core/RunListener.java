@@ -9,7 +9,7 @@ package edu.csus.ecs.pc2.core;
 
 // $HeadURL$
 public interface RunListener {
-    
+
     /**
      * New Run.
      * @param event

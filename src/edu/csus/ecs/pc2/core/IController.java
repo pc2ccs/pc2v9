@@ -9,8 +9,11 @@ import edu.csus.ecs.pc2.transport.TransportReceiver;
  * @author pc2@ecs.csus.edu
  */
 
-// $HeadURL:
-// http://pc2.ecs.csus.edu/repos/v9wip/trunk/src/edu.csus.ecs.pc2/IController.java $
+// $HeadURL$
 public interface IController extends TransportReceiver {
+    
+    public static final String SVN_ID = "$Id$";
+
+
 
 }

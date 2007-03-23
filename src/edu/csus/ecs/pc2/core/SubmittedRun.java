@@ -2,10 +2,16 @@ package edu.csus.ecs.pc2.core;
 
 /**
  * A run submission.
+ * 
  * @author Douglas A. Lane
  * 
  */
+
+// $HeadURL$
 public class SubmittedRun {
+
+    public static final String SVN_ID = "$Id$";
+
     private int number;
 
     private int teamNumber;

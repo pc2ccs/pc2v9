@@ -6,7 +6,11 @@ package edu.csus.ecs.pc2.core;
  * 
  * @author Douglas A. Lane
  */
+
+//$HeadURL$
 public class RunEvent {
+
+    public static final String SVN_ID = "$Id$";
 
     /**
      * Run Event States(s).
