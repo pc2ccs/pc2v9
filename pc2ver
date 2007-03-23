@@ -2,8 +2,13 @@
 #
 # Purpose: print version number
 # Author : pc2@ecs.csus.edu
+# $HeadURL$
 #
 
-java -Djava.security.policy=policy.ini edu.csus.ecs.pc2.VersionInfo
+if [ -f ../VERSION ] ; then
+  cd ..
+fi 
 
-# eof $Id$ 
+java  -cp lib/pc2.jar edu.csus.ecs.pc2.VersionInfo
+
+# eof pc2ver $Id$ 
