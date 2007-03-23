@@ -1,9 +1,11 @@
 @echo off
 
-rem Purpose: start pc2 Server and Client version 9
+rem Purpose: print pc2 version number
 rem Author : pc2@ecs.csus.edu
-rem Mon Sep 11 13:29:58 PDT 2006
+rem $HeadURL$
 
-java -Djava.security.policy=policy.ini edu.csus.ecs.pc2.VersionInfo
+if exist ..\VERSION cd ..
 
-rem eof startpc2.bat 
+java -cp lib\pc2.jar edu.csus.ecs.pc2.VersionInfo
+
+rem eof pc2ver.bat $Id$
