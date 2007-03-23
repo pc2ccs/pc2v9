@@ -75,6 +75,7 @@
                 <include name="mclb.jar"/>
             </zipfileset>
 -->
+<!-- XXX comment out vendor jars for now
             <zipfileset dir="${samps.dir}" filemode="644" prefix="${release}/samps">
                 <exclude name="compile*"/>
                 <exclude name="sleep.exe"/>
@@ -83,6 +84,7 @@
                 <include name="compile*"/>
                 <include name="sleep.exe"/>
             </zipfileset>
+-->
  
         </zip>
         <checksum file="${zip.path}" algorithm="MD5" fileext=".md5.txt"/>
