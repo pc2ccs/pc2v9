@@ -15,6 +15,8 @@ import edu.csus.ecs.pc2.transport.StaticTransport;
 // $HeadURL$
 public class TeamController extends Controller implements ITeamController {
 
+    public static final String SVN_ID = "$Id$";
+
     private IModel model = null;
 
     public TeamController(IModel model) {

@@ -28,6 +28,8 @@ import edu.csus.ecs.pc2.core.RunListener;
 // $HeadURL$
 public class TeamView extends JFrame  {
 
+    public static final String SVN_ID = "$Id$";
+
     private IModel theModel = null;
 
     private ITeamController teamController = null;

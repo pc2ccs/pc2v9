@@ -12,8 +12,5 @@ import edu.csus.ecs.pc2.transport.TransportReceiver;
 // $HeadURL$
 public interface IController extends TransportReceiver {
     
-    public static final String SVN_ID = "$Id$";
-
-
 
 }

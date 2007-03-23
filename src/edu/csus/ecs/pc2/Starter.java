@@ -10,7 +10,7 @@ import edu.csus.ecs.pc2.team.TeamController;
 import edu.csus.ecs.pc2.team.TeamModel;
 import edu.csus.ecs.pc2.team.TeamView;
 import edu.csus.ecs.pc2.transport.StaticTransport;
-import edu.csus.ecs.pc2.transport.TransmissionIfier;
+import edu.csus.ecs.pc2.transport.QuickTransport;
 
 /**
  * Starter class.
@@ -76,7 +76,7 @@ public class Starter {
 
         // Create static transport server to client, client to server.
 
-        StaticTransport.setTransmissionIfier(new TransmissionIfier(serverController, teamController));
+        StaticTransport.setTransmissionIfier(new QuickTransport(serverController, teamController));
 
         TeamView viewWindow = new TeamView(model, teamController);
         System.out.println("Started TeamView class ");

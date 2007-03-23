@@ -18,6 +18,8 @@ import edu.csus.ecs.pc2.core.RunEvent.Action;
 // $HeadURL$
 public class TeamModel implements  IModel {
 
+    public static final String SVN_ID = "$Id$";
+
     private Vector<RunListener> runListenterList = new Vector<RunListener>();
 
     private Vector<SubmittedRun> runList = new Vector<SubmittedRun>();
