@@ -1,6 +1,5 @@
 package edu.csus.ecs.pc2.core;
 
-
 /**
  * Specifies methods used to manipulate contest data.
  * 
@@ -21,7 +20,7 @@ public interface IModel {
      * @param submittedRun
      */
     void addRun(SubmittedRun submittedRun);
-    
+
     /**
      * Add a run into the contest data, return updated Submitted Run.
      * 
@@ -29,5 +28,31 @@ public interface IModel {
      * @return
      */
     SubmittedRun acceptRun(SubmittedRun submittedRun) throws Exception;
+
+    /**
+     * Add new accounts.
+     * 
+     * @param clientTypeName
+     *            name of client type, "team", "judge", etc.
+     * @param count
+     *            number of accounts to add
+     * @param active
+     *            set to True if the accounts are active
+     */
+    void generateNewAccounts(String clientTypeName, int count, boolean active);
+
+    /**
+     * Add a new account listener.
+     * 
+     * @param accountListener
+     */
+    void addAccountListener(AccountListener accountListener);
+
+    /**
+     * Remove a account listener.
+     * 
+     * @param accountListener
+     */
+    void removeAccountListener(AccountListener accountListener);
 
 }

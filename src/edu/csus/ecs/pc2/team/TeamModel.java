@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.team;
 
 import java.util.Vector;
 
+import edu.csus.ecs.pc2.core.AccountListener;
 import edu.csus.ecs.pc2.core.IModel;
 import edu.csus.ecs.pc2.core.RunEvent;
 import edu.csus.ecs.pc2.core.RunListener;
@@ -57,5 +58,20 @@ public class TeamModel implements  IModel {
 
     public SubmittedRun acceptRun(SubmittedRun submittedRun) throws Exception {
         throw new Exception("who cares");
+    }
+
+    public void generateNewAccounts(String clientTypeName, int count, boolean active) {
+        // TODO Is there a need for this setting on the team ??
+        
+    }
+
+    public void addAccountListener(AccountListener accountListener) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void removeAccountListener(AccountListener accountListener) {
+        // TODO Auto-generated method stub
+        
     }
 }

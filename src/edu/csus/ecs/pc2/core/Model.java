@@ -31,4 +31,19 @@ public class Model implements IModel {
         return null;
     }
 
+    public void generateNewAccounts(String clientTypeName, int count, boolean active) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void addAccountListener(AccountListener accountListener) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void removeAccountListener(AccountListener accountListener) {
+        // TODO Auto-generated method stub
+        
+    }
+
 }
