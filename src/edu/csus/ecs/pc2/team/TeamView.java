@@ -30,6 +30,8 @@ public class TeamView extends JFrame  {
 
     public static final String SVN_ID = "$Id$";
 
+    // TODO remove @SuppressWarnings for theModel
+    @SuppressWarnings("unused")
     private IModel theModel = null;
 
     private ITeamController teamController = null;

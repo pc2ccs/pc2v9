@@ -36,6 +36,8 @@ public class ServerView extends JFrame {
 
     private IModel serverModel = null;
 
+    // TODO remove @SuppressWarnings for serverController
+    @SuppressWarnings("unused")
     private IController serverController = null;
 
     /**
