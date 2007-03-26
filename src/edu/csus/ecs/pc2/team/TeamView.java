@@ -238,8 +238,8 @@ public class TeamView extends JFrame  {
 
     protected void submitRun() {
 
-        String problem = (String) getProblemComboBox().getSelectedItem();
-        String language = (String) getLanguageComboBox().getSelectedItem();
+        String problem = ((Problem) getProblemComboBox().getSelectedItem()).toString();
+        String language = ((Language) getLanguageComboBox().getSelectedItem()).toString();
         String filename = fileNameLabel.getText();
 
         if (!fileExists(filename)) {
