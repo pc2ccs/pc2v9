@@ -1,8 +1,12 @@
-package edu.csus.ecs.pc2.core;
+package edu.csus.ecs.pc2.core.list;
 
 import java.util.Enumeration;
 import java.util.Vector;
 
+import edu.csus.ecs.pc2.core.Account;
+import edu.csus.ecs.pc2.core.ClientId;
+import edu.csus.ecs.pc2.core.ClientType;
+import edu.csus.ecs.pc2.core.ElementObject;
 import edu.csus.ecs.pc2.core.ClientType.Type;
 
 /**

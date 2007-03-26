@@ -46,4 +46,14 @@ public class Model implements IModel {
         
     }
 
+    public Problem[] getProblems() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public Language[] getLanguages() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

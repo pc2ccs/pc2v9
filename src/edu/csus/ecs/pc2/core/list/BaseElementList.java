@@ -1,10 +1,13 @@
-package edu.csus.ecs.pc2.core;
+package edu.csus.ecs.pc2.core.list;
 
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Map;
+
+import edu.csus.ecs.pc2.core.ElementId;
+import edu.csus.ecs.pc2.core.ElementObject;
 
 /**
  * Maintains a list of {@link edu.csus.ecs.pc2.core.ElementObject}

@@ -54,5 +54,17 @@ public interface IModel {
      * @param accountListener
      */
     void removeAccountListener(AccountListener accountListener);
+    
+    /**
+     * Fetch all defined problems.
+     * @return array of Problem
+     */
+    Problem [] getProblems();
+    
+    /**
+     * Fetch all defined languages.
+     * @return array of Language
+     */
+    Language [] getLanguages();
 
 }

@@ -15,6 +15,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 
 import edu.csus.ecs.pc2.core.IModel;
+import edu.csus.ecs.pc2.core.Language;
+import edu.csus.ecs.pc2.core.Problem;
 import edu.csus.ecs.pc2.core.RunEvent;
 import edu.csus.ecs.pc2.core.RunListener;
 
@@ -103,9 +105,23 @@ public class TeamView extends JFrame  {
                 System.exit(0);
             }
         });
+        
+        populateGUI();
     }
     
-    
+    private void populateGUI() {
+        
+        getProblemComboBox().removeAllItems();
+        for (Problem problem : theModel.getProblems()){
+            getProblemComboBox().addItem(problem);
+        }
+        
+        getLanguageComboBox().removeAllItems();
+        for (Language language : theModel.getLanguages()){
+            getLanguageComboBox().addItem(language);
+        }
+        
+    }
 
     private void updateListBox(String string) {
         runListModel.addElement(string);
@@ -260,16 +276,10 @@ public class TeamView extends JFrame  {
         if (problemComboBox == null) {
             problemComboBox = new JComboBox();
             problemComboBox.setBounds(new java.awt.Rectangle(126, 15, 221, 28));
-
-            quickPopulate(problemComboBox, "Select Problem", "Sum it!");
+            
+            problemComboBox.addItem(new Problem("Select Problem"));
         }
         return problemComboBox;
-    }
-
-    private void quickPopulate(JComboBox jComboBox, String string, String string2) {
-        jComboBox.addItem(string);
-        jComboBox.addItem(string2);
-        jComboBox.setSelectedIndex(1);
     }
 
     /**
@@ -281,7 +291,8 @@ public class TeamView extends JFrame  {
         if (languageComboBox == null) {
             languageComboBox = new JComboBox();
             languageComboBox.setBounds(new java.awt.Rectangle(127, 58, 221, 28));
-            quickPopulate(languageComboBox, "Select Language", "Java");
+            
+            languageComboBox.addItem(new Language("Select Language"));
         }
         return languageComboBox;
     }

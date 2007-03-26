@@ -4,10 +4,16 @@ import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.AccountListener;
 import edu.csus.ecs.pc2.core.IModel;
+import edu.csus.ecs.pc2.core.Language;
+import edu.csus.ecs.pc2.core.Problem;
 import edu.csus.ecs.pc2.core.RunEvent;
 import edu.csus.ecs.pc2.core.RunListener;
 import edu.csus.ecs.pc2.core.SubmittedRun;
 import edu.csus.ecs.pc2.core.RunEvent.Action;
+import edu.csus.ecs.pc2.core.list.LanguageDisplayList;
+import edu.csus.ecs.pc2.core.list.LanguageList;
+import edu.csus.ecs.pc2.core.list.ProblemDisplayList;
+import edu.csus.ecs.pc2.core.list.ProblemList;
 
 /**
  * Represents the collection of contest data.
@@ -24,9 +30,65 @@ public class TeamModel implements  IModel {
     private Vector<RunListener> runListenterList = new Vector<RunListener>();
 
     private Vector<SubmittedRun> runList = new Vector<SubmittedRun>();
+    
+    /**
+     * List of all defined problems. Contains deleted problems too.
+     */
+    private ProblemList problemList = new ProblemList();
+
+    /**
+     * List of all problems displayed to users, in order. Does not contain deleted problems.
+     */
+    private ProblemDisplayList problemDisplayList = new ProblemDisplayList();
+
+    /**
+     * List of all languages. Contains deleted problems too.
+     */
+    private LanguageList languageList = new LanguageList();
+
+    /**
+     * List of all displayed languages, in order. Does not contain deleted languages.
+     */
+    private LanguageDisplayList languageDisplayList = new LanguageDisplayList();
+
 
     public TeamModel() {
+        
+        initialize();
     }
+    
+
+    /**
+     * Initialize Model with data.
+     * 
+     */
+    private void initialize() {
+
+        String[] probNames = { "Sum of Squares", "Sumit", "Hello", "GoodBye" };
+        Problem problem = new Problem("None Selected");
+
+        problemDisplayList.add(problem);
+        problemList.add(problem);
+
+        for (String problemNames : probNames) {
+            problem = new Problem(problemNames);
+            problemDisplayList.add(problem);
+            problemList.add(problem);
+        }
+
+        String[] langNames = { "Java", "BASIC", "C++", "ANSI C", "APL" };
+        Language language = new Language("None Selected");
+
+        languageDisplayList.add(language);
+        languageList.add(language);
+
+        for (String languageName : langNames) {
+            language = new Language(languageName);
+            languageList.add(language);
+            languageDisplayList.add(language);
+        }
+    }
+
 
     public void addRunListener(RunListener runListener) {
         runListenterList.addElement(runListener);
@@ -73,5 +135,14 @@ public class TeamModel implements  IModel {
     public void removeAccountListener(AccountListener accountListener) {
         // TODO Auto-generated method stub
         
+    }
+    
+
+    public Problem[] getProblems() {
+        return problemDisplayList.getList();
+    }
+
+    public Language[] getLanguages() {
+        return languageDisplayList.getList();
     }
 }
