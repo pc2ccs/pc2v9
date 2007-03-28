@@ -1,10 +1,10 @@
 package edu.csus.ecs.pc2.server;
 
 import edu.csus.ecs.pc2.core.Controller;
-import edu.csus.ecs.pc2.core.IModel;
-import edu.csus.ecs.pc2.core.SubmittedRun;
-import edu.csus.ecs.pc2.transport.StaticTransport;
-import edu.csus.ecs.pc2.transport.TransportReceiver;
+import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.SubmittedRun;
+import edu.csus.ecs.pc2.core.transport.StaticTransport;
+import edu.csus.ecs.pc2.core.transport.TransportReceiver;
 
 /**
  *  Represents the collection of modules comprising a contest server engine.

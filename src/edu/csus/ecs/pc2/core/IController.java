@@ -1,6 +1,6 @@
 package edu.csus.ecs.pc2.core;
 
-import edu.csus.ecs.pc2.transport.TransportReceiver;
+import edu.csus.ecs.pc2.core.transport.TransportReceiver;
 
 /**
  * Represents functions provided by modules comprising the contest engine.

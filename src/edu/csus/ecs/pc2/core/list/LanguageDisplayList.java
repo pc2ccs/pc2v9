@@ -1,6 +1,6 @@
 package edu.csus.ecs.pc2.core.list;
 
-import edu.csus.ecs.pc2.core.Language;
+import edu.csus.ecs.pc2.core.model.Language;
 
 /**
  * Language Display List.

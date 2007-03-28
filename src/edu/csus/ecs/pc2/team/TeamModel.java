@@ -2,18 +2,18 @@ package edu.csus.ecs.pc2.team;
 
 import java.util.Vector;
 
-import edu.csus.ecs.pc2.core.AccountListener;
-import edu.csus.ecs.pc2.core.IModel;
-import edu.csus.ecs.pc2.core.Language;
-import edu.csus.ecs.pc2.core.Problem;
-import edu.csus.ecs.pc2.core.RunEvent;
-import edu.csus.ecs.pc2.core.RunListener;
-import edu.csus.ecs.pc2.core.SubmittedRun;
-import edu.csus.ecs.pc2.core.RunEvent.Action;
 import edu.csus.ecs.pc2.core.list.LanguageDisplayList;
 import edu.csus.ecs.pc2.core.list.LanguageList;
 import edu.csus.ecs.pc2.core.list.ProblemDisplayList;
 import edu.csus.ecs.pc2.core.list.ProblemList;
+import edu.csus.ecs.pc2.core.model.AccountListener;
+import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.Language;
+import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.RunEvent;
+import edu.csus.ecs.pc2.core.model.RunListener;
+import edu.csus.ecs.pc2.core.model.SubmittedRun;
+import edu.csus.ecs.pc2.core.model.RunEvent.Action;
 
 /**
  * Represents the collection of contest data.

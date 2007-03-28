@@ -1,9 +1,9 @@
 package edu.csus.ecs.pc2.core.list;
 
-import edu.csus.ecs.pc2.core.ElementObject;
+import edu.csus.ecs.pc2.core.model.ElementObject;
 
 /**
- * Maintains a list of {@link edu.csus.ecs.pc2.core.ElementObject}
+ * Maintains a list of {@link edu.csus.ecs.pc2.core.model.ElementObject}
  *
  * @author pc2@ecs.csus.edu
  */

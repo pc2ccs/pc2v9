@@ -3,11 +3,11 @@ package edu.csus.ecs.pc2.core.list;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import edu.csus.ecs.pc2.core.Account;
-import edu.csus.ecs.pc2.core.ClientId;
-import edu.csus.ecs.pc2.core.ClientType;
-import edu.csus.ecs.pc2.core.ElementObject;
-import edu.csus.ecs.pc2.core.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ElementObject;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 
 /**
  * List of accounts.
@@ -267,7 +267,7 @@ public class AccountList extends BaseElementList {
         /*
          * Fri Oct 20 12:39:40 PDT 2006 Thread-7 printHTML() java.lang.ClassCastException: [Ljava.lang.Object; at
          * edu.csus.ecs.pc2.core.AccountList.getList(AccountList.java:211) at
-         * edu.csus.ecs.pc2.core.gui.BaseClient.getAccounts(BaseClient.java:213)
+         * edu.csus.ecs.pc2.ui.BaseClient.getAccounts(BaseClient.java:213)
          */
         // return (Account []) values().toArray();
     }

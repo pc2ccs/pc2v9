@@ -1,4 +1,4 @@
-package edu.csus.ecs.pc2.core;
+package edu.csus.ecs.pc2.core.model;
 
 
 /**
@@ -19,11 +19,11 @@ public interface RunListener {
     /**
      * Run state has changed.
      * 
-     * The chage info is in the {@link edu.csus.ecs.pc2.core.RunEvent.Action} of
+     * The chage info is in the {@link edu.csus.ecs.pc2.core.model.RunEvent.Action} of
      * {@link RunEvent}.
      * 
      * @see RunEvent
-     * @see edu.csus.ecs.pc2.core.RunEvent.Action
+     * @see edu.csus.ecs.pc2.core.model.RunEvent.Action
      * 
      * @param event
      */

@@ -1,4 +1,4 @@
-package edu.csus.ecs.pc2.core;
+package edu.csus.ecs.pc2.core.model;
 
 /**
  * PC<sup>2</sup> client types.

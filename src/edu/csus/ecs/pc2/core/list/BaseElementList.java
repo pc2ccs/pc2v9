@@ -6,11 +6,11 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Map;
 
-import edu.csus.ecs.pc2.core.ElementId;
-import edu.csus.ecs.pc2.core.ElementObject;
+import edu.csus.ecs.pc2.core.model.ElementId;
+import edu.csus.ecs.pc2.core.model.ElementObject;
 
 /**
- * Maintains a list of {@link edu.csus.ecs.pc2.core.ElementObject}
+ * Maintains a list of {@link edu.csus.ecs.pc2.core.model.ElementObject}
  *
  * @author pc2@ecs.csus.edu
  */

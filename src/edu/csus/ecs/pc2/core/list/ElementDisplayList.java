@@ -3,7 +3,7 @@ package edu.csus.ecs.pc2.core.list;
 import java.io.Serializable;
 import java.util.Vector;
 
-import edu.csus.ecs.pc2.core.ElementObject;
+import edu.csus.ecs.pc2.core.model.ElementObject;
 
 /**
  * A list of elements to be displayed.

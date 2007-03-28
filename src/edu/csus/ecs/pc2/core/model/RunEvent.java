@@ -1,7 +1,7 @@
-package edu.csus.ecs.pc2.core;
+package edu.csus.ecs.pc2.core.model;
 
 /**
- * A run and a event state {@link edu.csus.ecs.pc2.core.RunEvent.Action}.
+ * A run and a event state {@link edu.csus.ecs.pc2.core.model.RunEvent.Action}.
  * 
  * 
  * @author Douglas A. Lane

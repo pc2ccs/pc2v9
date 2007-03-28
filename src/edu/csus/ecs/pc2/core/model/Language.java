@@ -1,4 +1,5 @@
-package edu.csus.ecs.pc2.core;
+package edu.csus.ecs.pc2.core.model;
+
 
 /**
  * Single Language Definition.

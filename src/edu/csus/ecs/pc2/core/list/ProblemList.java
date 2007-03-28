@@ -1,6 +1,6 @@
 package edu.csus.ecs.pc2.core.list;
 
-import edu.csus.ecs.pc2.core.Problem;
+import edu.csus.ecs.pc2.core.model.Problem;
 
 
 /**

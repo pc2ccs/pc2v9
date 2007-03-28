@@ -1,8 +1,8 @@
-package edu.csus.ecs.pc2.core;
+package edu.csus.ecs.pc2.core.model;
 
 import java.io.Serializable;
 
-import edu.csus.ecs.pc2.core.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 
 /**
  * Basic Client Information.
