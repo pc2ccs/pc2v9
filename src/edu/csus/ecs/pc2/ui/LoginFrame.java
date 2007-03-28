@@ -1,18 +1,19 @@
 package edu.csus.ecs.pc2.ui;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import java.awt.GridBagLayout;
-import javax.swing.JPasswordField;
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
-import javax.swing.JTextField;
-import javax.swing.JLabel;
-import javax.swing.SwingConstants;
-import java.awt.Font;
-import javax.swing.JButton;
-import java.awt.event.KeyEvent;
 import java.awt.Color;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.KeyEvent;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 /**
  * Login frame for all clients.
@@ -29,9 +30,9 @@ public class LoginFrame extends JFrame {
 
     private JPanel jPanel = null;
 
-    private JPasswordField jPasswordField = null;
+    private JPasswordField passwordTextField = null;
 
-    private JTextField jTextField = null;
+    private JTextField loginTextField = null;
 
     private JLabel jLabel = null;
 
@@ -48,6 +49,8 @@ public class LoginFrame extends JFrame {
     private JButton jButton1 = null;
 
     private JLabel jLabel5 = null;
+
+    private Runnable starterRunnable;
 
     /**
      * This method initializes
@@ -164,8 +167,8 @@ public class LoginFrame extends JFrame {
             gridBagConstraints.insets = new Insets(7, 80, 13, 91);
             jPanel = new JPanel();
             jPanel.setLayout(new GridBagLayout());
-            jPanel.add(getJPasswordField(), gridBagConstraints);
-            jPanel.add(getJTextField(), gridBagConstraints1);
+            jPanel.add(getPasswordTextField(), gridBagConstraints);
+            jPanel.add(getLoginTextField(), gridBagConstraints1);
             jPanel.add(jLabel, gridBagConstraints2);
             jPanel.add(jLabel1, gridBagConstraints3);
             jPanel.add(jLabel2, gridBagConstraints4);
@@ -183,11 +186,11 @@ public class LoginFrame extends JFrame {
      * 
      * @return javax.swing.JPasswordField
      */
-    private JPasswordField getJPasswordField() {
-        if (jPasswordField == null) {
-            jPasswordField = new JPasswordField();
+    private JPasswordField getPasswordTextField() {
+        if (passwordTextField == null) {
+            passwordTextField = new JPasswordField();
         }
-        return jPasswordField;
+        return passwordTextField;
     }
 
     /**
@@ -195,11 +198,11 @@ public class LoginFrame extends JFrame {
      * 
      * @return javax.swing.JTextField
      */
-    private JTextField getJTextField() {
-        if (jTextField == null) {
-            jTextField = new JTextField();
+    private JTextField getLoginTextField() {
+        if (loginTextField == null) {
+            loginTextField = new JTextField();
         }
-        return jTextField;
+        return loginTextField;
     }
 
     /**
@@ -214,7 +217,8 @@ public class LoginFrame extends JFrame {
             jButton.setText("Login");
             jButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.out.println("actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+
+                    starterRunnable.run();
                 }
             });
         }
@@ -239,9 +243,23 @@ public class LoginFrame extends JFrame {
         }
         return jButton1;
     }
-    
+
     public static void main(String[] args) {
         new LoginFrame().setVisible(true);
+    }
+
+    public void setRunnable(Runnable runnable) {
+
+        this.starterRunnable = runnable;
+
+    }
+
+    public String getLogin() {
+        return loginTextField.getText();
+    }
+
+    public String getPassword() {
+        return new String(passwordTextField.getPassword());
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

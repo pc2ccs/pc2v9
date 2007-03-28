@@ -7,12 +7,12 @@ import edu.csus.ecs.pc2.core.IController;
  * 
  * @see edu.csus.ecs.pc2.Starter
  * @author pc2@ecs.csus.edu
+ * @deprecated
  */
 
 // $HeadURL:
 // http://pc2.ecs.csus.edu/repos/v9wip/trunk/src/edu.csus.ecs.pc2/IController.java $
 public interface ITeamController extends IController {
 
-    void submitRun(int teamNumber, String problemName, String languageName, String filename) throws Exception;
-
+ 
 }

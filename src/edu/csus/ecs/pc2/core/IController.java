@@ -12,5 +12,6 @@ import edu.csus.ecs.pc2.core.transport.TransportReceiver;
 // $HeadURL$
 public interface IController extends TransportReceiver {
     
+    void submitRun(int teamNumber, String problemName, String languageName, String filename) throws Exception;
 
 }

@@ -1,6 +1,5 @@
 package edu.csus.ecs.pc2.core.model;
 
-
 /**
  * Specifies methods used to manipulate contest data.
  * 
@@ -55,17 +54,19 @@ public interface IModel {
      * @param accountListener
      */
     void removeAccountListener(AccountListener accountListener);
-    
+
     /**
      * Fetch all defined problems.
+     * 
      * @return array of Problem
      */
-    Problem [] getProblems();
-    
+    Problem[] getProblems();
+
     /**
      * Fetch all defined languages.
+     * 
      * @return array of Language
      */
-    Language [] getLanguages();
+    Language[] getLanguages();
 
 }

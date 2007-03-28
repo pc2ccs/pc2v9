@@ -11,18 +11,19 @@ import edu.csus.ecs.pc2.core.transport.TransportReceiver;
  * 
  * 
  * @author Douglas A. Lane
+ * @deprecated
  * 
  */
 
 //$HeadURL$
-public class ServerController extends Controller implements IServerController , TransportReceiver {
+public class ServerController extends Controller implements TransportReceiver {
 
     public static final String SVN_ID = "$Id$";
 
     private IModel model = null;
 
     public ServerController(IModel model) {
-        super();
+        super(model);
         this.model = model;
     }
 

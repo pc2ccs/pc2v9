@@ -14,12 +14,12 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 
+import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.model.IModel;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.RunListener;
-import edu.csus.ecs.pc2.team.ITeamController;
 
 /**
  * Represents an arbitrary contest GUI.
@@ -37,7 +37,7 @@ public class TeamView extends JFrame  {
     @SuppressWarnings("unused")
     private IModel theModel = null;
 
-    private ITeamController teamController = null;
+    private IController teamController = null;
 
     /**
      * 
@@ -74,7 +74,7 @@ public class TeamView extends JFrame  {
 
     private DefaultListModel runListModel = new DefaultListModel();
 
-    public TeamView(IModel theModel, ITeamController teamController) {
+    public TeamView(IModel theModel, IController teamController) {
         super();
         this.theModel = theModel;
         this.teamController = teamController;

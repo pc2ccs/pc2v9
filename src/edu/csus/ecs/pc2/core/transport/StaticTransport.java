@@ -20,21 +20,21 @@ public final class StaticTransport {
 
     }
 
-    private static QuickTransport transmissionIfier;
+    private static QuickTransport quickTransport;
 
     public static void sendToServer(SubmittedRun submittedRun) {
-        transmissionIfier.sendToServer(submittedRun);
+        quickTransport.sendToServer(submittedRun);
     }
 
     public static void sendToClient(SubmittedRun submittedRun) {
-        transmissionIfier.sendToClient(submittedRun);
+        quickTransport.sendToClient(submittedRun);
     }
 
-    public static QuickTransport getTransmissionIfier() {
-        return transmissionIfier;
+    public static QuickTransport getQuickTransport() {
+        return quickTransport;
     }
 
-    public static void setTransmissionIfier(QuickTransport transmissionIfier) {
-        StaticTransport.transmissionIfier = transmissionIfier;
+    public static void setQuickTransport(QuickTransport inQuickTransport) {
+        StaticTransport.quickTransport = inQuickTransport;
     }
 }

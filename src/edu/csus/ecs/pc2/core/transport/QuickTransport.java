@@ -19,7 +19,25 @@ public class QuickTransport {
 
     private TransportReceiver transportReceiverServer;
 
-    private Vector<TransportReceiver> receiverList = new Vector<TransportReceiver>(25);
+    private Vector<TransportReceiver> receiverList = new Vector<TransportReceiver>();
+    
+    public QuickTransport() {
+    }
+        
+
+    public TransportReceiver getTransportReceiverServer() {
+        return transportReceiverServer;
+    }
+
+
+    /**
+     * Set the server transport
+     * @param transportReceiverServer
+     */
+    public void setTransportReceiverServer(TransportReceiver transportReceiverServer) {
+        this.transportReceiverServer = transportReceiverServer;
+    }
+
 
     public QuickTransport(TransportReceiver transportReceiverServer, TransportReceiver transportReceiverClient) {
         super();
@@ -29,10 +47,12 @@ public class QuickTransport {
 
     /**
      * Add a new client to transport list.
+     * 
      * @param transportReceiver
      */
     private void addClientTransport(TransportReceiver transportReceiver) {
         receiverList.addElement(transportReceiver);
+        System.out.println(" debug22 "+receiverList.size());
     }
 
     /**
@@ -48,8 +68,8 @@ public class QuickTransport {
      * @param submittedRun
      */
     public void sendToClient(SubmittedRun submittedRun) {
-        for (int i = 0; i < receiverList.size(); i++) {
-            receiverList.elementAt(i).receiveSubmittedRun(submittedRun);
+        for (int i = 0; i < receiverList.size() && i < 2; i++) {
+            receiverList.elementAt(i).receiveNewRun(submittedRun);
         }
     }
 

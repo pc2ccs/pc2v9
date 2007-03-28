@@ -10,6 +10,7 @@ import edu.csus.ecs.pc2.core.transport.StaticTransport;
  * Represents the collection of modules comprising a contest engine.
  * 
  * @see edu.csus.ecs.pc2.Starter
+ * @deprecated use Controller
  */
 
 // $HeadURL$
@@ -20,7 +21,7 @@ public class TeamController extends Controller implements ITeamController {
     private IModel model = null;
 
     public TeamController(IModel model) {
-        super();
+        super(model);
         this.model = model;
     }
 

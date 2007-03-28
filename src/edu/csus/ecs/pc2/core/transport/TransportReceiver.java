@@ -17,4 +17,11 @@ public interface TransportReceiver {
      */
     void receiveSubmittedRun(SubmittedRun submittedRun);
 
+    /**
+     * New run on client. 
+     * @param submittedRun
+     */
+    void receiveNewRun (SubmittedRun submittedRun);
+
+
 }

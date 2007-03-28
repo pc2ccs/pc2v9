@@ -5,6 +5,7 @@ import edu.csus.ecs.pc2.core.IController;
 /**
  * 
  * @author pc2@ecs.csus.edu
+ * @deprecated 
  */
 
 //$HeadURL$

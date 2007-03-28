@@ -82,7 +82,7 @@ public class FrameUtilities {
      * 
      * @param component
      */
-    public void waitCursor(Component component) {
+    public static void waitCursor(Component component) {
         component.setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.WAIT_CURSOR));
     }
 
@@ -91,8 +91,19 @@ public class FrameUtilities {
      * 
      * @param component
      */
-    public void regularCursor(Component component) {
+    public static void regularCursor(Component component) {
         component.setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.DEFAULT_CURSOR));
+    }
+    
+    /**
+     * Puts this frame/component to right of input frame.
+     * 
+     * @param sourceComponent component relative to otherComponent
+     * @param otherComponent component to be to the right of the sourceComponent
+     */
+    public static void windowToRight(Component sourceComponent, Component otherComponent) {
+        int rightX = sourceComponent.getX() + sourceComponent.getWidth();
+        otherComponent.setLocation(rightX, otherComponent.getY());
     }
 
     /**
