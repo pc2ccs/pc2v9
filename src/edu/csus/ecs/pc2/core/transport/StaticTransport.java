@@ -1,11 +1,11 @@
-package edu.csus.ecs.pc2.core.transport;
+package edu.csus.ecs.pc2.transport;
 
-import edu.csus.ecs.pc2.core.model.SubmittedRun;
+import edu.csus.ecs.pc2.core.SubmittedRun;
 
 /**
  * A Static implementation of a simple transport.
  * 
- * This class registers holds a single instance of {@link edu.csus.ecs.pc2.core.transport.QuickTransport}.
+ * This class registers holds a single instance of {@link edu.csus.ecs.pc2.transport.QuickTransport}.
  * 
  * @author Douglas A. Lane
  * 

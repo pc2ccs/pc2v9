@@ -1,9 +1,9 @@
-package edu.csus.ecs.pc2.core.transport;
+package edu.csus.ecs.pc2.transport;
 
-import edu.csus.ecs.pc2.core.model.SubmittedRun;
+import edu.csus.ecs.pc2.core.SubmittedRun;
 
 /**
- * Basis for {@link edu.csus.ecs.pc2.core.transport.QuickTransport}.
+ * Basis for {@link edu.csus.ecs.pc2.transport.QuickTransport}.
  * 
  * @author pc2@ecs.csus.edu
  */

@@ -1,8 +1,8 @@
-package edu.csus.ecs.pc2.core.transport;
+package edu.csus.ecs.pc2.transport;
 
 import java.util.Vector;
 
-import edu.csus.ecs.pc2.core.model.SubmittedRun;
+import edu.csus.ecs.pc2.core.SubmittedRun;
 
 /**
  * A Quick transport.
