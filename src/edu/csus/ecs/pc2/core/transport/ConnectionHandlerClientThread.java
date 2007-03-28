@@ -1,0 +1,88 @@
+package edu.csus.ecs.pc2.core.transport;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
+import java.net.SocketException;
+import javax.crypto.SealedObject;
+
+import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.transport.TransportManager.tmTypes;
+
+/**
+ * A Client ConnectionHandler.
+ * 
+ * This manages a client connection, it established a connection to
+ * a server and allows the pc2 module to send and recieve information
+ * from a server.  Note that a server that logs into another server
+ * uses this connection handler.
+ * 
+ * @see edu.csus.ecs.pc2.core.transport.ConnectionHandler
+ * @author pc2@ecs.csus.edu
+ */
+
+// $HeadURL: http://pc2.ecs.csus.edu/repos/v9wip/trunk/src/edu/csus/ecs/pc2/core/transport/ConnectionHandlerClientThread.java $
+public class ConnectionHandlerClientThread extends ConnectionHandlerThread {
+    public static final String SVN_ID = "$Id: ConnectionHandlerClientThread.java 872 2006-12-08 05:20:08Z laned $";
+
+    private tmTypes tmType = null;
+
+    public ConnectionHandlerClientThread(Socket socket, TransportManager tmCallBack, ConnectionHandler chCallBack,
+            tmTypes incomingTmType, Log log) {
+        super(socket, tmCallBack, chCallBack);
+        chCallBack.setConnectionHandlerClientThread(this);
+        setTmType(incomingTmType);
+        setLog(log);
+    }
+
+    public void run() {
+        try {
+            setToOtherModule(new ObjectOutputStream(getMySocket().getOutputStream()));
+
+            InputStream iss = getMySocket().getInputStream();
+            setFromOtherModule(new ObjectInputStream(iss));
+
+            if (getTmType() == tmTypes.SERVER) {
+                getTmCallBack().registerIncomingConnectionRequest(getMyConnectionID(), this);
+            }
+
+            // Code should insure that the receive worked!
+            getTmCallBack().receiveUnencrypted(receiveUnencrypted(), getMyConnectionID());
+
+            // Code should insure that the send worked!
+            sendUnencrypted(getTmCallBack().getPublicKeyPacket());
+
+            setStillListening(true);
+
+            while (isStillListening()) {
+                SealedObject sealedObject = null;
+                try {
+                    sealedObject = receive();
+                    getTmCallBack().receive(sealedObject, getMyConnectionID());
+                } catch (TransportException e) {
+                    if (e.getMessage().equalsIgnoreCase(TransportException.CONNECTION_RESET)) {
+                        setStillListening(false);
+                    }
+                }
+            }
+
+        } catch (SocketException e) {
+            getLog().info("Lost connection to this client!");
+        } catch (TransportException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        getTmCallBack().connectionDropped(getMyConnectionID());
+    }
+
+    private tmTypes getTmType() {
+        return tmType;
+    }
+
+    private void setTmType(tmTypes tmType) {
+        this.tmType = tmType;
+    }
+}
