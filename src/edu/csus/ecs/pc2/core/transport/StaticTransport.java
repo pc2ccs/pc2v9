@@ -1,6 +1,6 @@
-package edu.csus.ecs.pc2.transport;
+package edu.csus.ecs.pc2.core.transport;
 
-import edu.csus.ecs.pc2.core.SubmittedRun;
+import edu.csus.ecs.pc2.core.model.SubmittedRun;
 
 /**
  * A Static implementation of a simple transport.
