@@ -1,12 +1,17 @@
-package edu.csus.ecs.pc2.server.ui;
+package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 
 import javax.swing.DefaultListModel;
+import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
 
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -16,13 +21,6 @@ import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.IModel;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.RunListener;
-import edu.csus.ecs.pc2.ui.IntegerDocument;
-
-import javax.swing.JTabbedPane;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
-import java.awt.FlowLayout;
-import javax.swing.JButton;
 
 /**
  * GUI for Server.

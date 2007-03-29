@@ -5,8 +5,8 @@ import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.model.IModel;
 import edu.csus.ecs.pc2.core.transport.QuickTransport;
 import edu.csus.ecs.pc2.core.transport.StaticTransport;
-import edu.csus.ecs.pc2.server.ui.ServerView;
-import edu.csus.ecs.pc2.team.ui.TeamView;
+import edu.csus.ecs.pc2.ui.ServerView;
+import edu.csus.ecs.pc2.ui.TeamView;
 
 
 /**

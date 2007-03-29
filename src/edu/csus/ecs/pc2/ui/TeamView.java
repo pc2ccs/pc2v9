@@ -1,4 +1,4 @@
-package edu.csus.ecs.pc2.team.ui;
+package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.io.File;
