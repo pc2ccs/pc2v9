@@ -18,7 +18,8 @@ import edu.csus.ecs.pc2.core.model.IElementObject;
 // $HeadURL$
 public abstract class BaseElementList implements Serializable {
 
-    public static final String SVN_ID = "$Id$";
+    // No ID string, two reasons, causes compiler warnings, but 
+    // more importantly this class is never instanciated.
 
     private Hashtable<String, IElementObject> hash = new Hashtable<String, IElementObject>(
             200);
