@@ -15,12 +15,16 @@ import javax.swing.UIManager;
  */
 
 // $HeadURL$
-public class FrameUtilities {
+public final class FrameUtilities {
 
     /**
      * 
      */
     private static final long serialVersionUID = -1342163314986200464L;
+    
+    private FrameUtilities () {
+        // Constructor required by CheckEclipse
+    }
 
     /**
      * Set Native Look and Feel.
@@ -62,7 +66,7 @@ public class FrameUtilities {
      * 
      * @param component
      */
-    public void centerFrameTop(Component component) {
+    public static void centerFrameTop(Component component) {
         java.awt.Dimension screenDim = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
         component.setLocation(screenDim.width / 2 - component.getSize().width / 2, 20);
     }
@@ -72,7 +76,7 @@ public class FrameUtilities {
      * 
      * @param component
      */
-    public void setFrameWindowWidth(Component component) {
+    public static void setFrameWindowWidth(Component component) {
         java.awt.Dimension screenDim = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
         component.setSize(new Dimension(screenDim.width, component.getHeight()));
     }
@@ -87,7 +91,7 @@ public class FrameUtilities {
     }
 
     /**
-     * Display mouse Detault cursor (usually pointer)
+     * Display mouse Default cursor (usually pointer)
      * 
      * @param component
      */
@@ -98,8 +102,10 @@ public class FrameUtilities {
     /**
      * Puts this frame/component to right of input frame.
      * 
-     * @param sourceComponent component relative to otherComponent
-     * @param otherComponent component to be to the right of the sourceComponent
+     * @param sourceComponent
+     *            component relative to otherComponent
+     * @param otherComponent
+     *            component to be to the right of the sourceComponent
      */
     public static void windowToRight(Component sourceComponent, Component otherComponent) {
         int rightX = sourceComponent.getX() + sourceComponent.getWidth();

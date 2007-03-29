@@ -179,4 +179,15 @@ public class Model implements IModel {
         this.clientId = clientId;
     }
 
+    /**
+     * Return frame class name.
+     */
+    public String getFrameName() {
+        String typeName = clientId.getClientType().toString();
+        
+        // TODO change this to a table lookup
+
+        return typeName.charAt(0) + typeName.substring(1).toLowerCase() + "View";
+    }
+
 }

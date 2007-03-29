@@ -16,10 +16,10 @@ import javax.swing.JTabbedPane;
 
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.RunEvent;
-import edu.csus.ecs.pc2.core.model.RunListener;
 
 /**
  * Represents an arbitrary contest GUI.
@@ -84,7 +84,7 @@ public class TeamView extends JFrame  {
     }
 
     /**
-     * Nevermind this method, needed for VE and other reasons.
+     * Nevermind this constructor, needed for VE and other reasons.
      * 
      */
     public TeamView() {
@@ -108,6 +108,8 @@ public class TeamView extends JFrame  {
         });
         
         populateGUI();
+        
+        FrameUtilities.centerFrame(this);
     }
     
     private void populateGUI() {
@@ -132,7 +134,7 @@ public class TeamView extends JFrame  {
      * 
      * @author pc2@ecs.csus.edu
      */
-    private class RunListenerImplementation implements RunListener {
+    private class RunListenerImplementation implements IRunListener {
 
         public void runAdded(RunEvent event) {
             updateListBox(event.getSubmittedRun() + " ADDED ");

@@ -10,10 +10,12 @@ import java.awt.event.KeyEvent;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 /**
  * Login frame for all clients.
@@ -28,29 +30,29 @@ public class LoginFrame extends JFrame {
      */
     private static final long serialVersionUID = -6389607881992853161L;
 
-    private JPanel jPanel = null;
+    private JPanel centerPane = null;
 
     private JPasswordField passwordTextField = null;
 
     private JTextField loginTextField = null;
 
-    private JLabel jLabel = null;
+    private JLabel nameTitleLabel = null;
 
-    private JLabel jLabel1 = null;
+    private JLabel versionTitleLabel = null;
 
-    private JLabel jLabel2 = null;
+    private JLabel mainTitleTopLabel = null;
 
-    private JLabel jLabel3 = null;
+    private JLabel passwordTitleLabel = null;
 
-    private JLabel jLabel4 = null;
+    private JButton loginButton = null;
 
-    private JButton jButton = null;
+    private JButton exitButton = null;
 
-    private JButton jButton1 = null;
-
-    private JLabel jLabel5 = null;
+    private JLabel messageLabel = null;
 
     private Runnable starterRunnable;
+
+    private JLabel mainTitleBottomLabel = null;
 
     /**
      * This method initializes
@@ -69,7 +71,7 @@ public class LoginFrame extends JFrame {
     private void initialize() {
         this.setSize(new java.awt.Dimension(429, 365));
         this.setTitle("PC^2 Login");
-        this.setContentPane(getJPanel());
+        this.setContentPane(getPasswordTitleLabel());
         this.addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent e) {
                 System.exit(0);
@@ -82,29 +84,80 @@ public class LoginFrame extends JFrame {
      * 
      * @return javax.swing.JPanel
      */
-    private JPanel getJPanel() {
-        if (jPanel == null) {
+    private JPanel getPasswordTitleLabel() {
+        if (centerPane == null) {
+            GridBagConstraints gridBagConstraints11 = new GridBagConstraints();
+            gridBagConstraints11.insets = new java.awt.Insets(1, 21, 3, 24);
+            gridBagConstraints11.gridx = 0;
+            gridBagConstraints11.gridy = 1;
+            gridBagConstraints11.ipadx = 167;
+            gridBagConstraints11.ipady = 6;
+            gridBagConstraints11.gridwidth = 2;
+            GridBagConstraints gridBagConstraints10 = new GridBagConstraints();
+            gridBagConstraints10.insets = new java.awt.Insets(4, 5, 2, 5);
+            gridBagConstraints10.gridx = 0;
+            gridBagConstraints10.gridy = 7;
+            gridBagConstraints10.ipadx = 411;
+            gridBagConstraints10.ipady = 26;
+            gridBagConstraints10.gridwidth = 2;
             GridBagConstraints gridBagConstraints9 = new GridBagConstraints();
-            gridBagConstraints9.insets = new Insets(4, 5, 2, 5);
-            gridBagConstraints9.gridx = 0;
-            gridBagConstraints9.gridy = 7;
-            gridBagConstraints9.ipadx = 411;
-            gridBagConstraints9.ipady = 26;
-            gridBagConstraints9.gridwidth = 2;
-            jLabel5 = new JLabel();
-            jLabel5.setForeground(Color.red);
-            jLabel5.setText("");
-            jLabel5.setHorizontalAlignment(SwingConstants.CENTER);
+            gridBagConstraints9.insets = new java.awt.Insets(14, 29, 3, 91);
+            gridBagConstraints9.gridy = 6;
+            gridBagConstraints9.ipadx = 18;
+            gridBagConstraints9.gridx = 1;
             GridBagConstraints gridBagConstraints8 = new GridBagConstraints();
-            gridBagConstraints8.insets = new Insets(14, 37, 3, 92);
+            gridBagConstraints8.insets = new java.awt.Insets(14, 80, 3, 53);
             gridBagConstraints8.gridy = 6;
-            gridBagConstraints8.ipadx = 40;
-            gridBagConstraints8.gridx = 1;
+            gridBagConstraints8.ipadx = 30;
+            gridBagConstraints8.gridx = 0;
             GridBagConstraints gridBagConstraints7 = new GridBagConstraints();
-            gridBagConstraints7.insets = new Insets(14, 87, 3, 37);
-            gridBagConstraints7.gridy = 6;
-            gridBagConstraints7.ipadx = 30;
+            gridBagConstraints7.insets = new java.awt.Insets(7, 80, 6, 28);
+            gridBagConstraints7.gridy = 4;
+            gridBagConstraints7.ipadx = 62;
             gridBagConstraints7.gridx = 0;
+            GridBagConstraints gridBagConstraints5 = new GridBagConstraints();
+            gridBagConstraints5.insets = new java.awt.Insets(15, 21, 1, 24);
+            gridBagConstraints5.gridx = 0;
+            gridBagConstraints5.gridy = 0;
+            gridBagConstraints5.ipadx = 202;
+            gridBagConstraints5.ipady = 6;
+            gridBagConstraints5.gridwidth = 2;
+            GridBagConstraints gridBagConstraints3 = new GridBagConstraints();
+            gridBagConstraints3.insets = new java.awt.Insets(2, 5, 39, 11);
+            gridBagConstraints3.gridx = 0;
+            gridBagConstraints3.gridy = 8;
+            gridBagConstraints3.ipadx = 257;
+            gridBagConstraints3.gridwidth = 2;
+            GridBagConstraints gridBagConstraints2 = new GridBagConstraints();
+            gridBagConstraints2.insets = new java.awt.Insets(4, 80, 5, 28);
+            gridBagConstraints2.gridy = 2;
+            gridBagConstraints2.ipadx = 75;
+            gridBagConstraints2.gridx = 0;
+            GridBagConstraints gridBagConstraints1 = new GridBagConstraints();
+            gridBagConstraints1.fill = java.awt.GridBagConstraints.HORIZONTAL;
+            gridBagConstraints1.gridwidth = 2;
+            gridBagConstraints1.gridx = 0;
+            gridBagConstraints1.gridy = 3;
+            gridBagConstraints1.ipadx = 244;
+            gridBagConstraints1.weightx = 1.0;
+            gridBagConstraints1.insets = new java.awt.Insets(6, 80, 6, 93);
+            GridBagConstraints gridBagConstraints = new GridBagConstraints();
+            gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+            gridBagConstraints.gridwidth = 2;
+            gridBagConstraints.gridx = 0;
+            gridBagConstraints.gridy = 5;
+            gridBagConstraints.ipadx = 246;
+            gridBagConstraints.weightx = 1.0;
+            gridBagConstraints.insets = new java.awt.Insets(7, 80, 13, 91);
+            mainTitleBottomLabel = new JLabel();
+            mainTitleBottomLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            mainTitleBottomLabel.setHorizontalTextPosition(SwingConstants.CENTER);
+            mainTitleBottomLabel.setText("Contest Control System");
+            mainTitleBottomLabel.setFont(new Font("Dialog", Font.BOLD, 18));
+            messageLabel = new JLabel();
+            messageLabel.setForeground(Color.red);
+            messageLabel.setText("");
+            messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
             GridBagConstraints gridBagConstraints6 = new GridBagConstraints();
             gridBagConstraints6.insets = new Insets(0, 24, 5, 20);
             gridBagConstraints6.gridx = 0;
@@ -112,16 +165,12 @@ public class LoginFrame extends JFrame {
             gridBagConstraints6.ipadx = 168;
             gridBagConstraints6.ipady = 9;
             gridBagConstraints6.gridwidth = 2;
-            jLabel4 = new JLabel();
-            jLabel4.setFont(new Font("Dialog", Font.BOLD, 18));
-            jLabel4.setText("Contest Control System");
-            jLabel4.setHorizontalAlignment(SwingConstants.CENTER);
-            GridBagConstraints gridBagConstraints5 = new GridBagConstraints();
-            gridBagConstraints5.insets = new Insets(7, 81, 6, 72);
-            gridBagConstraints5.gridy = 4;
-            gridBagConstraints5.gridx = 0;
-            jLabel3 = new JLabel();
-            jLabel3.setText("Password");
+            mainTitleTopLabel = new JLabel();
+            mainTitleTopLabel.setFont(new Font("Dialog", Font.BOLD, 18));
+            mainTitleTopLabel.setText("Contest Control System");
+            mainTitleTopLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            passwordTitleLabel = new JLabel();
+            passwordTitleLabel.setText("Password");
             GridBagConstraints gridBagConstraints4 = new GridBagConstraints();
             gridBagConstraints4.insets = new Insets(20, 22, 0, 23);
             gridBagConstraints4.gridx = 0;
@@ -129,56 +178,31 @@ public class LoginFrame extends JFrame {
             gridBagConstraints4.ipadx = 202;
             gridBagConstraints4.ipady = 6;
             gridBagConstraints4.gridwidth = 2;
-            jLabel2 = new JLabel();
-            jLabel2.setFont(new Font("Dialog", Font.BOLD, 18));
-            jLabel2.setHorizontalTextPosition(SwingConstants.CENTER);
-            jLabel2.setText("CSUS Programming");
-            jLabel2.setHorizontalAlignment(SwingConstants.CENTER);
-            GridBagConstraints gridBagConstraints3 = new GridBagConstraints();
-            gridBagConstraints3.insets = new Insets(2, 5, 11, 11);
-            gridBagConstraints3.gridx = 0;
-            gridBagConstraints3.gridy = 8;
-            gridBagConstraints3.ipadx = 265;
-            gridBagConstraints3.gridwidth = 2;
-            jLabel1 = new JLabel();
-            jLabel1.setHorizontalAlignment(SwingConstants.RIGHT);
-            jLabel1.setText("Version XX. XX YYYY vv 22");
-            GridBagConstraints gridBagConstraints2 = new GridBagConstraints();
-            gridBagConstraints2.insets = new Insets(6, 80, 5, 95);
-            gridBagConstraints2.gridy = 2;
-            gridBagConstraints2.gridx = 0;
-            jLabel = new JLabel();
-            jLabel.setText("Name");
-            GridBagConstraints gridBagConstraints1 = new GridBagConstraints();
-            gridBagConstraints1.fill = GridBagConstraints.HORIZONTAL;
-            gridBagConstraints1.gridwidth = 2;
-            gridBagConstraints1.gridx = 0;
-            gridBagConstraints1.gridy = 3;
-            gridBagConstraints1.ipadx = 244;
-            gridBagConstraints1.weightx = 1.0;
-            gridBagConstraints1.insets = new Insets(6, 80, 6, 93);
-            GridBagConstraints gridBagConstraints = new GridBagConstraints();
-            gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-            gridBagConstraints.gridwidth = 2;
-            gridBagConstraints.gridx = 0;
-            gridBagConstraints.gridy = 5;
-            gridBagConstraints.ipadx = 246;
-            gridBagConstraints.weightx = 1.0;
-            gridBagConstraints.insets = new Insets(7, 80, 13, 91);
-            jPanel = new JPanel();
-            jPanel.setLayout(new GridBagLayout());
-            jPanel.add(getPasswordTextField(), gridBagConstraints);
-            jPanel.add(getLoginTextField(), gridBagConstraints1);
-            jPanel.add(jLabel, gridBagConstraints2);
-            jPanel.add(jLabel1, gridBagConstraints3);
-            jPanel.add(jLabel2, gridBagConstraints4);
-            jPanel.add(jLabel3, gridBagConstraints5);
-            jPanel.add(jLabel4, gridBagConstraints6);
-            jPanel.add(getJButton(), gridBagConstraints7);
-            jPanel.add(getJButton1(), gridBagConstraints8);
-            jPanel.add(jLabel5, gridBagConstraints9);
+            mainTitleTopLabel.setFont(new Font("Dialog", Font.BOLD, 18));
+            mainTitleTopLabel.setHorizontalTextPosition(SwingConstants.CENTER);
+            mainTitleTopLabel.setText("CSUS Programming");
+            mainTitleTopLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            versionTitleLabel = new JLabel();
+            versionTitleLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+            versionTitleLabel.setText("Version XX. XX YYYY vv 22");
+            nameTitleLabel = new JLabel();
+            nameTitleLabel.setText("Name");
+            nameTitleLabel.setPreferredSize(new java.awt.Dimension(45, 16));
+            centerPane = new JPanel();
+            centerPane.setLayout(new GridBagLayout());
+            centerPane.add(getPasswordTextField(), gridBagConstraints);
+            centerPane.add(getLoginTextField(), gridBagConstraints1);
+            centerPane.add(nameTitleLabel, gridBagConstraints2);
+            centerPane.add(versionTitleLabel, gridBagConstraints3);
+            centerPane.add(mainTitleTopLabel, gridBagConstraints5);
+            centerPane.add(passwordTitleLabel, gridBagConstraints7);
+            centerPane.add(getLoginButton(), gridBagConstraints8);
+            centerPane.add(getExitButton(), gridBagConstraints9);
+            centerPane.add(messageLabel, gridBagConstraints10);
+            centerPane.add(mainTitleBottomLabel, gridBagConstraints11);
+            centerPane.add(mainTitleBottomLabel, gridBagConstraints6);
         }
-        return jPanel;
+        return centerPane;
     }
 
     /**
@@ -210,19 +234,28 @@ public class LoginFrame extends JFrame {
      * 
      * @return javax.swing.JButton
      */
-    private JButton getJButton() {
-        if (jButton == null) {
-            jButton = new JButton();
-            jButton.setMnemonic(KeyEvent.VK_L);
-            jButton.setText("Login");
-            jButton.addActionListener(new java.awt.event.ActionListener() {
+    private JButton getLoginButton() {
+        if (loginButton == null) {
+            loginButton = new JButton();
+            loginButton.setMnemonic(KeyEvent.VK_L);
+            loginButton.setText("Login");
+            loginButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-
-                    starterRunnable.run();
+                    attemptToLogin();
                 }
             });
         }
-        return jButton;
+        return loginButton;
+    }
+
+    protected void attemptToLogin() {
+
+        setStatusMessage("");
+        if (getLogin() == null || getLogin().length() < 1) {
+            setStatusMessage("Please enter a login");
+        } else {
+            starterRunnable.run();
+        }
     }
 
     /**
@@ -230,18 +263,28 @@ public class LoginFrame extends JFrame {
      * 
      * @return javax.swing.JButton
      */
-    private JButton getJButton1() {
-        if (jButton1 == null) {
-            jButton1 = new JButton();
-            jButton1.setMnemonic(KeyEvent.VK_X);
-            jButton1.setText("Exit");
-            jButton1.addActionListener(new java.awt.event.ActionListener() {
+    private JButton getExitButton() {
+        if (exitButton == null) {
+            exitButton = new JButton();
+            exitButton.setMnemonic(KeyEvent.VK_X);
+            exitButton.setText("Exit");
+            exitButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.exit(0);
+                    promptBeforeExit();
                 }
             });
         }
-        return jButton1;
+        return exitButton;
+    }
+
+    protected void promptBeforeExit() {
+
+        setStatusMessage("");
+        int result = FrameUtilities.yesNoCancelDialog("Are you sure you want to exit?", "Exit PC^2");
+
+        if (result == JOptionPane.YES_OPTION) {
+            System.exit(0);
+        }
     }
 
     public static void main(String[] args) {
@@ -249,15 +292,39 @@ public class LoginFrame extends JFrame {
     }
 
     public void setRunnable(Runnable runnable) {
-
         this.starterRunnable = runnable;
-
     }
 
+    /**
+     * Display a message for the user.
+     * 
+     * @param messageString
+     *            text to show to user
+     */
+    public void setStatusMessage(final String messageString) {
+
+        Runnable messageRunnable = new Runnable() {
+            public void run() {
+                messageLabel.setText(messageString);
+            }
+        };
+        SwingUtilities.invokeLater(messageRunnable);
+    }
+
+    /**
+     * Fetch Login name for client.
+     * 
+     * @return
+     */
     public String getLogin() {
         return loginTextField.getText();
     }
 
+    /**
+     * fetch password for client.
+     * 
+     * @return
+     */
     public String getPassword() {
         return new String(passwordTextField.getPassword());
     }

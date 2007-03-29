@@ -78,14 +78,20 @@ public class Controller implements IController {
 
         ClientId clientId;
 
-        if (id.startsWith("site")) {
+        if (id.startsWith("s")) {
             clientId = new ClientId(0, Type.SERVER, 0);
-        } else if (id.startsWith("team")) {
+        } else if (id.startsWith("t") && id.length() > 4) {
             int number = getIntegerValue(id.substring(4));
+            clientId = new ClientId(0, Type.TEAM, number);
+        } else if (Character.isDigit(id.charAt(0))) {
+            int number = getIntegerValue(id);
             clientId = new ClientId(0, Type.TEAM, number);
         } else {
             throw new SecurityException("No such account " + id);
         }
+
+        // TODO if first server must authenticate against "loaded" data.
+        // TODO if joining server must login to other server and authenticate
 
         Model model = new Model();
         model.setClientId(clientId);

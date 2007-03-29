@@ -16,11 +16,11 @@ import javax.swing.JTextField;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
-import edu.csus.ecs.pc2.core.model.AccountListener;
+import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.IModel;
 import edu.csus.ecs.pc2.core.model.RunEvent;
-import edu.csus.ecs.pc2.core.model.RunListener;
+import edu.csus.ecs.pc2.core.model.IRunListener;
 
 /**
  * GUI for Server.
@@ -112,6 +112,8 @@ public class ServerView extends JFrame {
             }
         });
         setVisible(true);
+        
+        FrameUtilities.centerFrameTop(this);
     }
 
     private void updateListBox(String string) {
@@ -124,7 +126,7 @@ public class ServerView extends JFrame {
      * @author pc2@ecs.csus.edu
      * 
      */
-    private class RunListenerImplementation implements RunListener {
+    private class RunListenerImplementation implements IRunListener {
 
         public void runAdded(RunEvent event) {
             updateListBox(event.getSubmittedRun() + " ADDED ");
@@ -152,7 +154,7 @@ public class ServerView extends JFrame {
      * @author pc2@ecs.csus
      * 
      */
-    public class AccountListenerImplementation implements AccountListener {
+    public class AccountListenerImplementation implements IAccountListener {
 
         public void accountAdded(AccountEvent accountEvent) {
             updateListBox("Account " + accountEvent.getAction() + " " + accountText(accountEvent.getAccount()));

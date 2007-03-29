@@ -69,4 +69,11 @@ public interface IModel {
      */
     Language[] getLanguages();
 
+    /**
+     * The name of the class to display after login.
+     * 
+     * @return class name
+     */
+    String getFrameName();
+
 }

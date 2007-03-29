@@ -3,8 +3,6 @@ package edu.csus.ecs.pc2;
 import edu.csus.ecs.pc2.core.Controller;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.model.IModel;
-import edu.csus.ecs.pc2.core.transport.QuickTransport;
-import edu.csus.ecs.pc2.core.transport.StaticTransport;
 import edu.csus.ecs.pc2.ui.LoginFrame;
 import edu.csus.ecs.pc2.ui.ServerView;
 import edu.csus.ecs.pc2.ui.TeamView;
@@ -50,12 +48,11 @@ import edu.csus.ecs.pc2.ui.TeamView;
  * @author pc2@ecs.csus.edu
  */
 
+// TODO write code for a command line login
 // $HeadURL$
 public class Starter implements Runnable {
 
     public static final String SVN_ID = "$Id$";
-
-    private static QuickTransport quickTransport = new QuickTransport();
 
     private LoginFrame loginFrame = new LoginFrame();
 
@@ -64,6 +61,11 @@ public class Starter implements Runnable {
 
     }
 
+    /**
+     * Show version info and start Login window.
+     * 
+     * @param args
+     */
     public static void main(String[] args) {
 
         VersionInfo versionInfo = new VersionInfo();
@@ -71,45 +73,70 @@ public class Starter implements Runnable {
         System.out.println();
 
         Starter starter = new Starter();
+        
         starter.startLoginFrame();
 
     }
 
+    /**
+     * Show the login frame.
+     *
+     */
     private void startLoginFrame() {
-
-        StaticTransport.setQuickTransport(quickTransport);
-
         loginFrame.setRunnable(this);
-        loginFrame.setTitle(loginFrame.getTitle() + " SERVER/SITE");
         loginFrame.setVisible(true);
-
-        // LoginFrame loginFrame2 = new LoginFrame();
-        // loginFrame2.setRunnable (this);
-
-        // loginFrame2.setVisible(true);
-        // loginFrame.setTitle(loginFrame.getTitle()+" Client ");
-        // FrameUtilities.windowToRight(loginFrame, loginFrame2);
-        //        
     }
 
     /**
-     * Run the login.
+     * Attempt to login and show main frame for client.
      * 
-     * User hit login.
-     * 
+     * This is a call back method for the LoginFrame when the Login button is used.
      */
     public void run() {
         String id = loginFrame.getLogin();
         String password = loginFrame.getPassword();
+        login(id, password, true);
+    }
 
-        IModel model = Controller.login(id, password);
-        IController controller = new Controller(model);
+    /**
+     * Login to PC^2, either with UI or not.
+     * 
+     * @param id - login name
+     * @param password - login password
+     * @param showDefaultUI assume LoginFrame is used and that UI is presented to user.
+     */
+    public void login(String id, String password, boolean showDefaultUI) {
 
-        if (id.startsWith("root")) {
-            new ServerView(model, controller);
+        try {
+            IModel model = Controller.login(id, password);
+            IController controller = new Controller(model);
 
-        } else {
-            new TeamView(model, controller);
+            if (showDefaultUI) {
+                if (model.getFrameName().equals("ServerView")) {
+                    new ServerView(model, controller);
+                    loginFrame.setVisible(false); // hide LoginFrame
+                } else if (model.getFrameName().equals("TeamView")) {
+                    new TeamView(model, controller);
+                    loginFrame.setVisible(false); // hide LoginFrame
+                } else {
+                    throw new Exception("Could not find class to display " + model.getFrameName());
+                }
+            }
+
+        } catch (SecurityException securityException) {
+            // TODO log this
+            System.err.println("SecurityException: " + securityException.getMessage());
+            securityException.printStackTrace(System.err);
+            if (showDefaultUI) {
+                loginFrame.setStatusMessage(securityException.getMessage());
+            }
+        } catch (Exception e) {
+            // TODO log this
+            System.err.println("Trouble showing frame " + e.getMessage());
+            e.printStackTrace(System.err);
+            if (showDefaultUI) {
+                loginFrame.setStatusMessage("Trouble logging in try again ");
+            }
         }
 
     }
