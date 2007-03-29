@@ -42,7 +42,7 @@ public class LanguageDisplayList extends ElementDisplayList {
 
     /**
      * Get sorted list of Languages.
-     * @return
+     * @return the array of Languages
      */
     public Language[] getList() {
         if (size() == 0) {

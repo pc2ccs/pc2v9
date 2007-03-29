@@ -25,7 +25,7 @@ public interface IModel {
      * Add a run into the contest data, return updated Submitted Run.
      * 
      * @param submittedRun
-     * @return
+     * @return Sumitted Run with id and timestamps
      */
     SubmittedRun acceptRun(SubmittedRun submittedRun) throws Exception;
 

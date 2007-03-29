@@ -10,10 +10,10 @@ import edu.csus.ecs.pc2.ui.TeamView;
 /**
  * Starter class.
  * 
- * This class mimics the main driver for a contest. It instantiates a {@link edu.csus.ecs.pc2.team.TeamModel} object which is an
+ * This class mimics the main driver for a contest. It instantiates a {@link edu.csus.ecs.pc2.core.model.Model} object which is an
  * abstraction for the complete set of contest data.
  * <P>
- * The {@link edu.csus.ecs.pc2.team.TeamModel} implements two interfaces, {@link edu.csus.ecs.pc2.IObservable} and
+ * The {@link edu.csus.ecs.pc2.core.model.Model} implements two interfaces, {@link edu.csus.ecs.pc2.IObservable} and
  * {@link edu.csus.ecs.pc2.core.model.IModel}. {@link edu.csus.ecs.pc2.IObservable} specifies methods for an external class to
  * register as an observer of the model. {@link edu.csus.ecs.pc2.core.model.IModel} represents the public interface into the contest
  * data.
@@ -29,20 +29,20 @@ import edu.csus.ecs.pc2.ui.TeamView;
  * arbitrary functions provided by the contest engine.
  * 
  * <P>
- * Finally, the Starter instantiates a {@link edu.csus.ecs.pc2.team.TeamView} object, which is an abstraction for GUIs which
- * reference contest data. The {@link edu.csus.ecs.pc2.team.TeamView} is passed the model and the controller.
+ * Finally, the Starter instantiates a {@link edu.csus.ecs.pc2.ui.TeamView} object, which is an abstraction for GUIs which
+ * reference contest data. The {@link edu.csus.ecs.pc2.ui.TeamView} is passed the model and the controller.
  * <P>
  * 
- * The {@link edu.csus.ecs.pc2.team.TeamView} object implements interface {@link edu.csus.ecs.pc2.IObserver} and registers itself as
+ * The {@link edu.csus.ecs.pc2.ui.TeamView} object implements interface {@link edu.csus.ecs.pc2.IObserver} and registers itself as
  * an observer of the model. Changes to the model invoked through the {@link edu.csus.ecs.pc2.core.model.IModel} interface cause the
- * model to invoke the update method in the {@link edu.csus.ecs.pc2.team.TeamView} observer.
+ * model to invoke the update method in the {@link edu.csus.ecs.pc2.ui.TeamView} observer.
  * <P>
  * 
- * The {@link edu.csus.ecs.pc2.team.TeamView} object gets input from the user and invokes functions in the controller interface,
+ * The {@link edu.csus.ecs.pc2.ui.TeamView} object gets input from the user and invokes functions in the controller interface,
  * similar to the way a contest GUI obtains input from the user and invokes contest engine functions. The controller responds to
  * requests from the view by invoking functions to update the model through the {@link edu.csus.ecs.pc2.core.model.IModel}
  * interface, similar to the way functions in the contest engine make changes in the contest data. Changes to the model in turn
- * invoke callbacks to the {@link edu.csus.ecs.pc2.team.TeamView} observer, similar to the way that changes in contest data update
+ * invoke callbacks to the {@link edu.csus.ecs.pc2.ui.TeamView} observer, similar to the way that changes in contest data update
  * contest GUIs.
  * 
  * @author pc2@ecs.csus.edu

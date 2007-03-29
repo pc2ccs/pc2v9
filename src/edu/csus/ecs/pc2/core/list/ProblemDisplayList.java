@@ -42,7 +42,7 @@ public class ProblemDisplayList extends ElementDisplayList {
     /**
      * Get a sorted list of Problems.
      * 
-     * @return
+     * @return the array of Problems
      */
     public Problem[] getList() {
         if (size() == 0) {

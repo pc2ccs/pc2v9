@@ -314,7 +314,7 @@ public class LoginFrame extends JFrame {
     /**
      * Fetch Login name for client.
      * 
-     * @return
+     * @return the login name
      */
     public String getLogin() {
         return loginTextField.getText();
@@ -323,7 +323,7 @@ public class LoginFrame extends JFrame {
     /**
      * fetch password for client.
      * 
-     * @return
+     * @return the password
      */
     public String getPassword() {
         return new String(passwordTextField.getPassword());
