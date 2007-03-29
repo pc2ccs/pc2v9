@@ -1,9 +1,9 @@
 package edu.csus.ecs.pc2.core.list;
 
-import edu.csus.ecs.pc2.core.model.ElementObject;
+import edu.csus.ecs.pc2.core.model.IElementObject;
 
 /**
- * Maintains a list of {@link edu.csus.ecs.pc2.core.model.ElementObject}
+ * Maintains a list of {@link edu.csus.ecs.pc2.core.model.IElementObject}
  *
  * @author pc2@ecs.csus.edu
  */
@@ -24,7 +24,7 @@ public class ElementList extends BaseElementList {
      * @param elementObject
      * @return the object key
      */
-    public String getKey(ElementObject elementObject) {
+    public String getKey(IElementObject elementObject) {
         return elementObject.getElementId().toString();
     }
 

@@ -8,7 +8,7 @@ package edu.csus.ecs.pc2.core.model;
  * 
  */
 // $HeadURL$
-public class Problem implements ElementObject {
+public class Problem implements IElementObject {
 
     public static final String SVN_ID = "$Id$";
 

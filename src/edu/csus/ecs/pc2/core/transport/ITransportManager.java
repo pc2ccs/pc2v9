@@ -10,8 +10,8 @@ import java.io.Serializable;
  */
 
 // $HeadURL$
-public interface TransportManagerInterface {
-    String SVN_ID = "$Id: TransportManagerInterface.java 882 2006-12-09 20:07:56Z boudreat $";
+public interface ITransportManager {
+    String SVN_ID = "$Id: ITransportManager.java 882 2006-12-09 20:07:56Z boudreat $";
 
     /**
      * Interface method for Client Applications. Used to establish Connection to the Server.

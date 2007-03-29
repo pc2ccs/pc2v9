@@ -15,7 +15,7 @@ import edu.csus.ecs.pc2.core.transport.TransportManager.tmTypes;
  * A Client ConnectionHandler.
  * 
  * This manages a client connection, it established a connection to
- * a server and allows the pc2 module to send and recieve information
+ * a server and allows the pc2 module to send and receive information
  * from a server.  Note that a server that logs into another server
  * uses this connection handler.
  * 

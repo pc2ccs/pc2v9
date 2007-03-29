@@ -8,7 +8,7 @@ package edu.csus.ecs.pc2.core.model;
  */
 
 // $HeadURL$
-public interface RunListener {
+public interface IRunListener {
 
     /**
      * New Run.

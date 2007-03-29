@@ -7,7 +7,7 @@ package edu.csus.ecs.pc2.core.model;
  */
 
 // $HeadURL$
-public interface AccountListener {
+public interface IAccountListener {
 
     /**
      * An account was added.

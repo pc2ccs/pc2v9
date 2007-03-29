@@ -7,7 +7,7 @@ package edu.csus.ecs.pc2.core.model;
  * @author pc2@ecs.csus.edu
  */
 // $HeadURL$
-public class Language implements ElementObject {
+public class Language implements IElementObject {
     public static final String SVN_ID = "$Id$";
 
     /**

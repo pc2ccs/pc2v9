@@ -10,9 +10,9 @@ package edu.csus.ecs.pc2.core.model;
 // $HeadURL$
 public interface IModel {
 
-    void addRunListener(RunListener runListener);
+    void addRunListener(IRunListener runListener);
 
-    void removeRunListener(RunListener runListener);
+    void removeRunListener(IRunListener runListener);
 
     /**
      * Add Run into TeamModel's data or receive run from Server.
@@ -46,14 +46,14 @@ public interface IModel {
      * 
      * @param accountListener
      */
-    void addAccountListener(AccountListener accountListener);
+    void addAccountListener(IAccountListener accountListener);
 
     /**
      * Remove a account listener.
      * 
      * @param accountListener
      */
-    void removeAccountListener(AccountListener accountListener);
+    void removeAccountListener(IAccountListener accountListener);
 
     /**
      * Fetch all defined problems.

@@ -10,7 +10,7 @@ package edu.csus.ecs.pc2.core.model;
  */
 
 // $HeadURL$
-public class Account implements ElementObject {
+public class Account implements IElementObject {
     public static final String SVN_ID = "$Id$";
 
     /**

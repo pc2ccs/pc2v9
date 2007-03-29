@@ -23,13 +23,13 @@ public class Model implements IModel {
 
     private ClientId clientId = null;
 
-    private Vector<RunListener> runListenterList = new Vector<RunListener>();
+    private Vector<IRunListener> runListenterList = new Vector<IRunListener>();
 
     private Vector<SubmittedRun> runList = new Vector<SubmittedRun>();
 
     private AccountList accountList = new AccountList();
 
-    private Vector<AccountListener> accountListenerList = new Vector<AccountListener>();
+    private Vector<IAccountListener> accountListenerList = new Vector<IAccountListener>();
 
     private int runNumber = 0;
 
@@ -85,11 +85,11 @@ public class Model implements IModel {
         }
     }
 
-    public void addRunListener(RunListener runListener) {
+    public void addRunListener(IRunListener runListener) {
         runListenterList.addElement(runListener);
     }
 
-    public void removeRunListener(RunListener runListener) {
+    public void removeRunListener(IRunListener runListener) {
         runListenterList.removeElement(runListener);
     }
 
@@ -143,12 +143,12 @@ public class Model implements IModel {
         }
     }
 
-    public void addAccountListener(AccountListener accountListener) {
+    public void addAccountListener(IAccountListener accountListener) {
         accountListenerList.addElement(accountListener);
 
     }
 
-    public void removeAccountListener(AccountListener accountListener) {
+    public void removeAccountListener(IAccountListener accountListener) {
         accountListenerList.removeElement(accountListener);
     }
 

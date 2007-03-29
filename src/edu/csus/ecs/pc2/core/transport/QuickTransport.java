@@ -17,15 +17,15 @@ public class QuickTransport {
 
     public static final String SVN_ID = "$Id$";
 
-    private TransportReceiver transportReceiverServer;
+    private ITransportReceiver transportReceiverServer;
 
-    private Vector<TransportReceiver> receiverList = new Vector<TransportReceiver>();
+    private Vector<ITransportReceiver> receiverList = new Vector<ITransportReceiver>();
     
     public QuickTransport() {
     }
         
 
-    public TransportReceiver getTransportReceiverServer() {
+    public ITransportReceiver getTransportReceiverServer() {
         return transportReceiverServer;
     }
 
@@ -34,12 +34,12 @@ public class QuickTransport {
      * Set the server transport
      * @param transportReceiverServer
      */
-    public void setTransportReceiverServer(TransportReceiver transportReceiverServer) {
+    public void setTransportReceiverServer(ITransportReceiver transportReceiverServer) {
         this.transportReceiverServer = transportReceiverServer;
     }
 
 
-    public QuickTransport(TransportReceiver transportReceiverServer, TransportReceiver transportReceiverClient) {
+    public QuickTransport(ITransportReceiver transportReceiverServer, ITransportReceiver transportReceiverClient) {
         super();
         this.transportReceiverServer = transportReceiverServer;
         addClientTransport(transportReceiverClient);
@@ -50,7 +50,7 @@ public class QuickTransport {
      * 
      * @param transportReceiver
      */
-    private void addClientTransport(TransportReceiver transportReceiver) {
+    private void addClientTransport(ITransportReceiver transportReceiver) {
         receiverList.addElement(transportReceiver);
         System.out.println(" debug22 "+receiverList.size());
     }

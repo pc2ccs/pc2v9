@@ -6,7 +6,7 @@ import java.util.Vector;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
-import edu.csus.ecs.pc2.core.model.ElementObject;
+import edu.csus.ecs.pc2.core.model.IElementObject;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 
 /**
@@ -251,7 +251,7 @@ public class AccountList extends BaseElementList {
      * Get the account lookup key.
      */
     @Override
-    public String getKey(ElementObject elementObject) {
+    public String getKey(IElementObject elementObject) {
         Account account = (Account) elementObject;
         return account.getClientId().getTripletKey();
     }

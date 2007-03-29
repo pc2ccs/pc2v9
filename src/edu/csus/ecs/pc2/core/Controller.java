@@ -25,12 +25,12 @@ public class Controller implements IController {
     }
 
     /**
-     * Recieve a run and add it to the run list.
+     * Receive a run and add it to the run list.
      */
     public void receiveSubmittedRun(SubmittedRun submittedRun) {
 
         try {
-            System.out.println("Controller.recieveSubmittedRun - got - " + submittedRun);
+            System.out.println("Controller.receiveSubmittedRun - got - " + submittedRun);
 
             SubmittedRun nextSubmittedRun = model.acceptRun(submittedRun);
 

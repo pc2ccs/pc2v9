@@ -7,10 +7,10 @@ import java.util.Hashtable;
 import java.util.Map;
 
 import edu.csus.ecs.pc2.core.model.ElementId;
-import edu.csus.ecs.pc2.core.model.ElementObject;
+import edu.csus.ecs.pc2.core.model.IElementObject;
 
 /**
- * Maintains a list of {@link edu.csus.ecs.pc2.core.model.ElementObject}
+ * Maintains a list of {@link edu.csus.ecs.pc2.core.model.IElementObject}
  *
  * @author pc2@ecs.csus.edu
  */
@@ -20,7 +20,7 @@ public abstract class BaseElementList implements Serializable {
 
     public static final String SVN_ID = "$Id$";
 
-    private Hashtable<String, ElementObject> hash = new Hashtable<String, ElementObject>(
+    private Hashtable<String, IElementObject> hash = new Hashtable<String, IElementObject>(
             200);
 
     /**
@@ -29,20 +29,20 @@ public abstract class BaseElementList implements Serializable {
      * @param elementObject
      * @return the object key
      */
-    public abstract String getKey(ElementObject elementObject);
+    public abstract String getKey(IElementObject elementObject);
 
     /**
      * Add object into list.
      *
      * @param elementObject
      */
-    public void add(ElementObject elementObject) {
+    public void add(IElementObject elementObject) {
 
         hash.put(getKey(elementObject), elementObject);
 
     }
 
-    public void addList(Map<String, ElementObject> moreItems) {
+    public void addList(Map<String, IElementObject> moreItems) {
         hash.putAll(moreItems);
     }
 
@@ -52,7 +52,7 @@ public abstract class BaseElementList implements Serializable {
      * @param elementObject
      *            elementObject to delete
      */
-    public void delete(ElementObject elementObject) {
+    public void delete(IElementObject elementObject) {
 
         hash.remove(getKey(elementObject));
 
@@ -76,9 +76,9 @@ public abstract class BaseElementList implements Serializable {
      * Get elementObject from list.
      *
      * @param id
-     * @return the ElementObject
+     * @return the IElementObject
      */
-    public ElementObject get(ElementId id) {
+    public IElementObject get(ElementId id) {
 
         return hash.get(id.toString());
 
@@ -87,7 +87,7 @@ public abstract class BaseElementList implements Serializable {
     /**
      * Get a elementObject from the list.
      */
-    public ElementObject get(ElementObject elementObject) {
+    public IElementObject get(IElementObject elementObject) {
         return hash.get(getKey(elementObject));
     }
 
@@ -96,7 +96,7 @@ public abstract class BaseElementList implements Serializable {
      */
     public void clear() {
 
-        hash = new Hashtable<String, ElementObject>(200);
+        hash = new Hashtable<String, IElementObject>(200);
 
     }
 
@@ -108,7 +108,7 @@ public abstract class BaseElementList implements Serializable {
      * @param elementObject
      * @return if the object was updated return true, otherwise return false
      */
-    public boolean update(ElementObject elementObject) {
+    public boolean update(IElementObject elementObject) {
         if (hash.containsKey(getKey(elementObject))) {
             elementObject.getElementId().incrementVersionNumber();
             hash.put(getKey(elementObject), elementObject);

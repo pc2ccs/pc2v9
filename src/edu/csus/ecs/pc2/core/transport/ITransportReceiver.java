@@ -9,7 +9,7 @@ import edu.csus.ecs.pc2.core.model.SubmittedRun;
  */
 
 // $HeadURL$
-public interface TransportReceiver {
+public interface ITransportReceiver {
     
     /**
      * Get a run from another module, very similar to receivePacket().

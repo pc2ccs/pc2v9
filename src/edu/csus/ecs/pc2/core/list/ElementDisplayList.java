@@ -3,7 +3,7 @@ package edu.csus.ecs.pc2.core.list;
 import java.io.Serializable;
 import java.util.Vector;
 
-import edu.csus.ecs.pc2.core.model.ElementObject;
+import edu.csus.ecs.pc2.core.model.IElementObject;
 
 /**
  * A list of elements to be displayed.
@@ -16,7 +16,7 @@ import edu.csus.ecs.pc2.core.model.ElementObject;
  */
 
 // $HeadURL$
-public class ElementDisplayList extends Vector<ElementObject> implements
+public class ElementDisplayList extends Vector<IElementObject> implements
         Serializable {
 
     /**

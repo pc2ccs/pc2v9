@@ -12,7 +12,7 @@ import java.io.Serializable;
  */
 
 // $HeadURL$
-public interface ElementObject extends Serializable {
+public interface IElementObject extends Serializable {
 
     String SVN_ID = "$Id$";
 

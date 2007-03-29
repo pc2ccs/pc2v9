@@ -27,7 +27,7 @@ import edu.csus.ecs.pc2.core.transport.crypto.CryptoException;
  * 
  */
 // $HeadURL: http://pc2.ecs.csus.edu/repos/v9wip/trunk/src/edu/csus/ecs/pc2/core/transport/TransportManager.java$
-public class TransportManager implements TransportManagerInterface {
+public class TransportManager implements ITransportManager {
     public static final String SVN_ID = "$Id: TransportManager.java 882 2006-12-09 20:07:56Z boudreat $";
 
     /**
@@ -71,9 +71,9 @@ public class TransportManager implements TransportManagerInterface {
 
     private tmTypes tmType;
 
-    private TwoToOne appServerCallBack = null;
+    private ITwoToOne appServerCallBack = null;
 
-    private BtoA appClientCallBack = null;
+    private IBtoA appClientCallBack = null;
 
     /**
      * Server Constructor.
@@ -81,7 +81,7 @@ public class TransportManager implements TransportManagerInterface {
      * @param log
      * @param appCallBack
      */
-    public TransportManager(Log log, TwoToOne appCallBack) {
+    public TransportManager(Log log, ITwoToOne appCallBack) {
         super();
         setEncrytionKeys(new Crypto());
         setConnectionHandlerThreadList(new ConnectionHandlerThreadList());
@@ -99,7 +99,7 @@ public class TransportManager implements TransportManagerInterface {
      * @param port
      * @param appCallBack
      */
-    public TransportManager(Log log, String serverIP, int port, BtoA appCallBack) {
+    public TransportManager(Log log, String serverIP, int port, IBtoA appCallBack) {
         super();
         // constructor for a client
         setMyServerPort(port);
@@ -535,7 +535,7 @@ public class TransportManager implements TransportManagerInterface {
      * 
      * @return
      */
-    private TwoToOne getAppServerCallBack() {
+    private ITwoToOne getAppServerCallBack() {
         return appServerCallBack;
     }
 
@@ -544,7 +544,7 @@ public class TransportManager implements TransportManagerInterface {
      * 
      * @param appCallBack
      */
-    private void setAppServerCallBack(TwoToOne appCallBack) {
+    private void setAppServerCallBack(ITwoToOne appCallBack) {
         this.appServerCallBack = appCallBack;
     }
 
@@ -553,7 +553,7 @@ public class TransportManager implements TransportManagerInterface {
      * 
      * @return
      */
-    private BtoA getAppClientCallBack() {
+    private IBtoA getAppClientCallBack() {
         return appClientCallBack;
     }
 
@@ -562,7 +562,7 @@ public class TransportManager implements TransportManagerInterface {
      * 
      * @param appClientCallBack
      */
-    private void setAppClientCallBack(BtoA appClientCallBack) {
+    private void setAppClientCallBack(IBtoA appClientCallBack) {
         this.appClientCallBack = appClientCallBack;
     }
 
