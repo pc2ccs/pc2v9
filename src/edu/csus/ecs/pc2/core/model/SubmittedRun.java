@@ -1,14 +1,16 @@
 package edu.csus.ecs.pc2.core.model;
 
+import java.io.Serializable;
+
 /**
  * A run submission.
  * 
- * @author Douglas A. Lane
+ * @author pc2@ecs.csus.edu
  * 
  */
 
 // $HeadURL$
-public class SubmittedRun {
+public class SubmittedRun implements Serializable {
 
     public static final String SVN_ID = "$Id$";
 

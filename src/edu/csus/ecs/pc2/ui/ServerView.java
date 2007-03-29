@@ -8,6 +8,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -108,12 +109,20 @@ public class ServerView extends JFrame {
         this.setContentPane(getMainViewPane());
         this.addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent e) {
-                System.exit(22);
+                promptAndExit();
             }
         });
         setVisible(true);
         
         FrameUtilities.centerFrameTop(this);
+    }
+
+    protected void promptAndExit() {
+        int result = FrameUtilities.yesNoCancelDialog("Are you sure you want to exit PC^2?", "Exit PC^2");
+
+        if (result == JOptionPane.YES_OPTION) {
+            System.exit(0);
+        }
     }
 
     private void updateListBox(String string) {

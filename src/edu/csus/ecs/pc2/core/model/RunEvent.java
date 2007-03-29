@@ -4,7 +4,7 @@ package edu.csus.ecs.pc2.core.model;
  * A run and a event state {@link edu.csus.ecs.pc2.core.model.RunEvent.Action}.
  * 
  * 
- * @author Douglas A. Lane
+ * @author pc2@ecs.csus.edu
  */
 
 //$HeadURL$

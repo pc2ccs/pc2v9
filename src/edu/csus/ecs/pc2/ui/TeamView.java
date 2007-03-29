@@ -6,6 +6,7 @@ import java.io.File;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -29,7 +30,7 @@ import edu.csus.ecs.pc2.core.model.RunEvent;
  */
 
 // $HeadURL$
-public class TeamView extends JFrame  {
+public class TeamView extends JFrame {
 
     public static final String SVN_ID = "$Id$";
 
@@ -38,6 +39,8 @@ public class TeamView extends JFrame  {
     private IModel theModel = null;
 
     private IController teamController = null;
+
+    private String lastOpenedFile = null;
 
     /**
      * 
@@ -80,7 +83,7 @@ public class TeamView extends JFrame  {
         this.teamController = teamController;
         initialize();
         theModel.addRunListener(new RunListenerImplementation());
-        
+
     }
 
     /**
@@ -103,33 +106,41 @@ public class TeamView extends JFrame  {
         setVisible(true);
         this.addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent e) {
-                System.exit(0);
+                promptAndExit();
             }
         });
-        
+
         populateGUI();
-        
+
         FrameUtilities.centerFrame(this);
     }
-    
+
+    protected void promptAndExit() {
+        int result = FrameUtilities.yesNoCancelDialog("Are you sure you want to exit PC^2?", "Exit PC^2");
+
+        if (result == JOptionPane.YES_OPTION) {
+            System.exit(0);
+        }
+    }
+
     private void populateGUI() {
-        
+
         getProblemComboBox().removeAllItems();
-        for (Problem problem : theModel.getProblems()){
+        for (Problem problem : theModel.getProblems()) {
             getProblemComboBox().addItem(problem);
         }
-        
+
         getLanguageComboBox().removeAllItems();
-        for (Language language : theModel.getLanguages()){
+        for (Language language : theModel.getLanguages()) {
             getLanguageComboBox().addItem(language);
         }
-        
+
     }
 
     private void updateListBox(String string) {
         runListModel.addElement(string);
     }
-    
+
     /**
      * 
      * @author pc2@ecs.csus.edu
@@ -149,7 +160,6 @@ public class TeamView extends JFrame  {
         }
     }
 
-  
     /**
      * This method initializes submitRunPane
      * 
@@ -279,7 +289,7 @@ public class TeamView extends JFrame  {
         if (problemComboBox == null) {
             problemComboBox = new JComboBox();
             problemComboBox.setBounds(new java.awt.Rectangle(126, 15, 221, 28));
-            
+
             problemComboBox.addItem(new Problem("Select Problem"));
         }
         return problemComboBox;
@@ -294,7 +304,7 @@ public class TeamView extends JFrame  {
         if (languageComboBox == null) {
             languageComboBox = new JComboBox();
             languageComboBox.setBounds(new java.awt.Rectangle(127, 58, 221, 28));
-            
+
             languageComboBox.addItem(new Language("Select Language"));
         }
         return languageComboBox;
@@ -312,7 +322,7 @@ public class TeamView extends JFrame  {
             pickFileButton.setText("Pick");
             pickFileButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.out.println("actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+                    selectMainFile();
                 }
             });
         }
@@ -354,12 +364,30 @@ public class TeamView extends JFrame  {
             runListPane = new JPanel();
             runListPane.setLayout(new BorderLayout());
             runListPane.setBounds(new java.awt.Rectangle(22, 170, 418, 130));
-            runListPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Runs",
-                    javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, null,
-                    null));
+            runListPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Runs", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+                    javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
             runListPane.add(getRunListScrollPane(), java.awt.BorderLayout.CENTER);
         }
         return runListPane;
+    }
+
+    private void selectMainFile() {
+        JFileChooser chooser = new JFileChooser(lastOpenedFile);
+        try {
+            int returnVal = chooser.showOpenDialog(this);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                lastOpenedFile = chooser.getCurrentDirectory().toString();
+                fileNameLabel.setText(chooser.getSelectedFile().getCanonicalFile().toString());
+                fileNameLabel.setToolTipText(chooser.getSelectedFile().getCanonicalFile().toString());
+
+            }
+        } catch (Exception e) {
+            System.err.println("Error getting selected file, try again.");
+            e.printStackTrace(System.err);
+            // getLog().log(Log.CONFIG, "Error getting selected file, try again.", e);
+        }
+        chooser = null;
+
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

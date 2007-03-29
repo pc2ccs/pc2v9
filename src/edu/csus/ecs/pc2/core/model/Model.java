@@ -190,4 +190,8 @@ public class Model implements IModel {
         return typeName.charAt(0) + typeName.substring(1).toLowerCase() + "View";
     }
 
+    public String getTitle() {
+        return clientId.toString();
+    }
+
 }

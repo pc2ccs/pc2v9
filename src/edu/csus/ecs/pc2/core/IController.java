@@ -1,7 +1,5 @@
 package edu.csus.ecs.pc2.core;
 
-import edu.csus.ecs.pc2.core.transport.ITransportReceiver;
-
 /**
  * Represents functions provided by modules comprising the contest engine.
  * 
@@ -10,7 +8,7 @@ import edu.csus.ecs.pc2.core.transport.ITransportReceiver;
  */
 
 // $HeadURL$
-public interface IController extends ITransportReceiver {
+public interface IController  {
     
     void submitRun(int teamNumber, String problemName, String languageName, String filename) throws Exception;
 

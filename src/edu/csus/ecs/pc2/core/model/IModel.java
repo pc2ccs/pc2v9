@@ -75,5 +75,7 @@ public interface IModel {
      * @return class name
      */
     String getFrameName();
+    
+    String getTitle();
 
 }

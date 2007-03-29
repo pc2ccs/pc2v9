@@ -21,7 +21,19 @@ import edu.csus.ecs.pc2.core.transport.crypto.CryptoException;
  * A {@link TransportManager.tmTypes#CLIENT CLIENT} will contact a {@link TransportManager.tmTypes#SERVER SERVER} and establish a
  * connection. Note that a PC<sup>2</sup> server module can also be a {@link TransportManager.tmTypes#CLIENT CLIENT} if it joins a
  * contest.
- * 
+ * <P>
+ * To instanciate a Server:
+ * <ol>
+ * <li> Use the server {@link #TransportManager(Log, ITwoToOne)} constructor
+ * <li> Start the transport listening using {@link #accecptConnections(int)}
+ * </ol>
+ * <P>
+ * To instanciate a Client:
+ * <ol>
+ * <li> Use the client {@link #TransportManager(Log, String, int, IBtoA)} constructor
+ * <li> Contact the server using {@link #connectToMyServer()}
+ * </ol>
+ * Needless to say the port numbers should be identical. 
  * 
  * @author pc2@ecs.csus.edu
  * 
@@ -52,6 +64,11 @@ public class TransportManager implements ITransportManager {
          */
         SERVER
     };
+    
+    /**
+     * Default connection/host port.
+     */
+    public static final String DEFAULT_PC2_PORT = "50002";
 
     private static final String PUBLIC_KEY = "PUBLIC_KEY";
 
