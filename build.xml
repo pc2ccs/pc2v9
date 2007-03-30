@@ -19,6 +19,9 @@
         <property name="vendor.lib.dir" location="${basedir}/vendor/lib"/>
         <property name="scripts.dir" location="${basedir}"/>
         <property name="samps.dir" location="${basedir}/samps"/>
+        <!-- used in javadocs linkoffline, this is the location on
+             the build host, override on the ant commandline -->
+        <property name="api.url" location="/software/pc2/java/docs/api/"/>
 
         <!-- Compiler settings. -->
         <property name="javacFailOnError" value="false"/>
@@ -166,7 +169,7 @@
 
     <target name="javadocs" depends="compile" description="Creates javadocs">
         <mkdir dir="${docs.dir}/api" />
-        <javadoc sourcepath="${src.dir}" destdir="${docs.dir}/api" classpathref="project.classpath" defaultexcludes="yes" packagenames="edu.csus.ecs.pc2.*" doctitle="PC^2 Version 9 Java Documentation"/>
+        <javadoc sourcepath="${src.dir}" destdir="${docs.dir}/api" classpathref="project.classpath" defaultexcludes="yes" packagenames="edu.csus.ecs.pc2.*" doctitle="PC^2 Version 9 Java Documentation" Use="yes" SplitIndex="yes" linkoffline="http://java.sun.com/j2se/1.5.0/docs/api/ ${api.url}"/>
     </target>
 </project>
 
