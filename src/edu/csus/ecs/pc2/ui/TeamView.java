@@ -34,9 +34,9 @@ public class TeamView extends JFrame {
 
     public static final String SVN_ID = "$Id$";
 
-    // TODO remove @SuppressWarnings for theModel
+    // TODO remove @SuppressWarnings for model
     @SuppressWarnings("unused")
-    private IModel theModel = null;
+    private IModel model = null;
 
     private IController teamController = null;
 
@@ -77,12 +77,12 @@ public class TeamView extends JFrame {
 
     private DefaultListModel runListModel = new DefaultListModel();
 
-    public TeamView(IModel theModel, IController teamController) {
+    public TeamView(IModel model, IController teamController) {
         super();
-        this.theModel = theModel;
+        this.model = model;
         this.teamController = teamController;
         initialize();
-        theModel.addRunListener(new RunListenerImplementation());
+        model.addRunListener(new RunListenerImplementation());
 
     }
 
@@ -113,6 +113,9 @@ public class TeamView extends JFrame {
         populateGUI();
 
         FrameUtilities.centerFrame(this);
+        
+        setTitle("PC^2 Server "+model.getTitle());
+
     }
 
     protected void promptAndExit() {
@@ -126,12 +129,12 @@ public class TeamView extends JFrame {
     private void populateGUI() {
 
         getProblemComboBox().removeAllItems();
-        for (Problem problem : theModel.getProblems()) {
+        for (Problem problem : model.getProblems()) {
             getProblemComboBox().addItem(problem);
         }
 
         getLanguageComboBox().removeAllItems();
-        for (Language language : theModel.getLanguages()) {
+        for (Language language : model.getLanguages()) {
             getLanguageComboBox().addItem(language);
         }
 

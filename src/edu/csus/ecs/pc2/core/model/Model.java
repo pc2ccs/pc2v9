@@ -24,13 +24,15 @@ public class Model implements IModel {
     private ClientId clientId = null;
 
     private Vector<IRunListener> runListenterList = new Vector<IRunListener>();
+    
+    private Vector<IProblemListener> problemListenerList = new Vector <IProblemListener>();
 
     private Vector<SubmittedRun> runList = new Vector<SubmittedRun>();
 
     private AccountList accountList = new AccountList();
 
     private Vector<IAccountListener> accountListenerList = new Vector<IAccountListener>();
-
+    
     private int runNumber = 0;
 
     private int siteNumber = 1;
@@ -62,7 +64,7 @@ public class Model implements IModel {
 
         String[] probNames = { "Sum of Squares", "Sumit", "Hello", "GoodBye" };
         Problem problem = new Problem("None Selected");
-
+        
         problemDisplayList.add(problem);
         problemList.add(problem);
 
@@ -105,6 +107,23 @@ public class Model implements IModel {
             }
         }
     }
+    
+
+    private void fireProblemListener(ProblemEvent problemEvent) {
+        for (int i = 0; i < runListenterList.size(); i++) {
+
+            if (problemEvent.getAction() == ProblemEvent.Action.ADDED) {
+                problemListenerList.elementAt(i).problemAdded(problemEvent);
+            } else if (problemEvent.getAction() == ProblemEvent.Action.DELETED) {
+                problemListenerList.elementAt(i).problemRemoved(problemEvent);
+            } else {
+                problemListenerList.elementAt(i).problemChanged(problemEvent);
+            }
+        }
+        // TODO Auto-generated method stub
+        
+    }
+
 
     /**
      * Add a run to the contest data.
@@ -113,6 +132,13 @@ public class Model implements IModel {
         runList.addElement(submittedRun);
         RunEvent runEvent = new RunEvent(Action.ADDED, submittedRun);
         fireRunListener(runEvent);
+    }
+    
+    public void addProblem (Problem problem){
+        problemDisplayList.add(problem);
+        problemList.add(problem);
+        ProblemEvent problemEvent = new ProblemEvent(ProblemEvent.Action.ADDED, problem);
+        fireProblemListener(problemEvent);
     }
 
     /**
@@ -191,7 +217,9 @@ public class Model implements IModel {
     }
 
     public String getTitle() {
-        return clientId.toString();
+        String titleCase = clientId.getClientType().toString();
+        titleCase = titleCase.charAt(0) + titleCase.substring(1);
+        return titleCase + " "+clientId.getClientNumber()+" (Site "+clientId.getSiteNumber()+")";
     }
 
 }

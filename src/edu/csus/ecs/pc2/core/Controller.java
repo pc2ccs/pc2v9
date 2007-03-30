@@ -2,9 +2,12 @@ package edu.csus.ecs.pc2.core;
 
 import java.io.Serializable;
 
+import edu.csus.ecs.pc2.core.list.LoginList;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.LoginEvent;
+import edu.csus.ecs.pc2.core.model.LoginRequest;
 import edu.csus.ecs.pc2.core.model.Model;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.SubmittedRun;
@@ -13,6 +16,7 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 import edu.csus.ecs.pc2.core.transport.IBtoA;
 import edu.csus.ecs.pc2.core.transport.ITransportManager;
 import edu.csus.ecs.pc2.core.transport.ITwoToOne;
+import edu.csus.ecs.pc2.core.transport.TransportException;
 import edu.csus.ecs.pc2.core.transport.TransportManager;
 
 /**
@@ -34,12 +38,8 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
     private static IBtoA btoA;
 
-    /**
-     * Very temporary connection id for single client transport testing. dal.
-     */
-    // TODO remove this soon, replace with actual login list.
-    private ConnectionHandlerID lastConnectionHandlerID;
-
+    private LoginList loginList = new LoginList();
+    
     public Controller(IModel model) {
         super();
         this.model = model;
@@ -51,9 +51,14 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     public void receiveSubmittedRun(SubmittedRun submittedRun) {
 
         try {
-            System.out.println("Controller.receiveSubmittedRun - got - " + submittedRun);
+            ClientId clientId = submittedRun.getClientId();
+            System.out.println("Controller.receiveSubmittedRun - received - " + submittedRun);
+            System.out.println("Controller.receiveSubmittedRun - from - " + clientId);
             SubmittedRun nextSubmittedRun = model.acceptRun(submittedRun);
-            send(nextSubmittedRun);
+            System.out.println("Controller.receiveSubmittedRun - added - " + nextSubmittedRun);
+            
+            ConnectionHandlerID connectionHandlerID = loginList.getConnectionHandleID(clientId);
+            sendToClient (connectionHandlerID,nextSubmittedRun);
         } catch (Exception e) {
             // TODO: handle exception maybe someday !! :)
             e.printStackTrace();
@@ -61,24 +66,40 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
     }
 
+    /**
+     * Send a object to a client.
+     * @param connectionHandlerID
+     * @param submittedRun
+     */
+    private void sendToClient(ConnectionHandlerID connectionHandlerID, SubmittedRun submittedRun) {
+        
+        try {
+            transportManager.send(submittedRun, connectionHandlerID);
+        } catch (TransportException e) {
+            // TODO log
+            e.printStackTrace();
+        }
+    }
+
     public void receiveNewRun(SubmittedRun submittedRun) {
+        System.out.println("Controller.receiveNewRun - added - " + submittedRun);
         model.addRun(submittedRun);
     }
 
     /**
-     * Submit a run to the server.
+     * Client submit a run to the server.
      */
     public void submitRun(int teamNumber, String problemName, String languageName, String filename) throws Exception {
 
         SerializedFile serializedFile = new SerializedFile(filename);
 
-        SubmittedRun submittedRun = new SubmittedRun(teamNumber, problemName, languageName, serializedFile);
+        SubmittedRun submittedRun = new SubmittedRun(model.getClientId(), problemName, languageName, serializedFile);
 
         // If we want to immediately populate the run on the GUI without
         // the run number we can invoke: model.addRun(submittedRun);
 
         try {
-            transportManager.send(submittedRun);
+            transportManager.send (submittedRun);
             System.out.println("Controller.submitRun - submitted - " + submittedRun);
 
         } catch (Exception e) {
@@ -87,6 +108,11 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         }
     }
 
+    /**
+     * Return int for input string
+     * @param s
+     * @return zero if error, otherwise returns value.
+     */
     private static int getIntegerValue(String s) {
         try {
             return Integer.parseInt(s);
@@ -139,6 +165,8 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             transportManager.connectToMyServer();
             System.err.println("Started Client Transport");
             System.err.println("on " + serverIP + " " + port);
+            
+            sendLoginRequest (transportManager, clientId, password);
 
         }
 
@@ -152,6 +180,25 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
 
     /**
+     * Send login request to server.
+     * @param manager
+     * @param clientId
+     * @param password
+     */
+    private static void sendLoginRequest(ITransportManager manager, ClientId clientId, String password) {
+
+        LoginRequest loginRequest = new LoginRequest(clientId, password, clientId.getClientType().toString());
+
+        try {
+            manager.send(loginRequest);
+        } catch (TransportException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
      * Server recieve object.
      * 
      * @see edu.csus.ecs.pc2.core.transport.ITwoToOne#receiveObject(java.io.Serializable, edu.csus.ecs.pc2.core.transport.ConnectionHandlerID)
@@ -162,26 +209,56 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
         if (object instanceof SubmittedRun) {
             SubmittedRun submittedRun = (SubmittedRun) object;
+//            ClientId clientId = submittedRun.getClientId();
+//            
+//            if (! loginList.isValidConnectionID(clientId, connectionHandlerID)) {
+//                throw new SecurityException("attempted to spoof "+clientId+" @ "+connectionHandlerID);
+//            }
+            
             receiveSubmittedRun(submittedRun);
-            lastConnectionHandlerID = connectionHandlerID;
+        } else if (object instanceof LoginRequest) {
+            LoginRequest loginRequest = (LoginRequest) object;
+            // TODO validate login requests
+            
+            ClientId clientId = loginRequest.getClientId();
+            loginList.add(clientId, connectionHandlerID);
+            
+            LoginEvent loginEvent = new LoginEvent (clientId, connectionHandlerID);
+            fireLoginListener (loginEvent);
+            
         } else {
             System.err.println("receiveObject: Unsupported class received: " + object.getClass().getName());
         }
     }
 
+    private void fireLoginListener(LoginEvent loginEvent) {
+        // TODO Auto-generated method stub
+        
+        System.err.println("fireLoginListener: "+loginEvent.getClientId());
+        
+        // TODO send login response to team
+        
+        // TODO send login event to other clients and sites
+        
+    }
+
     public void connectionEstablished(ConnectionHandlerID connectionHandlerID) {
         // TODO code
         System.err.println("connectionEstablished: " + model.getTitle() + " " + connectionHandlerID);
-        
-        lastConnectionHandlerID = connectionHandlerID;
-
     }
 
+    /**
+     * Connection to client lost.
+     */
     public void connectionDropped(ConnectionHandlerID connectionHandlerID) {
         // TODO code
         System.err.println("connectionDropped: " + model.getTitle() + " " + connectionHandlerID);
-        
-        lastConnectionHandlerID = null;
+
+        ClientId clientId = loginList.getClientId(connectionHandlerID);
+        if (clientId != null){
+            System.err.println("connectionDropped: removed user "+clientId);
+            loginList.remove(clientId);            
+        }
 
     }
 
@@ -208,25 +285,13 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
     }
 
+    /**
+     * Connection Dropped on client.
+     */
     public void connectionDropped() {
         // TODO code handle client dropped
         System.err.println("connectionDropped: " + model.getTitle());
 
-    }
-
-    /**
-     * Send object to client.
-     * 
-     * @param serializableObject
-     */
-    public void send(Serializable serializableObject) {
-        try {
-            transportManager.send(serializableObject, lastConnectionHandlerID);
-
-        } catch (Exception e) {
-            System.err.println("send: could not sent");
-            e.printStackTrace(System.err);
-        }
     }
 
 }

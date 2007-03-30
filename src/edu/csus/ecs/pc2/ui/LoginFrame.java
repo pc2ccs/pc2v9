@@ -17,6 +17,8 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
+import edu.csus.ecs.pc2.VersionInfo;
+
 /**
  * Login frame for all clients.
  * 
@@ -77,6 +79,9 @@ public class LoginFrame extends JFrame {
                 System.exit(0);
             }
         });
+        
+        VersionInfo versionInfo = new VersionInfo();
+        versionTitleLabel.setText("PC^2 version "+versionInfo.getVersionNumber()+" "+versionInfo.getBuildNumber());
     }
 
     /**
@@ -213,6 +218,14 @@ public class LoginFrame extends JFrame {
     private JPasswordField getPasswordTextField() {
         if (passwordTextField == null) {
             passwordTextField = new JPasswordField();
+            
+            passwordTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyPressed(java.awt.event.KeyEvent e) {
+                    if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
+                        attemptToLogin();
+                    }
+                }
+            });
         }
         return passwordTextField;
     }
@@ -225,6 +238,14 @@ public class LoginFrame extends JFrame {
     private JTextField getLoginTextField() {
         if (loginTextField == null) {
             loginTextField = new JTextField();
+            
+            loginTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyPressed(java.awt.event.KeyEvent e) {
+                    if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                        passwordTextField.requestFocus();
+                    }
+                }
+            });
         }
         return loginTextField;
     }

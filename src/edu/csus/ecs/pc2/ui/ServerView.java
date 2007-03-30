@@ -34,7 +34,7 @@ public class ServerView extends JFrame {
 
     public static final String SVN_ID = "$Id$";
 
-    private IModel serverModel = null;
+    private IModel model = null;
 
     // TODO remove @SuppressWarnings for serverController
     @SuppressWarnings("unused")
@@ -81,12 +81,12 @@ public class ServerView extends JFrame {
 
     private JLabel getScoreboardLabel = null;
 
-    public ServerView(IModel serverModel, IController serverController) {
+    public ServerView(IModel model, IController serverController) {
         super();
-        this.serverModel = serverModel;
+        this.model = model;
         this.serverController = serverController;
-        serverModel.addRunListener(new RunListenerImplementation());
-        serverModel.addAccountListener(new AccountListenerImplementation());
+        model.addRunListener(new RunListenerImplementation());
+        model.addAccountListener(new AccountListenerImplementation());
         initialize();
     }
 
@@ -115,6 +115,8 @@ public class ServerView extends JFrame {
         setVisible(true);
         
         FrameUtilities.centerFrameTop(this);
+        
+        setTitle("PC^2 Server "+model.getClientId());
     }
 
     protected void promptAndExit() {
@@ -334,22 +336,22 @@ public class ServerView extends JFrame {
         try {
             int count = getIntegerValue(adminCountTextField.getText());
             if (count > 0) {
-                serverModel.generateNewAccounts(ClientType.Type.ADMINISTRATOR.toString(), count, true);
+                model.generateNewAccounts(ClientType.Type.ADMINISTRATOR.toString(), count, true);
             }
 
             count = getIntegerValue(judgeCountTextField.getText());
             if (count > 0) {
-                serverModel.generateNewAccounts(ClientType.Type.JUDGE.toString(), count, true);
+                model.generateNewAccounts(ClientType.Type.JUDGE.toString(), count, true);
             }
 
             count = getIntegerValue(teamCountTextField.getText());
             if (count > 0) {
-                serverModel.generateNewAccounts(ClientType.Type.TEAM.toString(), count, true);
+                model.generateNewAccounts(ClientType.Type.TEAM.toString(), count, true);
             }
 
             count = getIntegerValue(boardCountTextField.getText());
             if (count > 0) {
-                serverModel.generateNewAccounts(ClientType.Type.SCOREBOARD.toString(), count, true);
+                model.generateNewAccounts(ClientType.Type.SCOREBOARD.toString(), count, true);
             }
 
         } catch (Exception e) {

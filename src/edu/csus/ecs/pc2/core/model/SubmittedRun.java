@@ -12,11 +12,16 @@ import java.io.Serializable;
 // $HeadURL$
 public class SubmittedRun implements Serializable {
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1798419856473207255L;
+
     public static final String SVN_ID = "$Id$";
 
     private int number;
-
-    private int teamNumber;
+    
+    private ClientId clientId;
 
     private String problemName;
 
@@ -56,25 +61,25 @@ public class SubmittedRun implements Serializable {
         this.submittedFile = submittedFile;
     }
 
-    public int getTeamNumber() {
-        return teamNumber;
-    }
 
-    public void setTeamNumber(int teamNumber) {
-        this.teamNumber = teamNumber;
-    }
-
-    public SubmittedRun(int teamNumber, String problemName, String languageName, SerializedFile submittedFile) {
+    public SubmittedRun(ClientId clientId, String problemName, String languageName, SerializedFile submittedFile) {
         super();
-        // TODO Auto-generated constructor stub
-        this.teamNumber = teamNumber;
+        this.clientId = clientId;
         this.problemName = problemName;
         this.languageName = languageName;
         this.submittedFile = submittedFile;
     }
 
     public String toString() {
-        return "Run " + number + " team" + teamNumber + " " + problemName + " " + languageName + " " + submittedFile.getName();
+        return "Run " + number + " "+clientId + " " + problemName + " " + languageName + " " + submittedFile.getName();
+    }
+
+    public ClientId getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(ClientId clientId) {
+        this.clientId = clientId;
     }
 
 }

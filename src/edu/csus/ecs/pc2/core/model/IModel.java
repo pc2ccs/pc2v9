@@ -77,5 +77,11 @@ public interface IModel {
     String getFrameName();
     
     String getTitle();
+    
+    /**
+     * 
+     * @return the ClientId for the logged in client.
+     */
+    ClientId getClientId();
 
 }
