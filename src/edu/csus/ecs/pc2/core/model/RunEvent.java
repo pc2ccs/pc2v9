@@ -7,7 +7,7 @@ package edu.csus.ecs.pc2.core.model;
  * @author pc2@ecs.csus.edu
  */
 
-//$HeadURL$
+// $HeadURL$
 public class RunEvent {
 
     public static final String SVN_ID = "$Id$";
@@ -36,23 +36,45 @@ public class RunEvent {
 
     private Action action;
 
-    private SubmittedRun submittedRun;
+    private Run run;
 
-    public RunEvent(Action runAction, SubmittedRun submittedRun) {
+    private RunFiles runFiles;
+
+    public RunEvent(Action action, Run run, RunFiles runFiles) {
         super();
-        this.action = runAction;
-        this.submittedRun = submittedRun;
+        this.action = action;
+        this.run = run;
+        this.runFiles = runFiles;
     }
 
     public Action getAction() {
         return action;
     }
 
+    public Run getRun() {
+        return run;
+    }
+
     // TODO this should not be returning a reference to a submitted run object, it needs to return an interface or read only version
     // of the data (clone?)
 
-    public SubmittedRun getSubmittedRun() {
-        return submittedRun;
+    public void setRun(Run run) {
+        this.run = run;
+    }
+
+    // TODO this should not be returning a reference to a submitted run object, it needs to return an interface or read only version
+    // of the data (clone?)
+
+    public RunFiles getRunFiles() {
+        return runFiles;
+    }
+
+    public void setRunFiles(RunFiles runFiles) {
+        this.runFiles = runFiles;
+    }
+
+    public void setAction(Action action) {
+        this.action = action;
     }
 
 }

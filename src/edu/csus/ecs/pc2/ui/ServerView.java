@@ -140,15 +140,15 @@ public class ServerView extends JFrame {
     private class RunListenerImplementation implements IRunListener {
 
         public void runAdded(RunEvent event) {
-            updateListBox(event.getSubmittedRun() + " ADDED ");
+            updateListBox(event.getRun() + " ADDED ");
         }
 
         public void runChanged(RunEvent event) {
-            updateListBox(event.getSubmittedRun() + " CHANGED ");
+            updateListBox(event.getRun() + " CHANGED ");
         }
 
         public void runRemoved(RunEvent event) {
-            updateListBox(event.getSubmittedRun() + " REMOVED ");
+            updateListBox(event.getRun() + " REMOVED ");
         }
     }
 

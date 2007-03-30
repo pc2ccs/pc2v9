@@ -13,23 +13,25 @@ import java.io.Serializable;
  * @author PC<sup>2</sup> (pc2@ecs.csus.edu)
  */
 
-// TODO: Settings update <br>
-// TODO: Settings update <br>
+// TODO: Settings update 
+// TODO: Settings update 
 //
-// TODO: Settings update from admin <br>
-// TODO: Run update from admin <br>
-// TODO: Clar update from admin <br>
-// TODO: contest start <br>
-// TODO: contest stop <br>
-// TODO: stop all sites <br>
-// TODO: start all sites <br>
-// TODO: Settings update <br>
-// TODO: import <br>
-// TODO: export <br>
-// TODO: force logoff <br>
-// TODO: force transport disconnection <br>
-// TODO: Settings update <br>
-// TODO: Settings update <br>
+// TODO: Settings update from admin 
+// TODO: Run update from admin 
+// TODO: Clar update from admin 
+// TODO: contest start 
+// TODO: contest stop 
+// TODO: stop all sites 
+// TODO: start all sites 
+// TODO: Settings update 
+// TODO: import 
+// TODO: export 
+// TODO: force logoff 
+// TODO: force transport disconnection 
+// TODO: Settings update 
+// TODO: Settings update 
+
+
 // $HeadURL$
 public final class PacketType implements Serializable {
 

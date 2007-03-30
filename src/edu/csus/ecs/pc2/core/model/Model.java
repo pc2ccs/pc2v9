@@ -7,6 +7,7 @@ import edu.csus.ecs.pc2.core.list.LanguageDisplayList;
 import edu.csus.ecs.pc2.core.list.LanguageList;
 import edu.csus.ecs.pc2.core.list.ProblemDisplayList;
 import edu.csus.ecs.pc2.core.list.ProblemList;
+import edu.csus.ecs.pc2.core.list.RunList;
 import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
 import edu.csus.ecs.pc2.core.model.RunEvent.Action;
 
@@ -24,18 +25,20 @@ public class Model implements IModel {
     private ClientId clientId = null;
 
     private Vector<IRunListener> runListenterList = new Vector<IRunListener>();
-    
-    private Vector<IProblemListener> problemListenerList = new Vector <IProblemListener>();
 
-    private Vector<SubmittedRun> runList = new Vector<SubmittedRun>();
+    private Vector<IProblemListener> problemListenerList = new Vector<IProblemListener>();
 
     private AccountList accountList = new AccountList();
 
     private Vector<IAccountListener> accountListenerList = new Vector<IAccountListener>();
-    
+
+    private RunList runList = new RunList();
+
     private int runNumber = 0;
 
     private int siteNumber = 1;
+
+    private ContestTime contestTime = new ContestTime();
 
     /**
      * List of all defined problems. Contains deleted problems too.
@@ -64,7 +67,7 @@ public class Model implements IModel {
 
         String[] probNames = { "Sum of Squares", "Sumit", "Hello", "GoodBye" };
         Problem problem = new Problem("None Selected");
-        
+
         problemDisplayList.add(problem);
         problemList.add(problem);
 
@@ -85,6 +88,9 @@ public class Model implements IModel {
             languageList.add(language);
             languageDisplayList.add(language);
         }
+
+        contestTime.setElapsedMins(9);
+        contestTime.startContestClock();
     }
 
     public void addRunListener(IRunListener runListener) {
@@ -107,7 +113,6 @@ public class Model implements IModel {
             }
         }
     }
-    
 
     private void fireProblemListener(ProblemEvent problemEvent) {
         for (int i = 0; i < runListenterList.size(); i++) {
@@ -120,21 +125,18 @@ public class Model implements IModel {
                 problemListenerList.elementAt(i).problemChanged(problemEvent);
             }
         }
-        // TODO Auto-generated method stub
-        
     }
-
 
     /**
      * Add a run to the contest data.
      */
-    public void addRun(SubmittedRun submittedRun) {
-        runList.addElement(submittedRun);
-        RunEvent runEvent = new RunEvent(Action.ADDED, submittedRun);
+    public void addRun(Run run) {
+        runList.add(run);
+        RunEvent runEvent = new RunEvent(Action.ADDED, run, null);
         fireRunListener(runEvent);
     }
-    
-    public void addProblem (Problem problem){
+
+    public void addProblem(Problem problem) {
         problemDisplayList.add(problem);
         problemList.add(problem);
         ProblemEvent problemEvent = new ProblemEvent(ProblemEvent.Action.ADDED, problem);
@@ -148,7 +150,6 @@ public class Model implements IModel {
      * 
      */
     public SubmittedRun acceptRun(SubmittedRun submittedRun) {
-
         runNumber++;
         submittedRun.setNumber(runNumber);
         addRun(submittedRun);
@@ -210,7 +211,7 @@ public class Model implements IModel {
      */
     public String getFrameName() {
         String typeName = clientId.getClientType().toString();
-        
+
         // TODO change this to a table lookup
 
         return typeName.charAt(0) + typeName.substring(1).toLowerCase() + "View";
@@ -219,7 +220,29 @@ public class Model implements IModel {
     public String getTitle() {
         String titleCase = clientId.getClientType().toString();
         titleCase = titleCase.charAt(0) + titleCase.substring(1);
-        return titleCase + " "+clientId.getClientNumber()+" (Site "+clientId.getSiteNumber()+")";
+        return titleCase + " " + clientId.getClientNumber() + " (Site " + clientId.getSiteNumber() + ")";
+    }
+
+    public void addRun(SubmittedRun submittedRun) {
+
+        Language runLanguage = null;
+        for (Language language : languageList.getList()) {
+            if (language.getDisplayName().equals(submittedRun.getLanguageName())) {
+                runLanguage = language;
+            }
+        }
+
+        Problem runProblem = null;
+        for (Problem problem : problemList.getList()) {
+            if (problem.getDisplayName().equals(submittedRun.getProblemName())) {
+                runProblem = problem;
+            }
+        }
+
+        Run run = new Run(submittedRun.getClientId(), runLanguage, runProblem);
+        run.setNumber(submittedRun.getNumber());
+
+        addRun(run);
     }
 
 }
