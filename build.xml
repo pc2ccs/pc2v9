@@ -69,11 +69,9 @@
         <path id="project.classpath">
             <pathelement location="${build.prod.dir}"/>
             <pathelement location="${build.test.dir}"/>
-<!-- XXX comment out vendor jars for now
             <fileset dir="${vendor.lib.dir}">
                 <include name="*.jar"/>
             </fileset>
--->
         </path>
 
     <target name="properties">
