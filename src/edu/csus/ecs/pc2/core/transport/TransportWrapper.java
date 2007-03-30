@@ -17,7 +17,7 @@ public class TransportWrapper implements Serializable {
      */
     private static final long serialVersionUID = -7482263258599397916L;
 
-    public static final String SVN_ID = "$Id: TransportWrapper.java 762 2006-11-29 09:04:16Z boudreat $";
+    public static final String SVN_ID = "$Id$";
 
     private Hashtable<String, Serializable> hashtable = new Hashtable<String, Serializable>();
 

@@ -11,7 +11,7 @@ import java.io.Serializable;
 
 // $HeadURL$
 public interface ITransportManager {
-    String SVN_ID = "$Id: ITransportManager.java 882 2006-12-09 20:07:56Z boudreat $";
+    String SVN_ID = "$Id$";
 
     /**
      * Interface method for Client Applications. Used to establish Connection to the Server.

@@ -16,7 +16,7 @@ public class LoginRequest implements Serializable {
      */
     private static final long serialVersionUID = -911355815843431017L;
 
-    public static final String SVN_ID = "$Id: Controller.java 23 2007-03-23 05:47:13Z laned $";
+    public static final String SVN_ID = "$Id$";
 
     private ClientId clientId;
     private String password;

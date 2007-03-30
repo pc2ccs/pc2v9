@@ -12,7 +12,7 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
 public class LoginEvent {
 
-    public static final String SVN_ID = "$Id: LoginEvent.java 59 2007-03-29 08:28:17Z laned $";
+    public static final String SVN_ID = "$Id$";
 
     /**
      * Run Event States(s).
