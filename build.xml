@@ -17,7 +17,7 @@
 	<property name="dist.dir" location="dist" />
         <!-- this should change one the location of mclb.jar changes -->
         <property name="vendor.lib.dir" location="${basedir}/vendor/lib"/>
-        <property name="scripts.dir" location="${basedir}"/>
+        <property name="scripts.dir" location="${basedir}/bin"/>
         <property name="samps.dir" location="${basedir}/samps"/>
         <!-- used in javadocs linkoffline, this is the location on
              the build host, override on the ant commandline -->
