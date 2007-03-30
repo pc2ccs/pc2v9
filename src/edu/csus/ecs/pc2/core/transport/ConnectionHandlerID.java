@@ -49,7 +49,9 @@ public class ConnectionHandlerID implements Serializable {
     }
 
     public boolean equals(Object obj) {
-        if (obj instanceof ConnectionHandlerID) {
+        if (obj == null) {
+            return false;
+        } else if (obj instanceof ConnectionHandlerID) {
             ConnectionHandlerID otherId = (ConnectionHandlerID) obj;
             return otherId.elementID.equals(this.elementID);
         } else {
