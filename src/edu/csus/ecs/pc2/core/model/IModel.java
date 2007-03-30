@@ -16,7 +16,11 @@ public interface IModel {
      * @param submittedRun
      */
     void addRun(SubmittedRun submittedRun);
-
+    
+    void addLanguage (Language language);
+    
+    void addProblem (Problem problem);
+    
     /**
      * Add a run into the contest data, return updated Submitted Run.
      * 
@@ -100,5 +104,7 @@ public interface IModel {
     void addLoginListener(ILoginListener loginListener);
 
     void removeLoginListener(ILoginListener loginListener);
+    
+    Run getRun (ElementId id);
 
 }
