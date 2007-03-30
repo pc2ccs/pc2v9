@@ -11,12 +11,12 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 
 /**
  * List of accounts.
- *
+ * 
  * Generate accounts as well as maintain list of accounts.
- *
+ * 
  * @author pc2@ecs.csus.edu
- *
- *
+ * 
+ * 
  */
 
 // $HeadURL$
@@ -24,7 +24,7 @@ public class AccountList extends BaseElementList {
     public static final String SVN_ID = "$Id$";
 
     /**
-     *
+     * 
      */
     private static final long serialVersionUID = -9188551825072244360L;
 
@@ -32,13 +32,13 @@ public class AccountList extends BaseElementList {
 
     /**
      * All password generation types
-     *
+     * 
      * @author pc2@ecs.csus.edu
      */
     public enum PasswordType {
         /**
          * Same as login (lowercase).
-         *
+         * 
          * ie. team1 is team1, board1 is board1
          */
         JOE,
@@ -47,21 +47,20 @@ public class AccountList extends BaseElementList {
          */
         RANDOM,
         /**
-         *
+         * 
          */
         DICTIONARY_WORDS
     }
 
     /**
      * Generate/add new accounts.
-     *
+     * 
      * @param type
      * @param count
      * @param passwordType
      * @param siteNumber
      */
-    public void generateNewAccounts(Type type, int count,
-            PasswordType passwordType, int siteNumber, boolean isActive) {
+    public void generateNewAccounts(Type type, int count, PasswordType passwordType, int siteNumber, boolean isActive) {
         Vector accounts = getAccounts(type, siteNumber);
         int total = accounts.size();
 
@@ -75,8 +74,18 @@ public class AccountList extends BaseElementList {
     }
 
     /**
+     * Return true if account defined.
+     * 
+     * @param clientId
+     * @return true if defined, false if not defined.
+     */
+    public boolean isDefinedAccount(ClientId clientId) {
+        return getAccount(clientId) != null;
+    }
+
+    /**
      * Get account by clientid.
-     *
+     * 
      * @param clientId
      *            ClientId
      * @return the account
@@ -88,7 +97,7 @@ public class AccountList extends BaseElementList {
 
     /**
      * Get display name for user.
-     *
+     * 
      * @param id
      *            client id for user
      * @return string of display name or short client id name {@link ClientId#getName()}
@@ -108,7 +117,7 @@ public class AccountList extends BaseElementList {
 
     /**
      * Generate password
-     *
+     * 
      * @param passwordType
      *            PasswordType
      * @param clientId
@@ -117,12 +126,10 @@ public class AccountList extends BaseElementList {
      */
     private String generatePassword(PasswordType passwordType, ClientId clientId) {
         if (passwordType == PasswordType.JOE) {
-            return clientId.getClientType().toString().toLowerCase()
-                    + clientId.getClientNumber();
+            return clientId.getClientType().toString().toLowerCase() + clientId.getClientNumber();
         } else {
             // TODO Random and dictionary words
-            return clientId.getClientType().toString().toLowerCase()
-                    + clientId.getClientNumber();
+            return clientId.getClientType().toString().toLowerCase() + clientId.getClientNumber();
         }
     }
 
@@ -177,9 +184,9 @@ public class AccountList extends BaseElementList {
 
     /**
      * Returns site account/info for input password.
-     *
+     * 
      * This assumes that no site password can be identical.
-     *
+     * 
      * @param password
      * @return null if no matching account, otherwise returns account.
      */
@@ -198,8 +205,7 @@ public class AccountList extends BaseElementList {
     public String loginResult(ClientId clientId, String password) {
         Account account = getAccount(clientId);
 
-        if (account == null
-                || clientId.getClientType() == ClientType.Type.SERVER) {
+        if (account == null || clientId.getClientType() == ClientType.Type.SERVER) {
             Account siteAccount = getSiteAccountByPassword(password);
             if (siteAccount != null) {
                 return VALID_LOGIN;
@@ -231,18 +237,16 @@ public class AccountList extends BaseElementList {
 
     /**
      * Add account, set client number number.
-     *
+     * 
      * The add method inserts without changes.
-     *
+     * 
      * @param account
      */
     public void addNewAccount(Account account) {
         int siteNumber = account.getSiteNumber();
-        Vector accounts = getAccounts(account.getClientId().getClientType(),
-                siteNumber);
+        Vector accounts = getAccounts(account.getClientId().getClientType(), siteNumber);
         int nextClientNumber = accounts.size() + 1;
-        ClientId id = new ClientId(siteNumber, account.getClientId()
-                .getClientType(), nextClientNumber);
+        ClientId id = new ClientId(siteNumber, account.getClientId().getClientType(), nextClientNumber);
         account.setClientId(id);
         super.add(account);
     }
@@ -258,18 +262,12 @@ public class AccountList extends BaseElementList {
 
     /**
      * Get all accounts
-     *
+     * 
      * @return an array of acounts
      */
     @SuppressWarnings("unchecked")
     public Account[] getList() {
         return (Account[]) values().toArray(new Account[size()]);
-        /*
-         * Fri Oct 20 12:39:40 PDT 2006 Thread-7 printHTML() java.lang.ClassCastException: [Ljava.lang.Object; at
-         * edu.csus.ecs.pc2.core.AccountList.getList(AccountList.java:211) at
-         * edu.csus.ecs.pc2.ui.BaseClient.getAccounts(BaseClient.java:213)
-         */
-        // return (Account []) values().toArray();
     }
 
 }
