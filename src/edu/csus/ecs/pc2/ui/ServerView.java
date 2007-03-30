@@ -79,7 +79,7 @@ public class ServerView extends JFrame {
 
     private JLabel genTeamLabels = null;
 
-    private JLabel getScoreboardLabel = null;
+    private JLabel genScoreboardLabel = null;
 
     public ServerView(IModel model, IController serverController) {
         super();
@@ -117,6 +117,8 @@ public class ServerView extends JFrame {
         FrameUtilities.centerFrameTop(this);
         
         setTitle("PC^2 Server "+model.getClientId());
+        
+        updateGenerateTitles();
     }
 
     protected void promptAndExit() {
@@ -133,6 +135,7 @@ public class ServerView extends JFrame {
     }
 
     /**
+     * Implementation for the Run Listener.
      * 
      * @author pc2@ecs.csus.edu
      * 
@@ -161,8 +164,8 @@ public class ServerView extends JFrame {
     }
 
     /**
-     * 
-     * @author pc2@ecs.csus
+     * Implementation for a Account Listener.
+     * @author pc2@ecs.csus.edu
      * 
      */
     public class AccountListenerImplementation implements IAccountListener {
@@ -358,6 +361,25 @@ public class ServerView extends JFrame {
             // TODO: handle exception
             e.printStackTrace();
         }
+        
+        updateGenerateTitles();
+    }
+
+    private void updateGenerateTitles() {
+
+        // Update the Number of accounts
+
+        int number = model.getAccounts(ClientType.Type.SCOREBOARD).size();
+        genScoreboardLabel.setText("Scoreboards (" + number + ")");
+
+        number = model.getAccounts(ClientType.Type.TEAM).size();
+        genTeamLabels.setText("Teams (" + number + ")");
+
+        number = model.getAccounts(ClientType.Type.JUDGE).size();
+        genJudgeLabel.setText("Judges (" + number + ")");
+
+        number = model.getAccounts(ClientType.Type.ADMINISTRATOR).size();
+        genAdminLabel.setText("Administrators (" + number + ")");
     }
 
     /**
@@ -409,9 +431,9 @@ public class ServerView extends JFrame {
      */
     private JPanel getCenterPane2() {
         if (centerPane2 == null) {
-            getScoreboardLabel = new JLabel();
-            getScoreboardLabel.setBounds(new java.awt.Rectangle(62, 165, 257, 31));
-            getScoreboardLabel.setText("Scoreboards");
+            genScoreboardLabel = new JLabel();
+            genScoreboardLabel.setBounds(new java.awt.Rectangle(62, 165, 257, 31));
+            genScoreboardLabel.setText("Scoreboards");
             genTeamLabels = new JLabel();
             genTeamLabels.setBounds(new java.awt.Rectangle(62, 115, 257, 31));
             genTeamLabels.setText("Teams");
@@ -430,7 +452,7 @@ public class ServerView extends JFrame {
             centerPane2.add(genAdminLabel, null);
             centerPane2.add(genJudgeLabel, null);
             centerPane2.add(genTeamLabels, null);
-            centerPane2.add(getScoreboardLabel, null);
+            centerPane2.add(genScoreboardLabel, null);
         }
         return centerPane2;
     }

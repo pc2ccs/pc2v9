@@ -9,6 +9,7 @@ import edu.csus.ecs.pc2.core.list.ProblemDisplayList;
 import edu.csus.ecs.pc2.core.list.ProblemList;
 import edu.csus.ecs.pc2.core.list.RunList;
 import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.RunEvent.Action;
 
 /**
@@ -92,6 +93,9 @@ public class Model implements IModel {
             languageList.add(language);
             languageDisplayList.add(language);
         }
+        
+        // Generate the server account
+        generateNewAccounts(ClientType.Type.SERVER.toString(), 1, true);
 
         contestTime.setElapsedMins(9);
         contestTime.startContestClock();
@@ -298,5 +302,12 @@ public class Model implements IModel {
         return runList.get(id);
     }
 
+    public Vector<Account> getAccounts(Type type, int inSiteNumber) {
+        return accountList.getAccounts(type, inSiteNumber);
+    }
+
+    public Vector<Account> getAccounts(Type type) {
+        return accountList.getAccounts(type);
+    }
 
 }

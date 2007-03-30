@@ -1,5 +1,9 @@
 package edu.csus.ecs.pc2.core.model;
 
+import java.util.Vector;
+
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
+
 /**
  * Specifies methods used to manipulate contest data.
  * 
@@ -106,5 +110,9 @@ public interface IModel {
     void removeLoginListener(ILoginListener loginListener);
     
     Run getRun (ElementId id);
+    
+    Vector<Account> getAccounts(Type type, int siteNumber);
+    
+    Vector<Account> getAccounts(Type type);
 
 }
