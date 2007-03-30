@@ -10,10 +10,6 @@ package edu.csus.ecs.pc2.core.model;
 // $HeadURL$
 public interface IModel {
 
-    void addRunListener(IRunListener runListener);
-
-    void removeRunListener(IRunListener runListener);
-
     /**
      * Add Run into TeamModel's data or receive run from Server.
      * 
@@ -25,7 +21,7 @@ public interface IModel {
      * Add a run into the contest data, return updated Submitted Run.
      * 
      * @param submittedRun
-     * @return Sumitted Run with id and timestamps
+     * @return Submitted Run with id and timestamps
      */
     SubmittedRun acceptRun(SubmittedRun submittedRun) throws Exception;
 
@@ -75,13 +71,34 @@ public interface IModel {
      * @return class name
      */
     String getFrameName();
-    
+
+    /**
+     * get title for this logged in client.
+     * 
+     * @return
+     */
     String getTitle();
-    
+
     /**
      * 
      * @return the ClientId for the logged in client.
      */
     ClientId getClientId();
+
+    void addRunListener(IRunListener runListener);
+
+    void removeRunListener(IRunListener runListener);
+
+    void addProblemListener(IProblemListener problemListener);
+
+    void removeProblemListener(IProblemListener problemListener);
+
+    void addLanguageListener(ILanguageListener languageListener);
+
+    void removeLanguageListener(ILanguageListener languageListener);
+
+    void addLoginListener(ILoginListener loginListener);
+
+    void removeLoginListener(ILoginListener loginListener);
 
 }

@@ -28,6 +28,10 @@ public class Model implements IModel {
 
     private Vector<IProblemListener> problemListenerList = new Vector<IProblemListener>();
 
+    private Vector<ILanguageListener> languageListenerList = new Vector<ILanguageListener>();
+
+    private Vector<ILoginListener> loginListenerList = new Vector<ILoginListener>();
+
     private AccountList accountList = new AccountList();
 
     private Vector<IAccountListener> accountListenerList = new Vector<IAccountListener>();
@@ -243,6 +247,30 @@ public class Model implements IModel {
         run.setNumber(submittedRun.getNumber());
 
         addRun(run);
+    }
+
+    public void addProblemListener(IProblemListener problemListener) {
+        problemListenerList.addElement(problemListener);
+    }
+
+    public void removeProblemListener(IProblemListener problemListener) {
+        problemListenerList.remove(problemListener);
+    }
+
+    public void addLanguageListener(ILanguageListener languageListener) {
+        languageListenerList.addElement(languageListener);
+    }
+
+    public void removeLanguageListener(ILanguageListener languageListener) {
+        languageListenerList.remove(languageListener);
+    }
+
+    public void addLoginListener(ILoginListener loginListener) {
+        loginListenerList.addElement(loginListener);
+    }
+
+    public void removeLoginListener(ILoginListener loginListener) {
+        loginListenerList.remove(loginListener);
     }
 
 }
