@@ -130,6 +130,19 @@ public class Model implements IModel {
             }
         }
     }
+    
+    private void fireLanguageListener(LanguageEvent languageEvent) {
+        for (int i = 0; i < runListenterList.size(); i++) {
+
+            if (languageEvent.getAction() == LanguageEvent.Action.ADDED) {
+                languageListenerList.elementAt(i).languageAdded(languageEvent);
+            } else if (languageEvent.getAction() == LanguageEvent.Action.DELETED) {
+                languageListenerList.elementAt(i).languageRemoved(languageEvent);
+            } else {
+                languageListenerList.elementAt(i).languageChanged(languageEvent);
+            }
+        }
+    }
 
     /**
      * Add a run to the contest data.
@@ -138,6 +151,14 @@ public class Model implements IModel {
         runList.add(run);
         RunEvent runEvent = new RunEvent(Action.ADDED, run, null);
         fireRunListener(runEvent);
+    }
+    
+
+    public void addLanguage(Language language) {
+        languageDisplayList.add(language);
+        languageList.add(language);
+        LanguageEvent languageEvent = new LanguageEvent(LanguageEvent.Action.ADDED, language);
+        fireLanguageListener(languageEvent);
     }
 
     public void addProblem(Problem problem) {
@@ -272,5 +293,10 @@ public class Model implements IModel {
     public void removeLoginListener(ILoginListener loginListener) {
         loginListenerList.remove(loginListener);
     }
+
+    public Run getRun(ElementId id) {
+        return runList.get(id);
+    }
+
 
 }

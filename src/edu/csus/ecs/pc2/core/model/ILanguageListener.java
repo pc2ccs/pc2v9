@@ -14,17 +14,17 @@ public interface ILanguageListener {
      * New Language.
      * @param event
      */
-    void problemAdded(LanguageEvent event);
+    void languageAdded(LanguageEvent event);
 
     /**
      * Language information has changed.
      * @param event
      */
-    void problemChanged(LanguageEvent event);
+    void languageChanged(LanguageEvent event);
 
     /**
      * Run has been removed.
      * @param event
      */
-    void problemRemoved(LanguageEvent event);
+    void languageRemoved(LanguageEvent event);
 }
