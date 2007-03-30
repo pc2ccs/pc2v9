@@ -8,9 +8,9 @@ import java.util.Hashtable;
  * @author pc2@ecs.csus.edu
  */
 
-// $HeadURL: http://pc2.ecs.csus.edu/repos/v9wip/trunk/src/edu/csus/ecs/pc2/core/transport/ConnectionHandlerThreadList.java $
+// $HeadURL$
 public class ConnectionHandlerThreadList {
-    public static final String SVN_ID = "$Id: ConnectionHandlerThreadList.java 872 2006-12-08 05:20:08Z laned $";
+    public static final String SVN_ID = "$Id$";
 
     private Hashtable<ConnectionHandlerID, ConnectionHandlerThread> hashtable = new Hashtable<ConnectionHandlerID, ConnectionHandlerThread>();
 

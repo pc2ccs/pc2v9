@@ -38,7 +38,7 @@ public class LoginList implements Serializable {
      */
     private static final long serialVersionUID = -6212994169038018512L;
 
-    public static final String SVN_ID = "$Id: LoginList.java 882 2006-12-09 20:07:56Z boudreat $";
+    public static final String SVN_ID = "$Id$";
 
     /**
      * ClientId for a ConnectionHandlerID.

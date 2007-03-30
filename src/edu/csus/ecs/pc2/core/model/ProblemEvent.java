@@ -6,10 +6,10 @@ package edu.csus.ecs.pc2.core.model;
  * @author pc2@ecs.csus.edu
  */
 
-//$HeadURL: http://pc2.ecs.csus.edu/repos/pc2v9/tproblemk/src/edu/csus/ecs/pc2/core/model/RunEvent.java $
+//$HeadURL$
 public class ProblemEvent {
 
-    public static final String SVN_ID = "$Id: RunEvent.java 59 2007-03-29 08:28:17Z laned $";
+    public static final String SVN_ID = "$Id$";
 
     /**
      * Run Event States(s).

@@ -24,7 +24,7 @@ import edu.csus.ecs.pc2.VersionInfo;
  * 
  * @author pc2@ecs.csus.edu
  */
-// $HeadURL: http://pc2.ecs.csus.edu/repos/v9wip/trunk/src/edu/csus/ecs/pc2/core/gui/LoginFrame.java $
+// $HeadURL$
 public class LoginFrame extends JFrame {
 
     /**

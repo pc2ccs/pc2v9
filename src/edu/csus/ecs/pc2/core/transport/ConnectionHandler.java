@@ -26,9 +26,9 @@ import edu.csus.ecs.pc2.core.transport.TransportManager.tmTypes;
  * 
  * @author pc2@ecs.csus.edu
  */
-// $HeadURL: http://pc2.ecs.csus.edu/repos/v9wip/trunk/src/edu/csus/ecs/pc2/core/transport/ConnectionHandler.java $
+// $HeadURL$
 public class ConnectionHandler implements Runnable {
-    public static final String SVN_ID = "$Id: ConnectionHandler.java 872 2006-12-08 05:20:08Z laned $";
+    public static final String SVN_ID = "$Id$";
 
     private Socket mySocket = null;
 

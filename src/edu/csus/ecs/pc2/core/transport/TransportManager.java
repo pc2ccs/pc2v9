@@ -40,7 +40,7 @@ import edu.csus.ecs.pc2.core.transport.crypto.CryptoException;
  */
 // $HeadURL: http://pc2.ecs.csus.edu/repos/v9wip/trunk/src/edu/csus/ecs/pc2/core/transport/TransportManager.java$
 public class TransportManager implements ITransportManager {
-    public static final String SVN_ID = "$Id: TransportManager.java 882 2006-12-09 20:07:56Z boudreat $";
+    public static final String SVN_ID = "$Id$";
 
     /**
      * The type/kind of transport manager.

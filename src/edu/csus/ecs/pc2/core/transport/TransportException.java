@@ -6,9 +6,9 @@ package edu.csus.ecs.pc2.core.transport;
  * @author pc2@ecs.csus.edu
  * 
  */
-// $HeadURL: http://pc2.ecs.csus.edu/repos/v9wip/trunk/src/edu/csus/ecs/pc2/core/transport/TransportException.java $
+// $HeadURL$
 public class TransportException extends Exception {
-    public static final String SVN_ID = "$Id: TransportException.java 882 2006-12-09 20:07:56Z boudreat $";
+    public static final String SVN_ID = "$Id$";
 
     /**
      * Transport related Exceptions

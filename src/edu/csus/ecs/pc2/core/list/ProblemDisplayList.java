@@ -12,7 +12,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
  *
  */
 
-// $HeadURL: http://pc2.ecs.csus.edu/repos/v9wip/trunk/src/edu/csus/ecs/pc2/core/ProblemDisplayList.java $
+// $HeadURL$
 public class ProblemDisplayList extends ElementDisplayList {
 
     /**
@@ -20,7 +20,7 @@ public class ProblemDisplayList extends ElementDisplayList {
      */
     private static final long serialVersionUID = -6256102346010208716L;
 
-    public static final String SVN_ID = "$Id: ProblemDisplayList.java 762 2006-11-29 09:04:16Z boudreat $";
+    public static final String SVN_ID = "$Id$";
 
     public void addElement(Problem problem) {
         super.addElement(problem);

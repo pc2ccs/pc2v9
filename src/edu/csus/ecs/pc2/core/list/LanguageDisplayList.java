@@ -12,7 +12,7 @@ import edu.csus.ecs.pc2.core.model.Language;
  * 
  */
 
-// $HeadURL: http://pc2.ecs.csus.edu/repos/v9wip/trunk/src/edu/csus/ecs/pc2/core/LanguageDisplayList.java $
+// $HeadURL$
 public class LanguageDisplayList extends ElementDisplayList {
 
     /**
@@ -20,7 +20,7 @@ public class LanguageDisplayList extends ElementDisplayList {
      */
     private static final long serialVersionUID = 7150174428160449009L;
 
-    public static final String SVN_ID = "$Id: LanguageDisplayList.java 762 2006-11-29 09:04:16Z boudreat $";
+    public static final String SVN_ID = "$Id$";
 
     public void addElement(Language language) {
         super.addElement(language);

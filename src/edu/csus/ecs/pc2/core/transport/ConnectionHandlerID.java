@@ -13,14 +13,14 @@ import edu.csus.ecs.pc2.core.model.ElementId;
  */
 
 // TODO should this be named something different, it contains information beyond just Id.
-// $HeadURL: http://pc2.ecs.csus.edu/repos/v9wip/trunk/src/edu/csus/ecs/pc2/core/transport/ConnectionHandlerID.java $
+// $HeadURL$
 public class ConnectionHandlerID implements Serializable {
     /**
      * 
      */
     private static final long serialVersionUID = -3845388028654277507L;
 
-    public static final String SVN_ID = "$Id: ConnectionHandlerID.java 762 2006-11-29 09:04:16Z boudreat $";
+    public static final String SVN_ID = "$Id$";
 
     /**
      * Unique identifier for each instance of a ConnectionHandler.
