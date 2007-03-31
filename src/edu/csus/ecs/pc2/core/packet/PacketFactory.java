@@ -19,6 +19,7 @@ import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
+import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
@@ -108,6 +109,9 @@ public final class PacketFactory {
     public static final String BALOON_SETTINGS = "BALOON_SETTINGS";
 
     public static final String SITE_LIST = "SITE_LIST";
+    
+    public static final String MESSAGE_STRING = "MESSAGE_STRING";
+
 
     /**
      * On login, send settings to server.
@@ -117,6 +121,16 @@ public final class PacketFactory {
     public static final String SEND_SETTINGS = "SEND_SETTINGS";
 
     public static final String RUN_RESULTS_FILE = "RUN_RESULTS_FILE";
+
+    /**
+     * Array of Problem
+     */
+    public static final String PROBLEM_LIST = "PROBLEM_LIST";
+    
+    /**
+     * Array of Language
+     */
+    public static final String LANGUAGE_LIST = "LANGUAGE_LIST";
 
     /**
      * Create a Login Packet.
@@ -213,7 +227,7 @@ public final class PacketFactory {
      * @param pw
      * @param packet
      */
-    private static void dumpPacket(PrintStream pw, Packet packet) {
+    public static void dumpPacket(PrintStream pw, Packet packet) {
         pw.println("Packet " + packet.getType());
         pw.println("  From: " + packet.getSourceId());
         pw.println("    To: " + packet.getDestinationId());
@@ -227,7 +241,12 @@ public final class PacketFactory {
                 pw.println("   key: " + element + " is: " + prop.get(element).getClass().getName());
             }
         } else {
-            pw.println("  Contains: " + obj.getClass().getName());
+            
+            if (obj instanceof String) {
+                pw.println("  Contains: " + (String) obj);
+            } else {
+                pw.println("  Contains: " + obj.getClass().getName());
+            }
         }
         pw.println();
 
@@ -480,9 +499,16 @@ public final class PacketFactory {
         return packet;
     }
 
-    public static Packet createLoginSuccess(ClientId source, ClientId destination, String string) {
+    public static Packet createLoginSuccess(ClientId source, ClientId destination, ContestTime inContestTime, int siteNumber,
+            Language[] languages, Problem [] problems) {
+        Properties prop = new Properties();
+        prop.put(SITE_NUMBER, new Integer(siteNumber));
+        prop.put(PacketType.CONTEST_TIME, inContestTime);
+        prop.put(CLIENT_ID, destination);
+        prop.put(PROBLEM_LIST, problems);
+        prop.put(LANGUAGE_LIST, languages);
 
-        Packet packet = new Packet(Type.LOGIN_SUCCESS, source, destination, string);
+        Packet packet = new Packet(Type.LOGIN_SUCCESS, source, destination, prop);
         return packet;
     }
 
@@ -492,8 +518,9 @@ public final class PacketFactory {
     }
 
     public static Packet createLoginDenied(ClientId source, ClientId destination, String string) {
-
-        Packet packet = new Packet(Type.LOGIN_FAILED, source, destination, string);
+        Properties props = new Properties();
+        props.put(PacketFactory.MESSAGE_STRING, string);
+        Packet packet = new Packet(Type.LOGIN_FAILED, source, destination, props);
         return packet;
 
     }

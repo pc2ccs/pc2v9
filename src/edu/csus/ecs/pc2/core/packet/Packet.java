@@ -37,7 +37,8 @@ public class Packet implements Serializable {
 
     private Serializable content = null;
 
-    Packet(PacketType.Type type, ClientId source, ClientId destination, Serializable content) {
+    // TODO change this back to protected, soon.
+    public Packet(PacketType.Type type, ClientId source, ClientId destination, Serializable content) {
         sourceId = source;
         destinationId = destination;
         this.content = content;
@@ -51,7 +52,7 @@ public class Packet implements Serializable {
      * @param source
      * @param destination
      */
-    Packet(PacketType.Type type, ClientId source, ClientId destination) {
+    protected Packet(PacketType.Type type, ClientId source, ClientId destination) {
         sourceId = source;
         destinationId = destination;
         this.content = null;

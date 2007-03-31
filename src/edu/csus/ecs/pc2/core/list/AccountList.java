@@ -199,40 +199,49 @@ public class AccountList extends BaseElementList {
         return null;
     }
 
+    
     /**
-     * Return result for login.
+     * Is clientId and password valid ?.
+     * 
+     * Throws exception if account does not exist, password
+     * does not match.  Exception message gives description of
+     * problem.
+     * 
+     * @param clientId
+     * @param password
+     * @return  true if login and password match
      */
-    public String loginResult(ClientId clientId, String password) {
+    public boolean isValidLoginAndPassword (ClientId clientId, String password) {
         Account account = getAccount(clientId);
 
         if (account == null || clientId.getClientType() == ClientType.Type.SERVER) {
             Account siteAccount = getSiteAccountByPassword(password);
             if (siteAccount != null) {
-                return VALID_LOGIN;
+                return true;
             } else if (account == null) {
-                return "No such account";
+                throw new SecurityException("No such account");
             } else {
-                return "Invalid password";
+                throw new SecurityException("Invalid password");
             }
         }
 
         if (account == null) {
-            return "No such account";
+            throw new SecurityException("No such account");
         }
 
         if (!account.isActive()) {
-            return "Account inactive";
+            throw new SecurityException("Account inactive");
         }
 
         if (account.getClientId().equals(clientId)) {
             if (account.getPassword().equals(password)) {
-                return VALID_LOGIN;
+                return true;
             } else {
-                return "Invalid password";
+                throw new SecurityException("Invalid password");
             }
         }
 
-        return "No such account.";
+        throw new SecurityException("No such account.");
     }
 
     /**

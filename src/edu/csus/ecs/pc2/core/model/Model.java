@@ -5,12 +5,14 @@ import java.util.Vector;
 import edu.csus.ecs.pc2.core.list.AccountList;
 import edu.csus.ecs.pc2.core.list.LanguageDisplayList;
 import edu.csus.ecs.pc2.core.list.LanguageList;
+import edu.csus.ecs.pc2.core.list.LoginList;
 import edu.csus.ecs.pc2.core.list.ProblemDisplayList;
 import edu.csus.ecs.pc2.core.list.ProblemList;
 import edu.csus.ecs.pc2.core.list.RunList;
 import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.RunEvent.Action;
+import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
 /**
  * 
@@ -23,7 +25,7 @@ public class Model implements IModel {
 
     public static final String SVN_ID = "$Id$";
 
-    private ClientId clientId = null;
+    private ClientId localClientId = null;
 
     private Vector<IRunListener> runListenterList = new Vector<IRunListener>();
 
@@ -36,6 +38,8 @@ public class Model implements IModel {
     private AccountList accountList = new AccountList();
 
     private Vector<IAccountListener> accountListenerList = new Vector<IAccountListener>();
+
+    private LoginList loginList = new LoginList();
 
     private RunList runList = new RunList();
 
@@ -93,7 +97,7 @@ public class Model implements IModel {
             languageList.add(language);
             languageDisplayList.add(language);
         }
-        
+
         // Generate the server account
         generateNewAccounts(ClientType.Type.SERVER.toString(), 1, true);
 
@@ -123,7 +127,7 @@ public class Model implements IModel {
     }
 
     private void fireProblemListener(ProblemEvent problemEvent) {
-        for (int i = 0; i < runListenterList.size(); i++) {
+        for (int i = 0; i < problemListenerList.size(); i++) {
 
             if (problemEvent.getAction() == ProblemEvent.Action.ADDED) {
                 problemListenerList.elementAt(i).problemAdded(problemEvent);
@@ -134,9 +138,9 @@ public class Model implements IModel {
             }
         }
     }
-    
+
     private void fireLanguageListener(LanguageEvent languageEvent) {
-        for (int i = 0; i < runListenterList.size(); i++) {
+        for (int i = 0; i < languageListenerList.size(); i++) {
 
             if (languageEvent.getAction() == LanguageEvent.Action.ADDED) {
                 languageListenerList.elementAt(i).languageAdded(languageEvent);
@@ -148,15 +152,38 @@ public class Model implements IModel {
         }
     }
 
+    private void fireLoginListener(LoginEvent loginEvent) {
+        for (int i = 0; i < loginListenerList.size(); i++) {
+
+            if (loginEvent.getAction() == LoginEvent.Action.NEW_LOGIN) {
+                loginListenerList.elementAt(i).loginAdded(loginEvent);
+            } else if (loginEvent.getAction() == LoginEvent.Action.LOGOFF) {
+                loginListenerList.elementAt(i).loginRemoved(loginEvent);
+            } else {
+                throw new UnsupportedOperationException("Unknown login action "+loginEvent.getAction());
+            }
+        }
+    }
+
     /**
      * Add a run to the contest data.
      */
-    public void addRun(Run run) {
+    public Run addRun(Run run) {
+        // TODO debug remove == 0 condition when addRun(SubmittedRun) is gone.
+        if (run.getNumber() == 0) {
+            run.setNumber(++runNumber);
+        }
         runList.add(run);
         RunEvent runEvent = new RunEvent(Action.ADDED, run, null);
         fireRunListener(runEvent);
+        return run;
     }
-    
+
+    public void addLogin(ClientId inClientId, ConnectionHandlerID connectionHandlerID) {
+        loginList.add(inClientId, connectionHandlerID);
+        LoginEvent loginEvent = new LoginEvent(inClientId, connectionHandlerID);
+        fireLoginListener(loginEvent);
+    }
 
     public void addLanguage(Language language) {
         languageDisplayList.add(language);
@@ -228,18 +255,18 @@ public class Model implements IModel {
     }
 
     public ClientId getClientId() {
-        return clientId;
+        return localClientId;
     }
 
     public void setClientId(ClientId clientId) {
-        this.clientId = clientId;
+        this.localClientId = clientId;
     }
 
     /**
      * Return frame class name.
      */
     public String getFrameName() {
-        String typeName = clientId.getClientType().toString();
+        String typeName = localClientId.getClientType().toString();
 
         // TODO change this to a table lookup
 
@@ -247,12 +274,12 @@ public class Model implements IModel {
     }
 
     public String getTitle() {
-        String titleCase = clientId.getClientType().toString();
+        String titleCase = localClientId.getClientType().toString();
         titleCase = titleCase.charAt(0) + titleCase.substring(1);
-        return titleCase + " " + clientId.getClientNumber() + " (Site " + clientId.getSiteNumber() + ")";
+        return titleCase + " " + localClientId.getClientNumber() + " (Site " + localClientId.getSiteNumber() + ")";
     }
 
-    public void addRun(SubmittedRun submittedRun) {
+    public Run addRun(SubmittedRun submittedRun) {
 
         Language runLanguage = null;
         for (Language language : languageList.getList()) {
@@ -272,6 +299,7 @@ public class Model implements IModel {
         run.setNumber(submittedRun.getNumber());
 
         addRun(run);
+        return run;
     }
 
     public void addProblemListener(IProblemListener problemListener) {
@@ -310,4 +338,36 @@ public class Model implements IModel {
         return accountList.getAccounts(type);
     }
 
+    public boolean isValidLoginAndPassword(ClientId inClientId, String password) {
+        return accountList.isValidLoginAndPassword(inClientId, password);
+    }
+
+
+    public ClientId getLoginClientId(ConnectionHandlerID connectionHandlerID) {
+        return loginList.getClientId(connectionHandlerID);
+    }
+
+    public boolean isLoggedIn(ClientId sourceId) {
+        return loginList.isLoggedIn(sourceId);
+    }
+
+    public ConnectionHandlerID getConnectionHandleID(ClientId sourceId) {
+        return loginList.getConnectionHandleID(sourceId);
+    }
+
+    public void removeLogin(ClientId sourceId) {
+        loginList.remove(sourceId);
+    }
+
+    public int getSiteNumber() {
+        return siteNumber;
+    }
+
+    public void setSiteNumber(int number) {
+        this.siteNumber = number;
+    }
+
+    public ContestTime getContestTime() {
+        return contestTime;
+    }
 }

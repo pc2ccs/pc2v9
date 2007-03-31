@@ -13,13 +13,16 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ILoginListener;
 import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.LoginEvent;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.IRunListener;
 
@@ -87,6 +90,7 @@ public class ServerView extends JFrame {
         this.serverController = serverController;
         model.addRunListener(new RunListenerImplementation());
         model.addAccountListener(new AccountListenerImplementation());
+        model.addLoginListener(new LoginListenerImplementation());
         initialize();
     }
 
@@ -129,9 +133,14 @@ public class ServerView extends JFrame {
         }
     }
 
-    private void updateListBox(String string) {
-        runListModel.addElement(string);
-        System.out.println("Box: " + string);
+    private void updateListBox(final String messageString) {
+        Runnable messageRunnable = new Runnable() {
+            public void run() {
+                runListModel.addElement(messageString);
+                System.out.println("Box: " + messageString);
+            }
+        };
+        SwingUtilities.invokeLater(messageRunnable);
     }
 
     /**
@@ -162,9 +171,27 @@ public class ServerView extends JFrame {
             return account.getClientId().toString();
         }
     }
+    
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     *
+     */
+    public class LoginListenerImplementation implements ILoginListener {
+
+        public void loginAdded(LoginEvent event) {
+            updateListBox("Login " + event.getAction() + " " + event.getClientId());
+        }
+
+        public void loginRemoved(LoginEvent event) {
+            updateListBox("Login " + event.getAction() + " " + event.getClientId());
+        }
+
+    }
 
     /**
      * Implementation for a Account Listener.
+     * 
      * @author pc2@ecs.csus.edu
      * 
      */

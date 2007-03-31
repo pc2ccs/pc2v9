@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.core.model;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
 /**
  * Specifies methods used to manipulate contest data.
@@ -19,7 +20,8 @@ public interface IModel {
      * 
      * @param submittedRun
      */
-    void addRun(SubmittedRun submittedRun);
+    Run addRun(SubmittedRun submittedRun);
+    Run addRun(Run run);
     
     void addLanguage (Language language);
     
@@ -88,8 +90,7 @@ public interface IModel {
     String getTitle();
 
     /**
-     * 
-     * @return the ClientId for the logged in client.
+     * @return ClientId for the logged in client.
      */
     ClientId getClientId();
 
@@ -114,5 +115,58 @@ public interface IModel {
     Vector<Account> getAccounts(Type type, int siteNumber);
     
     Vector<Account> getAccounts(Type type);
+
+    /**
+     * return true if account exists and valid password matches.
+     * 
+     * @param clientId
+     * @param password
+     * @return true if valid password for input clientId
+     */
+    boolean isValidLoginAndPassword(ClientId clientId, String password);
+
+    /**
+     * add a already validated login and connection to list.
+     * 
+     * @param clientId
+     * @param connectionHandlerID
+     */
+    void addLogin(ClientId clientId, ConnectionHandlerID connectionHandlerID);
+
+    /**
+     * Lookup a client id given a ConnectionHandlerID.
+     * @param connectionHandlerID
+     * @return ClientId or null if not found.
+     */
+    ClientId getLoginClientId(ConnectionHandlerID connectionHandlerID);
+
+    /**
+     * 
+     * @param sourceId
+     * @return true if logged in.
+     */
+    boolean isLoggedIn(ClientId sourceId);
+
+    /**
+     * Lookup ConnectionHandlerID for a given ClientId.
+     * @param clientId
+     * @return ClientId or null if not found.
+     */
+    ConnectionHandlerID getConnectionHandleID(ClientId clientId);
+
+    /**
+     * Logoff, remove user from login list.
+     * 
+     * @param clientId
+     */
+    void removeLogin(ClientId clientId);
+    
+    int getSiteNumber();
+    
+    ContestTime getContestTime();
+    
+    void setClientId (ClientId clientId);
+    
+    void setSiteNumber (int number);
 
 }

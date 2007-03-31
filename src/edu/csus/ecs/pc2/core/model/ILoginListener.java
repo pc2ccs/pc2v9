@@ -14,17 +14,11 @@ public interface ILoginListener {
      * New Login.
      * @param event
      */
-    void problemAdded(LoginEvent event);
-
-    /**
-     * Login information has changed.
-     * @param event
-     */
-    void problemChanged(LoginEvent event);
+    void loginAdded(LoginEvent event);
 
     /**
      * Run has been removed.
      * @param event
      */
-    void problemRemoved(LoginEvent event);
+    void loginRemoved(LoginEvent event);
 }

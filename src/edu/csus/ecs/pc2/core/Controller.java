@@ -2,16 +2,17 @@ package edu.csus.ecs.pc2.core;
 
 import java.io.Serializable;
 
-import edu.csus.ecs.pc2.core.list.LoginList;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IModel;
-import edu.csus.ecs.pc2.core.model.LoginEvent;
-import edu.csus.ecs.pc2.core.model.LoginRequest;
 import edu.csus.ecs.pc2.core.model.Model;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.SubmittedRun;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.packet.Packet;
+import edu.csus.ecs.pc2.core.packet.PacketFactory;
+import edu.csus.ecs.pc2.core.packet.PacketType;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 import edu.csus.ecs.pc2.core.transport.IBtoA;
 import edu.csus.ecs.pc2.core.transport.ITransportManager;
@@ -37,49 +38,41 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     private static Log log;
 
     private static IBtoA btoA;
-
-    private LoginList loginList = new LoginList();
+    
     
     public Controller(IModel model) {
         super();
         this.model = model;
     }
 
-    /**
-     * Server Receive a run and add it to the run list.
-     */
-    public void receiveSubmittedRun(SubmittedRun submittedRun) {
-
+    private void sendToServer(Packet packet) {
         try {
-            ClientId clientId = submittedRun.getClientId();
-            System.out.println("Controller.receiveSubmittedRun - received - " + submittedRun);
-            System.out.println("Controller.receiveSubmittedRun - from - " + clientId);
-            SubmittedRun nextSubmittedRun = model.acceptRun(submittedRun);
-            System.out.println("Controller.receiveSubmittedRun - added - " + nextSubmittedRun);
-            
-            ConnectionHandlerID connectionHandlerID = loginList.getConnectionHandleID(clientId);
-            sendToClient (connectionHandlerID,nextSubmittedRun);
-        } catch (Exception e) {
-            // TODO: handle exception maybe someday !! :)
-            e.printStackTrace();
-        }
-
-    }
-
-    /**
-     * Send a object to a client.
-     * @param connectionHandlerID
-     * @param submittedRun
-     */
-    private void sendToClient(ConnectionHandlerID connectionHandlerID, SubmittedRun submittedRun) {
-        
-        try {
-            transportManager.send(submittedRun, connectionHandlerID);
+            transportManager.send(packet);
         } catch (TransportException e) {
-            // TODO log
+            info("Unable to send to Server  "+packet);
             e.printStackTrace();
         }
     }
+    
+    private void sendToClient(ConnectionHandlerID connectionHandlerID, Packet packet) {
+        try {
+            transportManager.send(packet, connectionHandlerID);
+        } catch (TransportException e) {
+            info("Unable to send to "+connectionHandlerID+" packet "+packet);
+            e.printStackTrace();
+        }
+    }
+    
+    public void sendToClient(Packet packet) {
+        info( " sendToClient b4 " + packet);
+        ConnectionHandlerID connectionHandlerID = model.getConnectionHandleID(packet.getDestinationId());
+        info("sendToClient "+packet.getSourceId()+" "+connectionHandlerID);
+        sendToClient(connectionHandlerID, packet);
+        info(" sendToClient af " + packet);
+    }
+    
+    
+
 
     public void receiveNewRun(SubmittedRun submittedRun) {
         System.out.println("Controller.receiveNewRun - added - " + submittedRun);
@@ -90,22 +83,20 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * Client submit a run to the server.
      */
     public void submitRun(int teamNumber, String problemName, String languageName, String filename) throws Exception {
-
         SerializedFile serializedFile = new SerializedFile(filename);
 
+        // TODO replace with Run and RunFiles
         SubmittedRun submittedRun = new SubmittedRun(model.getClientId(), problemName, languageName, serializedFile);
+        
+        ClientId serverClientId = new ClientId(0, Type.SERVER, 0);
+        Packet packet = new Packet(PacketType.Type.RUN_SUBMISSION, model.getClientId(), serverClientId, submittedRun);
+        
+//        SubmittedRun submittedRun = (SubmittedRun) packet.getContent();
 
         // If we want to immediately populate the run on the GUI without
         // the run number we can invoke: model.addRun(submittedRun);
-
-        try {
-            transportManager.send (submittedRun);
-            System.out.println("Controller.submitRun - submitted - " + submittedRun);
-
-        } catch (Exception e) {
-            // TODO: handle exception
-            e.printStackTrace(System.err);
-        }
+        
+        sendToServer(packet);
     }
 
     /**
@@ -144,6 +135,10 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         }
 
         log = new Log(clientId.toString());
+        
+        if (password.length() < 1){
+            password = clientId.getName(); // Joe password.
+        }
 
         Model model = new Model();
         controller = new Controller(model);
@@ -157,14 +152,14 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
             transportManager = new TransportManager(log, controller);
             transportManager.accecptConnections(port);
-            System.err.println("Started Server Transport on " + port);
+            info("Started Server Transport on " + port);
         } else {
 
             String serverIP = "localhost";
+            info("Contacting server at " + serverIP + ":" + port);
             transportManager = new TransportManager(log, serverIP, port, btoA);
             transportManager.connectToMyServer();
-            System.err.println("Started Client Transport");
-            System.err.println("on " + serverIP + " " + port);
+            info("Started Client Transport");
             
             sendLoginRequest (transportManager, clientId, password);
 
@@ -175,7 +170,6 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
         model.setClientId(clientId);
         model.initializeWithFakeData();
-
         return model;
     }
 
@@ -186,102 +180,188 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * @param password
      */
     private static void sendLoginRequest(ITransportManager manager, ClientId clientId, String password) {
-
-        LoginRequest loginRequest = new LoginRequest(clientId, password, clientId.getClientType().toString());
-
         try {
-            manager.send(loginRequest);
+            ClientId serverClientId = new ClientId(0, Type.SERVER, 0);
+            Packet loginPacket = PacketFactory.createLogin(clientId,password,serverClientId);
+            manager.send(loginPacket);
         } catch (TransportException e) {
-            // TODO Auto-generated catch block
+            // TODO log exception 
             e.printStackTrace();
         }
-
     }
 
     /**
-     * Server recieve object.
+     * Server receive object.
      * 
      * @see edu.csus.ecs.pc2.core.transport.ITwoToOne#receiveObject(java.io.Serializable, edu.csus.ecs.pc2.core.transport.ConnectionHandlerID)
      */
     public void receiveObject(Serializable object, ConnectionHandlerID connectionHandlerID) {
 
         // TODO code check the input connection to insure they are valid connection
+        info("receiveObject " + object.getClass().getName());
 
-        if (object instanceof SubmittedRun) {
-            SubmittedRun submittedRun = (SubmittedRun) object;
-//            ClientId clientId = submittedRun.getClientId();
-//            
-//            if (! loginList.isValidConnectionID(clientId, connectionHandlerID)) {
-//                throw new SecurityException("attempted to spoof "+clientId+" @ "+connectionHandlerID);
-//            }
+        try {
+
+            if (object instanceof Packet) {
+
+                Packet packet = (Packet) object;
+                ClientId clientId = packet.getSourceId();
+                
+                info("receiveObject " + packet);
+                if (model.isLoggedIn(packet.getSourceId())) {
+                    // LOGGED IN - process the packet
+
+                    // TODO security authenticate the login vs connection
+
+                    processPacket(packet);
+
+                } else if (packet.getType().equals(PacketType.Type.LOGIN_REQUEST)) {
+                    String password = PacketFactory.getStringValue(packet, PacketFactory.PASSWORD);
+                    try {
+
+                        if (clientId.getSiteNumber() == ClientId.UNSET) {
+                            clientId = new ClientId(model.getSiteNumber(),clientId.getClientType(),clientId.getClientNumber());
+                        }
+                        attemptToLogin(clientId, password, connectionHandlerID);
+                        sendLoginSuccess(clientId, connectionHandlerID);
+
+                    } catch (SecurityException securityException) {
+                        String message = securityException.getMessage();
+                        sendLoginFailure(packet.getSourceId(), connectionHandlerID, message);
+                    }
+                } else {
+                    // Security Failure 
+                    
+                    String message = "Security violation user "+clientId;
+                    info (message + " on " + connectionHandlerID);
+                    sendSecurityVioation(clientId, connectionHandlerID, message);
+                }
+            } else {
+                info("receiveObject(S,C): Unsupported class received: " + object.getClass().getName());
+            }
+
+        } catch (Exception e) {
+            info("Exception in receiveObject(S,C): " + e.getMessage());
+            e.printStackTrace(System.err);
+        }
+        info("receiveObject (S,C) debug end : Processing " + object.getClass().getName());
+
+    }
+
+    /**
+     * Attempt to login, if login success add to login list.
+     * 
+     * @param clientId
+     * @param password
+     * @param connectionHandlerID
+     */
+    private void attemptToLogin(ClientId clientId, String password, ConnectionHandlerID connectionHandlerID) {
+        
+        if (model.isValidLoginAndPassword(clientId, password)) {
+            info("Added "+clientId);
+            model.addLogin(clientId, connectionHandlerID);
             
-            receiveSubmittedRun(submittedRun);
-        } else if (object instanceof LoginRequest) {
-            LoginRequest loginRequest = (LoginRequest) object;
-            // TODO validate login requests
+            ConnectionHandlerID connectionHandlerID2 = model.getConnectionHandleID(clientId);
             
-            ClientId clientId = loginRequest.getClientId();
-            loginList.add(clientId, connectionHandlerID);
-            
-            LoginEvent loginEvent = new LoginEvent (clientId, connectionHandlerID);
-            fireLoginListener (loginEvent);
-            
+            info ("attemptToLogin debug "+clientId);
+            info ("attemptToLogin debug "+connectionHandlerID);
+            info ("attemptToLogin debug "+connectionHandlerID2);
+
         } else {
-            System.err.println("receiveObject: Unsupported class received: " + object.getClass().getName());
+            // this code will never be executed, if invalid login
+            // isValidLogin will throw a SecurityException.
+            throw new SecurityException("Failed attempt to login");
         }
     }
 
-    private void fireLoginListener(LoginEvent loginEvent) {
-        // TODO Auto-generated method stub
-        
-        System.err.println("fireLoginListener: "+loginEvent.getClientId());
-        
-        // TODO send login response to team
-        
-        // TODO send login event to other clients and sites
-        
+    /**
+     * Process all packets.
+     * 
+     * Process packets when user is logged in.
+     * 
+     * @param packet
+     */
+    private void processPacket(Packet packet) {
+        PacketHandler.handlePacket (this, model, packet);
+    }
+
+    /**
+     * Send login failure packet back to non-logged in user, via ConnectionHandlerID.
+     * 
+     * @param destinationId
+     * @param connectionHandlerID
+     * @param message
+     */
+    private void sendLoginFailure(ClientId destinationId, ConnectionHandlerID connectionHandlerID, String message) {
+        Packet packet = PacketFactory.createLoginDenied(model.getClientId(),destinationId, message);
+        sendToClient(connectionHandlerID, packet);
+    }
+    
+    /**
+     * Send login failure packet back to non-logged in user, via ConnectionHandlerID.
+     * 
+     * @param destinationId
+     * @param connectionHandlerID
+     * @param message
+     */
+    private void sendSecurityVioation(ClientId destinationId, ConnectionHandlerID connectionHandlerID, String message) {
+        Packet packet = PacketFactory.createMessage(model.getClientId(),destinationId, message);
+        sendToClient(connectionHandlerID, packet);
+    }
+
+    private void sendLoginSuccess(ClientId clientId, ConnectionHandlerID connectionHandlerID) {
+        Packet packetToSend = PacketFactory.createLoginSuccess(model.getClientId(), clientId, model.getContestTime(), model.getSiteNumber(), model
+                .getLanguages(), model.getProblems());
+        sendToClient(packetToSend);
     }
 
     public void connectionEstablished(ConnectionHandlerID connectionHandlerID) {
-        // TODO code
-        System.err.println("connectionEstablished: " + model.getTitle() + " " + connectionHandlerID);
+        // TODO code connectionEstablished
+        info("connectionEstablished: " + model.getTitle() + " " + connectionHandlerID);
     }
 
     /**
      * Connection to client lost.
      */
     public void connectionDropped(ConnectionHandlerID connectionHandlerID) {
-        // TODO code
-        System.err.println("connectionDropped: " + model.getTitle() + " " + connectionHandlerID);
+        // TODO code connectionDropped
+        info("connectionDropped: " + model.getTitle() + " " + connectionHandlerID);
 
-        ClientId clientId = loginList.getClientId(connectionHandlerID);
+        ClientId clientId = model.getLoginClientId(connectionHandlerID);
         if (clientId != null){
-            System.err.println("connectionDropped: removed user "+clientId);
-            loginList.remove(clientId);            
+            info("connectionDropped: removed user "+clientId);
+            model.removeLogin(clientId);            
         }
 
     }
 
     public void connectionError(Serializable object, ConnectionHandlerID connectionHandlerID, String causeDescription) {
 
-        // TODO code
-        System.err.println("connectionError: " + model.getTitle() + " " + connectionHandlerID + " " + causeDescription + " " + object.getClass().getName());
+        // TODO code connectionError
+        info("connectionError: " + model.getTitle() + " " + connectionHandlerID + " " + causeDescription + " " + object.getClass().getName());
 
     }
 
     /**
-     * Client recieve object.
+     * Client receive object.
      * 
      * @see edu.csus.ecs.pc2.core.transport.IBtoA#receiveObject(java.io.Serializable)
      */
     public void receiveObject(Serializable object) {
 
+        info(" receiveObject(S) debug Processing "+object.getClass().getName());
+
         if (object instanceof SubmittedRun) {
             SubmittedRun submittedRun = (SubmittedRun) object;
             receiveNewRun(submittedRun);
+        } else if  (object instanceof Packet) {
+            Packet packet = (Packet) object; 
+            PacketFactory.dumpPacket(System.err, packet);
+            PacketHandler.handlePacket(controller, model, packet);
         } else {
-            System.err.println("receiveObject: Unsupported class received: " + object.getClass().getName());
+            info("receiveObject(S) Unsupported class received: " + object.getClass().getName());
         }
+        info(" receiveObject(S) debug end Processing "+object.getClass().getName());
 
     }
 
@@ -290,8 +370,24 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      */
     public void connectionDropped() {
         // TODO code handle client dropped
-        System.err.println("connectionDropped: " + model.getTitle());
+        info("connectionDropped: " + model.getTitle());
 
+    }
+    
+    public static void info(String s) {
+        System.err.println(Thread.currentThread().getName() + " " + s);
+    }
+
+    public void setSiteNumber(int number) {
+        model.setSiteNumber(number);
+    }
+
+    public void setContestTime(ContestTime contestTime) {
+        // TODO code
+    }
+
+    public void setClientId(ClientId clientId) {
+        model.setClientId(clientId);
     }
 
 }

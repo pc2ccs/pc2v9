@@ -110,4 +110,8 @@ public class ClientId implements Serializable {
         return getSiteNumber() + getClientType().toString() + getClientNumber();
     }
 
+    public void setSiteNumber(int siteNumber) {
+        this.siteNumber = siteNumber;
+    }
+
 }
