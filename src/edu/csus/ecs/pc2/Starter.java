@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2;
 import edu.csus.ecs.pc2.core.Controller;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.transport.TransportException;
 import edu.csus.ecs.pc2.ui.LoginFrame;
 import edu.csus.ecs.pc2.ui.ServerView;
 import edu.csus.ecs.pc2.ui.TeamView;
@@ -123,6 +124,16 @@ public class Starter implements Runnable {
                 }
             }
 
+        } catch (TransportException transportException) {
+            // TODO log this
+            System.err.println("TransportException: " + transportException.getMessage());
+            String message = "Unable to contact server, contact staff";
+            System.err.println(message);
+            
+            if (showDefaultUI) {
+                loginFrame.setStatusMessage(message);
+            }
+
         } catch (SecurityException securityException) {
             // TODO log this
             System.err.println("SecurityException: " + securityException.getMessage());
@@ -138,6 +149,5 @@ public class Starter implements Runnable {
                 loginFrame.setStatusMessage("Trouble logging in try again ");
             }
         }
-
     }
 }
