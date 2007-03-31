@@ -14,6 +14,9 @@ import edu.csus.ecs.pc2.core.packet.PacketType.Type;
 /**
  * Process all incoming packets.
  * 
+ * Processed contents of packets and updated the model with 
+ * the data it finds.
+ * 
  * @author pc2@ecs.csus.edu
  */
 
@@ -25,6 +28,7 @@ public final class PacketHandler {
     }
 
     /**
+     * Take each input packet and update the data.
      * 
      * @param controller
      * @param model
@@ -65,6 +69,15 @@ public final class PacketHandler {
 
     }
 
+    /**
+     * Add contest data into the model.
+     * 
+     * This can be used to add data to the model.
+     * 
+     * @param packet
+     * @param controller
+     * @param model
+     */
     private static void loadDataIntoModel(Packet packet, IController controller, IModel model) {
 
          ClientId clientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
@@ -100,6 +113,11 @@ public final class PacketHandler {
         }
 
     }
+    
+    /**
+     * TODO - a temporary logging routine.
+     * @param s
+     */
     public static void info(String s) {
         System.err.println(Thread.currentThread().getName() + " " + s);
     }
