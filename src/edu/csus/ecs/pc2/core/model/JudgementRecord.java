@@ -4,11 +4,12 @@ import java.io.Serializable;
 
 /**
  * A single Judgement from a judge for a Run.
- * 
- * This is has the judgement, who did the judgement, and other data about the judgement.
+ * <br>
+ * This contains all the information about a single judgement, who
+ * judged the run, what the judgement was, how long it took to judge,
+ * and whether the judgmeent {@link #isActive() is Active}
  * 
  * @author pc2@ecs.csus.edu
- * 
  */
 
 // $HeadURL$
@@ -22,22 +23,24 @@ public class JudgementRecord implements Serializable {
     public static final String SVN_ID = "$Id$";
 
     /**
-     * Judgement Id.
+     * A Unique contest-wide identifier for this judgement record.
      */
     private ElementId judgementId = null;
 
     /**
-     * Who did this judgement.
+     * Who entered this judgement.
      */
     private ClientId judgerClientId;
 
     /**
-     * use the validator.
+     * Is this judgement from a validator.
      */
     private boolean usedValidator = false;
 
     /**
-     * Is this judgement active.
+     * Is this "the" judgement for a run.
+     * 
+     * @see #isActive
      */
     private boolean active = true;
 
@@ -46,8 +49,19 @@ public class JudgementRecord implements Serializable {
      */
     private long judgedSeconds = 0;
 
+    /**
+     * Number of seconds it took to execute the run.
+     */
+    private long executeSeconds = 0;
+
+    /**
+     * Comment for team only.
+     */
     private JudgeComment commentForTeam = null;
 
+    /**
+     * Comment for judges only.
+     */
     private JudgeComment commentForJudge = null;
 
     /**
@@ -63,10 +77,14 @@ public class JudgementRecord implements Serializable {
      */
     private long howLongToJudgeInSeconds;
 
-    // TODO create a amount of time it took for the program to execute
-
+    /**
+     * Is this judgement a Yes ?.
+     */
     private boolean solved = false;
 
+    /**
+     * Send this judgement to team ?.
+     */
     private boolean sendToTeam = true;
 
     public JudgementRecord(ElementId judgementId, ClientId judgerClientId, boolean solved, boolean usedValidator) {
@@ -76,10 +94,24 @@ public class JudgementRecord implements Serializable {
         this.solved = solved;
     }
 
+    /**
+     * Is this "the" Judgement. ?
+     * 
+     * There may be many judgements for a run, if this returns true then this is the judgement shown to the teams and scoreboard and
+     * is the official judgement which is used to rank teams.
+     * 
+     * @return true if this is "the" judgement.
+     */
     public boolean isActive() {
         return active;
     }
 
+    /**
+     * Set this as "the" judgement.
+     * 
+     * @see #isActive()
+     * @param active
+     */
     public void setActive(boolean active) {
         this.active = active;
     }
@@ -114,6 +146,10 @@ public class JudgementRecord implements Serializable {
         this.judgementId = judgementId;
     }
 
+    /**
+     * get who entered this judgement.
+     * @return
+     */
     public ClientId getJudgerClientId() {
         return judgerClientId;
     }
@@ -151,6 +187,10 @@ public class JudgementRecord implements Serializable {
         this.whenJudgedTime = whenJudgedTime;
     }
 
+    /**
+     * is this problem solved, marked as Yes? .
+     * @return
+     */
     public boolean isSolved() {
         return solved;
     }
@@ -227,6 +267,14 @@ public class JudgementRecord implements Serializable {
 
     public void setUsedValidator(boolean usedValidator) {
         this.usedValidator = usedValidator;
+    }
+
+    public long getExecuteSeconds() {
+        return executeSeconds;
+    }
+
+    public void setExecuteSeconds(long executeSections) {
+        this.executeSeconds = executeSections;
     }
 
 }
