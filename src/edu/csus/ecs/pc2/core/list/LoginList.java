@@ -15,17 +15,15 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
  * 
  * Maintain a list of logged in users, when the logged in and the
  * {@link edu.csus.ecs.pc2.core.transport.ConnectionHandlerID ConnectionHandlerID} for that login.
+ * 
  * <P>
  * Use: {@link #isValidConnectionID(ClientId, ConnectionHandlerID)} for security purposes, that method insures that the ClientId
  * matches the ConnectionId that the clientId was intialially
- * 
  * <P>
  * 
- * Maintains 3 maps: {@link edu.csus.ecs.pc2.core.ClientId} to {@link edu.csus.ecs.pc2.core.transport.ConnectionHandlerID}, and
- * 
- * {@link edu.csus.ecs.pc2.core.transport.ConnectionHandlerID} to {@link edu.csus.ecs.pc2.core.ClientId} and
- * 
- * {@link edu.csus.ecs.pc2.core.ClientId} to {@link java.util.Date}
+ * Maintains 3 maps: {@link edu.csus.ecs.pc2.core.model.ClientId} to {@link edu.csus.ecs.pc2.core.transport.ConnectionHandlerID},
+ * and {@link edu.csus.ecs.pc2.core.transport.ConnectionHandlerID} to {@link edu.csus.ecs.pc2.core.model.ClientId} and
+ * {@link edu.csus.ecs.pc2.core.model.ClientId} to {@link java.util.Date}
  * 
  * @author pc2@ecs.csus.edu
  */
@@ -105,7 +103,9 @@ public class LoginList implements Serializable {
 
     /**
      * Returns an enumeration of logged in clients.
-     * @param type {@link ClientType.Type}
+     * 
+     * @param type
+     *            {@link edu.csus.ecs.pc2.core.model.ClientType.Type}
      * @return enumeration of clients.
      */
     public Enumeration<ClientId> getClients(ClientType.Type type) {
@@ -217,8 +217,6 @@ public class LoginList implements Serializable {
 
     /**
      * Get a list of all logged in clients.
-     * 
-     * @return
      */
     public ClientId[] getClientIdList() {
         ClientId[] theList = new ClientId[handlerClientHash.size()];

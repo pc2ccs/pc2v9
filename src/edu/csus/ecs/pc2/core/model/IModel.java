@@ -25,7 +25,6 @@ public interface IModel {
      * 
      * @param run
      * @param runFiles this may be null.
-     * @return
      */
     Run addRun(Run run, RunFiles runFiles);
 
@@ -94,8 +93,6 @@ public interface IModel {
 
     /**
      * Fetch all defined judgements.
-     * 
-     * @return
      */
     Judgement[] getJudgements();
 
@@ -115,8 +112,6 @@ public interface IModel {
 
     /**
      * get title for this logged in client.
-     * 
-     * @return
      */
     String getTitle();
 

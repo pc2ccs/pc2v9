@@ -14,7 +14,7 @@ import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 
 /**
- * Maintains a list of {@link edu.csus.ecs.pc2.core.Run}s.
+ * Maintains a list of {@link edu.csus.ecs.pc2.core.model.Run}s.
  * 
  * This class maintains a list of runs, as well as load/save the runs to disk. <br>
  * 

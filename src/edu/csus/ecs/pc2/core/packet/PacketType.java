@@ -135,7 +135,7 @@ public final class PacketType implements Serializable {
          * From server to team <br>
          * From server to judges, admins, servers<br>
          * <br>
-         * Contents: {@link edu.csus.ecs.pc2.core.Run}
+         * Contents: {@link edu.csus.ecs.pc2.core.model.Run}
          * 
          * @see #RUN_SUBMISSION
          */
@@ -387,7 +387,11 @@ public final class PacketType implements Serializable {
         CONTEST_RESET,
 
         /**
-         * Failed to login.
+         * Failure to Login.  
+         * 
+         * This could be caused by a number of causes which include
+         * but are not limited to: no such account, invalid login,
+         * invalid password, inactive account.
          * 
          * From server to client<br>
          * From server to server <br>
@@ -560,10 +564,6 @@ public final class PacketType implements Serializable {
          * 
          */
         CONTEST_PROPERTIES,
-    }
-
-    public static void main(String[] args) {
-
     }
 
     /**

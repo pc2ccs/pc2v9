@@ -12,40 +12,19 @@ import edu.csus.ecs.pc2.ui.TeamView;
 /**
  * Starter class.
  * 
- * This class mimics the main driver for a contest. It instantiates a {@link edu.csus.ecs.pc2.core.model.Model} object which is an
- * abstraction for the complete set of contest data.
+ * The Starter class is the main driver for all PC<sup>2</sup> modules.
  * <P>
- * The {@link edu.csus.ecs.pc2.core.model.Model} implements two interfaces, {@link edu.csus.ecs.pc2.IObservable} and
- * {@link edu.csus.ecs.pc2.core.model.IModel}. {@link edu.csus.ecs.pc2.IObservable} specifies methods for an external class to
- * register as an observer of the model. {@link edu.csus.ecs.pc2.core.model.IModel} represents the public interface into the contest
- * data.
+ * The class presents the user with a {@link edu.csus.ecs.pc2.ui.LoginFrame}, upon selecting login the LoginFrame class invokes the
+ * {@link #run()} method and uses {@link edu.csus.ecs.pc2.core.Controller#login}, that method returns a
+ * {@link edu.csus.ecs.pc2.core.model.IModel}, a model on succesful login.
  * <P>
- * 
- * Next the Starter instantiates a {@link edu.csus.ecs.pc2.core.Controller} object, which is an abstraction for all the functions
- * performed by the contest control engine (which might be comprised of several modules). The
- * {@link edu.csus.ecs.pc2.core.Controller} receives the previously constructed model as a parameter so that it can invoke methods
- * to manipulate data in the model.
+ * Upon a Exception or invalid login a message will appear on the LoginFrame message area.
  * <P>
- * 
- * The {@link edu.csus.ecs.pc2.core.Controller} implements interface {@link edu.csus.ecs.pc2.core.IController} which represents
- * arbitrary functions provided by the contest engine.
- * 
+ * Upon a successful login, based on {@link edu.csus.ecs.pc2.core.model.ClientType.Type} a class name will be looked up in a {@link java.util.Properties} file.
+ * The class will be instanciated and passed a {@link edu.csus.ecs.pc2.core.model.IModel} and
+ * {@link edu.csus.ecs.pc2.core.IController}.
  * <P>
- * Finally, the Starter instantiates a {@link edu.csus.ecs.pc2.ui.TeamView} object, which is an abstraction for GUIs which
- * reference contest data. The {@link edu.csus.ecs.pc2.ui.TeamView} is passed the model and the controller.
- * <P>
- * 
- * The {@link edu.csus.ecs.pc2.ui.TeamView} object implements interface {@link edu.csus.ecs.pc2.IObserver} and registers itself as
- * an observer of the model. Changes to the model invoked through the {@link edu.csus.ecs.pc2.core.model.IModel} interface cause the
- * model to invoke the update method in the {@link edu.csus.ecs.pc2.ui.TeamView} observer.
- * <P>
- * 
- * The {@link edu.csus.ecs.pc2.ui.TeamView} object gets input from the user and invokes functions in the controller interface,
- * similar to the way a contest GUI obtains input from the user and invokes contest engine functions. The controller responds to
- * requests from the view by invoking functions to update the model through the {@link edu.csus.ecs.pc2.core.model.IModel}
- * interface, similar to the way functions in the contest engine make changes in the contest data. Changes to the model in turn
- * invoke callbacks to the {@link edu.csus.ecs.pc2.ui.TeamView} observer, similar to the way that changes in contest data update
- * contest GUIs.
+ * At this point the LoginFrame is set not visible and the class that was loaded takes over focus.
  * 
  * @author pc2@ecs.csus.edu
  */
@@ -75,14 +54,14 @@ public class Starter implements Runnable {
         System.out.println();
 
         Starter starter = new Starter();
-        
+
         starter.startLoginFrame();
 
     }
 
     /**
      * Show the login frame.
-     *
+     * 
      */
     private void startLoginFrame() {
         loginFrame.setRunnable(this);
@@ -103,9 +82,12 @@ public class Starter implements Runnable {
     /**
      * Login to PC^2, either with UI or not.
      * 
-     * @param id - login name
-     * @param password - login password
-     * @param showDefaultUI assume LoginFrame is used and that UI is presented to user.
+     * @param id -
+     *            login name
+     * @param password -
+     *            login password
+     * @param showDefaultUI
+     *            assume LoginFrame is used and that UI is presented to user.
      */
     public void login(String id, String password, boolean showDefaultUI) {
 
@@ -133,7 +115,7 @@ public class Starter implements Runnable {
             System.err.println("TransportException: " + transportException.getMessage());
             String message = "Unable to contact server, contact staff";
             System.err.println(message);
-            
+
             if (showDefaultUI) {
                 loginFrame.setStatusMessage(message);
             }

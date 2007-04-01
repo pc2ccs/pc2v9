@@ -51,7 +51,7 @@ public class ClarificationList implements Serializable {
     /**
      * Create list and save list to disk on update/add.
      * 
-     * @param dirname
+     * @param directoryName directory name for clarification file.
      */
     private ClarificationList(String directoryName) {
         this.directoryName = directoryName;

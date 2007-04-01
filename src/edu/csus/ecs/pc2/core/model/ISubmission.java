@@ -5,7 +5,8 @@ import java.io.Serializable;
 /**
  * A submission from the user.
  * 
- * This is a parent class to submissions like, {@link edu.csus.ecs.pc2.core.Run} and {@link edu.csus.ecs.pc2.core.Clarification}.
+ * This is a parent class to submissions like, {@link edu.csus.ecs.pc2.core.model.Run} and
+ * {@link edu.csus.ecs.pc2.core.model.Clarification}.
  * 
  * @author pc2@ecs.csus.edu
  */

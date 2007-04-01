@@ -189,8 +189,6 @@ public class TransportManager implements ITransportManager {
 
     /**
      * Returns the internal MyServerIP (used by a client)
-     * 
-     * @return
      */
     private String getMyServerIP() {
         return myServerIP;
@@ -207,8 +205,6 @@ public class TransportManager implements ITransportManager {
 
     /**
      * Returns MyServerPort (used be a client)
-     * 
-     * @return
      */
     private int getMyServerPort() {
         return myServerPort;
@@ -225,8 +221,6 @@ public class TransportManager implements ITransportManager {
 
     /**
      * Returns the Log
-     * 
-     * @return
      */
     private Log getLog() {
         return log;
@@ -234,8 +228,6 @@ public class TransportManager implements ITransportManager {
 
     /**
      * Returns encryptionKeys
-     * 
-     * @return
      */
     private Crypto getEncrytionKeys() {
         return encryptionKeys;
@@ -368,8 +360,6 @@ public class TransportManager implements ITransportManager {
 
     /**
      * Returns the connectionHandlerThreadList
-     * 
-     * @return
      */
     private ConnectionHandlerThreadList getConnectionHandlerThreadList() {
         return connectionHandlerThreadList;
@@ -386,8 +376,6 @@ public class TransportManager implements ITransportManager {
 
     /**
      * Returns the myConnection
-     * 
-     * @return
      */
     private ConnectionHandler getMyConnection() {
         return myConnection;
@@ -549,8 +537,6 @@ public class TransportManager implements ITransportManager {
 
     /**
      * Returns the Server Application Callback
-     * 
-     * @return
      */
     private ITwoToOne getAppServerCallBack() {
         return appServerCallBack;
@@ -567,8 +553,6 @@ public class TransportManager implements ITransportManager {
 
     /**
      * Returns the Client Application Callback
-     * 
-     * @return
      */
     private IBtoA getAppClientCallBack() {
         return appClientCallBack;
@@ -594,8 +578,6 @@ public class TransportManager implements ITransportManager {
 
     /**
      * Returns the serversConnectionHandlerList
-     * 
-     * @return
      */
     private ConnectionHandlerList getServersConnectionHandlerList() {
         return serversConnectionHandlerList;

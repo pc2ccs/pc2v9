@@ -122,7 +122,7 @@ public class AccountList extends BaseElementList {
      *            PasswordType
      * @param clientId
      *            ClientId
-     * @return
+     * @return a password baed on the PasswordType.
      */
     private String generatePassword(PasswordType passwordType, ClientId clientId) {
         if (passwordType == PasswordType.JOE) {

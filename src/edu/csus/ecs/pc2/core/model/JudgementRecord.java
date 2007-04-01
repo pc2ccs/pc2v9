@@ -148,7 +148,6 @@ public class JudgementRecord implements Serializable {
 
     /**
      * get who entered this judgement.
-     * @return
      */
     public ClientId getJudgerClientId() {
         return judgerClientId;
@@ -189,7 +188,6 @@ public class JudgementRecord implements Serializable {
 
     /**
      * is this problem solved, marked as Yes? .
-     * @return
      */
     public boolean isSolved() {
         return solved;

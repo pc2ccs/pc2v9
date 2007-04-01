@@ -15,8 +15,8 @@ import edu.csus.ecs.pc2.core.packet.PacketType.Type;
 /**
  * Process all incoming packets.
  * 
- * Processed contents of packets and updated the model with 
- * the data it finds.
+ * Process packets. In {@link #handlePacket(IController, IModel, Packet) handlePacket} a packet is unpacked, model is updated, and
+ * controller used to send packets as needed.
  * 
  * @author pc2@ecs.csus.edu
  */
@@ -29,7 +29,7 @@ public final class PacketHandler {
     }
 
     /**
-     * Take each input packet and update the data.
+     * Take each input packet, update the model, send out packets as needed.
      * 
      * @param controller
      * @param model
@@ -44,21 +44,19 @@ public final class PacketHandler {
         if (packetType.equals(Type.MESSAGE)) {
             PacketFactory.dumpPacket(System.err, packet);
         } else if (packetType.equals(Type.RUN_SUBMISSION_CONFIRM)) {
-            Run run  = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
+            Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
             model.addRun(run, null);
         } else if (packetType.equals(Type.RUN_SUBMISSION)) {
             // RUN submitted by team to server
-            
-            Run submittedRun = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
-            // TODO implement RunFiles
 
+            Run submittedRun = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
             RunFiles runFiles = (RunFiles) PacketFactory.getObjectValue(packet, PacketFactory.RUN_FILES);
             Run run = model.addRun(submittedRun, runFiles);
-            
+
             // Send to team
             Packet confirmPacket = PacketFactory.createRunSubmissionConfirm(model.getClientId(), packet.getSourceId(), run);
             controller.sendToClient(confirmPacket);
-            
+
             // Send to all other interested parties.
             controller.sendToAdministrators(confirmPacket);
             controller.sendToJudges(confirmPacket);
@@ -69,9 +67,9 @@ public final class PacketHandler {
             String message = PacketFactory.getStringValue(packet, PacketFactory.MESSAGE_STRING);
             info("Login Failed: " + message);
         } else if (packetType.equals(Type.LOGIN_SUCCESS)) {
-            info (" handlePacket LOGIN_SUCCESS before ");
+            info(" handlePacket LOGIN_SUCCESS before ");
             loadDataIntoModel(packet, controller, model);
-            info (" handlePacket LOGIN_SUCCESS after -- all settings loaded ");
+            info(" handlePacket LOGIN_SUCCESS after -- all settings loaded ");
         } else {
 
             Exception exception = new Exception("PacketHandler.handlePacket Unhandled packet " + packet);
@@ -84,7 +82,18 @@ public final class PacketHandler {
     /**
      * Add contest data into the model.
      * 
-     * This can be used to add data to the model.
+     * This will read a packet and as it finds data loads it into the model.
+     * <P>
+     * It processes:
+     * <ol>
+     * <li> {@link PacketFactory#CLIENT_ID}
+     * <li> {@link PacketFactory#SITE_NUMBER}
+     * <li> {@link PacketFactory#SITE_NUMBER}
+     * <li> {@link PacketFactory#LANGUAGE_LIST}
+     * <li> {@link PacketFactory#PROBLEM_LIST}
+     * <li> {@link PacketFactory#JUDGEMENT_LIST}
+     * <li> {@link PacketFactory#CONTEST_TIME}
+     * <ol>
      * 
      * @param packet
      * @param controller
@@ -92,18 +101,18 @@ public final class PacketHandler {
      */
     private static void loadDataIntoModel(Packet packet, IController controller, IModel model) {
 
-         ClientId clientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-         if (clientId != null) {
-             controller.setClientId(clientId);
-         }
+        ClientId clientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+        if (clientId != null) {
+            controller.setClientId(clientId);
+        }
 
         Integer siteNumber = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
         if (siteNumber != null) {
             controller.setSiteNumber(siteNumber.intValue());
         }
-        
-        info ("Site set to "+model.getSiteNumber());
-        
+
+        info("Site set to " + model.getSiteNumber());
+
         Language[] languages = (Language[]) PacketFactory.getObjectValue(packet, PacketFactory.LANGUAGE_LIST);
         if (languages != null) {
             for (Language language : languages) {
@@ -117,7 +126,6 @@ public final class PacketHandler {
                 model.addProblem(problem);
             }
         }
-        
 
         Judgement[] judgements = (Judgement[]) PacketFactory.getObjectValue(packet, PacketFactory.JUDGEMENT_LIST);
         if (judgements != null) {
@@ -126,19 +134,16 @@ public final class PacketHandler {
             }
         }
 
-
-
         ContestTime contestTime = (ContestTime) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME);
         if (contestTime != null) {
             model.addContestTime(contestTime, model.getSiteNumber());
         }
-        
-        
 
     }
-    
+
     /**
      * TODO - a temporary logging routine.
+     * 
      * @param s
      */
     public static void info(String s) {
