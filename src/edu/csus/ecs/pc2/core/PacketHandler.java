@@ -41,11 +41,13 @@ public final class PacketHandler {
         info("handlePacket " + packet);
 
         if (packetType.equals(Type.MESSAGE)) {
-
             PacketFactory.dumpPacket(System.err, packet);
-
+        } else if (packetType.equals(Type.RUN_SUBMISSION_CONFIRM)) {
+            Run run  = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
+            model.addRun(run);
         } else if (packetType.equals(Type.RUN_SUBMISSION)) {
-
+            // RUN submitted by team to server
+            
             // TODO change to Run
             // Run submittedRun = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
 

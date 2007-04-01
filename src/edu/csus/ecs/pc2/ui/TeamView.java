@@ -265,7 +265,8 @@ public class TeamView extends JFrame {
     private class RunListenerImplementation implements IRunListener {
 
         public void runAdded(RunEvent event) {
-            updateListBox(event.getRun() + " ADDED ");
+//            updateListBox(event.getRun() + " ADDED ");
+            updateListBox("Added run "+event.getRun());
         }
 
         public void runChanged(RunEvent event) {
