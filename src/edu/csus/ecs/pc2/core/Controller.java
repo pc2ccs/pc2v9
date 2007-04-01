@@ -151,8 +151,16 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             // TODO handle server which is contacting another server.
 
             transportManager = new TransportManager(log, controller);
-            transportManager.accecptConnections(port);
             info("Started Server Transport on " + port);
+            
+            // TODO if first server must authenticate against "loaded" data.
+            // TODO if joining server must login to other server and authenticate
+
+            transportManager.accecptConnections(port);
+            
+            model.setClientId(clientId);
+            model.initializeWithFakeData();
+            
         } else {
 
             String serverIP = "localhost";
@@ -161,15 +169,11 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             transportManager.connectToMyServer();
             info("Started Client Transport");
             
+            model.setClientId(clientId);
+            
             sendLoginRequest (transportManager, clientId, password);
-
         }
-
-        // TODO if first server must authenticate against "loaded" data.
-        // TODO if joining server must login to other server and authenticate
-
-        model.setClientId(clientId);
-        model.initializeWithFakeData();
+   
         return model;
     }
 
@@ -181,9 +185,11 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      */
     private static void sendLoginRequest(ITransportManager manager, ClientId clientId, String password) {
         try {
+            info("sendLoginRequest start");
             ClientId serverClientId = new ClientId(0, Type.SERVER, 0);
             Packet loginPacket = PacketFactory.createLogin(clientId,password,serverClientId);
             manager.send(loginPacket);
+            info("sendLoginRequest end - sent packet");
         } catch (TransportException e) {
             // TODO log exception 
             e.printStackTrace();

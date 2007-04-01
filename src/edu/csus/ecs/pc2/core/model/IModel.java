@@ -21,12 +21,29 @@ public interface IModel {
      * @param submittedRun
      */
     Run addRun(SubmittedRun submittedRun);
+
     Run addRun(Run run);
-    
-    void addLanguage (Language language);
-    
-    void addProblem (Problem problem);
-    
+
+    void addLanguage(Language language);
+
+    void addProblem(Problem problem);
+
+    void addContestTime(ContestTime contestTime, int siteNumber);
+
+    /**
+     * Start Contest Clock at site.
+     * 
+     * @param siteNumber
+     */
+    void startContest(int siteNumber);
+
+    /**
+     * Stop Contest Clock at site.
+     * 
+     * @param siteNumber
+     */
+    void stopContest(int siteNumber);
+
     /**
      * Add a run into the contest data, return updated Submitted Run.
      * 
@@ -109,11 +126,15 @@ public interface IModel {
     void addLoginListener(ILoginListener loginListener);
 
     void removeLoginListener(ILoginListener loginListener);
-    
-    Run getRun (ElementId id);
-    
+
+    void addContestTimeListener(IContestTimeListener contestTimeListener);
+
+    void removeContestTimeListener(IContestTimeListener contestTimeListener);
+
+    Run getRun(ElementId id);
+
     Vector<Account> getAccounts(Type type, int siteNumber);
-    
+
     Vector<Account> getAccounts(Type type);
 
     /**
@@ -135,6 +156,7 @@ public interface IModel {
 
     /**
      * Lookup a client id given a ConnectionHandlerID.
+     * 
      * @param connectionHandlerID
      * @return ClientId or null if not found.
      */
@@ -149,6 +171,7 @@ public interface IModel {
 
     /**
      * Lookup ConnectionHandlerID for a given ClientId.
+     * 
      * @param clientId
      * @return ClientId or null if not found.
      */
@@ -160,13 +183,15 @@ public interface IModel {
      * @param clientId
      */
     void removeLogin(ClientId clientId);
-    
+
     int getSiteNumber();
-    
+
     ContestTime getContestTime();
-    
-    void setClientId (ClientId clientId);
-    
-    void setSiteNumber (int number);
+
+    ContestTime getContestTime(int siteNumber);
+
+    void setClientId(ClientId clientId);
+
+    void setSiteNumber(int number);
 
 }

@@ -14,12 +14,19 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
+import edu.csus.ecs.pc2.core.model.IContestTimeListener;
+import edu.csus.ecs.pc2.core.model.ILanguageListener;
 import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.IProblemListener;
 import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.Language;
+import edu.csus.ecs.pc2.core.model.LanguageEvent;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.ProblemEvent;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 
 /**
@@ -34,8 +41,6 @@ public class TeamView extends JFrame {
 
     public static final String SVN_ID = "$Id$";
 
-    // TODO remove @SuppressWarnings for model
-    @SuppressWarnings("unused")
     private IModel model = null;
 
     private IController teamController = null;
@@ -83,7 +88,9 @@ public class TeamView extends JFrame {
         this.teamController = teamController;
         initialize();
         model.addRunListener(new RunListenerImplementation());
-
+        model.addContestTimeListener(new ContestTimeListenerImplementation());
+        model.addProblemListener(new ProblemListenerImplementation());
+        model.addLanguageListener(new LanguageListenerImplementation());
     }
 
     /**
@@ -104,18 +111,17 @@ public class TeamView extends JFrame {
         this.setContentPane(getMainViewPane());
         this.setTitle("The TeamView");
         setVisible(true);
+        FrameUtilities.waitCursor(this);
         this.addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent e) {
                 promptAndExit();
             }
         });
 
+   
         populateGUI();
-
         FrameUtilities.centerFrame(this);
-        
-        setTitle("PC^2 Server "+model.getTitle());
-
+        setTitle("PC^2 Team - Not Logged In ");
     }
 
     protected void promptAndExit() {
@@ -129,19 +135,127 @@ public class TeamView extends JFrame {
     private void populateGUI() {
 
         getProblemComboBox().removeAllItems();
-        for (Problem problem : model.getProblems()) {
-            getProblemComboBox().addItem(problem);
-        }
+        Problem problem = new Problem("None Selected");
+        getProblemComboBox().addItem(problem);
 
         getLanguageComboBox().removeAllItems();
-        for (Language language : model.getLanguages()) {
-            getLanguageComboBox().addItem(language);
-        }
+        Language language = new Language("None Selected");
+        getLanguageComboBox().addItem(language);
 
     }
 
     private void updateListBox(String string) {
         runListModel.addElement(string);
+    }
+
+    private boolean isThisSite(int siteNumber) {
+        return siteNumber == model.getSiteNumber();
+    }
+
+    /**
+     * Enable or disable submission buttons.
+     * 
+     * @param turnButtonsOn
+     *            if true, buttons enabled.
+     */
+    private void setButtonsActive(final boolean turnButtonsOn) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                getSubmitRunButton().setEnabled(turnButtonsOn);
+                getPickFileButton().setEnabled(turnButtonsOn);
+                if (turnButtonsOn) {
+                    setTitle("PC^2 Team " + model.getTitle() + " [STARTED]");
+                } else {
+                    setTitle("PC^2 Team " + model.getTitle() + " [STOPPED]");
+                }
+            }
+        });
+        FrameUtilities.regularCursor(this);
+    }
+
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     * 
+     */
+    private class ContestTimeListenerImplementation implements IContestTimeListener {
+
+        public void contestTimeAdded(ContestTimeEvent event) {
+            updateListBox("ContestTime site " + event.getSiteNumber() + " ADDED " + event.getContestTime().getElapsedTimeStr());
+            if (isThisSite(event.getSiteNumber())) {
+                setButtonsActive(event.getContestTime().isContestRunning());
+            }
+        }
+
+        public void contestTimeRemoved(ContestTimeEvent event) {
+            updateListBox("ContestTime site " + event.getSiteNumber() + " REMOVED ");
+        }
+
+        public void contestTimeChanged(ContestTimeEvent event) {
+            updateListBox("ContestTime site " + event.getSiteNumber() + " REMOVED ");
+        }
+
+        public void contestStarted(ContestTimeEvent event) {
+            updateListBox("ContestTime site " + event.getSiteNumber() + " STARTED " + event.getContestTime().getElapsedTimeStr());
+            if (isThisSite(event.getSiteNumber())) {
+                setButtonsActive(event.getContestTime().isContestRunning());
+            }
+        }
+
+        public void contestStopped(ContestTimeEvent event) {
+            updateListBox("ContestTime site " + event.getSiteNumber() + " STOPPED " + event.getContestTime().getElapsedTimeStr());
+            if (isThisSite(event.getSiteNumber())) {
+                setButtonsActive(event.getContestTime().isContestRunning());
+            }
+        }
+    }
+
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     * 
+     */
+    private class ProblemListenerImplementation implements IProblemListener {
+
+        public void problemAdded(final ProblemEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    getProblemComboBox().addItem(event.getProblem());
+                }
+            });
+        }
+
+        public void problemChanged(ProblemEvent event) {
+            updateListBox("Problem CHANGED  " + event.getProblem());
+        }
+
+        public void problemRemoved(ProblemEvent event) {
+            updateListBox("Problem REMOVED  " + event.getProblem());
+        }
+    }
+
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     * 
+     */
+    private class LanguageListenerImplementation implements ILanguageListener {
+
+        public void languageAdded(final LanguageEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    getLanguageComboBox().addItem(event.getLanguage());
+                }
+            });
+        }
+
+        public void languageChanged(LanguageEvent event) {
+            // TODO Auto-generated method stub
+        }
+
+        public void languageRemoved(LanguageEvent event) {
+            // TODO Auto-generated method stub
+        }
     }
 
     /**
@@ -236,6 +350,7 @@ public class TeamView extends JFrame {
         if (submitRunButton == null) {
             submitRunButton = new JButton();
             submitRunButton.setBounds(new java.awt.Rectangle(366, 131, 74, 26));
+            submitRunButton.setEnabled(false);
             submitRunButton.setText("Submit");
             submitRunButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -322,6 +437,7 @@ public class TeamView extends JFrame {
         if (pickFileButton == null) {
             pickFileButton = new JButton();
             pickFileButton.setBounds(new java.awt.Rectangle(367, 94, 74, 26));
+            pickFileButton.setEnabled(false);
             pickFileButton.setText("Pick");
             pickFileButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -367,8 +483,9 @@ public class TeamView extends JFrame {
             runListPane = new JPanel();
             runListPane.setLayout(new BorderLayout());
             runListPane.setBounds(new java.awt.Rectangle(22, 170, 418, 130));
-            runListPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Runs", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
-                    javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
+            runListPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Runs",
+                    javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, null,
+                    null));
             runListPane.add(getRunListScrollPane(), java.awt.BorderLayout.CENTER);
         }
         return runListPane;

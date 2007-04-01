@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.core.model;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.list.AccountList;
+import edu.csus.ecs.pc2.core.list.ContestTimeList;
 import edu.csus.ecs.pc2.core.list.LanguageDisplayList;
 import edu.csus.ecs.pc2.core.list.LanguageList;
 import edu.csus.ecs.pc2.core.list.LoginList;
@@ -11,7 +12,6 @@ import edu.csus.ecs.pc2.core.list.ProblemList;
 import edu.csus.ecs.pc2.core.list.RunList;
 import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
-import edu.csus.ecs.pc2.core.model.RunEvent.Action;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
 /**
@@ -27,27 +27,29 @@ public class Model implements IModel {
 
     private ClientId localClientId = null;
 
-    private Vector<IRunListener> runListenterList = new Vector<IRunListener>();
+    private Vector<IRunListener> runListenerList = new Vector<IRunListener>();
 
     private Vector<IProblemListener> problemListenerList = new Vector<IProblemListener>();
 
     private Vector<ILanguageListener> languageListenerList = new Vector<ILanguageListener>();
 
     private Vector<ILoginListener> loginListenerList = new Vector<ILoginListener>();
+    
+    private Vector<IContestTimeListener> contestTimeListenerList = new Vector<IContestTimeListener>();
 
     private AccountList accountList = new AccountList();
 
     private Vector<IAccountListener> accountListenerList = new Vector<IAccountListener>();
 
     private LoginList loginList = new LoginList();
+    
+    private ContestTimeList contestTimeList = new ContestTimeList();
 
     private RunList runList = new RunList();
 
     private int runNumber = 0;
 
-    private int siteNumber = 1;
-
-    private ContestTime contestTime = new ContestTime();
+    private int siteNumber = 6;
 
     /**
      * List of all defined problems. Contains deleted problems too.
@@ -74,54 +76,76 @@ public class Model implements IModel {
      */
     public void initializeWithFakeData() {
 
-        String[] probNames = { "Sum of Squares", "Sumit", "Hello", "GoodBye" };
-        Problem problem = new Problem("None Selected");
-
-        problemDisplayList.add(problem);
-        problemList.add(problem);
+        String[] probNames = { "A - Sum of Squares", "B - Sumit", "C - Hello", "D - GoodBye" };
 
         for (String problemNames : probNames) {
-            problem = new Problem(problemNames);
+            Problem problem = new Problem(problemNames);
             problemDisplayList.add(problem);
             problemList.add(problem);
         }
 
         String[] langNames = { "Java", "BASIC", "C++", "ANSI C", "APL" };
-        Language language = new Language("None Selected");
-
-        languageDisplayList.add(language);
-        languageList.add(language);
 
         for (String languageName : langNames) {
-            language = new Language(languageName);
+            Language language = new Language(languageName);
             languageList.add(language);
             languageDisplayList.add(language);
         }
 
         // Generate the server account
         generateNewAccounts(ClientType.Type.SERVER.toString(), 1, true);
-
+        
+        ContestTime contestTime = new ContestTime();
         contestTime.setElapsedMins(9);
         contestTime.startContestClock();
+        
+        addContestTime(contestTime, siteNumber);
     }
 
     public void addRunListener(IRunListener runListener) {
-        runListenterList.addElement(runListener);
+        runListenerList.addElement(runListener);
     }
 
     public void removeRunListener(IRunListener runListener) {
-        runListenterList.removeElement(runListener);
+        runListenerList.removeElement(runListener);
+    }
+    
+    public void addContestTimeListener(IContestTimeListener contestTimeListener) {
+        contestTimeListenerList.addElement(contestTimeListener);
     }
 
+    public void removeContestTimeListener(IContestTimeListener contestTimeListener) {
+        contestTimeListenerList.removeElement(contestTimeListener);
+    }
+    
     private void fireRunListener(RunEvent runEvent) {
-        for (int i = 0; i < runListenterList.size(); i++) {
+        for (int i = 0; i < runListenerList.size(); i++) {
 
-            if (runEvent.getAction() == Action.ADDED) {
-                runListenterList.elementAt(i).runAdded(runEvent);
-            } else if (runEvent.getAction() == Action.DELETED) {
-                runListenterList.elementAt(i).runRemoved(runEvent);
+            if (runEvent.getAction() == RunEvent.Action.ADDED) {
+                runListenerList.elementAt(i).runAdded(runEvent);
+            } else if (runEvent.getAction() == RunEvent.Action.DELETED) {
+                runListenerList.elementAt(i).runRemoved(runEvent);
             } else {
-                runListenterList.elementAt(i).runChanged(runEvent);
+                runListenerList.elementAt(i).runChanged(runEvent);
+            }
+        }
+    }
+
+    private void fireContestTimeListener(ContestTimeEvent contestTimeEvent) {
+        for (int i = 0; i < contestTimeListenerList.size(); i++) {
+
+            if (contestTimeEvent.getAction() == ContestTimeEvent.Action.ADDED) {
+                contestTimeListenerList.elementAt(i).contestTimeAdded(contestTimeEvent);
+            } else if (contestTimeEvent.getAction() == ContestTimeEvent.Action.DELETED) {
+                contestTimeListenerList.elementAt(i).contestTimeRemoved(contestTimeEvent);
+            } else if (contestTimeEvent.getAction() == ContestTimeEvent.Action.CLOCK_STARTED) {
+                contestTimeListenerList.elementAt(i).contestStarted(contestTimeEvent);
+            } else if (contestTimeEvent.getAction() == ContestTimeEvent.Action.CLOCK_STOPPED) {
+                contestTimeListenerList.elementAt(i).contestStopped(contestTimeEvent);
+            } else if (contestTimeEvent.getAction() == ContestTimeEvent.Action.UPDATED) {
+                contestTimeListenerList.elementAt(i).contestTimeChanged(contestTimeEvent);
+            } else {
+                contestTimeListenerList.elementAt(i).contestTimeChanged(contestTimeEvent);
             }
         }
     }
@@ -174,7 +198,7 @@ public class Model implements IModel {
             run.setNumber(++runNumber);
         }
         runList.add(run);
-        RunEvent runEvent = new RunEvent(Action.ADDED, run, null);
+        RunEvent runEvent = new RunEvent(RunEvent.Action.ADDED, run, null);
         fireRunListener(runEvent);
         return run;
     }
@@ -367,7 +391,50 @@ public class Model implements IModel {
         this.siteNumber = number;
     }
 
+    /**
+     * Get this site's contest time.
+     */
     public ContestTime getContestTime() {
-        return contestTime;
+        return getContestTime(getSiteNumber());
     }
+    
+    public ContestTime getContestTime(int inSiteNumber) {
+        return contestTimeList.get(inSiteNumber);
+    }
+
+    public void startContest(int inSiteNumber) {
+        ContestTime contestTime = getContestTime(inSiteNumber);
+        if (contestTime != null) {
+            ContestTimeEvent contestTimeEvent = new ContestTimeEvent(ContestTimeEvent.Action.CLOCK_STARTED, contestTime,
+                    inSiteNumber);
+            fireContestTimeListener(contestTimeEvent);
+        } else {
+            throw new SecurityException("Attempted to start clock site " + inSiteNumber);
+        }
+    }
+
+    public void stopContest(int inSiteNumber) {
+        ContestTime contestTime = getContestTime(inSiteNumber);
+        if (contestTime != null) {
+            ContestTimeEvent contestTimeEvent = new ContestTimeEvent(ContestTimeEvent.Action.CLOCK_STOPPED, contestTime,
+                    inSiteNumber);
+            fireContestTimeListener(contestTimeEvent);
+        } else {
+            throw new SecurityException("Attempted to stop clock site " + inSiteNumber);
+        }
+    }
+
+    public void addContestTime(ContestTime contestTime, int inSiteNumber) {
+        if (contestTime == null) {
+            throw new IllegalArgumentException("contestTime is null");
+        }
+        contestTimeList.add(inSiteNumber, contestTime);
+        if (contestTime != null) {
+            ContestTimeEvent contestTimeEvent = new ContestTimeEvent(ContestTimeEvent.Action.ADDED, contestTime, inSiteNumber);
+            fireContestTimeListener(contestTimeEvent);
+        } else {
+            throw new SecurityException("Attempted to stop clock site " + inSiteNumber);
+        }
+    }
+
 }

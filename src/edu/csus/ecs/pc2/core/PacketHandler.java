@@ -59,7 +59,9 @@ public final class PacketHandler {
             String message = PacketFactory.getStringValue(packet, PacketFactory.MESSAGE_STRING);
             info("Login Failed: " + message);
         } else if (packetType.equals(Type.LOGIN_SUCCESS)) {
+            info (" handlePacket LOGIN_SUCCESS before ");
             loadDataIntoModel(packet, controller, model);
+            info (" handlePacket LOGIN_SUCCESS after -- all settings loaded ");
         } else {
 
             Exception exception = new Exception("PacketHandler.handlePacket Unhandled packet " + packet);
@@ -92,7 +94,6 @@ public final class PacketHandler {
         
         info ("Site set to "+model.getSiteNumber());
         
-
         Language[] languages = (Language[]) PacketFactory.getObjectValue(packet, PacketFactory.LANGUAGE_LIST);
         if (languages != null) {
             for (Language language : languages) {
@@ -109,8 +110,10 @@ public final class PacketHandler {
 
         ContestTime contestTime = (ContestTime) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME);
         if (contestTime != null) {
-            controller.setContestTime(contestTime);
+            model.addContestTime(contestTime, model.getSiteNumber());
         }
+        
+        
 
     }
     
