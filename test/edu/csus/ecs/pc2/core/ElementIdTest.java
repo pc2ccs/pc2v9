@@ -1,4 +1,4 @@
-package test.edu.csus.ecs.pc2.core;
+package edu.csus.ecs.pc2.core;
 
 import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.model.ElementId;
