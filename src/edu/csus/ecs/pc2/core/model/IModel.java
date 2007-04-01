@@ -31,6 +31,8 @@ public interface IModel {
 
     void addContestTime(ContestTime contestTime, int siteNumber);
 
+    void addJudgement(Judgement judgement);
+
     /**
      * Start Contest Clock at site.
      * 
@@ -87,6 +89,13 @@ public interface IModel {
     Problem[] getProblems();
 
     /**
+     * Fetch all defined judgements.
+     * 
+     * @return
+     */
+    Judgement[] getJudgements();
+
+    /**
      * Fetch all defined languages.
      * 
      * @return array of Language
@@ -131,6 +140,10 @@ public interface IModel {
     void addContestTimeListener(IContestTimeListener contestTimeListener);
 
     void removeContestTimeListener(IContestTimeListener contestTimeListener);
+
+    void addJudgementListener(IJudgementListener judgementListener);
+
+    void removeJudgementListener(IJudgementListener judgementListener);
 
     Run getRun(ElementId id);
 

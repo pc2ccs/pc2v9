@@ -325,7 +325,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
     private void sendLoginSuccess(ClientId clientId, ConnectionHandlerID connectionHandlerID) {
         Packet packetToSend = PacketFactory.createLoginSuccess(model.getClientId(), clientId, model.getContestTime(), model
-                .getSiteNumber(), model.getLanguages(), model.getProblems());
+                .getSiteNumber(), model.getLanguages(), model.getProblems(), model.getJudgements());
         sendToClient(packetToSend);
     }
 

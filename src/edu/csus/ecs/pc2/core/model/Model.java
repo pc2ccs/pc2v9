@@ -5,6 +5,8 @@ import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.list.AccountList;
 import edu.csus.ecs.pc2.core.list.ContestTimeList;
+import edu.csus.ecs.pc2.core.list.JudgementDisplayList;
+import edu.csus.ecs.pc2.core.list.JudgementList;
 import edu.csus.ecs.pc2.core.list.LanguageDisplayList;
 import edu.csus.ecs.pc2.core.list.LanguageList;
 import edu.csus.ecs.pc2.core.list.LoginList;
@@ -35,15 +37,17 @@ public class Model implements IModel {
     private Vector<ILanguageListener> languageListenerList = new Vector<ILanguageListener>();
 
     private Vector<ILoginListener> loginListenerList = new Vector<ILoginListener>();
-    
+
     private Vector<IContestTimeListener> contestTimeListenerList = new Vector<IContestTimeListener>();
+
+    private Vector<IJudgementListener> judgementListenerList = new Vector<IJudgementListener>();
 
     private AccountList accountList = new AccountList();
 
     private Vector<IAccountListener> accountListenerList = new Vector<IAccountListener>();
 
     private LoginList loginList = new LoginList();
-    
+
     private ContestTimeList contestTimeList = new ContestTimeList();
 
     private RunList runList = new RunList();
@@ -73,6 +77,16 @@ public class Model implements IModel {
     private LanguageDisplayList languageDisplayList = new LanguageDisplayList();
 
     /**
+     * List of all displayed judgements, in order. Does not contain deleted judgements.
+     */
+    private JudgementDisplayList judgementDisplayList = new JudgementDisplayList();
+
+    /**
+     * List of all judgements. Contains deleted judgements too.
+     */
+    private JudgementList judgementList = new JudgementList();
+
+    /**
      * Initialize Model with data.
      */
     public void initializeWithFakeData() {
@@ -81,26 +95,35 @@ public class Model implements IModel {
 
         for (String problemNames : probNames) {
             Problem problem = new Problem(problemNames);
-            problemDisplayList.add(problem);
-            problemList.add(problem);
+            addProblem(problem);
         }
 
         String[] langNames = { "Java", "BASIC", "C++", "ANSI C", "APL" };
 
         for (String languageName : langNames) {
             Language language = new Language(languageName);
-            languageList.add(language);
-            languageDisplayList.add(language);
+            addLanguage(language);
         }
 
         // Generate the server account
         generateNewAccounts(ClientType.Type.SERVER.toString(), 1, true);
-        
+
         ContestTime contestTime = new ContestTime();
         contestTime.setElapsedMins(9);
         contestTime.startContestClock();
-        
+
         addContestTime(contestTime, siteNumber);
+        
+        String[] judgementNames = { "Yes", "No - compilation error", "No - incorrect output", 
+                "No - It's just really bad", 
+                "No - judges enjoyed a good laugh",
+                "You've been bad - contact staff" };
+
+        for (String judgementName : judgementNames) {
+            Judgement judgement = new Judgement(judgementName);
+            addJudgement(judgement);
+        }  
+        
     }
 
     public void addRunListener(IRunListener runListener) {
@@ -110,7 +133,7 @@ public class Model implements IModel {
     public void removeRunListener(IRunListener runListener) {
         runListenerList.removeElement(runListener);
     }
-    
+
     public void addContestTimeListener(IContestTimeListener contestTimeListener) {
         contestTimeListenerList.addElement(contestTimeListener);
     }
@@ -118,7 +141,15 @@ public class Model implements IModel {
     public void removeContestTimeListener(IContestTimeListener contestTimeListener) {
         contestTimeListenerList.removeElement(contestTimeListener);
     }
-    
+
+    public void addJudgementListener(IJudgementListener judgementListener) {
+        judgementListenerList.addElement(judgementListener);
+    }
+
+    public void removeJudgementListener(IJudgementListener judgementListener) {
+        judgementListenerList.remove(judgementListener);
+    }
+
     private void fireRunListener(RunEvent runEvent) {
         for (int i = 0; i < runListenerList.size(); i++) {
 
@@ -185,7 +216,20 @@ public class Model implements IModel {
             } else if (loginEvent.getAction() == LoginEvent.Action.LOGOFF) {
                 loginListenerList.elementAt(i).loginRemoved(loginEvent);
             } else {
-                throw new UnsupportedOperationException("Unknown login action "+loginEvent.getAction());
+                throw new UnsupportedOperationException("Unknown login action " + loginEvent.getAction());
+            }
+        }
+    }
+    
+    private void fireJudgementListener(JudgementEvent judgementEvent) {
+        for (int i = 0; i < judgementListenerList.size(); i++) {
+
+            if (judgementEvent.getAction() == JudgementEvent.Action.ADDED) {
+                judgementListenerList.elementAt(i).judgementAdded(judgementEvent);
+            } else if (judgementEvent.getAction() == JudgementEvent.Action.DELETED) {
+                judgementListenerList.elementAt(i).judgementRemoved(judgementEvent);
+            } else {
+                judgementListenerList.elementAt(i).judgementChanged(judgementEvent);
             }
         }
     }
@@ -222,6 +266,17 @@ public class Model implements IModel {
         problemList.add(problem);
         ProblemEvent problemEvent = new ProblemEvent(ProblemEvent.Action.ADDED, problem);
         fireProblemListener(problemEvent);
+    }
+
+    public void addJudgement(Judgement judgement) {
+        judgementDisplayList.add(judgement);
+        judgementList.add(judgement);
+        JudgementEvent judgementEvent = new JudgementEvent(JudgementEvent.Action.ADDED, judgement);
+        fireJudgementListener(judgementEvent);
+    }
+
+    public Judgement[] getJudgements() {
+        return judgementDisplayList.getList();
     }
 
     /**
@@ -367,7 +422,6 @@ public class Model implements IModel {
         return accountList.isValidLoginAndPassword(inClientId, password);
     }
 
-
     public ClientId getLoginClientId(ConnectionHandlerID connectionHandlerID) {
         return loginList.getClientId(connectionHandlerID);
     }
@@ -398,7 +452,7 @@ public class Model implements IModel {
     public ContestTime getContestTime() {
         return getContestTime(getSiteNumber());
     }
-    
+
     public ContestTime getContestTime(int inSiteNumber) {
         return contestTimeList.get(inSiteNumber);
     }

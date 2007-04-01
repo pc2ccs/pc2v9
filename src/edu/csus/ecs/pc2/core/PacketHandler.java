@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.core;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
@@ -116,6 +117,16 @@ public final class PacketHandler {
                 model.addProblem(problem);
             }
         }
+        
+
+        Judgement[] judgements = (Judgement[]) PacketFactory.getObjectValue(packet, PacketFactory.JUDGEMENT_LIST);
+        if (judgements != null) {
+            for (Judgement judgement : judgements) {
+                model.addJudgement(judgement);
+            }
+        }
+
+
 
         ContestTime contestTime = (ContestTime) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME);
         if (contestTime != null) {

@@ -131,6 +131,8 @@ public final class PacketFactory {
      * Array of Language
      */
     public static final String LANGUAGE_LIST = "LANGUAGE_LIST";
+    
+    public static final String JUDGEMENT_LIST = "JUDGEMENT_LIST";
 
     /**
      * Create a Login Packet.
@@ -502,13 +504,14 @@ public final class PacketFactory {
     }
 
     public static Packet createLoginSuccess(ClientId source, ClientId destination, ContestTime inContestTime, int siteNumber,
-            Language[] languages, Problem [] problems) {
+            Language[] languages, Problem [] problems, Judgement [] judgements) {
         Properties prop = new Properties();
         prop.put(SITE_NUMBER, new Integer(siteNumber));
         prop.put(PacketType.CONTEST_TIME, inContestTime);
         prop.put(CLIENT_ID, destination);
         prop.put(PROBLEM_LIST, problems);
         prop.put(LANGUAGE_LIST, languages);
+        prop.put(JUDGEMENT_LIST, judgements);
 
         Packet packet = new Packet(Type.LOGIN_SUCCESS, source, destination, prop);
         return packet;
