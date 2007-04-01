@@ -2,6 +2,8 @@ package edu.csus.ecs.pc2.core;
 
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ContestTime;
+import edu.csus.ecs.pc2.core.model.Language;
+import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.packet.Packet;
 
 /**
@@ -14,7 +16,7 @@ import edu.csus.ecs.pc2.core.packet.Packet;
 // $HeadURL$
 public interface IController {
 
-    void submitRun(int teamNumber, String problemName, String languageName, String filename) throws Exception;
+    void submitRun(Problem problem, Language language, String filename) throws Exception;
 
     void setSiteNumber(int i);
 

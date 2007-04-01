@@ -19,11 +19,15 @@ public interface IModel {
     /**
      * Add Run into TeamModel's data or receive run from Server.
      * 
-     * @param submittedRun
+     * runFiles will not be null if this is a run submitted from
+     * a team or if it is a run to be fetched for a judge to execute
+     * and judge this run.
+     * 
+     * @param run
+     * @param runFiles this may be null.
+     * @return
      */
-    Run addRun(SubmittedRun submittedRun);
-
-    Run addRun(Run run);
+    Run addRun(Run run, RunFiles runFiles);
 
     void addLanguage(Language language);
 
@@ -53,7 +57,7 @@ public interface IModel {
      * @param submittedRun
      * @return Submitted Run with id and timestamps
      */
-    SubmittedRun acceptRun(SubmittedRun submittedRun) throws Exception;
+    Run acceptRun(Run submittedRun, RunFiles runFiles) throws Exception;
 
     /**
      * Add new accounts.

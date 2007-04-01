@@ -202,9 +202,9 @@ public final class PacketFactory {
      * @param packet
      */
     public static void dumpPacket(PrintWriter pw, Packet packet) {
-
-        dumpPacket(System.err, packet);
-
+        
+        dumpPacket (pw, packet); 
+        
         pw.println("Packet " + packet.getType());
         pw.println("  From: " + packet.getSourceId());
         pw.println("    To: " + packet.getDestinationId());
@@ -218,9 +218,17 @@ public final class PacketFactory {
                 pw.println("   key: " + element + " is: " + prop.get(element).getClass().getName());
             }
         } else {
-            pw.println("  Contains: " + obj.getClass().getName());
+            
+            if (obj instanceof String) {
+                pw.println("  Contains: " + (String) obj);
+            } else if (obj instanceof Run) {
+                pw.println("  Contains: " + (Run) obj);
+            } else {
+                pw.println("  Contains: " + obj.toString());
+            }
         }
         pw.println();
+
     }
 
     /**

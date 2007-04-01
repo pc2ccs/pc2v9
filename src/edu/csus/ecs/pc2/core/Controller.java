@@ -8,9 +8,12 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Model;
+import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
-import edu.csus.ecs.pc2.core.model.SubmittedRun;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.packet.PacketFactory;
@@ -73,27 +76,14 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         info(" sendToClient af " + packet);
     }
 
-    public void receiveNewRun(SubmittedRun submittedRun) {
-        System.out.println("Controller.receiveNewRun - added - " + submittedRun);
-        model.addRun(submittedRun);
-    }
-
-    /**
-     * Client submit a run to the server.
-     */
-    public void submitRun(int teamNumber, String problemName, String languageName, String filename) throws Exception {
+    public void submitRun(Problem problem, Language language, String filename) throws Exception {
         SerializedFile serializedFile = new SerializedFile(filename);
 
-        // TODO replace with Run and RunFiles
-        SubmittedRun submittedRun = new SubmittedRun(model.getClientId(), problemName, languageName, serializedFile);
-
-        ClientId serverClientId = new ClientId(0, Type.SERVER, 0);
-        Packet packet = new Packet(PacketType.Type.RUN_SUBMISSION, model.getClientId(), serverClientId, submittedRun);
-
-        // SubmittedRun submittedRun = (SubmittedRun) packet.getContent();
-
-        // If we want to immediately populate the run on the GUI without
-        // the run number we can invoke: model.addRun(submittedRun);
+        ClientId serverClientId = new ClientId(model.getSiteNumber(), Type.SERVER, 0);
+        Run run = new Run(model.getClientId(), language, problem);
+        RunFiles runFiles = new RunFiles(run, serializedFile,null);
+        
+        Packet packet = PacketFactory.createSubmittedRun(model.getClientId(), serverClientId, run, runFiles);
 
         sendToServer(packet);
     }
@@ -114,7 +104,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
     public static IModel login(String id, String password) throws Exception {
 
-        // TODO Start Transport
+        // TODO Start Transport or something here
 
         ClientId clientId;
 
@@ -246,8 +236,9 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                 } else {
                     // Security Failure
 
-                    String message = "Security violation user " + clientId;
+                    String message = "Security violation user " + clientId+ " got a "+packet;
                     info(message + " on " + connectionHandlerID);
+                    PacketFactory.dumpPacket(System.err, packet);
                     sendSecurityVioation(clientId, connectionHandlerID, message);
                 }
             } else {
@@ -366,10 +357,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
         info(" receiveObject(S) debug Processing " + object.getClass().getName());
 
-        if (object instanceof SubmittedRun) {
-            SubmittedRun submittedRun = (SubmittedRun) object;
-            receiveNewRun(submittedRun);
-        } else if (object instanceof Packet) {
+        if (object instanceof Packet) {
             Packet packet = (Packet) object;
             PacketFactory.dumpPacket(System.err, packet);
             PacketHandler.handlePacket(controller, model, packet);
@@ -459,5 +447,6 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     public void sendToTeams(Packet packet) {
         sendPacketToClients(packet, ClientType.Type.SCOREBOARD);
     }
+
 
 }

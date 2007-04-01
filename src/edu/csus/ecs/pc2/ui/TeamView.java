@@ -250,11 +250,11 @@ public class TeamView extends JFrame {
         }
 
         public void languageChanged(LanguageEvent event) {
-            // TODO Auto-generated method stub
+            updateListBox("Language CHANGED  " + event.getLanguage());
         }
 
         public void languageRemoved(LanguageEvent event) {
-            // TODO Auto-generated method stub
+            updateListBox("Language REMOVED  " + event.getLanguage());
         }
     }
 
@@ -370,8 +370,9 @@ public class TeamView extends JFrame {
 
     protected void submitRun() {
 
-        String problem = ((Problem) getProblemComboBox().getSelectedItem()).toString();
-        String language = ((Language) getLanguageComboBox().getSelectedItem()).toString();
+        Problem problem = ((Problem) getProblemComboBox().getSelectedItem());
+        Language language = ((Language) getLanguageComboBox().getSelectedItem());
+        
         String filename = fileNameLabel.getText();
 
         if (!fileExists(filename)) {
@@ -389,14 +390,11 @@ public class TeamView extends JFrame {
         }
 
         try {
-
-            teamController.submitRun(1, problem, language, filename);
-
+            teamController.submitRun(problem, language, filename);
         } catch (Exception e) {
-
+            // TODO nead to make this cleaner 
             JOptionPane.showMessageDialog(this, "Exception " + e.getMessage());
         }
-
     }
 
     /**

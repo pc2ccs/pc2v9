@@ -12,6 +12,7 @@ import edu.csus.ecs.pc2.core.list.LanguageList;
 import edu.csus.ecs.pc2.core.list.LoginList;
 import edu.csus.ecs.pc2.core.list.ProblemDisplayList;
 import edu.csus.ecs.pc2.core.list.ProblemList;
+import edu.csus.ecs.pc2.core.list.RunFilesList;
 import edu.csus.ecs.pc2.core.list.RunList;
 import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
@@ -51,6 +52,8 @@ public class Model implements IModel {
     private ContestTimeList contestTimeList = new ContestTimeList();
 
     private RunList runList = new RunList();
+    
+    private RunFilesList runFilesList = new RunFilesList();
 
     private int runNumber = 0;
 
@@ -237,12 +240,15 @@ public class Model implements IModel {
     /**
      * Add a run to the contest data.
      */
-    public Run addRun(Run run) {
+    public Run addRun(Run run, RunFiles runFiles) {
         // TODO debug remove == 0 condition when addRun(SubmittedRun) is gone.
         if (run.getNumber() == 0) {
             run.setNumber(++runNumber);
         }
         runList.add(run);
+        if (runFiles != null) {
+            runFilesList.add(run, runFiles);
+        }
         RunEvent runEvent = new RunEvent(RunEvent.Action.ADDED, run, null);
         fireRunListener(runEvent);
         return run;
@@ -285,10 +291,13 @@ public class Model implements IModel {
      * On Server, adds run to run list, increments runnumber.
      * 
      */
-    public SubmittedRun acceptRun(SubmittedRun submittedRun) {
+    public Run acceptRun(Run submittedRun, RunFiles runFiles) {
         runNumber++;
         submittedRun.setNumber(runNumber);
-        addRun(submittedRun);
+        addRun(submittedRun, runFiles);
+        
+        info("acceptRun "+submittedRun+" mainfile "+runFiles.getMainFile().getName());
+        
         return submittedRun;
     }
 
@@ -357,29 +366,6 @@ public class Model implements IModel {
         String titleCase = localClientId.getClientType().toString();
         titleCase = titleCase.charAt(0) + titleCase.substring(1);
         return titleCase + " " + localClientId.getClientNumber() + " (Site " + localClientId.getSiteNumber() + ")";
-    }
-
-    public Run addRun(SubmittedRun submittedRun) {
-
-        Language runLanguage = null;
-        for (Language language : languageList.getList()) {
-            if (language.getDisplayName().equals(submittedRun.getLanguageName())) {
-                runLanguage = language;
-            }
-        }
-
-        Problem runProblem = null;
-        for (Problem problem : problemList.getList()) {
-            if (problem.getDisplayName().equals(submittedRun.getProblemName())) {
-                runProblem = problem;
-            }
-        }
-
-        Run run = new Run(submittedRun.getClientId(), runLanguage, runProblem);
-        run.setNumber(submittedRun.getNumber());
-
-        addRun(run);
-        return run;
     }
 
     public void addProblemListener(IProblemListener problemListener) {
@@ -496,4 +482,7 @@ public class Model implements IModel {
         return loginList.getClients(type);
     }
 
+    public static void info(String s) {
+        System.err.println(Thread.currentThread().getName() + " " + s);
+    }
 }

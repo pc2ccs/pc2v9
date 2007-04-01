@@ -7,7 +7,7 @@ import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
-import edu.csus.ecs.pc2.core.model.SubmittedRun;
+import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.packet.PacketFactory;
 import edu.csus.ecs.pc2.core.packet.PacketType.Type;
@@ -45,16 +45,16 @@ public final class PacketHandler {
             PacketFactory.dumpPacket(System.err, packet);
         } else if (packetType.equals(Type.RUN_SUBMISSION_CONFIRM)) {
             Run run  = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
-            model.addRun(run);
+            model.addRun(run, null);
         } else if (packetType.equals(Type.RUN_SUBMISSION)) {
             // RUN submitted by team to server
             
-            // TODO change to Run
-            // Run submittedRun = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
+            Run submittedRun = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
+            // TODO implement RunFiles
 
-            SubmittedRun submittedRun = (SubmittedRun) packet.getContent();
-            Run run = model.addRun(submittedRun);
-
+            RunFiles runFiles = (RunFiles) PacketFactory.getObjectValue(packet, PacketFactory.RUN_FILES);
+            Run run = model.addRun(submittedRun, runFiles);
+            
             // Send to team
             Packet confirmPacket = PacketFactory.createRunSubmissionConfirm(model.getClientId(), packet.getSourceId(), run);
             controller.sendToClient(confirmPacket);
