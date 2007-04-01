@@ -103,7 +103,12 @@ public class LoginList implements Serializable {
         }
     }
 
-    public Enumeration getClients(ClientType.Type type) {
+    /**
+     * Returns an enumeration of logged in clients.
+     * @param type {@link ClientType.Type}
+     * @return enumeration of clients.
+     */
+    public Enumeration<ClientId> getClients(ClientType.Type type) {
         synchronized (clientHandlerHash) {
             Vector<ClientId> v = new Vector<ClientId>();
             Enumeration enumeration = clientHandlerHash.keys();
@@ -113,10 +118,8 @@ public class LoginList implements Serializable {
                     v.addElement(clientId);
                 }
             }
-
             return v.elements();
         }
-
     }
 
     public Enumeration<ConnectionHandlerID> getHandles(ClientType.Type type) {

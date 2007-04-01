@@ -244,8 +244,10 @@ public final class PacketFactory {
             
             if (obj instanceof String) {
                 pw.println("  Contains: " + (String) obj);
+            } else if (obj instanceof Run) {
+                pw.println("  Contains: " + (Run) obj);
             } else {
-                pw.println("  Contains: " + obj.getClass().getName());
+                pw.println("  Contains: " + obj.toString());
             }
         }
         pw.println();

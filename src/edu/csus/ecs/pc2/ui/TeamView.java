@@ -192,7 +192,7 @@ public class TeamView extends JFrame {
         }
 
         public void contestTimeChanged(ContestTimeEvent event) {
-            updateListBox("ContestTime site " + event.getSiteNumber() + " REMOVED ");
+            updateListBox("ContestTime site " + event.getSiteNumber() + " CHANGED ");
         }
 
         public void contestStarted(ContestTimeEvent event) {

@@ -4,6 +4,7 @@ import edu.csus.ecs.pc2.core.Controller;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.model.IModel;
 import edu.csus.ecs.pc2.core.transport.TransportException;
+import edu.csus.ecs.pc2.ui.JudgeView;
 import edu.csus.ecs.pc2.ui.LoginFrame;
 import edu.csus.ecs.pc2.ui.ServerView;
 import edu.csus.ecs.pc2.ui.TeamView;
@@ -118,6 +119,9 @@ public class Starter implements Runnable {
                     loginFrame.setVisible(false); // hide LoginFrame
                 } else if (model.getFrameName().equals("TeamView")) {
                     new TeamView(model, controller);
+                    loginFrame.setVisible(false); // hide LoginFrame
+                } else if (model.getFrameName().equals("JudgeView")) {
+                    new JudgeView(model, controller);
                     loginFrame.setVisible(false); // hide LoginFrame
                 } else {
                     throw new Exception("Could not find class to display " + model.getFrameName());

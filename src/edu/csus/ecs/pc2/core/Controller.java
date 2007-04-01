@@ -1,9 +1,11 @@
 package edu.csus.ecs.pc2.core;
 
 import java.io.Serializable;
+import java.util.Enumeration;
 
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IModel;
 import edu.csus.ecs.pc2.core.model.Model;
@@ -19,6 +21,7 @@ import edu.csus.ecs.pc2.core.transport.ITransportManager;
 import edu.csus.ecs.pc2.core.transport.ITwoToOne;
 import edu.csus.ecs.pc2.core.transport.TransportException;
 import edu.csus.ecs.pc2.core.transport.TransportManager;
+import edu.csus.ecs.pc2.ui.CountDownMessage;
 
 /**
  * 
@@ -38,8 +41,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     private static Log log;
 
     private static IBtoA btoA;
-    
-    
+
     public Controller(IModel model) {
         super();
         this.model = model;
@@ -49,30 +51,27 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         try {
             transportManager.send(packet);
         } catch (TransportException e) {
-            info("Unable to send to Server  "+packet);
+            info("Unable to send to Server  " + packet);
             e.printStackTrace();
         }
     }
-    
+
     private void sendToClient(ConnectionHandlerID connectionHandlerID, Packet packet) {
         try {
             transportManager.send(packet, connectionHandlerID);
         } catch (TransportException e) {
-            info("Unable to send to "+connectionHandlerID+" packet "+packet);
+            info("Unable to send to " + connectionHandlerID + " packet " + packet);
             e.printStackTrace();
         }
     }
     
     public void sendToClient(Packet packet) {
-        info( " sendToClient b4 " + packet);
+        info(" sendToClient b4 " + packet);
         ConnectionHandlerID connectionHandlerID = model.getConnectionHandleID(packet.getDestinationId());
-        info("sendToClient "+packet.getSourceId()+" "+connectionHandlerID);
+        info("sendToClient " + packet.getSourceId() + " " + connectionHandlerID);
         sendToClient(connectionHandlerID, packet);
         info(" sendToClient af " + packet);
     }
-    
-    
-
 
     public void receiveNewRun(SubmittedRun submittedRun) {
         System.out.println("Controller.receiveNewRun - added - " + submittedRun);
@@ -87,20 +86,21 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
         // TODO replace with Run and RunFiles
         SubmittedRun submittedRun = new SubmittedRun(model.getClientId(), problemName, languageName, serializedFile);
-        
+
         ClientId serverClientId = new ClientId(0, Type.SERVER, 0);
         Packet packet = new Packet(PacketType.Type.RUN_SUBMISSION, model.getClientId(), serverClientId, submittedRun);
-        
-//        SubmittedRun submittedRun = (SubmittedRun) packet.getContent();
+
+        // SubmittedRun submittedRun = (SubmittedRun) packet.getContent();
 
         // If we want to immediately populate the run on the GUI without
         // the run number we can invoke: model.addRun(submittedRun);
-        
+
         sendToServer(packet);
     }
 
     /**
      * Return int for input string
+     * 
      * @param s
      * @return zero if error, otherwise returns value.
      */
@@ -124,6 +124,12 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
         if (id.startsWith("s")) {
             clientId = new ClientId(0, Type.SERVER, 0);
+        } else if (id.startsWith("judge") && id.length() > 5) {
+            int number = getIntegerValue(id.substring(5));
+            clientId = new ClientId(0, Type.JUDGE, number);
+        } else if (id.startsWith("j") && id.length() > 1) {
+            int number = getIntegerValue(id.substring(1));
+            clientId = new ClientId(0, Type.JUDGE, number);
         } else if (id.startsWith("t") && id.length() > 4) {
             int number = getIntegerValue(id.substring(4));
             clientId = new ClientId(0, Type.TEAM, number);
@@ -135,8 +141,8 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         }
 
         log = new Log(clientId.toString());
-        
-        if (password.length() < 1){
+
+        if (password.length() < 1) {
             password = clientId.getName(); // Joe password.
         }
 
@@ -152,15 +158,15 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
             transportManager = new TransportManager(log, controller);
             info("Started Server Transport on " + port);
-            
+
             // TODO if first server must authenticate against "loaded" data.
             // TODO if joining server must login to other server and authenticate
 
             transportManager.accecptConnections(port);
-            
+
             model.setClientId(clientId);
             model.initializeWithFakeData();
-            
+
         } else {
 
             String serverIP = "localhost";
@@ -168,17 +174,18 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             transportManager = new TransportManager(log, serverIP, port, btoA);
             transportManager.connectToMyServer();
             info("Started Client Transport");
-            
+
             model.setClientId(clientId);
-            
-            sendLoginRequest (transportManager, clientId, password);
+
+            sendLoginRequest(transportManager, clientId, password);
         }
-   
+
         return model;
     }
 
     /**
      * Send login request to server.
+     * 
      * @param manager
      * @param clientId
      * @param password
@@ -187,11 +194,11 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         try {
             info("sendLoginRequest start");
             ClientId serverClientId = new ClientId(0, Type.SERVER, 0);
-            Packet loginPacket = PacketFactory.createLogin(clientId,password,serverClientId);
+            Packet loginPacket = PacketFactory.createLogin(clientId, password, serverClientId);
             manager.send(loginPacket);
             info("sendLoginRequest end - sent packet");
         } catch (TransportException e) {
-            // TODO log exception 
+            // TODO log exception
             e.printStackTrace();
         }
     }
@@ -199,7 +206,8 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     /**
      * Server receive object.
      * 
-     * @see edu.csus.ecs.pc2.core.transport.ITwoToOne#receiveObject(java.io.Serializable, edu.csus.ecs.pc2.core.transport.ConnectionHandlerID)
+     * @see edu.csus.ecs.pc2.core.transport.ITwoToOne#receiveObject(java.io.Serializable,
+     *      edu.csus.ecs.pc2.core.transport.ConnectionHandlerID)
      */
     public void receiveObject(Serializable object, ConnectionHandlerID connectionHandlerID) {
 
@@ -212,7 +220,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
                 Packet packet = (Packet) object;
                 ClientId clientId = packet.getSourceId();
-                
+
                 info("receiveObject " + packet);
                 if (model.isLoggedIn(packet.getSourceId())) {
                     // LOGGED IN - process the packet
@@ -226,7 +234,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                     try {
 
                         if (clientId.getSiteNumber() == ClientId.UNSET) {
-                            clientId = new ClientId(model.getSiteNumber(),clientId.getClientType(),clientId.getClientNumber());
+                            clientId = new ClientId(model.getSiteNumber(), clientId.getClientType(), clientId.getClientNumber());
                         }
                         attemptToLogin(clientId, password, connectionHandlerID);
                         sendLoginSuccess(clientId, connectionHandlerID);
@@ -236,10 +244,10 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                         sendLoginFailure(packet.getSourceId(), connectionHandlerID, message);
                     }
                 } else {
-                    // Security Failure 
-                    
-                    String message = "Security violation user "+clientId;
-                    info (message + " on " + connectionHandlerID);
+                    // Security Failure
+
+                    String message = "Security violation user " + clientId;
+                    info(message + " on " + connectionHandlerID);
                     sendSecurityVioation(clientId, connectionHandlerID, message);
                 }
             } else {
@@ -262,16 +270,16 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * @param connectionHandlerID
      */
     private void attemptToLogin(ClientId clientId, String password, ConnectionHandlerID connectionHandlerID) {
-        
+
         if (model.isValidLoginAndPassword(clientId, password)) {
-            info("Added "+clientId);
+            info("Added " + clientId);
             model.addLogin(clientId, connectionHandlerID);
-            
+
             ConnectionHandlerID connectionHandlerID2 = model.getConnectionHandleID(clientId);
-            
-            info ("attemptToLogin debug "+clientId);
-            info ("attemptToLogin debug "+connectionHandlerID);
-            info ("attemptToLogin debug "+connectionHandlerID2);
+
+            info("attemptToLogin debug " + clientId);
+            info("attemptToLogin debug " + connectionHandlerID);
+            info("attemptToLogin debug " + connectionHandlerID2);
 
         } else {
             // this code will never be executed, if invalid login
@@ -288,7 +296,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * @param packet
      */
     private void processPacket(Packet packet) {
-        PacketHandler.handlePacket (this, model, packet);
+        PacketHandler.handlePacket(this, model, packet);
     }
 
     /**
@@ -299,10 +307,10 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * @param message
      */
     private void sendLoginFailure(ClientId destinationId, ConnectionHandlerID connectionHandlerID, String message) {
-        Packet packet = PacketFactory.createLoginDenied(model.getClientId(),destinationId, message);
+        Packet packet = PacketFactory.createLoginDenied(model.getClientId(), destinationId, message);
         sendToClient(connectionHandlerID, packet);
     }
-    
+
     /**
      * Send login failure packet back to non-logged in user, via ConnectionHandlerID.
      * 
@@ -311,13 +319,13 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * @param message
      */
     private void sendSecurityVioation(ClientId destinationId, ConnectionHandlerID connectionHandlerID, String message) {
-        Packet packet = PacketFactory.createMessage(model.getClientId(),destinationId, message);
+        Packet packet = PacketFactory.createMessage(model.getClientId(), destinationId, message);
         sendToClient(connectionHandlerID, packet);
     }
 
     private void sendLoginSuccess(ClientId clientId, ConnectionHandlerID connectionHandlerID) {
-        Packet packetToSend = PacketFactory.createLoginSuccess(model.getClientId(), clientId, model.getContestTime(), model.getSiteNumber(), model
-                .getLanguages(), model.getProblems());
+        Packet packetToSend = PacketFactory.createLoginSuccess(model.getClientId(), clientId, model.getContestTime(), model
+                .getSiteNumber(), model.getLanguages(), model.getProblems());
         sendToClient(packetToSend);
     }
 
@@ -334,9 +342,9 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         info("connectionDropped: " + model.getTitle() + " " + connectionHandlerID);
 
         ClientId clientId = model.getLoginClientId(connectionHandlerID);
-        if (clientId != null){
-            info("connectionDropped: removed user "+clientId);
-            model.removeLogin(clientId);            
+        if (clientId != null) {
+            info("connectionDropped: removed user " + clientId);
+            model.removeLogin(clientId);
         }
 
     }
@@ -344,7 +352,8 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     public void connectionError(Serializable object, ConnectionHandlerID connectionHandlerID, String causeDescription) {
 
         // TODO code connectionError
-        info("connectionError: " + model.getTitle() + " " + connectionHandlerID + " " + causeDescription + " " + object.getClass().getName());
+        info("connectionError: " + model.getTitle() + " " + connectionHandlerID + " " + causeDescription + " "
+                + object.getClass().getName());
 
     }
 
@@ -355,19 +364,19 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      */
     public void receiveObject(Serializable object) {
 
-        info(" receiveObject(S) debug Processing "+object.getClass().getName());
+        info(" receiveObject(S) debug Processing " + object.getClass().getName());
 
         if (object instanceof SubmittedRun) {
             SubmittedRun submittedRun = (SubmittedRun) object;
             receiveNewRun(submittedRun);
-        } else if  (object instanceof Packet) {
-            Packet packet = (Packet) object; 
+        } else if (object instanceof Packet) {
+            Packet packet = (Packet) object;
             PacketFactory.dumpPacket(System.err, packet);
             PacketHandler.handlePacket(controller, model, packet);
         } else {
             info("receiveObject(S) Unsupported class received: " + object.getClass().getName());
         }
-        info(" receiveObject(S) debug end Processing "+object.getClass().getName());
+        info(" receiveObject(S) debug end Processing " + object.getClass().getName());
 
     }
 
@@ -378,8 +387,21 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         // TODO code handle client dropped
         info("connectionDropped: " + model.getTitle());
 
+        // Connection dropped, countdown and die.
+        CountDownMessage countDownMessage = new CountDownMessage(
+                "Shutting down PC^2 in ", 10);
+        if (model.getClientId() != null) {
+            countDownMessage.setTitle("Shutting down PC^2 "
+                    + model.getClientId().getClientType() + " "
+                    + model.getTitle());
+        } else {
+            countDownMessage.setTitle("Shutting down PC^2 Client");
+        }
+        countDownMessage.setExitOnClose(true);
+        countDownMessage.setVisible(true);
+        
     }
-    
+
     public static void info(String s) {
         System.err.println(Thread.currentThread().getName() + " " + s);
     }
@@ -394,6 +416,48 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
     public void setClientId(ClientId clientId) {
         model.setClientId(clientId);
+    }
+
+    public void sendToServers(Packet packet) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    /**
+     * Send packet to all logged in server.
+     * 
+     * @param packet
+     */
+    private void sendPacketToClients(Packet packet, ClientType.Type type) {
+        Enumeration<ClientId> clientIds = model.getLoggedInClients(type);
+        while (clientIds.hasMoreElements()) {
+            ClientId clientId = clientIds.nextElement();
+            ConnectionHandlerID connectionHandlerID = model.getConnectionHandleID(clientId);
+            if (isThisSite(clientId.getSiteNumber())) {
+                sendToClient(connectionHandlerID, packet);
+            }
+        }
+
+    }
+    
+    private boolean isThisSite(int siteNumber) {
+        return siteNumber == model.getSiteNumber();
+    }
+
+    public void sendToJudges(Packet packet) {
+        sendPacketToClients(packet, ClientType.Type.JUDGE);
+    }
+
+    public void sendToAdministrators(Packet packet) {
+        sendPacketToClients(packet, ClientType.Type.ADMINISTRATOR);
+    }
+
+    public void sendToScoreboards(Packet packet) {
+        sendPacketToClients(packet, ClientType.Type.SCOREBOARD);
+    }
+
+    public void sendToTeams(Packet packet) {
+        sendPacketToClients(packet, ClientType.Type.SCOREBOARD);
     }
 
 }

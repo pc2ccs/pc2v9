@@ -4,7 +4,6 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.packet.Packet;
 
-
 /**
  * Represents functions provided by modules comprising the contest engine.
  * 
@@ -13,8 +12,8 @@ import edu.csus.ecs.pc2.core.packet.Packet;
  */
 
 // $HeadURL$
-public interface IController  {
-    
+public interface IController {
+
     void submitRun(int teamNumber, String problemName, String languageName, String filename) throws Exception;
 
     void setSiteNumber(int i);
@@ -24,5 +23,15 @@ public interface IController  {
     void sendToClient(Packet confirmPacket);
 
     void setClientId(ClientId clientId);
+
+    void sendToServers(Packet packet);
+
+    void sendToJudges(Packet packet);
+
+    void sendToAdministrators(Packet packet);
+
+    void sendToScoreboards(Packet packet);
+
+    void sendToTeams(Packet packet);
 
 }

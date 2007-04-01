@@ -54,8 +54,15 @@ public final class PacketHandler {
             SubmittedRun submittedRun = (SubmittedRun) packet.getContent();
             Run run = model.addRun(submittedRun);
 
+            // Send to team
             Packet confirmPacket = PacketFactory.createRunSubmissionConfirm(model.getClientId(), packet.getSourceId(), run);
             controller.sendToClient(confirmPacket);
+            
+            // Send to all other interested parties.
+            controller.sendToAdministrators(confirmPacket);
+            controller.sendToJudges(confirmPacket);
+            controller.sendToScoreboards(confirmPacket);
+            controller.sendToServers(confirmPacket);
 
         } else if (packetType.equals(Type.LOGIN_FAILED)) {
             String message = PacketFactory.getStringValue(packet, PacketFactory.MESSAGE_STRING);

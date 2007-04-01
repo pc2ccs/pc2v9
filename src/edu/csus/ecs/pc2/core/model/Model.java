@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core.model;
 
+import java.util.Enumeration;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.list.AccountList;
@@ -435,6 +436,10 @@ public class Model implements IModel {
         } else {
             throw new SecurityException("Attempted to stop clock site " + inSiteNumber);
         }
+    }
+
+    public Enumeration<ClientId> getLoggedInClients(Type type) {
+        return loginList.getClients(type);
     }
 
 }

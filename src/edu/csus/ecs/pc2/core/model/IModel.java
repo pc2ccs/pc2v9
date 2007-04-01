@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core.model;
 
+import java.util.Enumeration;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
@@ -193,5 +194,7 @@ public interface IModel {
     void setClientId(ClientId clientId);
 
     void setSiteNumber(int number);
+
+    Enumeration<ClientId> getLoggedInClients(Type type);
 
 }
