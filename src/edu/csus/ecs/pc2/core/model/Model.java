@@ -61,7 +61,7 @@ public class Model implements IModel {
 
     private int runNumber = 0;
 
-    private int siteNumber = 6;
+    private int siteNumber = 1;
 
     /**
      * List of all defined problems. Contains deleted problems too.
@@ -128,7 +128,6 @@ public class Model implements IModel {
             Judgement judgement = new Judgement(judgementName);
             addJudgement(judgement);
         }
-
     }
 
     public void addRunListener(IRunListener runListener) {
@@ -464,9 +463,24 @@ public class Model implements IModel {
     public int getSiteNumber() {
         return siteNumber;
     }
+    
+    private void variousKludgeInitializeWhenChangeSiteNumber()    {
+        ContestTime contestTime = new ContestTime();
+        contestTime.setElapsedMins(9);
+        contestTime.startContestClock();
+
+        addContestTime(contestTime, siteNumber);
+    }
 
     public void setSiteNumber(int number) {
         this.siteNumber = number;
+        if (isServer()) {
+            variousKludgeInitializeWhenChangeSiteNumber();
+        }
+    }
+
+    private boolean isServer() {
+        return getClientId().getClientType().equals(ClientType.Type.SERVER);
     }
 
     /**

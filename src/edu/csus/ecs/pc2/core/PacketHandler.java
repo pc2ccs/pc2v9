@@ -1,5 +1,7 @@
 package edu.csus.ecs.pc2.core;
 
+import javax.swing.JOptionPane;
+
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IModel;
@@ -67,7 +69,15 @@ public final class PacketHandler {
 
         } else if (packetType.equals(Type.LOGIN_FAILED)) {
             String message = PacketFactory.getStringValue(packet, PacketFactory.MESSAGE_STRING);
+            
+            // TODO Handle this better via new login code.
             info("Login Failed: " + message);
+            if (message.equals("No such account")) {
+                message = "(Accounts Generated ??) ERROR " +message ;
+            }
+            JOptionPane.showMessageDialog(null,message+" "+model.getClientId(),"Login Denied", JOptionPane.ERROR_MESSAGE);
+            System.exit(0); // TODO remove this code on valid login
+            
         } else if (packetType.equals(Type.LOGIN_SUCCESS)) {
             info(" handlePacket LOGIN_SUCCESS before ");
             loadDataIntoModel(packet, controller, model);

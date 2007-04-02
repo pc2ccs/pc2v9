@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2;
 
 import edu.csus.ecs.pc2.core.Controller;
 import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.ParseArguments;
 import edu.csus.ecs.pc2.core.model.IModel;
 import edu.csus.ecs.pc2.core.transport.TransportException;
 import edu.csus.ecs.pc2.ui.JudgeView;
@@ -35,11 +36,20 @@ public class Starter implements Runnable {
 
     public static final String SVN_ID = "$Id$";
 
+    private static final String SITE_OPTION = "--site";
+
     private LoginFrame loginFrame = new LoginFrame();
+    
+    private ParseArguments parseArguments = new ParseArguments();
 
     protected Starter() {
         // this constructor required by CheckStyle.
 
+    }
+    
+    public Starter (String [] stringArray){
+        String [] arguments = {"--site"};
+        parseArguments = new ParseArguments(stringArray, arguments);
     }
 
     /**
@@ -52,9 +62,9 @@ public class Starter implements Runnable {
         VersionInfo versionInfo = new VersionInfo();
         System.out.println(versionInfo.getSystemVersionInfo());
         System.out.println();
-
-        Starter starter = new Starter();
-
+        
+        Starter starter = new Starter(args);
+        
         starter.startLoginFrame();
 
     }
@@ -94,16 +104,26 @@ public class Starter implements Runnable {
         try {
             IModel model = Controller.login(id, password);
             IController controller = new Controller(model);
+            if (parseArguments.isOptPresent(SITE_OPTION)){
+                Long long1 = parseArguments.getLongOptionValue(SITE_OPTION);
+                model.setSiteNumber(long1.intValue());
+            }
 
             if (showDefaultUI) {
                 if (model.getFrameName().equals("ServerView")) {
-                    new ServerView(model, controller);
+                    ServerView serverView = new ServerView();
+                    serverView.setModelController(model, controller);
+                    
                     loginFrame.setVisible(false); // hide LoginFrame
                 } else if (model.getFrameName().equals("TeamView")) {
-                    new TeamView(model, controller);
+                    TeamView teamView = new TeamView(model, controller);
+                    teamView.setModelController(model, controller);
+                    
                     loginFrame.setVisible(false); // hide LoginFrame
                 } else if (model.getFrameName().equals("JudgeView")) {
-                    new JudgeView(model, controller);
+                    JudgeView judgeView = new JudgeView(model, controller);
+                    judgeView.setModelController(model, controller);
+                    
                     loginFrame.setVisible(false); // hide LoginFrame
                 } else {
                     throw new Exception("Could not find class to display " + model.getFrameName());
