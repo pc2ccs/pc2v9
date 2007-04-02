@@ -8,6 +8,8 @@ import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
+import edu.csus.ecs.pc2.core.model.Site;
+import edu.csus.ecs.pc2.core.model.SiteList;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.packet.PacketFactory;
 import edu.csus.ecs.pc2.core.packet.PacketType.Type;
@@ -137,6 +139,13 @@ public final class PacketHandler {
         ContestTime contestTime = (ContestTime) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME);
         if (contestTime != null) {
             model.addContestTime(contestTime, model.getSiteNumber());
+        }
+
+        SiteList sites = (SiteList) PacketFactory.getObjectValue(packet, PacketFactory.SITE_LIST);
+        if (sites != null) {
+            for (Site site : sites.getList()) {
+                model.addSite(site);
+            }
         }
 
     }

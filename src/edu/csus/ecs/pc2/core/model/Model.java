@@ -43,6 +43,8 @@ public class Model implements IModel {
 
     private Vector<IJudgementListener> judgementListenerList = new Vector<IJudgementListener>();
 
+    private Vector<ISiteListener> siteListenerList = new Vector<ISiteListener>();
+
     private AccountList accountList = new AccountList();
 
     private Vector<IAccountListener> accountListenerList = new Vector<IAccountListener>();
@@ -52,8 +54,10 @@ public class Model implements IModel {
     private ContestTimeList contestTimeList = new ContestTimeList();
 
     private RunList runList = new RunList();
-    
+
     private RunFilesList runFilesList = new RunFilesList();
+
+    private SiteList siteList = new SiteList();
 
     private int runNumber = 0;
 
@@ -116,17 +120,15 @@ public class Model implements IModel {
         contestTime.startContestClock();
 
         addContestTime(contestTime, siteNumber);
-        
-        String[] judgementNames = { "Yes", "No - compilation error", "No - incorrect output", 
-                "No - It's just really bad", 
-                "No - judges enjoyed a good laugh",
-                "You've been bad - contact staff" };
+
+        String[] judgementNames = { "Yes", "No - compilation error", "No - incorrect output", "No - It's just really bad",
+                "No - judges enjoyed a good laugh", "You've been bad - contact staff" };
 
         for (String judgementName : judgementNames) {
             Judgement judgement = new Judgement(judgementName);
             addJudgement(judgement);
-        }  
-        
+        }
+
     }
 
     public void addRunListener(IRunListener runListener) {
@@ -223,7 +225,7 @@ public class Model implements IModel {
             }
         }
     }
-    
+
     private void fireJudgementListener(JudgementEvent judgementEvent) {
         for (int i = 0; i < judgementListenerList.size(); i++) {
 
@@ -233,6 +235,23 @@ public class Model implements IModel {
                 judgementListenerList.elementAt(i).judgementRemoved(judgementEvent);
             } else {
                 judgementListenerList.elementAt(i).judgementChanged(judgementEvent);
+            }
+        }
+    }
+
+    private void fireSiteListener(SiteEvent siteEvent) {
+        for (int i = 0; i < siteListenerList.size(); i++) {
+
+            if (siteEvent.getAction() == SiteEvent.Action.ADDED) {
+                siteListenerList.elementAt(i).siteAdded(siteEvent);
+            } else if (siteEvent.getAction() == SiteEvent.Action.DELETED) {
+                siteListenerList.elementAt(i).siteRemoved(siteEvent);
+            } else if (siteEvent.getAction() == SiteEvent.Action.LOGIN) {
+                siteListenerList.elementAt(i).siteLoggedOn(siteEvent);
+            } else if (siteEvent.getAction() == SiteEvent.Action.LOGOFF) {
+                siteListenerList.elementAt(i).siteLoggedOff(siteEvent);
+            } else {
+                siteListenerList.elementAt(i).siteAdded(siteEvent);
             }
         }
     }
@@ -281,6 +300,12 @@ public class Model implements IModel {
         fireJudgementListener(judgementEvent);
     }
 
+    public void addSite(Site site) {
+        siteList.add(site);
+        SiteEvent siteEvent = new SiteEvent(SiteEvent.Action.ADDED, site);
+        fireSiteListener(siteEvent);
+    }
+
     public Judgement[] getJudgements() {
         return judgementDisplayList.getList();
     }
@@ -295,9 +320,9 @@ public class Model implements IModel {
         runNumber++;
         submittedRun.setNumber(runNumber);
         addRun(submittedRun, runFiles);
-        
-        info("acceptRun "+submittedRun+" mainfile "+runFiles.getMainFile().getName());
-        
+
+        info("acceptRun " + submittedRun + " mainfile " + runFiles.getMainFile().getName());
+
         return submittedRun;
     }
 
@@ -351,6 +376,10 @@ public class Model implements IModel {
         this.localClientId = clientId;
     }
 
+    public Site[] getSites() {
+        return siteList.getList();
+    }
+
     /**
      * Return frame class name.
      */
@@ -390,6 +419,14 @@ public class Model implements IModel {
 
     public void removeLoginListener(ILoginListener loginListener) {
         loginListenerList.remove(loginListener);
+    }
+
+    public void addSiteListener(ISiteListener siteListener) {
+        siteListenerList.add(siteListener);
+    }
+
+    public void removeSiteListener(ISiteListener siteListener) {
+        siteListenerList.remove(siteListener);
     }
 
     public Run getRun(ElementId id) {
@@ -485,4 +522,5 @@ public class Model implements IModel {
     public static void info(String s) {
         System.err.println(Thread.currentThread().getName() + " " + s);
     }
+
 }
