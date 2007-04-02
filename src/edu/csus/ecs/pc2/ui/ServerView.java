@@ -121,10 +121,6 @@ public class ServerView extends JFrame implements GUIPlugin {
         setVisible(true);
         
         FrameUtilities.centerFrameTop(this);
-        
-        setTitle("PC^2 Server "+model.getClientId());
-        
-        updateGenerateTitles();
     }
 
     protected void promptAndExit() {
@@ -489,6 +485,8 @@ public class ServerView extends JFrame implements GUIPlugin {
     public void setModelController(IModel inModel, IController inController) {
         this.model = inModel;
         this.serverController = inController;
+        setTitle("PC^2 Server (Site "+model.getSiteNumber()+")");
+        updateGenerateTitles();
     }
 
     public String getPluginTitle() {
