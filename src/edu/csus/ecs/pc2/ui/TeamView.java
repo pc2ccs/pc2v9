@@ -518,7 +518,7 @@ public class TeamView extends JFrame implements GUIPlugin {
     }
 
     public String getPluginTitle() {
-        return "Server Main GUI";
+        return "Team Main GUI";
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

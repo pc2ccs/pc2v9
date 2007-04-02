@@ -243,7 +243,7 @@ public class JudgeView extends JFrame implements GUIPlugin {
     }
 
     public String getPluginTitle() {
-        return "Server Main GUI";
+        return "Judge Main GUI";
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
