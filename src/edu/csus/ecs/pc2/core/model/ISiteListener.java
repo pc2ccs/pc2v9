@@ -24,7 +24,7 @@ public interface ISiteListener {
 
     /**
      * Site logged on.
-     * @param siteEvent
+     * @param event
      */
     void siteLoggedOn(SiteEvent event);
 
