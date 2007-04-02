@@ -5,10 +5,10 @@ import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.ParseArguments;
 import edu.csus.ecs.pc2.core.model.IModel;
 import edu.csus.ecs.pc2.core.transport.TransportException;
-import edu.csus.ecs.pc2.ui.JudgeView;
 import edu.csus.ecs.pc2.ui.LoginFrame;
-import edu.csus.ecs.pc2.ui.ServerView;
-import edu.csus.ecs.pc2.ui.TeamView;
+import edu.csus.ecs.pc2.ui.judge.JudgeView;
+import edu.csus.ecs.pc2.ui.server.ServerView;
+import edu.csus.ecs.pc2.ui.team.TeamView;
 
 /**
  * Starter class.

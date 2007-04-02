@@ -1,4 +1,4 @@
-package edu.csus.ecs.pc2.ui;
+package edu.csus.ecs.pc2.ui.judge;
 
 import java.awt.BorderLayout;
 
@@ -18,6 +18,8 @@ import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.core.model.IModel;
 import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.RunEvent;
+import edu.csus.ecs.pc2.ui.FrameUtilities;
+import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
  * Judge GUI.

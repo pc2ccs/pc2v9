@@ -1,4 +1,4 @@
-package edu.csus.ecs.pc2.ui;
+package edu.csus.ecs.pc2.ui.team;
 
 import java.awt.BorderLayout;
 import java.io.File;
@@ -29,6 +29,8 @@ import edu.csus.ecs.pc2.core.model.LanguageEvent;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemEvent;
 import edu.csus.ecs.pc2.core.model.RunEvent;
+import edu.csus.ecs.pc2.ui.FrameUtilities;
+import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
  * Represents an arbitrary contest GUI.

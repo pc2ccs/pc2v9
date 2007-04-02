@@ -1,4 +1,4 @@
-package edu.csus.ecs.pc2.ui;
+package edu.csus.ecs.pc2.ui.server;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -26,6 +26,9 @@ import edu.csus.ecs.pc2.core.model.IModel;
 import edu.csus.ecs.pc2.core.model.LoginEvent;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.IRunListener;
+import edu.csus.ecs.pc2.ui.FrameUtilities;
+import edu.csus.ecs.pc2.ui.IntegerDocument;
+import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
  * GUI for Server.
