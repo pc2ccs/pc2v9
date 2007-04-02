@@ -11,7 +11,9 @@
 	<property name="build.dir" location="build" />
 	<property name="build.prod.dir" location="${build.dir}/prod" />
 	<property name="build.test.dir" location="${build.dir}/test" />
-	<property name="test.xml.dir" location="${build.dir}/test-results" />
+	<property name="testresults.dir" location="${build.dir}/test-results" />
+	<property name="testresults.xml.dir" location="${testresults.dir}/xml" />
+	<property name="testresults.html.dir" location="${testresults.dir}/html" />
 	<property name="compilelogs.dir" location="${build.dir}" />
 	<property name="docs.dir" location="${build.dir}/docs" />
 	<property name="dist.dir" location="dist" />
@@ -109,16 +111,21 @@
                 </javac>
 	</target>
 	<target name="test" depends="compile-tests" description="run junit tests">
-	    <delete dir="${test.xml.dir}"/>
-	    <mkdir dir="${test.xml.dir}"/>
+	    <delete dir="${testresults.dir}"/>
+	    <mkdir dir="${testresults.xml.dir}"/>
 	    <junit errorProperty="test.failed" failureProperty="test.failed">
 		<classpath refid="project.classpath"/>
 		<formatter type="brief" usefile="false"/>
 		<formatter type="xml"/>
-		<batchtest todir="${test.xml.dir}">
+		<batchtest todir="${testresults.xml.dir}">
 		    <fileset dir="${build.test.dir}" includes="**/*Test.class"/>
 		</batchtest>
 	    </junit>
+            <!-- remove TEST- from filenames  -->
+            <move todir="${testresults.xml.dir}">
+                 <fileset dir="${testresults.xml.dir}" includes="**/*"/>
+                 <mapper type="glob" from="TEST-*" to="*"/>
+            </move>
 	    <fail message="Tests failed! Check test reports.">
                 <condition>
                     <and>
