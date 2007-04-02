@@ -10,7 +10,7 @@ import edu.csus.ecs.pc2.core.model.IModel;
  */
 
 // $HeadURL$
-public interface GUIPlugin {
+public interface UIPlugin {
 
     /**
      * set the Model and Controller.

@@ -34,7 +34,7 @@ import edu.csus.ecs.pc2.core.model.IRunListener;
  */
 
 // $HeadURL$
-public class ServerView extends JFrame implements GUIPlugin {
+public class ServerView extends JFrame implements UIPlugin {
 
     public static final String SVN_ID = "$Id$";
 

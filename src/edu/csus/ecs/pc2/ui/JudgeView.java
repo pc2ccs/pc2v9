@@ -25,7 +25,7 @@ import edu.csus.ecs.pc2.core.model.RunEvent;
  * 
  */
 
-public class JudgeView extends JFrame implements GUIPlugin {
+public class JudgeView extends JFrame implements UIPlugin {
 
     /**
      * 

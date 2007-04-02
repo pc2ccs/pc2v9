@@ -38,7 +38,7 @@ import edu.csus.ecs.pc2.core.model.RunEvent;
  */
 
 // $HeadURL$
-public class TeamView extends JFrame implements GUIPlugin {
+public class TeamView extends JFrame implements UIPlugin {
 
     public static final String SVN_ID = "$Id$";
 
