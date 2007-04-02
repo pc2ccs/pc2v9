@@ -15,6 +15,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
+import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
@@ -33,7 +34,7 @@ import edu.csus.ecs.pc2.core.model.IRunListener;
  */
 
 // $HeadURL$
-public class ServerView extends JFrame {
+public class ServerView extends JFrame implements GUIPlugin {
 
     public static final String SVN_ID = "$Id$";
 
@@ -86,12 +87,13 @@ public class ServerView extends JFrame {
 
     public ServerView(IModel model, IController serverController) {
         super();
-        this.model = model;
-        this.serverController = serverController;
+        setModelController(model, serverController);
         model.addRunListener(new RunListenerImplementation());
         model.addAccountListener(new AccountListenerImplementation());
         model.addLoginListener(new LoginListenerImplementation());
         initialize();
+        
+        updateListBox (getPluginTitle()+" Build "+new VersionInfo().getBuildNumber());
     }
 
     /**
@@ -482,6 +484,15 @@ public class ServerView extends JFrame {
             centerPane2.add(genScoreboardLabel, null);
         }
         return centerPane2;
+    }
+
+    public void setModelController(IModel inModel, IController inController) {
+        this.model = inModel;
+        this.serverController = inController;
+    }
+
+    public String getPluginTitle() {
+        return "Server Main GUI";
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

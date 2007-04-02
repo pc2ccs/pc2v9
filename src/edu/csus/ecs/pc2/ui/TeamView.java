@@ -16,6 +16,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
+import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
@@ -37,12 +38,12 @@ import edu.csus.ecs.pc2.core.model.RunEvent;
  */
 
 // $HeadURL$
-public class TeamView extends JFrame {
+public class TeamView extends JFrame implements GUIPlugin {
 
     public static final String SVN_ID = "$Id$";
 
     private IModel model = null;
-
+    
     private IController teamController = null;
 
     private String lastOpenedFile = null;
@@ -84,13 +85,15 @@ public class TeamView extends JFrame {
 
     public TeamView(IModel model, IController teamController) {
         super();
-        this.model = model;
-        this.teamController = teamController;
+        setModelController(model, teamController);
         initialize();
         model.addRunListener(new RunListenerImplementation());
         model.addContestTimeListener(new ContestTimeListenerImplementation());
         model.addProblemListener(new ProblemListenerImplementation());
         model.addLanguageListener(new LanguageListenerImplementation());
+        
+        updateListBox (getPluginTitle()+" Build "+new VersionInfo().getBuildNumber());
+
     }
 
     /**
@@ -507,6 +510,15 @@ public class TeamView extends JFrame {
         }
         chooser = null;
 
+    }
+    
+    public void setModelController(IModel inModel, IController inController) {
+        this.model = inModel;
+        this.teamController = inController;
+    }
+
+    public String getPluginTitle() {
+        return "Server Main GUI";
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

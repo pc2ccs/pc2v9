@@ -11,6 +11,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
+import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
@@ -19,12 +20,12 @@ import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 
 /**
- * 
+ * Judge GUI.
  * @author pc2@ecs.csus.edu
  * 
  */
 
-public class JudgeView extends JFrame {
+public class JudgeView extends JFrame implements GUIPlugin {
 
     /**
      * 
@@ -57,15 +58,12 @@ public class JudgeView extends JFrame {
 
     public JudgeView(IModel model, IController controller) {
         super();
-        // TODO Auto-generated constructor stub
-        this.model = model;
-        this.controller = controller;
+        setModelController(model, controller);
         initialize();
-        
         model.addContestTimeListener(new ContestTimeListenerImplementation());
         model.addRunListener(new RunListenerImplementation());
-        
-        updateListBox ("debug initialize!! ");
+
+        updateListBox (getPluginTitle()+" Build "+new VersionInfo().getBuildNumber());
 
     }
 
@@ -237,6 +235,15 @@ public class JudgeView extends JFrame {
                 setFrameTitle(event.getContestTime().isContestRunning());
             }
         }
+    }
+    
+    public void setModelController(IModel inModel, IController inController) {
+        this.model = inModel;
+        this.controller = inController;
+    }
+
+    public String getPluginTitle() {
+        return "Server Main GUI";
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

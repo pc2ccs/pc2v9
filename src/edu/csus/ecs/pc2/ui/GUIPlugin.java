@@ -25,6 +25,6 @@ public interface GUIPlugin {
     /**
      * @return name of this plugin, used in choosing plugin.
      */
-    String pluginTitle();
+    String getPluginTitle();
 
 }
