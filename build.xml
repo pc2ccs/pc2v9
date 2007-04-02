@@ -165,9 +165,9 @@
 		<mail from="pc2@ecs.csus.edu" tolist="boudreat@gaia.ecs.csus.edu" mailhost="gaia.ecs.csus.edu" subject="Checkstyle violation(s) in project ${ant.project.name}" files="checkstyle_report.html" />
 	</target>
 
-    <target name="javadocs" depends="compile" description="Creates javadocs">
+    <target name="javadocs" description="Creates javadocs">
         <mkdir dir="${docs.dir}/api" />
-        <javadoc sourcepath="${src.dir}" destdir="${docs.dir}/api" classpathref="project.classpath" defaultexcludes="yes" packagenames="edu.csus.ecs.pc2.*" doctitle="PC^2 Version 9 Java Documentation" Use="yes" SplitIndex="yes" linkoffline="http://java.sun.com/j2se/1.5.0/docs/api/ ${api.url}"/>
+        <javadoc sourcepath="${src.dir}" destdir="${docs.dir}/api" defaultexcludes="yes" packagenames="edu.csus.ecs.pc2.*" doctitle="PC^2 Version 9 Java Documentation" Use="yes" SplitIndex="yes" linkoffline="http://java.sun.com/j2se/1.5.0/docs/api/ ${api.url}"/>
     </target>
 </project>
 
