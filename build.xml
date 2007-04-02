@@ -2,141 +2,133 @@
 <!-- $Id$ -->
 <!-- $HeadURL$ -->
 <project name="pc2v9" default="jar" basedir=".">
-	<description>
-         simple v9 build file
+    <description>
+        v9 build file
     </description>
-	<!-- set global properties for this build -->
-	<property name="src.dir" location="src" />
-	<property name="test.dir" location="test" />
-	<property name="build.dir" location="build" />
-	<property name="build.prod.dir" location="${build.dir}/prod" />
-	<property name="build.test.dir" location="${build.dir}/test" />
-	<property name="testresults.dir" location="${build.dir}/test-results" />
-	<property name="testresults.xml.dir" location="${testresults.dir}/xml" />
-	<property name="testresults.html.dir" location="${testresults.dir}/html" />
-	<property name="compilelogs.dir" location="${build.dir}" />
-	<property name="docs.dir" location="${build.dir}/docs" />
-	<property name="dist.dir" location="dist" />
-        <!-- this should change one the location of mclb.jar changes -->
-        <property name="vendor.lib.dir" location="${basedir}/vendor/lib"/>
-        <property name="scripts.dir" location="${basedir}/bin"/>
-        <property name="samps.dir" location="${basedir}/samps"/>
-        <!-- used in javadocs linkoffline, this is the location on
-             the build host, override on the ant commandline -->
-        <property name="api.url" location="/software/pc2/java/docs/api/"/>
+    <!-- set global properties for this build -->
+    <property name="src.dir" location="src" />
+    <property name="test.dir" location="test" />
+    <property name="build.dir" location="build" />
+    <property name="build.prod.dir" location="${build.dir}/prod" />
+    <property name="build.test.dir" location="${build.dir}/test" />
+    <property name="testresults.dir" location="${build.dir}/test-results" />
+    <property name="testresults.xml.dir" location="${testresults.dir}/xml" />
+    <property name="testresults.html.dir" location="${testresults.dir}/html" />
+    <property name="compilelogs.dir" location="${build.dir}" />
+    <property name="docs.dir" location="${build.dir}/docs" />
+    <property name="dist.dir" location="dist" />
+    <!-- this should change one the location of mclb.jar changes -->
+    <property name="vendor.lib.dir" location="${basedir}/vendor/lib"/>
+    <property name="scripts.dir" location="${basedir}/bin"/>
+    <property name="samps.dir" location="${basedir}/samps"/>
+    <!-- used in javadocs linkoffline, this is the location on
+         the build host, override on the ant commandline -->
+    <property name="api.url" location="/software/pc2/java/docs/api/"/>
 
-        <!-- Compiler settings. -->
-        <property name="javacFailOnError" value="false"/>
-        <property name="javacDebugInfo" value="on"/>
-        <property name="javacVerbose" value="false"/>
-        <property name="logExtension" value=".log"/>
-        <property name="compilerArg" value=""/>
-        <property name="javacSource" value="1.5"/>
-        <property name="javacTarget" value="1.5"/>
-        <path id="path_bootclasspath">
-                <fileset dir="${java.home}/lib">
-                        <include name="*.jar"/>
-                </fileset>
-        </path>
+    <!-- Compiler settings. -->
+    <property name="javacFailOnError" value="false"/>
+    <property name="javacDebugInfo" value="on"/>
+    <property name="javacVerbose" value="false"/>
+    <property name="logExtension" value=".log"/>
+    <property name="compilerArg" value=""/>
+    <property name="javacSource" value="1.5"/>
+    <property name="javacTarget" value="1.5"/>
+    <path id="path_bootclasspath">
+            <fileset dir="${java.home}/lib">
+                <include name="*.jar"/>
+            </fileset>
+    </path>
 
-        <property name="bootclasspath" refid="path_bootclasspath"/>
-        <property name="bundleJavacSource" value="${javacSource}"/>
-        <property name="bundleJavacTarget" value="${javacTarget}"/>
-        <property name="bundleBootClasspath" value="${bootclasspath}"/>
+    <property name="bootclasspath" refid="path_bootclasspath"/>
+    <property name="bundleJavacSource" value="${javacSource}"/>
+    <property name="bundleJavacTarget" value="${javacTarget}"/>
+    <property name="bundleBootClasspath" value="${bootclasspath}"/>
 
     <property name="name" value="pc2"/>
     <property name="jar.name" value="${name}.jar"/>
     <property name="jar.path" value="${dist.dir}/${jar.name}"/>
 
     <tstamp>
-        <format
-            property="date"
-            pattern="yyyyMMdd"
-            timezone="UTC" />
+        <format property="date" pattern="yyyyMMdd" timezone="UTC" />
     </tstamp>
     <tstamp>
-        <format
-            property="time"
-            pattern="HHmm"
-            timezone="UTC" />
+        <format property="time" pattern="HHmm" timezone="UTC" />
     </tstamp>
-    <property
-        name="timestamp"
-        value="${date}${time}" />
+    <property name="timestamp" value="${date}${time}" />
     <!-- version is used in the jar manifest & in package.xml -->
     <property name="version" value="9_0_alpha_${timestamp}"/>
 
-	<taskdef resource="checkstyletask.properties"/>
+    <taskdef resource="checkstyletask.properties"/>
 
-        <path id="project.classpath">
-            <pathelement location="${build.prod.dir}"/>
-            <pathelement location="${build.test.dir}"/>
-            <fileset dir="${vendor.lib.dir}">
-                <include name="*.jar"/>
-            </fileset>
-        </path>
+    <path id="project.classpath">
+        <pathelement location="${build.prod.dir}"/>
+        <pathelement location="${build.test.dir}"/>
+        <fileset dir="${vendor.lib.dir}">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
 
     <target name="properties">
         <available classname="org.eclipse.jdt.core.JDTCompilerAdapter" property="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
     </target>
 
-	<target name="init" depends="properties">
-		<!-- Create the time stamp -->
-		<tstamp />
-		<!-- Create the build directory structure used by compile -->
-		<mkdir dir="${build.prod.dir}" />
-		<mkdir dir="${build.test.dir}" />
-		<mkdir dir="${compilelogs.dir}" />
-                <exec executable="svnversion" outputproperty="repo.version">
-                     <arg line="-n ."/>
-                </exec>
-	</target>
+    <target name="init" depends="properties">
+        <!-- Create the time stamp -->
+        <tstamp />
+        <!-- Create the build directory structure used by compile -->
+        <mkdir dir="${build.prod.dir}" />
+        <mkdir dir="${build.test.dir}" />
+        <mkdir dir="${compilelogs.dir}" />
+        <exec executable="svnversion" outputproperty="repo.version">
+            <arg line="-n ."/>
+        </exec>
+    </target>
 
-	<target name="compile" depends="init" description="compile the source ">
-		<!-- Compile the java code from ${src.dir} into ${build.dir} -->
-                <javac srcdir="${src.dir}" destdir="${build.prod.dir}" failonerror="${javacFailOnError}" verbose="${javacVerbose}" debug="${javacDebugInfo}" includeAntRuntime="no" bootclasspath="${bundleBootClasspath}" source="${bundleJavacSource}" target="${bundleJavacTarget}">
-		    <compilerarg line="${compilerArg}" compiler="${build.compiler}"/>
-                    <classpath refid="project.classpath"/>
-		    <!-- <compilerarg value="" compiler="org.eclipse.jdt.core.JDTCompilerAdapter"/> -->
-		    <compilerarg line="-log '${compilelogs.dir}/${name}.prod${logExtension}'" compiler="org.eclipse.jdt.core.JDTCompilerAdapter"/>
-                </javac>
-	</target>
+    <target name="compile" depends="init" description="compile the source ">
+        <!-- Compile the java code from ${src.dir} into ${build.dir} -->
+        <javac srcdir="${src.dir}" destdir="${build.prod.dir}" failonerror="${javacFailOnError}" verbose="${javacVerbose}" debug="${javacDebugInfo}" includeAntRuntime="no" bootclasspath="${bundleBootClasspath}" source="${bundleJavacSource}" target="${bundleJavacTarget}">
+            <compilerarg line="${compilerArg}" compiler="${build.compiler}"/>
+            <classpath refid="project.classpath"/>
+            <!-- <compilerarg value="" compiler="org.eclipse.jdt.core.JDTCompilerAdapter"/> -->
+            <compilerarg line="-log '${compilelogs.dir}/${name}.prod${logExtension}'" compiler="org.eclipse.jdt.core.JDTCompilerAdapter"/>
+        </javac>
+    </target>
 
-	<target name="compile-tests" depends="compile" description="compile the junit tests">
-                <javac srcdir="${test.dir}" destdir="${build.test.dir}" failonerror="${javacFailOnError}" verbose="${javacVerbose}" debug="${javacDebugInfo}" includeAntRuntime="no" bootclasspath="${bundleBootClasspath}" source="${bundleJavacSource}" target="${bundleJavacTarget}">
-		    <compilerarg line="${compilerArg}" compiler="${build.compiler}"/>
-                    <classpath refid="project.classpath"/>
-		    <!-- <compilerarg value="" compiler="org.eclipse.jdt.core.JDTCompilerAdapter"/> -->
-		    <compilerarg line="-log '${compilelogs.dir}/${name}.test${logExtension}'" compiler="org.eclipse.jdt.core.JDTCompilerAdapter"/>
-                </javac>
-	</target>
-	<target name="test" depends="compile-tests" description="run junit tests">
-	    <delete dir="${testresults.dir}"/>
-	    <mkdir dir="${testresults.xml.dir}"/>
-	    <junit errorProperty="test.failed" failureProperty="test.failed">
-		<classpath refid="project.classpath"/>
-		<formatter type="brief" usefile="false"/>
-		<formatter type="xml"/>
-		<batchtest todir="${testresults.xml.dir}">
-		    <fileset dir="${build.test.dir}" includes="**/*Test.class"/>
-		</batchtest>
-	    </junit>
-            <!-- remove TEST- from filenames  -->
-            <move todir="${testresults.xml.dir}">
-                 <fileset dir="${testresults.xml.dir}" includes="**/*"/>
-                 <mapper type="glob" from="TEST-*" to="*"/>
-            </move>
-	    <fail message="Tests failed! Check test reports.">
-                <condition>
-                    <and>
-                        <isset property="test.failed"/>
-                        <not>
-                            <isset property="cruisecontrol"/>
-                        </not>
-                    </and>
-                </condition>
-            </fail>
-	</target>
+    <target name="compile-tests" depends="compile" description="compile the junit tests">
+        <javac srcdir="${test.dir}" destdir="${build.test.dir}" failonerror="${javacFailOnError}" verbose="${javacVerbose}" debug="${javacDebugInfo}" includeAntRuntime="no" bootclasspath="${bundleBootClasspath}" source="${bundleJavacSource}" target="${bundleJavacTarget}">
+            <compilerarg line="${compilerArg}" compiler="${build.compiler}"/>
+            <classpath refid="project.classpath"/>
+        <!-- <compilerarg value="" compiler="org.eclipse.jdt.core.JDTCompilerAdapter"/> -->
+            <compilerarg line="-log '${compilelogs.dir}/${name}.test${logExtension}'" compiler="org.eclipse.jdt.core.JDTCompilerAdapter"/>
+        </javac>
+    </target>
+    <target name="test" depends="compile-tests" description="run junit tests">
+        <delete dir="${testresults.dir}"/>
+        <mkdir dir="${testresults.xml.dir}"/>
+        <junit errorProperty="test.failed" failureProperty="test.failed">
+                <classpath refid="project.classpath"/>
+                <formatter type="brief" usefile="false"/>
+                <formatter type="xml"/>
+                <batchtest todir="${testresults.xml.dir}">
+                    <fileset dir="${build.test.dir}" includes="**/*Test.class"/>
+                </batchtest>
+        </junit>
+        <!-- remove TEST- from filenames  -->
+        <move todir="${testresults.xml.dir}">
+            <fileset dir="${testresults.xml.dir}" includes="**/*"/>
+            <mapper type="glob" from="TEST-*" to="*"/>
+        </move>
+        <fail message="Tests failed! Check test reports.">
+            <condition>
+                <and>
+                    <isset property="test.failed"/>
+                    <not>
+                        <isset property="cruisecontrol"/>
+                    </not>
+                </and>
+            </condition>
+        </fail>
+    </target>
 
     <target name="jar" depends="test" description="creates a jar of our classes">
         <mkdir dir="${dist.dir}" />
@@ -152,30 +144,28 @@
         </jar>
     </target>
 
-	<target name="clean" description="clean up">
-		<!-- Delete the ${build.dir} and ${dist.dir} directory trees -->
-		<delete dir="${build.dir}" />
-		<delete dir="${dist.dir}" />
-	</target>
+    <target name="clean" description="clean up">
+        <!-- Delete the ${build.dir} and ${dist.dir} directory trees -->
+        <delete dir="${build.dir}" />
+        <delete dir="${dist.dir}" />
+    </target>
 
-	<target name="checkstyle" description="Generates a report of code convention violations." depends="compile">
-		<checkstyle config="${basedir}/.pc2_checks.xml" failureProperty="checkstyle.failure" failOnViolation="false">
-			<formatter type="xml" tofile="checkstyle_report.xml" />
-			<fileset dir="src" includes="**/*.java" />
-		    <classpath refid="project.classpath"/>
-		</checkstyle>
-		<style in="checkstyle_report.xml" out="checkstyle_report.html" style="checkstyle.xsl" />
-	</target>
+    <target name="checkstyle" description="Generates a report of code convention violations." depends="compile">
+        <checkstyle config="${basedir}/.pc2_checks.xml" failureProperty="checkstyle.failure" failOnViolation="false">
+            <formatter type="xml" tofile="checkstyle_report.xml" />
+            <fileset dir="src" includes="**/*.java" />
+            <classpath refid="project.classpath"/>
+        </checkstyle>
+        <style in="checkstyle_report.xml" out="checkstyle_report.html" style="checkstyle.xsl" />
+    </target>
 
-	<!-- run this target as part of automated build -->
-	<target name="checkstyle-nightly" depends="checkstyle" if="checkstyle.failure" description="Sends email if checkstyle detected code conventions violations.">
-		<mail from="pc2@ecs.csus.edu" tolist="boudreat@gaia.ecs.csus.edu" mailhost="gaia.ecs.csus.edu" subject="Checkstyle violation(s) in project ${ant.project.name}" files="checkstyle_report.html" />
-	</target>
+    <!-- run this target as part of automated build -->
+    <target name="checkstyle-nightly" depends="checkstyle" if="checkstyle.failure" description="Sends email if checkstyle detected code conventions violations.">
+        <mail from="pc2@ecs.csus.edu" tolist="boudreat@gaia.ecs.csus.edu" mailhost="gaia.ecs.csus.edu" subject="Checkstyle violation(s) in project ${ant.project.name}" files="checkstyle_report.html" />
+    </target>
 
     <target name="javadocs" description="Creates javadocs">
         <mkdir dir="${docs.dir}/api" />
         <javadoc sourcepath="${src.dir}" destdir="${docs.dir}/api" defaultexcludes="yes" packagenames="edu.csus.ecs.pc2.*" doctitle="PC^2 Version 9 Java Documentation" Use="yes" SplitIndex="yes" linkoffline="http://java.sun.com/j2se/1.5.0/docs/api/ ${api.url}"/>
     </target>
 </project>
-
-
