@@ -18,6 +18,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
+import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.packet.PacketFactory;
@@ -171,41 +172,62 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             return "";
         }
     }
+    
+    protected static ClientId loginShortcutExpansion(int defaultSiteNumber, String loginName) {
+        if (loginName.equals("t")) {
+            loginName = "team1";
+        }
+
+        if (loginName.equals("s")) {
+            loginName = "server1";
+        }
+
+        if (loginName.startsWith("site") && loginName.length() > 4) {
+            int number = getIntegerValue(loginName.substring(4));
+            return new ClientId(number, Type.SERVER, 0);
+        } else if (loginName.startsWith("server") && loginName.length() > 6) {
+            int number = getIntegerValue(loginName.substring(6));
+            return new ClientId(number, Type.SERVER, 0);
+        } else if (loginName.startsWith("s") && loginName.length() > 1) {
+            if (Character.isDigit(loginName.charAt(1))) {
+                int number = getIntegerValue(loginName.substring(1));
+                return new ClientId(number, Type.SERVER, 0);
+            } else {
+                throw new SecurityException("No such account " + loginName);
+            }
+        } else if (loginName.startsWith("judge") && loginName.length() > 5) {
+            int number = getIntegerValue(loginName.substring(5));
+            return new ClientId(defaultSiteNumber, Type.JUDGE, number);
+        } else if (loginName.startsWith("j") && loginName.length() > 1) {
+            int number = getIntegerValue(loginName.substring(1));
+            return new ClientId(defaultSiteNumber, Type.JUDGE, number);
+        } else if (loginName.startsWith("t") && loginName.length() > 4) {
+            int number = getIntegerValue(loginName.substring(4));
+            return new ClientId(defaultSiteNumber, Type.TEAM, number);
+        } else if (Character.isDigit(loginName.charAt(0))) {
+            int number = getIntegerValue(loginName);
+            return new ClientId(defaultSiteNumber, Type.TEAM, number);
+        } else {
+            throw new SecurityException("No such account " + loginName);
+        }
+
+    }
 
     /**
      * Login to contest server.
      * 
-     * @param id the login name.
-     * @param password the password for the id.
+     * @param id
+     *            the login name.
+     * @param password
+     *            the password for the id.
      * @return model (contest data) if login successful
-     * @throws Exception if there is a problem contacting server or logging in.
+     * @throws Exception
+     *             if there is a problem contacting server or logging in.
      */
     public static IModel login(String id, String password, int tmpSiteNum) throws Exception {
 
-        ClientId clientId;
-
-        if (id.equals("t")) {
-            id = "team1";
-        }
-
-        if (id.startsWith("s")) {
-            clientId = new ClientId(tmpSiteNum, Type.SERVER, 0);
-        } else if (id.startsWith("judge") && id.length() > 5) {
-            int number = getIntegerValue(id.substring(5));
-            clientId = new ClientId(tmpSiteNum, Type.JUDGE, number);
-        } else if (id.startsWith("j") && id.length() > 1) {
-            int number = getIntegerValue(id.substring(1));
-            clientId = new ClientId(tmpSiteNum, Type.JUDGE, number);
-        } else if (id.startsWith("t") && id.length() > 4) {
-            int number = getIntegerValue(id.substring(4));
-            clientId = new ClientId(tmpSiteNum, Type.TEAM, number);
-        } else if (Character.isDigit(id.charAt(0))) {
-            int number = getIntegerValue(id);
-            clientId = new ClientId(tmpSiteNum, Type.TEAM, number);
-        } else {
-            throw new SecurityException("No such account " + id);
-        }
-
+        ClientId clientId = loginShortcutExpansion (tmpSiteNum, id);
+     
         log = new Log(clientId.toString());
         StaticLog.setLog(log);  // From this point forward any class can use StaticLog.
         info("");
@@ -421,6 +443,24 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         JOptionPane.showMessageDialog(null,message+" "+model.getClientId(),"Login Denied", JOptionPane.ERROR_MESSAGE);
         System.exit(0); // TODO remove this code on valid login
     }
+    
+    /**
+     * Looks up site number based on password.
+     * 
+     * @param password
+     * @return site number or throws SecurityException if nothing matches.
+     */
+    private int getServerSiteNumber (String password)
+    {
+        for (Site site : model.getSites())
+        {
+            if (site.getPassword().equals(password)){
+                return site.getSiteNumber();
+            }
+        }
+        
+        throw new SecurityException("Failed login - invalid password");
+    }
 
     /**
      * Attempt to login, if login success add to login list.
@@ -439,6 +479,16 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             info("attemptToLogin debug logged on: " + clientId );
 
         } else {
+            if (clientId.getClientType().equals(Type.SERVER)){
+                
+                int newSiteNumber = getServerSiteNumber(password);
+                ClientId newId = new ClientId(newSiteNumber,ClientType.Type.SCOREBOARD, 0);
+                if (model.isLoggedIn(newId)){
+                    info ("Note site "+clientId+" site "+newSiteNumber+" already logged in, ignoring ");
+                }
+                model.addLogin(newId, connectionHandlerID);
+           
+            }
             info("attemptToLogin debug FAILED logged on: " + clientId );
             // this code will never be executed, if invalid login
             // isValidLogin will throw a SecurityException.
