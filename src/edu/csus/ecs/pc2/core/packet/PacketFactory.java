@@ -23,6 +23,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
+import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.packet.PacketType.Type;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
@@ -235,17 +236,11 @@ public final class PacketFactory {
 
             while (enumeration.hasMoreElements()) {
                 String element = (String) enumeration.nextElement();
-                pw.println("   key: " + element + " is: " + prop.get(element).getClass().getName());
+                pw.println("   key: " + element + " is: " + prop.get(element).getClass().getName()+" "+prop.get(element));
             }
         } else {
 
-            if (obj instanceof String) {
-                pw.println("  Contains: " + (String) obj);
-            } else if (obj instanceof Run) {
-                pw.println("  Contains: " + (Run) obj);
-            } else {
-                pw.println("  Contains: " + obj.toString());
-            }
+            pw.println("  Contains: " + obj.toString() + " " +obj);
         }
         pw.println();
 
@@ -268,17 +263,11 @@ public final class PacketFactory {
 
             while (enumeration.hasMoreElements()) {
                 String element = (String) enumeration.nextElement();
-                pw.println("   key: " + element + " is: " + prop.get(element).getClass().getName());
+                pw.println("   key: " + element + " is: " + prop.get(element).getClass().getName()+" "+prop.get(element));
             }
         } else {
 
-            if (obj instanceof String) {
-                pw.println("  Contains: " + (String) obj);
-            } else if (obj instanceof Run) {
-                pw.println("  Contains: " + (Run) obj);
-            } else {
-                pw.println("  Contains: " + obj.toString());
-            }
+            pw.println("  Contains: " + obj.toString() + " " +obj);
         }
         pw.println();
 
@@ -664,7 +653,7 @@ public final class PacketFactory {
      * @param judgements
      */
     public static Packet createLoginSuccess(ClientId source, ClientId destination, ContestTime inContestTime, int siteNumber,
-            Language[] languages, Problem[] problems, Judgement[] judgements) {
+            Language[] languages, Problem[] problems, Judgement[] judgements, Site [] sites) {
         Properties prop = new Properties();
         prop.put(SITE_NUMBER, new Integer(siteNumber));
         prop.put(PacketType.CONTEST_TIME, inContestTime);
@@ -672,6 +661,7 @@ public final class PacketFactory {
         prop.put(PROBLEM_LIST, problems);
         prop.put(LANGUAGE_LIST, languages);
         prop.put(JUDGEMENT_LIST, judgements);
+        prop.put(SITE_LIST, sites);
 
         Packet packet = new Packet(Type.LOGIN_SUCCESS, source, destination, prop);
         return packet;
