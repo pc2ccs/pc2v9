@@ -99,17 +99,6 @@ public class ServerView extends JFrame implements UIPlugin {
 
     private JButton generateSitesAccountButton = null;
 
-    public ServerView(IModel model, IController serverController) {
-        super();
-        setModelController(model, serverController);
-        model.addRunListener(new RunListenerImplementation());
-        model.addAccountListener(new AccountListenerImplementation());
-        model.addLoginListener(new LoginListenerImplementation());
-        initialize();
-        
-        updateListBox (getPluginTitle()+" Build "+new VersionInfo().getBuildNumber());
-    }
-
     /**
      * This method initializes
      * 
@@ -117,6 +106,8 @@ public class ServerView extends JFrame implements UIPlugin {
     public ServerView() {
         super();
         initialize();
+        updateListBox (getPluginTitle()+" Build "+new VersionInfo().getBuildNumber());
+
     }
 
     /**
@@ -439,7 +430,7 @@ public class ServerView extends JFrame implements UIPlugin {
         number = model.getAccounts(ClientType.Type.ADMINISTRATOR).size();
         genAdminLabel.setText("Administrators (" + number + ")");
         
-        number = model.getAccounts(ClientType.Type.SERVER).size();
+        number = model.getSites().length;
         genSiteLabel.setText("Sites (" + number + ")");
     }
 
@@ -523,6 +514,16 @@ public class ServerView extends JFrame implements UIPlugin {
         this.serverController = inController;
         setTitle("PC^2 Server (Site "+model.getSiteNumber()+")");
         updateGenerateTitles();
+        
+        model.addRunListener(new RunListenerImplementation());
+        model.addAccountListener(new AccountListenerImplementation());
+        model.addLoginListener(new LoginListenerImplementation());
+        model.addSiteListener(new SiteListenerImplementation());
+        
+        // TODO add listeners for languages and problems
+        
+//      model.addLanguageListener(new LanguageListenerImplementation());
+//      model.addProblemListener(new ProblemListenerImplementation());
     }
 
     public String getPluginTitle() {
@@ -585,7 +586,7 @@ public class ServerView extends JFrame implements UIPlugin {
         try {
             int count = getIntegerValue(sitesCountTextBox.getText());
             if (count > 0) {
-                model.generateNewAccounts(ClientType.Type.SERVER.toString(), count, true);
+                model.generateNewSites(count, true);
             }
         } catch (Exception e) {
             // TODO: log handle exception

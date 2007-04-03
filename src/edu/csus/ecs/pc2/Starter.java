@@ -121,12 +121,12 @@ public class Starter implements Runnable {
                     
                     loginFrame.setVisible(false); // hide LoginFrame
                 } else if (model.getFrameName().equals("TeamView")) {
-                    TeamView teamView = new TeamView(model, controller);
+                    TeamView teamView = new TeamView();
                     teamView.setModelController(model, controller);
                     
                     loginFrame.setVisible(false); // hide LoginFrame
                 } else if (model.getFrameName().equals("JudgeView")) {
-                    JudgeView judgeView = new JudgeView(model, controller);
+                    JudgeView judgeView = new JudgeView();
                     judgeView.setModelController(model, controller);
                     
                     loginFrame.setVisible(false); // hide LoginFrame

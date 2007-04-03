@@ -32,6 +32,7 @@ import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
+
 /**
  * Represents an arbitrary contest GUI.
  * 
@@ -85,19 +86,6 @@ public class TeamView extends JFrame implements UIPlugin {
 
     private DefaultListModel runListModel = new DefaultListModel();
 
-    public TeamView(IModel model, IController teamController) {
-        super();
-        setModelController(model, teamController);
-        initialize();
-        model.addRunListener(new RunListenerImplementation());
-        model.addContestTimeListener(new ContestTimeListenerImplementation());
-        model.addProblemListener(new ProblemListenerImplementation());
-        model.addLanguageListener(new LanguageListenerImplementation());
-        
-        updateListBox (getPluginTitle()+" Build "+new VersionInfo().getBuildNumber());
-
-    }
-
     /**
      * Nevermind this constructor, needed for VE and other reasons.
      * 
@@ -105,6 +93,7 @@ public class TeamView extends JFrame implements UIPlugin {
     public TeamView() {
         super();
         initialize();
+        updateListBox (getPluginTitle()+" Build "+new VersionInfo().getBuildNumber());
     }
 
     /**
@@ -517,6 +506,17 @@ public class TeamView extends JFrame implements UIPlugin {
     public void setModelController(IModel inModel, IController inController) {
         this.model = inModel;
         this.teamController = inController;
+        
+        model.addRunListener(new RunListenerImplementation());
+        model.addContestTimeListener(new ContestTimeListenerImplementation());
+        model.addLanguageListener(new LanguageListenerImplementation());
+        model.addProblemListener(new ProblemListenerImplementation());
+        
+        // TODO add listeners for accounts, login and site.
+        
+//        model.addAccountListener(new AccountListenerImplementation());
+//        model.addLoginListener(new LoginListenerImplementation());
+//        model.addSiteListener(new SiteListenerImplementation());
     }
 
     public String getPluginTitle() {

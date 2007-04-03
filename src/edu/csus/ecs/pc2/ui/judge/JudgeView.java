@@ -49,24 +49,11 @@ public class JudgeView extends JFrame implements UIPlugin {
 
     private DefaultListModel runListModel = new DefaultListModel(); // @jve:decl-index=0:visual-constraint=""
 
-    /**
-     * This method initializes
-     * 
-     */
     public JudgeView() {
         super();
         initialize();
-    }
-
-    public JudgeView(IModel model, IController controller) {
-        super();
-        setModelController(model, controller);
-        initialize();
-        model.addContestTimeListener(new ContestTimeListenerImplementation());
-        model.addRunListener(new RunListenerImplementation());
 
         updateListBox (getPluginTitle()+" Build "+new VersionInfo().getBuildNumber());
-
     }
 
     /**
@@ -242,6 +229,18 @@ public class JudgeView extends JFrame implements UIPlugin {
     public void setModelController(IModel inModel, IController inController) {
         this.model = inModel;
         this.controller = inController;
+        
+        model.addRunListener(new RunListenerImplementation());
+        model.addContestTimeListener(new ContestTimeListenerImplementation());
+        // TODO add langauge and problem listeners
+//        model.addLanguageListener(new LanguageListenerImplementation());
+//        model.addProblemListener(new ProblemListenerImplementation());
+        
+        // TODO add listeners for accounts, login and site.
+        
+//        model.addAccountListener(new AccountListenerImplementation());
+//        model.addLoginListener(new LoginListenerImplementation());
+//        model.addSiteListener(new SiteListenerImplementation());
     }
 
     public String getPluginTitle() {

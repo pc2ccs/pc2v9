@@ -41,7 +41,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
     private static ITransportManager transportManager;
 
-    private static Controller controller;
+    public static Controller controller;
 
     private static Log log;
 
@@ -262,10 +262,14 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                  info("Sending login request to " + remoteHostName + " as " + clientId);
                  sendLoginRequest(transportManager, remoteServerConnectionHandlerID, clientId, password);
                  
+                 info("Started Server Transport listening on " + port);
                  transportManager.accecptConnections(port);
+                 
+                 info("Secondary Server has started "+model.getTitle());
             } else {
                 info("Started Server Transport listening on " + port);
                 transportManager.accecptConnections(port);
+                info("Primary Server has started "+model.getTitle());
             }
 
         } else {

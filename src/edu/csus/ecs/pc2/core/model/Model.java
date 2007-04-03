@@ -335,15 +335,26 @@ public class Model implements IModel {
         for (int i = 0; i < count; i++) {
             ClientId nextClientId = new ClientId(siteNumber, type, 1 + i + numberAccounts);
             Account account = accountList.getAccount(nextClientId);
-            if (type.equals(Type.SERVER)) {
-                Site site = new Site("Site " + account.getSiteNumber(), account.getClientId().getClientNumber());
-                SiteEvent siteEvent = new SiteEvent(SiteEvent.Action.ADDED, site);
-                fireSiteListener(siteEvent);
+            AccountEvent accountEvent = new AccountEvent(AccountEvent.Action.ADDED, account);
+            fireAccountListener(accountEvent);
+        }
+    }
+    
+    /**
+     * Generate new sites
+     * @param count
+     * @param active
+     */
+    public void generateNewSites (int count, boolean active){
 
-            } else {
-                AccountEvent accountEvent = new AccountEvent(AccountEvent.Action.ADDED, account);
-                fireAccountListener(accountEvent);
-            }
+        int numSites = siteList.size();
+
+        for (int i = 0; i < count; i++) {
+            int nextSiteNumber = i + numSites + 1;
+            Site site = new Site ("Site "+nextSiteNumber, nextSiteNumber);
+            site.setPassword("site"+nextSiteNumber); // JOE password
+            site.setActive(active);
+            addSite(site);
         }
     }
 

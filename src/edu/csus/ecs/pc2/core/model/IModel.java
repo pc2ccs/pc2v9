@@ -71,6 +71,15 @@ public interface IModel {
      *            set to True if the accounts are active
      */
     void generateNewAccounts(String clientTypeName, int count, boolean active);
+    
+    
+    /**
+     * Add new sites.
+     * 
+     * @param count
+     * @param active
+     */
+    void generateNewSites (int count, boolean active);
 
     /**
      * Add a new account listener.
