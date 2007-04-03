@@ -3,6 +3,8 @@ package edu.csus.ecs.pc2.core;
 import java.io.Serializable;
 import java.util.Enumeration;
 
+import javax.swing.JOptionPane;
+
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
@@ -374,7 +376,18 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                     }
                 } else {
                     // Security Failure
-
+                    
+                    if (clientId.getClientType().equals(Type.SERVER)) {
+                        if (packet.getType() == PacketType.Type.LOGIN_FAILED) {
+                            handleServerLoginFailure(packet);
+                        } else {
+                            String message = "Security violation user " + clientId + " got a " + packet;
+                            info(message + " on " + connectionHandlerID);
+                            PacketFactory.dumpPacket(System.err, packet);
+                        }
+                        return;
+                    }
+                    
                     String message = "Security violation user " + clientId + " got a " + packet;
                     info(message + " on " + connectionHandlerID);
                     PacketFactory.dumpPacket(System.err, packet);
@@ -390,6 +403,23 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         }
         info("receiveObject (S,C) debug end : Processing " + object.getClass().getName());
 
+    }
+
+    private void handleServerLoginFailure(Packet packet) {
+        // TODO rewrite handle this failure better
+        
+        String message = PacketFactory.getStringValue(packet, PacketFactory.MESSAGE_STRING);
+        
+        // TODO Handle this better via new login code.
+        info("Login Failed: " + message);
+        if (message.equals("No such account")) {
+            message = "(Accounts Generated ??) ERROR " +message ;
+        }
+        
+        info("Login Failure");
+        PacketFactory.dumpPacket(System.err, packet);
+        JOptionPane.showMessageDialog(null,message+" "+model.getClientId(),"Login Denied", JOptionPane.ERROR_MESSAGE);
+        System.exit(0); // TODO remove this code on valid login
     }
 
     /**
