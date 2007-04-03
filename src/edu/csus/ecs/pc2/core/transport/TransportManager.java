@@ -32,6 +32,7 @@ import edu.csus.ecs.pc2.core.transport.crypto.CryptoException;
  * <ol>
  * <li> Use the client {@link #TransportManager(Log, String, int, IBtoA)} constructor
  * <li> Contact the server using {@link #connectToMyServer()}
+ * <li> Start the transport listening using {@link #accecptConnections(int)}
  * </ol>
  * Needless to say the port numbers should be identical. 
  * 
