@@ -17,15 +17,18 @@ import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ILoginListener;
 import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.ISiteListener;
 import edu.csus.ecs.pc2.core.model.LoginEvent;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.IRunListener;
+import edu.csus.ecs.pc2.core.model.SiteEvent;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.IntegerDocument;
 import edu.csus.ecs.pc2.ui.UIPlugin;
@@ -87,6 +90,14 @@ public class ServerView extends JFrame implements UIPlugin {
     private JLabel genTeamLabels = null;
 
     private JLabel genScoreboardLabel = null;
+
+    private JPanel sitePane = null;
+
+    private JLabel genSiteLabel = null;
+
+    private JTextField sitesCountTextBox = null;
+
+    private JButton generateSitesAccountButton = null;
 
     public ServerView(IModel model, IController serverController) {
         super();
@@ -207,7 +218,25 @@ public class ServerView extends JFrame implements UIPlugin {
             updateListBox("Account " + accountEvent.getAction() + " " + accountText(accountEvent.getAccount()));
 
         }
+    }
+    
+    public class SiteListenerImplementation implements ISiteListener {
 
+        public void siteAdded(SiteEvent event) {
+            updateListBox("Site " + event.getAction() + " " + event.getSite());
+        }
+
+        public void siteRemoved(SiteEvent event) {
+            updateListBox("Site " + event.getAction() + " " + event.getSite());
+        }
+
+        public void siteLoggedOn(SiteEvent event) {
+            updateListBox("Site " + event.getAction() + " " + event.getSite());
+        }
+
+        public void siteLoggedOff(SiteEvent event) {
+            updateListBox("Site " + event.getAction() + " " + event.getSite());
+        }
     }
 
     /**
@@ -286,6 +315,7 @@ public class ServerView extends JFrame implements UIPlugin {
             mainTabbedPane = new JTabbedPane();
             mainTabbedPane.addTab("Runs Submitted", null, getRunPane(), null);
             mainTabbedPane.addTab("Generate Accounts", null, getGenerateAccountsPane(), null);
+            mainTabbedPane.addTab("Sites", null, getSitePane(), null);
         }
         return mainTabbedPane;
     }
@@ -408,6 +438,9 @@ public class ServerView extends JFrame implements UIPlugin {
 
         number = model.getAccounts(ClientType.Type.ADMINISTRATOR).size();
         genAdminLabel.setText("Administrators (" + number + ")");
+        
+        number = model.getAccounts(ClientType.Type.SERVER).size();
+        genSiteLabel.setText("Sites (" + number + ")");
     }
 
     /**
@@ -494,6 +527,70 @@ public class ServerView extends JFrame implements UIPlugin {
 
     public String getPluginTitle() {
         return "Server Main GUI";
+    }
+
+    /**
+     * This method initializes sitePane	
+     * 	
+     * @return javax.swing.JPanel	
+     */
+    private JPanel getSitePane() {
+        if (sitePane == null) {
+            genSiteLabel = new JLabel();
+            genSiteLabel.setBounds(new java.awt.Rectangle(51,46,147,20));
+            genSiteLabel.setText("Sites");
+            sitePane = new JPanel();
+            sitePane.setLayout(null);
+            sitePane.add(genSiteLabel, null);
+            sitePane.add(getSitesCountTextBox(), null);
+            sitePane.add(getGenerateSitesAccountButton(), null);
+        }
+        return sitePane;
+    }
+
+    /**
+     * This method initializes sitesCountTextBox	
+     * 	
+     * @return javax.swing.JTextField	
+     */
+    private JTextField getSitesCountTextBox() {
+        if (sitesCountTextBox == null) {
+            sitesCountTextBox = new JTextField();
+            sitesCountTextBox.setBounds(new java.awt.Rectangle(249,42,61,24));
+            sitesCountTextBox.setDocument(new IntegerDocument());
+        }
+        return sitesCountTextBox;
+    }
+
+    /**
+     * This method initializes generateSitesAccountButton	
+     * 	
+     * @return javax.swing.JButton	
+     */
+    private JButton getGenerateSitesAccountButton() {
+        if (generateSitesAccountButton == null) {
+            generateSitesAccountButton = new JButton();
+            generateSitesAccountButton.setBounds(new java.awt.Rectangle(361,41,93,25));
+            generateSitesAccountButton.setText("Generate");
+            generateSitesAccountButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    generateSiteAccounts();
+                }
+            });
+        }
+        return generateSitesAccountButton;
+    }
+
+    protected void generateSiteAccounts() {
+        try {
+            int count = getIntegerValue(sitesCountTextBox.getText());
+            if (count > 0) {
+                model.generateNewAccounts(ClientType.Type.SERVER.toString(), count, true);
+            }
+        } catch (Exception e) {
+            // TODO: log handle exception
+            StaticLog.log("Exception logged ", e);
+        }
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
