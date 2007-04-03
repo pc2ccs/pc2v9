@@ -15,6 +15,7 @@ import edu.csus.ecs.pc2.core.list.ProblemList;
 import edu.csus.ecs.pc2.core.list.RunFilesList;
 import edu.csus.ecs.pc2.core.list.RunList;
 import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
@@ -468,8 +469,8 @@ public class Model implements IModel {
         ContestTime contestTime = new ContestTime();
         contestTime.setElapsedMins(9);
         contestTime.startContestClock();
-
         addContestTime(contestTime, siteNumber);
+        localClientId.setSiteNumber(getSiteNumber());
     }
 
     public void setSiteNumber(int number) {
@@ -491,7 +492,14 @@ public class Model implements IModel {
     }
 
     public ContestTime getContestTime(int inSiteNumber) {
-        return contestTimeList.get(inSiteNumber);
+        ContestTime contestTime2 = contestTimeList.get(inSiteNumber);
+        if (contestTime2 == null){
+            StaticLog.info("getContestTime time for "+inSiteNumber+" does not exist, created it. ");
+            contestTime2 = new ContestTime();
+            contestTime2.startContestClock();
+            addContestTime(contestTime2, inSiteNumber);
+        }
+        return  contestTime2;
     }
 
     public void startContest(int inSiteNumber) {

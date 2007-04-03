@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.core;
 
 import javax.swing.JOptionPane;
 
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IModel;
@@ -113,50 +114,87 @@ public final class PacketHandler {
      */
     private static void loadDataIntoModel(Packet packet, IController controller, IModel model) {
 
-        ClientId clientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-        if (clientId != null) {
-            controller.setClientId(clientId);
+        try {
+            ClientId clientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+            if (clientId != null) {
+                controller.setClientId(clientId);
+            }
+        } catch (Exception e) {
+            // TODO: log handle exception
+            StaticLog.log("Exception logged ", e);
         }
 
-        Integer siteNumber = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
-        if (siteNumber != null) {
-            controller.setSiteNumber(siteNumber.intValue());
+        try {
+            Integer siteNumber = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
+            if (siteNumber != null) {
+                controller.setSiteNumber(siteNumber.intValue());
+            }
+        } catch (Exception e) {
+            // TODO: log handle exception
+            StaticLog.log("Exception logged ", e);
         }
 
         info("Site set to " + model.getSiteNumber());
 
-        Language[] languages = (Language[]) PacketFactory.getObjectValue(packet, PacketFactory.LANGUAGE_LIST);
-        if (languages != null) {
-            for (Language language : languages) {
-                model.addLanguage(language);
+        try {
+            Language[] languages = (Language[]) PacketFactory.getObjectValue(packet, PacketFactory.LANGUAGE_LIST);
+            if (languages != null) {
+                for (Language language : languages) {
+                    model.addLanguage(language);
+                }
             }
+        } catch (Exception e) {
+            // TODO: log handle exception
+            StaticLog.log("Exception logged ", e);
         }
 
-        Problem[] problems = (Problem[]) PacketFactory.getObjectValue(packet, PacketFactory.PROBLEM_LIST);
-        if (problems != null) {
-            for (Problem problem : problems) {
-                model.addProblem(problem);
+        try {
+            Problem[] problems = (Problem[]) PacketFactory.getObjectValue(packet, PacketFactory.PROBLEM_LIST);
+            if (problems != null) {
+                for (Problem problem : problems) {
+                    model.addProblem(problem);
+                }
             }
+        } catch (Exception e) {
+            // TODO: log handle exception
+            StaticLog.log("Exception logged ", e);
         }
 
-        Judgement[] judgements = (Judgement[]) PacketFactory.getObjectValue(packet, PacketFactory.JUDGEMENT_LIST);
-        if (judgements != null) {
-            for (Judgement judgement : judgements) {
-                model.addJudgement(judgement);
+        try {
+            Judgement[] judgements = (Judgement[]) PacketFactory.getObjectValue(packet, PacketFactory.JUDGEMENT_LIST);
+            if (judgements != null) {
+                for (Judgement judgement : judgements) {
+                    model.addJudgement(judgement);
+                }
             }
+        } catch (Exception e) {
+            // TODO: log handle exception
+            StaticLog.log("Exception logged ", e);
         }
 
-        ContestTime contestTime = (ContestTime) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME);
-        if (contestTime != null) {
-            model.addContestTime(contestTime, model.getSiteNumber());
-        }
-
-        SiteList sites = (SiteList) PacketFactory.getObjectValue(packet, PacketFactory.SITE_LIST);
-        if (sites != null) {
-            for (Site site : sites.getList()) {
-                model.addSite(site);
+        try {
+            ContestTime contestTime = (ContestTime) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME);
+            if (contestTime != null) {
+                model.addContestTime(contestTime, model.getSiteNumber());
             }
+            
+        } catch (Exception e) {
+            // TODO: log handle exception
+            StaticLog.log("Exception logged ", e);
         }
+        
+        try {
+            Site[] sites = (Site[]) PacketFactory.getObjectValue(packet, PacketFactory.SITE_LIST);
+            if (sites != null) {
+                for (Site site : sites) {
+                    model.addSite(site);
+                }
+            }
+        } catch (Exception e) {
+            // TODO: log handle exception
+            StaticLog.log("Exception logged ", e);
+        }
+        
 
     }
 
