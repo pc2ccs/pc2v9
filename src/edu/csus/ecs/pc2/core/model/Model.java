@@ -335,8 +335,15 @@ public class Model implements IModel {
         for (int i = 0; i < count; i++) {
             ClientId nextClientId = new ClientId(siteNumber, type, 1 + i + numberAccounts);
             Account account = accountList.getAccount(nextClientId);
-            AccountEvent accountEvent = new AccountEvent(AccountEvent.Action.ADDED, account);
-            fireAccountListener(accountEvent);
+            if (type.equals(Type.SERVER)) {
+                Site site = new Site("Site " + account.getSiteNumber(), account.getClientId().getClientNumber());
+                SiteEvent siteEvent = new SiteEvent(SiteEvent.Action.ADDED, site);
+                fireSiteListener(siteEvent);
+
+            } else {
+                AccountEvent accountEvent = new AccountEvent(AccountEvent.Action.ADDED, account);
+                fireAccountListener(accountEvent);
+            }
         }
     }
 

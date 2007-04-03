@@ -102,12 +102,17 @@ public class Starter implements Runnable {
     public void login(String id, String password, boolean showDefaultUI) {
 
         try {
-            IModel model = Controller.login(id, password);
-            IController controller = new Controller(model);
+            int temporarySiteNumber = 1;
+            
             if (parseArguments.isOptPresent(SITE_OPTION)){
                 Long long1 = parseArguments.getLongOptionValue(SITE_OPTION);
-                model.setSiteNumber(long1.intValue());
+                temporarySiteNumber = long1.intValue();
             }
+            
+            IModel model = Controller.login(id, password, temporarySiteNumber);
+            IController controller = new Controller(model);
+            model.setSiteNumber(temporarySiteNumber);
+
 
             if (showDefaultUI) {
                 if (model.getFrameName().equals("ServerView")) {

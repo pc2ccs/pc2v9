@@ -82,6 +82,8 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * Key in the .ini for the client port.
      */
     private static final String CLIENT_PORT_KEY = "client.port";
+    
+    private static ConnectionHandlerID remoteServerConnectionHandlerID = null;
 
     public Controller(IModel model) {
         super();
@@ -140,6 +142,13 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         }
     }
     
+    /**
+     * returns true if .ini file exists and key is present in file.
+     * 
+     * @see IniFile#getValue(String)
+     * @param key
+     * @return true if key found and ini file exists.
+     */
     private static boolean containsINIKey(String key) {
         if (IniFile.isFilePresent()) {
             return IniFile.containsKey(key);
@@ -148,7 +157,12 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         }
     }
 
-    public static String getINIValue(String key) {
+    /**
+     * Get value from .ini file if it exists.
+     * @param key
+     * @return
+     */
+    private static String getINIValue(String key) {
         if (IniFile.isFilePresent()) {
             return IniFile.getValue(key);
         } else {
@@ -156,7 +170,15 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         }
     }
 
-    public static IModel login(String id, String password) throws Exception {
+    /**
+     * Login to contest server.
+     * 
+     * @param id the login name.
+     * @param password the password for the id.
+     * @return model (contest data) if login successful
+     * @throws Exception if there is a problem contacting server or logging in.
+     */
+    public static IModel login(String id, String password, int tmpSiteNum) throws Exception {
 
         ClientId clientId;
 
@@ -165,25 +187,25 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         }
 
         if (id.startsWith("s")) {
-            clientId = new ClientId(0, Type.SERVER, 0);
+            clientId = new ClientId(tmpSiteNum, Type.SERVER, 0);
         } else if (id.startsWith("judge") && id.length() > 5) {
             int number = getIntegerValue(id.substring(5));
-            clientId = new ClientId(0, Type.JUDGE, number);
+            clientId = new ClientId(tmpSiteNum, Type.JUDGE, number);
         } else if (id.startsWith("j") && id.length() > 1) {
             int number = getIntegerValue(id.substring(1));
-            clientId = new ClientId(0, Type.JUDGE, number);
+            clientId = new ClientId(tmpSiteNum, Type.JUDGE, number);
         } else if (id.startsWith("t") && id.length() > 4) {
             int number = getIntegerValue(id.substring(4));
-            clientId = new ClientId(0, Type.TEAM, number);
+            clientId = new ClientId(tmpSiteNum, Type.TEAM, number);
         } else if (Character.isDigit(id.charAt(0))) {
             int number = getIntegerValue(id);
-            clientId = new ClientId(0, Type.TEAM, number);
+            clientId = new ClientId(tmpSiteNum, Type.TEAM, number);
         } else {
             throw new SecurityException("No such account " + id);
         }
 
         log = new Log(clientId.toString());
-        StaticLog.setLog(log);
+        StaticLog.setLog(log);  // From this point forward any class can use StaticLog.
         info("");
         info(new VersionInfo().getSystemVersionInfo());
         info(" login(" + id + "," + password + ")");
@@ -196,9 +218,14 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         controller = new Controller(model);
         btoA = controller;
 
-        // new IniFile("pc2v9.ini");
+        if (IniFile.isFilePresent()){
+            // Only read and load .ini file if it is present.
+            new IniFile();
+        }
 
         port = Integer.parseInt(TransportManager.DEFAULT_PC2_PORT);
+        
+        model.setClientId(clientId);  
 
         if (clientId.getClientType().equals(Type.SERVER)) {
 
@@ -228,14 +255,17 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                 }
 
                 info("Contacting " + remoteHostName + ":" + remoteHostPort);
-                transportManager.connectToServer(remoteHostName, remoteHostPort);
+                remoteServerConnectionHandlerID = transportManager.connectToServer(remoteHostName, remoteHostPort);
+                
+                info ("Contacted using connection id "+remoteServerConnectionHandlerID);
 
-                // info("Sending login request to " + remoteHostName + " as " + clientId);
-                // sendLoginRequest(transportManager, clientId, password);
+                 info("Sending login request to " + remoteHostName + " as " + clientId);
+                 sendLoginRequest(transportManager, remoteServerConnectionHandlerID, clientId, password);
+                 
+                 transportManager.accecptConnections(port);
             } else {
                 info("Started Server Transport listening on " + port);
                 transportManager.accecptConnections(port);
-                model.setClientId(clientId);
             }
 
         } else {
@@ -259,12 +289,23 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             transportManager.connectToMyServer();
             info("Started Client Transport");
 
-            model.setClientId(clientId);
-
             sendLoginRequest(transportManager, clientId, password);
         }
 
         return model;
+    }
+
+    private static void sendLoginRequest(ITransportManager manager, ConnectionHandlerID connectionHandlerID, ClientId clientId, String password) {
+        try {
+            info("sendLoginRequest ConId start - sending from "+clientId);
+            ClientId serverClientId = new ClientId(0, Type.SERVER, 0);
+            Packet loginPacket = PacketFactory.createLogin(clientId, password, serverClientId);
+            manager.send(loginPacket, connectionHandlerID); 
+            info("sendLoginRequest ConId end - packet sent.");
+        } catch (TransportException e) {
+            // TODO log exception
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -276,11 +317,11 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      */
     private static void sendLoginRequest(ITransportManager manager, ClientId clientId, String password) {
         try {
-            info("sendLoginRequest start");
+            info("sendLoginRequest start - sending from "+clientId);
             ClientId serverClientId = new ClientId(0, Type.SERVER, 0);
             Packet loginPacket = PacketFactory.createLogin(clientId, password, serverClientId);
             manager.send(loginPacket);
-            info("sendLoginRequest end - sent packet");
+            info("sendLoginRequest end - packet sent.");
         } catch (TransportException e) {
             // TODO log exception
             e.printStackTrace();
@@ -480,7 +521,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
 
     public static void info(String s) {
-        log.info(s);
+        StaticLog.info(s);
         System.err.println(Thread.currentThread().getName() + " " + s);
     }
 
