@@ -2,6 +2,13 @@ package edu.csus.ecs.pc2.ui.server;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Vector;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -20,14 +27,18 @@ import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
+import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ILoginListener;
 import edu.csus.ecs.pc2.core.model.IModel;
 import edu.csus.ecs.pc2.core.model.ISiteListener;
+import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.LoginEvent;
+import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.IRunListener;
+import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.SiteEvent;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.IntegerDocument;
@@ -99,6 +110,14 @@ public class ServerView extends JFrame implements UIPlugin {
 
     private JButton generateSitesAccountButton = null;
 
+    private JPanel buttonPane = null;
+
+    private JButton viewReportButton = null;
+
+    private JTextField editorCommandTextField = null;
+
+    private JLabel editorCommandLabel = null;
+
     /**
      * This method initializes
      * 
@@ -140,7 +159,10 @@ public class ServerView extends JFrame implements UIPlugin {
     private void updateListBox(final String messageString) {
         Runnable messageRunnable = new Runnable() {
             public void run() {
-                runListModel.addElement(messageString);
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:MM:ss");
+                String dateString = simpleDateFormat.format(new Date());
+                
+                runListModel.insertElementAt(dateString + " " +messageString,0);
                 System.out.println("debug Box: " + messageString);
             }
         };
@@ -261,6 +283,7 @@ public class ServerView extends JFrame implements UIPlugin {
                     javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, null,
                     null));
             runPane.add(getRunScrollPane(), java.awt.BorderLayout.CENTER);
+            runPane.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
         }
         return runPane;
     }
@@ -597,5 +620,177 @@ public class ServerView extends JFrame implements UIPlugin {
             StaticLog.log("Exception logged ", e);
         }
     }
+    
+    /**
+     * Dump connection data
+     */
+    public String dumpContestData() {
+
+        try {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM.dd.SSS");
+            // "yyMMdd HHmmss.SSS");
+            String filename = "dump" + simpleDateFormat.format(new Date()) + ".log";
+            PrintWriter log = new PrintWriter(new FileOutputStream(filename, false), true);
+
+            log.println(new VersionInfo().getSystemName());
+            log.println("Build "+ new VersionInfo().getBuildNumber());
+            log.println(new VersionInfo().getSystemVersionInfo() );
+            log.println("Date: " + new Date());
+
+            log.println();
+            log.println("-- Accounts --");
+            for (ClientType.Type ctype : ClientType.Type.values()) {
+                if (model.getAccounts(ctype).size() > 0) {
+                    log.println("Accounts " + ctype.toString() + " there are " + model.getAccounts(ctype).size());
+                    Vector<Account> accounts = model.getAccounts(ctype);
+                    for (int i = 0; i < accounts.size(); i++) {
+                        log.println("   " + accounts.elementAt(i));
+                    }
+                }
+
+            }
+
+            // Sites
+            log.println();
+            log.println("-- " + model.getSites().length + " sites --");
+            for (Site site1 : model.getSites()) {
+                log.println("Site " + site1.getSiteNumber() + " " + site1.getDisplayName() + "/" + site1.getPassword());
+            }
+
+            // Problem
+            log.println();
+            log.println("-- " + model.getProblems().length + " problems --");
+            for (Problem problem : model.getProblems()) {
+                log.println("  Problem " + problem);
+            }
+
+            // Language
+            log.println();
+            log.println("-- " + model.getLanguages().length + " languages --");
+            for (Language language : model.getLanguages()) {
+                log.println("  Language " + language);
+            }
+
+            // Logins
+            log.println();
+            log.println("-- Logins -- ");
+            for (ClientType.Type ctype : ClientType.Type.values()) {
+                
+                Enumeration<ClientId> enumeration = model.getLoggedInClients(ctype);
+                if (model.getLoggedInClients(ctype).hasMoreElements()) {
+                    log.println("Logged in " + ctype.toString());
+                    while (enumeration.hasMoreElements()) {
+                        ClientId aClientId = (ClientId) enumeration.nextElement();
+                        log.println("   " + aClientId);
+                    }
+                }
+            }
+
+            log.println();
+            log.println("*end*");
+
+            log.close();
+            log = null;
+            
+            return filename;
+
+
+        } catch (Exception e) {
+            // TODO: log handle exception
+            // StaticLog.log("Exception logged ", e);
+            System.err.println("Exception " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return null;
+
+    }
+
+    /**
+     * This method initializes buttonPane	
+     * 	
+     * @return javax.swing.JPanel	
+     */
+    private JPanel getButtonPane() {
+        if (buttonPane == null) {
+            editorCommandLabel = new JLabel();
+            editorCommandLabel.setBounds(new java.awt.Rectangle(21,10,102,23));
+            editorCommandLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+            editorCommandLabel.setText("View Command");
+            buttonPane = new JPanel();
+            buttonPane.setLayout(null);
+            buttonPane.setPreferredSize(new java.awt.Dimension(45,45));
+            buttonPane.add(getViewReportButton(), null);
+            buttonPane.add(getEditorCommandTextField(), null);
+            buttonPane.add(editorCommandLabel, null);
+        }
+        return buttonPane;
+    }
+
+    /**
+     * This method initializes viewReportButton	
+     * 	
+     * @return javax.swing.JButton	
+     */
+    private JButton getViewReportButton() {
+        if (viewReportButton == null) {
+            viewReportButton = new JButton();
+            viewReportButton.setBounds(new java.awt.Rectangle(347,8,124,24));
+            viewReportButton.setText("View Dump");
+            viewReportButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    viewDumpFile();
+                }
+            });
+        }
+        return viewReportButton;
+    }
+
+    /**
+     * Generate and view dump file.
+     *
+     */
+    protected void viewDumpFile() {
+        String dumpFileName = dumpContestData();
+        viewFile (dumpFileName);
+    }
+
+    /**
+     * view the input file
+     * @param dumpFileName
+     */
+    protected void viewFile(String dumpFileName) {
+        String editorName = getEditorCommandTextField().getText();
+        String command = editorName + " " + dumpFileName;
+        try {
+            Runtime.getRuntime().exec(command);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "Unable to run command " + command + " " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * This method initializes editorCommandTextField	
+     * 	
+     * @return javax.swing.JTextField	
+     */
+    private JTextField getEditorCommandTextField() {
+        if (editorCommandTextField == null) {
+            editorCommandTextField = new JTextField();
+            editorCommandTextField.setBounds(new java.awt.Rectangle(144,10,182,21));
+            editorCommandTextField.setText("/windows/vi.bat");
+            
+            editorCommandTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyPressed(java.awt.event.KeyEvent e) {
+                    if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
+                        viewDumpFile();
+                    }
+                }
+            });
+        }
+        return editorCommandTextField;
+    }
+  
 
 } // @jve:decl-index=0:visual-constraint="10,10"
