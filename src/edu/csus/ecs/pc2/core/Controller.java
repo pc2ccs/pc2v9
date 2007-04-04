@@ -482,10 +482,6 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         
         // TODO Handle this better via new login code.
         info("Login Failed: " + message);
-        if (message.equals("No such account")) {
-            message = "(Accounts Generated ??) ERROR " +message ;
-        }
-        
         info("Login Failure");
         PacketFactory.dumpPacket(System.err, packet);
         
@@ -586,7 +582,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
     private void sendLoginSuccess(ClientId clientId, ConnectionHandlerID connectionHandlerID) {
         Packet packetToSend = PacketFactory.createLoginSuccess(model.getClientId(), clientId, model.getContestTime(), model
-                .getSiteNumber(), model.getLanguages(), model.getProblems(), model.getJudgements(), model.getSites());
+                .getSiteNumber(), model.getLanguages(), model.getProblems(), model.getJudgements(), model.getSites(), model.getRuns());
         sendToClient(packetToSend);
     }
 
@@ -644,13 +640,14 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      */
     public void connectionDropped() {
         // TODO code handle client dropped
-        info("connectionDropped: " + model.getTitle());
-
+        
         // Connection dropped, countdown and die.
         CountDownMessage countDownMessage = new CountDownMessage("Shutting down PC^2 in ", 10);
         if (model.getClientId() != null) {
-            countDownMessage.setTitle("Shutting down PC^2 " + model.getClientId().getClientType() + " " + model.getTitle());
+            info("connectionDropped: " + model.getClientId());
+            countDownMessage.setTitle("Shutting down PC^2 " + model.getClientId().getClientType()  + " " + model.getTitle());
         } else {
+            info("connectionDropped: <non-logged in client>");
             countDownMessage.setTitle("Shutting down PC^2 Client");
         }
         countDownMessage.setExitOnClose(true);

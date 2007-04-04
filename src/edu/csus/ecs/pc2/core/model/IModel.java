@@ -235,4 +235,6 @@ public interface IModel {
     void loginDenied(ClientId clientId, ConnectionHandlerID connectionHandlerID, String message);
 
     void initializeWithFakeData();
+
+    Run [] getRuns();
 }

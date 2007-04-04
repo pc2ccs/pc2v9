@@ -50,6 +50,8 @@ public final class PacketFactory {
     public static final String PASSWORD = "PASSWORD";
 
     public static final String JUDGEMENT_RECORD = "JUDGEMENT_RECORD";
+    
+    public static final String RUN_LIST = "RUN_LIST";
 
     public static final String RUN_FILES = "RUN_FILES";
 
@@ -349,8 +351,10 @@ public final class PacketFactory {
      * @param destination
      * @param runList
      */
-    public static Packet createRunList(ClientId source, ClientId destination, RunList runList) {
-        Packet packet = new Packet(Type.RUN_LIST, source, destination, runList);
+    public static Packet createRunList(ClientId source, ClientId destination, Run [] runs) {
+        Properties prop = new Properties();
+        prop.put(RUN_LIST, runs);
+        Packet packet = new Packet(Type.RUN_LIST, source, destination, prop);
         return packet;
     }
 
@@ -653,7 +657,7 @@ public final class PacketFactory {
      * @param judgements
      */
     public static Packet createLoginSuccess(ClientId source, ClientId destination, ContestTime inContestTime, int siteNumber,
-            Language[] languages, Problem[] problems, Judgement[] judgements, Site [] sites) {
+            Language[] languages, Problem[] problems, Judgement[] judgements, Site [] sites, Run [] runs) {
         Properties prop = new Properties();
         prop.put(SITE_NUMBER, new Integer(siteNumber));
         prop.put(PacketType.CONTEST_TIME, inContestTime);
@@ -662,6 +666,7 @@ public final class PacketFactory {
         prop.put(LANGUAGE_LIST, languages);
         prop.put(JUDGEMENT_LIST, judgements);
         prop.put(SITE_LIST, sites);
+        prop.put(RUN_LIST, runs);
 
         Packet packet = new Packet(Type.LOGIN_SUCCESS, source, destination, prop);
         return packet;

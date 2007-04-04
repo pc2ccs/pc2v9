@@ -72,9 +72,6 @@ public final class PacketHandler {
             
             // TODO Handle this better via new login code.
             info("Login Failed: " + message);
-            if (message.equals("No such account")) {
-                message = "(Accounts Generated ??) ERROR " +message ;
-            }
             model.loginDenied(packet.getDestinationId(), connectionHandlerID, message);
             
         } else if (packetType.equals(Type.RUN_NOTAVAILABLE)) {
@@ -114,6 +111,27 @@ public final class PacketHandler {
             exception.printStackTrace(System.err);
         }
 
+    }
+    
+    /**
+     * Unpack and add list of runs to model.
+     * @param packet
+     * @param model
+     */
+    private static void unpackAndAddList (Packet packet,  IModel model ){
+        
+        try {
+            Run runs[] = (Run[]) PacketFactory.getObjectValue(packet, PacketFactory.RUN_LIST);
+            if (runs != null) {
+                for (Run run : runs) {
+                    model.addRun(run);
+                }
+            }
+        } catch (Exception e) {
+            // TODO: log handle exception
+            e.printStackTrace();
+            StaticLog.log("Exception logged ", e);
+        }
     }
 
     /**
@@ -220,6 +238,8 @@ public final class PacketHandler {
             // TODO: log handle exception
             StaticLog.log("Exception logged ", e);
         }
+        
+        unpackAndAddList (packet, model);
         
         if (model.isLoggedIn()){
             controller.startMainUI(clientId);

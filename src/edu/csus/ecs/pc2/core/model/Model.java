@@ -310,7 +310,6 @@ public class Model implements IModel {
      * On Server, adds run to run list, increments run number.
      */
     public Run acceptRun (Run run, RunFiles runFiles) {
-        new Exception("debug AcceptRun ").printStackTrace();
         run.setElapsedMins(getContestTime().getElapsedMins());
         if (runFiles != null) {
             runFilesList.add(run, runFiles);
@@ -415,9 +414,10 @@ public class Model implements IModel {
     }
 
     public String getTitle() {
-        String titleCase = localClientId.getClientType().toString();
+        ClientId id = getClientId();
+        String titleCase = id.getClientType().toString();
         titleCase = titleCase.charAt(0) + titleCase.substring(1);
-        return titleCase + " " + localClientId.getClientNumber() + " (Site " + localClientId.getSiteNumber() + ")";
+        return titleCase + " " + id.getClientNumber() + " (Site " + id.getSiteNumber() + ")";
     }
 
     public void addProblemListener(IProblemListener problemListener) {
@@ -559,6 +559,10 @@ public class Model implements IModel {
 
     public static void info(String s) {
         System.err.println(Thread.currentThread().getName() + " " + s);
+    }
+
+    public Run[] getRuns() {
+        return runList.getList();
     }
 
 }
