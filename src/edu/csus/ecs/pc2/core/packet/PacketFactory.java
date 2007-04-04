@@ -349,7 +349,7 @@ public final class PacketFactory {
      * 
      * @param source
      * @param destination
-     * @param runList
+     * @param runs
      */
     public static Packet createRunList(ClientId source, ClientId destination, Run [] runs) {
         Properties prop = new Properties();
