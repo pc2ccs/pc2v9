@@ -287,11 +287,13 @@ public class LoginFrame extends JFrame implements UIPlugin {
             setStatusMessage("Please enter a login");
         } else {
             try {
+                setStatusMessage("Logging in...");
+                FrameUtilities.waitCursor(this);
                 controller.login (getLoginName(), getPassword());
                 
             } catch (Exception e) {
                 // TODO: log handle exception
-                showMessageToUser(e.getMessage());
+                setStatusMessage(e.getMessage());
                 System.err.println("Exception in login "+e.getMessage());
                 e.printStackTrace(System.err);
                 
@@ -401,10 +403,6 @@ public class LoginFrame extends JFrame implements UIPlugin {
 
     public String getPluginTitle() {
         return "Login";
-    }
-
-    public void showMessageToUser(String message) {
-        setStatusMessage (message);
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
