@@ -226,7 +226,7 @@ public class JudgeView extends JFrame implements UIPlugin {
         }
     }
     
-    public void setModelController(IModel inModel, IController inController) {
+    public void setModelAndController(IModel inModel, IController inController) {
         this.model = inModel;
         this.controller = inController;
         

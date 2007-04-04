@@ -509,7 +509,7 @@ public class ServerView extends JFrame implements UIPlugin {
         return centerPane2;
     }
 
-    public void setModelController(IModel inModel, IController inController) {
+    public void setModelAndController(IModel inModel, IController inController) {
         this.model = inModel;
         this.serverController = inController;
         setTitle("PC^2 Server (Site "+model.getSiteNumber()+")");

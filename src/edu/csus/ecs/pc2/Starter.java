@@ -117,17 +117,17 @@ public class Starter implements Runnable {
             if (showDefaultUI) {
                 if (model.getFrameName().equals("ServerView")) {
                     ServerView serverView = new ServerView();
-                    serverView.setModelController(model, controller);
+                    serverView.setModelAndController(model, controller);
                     
                     loginFrame.setVisible(false); // hide LoginFrame
                 } else if (model.getFrameName().equals("TeamView")) {
                     TeamView teamView = new TeamView();
-                    teamView.setModelController(model, controller);
+                    teamView.setModelAndController(model, controller);
                     
                     loginFrame.setVisible(false); // hide LoginFrame
                 } else if (model.getFrameName().equals("JudgeView")) {
                     JudgeView judgeView = new JudgeView();
-                    judgeView.setModelController(model, controller);
+                    judgeView.setModelAndController(model, controller);
                     
                     loginFrame.setVisible(false); // hide LoginFrame
                 } else {
