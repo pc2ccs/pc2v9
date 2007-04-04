@@ -7,6 +7,8 @@ package edu.csus.ecs.pc2.core.model;
  * @author pc2@ecs.csus.edu
  */
 
+// TODO should the get methods return clones or the references to the fields ??
+
 // $HeadURL$
 public class RunEvent {
 
@@ -28,10 +30,25 @@ public class RunEvent {
          */
         ADDED,
         /**
-         * A new run submission.
+         * An updated run submission.
          */
         UPDATED,
-
+        /**
+         * A checked out run
+         */
+        CHECKEDOUT_RUN,
+        /**
+         * A checked out rejudged run
+         */
+        CHECKEDOUT_REJUDGE_RUN,
+        /**
+         * A run has not been 
+         */
+        RUN_AVIALABLE,
+        /**
+         * Held Run
+         */
+        RUN_HELD,
     }
 
     private Action action;
@@ -39,6 +56,13 @@ public class RunEvent {
     private Run run;
 
     private RunFiles runFiles;
+    
+    /**
+     * Who this run is sent to.
+     */
+    private ClientId sentToClientId;
+    
+    private String message;
 
     public RunEvent(Action action, Run run, RunFiles runFiles) {
         super();
@@ -55,15 +79,9 @@ public class RunEvent {
         return run;
     }
 
-    // TODO this should not be returning a reference to a submitted run object, it needs to return an interface or read only version
-    // of the data (clone?)
-
     public void setRun(Run run) {
         this.run = run;
     }
-
-    // TODO this should not be returning a reference to a submitted run object, it needs to return an interface or read only version
-    // of the data (clone?)
 
     public RunFiles getRunFiles() {
         return runFiles;
@@ -75,6 +93,22 @@ public class RunEvent {
 
     public void setAction(Action action) {
         this.action = action;
+    }
+
+    public ClientId getSentToClientId() {
+        return sentToClientId;
+    }
+
+    public void setSentToClientId(ClientId sentToClientId) {
+        this.sentToClientId = sentToClientId;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 
 }

@@ -16,10 +16,12 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
+import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
@@ -910,6 +912,28 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             e.printStackTrace();
         }
 
+    }
+    
+    private ClientId getServerClientId(){
+        return new ClientId (model.getSiteNumber(), Type.SERVER, 0);
+    }
+
+    public void checkOutRun(Run run) {
+        ClientId clientId = model.getClientId();
+        Packet packet = PacketFactory.createRunRequest(clientId,getServerClientId(),run.getElementId(), clientId);
+        sendToServer(packet);
+    }
+
+    public void submitRunJudgement(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles) {
+        ClientId clientId = model.getClientId();
+        Packet packet = PacketFactory.createRunJudgement(clientId,getServerClientId(), run, judgementRecord, runResultFiles);
+        sendToServer(packet);
+    }
+
+    public void cancelRun(Run run) {
+        ClientId clientId = model.getClientId();
+        Packet packet = PacketFactory.createUnCheckoutRun(clientId, getServerClientId(), run);
+        sendToServer(packet);
     }
 
 }

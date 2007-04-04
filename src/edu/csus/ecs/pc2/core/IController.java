@@ -2,8 +2,11 @@ package edu.csus.ecs.pc2.core;
 
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ContestTime;
+import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.packet.Packet;
 
 /**
@@ -39,5 +42,24 @@ public interface IController {
     void login(String loginName, String password);
 
     void startMainUI(ClientId clientId);
+    
+    /**
+     * Request a run from the server.
+     * @param run
+     */
+    void checkOutRun (Run run);
+    
+    /**
+     * Submit judgement from run to judge.
+     * @param run
+     * @param judgementRecord
+     */
+    void submitRunJudgement (Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles);
+    
+    /**
+     * Cancel selected run.
+     * @param run
+     */
+    void cancelRun (Run run);
 
 }

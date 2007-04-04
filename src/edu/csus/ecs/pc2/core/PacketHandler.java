@@ -77,6 +77,27 @@ public final class PacketHandler {
             }
             model.loginDenied(packet.getDestinationId(), connectionHandlerID, message);
             
+        } else if (packetType.equals(Type.RUN_NOTAVAILABLE)) {
+            // Run not available
+            // TODO code handle RUN_NOTAVAILABLE
+            
+            info(" Unhandled packet RUN_NOTAVAILABLE ");
+            
+        } else if (packetType.equals(Type.RUN_JUDGEMENT)) {
+            // Judgement from judge.
+            // TODO code handle RUN_JUDGEMENT
+            
+            info(" Unhandled packet RUN_JUDGEMENT ");
+        } else if (packetType.equals(Type.RUN_UNCHECKOUT)) {
+            // Cancel run
+            // TODO code handle RUN_UNCHECKOUT
+            info(" Unhandled packet RUN_UNCHECKOUT ");
+            
+        } else if (packetType.equals(Type.RUN_REQUEST)) {
+            // Request Run
+            // TODO code handle RUN_UNCHECKOUT
+            info(" Unhandled packet RUN_REQUEST ");
+            
         } else if (packetType.equals(Type.LOGIN_SUCCESS)) {
             if (! model.isLoggedIn()){
                 info(" handlePacket LOGIN_SUCCESS before ");
@@ -214,6 +235,6 @@ public final class PacketHandler {
      * @param s
      */
     public static void info(String s) {
-        System.err.println(Thread.currentThread().getName() + " " + s);
+        StaticLog.info(s) ;
     }
 }
