@@ -17,6 +17,7 @@ import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.core.model.IModel;
 import edu.csus.ecs.pc2.core.model.IRunListener;
+import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.UIPlugin;
@@ -243,6 +244,21 @@ public class JudgeView extends JFrame implements UIPlugin {
 //        model.addSiteListener(new SiteListenerImplementation());
         
         setFrameTitle(model.getContestTime().isRunning());
+        
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                populateGUI();
+        }});
+    }
+
+    private void populateGUI() {
+        
+        for (Run run : model.getRuns())  {
+            updateListBox("Existing run " + run);
+        }
+        
+        updateListBox("Contest Time elapsed: "+model.getContestTime().getElapsedTimeStr());
+        
     }
 
     public String getPluginTitle() {
