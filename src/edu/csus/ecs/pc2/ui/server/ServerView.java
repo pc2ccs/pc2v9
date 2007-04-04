@@ -132,6 +132,7 @@ public class ServerView extends JFrame implements UIPlugin {
         int result = FrameUtilities.yesNoCancelDialog("Are you sure you want to exit PC^2?", "Exit PC^2");
 
         if (result == JOptionPane.YES_OPTION) {
+            System.err.println("Server halting");
             System.exit(0);
         }
     }
@@ -140,7 +141,7 @@ public class ServerView extends JFrame implements UIPlugin {
         Runnable messageRunnable = new Runnable() {
             public void run() {
                 runListModel.addElement(messageString);
-                System.out.println("Box: " + messageString);
+                System.out.println("debug Box: " + messageString);
             }
         };
         SwingUtilities.invokeLater(messageRunnable);
