@@ -60,8 +60,6 @@ public class Model implements IModel {
 
     private SiteList siteList = new SiteList();
 
-    private int runNumber = 0;
-
     private int siteNumber = 1;
 
     /**
@@ -312,13 +310,14 @@ public class Model implements IModel {
      * On Server, adds run to run list, increments run number.
      */
     public Run acceptRun (Run run, RunFiles runFiles) {
-        run.setNumber(++runNumber);
+        new Exception("debug AcceptRun ").printStackTrace();
         run.setElapsedMins(getContestTime().getElapsedMins());
         if (runFiles != null) {
             runFilesList.add(run, runFiles);
         }
-        addRun(run);
-        return run;
+        Run newRun = runList.addNewRun(run); // this set the run number.
+        addRun(newRun);
+        return newRun;
     }
     
     /**

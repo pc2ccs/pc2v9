@@ -82,19 +82,28 @@ public class RunList implements Serializable {
     }
 
     /**
-     * Add run into list.
+     * Add new run, increment run number.
      * 
      * @param run
      * @return the run now with the run number.
      */
-    public Run add(Run run) {
+    public Run addNewRun(Run run) {
         run.setNumber(nextRunNumber++);
+        add(run);
+        return run;
+    }
+    
+    /**
+     * Add a run into the run list, no changes.
+     * @param run
+     */
+    public void add (Run run) {
         runHash.put(getRunKey(run), run);
         if (saveToDisk) {
             writeToDisk();
         }
-        return run;
     }
+    
 
     /**
      * Get a run from the list.
@@ -170,12 +179,20 @@ public class RunList implements Serializable {
 
     }
 
+    /**
+     * Update run, increment version number.
+     * @param run
+     */
     public void updateRun(Run run) {
         run.getElementId().incrementVersionNumber();
         runHash.put(getRunKey(run), run);
         writeToDisk();
     }
 
+    /**
+     * Update run, increment version number add judgement.
+     * @param run
+     */
     public void updateRun(Run run, JudgementRecord judgement) {
         Run theRun = runHash.get(getRunKey(run));
         theRun.getElementId().incrementVersionNumber();
