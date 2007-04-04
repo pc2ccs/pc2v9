@@ -171,7 +171,7 @@ public class IniFile {
      * 
      * @see #getINIFilename()
      * @see #setIniFile(String)
-     * @return
+     * @return true if it file is present; false otherwise.
      */
     public static boolean isFilePresent() {
         File iniFilefile = new File(getINIFilename());
