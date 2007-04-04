@@ -1,15 +1,19 @@
 package edu.csus.ecs.pc2.core;
 
+import edu.csus.ecs.pc2.core.list.RunList;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IModel;
 import edu.csus.ecs.pc2.core.model.Judgement;
+import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
+import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.Site;
+import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.packet.PacketFactory;
 import edu.csus.ecs.pc2.core.packet.PacketType.Type;
@@ -18,7 +22,7 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 /**
  * Process all incoming packets.
  * 
- * Process packets. In {@link #handlePacket(IController, IModel, Packet) handlePacket} a packet is unpacked, model is updated, and
+ * Process packets. In {@link #handlePacket(IController, IModel, Packet, ConnectionHandlerID) handlePacket} a packet is unpacked, model is updated, and
  * controller used to send packets as needed.
  * 
  * @author pc2@ecs.csus.edu
@@ -44,6 +48,8 @@ public final class PacketHandler {
         Type packetType = packet.getType();
 
         info("handlePacket " + packet);
+        
+        ClientId fromId = packet.getSourceId();
 
         if (packetType.equals(Type.MESSAGE)) {
             PacketFactory.dumpPacket(System.err, packet);
@@ -58,7 +64,7 @@ public final class PacketHandler {
             Run run = model.acceptRun(submittedRun, runFiles);
 
             // Send to team
-            Packet confirmPacket = PacketFactory.createRunSubmissionConfirm(model.getClientId(), packet.getSourceId(), run);
+            Packet confirmPacket = PacketFactory.createRunSubmissionConfirm(model.getClientId(), fromId, run);
             controller.sendToClient(confirmPacket);
 
             // Send to all other interested parties.
@@ -75,25 +81,32 @@ public final class PacketHandler {
             model.loginDenied(packet.getDestinationId(), connectionHandlerID, message);
             
         } else if (packetType.equals(Type.RUN_NOTAVAILABLE)) {
-            // Run not available
-            // TODO code handle RUN_NOTAVAILABLE
-            
-            info(" Unhandled packet RUN_NOTAVAILABLE ");
+            // Run not available from server
+            Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
+            model.runNotAvailable(run);
             
         } else if (packetType.equals(Type.RUN_JUDGEMENT)) {
-            // Judgement from judge.
-            // TODO code handle RUN_JUDGEMENT
+            // Judgement from judge to server
+            // TODO security code insure that this judge/admin can make this change
+            Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
+            JudgementRecord judgementRecord = (JudgementRecord) PacketFactory.getObjectValue(packet, PacketFactory.JUDGEMENT_RECORD);
+            RunResultFiles runResultFiles = (RunResultFiles) PacketFactory.getObjectValue(packet, PacketFactory.RUN_RESULTS_FILE);
+            
+            model.addRunJudgement(run, judgementRecord, runResultFiles, fromId);
+            
+            // TODO code send this update run to all others.
             
             info(" Unhandled packet RUN_JUDGEMENT ");
+            
         } else if (packetType.equals(Type.RUN_UNCHECKOUT)) {
-            // Cancel run
+            // Cancel run from requestor to server
             // TODO code handle RUN_UNCHECKOUT
             info(" Unhandled packet RUN_UNCHECKOUT ");
             
         } else if (packetType.equals(Type.RUN_REQUEST)) {
-            // Request Run
-            // TODO code handle RUN_UNCHECKOUT
-            info(" Unhandled packet RUN_REQUEST ");
+            // Request Run from requestor to server
+            Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
+            requestRun (run, model, controller, fromId);
             
         } else if (packetType.equals(Type.LOGIN_SUCCESS)) {
             if (! model.isLoggedIn()){
@@ -113,8 +126,51 @@ public final class PacketHandler {
 
     }
     
+    
+    /**
+     * Checkout run.
+     * 
+     * Either checks out run (marks as {@link edu.csus.ecs.pc2.core.model.Run.RunStates#BEING_JUDGED BEING_JUDGED})
+     * and send to everyone, or send a {@link edu.csus.ecs.pc2.core.packet.PacketType.Type#RUN_NOTAVAILABLE RUN_NOTAVAILABLE}.
+     * 
+     * @param run
+     * @param fromId 
+     * @param model 
+     * @param controller 
+     */
+    private static void requestRun(Run run, IModel model, IController controller, ClientId fromId) {
+
+        Run theRun = model.getRun(run.getElementId());
+
+        if (run == null) {
+            Packet packet = PacketFactory.createRunNotAvailable(model.getClientId(), fromId, run);
+            controller.sendToClient(packet);
+        } else if (run.getStatus() == RunStates.NEW) {
+            model.updateRun(theRun, RunStates.BEING_JUDGED, fromId);
+
+            theRun = model.getRun(run.getElementId());
+            RunFiles runFiles = model.getRunFiles(run);
+
+            Packet checkOutPacket = PacketFactory.createCheckedOutRun(model.getClientId(), fromId, theRun, runFiles, fromId);
+            controller.sendToClient(checkOutPacket);
+
+            // Send to all other interested parties.
+            controller.sendToAdministrators(checkOutPacket);
+            controller.sendToJudges(checkOutPacket);
+            controller.sendToScoreboards(checkOutPacket);
+            controller.sendToServers(checkOutPacket);
+
+        } else {
+
+            Packet notAvailableRunPacket = PacketFactory.createRunNotAvailable(model.getClientId(), fromId, theRun);
+            controller.sendToClient(notAvailableRunPacket);
+        }
+
+    }
+
     /**
      * Unpack and add list of runs to model.
+     * 
      * @param packet
      * @param model
      */

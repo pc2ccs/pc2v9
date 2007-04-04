@@ -169,7 +169,7 @@ public final class PacketType implements Serializable {
         RUN_REJUDGE_CHECKOUT,
 
         /**
-         * Run Request denied, run not available for checkout.
+         * Could not get run, from server to requestor.
          * <P>
          * When a judge requests a run (RUN_REQUEST) and the run is not available, this packet is sent to the judge.<br>
          * 

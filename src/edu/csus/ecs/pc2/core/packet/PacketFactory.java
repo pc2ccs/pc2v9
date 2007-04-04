@@ -337,7 +337,7 @@ public final class PacketFactory {
      * @param destination
      * @param run
      */
-    public static Packet runNotAvailable(ClientId source, ClientId destination, Run run) {
+    public static Packet createRunNotAvailable(ClientId source, ClientId destination, Run run) {
         Properties prop = new Properties();
         prop.put(RUN, run);
         Packet packet = new Packet(Type.RUN_NOTAVAILABLE, source, destination, prop);

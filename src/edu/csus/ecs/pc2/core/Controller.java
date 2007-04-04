@@ -243,7 +243,6 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      *            the login name.
      * @param password
      *            the password for the id.
-     * @return model (contest data) if login successful
      * @throws Exception
      *             if there is a problem contacting server or logging in.
      */
@@ -714,7 +713,6 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     /**
      * Client has successfully logged in, show them new UI.
      * 
-     * @param uiplugin login or previous UI.
      * @param clientId new client id
      */
     public void startMainUI (ClientId clientId) {
@@ -915,18 +913,27 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         return new ClientId (model.getSiteNumber(), Type.SERVER, 0);
     }
 
+    /**
+     * Send checkout run request to server.
+     */
     public void checkOutRun(Run run) {
         ClientId clientId = model.getClientId();
         Packet packet = PacketFactory.createRunRequest(clientId,getServerClientId(),run.getElementId(), clientId);
         sendToServer(packet);
     }
 
+    /**
+     * Send run judgement to server.
+     */
     public void submitRunJudgement(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles) {
         ClientId clientId = model.getClientId();
         Packet packet = PacketFactory.createRunJudgement(clientId,getServerClientId(), run, judgementRecord, runResultFiles);
         sendToServer(packet);
     }
 
+    /**
+     * Send cancel run to server.
+     */
     public void cancelRun(Run run) {
         ClientId clientId = model.getClientId();
         Packet packet = PacketFactory.createUnCheckoutRun(clientId, getServerClientId(), run);

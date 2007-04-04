@@ -4,6 +4,7 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
 /**
@@ -47,15 +48,15 @@ public interface IModel {
      * @return Submitted Run with id and timestamps
      */
     Run acceptRun(Run submittedRun, RunFiles runFiles);
-    
+
     /**
      * Add a run into the runList.
      * 
-     * This just adds the run into the list, unlike acceptRun,
-     * this does not increment the run.
+     * This just adds the run into the list, unlike acceptRun, this does not increment the run.
+     * 
      * @param run
      */
-    void addRun (Run run);
+    void addRun(Run run);
 
     /**
      * Add new accounts.
@@ -200,8 +201,6 @@ public interface IModel {
 
     /**
      * Has this module been logged in, loaded with data, authenticated.
-     * 
-     * @return
      */
     boolean isLoggedIn();
 
@@ -236,5 +235,39 @@ public interface IModel {
 
     void initializeWithFakeData();
 
-    Run [] getRuns();
+    /**
+     * Fetch all runs.
+     */
+    Run[] getRuns();
+
+    void runUpdated (Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles, ClientId whoUpdatedRun);
+    
+    /**
+     * Add a run not available, notify listeners.
+     * @param run
+     */
+    void runNotAvailable (Run run);
+
+    /**
+     * Update the run.
+     * @param run
+     * @param newState
+     * @param whoChangedRun
+     */
+    void updateRun(Run run, RunStates newState, ClientId whoChangedRun);
+
+    /**
+     * Get submitted files for input run.
+     * @param run
+     */
+    RunFiles getRunFiles(Run run);
+
+    /**
+     * Add a run judgement.
+     * @param run
+     * @param judgementRecord
+     * @param runResultFiles
+     * @param judgeId
+     */
+    void addRunJudgement(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles, ClientId judgeId);
 }

@@ -39,8 +39,17 @@ public interface IController {
 
     void start(String[] stringArray);
 
+    /**
+     * Login to server.
+     * @param loginName
+     * @param password
+     */
     void login(String loginName, String password);
 
+    /**
+     * Start the UI for the input client.
+     * @param clientId
+     */
     void startMainUI(ClientId clientId);
     
     /**

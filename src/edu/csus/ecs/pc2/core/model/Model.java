@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.core.model;
 
 import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.list.AccountList;
@@ -17,6 +18,7 @@ import edu.csus.ecs.pc2.core.list.RunList;
 import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
 /**
@@ -45,6 +47,11 @@ public class Model implements IModel {
     private Vector<IJudgementListener> judgementListenerList = new Vector<IJudgementListener>();
 
     private Vector<ISiteListener> siteListenerList = new Vector<ISiteListener>();
+    
+    /**
+     * List of who checked a run out.
+     */
+    private Hashtable<ElementId, ClientId> runCheckOutList = new Hashtable<ElementId, ClientId>(200);
 
     private AccountList accountList = new AccountList();
 
@@ -563,6 +570,52 @@ public class Model implements IModel {
 
     public Run[] getRuns() {
         return runList.getList();
+    }
+
+    public void runUpdated (Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles, ClientId whoUpdatedRun) {
+        // TODO handle run RunResultsFiles
+        runList.updateRun(run, judgementRecord);
+        Run newRun = runList.get(run.getElementId());
+        RunEvent runEvent = new RunEvent(RunEvent.Action.UPDATED, newRun, null);
+        runEvent.setWhoModifiedRun(localClientId);
+        fireRunListener(runEvent);
+    }
+
+    public void runNotAvailable(Run run) {
+        RunEvent runEvent = new RunEvent(RunEvent.Action.RUN_NOT_AVIALABLE, run, null);
+        fireRunListener(runEvent);
+    }
+
+    public void updateRun(Run run, RunStates newState, ClientId whoChangedRun) {
+        runList.updateRun(run,newState);
+        runCheckOutList.put(run.getElementId(), whoChangedRun);
+        Run newRun = runList.get(run.getElementId());
+        RunEvent runEvent = new RunEvent(RunEvent.Action.UPDATED, newRun, null);
+        runEvent.setWhoModifiedRun(whoChangedRun);
+        fireRunListener(runEvent);
+    }
+
+    public RunFiles getRunFiles(Run run) {
+        return runFilesList.getRunFiles(run);
+    }
+
+    public void addRunJudgement(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles, ClientId whoJudgedItId) {
+        
+        Run theRun = runList.get(run);
+        ClientId whoCheckedOut = runCheckOutList.get(run.getElementId());
+        
+        if (whoCheckedOut == null || whoCheckedOut.equals(whoJudgedItId)){
+            // TODO security code, handle this problem.
+            System.err.println("Security Warning "+run+" not checked out by "+whoJudgedItId);
+        }
+        
+        runList.updateRun(theRun, judgementRecord);
+        runCheckOutList.remove(whoCheckedOut);
+        theRun = runList.get(run);
+        
+        RunEvent runEvent = new RunEvent(RunEvent.Action.UPDATED, theRun, null);
+        fireRunListener(runEvent);
+        
     }
 
 }

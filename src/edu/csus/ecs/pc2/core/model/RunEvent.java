@@ -34,7 +34,7 @@ public class RunEvent {
          */
         UPDATED,
         /**
-         * A checked out run
+         * The run from the server to be judged.
          */
         CHECKEDOUT_RUN,
         /**
@@ -42,13 +42,21 @@ public class RunEvent {
          */
         CHECKEDOUT_REJUDGE_RUN,
         /**
-         * A run has not been 
+         * A run is newly available.
+         * 
+         * Usually triggered by a cancel run.
          */
         RUN_AVIALABLE,
         /**
          * Held Run
          */
-        RUN_HELD,
+        RUN_HELD, 
+        /**
+         * Run not available.
+         * 
+         * Send to a judge in response to a {@link #CHECKEDOUT_REJUDGE_RUN} or {@link #CHECKEDOUT_RUN}
+         */
+        RUN_NOT_AVIALABLE,
     }
 
     private Action action;
@@ -62,6 +70,11 @@ public class RunEvent {
      */
     private ClientId sentToClientId;
     
+    /**
+     * 
+     */
+    private ClientId whoModifiedRun;
+    
     private String message;
 
     public RunEvent(Action action, Run run, RunFiles runFiles) {
@@ -71,6 +84,7 @@ public class RunEvent {
         this.runFiles = runFiles;
     }
 
+    
     public Action getAction() {
         return action;
     }
@@ -109,6 +123,16 @@ public class RunEvent {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+
+    public ClientId getWhoModifiedRun() {
+        return whoModifiedRun;
+    }
+
+
+    public void setWhoModifiedRun(ClientId whoModifiedRun) {
+        this.whoModifiedRun = whoModifiedRun;
     }
 
 }
