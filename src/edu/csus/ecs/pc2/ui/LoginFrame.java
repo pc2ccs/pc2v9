@@ -169,6 +169,7 @@ public class LoginFrame extends JFrame implements UIPlugin {
             messageLabel = new JLabel();
             messageLabel.setForeground(Color.red);
             messageLabel.setText("");
+            messageLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 14));
             messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
             GridBagConstraints gridBagConstraints6 = new GridBagConstraints();
             gridBagConstraints6.insets = new Insets(0, 24, 5, 20);
@@ -345,9 +346,11 @@ public class LoginFrame extends JFrame implements UIPlugin {
         Runnable messageRunnable = new Runnable() {
             public void run() {
                 messageLabel.setText(messageString);
+       
             }
         };
         SwingUtilities.invokeLater(messageRunnable);
+        FrameUtilities.regularCursor(this);
     }
 
     /**
