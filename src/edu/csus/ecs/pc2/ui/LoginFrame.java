@@ -7,6 +7,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.KeyEvent;
 
+import javax.net.ssl.SSLEngineResult.Status;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -18,6 +19,10 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.VersionInfo;
+import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.model.ILoginListener;
+import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.LoginEvent;
 
 /**
  * Login frame for all clients.
@@ -25,12 +30,16 @@ import edu.csus.ecs.pc2.VersionInfo;
  * @author pc2@ecs.csus.edu
  */
 // $HeadURL$
-public class LoginFrame extends JFrame {
+public class LoginFrame extends JFrame implements UIPlugin {
 
     /**
      * 
      */
     private static final long serialVersionUID = -6389607881992853161L;
+    
+    private IModel model;
+    
+    private IController controller;
 
     private JPanel centerPane = null;
 
@@ -51,8 +60,6 @@ public class LoginFrame extends JFrame {
     private JButton exitButton = null;
 
     private JLabel messageLabel = null;
-
-    private Runnable starterRunnable;
 
     private JLabel mainTitleBottomLabel = null;
 
@@ -262,6 +269,7 @@ public class LoginFrame extends JFrame {
             loginButton.setText("Login");
             loginButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
+                    messageLabel.setText("Logging in");
                     attemptToLogin();
                 }
             });
@@ -269,13 +277,25 @@ public class LoginFrame extends JFrame {
         return loginButton;
     }
 
+    /**
+     * User hit ok, attempt to login.
+     */
     protected void attemptToLogin() {
 
         setStatusMessage("");
-        if (getLogin() == null || getLogin().length() < 1) {
+        if (getLoginName() == null || getLoginName().length() < 1) {
             setStatusMessage("Please enter a login");
         } else {
-            starterRunnable.run();
+            try {
+                controller.login (getLoginName(), getPassword());
+                
+            } catch (Exception e) {
+                // TODO: log handle exception
+                showMessageToUser(e.getMessage());
+                System.err.println("Exception in login "+e.getMessage());
+                e.printStackTrace(System.err);
+                
+            }
         }
     }
 
@@ -312,10 +332,6 @@ public class LoginFrame extends JFrame {
         new LoginFrame().setVisible(true);
     }
 
-    public void setRunnable(Runnable runnable) {
-        this.starterRunnable = runnable;
-    }
-
     /**
      * Display a message for the user.
      * 
@@ -337,7 +353,7 @@ public class LoginFrame extends JFrame {
      * 
      * @return the login name
      */
-    public String getLogin() {
+    private String getLoginName() {
         return loginTextField.getText();
     }
 
@@ -346,8 +362,49 @@ public class LoginFrame extends JFrame {
      * 
      * @return the password
      */
-    public String getPassword() {
+    private String getPassword() {
         return new String(passwordTextField.getPassword());
+    }
+    
+    
+    /**
+     * A login listener 
+     * @author pc2@ecs.csus.edu
+     *
+     */
+    public class LoginListenerImplementation implements ILoginListener {
+
+        public void loginAdded(LoginEvent event) {
+            // TODO log this.
+            System.err.println("Login " + event.getAction() + " " + event.getClientId());
+        }
+
+        public void loginRemoved(LoginEvent event) {
+            // TODO log this.
+            System.err.println("Login " + event.getAction() + " " + event.getClientId());
+        }
+
+        public void loginDenied(LoginEvent event) {
+            setStatusMessage(event.getMessage());
+        }
+    }
+
+
+    public void setModelAndController(IModel model, IController controller) {
+        this.model = model;
+        this.controller = controller;
+        
+        model.addLoginListener(new LoginListenerImplementation());
+        
+        setVisible(true);
+    }
+
+    public String getPluginTitle() {
+        return "Login";
+    }
+
+    public void showMessageToUser(String message) {
+        setStatusMessage (message);
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

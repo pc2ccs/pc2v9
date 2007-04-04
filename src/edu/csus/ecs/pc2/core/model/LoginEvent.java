@@ -29,6 +29,11 @@ public class LoginEvent {
          * A new client login.
          */
         NEW_LOGIN,
+        
+        /**
+         *  A client was not allowed to login
+         */
+        LOGIN_DENIED,
     }
 
     private Action action = Action.NEW_LOGIN;
@@ -36,18 +41,22 @@ public class LoginEvent {
     private ClientId clientId;
     
     private ConnectionHandlerID connectionHandlerID;
+    
+    /**
+     * Message that gives more description
+     */
+    private String message;
 
     public LoginEvent(Action action, ClientId clientId, ConnectionHandlerID connectionHandlerID) {
+        this(action,clientId,connectionHandlerID,null);
+    }
+
+    public LoginEvent(Action action, ClientId clientId, ConnectionHandlerID connectionHandlerID, String message) {
         super();
         this.action = action;
         this.clientId = clientId;
         this.connectionHandlerID = connectionHandlerID;
-    }
-
-    public LoginEvent(ClientId clientId, ConnectionHandlerID connectionHandlerID) {
-        super();
-        this.clientId = clientId;
-        this.connectionHandlerID = connectionHandlerID;
+        this.message = message;
     }
 
     public Action getAction() {
@@ -72,6 +81,14 @@ public class LoginEvent {
 
     public void setConnectionHandlerID(ConnectionHandlerID connectionHandlerID) {
         this.connectionHandlerID = connectionHandlerID;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 
 

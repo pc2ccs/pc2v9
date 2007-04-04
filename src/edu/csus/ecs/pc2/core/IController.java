@@ -24,8 +24,6 @@ public interface IController {
 
     void sendToClient(Packet confirmPacket);
 
-    void setClientId(ClientId clientId);
-
     void sendToServers(Packet packet);
 
     void sendToJudges(Packet packet);
@@ -35,5 +33,11 @@ public interface IController {
     void sendToScoreboards(Packet packet);
 
     void sendToTeams(Packet packet);
+
+    void start(String[] stringArray);
+
+    void login(String loginName, String password);
+
+    void startMainUI(ClientId clientId);
 
 }

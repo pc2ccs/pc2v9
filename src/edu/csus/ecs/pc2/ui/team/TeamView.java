@@ -104,7 +104,6 @@ public class TeamView extends JFrame implements UIPlugin {
         this.setSize(new java.awt.Dimension(490, 368));
         this.setContentPane(getMainViewPane());
         this.setTitle("The TeamView");
-        setVisible(true);
         FrameUtilities.waitCursor(this);
         this.addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent e) {
@@ -112,8 +111,6 @@ public class TeamView extends JFrame implements UIPlugin {
             }
         });
 
-   
-        populateGUI();
         FrameUtilities.centerFrame(this);
         setTitle("PC^2 Team - Not Logged In ");
     }
@@ -129,13 +126,22 @@ public class TeamView extends JFrame implements UIPlugin {
     private void populateGUI() {
 
         getProblemComboBox().removeAllItems();
-        Problem problem = new Problem("None Selected");
-        getProblemComboBox().addItem(problem);
+        Problem problemN = new Problem("None Selected");
+        getProblemComboBox().addItem(problemN);
+        
+        for (Problem problem : model.getProblems()){
+            getProblemComboBox().addItem(problem);
+        }
 
         getLanguageComboBox().removeAllItems();
-        Language language = new Language("None Selected");
-        getLanguageComboBox().addItem(language);
-
+        Language languageN = new Language("None Selected");
+        getLanguageComboBox().addItem(languageN);
+        
+        for (Language language : model.getLanguages()){
+            getLanguageComboBox().addItem(language);
+        }
+        
+        setButtonsActive(model.getContestTime().isContestRunning());
     }
 
     private void updateListBox(String string) {
@@ -517,6 +523,13 @@ public class TeamView extends JFrame implements UIPlugin {
 //        model.addAccountListener(new AccountListenerImplementation());
 //        model.addLoginListener(new LoginListenerImplementation());
 //        model.addSiteListener(new SiteListenerImplementation());
+        
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                populateGUI();
+        }});
+        
+        setVisible(true);
     }
 
     public String getPluginTitle() {

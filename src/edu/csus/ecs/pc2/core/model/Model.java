@@ -129,6 +129,11 @@ public class Model implements IModel {
             Judgement judgement = new Judgement(judgementName);
             addJudgement(judgement);
         }
+
+        Site site = new Site("Site 1/auto", 1);
+        site.setPassword("site1");
+        site.setActive(true);
+        siteList.add(site);
     }
 
     public void addRunListener(IRunListener runListener) {
@@ -220,6 +225,8 @@ public class Model implements IModel {
                 loginListenerList.elementAt(i).loginAdded(loginEvent);
             } else if (loginEvent.getAction() == LoginEvent.Action.LOGOFF) {
                 loginListenerList.elementAt(i).loginRemoved(loginEvent);
+            } else if (loginEvent.getAction() == LoginEvent.Action.LOGIN_DENIED) {
+                loginListenerList.elementAt(i).loginDenied(loginEvent);
             } else {
                 throw new UnsupportedOperationException("Unknown login action " + loginEvent.getAction());
             }
@@ -256,26 +263,15 @@ public class Model implements IModel {
         }
     }
 
-    /**
-     * Add a run to the contest data.
-     */
-    public Run addRun(Run run, RunFiles runFiles) {
-        // TODO debug remove == 0 condition when addRun(SubmittedRun) is gone.
-        if (run.getNumber() == 0) {
-            run.setNumber(++runNumber);
-        }
-        runList.add(run);
-        if (runFiles != null) {
-            runFilesList.add(run, runFiles);
-        }
-        RunEvent runEvent = new RunEvent(RunEvent.Action.ADDED, run, null);
-        fireRunListener(runEvent);
-        return run;
-    }
 
     public void addLogin(ClientId inClientId, ConnectionHandlerID connectionHandlerID) {
         loginList.add(inClientId, connectionHandlerID);
-        LoginEvent loginEvent = new LoginEvent(inClientId, connectionHandlerID);
+        LoginEvent loginEvent = new LoginEvent(LoginEvent.Action.NEW_LOGIN, inClientId, connectionHandlerID, "New");
+        fireLoginListener(loginEvent);
+    }
+    
+    public void loginDenied (ClientId clientId, ConnectionHandlerID connectionHandlerID, String message){
+        LoginEvent loginEvent = new LoginEvent(LoginEvent.Action.LOGIN_DENIED, clientId, connectionHandlerID, message);
         fireLoginListener(loginEvent);
     }
 
@@ -311,20 +307,30 @@ public class Model implements IModel {
     }
 
     /**
-     * Accept Run.
+     * Accept Run, add new run onto server.
      * 
-     * On Server, adds run to run list, increments runnumber.
-     * 
+     * On Server, adds run to run list, increments run number.
      */
-    public Run acceptRun(Run submittedRun, RunFiles runFiles) {
-        runNumber++;
-        submittedRun.setNumber(runNumber);
-        addRun(submittedRun, runFiles);
-
-        info("acceptRun " + submittedRun + " mainfile " + runFiles.getMainFile().getName());
-
-        return submittedRun;
+    public Run acceptRun (Run run, RunFiles runFiles) {
+        run.setNumber(++runNumber);
+        run.setElapsedMins(getContestTime().getElapsedMins());
+        if (runFiles != null) {
+            runFilesList.add(run, runFiles);
+        }
+        addRun(run);
+        return run;
     }
+    
+    /**
+     * Add a run to run list, notify listeners.
+     * @param run
+     */
+    public void addRun (Run run){
+        runList.add(run);
+        RunEvent runEvent = new RunEvent(RunEvent.Action.ADDED, run, null);
+        fireRunListener(runEvent);
+    }
+
 
     public void generateNewAccounts(String clientTypeName, int count, boolean active) {
         ClientType.Type type = ClientType.Type.valueOf(clientTypeName.toUpperCase());
@@ -470,6 +476,10 @@ public class Model implements IModel {
     public boolean isLoggedIn(ClientId sourceId) {
         return loginList.isLoggedIn(sourceId);
     }
+    
+    public boolean isLoggedIn(){
+        return localClientId != null;
+    }
 
     public ConnectionHandlerID getConnectionHandleID(ClientId sourceId) {
         return loginList.getConnectionHandleID(sourceId);
@@ -483,19 +493,8 @@ public class Model implements IModel {
         return siteNumber;
     }
     
-    private void variousKludgeInitializeWhenChangeSiteNumber()    {
-        ContestTime contestTime = new ContestTime();
-        contestTime.setElapsedMins(9);
-        contestTime.startContestClock();
-        addContestTime(contestTime, siteNumber);
-        localClientId.setSiteNumber(getSiteNumber());
-    }
-
     public void setSiteNumber(int number) {
         this.siteNumber = number;
-        if (isServer()) {
-            variousKludgeInitializeWhenChangeSiteNumber();
-        }
     }
 
     private boolean isServer() {

@@ -190,6 +190,9 @@ public class ServerView extends JFrame implements UIPlugin {
             updateListBox("Login " + event.getAction() + " " + event.getClientId());
         }
 
+        public void loginDenied(LoginEvent event) {
+            updateListBox("Login " + event.getAction() + " " + event.getClientId());
+        }
     }
 
     /**

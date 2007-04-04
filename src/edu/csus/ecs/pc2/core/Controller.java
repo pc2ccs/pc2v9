@@ -1,19 +1,22 @@
 package edu.csus.ecs.pc2.core;
 
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Enumeration;
-
-import javax.swing.JOptionPane;
+import java.util.Vector;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
+import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IModel;
 import edu.csus.ecs.pc2.core.model.Language;
-import edu.csus.ecs.pc2.core.model.Model;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
@@ -30,6 +33,10 @@ import edu.csus.ecs.pc2.core.transport.ITwoToOne;
 import edu.csus.ecs.pc2.core.transport.TransportException;
 import edu.csus.ecs.pc2.core.transport.TransportManager;
 import edu.csus.ecs.pc2.ui.CountDownMessage;
+import edu.csus.ecs.pc2.ui.LoginFrame;
+import edu.csus.ecs.pc2.ui.judge.JudgeView;
+import edu.csus.ecs.pc2.ui.server.ServerView;
+import edu.csus.ecs.pc2.ui.team.TeamView;
 
 /**
  * 
@@ -39,16 +46,24 @@ import edu.csus.ecs.pc2.ui.CountDownMessage;
 public class Controller implements IController, ITwoToOne, IBtoA {
 
     public static final String SVN_ID = "$Id$";
+    
+    private static final String SITE_OPTION = "--site";
 
+    /**
+     * Contest data.
+     */
     private IModel model;
 
-    private static ITransportManager transportManager;
+    /**
+     * Transport.
+     */
+    private ITransportManager transportManager;
 
-    public static Controller controller;
+    /**
+     * Controller.
+     */
 
-    private static Log log;
-
-    private static IBtoA btoA;
+    private Log log;
 
     /**
      * The port to contact and for the server to listen on.
@@ -87,6 +102,12 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     private static final String CLIENT_PORT_KEY = "client.port";
     
     private static ConnectionHandlerID remoteServerConnectionHandlerID = null;
+    
+    private ParseArguments parseArguments = new ParseArguments();
+    
+    // TODO change this to UIPlugin
+    private LoginFrame loginUI;
+    
 
     public Controller(IModel model) {
         super();
@@ -224,103 +245,126 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * @throws Exception
      *             if there is a problem contacting server or logging in.
      */
-    public static IModel login(String id, String password, int tmpSiteNum) throws Exception {
-
-        ClientId clientId = loginShortcutExpansion (tmpSiteNum, id);
-     
-        log = new Log(clientId.toString());
-        StaticLog.setLog(log);  // From this point forward any class can use StaticLog.
-        info("");
-        info(new VersionInfo().getSystemVersionInfo());
-        info(" login(" + id + "," + password + ")");
-
-        if (password.length() < 1) {
-            password = clientId.getName(); // Joe password.
-        }
-
-        Model model = new Model();
-        controller = new Controller(model);
-        btoA = controller;
-
-        if (IniFile.isFilePresent()){
-            // Only read and load .ini file if it is present.
-            new IniFile();
-        }
-
-        port = Integer.parseInt(TransportManager.DEFAULT_PC2_PORT);
+    public void login(String id, String password)  {
         
-        model.setClientId(clientId);  
+        try {
 
-        if (clientId.getClientType().equals(Type.SERVER)) {
+            ClientId clientId = loginShortcutExpansion(0, id);
 
-            model.initializeWithFakeData();
+            log = new Log(clientId.toString());
+            StaticLog.setLog(log); 
             
-            if (containsINIKey(SERVER_PORT_KEY)) {
-                port = Integer.parseInt(getINIValue(SERVER_PORT_KEY));
+            info("");
+            info(new VersionInfo().getSystemVersionInfo());
+            info(" login(" + id + "," + password + ")");
+
+            if (password.length() < 1) {
+                password = clientId.getName(); // Joe password.
+                if (clientId.getClientType().equals(Type.SERVER)) {
+                    password = "site" + clientId.getSiteNumber();
+                }
             }
 
-            info("Starting Server Transport...");
-            transportManager = new TransportManager(log, controller);
+            if (IniFile.isFilePresent()) {
+                // Only read and load .ini file if it is present.
+                new IniFile();
+            }
 
-            if (containsINIKey(REMOTE_SERVER_KEY)) {
+            port = Integer.parseInt(TransportManager.DEFAULT_PC2_PORT);
 
-                // Contacting another server. "join"
+            if (clientId.getClientType().equals(Type.SERVER)) {
+
+                if (containsINIKey(SERVER_PORT_KEY)) {
+                    port = Integer.parseInt(getINIValue(SERVER_PORT_KEY));
+                }
+
+                info("Starting Server Transport...");
+                transportManager = new TransportManager(log, this);
+
                 if (containsINIKey(REMOTE_SERVER_KEY)) {
-                    remoteHostName = getINIValue(REMOTE_SERVER_KEY);
+
+                    // Contacting another server. "join"
+                    if (containsINIKey(REMOTE_SERVER_KEY)) {
+                        remoteHostName = getINIValue(REMOTE_SERVER_KEY);
+                    }
+
+                    // Set port to default
+                    remoteHostPort = Integer.parseInt(TransportManager.DEFAULT_PC2_PORT);
+
+                    int idx = remoteHostName.indexOf(":");
+                    if (idx > 2) {
+                        remoteHostPort = Integer.parseInt(remoteHostName.substring(idx + 1));
+                        remoteHostName = remoteHostName.substring(0, idx);
+                    }
+
+                    info("Contacting " + remoteHostName + ":" + remoteHostPort);
+                    remoteServerConnectionHandlerID = transportManager.connectToServer(remoteHostName, remoteHostPort);
+
+                    info("Contacted using connection id " + remoteServerConnectionHandlerID);
+
+                    info("Sending login request to " + remoteHostName + " as " + clientId+" " +password); // TODO remove this
+                    sendLoginRequest(transportManager, remoteServerConnectionHandlerID, clientId, password);
+
+                    info("Started Server Transport listening on " + port);
+                    transportManager.accecptConnections(port);
+
+                    info("Secondary Server has started " + model.getTitle());
+                } else {
+                    
+                    clientId = authenticateFirstServer (password);
+                    info("Started Server Transport listening on " + port);
+                    transportManager.accecptConnections(port);
+                    info("Primary Server has started.");
+                    startMainUI(clientId);
                 }
 
-                // Set port to default
-                remoteHostPort = Integer.parseInt(TransportManager.DEFAULT_PC2_PORT);
-
-                int idx = remoteHostName.indexOf(":");
-                if (idx > 2) {
-                    remoteHostPort = Integer.parseInt(remoteHostName.substring(idx + 1));
-                    remoteHostName = remoteHostName.substring(0, idx);
-                }
-
-                info("Contacting " + remoteHostName + ":" + remoteHostPort);
-                remoteServerConnectionHandlerID = transportManager.connectToServer(remoteHostName, remoteHostPort);
-                
-                info ("Contacted using connection id "+remoteServerConnectionHandlerID);
-
-                 info("Sending login request to " + remoteHostName + " as " + clientId);
-                 sendLoginRequest(transportManager, remoteServerConnectionHandlerID, clientId, password);
-                 
-                 info("Started Server Transport listening on " + port);
-                 transportManager.accecptConnections(port);
-                 
-                 info("Secondary Server has started "+model.getTitle());
             } else {
-                info("Started Server Transport listening on " + port);
-                transportManager.accecptConnections(port);
-                info("Primary Server has started "+model.getTitle());
-            }
+                
+                // Client login
 
-        } else {
+                remoteHostName = "localhost";
 
-            remoteHostName = "localhost";
-
-            if (containsINIKey(CLIENT_SERVER_KEY)) {
-                remoteHostName = getINIValue(CLIENT_SERVER_KEY);
-                int idx = remoteHostName.indexOf(":");
-                if (idx > 2) {
-                    port = Integer.parseInt(remoteHostName.substring(idx + 1));
-                    remoteHostName = remoteHostName.substring(0, idx);
+                if (containsINIKey(CLIENT_SERVER_KEY)) {
+                    remoteHostName = getINIValue(CLIENT_SERVER_KEY);
+                    int idx = remoteHostName.indexOf(":");
+                    if (idx > 2) {
+                        port = Integer.parseInt(remoteHostName.substring(idx + 1));
+                        remoteHostName = remoteHostName.substring(0, idx);
+                    }
                 }
-            }
-            if (containsINIKey(CLIENT_PORT_KEY)) {
-                port = Integer.parseInt(getINIValue(CLIENT_PORT_KEY));
-            }
+                if (containsINIKey(CLIENT_PORT_KEY)) {
+                    port = Integer.parseInt(getINIValue(CLIENT_PORT_KEY));
+                }
 
-            info("Contacting server at " + remoteHostName + ":" + port);
-            transportManager = new TransportManager(log, remoteHostName, port, btoA);
-            transportManager.connectToMyServer();
-            info("Started Client Transport");
+                info("Contacting server at " + remoteHostName + ":" + port);
+                transportManager = new TransportManager(log, remoteHostName, port, this);
+                transportManager.connectToMyServer();
+                info("Started Client Transport");
 
-            sendLoginRequest(transportManager, clientId, password);
+                sendLoginRequest(transportManager, clientId, password);
+            }
+        } catch (Exception e) {
+            // TODO: log handle exception
+            StaticLog.log("Exception logged ", e);
+            throw new SecurityException (e.getMessage());
         }
+    }
 
-        return model;
+    private ClientId authenticateFirstServer(String password) {
+        
+        if (model.getSites().length == 0){
+            // TODO remove this when we can populate with real data.
+            model.initializeWithFakeData();
+        }
+        int newSiteNumber = getServerSiteNumber(password);
+        
+        ClientId newId = new ClientId(newSiteNumber,ClientType.Type.SERVER, 0);
+        if (model.isLoggedIn(newId)){
+            info ("Note site "+newId+" site "+newSiteNumber+" already logged in, ignoring ");
+        } 
+        ConnectionHandlerID connectionHandlerID = new ConnectionHandlerID("Site "+newSiteNumber);
+        model.addLogin(newId, connectionHandlerID);
+        return newId;
     }
 
     private static void sendLoginRequest(ITransportManager manager, ConnectionHandlerID connectionHandlerID, ClientId clientId, String password) {
@@ -379,8 +423,10 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                     // LOGGED IN - process the packet
 
                     // TODO security authenticate the login vs connection
+                    
+                    // When we have validated the sender we then process the packet.
 
-                    processPacket(packet);
+                    processPacket(packet, connectionHandlerID);
 
                 } else if (packet.getType().equals(PacketType.Type.LOGIN_REQUEST)) {
                     String password = PacketFactory.getStringValue(packet, PacketFactory.PASSWORD);
@@ -440,8 +486,9 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         
         info("Login Failure");
         PacketFactory.dumpPacket(System.err, packet);
-        JOptionPane.showMessageDialog(null,message+" "+model.getClientId(),"Login Denied", JOptionPane.ERROR_MESSAGE);
-        System.exit(0); // TODO remove this code on valid login
+        
+        model.loginDenied(packet.getDestinationId(), null, message);
+     
     }
     
     /**
@@ -499,12 +546,16 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     /**
      * Process all packets.
      * 
+     * Assumes that the packet is from an authenticated user.
+     * 
      * Process packets when user is logged in.
      * 
      * @param packet
+     * @param connectionHandlerID 
      */
-    private void processPacket(Packet packet) {
-        PacketHandler.handlePacket(this, model, packet);
+    private void processPacket(Packet packet, ConnectionHandlerID connectionHandlerID) {
+        PacketHandler.handlePacket(this, model, packet, connectionHandlerID);
+        
     }
 
     /**
@@ -539,22 +590,22 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
     public void connectionEstablished(ConnectionHandlerID connectionHandlerID) {
         // TODO code connectionEstablished
-        info("connectionEstablished: " + model.getTitle() + " " + connectionHandlerID);
+        info("connectionEstablished: "+ connectionHandlerID);
     }
 
     /**
      * Connection to client lost.
      */
     public void connectionDropped(ConnectionHandlerID connectionHandlerID) {
-        // TODO code connectionDropped
-        info("connectionDropped: " + model.getTitle() + " " + connectionHandlerID);
+        // TODO code connectionDropped reconnection logic
 
         ClientId clientId = model.getLoginClientId(connectionHandlerID);
         if (clientId != null) {
             info("connectionDropped: removed user " + clientId);
             model.removeLogin(clientId);
+        } else {
+            info("connectionDropped: connection " + connectionHandlerID);
         }
-
     }
 
     public void connectionError(Serializable object, ConnectionHandlerID connectionHandlerID, String causeDescription) {
@@ -577,7 +628,8 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         if (object instanceof Packet) {
             Packet packet = (Packet) object;
             PacketFactory.dumpPacket(System.err, packet);
-            PacketHandler.handlePacket(controller, model, packet);
+            // TODO code put the server's connection handler id as 4th parameter
+            PacketHandler.handlePacket(this, model, packet, null);
         } else {
             info("receiveObject(S) Unsupported class received: " + object.getClass().getName());
         }
@@ -615,10 +667,6 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
     public void setContestTime(ContestTime contestTime) {
         // TODO code
-    }
-
-    public void setClientId(ClientId clientId) {
-        model.setClientId(clientId);
     }
 
     public void sendToServers(Packet packet) {
@@ -661,6 +709,207 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
     public void sendToTeams(Packet packet) {
         sendPacketToClients(packet, ClientType.Type.SCOREBOARD);
+    }
+    
+
+    /**
+     * Client has successfully logged in, show them new UI.
+     * 
+     * @param uiplugin login or previous UI.
+     * @param clientId new client id
+     */
+    public void startMainUI (ClientId clientId) {
+
+        try {
+            
+            model.setClientId(clientId);
+            
+            // Determine which UIPlugin to display.
+            // TODO code a method to return the UI Plugin 
+
+            if (model.getFrameName().equals("ServerView")) {
+                try {
+                    ServerView serverView = new ServerView();
+                    serverView.setModelAndController(model, this);
+                    loginUI.dispose();
+                } catch (Exception e) {
+                    // TODO: log handle exception
+                    StaticLog.log("Exception logged ", e);
+                }
+               
+            } else if (model.getFrameName().equals("TeamView")) {
+                try {
+                    TeamView teamView = new TeamView();
+                    teamView.setModelAndController(model, this);
+                    loginUI.dispose();
+                } catch (Exception e) {
+                    // TODO: log handle exception
+                    StaticLog.log("Exception logged ", e);
+                }
+            
+            } else if (model.getFrameName().equals("JudgeView")) {
+                try {
+                    JudgeView judgeView = new JudgeView();
+                    judgeView.setModelAndController(model, this);
+                    loginUI.dispose();
+                } catch (Exception e) {
+                    // TODO: log handle exception
+                    StaticLog.log("Exception logged ", e);
+                }
+            } else {
+                throw new Exception("Could not find class to display " + model.getFrameName());
+            }
+        } catch (Exception e) {
+            // TODO log this
+            System.err.println("Trouble showing frame " + e.getMessage());
+            e.printStackTrace(System.err);
+            model.loginDenied(clientId, null, e.getMessage());
+        }
+    }
+          
+          
+    // huh
+    // } catch (TransportException transportException) {
+    // // TODO log this
+    // System.err.println("TransportException: " + transportException.getMessage());
+    // String message = "Unable to contact server, contact staff";
+    // System.err.println(message);
+    //
+    // if (showDefaultUI) {
+    // loginFrame.setStatusMessage(message);
+    // }
+    //
+    // } catch (SecurityException securityException) {
+    // // TODO log this
+    // System.err.println("SecurityException: " + securityException.getMessage());
+    // securityException.printStackTrace(System.err);
+    // if (showDefaultUI) {
+    // loginFrame.setStatusMessage(securityException.getMessage());
+    // }
+    // } catch (Exception e) {
+    // // TODO log this
+    // System.err.println("Trouble showing frame " + e.getMessage());
+    // e.printStackTrace(System.err);
+    // if (showDefaultUI) {
+    // loginFrame.setStatusMessage("Trouble logging in try again ");
+    // }
+
+    public void start(String[] stringArray) {
+
+        String[] arguments = { "--site" };
+        parseArguments = new ParseArguments(stringArray, arguments);
+        
+
+        // TODO parse arguments logic 
+        
+        /**
+         * if (args DOES NOT contains login/pwd) {
+         *   String s;
+         *   if (args contains LoginUI )
+         *   {
+         *      s = args login UI
+         *    }
+         *    else
+         *    {
+         *        s = pc2 LoginFrame
+         *    }
+         *    UIPlugin l = classloader (s);
+         *    l.setModelAndListener (model, this);
+         * }
+         * else {
+         *   this.login (login,password)
+         * 
+         */
+        
+        log = new Log("pc2.startup");
+        StaticLog.setLog(log);
+        
+        loginUI = new LoginFrame();
+        loginUI.setModelAndController(model, this);
+
+    }
+    
+    /**
+     * Dump connection data
+     */
+    public void dumpContestData() {
+
+        try {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM.dd.SSS");
+            // "yyMMdd HHmmss.SSS");
+            String filename = "dump" + simpleDateFormat.format(new Date()) + ".log";
+            PrintWriter log = new PrintWriter(new FileOutputStream(filename, false), true);
+
+            log.println(new VersionInfo().getSystemName());
+            log.println("Build "+ new VersionInfo().getBuildNumber());
+            log.println(new VersionInfo().getSystemVersionInfo() );
+            log.println("Date: " + new Date());
+
+            log.println();
+            log.println("-- Accounts --");
+            for (ClientType.Type ctype : ClientType.Type.values()) {
+                if (model.getAccounts(ctype).size() > 0) {
+                    log.println("Accounts " + ctype.toString() + " there are " + model.getAccounts(ctype).size());
+                    Vector<Account> accounts = model.getAccounts(ctype);
+                    for (int i = 0; i < accounts.size(); i++) {
+                        log.println("   " + accounts.elementAt(i));
+                    }
+                }
+
+            }
+
+            // Sites
+            log.println();
+            log.println("-- " + model.getSites().length + " sites --");
+            for (Site site1 : model.getSites()) {
+                log.println("Site " + site1.getSiteNumber() + " " + site1.getDisplayName() + "/" + site1.getPassword());
+            }
+
+            // Problem
+            log.println();
+            log.println("-- " + model.getProblems().length + " problems --");
+            for (Problem problem : model.getProblems()) {
+                log.println("  Problem " + problem);
+            }
+
+            // Language
+            log.println();
+            log.println("-- " + model.getLanguages().length + " languages --");
+            for (Language language : model.getLanguages()) {
+                log.println("  Language " + language);
+            }
+
+            // Logins
+            log.println();
+            log.println("-- Logins -- ");
+            for (ClientType.Type ctype : ClientType.Type.values()) {
+                
+                Enumeration<ClientId> enumeration = model.getLoggedInClients(ctype);
+                if (model.getLoggedInClients(ctype).hasMoreElements()) {
+                    log.println("Logged in " + ctype.toString());
+                    while (enumeration.hasMoreElements()) {
+                        ClientId aClientId = (ClientId) enumeration.nextElement();
+                        log.println("   " + aClientId);
+                    }
+                }
+            }
+
+            log.println();
+            log.println("*end*");
+
+            log.close();
+            log = null;
+
+            String command = "/windows/vi.bat " + filename;
+            Runtime.getRuntime().exec(command);
+
+        } catch (Exception e) {
+            // TODO: log handle exception
+            // StaticLog.log("Exception logged ", e);
+            System.err.println("Exception " + e.getMessage());
+            e.printStackTrace();
+        }
+
     }
 
 }

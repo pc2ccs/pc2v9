@@ -2,13 +2,8 @@ package edu.csus.ecs.pc2;
 
 import edu.csus.ecs.pc2.core.Controller;
 import edu.csus.ecs.pc2.core.IController;
-import edu.csus.ecs.pc2.core.ParseArguments;
 import edu.csus.ecs.pc2.core.model.IModel;
-import edu.csus.ecs.pc2.core.transport.TransportException;
-import edu.csus.ecs.pc2.ui.LoginFrame;
-import edu.csus.ecs.pc2.ui.judge.JudgeView;
-import edu.csus.ecs.pc2.ui.server.ServerView;
-import edu.csus.ecs.pc2.ui.team.TeamView;
+import edu.csus.ecs.pc2.core.model.Model;
 
 /**
  * Starter class.
@@ -32,25 +27,9 @@ import edu.csus.ecs.pc2.ui.team.TeamView;
 
 // TODO write code for a command line login
 // $HeadURL$
-public class Starter implements Runnable {
+public class Starter  {
 
     public static final String SVN_ID = "$Id$";
-
-    private static final String SITE_OPTION = "--site";
-
-    private LoginFrame loginFrame = new LoginFrame();
-    
-    private ParseArguments parseArguments = new ParseArguments();
-
-    protected Starter() {
-        // this constructor required by CheckStyle.
-
-    }
-    
-    public Starter (String [] stringArray){
-        String [] arguments = {"--site"};
-        parseArguments = new ParseArguments(stringArray, arguments);
-    }
 
     /**
      * Show version info and start Login window.
@@ -58,107 +37,9 @@ public class Starter implements Runnable {
      * @param args
      */
     public static void main(String[] args) {
-
-        VersionInfo versionInfo = new VersionInfo();
-        System.out.println(versionInfo.getSystemVersionInfo());
-        System.out.println();
         
-        Starter starter = new Starter(args);
-        
-        starter.startLoginFrame();
-
-    }
-
-    /**
-     * Show the login frame.
-     * 
-     */
-    private void startLoginFrame() {
-        loginFrame.setRunnable(this);
-        loginFrame.setVisible(true);
-    }
-
-    /**
-     * Attempt to login and show main frame for client.
-     * 
-     * This is a call back method for the LoginFrame when the Login button is used.
-     */
-    public void run() {
-        String id = loginFrame.getLogin();
-        String password = loginFrame.getPassword();
-        login(id, password, true);
-    }
-
-    /**
-     * Login to PC^2, either with UI or not.
-     * 
-     * @param id -
-     *            login name
-     * @param password -
-     *            login password
-     * @param showDefaultUI
-     *            assume LoginFrame is used and that UI is presented to user.
-     */
-    public void login(String id, String password, boolean showDefaultUI) {
-
-        try {
-            int temporarySiteNumber = 1;
-            
-            if (parseArguments.isOptPresent(SITE_OPTION)){
-                Long long1 = parseArguments.getLongOptionValue(SITE_OPTION);
-                temporarySiteNumber = long1.intValue();
-            }
-            
-            IModel model = Controller.login(id, password, temporarySiteNumber);
-            IController controller = new Controller(model);
-            model.setSiteNumber(temporarySiteNumber);
-
-
-            if (showDefaultUI) {
-                if (model.getFrameName().equals("ServerView")) {
-                    ServerView serverView = new ServerView();
-                    serverView.setModelAndController(model, controller);
-                    
-                    loginFrame.setVisible(false); // hide LoginFrame
-                } else if (model.getFrameName().equals("TeamView")) {
-                    TeamView teamView = new TeamView();
-                    teamView.setModelAndController(model, controller);
-                    
-                    loginFrame.setVisible(false); // hide LoginFrame
-                } else if (model.getFrameName().equals("JudgeView")) {
-                    JudgeView judgeView = new JudgeView();
-                    judgeView.setModelAndController(model, controller);
-                    
-                    loginFrame.setVisible(false); // hide LoginFrame
-                } else {
-                    throw new Exception("Could not find class to display " + model.getFrameName());
-                }
-            }
-
-        } catch (TransportException transportException) {
-            // TODO log this
-            System.err.println("TransportException: " + transportException.getMessage());
-            String message = "Unable to contact server, contact staff";
-            System.err.println(message);
-
-            if (showDefaultUI) {
-                loginFrame.setStatusMessage(message);
-            }
-
-        } catch (SecurityException securityException) {
-            // TODO log this
-            System.err.println("SecurityException: " + securityException.getMessage());
-            securityException.printStackTrace(System.err);
-            if (showDefaultUI) {
-                loginFrame.setStatusMessage(securityException.getMessage());
-            }
-        } catch (Exception e) {
-            // TODO log this
-            System.err.println("Trouble showing frame " + e.getMessage());
-            e.printStackTrace(System.err);
-            if (showDefaultUI) {
-                loginFrame.setStatusMessage("Trouble logging in try again ");
-            }
-        }
+        IModel model = new Model();
+        IController controller = new Controller (model);
+        controller.start(args);
     }
 }

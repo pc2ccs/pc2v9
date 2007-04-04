@@ -17,8 +17,14 @@ public interface ILoginListener {
     void loginAdded(LoginEvent event);
 
     /**
-     * Run has been removed.
+     * Logged off.
      * @param event
      */
     void loginRemoved(LoginEvent event);
+    
+    /**
+     * Invalid login, contains message.
+     * @param event
+     */
+    void loginDenied (LoginEvent event);
 }

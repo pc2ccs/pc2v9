@@ -16,18 +16,6 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 // $HeadURL$
 public interface IModel {
 
-    /**
-     * Add Run into TeamModel's data or receive run from Server.
-     * 
-     * runFiles will not be null if this is a run submitted from
-     * a team or if it is a run to be fetched for a judge to execute
-     * and judge this run.
-     * 
-     * @param run
-     * @param runFiles this may be null.
-     */
-    Run addRun(Run run, RunFiles runFiles);
-
     void addLanguage(Language language);
 
     void addProblem(Problem problem);
@@ -35,8 +23,8 @@ public interface IModel {
     void addContestTime(ContestTime contestTime, int siteNumber);
 
     void addJudgement(Judgement judgement);
-    
-    void addSite (Site site);
+
+    void addSite(Site site);
 
     /**
      * Start Contest Clock at site.
@@ -58,7 +46,16 @@ public interface IModel {
      * @param submittedRun
      * @return Submitted Run with id and timestamps
      */
-    Run acceptRun(Run submittedRun, RunFiles runFiles) throws Exception;
+    Run acceptRun(Run submittedRun, RunFiles runFiles);
+    
+    /**
+     * Add a run into the runList.
+     * 
+     * This just adds the run into the list, unlike acceptRun,
+     * this does not increment the run.
+     * @param run
+     */
+    void addRun (Run run);
 
     /**
      * Add new accounts.
@@ -71,15 +68,14 @@ public interface IModel {
      *            set to True if the accounts are active
      */
     void generateNewAccounts(String clientTypeName, int count, boolean active);
-    
-    
+
     /**
      * Add new sites.
      * 
      * @param count
      * @param active
      */
-    void generateNewSites (int count, boolean active);
+    void generateNewSites(int count, boolean active);
 
     /**
      * Add a new account listener.
@@ -106,7 +102,7 @@ public interface IModel {
      * Fetch all defined judgements.
      */
     Judgement[] getJudgements();
-    
+
     /**
      * Fetch all defined sites.
      */
@@ -159,7 +155,7 @@ public interface IModel {
     void addJudgementListener(IJudgementListener judgementListener);
 
     void removeJudgementListener(IJudgementListener judgementListener);
-    
+
     void addSiteListener(ISiteListener siteListener);
 
     void removeSiteListener(ISiteListener siteListener);
@@ -203,6 +199,13 @@ public interface IModel {
     boolean isLoggedIn(ClientId sourceId);
 
     /**
+     * Has this module been logged in, loaded with data, authenticated.
+     * 
+     * @return
+     */
+    boolean isLoggedIn();
+
+    /**
      * Lookup ConnectionHandlerID for a given ClientId.
      * 
      * @param clientId
@@ -229,4 +232,7 @@ public interface IModel {
 
     Enumeration<ClientId> getLoggedInClients(Type type);
 
+    void loginDenied(ClientId clientId, ConnectionHandlerID connectionHandlerID, String message);
+
+    void initializeWithFakeData();
 }

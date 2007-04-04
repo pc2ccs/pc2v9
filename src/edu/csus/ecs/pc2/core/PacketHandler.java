@@ -1,7 +1,5 @@
 package edu.csus.ecs.pc2.core;
 
-import javax.swing.JOptionPane;
-
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ContestTime;
@@ -12,10 +10,10 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.Site;
-import edu.csus.ecs.pc2.core.model.SiteList;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.packet.PacketFactory;
 import edu.csus.ecs.pc2.core.packet.PacketType.Type;
+import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
 /**
  * Process all incoming packets.
@@ -39,8 +37,9 @@ public final class PacketHandler {
      * @param controller
      * @param model
      * @param packet
+     * @param connectionHandlerID 
      */
-    public static void handlePacket(IController controller, IModel model, Packet packet) {
+    public static void handlePacket(IController controller, IModel model, Packet packet, ConnectionHandlerID connectionHandlerID) {
 
         Type packetType = packet.getType();
 
@@ -50,13 +49,13 @@ public final class PacketHandler {
             PacketFactory.dumpPacket(System.err, packet);
         } else if (packetType.equals(Type.RUN_SUBMISSION_CONFIRM)) {
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
-            model.addRun(run, null);
+            model.addRun(run);
         } else if (packetType.equals(Type.RUN_SUBMISSION)) {
             // RUN submitted by team to server
 
             Run submittedRun = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
             RunFiles runFiles = (RunFiles) PacketFactory.getObjectValue(packet, PacketFactory.RUN_FILES);
-            Run run = model.addRun(submittedRun, runFiles);
+            Run run = model.acceptRun(submittedRun, runFiles);
 
             // Send to team
             Packet confirmPacket = PacketFactory.createRunSubmissionConfirm(model.getClientId(), packet.getSourceId(), run);
@@ -76,13 +75,17 @@ public final class PacketHandler {
             if (message.equals("No such account")) {
                 message = "(Accounts Generated ??) ERROR " +message ;
             }
-            JOptionPane.showMessageDialog(null,message+" "+model.getClientId(),"Login Denied", JOptionPane.ERROR_MESSAGE);
-            System.exit(0); // TODO remove this code on valid login
+            model.loginDenied(packet.getDestinationId(), connectionHandlerID, message);
             
         } else if (packetType.equals(Type.LOGIN_SUCCESS)) {
-            info(" handlePacket LOGIN_SUCCESS before ");
-            loadDataIntoModel(packet, controller, model);
-            info(" handlePacket LOGIN_SUCCESS after -- all settings loaded ");
+            if (! model.isLoggedIn()){
+                info(" handlePacket LOGIN_SUCCESS before ");
+                loadDataIntoModel(packet, controller, model, connectionHandlerID);
+                info(" handlePacket LOGIN_SUCCESS after -- all settings loaded "); 
+            } else {
+                info(" handlePacket LOGIN_SUCCESS again: "+packet); 
+            }
+
         } else {
 
             Exception exception = new Exception("PacketHandler.handlePacket Unhandled packet " + packet);
@@ -112,12 +115,14 @@ public final class PacketHandler {
      * @param controller
      * @param model
      */
-    private static void loadDataIntoModel(Packet packet, IController controller, IModel model) {
+    private static void loadDataIntoModel(Packet packet, IController controller, IModel model, ConnectionHandlerID connectionHandlerID) {
 
+        ClientId clientId = null;
+        
         try {
-            ClientId clientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+            clientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
             if (clientId != null) {
-                controller.setClientId(clientId);
+                model.setClientId(clientId);
             }
         } catch (Exception e) {
             // TODO: log handle exception
@@ -195,7 +200,12 @@ public final class PacketHandler {
             StaticLog.log("Exception logged ", e);
         }
         
-
+        if (model.isLoggedIn()){
+            controller.startMainUI(clientId);
+        }else{
+            String message = "Trouble loggin in, check logs";
+            model.loginDenied(packet.getDestinationId(), connectionHandlerID, message);
+        }
     }
 
     /**
