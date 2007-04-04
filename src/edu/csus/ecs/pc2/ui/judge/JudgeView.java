@@ -176,9 +176,9 @@ public class JudgeView extends JFrame implements UIPlugin {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 if (contestStarted) {
-                    setTitle("PC^2 Team " + model.getTitle() + " [STARTED]");
+                    setTitle("PC^2 Judge " + model.getTitle() + " [STARTED] Build "+new VersionInfo().getBuildNumber());
                 } else {
-                    setTitle("PC^2 Team " + model.getTitle() + " [STOPPED]");
+                    setTitle("PC^2 Judge " + model.getTitle() + " [STOPPED] Build "+new VersionInfo().getBuildNumber());
                 }
             }
         });

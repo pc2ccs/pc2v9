@@ -164,9 +164,9 @@ public class TeamView extends JFrame implements UIPlugin {
                 getSubmitRunButton().setEnabled(turnButtonsOn);
                 getPickFileButton().setEnabled(turnButtonsOn);
                 if (turnButtonsOn) {
-                    setTitle("PC^2 Team " + model.getTitle() + " [STARTED]");
+                    setTitle("PC^2 Team " + model.getTitle() + " [STARTED] Build "+new VersionInfo().getBuildNumber());
                 } else {
-                    setTitle("PC^2 Team " + model.getTitle() + " [STOPPED]");
+                    setTitle("PC^2 Team " + model.getTitle() + " [STOPPED] Build "+new VersionInfo().getBuildNumber());
                 }
             }
         });
