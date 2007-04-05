@@ -20,6 +20,7 @@ import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
@@ -35,7 +36,9 @@ import edu.csus.ecs.pc2.core.transport.ITwoToOne;
 import edu.csus.ecs.pc2.core.transport.TransportException;
 import edu.csus.ecs.pc2.core.transport.TransportManager;
 import edu.csus.ecs.pc2.ui.CountDownMessage;
+import edu.csus.ecs.pc2.ui.LoadUIClass;
 import edu.csus.ecs.pc2.ui.LoginFrame;
+import edu.csus.ecs.pc2.ui.UIPlugin;
 import edu.csus.ecs.pc2.ui.judge.JudgeView;
 import edu.csus.ecs.pc2.ui.server.ServerView;
 import edu.csus.ecs.pc2.ui.team.TeamView;
@@ -102,6 +105,11 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     /**
      * Controller.
      */
+    
+    /**
+     * The main UI, started by the controller.
+     */
+    private UIPlugin mainUI;
 
     private Log log;
 
@@ -774,41 +782,18 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             
             model.setClientId(clientId);
             
-            // Determine which UIPlugin to display.
-            // TODO code a method to return the UI Plugin 
-
-            if (model.getFrameName().equals("ServerView")) {
-                try {
-                    ServerView serverView = new ServerView();
-                    serverView.setModelAndController(model, this);
-                    loginUI.dispose();
-                } catch (Exception e) {
-                    // TODO: log handle exception
-                    StaticLog.log("Exception logged ", e);
-                }
-               
-            } else if (model.getFrameName().equals("TeamView")) {
-                try {
-                    TeamView teamView = new TeamView();
-                    teamView.setModelAndController(model, this);
-                    loginUI.dispose();
-                } catch (Exception e) {
-                    // TODO: log handle exception
-                    StaticLog.log("Exception logged ", e);
-                }
-            
-            } else if (model.getFrameName().equals("JudgeView")) {
-                try {
-                    JudgeView judgeView = new JudgeView();
-                    judgeView.setModelAndController(model, this);
-                    loginUI.dispose();
-                } catch (Exception e) {
-                    // TODO: log handle exception
-                    StaticLog.log("Exception logged ", e);
-                }
-            } else {
-                throw new Exception("Could not find class to display " + model.getFrameName());
+            try {
+                String uiClassName = LoadUIClass.getUIClassName(clientId);
+                mainUI = LoadUIClass.loadUIClass(uiClassName);
+                mainUI.setModelAndController(model, this);
+                loginUI.dispose();
+            } catch (Exception e) {
+                // TODO: log handle exception
+                System.err.println("Error loading UI, check log, (class not found?)  " + e.getMessage());
+                StaticLog.log("Exception loading UI for (class not found?) "+clientId.getName(), e);
+                throw new Exception("Unable to start main UI, contact staff");
             }
+            
         } catch (Exception e) {
             // TODO log this
             info("Trouble showing frame ", e);
