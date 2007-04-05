@@ -7,7 +7,6 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.KeyEvent;
 
-import javax.net.ssl.SSLEngineResult.Status;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -37,6 +36,7 @@ public class LoginFrame extends JFrame implements UIPlugin {
      */
     private static final long serialVersionUID = -6389607881992853161L;
     
+    @SuppressWarnings("unused")
     private IModel model;
     
     private IController controller;
