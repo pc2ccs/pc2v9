@@ -26,6 +26,25 @@ public final class StaticLog {
         // empty private constructor because codestyle needed it.
     }
 
+    /**
+     * A method that indicates that this is Unclassified log message.
+     * 
+     * This message should be changed to an actual log message.
+     * @param message
+     * @param ex
+     */
+    public static void unclassified(String message, Exception ex) {
+        log.log(Log.WARNING, "U "+message, ex);
+    }
+    
+    /**
+     * @see #unclassified(String, Exception)
+     * @param message
+     */
+    public static void unclassified(String message) {
+        log.log(Log.WARNING, "U "+message);
+    }
+
     public static void warning(String message) {
         log.warning(message);
     }
