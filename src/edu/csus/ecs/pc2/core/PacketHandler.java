@@ -1,8 +1,8 @@
 package edu.csus.ecs.pc2.core;
 
-import edu.csus.ecs.pc2.core.list.RunList;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IModel;
 import edu.csus.ecs.pc2.core.model.Judgement;
@@ -75,9 +75,6 @@ public final class PacketHandler {
 
         } else if (packetType.equals(Type.LOGIN_FAILED)) {
             String message = PacketFactory.getStringValue(packet, PacketFactory.MESSAGE_STRING);
-            
-            // TODO Handle this better via new login code.
-            info("Login Failed: " + message);
             model.loginDenied(packet.getDestinationId(), connectionHandlerID, message);
             
         } else if (packetType.equals(Type.RUN_NOTAVAILABLE)) {
@@ -91,17 +88,19 @@ public final class PacketHandler {
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
             JudgementRecord judgementRecord = (JudgementRecord) PacketFactory.getObjectValue(packet, PacketFactory.JUDGEMENT_RECORD);
             RunResultFiles runResultFiles = (RunResultFiles) PacketFactory.getObjectValue(packet, PacketFactory.RUN_RESULTS_FILE);
-            
-            model.addRunJudgement(run, judgementRecord, runResultFiles, fromId);
-            
-            // TODO code send this update run to all others.
-            
-            info(" Unhandled packet RUN_JUDGEMENT ");
+            judgeRun(run, model,controller,judgementRecord,runResultFiles, fromId);
             
         } else if (packetType.equals(Type.RUN_UNCHECKOUT)) {
             // Cancel run from requestor to server
-            // TODO code handle RUN_UNCHECKOUT
-            info(" Unhandled packet RUN_UNCHECKOUT ");
+            Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
+            cancelRun (run, model, controller, fromId);
+            
+        } else if (packetType.equals(Type.RUN_CHECKOUT)) {
+            // Run from server to judge
+            Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
+            RunFiles runFiles = (RunFiles) PacketFactory.getObjectValue(packet, PacketFactory.RUN_FILES);
+            checkedOutRun (model, run, runFiles);
+            
             
         } else if (packetType.equals(Type.RUN_REQUEST)) {
             // Request Run from requestor to server
@@ -120,32 +119,107 @@ public final class PacketHandler {
         } else {
 
             Exception exception = new Exception("PacketHandler.handlePacket Unhandled packet " + packet);
-            info("Exception " + exception.getMessage());
-            exception.printStackTrace(System.err);
+            StaticLog.unclassified("Unhandled Packet ",exception);
         }
-
     }
     
+    /**
+     * Handle Check out run, add to model, trigger listeners.
+     * @param model
+     * @param run
+     * @param runFiles
+     */
+    private static void checkedOutRun(IModel model, Run run, RunFiles runFiles) {
+        model.addRun(run, runFiles);
+
+    }
+
+    private static boolean isSuperUser (ClientId id){
+        return id.getClientType().equals(ClientType.Type.ADMINISTRATOR);
+    }
     
+    private static void cancelRun(Run run, IModel model, IController controller, ClientId fromId) {
+        
+        Run theRun = model.getRun(run.getElementId());
+        ClientId whoCheckedOut = model.getRunCheckedOutBy (run);
+        
+        if (theRun == null){
+            // TODO unable to cancel run?!
+            StaticLog.unclassified("cancelRun ", new Exception("Unable to cancel (fetch) run "+run));
+            
+        } else if ((run.getStatus() == RunStates.BEING_JUDGED) || isSuperUser(fromId)){
+            
+            if (isSuperUser(fromId) || fromId.equals(whoCheckedOut)){
+                
+                // authorized to cancel the run.
+                model.cancelRunCheckOut(theRun, fromId);
+                
+                Run availableRun = model.getRun(run.getElementId());
+                Packet availableRunPacket = PacketFactory.createRunAvailable(model.getClientId(), fromId, availableRun);
+                
+                controller.sendToAdministrators(availableRunPacket);
+                controller.sendToJudges(availableRunPacket);
+                controller.sendToScoreboards(availableRunPacket); // TODO send this to boards to ?
+                controller.sendToServers(availableRunPacket); 
+            } else {
+                // Un authorized
+                StaticLog.unclassified("cancelRun ", new Exception("Unable to cancel run "+run+" user "+fromId+" "+whoCheckedOut));
+                
+            }
+        } else {
+            // un authorized
+            StaticLog.unclassified("cancelRun ", new Exception("Unable to cancel run "+run+" user "+fromId+" "+whoCheckedOut));
+        }
+    }
+
+    private static void judgeRun(Run run, IModel model, IController controller, JudgementRecord judgementRecord,
+            RunResultFiles runResultFiles, ClientId fromId) {
+
+        Run theRun = model.getRun(run.getElementId());
+
+        if (theRun == null) {
+            // TODO code unable to get run
+            throw new SecurityException("Unable to judge run "+run+" could not fetch run");
+        } else {
+            model.addRunJudgement(run, judgementRecord, runResultFiles, fromId);
+            
+            Packet judgementPacket = PacketFactory.createRunJudgement(model.getClientId(), fromId, theRun, judgementRecord, runResultFiles);
+
+            if (judgementRecord.isSendToTeam()) {
+                controller.sendToClient(judgementPacket);
+            }
+            
+            controller.sendToAdministrators(judgementPacket);
+            controller.sendToJudges(judgementPacket);
+            controller.sendToScoreboards(judgementPacket);
+            controller.sendToServers(judgementPacket);
+        }
+    }
+
     /**
      * Checkout run.
      * 
-     * Either checks out run (marks as {@link edu.csus.ecs.pc2.core.model.Run.RunStates#BEING_JUDGED BEING_JUDGED})
-     * and send to everyone, or send a {@link edu.csus.ecs.pc2.core.packet.PacketType.Type#RUN_NOTAVAILABLE RUN_NOTAVAILABLE}.
+     * Either checks out run (marks as {@link edu.csus.ecs.pc2.core.model.Run.RunStates#BEING_JUDGED BEING_JUDGED}) and send to
+     * everyone, or send a {@link edu.csus.ecs.pc2.core.packet.PacketType.Type#RUN_NOTAVAILABLE RUN_NOTAVAILABLE}.
      * 
      * @param run
-     * @param fromId 
-     * @param model 
-     * @param controller 
+     * @param fromId
+     * @param model
+     * @param controller
      */
     private static void requestRun(Run run, IModel model, IController controller, ClientId fromId) {
 
         Run theRun = model.getRun(run.getElementId());
 
         if (run == null) {
+            
+            // Run not available, perhaps on another server.
             Packet packet = PacketFactory.createRunNotAvailable(model.getClientId(), fromId, run);
             controller.sendToClient(packet);
-        } else if (run.getStatus() == RunStates.NEW) {
+            
+        } else if (run.getStatus() == RunStates.NEW || fromId.getClientType().equals(ClientType.Type.ADMINISTRATOR)) {
+            // Run available, fetch it for judge.
+            
             model.updateRun(theRun, RunStates.BEING_JUDGED, fromId);
 
             theRun = model.getRun(run.getElementId());
@@ -162,6 +236,7 @@ public final class PacketHandler {
 
         } else {
 
+            // run not available for judging
             Packet notAvailableRunPacket = PacketFactory.createRunNotAvailable(model.getClientId(), fromId, theRun);
             controller.sendToClient(notAvailableRunPacket);
         }
@@ -186,7 +261,7 @@ public final class PacketHandler {
         } catch (Exception e) {
             // TODO: log handle exception
             e.printStackTrace();
-            StaticLog.log("Exception logged ", e);
+            StaticLog.unclassified("Exception logged ", e);
         }
     }
 
@@ -199,7 +274,7 @@ public final class PacketHandler {
      * <ol>
      * <li> {@link PacketFactory#CLIENT_ID}
      * <li> {@link PacketFactory#SITE_NUMBER}
-     * <li> {@link PacketFactory#SITE_NUMBER}
+     * <li> {@link PacketFactory#SITE_LIST}
      * <li> {@link PacketFactory#LANGUAGE_LIST}
      * <li> {@link PacketFactory#PROBLEM_LIST}
      * <li> {@link PacketFactory#JUDGEMENT_LIST}
@@ -221,7 +296,7 @@ public final class PacketHandler {
             }
         } catch (Exception e) {
             // TODO: log handle exception
-            StaticLog.log("Exception logged ", e);
+            StaticLog.unclassified("Exception logged ", e);
         }
 
         try {
@@ -231,7 +306,7 @@ public final class PacketHandler {
             }
         } catch (Exception e) {
             // TODO: log handle exception
-            StaticLog.log("Exception logged ", e);
+            StaticLog.unclassified("Exception logged ", e);
         }
 
         info("Site set to " + model.getSiteNumber());
@@ -245,7 +320,7 @@ public final class PacketHandler {
             }
         } catch (Exception e) {
             // TODO: log handle exception
-            StaticLog.log("Exception logged ", e);
+            StaticLog.unclassified("Exception logged ", e);
         }
 
         try {
@@ -257,7 +332,7 @@ public final class PacketHandler {
             }
         } catch (Exception e) {
             // TODO: log handle exception
-            StaticLog.log("Exception logged ", e);
+            StaticLog.unclassified("Exception logged ", e);
         }
 
         try {
@@ -269,7 +344,7 @@ public final class PacketHandler {
             }
         } catch (Exception e) {
             // TODO: log handle exception
-            StaticLog.log("Exception logged ", e);
+            StaticLog.unclassified("Exception logged ", e);
         }
 
         try {
@@ -280,7 +355,7 @@ public final class PacketHandler {
             
         } catch (Exception e) {
             // TODO: log handle exception
-            StaticLog.log("Exception logged ", e);
+            StaticLog.unclassified("Exception logged ", e);
         }
         
         try {
@@ -292,7 +367,7 @@ public final class PacketHandler {
             }
         } catch (Exception e) {
             // TODO: log handle exception
-            StaticLog.log("Exception logged ", e);
+            StaticLog.unclassified("Exception logged ", e);
         }
         
         unpackAndAddList (packet, model);

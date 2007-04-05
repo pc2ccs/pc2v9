@@ -105,6 +105,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     
     private static ConnectionHandlerID remoteServerConnectionHandlerID = null;
     
+    @SuppressWarnings("unused")
     private ParseArguments parseArguments = new ParseArguments();
     
     // TODO change this to UIPlugin
@@ -410,7 +411,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     public void receiveObject(Serializable object, ConnectionHandlerID connectionHandlerID) {
 
         // TODO code check the input connection to insure they are valid connection
-        info("receiveObject " + object.getClass().getName());
+        info("receiveObject (S,C) debug start : Processing " + object.getClass().getName());
 
         try {
 
@@ -467,11 +468,13 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             }
 
         } catch (Exception e) {
-            info("Exception in receiveObject(S,C): " + e.getMessage());
-            e.printStackTrace(System.err);
+            
+            // TODO Archive the packet that had an exception for future review - soon.
+            
+            System.err.println("Exception in receiveObject(S,C): " + e.getMessage());
+            StaticLog.unclassified("Exception in receiveObject ", e);
         }
-        info("receiveObject (S,C) debug end : Processing " + object.getClass().getName());
-
+        info("receiveObject (S,C) debug end   : Processing " + object.getClass().getName());
     }
 
     private void handleServerLoginFailure(Packet packet) {
@@ -620,17 +623,23 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      */
     public void receiveObject(Serializable object) {
 
-        info(" receiveObject(S) debug Processing " + object.getClass().getName());
+        info(" receiveObject(S) debug start " + object.getClass().getName());
 
-        if (object instanceof Packet) {
-            Packet packet = (Packet) object;
-            PacketFactory.dumpPacket(System.err, packet);
-            // TODO code put the server's connection handler id as 4th parameter
-            PacketHandler.handlePacket(this, model, packet, null);
-        } else {
-            info("receiveObject(S) Unsupported class received: " + object.getClass().getName());
+        try {
+            if (object instanceof Packet) {
+                Packet packet = (Packet) object;
+                PacketFactory.dumpPacket(System.err, packet);
+                
+                // TODO code put the server's connection handler id as 4th parameter
+                PacketHandler.handlePacket(this, model, packet, null);
+            } else {
+                info("receiveObject(S) Unsupported class received: " + object.getClass().getName());
+            }
+        } catch (Exception e) {
+            // TODO: log handle exception
+            StaticLog.unclassified("Exception logged ", e);
         }
-        info(" receiveObject(S) debug end Processing " + object.getClass().getName());
+        info(" receiveObject(S) debug end   " + object.getClass().getName());
 
     }
 
@@ -655,8 +664,14 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
 
     public static void info(String s) {
-        StaticLog.info(s);
+        StaticLog.unclassified(s);
         System.err.println(Thread.currentThread().getName() + " " + s);
+    }
+    
+    public static void info(String s, Exception exception) {
+        StaticLog.unclassified (s, exception);
+        System.err.println(Thread.currentThread().getName() + " " + s);
+        exception.printStackTrace(System.err);
     }
 
     public void setSiteNumber(int number) {
@@ -758,44 +773,18 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             }
         } catch (Exception e) {
             // TODO log this
-            System.err.println("Trouble showing frame " + e.getMessage());
-            e.printStackTrace(System.err);
+            info("Trouble showing frame ", e);
             model.loginDenied(clientId, null, e.getMessage());
         }
     }
-          
-          
-    // huh
-    // } catch (TransportException transportException) {
-    // // TODO log this
-    // System.err.println("TransportException: " + transportException.getMessage());
-    // String message = "Unable to contact server, contact staff";
-    // System.err.println(message);
-    //
-    // if (showDefaultUI) {
-    // loginFrame.setStatusMessage(message);
-    // }
-    //
-    // } catch (SecurityException securityException) {
-    // // TODO log this
-    // System.err.println("SecurityException: " + securityException.getMessage());
-    // securityException.printStackTrace(System.err);
-    // if (showDefaultUI) {
-    // loginFrame.setStatusMessage(securityException.getMessage());
-    // }
-    // } catch (Exception e) {
-    // // TODO log this
-    // System.err.println("Trouble showing frame " + e.getMessage());
-    // e.printStackTrace(System.err);
-    // if (showDefaultUI) {
-    // loginFrame.setStatusMessage("Trouble logging in try again ");
-    // }
 
+    /**
+     * Start the UI.
+     */
     public void start(String[] stringArray) {
 
-        String[] arguments = { "--site" };
+        String[] arguments = { "--site", "--login", "--id", "--password", "--loginUI" };
         parseArguments = new ParseArguments(stringArray, arguments);
-        
 
         // TODO parse arguments logic 
         
@@ -902,9 +891,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
         } catch (Exception e) {
             // TODO: log handle exception
-            // StaticLog.log("Exception logged ", e);
-            System.err.println("Exception " + e.getMessage());
-            e.printStackTrace();
+            info ("Exception logged ", e);
         }
 
     }

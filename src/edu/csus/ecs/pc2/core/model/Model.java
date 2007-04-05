@@ -22,6 +22,13 @@ import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
 /**
+ * Implementation of IModel.
+ * 
+ * This model is not responsible for logic, just storage.  So, for example,
+ * {@link #cancelRunCheckOut(Run, ClientId)} will simply update the Run
+ * but will not check whether the run should be cancelled.  The Controller
+ * should be used to check whether a Run should be cancelled.  Other logic
+ * of this sort is in the Controller, not the Model.
  * 
  * @author pc2@ecs.csus.edu
  * 
@@ -49,7 +56,7 @@ public class Model implements IModel {
     private Vector<ISiteListener> siteListenerList = new Vector<ISiteListener>();
     
     /**
-     * List of who checked a run out.
+     * Contains name of client (judge or admin) who checks out the run.
      */
     private Hashtable<ElementId, ClientId> runCheckOutList = new Hashtable<ElementId, ClientId>(200);
 
@@ -335,7 +342,12 @@ public class Model implements IModel {
         RunEvent runEvent = new RunEvent(RunEvent.Action.ADDED, run, null);
         fireRunListener(runEvent);
     }
-
+    
+    public void addRun(Run run, RunFiles runFiles) {
+        runList.add(run); 
+        RunEvent runEvent = new RunEvent(RunEvent.Action.CHECKEDOUT_RUN, run, runFiles);
+        fireRunListener(runEvent);
+    }
 
     public void generateNewAccounts(String clientTypeName, int count, boolean active) {
         ClientType.Type type = ClientType.Type.valueOf(clientTypeName.toUpperCase());
@@ -503,6 +515,9 @@ public class Model implements IModel {
         this.siteNumber = number;
     }
 
+    
+    @SuppressWarnings("unused")
+    // TODO remove isServer method ?
     private boolean isServer() {
         return getClientId().getClientType().equals(ClientType.Type.SERVER);
     }
@@ -603,11 +618,11 @@ public class Model implements IModel {
         
         Run theRun = runList.get(run);
         ClientId whoCheckedOut = runCheckOutList.get(run.getElementId());
-        
-        if (whoCheckedOut == null || whoCheckedOut.equals(whoJudgedItId)){
-            // TODO security code, handle this problem.
-            System.err.println("Security Warning "+run+" not checked out by "+whoJudgedItId);
-        }
+//        
+//        if (whoCheckedOut == null || whoCheckedOut.equals(whoJudgedItId)){
+//            // TODO security code, handle this problem.
+//            System.err.println("Security Warning "+run+" not checked out by "+whoJudgedItId);
+//        }
         
         runList.updateRun(theRun, judgementRecord);
         runCheckOutList.remove(whoCheckedOut);
@@ -617,5 +632,26 @@ public class Model implements IModel {
         fireRunListener(runEvent);
         
     }
+
+    public void cancelRunCheckOut(Run run, ClientId fromId) {
+
+        ClientId whoCheckedOut = runCheckOutList.get(run.getElementId());
+//        if (fromId.equals(whoCheckedOut)) {
+//            // TODO security code, handle this problem.
+//            StaticLog.unclassified("Security Warning canceling "+run+",  not checked out by "+whoCheckedOut);
+//        }
+        
+        runCheckOutList.remove(whoCheckedOut);
+        runList.updateRun(run, RunStates.NEW);
+        Run theRun = runList.get(run);
+        
+        RunEvent runEvent = new RunEvent(RunEvent.Action.RUN_AVIALABLE, theRun, null);
+        fireRunListener(runEvent);
+    }
+
+    public ClientId getRunCheckedOutBy(Run run) {
+        return runCheckOutList.get(run.getElementId());
+    }
+
 
 }

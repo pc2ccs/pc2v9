@@ -57,6 +57,14 @@ public interface IModel {
      * @param run
      */
     void addRun(Run run);
+    
+    /**
+     * Add a run from the server, a run ready to be judged.
+     * 
+     * @param run submitted run
+     * @param runFiles submitted run files (like source files)
+     */
+    void addRun (Run run, RunFiles runFiles);
 
     /**
      * Add new accounts.
@@ -270,4 +278,18 @@ public interface IModel {
      * @param judgeId
      */
     void addRunJudgement(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles, ClientId judgeId);
+
+    /**
+     * Cancel a checked out run.
+     * @param run
+     * @param fromId
+     */
+    void cancelRunCheckOut(Run run, ClientId fromId);
+
+    /**
+     * Returns which user has checked out the input run.
+     * @param run
+     * @return clientId, or null if not checked out.
+     */
+    ClientId getRunCheckedOutBy(Run run);
 }
