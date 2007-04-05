@@ -82,6 +82,10 @@ public final class PacketHandler {
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
             model.runNotAvailable(run);
             
+        } else if (packetType.equals(Type.RUN_AVAILABLE)) {
+            Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
+            model.availableRun (run);
+            
         } else if (packetType.equals(Type.RUN_JUDGEMENT)) {
             // Judgement from judge to server
             // TODO security code insure that this judge/admin can make this change
@@ -227,7 +231,7 @@ public final class PacketHandler {
 
             Packet checkOutPacket = PacketFactory.createCheckedOutRun(model.getClientId(), fromId, theRun, runFiles, fromId);
             controller.sendToClient(checkOutPacket);
-
+            
             // Send to all other interested parties.
             controller.sendToAdministrators(checkOutPacket);
             controller.sendToJudges(checkOutPacket);

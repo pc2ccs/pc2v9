@@ -292,4 +292,10 @@ public interface IModel {
      * @return clientId, or null if not checked out.
      */
     ClientId getRunCheckedOutBy(Run run);
+
+    /**
+     * Available run, a canceled run.
+     * @param run
+     */
+    void availableRun(Run run);
 }

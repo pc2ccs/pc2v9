@@ -41,6 +41,44 @@ import edu.csus.ecs.pc2.ui.server.ServerView;
 import edu.csus.ecs.pc2.ui.team.TeamView;
 
 /**
+ * Implementation of Contest Controller.
+ * 
+ * Run Flow, submit run.
+ * <ol>
+ * <li> Team: {@link #submitRun(Problem, Language, String)}
+ * <li> Server: {@link edu.csus.ecs.pc2.core.PacketHandler#handlePacket(IController, IModel, Packet, ConnectionHandlerID)}
+ * <li> Server: {@link edu.csus.ecs.pc2.core.model.Model#acceptRun(Run, RunFiles)}
+ * <li> Team: {@link edu.csus.ecs.pc2.core.model.IRunListener#runAdded(RunEvent)}
+ * RunEvent action is: {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#ADDED}
+ * <li> Client: {@link edu.csus.ecs.pc2.core.model.IRunListener#runAdded(RunEvent)}
+ * RunEvent action is: {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#ADDED}
+ * </ol>
+ * Check out run
+ * <ol> 
+ * <li> Judge: {@link #checkOutRun(Run)}
+ * <li> Server: {@link edu.csus.ecs.pc2.core.PacketHandler#requestRun(Run, IModel, IController, ClientId)} 
+ * <li> Judge and clients: {@link edu.csus.ecs.pc2.core.model.IRunListener#runChanged(RunEvent)},
+ * check {@link edu.csus.ecs.pc2.core.model.RunEvent#getSentToClientId()} to learn if you are the judge/client to get the run.
+ * RunEvent action is: {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#CHECKEDOUT_RUN}
+ * </ol>
+ * Submit Judgement
+ * <ol>
+ * <li> Judge: {@link #submitRunJudgement(Run, JudgementRecord, RunResultFiles)}
+ * <li> Server: {@link edu.csus.ecs.pc2.core.PacketHandler#judgeRun(Run, IModel, IController, JudgementRecord, RunResultFiles, ClientId)}
+ * <li> Team: {@link edu.csus.ecs.pc2.core.model.IRunListener#runChanged(RunEvent)} if
+ * {@link Run#isSendToTeams()} set true.
+ * RunEvent action is: {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#UPDATED}
+ * <li> Clients: {@link edu.csus.ecs.pc2.core.model.IRunListener#runChanged(RunEvent)} 
+ * RunEvent action is: {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#UPDATED}
+ * </ol>
+ * Cancel Run
+ * <ol>
+ * <li> Judge: {@link #cancelRun(Run)}
+ * <li> Server: {@link edu.csus.ecs.pc2.core.PacketHandler#cancelRun(Run, IModel, IController, ClientId)}
+ * <li> Team: n/a
+ * <li> Judge/Clients: {@link edu.csus.ecs.pc2.core.model.IRunListener#runChanged(RunEvent)}.
+ * RunEvent action is: {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#RUN_AVIALABLE}
+ * </ol>
  * 
  * @author pc2@ecs.csus.edu *
  */

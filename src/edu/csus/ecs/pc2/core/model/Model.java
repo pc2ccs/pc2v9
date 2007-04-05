@@ -348,6 +348,14 @@ public class Model implements IModel {
         RunEvent runEvent = new RunEvent(RunEvent.Action.CHECKEDOUT_RUN, run, runFiles);
         fireRunListener(runEvent);
     }
+    
+    public void availableRun(Run run) {
+        runList.add(run); 
+        RunEvent runEvent = new RunEvent(RunEvent.Action.RUN_AVIALABLE, run, null);
+        fireRunListener(runEvent); 
+    }
+
+
 
     public void generateNewAccounts(String clientTypeName, int count, boolean active) {
         ClientType.Type type = ClientType.Type.valueOf(clientTypeName.toUpperCase());
