@@ -21,16 +21,17 @@ public interface IModel {
 
     void addProblem(Problem problem);
 
-    void addContestTime(ContestTime contestTime, int siteNumber);
+    void addContestTime(ContestTime contestTime);
 
     void addJudgement(Judgement judgement);
 
     void addSite(Site site);
-    
+
     /**
      * Update the run information.
      * 
      * To add a judgement, use {@link #addRunJudgement(Run, JudgementRecord, RunResultFiles, ClientId)}
+     * 
      * @param run
      */
     void updateRun(Run run);
@@ -39,10 +40,13 @@ public interface IModel {
 
     void updateProblem(Problem problem);
 
-    void updateContestTime(ContestTime contestTime, int siteNumber);
+    void updateContestTime(ContestTime contestTime, int inSiteNumber);
     
+    void addAccount(Account account);
+
     /**
      * Update current contest time values.
+     * 
      * @param contestTime
      */
     void updateContestTime(ContestTime contestTime);
@@ -51,7 +55,7 @@ public interface IModel {
 
     void updateSite(Site site);
 
-    void updateAccount (Account account);
+    void updateAccount(Account account);
 
     /**
      * Start Contest Clock at site.
@@ -151,13 +155,6 @@ public interface IModel {
      * @return array of Language
      */
     Language[] getLanguages();
-
-    /**
-     * The name of the class to display after login.
-     * 
-     * @return class name
-     */
-    String getFrameName();
 
     /**
      * get title for this logged in client.

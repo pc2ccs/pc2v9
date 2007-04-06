@@ -268,6 +268,11 @@ public class AccountList extends BaseElementList {
         Account account = (Account) elementObject;
         return account.getClientId().getTripletKey();
     }
+    
+    public Account get(ClientId id){
+        Account account = new Account(id, "", id.getSiteNumber());
+        return (Account) get(account);
+    }
 
     /**
      * Get all accounts

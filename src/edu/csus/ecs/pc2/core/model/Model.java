@@ -24,11 +24,9 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 /**
  * Implementation of IModel.
  * 
- * This model is not responsible for logic, just storage.  So, for example,
- * {@link #cancelRunCheckOut(Run, ClientId)} will simply update the Run
- * but will not check whether the run should be cancelled.  The Controller
- * should be used to check whether a Run should be cancelled.  Other logic
- * of this sort is in the Controller, not the Model.
+ * This model is not responsible for logic, just storage. So, for example, {@link #cancelRunCheckOut(Run, ClientId)} will simply
+ * update the Run but will not check whether the run should be cancelled. The Controller should be used to check whether a Run
+ * should be cancelled. Other logic of this sort is in the Controller, not the Model.
  * 
  * @author pc2@ecs.csus.edu
  * 
@@ -131,8 +129,6 @@ public class Model implements IModel {
         ContestTime contestTime = new ContestTime();
         contestTime.setElapsedMins(9);
         contestTime.startContestClock();
-
-        addContestTime(contestTime, siteNumber);
 
         String[] judgementNames = { "Yes", "No - compilation error", "No - incorrect output", "No - It's just really bad",
                 "No - judges enjoyed a good laugh", "You've been bad - contact staff" };
@@ -313,6 +309,12 @@ public class Model implements IModel {
         SiteEvent siteEvent = new SiteEvent(SiteEvent.Action.ADDED, site);
         fireSiteListener(siteEvent);
     }
+    
+    public void addAccount(Account account) {
+        accountList.add(account);
+        AccountEvent accountEvent = new AccountEvent(AccountEvent.Action.ADDED,account);
+        fireAccountListener(accountEvent);
+    }
 
     public Judgement[] getJudgements() {
         return judgementDisplayList.getList();
@@ -335,6 +337,7 @@ public class Model implements IModel {
     
     /**
      * Add a run to run list, notify listeners.
+     * 
      * @param run
      */
     public void addRun (Run run){
@@ -373,6 +376,7 @@ public class Model implements IModel {
     
     /**
      * Generate new sites
+     * 
      * @param count
      * @param active
      */
@@ -427,17 +431,6 @@ public class Model implements IModel {
 
     public Site[] getSites() {
         return siteList.getList();
-    }
-
-    /**
-     * Return frame class name.
-     */
-    public String getFrameName() {
-        String typeName = localClientId.getClientType().toString();
-
-        // TODO change this to a table lookup
-
-        return typeName.charAt(0) + typeName.substring(1).toLowerCase() + "View";
     }
 
     public String getTitle() {
@@ -540,10 +533,14 @@ public class Model implements IModel {
     public ContestTime getContestTime(int inSiteNumber) {
         ContestTime contestTime2 = contestTimeList.get(inSiteNumber);
         if (contestTime2 == null){
-            StaticLog.info("getContestTime time for "+inSiteNumber+" does not exist, created it. ");
+            /**
+             * Insure that Contest Time is created.
+             */
+            StaticLog.info("Warning getContestTime time for "+inSiteNumber+" does not exist, created it. ");
             contestTime2 = new ContestTime();
+            contestTime2.setSiteNumber(inSiteNumber);
             contestTime2.startContestClock();
-            addContestTime(contestTime2, inSiteNumber);
+            addContestTime(contestTime2);
         }
         return  contestTime2;
     }
@@ -570,17 +567,13 @@ public class Model implements IModel {
         }
     }
 
-    public void addContestTime(ContestTime contestTime, int inSiteNumber) {
+    public void addContestTime(ContestTime contestTime) {
         if (contestTime == null) {
             throw new IllegalArgumentException("contestTime is null");
         }
-        contestTimeList.add(inSiteNumber, contestTime);
-        if (contestTime != null) {
-            ContestTimeEvent contestTimeEvent = new ContestTimeEvent(ContestTimeEvent.Action.ADDED, contestTime, inSiteNumber);
-            fireContestTimeListener(contestTimeEvent);
-        } else {
-            throw new SecurityException("Attempted to stop clock site " + inSiteNumber);
-        }
+        contestTimeList.add(contestTime);
+        ContestTimeEvent contestTimeEvent = new ContestTimeEvent(ContestTimeEvent.Action.ADDED, contestTime, contestTime.getSiteNumber());
+        fireContestTimeListener(contestTimeEvent);
     }
 
     public Enumeration<ClientId> getLoggedInClients(Type type) {
@@ -627,10 +620,10 @@ public class Model implements IModel {
         Run theRun = runList.get(run);
         ClientId whoCheckedOut = runCheckOutList.get(run.getElementId());
 //        
-//        if (whoCheckedOut == null || whoCheckedOut.equals(whoJudgedItId)){
-//            // TODO security code, handle this problem.
-//            System.err.println("Security Warning "+run+" not checked out by "+whoJudgedItId);
-//        }
+// if (whoCheckedOut == null || whoCheckedOut.equals(whoJudgedItId)){
+// // TODO security code, handle this problem.
+// System.err.println("Security Warning "+run+" not checked out by "+whoJudgedItId);
+// }
         
         runList.updateRun(theRun, judgementRecord);
         runCheckOutList.remove(whoCheckedOut);
@@ -644,10 +637,10 @@ public class Model implements IModel {
     public void cancelRunCheckOut(Run run, ClientId fromId) {
 
         ClientId whoCheckedOut = runCheckOutList.get(run.getElementId());
-//        if (fromId.equals(whoCheckedOut)) {
-//            // TODO security code, handle this problem.
-//            StaticLog.unclassified("Security Warning canceling "+run+",  not checked out by "+whoCheckedOut);
-//        }
+// if (fromId.equals(whoCheckedOut)) {
+// // TODO security code, handle this problem.
+// StaticLog.unclassified("Security Warning canceling "+run+", not checked out by "+whoCheckedOut);
+// }
         
         runCheckOutList.remove(whoCheckedOut);
         runList.updateRun(run, RunStates.NEW);
@@ -662,44 +655,84 @@ public class Model implements IModel {
     }
 
     public void updateLanguage(Language language) {
-        // TODO code 
-
+        languageList.update(language);
+        LanguageEvent languageEvent = new LanguageEvent(LanguageEvent.Action.UPDATED, language);
+        fireLanguageListener(languageEvent);
     }
 
     public void updateProblem(Problem problem) {
-        // TODO code 
-
+        problemList.update(problem);
+        ProblemEvent problemEvent = new ProblemEvent(ProblemEvent.Action.UPDATED, problem);
+        fireProblemListener(problemEvent);
     }
 
-    public void updateContestTime(ContestTime contestTime, int siteNum) {
-        // TODO code 
+    public void updateContestTime(ContestTime contestTime, int inSiteNumber) {
+        if (contestTime == null) {
+            throw new IllegalArgumentException("contestTime is null");
+        }
+        if (inSiteNumber != contestTime.getSiteNumber()){
+            throw new IllegalArgumentException("contestTime site number ("+contestTime+") does not match "+inSiteNumber);
+        }
+        contestTimeList.update(contestTime);
+        ContestTimeEvent contestTimeEvent = new ContestTimeEvent(ContestTimeEvent.Action.UPDATED, contestTime, contestTime.getSiteNumber());
+        fireContestTimeListener(contestTimeEvent);
 
     }
 
     public void updateContestTime(ContestTime contestTime) {
-        // TODO code 
-
+        if (contestTime == null) {
+            throw new IllegalArgumentException("contestTime is null");
+        }
+        contestTimeList.update(contestTime);
+        ContestTimeEvent contestTimeEvent = new ContestTimeEvent(ContestTimeEvent.Action.UPDATED, contestTime, contestTime.getSiteNumber());
+        fireContestTimeListener(contestTimeEvent);
     }
 
     public void updateJudgement(Judgement judgement) {
-        // TODO code 
-
+        judgementList.update(judgement);
+        JudgementEvent judgementEvent = new JudgementEvent(JudgementEvent.Action.UPDATED, judgement);
+        fireJudgementListener(judgementEvent);
     }
 
     public void updateSite(Site site) {
-        // TODO code 
-
+        siteList.update(site);
+        SiteEvent siteEvent = new SiteEvent(SiteEvent.Action.MODIFIED, site);
+        fireSiteListener(siteEvent);
     }
 
     public void updateRun(Run run) {
-        // TODO code 
-
+        runList.updateRun(run);
+        RunEvent runEvent = new RunEvent(RunEvent.Action.UPDATED, run, null);
+        fireRunListener(runEvent);
     }
 
     public void updateAccount(Account account) {
-        // TODO code 
+        accountList.update(account);
+        AccountEvent accountEvent = new AccountEvent(AccountEvent.Action.UPDATED, account);
+        fireAccountListener(accountEvent);
+    }
+
+    private Language getLanguage(ElementId elementId) {
+        return (Language) languageList.get(elementId);
+    }
+
+    private Problem getProblem(ElementId elementId) {
+        return (Problem) problemList.get(elementId);
+    }
+
+    private Judgement getJudgement(ElementId elementId) {
+        return (Judgement) judgementList.get(elementId);
+    }
+
+    private Site getSite(ElementId elementId) {
+        return (Site) siteList.get(elementId);
+    }
+
+    private Account getAccount(ElementId elementId) {
+        return (Account) accountList.get(elementId);
 
     }
+
 
 
 }

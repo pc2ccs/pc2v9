@@ -1,13 +1,11 @@
 package edu.csus.ecs.pc2.core.model;
 
-import java.io.Serializable;
 import java.util.GregorianCalendar;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 
 /**
  * Contest Time Information.
- * 
  * 
  * Methods used to access contest time as well as start and stop contest time. <br>
  * Start clock: {@link #startContestClock()}. <br>
@@ -21,7 +19,7 @@ import java.util.TimeZone;
  */
 
 // $HeadURL$
-public class ContestTime implements Serializable {
+public class ContestTime implements IElementObject {
 
     /**
      * 
@@ -60,7 +58,29 @@ public class ContestTime implements Serializable {
     /**
      * Is contest clock running (counting down) ?
      */
-    private boolean running = false;
+    private boolean contestRunning = false;
+
+    private int siteNumber;
+
+    private ElementId elementId;
+
+    public ContestTime() {
+        this("Contest Time");
+    }
+
+    /**
+     * Create contest time with given site.
+     * 
+     * @param siteNumber
+     */
+    public ContestTime(int siteNumber) {
+        this("Contest Time Site " + siteNumber);
+        this.siteNumber = siteNumber;
+    }
+
+    private ContestTime(String idString) {
+        elementId = new ElementId(idString);
+    }
 
     /**
      * 
@@ -83,7 +103,7 @@ public class ContestTime implements Serializable {
      * @return true if contest clock running, false if clock stopped.
      */
     public boolean isContestRunning() {
-        return running;
+        return contestRunning;
     }
 
     /**
@@ -217,7 +237,7 @@ public class ContestTime implements Serializable {
     }
 
     private long secsSinceContestStart() {
-        if (running) {
+        if (contestRunning) {
             TimeZone tz = TimeZone.getTimeZone("GMT");
             GregorianCalendar cal = new GregorianCalendar(tz);
 
@@ -259,9 +279,9 @@ public class ContestTime implements Serializable {
     }
 
     public void startContestClock() {
-        if (!running) {
+        if (!contestRunning) {
             forceContestStartTimeResync();
-            running = true;
+            contestRunning = true;
         }
     }
 
@@ -270,20 +290,13 @@ public class ContestTime implements Serializable {
      * 
      */
     public void stopContestClock() {
-        if (running) {
+        if (contestRunning) {
             elapsedSecs = elapsedSecs + secsSinceContestStart();
-            running = false;
+            contestRunning = false;
         }
     }
 
-    /**
-     * Is contest clock running?.
-     * 
-     * @return true if clock is running.
-     */
-    public boolean isRunning() {
-        return running;
-    }
+
 
     /**
      * @return Returns the resumeTime.
@@ -382,5 +395,22 @@ public class ContestTime implements Serializable {
         long milliDiff = gregorianCalendar.getTime().getTime() - serverTransmitTime.getTime().getTime();
 
         localClockOffset = milliDiff / 1000;
+    }
+
+    public ElementId getElementId() {
+        return elementId;
+    }
+
+    public int versionNumber() {
+        return elementId.getVersionNumber();
+    }
+
+    public int getSiteNumber() {
+        return siteNumber;
+    }
+
+    public void setSiteNumber(int siteNumber) {
+        this.siteNumber = siteNumber;
+
     }
 }

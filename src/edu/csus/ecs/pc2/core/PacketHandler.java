@@ -379,7 +379,7 @@ public final class PacketHandler {
         try {
             ContestTime contestTime = (ContestTime) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME);
             if (contestTime != null) {
-                model.addContestTime(contestTime, model.getSiteNumber());
+                model.addContestTime(contestTime);
             }
             
         } catch (Exception e) {

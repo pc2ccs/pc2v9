@@ -242,7 +242,7 @@ public class JudgeView extends JFrame implements UIPlugin {
 //        model.addLoginListener(new LoginListenerImplementation());
 //        model.addSiteListener(new SiteListenerImplementation());
         
-        setFrameTitle(model.getContestTime().isRunning());
+        setFrameTitle(model.getContestTime().isContestRunning());
         
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
