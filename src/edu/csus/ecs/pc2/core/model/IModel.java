@@ -26,6 +26,32 @@ public interface IModel {
     void addJudgement(Judgement judgement);
 
     void addSite(Site site);
+    
+    /**
+     * Update the run information.
+     * 
+     * To add a judgement, use {@link #addRunJudgement(Run, JudgementRecord, RunResultFiles, ClientId)}
+     * @param run
+     */
+    void updateRun(Run run);
+
+    void updateLanguage(Language language);
+
+    void updateProblem(Problem problem);
+
+    void updateContestTime(ContestTime contestTime, int siteNumber);
+    
+    /**
+     * Update current contest time values.
+     * @param contestTime
+     */
+    void updateContestTime(ContestTime contestTime);
+
+    void updateJudgement(Judgement judgement);
+
+    void updateSite(Site site);
+
+    void updateAccount (Account account);
 
     /**
      * Start Contest Clock at site.
@@ -57,14 +83,16 @@ public interface IModel {
      * @param run
      */
     void addRun(Run run);
-    
+
     /**
      * Add a run from the server, a run ready to be judged.
      * 
-     * @param run submitted run
-     * @param runFiles submitted run files (like source files)
+     * @param run
+     *            submitted run
+     * @param runFiles
+     *            submitted run files (like source files)
      */
-    void addRun (Run run, RunFiles runFiles);
+    void addRun(Run run, RunFiles runFiles);
 
     /**
      * Add new accounts.
@@ -248,16 +276,18 @@ public interface IModel {
      */
     Run[] getRuns();
 
-    void runUpdated (Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles, ClientId whoUpdatedRun);
-    
+    void runUpdated(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles, ClientId whoUpdatedRun);
+
     /**
      * Add a run not available, notify listeners.
+     * 
      * @param run
      */
-    void runNotAvailable (Run run);
+    void runNotAvailable(Run run);
 
     /**
      * Update the run.
+     * 
      * @param run
      * @param newState
      * @param whoChangedRun
@@ -266,12 +296,14 @@ public interface IModel {
 
     /**
      * Get submitted files for input run.
+     * 
      * @param run
      */
     RunFiles getRunFiles(Run run);
 
     /**
      * Add a run judgement.
+     * 
      * @param run
      * @param judgementRecord
      * @param runResultFiles
@@ -281,6 +313,7 @@ public interface IModel {
 
     /**
      * Cancel a checked out run.
+     * 
      * @param run
      * @param fromId
      */
@@ -288,6 +321,7 @@ public interface IModel {
 
     /**
      * Returns which user has checked out the input run.
+     * 
      * @param run
      * @return clientId, or null if not checked out.
      */
@@ -295,6 +329,7 @@ public interface IModel {
 
     /**
      * Available run, a canceled run.
+     * 
      * @param run
      */
     void availableRun(Run run);

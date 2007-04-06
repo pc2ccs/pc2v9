@@ -661,5 +661,45 @@ public class Model implements IModel {
         return runCheckOutList.get(run.getElementId());
     }
 
+    public void updateLanguage(Language language) {
+        // TODO code 
+
+    }
+
+    public void updateProblem(Problem problem) {
+        // TODO code 
+
+    }
+
+    public void updateContestTime(ContestTime contestTime, int siteNum) {
+        // TODO code 
+
+    }
+
+    public void updateContestTime(ContestTime contestTime) {
+        // TODO code 
+
+    }
+
+    public void updateJudgement(Judgement judgement) {
+        // TODO code 
+
+    }
+
+    public void updateSite(Site site) {
+        // TODO code 
+
+    }
+
+    public void updateRun(Run run) {
+        // TODO code 
+
+    }
+
+    public void updateAccount(Account account) {
+        // TODO code 
+
+    }
+
 
 }
