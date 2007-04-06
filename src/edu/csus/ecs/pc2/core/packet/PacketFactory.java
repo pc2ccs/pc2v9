@@ -9,6 +9,7 @@ import java.util.Properties;
 import edu.csus.ecs.pc2.core.list.ClarificationList;
 import edu.csus.ecs.pc2.core.list.LanguageDisplayList;
 import edu.csus.ecs.pc2.core.list.ProblemDisplayList;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -63,6 +64,11 @@ public final class PacketFactory {
     public static final String REQUESTED_RUN_ELEMENT_ID = "REQUESTED_RUN_ELEMENT_ID";
 
     public static final String CLIENT_ID = "CLIENT_ID";
+    
+    /**
+     * Array of ClientIds of logged in users.
+     */
+    public static final String LOGGED_IN_USERS = "LOGGED_IN_USERS";
 
     /**
      * Site Number
@@ -654,21 +660,30 @@ public final class PacketFactory {
      * @param languages
      * @param problems
      * @param judgements
+     * @param loggedInUsers 
      */
     public static Packet createLoginSuccess(ClientId source, ClientId destination, ContestTime inContestTime, int siteNumber,
-            Language[] languages, Problem[] problems, Judgement[] judgements, Site [] sites, Run [] runs) {
-        Properties prop = new Properties();
-        prop.put(SITE_NUMBER, new Integer(siteNumber));
-        prop.put(PacketType.CONTEST_TIME, inContestTime);
-        prop.put(CLIENT_ID, destination);
-        prop.put(PROBLEM_LIST, problems);
-        prop.put(LANGUAGE_LIST, languages);
-        prop.put(JUDGEMENT_LIST, judgements);
-        prop.put(SITE_LIST, sites);
-        prop.put(RUN_LIST, runs);
+            Language[] languages, Problem[] problems, Judgement[] judgements, Site [] sites, Run [] runs, ClientId[] loggedInUsers) {
+        try {
+            Properties prop = new Properties();
+            prop.put(SITE_NUMBER, new Integer(siteNumber));
+            prop.put(PacketType.CONTEST_TIME, inContestTime);
+            prop.put(CLIENT_ID, destination);
+            prop.put(PROBLEM_LIST, problems);
+            prop.put(LANGUAGE_LIST, languages);
+            prop.put(JUDGEMENT_LIST, judgements);
+            prop.put(SITE_LIST, sites);
+            prop.put(RUN_LIST, runs);
+            prop.put(LOGGED_IN_USERS, loggedInUsers);
 
-        Packet packet = new Packet(Type.LOGIN_SUCCESS, source, destination, prop);
-        return packet;
+            Packet packet = new Packet(Type.LOGIN_SUCCESS, source, destination, prop);
+            return packet;
+        } catch (Exception e) {
+            System.err.println("Exception creating LOGIN_SUCCESS ");
+            e.printStackTrace(System.err);
+            StaticLog.log("Exception in createLoginSuccess ", e);
+            throw new SecurityException(e.getMessage());
+        }
     }
 
     /**

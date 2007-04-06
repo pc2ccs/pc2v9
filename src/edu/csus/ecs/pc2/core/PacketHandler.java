@@ -157,7 +157,7 @@ public final class PacketHandler {
             controller.sendToJudges(packet);
             controller.sendToScoreboards(packet);
             if (sendToServers) {
-                controller.sendToScoreboards(packet);
+                controller.sendToServers(packet);
             }
         }
     }
@@ -399,6 +399,20 @@ public final class PacketHandler {
             StaticLog.unclassified("Exception logged ", e);
         }
         
+        try {
+            ClientId [] listOfLoggedInUsers = (ClientId[]) PacketFactory.getObjectValue(packet, PacketFactory.LOGGED_IN_USERS);
+            for (ClientId id : listOfLoggedInUsers){
+                if (isServer (id)){
+                    if ( ! model.isLoggedIn(id)){
+                        loginToOtherSite (clientId.getSiteNumber()); 
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // TODO: log handle exception
+            StaticLog.unclassified("Exception logged ", e);
+        }
+        
         unpackAndAddList (packet, model);
         
         if (model.isLoggedIn()){
@@ -407,6 +421,15 @@ public final class PacketHandler {
             String message = "Trouble loggin in, check logs";
             model.loginDenied(packet.getDestinationId(), connectionHandlerID, message);
         }
+    }
+
+    private static void loginToOtherSite(int siteNumber) {
+        info("debug loginToOtherSite "+siteNumber);
+        
+    }
+
+    private static boolean isServer(ClientId id) {
+        return id.getClientType().equals(ClientType.Type.SERVER);
     }
 
     /**

@@ -4,11 +4,13 @@ import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.VersionInfo;
+import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -663,11 +665,37 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         Packet packet = PacketFactory.createMessage(model.getClientId(), destinationId, message);
         sendToClient(connectionHandlerID, packet);
     }
+    
+    /**
+     * Return an array of all logged in users.
+     * 
+     * @return array of clientId's.
+     */
+    private ClientId [] allLoggedInUsers() {
+        Vector<ClientId> clientList = new Vector<ClientId>();
+
+        for (ClientType.Type ctype : ClientType.Type.values()) {
+
+            Enumeration<ClientId> enumeration = model.getLoggedInClients(ctype);
+            if (model.getLoggedInClients(ctype).hasMoreElements()) {
+                while (enumeration.hasMoreElements()) {
+                    ClientId aClientId = (ClientId) enumeration.nextElement();
+                    clientList.addElement(aClientId);
+                }
+            }
+        }
+        if (clientList.size() == 0) {
+            return new ClientId[0];
+        } else {
+            ClientId [] clients = (ClientId[]) clientList.toArray(new ClientId[clientList.size()]);
+            return clients;
+        }
+    }
 
     private void sendLoginSuccess(ClientId clientId, ConnectionHandlerID connectionHandlerID) {
         Packet packetToSend = PacketFactory.createLoginSuccess(model.getClientId(), clientId, model.getContestTime(), model
                 .getSiteNumber(), model.getLanguages(), model.getProblems(), model.getJudgements(), model.getSites(), model
-                .getRuns());
+                .getRuns(), allLoggedInUsers());
         sendToClient(packetToSend);
     }
 
@@ -782,11 +810,14 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         while (clientIds.hasMoreElements()) {
             ClientId clientId = clientIds.nextElement();
             ConnectionHandlerID connectionHandlerID = model.getConnectionHandleID(clientId);
-            if (isThisSite(clientId.getSiteNumber())) {
+            boolean isThisServer = type.equals(Type.SERVER) && isThisSite(clientId.getSiteNumber());
+            if ( ! isThisServer ){
+                /**
+                 * Only send to a client that is not this site's server, ever.
+                 */
                 sendToClient(connectionHandlerID, packet);
             }
         }
-
     }
 
     private boolean isThisSite(int siteNumber) {
@@ -900,6 +931,8 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             writer.println("Build " + new VersionInfo().getBuildNumber());
             writer.println(new VersionInfo().getSystemVersionInfo());
             writer.println("Date: " + new Date());
+            
+
 
             writer.println();
             writer.println("-- Accounts --");
@@ -917,8 +950,22 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             // Sites
             writer.println();
             writer.println("-- " + model.getSites().length + " sites --");
-            for (Site site1 : model.getSites()) {
-                writer.println("Site " + site1.getSiteNumber() + " " + site1.getDisplayName() + "/" + site1.getPassword());
+            Site [] sites  = model.getSites();
+            Arrays.sort(sites,new SiteComparatorBySiteNumber());
+            for (Site site1 : sites) {
+                writer.println("Site " + site1.getSiteNumber() + " " + site1.getDisplayName() + "/" + site1.getPassword()+" "+site1.getElementId());
+            }
+            
+            // Contest Times
+            writer.println();
+            writer.println("-- Contest Times -- ");
+            for (Site site1 : sites) {
+                int siteNumber = site1.getSiteNumber();
+                ContestTime contestTime = model.getContestTime(siteNumber);
+                if (contestTime != null){
+                    writer.println("Site " + site1.getSiteNumber() + " running" + contestTime.isContestRunning()+" e="
+                            + contestTime.getElapsedTimeStr()+" r="+contestTime.getRemainingTimeStr());
+                }
             }
 
             // Problem
