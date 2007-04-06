@@ -23,13 +23,13 @@ public class LanguageEvent {
          */
         DELETED,
         /**
-         * A new language submission.
+         * A new language.
          */
         ADDED,
         /**
-         * A new language submission.
+         * Modified Language.
          */
-        UPDATED,
+        CHANGED,
 
     }
 

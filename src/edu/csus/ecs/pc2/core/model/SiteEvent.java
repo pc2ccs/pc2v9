@@ -37,7 +37,7 @@ public class SiteEvent {
         /**
          * A site modified.
          */
-        MODIFIED,
+        CHANGED,
 
     }
 

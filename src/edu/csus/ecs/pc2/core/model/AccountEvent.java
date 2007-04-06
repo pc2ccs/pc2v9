@@ -21,7 +21,7 @@ public class AccountEvent {
         /**
          * Account updated.
          */
-        UPDATED,
+        CHANGED,
         /**
          * Account deleted
          */

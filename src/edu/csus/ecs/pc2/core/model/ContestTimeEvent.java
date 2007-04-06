@@ -33,7 +33,7 @@ public class ContestTimeEvent {
         /**
          * Updated ContestTime.
          */
-        UPDATED,
+        CHANGED,
         /**
          * Clock has been started.
          */

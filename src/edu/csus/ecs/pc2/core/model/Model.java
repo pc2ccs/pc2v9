@@ -192,7 +192,7 @@ public class Model implements IModel {
                 contestTimeListenerList.elementAt(i).contestStarted(contestTimeEvent);
             } else if (contestTimeEvent.getAction() == ContestTimeEvent.Action.CLOCK_STOPPED) {
                 contestTimeListenerList.elementAt(i).contestStopped(contestTimeEvent);
-            } else if (contestTimeEvent.getAction() == ContestTimeEvent.Action.UPDATED) {
+            } else if (contestTimeEvent.getAction() == ContestTimeEvent.Action.CHANGED) {
                 contestTimeListenerList.elementAt(i).contestTimeChanged(contestTimeEvent);
             } else {
                 contestTimeListenerList.elementAt(i).contestTimeChanged(contestTimeEvent);
@@ -592,7 +592,7 @@ public class Model implements IModel {
         // TODO handle run RunResultsFiles
         runList.updateRun(run, judgementRecord);
         Run newRun = runList.get(run.getElementId());
-        RunEvent runEvent = new RunEvent(RunEvent.Action.UPDATED, newRun, null);
+        RunEvent runEvent = new RunEvent(RunEvent.Action.CHANGED, newRun, null);
         runEvent.setWhoModifiedRun(localClientId);
         fireRunListener(runEvent);
     }
@@ -606,7 +606,7 @@ public class Model implements IModel {
         runList.updateRun(run,newState);
         runCheckOutList.put(run.getElementId(), whoChangedRun);
         Run newRun = runList.get(run.getElementId());
-        RunEvent runEvent = new RunEvent(RunEvent.Action.UPDATED, newRun, null);
+        RunEvent runEvent = new RunEvent(RunEvent.Action.CHANGED, newRun, null);
         runEvent.setWhoModifiedRun(whoChangedRun);
         fireRunListener(runEvent);
     }
@@ -629,7 +629,7 @@ public class Model implements IModel {
         runCheckOutList.remove(whoCheckedOut);
         theRun = runList.get(run);
         
-        RunEvent runEvent = new RunEvent(RunEvent.Action.UPDATED, theRun, null);
+        RunEvent runEvent = new RunEvent(RunEvent.Action.CHANGED, theRun, null);
         fireRunListener(runEvent);
         
     }
@@ -656,13 +656,13 @@ public class Model implements IModel {
 
     public void updateLanguage(Language language) {
         languageList.update(language);
-        LanguageEvent languageEvent = new LanguageEvent(LanguageEvent.Action.UPDATED, language);
+        LanguageEvent languageEvent = new LanguageEvent(LanguageEvent.Action.CHANGED, language);
         fireLanguageListener(languageEvent);
     }
 
     public void updateProblem(Problem problem) {
         problemList.update(problem);
-        ProblemEvent problemEvent = new ProblemEvent(ProblemEvent.Action.UPDATED, problem);
+        ProblemEvent problemEvent = new ProblemEvent(ProblemEvent.Action.CHANGED, problem);
         fireProblemListener(problemEvent);
     }
 
@@ -674,7 +674,7 @@ public class Model implements IModel {
             throw new IllegalArgumentException("contestTime site number ("+contestTime+") does not match "+inSiteNumber);
         }
         contestTimeList.update(contestTime);
-        ContestTimeEvent contestTimeEvent = new ContestTimeEvent(ContestTimeEvent.Action.UPDATED, contestTime, contestTime.getSiteNumber());
+        ContestTimeEvent contestTimeEvent = new ContestTimeEvent(ContestTimeEvent.Action.CHANGED, contestTime, contestTime.getSiteNumber());
         fireContestTimeListener(contestTimeEvent);
 
     }
@@ -684,31 +684,31 @@ public class Model implements IModel {
             throw new IllegalArgumentException("contestTime is null");
         }
         contestTimeList.update(contestTime);
-        ContestTimeEvent contestTimeEvent = new ContestTimeEvent(ContestTimeEvent.Action.UPDATED, contestTime, contestTime.getSiteNumber());
+        ContestTimeEvent contestTimeEvent = new ContestTimeEvent(ContestTimeEvent.Action.CHANGED, contestTime, contestTime.getSiteNumber());
         fireContestTimeListener(contestTimeEvent);
     }
 
     public void updateJudgement(Judgement judgement) {
         judgementList.update(judgement);
-        JudgementEvent judgementEvent = new JudgementEvent(JudgementEvent.Action.UPDATED, judgement);
+        JudgementEvent judgementEvent = new JudgementEvent(JudgementEvent.Action.CHANGED, judgement);
         fireJudgementListener(judgementEvent);
     }
 
     public void updateSite(Site site) {
         siteList.update(site);
-        SiteEvent siteEvent = new SiteEvent(SiteEvent.Action.MODIFIED, site);
+        SiteEvent siteEvent = new SiteEvent(SiteEvent.Action.CHANGED, site);
         fireSiteListener(siteEvent);
     }
 
     public void updateRun(Run run) {
         runList.updateRun(run);
-        RunEvent runEvent = new RunEvent(RunEvent.Action.UPDATED, run, null);
+        RunEvent runEvent = new RunEvent(RunEvent.Action.CHANGED, run, null);
         fireRunListener(runEvent);
     }
 
     public void updateAccount(Account account) {
         accountList.update(account);
-        AccountEvent accountEvent = new AccountEvent(AccountEvent.Action.UPDATED, account);
+        AccountEvent accountEvent = new AccountEvent(AccountEvent.Action.CHANGED, account);
         fireAccountListener(accountEvent);
     }
 

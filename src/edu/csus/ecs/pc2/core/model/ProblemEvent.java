@@ -23,13 +23,13 @@ public class ProblemEvent {
          */
         DELETED,
         /**
-         * A new problem submission.
+         * Problem added.
          */
         ADDED,
         /**
-         * A new problem submission.
+         * Problem modified.
          */
-        UPDATED,
+        CHANGED,
 
     }
 

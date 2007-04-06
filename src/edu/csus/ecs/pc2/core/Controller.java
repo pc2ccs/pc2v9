@@ -68,9 +68,9 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
  * <li> Server:
  * {@link edu.csus.ecs.pc2.core.PacketHandler#judgeRun(Run, IModel, IController, JudgementRecord, RunResultFiles, ClientId)}
  * <li> Team: {@link edu.csus.ecs.pc2.core.model.IRunListener#runChanged(RunEvent)} if {@link Run#isSendToTeams()} set true.
- * RunEvent action is: {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#UPDATED}
+ * RunEvent action is: {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#CHANGED}
  * <li> Clients: {@link edu.csus.ecs.pc2.core.model.IRunListener#runChanged(RunEvent)} RunEvent action is:
- * {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#UPDATED}
+ * {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#CHANGED}
  * </ol>
  * Cancel Run
  * <ol>

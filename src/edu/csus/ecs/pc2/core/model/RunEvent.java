@@ -32,7 +32,7 @@ public class RunEvent {
         /**
          * An updated run submission.
          */
-        UPDATED,
+        CHANGED,
         /**
          * The run from the server to be judged.
          */

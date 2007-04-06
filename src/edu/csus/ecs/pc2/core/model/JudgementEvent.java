@@ -19,17 +19,17 @@ public class JudgementEvent {
     public enum Action {
 
         /**
-         * Run set to be deleted.
+         * Judgement deleted.
          */
         DELETED,
         /**
-         * A new judgement submission.
+         * A new judgement.
          */
         ADDED,
         /**
-         * A new judgement submission.
+         * Modify a judgement.
          */
-        UPDATED,
+        CHANGED,
 
     }
 
