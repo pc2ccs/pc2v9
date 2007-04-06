@@ -125,7 +125,7 @@ public class ServerView extends JFrame implements UIPlugin {
     public ServerView() {
         super();
         initialize();
-        updateListBox (getPluginTitle()+" Build "+new VersionInfo().getBuildNumber());
+        updateListBox(getPluginTitle() + " Build " + new VersionInfo().getBuildNumber());
 
     }
 
@@ -143,7 +143,7 @@ public class ServerView extends JFrame implements UIPlugin {
             }
         });
         setVisible(true);
-        
+
         FrameUtilities.centerFrameTop(this);
     }
 
@@ -161,8 +161,8 @@ public class ServerView extends JFrame implements UIPlugin {
             public void run() {
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:MM:ss");
                 String dateString = simpleDateFormat.format(new Date());
-                
-                runListModel.insertElementAt(dateString + " " +messageString,0);
+
+                runListModel.insertElementAt(dateString + " " + messageString, 0);
                 System.out.println("debug Box: " + messageString);
             }
         };
@@ -197,11 +197,11 @@ public class ServerView extends JFrame implements UIPlugin {
             return account.getClientId().toString();
         }
     }
-    
+
     /**
      * 
      * @author pc2@ecs.csus.edu
-     *
+     * 
      */
     public class LoginListenerImplementation implements ILoginListener {
 
@@ -236,7 +236,13 @@ public class ServerView extends JFrame implements UIPlugin {
 
         }
     }
-    
+
+    /**
+     * Site Listener for use by ServerView.
+     *  
+     * @author pc2@ecs.csus.edu
+     *
+     */
     public class SiteListenerImplementation implements ISiteListener {
 
         public void siteAdded(SiteEvent event) {
@@ -437,7 +443,7 @@ public class ServerView extends JFrame implements UIPlugin {
             // TODO: handle exception
             e.printStackTrace();
         }
-        
+
         updateGenerateTitles();
     }
 
@@ -456,7 +462,7 @@ public class ServerView extends JFrame implements UIPlugin {
 
         number = model.getAccounts(ClientType.Type.ADMINISTRATOR).size();
         genAdminLabel.setText("Administrators (" + number + ")");
-        
+
         number = model.getSites().length;
         genSiteLabel.setText("Sites (" + number + ")");
     }
@@ -539,18 +545,18 @@ public class ServerView extends JFrame implements UIPlugin {
     public void setModelAndController(IModel inModel, IController inController) {
         this.model = inModel;
         this.serverController = inController;
-        setTitle("PC^2 Server (Site "+model.getSiteNumber()+")");
+        setTitle("PC^2 Server (Site " + model.getSiteNumber() + ")");
         updateGenerateTitles();
-        
+
         model.addRunListener(new RunListenerImplementation());
         model.addAccountListener(new AccountListenerImplementation());
         model.addLoginListener(new LoginListenerImplementation());
         model.addSiteListener(new SiteListenerImplementation());
-        
+
         // TODO add listeners for languages and problems
-        
-//      model.addLanguageListener(new LanguageListenerImplementation());
-//      model.addProblemListener(new ProblemListenerImplementation());
+
+        // model.addLanguageListener(new LanguageListenerImplementation());
+        // model.addProblemListener(new ProblemListenerImplementation());
     }
 
     public String getPluginTitle() {
@@ -558,14 +564,14 @@ public class ServerView extends JFrame implements UIPlugin {
     }
 
     /**
-     * This method initializes sitePane	
-     * 	
-     * @return javax.swing.JPanel	
+     * This method initializes sitePane
+     * 
+     * @return javax.swing.JPanel
      */
     private JPanel getSitePane() {
         if (sitePane == null) {
             genSiteLabel = new JLabel();
-            genSiteLabel.setBounds(new java.awt.Rectangle(51,46,147,20));
+            genSiteLabel.setBounds(new java.awt.Rectangle(51, 46, 147, 20));
             genSiteLabel.setText("Sites");
             sitePane = new JPanel();
             sitePane.setLayout(null);
@@ -577,28 +583,28 @@ public class ServerView extends JFrame implements UIPlugin {
     }
 
     /**
-     * This method initializes sitesCountTextBox	
-     * 	
-     * @return javax.swing.JTextField	
+     * This method initializes sitesCountTextBox
+     * 
+     * @return javax.swing.JTextField
      */
     private JTextField getSitesCountTextBox() {
         if (sitesCountTextBox == null) {
             sitesCountTextBox = new JTextField();
-            sitesCountTextBox.setBounds(new java.awt.Rectangle(249,42,61,24));
+            sitesCountTextBox.setBounds(new java.awt.Rectangle(249, 42, 61, 24));
             sitesCountTextBox.setDocument(new IntegerDocument());
         }
         return sitesCountTextBox;
     }
 
     /**
-     * This method initializes generateSitesAccountButton	
-     * 	
-     * @return javax.swing.JButton	
+     * This method initializes generateSitesAccountButton
+     * 
+     * @return javax.swing.JButton
      */
     private JButton getGenerateSitesAccountButton() {
         if (generateSitesAccountButton == null) {
             generateSitesAccountButton = new JButton();
-            generateSitesAccountButton.setBounds(new java.awt.Rectangle(361,41,93,25));
+            generateSitesAccountButton.setBounds(new java.awt.Rectangle(361, 41, 93, 25));
             generateSitesAccountButton.setText("Generate");
             generateSitesAccountButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -620,7 +626,7 @@ public class ServerView extends JFrame implements UIPlugin {
             StaticLog.log("Exception logged ", e);
         }
     }
-    
+
     /**
      * Dump connection data
      */
@@ -633,8 +639,8 @@ public class ServerView extends JFrame implements UIPlugin {
             PrintWriter log = new PrintWriter(new FileOutputStream(filename, false), true);
 
             log.println(new VersionInfo().getSystemName());
-            log.println("Build "+ new VersionInfo().getBuildNumber());
-            log.println(new VersionInfo().getSystemVersionInfo() );
+            log.println("Build " + new VersionInfo().getBuildNumber());
+            log.println(new VersionInfo().getSystemVersionInfo());
             log.println("Date: " + new Date());
 
             log.println();
@@ -675,7 +681,7 @@ public class ServerView extends JFrame implements UIPlugin {
             log.println();
             log.println("-- Logins -- ");
             for (ClientType.Type ctype : ClientType.Type.values()) {
-                
+
                 Enumeration<ClientId> enumeration = model.getLoggedInClients(ctype);
                 if (model.getLoggedInClients(ctype).hasMoreElements()) {
                     log.println("Logged in " + ctype.toString());
@@ -691,9 +697,8 @@ public class ServerView extends JFrame implements UIPlugin {
 
             log.close();
             log = null;
-            
-            return filename;
 
+            return filename;
 
         } catch (Exception e) {
             // TODO: log handle exception
@@ -701,25 +706,25 @@ public class ServerView extends JFrame implements UIPlugin {
             System.err.println("Exception " + e.getMessage());
             e.printStackTrace();
         }
-        
+
         return null;
 
     }
 
     /**
-     * This method initializes buttonPane	
-     * 	
-     * @return javax.swing.JPanel	
+     * This method initializes buttonPane
+     * 
+     * @return javax.swing.JPanel
      */
     private JPanel getButtonPane() {
         if (buttonPane == null) {
             editorCommandLabel = new JLabel();
-            editorCommandLabel.setBounds(new java.awt.Rectangle(21,10,102,23));
+            editorCommandLabel.setBounds(new java.awt.Rectangle(21, 10, 102, 23));
             editorCommandLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
             editorCommandLabel.setText("View Command");
             buttonPane = new JPanel();
             buttonPane.setLayout(null);
-            buttonPane.setPreferredSize(new java.awt.Dimension(45,45));
+            buttonPane.setPreferredSize(new java.awt.Dimension(45, 45));
             buttonPane.add(getViewReportButton(), null);
             buttonPane.add(getEditorCommandTextField(), null);
             buttonPane.add(editorCommandLabel, null);
@@ -728,14 +733,14 @@ public class ServerView extends JFrame implements UIPlugin {
     }
 
     /**
-     * This method initializes viewReportButton	
-     * 	
-     * @return javax.swing.JButton	
+     * This method initializes viewReportButton
+     * 
+     * @return javax.swing.JButton
      */
     private JButton getViewReportButton() {
         if (viewReportButton == null) {
             viewReportButton = new JButton();
-            viewReportButton.setBounds(new java.awt.Rectangle(347,8,124,24));
+            viewReportButton.setBounds(new java.awt.Rectangle(347, 8, 124, 24));
             viewReportButton.setText("View Dump");
             viewReportButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -748,15 +753,16 @@ public class ServerView extends JFrame implements UIPlugin {
 
     /**
      * Generate and view dump file.
-     *
+     * 
      */
     protected void viewDumpFile() {
         String dumpFileName = dumpContestData();
-        viewFile (dumpFileName);
+        viewFile(dumpFileName);
     }
 
     /**
      * view the input file
+     * 
      * @param dumpFileName
      */
     protected void viewFile(String dumpFileName) {
@@ -771,16 +777,16 @@ public class ServerView extends JFrame implements UIPlugin {
     }
 
     /**
-     * This method initializes editorCommandTextField	
-     * 	
-     * @return javax.swing.JTextField	
+     * This method initializes editorCommandTextField
+     * 
+     * @return javax.swing.JTextField
      */
     private JTextField getEditorCommandTextField() {
         if (editorCommandTextField == null) {
             editorCommandTextField = new JTextField();
-            editorCommandTextField.setBounds(new java.awt.Rectangle(144,10,182,21));
+            editorCommandTextField.setBounds(new java.awt.Rectangle(144, 10, 182, 21));
             editorCommandTextField.setText("/windows/vi.bat");
-            
+
             editorCommandTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyPressed(java.awt.event.KeyEvent e) {
                     if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
@@ -791,6 +797,5 @@ public class ServerView extends JFrame implements UIPlugin {
         }
         return editorCommandTextField;
     }
-  
 
 } // @jve:decl-index=0:visual-constraint="10,10"
