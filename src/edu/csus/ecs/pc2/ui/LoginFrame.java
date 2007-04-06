@@ -394,10 +394,9 @@ public class LoginFrame extends JFrame implements UIPlugin {
         }
     }
 
-
-    public void setModelAndController(IModel model, IController controller) {
-        this.model = model;
-        this.controller = controller;
+    public void setModelAndController(IModel inModel, IController inController) {
+        this.model = inModel;
+        this.controller = inController;
         
         model.addLoginListener(new LoginListenerImplementation());
         
