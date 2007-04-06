@@ -5,7 +5,6 @@ import java.io.FileOutputStream;
 import java.util.Properties;
 
 import edu.csus.ecs.pc2.core.model.ClientId;
-import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
  * Contains methods to find/instantiate UI classes.
@@ -15,14 +14,22 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
  */
 
 // $HeadURL$
-public class LoadUIClass {
-    
+public final class LoadUIClass {
+   
+    /**
+     * The base project path for all classes.
+     */
+    private static final String PROJECT_PACKAGE_PATH = "edu.csus.ecs.pc2";
     /**
      * name of the UI load properties class.
      */
-    private static final String uiPropertiesFilename = "uiname.properties";
+    private static final String UI_PROPERTIES_FILENAME = "uiname.properties";
     
     public static final String SVN_ID = "$Id$";
+    
+    private LoadUIClass (){
+        // present per CodeStyle
+    }
 
     /**
      * Find and create an instance of UIPlugin from className.
@@ -58,11 +65,11 @@ public class LoadUIClass {
     public static Properties getDefaultUIProperties() {
 
         Properties properties = new Properties();
-        properties.put("admin", "edu.csus.ecs.pc2.ui.admin.AdminstratorView");
-        properties.put("board", "edu.csus.ecs.pc2.ui.board.ScoreboardView");
-        properties.put("judge", "edu.csus.ecs.pc2.ui.judge.JudgeView");
-        properties.put("server", "edu.csus.ecs.pc2.ui.server.ServerView");
-        properties.put("team", "edu.csus.ecs.pc2.ui.team.TeamView");
+        properties.put("admin", PROJECT_PACKAGE_PATH + ".ui.admin.AdminstratorView");
+        properties.put("board", PROJECT_PACKAGE_PATH + ".ui.board.ScoreboardView");
+        properties.put("judge", PROJECT_PACKAGE_PATH + ".ui.judge.JudgeView");
+        properties.put("server", PROJECT_PACKAGE_PATH + ".ui.server.ServerView");
+        properties.put("team", PROJECT_PACKAGE_PATH + ".ui.team.TeamView");
         return properties;
 
     }
@@ -99,13 +106,13 @@ public class LoadUIClass {
         
         Properties properties = new Properties();
         try {
-            FileInputStream fileInputStream = new FileInputStream (uiPropertiesFilename);
+            FileInputStream fileInputStream = new FileInputStream (UI_PROPERTIES_FILENAME);
             properties.load(fileInputStream);
             fileInputStream.close();
             fileInputStream = null;
         } catch (Exception e) {
             // TODO: handle exception
-            System.err.println("Note: unable to read UI properties from "+uiPropertiesFilename);
+            System.err.println("Note: unable to read UI properties from "+UI_PROPERTIES_FILENAME);
         }
         
         className = properties.getProperty(clientId.getName());  // lookup by short/login name
