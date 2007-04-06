@@ -20,7 +20,6 @@ import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
-import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
@@ -39,9 +38,6 @@ import edu.csus.ecs.pc2.ui.CountDownMessage;
 import edu.csus.ecs.pc2.ui.LoadUIClass;
 import edu.csus.ecs.pc2.ui.LoginFrame;
 import edu.csus.ecs.pc2.ui.UIPlugin;
-import edu.csus.ecs.pc2.ui.judge.JudgeView;
-import edu.csus.ecs.pc2.ui.server.ServerView;
-import edu.csus.ecs.pc2.ui.team.TeamView;
 
 /**
  * Implementation of Contest Controller.
@@ -51,36 +47,36 @@ import edu.csus.ecs.pc2.ui.team.TeamView;
  * <li> Team: {@link #submitRun(Problem, Language, String)}
  * <li> Server: {@link edu.csus.ecs.pc2.core.PacketHandler#handlePacket(IController, IModel, Packet, ConnectionHandlerID)}
  * <li> Server: {@link edu.csus.ecs.pc2.core.model.Model#acceptRun(Run, RunFiles)}
- * <li> Team: {@link edu.csus.ecs.pc2.core.model.IRunListener#runAdded(RunEvent)}
- * RunEvent action is: {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#ADDED}
- * <li> Client: {@link edu.csus.ecs.pc2.core.model.IRunListener#runAdded(RunEvent)}
- * RunEvent action is: {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#ADDED}
+ * <li> Team: {@link edu.csus.ecs.pc2.core.model.IRunListener#runAdded(RunEvent)} RunEvent action is:
+ * {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#ADDED}
+ * <li> Client: {@link edu.csus.ecs.pc2.core.model.IRunListener#runAdded(RunEvent)} RunEvent action is:
+ * {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#ADDED}
  * </ol>
  * Check out run
- * <ol> 
+ * <ol>
  * <li> Judge: {@link #checkOutRun(Run)}
- * <li> Server: {@link edu.csus.ecs.pc2.core.PacketHandler#requestRun(Run, IModel, IController, ClientId)} 
- * <li> Judge and clients: {@link edu.csus.ecs.pc2.core.model.IRunListener#runChanged(RunEvent)},
- * check {@link edu.csus.ecs.pc2.core.model.RunEvent#getSentToClientId()} to learn if you are the judge/client to get the run.
- * RunEvent action is: {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#CHECKEDOUT_RUN}
+ * <li> Server: {@link edu.csus.ecs.pc2.core.PacketHandler#requestRun(Run, IModel, IController, ClientId)}
+ * <li> Judge and clients: {@link edu.csus.ecs.pc2.core.model.IRunListener#runChanged(RunEvent)}, check
+ * {@link edu.csus.ecs.pc2.core.model.RunEvent#getSentToClientId()} to learn if you are the judge/client to get the run. RunEvent
+ * action is: {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#CHECKEDOUT_RUN}
  * </ol>
  * Submit Judgement
  * <ol>
  * <li> Judge: {@link #submitRunJudgement(Run, JudgementRecord, RunResultFiles)}
- * <li> Server: {@link edu.csus.ecs.pc2.core.PacketHandler#judgeRun(Run, IModel, IController, JudgementRecord, RunResultFiles, ClientId)}
- * <li> Team: {@link edu.csus.ecs.pc2.core.model.IRunListener#runChanged(RunEvent)} if
- * {@link Run#isSendToTeams()} set true.
+ * <li> Server:
+ * {@link edu.csus.ecs.pc2.core.PacketHandler#judgeRun(Run, IModel, IController, JudgementRecord, RunResultFiles, ClientId)}
+ * <li> Team: {@link edu.csus.ecs.pc2.core.model.IRunListener#runChanged(RunEvent)} if {@link Run#isSendToTeams()} set true.
  * RunEvent action is: {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#UPDATED}
- * <li> Clients: {@link edu.csus.ecs.pc2.core.model.IRunListener#runChanged(RunEvent)} 
- * RunEvent action is: {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#UPDATED}
+ * <li> Clients: {@link edu.csus.ecs.pc2.core.model.IRunListener#runChanged(RunEvent)} RunEvent action is:
+ * {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#UPDATED}
  * </ol>
  * Cancel Run
  * <ol>
  * <li> Judge: {@link #cancelRun(Run)}
  * <li> Server: {@link edu.csus.ecs.pc2.core.PacketHandler#cancelRun(Run, IModel, IController, ClientId)}
  * <li> Team: n/a
- * <li> Judge/Clients: {@link edu.csus.ecs.pc2.core.model.IRunListener#runChanged(RunEvent)}.
- * RunEvent action is: {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#RUN_AVIALABLE}
+ * <li> Judge/Clients: {@link edu.csus.ecs.pc2.core.model.IRunListener#runChanged(RunEvent)}. RunEvent action is:
+ * {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#RUN_AVIALABLE}
  * </ol>
  * 
  * @author pc2@ecs.csus.edu *
@@ -89,8 +85,6 @@ import edu.csus.ecs.pc2.ui.team.TeamView;
 public class Controller implements IController, ITwoToOne, IBtoA {
 
     public static final String SVN_ID = "$Id$";
-    
-    private static final String SITE_OPTION = "--site";
 
     /**
      * Contest data.
@@ -105,7 +99,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     /**
      * Controller.
      */
-    
+
     /**
      * The main UI, started by the controller.
      */
@@ -127,18 +121,17 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * The port for a server to login to/contact.
      */
     private static int remoteHostPort;
-    
+
     /**
      * Key in .ini for the server port.
      */
     private static final String SERVER_PORT_KEY = "server.port";
-    
+
     /**
      * Key in the .ini for the remote server host name.
      */
     private static final String REMOTE_SERVER_KEY = "server.remoteServer";
-    
-    
+
     /**
      * Key in the .ini for the client server name.
      */
@@ -148,15 +141,14 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * Key in the .ini for the client port.
      */
     private static final String CLIENT_PORT_KEY = "client.port";
-    
+
     private static ConnectionHandlerID remoteServerConnectionHandlerID = null;
-    
+
     @SuppressWarnings("unused")
     private ParseArguments parseArguments = new ParseArguments();
-    
+
     // TODO change this to UIPlugin
     private LoginFrame loginUI;
-    
 
     public Controller(IModel model) {
         super();
@@ -185,7 +177,12 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         info(" sendToClient b4 " + packet);
         ConnectionHandlerID connectionHandlerID = model.getConnectionHandleID(packet.getDestinationId());
         info("sendToClient " + packet.getSourceId() + " " + connectionHandlerID);
-        sendToClient(connectionHandlerID, packet);
+        if (connectionHandlerID == null) {
+            sendToServer(packet);
+        } else {
+            sendToClient(connectionHandlerID, packet);
+        }
+
         info(" sendToClient af " + packet);
     }
 
@@ -214,7 +211,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             return 0;
         }
     }
-    
+
     /**
      * returns true if .ini file exists and key is present in file.
      * 
@@ -242,7 +239,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             return "";
         }
     }
-    
+
     protected static ClientId loginShortcutExpansion(int defaultSiteNumber, String loginName) {
         if (loginName.equals("t")) {
             loginName = "team1";
@@ -293,15 +290,15 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * @throws Exception
      *             if there is a problem contacting server or logging in.
      */
-    public void login(String id, String password)  {
-        
+    public void login(String id, String password) {
+
         try {
 
             ClientId clientId = loginShortcutExpansion(0, id);
 
             log = new Log(clientId.toString());
-            StaticLog.setLog(log); 
-            
+            StaticLog.setLog(log);
+
             info("");
             info(new VersionInfo().getSystemVersionInfo());
             info(" login(" + id + "," + password + ")");
@@ -332,9 +329,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                 if (containsINIKey(REMOTE_SERVER_KEY)) {
 
                     // Contacting another server. "join"
-                    if (containsINIKey(REMOTE_SERVER_KEY)) {
-                        remoteHostName = getINIValue(REMOTE_SERVER_KEY);
-                    }
+                    remoteHostName = getINIValue(REMOTE_SERVER_KEY);
 
                     // Set port to default
                     remoteHostPort = Integer.parseInt(TransportManager.DEFAULT_PC2_PORT);
@@ -350,16 +345,12 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
                     info("Contacted using connection id " + remoteServerConnectionHandlerID);
 
-                    info("Sending login request to " + remoteHostName + " as " + clientId+" " +password); // TODO remove this
+                    info("Sending login request to " + remoteHostName + " as " + clientId + " " + password); // TODO remove this
                     sendLoginRequest(transportManager, remoteServerConnectionHandlerID, clientId, password);
 
-                    info("Started Server Transport listening on " + port);
-                    transportManager.accecptConnections(port);
-
-                    info("Secondary Server has started " + model.getTitle());
                 } else {
-                    
-                    clientId = authenticateFirstServer (password);
+
+                    clientId = authenticateFirstServer(password);
                     info("Started Server Transport listening on " + port);
                     transportManager.accecptConnections(port);
                     info("Primary Server has started.");
@@ -367,7 +358,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                 }
 
             } else {
-                
+
                 // Client login
 
                 remoteHostName = "localhost";
@@ -384,17 +375,24 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                     port = Integer.parseInt(getINIValue(CLIENT_PORT_KEY));
                 }
 
-                info("Contacting server at " + remoteHostName + ":" + port);
-                transportManager = new TransportManager(log, remoteHostName, port, this);
-                transportManager.connectToMyServer();
-                info("Started Client Transport");
+                try {
+                    info("Contacting server at " + remoteHostName + ":" + port);
+                    transportManager = new TransportManager(log, remoteHostName, port, this);
+                    transportManager.connectToMyServer();
+                    info("Started Client Transport");
 
-                sendLoginRequest(transportManager, clientId, password);
+                    sendLoginRequest(transportManager, clientId, password);
+                } catch (TransportException e) {
+                    // TODO: log make this a very silent log entry.
+                    StaticLog.log("Exception starting up ", e);
+                    throw new SecurityException("Unable to contact server, contact staff");
+                }
             }
-        } catch (Exception e) {
-            // TODO: log handle exception
-            StaticLog.log("Exception logged ", e);
-            throw new SecurityException (e.getMessage());
+        } catch (TransportException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            StaticLog.log("Exception on startup ", e);
+            throw new SecurityException("Unable to start server, check logs");
         }
     }
 
@@ -405,22 +403,23 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             model.initializeWithFakeData();
         }
         int newSiteNumber = getServerSiteNumber(password);
-        
-        ClientId newId = new ClientId(newSiteNumber,ClientType.Type.SERVER, 0);
-        if (model.isLoggedIn(newId)){
-            info ("Note site "+newId+" site "+newSiteNumber+" already logged in, ignoring ");
-        } 
-        ConnectionHandlerID connectionHandlerID = new ConnectionHandlerID("Site "+newSiteNumber);
+
+        ClientId newId = new ClientId(newSiteNumber, ClientType.Type.SERVER, 0);
+        if (model.isLoggedIn(newId)) {
+            info("Note site " + newId + " site " + newSiteNumber + " already logged in, ignoring ");
+        }
+        ConnectionHandlerID connectionHandlerID = new ConnectionHandlerID("Site " + newSiteNumber);
         model.addLogin(newId, connectionHandlerID);
         return newId;
     }
 
-    private static void sendLoginRequest(ITransportManager manager, ConnectionHandlerID connectionHandlerID, ClientId clientId, String password) {
+    private static void sendLoginRequest(ITransportManager manager, ConnectionHandlerID connectionHandlerID, ClientId clientId,
+            String password) {
         try {
-            info("sendLoginRequest ConId start - sending from "+clientId);
+            info("sendLoginRequest ConId start - sending from " + clientId);
             ClientId serverClientId = new ClientId(0, Type.SERVER, 0);
             Packet loginPacket = PacketFactory.createLogin(clientId, password, serverClientId);
-            manager.send(loginPacket, connectionHandlerID); 
+            manager.send(loginPacket, connectionHandlerID);
             info("sendLoginRequest ConId end - packet sent.");
         } catch (TransportException e) {
             // TODO log exception
@@ -468,17 +467,23 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
                 info("receiveObject " + packet);
                 if (model.isLoggedIn(packet.getSourceId())) {
-                    // LOGGED IN - process the packet
 
-                    // TODO security authenticate the login vs connection
-                    
-                    // When we have validated the sender we then process the packet.
+                    /**
+                     * This user is in the login list and we process their request.
+                     */
 
+                    // TODO code security double check by checking their clientId and
+                    // their connection id against what we have in the model.
                     processPacket(packet, connectionHandlerID);
 
                 } else if (packet.getType().equals(PacketType.Type.LOGIN_REQUEST)) {
                     String password = PacketFactory.getStringValue(packet, PacketFactory.PASSWORD);
                     try {
+
+                        /**
+                         * Login request from client or other server. When this block is done, they are logged in and a login
+                         * success is sent to them.
+                         */
 
                         if (clientId.getSiteNumber() == ClientId.UNSET) {
                             clientId = new ClientId(model.getSiteNumber(), clientId.getClientType(), clientId.getClientNumber());
@@ -492,10 +497,40 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                     }
                 } else {
                     // Security Failure
-                    
+
                     if (clientId.getClientType().equals(Type.SERVER)) {
+                        // Packet from a server.
+
                         if (packet.getType() == PacketType.Type.LOGIN_FAILED) {
                             handleServerLoginFailure(packet);
+                        } else if (!model.isLoggedIn() && packet.getType().equals(PacketType.Type.LOGIN_SUCCESS)) {
+
+                            /**
+                             * Since this module is not logged in, this packet should only be a LOGIN_SUCCESS from a server we just
+                             * tried to login to. At this point we are not connected to the contest and need information from the
+                             * server we logged into.
+                             */
+
+                            // TODO add a security check that this connection id matches the one we
+                            // sent the login request packet to. If we don't add this, then some other
+                            // server could send us a LOGIN_SUCCESS packet, which would be bad. Highly
+                            // unlikely but potentially bad.
+                            // Add data from packet into model.
+                            processPacket(packet, connectionHandlerID);
+
+                            // Add the other (server we logged into) into our logged in list.
+                            model.addLogin(clientId, connectionHandlerID);
+
+                        } else if (model.isLoggedIn() && packet.getType().equals(PacketType.Type.LOGIN_SUCCESS)) {
+
+                            /**
+                             * This server is logged in, so this must be from a server we attempted to login to. We don't want their
+                             * information because we are already connected to other servers in the contest.
+                             */
+
+                            // Add the other (server we logged into) into our logged in list.
+                            model.addLogin(clientId, connectionHandlerID);
+
                         } else {
                             String message = "Security violation user " + clientId + " got a " + packet;
                             info(message + " on " + connectionHandlerID);
@@ -503,7 +538,9 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                         }
                         return;
                     }
-                    
+                    // else
+                    // We don't know why they send us these things...
+
                     String message = "Security violation user " + clientId + " got a " + packet;
                     info(message + " on " + connectionHandlerID);
                     PacketFactory.dumpPacket(System.err, packet);
@@ -514,9 +551,9 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             }
 
         } catch (Exception e) {
-            
+
             // TODO Archive the packet that had an exception for future review - soon.
-            
+
             System.err.println("Exception in receiveObject(S,C): " + e.getMessage());
             StaticLog.unclassified("Exception in receiveObject ", e);
         }
@@ -527,32 +564,30 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         // TODO rewrite handle this failure better
         
         String message = PacketFactory.getStringValue(packet, PacketFactory.MESSAGE_STRING);
-        
+
         // TODO Handle this better via new login code.
         info("Login Failed: " + message);
         info("Login Failure");
         PacketFactory.dumpPacket(System.err, packet);
-        
+
         model.loginDenied(packet.getDestinationId(), null, message);
-     
+
     }
-    
+
     /**
      * Looks up site number based on password.
      * 
      * @param password
      * @return site number or throws SecurityException if nothing matches.
      */
-    private int getServerSiteNumber (String password)
-    {
-        for (Site site : model.getSites())
-        {
-            if (site.getPassword().equals(password)){
+    private int getServerSiteNumber(String password) {
+        for (Site site : model.getSites()) {
+            if (site.getPassword().equals(password)) {
                 return site.getSiteNumber();
             }
         }
-        
-        throw new SecurityException("Failed login - invalid password");
+
+        throw new SecurityException("No such site or invalid password");
     }
 
     /**
@@ -564,25 +599,26 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      */
     private void attemptToLogin(ClientId clientId, String password, ConnectionHandlerID connectionHandlerID) {
 
-        info("attemptToLogin debug " + clientId + " pass:"+password+" "+connectionHandlerID);
+        info("attemptToLogin debug " + clientId + " pass:" + password + " " + connectionHandlerID);
 
-        if (model.isValidLoginAndPassword(clientId, password)) {
+        if (clientId.getClientType().equals(Type.SERVER)) {
+
+            int newSiteNumber = getServerSiteNumber(password);
+
+            ClientId newId = new ClientId(newSiteNumber, ClientType.Type.SERVER, 0);
+            if (model.isLoggedIn(newId)) {
+                info("Note site " + clientId + " site " + newSiteNumber + " already logged in, ignoring ");
+            }
+            model.addLogin(newId, connectionHandlerID);
+
+        } else if (model.isValidLoginAndPassword(clientId, password)) {
             info("Added " + clientId);
             model.addLogin(clientId, connectionHandlerID);
-            info("attemptToLogin debug logged on: " + clientId );
+            info("attemptToLogin debug logged on: " + clientId);
 
         } else {
-            if (clientId.getClientType().equals(Type.SERVER)){
-                
-                int newSiteNumber = getServerSiteNumber(password);
-                ClientId newId = new ClientId(newSiteNumber,ClientType.Type.SCOREBOARD, 0);
-                if (model.isLoggedIn(newId)){
-                    info ("Note site "+clientId+" site "+newSiteNumber+" already logged in, ignoring ");
-                }
-                model.addLogin(newId, connectionHandlerID);
-           
-            }
-            info("attemptToLogin debug FAILED logged on: " + clientId );
+
+            info("attemptToLogin debug FAILED logged on: " + clientId);
             // this code will never be executed, if invalid login
             // isValidLogin will throw a SecurityException.
             throw new SecurityException("Failed attempt to login");
@@ -597,11 +633,11 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * Process packets when user is logged in.
      * 
      * @param packet
-     * @param connectionHandlerID 
+     * @param connectionHandlerID
      */
     private void processPacket(Packet packet, ConnectionHandlerID connectionHandlerID) {
         PacketHandler.handlePacket(this, model, packet, connectionHandlerID);
-        
+
     }
 
     /**
@@ -630,7 +666,8 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
     private void sendLoginSuccess(ClientId clientId, ConnectionHandlerID connectionHandlerID) {
         Packet packetToSend = PacketFactory.createLoginSuccess(model.getClientId(), clientId, model.getContestTime(), model
-                .getSiteNumber(), model.getLanguages(), model.getProblems(), model.getJudgements(), model.getSites(), model.getRuns());
+                .getSiteNumber(), model.getLanguages(), model.getProblems(), model.getJudgements(), model.getSites(), model
+                .getRuns());
         sendToClient(packetToSend);
     }
 
@@ -644,6 +681,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      */
     public void connectionDropped(ConnectionHandlerID connectionHandlerID) {
         // TODO code connectionDropped reconnection logic
+        // TODO code create a packet and send it to servers and admins
 
         ClientId clientId = model.getLoginClientId(connectionHandlerID);
         if (clientId != null) {
@@ -655,6 +693,8 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
 
     public void connectionError(Serializable object, ConnectionHandlerID connectionHandlerID, String causeDescription) {
+
+        // TODO code create a packet and send it to servers and admins
 
         // TODO code connectionError
         info("connectionError: " + model.getTitle() + " " + connectionHandlerID + " " + causeDescription + " "
@@ -675,7 +715,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             if (object instanceof Packet) {
                 Packet packet = (Packet) object;
                 PacketFactory.dumpPacket(System.err, packet);
-                
+
                 // TODO code put the server's connection handler id as 4th parameter
                 PacketHandler.handlePacket(this, model, packet, null);
             } else {
@@ -699,7 +739,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         CountDownMessage countDownMessage = new CountDownMessage("Shutting down PC^2 in ", 10);
         if (model.getClientId() != null) {
             info("connectionDropped: " + model.getClientId());
-            countDownMessage.setTitle("Shutting down PC^2 " + model.getClientId().getClientType()  + " " + model.getTitle());
+            countDownMessage.setTitle("Shutting down PC^2 " + model.getClientId().getClientType() + " " + model.getTitle());
         } else {
             info("connectionDropped: <non-logged in client>");
             countDownMessage.setTitle("Shutting down PC^2 Client");
@@ -713,7 +753,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         StaticLog.unclassified(s);
         System.err.println(Thread.currentThread().getName() + " " + s);
     }
-    
+
     public static void info(String s, Exception exception) {
         StaticLog.unclassified (s, exception);
         System.err.println(Thread.currentThread().getName() + " " + s);
@@ -729,8 +769,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
 
     public void sendToServers(Packet packet) {
-        // TODO Auto-generated method stub
-
+        sendPacketToClients(packet, ClientType.Type.SERVER);
     }
 
     /**
@@ -769,19 +808,27 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     public void sendToTeams(Packet packet) {
         sendPacketToClients(packet, ClientType.Type.SCOREBOARD);
     }
-    
 
     /**
      * Client has successfully logged in, show them new UI.
      * 
-     * @param clientId new client id
+     * @param clientId
+     *            new client id
      */
-    public void startMainUI (ClientId clientId) {
+    public void startMainUI(ClientId clientId) {
 
         try {
-            
+
             model.setClientId(clientId);
-            
+
+            if (containsINIKey(REMOTE_SERVER_KEY)) {
+                // secondary server logged in, start listening.
+                info("Started Server Transport listening on " + port);
+                transportManager.accecptConnections(port);
+
+                info("Secondary Server has started " + model.getTitle());
+            }
+
             try {
                 String uiClassName = LoadUIClass.getUIClassName(clientId);
                 mainUI = LoadUIClass.loadUIClass(uiClassName);
@@ -790,10 +837,10 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             } catch (Exception e) {
                 // TODO: log handle exception
                 System.err.println("Error loading UI, check log, (class not found?)  " + e.getMessage());
-                StaticLog.log("Exception loading UI for (class not found?) "+clientId.getName(), e);
+                StaticLog.log("Exception loading UI for (class not found?) " + clientId.getName(), e);
                 throw new Exception("Unable to start main UI, contact staff");
             }
-            
+
         } catch (Exception e) {
             // TODO log this
             info("Trouble showing frame ", e);
@@ -829,15 +876,15 @@ public class Controller implements IController, ITwoToOne, IBtoA {
          *   this.login (login,password)
          * 
          */
-        
+
         log = new Log("pc2.startup");
         StaticLog.setLog(log);
-        
+
         loginUI = new LoginFrame();
         loginUI.setModelAndController(model, this);
 
     }
-    
+
     /**
      * Dump connection data
      */
@@ -847,78 +894,81 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM.dd.SSS");
             // "yyMMdd HHmmss.SSS");
             String filename = "dump" + simpleDateFormat.format(new Date()) + ".log";
-            PrintWriter log = new PrintWriter(new FileOutputStream(filename, false), true);
+            PrintWriter writer = new PrintWriter(new FileOutputStream(filename, false), true);
 
-            log.println(new VersionInfo().getSystemName());
-            log.println("Build "+ new VersionInfo().getBuildNumber());
-            log.println(new VersionInfo().getSystemVersionInfo() );
-            log.println("Date: " + new Date());
+            writer.println(new VersionInfo().getSystemName());
+            writer.println("Build " + new VersionInfo().getBuildNumber());
+            writer.println(new VersionInfo().getSystemVersionInfo());
+            writer.println("Date: " + new Date());
 
-            log.println();
-            log.println("-- Accounts --");
+            writer.println();
+            writer.println("-- Accounts --");
             for (ClientType.Type ctype : ClientType.Type.values()) {
                 if (model.getAccounts(ctype).size() > 0) {
-                    log.println("Accounts " + ctype.toString() + " there are " + model.getAccounts(ctype).size());
+                    writer.println("Accounts " + ctype.toString() + " there are " + model.getAccounts(ctype).size());
                     Vector<Account> accounts = model.getAccounts(ctype);
                     for (int i = 0; i < accounts.size(); i++) {
-                        log.println("   " + accounts.elementAt(i));
+                        writer.println("   " + accounts.elementAt(i));
                     }
                 }
 
             }
 
             // Sites
-            log.println();
-            log.println("-- " + model.getSites().length + " sites --");
+            writer.println();
+            writer.println("-- " + model.getSites().length + " sites --");
             for (Site site1 : model.getSites()) {
-                log.println("Site " + site1.getSiteNumber() + " " + site1.getDisplayName() + "/" + site1.getPassword());
+                writer.println("Site " + site1.getSiteNumber() + " " + site1.getDisplayName() + "/" + site1.getPassword());
             }
 
             // Problem
-            log.println();
-            log.println("-- " + model.getProblems().length + " problems --");
+            writer.println();
+            writer.println("-- " + model.getProblems().length + " problems --");
             for (Problem problem : model.getProblems()) {
-                log.println("  Problem " + problem);
+                writer.println("  Problem " + problem);
             }
 
             // Language
-            log.println();
-            log.println("-- " + model.getLanguages().length + " languages --");
+            writer.println();
+            writer.println("-- " + model.getLanguages().length + " languages --");
             for (Language language : model.getLanguages()) {
-                log.println("  Language " + language);
+                writer.println("  Language " + language);
             }
 
             // Logins
-            log.println();
-            log.println("-- Logins -- ");
+            writer.println();
+            writer.println("-- Logins -- ");
             for (ClientType.Type ctype : ClientType.Type.values()) {
-                
+
                 Enumeration<ClientId> enumeration = model.getLoggedInClients(ctype);
                 if (model.getLoggedInClients(ctype).hasMoreElements()) {
-                    log.println("Logged in " + ctype.toString());
+                    writer.println("Logged in " + ctype.toString());
                     while (enumeration.hasMoreElements()) {
                         ClientId aClientId = (ClientId) enumeration.nextElement();
-                        log.println("   " + aClientId);
+                        writer.println("   " + aClientId);
                     }
                 }
             }
 
-            log.println();
-            log.println("*end*");
+            writer.println();
+            writer.println("Current clientId is " + model.getClientId());
 
-            log.close();
-            log = null;
+            writer.println();
+            writer.println("*end*");
+
+            writer.close();
+            writer = null;
 
             String command = "/windows/vi.bat " + filename;
             Runtime.getRuntime().exec(command);
 
         } catch (Exception e) {
-            // TODO: log handle exception
-            info ("Exception logged ", e);
+            // TODO: writer handle exception
+            info("Exception logged ", e);
         }
 
     }
-    
+
     private ClientId getServerClientId(){
         return new ClientId (model.getSiteNumber(), Type.SERVER, 0);
     }

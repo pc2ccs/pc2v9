@@ -53,9 +53,12 @@ public final class PacketHandler {
 
         if (packetType.equals(Type.MESSAGE)) {
             PacketFactory.dumpPacket(System.err, packet);
+            
         } else if (packetType.equals(Type.RUN_SUBMISSION_CONFIRM)) {
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
             model.addRun(run);
+            sendToJudgesAndOthers (model, controller, packet, isThisSite(model, run));
+            
         } else if (packetType.equals(Type.RUN_SUBMISSION)) {
             // RUN submitted by team to server
 
@@ -66,12 +69,9 @@ public final class PacketHandler {
             // Send to team
             Packet confirmPacket = PacketFactory.createRunSubmissionConfirm(model.getClientId(), fromId, run);
             controller.sendToClient(confirmPacket);
-
-            // Send to all other interested parties.
-            controller.sendToAdministrators(confirmPacket);
-            controller.sendToJudges(confirmPacket);
-            controller.sendToScoreboards(confirmPacket);
-            controller.sendToServers(confirmPacket);
+            
+            // Send to clients and servers
+            sendToJudgesAndOthers(model, controller, confirmPacket, true);
 
         } else if (packetType.equals(Type.LOGIN_FAILED)) {
             String message = PacketFactory.getStringValue(packet, PacketFactory.MESSAGE_STRING);
@@ -82,9 +82,13 @@ public final class PacketHandler {
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
             model.runNotAvailable(run);
             
+            sendToJudgesAndOthers(model, controller, packet, isThisSite(model, run));
+            
         } else if (packetType.equals(Type.RUN_AVAILABLE)) {
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
             model.availableRun (run);
+            
+            sendToJudgesAndOthers(model, controller, packet, isThisSite(model,run));
             
         } else if (packetType.equals(Type.RUN_JUDGEMENT)) {
             // Judgement from judge to server
@@ -93,7 +97,7 @@ public final class PacketHandler {
             JudgementRecord judgementRecord = (JudgementRecord) PacketFactory.getObjectValue(packet, PacketFactory.JUDGEMENT_RECORD);
             RunResultFiles runResultFiles = (RunResultFiles) PacketFactory.getObjectValue(packet, PacketFactory.RUN_RESULTS_FILE);
             judgeRun(run, model,controller,judgementRecord,runResultFiles, fromId);
-            
+
         } else if (packetType.equals(Type.RUN_UNCHECKOUT)) {
             // Cancel run from requestor to server
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
@@ -103,8 +107,9 @@ public final class PacketHandler {
             // Run from server to judge
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
             RunFiles runFiles = (RunFiles) PacketFactory.getObjectValue(packet, PacketFactory.RUN_FILES);
-            checkedOutRun (model, run, runFiles);
+            checkedOutRun (model, controller, run, runFiles);
             
+            sendToJudgesAndOthers(model, controller, packet, false);
             
         } else if (packetType.equals(Type.RUN_REQUEST)) {
             // Request Run from requestor to server
@@ -127,14 +132,46 @@ public final class PacketHandler {
         }
     }
     
+    private static boolean isThisSite(IModel model, Run run) {
+        return run.getSiteNumber() == model.getSiteNumber();
+    }
+
+    /**
+     * Send to all logged in Judges, Admins, Boards and optionally sites.
+     * 
+     * This sends all sorts of packets to all logged in clients (other than
+     * teams).   Typicall sendToServes is set if this is the originating
+     * site, if not done then a nasty circular path will occur.
+     * 
+     * @param model
+     * @param controller
+     * @param packet
+     * @param sendToServers send To other server.
+     */
+    private static void sendToJudgesAndOthers (IModel model, IController controller, Packet packet, boolean sendToServers) {
+        
+        if (model.getClientId().getClientType().equals(ClientType.Type.SERVER)){
+            // If I am a server
+            // forward to clients on this site.
+            controller.sendToAdministrators(packet);
+            controller.sendToJudges(packet);
+            controller.sendToScoreboards(packet);
+            if (sendToServers) {
+                controller.sendToScoreboards(packet);
+            }
+        }
+    }
+
     /**
      * Handle Check out run, add to model, trigger listeners.
      * @param model
      * @param run
      * @param runFiles
      */
-    private static void checkedOutRun(IModel model, Run run, RunFiles runFiles) {
+    private static void checkedOutRun(IModel model,IController controller, Run run, RunFiles runFiles) {
         model.addRun(run, runFiles);
+        
+        // TODO code for if checkout run from another site.
 
     }
 
@@ -146,6 +183,8 @@ public final class PacketHandler {
         
         Run theRun = model.getRun(run.getElementId());
         ClientId whoCheckedOut = model.getRunCheckedOutBy (run);
+        
+        // TODO code for if canceling run on another site.
         
         if (theRun == null){
             // TODO unable to cancel run?!
@@ -161,10 +200,8 @@ public final class PacketHandler {
                 Run availableRun = model.getRun(run.getElementId());
                 Packet availableRunPacket = PacketFactory.createRunAvailable(model.getClientId(), fromId, availableRun);
                 
-                controller.sendToAdministrators(availableRunPacket);
-                controller.sendToJudges(availableRunPacket);
-                controller.sendToScoreboards(availableRunPacket); // TODO send this to boards to ?
-                controller.sendToServers(availableRunPacket); 
+                sendToJudgesAndOthers(model, controller, availableRunPacket, true);
+                
             } else {
                 // Un authorized
                 StaticLog.unclassified("cancelRun ", new Exception("Unable to cancel run "+run+" user "+fromId+" "+whoCheckedOut));
@@ -180,6 +217,8 @@ public final class PacketHandler {
             RunResultFiles runResultFiles, ClientId fromId) {
 
         Run theRun = model.getRun(run.getElementId());
+        
+        // TODO code for if this run is on another site
 
         if (theRun == null) {
             // TODO code unable to get run
@@ -193,10 +232,7 @@ public final class PacketHandler {
                 controller.sendToClient(judgementPacket);
             }
             
-            controller.sendToAdministrators(judgementPacket);
-            controller.sendToJudges(judgementPacket);
-            controller.sendToScoreboards(judgementPacket);
-            controller.sendToServers(judgementPacket);
+            sendToJudgesAndOthers(model, controller, judgementPacket, isThisSite(model, theRun));
         }
     }
 
@@ -215,6 +251,8 @@ public final class PacketHandler {
 
         Run theRun = model.getRun(run.getElementId());
 
+        // TODO handle request if run is on another server.
+        
         if (run == null) {
             
             // Run not available, perhaps on another server.
@@ -232,11 +270,7 @@ public final class PacketHandler {
             Packet checkOutPacket = PacketFactory.createCheckedOutRun(model.getClientId(), fromId, theRun, runFiles, fromId);
             controller.sendToClient(checkOutPacket);
             
-            // Send to all other interested parties.
-            controller.sendToAdministrators(checkOutPacket);
-            controller.sendToJudges(checkOutPacket);
-            controller.sendToScoreboards(checkOutPacket);
-            controller.sendToServers(checkOutPacket);
+            sendToJudgesAndOthers(model, controller, checkOutPacket, true);
 
         } else {
 
@@ -253,10 +287,10 @@ public final class PacketHandler {
      * @param packet
      * @param model
      */
-    private static void unpackAndAddList (Packet packet,  IModel model ){
-        
+    private static void unpackAndAddList(Packet packet, IModel model) {
+
         try {
-            Run runs[] = (Run[]) PacketFactory.getObjectValue(packet, PacketFactory.RUN_LIST);
+            Run [] runs = (Run[]) PacketFactory.getObjectValue(packet, PacketFactory.RUN_LIST);
             if (runs != null) {
                 for (Run run : runs) {
                     model.addRun(run);
@@ -297,23 +331,14 @@ public final class PacketHandler {
             clientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
             if (clientId != null) {
                 model.setClientId(clientId);
+                info("DEBUG set client to : "+model.getClientId());
             }
         } catch (Exception e) {
             // TODO: log handle exception
             StaticLog.unclassified("Exception logged ", e);
         }
 
-        try {
-            Integer siteNumber = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
-            if (siteNumber != null) {
-                controller.setSiteNumber(siteNumber.intValue());
-            }
-        } catch (Exception e) {
-            // TODO: log handle exception
-            StaticLog.unclassified("Exception logged ", e);
-        }
-
-        info("Site set to " + model.getSiteNumber());
+        controller.setSiteNumber(clientId.getSiteNumber());
 
         try {
             Language[] languages = (Language[]) PacketFactory.getObjectValue(packet, PacketFactory.LANGUAGE_LIST);
@@ -377,7 +402,7 @@ public final class PacketHandler {
         unpackAndAddList (packet, model);
         
         if (model.isLoggedIn()){
-            controller.startMainUI(clientId);
+            controller.startMainUI(model.getClientId());
         }else{
             String message = "Trouble loggin in, check logs";
             model.loginDenied(packet.getDestinationId(), connectionHandlerID, message);
@@ -390,6 +415,7 @@ public final class PacketHandler {
      * @param s
      */
     public static void info(String s) {
+        System.err.println(s);
         StaticLog.info(s) ;
     }
 }
