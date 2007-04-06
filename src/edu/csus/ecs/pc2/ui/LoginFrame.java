@@ -19,6 +19,7 @@ import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ILoginListener;
 import edu.csus.ecs.pc2.core.model.IModel;
 import edu.csus.ecs.pc2.core.model.LoginEvent;
@@ -301,8 +302,8 @@ public class LoginFrame extends JFrame implements UIPlugin {
             } catch (Exception e) {
                 // TODO: log handle exception
                 setStatusMessage(e.getMessage());
-                System.err.println("Exception in login "+e.getMessage());
-                e.printStackTrace(System.err);
+                StaticLog.info("Login not successful: "+e.getMessage());
+                System.err.println("Login not successful: "+e.getMessage());
                 
             }
         }

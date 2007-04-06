@@ -301,9 +301,8 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             log = new Log(clientId.toString());
             StaticLog.setLog(log);
 
-            info("");
             info(new VersionInfo().getSystemVersionInfo());
-            info(" login(" + id + "," + password + ")");
+            info("Login: "+id+" (aka "+clientId.getName()+")");
 
             if (password.length() < 1) {
                 password = clientId.getName(); // Joe password.
