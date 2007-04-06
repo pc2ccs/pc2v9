@@ -79,11 +79,17 @@ public class LoginFrame extends JFrame implements UIPlugin {
      */
     private void initialize() {
         this.setSize(new java.awt.Dimension(429, 365));
+        this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setTitle("PC^2 Login");
         this.setContentPane(getPasswordTitleLabel());
         this.addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent e) {
                 System.exit(0);
+            }
+        });
+        this.addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                promptBeforeExit();
             }
         });
         

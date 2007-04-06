@@ -102,6 +102,7 @@ public class TeamView extends JFrame implements UIPlugin {
      */
     private void initialize() {
         this.setSize(new java.awt.Dimension(490, 368));
+        this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setContentPane(getMainViewPane());
         this.setTitle("The TeamView");
         FrameUtilities.waitCursor(this);

@@ -63,9 +63,8 @@ public class JudgeView extends JFrame implements UIPlugin {
      */
     private void initialize() {
         this.setSize(new java.awt.Dimension(569, 299));
-
+        this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setContentPane(getMainTabbedPane());
-
         setTitle("PC^2 Judge - Not Logged In ");
         setVisible(true);
         this.addWindowListener(new java.awt.event.WindowAdapter() {

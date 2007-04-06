@@ -135,6 +135,7 @@ public class ServerView extends JFrame implements UIPlugin {
      */
     private void initialize() {
         this.setSize(new java.awt.Dimension(518, 327));
+        this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setTitle("Server View");
         this.setContentPane(getMainViewPane());
         this.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -620,6 +621,7 @@ public class ServerView extends JFrame implements UIPlugin {
             int count = getIntegerValue(sitesCountTextBox.getText());
             if (count > 0) {
                 model.generateNewSites(count, true);
+                updateGenerateTitles();
             }
         } catch (Exception e) {
             // TODO: log handle exception
