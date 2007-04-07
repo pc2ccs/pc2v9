@@ -1,11 +1,7 @@
 package edu.csus.ecs.pc2.core;
 
-import java.io.FileOutputStream;
-import java.io.PrintWriter;
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -13,7 +9,6 @@ import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
-import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestTime;
@@ -838,6 +833,22 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     public void sendToTeams(Packet packet) {
         sendPacketToClients(packet, ClientType.Type.SCOREBOARD);
     }
+    
+    private int getPortForSite(int inSiteNumber) {
+
+        try {
+            Site []  sites = model.getSites();
+            Arrays.sort(sites, new SiteComparatorBySiteNumber());
+            Site thisSite = sites[model.getSiteNumber() - 1];
+            String portStr = thisSite.getConnectionInfo().getProperty(Site.PORT_KEY);
+            return Integer.parseInt(portStr);
+
+        } catch (Exception e) {
+            // TODO: log handle exception
+            StaticLog.log("Exception logged ", e);
+            throw new SecurityException("Unable to determine port for site " + inSiteNumber);
+        }
+    }
 
     /**
      * Client has successfully logged in, show them new UI.
@@ -853,6 +864,8 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
             if (containsINIKey(REMOTE_SERVER_KEY)) {
                 // secondary server logged in, start listening.
+        
+                port = getPortForSite(model.getSiteNumber());
                 info("Started Server Transport listening on " + port);
                 transportManager.accecptConnections(port);
 
@@ -915,106 +928,6 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
     }
 
-    /**
-     * Dump connection data
-     */
-    public void dumpContestData() {
-
-        try {
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM.dd.SSS");
-            // "yyMMdd HHmmss.SSS");
-            String filename = "dump" + simpleDateFormat.format(new Date()) + ".log";
-            PrintWriter writer = new PrintWriter(new FileOutputStream(filename, false), true);
-
-            writer.println(new VersionInfo().getSystemName());
-            writer.println("Build " + new VersionInfo().getBuildNumber());
-            writer.println(new VersionInfo().getSystemVersionInfo());
-            writer.println("Date: " + new Date());
-            
-
-
-            writer.println();
-            writer.println("-- Accounts --");
-            for (ClientType.Type ctype : ClientType.Type.values()) {
-                if (model.getAccounts(ctype).size() > 0) {
-                    writer.println("Accounts " + ctype.toString() + " there are " + model.getAccounts(ctype).size());
-                    Vector<Account> accounts = model.getAccounts(ctype);
-                    for (int i = 0; i < accounts.size(); i++) {
-                        writer.println("   " + accounts.elementAt(i));
-                    }
-                }
-
-            }
-
-            // Sites
-            writer.println();
-            writer.println("-- " + model.getSites().length + " sites --");
-            Site [] sites  = model.getSites();
-            Arrays.sort(sites,new SiteComparatorBySiteNumber());
-            for (Site site1 : sites) {
-                writer.println("Site " + site1.getSiteNumber() + " " + site1.getDisplayName() + "/" + site1.getPassword()+" "+site1.getElementId());
-            }
-            
-            // Contest Times
-            writer.println();
-            writer.println("-- Contest Times -- ");
-            for (Site site1 : sites) {
-                int siteNumber = site1.getSiteNumber();
-                ContestTime contestTime = model.getContestTime(siteNumber);
-                if (contestTime != null){
-                    writer.println("Site " + site1.getSiteNumber() + " running" + contestTime.isContestRunning()+" e="
-                            + contestTime.getElapsedTimeStr()+" r="+contestTime.getRemainingTimeStr());
-                }
-            }
-
-            // Problem
-            writer.println();
-            writer.println("-- " + model.getProblems().length + " problems --");
-            for (Problem problem : model.getProblems()) {
-                writer.println("  Problem " + problem);
-            }
-
-            // Language
-            writer.println();
-            writer.println("-- " + model.getLanguages().length + " languages --");
-            for (Language language : model.getLanguages()) {
-                writer.println("  Language " + language);
-            }
-
-            // Logins
-            writer.println();
-            writer.println("-- Logins -- ");
-            for (ClientType.Type ctype : ClientType.Type.values()) {
-
-                Enumeration<ClientId> enumeration = model.getLoggedInClients(ctype);
-                if (model.getLoggedInClients(ctype).hasMoreElements()) {
-                    writer.println("Logged in " + ctype.toString());
-                    while (enumeration.hasMoreElements()) {
-                        ClientId aClientId = (ClientId) enumeration.nextElement();
-                        writer.println("   " + aClientId);
-                    }
-                }
-            }
-
-            writer.println();
-            writer.println("Current clientId is " + model.getClientId());
-
-            writer.println();
-            writer.println("*end*");
-
-            writer.close();
-            writer = null;
-
-            String command = "/windows/vi.bat " + filename;
-            Runtime.getRuntime().exec(command);
-
-        } catch (Exception e) {
-            // TODO: writer handle exception
-            info("Exception logged ", e);
-        }
-
-    }
-
     private ClientId getServerClientId(){
         return new ClientId (model.getSiteNumber(), Type.SERVER, 0);
     }
@@ -1044,6 +957,26 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         ClientId clientId = model.getClientId();
         Packet packet = PacketFactory.createUnCheckoutRun(clientId, getServerClientId(), run);
         sendToServer(packet);
+    }
+
+    /**
+     * Add a new site into model, send update to other servers.
+     */
+    public void addNewSite(Site site) {
+        int numSites = model.getSites().length;
+        site.setSiteNumber(numSites + 1);
+        model.addSite(site);
+        Packet packet = PacketFactory.createAddSetting(getServerClientId(), PacketFactory.ALL_SERVERS, site);
+        sendToServers(packet);
+    }
+    
+    /**
+     * Modify an existing site, send update to other servers.
+     */
+    public void modifySite (Site site) {
+        model.updateSite(site);
+        Packet packet = PacketFactory.createUpdateSetting(getServerClientId(), PacketFactory.ALL_SERVERS, site);
+        sendToServers(packet);
     }
 
 }

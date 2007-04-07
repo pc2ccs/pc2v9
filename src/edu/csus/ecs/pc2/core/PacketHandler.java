@@ -287,7 +287,7 @@ public final class PacketHandler {
      * @param packet
      * @param model
      */
-    private static void unpackAndAddList(Packet packet, IModel model) {
+    private static void addRunsToRunList (Packet packet, IModel model) {
 
         try {
             Run [] runs = (Run[]) PacketFactory.getObjectValue(packet, PacketFactory.RUN_LIST);
@@ -306,7 +306,10 @@ public final class PacketHandler {
     /**
      * Add contest data into the model.
      * 
-     * This will read a packet and as it finds data loads it into the model.
+     * This will read a packet and load the data into the model.
+     * <br>
+     * This should only be execute with the first LOGIN_SUCCESS that
+     * this module processes. 
      * <P>
      * It processes:
      * <ol>
@@ -398,13 +401,29 @@ public final class PacketHandler {
             // TODO: log handle exception
             StaticLog.unclassified("Exception logged ", e);
         }
+
+        addRunsToRunList (packet, model);
         
+        if (model.isLoggedIn()){
+            
+            // show main UI
+            controller.startMainUI(model.getClientId());
+ 
+            // Login to other sites
+            loginToOtherSites (packet, model);
+        }else{
+            String message = "Trouble loggin in, check logs";
+            model.loginDenied(packet.getDestinationId(), connectionHandlerID, message);
+        }
+    }
+
+    private static void loginToOtherSites(Packet packet, IModel model) {
         try {
             ClientId [] listOfLoggedInUsers = (ClientId[]) PacketFactory.getObjectValue(packet, PacketFactory.LOGGED_IN_USERS);
             for (ClientId id : listOfLoggedInUsers){
                 if (isServer (id)){
                     if ( ! model.isLoggedIn(id)){
-                        loginToOtherSite (clientId.getSiteNumber()); 
+                        loginToOtherSite (id.getSiteNumber()); 
                     }
                 }
             }
@@ -413,18 +432,11 @@ public final class PacketHandler {
             StaticLog.unclassified("Exception logged ", e);
         }
         
-        unpackAndAddList (packet, model);
-        
-        if (model.isLoggedIn()){
-            controller.startMainUI(model.getClientId());
-        }else{
-            String message = "Trouble loggin in, check logs";
-            model.loginDenied(packet.getDestinationId(), connectionHandlerID, message);
-        }
     }
 
     private static void loginToOtherSite(int siteNumber) {
-        info("debug loginToOtherSite "+siteNumber);
+        
+        info("debug loginToOtherSite, would have logged into  "+siteNumber);
         
     }
 

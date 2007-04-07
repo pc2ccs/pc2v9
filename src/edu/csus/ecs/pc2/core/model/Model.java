@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.core.model;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Properties;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.list.AccountList;
@@ -103,6 +104,17 @@ public class Model implements IModel {
      * List of all judgements. Contains deleted judgements too.
      */
     private JudgementList judgementList = new JudgementList();
+    
+    private Site createFakeSite (int nextSiteNumber){
+        Site site = new Site("Site "+nextSiteNumber, nextSiteNumber);
+        Properties props = new Properties();
+        props.put(Site.IP_KEY, "localhost");
+        int port = 50002 + (nextSiteNumber-1)* 1000;
+        props.put(Site.PORT_KEY, "" + port);
+        site.setConnectionInfo(props);
+        site.setPassword("site"+nextSiteNumber);
+        return site;
+    }
 
     /**
      * Initialize Model with data.
@@ -138,8 +150,7 @@ public class Model implements IModel {
             addJudgement(judgement);
         }
 
-        Site site = new Site("Site 1/auto", 1);
-        site.setPassword("site1");
+        Site site = createFakeSite (1);
         site.setActive(true);
         siteList.add(site);
     }

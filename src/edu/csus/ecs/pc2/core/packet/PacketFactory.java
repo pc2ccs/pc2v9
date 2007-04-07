@@ -20,6 +20,7 @@ import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
@@ -50,7 +51,7 @@ public final class PacketFactory {
     public static final String PASSWORD = "PASSWORD";
 
     public static final String JUDGEMENT_RECORD = "JUDGEMENT_RECORD";
-    
+
     public static final String RUN_LIST = "RUN_LIST";
 
     public static final String RUN_FILES = "RUN_FILES";
@@ -64,7 +65,7 @@ public final class PacketFactory {
     public static final String REQUESTED_RUN_ELEMENT_ID = "REQUESTED_RUN_ELEMENT_ID";
 
     public static final String CLIENT_ID = "CLIENT_ID";
-    
+
     /**
      * Array of ClientIds of logged in users.
      */
@@ -148,6 +149,11 @@ public final class PacketFactory {
      * Array of {@link Judgement}.
      */
     public static final String JUDGEMENT_LIST = "JUDGEMENT_LIST";
+
+    /**
+     * A ClientId representing all sites (used as a destinationId).
+     */
+    public static final ClientId ALL_SERVERS = new ClientId(0, ClientType.Type.SERVER, 0);
 
     /**
      * Constructor is private as this is a utility class which should not be extended or invoked.
@@ -243,11 +249,11 @@ public final class PacketFactory {
 
             while (enumeration.hasMoreElements()) {
                 String element = (String) enumeration.nextElement();
-                pw.println("   key: " + element + " is: " + prop.get(element).getClass().getName()+" "+prop.get(element));
+                pw.println("   key: " + element + " is: " + prop.get(element).getClass().getName() + " " + prop.get(element));
             }
         } else {
 
-            pw.println("  Contains: " + obj.toString() + " " +obj);
+            pw.println("  Contains: " + obj.toString() + " " + obj);
         }
         pw.println();
 
@@ -270,11 +276,11 @@ public final class PacketFactory {
 
             while (enumeration.hasMoreElements()) {
                 String element = (String) enumeration.nextElement();
-                pw.println("   key: " + element + " is: " + prop.get(element).getClass().getName()+" "+prop.get(element));
+                pw.println("   key: " + element + " is: " + prop.get(element).getClass().getName() + " " + prop.get(element));
             }
         } else {
 
-            pw.println("  Contains: " + obj.toString() + " " +obj);
+            pw.println("  Contains: " + obj.toString() + " " + obj);
         }
         pw.println();
 
@@ -356,7 +362,7 @@ public final class PacketFactory {
      * @param destination
      * @param runs
      */
-    public static Packet createRunList(ClientId source, ClientId destination, Run [] runs) {
+    public static Packet createRunList(ClientId source, ClientId destination, Run[] runs) {
         Properties prop = new Properties();
         prop.put(RUN_LIST, runs);
         Packet packet = new Packet(Type.RUN_LIST, source, destination, prop);
@@ -469,17 +475,18 @@ public final class PacketFactory {
         return packet;
     }
 
-    // public static Packet createUpdateSetting(ClientId source, ClientId destination, Problem problem,
-    // ProblemDataFiles problemDataFiles) {
-    // Properties prop = new Properties();
-    // prop.put(PROBLEM, problem);
-    // if (problemDataFiles != null) {
-    // prop.put(PROBLEM_DATA_FILES, problemDataFiles);
-    // }
-    // Packet packet = new Packet(Type.UPDATE_SETTING, source, destination, prop);
-    // return packet;
-    // }
+     public static Packet createUpdateSetting(ClientId source, ClientId destination, Problem problem,
+            ProblemDataFiles problemDataFiles) {
+        Properties prop = new Properties();
+        prop.put(PROBLEM, problem);
+        if (problemDataFiles != null) {
+            prop.put(PROBLEM_DATA_FILES, problemDataFiles);
+        }
+        Packet packet = new Packet(Type.UPDATE_SETTING, source, destination, prop);
+        return packet;
+    }
 
+     // TODO code add BalloonSettings settings packet
     // public static Packet createAddSetting(ClientId source, ClientId destination, BalloonSettings balloonSettings,
     // ClientId userLoginId) {
     // Properties prop = new Properties();
@@ -502,12 +509,12 @@ public final class PacketFactory {
         return packet;
     }
 
-    // public static Packet createAddSetting(ClientId source, ClientId destination, Site site) {
-    // Properties prop = new Properties();
-    // prop.put(SITE, site);
-    // Packet packet = new Packet(Type.ADD_SETTING, source, destination, prop);
-    // return packet;
-    // }
+     public static Packet createAddSetting(ClientId source, ClientId destination, Site site) {
+        Properties prop = new Properties();
+        prop.put(SITE, site);
+        Packet packet = new Packet(Type.ADD_SETTING, source, destination, prop);
+        return packet;
+    }
 
     /**
      * Create a packet of {@link PacketType.Type#ADD_SETTING}.
@@ -523,16 +530,15 @@ public final class PacketFactory {
         return packet;
     }
 
-    // public static Packet createAddSetting(ClientId source, ClientId destination, Problem problem, ProblemDataFiles
-    // problemDataFiles) {
-    // Properties prop = new Properties();
-    // prop.put(PROBLEM, problem);
-    // if (problemDataFiles != null) {
-    // prop.put(PROBLEM_DATA_FILES, problemDataFiles);
-    // }
-    // Packet packet = new Packet(Type.ADD_SETTING, source, destination, prop);
-    // return packet;
-    // }
+     public static Packet createAddSetting(ClientId source, ClientId destination, Problem problem, ProblemDataFiles problemDataFiles) {
+        Properties prop = new Properties();
+        prop.put(PROBLEM, problem);
+        if (problemDataFiles != null) {
+            prop.put(PROBLEM_DATA_FILES, problemDataFiles);
+        }
+        Packet packet = new Packet(Type.ADD_SETTING, source, destination, prop);
+        return packet;
+    }
 
     /**
      * @param source
@@ -660,10 +666,10 @@ public final class PacketFactory {
      * @param languages
      * @param problems
      * @param judgements
-     * @param loggedInUsers 
+     * @param loggedInUsers
      */
     public static Packet createLoginSuccess(ClientId source, ClientId destination, ContestTime inContestTime, int siteNumber,
-            Language[] languages, Problem[] problems, Judgement[] judgements, Site [] sites, Run [] runs, ClientId[] loggedInUsers) {
+            Language[] languages, Problem[] problems, Judgement[] judgements, Site[] sites, Run[] runs, ClientId[] loggedInUsers) {
         try {
             Properties prop = new Properties();
             prop.put(SITE_NUMBER, new Integer(siteNumber));
@@ -822,46 +828,19 @@ public final class PacketFactory {
         return packet;
     }
 
-    /**
-     * Create packet for {@link PacketType.Type#ADD_SETTING}.
-     * 
-     * @param source
-     * @param destination
-     * @param accounts
-     */
-    public static Packet createAddSetting(ClientId source, ClientId destination, Account[] accounts) {
+     /**
+         * Create packet for {@link PacketType.Type#UPDATE_SETTING}.
+         * 
+         * @param source
+         * @param destination
+         * @param sites
+         */
+    public static Packet createUpdateSetting(ClientId source, ClientId destination, Site site) {
         Properties prop = new Properties();
-        prop.put(ACCOUNT_ARRAY, accounts);
-        Packet packet = new Packet(Type.ADD_SETTING, source, destination, prop);
-        return packet;
-    }
-
-    /**
-     * Create packet for {@link PacketType.Type#UPDATE_SETTING}.
-     * 
-     * @param source
-     * @param destination
-     * @param accounts
-     */
-    public static Packet createUpdateSetting(ClientId source, ClientId destination, Account[] accounts) {
-        Properties prop = new Properties();
-        prop.put(ACCOUNT_ARRAY, accounts);
+        prop.put(SITE, site);
         Packet packet = new Packet(Type.UPDATE_SETTING, source, destination, prop);
         return packet;
     }
-
-    // 
-    // * Create packet for {@link PacketType.Type#UPDATE_SETTING}.
-    // * @param source
-    // * @param destination
-    // * @param sites
-    // */
-    // public static Packet createUpdateSetting(ClientId source, ClientId destination, Site[] sites) {
-    // Properties prop = new Properties();
-    // prop.put(SITE_LIST, sites);
-    // Packet packet = new Packet(Type.UPDATE_SETTING, source, destination, prop);
-    // return packet;
-    // }
 
     /**
      * Create packet for {@link PacketType.Type#ADD_SETTING}.

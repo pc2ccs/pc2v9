@@ -7,6 +7,7 @@ import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
+import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.packet.Packet;
 
 /**
@@ -74,5 +75,7 @@ public interface IController {
      * @param run
      */
     void cancelRun (Run run);
+    
+    void addNewSite (Site site);
 
 }
