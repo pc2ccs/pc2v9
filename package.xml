@@ -32,6 +32,32 @@
     <property name="gzip.name" value="${release}.tar.gz"/>
     <property name="gzip.path" value="${dist.dir}/${gzip.name}"/>
     <property name="version.path" value="${build.dir}/VERSION"/>
+    <property name="pc2jzip.name" value="pc2j-${version}.zip"/>
+    <property name="pc2jzip.path" value="${build.dir}/${pc2jzip.name}"/>
+    <property name="apizip.name" value="api-${version}.zip"/>
+    <property name="apizip.path" value="${build.dir}/${apizip.name}"/>
+
+    <target name="apizip" depends="javadocs" description="create zip of the javadocs">
+        <zip destfile="${apizip.path}">
+            <zipfileset dir="${docs.dir}/api" filemode="644" prefix="${release}/docs/api"/>
+        </zip>
+    </target>
+
+    <target name="pc2jzip" description="creates zip of the source">
+        <zip destfile="${pc2jzip.path}">
+            <zipfileset dir="${basedir}" filemode="644" prefix="${release}">
+                <include name="README"/>
+                <include name="LICENSE"/>
+                <include name="${version.path}"/>
+                <include name="pc2v9.ini"/>
+            </zipfileset>
+            <zipfileset dir="${basedir}/src" filemode="644" prefix="${release}/src">
+            </zipfileset>
+            <zipfileset dir="${basedir}/test" filemode="644" prefix="${release}/test">
+            </zipfileset>
+        </zip>
+    </target>
+
 
     <target name="zip" depends="jar">
         <delete file="${version.path}"/>
