@@ -8,6 +8,7 @@ import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.Properties;
 import java.util.Vector;
 
 import javax.swing.DefaultListModel;
@@ -28,16 +29,16 @@ import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
-import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.ILoginListener;
 import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.ISiteListener;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.LoginEvent;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.RunEvent;
-import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.SiteEvent;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
@@ -615,12 +616,29 @@ public class ServerView extends JFrame implements UIPlugin {
         }
         return generateSitesAccountButton;
     }
+    
+    private Site createSite (int nextSiteNumber){
+        Site site = new Site("Site "+nextSiteNumber, nextSiteNumber);
+        Properties props = new Properties();
+        props.put(Site.IP_KEY, "localhost");
+        int port = 50002 + (nextSiteNumber-1)* 1000;
+        props.put(Site.PORT_KEY, "" + port);
+        site.setConnectionInfo(props);
+        site.setPassword("site"+nextSiteNumber);
+        return site;
+    }
 
     protected void generateSiteAccounts() {
         try {
             int count = getIntegerValue(sitesCountTextBox.getText());
             if (count > 0) {
-                model.generateNewSites(count, true);
+                int numSites = model.getSites().length;
+                for (int i = 0; i < count ; i ++) {
+                    int nextSiteNumber = i + 1 +  numSites;
+                    Site site = createSite(nextSiteNumber);
+                    model.addSite(site);
+                }
+                    
                 updateGenerateTitles();
             }
         } catch (Exception e) {
@@ -662,7 +680,11 @@ public class ServerView extends JFrame implements UIPlugin {
             log.println();
             log.println("-- " + model.getSites().length + " sites --");
             for (Site site1 : model.getSites()) {
-                log.println("Site " + site1.getSiteNumber() + " " + site1.getDisplayName() + "/" + site1.getPassword());
+                String hostName = site1.getConnectionInfo().getProperty(Site.IP_KEY);
+                String portStr = site1.getConnectionInfo().getProperty(Site.PORT_KEY);
+
+                log.println("Site " + site1.getSiteNumber() + " " + hostName + ":" + portStr + " " + site1.getDisplayName() + "/"
+                        + site1.getPassword());
             }
 
             // Problem
