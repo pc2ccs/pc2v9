@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Properties;
@@ -25,6 +26,7 @@ import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
@@ -38,6 +40,7 @@ import edu.csus.ecs.pc2.core.model.ISiteListener;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.LoginEvent;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.SiteEvent;
@@ -700,6 +703,16 @@ public class ServerView extends JFrame implements UIPlugin {
             for (Language language : model.getLanguages()) {
                 log.println("  Language " + language);
             }
+            
+            // Runs
+            log.println();
+            Run [] runs = model.getRuns();
+            Arrays.sort(runs, new RunComparator());
+            log.println("-- " + runs.length + " runs --");
+            for (Run run : runs) {
+                log.println("  Run " + run);
+            }
+            
 
             // Logins
             log.println();
