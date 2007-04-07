@@ -118,11 +118,14 @@ public final class PacketHandler {
             
         } else if (packetType.equals(Type.LOGIN_SUCCESS)) {
             if (! model.isLoggedIn()){
-                info(" handlePacket LOGIN_SUCCESS before ");
+                info(" handlePacket original LOGIN_SUCCESS before ");
                 loadDataIntoModel(packet, controller, model, connectionHandlerID);
-                info(" handlePacket LOGIN_SUCCESS after -- all settings loaded "); 
+                info(" handlePacket original LOGIN_SUCCESS after -- all settings loaded "); 
             } else {
-                info(" handlePacket LOGIN_SUCCESS again: "+packet); 
+                info(" handlePacket LOGIN_SUCCESS - from another site, no update of contest data: "+packet);
+                
+                // Add them as a site which is logged in.
+                model.addLogin(fromId, connectionHandlerID);
             }
 
         } else {
@@ -410,20 +413,20 @@ public final class PacketHandler {
             controller.startMainUI(model.getClientId());
  
             // Login to other sites
-            loginToOtherSites (packet, model);
+            loginToOtherSites (packet, model, controller);
         }else{
             String message = "Trouble loggin in, check logs";
             model.loginDenied(packet.getDestinationId(), connectionHandlerID, message);
         }
     }
 
-    private static void loginToOtherSites(Packet packet, IModel model) {
+    private static void loginToOtherSites(Packet packet, IModel model, IController controller) {
         try {
             ClientId [] listOfLoggedInUsers = (ClientId[]) PacketFactory.getObjectValue(packet, PacketFactory.LOGGED_IN_USERS);
             for (ClientId id : listOfLoggedInUsers){
                 if (isServer (id)){
                     if ( ! model.isLoggedIn(id)){
-                        loginToOtherSite (id.getSiteNumber()); 
+                        controller.sendServerLoginRequest (id.getSiteNumber());
                     }
                 }
             }
@@ -431,12 +434,6 @@ public final class PacketHandler {
             // TODO: log handle exception
             StaticLog.unclassified("Exception logged ", e);
         }
-        
-    }
-
-    private static void loginToOtherSite(int siteNumber) {
-        
-        info("debug loginToOtherSite, would have logged into  "+siteNumber);
         
     }
 

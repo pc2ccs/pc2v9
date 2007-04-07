@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core.model;
 
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
@@ -16,6 +17,7 @@ import edu.csus.ecs.pc2.core.list.ProblemDisplayList;
 import edu.csus.ecs.pc2.core.list.ProblemList;
 import edu.csus.ecs.pc2.core.list.RunFilesList;
 import edu.csus.ecs.pc2.core.list.RunList;
+import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
@@ -735,13 +737,15 @@ public class Model implements IModel {
         return (Judgement) judgementList.get(elementId);
     }
 
-    private Site getSite(ElementId elementId) {
-        return (Site) siteList.get(elementId);
-    }
-
     private Account getAccount(ElementId elementId) {
         return (Account) accountList.get(elementId);
 
+    }
+
+    public Site getSite(int number) {
+        Site []  sites = siteList.getList();
+        Arrays.sort(sites, new SiteComparatorBySiteNumber());
+        return sites[number - 1];
     }
 
 

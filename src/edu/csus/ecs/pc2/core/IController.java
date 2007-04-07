@@ -78,4 +78,6 @@ public interface IController {
     
     void addNewSite (Site site);
 
+    void sendServerLoginRequest(int siteNumber);
+
 }

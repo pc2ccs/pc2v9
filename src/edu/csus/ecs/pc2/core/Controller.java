@@ -146,7 +146,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
     // TODO change this to UIPlugin
     private LoginFrame loginUI;
-
+    
     public Controller(IModel model) {
         super();
         this.model = model;
@@ -424,7 +424,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
 
     /**
-     * Send login request to server.
+     * Send login request to server as a login.
      * 
      * @param manager
      * @param clientId
@@ -979,4 +979,34 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         sendToServers(packet);
     }
 
+    /**
+     * Server login to other sites.
+     * 
+     * Contacts the other site and sends a login request.
+     */
+    public void sendServerLoginRequest(int inSiteNumber) {
+
+        try {
+            Site remoteSite = model.getSite(inSiteNumber);
+            Site localSite = model.getSite(model.getSiteNumber());
+            String localPassword = localSite.getPassword();
+
+            String hostName = remoteSite.getConnectionInfo().getProperty(Site.IP_KEY);
+            String portStr = remoteSite.getConnectionInfo().getProperty(Site.PORT_KEY);
+            int portNumber = Integer.parseInt(portStr);
+
+            info("Contacting Site " + remoteSite.getSiteNumber() + " " + hostName + ":" + portStr);
+            ConnectionHandlerID connectionHandlerID = transportManager.connectToServer(hostName, portNumber);
+
+            info("Contacted using connection id " + connectionHandlerID);
+
+            info("Sending login request to " + hostName + " as " + getServerClientId() + " " + localPassword); // TODO remove this
+            sendLoginRequest(transportManager, connectionHandlerID, getServerClientId(), localPassword);
+            
+        } catch (Exception e) {
+            // TODO: log handle exception
+            StaticLog.log("Unable to login to site "+inSiteNumber, e);
+        }
+
+    }
 }

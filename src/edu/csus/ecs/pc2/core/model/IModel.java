@@ -199,6 +199,8 @@ public interface IModel {
     Vector<Account> getAccounts(Type type, int siteNumber);
 
     Vector<Account> getAccounts(Type type);
+    
+    Site getSite (int siteNumber);
 
     /**
      * return true if account exists and valid password matches.
