@@ -833,7 +833,7 @@ public final class PacketFactory {
          * 
          * @param source
          * @param destination
-         * @param sites
+         * @param site
          */
     public static Packet createUpdateSetting(ClientId source, ClientId destination, Site site) {
         Properties prop = new Properties();

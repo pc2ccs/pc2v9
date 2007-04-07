@@ -5,9 +5,9 @@ import edu.csus.ecs.pc2.core.model.Run;
 /**
  * Run Comparator, Order the runs by team, problem, elapsed, runNumber, isSolved. This comparator groups like records together, it
  * does not sort by team number or problem number, so it should not be used to display runs in order. <br>
- * Use {@link edu.csus.ecs.pc2.core.RunComparator RunCompartor} to sort runs in site # and run # order.
+ * Use {@link edu.csus.ecs.pc2.core.list.RunComparator RunCompartor} to sort runs in site # and run # order.
  * 
- * @see edu.csus.ecs.pc2.core.RunComparator
+ * @see edu.csus.ecs.pc2.core.list.RunComparator
  * 
  * @author pc2@ecs.csus.edu
  */
