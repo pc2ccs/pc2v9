@@ -861,8 +861,10 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         try {
 
             model.setClientId(clientId);
+            
+            boolean isServer = clientId.getClientType().equals(ClientType.Type.SERVER);
 
-            if (containsINIKey(REMOTE_SERVER_KEY)) {
+            if (isServer && containsINIKey(REMOTE_SERVER_KEY)) {
                 // secondary server logged in, start listening.
         
                 port = getPortForSite(model.getSiteNumber());
@@ -891,7 +893,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         }
     }
 
-    /**
+     /**
      * Start the UI.
      */
     public void start(String[] stringArray) {
@@ -985,6 +987,15 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * Contacts the other site and sends a login request.
      */
     public void sendServerLoginRequest(int inSiteNumber) {
+        
+        if (isThisSite(inSiteNumber)) {
+            // TODO this code should not be invoked, find root cause.
+            /**
+             * Do not login to the server's site.
+             */
+            System.err.println("Tried to send login request to ourselves, login to "+inSiteNumber);
+            return;
+        }
 
         try {
             Site remoteSite = model.getSite(inSiteNumber);
