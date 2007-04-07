@@ -519,6 +519,9 @@ public class Model implements IModel {
 
     public void removeLogin(ClientId sourceId) {
         loginList.remove(sourceId);
+        ConnectionHandlerID connectionHandlerID = getConnectionHandleID(sourceId);
+        LoginEvent loginEvent = new LoginEvent(LoginEvent.Action.LOGOFF, sourceId, connectionHandlerID, "Logoff");
+        fireLoginListener(loginEvent);
     }
 
     public int getSiteNumber() {
