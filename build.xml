@@ -56,7 +56,7 @@
     </tstamp>
     <property name="timestamp" value="${date}${time}" />
     <!-- version is used in the jar manifest & in package.xml -->
-    <property name="version" value="9_0_alpha_${timestamp}"/>
+    <property name="version" value="9_0_alpha_${date}"/>
 
     <taskdef resource="checkstyletask.properties"/>
 
