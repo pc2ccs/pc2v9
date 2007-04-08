@@ -1,0 +1,5 @@
+#Fri Nov 17 13:06:00 PST 2006
+enabled=true
+file_filter=in\:\\.java$\nex\:/prototype/\nin\:\\.properties$\n
+eclipse.preferences.version=1
+filenames.config=.pc2_checks.xml
