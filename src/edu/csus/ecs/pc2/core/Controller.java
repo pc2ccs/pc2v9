@@ -123,7 +123,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * Key in .ini for the server port.
      */
     private static final String SERVER_PORT_KEY = "server.port";
-
+    
     /**
      * Key in the .ini for the remote server host name.
      */
@@ -143,6 +143,10 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
     @SuppressWarnings("unused")
     private ParseArguments parseArguments = new ParseArguments();
+    
+    private boolean contactingRemoteServer = false;
+    
+    private boolean usingMainUI = true;
 
     // TODO change this to UIPlugin
     private LoginFrame loginUI;
@@ -322,7 +326,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                 info("Starting Server Transport...");
                 transportManager = new TransportManager(log, this);
 
-                if (containsINIKey(REMOTE_SERVER_KEY)) {
+                if (isContactingRemoteServer()) {
 
                     // Contacting another server. "join"
                     remoteHostName = getINIValue(REMOTE_SERVER_KEY);
@@ -864,7 +868,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             
             boolean isServer = clientId.getClientType().equals(ClientType.Type.SERVER);
 
-            if (isServer && containsINIKey(REMOTE_SERVER_KEY)) {
+            if (isServer && isContactingRemoteServer()) {
                 // secondary server logged in, start listening.
         
                 port = getPortForSite(model.getSiteNumber());
@@ -875,10 +879,14 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             }
 
             try {
-                String uiClassName = LoadUIClass.getUIClassName(clientId);
-                mainUI = LoadUIClass.loadUIClass(uiClassName);
-                mainUI.setModelAndController(model, this);
-                loginUI.dispose();
+                if (isUsingMainUI()){
+                    // NO UI to display
+                    String uiClassName = LoadUIClass.getUIClassName(clientId);
+                    info("Loading UI class "+uiClassName);
+                    mainUI = LoadUIClass.loadUIClass(uiClassName);
+                    mainUI.setModelAndController(model, this);
+                    loginUI.dispose();
+                }
             } catch (Exception e) {
                 // TODO: log handle exception
                 System.err.println("Error loading UI, check log, (class not found?)  " + e.getMessage());
@@ -898,7 +906,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      */
     public void start(String[] stringArray) {
 
-        String[] arguments = { "--site", "--login", "--id", "--password", "--loginUI" };
+        String[] arguments = { "--login", "--id", "--password", "--loginUI", "--remoteServer", "--port" };
         parseArguments = new ParseArguments(stringArray, arguments);
 
         // TODO parse arguments logic 
@@ -924,9 +932,11 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
         log = new Log("pc2.startup");
         StaticLog.setLog(log);
-
-        loginUI = new LoginFrame();
-        loginUI.setModelAndController(model, this);
+        
+        if (isUsingMainUI()){
+            loginUI = new LoginFrame();
+            loginUI.setModelAndController(model, this);
+        }
 
     }
 
@@ -1025,4 +1035,33 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         }
 
     }
+
+    /**
+     * Contacting remote server (joining contest).
+     * @return true if joining contest, false if first server
+     */
+    public boolean isContactingRemoteServer() {
+        return contactingRemoteServer && containsINIKey(REMOTE_SERVER_KEY);
+    }
+
+    public void setContactingRemoteServer(boolean contactingRemoteServer) {
+        this.contactingRemoteServer = contactingRemoteServer;
+    }
+
+    /**
+     * Will main UI be invoked/displayed ?
+     * 
+     * This includes Login UI as wella as Main UI.
+     * 
+     * @return true - shows main UI, false - does not show main UI.
+     */
+    public boolean isUsingMainUI() {
+        return usingMainUI;
+    }
+
+    public void setUsingMainUI(boolean usingMainUI) {
+        this.usingMainUI = usingMainUI;
+    }
+    
+  
 }
