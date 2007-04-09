@@ -102,6 +102,10 @@ public final class PacketHandler {
             // Cancel run from requestor to server
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
             cancelRun (run, model, controller, fromId);
+          
+            
+        } else if (packetType.equals(Type.ADD_SETTING)) {
+            addNewSetting (packet, model, controller);
             
         } else if (packetType.equals(Type.RUN_CHECKOUT)) {
             // Run from server to judge
@@ -135,6 +139,23 @@ public final class PacketHandler {
         }
     }
     
+    /**
+     * Add a new setting from another server.
+     * @param packet
+     * @param model
+     * @param controller
+     */
+    private static void addNewSetting(Packet packet, IModel model, IController controller) {
+        
+        Site site = (Site) PacketFactory.getObjectValue(packet, PacketFactory.SITE);
+        if (site != null){
+            model.addSite(site);
+            if (isServer(model.getClientId())){
+                sendToJudgesAndOthers(model, controller, packet, false);
+            }
+        }
+    }
+
     private static boolean isThisSite(IModel model, Run run) {
         return run.getSiteNumber() == model.getSiteNumber();
     }

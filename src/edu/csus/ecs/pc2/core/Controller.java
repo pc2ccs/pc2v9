@@ -970,6 +970,11 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         model.addSite(site);
         Packet packet = PacketFactory.createAddSetting(getServerClientId(), PacketFactory.ALL_SERVERS, site);
         sendToServers(packet);
+        
+        sendToJudges(packet);
+        sendToAdministrators(packet);
+        sendToScoreboards(packet);
+        // TODO send to all teams ?? (for "to all" clarification site name ?
     }
     
     /**
