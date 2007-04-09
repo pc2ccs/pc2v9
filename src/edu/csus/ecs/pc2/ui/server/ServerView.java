@@ -27,6 +27,7 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.list.RunComparator;
+import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
@@ -252,10 +253,12 @@ public class ServerView extends JFrame implements UIPlugin {
 
         public void siteAdded(SiteEvent event) {
             updateListBox("Site " + event.getAction() + " " + event.getSite());
+            updateGenerateTitles();
         }
 
         public void siteRemoved(SiteEvent event) {
             updateListBox("Site " + event.getAction() + " " + event.getSite());
+            updateGenerateTitles();
         }
 
         public void siteLoggedOn(SiteEvent event) {
@@ -639,7 +642,7 @@ public class ServerView extends JFrame implements UIPlugin {
                 for (int i = 0; i < count ; i ++) {
                     int nextSiteNumber = i + 1 +  numSites;
                     Site site = createSite(nextSiteNumber);
-                    model.addSite(site);
+                    serverController.addNewSite(site);
                 }
                     
                 updateGenerateTitles();
@@ -682,7 +685,9 @@ public class ServerView extends JFrame implements UIPlugin {
             // Sites
             log.println();
             log.println("-- " + model.getSites().length + " sites --");
-            for (Site site1 : model.getSites()) {
+            Site [] sites = model.getSites();
+            Arrays.sort (sites, new SiteComparatorBySiteNumber());
+            for (Site site1 : sites) {
                 String hostName = site1.getConnectionInfo().getProperty(Site.IP_KEY);
                 String portStr = site1.getConnectionInfo().getProperty(Site.PORT_KEY);
 
