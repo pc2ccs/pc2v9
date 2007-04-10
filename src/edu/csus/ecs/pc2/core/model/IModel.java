@@ -169,6 +169,10 @@ public interface IModel {
     void addRunListener(IRunListener runListener);
 
     void removeRunListener(IRunListener runListener);
+    
+    void addClarificationListener(IClarificationListener clarificationListener);
+
+    void removeClarificationListener(IClarificationListener clarificationListener);
 
     void addProblemListener(IProblemListener problemListener);
 
@@ -332,4 +336,23 @@ public interface IModel {
      * @param run
      */
     void availableRun(Run run);
+    
+    /**
+     * add clarification into model.
+     * @param clarification
+     */
+    void addClarification(Clarification clarification);
+
+    /**
+     * remove clarification from model.
+     * @param clarification
+     */
+    void removeClarification(Clarification clarification);
+
+    /**
+     * change/update clarification in model.
+     * @param clarification
+     */
+    void changeClarification(Clarification clarification);
+ 
 }

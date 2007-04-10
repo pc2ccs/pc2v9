@@ -7,6 +7,7 @@ import java.util.Properties;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.list.AccountList;
+import edu.csus.ecs.pc2.core.list.ClarificationList;
 import edu.csus.ecs.pc2.core.list.ContestTimeList;
 import edu.csus.ecs.pc2.core.list.JudgementDisplayList;
 import edu.csus.ecs.pc2.core.list.JudgementList;
@@ -44,6 +45,8 @@ public class Model implements IModel {
 
     private Vector<IRunListener> runListenerList = new Vector<IRunListener>();
 
+    private Vector<IClarificationListener> clarificationListenerList = new Vector<IClarificationListener>();
+
     private Vector<IProblemListener> problemListenerList = new Vector<IProblemListener>();
 
     private Vector<ILanguageListener> languageListenerList = new Vector<ILanguageListener>();
@@ -72,6 +75,8 @@ public class Model implements IModel {
     private RunList runList = new RunList();
 
     private RunFilesList runFilesList = new RunFilesList();
+
+    private ClarificationList clarificationList = new ClarificationList();
 
     private SiteList siteList = new SiteList();
 
@@ -163,6 +168,14 @@ public class Model implements IModel {
 
     public void removeRunListener(IRunListener runListener) {
         runListenerList.removeElement(runListener);
+    }
+    
+    public void addClarificationListener(IClarificationListener clarificationListener) {
+        clarificationListenerList.addElement(clarificationListener);
+    }
+
+    public void removeClarificationListener(IClarificationListener clarificationListener) {
+        clarificationListenerList.remove(clarificationListener);
     }
 
     public void addContestTimeListener(IContestTimeListener contestTimeListener) {
@@ -753,7 +766,38 @@ public class Model implements IModel {
         Arrays.sort(sites, new SiteComparatorBySiteNumber());
         return sites[number - 1];
     }
+    
 
 
 
+    private void fireClarificationListener(ClarificationEvent clarificationEvent) {
+        for (int i = 0; i < clarificationListenerList.size(); i++) {
+
+            if (clarificationEvent.getAction() == ClarificationEvent.Action.ADDED) {
+                clarificationListenerList.elementAt(i).clarificationAdded(clarificationEvent);
+            } else if (clarificationEvent.getAction() == ClarificationEvent.Action.DELETED) {
+                clarificationListenerList.elementAt(i).clarificationRemoved(clarificationEvent);
+            } else {
+                clarificationListenerList.elementAt(i).clarificationChanged(clarificationEvent);
+            }
+        }
+    }
+
+    public void addClarification(Clarification clarification) {
+        clarificationList.add(clarification);
+        ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.ADDED, clarification);
+        fireClarificationListener(clarificationEvent);
+    }
+
+    public void removeClarification(Clarification clarification) {
+        clarificationList.delete(clarification);
+        ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.DELETED, clarification);
+        fireClarificationListener(clarificationEvent);
+    }
+
+    public void changeClarification(Clarification clarification) {
+        clarificationList.updateClarification(clarification);
+        ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.CHANGED, clarification);
+        fireClarificationListener(clarificationEvent);
+    }
 }
