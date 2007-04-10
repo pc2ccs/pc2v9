@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.core.model;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
@@ -8,6 +9,7 @@ import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.list.AccountList;
 import edu.csus.ecs.pc2.core.list.ClarificationList;
+import edu.csus.ecs.pc2.core.list.ConnectionHandlerList;
 import edu.csus.ecs.pc2.core.list.ContestTimeList;
 import edu.csus.ecs.pc2.core.list.JudgementDisplayList;
 import edu.csus.ecs.pc2.core.list.JudgementList;
@@ -58,7 +60,9 @@ public class Model implements IModel {
     private Vector<IJudgementListener> judgementListenerList = new Vector<IJudgementListener>();
 
     private Vector<ISiteListener> siteListenerList = new Vector<ISiteListener>();
-    
+
+    private Vector<IConnectionListener> connectionListenerList = new Vector<IConnectionListener>();
+ 
     /**
      * Contains name of client (judge or admin) who checks out the run.
      */
@@ -79,6 +83,8 @@ public class Model implements IModel {
     private ClarificationList clarificationList = new ClarificationList();
 
     private SiteList siteList = new SiteList();
+    
+    private ConnectionHandlerList connectionHandlerList = new ConnectionHandlerList();
 
     private int siteNumber = 1;
 
@@ -296,6 +302,20 @@ public class Model implements IModel {
             }
         }
     }
+    
+
+    private void fireConnectionListener(ConnectionEvent connectionEvent) {
+        for (int i = 0; i < connectionListenerList.size(); i++) {
+
+            if (connectionEvent.getAction() == ConnectionEvent.Action.ESTABLISHED) {
+                connectionListenerList.elementAt(i).connectionEstablished(connectionEvent);
+            } else if (connectionEvent.getAction() == ConnectionEvent.Action.DROPPED) {
+                connectionListenerList.elementAt(i).connectionDropped(connectionEvent);
+            } else {
+                throw new UnsupportedOperationException("Unknown connection action " + connectionEvent.getAction());
+            }
+        }
+    }
 
 
     public void addLogin(ClientId inClientId, ConnectionHandlerID connectionHandlerID) {
@@ -501,6 +521,14 @@ public class Model implements IModel {
         siteListenerList.remove(siteListener);
     }
 
+    public void addConnectionListener(IConnectionListener connectionListener) {
+        connectionListenerList.addElement(connectionListener);
+    }
+
+    public void removeConnectionListener(IConnectionListener connectionListener) {
+        connectionListenerList.remove(connectionListener);
+    }
+    
     public Run getRun(ElementId id) {
         return runList.get(id);
     }
@@ -800,4 +828,17 @@ public class Model implements IModel {
         ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.CHANGED, clarification);
         fireClarificationListener(clarificationEvent);
     }
+
+    public void connectionEstablished(ConnectionHandlerID connectionHandlerID) {
+        connectionHandlerList.add(connectionHandlerID, new Date());
+        ConnectionEvent connectionEvent = new ConnectionEvent(ConnectionEvent.Action.ESTABLISHED, connectionHandlerID);
+        fireConnectionListener(connectionEvent);
+    }
+
+    public void connectionDropped(ConnectionHandlerID connectionHandlerID) {
+        connectionHandlerList.remove(connectionHandlerID);
+        ConnectionEvent connectionEvent = new ConnectionEvent(ConnectionEvent.Action.DROPPED, connectionHandlerID);
+        fireConnectionListener(connectionEvent);
+    }
+
 }

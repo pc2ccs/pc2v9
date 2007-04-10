@@ -26,6 +26,10 @@ public interface IModel {
     void addJudgement(Judgement judgement);
 
     void addSite(Site site);
+    
+    void connectionEstablished(ConnectionHandlerID connectionHandlerID) ;
+
+    void connectionDropped(ConnectionHandlerID connectionHandlerID) ;
 
     /**
      * Update the run information.
@@ -197,6 +201,11 @@ public interface IModel {
     void addSiteListener(ISiteListener siteListener);
 
     void removeSiteListener(ISiteListener siteListener);
+    
+    void addConnectionListener(IConnectionListener connectionListener) ;
+
+    void removeConnectionListener(IConnectionListener connectionListener);
+
 
     Run getRun(ElementId id);
 
