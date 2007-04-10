@@ -164,7 +164,7 @@ public final class PacketHandler {
      * Send to all logged in Judges, Admins, Boards and optionally sites.
      * 
      * This sends all sorts of packets to all logged in clients (other than
-     * teams).   Typicall sendToServes is set if this is the originating
+     * teams).   Typically sendToServers is set if this is the originating
      * site, if not done then a nasty circular path will occur.
      * 
      * @param model
@@ -183,7 +183,7 @@ public final class PacketHandler {
             if (sendToServers) {
                 controller.sendToServers(packet);
             }
-        }
+        } // else not a server, just return.
     }
 
     /**
@@ -248,9 +248,12 @@ public final class PacketHandler {
             // TODO code unable to get run
             throw new SecurityException("Unable to judge run "+run+" could not fetch run");
         } else {
+            // Set when server got judgement from judge
+            judgementRecord.setWhenJudgedTime(model.getContestTime().getElapsedMins());
+            
             model.addRunJudgement(run, judgementRecord, runResultFiles, fromId);
             
-            Packet judgementPacket = PacketFactory.createRunJudgement(model.getClientId(), fromId, theRun, judgementRecord, runResultFiles);
+            Packet judgementPacket = PacketFactory.createRunJudgement(model.getClientId(), run.getSubmitter(), theRun, judgementRecord, runResultFiles);
 
             if (judgementRecord.isSendToTeam()) {
                 controller.sendToClient(judgementPacket);
@@ -273,11 +276,12 @@ public final class PacketHandler {
      */
     private static void requestRun(Run run, IModel model, IController controller, ClientId fromId) {
 
-        Run theRun = model.getRun(run.getElementId());
-
         // TODO handle request if run is on another server.
         
         if (run == null) {
+            
+            Exception ex = new Exception("Run request has no run (id), it is null, from "+fromId);
+            info("Exception ",ex);
             
             // Run not available, perhaps on another server.
             Packet packet = PacketFactory.createRunNotAvailable(model.getClientId(), fromId, run);
@@ -285,6 +289,8 @@ public final class PacketHandler {
             
         } else if (run.getStatus() == RunStates.NEW || fromId.getClientType().equals(ClientType.Type.ADMINISTRATOR)) {
             // Run available, fetch it for judge.
+            
+            Run theRun = model.getRun(run.getElementId());
             
             model.updateRun(theRun, RunStates.BEING_JUDGED, fromId);
 
@@ -299,7 +305,7 @@ public final class PacketHandler {
         } else {
 
             // run not available for judging
-            Packet notAvailableRunPacket = PacketFactory.createRunNotAvailable(model.getClientId(), fromId, theRun);
+            Packet notAvailableRunPacket = PacketFactory.createRunNotAvailable(model.getClientId(), fromId, run);
             controller.sendToClient(notAvailableRunPacket);
         }
 
@@ -469,6 +475,13 @@ public final class PacketHandler {
      */
     public static void info(String s) {
         System.err.println(s);
-        StaticLog.info(s) ;
+        StaticLog.unclassified(s) ;
     }
+    public static void info(String s, Exception ex) {
+        System.err.println(s);
+        ex.printStackTrace();
+        StaticLog.unclassified(s, ex) ;
+    }
+    
+    
 }

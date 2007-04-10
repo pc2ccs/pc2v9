@@ -351,8 +351,15 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                 } else {
 
                     clientId = authenticateFirstServer(password);
-                    info("Started Server Transport listening on " + port);
-                    transportManager.accecptConnections(port);
+                    try {
+                        transportManager.accecptConnections(port);
+                        info("Started Server Transport listening on " + port);
+                    } catch (Exception e) {
+                        StaticLog.log("Exception logged ", e);
+                        SecurityException securityException = new SecurityException("Port "+port+" in use, server already running?");
+                        securityException.printStackTrace(System.err);
+                        throw securityException;
+                    }
                     info("Primary Server has started.");
                     startMainUI(clientId);
                 }
@@ -456,7 +463,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     public void receiveObject(Serializable object, ConnectionHandlerID connectionHandlerID) {
 
         // TODO code check the input connection to insure they are valid connection
-        info("receiveObject (S,C) debug start : Processing " + object.getClass().getName());
+        info("receiveObject (S,C) debug start (by "+model.getClientId()+") got " + object);
 
         try {
 
@@ -547,17 +554,17 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                     sendSecurityVioation(clientId, connectionHandlerID, message);
                 }
             } else {
-                info("receiveObject(S,C): Unsupported class received: " + object.getClass().getName());
+                info("receiveObject(S,C): Unsupported class received: " + object);
             }
 
         } catch (Exception e) {
 
             // TODO Archive the packet that had an exception for future review - soon.
 
-            System.err.println("Exception in receiveObject(S,C): " + e.getMessage());
+            info("Exception in receiveObject(S,C): " + e.getMessage(),e);
             StaticLog.unclassified("Exception in receiveObject ", e);
         }
-        info("receiveObject (S,C) debug end   : Processing " + object.getClass().getName());
+        info("receiveObject (S,C) debug end   (by "+model.getClientId()+") got " + object.getClass().getName());
     }
 
     private void handleServerLoginFailure(Packet packet) {
@@ -735,7 +742,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      */
     public void receiveObject(Serializable object) {
 
-        info(" receiveObject(S) debug start " + object.getClass().getName());
+        info(" receiveObject(S) debug start (by "+model.getClientId()+") "+ object);
 
         try {
             if (object instanceof Packet) {
@@ -751,8 +758,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             // TODO: log handle exception
             StaticLog.unclassified("Exception logged ", e);
         }
-        info(" receiveObject(S) debug end   " + object.getClass().getName());
-
+        info(" receiveObject(S) debug end   (by "+model.getClientId()+") "+ object);
     }
 
     /**
@@ -771,7 +777,9 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             countDownMessage.setTitle("Shutting down PC^2 Client");
         }
         countDownMessage.setExitOnClose(true);
-        countDownMessage.setVisible(true);
+        if (isUsingMainUI()){
+            countDownMessage.setVisible(true);
+        }
 
     }
 
@@ -949,7 +957,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      */
     public void checkOutRun(Run run) {
         ClientId clientId = model.getClientId();
-        Packet packet = PacketFactory.createRunRequest(clientId,getServerClientId(),run.getElementId(), clientId);
+        Packet packet = PacketFactory.createRunRequest(clientId,getServerClientId(),run, clientId);
         sendToServer(packet);
     }
 
@@ -1051,7 +1059,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     /**
      * Will main UI be invoked/displayed ?
      * 
-     * This includes Login UI as wella as Main UI.
+     * This includes Login UI as well as Main UI.
      * 
      * @return true - shows main UI, false - does not show main UI.
      */

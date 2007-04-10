@@ -727,9 +727,9 @@ public final class PacketFactory {
      * @param id
      * @param requesingId
      */
-    public static Packet createRunRequest(ClientId source, ClientId destination, ElementId id, ClientId requesingId) {
+    public static Packet createRunRequest(ClientId source, ClientId destination, Run run, ClientId requesingId) {
         Properties props = new Properties();
-        props.put(PacketFactory.REQUESTED_RUN_ELEMENT_ID, id);
+        props.put(PacketFactory.RUN, run);
         props.put(PacketFactory.CLIENT_ID, requesingId);
         Packet packet = new Packet(Type.RUN_REQUEST, source, destination, props);
         return packet;

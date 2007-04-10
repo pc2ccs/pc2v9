@@ -7,7 +7,7 @@ import java.io.Serializable;
  * <br>
  * This contains all the information about a single judgement, who
  * judged the run, what the judgement was, how long it took to judge,
- * and whether the judgmeent {@link #isActive() is Active}
+ * and whether the judgement {@link #isActive() is Active}
  * 
  * @author pc2@ecs.csus.edu
  */
@@ -23,9 +23,17 @@ public class JudgementRecord implements Serializable {
     public static final String SVN_ID = "$Id$";
 
     /**
-     * A Unique contest-wide identifier for this judgement record.
+     * A Unique contest-wide identifier the judgement.
+     * 
+     * Will match Judgement.getElementId();
      */
     private ElementId judgementId = null;
+    
+    /**
+     * A Unique contest-wide identifier this JudgementRecord instance.
+     * 
+     */
+    private ElementId elementId = new ElementId ("JudgementRecord");
 
     /**
      * Who entered this judgement.
@@ -274,5 +282,25 @@ public class JudgementRecord implements Serializable {
     public void setExecuteSeconds(long executeSections) {
         this.executeSeconds = executeSections;
     }
+    
+    public String toString() {
+        String infoString = "No";
+        if (isSolved() ) {
+            infoString = "Yes";
+        }
+        return infoString +" by "+judgerClientId + " judgement " + judgementId + " id "+getElementId();
+    }
+
+    public ElementId getElementId() {
+        return elementId;
+    }
+
+    public int versionNumber() {
+        return elementId.getVersionNumber();
+    }
+
+
+    
+    
 
 }

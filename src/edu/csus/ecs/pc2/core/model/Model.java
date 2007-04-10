@@ -440,6 +440,9 @@ public class Model implements IModel {
 
     public void setClientId(ClientId clientId) {
         this.localClientId = clientId;
+        if (isServer()){
+            runList = new RunList(clientId.getSiteNumber(), true);
+        }
     }
 
     public Site[] getSites() {
