@@ -58,8 +58,31 @@ public class VersionInfo {
 
     private String buildNumber = "BBB";
 
+    /**
+     * If available, the Specification-Version from the manifest (eg the version number).
+     */
+    private String manifestSpecificationVersion = "";
+
+    /**
+     * If available, the Implementation-Version from the manifest (eg the build number).
+     */
+    private String manifestImplementationVersion = "";
+
     public VersionInfo() {
         loadVersionInfoFromFile(locateHome() + File.separator + VERSION_FILENAME);
+
+        int violation = checkAgainstManifest();
+        if (violation == 1) {
+            int versionWithoutDate = getVersionNumber().indexOf(' ');
+            System.out.println("Problem with version numbers.  Expected " + getVersionNumber().substring(0, versionWithoutDate) 
+                    + ", but got " + manifestSpecificationVersion);
+            System.exit(1);
+        }
+        if (violation == 2) {
+            System.out.println("Problem with build numbers.  Expected " + getBuildNumber() 
+                    + ", but got " + manifestImplementationVersion);
+            System.exit(2);
+        }
     }
 
     /**
@@ -240,6 +263,33 @@ public class VersionInfo {
                 System.err.println("Expecting 10 fields, found " + fields.length + " fields.");
             }
         }
+    }
+
+    /**
+     * Retreives version info from the manifest and checks against what has been set
+     * from reading the VERSION file.
+     * 
+     * @return 1 if the version number do not match, 2 if the build numbers do not match, otherwise 0 
+     */
+    private int checkAgainstManifest() {
+        Package corePackage = Package.getPackage("edu.csus.ecs.pc2");
+        if (corePackage != null) {
+            manifestSpecificationVersion = corePackage
+                    .getSpecificationVersion();
+            manifestImplementationVersion = corePackage
+                    .getImplementationVersion();
+            int versionWithoutDate = getVersionNumber().indexOf(' ');
+            if (manifestSpecificationVersion != null) {
+                if (!getVersionNumber().substring(0, versionWithoutDate).equals(
+                        corePackage.getSpecificationVersion())) {
+                    return 1;
+                }
+                if (!getBuildNumber().equals(corePackage.getImplementationVersion())) {
+                    return 2;
+                }
+            }
+        }
+        return 0;
     }
 
     /**
