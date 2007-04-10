@@ -144,7 +144,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     @SuppressWarnings("unused")
     private ParseArguments parseArguments = new ParseArguments();
     
-    private boolean contactingRemoteServer = false;
+    private boolean contactingRemoteServer = true;
     
     private boolean usingMainUI = true;
 
