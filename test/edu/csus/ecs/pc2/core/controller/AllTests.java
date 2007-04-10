@@ -19,9 +19,10 @@ public final class AllTests {
 
     public static Test suite() {
         TestSuite suite = new TestSuite("Test for edu.csus.ecs.pc2.core.controller");
-        // $JUnit-BEGIN$
+        //$JUnit-BEGIN$
+        suite.addTestSuite(RunFlowTest.class);
         suite.addTestSuite(MultiSiteTest.class);
-        // $JUnit-END$
+        //$JUnit-END$
         return suite;
     }
 
