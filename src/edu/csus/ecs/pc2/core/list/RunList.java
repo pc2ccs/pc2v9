@@ -142,7 +142,7 @@ public class RunList implements Serializable {
      * Does not remove from list simply marks run as deleted.
      * 
      * @param run
-     * @return true if delted, false if not deleted or not found.
+     * @return true if deleted, false if not deleted or not found.
      */
     public boolean delete(Run run) {
 
@@ -210,7 +210,7 @@ public class RunList implements Serializable {
     }
 
     /**
-     * Write the run data to diskl
+     * Write the run data to disk.
      * 
      * @throws IOException
      * 
@@ -282,11 +282,11 @@ public class RunList implements Serializable {
         return (Run[]) runHash.values().toArray(new Run[size()]);
     }
 
-    protected boolean isSaveToDisk() {
+    public boolean isSaveToDisk() {
         return saveToDisk;
     }
 
-    protected void setSaveToDisk(boolean saveToDisk) {
+    public void setSaveToDisk(boolean saveToDisk) {
         this.saveToDisk = saveToDisk;
     }
 
