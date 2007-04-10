@@ -5,22 +5,6 @@
     <!-- import build.xml instead of duplicating properties -->
     <import file="build.xml"/>
 
-    <tstamp>
-        <format
-            property="date.english"
-            pattern="EEEE, MMMM d yyyy"
-            timezone="UTC" />
-    </tstamp>
-    <tstamp>
-        <format
-            property="time.english"
-            pattern="HH:mm z"
-            timezone="UTC" />
-    </tstamp>
-    <property
-        name="timestamp.english"
-        value="${date.english} ${time.english}" />
-
     <!-- version is set in build.xml and can be overriden
            on ant cmdline w/ -Dversion=9_0 -->
     <property name="release" value="${name}-${version}"/>
@@ -60,10 +44,6 @@
 
 
     <target name="zip" depends="jar">
-        <delete file="${version.path}"/>
-        <echo message="CSUS Programming Contest Control System${line.separator}" file="${version.path}"/>
-        <echo message="Version ${version} ${date} ${repo.version} (${timestamp.english})${line.separator}" file="${version.path}" append="true"/>
-
         <zip destfile="${zip.path}">
             <zipfileset dir="${basedir}" filemode="644" prefix="${release}">
                 <include name="README"/>

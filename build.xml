@@ -12,6 +12,7 @@
     <property name="build.prod.dir" location="${build.dir}/prod" />
     <property name="build.test.dir" location="${build.dir}/test" />
     <property name="testresults.dir" location="${build.dir}/test-results" />
+    <property name="version.path" value="${build.dir}/VERSION"/>
     <property name="testresults.xml.dir" location="${testresults.dir}/xml" />
     <property name="testresults.html.dir" location="${testresults.dir}/html" />
     <property name="compilelogs.dir" location="${build.dir}" />
@@ -24,6 +25,7 @@
     <!-- used in javadocs linkoffline, this is the location on
          the build host, override on the ant commandline -->
     <property name="api.url" location="/software/pc2/java/docs/api/"/>
+
 
     <!-- Compiler settings. -->
     <property name="javacFailOnError" value="false"/>
@@ -55,6 +57,22 @@
         <format property="time" pattern="HHmm" timezone="UTC" />
     </tstamp>
     <property name="timestamp" value="${date}${time}" />
+    <tstamp>
+        <format
+            property="date.english"
+            pattern="EEEE, MMMM d yyyy"
+            timezone="UTC" />
+    </tstamp>
+    <tstamp>
+        <format
+            property="time.english"
+            pattern="HH:mm z"
+            timezone="UTC" />
+    </tstamp>
+    <property
+        name="timestamp.english"
+        value="${date.english} ${time.english}" />
+
     <!-- version is used in the jar manifest & in package.xml -->
     <property name="version" value="9_0_alpha_${date}"/>
 
@@ -130,7 +148,13 @@
         </fail>
     </target>
 
+    <target name="version" description="re-creates the VERSION file">
+        <delete file="${version.path}"/>
+        <echo message="CSUS Programming Contest Control System${line.separator}" file="${version.path}"/>
+        <echo message="Version ${version} ${date} ${repo.version} (${timestamp.english})${line.separator}" file="${version.path}" append="true"/>
+    </target>
     <target name="jar" depends="test" description="creates a jar of our classes">
+        <antcall target="version"/>
         <mkdir dir="${dist.dir}" />
 
         <!-- consider doing the manifest in a separate target
@@ -140,6 +164,7 @@
                 <attribute name="Specification-Version" value="${version}"/>
                 <attribute name="Implementation-Title" value="CSUS Programming Contest Control System"/>
                 <attribute name="Implementation-Version" value="${repo.version}"/>
+                <attribute name="Built-On" value="${timestamp.english}"/>
             </manifest>
         </jar>
     </target>
