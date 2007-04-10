@@ -1,5 +1,9 @@
 package edu.csus.ecs.pc2;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.StringTokenizer;
+
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 
@@ -55,7 +59,7 @@ public class VersionInfo {
     private String buildNumber = "BBB";
 
     public VersionInfo() {
-        loadVersionInfoFromFile(VERSION_FILENAME);
+        loadVersionInfoFromFile(locateHome() + File.separator + VERSION_FILENAME);
     }
 
     /**
@@ -238,6 +242,33 @@ public class VersionInfo {
         }
     }
 
+    /**
+     * Attempts to locate pc2home/lib/pc2.jar, returns pc2home.
+     * 
+     * @return location of VERSION file
+     */
+    public String locateHome() {
+        String pc2home = "."; // default to current directory
+        try {
+            String cp = System.getProperty("java.class.path");
+            StringTokenizer st = new StringTokenizer(cp, File.pathSeparator);
+            while (st.hasMoreTokens()) {
+                String token = st.nextToken();
+                File dir = new File(token);
+                if (dir.exists() && dir.isFile()
+                        && dir.toString().endsWith("pc2.jar")) {
+                    pc2home = new File(dir.getParent() + File.separator + "..")
+                            .getCanonicalPath();
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Trouble locating pc2home: " + e.getMessage());
+            pc2home = ".";
+        }
+        return (pc2home);
+    }
+    
     public void setBuildNumber(String buildNumber) {
         this.buildNumber = buildNumber;
     }
