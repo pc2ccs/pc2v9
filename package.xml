@@ -76,12 +76,10 @@
             </zipfileset>
             <zipfileset dir="${dist.dir}" filemode="644" includes="${jar.name}" 
                                                  prefix="${release}/lib"/>
-<!-- XXX comment out vendor jars for now
             <zipfileset dir="${vendor.lib.dir}" filemode="644" prefix="${release}/lib">
                 <include name="mclb.jar"/>
             </zipfileset>
--->
-<!-- XXX comment out vendor jars for now
+<!-- XXX comment out samps for now
             <zipfileset dir="${samps.dir}" filemode="644" prefix="${release}/samps">
                 <exclude name="compile*"/>
                 <exclude name="sleep.exe"/>
