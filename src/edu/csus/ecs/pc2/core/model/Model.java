@@ -162,6 +162,9 @@ public class Model implements IModel {
             Judgement judgement = new Judgement(judgementName);
             addJudgement(judgement);
         }
+        
+        // Add root account 
+        generateNewAccounts(ClientType.Type.ADMINISTRATOR.toString(), 1, true);
 
         Site site = createFakeSite (1);
         site.setActive(true);
