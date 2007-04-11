@@ -47,7 +47,7 @@ public class ConnectionHandlerServerThread extends ConnectionHandlerThread {
             try {
                 getTmCallBack().receiveUnencrypted(receiveUnencrypted(), getMyConnectionID());
             } catch (Exception e) {
-                getLog().info("Could not recive unencypted packet");
+                getLog().info("Could not receive unencrypted packet");
                 if (getMyConnectionID().getSecretKey() == null) {
                     getLog().info("Could not generate SecretKey -- Aborting connection");
                     // TODO Throw the expection to upper level
