@@ -121,15 +121,16 @@ public final class PacketHandler {
             requestRun (run, model, controller, fromId);
             
         } else if (packetType.equals(Type.LOGIN_SUCCESS)) {
+            
+            // Add them as a site which is logged in.
+            model.addLogin(fromId, connectionHandlerID);
+            
             if (! model.isLoggedIn()){
                 info(" handlePacket original LOGIN_SUCCESS before ");
                 loadDataIntoModel(packet, controller, model, connectionHandlerID);
                 info(" handlePacket original LOGIN_SUCCESS after -- all settings loaded "); 
             } else {
                 info(" handlePacket LOGIN_SUCCESS - from another site, no update of contest data: "+packet);
-                
-                // Add them as a site which is logged in.
-                model.addLogin(fromId, connectionHandlerID);
             }
 
         } else {
@@ -442,7 +443,7 @@ public final class PacketHandler {
             // Login to other sites
             loginToOtherSites (packet, model, controller);
         }else{
-            String message = "Trouble loggin in, check logs";
+            String message = "Trouble logging in, check logs";
             model.loginDenied(packet.getDestinationId(), connectionHandlerID, message);
         }
     }
