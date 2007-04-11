@@ -359,20 +359,6 @@ public final class PacketHandler {
      */
     private static void loadDataIntoModel(Packet packet, IController controller, IModel model, ConnectionHandlerID connectionHandlerID) {
 
-        ClientId clientId = null;
-        
-        try {
-            clientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-            if (clientId != null) {
-                model.setClientId(clientId);
-                info("DEBUG set client to : "+model.getClientId());
-            }
-        } catch (Exception e) {
-            // TODO: log handle exception
-            StaticLog.unclassified("Exception logged ", e);
-        }
-
-        controller.setSiteNumber(clientId.getSiteNumber());
 
         try {
             Language[] languages = (Language[]) PacketFactory.getObjectValue(packet, PacketFactory.LANGUAGE_LIST);
@@ -434,6 +420,22 @@ public final class PacketHandler {
         }
 
         addRunsToRunList (packet, model);
+        
+        ClientId clientId = null;
+        
+        try {
+            clientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+            if (clientId != null) {
+                model.setClientId(clientId);
+                info("DEBUG set client to : "+model.getClientId());
+            }
+        } catch (Exception e) {
+            // TODO: log handle exception
+            StaticLog.unclassified("Exception logged ", e);
+        }
+
+        controller.setSiteNumber(clientId.getSiteNumber());
+
         
         if (model.isLoggedIn()){
             
