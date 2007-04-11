@@ -14,6 +14,7 @@ import java.util.Vector;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -122,6 +123,10 @@ public class ServerView extends JFrame implements UIPlugin {
     private JTextField editorCommandTextField = null;
 
     private JLabel editorCommandLabel = null;
+
+    private JPanel optionsPanel = null;
+
+    private JCheckBox showLogWindowCheckBox = null;
 
     /**
      * This method initializes
@@ -245,9 +250,9 @@ public class ServerView extends JFrame implements UIPlugin {
 
     /**
      * Site Listener for use by ServerView.
-     *  
+     * 
      * @author pc2@ecs.csus.edu
-     *
+     * 
      */
     public class SiteListenerImplementation implements ISiteListener {
 
@@ -293,8 +298,7 @@ public class ServerView extends JFrame implements UIPlugin {
         if (runPane == null) {
             runPane = new JPanel();
             runPane.setLayout(new BorderLayout());
-            runPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Runs",
-                    javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, null,
+            runPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Runs", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, null,
                     null));
             runPane.add(getRunScrollPane(), java.awt.BorderLayout.CENTER);
             runPane.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
@@ -348,6 +352,7 @@ public class ServerView extends JFrame implements UIPlugin {
             mainTabbedPane.addTab("Runs Submitted", null, getRunPane(), null);
             mainTabbedPane.addTab("Generate Accounts", null, getGenerateAccountsPane(), null);
             mainTabbedPane.addTab("Sites", null, getSitePane(), null);
+            mainTabbedPane.addTab("Options", null, getOptionsPanel(), null);
         }
         return mainTabbedPane;
     }
@@ -622,15 +627,15 @@ public class ServerView extends JFrame implements UIPlugin {
         }
         return generateSitesAccountButton;
     }
-    
-    private Site createSite (int nextSiteNumber){
-        Site site = new Site("Site "+nextSiteNumber, nextSiteNumber);
+
+    private Site createSite(int nextSiteNumber) {
+        Site site = new Site("Site " + nextSiteNumber, nextSiteNumber);
         Properties props = new Properties();
         props.put(Site.IP_KEY, "localhost");
-        int port = 50002 + (nextSiteNumber-1)* 1000;
+        int port = 50002 + (nextSiteNumber - 1) * 1000;
         props.put(Site.PORT_KEY, "" + port);
         site.setConnectionInfo(props);
-        site.setPassword("site"+nextSiteNumber);
+        site.setPassword("site" + nextSiteNumber);
         return site;
     }
 
@@ -639,12 +644,12 @@ public class ServerView extends JFrame implements UIPlugin {
             int count = getIntegerValue(sitesCountTextBox.getText());
             if (count > 0) {
                 int numSites = model.getSites().length;
-                for (int i = 0; i < count ; i ++) {
-                    int nextSiteNumber = i + 1 +  numSites;
+                for (int i = 0; i < count; i++) {
+                    int nextSiteNumber = i + 1 + numSites;
                     Site site = createSite(nextSiteNumber);
                     serverController.addNewSite(site);
                 }
-                    
+
                 updateGenerateTitles();
             }
         } catch (Exception e) {
@@ -685,14 +690,13 @@ public class ServerView extends JFrame implements UIPlugin {
             // Sites
             log.println();
             log.println("-- " + model.getSites().length + " sites --");
-            Site [] sites = model.getSites();
-            Arrays.sort (sites, new SiteComparatorBySiteNumber());
+            Site[] sites = model.getSites();
+            Arrays.sort(sites, new SiteComparatorBySiteNumber());
             for (Site site1 : sites) {
                 String hostName = site1.getConnectionInfo().getProperty(Site.IP_KEY);
                 String portStr = site1.getConnectionInfo().getProperty(Site.PORT_KEY);
 
-                log.println("Site " + site1.getSiteNumber() + " " + hostName + ":" + portStr + " " + site1.getDisplayName() + "/"
-                        + site1.getPassword());
+                log.println("Site " + site1.getSiteNumber() + " " + hostName + ":" + portStr + " " + site1.getDisplayName() + "/" + site1.getPassword());
             }
 
             // Problem
@@ -708,16 +712,15 @@ public class ServerView extends JFrame implements UIPlugin {
             for (Language language : model.getLanguages()) {
                 log.println("  Language " + language);
             }
-            
+
             // Runs
             log.println();
-            Run [] runs = model.getRuns();
+            Run[] runs = model.getRuns();
             Arrays.sort(runs, new RunComparator());
             log.println("-- " + runs.length + " runs --");
             for (Run run : runs) {
                 log.println("  Run " + run);
             }
-            
 
             // Logins
             log.println();
@@ -838,6 +841,43 @@ public class ServerView extends JFrame implements UIPlugin {
             });
         }
         return editorCommandTextField;
+    }
+
+    /**
+     * This method initializes optionsPanel
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getOptionsPanel() {
+        if (optionsPanel == null) {
+            optionsPanel = new JPanel();
+            optionsPanel.add(getShowLogWindowCheckBox(), null);
+        }
+        return optionsPanel;
+    }
+
+    /**
+     * This method initializes showLogWindowCheckBox
+     * 
+     * @return javax.swing.JCheckBox
+     */
+    private JCheckBox getShowLogWindowCheckBox() {
+        if (showLogWindowCheckBox == null) {
+            showLogWindowCheckBox = new JCheckBox();
+            showLogWindowCheckBox.setText("Show Log");
+            showLogWindowCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    showLog(showLogWindowCheckBox.isSelected());
+                }
+
+            });
+
+        }
+        return showLogWindowCheckBox;
+    }
+
+    protected void showLog(boolean showLogWindow) {
+        serverController.setLogVisible(showLogWindow);
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

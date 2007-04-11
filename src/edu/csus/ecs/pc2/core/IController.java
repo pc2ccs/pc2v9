@@ -80,4 +80,8 @@ public interface IController {
 
     void sendServerLoginRequest(int siteNumber);
 
+    void updateSite(Site newSite);
+    
+    void setLogVisible (boolean visible);
+
 }

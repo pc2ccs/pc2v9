@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Vector;
 
+import javax.swing.SwingUtilities;
+
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -32,6 +34,7 @@ import edu.csus.ecs.pc2.core.transport.ITwoToOne;
 import edu.csus.ecs.pc2.core.transport.TransportException;
 import edu.csus.ecs.pc2.core.transport.TransportManager;
 import edu.csus.ecs.pc2.ui.CountDownMessage;
+import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.LoadUIClass;
 import edu.csus.ecs.pc2.ui.LoginFrame;
 import edu.csus.ecs.pc2.ui.UIPlugin;
@@ -156,8 +159,13 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         this.model = model;
     }
 
+    /**
+     * Client send packet to server.
+     * @param packet
+     */
     private void sendToServer(Packet packet) {
         try {
+            log.info("Sending packet to server "+packet);
             transportManager.send(packet);
         } catch (TransportException e) {
             info("Unable to send to Server  " + packet);
@@ -249,6 +257,10 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         if (loginName.equals("s")) {
             loginName = "server1";
         }
+        
+        if (loginName.equals("r") || loginName.equals("root")) {
+            loginName = "administrator1";
+        }
 
         if (loginName.startsWith("site") && loginName.length() > 4) {
             int number = getIntegerValue(loginName.substring(4));
@@ -266,6 +278,9 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         } else if (loginName.startsWith("judge") && loginName.length() > 5) {
             int number = getIntegerValue(loginName.substring(5));
             return new ClientId(defaultSiteNumber, Type.JUDGE, number);
+        } else if (loginName.startsWith("administrator") && loginName.length() > 13) {
+            int number = getIntegerValue(loginName.substring(13));
+            return new ClientId(defaultSiteNumber, Type.ADMINISTRATOR, number);
         } else if (loginName.startsWith("j") && loginName.length() > 1) {
             int number = getIntegerValue(loginName.substring(1));
             return new ClientId(defaultSiteNumber, Type.JUDGE, number);
@@ -577,6 +592,9 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         info("Login Failure");
         PacketFactory.dumpPacket(System.err, packet);
 
+        if (loginUI != null ){
+            FrameUtilities.regularCursor(loginUI);
+        }
         model.loginDenied(packet.getDestinationId(), null, message);
 
     }
@@ -756,7 +774,15 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             }
         } catch (Exception e) {
             // TODO: log handle exception
+            String message = "Unable to start main UI, contact staff";
+            
+            if (loginUI != null ){
+                FrameUtilities.regularCursor(loginUI);
+            }
+            model.loginDenied(null, null, message);
+
             StaticLog.unclassified("Exception logged ", e);
+            info ("Exception ", e);
         }
         info(" receiveObject(S) debug end   (by "+model.getClientId()+") "+ object);
     }
@@ -891,7 +917,11 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                     if (uiPlugin == null) {
                         // NO UI to display
                         String uiClassName = LoadUIClass.getUIClassName(clientId);
-                        info("Loading UI class " + uiClassName);
+                        if (uiClassName == null) {
+                            info("Unable to find UI class for " + clientId.getClientType().toString().toLowerCase());
+                        } else {
+                            info("Attempting to load UI class " + uiClassName);
+                        }
                         uiPlugin = LoadUIClass.loadUIClass(uiClassName);
                     }
 
@@ -911,6 +941,9 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         } catch (Exception e) {
             // TODO log this
             info("Trouble showing frame ", e);
+            if (loginUI != null ){
+                FrameUtilities.regularCursor(loginUI);
+            }
             model.loginDenied(clientId, null, e.getMessage());
         }
     }
@@ -922,6 +955,12 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
         String[] arguments = { "--login", "--id", "--password", "--loginUI", "--remoteServer", "--port" };
         parseArguments = new ParseArguments(stringArray, arguments);
+        
+        for (String arg : stringArray){
+            if (arg.equals("--first")){
+                setContactingRemoteServer(false);
+            }
+        }
 
         // TODO parse arguments logic 
         
@@ -990,16 +1029,18 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * Add a new site into model, send update to other servers.
      */
     public void addNewSite(Site site) {
-        int numSites = model.getSites().length;
-        site.setSiteNumber(numSites + 1);
-        model.addSite(site);
-        Packet packet = PacketFactory.createAddSetting(getServerClientId(), PacketFactory.ALL_SERVERS, site);
-        sendToServers(packet);
-        
-        sendToJudges(packet);
-        sendToAdministrators(packet);
-        sendToScoreboards(packet);
-        // TODO send to all teams ?? (for "to all" clarification site name ?
+        if (isServer ()){
+            model.addSite(site);
+            Packet packet = PacketFactory.createAddSetting(model.getClientId(), PacketFactory.ALL_SERVERS, site);
+            sendToServers(packet);
+            
+            sendToJudges(packet);
+            sendToAdministrators(packet);
+            sendToScoreboards(packet);
+        } else {
+            Packet packet = PacketFactory.createAddSetting(model.getClientId(), getServerClientId(), site);
+            sendToServer(packet);
+        }
     }
     
     /**
@@ -1085,6 +1126,37 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     public void setUiPlugin(UIPlugin uiPlugin) {
         this.uiPlugin = uiPlugin;
     }
-    
+
+    public void updateSite(Site site) {
+        
+        if (isServer ()){
+            model.updateSite(site);
+            Packet packet = PacketFactory.createUpdateSetting(model.getClientId(), PacketFactory.ALL_SERVERS, site);
+            sendToServers(packet);
+            
+            sendToJudges(packet);
+            sendToAdministrators(packet);
+            sendToScoreboards(packet);
+        } else {
+            Packet packet = PacketFactory.createUpdateSetting(model.getClientId(), getServerClientId(), site);
+            sendToServer(packet);
+        }
+    }
+
+    /**
+     * Returns true if this client is a server.
+     * @return true if logged in client is a server.
+     */
+    private boolean isServer() {
+        return model.getClientId().getClientType().equals(ClientType.Type.SERVER);
+    }
+
+    public void setLogVisible(final boolean visible) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                StaticLog.getLog().setWindowVisible(visible);
+            }
+        });
+    }
   
 }
