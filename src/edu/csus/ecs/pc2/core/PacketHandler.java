@@ -121,9 +121,14 @@ public final class PacketHandler {
             requestRun (run, model, controller, fromId);
             
         } else if (packetType.equals(Type.LOGIN_SUCCESS)) {
-            
-            // Add them as a site which is logged in.
-            model.addLogin(fromId, connectionHandlerID);
+
+            if (isServer(packet.getDestinationId())) {
+                /**
+                 * Add the originating server into login list, if
+                 * this client is a server.
+                 */
+                model.addLogin(fromId, connectionHandlerID);
+            }
             
             if (! model.isLoggedIn()){
                 info(" handlePacket original LOGIN_SUCCESS before ");
