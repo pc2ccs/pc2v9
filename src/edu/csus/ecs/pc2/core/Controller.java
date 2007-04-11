@@ -100,7 +100,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     /**
      * The main UI, started by the controller.
      */
-    private UIPlugin mainUI;
+    private UIPlugin uiPlugin = null;
 
     private Log log;
 
@@ -887,13 +887,19 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             }
 
             try {
-                if (isUsingMainUI()){
-                    // NO UI to display
-                    String uiClassName = LoadUIClass.getUIClassName(clientId);
-                    info("Loading UI class "+uiClassName);
-                    mainUI = LoadUIClass.loadUIClass(uiClassName);
-                    mainUI.setModelAndController(model, this);
-                    loginUI.dispose();
+                if (isUsingMainUI()) {
+                    if (uiPlugin == null) {
+                        // NO UI to display
+                        String uiClassName = LoadUIClass.getUIClassName(clientId);
+                        info("Loading UI class " + uiClassName);
+                        uiPlugin = LoadUIClass.loadUIClass(uiClassName);
+                    }
+
+                    uiPlugin.setModelAndController(model, this);
+
+                    if (loginUI != null) {
+                        loginUI.dispose();
+                    }
                 }
             } catch (Exception e) {
                 // TODO: log handle exception
@@ -942,10 +948,11 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         StaticLog.setLog(log);
         
         if (isUsingMainUI()){
-            loginUI = new LoginFrame();
-            loginUI.setModelAndController(model, this);
+            if (uiPlugin == null){
+                loginUI = new LoginFrame();
+                loginUI.setModelAndController(model, this);
+            }
         }
-
     }
 
     private ClientId getServerClientId(){
@@ -1069,6 +1076,14 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
     public void setUsingMainUI(boolean usingMainUI) {
         this.usingMainUI = usingMainUI;
+    }
+
+    public UIPlugin getUiPlugin() {
+        return uiPlugin;
+    }
+
+    public void setUiPlugin(UIPlugin uiPlugin) {
+        this.uiPlugin = uiPlugin;
     }
     
   
