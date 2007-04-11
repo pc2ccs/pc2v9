@@ -4,5 +4,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="lib" path="vendor/lib/junit-4.1.jar"/>
+	<classpathentry kind="lib" path="vendor/lib/mclb.jar"/>
 	<classpathentry kind="output" path=".classes"/>
 </classpath>
