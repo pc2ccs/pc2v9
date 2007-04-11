@@ -65,7 +65,7 @@ public final class LoadUIClass {
     public static Properties getDefaultUIProperties() {
 
         Properties properties = new Properties();
-        properties.put("admin", PROJECT_PACKAGE_PATH + ".ui.admin.AdminstratorView");
+        properties.put("administrator", PROJECT_PACKAGE_PATH + ".ui.admin.AdministratorView");
         properties.put("board", PROJECT_PACKAGE_PATH + ".ui.board.ScoreboardView");
         properties.put("judge", PROJECT_PACKAGE_PATH + ".ui.judge.JudgeView");
         properties.put("server", PROJECT_PACKAGE_PATH + ".ui.server.ServerView");
