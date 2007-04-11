@@ -1,56 +1,69 @@
 package edu.csus.ecs.pc2.core.log;
 
-import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+
+import com.ibm.webrunner.j2mclb.MultiColumnListbox;
+import com.ibm.webrunner.j2mclb.util.HeapSorter;
 
 /**
- * A stub for now, An alternate for a multi-column list box.
+ * A multi-column list box.
  * 
  * @author pc2@ecs.csus.edu
  */
 // TODO move this to a better package
-// TODO implement this.
 // $HeadURL$
-// public class MCLB extends MultiColumnListbox {
-public class MCLB extends JPanel {
+public class MCLB extends MultiColumnListbox {
 
     /**
      * 
      */
-    private static final long serialVersionUID = -9110469835571727826L;
+    private static final long serialVersionUID = -2265655808758386762L;
 
-    /**
-     * 
-     */
     public static final String SVN_ID = "$Id$";
 
-    // private void bulkUpdateMclb(Object[] rowKeys, Object[][] rowObjects, MCLB mclb) {
-    // }
+    private void bulkUpdateMclb(Object[] rowKeys, Object[][] rowObjects, MCLB mclb) {
+        final Object[] fRowKeys = rowKeys;
+        final Object[][] fRowObjects = rowObjects;
+        final MCLB fMclb = mclb;
+
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                int rowIndex = fMclb.getSelectedIndex();
+                Object selectedObject = null;
+                if (rowIndex != -1) {
+                    selectedObject = fMclb.getRowKey(rowIndex);
+                }
+
+                fMclb.removeAllRows();
+                fMclb.addRows(fRowObjects, fRowKeys);
+                autoSizeAllColumns(fMclb);
+
+                if (selectedObject != null) {
+                    fMclb.selectRowByKey(selectedObject);
+                }
+
+            }
+        });
+    }
 
     private void autoSizeAllColumns(MCLB box) {
+        final MCLB theBox = box;
+
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                for (int i = 0; i < theBox.getColumnCount(); i++) {
+                    theBox.autoSizeColumn(i);
+                    if (theBox.getColumnInfo(i).getSorter() != null) {
+                        theBox.getColumnInfo(i).setWidth(theBox.getColumnInfo(i).getWidth() + 20);
+                    }
+                }
+                theBox.sort();
+            }
+        });
     }
 
     public void autoSizeAllColumns() {
         autoSizeAllColumns(this);
-    }
-
-    public void insertRow(Object[] newRow, int i) {
-        // TODO Auto-generated method stub
-
-    }
-
-    public int getRowCount() {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    public void removeRows(int numLines, int rowCount) {
-        // TODO Auto-generated method stub
-
-    }
-
-    public void addColumns(Object[] cols) {
-        // TODO Auto-generated method stub
-
     }
 
     /**
@@ -64,7 +77,9 @@ public class MCLB extends JPanel {
      *            which column will be sorted first, second, etc.
      */
 
-    // TODO implement this.
-    // public void setColumnSorter(int columnNumber, HeapSorter sorter, int sortRank) {
-    // }
+    public void setColumnSorter(int columnNumber, HeapSorter sorter, int sortRank) {
+        getColumnInfo(columnNumber).setSorter(sorter);
+        getColumnInfo(columnNumber).getSorter().setSortOrder(sortRank);
+    }
+
 }
