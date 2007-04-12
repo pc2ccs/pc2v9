@@ -108,16 +108,6 @@ public class Log extends Logger {
      */
     public static final Level FINEST = Level.FINEST;
 
-    /**
-     * This is the last directory setupFileHandlers was called with.
-     */
-    private static String oldLogDirBase = "";
-
-    /**
-     * The last log filename setupFileHandlers was called with.
-     */
-    private static String oldBaseFileName = "";
-
     private LogWindowHandler windowHandler = null;
 
     private boolean isWindowVisible = false;
@@ -201,11 +191,6 @@ public class Log extends Logger {
         if (baseFileName.endsWith(".log")) {
             baseFileName = baseFileName.substring(0, baseFileName.length() - 4);
         }
-        // no change
-        if (logDirBase.equals(oldLogDirBase)
-                && baseFileName.equals(oldBaseFileName)) {
-            return;
-        }
         // System.out.println("old="+oldLogDirBase+","+oldBaseFileName+"
         // new="+logDirBase+","+baseFileName);
         /*
@@ -238,8 +223,6 @@ public class Log extends Logger {
                 addHandler(windowHandler);
             }
 
-            oldLogDirBase = logDirBase;
-            oldBaseFileName = baseFileName;
         } catch (Exception e) {
             System.err.println("exception in setFileHandlers");
             e.printStackTrace();
