@@ -273,6 +273,10 @@ public class ServerView extends JFrame implements UIPlugin {
         public void siteLoggedOff(SiteEvent event) {
             updateListBox("Site " + event.getAction() + " " + event.getSite());
         }
+
+        public void siteChanged(SiteEvent event) {
+            updateListBox("Site " + event.getAction() + " " + event.getSite());
+        }
     }
 
     /**

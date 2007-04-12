@@ -57,7 +57,7 @@ public interface IModel {
 
     void updateJudgement(Judgement judgement);
 
-    void updateSite(Site site);
+    void changeSite(Site site);
 
     void updateAccount(Account account);
 
@@ -363,5 +363,12 @@ public interface IModel {
      * @param clarification
      */
     void changeClarification(Clarification clarification);
- 
+
+    Language getLanguage(ElementId elementId);
+
+    Problem getProblem(ElementId elementId);
+
+    Judgement getJudgement(ElementId elementId);
+
+    Account getAccount(ClientId id);
 }

@@ -2,26 +2,28 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.util.Arrays;
 import java.util.Properties;
 
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-import com.ibm.webrunner.j2mclb.util.HeapSorter;
-import com.ibm.webrunner.j2mclb.util.NumericStringComparator;
-
 import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.MCLB;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.IModel;
 import edu.csus.ecs.pc2.core.model.ISiteListener;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.SiteEvent;
+import edu.csus.ecs.pc2.core.model.SiteList;
 
 /**
- * A site list.
+ * A panel that displays the sides and edits the sites' settings.
  * 
  * @author pc2@ecs.csus.edu
  */
@@ -103,25 +105,29 @@ public class SitesPanel extends JPanePlugin {
 
             siteListBox.addColumns(cols);
 
-            // Sorters
-            HeapSorter sorter = new HeapSorter();
-            HeapSorter numericStringSorter = new HeapSorter();
-            numericStringSorter.setComparator(new NumericStringComparator());
-
-            // Site Number
-            siteListBox.setColumnSorter(0, numericStringSorter, 1);
-
-            // Site Title
-            siteListBox.setColumnSorter(1, sorter, 2);
-
-            // Password
-            siteListBox.setColumnSorter(2, sorter, 3);
-
-            // IP
-            siteListBox.setColumnSorter(3, sorter, 4);
-
-            // Port
-            siteListBox.setColumnSorter(4, sorter, 5);
+            /**
+             * No sorters for this frame, keep it in order.  If you
+             * want sorters, be sure to change update methods.
+             */
+//            // Sorters
+//            HeapSorter sorter = new HeapSorter();
+//            HeapSorter numericStringSorter = new HeapSorter();
+//            numericStringSorter.setComparator(new NumericStringComparator());
+//
+//            // Site Number
+//            siteListBox.setColumnSorter(0, numericStringSorter, 1);
+//
+//            // Site Title
+//            siteListBox.setColumnSorter(1, sorter, 2);
+//
+//            // Password
+//            siteListBox.setColumnSorter(2, sorter, 3);
+//
+//            // IP
+//            siteListBox.setColumnSorter(3, sorter, 4);
+//
+//            // Port
+//            siteListBox.setColumnSorter(4, sorter, 5);
 
             siteListBox.autoSizeAllColumns();
 
@@ -176,11 +182,11 @@ public class SitesPanel extends JPanePlugin {
     }
 
     protected void updateSitesData() {
-        
+
         String message = validateSiteListBox();
-        
-        if (message == null){
-            
+
+        if (message == null) {
+
             Site[] sites = getModel().getSites();
 
             for (int i = 0; i < siteListBox.getRowCount(); i++) {
@@ -190,24 +196,120 @@ public class SitesPanel extends JPanePlugin {
                 if (i >= sites.length) {
                     getController().addNewSite(newSite);
                 } else {
-                    System.out.println("Would have updated "+newSite);
-//                    getController().updateSite(newSite);
+                    getController().updateSite(newSite);
+                }
+            }
+            enableUpdateButtons(false);
+        } else {
+            JOptionPane.showMessageDialog(this, message);
+        }
+    }
+    
+    /**
+     * Return true if input string contains a valid port number.
+     * 
+     * @param portString
+     * @return true if valid port (1..65535) else false
+     */
+    private boolean validPort(String portString) {
+        int portNum = 0;
+        try {
+            portNum = Integer.parseInt(portString);
+        } catch (Exception e) {
+            StaticLog.getLog().log(Log.DEBUG, "validPort: ", e);
+            return false;
+        }
+
+        return portNum > 0 && portNum < 65536;
+    }
+    
+    /**
+     * Checks for invalid site settings.
+     * 
+     * Checks for: <br>
+     * Duplicate passwords <br>
+     * Duplicate site names <br>
+     * Duplicate IP and port combinations.<br>
+     * 
+     * @param inSiteList
+     * @return null if passes all validations, otherwire returns a nice error message.
+     */
+    private String validateSites(SiteList inSiteList) {
+        if (inSiteList.size() > 1) {
+            Site[] sites = inSiteList.getList();
+            for (int s1 = 0; s1 < sites.length - 1; s1++) {
+                Site site1 = sites[s1];
+                for (int s2 = s1 + 1; s2 < sites.length; s2++) {
+
+                    Site site2 = sites[s2];
+                    if (site1.getPassword().equals(site2.getPassword())) {
+                        return ("Duplicate passwords not allowed, " + site1.getPassword() + ", for " + site1 + " and " + site2);
+                    }
+                    if (site1.toString().equals(site2.toString())) {
+                        return ("Duplicate site names not allowed, name is: " + site1);
+                    }
+
+                    String ip1 = site1.getConnectionInfo().getProperty(Site.IP_KEY);
+                    String port1 = site1.getConnectionInfo().getProperty(Site.PORT_KEY);
+
+                    String ip2 = site2.getConnectionInfo().getProperty(Site.IP_KEY);
+                    String port2 = site2.getConnectionInfo().getProperty(Site.PORT_KEY);
+
+                    if (ip1 == null || ip1.trim().length() == 0) {
+                        return ("Please enter an IP for Site " + site1);
+                    }
+                    if (port1 == null || port1.trim().length() == 0) {
+                        return ("Please enter a port number for: " + site1);
+                    }
+
+                    if (!validPort(port1)) {
+                        return ("Invalid port, must be numeric, " + port1 + ") for: " + site1);
+                    }
+
+                    if (ip2 == null || ip2.trim().length() == 0) {
+                        return ("Please enter an IP for Site " + site2);
+                    }
+                    if (port2 == null || port2.trim().length() == 0) {
+                        return ("Please enter a port number for: " + site2);
+                    }
+                    if (!validPort(port2)) {
+                        return ("Invalid port, must be numeric, " + port2 + ") for: " + site2);
+                    }
+
+                    String conInfo1 = ip1 + ":" + port1;
+                    String conInfo2 = ip2 + ":" + port2;
+
+                    if (conInfo1.trim().equals(conInfo2.trim())) {
+                        return "Duplicate IP and port values are not allowed, for " + site1 + " and " + site2;
+                    }
                 }
             }
         }
+        return null;
     }
 
     /**
      * validates site list box, return message.
+     * 
      * @return null if valid, error message string if a problem.
      */
-    // TODO check unique IP/port pair
-    // TODO insure unique passwords
-    // TODO insure port is numeric
     private String validateSiteListBox() {
-        return null;
+
+        SiteList siteList = new SiteList();
+        
+        for (int i = 0; i < siteListBox.getRowCount(); i++) {
+            Site newSite = createSiteFromRow(i);
+            siteList.add(newSite);
+        }
+        
+        return validateSites(siteList);
     }
 
+    /**
+     * Create a Site from hst site list box.
+     * @param i - index in the list box.
+     * @return
+     */
     private Site createSiteFromRow(int i) {
 
         Object [] objects = siteListBox.getRow(i);
@@ -262,7 +364,10 @@ public class SitesPanel extends JPanePlugin {
         String hostName = site.getConnectionInfo().getProperty(Site.IP_KEY);
         obj[3] = createJTextField(hostName, false);
         String port = site.getConnectionInfo().getProperty(Site.PORT_KEY);
-        obj[4] = createJTextField(port, false);
+        JTextField textField = createJTextField(port, false);
+        textField.setDocument(new IntegerDocument());
+        textField.setText(port); // had to re-add port becuase IntegerDocument cleared it out.
+        obj[4] = textField;
 
         return obj;
     }
@@ -270,6 +375,7 @@ public class SitesPanel extends JPanePlugin {
     private void reloadListBox() {
         siteListBox.removeAllRows();
         Site[] sites = getModel().getSites();
+        Arrays.sort(sites, new SiteComparatorBySiteNumber());
 
         for (Site site : sites) {
             addSiteRow(site);
@@ -309,6 +415,20 @@ public class SitesPanel extends JPanePlugin {
         site.setPassword("site" + nextSiteNumber);
         return site;
     }
+   
+    private void insertSiteRow (Site site) {
+        int row = site.getSiteNumber();
+        Object [] objects = getSiteRow(site);
+        siteListBox.insertRow(objects, row - 1);
+        siteListBox.autoSizeAllColumns();
+    }
+    
+    private void updateSiteRow (Site site) {
+        int row = site.getSiteNumber();
+        Object [] objects = getSiteRow(site);
+        siteListBox.replaceRow(objects, row);
+        siteListBox.autoSizeAllColumns();
+    }
 
     private void addSiteRow(Site site) {
         Object[] objects = getSiteRow(site);
@@ -324,7 +444,6 @@ public class SitesPanel extends JPanePlugin {
                 reloadListBox();
             }
         });
-
     }
     
 
@@ -338,6 +457,7 @@ public class SitesPanel extends JPanePlugin {
 
         public void siteAdded(SiteEvent event) {
             StaticLog.unclassified("Site " + event.getAction() + " " + event.getSite());
+            updateSiteList (event.getSite());
         }
 
         public void siteRemoved(SiteEvent event) {
@@ -351,10 +471,40 @@ public class SitesPanel extends JPanePlugin {
         public void siteLoggedOff(SiteEvent event) {
             StaticLog.unclassified("Site " + event.getAction() + " " + event.getSite());
         }
+
+        public void siteChanged(SiteEvent event) {
+            StaticLog.unclassified("Site " + event.getAction() + " " + event.getSite());
+            updateSiteList (event.getSite());
+        }
     }
     
+    /**
+     * Reset to model existing.
+     *
+     */
     protected void undoEdit() {
         reloadListBox();
+    }
+
+    /**
+     * Update site list with input site.
+     * @param site
+     */
+    public void updateSiteList(final Site site) {
+        
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                int siteNumber = site.getSiteNumber();
+                int numRows = siteListBox.getRowCount();
+
+                if (siteNumber <= numRows) {
+                    updateSiteRow(site);
+                } else {
+                    insertSiteRow(site);
+                }
+            }
+        });
+            
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

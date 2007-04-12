@@ -1047,7 +1047,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * Modify an existing site, send update to other servers.
      */
     public void modifySite (Site site) {
-        model.updateSite(site);
+        model.changeSite(site);
         Packet packet = PacketFactory.createUpdateSetting(getServerClientId(), PacketFactory.ALL_SERVERS, site);
         sendToServers(packet);
     }
@@ -1130,7 +1130,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     public void updateSite(Site site) {
         
         if (isServer ()){
-            model.updateSite(site);
+            model.changeSite(site);
             Packet packet = PacketFactory.createUpdateSetting(model.getClientId(), PacketFactory.ALL_SERVERS, site);
             sendToServers(packet);
             

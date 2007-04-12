@@ -4,18 +4,21 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.SwingUtilities;
 
+import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.model.IModel;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
+import edu.csus.ecs.pc2.ui.RunsPanel;
 import edu.csus.ecs.pc2.ui.SitesPanel;
 import edu.csus.ecs.pc2.ui.UIPlugin;
-import javax.swing.JCheckBox;
 
 /**
  * 
@@ -76,13 +79,19 @@ public class AdministratorView extends JFrame implements UIPlugin {
     public void setModelAndController(IModel inModel, IController inController) {
         this.model = inModel;
         this.controller = inController;
-
-        SitesPanel sitesPanel = new SitesPanel();
-        addUIPlugin(getMainTabbedPanel(), "Sites", sitesPanel);
-
-        setVisible(true);
+        
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                RunsPanel runsPane = new RunsPanel();
+                addUIPlugin(getMainTabbedPanel(), "Runs", runsPane);
+                SitesPanel sitesPanel = new SitesPanel();
+                addUIPlugin(getMainTabbedPanel(), "Sites", sitesPanel);
+                setTitle("PC^2 " + model.getTitle() + " Build " + new VersionInfo().getBuildNumber());
+                setVisible(true);
+            }
+        });
     }
-
+    
     public String getPluginTitle() {
         return "Admin GUI";
     }

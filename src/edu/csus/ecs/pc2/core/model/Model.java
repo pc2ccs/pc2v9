@@ -296,6 +296,8 @@ public class Model implements IModel {
                 siteListenerList.elementAt(i).siteAdded(siteEvent);
             } else if (siteEvent.getAction() == SiteEvent.Action.DELETED) {
                 siteListenerList.elementAt(i).siteRemoved(siteEvent);
+            } else if (siteEvent.getAction() == SiteEvent.Action.CHANGED) {
+                siteListenerList.elementAt(i).siteChanged(siteEvent);
             } else if (siteEvent.getAction() == SiteEvent.Action.LOGIN) {
                 siteListenerList.elementAt(i).siteLoggedOn(siteEvent);
             } else if (siteEvent.getAction() == SiteEvent.Action.LOGOFF) {
@@ -757,7 +759,7 @@ public class Model implements IModel {
         fireJudgementListener(judgementEvent);
     }
 
-    public void updateSite(Site site) {
+    public void changeSite(Site site) {
         siteList.update(site);
         SiteEvent siteEvent = new SiteEvent(SiteEvent.Action.CHANGED, site);
         fireSiteListener(siteEvent);
@@ -775,21 +777,20 @@ public class Model implements IModel {
         fireAccountListener(accountEvent);
     }
 
-    private Language getLanguage(ElementId elementId) {
+    public Language getLanguage(ElementId elementId) {
         return (Language) languageList.get(elementId);
     }
 
-    private Problem getProblem(ElementId elementId) {
+    public Problem getProblem(ElementId elementId) {
         return (Problem) problemList.get(elementId);
     }
 
-    private Judgement getJudgement(ElementId elementId) {
+    public Judgement getJudgement(ElementId elementId) {
         return (Judgement) judgementList.get(elementId);
     }
 
-    private Account getAccount(ElementId elementId) {
-        return (Account) accountList.get(elementId);
-
+    public Account getAccount(ClientId inClientId) {
+        return (Account) accountList.getAccount(inClientId);
     }
 
     public Site getSite(int number) {

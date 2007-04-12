@@ -21,6 +21,11 @@ public interface ISiteListener {
      * @param event
      */
     void siteRemoved(SiteEvent event);
+    
+    /**
+     * 
+     */
+    void siteChanged (SiteEvent event);
 
     /**
      * Site logged on.
