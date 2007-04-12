@@ -111,7 +111,7 @@ public final class LanguageAutoFill {
 
     /**
      * Return list of autopopulate titles.
-     * @return
+     * @return list of language titles.
      */
     public static String[] getLanguageList() {
         return languageList;

@@ -3,7 +3,7 @@ package edu.csus.ecs.pc2.core.list;
 import edu.csus.ecs.pc2.core.model.Judgement;
 
 /**
- * List of judgements.
+ * Maintain a list of {@link edu.csus.ecs.pc2.core.model.Judgement}s.
  * 
  * @author pc2@ecs.csus.edu
  */

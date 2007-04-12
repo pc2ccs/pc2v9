@@ -21,9 +21,7 @@ public class ContestTimeList extends BaseElementList {
     public static final String SVN_ID = "$Id$";
 
     /**
-     * Add site number for contestTime.
-     * 
-     * @param siteNumber
+     * Add contest time into list.
      * @param contestTime
      */
     public void add(ContestTime contestTime) {

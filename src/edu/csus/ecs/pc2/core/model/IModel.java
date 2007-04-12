@@ -348,7 +348,6 @@ public interface IModel {
     
     /**
      * Fetch all clarifications.
-     * @return
      */
     Clarification [] getClarifications();
     

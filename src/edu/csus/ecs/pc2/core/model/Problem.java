@@ -4,6 +4,13 @@ package edu.csus.ecs.pc2.core.model;
 /**
  * Single Problem Definition.
  * 
+ * This contains settings for a problem.  Data files
+ * are not in this class, data files are in the {@link edu.csus.ecs.pc2.core.model.ProblemDataFiles}
+ * class.
+ * 
+ * @see edu.csus.ecs.pc2.core.list.ProblemList
+ * @see edu.csus.ecs.pc2.core.model.ProblemDataFiles
+ * 
  * @author pc2@ecs.csus.edu
  * 
  */

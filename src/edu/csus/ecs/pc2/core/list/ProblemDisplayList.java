@@ -3,13 +3,12 @@ package edu.csus.ecs.pc2.core.list;
 import edu.csus.ecs.pc2.core.model.Problem;
 
 /**
- * Problem Display List.
+ * Maintain a list of {@link edu.csus.ecs.pc2.core.model.Problem}s which are displayed to the users.
  *
  * Contains a list of Problem, in order, to display for the users.
  *
+ * @see edu.csus.ecs.pc2.core.list.ProblemList
  * @author pc2@ecs.csus.edu
- *
- *
  */
 
 // $HeadURL$

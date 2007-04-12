@@ -3,7 +3,7 @@ package edu.csus.ecs.pc2.core.model;
 import edu.csus.ecs.pc2.core.list.BaseElementList;
 
 /**
- *
+ * A list of {@link edu.csus.ecs.pc2.core.model.ProblemDataFiles}.
  * @author pc2@ecs.csus.edu
  */
 

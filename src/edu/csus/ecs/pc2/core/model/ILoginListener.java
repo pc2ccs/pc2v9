@@ -2,7 +2,7 @@ package edu.csus.ecs.pc2.core.model;
 
 
 /**
- * Listener for all Login Events.
+ * Listener for all Login/Logoff Events.
  * 
  * @author pc2@ecs.csus.edu
  */

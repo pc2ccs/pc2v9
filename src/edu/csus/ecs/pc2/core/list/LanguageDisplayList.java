@@ -3,13 +3,12 @@ package edu.csus.ecs.pc2.core.list;
 import edu.csus.ecs.pc2.core.model.Language;
 
 /**
- * Language Display List.
+ * Maintain a list of {@link edu.csus.ecs.pc2.core.model.Language}s to display to users.
  * 
  * Contains a list of Language, in order, to display for the users.
- * 
+ *
+ * @see edu.csus.ecs.pc2.core.list.LanguageList
  * @author pc2@ecs.csus.edu
- * 
- * 
  */
 
 // $HeadURL$

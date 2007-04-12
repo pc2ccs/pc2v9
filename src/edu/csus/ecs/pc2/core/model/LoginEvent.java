@@ -4,7 +4,7 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
 
 /**
- * 
+ * A login/logoff event.
  *
  * @author pc2@ecs.csus.edu
  */

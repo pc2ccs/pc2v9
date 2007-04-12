@@ -6,7 +6,7 @@ import java.util.Hashtable;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
 /**
- * Maintains a list of ConnectionHandlerIds.
+ * Maintains a list of {@link edu.csus.ecs.pc2.core.transport.ConnectionHandlerID}s.
  * 
  * @author pc2@ecs.csus.edu
  */

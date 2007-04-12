@@ -10,7 +10,7 @@ import edu.csus.ecs.pc2.core.model.IElementObject;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 
 /**
- * List of accounts.
+ * Maintain a list of {@link edu.csus.ecs.pc2.core.model.Account}s.
  * 
  * Generate accounts as well as maintain list of accounts.
  * 

@@ -3,9 +3,9 @@ package edu.csus.ecs.pc2.core.list;
 import edu.csus.ecs.pc2.core.model.Judgement;
 
 /**
- * Judgement Display List.
- *
- * Contains a list of Judgement, in order, to display for the users.
+ * Maintain a list of {@link edu.csus.ecs.pc2.core.model.Judgement}s that are displayed.
+ * 
+ * Contains a list of Judgement classes, in order, to display for the users.
  *
  * @author pc2@ecs.csus.edu
  */

@@ -13,7 +13,7 @@ import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
 
 /**
- * Maintains a list of clarifications.
+ * Maintains a list of {@link edu.csus.ecs.pc2.core.model.Clarification}s.
  * 
  * @author pc2@ecs.csus.edu
  */

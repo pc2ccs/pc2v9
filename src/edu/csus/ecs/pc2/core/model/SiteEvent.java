@@ -2,7 +2,9 @@ package edu.csus.ecs.pc2.core.model;
 
 
 /**
+ * A site event.
  * 
+ * @see edu.csus.ecs.pc2.core.model.ISiteListener
  * 
  * @author pc2@ecs.csus.edu
  */

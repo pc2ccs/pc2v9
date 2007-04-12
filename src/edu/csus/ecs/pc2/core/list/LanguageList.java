@@ -3,7 +3,7 @@ package edu.csus.ecs.pc2.core.list;
 import edu.csus.ecs.pc2.core.model.Language;
 
 /**
- * Maintain a list of Lanugages.
+ * Maintain a list of {@link edu.csus.ecs.pc2.core.model.Language}s.
  * 
  * @author pc2@ecs.csus.edu
  */

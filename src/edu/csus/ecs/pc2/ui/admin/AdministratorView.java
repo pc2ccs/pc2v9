@@ -25,7 +25,7 @@ import edu.csus.ecs.pc2.ui.SitesPanel;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
- * 
+ * Administrator GUI.
  * 
  * @author pc2@ecs.csus.edu
  */

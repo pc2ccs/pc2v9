@@ -4,7 +4,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
 
 
 /**
- *
+ * Maintain a list of {@link edu.csus.ecs.pc2.core.model.Problem}s.
  * @author pc2@ecs.csus.edu
  */
 

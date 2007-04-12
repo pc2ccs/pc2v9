@@ -2,9 +2,13 @@ package edu.csus.ecs.pc2.core.model;
 
 
 /**
+ * Listener for {@link edu.csus.ecs.pc2.core.transport.ConnectionHandlerID}s.
+ * 
+ * This a listener for when a server is connected to a client, when
+ * a user is logged in then the {@link edu.csus.ecs.pc2.core.model.ILoginListener}
+ * method will be invoked.
  * 
  * @author pc2@ecs.csus.edu
- * 
  */
 
 // $HeadURL$
