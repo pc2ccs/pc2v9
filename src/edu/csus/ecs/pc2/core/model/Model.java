@@ -136,18 +136,30 @@ public class Model implements IModel {
 
         String[] probNames = { "A - Sum of Squares", "B - Sumit", "C - Hello", "D - GoodBye" };
 
-        for (String problemNames : probNames) {
-            Problem problem = new Problem(problemNames);
+        for (String problemName : probNames) {
+            Problem problem = new Problem(problemName);
+            String baseName = problemName.substring(4).toLowerCase();
+            problem.setDataFileName(baseName +".dat");
+            problem.setAnswerFileName(baseName+".ans");
+            problem.setReadInputDataFromSTDIN(false);
+            problem.setTimeOutInSeconds(180);
             addProblem(problem);
+            
+            ClientId clientId = new ClientId(1, Type.ADMINISTRATOR, 1);
+            String question = "Why is problem "+problemName+" so hard ?";
+            Clarification clarification = new Clarification(clientId, problem, question);
+            addClarification(clarification);
         }
 
-        String[] langNames = { "Java", "BASIC", "C++", "ANSI C", "APL" };
+        Language language = createLanguageFromAutoFill(LanguageAutoFill.JAVATITLE);
+        addLanguage(language);
 
-        for (String languageName : langNames) {
-            Language language = new Language(languageName);
-            addLanguage(language);
-        }
+        language = createLanguageFromAutoFill(LanguageAutoFill.GNUCTITLE);
+        addLanguage(language);
 
+        language = createLanguageFromAutoFill(LanguageAutoFill.MSCTITLE);
+        addLanguage(language);
+        
         // Generate the server account
         generateNewAccounts(ClientType.Type.SERVER.toString(), 1, true);
 
@@ -165,10 +177,23 @@ public class Model implements IModel {
         
         // Add root account 
         generateNewAccounts(ClientType.Type.ADMINISTRATOR.toString(), 1, true);
+        
+        
 
         Site site = createFakeSite (1);
         site.setActive(true);
         siteList.add(site);
+    }
+
+    private Language createLanguageFromAutoFill(String key) {
+        
+        String [] values = LanguageAutoFill.getAutoFillValues(key);
+        Language language = new Language(key);
+        language.setCompileCommandLine(values[1]);
+        language.setExecutableIdentifierMask(values[2]);
+        language.setProgramExecuteCommandLine(values[3]);
+        language.setSiteNumber(getSiteNumber());
+        return language;
     }
 
     public void addRunListener(IRunListener runListener) {
@@ -719,6 +744,11 @@ public class Model implements IModel {
         return runCheckOutList.get(run.getElementId());
     }
 
+    
+    public Clarification [] getClarifications(){
+        return clarificationList.getList();
+    }
+    
     public void updateLanguage(Language language) {
         languageList.update(language);
         LanguageEvent languageEvent = new LanguageEvent(LanguageEvent.Action.CHANGED, language);

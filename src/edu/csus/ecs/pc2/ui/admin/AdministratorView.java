@@ -14,8 +14,12 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.ui.ClarificationsPane;
+import edu.csus.ecs.pc2.ui.ContestTimesPane;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
+import edu.csus.ecs.pc2.ui.LanguagesPane;
+import edu.csus.ecs.pc2.ui.ProblemsPane;
 import edu.csus.ecs.pc2.ui.RunsPanel;
 import edu.csus.ecs.pc2.ui.SitesPanel;
 import edu.csus.ecs.pc2.ui.UIPlugin;
@@ -84,8 +88,22 @@ public class AdministratorView extends JFrame implements UIPlugin {
             public void run() {
                 RunsPanel runsPane = new RunsPanel();
                 addUIPlugin(getMainTabbedPanel(), "Runs", runsPane);
+                
                 SitesPanel sitesPanel = new SitesPanel();
                 addUIPlugin(getMainTabbedPanel(), "Sites", sitesPanel);
+                
+                LanguagesPane languagesPane = new LanguagesPane();
+                addUIPlugin(getMainTabbedPanel(), "Languages", languagesPane);
+                
+                ProblemsPane problemsPane = new ProblemsPane();
+                addUIPlugin(getMainTabbedPanel(), "Problems", problemsPane);
+                
+                ClarificationsPane clarificationsPane = new ClarificationsPane();
+                addUIPlugin(getMainTabbedPanel(), "Clarifications", clarificationsPane);
+                
+                ContestTimesPane contestTimesPane = new ContestTimesPane();
+                addUIPlugin(getMainTabbedPanel(), "Times", contestTimesPane);
+                
                 setTitle("PC^2 " + model.getTitle() + " Build " + new VersionInfo().getBuildNumber());
                 setVisible(true);
             }

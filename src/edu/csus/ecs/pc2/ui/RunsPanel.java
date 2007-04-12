@@ -232,11 +232,6 @@ public class RunsPanel extends JPanePlugin {
     
     public void reloadRunList () {
         
-        Problem [] l = getModel().getProblems();
-        for (Problem problem : l){
-            System.out.println(problem.getElementId() + "  " +problem);
-        }
-
         Run [] runs = getModel().getRuns();
         
         // TODO bulk load these record

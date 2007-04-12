@@ -33,6 +33,12 @@ public class Language implements IElementObject {
      * Command line with field substitution to compile source.
      */
     private String compileCommandLine;
+    
+    /**
+     * Executable Identifier Mask.
+     * 
+     */
+    private String executableIdentifierMask;
 
     /**
      * Execute program command line.
@@ -172,5 +178,13 @@ public class Language implements IElementObject {
     public int hashCode() {
         // use elementId to be consistent with equals()
         return elementId.hashCode();
+    }
+
+    public String getExecutableIdentifierMask() {
+        return executableIdentifierMask;
+    }
+
+    public void setExecutableIdentifierMask(String executableIdentifierMask) {
+        this.executableIdentifierMask = executableIdentifierMask;
     }
 }

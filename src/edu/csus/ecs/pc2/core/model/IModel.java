@@ -347,6 +347,12 @@ public interface IModel {
     void availableRun(Run run);
     
     /**
+     * Fetch all clarifications.
+     * @return
+     */
+    Clarification [] getClarifications();
+    
+    /**
      * add clarification into model.
      * @param clarification
      */

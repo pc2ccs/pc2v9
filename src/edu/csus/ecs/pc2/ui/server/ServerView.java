@@ -32,6 +32,7 @@ import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
+import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
@@ -726,6 +727,17 @@ public class ServerView extends JFrame implements UIPlugin {
                 log.println("  Run " + run);
             }
 
+            // Clarifications
+            log.println();
+            Clarification [] clarifications = model.getClarifications();
+//            Arrays.sort(runs, new ClarifcationComparator());
+            log.println("-- " + clarifications.length + " clarifications --");
+            for (Clarification run : clarifications) {
+                log.println("  Clarifcation " + run);
+            }
+
+
+            
             // Logins
             log.println();
             log.println("-- Logins -- ");
