@@ -22,17 +22,18 @@ import edu.csus.ecs.pc2.core.transport.crypto.CryptoException;
  * connection. Note that a PC<sup>2</sup> server module can also be a {@link TransportManager.tmTypes#CLIENT CLIENT} if it joins a
  * contest.
  * <P>
- * To instanciate a Server:
+ * To instantiate a Server:
  * <ol>
- * <li> Use the server {@link #TransportManager(Log, ITwoToOne)} constructor
+ * <li> Use the {@link #TransportManager(Log)} constructor.
+ * <li> Start the server transport using {@link #startServerTransport(ITwoToOne)}
  * <li> Start the transport listening using {@link #accecptConnections(int)}
  * </ol>
  * <P>
- * To instanciate a Client:
+ * To instantiate a Client:
  * <ol>
- * <li> Use the client {@link #TransportManager(Log, String, int, IBtoA)} constructor
+ * <li> Use the {@link #TransportManager(Log)} constructor.
+ * <li> Start the client transport using {@link #startClientTransport(String, int, IBtoA)}
  * <li> Contact the server using {@link #connectToMyServer()}
- * <li> Start the transport listening using {@link #accecptConnections(int)}
  * </ol>
  * Needless to say the port numbers should be identical. 
  * 
@@ -94,38 +95,42 @@ public class TransportManager implements ITransportManager {
     private IBtoA appClientCallBack = null;
 
     /**
-     * Server Constructor.
+     * TransportManager constructor.
+     * 
+     * Start log and create encryption keys
      * 
      * @param log
+     */
+    public TransportManager(Log log) {
+        super();
+        setLog(log);
+        setEncrytionKeys(new Crypto());
+    }
+
+    /**
+     * Instantiate a Server Transport.
+     * 
      * @param appCallBack
      */
-    public TransportManager(Log log, ITwoToOne appCallBack) {
-        super();
-        setEncrytionKeys(new Crypto());
+    public void startServerTransport(ITwoToOne appCallBack) {
         setConnectionHandlerThreadList(new ConnectionHandlerThreadList());
         setTmType(tmTypes.SERVER);
         setAppServerCallBack(appCallBack);
-        setLog(log);
         setServersConnectionHandlerList(new ConnectionHandlerList());
     }
 
     /**
-     * Client Constructor.
+     * Instantiate a Client Transport.
      * 
-     * @param log
      * @param serverIP
      * @param port
      * @param appCallBack
      */
-    public TransportManager(Log log, String serverIP, int port, IBtoA appCallBack) {
-        super();
-        // constructor for a client
+    public void startClientTransport(String serverIP, int port, IBtoA appCallBack) {
         setMyServerPort(port);
         setMyServerIP(serverIP);
-        setEncrytionKeys(new Crypto());
         setTmType(tmTypes.CLIENT);
         setAppClientCallBack(appCallBack);
-        setLog(log);
     }
 
     /**
@@ -514,7 +519,7 @@ public class TransportManager implements ITransportManager {
         myConnectionID.setSecretKey(tmpKey);
         myConnectionID.setReadyToCommunicate(true);
 
-        getLog().info("Made a secret key " + tmpKey.toString());
+        getLog().info("in receiveUnencrypted Made a secret key " + tmpKey.toString());
     }
 
     /**
@@ -573,7 +578,7 @@ public class TransportManager implements ITransportManager {
      * 
      * @param log
      */
-    private void setLog(Log log) {
+    public void setLog(Log log) {
         this.log = log;
     }
 

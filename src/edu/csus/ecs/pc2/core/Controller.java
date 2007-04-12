@@ -339,7 +339,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                 }
 
                 info("Starting Server Transport...");
-                transportManager = new TransportManager(log, this);
+                transportManager.startServerTransport(this);
 
                 if (isContactingRemoteServer()) {
 
@@ -399,7 +399,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
                 try {
                     info("Contacting server at " + remoteHostName + ":" + port);
-                    transportManager = new TransportManager(log, remoteHostName, port, this);
+                    transportManager.startClientTransport(remoteHostName, port, this);
                     transportManager.connectToMyServer();
                     info("Started Client Transport");
 
@@ -985,6 +985,10 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
         log = new Log("pc2.startup");
         StaticLog.setLog(log);
+        
+        log.info("Starting TransportManager...");
+        transportManager = new TransportManager(log);
+        log.info("Started TransportManager");
         
         if (isUsingMainUI()){
             if (uiPlugin == null){

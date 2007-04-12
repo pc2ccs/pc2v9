@@ -60,4 +60,20 @@ public interface ITransportManager {
      * @throws TransportException
      */
     ConnectionHandlerID connectToServer(String serverIP, int port) throws TransportException;
+    
+    /**
+     * Start a client Transport.
+     * 
+     * @param serverIP
+     * @param port
+     * @param appCallBack
+     */
+    void startClientTransport(String serverIP, int port, IBtoA appCallBack);
+
+    /**
+     * Start a Server Transport.
+     * 
+     * @param appCallBack
+     */
+    void startServerTransport(ITwoToOne appCallBack);
 }
