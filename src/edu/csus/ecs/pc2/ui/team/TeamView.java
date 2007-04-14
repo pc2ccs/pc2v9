@@ -374,6 +374,16 @@ public class TeamView extends JFrame implements UIPlugin {
         Problem problem = ((Problem) getProblemComboBox().getSelectedItem());
         Language language = ((Language) getLanguageComboBox().getSelectedItem());
         
+        if ( getProblemComboBox().getSelectedIndex() < 1){
+            JOptionPane.showMessageDialog(this, "Please select problem");
+            return;
+        }
+
+        if ( getLanguageComboBox().getSelectedIndex() < 1){
+            JOptionPane.showMessageDialog(this, "Please select language");
+            return;
+        }
+
         String filename = fileNameLabel.getText();
 
         if (!fileExists(filename)) {
