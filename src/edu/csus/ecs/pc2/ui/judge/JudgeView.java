@@ -21,9 +21,11 @@ import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.UIPlugin;
+import javax.swing.JCheckBox;
 
 /**
  * Judge GUI.
+ * 
  * @author pc2@ecs.csus.edu
  * 
  */
@@ -50,11 +52,15 @@ public class JudgeView extends JFrame implements UIPlugin {
 
     private DefaultListModel runListModel = new DefaultListModel(); // @jve:decl-index=0:visual-constraint=""
 
+    private JPanel jPanel = null;
+
+    private JCheckBox showLogWindowCheckBox = null;
+
     public JudgeView() {
         super();
         initialize();
 
-        updateListBox (getPluginTitle()+" Build "+new VersionInfo().getBuildNumber());
+        updateListBox(getPluginTitle() + " Build " + new VersionInfo().getBuildNumber());
     }
 
     /**
@@ -75,7 +81,7 @@ public class JudgeView extends JFrame implements UIPlugin {
         FrameUtilities.centerFrame(this);
 
     }
-    
+
     protected void promptAndExit() {
         int result = FrameUtilities.yesNoCancelDialog("Are you sure you want to exit PC^2?", "Exit PC^2");
 
@@ -116,6 +122,7 @@ public class JudgeView extends JFrame implements UIPlugin {
         if (mainTabbedPane == null) {
             mainTabbedPane = new JTabbedPane();
             mainTabbedPane.addTab("All Runs", null, getAllRunsPane(), null);
+            mainTabbedPane.addTab("Option", null, getJPanel(), null);
         }
         return mainTabbedPane;
     }
@@ -176,9 +183,9 @@ public class JudgeView extends JFrame implements UIPlugin {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 if (contestStarted) {
-                    setTitle("PC^2 Judge " + model.getTitle() + " [STARTED] Build "+new VersionInfo().getBuildNumber());
+                    setTitle("PC^2 Judge " + model.getTitle() + " [STARTED] Build " + new VersionInfo().getBuildNumber());
                 } else {
-                    setTitle("PC^2 Judge " + model.getTitle() + " [STOPPED] Build "+new VersionInfo().getBuildNumber());
+                    setTitle("PC^2 Judge " + model.getTitle() + " [STOPPED] Build " + new VersionInfo().getBuildNumber());
                 }
             }
         });
@@ -225,43 +232,79 @@ public class JudgeView extends JFrame implements UIPlugin {
             }
         }
     }
-    
+
     public void setModelAndController(IModel inModel, IController inController) {
         this.model = inModel;
         this.controller = inController;
-        
+
         model.addRunListener(new RunListenerImplementation());
         model.addContestTimeListener(new ContestTimeListenerImplementation());
         // TODO add langauge and problem listeners
-//        model.addLanguageListener(new LanguageListenerImplementation());
-//        model.addProblemListener(new ProblemListenerImplementation());
-        
+        // model.addLanguageListener(new LanguageListenerImplementation());
+        // model.addProblemListener(new ProblemListenerImplementation());
+
         // TODO add listeners for accounts, login and site.
-        
-//        model.addAccountListener(new AccountListenerImplementation());
-//        model.addLoginListener(new LoginListenerImplementation());
-//        model.addSiteListener(new SiteListenerImplementation());
-        
+
+        // model.addAccountListener(new AccountListenerImplementation());
+        // model.addLoginListener(new LoginListenerImplementation());
+        // model.addSiteListener(new SiteListenerImplementation());
+
         setFrameTitle(model.getContestTime().isContestRunning());
-        
+
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 populateGUI();
-        }});
+            }
+        });
     }
 
     private void populateGUI() {
-        
-        for (Run run : model.getRuns())  {
+
+        for (Run run : model.getRuns()) {
             updateListBox("Existing run " + run);
         }
-        
-        updateListBox("Contest Time elapsed: "+model.getContestTime().getElapsedTimeStr());
-        
+
+        updateListBox("Contest Time elapsed: " + model.getContestTime().getElapsedTimeStr());
+
     }
 
     public String getPluginTitle() {
         return "Judge Main GUI";
+    }
+
+    /**
+     * This method initializes jPanel
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getJPanel() {
+        if (jPanel == null) {
+            jPanel = new JPanel();
+            jPanel.add(getShowLogWindowCheckBox(), null);
+        }
+        return jPanel;
+    }
+
+    /**
+     * This method initializes jCheckBox
+     * 
+     * @return javax.swing.JCheckBox
+     */
+    private JCheckBox getShowLogWindowCheckBox() {
+        if (showLogWindowCheckBox == null) {
+            showLogWindowCheckBox = new JCheckBox();
+            showLogWindowCheckBox.setText("Show Log");
+            showLogWindowCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    showLog(showLogWindowCheckBox.isSelected());
+                }
+            });
+        }
+        return showLogWindowCheckBox;
+    }
+
+    protected void showLog(boolean showLogWindow) {
+        controller.setLogVisible(showLogWindow);
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

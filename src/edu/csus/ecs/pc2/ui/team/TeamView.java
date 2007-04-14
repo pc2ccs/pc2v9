@@ -31,7 +31,7 @@ import edu.csus.ecs.pc2.core.model.ProblemEvent;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.UIPlugin;
-
+import javax.swing.JCheckBox;
 
 /**
  * Represents an arbitrary contest GUI.
@@ -46,7 +46,7 @@ public class TeamView extends JFrame implements UIPlugin {
     public static final String SVN_ID = "$Id$";
 
     private IModel model = null;
-    
+
     private IController teamController = null;
 
     private String lastOpenedFile = null;
@@ -86,6 +86,10 @@ public class TeamView extends JFrame implements UIPlugin {
 
     private DefaultListModel runListModel = new DefaultListModel();
 
+    private JPanel optionsPane = null;
+
+    private JCheckBox showLogWindowCheckBox = null;
+
     /**
      * Nevermind this constructor, needed for VE and other reasons.
      * 
@@ -93,7 +97,7 @@ public class TeamView extends JFrame implements UIPlugin {
     public TeamView() {
         super();
         initialize();
-        updateListBox (getPluginTitle()+" Build "+new VersionInfo().getBuildNumber());
+        updateListBox(getPluginTitle() + " Build " + new VersionInfo().getBuildNumber());
     }
 
     /**
@@ -129,19 +133,19 @@ public class TeamView extends JFrame implements UIPlugin {
         getProblemComboBox().removeAllItems();
         Problem problemN = new Problem("None Selected");
         getProblemComboBox().addItem(problemN);
-        
-        for (Problem problem : model.getProblems()){
+
+        for (Problem problem : model.getProblems()) {
             getProblemComboBox().addItem(problem);
         }
 
         getLanguageComboBox().removeAllItems();
         Language languageN = new Language("None Selected");
         getLanguageComboBox().addItem(languageN);
-        
-        for (Language language : model.getLanguages()){
+
+        for (Language language : model.getLanguages()) {
             getLanguageComboBox().addItem(language);
         }
-        
+
         setButtonsActive(model.getContestTime().isContestRunning());
     }
 
@@ -165,9 +169,9 @@ public class TeamView extends JFrame implements UIPlugin {
                 getSubmitRunButton().setEnabled(turnButtonsOn);
                 getPickFileButton().setEnabled(turnButtonsOn);
                 if (turnButtonsOn) {
-                    setTitle("PC^2 Team " + model.getTitle() + " [STARTED] Build "+new VersionInfo().getBuildNumber());
+                    setTitle("PC^2 Team " + model.getTitle() + " [STARTED] Build " + new VersionInfo().getBuildNumber());
                 } else {
-                    setTitle("PC^2 Team " + model.getTitle() + " [STOPPED] Build "+new VersionInfo().getBuildNumber());
+                    setTitle("PC^2 Team " + model.getTitle() + " [STOPPED] Build " + new VersionInfo().getBuildNumber());
                 }
             }
         });
@@ -266,8 +270,8 @@ public class TeamView extends JFrame implements UIPlugin {
     private class RunListenerImplementation implements IRunListener {
 
         public void runAdded(RunEvent event) {
-//            updateListBox(event.getRun() + " ADDED ");
-            updateListBox("Added run "+event.getRun());
+            // updateListBox(event.getRun() + " ADDED ");
+            updateListBox("Added run " + event.getRun());
         }
 
         public void runChanged(RunEvent event) {
@@ -339,6 +343,7 @@ public class TeamView extends JFrame implements UIPlugin {
         if (viewTabbedPane == null) {
             viewTabbedPane = new JTabbedPane();
             viewTabbedPane.addTab("Submit Run", null, getSubmitRunPane(), null);
+            viewTabbedPane.addTab("Option", null, getOptionsPane(), null);
         }
         return viewTabbedPane;
     }
@@ -373,13 +378,13 @@ public class TeamView extends JFrame implements UIPlugin {
 
         Problem problem = ((Problem) getProblemComboBox().getSelectedItem());
         Language language = ((Language) getLanguageComboBox().getSelectedItem());
-        
-        if ( getProblemComboBox().getSelectedIndex() < 1){
+
+        if (getProblemComboBox().getSelectedIndex() < 1) {
             JOptionPane.showMessageDialog(this, "Please select problem");
             return;
         }
 
-        if ( getLanguageComboBox().getSelectedIndex() < 1){
+        if (getLanguageComboBox().getSelectedIndex() < 1) {
             JOptionPane.showMessageDialog(this, "Please select language");
             return;
         }
@@ -403,7 +408,7 @@ public class TeamView extends JFrame implements UIPlugin {
         try {
             teamController.submitRun(problem, language, filename);
         } catch (Exception e) {
-            // TODO nead to make this cleaner 
+            // TODO nead to make this cleaner
             JOptionPane.showMessageDialog(this, "Exception " + e.getMessage());
         }
     }
@@ -493,9 +498,8 @@ public class TeamView extends JFrame implements UIPlugin {
             runListPane = new JPanel();
             runListPane.setLayout(new BorderLayout());
             runListPane.setBounds(new java.awt.Rectangle(22, 170, 418, 130));
-            runListPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Runs",
-                    javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, null,
-                    null));
+            runListPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Runs", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION,
+                    null, null));
             runListPane.add(getRunListScrollPane(), java.awt.BorderLayout.CENTER);
         }
         return runListPane;
@@ -519,32 +523,68 @@ public class TeamView extends JFrame implements UIPlugin {
         chooser = null;
 
     }
-    
+
     public void setModelAndController(IModel inModel, IController inController) {
         this.model = inModel;
         this.teamController = inController;
-        
+
         model.addRunListener(new RunListenerImplementation());
         model.addContestTimeListener(new ContestTimeListenerImplementation());
         model.addLanguageListener(new LanguageListenerImplementation());
         model.addProblemListener(new ProblemListenerImplementation());
-        
+
         // TODO add listeners for accounts, login and site.
-        
-//        model.addAccountListener(new AccountListenerImplementation());
-//        model.addLoginListener(new LoginListenerImplementation());
-//        model.addSiteListener(new SiteListenerImplementation());
-        
+
+        // model.addAccountListener(new AccountListenerImplementation());
+        // model.addLoginListener(new LoginListenerImplementation());
+        // model.addSiteListener(new SiteListenerImplementation());
+
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 populateGUI();
-        }});
-        
+            }
+        });
+
         setVisible(true);
     }
 
     public String getPluginTitle() {
         return "Team Main GUI";
+    }
+
+    /**
+     * This method initializes optionsPane
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getOptionsPane() {
+        if (optionsPane == null) {
+            optionsPane = new JPanel();
+            optionsPane.add(getShowLogWindowCheckBox(), null);
+        }
+        return optionsPane;
+    }
+
+    protected void showLog(boolean showLogWindow) {
+        teamController.setLogVisible(showLogWindow);
+    }
+
+    /**
+     * This method initializes showLogWindowCheckBox
+     * 
+     * @return javax.swing.JCheckBox
+     */
+    private JCheckBox getShowLogWindowCheckBox() {
+        if (showLogWindowCheckBox == null) {
+            showLogWindowCheckBox = new JCheckBox();
+            showLogWindowCheckBox.setText("Show Log");
+            showLogWindowCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    showLog(showLogWindowCheckBox.isSelected());
+                }
+            });
+        }
+        return showLogWindowCheckBox;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
