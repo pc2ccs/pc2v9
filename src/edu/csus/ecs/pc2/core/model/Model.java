@@ -504,7 +504,20 @@ public class Model implements IModel {
     public void setClientId(ClientId clientId) {
         this.localClientId = clientId;
         if (isServer()){
+            
+            /**
+             * These are actions that can only be taken when the server knows 
+             * which site number it is, until this point the server has been 
+             * not assigned a site number.
+             */
+            
             runList = new RunList(clientId.getSiteNumber(), true);
+            runFilesList = new RunFilesList(clientId.getSiteNumber());
+            if (getContestTime() == null){
+                ContestTime contestTime = new ContestTime();
+                contestTime.startContestClock(); // TODO remove this start contest, eventually
+                addContestTime(contestTime);
+            }
         }
     }
 
@@ -641,11 +654,8 @@ public class Model implements IModel {
     }
     
     public ContestTime[] getContestTimes() {
-        // TODO code getContestTimes
-        return null;
+        return contestTimeList.getList();
     }
-
-
 
     public void startContest(int inSiteNumber) {
         ContestTime contestTime = getContestTime(inSiteNumber);
