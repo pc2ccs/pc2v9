@@ -96,12 +96,14 @@ public final class PacketHandler {
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
             JudgementRecord judgementRecord = (JudgementRecord) PacketFactory.getObjectValue(packet, PacketFactory.JUDGEMENT_RECORD);
             RunResultFiles runResultFiles = (RunResultFiles) PacketFactory.getObjectValue(packet, PacketFactory.RUN_RESULTS_FILE);
-            judgeRun(run, model,controller,judgementRecord,runResultFiles, fromId);
+            ClientId whoJudgedRunId  = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+            judgeRun(run, model,controller,judgementRecord,runResultFiles, whoJudgedRunId);
 
         } else if (packetType.equals(Type.RUN_UNCHECKOUT)) {
             // Cancel run from requestor to server
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
-            cancelRun (run, model, controller, fromId);
+            ClientId whoCanceledId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+            cancelRun (run, model, controller, whoCanceledId);
           
             
         } else if (packetType.equals(Type.ADD_SETTING)) {
@@ -118,7 +120,8 @@ public final class PacketHandler {
         } else if (packetType.equals(Type.RUN_REQUEST)) {
             // Request Run from requestor to server
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
-            requestRun (run, model, controller, fromId);
+            ClientId requestFromId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+            requestRun (run, model, controller, requestFromId);
             
         } else if (packetType.equals(Type.LOGIN_SUCCESS)) {
 
@@ -209,112 +212,130 @@ public final class PacketHandler {
         return id.getClientType().equals(ClientType.Type.ADMINISTRATOR);
     }
     
-    private static void cancelRun(Run run, IModel model, IController controller, ClientId fromId) {
+    private static void cancelRun(Run run, IModel model, IController controller, ClientId whoCancledRun) {
         
-        Run theRun = model.getRun(run.getElementId());
-        ClientId whoCheckedOut = model.getRunCheckedOutBy (run);
-        
-        // TODO code for if canceling run on another site.
-        
-        if (theRun == null){
-            // TODO unable to cancel run?!
-            StaticLog.unclassified("cancelRun ", new Exception("Unable to cancel (fetch) run "+run));
-            
-        } else if ((run.getStatus() == RunStates.BEING_JUDGED) || isSuperUser(fromId)){
-            
-            if (isSuperUser(fromId) || fromId.equals(whoCheckedOut)){
-                
-                // authorized to cancel the run.
-                model.cancelRunCheckOut(theRun, fromId);
-                
-                Run availableRun = model.getRun(run.getElementId());
-                Packet availableRunPacket = PacketFactory.createRunAvailable(model.getClientId(), fromId, availableRun);
-                
-                sendToJudgesAndOthers(model, controller, availableRunPacket, true);
-                
+        if (isServer(model.getClientId())) {
+
+            if (!isThisSite(model, run)) {
+
+                // TODO: send cancel to other server, multi-site
+                System.out.println(" send cancel to other server ");
+
             } else {
-                // Un authorized
-                StaticLog.unclassified("cancelRun ", new Exception("Unable to cancel run "+run+" user "+fromId+" "+whoCheckedOut));
-                
+
+                // TODO: insure that this client checked out the run or send back a "oh no you didn't!"
+
+                model.cancelRunCheckOut(run, whoCancledRun);
+
+                Run availableRun = model.getRun(run.getElementId());
+                Packet availableRunPacket = PacketFactory.createRunAvailable(model.getClientId(), whoCancledRun, availableRun);
+
+                sendToJudgesAndOthers(model, controller, availableRunPacket, true);
             }
+
         } else {
-            // un authorized
-            StaticLog.unclassified("cancelRun ", new Exception("Unable to cancel run "+run+" user "+fromId+" "+whoCheckedOut));
+            // Client, update status and done.
+            
+            model.updateRun(run, RunStates.NEW, whoCancledRun);
         }
     }
 
-    private static void judgeRun(Run run, IModel model, IController controller, JudgementRecord judgementRecord,
-            RunResultFiles runResultFiles, ClientId fromId) {
-
-        Run theRun = model.getRun(run.getElementId());
+    private static void judgeRun(Run run, IModel model, IController controller, JudgementRecord judgementRecord, RunResultFiles runResultFiles, ClientId whoJudgedId) {
         
-        // TODO code for if this run is on another site
-
-        if (theRun == null) {
-            // TODO code unable to get run
-            throw new SecurityException("Unable to judge run "+run+" could not fetch run");
-        } else {
-            // Set when server got judgement from judge
-            judgementRecord.setWhenJudgedTime(model.getContestTime().getElapsedMins());
+        if (isServer(model.getClientId())){
             
-            model.addRunJudgement(run, judgementRecord, runResultFiles, fromId);
-            
-            Packet judgementPacket = PacketFactory.createRunJudgement(model.getClientId(), run.getSubmitter(), theRun, judgementRecord, runResultFiles);
+            if (! isThisSite(model, run)) {
+                
+                // TODO: forward packet to other site
+                
+                info("TODO: forward packet to other site");
+                
+            } else {
+                // This site's run
+                
+                judgementRecord.setWhenJudgedTime(model.getContestTime().getElapsedMins());
 
-            if (judgementRecord.isSendToTeam()) {
-                controller.sendToClient(judgementPacket);
+                model.addRunJudgement(run, judgementRecord, runResultFiles, whoJudgedId);
+                
+                Run theRun = model.getRun(run.getElementId());
+
+                Packet judgementPacket = PacketFactory.createRunJudgement(model.getClientId(), run.getSubmitter(), theRun, judgementRecord, runResultFiles);
+
+                if (judgementRecord.isSendToTeam()) {
+                    controller.sendToClient(judgementPacket);
+                }
+
+                // TODO: code - make work multi site
+                /**
+                 * To make this work multi site create a new packet type of RUN_JUDGEMENT_UPDATE
+                 * then when a server gets it send it to call clients as a RUN_JUDGEMENT.
+                 * Right now this just notifies local clients. 
+                 */
+                sendToJudgesAndOthers(model, controller, judgementPacket, false);
             }
             
-            sendToJudgesAndOthers(model, controller, judgementPacket, isThisSite(model, theRun));
+        } else {
+            model.updateRun(run, run.getStatus(), whoJudgedId);
         }
     }
 
     /**
      * Checkout run.
      * 
-     * Either checks out run (marks as {@link edu.csus.ecs.pc2.core.model.Run.RunStates#BEING_JUDGED BEING_JUDGED}) and send to
-     * everyone, or send a {@link edu.csus.ecs.pc2.core.packet.PacketType.Type#RUN_NOTAVAILABLE RUN_NOTAVAILABLE}.
+     * Either checks out run (marks as {@link edu.csus.ecs.pc2.core.model.Run.RunStates#BEING_JUDGED BEING_JUDGED}) and send to everyone, or send a
+     * {@link edu.csus.ecs.pc2.core.packet.PacketType.Type#RUN_NOTAVAILABLE RUN_NOTAVAILABLE}.
      * 
      * @param run
-     * @param fromId
      * @param model
      * @param controller
+     * @param whoRequestsRunId
      */
-    private static void requestRun(Run run, IModel model, IController controller, ClientId fromId) {
+    private static void requestRun(Run run, IModel model, IController controller, ClientId whoRequestsRunId) {
 
-        // TODO handle request if run is on another server.
-        
-        if (run == null) {
-            
-            Exception ex = new Exception("Run request has no run (id), it is null, from "+fromId);
-            info("Exception ",ex);
-            
-            // Run not available, perhaps on another server.
-            Packet packet = PacketFactory.createRunNotAvailable(model.getClientId(), fromId, run);
-            controller.sendToClient(packet);
-            
-        } else if (run.getStatus() == RunStates.NEW || fromId.getClientType().equals(ClientType.Type.ADMINISTRATOR)) {
-            // Run available, fetch it for judge.
-            
-            Run theRun = model.getRun(run.getElementId());
-            
-            model.updateRun(theRun, RunStates.BEING_JUDGED, fromId);
+        if (isServer(model.getClientId())) {
 
-            theRun = model.getRun(run.getElementId());
-            RunFiles runFiles = model.getRunFiles(run);
+            if (!isThisSite(model, run)) {
 
-            Packet checkOutPacket = PacketFactory.createCheckedOutRun(model.getClientId(), fromId, theRun, runFiles, fromId);
-            controller.sendToClient(checkOutPacket);
-            
-            sendToJudgesAndOthers(model, controller, checkOutPacket, true);
+                ClientId serverClientId = new ClientId(run.getSiteNumber(), ClientType.Type.SERVER, 0);
+                if (model.isLoggedIn(serverClientId)) {
 
+                    // TODO: send run request to other server
+                    info(" send run request to other server " + serverClientId);
+
+                } else {
+
+                    // send NOT_AVAILABLE back to client
+                    Packet notAvailableRunPacket = PacketFactory.createRunNotAvailable(model.getClientId(), whoRequestsRunId, run);
+                    controller.sendToClient(notAvailableRunPacket);
+                }
+
+            } else {
+                // This Site's run
+
+                Run theRun = model.getRun(run.getElementId());
+                if (run.getStatus() == RunStates.NEW || isSuperUser(whoRequestsRunId)) {
+
+                    model.updateRun(theRun, RunStates.BEING_JUDGED, whoRequestsRunId);
+
+                    theRun = model.getRun(run.getElementId());
+                    RunFiles runFiles = model.getRunFiles(run);
+
+                    // send to Judge
+                    Packet checkOutPacket = PacketFactory.createCheckedOutRun(model.getClientId(), whoRequestsRunId, theRun, runFiles, whoRequestsRunId);
+                    controller.sendToClient(checkOutPacket);
+
+                    sendToJudgesAndOthers(model, controller, checkOutPacket, true);
+                } else {
+                    // Unavailable
+                    Packet notAvailableRunPacket = PacketFactory.createRunNotAvailable(model.getClientId(), whoRequestsRunId, run);
+                    controller.sendToClient(notAvailableRunPacket);
+                }
+            }
         } else {
 
-            // run not available for judging
-            Packet notAvailableRunPacket = PacketFactory.createRunNotAvailable(model.getClientId(), fromId, run);
-            controller.sendToClient(notAvailableRunPacket);
-        }
+            throw new SecurityException("requestRun - sent to client " + model.getClientId());
 
+        }
     }
 
     /**
