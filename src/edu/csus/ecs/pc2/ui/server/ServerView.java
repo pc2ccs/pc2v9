@@ -27,6 +27,7 @@ import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.list.ContestTimeComparator;
 import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.log.StaticLog;
@@ -35,6 +36,7 @@ import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.ILoginListener;
 import edu.csus.ecs.pc2.core.model.IModel;
@@ -730,13 +732,32 @@ public class ServerView extends JFrame implements UIPlugin {
             // Clarifications
             log.println();
             Clarification [] clarifications = model.getClarifications();
-//            Arrays.sort(runs, new ClarifcationComparator());
+//            Arrays.sort(clarifications, new ClarifcationComparator());
             log.println("-- " + clarifications.length + " clarifications --");
-            for (Clarification run : clarifications) {
-                log.println("  Clarifcation " + run);
+            for (Clarification clarification : clarifications) {
+                log.println("  " + clarification);
             }
 
+            // Contest Times
+            log.println();
+            ContestTime[] contestTimes = model.getContestTimes();
+            Arrays.sort(contestTimes, new ContestTimeComparator());
+            log.println("-- " + contestTimes.length + " Contest Times --");
+            for (ContestTime contestTime : contestTimes) {
 
+                if (model.getSiteNumber() == contestTime.getSiteNumber()) {
+                    log.print("  * ");
+                } else {
+                    log.print("    ");
+                }
+                String state = "STOPPED";
+                if (contestTime.isContestRunning()) {
+                    state = "STARTED";
+                }
+
+                log.println("  Site " + contestTime.getSiteNumber() + " " + state + " " + contestTime.getElapsedTimeStr() + " " + contestTime.getRemainingTimeStr() + " "
+                        + contestTime.getContestLengthStr());
+            }
             
             // Logins
             log.println();
