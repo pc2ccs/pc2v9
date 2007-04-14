@@ -35,6 +35,9 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
  * There are also some methods to extract fields/classes from packets.
  * <P>
  * Typically the contents of a packet is a {@link java.util.Properties}.
+ * <P>
+ * There a constants which are used to add and get various contest data classes to and
+ * from the Properties in a Packet.
  * 
  * @author pc2@ecs.csus.edu
  */
@@ -150,28 +153,25 @@ public final class PacketFactory {
      */
     public static final String JUDGEMENT_LIST = "JUDGEMENT_LIST";
     
-    
     /**
      * Array of {@link ContestTime}.
      */
-    private static final String CONTEST_TIME_LIST = "CONTEST_TIME_LIST";
+    public static final String CONTEST_TIME_LIST = "CONTEST_TIME_LIST";
 
     /**
      * Array of {@link Clarification}.
      */
-    private static final String CLARIFICATION_LIST = "CLARIFICATION_LIST";
+    public static final String CLARIFICATION_LIST = "CLARIFICATION_LIST";
 
     /**
      * Array of {@link ConnectionHandlerID}
      */
-    private static final String CONNECTION_HANDLE_ID_LIST = "CONNECTION_HANDLE_ID_LIST";
+    public static final String CONNECTION_HANDLE_ID_LIST = "CONNECTION_HANDLE_ID_LIST";
 
     /**
      * A ClientId representing all sites (used as a destinationId).
      */
     public static final ClientId ALL_SERVERS = new ClientId(0, ClientType.Type.SERVER, 0);
-
-
 
     /**
      * Constructor is private as this is a utility class which should not be extended or invoked.
@@ -440,10 +440,24 @@ public final class PacketFactory {
      * 
      * If the packet contents is a {@link Properties} object, will retrieve the value for the input key from that {@link Properties}
      * object.
+     * <P>
+     * Examples:
+     * <pre>
+     * Clarification [] clarifications =(Clarification[]) PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION_LIST);
      * 
-     * @param packet
-     * @param key
-     * @return a Object value for a property inside a packet.
+     * Run [] runs = (Run[]) PacketFactory.getObjectValue(packet, PacketFactory.RUN_LIST);
+     * 
+     * ContestTime contestTime = (ContestTime) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME);
+     * 
+     * ClientId clientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+     * 
+     * </pre>
+     * One can then check for whether the item is null to determine whether item
+     * is in the packet.
+     * 
+     * @param packet packet to extract data from.
+     * @param key one of the many constant Strings in PacketFactory
+     * @return a Object value for a property inside a packet, or null if object is not present.
      */
     public static Object getObjectValue(Packet packet, String key) {
         try {
