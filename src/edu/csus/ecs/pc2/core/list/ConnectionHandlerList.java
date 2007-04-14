@@ -33,4 +33,8 @@ public class ConnectionHandlerList {
     public Object remove(ConnectionHandlerID key) {
         return hashtable.remove(key);
     }
+
+    public ConnectionHandlerID [] getList(){
+        return (ConnectionHandlerID[]) hashtable.values().toArray(new ConnectionHandlerID[hashtable.size()]);
+    }
 }
