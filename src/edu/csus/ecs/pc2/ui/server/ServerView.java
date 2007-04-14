@@ -49,6 +49,7 @@ import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.SiteEvent;
+import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.IntegerDocument;
 import edu.csus.ecs.pc2.ui.UIPlugin;
@@ -769,9 +770,19 @@ public class ServerView extends JFrame implements UIPlugin {
                     log.println("Logged in " + ctype.toString());
                     while (enumeration.hasMoreElements()) {
                         ClientId aClientId = (ClientId) enumeration.nextElement();
-                        log.println("   " + aClientId);
+                        ConnectionHandlerID connectionHandlerID = model.getConnectionHandleID(aClientId);
+                        log.println("   " + aClientId+" on "+connectionHandlerID);
                     }
                 }
+            }
+            
+            // Connections
+            log.println();
+            ConnectionHandlerID [] connectionHandlerIDs = model.getConnectionHandleIDs();
+//            Arrays.sort(connectionHandlerIDs, new ConnectionHanlderIDComparator());
+            log.println("-- " + connectionHandlerIDs.length + " Connections --");
+            for (ConnectionHandlerID connectionHandlerID : connectionHandlerIDs) {
+                log.println("  " + connectionHandlerID);
             }
 
             log.println();
