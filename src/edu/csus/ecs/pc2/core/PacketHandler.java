@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.core;
 
 import edu.csus.ecs.pc2.core.log.StaticLog;
+import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestTime;
@@ -344,13 +345,35 @@ public final class PacketHandler {
      * @param packet
      * @param model
      */
-    private static void addRunsToRunList (Packet packet, IModel model) {
+    private static void addRunsToModel (Packet packet, IModel model) {
 
         try {
             Run [] runs = (Run[]) PacketFactory.getObjectValue(packet, PacketFactory.RUN_LIST);
             if (runs != null) {
                 for (Run run : runs) {
                     model.addRun(run);
+                }
+            }
+        } catch (Exception e) {
+            // TODO: log handle exception
+            e.printStackTrace();
+            StaticLog.unclassified("Exception logged ", e);
+        }
+    }
+    
+    /**
+     * Unpack and add list of clarifications to model.
+     * 
+     * @param packet
+     * @param model
+     */
+    private static void addClarificationsToModel (Packet packet, IModel model) {
+
+        try {
+            Clarification [] clarifications =(Clarification[]) PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION_LIST);
+            if (clarifications != null) {
+                for (Clarification clarification : clarifications) {
+                    model.addClarification(clarification);
                 }
             }
         } catch (Exception e) {
@@ -432,20 +455,14 @@ public final class PacketHandler {
             // TODO: log handle exception
             StaticLog.unclassified("Exception logged ", e);
         }
-        
-        try {
-            Site[] sites = (Site[]) PacketFactory.getObjectValue(packet, PacketFactory.SITE_LIST);
-            if (sites != null) {
-                for (Site site : sites) {
-                    model.addSite(site);
-                }
-            }
-        } catch (Exception e) {
-            // TODO: log handle exception
-            StaticLog.unclassified("Exception logged ", e);
-        }
 
-        addRunsToRunList (packet, model);
+        addContestTimesToModel (packet, model);
+
+        addSitesToModel (packet, model);
+        
+        addRunsToModel (packet, model);
+        
+        addClarificationsToModel (packet, model);
         
         ClientId clientId = null;
         
@@ -453,7 +470,6 @@ public final class PacketHandler {
             clientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
             if (clientId != null) {
                 model.setClientId(clientId);
-                info("DEBUG set client to : "+model.getClientId());
             }
         } catch (Exception e) {
             // TODO: log handle exception
@@ -461,7 +477,6 @@ public final class PacketHandler {
         }
 
         controller.setSiteNumber(clientId.getSiteNumber());
-
         
         if (model.isLoggedIn()){
             
@@ -476,6 +491,53 @@ public final class PacketHandler {
         }
     }
 
+    private static void addContestTimesToModel(Packet packet, IModel model) {
+        try {
+            ContestTime [] contestTimes = (ContestTime[]) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME_LIST);
+            if (contestTimes != null) {
+                for (ContestTime contestTime : contestTimes) {
+                    model.addContestTime(contestTime);
+                }
+            }
+        } catch (Exception e) {
+            // TODO: log handle exception
+            e.printStackTrace();
+            StaticLog.unclassified("Exception logged ", e);
+        }
+    }
+
+    /**
+     * Unpack and add a list of sites to the model.
+     * 
+     * @param packet
+     * @param model
+     */
+    private static void addSitesToModel(Packet packet, IModel model) {
+        try {
+            Site[] sites = (Site[]) PacketFactory.getObjectValue(packet, PacketFactory.SITE_LIST);
+            if (sites != null) {
+                for (Site site : sites) {
+                    model.addSite(site);
+                }
+            }
+        } catch (Exception e) {
+            // TODO: log handle exception
+            StaticLog.unclassified("Exception logged ", e);
+        }
+        
+        
+    }
+
+    /**
+     * Login to other servers.
+     * 
+     * Sends a login request packet to sites that
+     * this server is nog logged into.
+     * 
+     * @param packet contains list of other servers
+     * @param model
+     * @param controller
+     */
     private static void loginToOtherSites(Packet packet, IModel model, IController controller) {
         try {
             ClientId [] listOfLoggedInUsers = (ClientId[]) PacketFactory.getObjectValue(packet, PacketFactory.LOGGED_IN_USERS);
