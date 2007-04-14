@@ -149,11 +149,29 @@ public final class PacketFactory {
      * Array of {@link Judgement}.
      */
     public static final String JUDGEMENT_LIST = "JUDGEMENT_LIST";
+    
+    
+    /**
+     * Array of {@link ContestTime}.
+     */
+    private static final String CONTEST_TIME_LIST = "CONTEST_TIME_LIST";
+
+    /**
+     * Array of {@link Clarification}.
+     */
+    private static final String CLARIFICATION_LIST = "CLARIFICATION_LIST";
+
+    /**
+     * Array of {@link ConnectionHandlerID}
+     */
+    private static final String CONNECTION_HANDLE_ID_LIST = "CONNECTION_HANDLE_ID_LIST";
 
     /**
      * A ClientId representing all sites (used as a destinationId).
      */
     public static final ClientId ALL_SERVERS = new ClientId(0, ClientType.Type.SERVER, 0);
+
+
 
     /**
      * Constructor is private as this is a utility class which should not be extended or invoked.
@@ -657,30 +675,39 @@ public final class PacketFactory {
     /**
      * Create packet for {@link PacketType.Type#LOGIN_SUCCESS}.
      * 
-     * This packet gives the user their {@link ClientId} and all the contest settings.
+     * Sent to a client or server on successful login.  This packet
+     * has all contest data.
      * 
      * @param source
      * @param destination
-     * @param inContestTime
+     * @param contestTime
+     * @param contestTimes
      * @param siteNumber
      * @param languages
      * @param problems
      * @param judgements
+     * @param sites
+     * @param runs
+     * @param clarifications
      * @param loggedInUsers
+     * @param connectionHandlerIDs
      */
-    public static Packet createLoginSuccess(ClientId source, ClientId destination, ContestTime inContestTime, int siteNumber,
-            Language[] languages, Problem[] problems, Judgement[] judgements, Site[] sites, Run[] runs, ClientId[] loggedInUsers) {
+    public static Packet createLoginSuccess(ClientId source, ClientId destination, ContestTime contestTime, ContestTime[] contestTimes, int siteNumber, Language[] languages, Problem[] problems,
+            Judgement[] judgements, Site[] sites, Run[] runs, Clarification[] clarifications, ClientId[] loggedInUsers, ConnectionHandlerID[] connectionHandlerIDs) {
         try {
             Properties prop = new Properties();
             prop.put(SITE_NUMBER, new Integer(siteNumber));
-            prop.put(PacketType.CONTEST_TIME, inContestTime);
+            prop.put(CONTEST_TIME, contestTime);
+            prop.put(CONTEST_TIME_LIST, contestTimes);
             prop.put(CLIENT_ID, destination);
             prop.put(PROBLEM_LIST, problems);
             prop.put(LANGUAGE_LIST, languages);
             prop.put(JUDGEMENT_LIST, judgements);
             prop.put(SITE_LIST, sites);
             prop.put(RUN_LIST, runs);
+            prop.put(CLARIFICATION_LIST, clarifications);
             prop.put(LOGGED_IN_USERS, loggedInUsers);
+            prop.put(CONNECTION_HANDLE_ID_LIST, connectionHandlerIDs);
 
             Packet packet = new Packet(Type.LOGIN_SUCCESS, source, destination, prop);
             return packet;
