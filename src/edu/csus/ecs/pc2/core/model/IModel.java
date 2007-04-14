@@ -376,4 +376,8 @@ public interface IModel {
     Judgement getJudgement(ElementId elementId);
 
     Account getAccount(ClientId id);
+
+    ContestTime[] getContestTimes();
+
+    ConnectionHandlerID[] getConnectionHandleIDs();
 }

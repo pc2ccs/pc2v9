@@ -590,6 +590,11 @@ public class Model implements IModel {
     public ConnectionHandlerID getConnectionHandleID(ClientId sourceId) {
         return loginList.getConnectionHandleID(sourceId);
     }
+    
+    public ConnectionHandlerID[] getConnectionHandleIDs() {
+        return connectionHandlerList.getList();
+    }
+
 
     public void removeLogin(ClientId sourceId) {
         loginList.remove(sourceId);
@@ -634,6 +639,13 @@ public class Model implements IModel {
         }
         return  contestTime2;
     }
+    
+    public ContestTime[] getContestTimes() {
+        // TODO code getContestTimes
+        return null;
+    }
+
+
 
     public void startContest(int inSiteNumber) {
         ContestTime contestTime = getContestTime(inSiteNumber);
@@ -874,5 +886,6 @@ public class Model implements IModel {
         ConnectionEvent connectionEvent = new ConnectionEvent(ConnectionEvent.Action.DROPPED, connectionHandlerID);
         fireConnectionListener(connectionEvent);
     }
+
 
 }
