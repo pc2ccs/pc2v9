@@ -288,7 +288,7 @@ public class TeamView extends JFrame implements UIPlugin {
         if (submitRunPane == null) {
             fileNameLabel = new JLabel();
             fileNameLabel.setBounds(new java.awt.Rectangle(126, 99, 219, 21));
-            fileNameLabel.setText("samps/sumit.java");
+            fileNameLabel.setText("samps/Sumit.java");
             jLabel1 = new JLabel();
             jLabel1.setBounds(new java.awt.Rectangle(28, 99, 80, 21));
             jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
