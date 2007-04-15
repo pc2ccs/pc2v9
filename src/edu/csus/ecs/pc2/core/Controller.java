@@ -106,6 +106,10 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     private UIPlugin uiPlugin = null;
 
     private Log log;
+    
+    private static final String LOGIN_OPTION_STRING = "--login";
+    private static final String PASSWORD_OPTION_STRING = "--password";
+    private static final String LOGIN_UI_OPTION_STRING = "--loginUI";
 
     /**
      * The port to contact and for the server to listen on.
@@ -152,6 +156,12 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     private boolean usingMainUI = true;
 
     // TODO change this to UIPlugin
+    /*
+     * Difficulty with changing LoginFrame to UIPlugin, there
+     * is no way to setVisible(false) a UIPlugin or make
+     * the GUI cursor change for a UIPlugin. dal.
+     * 
+     */
     private LoginFrame loginUI;
     
     public Controller(IModel model) {
@@ -890,7 +900,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
 
     /**
-     * Client has successfully logged in, show them new UI.
+     * Client has successfully logged in, show them UI.
      * 
      * @param clientId
      *            new client id
@@ -954,6 +964,9 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      */
     public void start(String[] stringArray) {
 
+        log = new Log("pc2.startup");
+        StaticLog.setLog(log);
+        
         String[] arguments = { "--login", "--id", "--password", "--loginUI", "--remoteServer", "--port" };
         parseArguments = new ParseArguments(stringArray, arguments);
         
@@ -962,7 +975,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                 setContactingRemoteServer(false);
             }
         }
-
+        
         // TODO parse arguments logic 
         
         /**
@@ -984,18 +997,47 @@ public class Controller implements IController, ITwoToOne, IBtoA {
          * 
          */
 
-        log = new Log("pc2.startup");
-        StaticLog.setLog(log);
         
         log.info("Starting TransportManager...");
         transportManager = new TransportManager(log);
         log.info("Started TransportManager");
         
-        if (isUsingMainUI()){
-            if (uiPlugin == null){
-                loginUI = new LoginFrame();
-                loginUI.setModelAndController(model, this);
+        if (  ! parseArguments.isOptPresent(LOGIN_OPTION_STRING)){
+
+            // TODO: code handle alternate Login UI.
+            
+//            if ( parseArguments.isOptPresent(LOGIN_UI_OPTION_STRING)) {
+//                String loginUIName = parseArguments.getOptValue(LOGIN_UI_OPTION_STRING);
+//                // TODO: load Login UI
+////                loginUI = LoadUIClass.loadUIClass(loginUIName);
+//            } else {
+//              
+//            }
+            
+            loginUI = new LoginFrame();
+            loginUI.setModelAndController(model, this);
+            
+        } else {
+            // has a login, go for it.
+            
+            
+            // Get loginId
+            String loginName = "";
+            if ( parseArguments.isOptPresent(LOGIN_OPTION_STRING)) {
+                loginName = parseArguments.getOptValue(LOGIN_OPTION_STRING);
             }
+            
+            // get password (optional if joe password)
+            String password = "";
+            if ( parseArguments.isOptPresent(PASSWORD_OPTION_STRING)) {
+                password = parseArguments.getOptValue(PASSWORD_OPTION_STRING);
+            }
+            
+            // TODO: handle this when no login GUI.
+            
+            loginUI = new LoginFrame();
+            loginUI.setModelAndController(model, this); // this displays the login
+            login (loginName, password);  // starts login attempt, will show failure to LoginFrame
         }
     }
 
