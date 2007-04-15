@@ -74,11 +74,7 @@ public class RunsPanel extends JPanePlugin {
             s[1] = getTeamDisplayName(run);
             s[2] = new Long(run.getNumber()).toString();
             s[3] = new Long(run.getElapsedMins()).toString();
-            if (run.getStatus() == RunStates.JUDGED) {
-                s[4] = getJudgementTitle(run.getJudgementRecord().getJudgementId());
-            } else {
-                s[4] = run.getStatus().toString();
-            }
+            s[4] = run.getStatus().toString();
             if (judgeId != null) {
                 s[5] = judgeId.getName();
             } else {
