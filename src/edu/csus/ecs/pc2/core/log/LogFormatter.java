@@ -84,7 +84,7 @@ public class LogFormatter extends Formatter {
                             + stackTraceElement.getLineNumber() + ")";
                 }
                 line = line + "|" + "    at "
-                        + stackTraceElement.getClassName()
+                        + stackTraceElement.getClassName() + "." 
                         + stackTraceElement.getMethodName() + " " + sourceName
                         + separator;
             }
