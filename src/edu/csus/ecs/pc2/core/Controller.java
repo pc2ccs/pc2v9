@@ -836,7 +836,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
 
     public void setContestTime(ContestTime contestTime) {
-        // TODO code
+        model.updateContestTime(contestTime);
     }
 
     public void sendToServers(Packet packet) {
@@ -1013,9 +1013,10 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 //            } else {
 //              
 //            }
-            
-            loginUI = new LoginFrame();
-            loginUI.setModelAndController(model, this);
+            if (isUsingMainUI()){
+                loginUI = new LoginFrame();
+                loginUI.setModelAndController(model, this);
+            }
             
         } else {
             // has a login, go for it.
@@ -1033,10 +1034,11 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                 password = parseArguments.getOptValue(PASSWORD_OPTION_STRING);
             }
             
-            // TODO: handle this when no login GUI.
+            if (isUsingMainUI()){
+                loginUI = new LoginFrame();
+                loginUI.setModelAndController(model, this); // this displays the login
+            }
             
-            loginUI = new LoginFrame();
-            loginUI.setModelAndController(model, this); // this displays the login
             login (loginName, password);  // starts login attempt, will show failure to LoginFrame
         }
     }
