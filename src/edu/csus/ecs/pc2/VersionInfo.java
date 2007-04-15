@@ -114,8 +114,8 @@ public class VersionInfo {
         String osArch = System.getProperty("os.arch", "?");
         String osVer = System.getProperty("os.version", "?");
 
-        return "Version " + versionNumber + " (" + versionDate + ") Java ver " + javaVer + " OS: " + osName + " " + osVer + " ("
-                + osArch + ") ";
+        return "Version " + versionNumber + " (" + versionDate + ") Java ver " + javaVer + " build " + buildNumber
+            + " " + osName + " " + osVer + " (" + osArch + ") ";
 
     }
 
