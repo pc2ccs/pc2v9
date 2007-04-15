@@ -5,6 +5,7 @@ import java.io.File;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -18,6 +19,7 @@ import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.core.model.ILanguageListener;
@@ -31,7 +33,6 @@ import edu.csus.ecs.pc2.core.model.ProblemEvent;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.UIPlugin;
-import javax.swing.JCheckBox;
 
 /**
  * Represents an arbitrary contest GUI.
@@ -68,10 +69,6 @@ public class TeamView extends JFrame implements UIPlugin {
 
     private JLabel jLabel = null;
 
-    private JLabel jLabel1 = null;
-
-    private JLabel fileNameLabel = null;
-
     private JComboBox problemComboBox = null;
 
     private JComboBox languageComboBox = null;
@@ -90,6 +87,10 @@ public class TeamView extends JFrame implements UIPlugin {
 
     private JCheckBox showLogWindowCheckBox = null;
 
+    private JPanel filenamePane = null;
+
+    private JLabel fileNameLabel = null;
+
     /**
      * Nevermind this constructor, needed for VE and other reasons.
      * 
@@ -105,7 +106,7 @@ public class TeamView extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(490, 368));
+        this.setSize(new java.awt.Dimension(481, 351));
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setContentPane(getMainViewPane());
         this.setTitle("The TeamView");
@@ -150,7 +151,8 @@ public class TeamView extends JFrame implements UIPlugin {
     }
 
     private void updateListBox(String string) {
-        runListModel.addElement(string);
+        runListModel.insertElementAt(string, 0);
+        StaticLog.unclassified(string);
     }
 
     private boolean isThisSite(int siteNumber) {
@@ -290,13 +292,6 @@ public class TeamView extends JFrame implements UIPlugin {
      */
     private JPanel getSubmitRunPane() {
         if (submitRunPane == null) {
-            fileNameLabel = new JLabel();
-            fileNameLabel.setBounds(new java.awt.Rectangle(126, 99, 219, 21));
-            fileNameLabel.setText("samps/Sumit.java");
-            jLabel1 = new JLabel();
-            jLabel1.setBounds(new java.awt.Rectangle(28, 99, 80, 21));
-            jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-            jLabel1.setText("Filename");
             jLabel = new JLabel();
             jLabel.setBounds(new java.awt.Rectangle(28, 62, 80, 21));
             jLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
@@ -310,14 +305,58 @@ public class TeamView extends JFrame implements UIPlugin {
             submitRunPane.add(getSubmitRunButton(), null);
             submitRunPane.add(problemLabel, null);
             submitRunPane.add(jLabel, null);
-            submitRunPane.add(jLabel1, null);
-            submitRunPane.add(fileNameLabel, null);
             submitRunPane.add(getProblemComboBox(), null);
             submitRunPane.add(getLanguageComboBox(), null);
-            submitRunPane.add(getPickFileButton(), null);
             submitRunPane.add(getRunListPane(), null);
+            submitRunPane.add(getFilenamePane(), null);
         }
         return submitRunPane;
+    }
+
+    protected void autoPopulate() {
+        // TODO: auto populate
+
+        String matchProblemString = "umit";
+        for (int i = 0; i < problemComboBox.getItemCount(); i++) {
+            Problem problem = (Problem) problemComboBox.getItemAt(i);
+            int idx = problem.toString().indexOf(matchProblemString);
+            if (idx > -1) {
+                problemComboBox.setSelectedIndex(i);
+            }
+        }
+
+        String matchLanguageString = "Java";
+        for (int i = 0; i < languageComboBox.getItemCount(); i++) {
+            Language language = (Language) languageComboBox.getItemAt(i);
+            int idx = language.toString().indexOf(matchLanguageString);
+            if (idx > -1) {
+                languageComboBox.setSelectedIndex(i);
+            }
+        }
+
+        // problemComboBox.
+        // getProblemCombo().setSelectedIndex(getProblemCombo().getItemCount() - 1);
+        // getLanguageCombo().setSelectedIndex(getLanguageCombo().getItemCount() - 1);
+
+        try {
+            String filename = "samps/Sumit.java";
+            File file = new File(filename);
+            if (file.exists()) {
+                fileNameLabel.setText(filename);
+            }
+        } catch (Exception e) {
+            StaticLog.log("Exception logged ", e);
+        }
+
+        try {
+            String filename = "/pc2/samps/sumit.java";
+            File file = new File(filename);
+            if (file.exists()) {
+                fileNameLabel.setText(filename);
+            }
+        } catch (Exception e) {
+            StaticLog.log("Exception logged ", e);
+        }
     }
 
     /**
@@ -356,7 +395,7 @@ public class TeamView extends JFrame implements UIPlugin {
     private JButton getSubmitRunButton() {
         if (submitRunButton == null) {
             submitRunButton = new JButton();
-            submitRunButton.setBounds(new java.awt.Rectangle(366, 131, 74, 26));
+            submitRunButton.setBounds(new java.awt.Rectangle(376, 105, 74, 26));
             submitRunButton.setEnabled(false);
             submitRunButton.setText("Submit");
             submitRunButton.addActionListener(new java.awt.event.ActionListener() {
@@ -451,8 +490,8 @@ public class TeamView extends JFrame implements UIPlugin {
     private JButton getPickFileButton() {
         if (pickFileButton == null) {
             pickFileButton = new JButton();
-            pickFileButton.setBounds(new java.awt.Rectangle(367, 94, 74, 26));
             pickFileButton.setEnabled(false);
+            pickFileButton.setBounds(new java.awt.Rectangle(250, 12, 74, 26));
             pickFileButton.setText("Pick");
             pickFileButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -497,7 +536,7 @@ public class TeamView extends JFrame implements UIPlugin {
         if (runListPane == null) {
             runListPane = new JPanel();
             runListPane.setLayout(new BorderLayout());
-            runListPane.setBounds(new java.awt.Rectangle(22, 170, 418, 130));
+            runListPane.setBounds(new java.awt.Rectangle(32, 147, 418, 130));
             runListPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Runs", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION,
                     null, null));
             runListPane.add(getRunListScrollPane(), java.awt.BorderLayout.CENTER);
@@ -585,6 +624,34 @@ public class TeamView extends JFrame implements UIPlugin {
             });
         }
         return showLogWindowCheckBox;
+    }
+
+    /**
+     * This method initializes filenamePane
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getFilenamePane() {
+        if (filenamePane == null) {
+            fileNameLabel = new JLabel();
+            fileNameLabel.setBounds(new java.awt.Rectangle(16, 13, 223, 25));
+            fileNameLabel.setText("");
+            fileNameLabel.addMouseListener(new java.awt.event.MouseAdapter() {
+                public void mouseClicked(java.awt.event.MouseEvent e) {
+                    if (e.getClickCount() > 1 && e.isShiftDown()) {
+                        autoPopulate();
+                    }
+                }
+            });
+            filenamePane = new JPanel();
+            filenamePane.setLayout(null);
+            filenamePane.setBounds(new java.awt.Rectangle(30, 95, 335, 44));
+            filenamePane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Main File", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+                    javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Dialog", java.awt.Font.BOLD, 12), new java.awt.Color(51, 51, 51)));
+            filenamePane.add(getPickFileButton(), null);
+            filenamePane.add(fileNameLabel, null);
+        }
+        return filenamePane;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
