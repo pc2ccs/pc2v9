@@ -100,7 +100,7 @@ public interface IModel {
      * @param runFiles
      *            submitted run files (like source files)
      */
-    void addRun(Run run, RunFiles runFiles);
+    void addRun(Run run, RunFiles runFiles, ClientId whoCheckedOutRunId);
 
     /**
      * Add new accounts.
@@ -299,6 +299,8 @@ public interface IModel {
 
     /**
      * Update the run.
+     * 
+     * Check out run or just update state. 
      * 
      * @param run
      * @param newState

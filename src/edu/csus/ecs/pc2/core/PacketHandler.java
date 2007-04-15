@@ -49,6 +49,7 @@ public final class PacketHandler {
         Type packetType = packet.getType();
 
         info("handlePacket " + packet);
+        PacketFactory.dumpPacket(System.err, packet);
         
         ClientId fromId = packet.getSourceId();
 
@@ -114,7 +115,8 @@ public final class PacketHandler {
             // Run from server to judge
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
             RunFiles runFiles = (RunFiles) PacketFactory.getObjectValue(packet, PacketFactory.RUN_FILES);
-            checkedOutRun (model, controller, run, runFiles);
+            ClientId whoCheckedOut = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+            checkedOutRun (model, controller, run, runFiles, whoCheckedOut);
             
             sendToJudgesAndOthers(model, controller, packet, false);
             
@@ -202,8 +204,8 @@ public final class PacketHandler {
      * @param run
      * @param runFiles
      */
-    private static void checkedOutRun(IModel model,IController controller, Run run, RunFiles runFiles) {
-        model.addRun(run, runFiles);
+    private static void checkedOutRun(IModel model,IController controller, Run run, RunFiles runFiles, ClientId whoCheckedOutId) {
+        model.addRun(run, runFiles, whoCheckedOutId);
         
         // TODO code for if checkout run from another site.
 
@@ -213,7 +215,7 @@ public final class PacketHandler {
         return id.getClientType().equals(ClientType.Type.ADMINISTRATOR);
     }
     
-    private static void cancelRun(Run run, IModel model, IController controller, ClientId whoCancledRun) {
+    private static void cancelRun(Run run, IModel model, IController controller, ClientId whoCanceledRun) {
         
         if (isServer(model.getClientId())) {
 
@@ -226,10 +228,10 @@ public final class PacketHandler {
 
                 // TODO: insure that this client checked out the run or send back a "oh no you didn't!"
 
-                model.cancelRunCheckOut(run, whoCancledRun);
+                model.cancelRunCheckOut(run, whoCanceledRun);
 
                 Run availableRun = model.getRun(run.getElementId());
-                Packet availableRunPacket = PacketFactory.createRunAvailable(model.getClientId(), whoCancledRun, availableRun);
+                Packet availableRunPacket = PacketFactory.createRunAvailable(model.getClientId(), whoCanceledRun, availableRun);
 
                 sendToJudgesAndOthers(model, controller, availableRunPacket, true);
             }
@@ -237,7 +239,7 @@ public final class PacketHandler {
         } else {
             // Client, update status and done.
             
-            model.updateRun(run, RunStates.NEW, whoCancledRun);
+            model.updateRun(run, RunStates.NEW, whoCanceledRun);
         }
     }
 
@@ -276,7 +278,7 @@ public final class PacketHandler {
             }
             
         } else {
-            model.updateRun(run, run.getStatus(), whoJudgedId);
+            model.updateRun(run, run.getStatus(), judgementRecord.getJudgerClientId());
         }
     }
 

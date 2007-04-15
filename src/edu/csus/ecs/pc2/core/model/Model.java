@@ -403,10 +403,11 @@ public class Model implements IModel {
      */
     public Run acceptRun (Run run, RunFiles runFiles) {
         run.setElapsedMins(getContestTime().getElapsedMins());
-        if (runFiles != null) {
-            runFilesList.add(run, runFiles);
-        }
+        run.setSiteNumber(getSiteNumber());
         Run newRun = runList.addNewRun(run); // this set the run number.
+        if (runFiles != null) {
+            runFilesList.add(newRun, runFiles);
+        }
         addRun(newRun);
         return newRun;
     }
@@ -422,9 +423,10 @@ public class Model implements IModel {
         fireRunListener(runEvent);
     }
     
-    public void addRun(Run run, RunFiles runFiles) {
+    public void addRun(Run run, RunFiles runFiles, ClientId whoCheckedOutRunId) {
         runList.add(run); 
         RunEvent runEvent = new RunEvent(RunEvent.Action.CHECKEDOUT_RUN, run, runFiles);
+        runEvent.setSentToClientId(whoCheckedOutRunId);
         fireRunListener(runEvent);
     }
     
@@ -705,7 +707,7 @@ public class Model implements IModel {
         runList.updateRun(run, judgementRecord);
         Run newRun = runList.get(run.getElementId());
         RunEvent runEvent = new RunEvent(RunEvent.Action.CHANGED, newRun, null);
-        runEvent.setWhoModifiedRun(localClientId);
+        runEvent.setWhoModifiedRun(whoUpdatedRun);
         fireRunListener(runEvent);
     }
 
@@ -714,9 +716,13 @@ public class Model implements IModel {
         fireRunListener(runEvent);
     }
 
-    public void updateRun(Run run, RunStates newState, ClientId whoChangedRun) {
+    // Check out run
+    public void updateRun (Run run, RunStates newState, ClientId whoChangedRun) {
         runList.updateRun(run,newState);
-        runCheckOutList.put(run.getElementId(), whoChangedRun);
+        if (newState.equals(RunStates.BEING_JUDGED)){
+            runCheckOutList.put(run.getElementId(), whoChangedRun);
+        }
+
         Run newRun = runList.get(run.getElementId());
         RunEvent runEvent = new RunEvent(RunEvent.Action.CHANGED, newRun, null);
         runEvent.setWhoModifiedRun(whoChangedRun);
@@ -731,14 +737,36 @@ public class Model implements IModel {
         
         Run theRun = runList.get(run);
         ClientId whoCheckedOut = runCheckOutList.get(run.getElementId());
-//        
-// if (whoCheckedOut == null || whoCheckedOut.equals(whoJudgedItId)){
-// // TODO security code, handle this problem.
-// System.err.println("Security Warning "+run+" not checked out by "+whoJudgedItId);
-// }
+        ClientId whoChangedItId = judgementRecord.getJudgerClientId();
         
-        runList.updateRun(theRun, judgementRecord);
-        runCheckOutList.remove(whoCheckedOut);
+        if (whoCheckedOut == null) {
+            // No one did this ?
+            
+            Exception ex = new Exception ("addRunJudgement - not in checkedout list, whoCheckedOut is null ");
+            StaticLog.log("debug ", ex);
+            info("Exception in log"+ex.getMessage());
+
+
+        } else if ( ! whoChangedItId.equals(whoCheckedOut))  {
+            // The judge who submitted this judgement is different than who actually judged it ?
+
+            Exception ex = new Exception ("addRunJudgement - who checked out and who it is differ ");
+            StaticLog.log("debug ", ex);
+            info("Exception in log"+ex.getMessage());
+
+            
+        } else {
+            // Judge is ok.
+            info("debug all is well, continuing... ");
+            
+        }
+        runList.updateRun(theRun, judgementRecord); // this sets run to JUDGED
+        info("debug  updated run to judged "+theRun );
+        
+        if (whoCheckedOut != null){
+            info("debug found checked out by "+whoCheckedOut+" judgement updated by "+judgementRecord.getJudgerClientId());
+            runCheckOutList.remove(whoCheckedOut);
+        }
         theRun = runList.get(run);
         
         RunEvent runEvent = new RunEvent(RunEvent.Action.CHANGED, theRun, null);
