@@ -103,6 +103,8 @@ public class MultiSiteTest extends TestCase {
         controllerOne = new Controller(modelOne);
         controllerOne.setContactingRemoteServer(false);
         controllerOne.setUsingMainUI(false);
+        controllerOne.start(new String[0]);
+
 
     }
 
@@ -125,6 +127,7 @@ public class MultiSiteTest extends TestCase {
         controllerTwo = new Controller(modelTwo);
         controllerTwo.setContactingRemoteServer(true);
         controllerTwo.setUsingMainUI(false);
+        controllerTwo.start(new String[0]);
 
         // Site 2 Login
         controllerTwo.login("site2", "site2");
@@ -144,7 +147,9 @@ public class MultiSiteTest extends TestCase {
         modelThree = new Model();
         controllerThree = new Controller(modelThree);
         controllerThree.setContactingRemoteServer(true);
-        controllerThree.setUsingMainUI(false);  
+        controllerThree.setUsingMainUI(false);
+        controllerThree.start(new String[0]);
+
         controllerThree.login("site3", "site3");
         sleep(SECS_TO_PAUSE_ON_LOGIN, "site 3 login");
 
