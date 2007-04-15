@@ -48,9 +48,9 @@ public class ParseArguments {
 
     public static final String SVN_ID = "$Id$";
 
-    private Hashtable<String, String> argHash = new Hashtable<String, String>();
+    private Hashtable<String, String> argHash = new Hashtable <String, String>();
 
-    private Vector<String> filelist = new Vector<String>();
+    private Vector<String> filelist = new Vector <String> ();
 
     private static final String NULL_VALUE = "<GAA" + Long.MAX_VALUE;
 

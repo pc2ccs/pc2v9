@@ -47,7 +47,7 @@ public class IniFile {
     /**
      * Name/Value pairs.
      */
-    private static Hashtable<String, String> nameValueHash = new Hashtable<String, String>();
+    private static Hashtable<String, String> nameValueHash = new Hashtable <String, String>();
 
     /**
      * The current section as input file scanned.

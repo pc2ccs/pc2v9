@@ -19,7 +19,7 @@ public class TransportWrapper implements Serializable {
 
     public static final String SVN_ID = "$Id$";
 
-    private Hashtable<String, Serializable> hashtable = new Hashtable<String, Serializable>();
+    private Hashtable<String, Serializable> hashtable = new Hashtable <String, Serializable>();
 
     public TransportWrapper() {
         super();

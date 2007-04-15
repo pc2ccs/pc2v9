@@ -62,7 +62,7 @@ public class Run extends ISubmission {
         JUDGED
     }
 
-    private Vector<JudgementRecord> judgementList = new Vector<JudgementRecord>();
+    private Vector<JudgementRecord> judgementList = new Vector <JudgementRecord>();
 
     // TODO Judgements
 

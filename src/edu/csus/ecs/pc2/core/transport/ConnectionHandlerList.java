@@ -12,7 +12,7 @@ import java.util.Hashtable;
 public class ConnectionHandlerList {
     public static final String SVN_ID = "$Id$";
 
-    private Hashtable<ConnectionHandlerID, ConnectionHandler> hashtable = new Hashtable<ConnectionHandlerID, ConnectionHandler>();
+    private Hashtable<ConnectionHandlerID, ConnectionHandler> hashtable = new Hashtable <ConnectionHandlerID, ConnectionHandler>();
 
     public ConnectionHandlerList() {
         super();

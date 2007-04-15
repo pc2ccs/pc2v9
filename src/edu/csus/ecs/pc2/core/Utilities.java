@@ -110,7 +110,7 @@ public final class Utilities {
      * @return Vector<String> lines from file.
      */
     public static String[] loadFile(String filename) {
-        Vector<String> lines = new Vector<String>();
+        Vector<String> lines = new Vector <String>();
 
         if (filename == null) {
             throw new IllegalArgumentException("filename is null");
