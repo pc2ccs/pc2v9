@@ -64,6 +64,8 @@ public class LoginFrame extends JFrame implements UIPlugin {
 
     private JLabel mainTitleBottomLabel = null;
 
+    private LogWindow logWindow = null;
+    
     /**
      * This method initializes
      * 
@@ -96,6 +98,11 @@ public class LoginFrame extends JFrame implements UIPlugin {
         
         VersionInfo versionInfo = new VersionInfo();
         versionTitleLabel.setText("PC^2 version "+versionInfo.getVersionNumber()+" "+versionInfo.getBuildNumber());
+ 
+        // initialize logWindow so it can add itself as a listener and
+        // start populating the mclb
+        logWindow = new LogWindow();
+        // XXX showing the logWindow here causes awt deadlock on login
     }
 
     /**

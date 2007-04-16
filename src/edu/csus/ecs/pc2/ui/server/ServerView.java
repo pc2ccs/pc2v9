@@ -52,6 +52,7 @@ import edu.csus.ecs.pc2.core.model.SiteEvent;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.IntegerDocument;
+import edu.csus.ecs.pc2.ui.LogWindow;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
@@ -132,6 +133,8 @@ public class ServerView extends JFrame implements UIPlugin {
 
     private JCheckBox showLogWindowCheckBox = null;
 
+    private LogWindow logWindow = null;
+    
     /**
      * This method initializes
      * 
@@ -157,6 +160,9 @@ public class ServerView extends JFrame implements UIPlugin {
                 promptAndExit();
             }
         });
+        if (logWindow == null) {
+            logWindow = new LogWindow();
+        }
         setVisible(true);
 
         FrameUtilities.centerFrameTop(this);
@@ -925,7 +931,7 @@ public class ServerView extends JFrame implements UIPlugin {
     }
 
     protected void showLog(boolean showLogWindow) {
-        serverController.setLogVisible(showLogWindow);
+       logWindow.setVisible(showLogWindow);
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

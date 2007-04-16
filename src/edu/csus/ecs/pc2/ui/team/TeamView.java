@@ -32,6 +32,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemEvent;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
+import edu.csus.ecs.pc2.ui.LogWindow;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
@@ -90,6 +91,8 @@ public class TeamView extends JFrame implements UIPlugin {
     private JPanel filenamePane = null;
 
     private JLabel fileNameLabel = null;
+    
+    private LogWindow logWindow = null;
 
     /**
      * Nevermind this constructor, needed for VE and other reasons.
@@ -119,6 +122,10 @@ public class TeamView extends JFrame implements UIPlugin {
 
         FrameUtilities.centerFrame(this);
         setTitle("PC^2 Team - Not Logged In ");
+
+        if (logWindow == null) {
+            logWindow = new LogWindow();
+        }
     }
 
     protected void promptAndExit() {
@@ -605,7 +612,7 @@ public class TeamView extends JFrame implements UIPlugin {
     }
 
     protected void showLog(boolean showLogWindow) {
-        teamController.setLogVisible(showLogWindow);
+        logWindow.setVisible(showLogWindow);
     }
 
     /**

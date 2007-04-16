@@ -20,6 +20,7 @@ import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
+import edu.csus.ecs.pc2.ui.LogWindow;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 import javax.swing.JCheckBox;
 
@@ -56,6 +57,8 @@ public class JudgeView extends JFrame implements UIPlugin {
 
     private JCheckBox showLogWindowCheckBox = null;
 
+    private LogWindow logWindow = null;
+    
     public JudgeView() {
         super();
         initialize();
@@ -80,6 +83,9 @@ public class JudgeView extends JFrame implements UIPlugin {
         });
         FrameUtilities.centerFrame(this);
 
+        if (logWindow == null) {
+            logWindow = new LogWindow();
+        }
     }
 
     protected void promptAndExit() {
@@ -304,7 +310,7 @@ public class JudgeView extends JFrame implements UIPlugin {
     }
 
     protected void showLog(boolean showLogWindow) {
-        controller.setLogVisible(showLogWindow);
+        logWindow.setVisible(showLogWindow);
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

@@ -19,6 +19,7 @@ import edu.csus.ecs.pc2.ui.ContestTimesPane;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
 import edu.csus.ecs.pc2.ui.LanguagesPane;
+import edu.csus.ecs.pc2.ui.LogWindow;
 import edu.csus.ecs.pc2.ui.ProblemsPane;
 import edu.csus.ecs.pc2.ui.RunsPanel;
 import edu.csus.ecs.pc2.ui.SitesPanel;
@@ -53,6 +54,8 @@ public class AdministratorView extends JFrame implements UIPlugin {
 
     private JCheckBox showLogWindowCheckBox = null;
 
+    private LogWindow logWindow = null;
+    
     /**
      * This method initializes
      * 
@@ -78,6 +81,9 @@ public class AdministratorView extends JFrame implements UIPlugin {
 
         FrameUtilities.centerFrame(this);
 
+        if (logWindow == null) {
+            logWindow = new LogWindow();
+        }
     }
 
     public void setModelAndController(IModel inModel, IController inController) {
@@ -240,7 +246,7 @@ public class AdministratorView extends JFrame implements UIPlugin {
     }
     
     protected void showLog(boolean showLogWindow) {
-        controller.setLogVisible(showLogWindow);
+        logWindow.setVisible(showLogWindow);
     }
 
     public static void main(String[] args) {
