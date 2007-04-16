@@ -22,7 +22,7 @@ public class LogWindow extends JFrame {
 
     private int maxLines = 400;
 
-    private MCLB logMessageListbox = null;
+    private static MCLB logMessageListbox = null;
 
     public LogWindow() {
         super();
@@ -33,46 +33,13 @@ public class LogWindow extends JFrame {
      * A Stream listener.
      * 
      */
-    public class StreamListener implements IStreamListener {
+    class StreamListener implements IStreamListener {
         public void messageAdded(String inString) {
             // TODO figure out to do do this on the tablemodel instead of gui
-            // add to listbox model
-            TableModel tableModel = getMCLB().getModel();
-            Object[] logMessageFields = inString.split("[|]");
-            // disable updates, update the model
-            // XXX is MCLB setUpdate swing safe?
-            getMCLB().setUpdate(false);
-            // XXX 2nd arguement is "info" may be null per TableModel javadoc
-            if (logMessageFields.length > 5) {
-                // fill in reverse order because inserts rows at top
-                for (int i = logMessageFields.length - 1; i > 4; i--) {
-                    Object[] newRow = new Object[5];
-                    newRow[0] = "";
-                    newRow[1] = "";
-                    newRow[2] = "";
-                    newRow[3] = "";
-                    newRow[4] = logMessageFields[i];
-                    tableModel.insertRow(newRow, null, 0);
-                }
-
-                // then print actual log message
-                Object[] row = { logMessageFields[0], logMessageFields[1], logMessageFields[2], logMessageFields[3], logMessageFields[4] };
-                tableModel.insertRow(row, null, 0);
-            } else {
-                tableModel.insertRow(logMessageFields, null, 0);
-            }
-            truncateTo(maxLines);
-            // then on swing thread update ui
-            SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        getMCLB().setUpdate(true);
-                        getMCLB().autoSizeAllColumns();
-                    }
-            });
-            /* XXX this works
             final String[] logMessageFields = inString.split("[|]");
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
+                    logMessageListbox.setUpdate(false);
                     if (logMessageFields.length > 5) {
                         // fill in reverse order because inserts rows at top
                         for (int i = logMessageFields.length - 1; i > 4; i--) {
@@ -93,11 +60,11 @@ public class LogWindow extends JFrame {
                     } else {
                         logMessageListbox.insertRow(logMessageFields, 0);
                     }
-                    logMessageListbox.autoSizeAllColumns();
                     truncateTo(maxLines);
+                    logMessageListbox.autoSizeAllColumns();
+                    logMessageListbox.setUpdate(true);
                 }
             });
-            */
         }
     }
 
@@ -111,7 +78,7 @@ public class LogWindow extends JFrame {
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.add(getMCLB());
         centerFrameTopFullWidth(this);
-//        log.getStreamHandler().addStreamListener(new StreamListener());
+        // log.getStreamHandler().addStreamListener(new StreamListener());
         StaticLog.getLog().getStreamHandler().addStreamListener(new StreamListener());
     }
 
