@@ -110,6 +110,8 @@ public class Log extends Logger {
 
     private LogWindowHandler windowHandler = null;
 
+    private LogStreamHandler streamHandler = null;
+    
     private boolean isWindowVisible = false;
 
     /**
@@ -222,6 +224,12 @@ public class Log extends Logger {
                 windowHandler.setLevel(Level.ALL);
                 addHandler(windowHandler);
             }
+            if (streamHandler == null) {
+                streamHandler = new LogStreamHandler();
+                streamHandler.setFormatter(new LogFormatter(false));
+                streamHandler.setLevel(Level.ALL);
+                addHandler(streamHandler);
+            }
 
         } catch (Exception e) {
             System.err.println("exception in setFileHandlers");
@@ -253,6 +261,7 @@ public class Log extends Logger {
         for (Handler handler : existingHandlers) {
             if (handler instanceof FileHandler) {
                 handler.close();
+                removeHandler(handler);
             }
         }
 
@@ -323,5 +332,9 @@ public class Log extends Logger {
             }
         };
         SwingUtilities.invokeLater(updateWindowTitleRunnable);
+    }
+
+    public LogStreamHandler getStreamHandler() {
+        return streamHandler;
     }
 }
