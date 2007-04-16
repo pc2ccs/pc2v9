@@ -34,7 +34,7 @@ public final class StaticLog {
      * @param ex
      */
     public static void unclassified(String message, Exception ex) {
-        log.log(Log.WARNING, "U "+message, ex);
+        log.log(Log.WARNING, "U " + message, ex);
     }
     
     /**
@@ -42,7 +42,7 @@ public final class StaticLog {
      * @param message
      */
     public static void unclassified(String message) {
-        log.log(Log.WARNING, "U "+message);
+        log.log(Log.WARNING, "U " + message);
     }
 
     public static void warning(String message) {
