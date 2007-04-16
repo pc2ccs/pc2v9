@@ -5,8 +5,6 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import javax.swing.SwingUtilities;
-
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -1200,12 +1198,4 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         return model.getClientId().getClientType().equals(ClientType.Type.SERVER);
     }
 
-    public void setLogVisible(final boolean visible) {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                StaticLog.getLog().setWindowVisible(visible);
-            }
-        });
-    }
-  
 }

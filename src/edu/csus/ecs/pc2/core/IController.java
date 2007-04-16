@@ -82,6 +82,4 @@ public interface IController {
 
     void updateSite(Site newSite);
     
-    void setLogVisible (boolean visible);
-
 }

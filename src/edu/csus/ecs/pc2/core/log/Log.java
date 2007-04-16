@@ -6,8 +6,6 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.SwingUtilities;
-
 /**
  * Based on the Java Logging API
  * <p>
@@ -107,8 +105,6 @@ public class Log extends Logger {
      * @see Logger#finest(java.lang.String)
      */
     public static final Level FINEST = Level.FINEST;
-
-    private LogWindowHandler windowHandler = null;
 
     private LogStreamHandler streamHandler = null;
     
@@ -217,13 +213,6 @@ public class Log extends Logger {
             fh.setFormatter(new LogFormatter(true));
             addHandler(fh);
 
-            if (windowHandler == null) {
-                windowHandler = new LogWindowHandler("Log " + baseFileName);
-                windowHandler.setFormatter(new LogFormatter(false));
-                windowHandler.setVisible(isWindowVisible);
-                windowHandler.setLevel(Level.ALL);
-                addHandler(windowHandler);
-            }
             if (streamHandler == null) {
                 streamHandler = new LogStreamHandler();
                 streamHandler.setFormatter(new LogFormatter(false));
@@ -314,24 +303,6 @@ public class Log extends Logger {
             }
         }
 
-    }
-
-    public void setWindowVisible(boolean isVisible) {
-        windowHandler.setVisible(isVisible);
-        isWindowVisible = isVisible;
-    }
-
-    public boolean isWindowVisible() {
-        return isWindowVisible;
-    }
-
-    public void setWindowTitle(final String title) {
-        Runnable updateWindowTitleRunnable = new Runnable() {
-            public void run() {
-                windowHandler.setWindowTitle(title);
-            }
-        };
-        SwingUtilities.invokeLater(updateWindowTitleRunnable);
     }
 
     public LogStreamHandler getStreamHandler() {
