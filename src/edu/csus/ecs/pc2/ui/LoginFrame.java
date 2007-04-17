@@ -301,6 +301,12 @@ public class LoginFrame extends JFrame implements UIPlugin {
         if (getLoginName() == null || getLoginName().length() < 1) {
             setStatusMessage("Please enter a login");
         } else {
+            
+            if (getLoginName().toLowerCase().startsWith("log")){
+                logWindow.setVisible(true);
+                return;
+            }
+            
             try {
                 setStatusMessage("Logging in...");
                 FrameUtilities.waitCursor(this);
