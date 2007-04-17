@@ -517,6 +517,7 @@ public class Model implements IModel {
             runFilesList = new RunFilesList(clientId.getSiteNumber());
             if (getContestTime() == null){
                 ContestTime contestTime = new ContestTime();
+                contestTime.setSiteNumber(getSiteNumber());
                 contestTime.startContestClock(); // TODO remove this start contest, eventually
                 addContestTime(contestTime);
             }
@@ -642,9 +643,9 @@ public class Model implements IModel {
 
     public ContestTime getContestTime(int inSiteNumber) {
         ContestTime contestTime2 = contestTimeList.get(inSiteNumber);
-        if (contestTime2 == null){
+        if (contestTime2 == null && inSiteNumber == getSiteNumber()){
             /**
-             * Insure that Contest Time is created.
+             * Insure that this Contest Time is created.
              */
             StaticLog.info("Warning getContestTime time for "+inSiteNumber+" does not exist, created it. ");
             contestTime2 = new ContestTime();
@@ -860,6 +861,11 @@ public class Model implements IModel {
     public Language getLanguage(ElementId elementId) {
         return (Language) languageList.get(elementId);
     }
+    
+    public ContestTime getContestTime (ElementId elementId) {
+        return (ContestTime) contestTimeList.get(elementId);
+    }
+
 
     public Problem getProblem(ElementId elementId) {
         return (Problem) problemList.get(elementId);

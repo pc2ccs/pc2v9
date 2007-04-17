@@ -382,4 +382,6 @@ public interface IModel {
     ContestTime[] getContestTimes();
 
     ConnectionHandlerID[] getConnectionHandleIDs();
+
+    ContestTime getContestTime(ElementId elementId);
 }
