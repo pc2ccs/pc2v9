@@ -1,7 +1,10 @@
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 
+import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
@@ -9,10 +12,10 @@ import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.log.MCLB;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.core.model.IModel;
 import edu.csus.ecs.pc2.core.model.Site;
-import javax.swing.JButton;
 
 /**
  * Contest Times Pane.
@@ -35,6 +38,10 @@ public class ContestTimesPane extends JPanePlugin {
     private MCLB contestTimeListBox = null;
 
     private JButton contestTimeRefreshButton = null;
+
+    private JButton startClockButton = null;
+
+    private JButton stopClockButton = null;
 
     /**
      * This method initializes
@@ -70,9 +77,14 @@ public class ContestTimesPane extends JPanePlugin {
      */
     private JPanel getContestTimeButtonPane() {
         if (contestTimeButtonPane == null) {
+            FlowLayout flowLayout = new FlowLayout();
+            flowLayout.setHgap(35);
             contestTimeButtonPane = new JPanel();
+            contestTimeButtonPane.setLayout(flowLayout);
             contestTimeButtonPane.setPreferredSize(new java.awt.Dimension(35, 35));
+            contestTimeButtonPane.add(getStartClockButton(), null);
             contestTimeButtonPane.add(getContestTimeRefreshButton(), null);
+            contestTimeButtonPane.add(getStopClockButton(), null);
         }
         return contestTimeButtonPane;
     }
@@ -119,6 +131,7 @@ public class ContestTimesPane extends JPanePlugin {
         Object[] c = new String[numberColumns];
 
         c[0] = "Site " + siteNumber;
+        c[1] = "NO CONTACT";
 
         if (contestTime != null) {
             if (contestTime.isContestRunning()) {
@@ -142,7 +155,9 @@ public class ContestTimesPane extends JPanePlugin {
 
         for (Site site : sites) {
             ContestTime contestTime = getModel().getContestTime(site.getSiteNumber());
-            addContestTimeRow(site.getSiteNumber(), contestTime);
+            if (contestTime != null) {
+                addContestTimeRow(site.getSiteNumber(), contestTime);
+            }
         }
     }
 
@@ -211,6 +226,79 @@ public class ContestTimesPane extends JPanePlugin {
             });
         }
         return contestTimeRefreshButton;
+    }
+
+    /**
+     * This method initializes startClockButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getStartClockButton() {
+        if (startClockButton == null) {
+            startClockButton = new JButton();
+            startClockButton.setText("Start");
+            startClockButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    startClockTimes();
+                }
+            });
+        }
+        return startClockButton;
+    }
+
+    protected void startClockTimes() {
+        int[] selectedSites = contestTimeListBox.getSelectedIndexes();
+        if (selectedSites.length == 0) {
+            JOptionPane.showMessageDialog(this, "No sites selected ");
+            return;
+        }
+        
+        for (int i = 0; i < selectedSites.length; i++) {
+            ElementId contestTimeElementId = (ElementId) contestTimeListBox.getKeys()[i];
+            ContestTime contestTime = getModel().getContestTime(contestTimeElementId);
+            if (contestTime != null){
+                getController().startContest(contestTime.getSiteNumber());
+            }
+        }
+
+    }
+
+    /**
+     * This method initializes stopClockButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getStopClockButton() {
+        if (stopClockButton == null) {
+            stopClockButton = new JButton();
+            stopClockButton.setText("Stop");
+            stopClockButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    stopClockTimes();
+                }
+            });
+        }
+        return stopClockButton;
+    }
+
+    protected void stopClockTimes() {
+
+        int[] selectedSites = contestTimeListBox.getSelectedIndexes();
+        if (selectedSites.length == 0) {
+            JOptionPane.showMessageDialog(this, "No sites selected ");
+            return;
+        }
+
+        for (int i = 0; i < selectedSites.length; i++) {
+            ElementId contestTimeElementId = (ElementId) contestTimeListBox.getKeys()[i];
+            ContestTime contestTime = getModel().getContestTime(contestTimeElementId);
+            if (contestTime != null){
+                getController().stopContest(contestTime.getSiteNumber());
+            }
+        }
+
+        // TODO Auto-generated method stub
+
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
