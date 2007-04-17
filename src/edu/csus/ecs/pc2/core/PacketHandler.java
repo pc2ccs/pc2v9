@@ -119,8 +119,11 @@ public final class PacketHandler {
             stopContest (contestTime, model, controller, contestTime.getSiteNumber(),  sourceServerId);
             
         } else if (packetType.equals(Type.ADD_SETTING)) {
-            addNewSetting (packet, model, controller);
-            
+            addNewSetting(packet, model, controller);
+
+        } else if (packetType.equals(Type.UPDATE_SETTING)) {
+            updateSetting(packet, model, controller);
+ 
         } else if (packetType.equals(Type.RUN_CHECKOUT)) {
             // Run from server to judge
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
@@ -205,6 +208,67 @@ public final class PacketHandler {
                 sendToJudgesAndOthers(model, controller, packet, false);
             }
         }
+        
+        Language language = (Language) PacketFactory.getObjectValue(packet, PacketFactory.LANGUAGE);
+        if (language != null){
+            model.addLanguage(language);
+            if (isServer(model.getClientId())){
+                sendToJudgesAndOthers(model, controller, packet, false);
+            }
+        }
+        
+        Problem problem = (Problem) PacketFactory.getObjectValue(packet, PacketFactory.PROBLEM);
+        if (problem != null){
+            model.addProblem(problem);
+            if (isServer(model.getClientId())){
+                sendToJudgesAndOthers(model, controller, packet, false);
+            }
+        }
+        
+        ContestTime contestTime = (ContestTime) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME);
+        if (contestTime != null){
+            model.addContestTime(contestTime);
+            if (isServer(model.getClientId())){
+                sendToJudgesAndOthers(model, controller, packet, false);
+            }
+        }
+        
+    }
+    
+    private static void updateSetting(Packet packet, IModel model, IController controller) {
+
+        Site site = (Site) PacketFactory.getObjectValue(packet, PacketFactory.SITE);
+        if (site != null) {
+            model.updateSite(site);
+            if (isServer(model.getClientId())) {
+                sendToJudgesAndOthers(model, controller, packet, false);
+            }
+        }
+
+        Language language = (Language) PacketFactory.getObjectValue(packet, PacketFactory.LANGUAGE);
+        if (language != null) {
+            model.updateLanguage(language);
+            if (isServer(model.getClientId())) {
+                sendToJudgesAndOthers(model, controller, packet, false);
+            }
+        }
+
+        Problem problem = (Problem) PacketFactory.getObjectValue(packet, PacketFactory.PROBLEM);
+        if (problem != null) {
+            model.updateProblem(problem);
+            if (isServer(model.getClientId())) {
+                sendToJudgesAndOthers(model, controller, packet, false);
+            }
+        }
+
+        ContestTime contestTime = (ContestTime) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME);
+        if (contestTime != null) {
+            model.updateContestTime(contestTime);
+            if (isServer(model.getClientId())) {
+                sendToJudgesAndOthers(model, controller, packet, false);
+            }
+        }
+
     }
 
     private static boolean isThisSite(IModel model, ISubmission submission) {
