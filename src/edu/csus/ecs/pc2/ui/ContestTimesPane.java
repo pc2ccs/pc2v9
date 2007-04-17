@@ -163,8 +163,10 @@ public class ContestTimesPane extends JPanePlugin {
 
     private void addContestTimeRow(int siteNumber, ContestTime contestTime) {
         Object[] objects = buildContestTimeRow(siteNumber, contestTime);
-        contestTimeListBox.addRow(objects, contestTime.getElementId());
-        contestTimeListBox.autoSizeAllColumns();
+        if (contestTime != null) {
+            contestTimeListBox.addRow(objects, contestTime.getElementId());
+            contestTimeListBox.autoSizeAllColumns();
+        }
     }
 
     public void setModelAndController(IModel inModel, IController inController) {
