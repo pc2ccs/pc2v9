@@ -498,7 +498,14 @@ public final class PacketHandler {
             ContestTime [] contestTimes = (ContestTime[]) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME_LIST);
             if (contestTimes != null) {
                 for (ContestTime contestTime : contestTimes) {
-                    model.addContestTime(contestTime);
+                    if (model.getSiteNumber() != contestTime.getSiteNumber()) {
+                        // Update other sites contestTime, do not touch ours.
+                        if (model.getContestTime(contestTime.getSiteNumber()) != null) {
+                            model.updateContestTime(contestTime);
+                        } else {
+                            model.addContestTime(contestTime);
+                        }
+                    }
                 }
             }
         } catch (Exception e) {
