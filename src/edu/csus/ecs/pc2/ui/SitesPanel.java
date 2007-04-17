@@ -438,6 +438,8 @@ public class SitesPanel extends JPanePlugin {
 
     public void setModelAndController(IModel inModel, IController inController) {
         super.setModelAndController(inModel, inController);
+        
+        getModel().addSiteListener(new SiteListenerImplementation());
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
