@@ -1198,4 +1198,44 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         return model.getClientId().getClientType().equals(ClientType.Type.SERVER);
     }
 
+    public void startContest(int inSiteNumber) {
+
+        if (isServer()) {
+
+            if (isThisSite(inSiteNumber)) {
+                model.startContest(inSiteNumber);
+
+                // send start to other sites
+                Packet stopContestTimePacket = PacketFactory.createContestStarted(getServerClientId(), PacketFactory.ALL_SERVERS, model.getContestTime());
+                PacketHandler.sendToJudgesAndOthers(model, this, stopContestTimePacket, true);
+            } else {
+                // TODO send to the other server
+                System.err.println("TODO startContest to other server "+inSiteNumber);
+            }
+
+        } else {
+            model.startContest(inSiteNumber);
+        }
+    }
+
+    public void stopContest(int inSiteNumber) {
+        
+        if (isServer()){
+            
+            if (isThisSite(inSiteNumber)){
+                model.stopContest(inSiteNumber);
+                
+                // send start to other sites
+                Packet startContestTimePacket = PacketFactory.createContestStopped(getServerClientId(), PacketFactory.ALL_SERVERS, model.getContestTime());
+                PacketHandler.sendToJudgesAndOthers(model, this, startContestTimePacket, true);
+            } else {
+                // TODO send to the other server
+                System.err.println("TODO stopContest to other server "+inSiteNumber);
+            }
+            
+        }else{
+            model.stopContest(remoteHostPort);
+        }
+    }
+
 }

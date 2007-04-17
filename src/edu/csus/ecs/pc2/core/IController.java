@@ -81,5 +81,9 @@ public interface IController {
     void sendServerLoginRequest(int siteNumber);
 
     void updateSite(Site newSite);
+
+    void startContest(int inSiteNumber);
+    
+    void stopContest(int inSiteNumber);
     
 }
