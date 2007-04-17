@@ -39,6 +39,8 @@ public interface IModel {
      * @param run
      */
     void updateRun(Run run);
+    
+    void updateSite (Site site);
 
     void updateLanguage(Language language);
 

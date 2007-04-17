@@ -386,6 +386,13 @@ public class Model implements IModel {
         fireSiteListener(siteEvent);
     }
     
+    public void updateSite (Site site){
+        siteList.add(site);
+        SiteEvent siteEvent = new SiteEvent(SiteEvent.Action.CHANGED, site);
+        fireSiteListener(siteEvent);
+        
+    }
+    
     public void addAccount(Account account) {
         accountList.add(account);
         AccountEvent accountEvent = new AccountEvent(AccountEvent.Action.ADDED,account);
