@@ -20,7 +20,9 @@ import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
+import edu.csus.ecs.pc2.ui.JPanePlugin;
 import edu.csus.ecs.pc2.ui.LogWindow;
+import edu.csus.ecs.pc2.ui.RunsPanel;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 import javax.swing.JCheckBox;
 
@@ -45,7 +47,7 @@ public class JudgeView extends JFrame implements UIPlugin {
 
     private JTabbedPane mainTabbedPane = null;
 
-    private JPanel allRunsPane = null;
+    private JPanel statusPane = null;
 
     private JScrollPane scrollPane = null;
 
@@ -127,7 +129,7 @@ public class JudgeView extends JFrame implements UIPlugin {
     private JTabbedPane getMainTabbedPane() {
         if (mainTabbedPane == null) {
             mainTabbedPane = new JTabbedPane();
-            mainTabbedPane.addTab("All Runs", null, getAllRunsPane(), null);
+            mainTabbedPane.addTab("debug", null, getStatusPane(), null);
             mainTabbedPane.addTab("Option", null, getJPanel(), null);
         }
         return mainTabbedPane;
@@ -138,15 +140,23 @@ public class JudgeView extends JFrame implements UIPlugin {
      * 
      * @return javax.swing.JPanel
      */
-    private JPanel getAllRunsPane() {
-        if (allRunsPane == null) {
-            allRunsPane = new JPanel();
-            allRunsPane.setLayout(new BorderLayout());
-            allRunsPane.add(getScrollPane(), java.awt.BorderLayout.NORTH);
-            allRunsPane.add(getRunListBox(), java.awt.BorderLayout.CENTER);
+    private JPanel getStatusPane() {
+        if (statusPane == null) {
+            statusPane = new JPanel();
+            statusPane.setLayout(new BorderLayout());
+            statusPane.add(getScrollPane(), java.awt.BorderLayout.NORTH);
+            statusPane.add(getRunListBox(), java.awt.BorderLayout.CENTER);
         }
-        return allRunsPane;
+        return statusPane;
     }
+    
+    protected void addUIPlugin(JTabbedPane tabbedPane, String tabTitle, JPanePlugin plugin) {
+
+        plugin.setModelAndController(model, controller);
+        tabbedPane.add(plugin, tabTitle);
+
+    }
+
 
     /**
      * This method initializes scrollPane
@@ -256,6 +266,9 @@ public class JudgeView extends JFrame implements UIPlugin {
         // model.addSiteListener(new SiteListenerImplementation());
 
         setFrameTitle(model.getContestTime().isContestRunning());
+        
+        RunsPanel runsPanel = new RunsPanel();
+        addUIPlugin(mainTabbedPane, "All Runs", runsPanel);
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
