@@ -15,7 +15,9 @@ import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.ISiteListener;
 import edu.csus.ecs.pc2.core.model.Site;
+import edu.csus.ecs.pc2.core.model.SiteEvent;
 
 /**
  * Contest Times Pane.
@@ -173,12 +175,56 @@ public class ContestTimesPane extends JPanePlugin {
         super.setModelAndController(inModel, inController);
 
         getModel().addContestTimeListener(new ContestTimeListenerImplementation());
+        
+        getModel().addSiteListener(new SiteListenerImplementation());
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 reloadListBox();
             }
         });
+    }
+
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     *
+     */
+    public class SiteListenerImplementation implements ISiteListener {
+        
+        protected void updateSiteInfo (int siteNumber){
+            ContestTime contestTime = getModel().getContestTime(siteNumber);
+            if (contestTime != null){
+                updateContestTimeRow(contestTime);
+            }
+            
+        }
+
+        public void siteAdded(SiteEvent event) {
+            int siteNumber = event.getSite().getSiteNumber();
+            updateSiteInfo(siteNumber);
+        }
+
+        public void siteRemoved(SiteEvent event) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public void siteChanged(SiteEvent event) {
+            int siteNumber = event.getSite().getSiteNumber();
+            updateSiteInfo(siteNumber);
+        }
+
+        public void siteLoggedOn(SiteEvent event) {
+            int siteNumber = event.getSite().getSiteNumber();
+            updateSiteInfo(siteNumber);
+        }
+
+        public void siteLoggedOff(SiteEvent event) {
+            int siteNumber = event.getSite().getSiteNumber();
+            updateSiteInfo(siteNumber);
+        }
+        
     }
 
     /**
