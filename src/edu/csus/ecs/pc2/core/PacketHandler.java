@@ -6,6 +6,7 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.ISubmission;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
@@ -106,7 +107,16 @@ public final class PacketHandler {
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
             ClientId whoCanceledId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
             cancelRun (run, model, controller, whoCanceledId);
-          
+
+        } else if (packetType.equals(Type.START_CONTEST_CLOCK)) {
+            ContestTime contestTime = (ContestTime) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME);
+            ClientId sourceServerId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+            startContest (contestTime, model, controller, contestTime.getSiteNumber(),  sourceServerId);
+
+        } else if (packetType.equals(Type.STOP_CONTEST_CLOCK)) {
+            ContestTime contestTime = (ContestTime) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME);
+            ClientId sourceServerId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+            stopContest (contestTime, model, controller, contestTime.getSiteNumber(),  sourceServerId);
             
         } else if (packetType.equals(Type.ADD_SETTING)) {
             addNewSetting (packet, model, controller);
@@ -151,6 +161,35 @@ public final class PacketHandler {
         }
     }
     
+    private static void startContest(ContestTime contestTime, IModel model, IController controller, int siteNumber, ClientId sourceServerId) {
+
+        if (model.getClientId().getClientType().equals(ClientType.Type.SERVER)){
+            
+            model.startContest(siteNumber);
+            
+            Packet startClockPacket = PacketFactory.createStartContestClock(sourceServerId, PacketFactory.ALL_SERVERS, contestTime);
+            sendToJudgesAndOthers(model, controller, startClockPacket, false);
+            
+        } else {
+            model.startContest(siteNumber);
+        }
+    }
+
+    private static void stopContest(ContestTime contestTime, IModel model, IController controller, int siteNumber, ClientId sourceServerId) {
+
+        if (model.getClientId().getClientType().equals(ClientType.Type.SERVER)){
+            
+            model.stopContest(siteNumber);
+            
+            Packet stopClockPacket = PacketFactory.createStopContestClock(sourceServerId, PacketFactory.ALL_SERVERS, contestTime);
+            sendToJudgesAndOthers(model, controller, stopClockPacket, false);
+            
+        } else {
+            model.stopContest(siteNumber);
+        }
+        
+    }
+
     /**
      * Add a new setting from another server.
      * @param packet
@@ -168,8 +207,8 @@ public final class PacketHandler {
         }
     }
 
-    private static boolean isThisSite(IModel model, Run run) {
-        return run.getSiteNumber() == model.getSiteNumber();
+    private static boolean isThisSite(IModel model, ISubmission submission) {
+        return submission.getSiteNumber() == model.getSiteNumber();
     }
 
     /**
@@ -184,7 +223,7 @@ public final class PacketHandler {
      * @param packet
      * @param sendToServers send To other server.
      */
-    private static void sendToJudgesAndOthers (IModel model, IController controller, Packet packet, boolean sendToServers) {
+    public static void sendToJudgesAndOthers (IModel model, IController controller, Packet packet, boolean sendToServers) {
         
         if (model.getClientId().getClientType().equals(ClientType.Type.SERVER)){
             // If I am a server
@@ -347,13 +386,15 @@ public final class PacketHandler {
      * @param packet
      * @param model
      */
-    private static void addRunsToModel (Packet packet, IModel model) {
+    private static void addRunsToModel(Packet packet, IModel model) {
 
         try {
-            Run [] runs = (Run[]) PacketFactory.getObjectValue(packet, PacketFactory.RUN_LIST);
+            Run[] runs = (Run[]) PacketFactory.getObjectValue(packet, PacketFactory.RUN_LIST);
             if (runs != null) {
                 for (Run run : runs) {
-                    model.addRun(run);
+                    if (!isThisSite(model, run)) {
+                        model.addRun(run);
+                    }
                 }
             }
         } catch (Exception e) {
@@ -369,13 +410,15 @@ public final class PacketHandler {
      * @param packet
      * @param model
      */
-    private static void addClarificationsToModel (Packet packet, IModel model) {
+    private static void addClarificationsToModel(Packet packet, IModel model) {
 
         try {
-            Clarification [] clarifications =(Clarification[]) PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION_LIST);
+            Clarification[] clarifications = (Clarification[]) PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION_LIST);
             if (clarifications != null) {
                 for (Clarification clarification : clarifications) {
-                    model.addClarification(clarification);
+                    if (!isThisSite(model, clarification)) {
+                        model.addClarification(clarification);
+                    }
                 }
             }
         } catch (Exception e) {
