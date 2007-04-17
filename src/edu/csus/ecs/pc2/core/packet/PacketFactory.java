@@ -572,14 +572,16 @@ public final class PacketFactory {
         return packet;
     }
 
-    /**
+    /** 
      * @param source
      * @param destination
      * @param siteNumber
      */
-    public static Packet createStartContestClock(ClientId source, ClientId destination, int siteNumber) {
+    public static Packet createStartContestClock(ClientId source, ClientId destination, ContestTime contestTime) {
         Properties prop = new Properties();
-        prop.put(SITE_NUMBER, new Integer(siteNumber));
+        prop.put(SITE_NUMBER, new Integer(contestTime.getSiteNumber()));
+        prop.put(CONTEST_TIME, contestTime);
+        prop.put(CLIENT_ID, source);
         Packet packet = new Packet(Type.START_CONTEST_CLOCK, source, destination, prop);
         return packet;
 
@@ -592,9 +594,11 @@ public final class PacketFactory {
      * @param destination
      * @param siteNumber
      */
-    public static Packet createStopContestClock(ClientId source, ClientId destination, int siteNumber) {
+    public static Packet createStopContestClock(ClientId source, ClientId destination, ContestTime contestTime) {
         Properties prop = new Properties();
-        prop.put(SITE_NUMBER, new Integer(siteNumber));
+        prop.put(SITE_NUMBER, new Integer(contestTime.getSiteNumber()));
+        prop.put(CONTEST_TIME, contestTime);
+        prop.put(CLIENT_ID, source);
         Packet packet = new Packet(Type.STOP_CONTEST_CLOCK, source, destination, prop);
         return packet;
     }
