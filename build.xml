@@ -148,7 +148,7 @@
         </fail>
     </target>
 
-    <target name="version" description="re-creates the VERSION file">
+    <target name="version" depends="init" description="re-creates the VERSION file">
         <delete file="${version.path}"/>
         <echo message="CSUS Programming Contest Control System${line.separator}" file="${version.path}"/>
         <echo message="Version ${version} ${date} ${repo.version} (${timestamp.english})${line.separator}" file="${version.path}" append="true"/>
