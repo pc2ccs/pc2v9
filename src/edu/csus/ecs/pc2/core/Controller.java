@@ -162,6 +162,12 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      */
     private LoginFrame loginUI;
     
+    /*
+     * Set to true when start() is called,
+     * checked by login().
+     */
+    private boolean isStarted = false;
+    
     public Controller(IModel model) {
         super();
         this.model = model;
@@ -316,6 +322,10 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      */
     public void login(String id, String password) {
 
+        if (!isStarted) {
+            // TODO review this message
+            throw new SecurityException("Invalid sequence, must call start(String[]) method before login(String, String).");
+        }
         try {
 
             ClientId clientId = loginShortcutExpansion(0, id);
@@ -999,6 +1009,8 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         log.info("Starting TransportManager...");
         transportManager = new TransportManager(log);
         log.info("Started TransportManager");
+        
+        isStarted = true;
         
         if (  ! parseArguments.isOptPresent(LOGIN_OPTION_STRING)){
 
