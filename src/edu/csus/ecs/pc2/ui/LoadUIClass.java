@@ -66,7 +66,7 @@ public final class LoadUIClass {
 
         Properties properties = new Properties();
         properties.put("administrator", PROJECT_PACKAGE_PATH + ".ui.admin.AdministratorView");
-        properties.put("board", PROJECT_PACKAGE_PATH + ".ui.board.ScoreboardView");
+        properties.put("scoreboard", PROJECT_PACKAGE_PATH + ".ui.board.ScoreboardView");
         properties.put("judge", PROJECT_PACKAGE_PATH + ".ui.judge.JudgeView");
         properties.put("server", PROJECT_PACKAGE_PATH + ".ui.server.ServerView");
         properties.put("team", PROJECT_PACKAGE_PATH + ".ui.team.TeamView");
