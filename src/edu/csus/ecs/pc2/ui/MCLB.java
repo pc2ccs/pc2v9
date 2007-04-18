@@ -1,4 +1,4 @@
-package edu.csus.ecs.pc2.core.log;
+package edu.csus.ecs.pc2.ui;
 
 import javax.swing.SwingUtilities;
 

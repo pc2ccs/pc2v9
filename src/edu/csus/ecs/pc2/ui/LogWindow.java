@@ -6,7 +6,6 @@ import javax.swing.SwingUtilities;
 import com.ibm.webrunner.j2mclb.util.TableModel;
 
 import edu.csus.ecs.pc2.core.log.IStreamListener;
-import edu.csus.ecs.pc2.core.log.MCLB;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 
 /**
