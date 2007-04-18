@@ -18,6 +18,7 @@ import edu.csus.ecs.pc2.ui.ClarificationsPane;
 import edu.csus.ecs.pc2.ui.ContestTimesPane;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.GenerateAccountsPane;
+import edu.csus.ecs.pc2.ui.InfoPane;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
 import edu.csus.ecs.pc2.ui.LanguagesPane;
 import edu.csus.ecs.pc2.ui.LogWindow;
@@ -114,6 +115,9 @@ public class AdministratorView extends JFrame implements UIPlugin {
                 
                 GenerateAccountsPane generateAccountsPane = new GenerateAccountsPane();
                 addUIPlugin(getMainTabbedPanel(), "Generate", generateAccountsPane);
+                
+                InfoPane infoPane = new InfoPane();
+                addUIPlugin(getMainTabbedPanel(), "Dev", infoPane);
                 
                 setTitle("PC^2 " + model.getTitle() + " Build " + new VersionInfo().getBuildNumber());
                 setVisible(true);
