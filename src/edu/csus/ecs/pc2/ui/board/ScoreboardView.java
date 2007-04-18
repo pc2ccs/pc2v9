@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.ui.board;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
+import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.model.IModel;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
@@ -69,7 +70,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
         this.model = inModel;
         this.controller = inController;
 
-        setTitle("PC^2 Scoreboard (Site " + model.getSiteNumber() + ")");
+        setTitle("PC^2 " + model.getTitle() + " Build " + new VersionInfo().getBuildNumber());
 
         setVisible(true);
     }
