@@ -2,15 +2,9 @@ package edu.csus.ecs.pc2.ui.server;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.Properties;
-import java.util.Vector;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -27,29 +21,20 @@ import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
-import edu.csus.ecs.pc2.core.list.ContestTimeComparator;
-import edu.csus.ecs.pc2.core.list.RunComparator;
-import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
-import edu.csus.ecs.pc2.core.model.Clarification;
-import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
-import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.ILoginListener;
 import edu.csus.ecs.pc2.core.model.IModel;
 import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.ISiteListener;
-import edu.csus.ecs.pc2.core.model.Language;
+import edu.csus.ecs.pc2.core.model.InternalDump;
 import edu.csus.ecs.pc2.core.model.LoginEvent;
-import edu.csus.ecs.pc2.core.model.Problem;
-import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.SiteEvent;
-import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.IntegerDocument;
 import edu.csus.ecs.pc2.ui.LogWindow;
@@ -673,144 +658,6 @@ public class ServerView extends JFrame implements UIPlugin {
     }
 
     /**
-     * Dump connection data
-     */
-    public String dumpContestData() {
-
-        try {
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM.dd.SSS");
-            // "yyMMdd HHmmss.SSS");
-            String filename = "dump" + simpleDateFormat.format(new Date()) + ".log";
-            PrintWriter log = new PrintWriter(new FileOutputStream(filename, false), true);
-
-            log.println(new VersionInfo().getSystemName());
-            log.println("Build " + new VersionInfo().getBuildNumber());
-            log.println(new VersionInfo().getSystemVersionInfo());
-            log.println("Date: " + new Date());
-
-            log.println();
-            log.println("-- Accounts --");
-            for (ClientType.Type ctype : ClientType.Type.values()) {
-                if (model.getAccounts(ctype).size() > 0) {
-                    log.println("Accounts " + ctype.toString() + " there are " + model.getAccounts(ctype).size());
-                    Vector<Account> accounts = model.getAccounts(ctype);
-                    for (int i = 0; i < accounts.size(); i++) {
-                        log.println("   " + accounts.elementAt(i));
-                    }
-                }
-
-            }
-
-            // Sites
-            log.println();
-            log.println("-- " + model.getSites().length + " sites --");
-            Site[] sites = model.getSites();
-            Arrays.sort(sites, new SiteComparatorBySiteNumber());
-            for (Site site1 : sites) {
-                String hostName = site1.getConnectionInfo().getProperty(Site.IP_KEY);
-                String portStr = site1.getConnectionInfo().getProperty(Site.PORT_KEY);
-
-                log.println("Site " + site1.getSiteNumber() + " " + hostName + ":" + portStr + " " + site1.getDisplayName() + "/" + site1.getPassword());
-            }
-
-            // Problem
-            log.println();
-            log.println("-- " + model.getProblems().length + " problems --");
-            for (Problem problem : model.getProblems()) {
-                log.println("  Problem " + problem);
-            }
-
-            // Language
-            log.println();
-            log.println("-- " + model.getLanguages().length + " languages --");
-            for (Language language : model.getLanguages()) {
-                log.println("  Language " + language);
-            }
-
-            // Runs
-            log.println();
-            Run[] runs = model.getRuns();
-            Arrays.sort(runs, new RunComparator());
-            log.println("-- " + runs.length + " runs --");
-            for (Run run : runs) {
-                log.println("  Run " + run);
-            }
-
-            // Clarifications
-            log.println();
-            Clarification [] clarifications = model.getClarifications();
-//            Arrays.sort(clarifications, new ClarifcationComparator());
-            log.println("-- " + clarifications.length + " clarifications --");
-            for (Clarification clarification : clarifications) {
-                log.println("  " + clarification);
-            }
-
-            // Contest Times
-            log.println();
-            ContestTime[] contestTimes = model.getContestTimes();
-            Arrays.sort(contestTimes, new ContestTimeComparator());
-            log.println("-- " + contestTimes.length + " Contest Times --");
-            for (ContestTime contestTime : contestTimes) {
-
-                if (model.getSiteNumber() == contestTime.getSiteNumber()) {
-                    log.print("  * ");
-                } else {
-                    log.print("    ");
-                }
-                String state = "STOPPED";
-                if (contestTime.isContestRunning()) {
-                    state = "STARTED";
-                }
-
-                log.println("  Site " + contestTime.getSiteNumber() + " " + state + " " + contestTime.getElapsedTimeStr() + " " + contestTime.getRemainingTimeStr() + " "
-                        + contestTime.getContestLengthStr());
-            }
-            
-            // Logins
-            log.println();
-            log.println("-- Logins -- ");
-            for (ClientType.Type ctype : ClientType.Type.values()) {
-
-                Enumeration<ClientId> enumeration = model.getLoggedInClients(ctype);
-                if (model.getLoggedInClients(ctype).hasMoreElements()) {
-                    log.println("Logged in " + ctype.toString());
-                    while (enumeration.hasMoreElements()) {
-                        ClientId aClientId = (ClientId) enumeration.nextElement();
-                        ConnectionHandlerID connectionHandlerID = model.getConnectionHandleID(aClientId);
-                        log.println("   " + aClientId+" on "+connectionHandlerID);
-                    }
-                }
-            }
-            
-            // Connections
-            log.println();
-            ConnectionHandlerID [] connectionHandlerIDs = model.getConnectionHandleIDs();
-//            Arrays.sort(connectionHandlerIDs, new ConnectionHanlderIDComparator());
-            log.println("-- " + connectionHandlerIDs.length + " Connections --");
-            for (ConnectionHandlerID connectionHandlerID : connectionHandlerIDs) {
-                log.println("  " + connectionHandlerID);
-            }
-
-            log.println();
-            log.println("*end*");
-
-            log.close();
-            log = null;
-
-            return filename;
-
-        } catch (Exception e) {
-            // TODO: log handle exception
-            // StaticLog.log("Exception logged ", e);
-            System.err.println("Exception " + e.getMessage());
-            e.printStackTrace();
-        }
-
-        return null;
-
-    }
-
-    /**
      * This method initializes buttonPane
      * 
      * @return javax.swing.JPanel
@@ -850,29 +697,10 @@ public class ServerView extends JFrame implements UIPlugin {
         return viewReportButton;
     }
 
-    /**
-     * Generate and view dump file.
-     * 
-     */
     protected void viewDumpFile() {
-        String dumpFileName = dumpContestData();
-        viewFile(dumpFileName);
-    }
-
-    /**
-     * view the input file
-     * 
-     * @param dumpFileName
-     */
-    protected void viewFile(String dumpFileName) {
-        String editorName = getEditorCommandTextField().getText();
-        String command = editorName + " " + dumpFileName;
-        try {
-            Runtime.getRuntime().exec(command);
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "Unable to run command " + command + " " + e.getMessage());
-            e.printStackTrace();
-        }
+        InternalDump internalDump = new InternalDump(model);
+        internalDump.setEditorNameFullPath(getEditorCommandTextField().getText());
+        internalDump.viewContestData();
     }
 
     /**
