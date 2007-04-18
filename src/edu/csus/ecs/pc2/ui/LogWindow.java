@@ -5,14 +5,15 @@ import javax.swing.SwingUtilities;
 
 import com.ibm.webrunner.j2mclb.util.TableModel;
 
+import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.log.IStreamListener;
-import edu.csus.ecs.pc2.core.log.StaticLog;
+import edu.csus.ecs.pc2.core.model.IModel;
 
 /**
  * This class is intended to register as a listener to the Log/LogWindowHandler and display the logs in a grid.
  * 
  */
-public class LogWindow extends JFrame {
+public class LogWindow extends JFrame implements UIPlugin {
 
     /**
      * 
@@ -22,6 +23,10 @@ public class LogWindow extends JFrame {
     private int maxLines = 400;
 
     private static MCLB logMessageListbox = null;
+
+    private IController controller;
+
+    private IModel model;
 
     public LogWindow() {
         super();
@@ -77,9 +82,7 @@ public class LogWindow extends JFrame {
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.add(getMCLB());
         centerFrameTopFullWidth(this);
-        // log.getStreamHandler().addStreamListener(new StreamListener());
-        StaticLog.getLog().getStreamHandler().addStreamListener(new StreamListener());
-    }
+   }
 
     /**
      * Center this frame on the screen.
@@ -163,6 +166,22 @@ public class LogWindow extends JFrame {
      */
     public void setMaxLines(int maxLines) {
         this.maxLines = maxLines;
+    }
+
+    public void setModelAndController(IModel inModel, IController inController) {
+       model = inModel;
+       controller = inController;
+       if (controller == null) {
+           System.err.println("controller is null");
+       }
+       if (controller.getLog() == null) {
+           System.err.println("controller.getLog() is null");
+       }
+       controller.getLog().getStreamHandler().addStreamListener(new StreamListener());
+    }
+
+    public String getPluginTitle() {
+        return getTitle();
     }
 
 }

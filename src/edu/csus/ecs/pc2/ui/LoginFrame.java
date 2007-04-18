@@ -99,10 +99,6 @@ public class LoginFrame extends JFrame implements UIPlugin {
         VersionInfo versionInfo = new VersionInfo();
         versionTitleLabel.setText("PC^2 version "+versionInfo.getVersionNumber()+" "+versionInfo.getBuildNumber());
  
-        // initialize logWindow so it can add itself as a listener and
-        // start populating the mclb
-        logWindow = new LogWindow();
-        // XXX showing the logWindow here causes awt deadlock on login
     }
 
     /**
@@ -417,6 +413,10 @@ public class LoginFrame extends JFrame implements UIPlugin {
     public void setModelAndController(IModel inModel, IController inController) {
         this.model = inModel;
         this.controller = inController;
+        // initialize logWindow so it can add itself as a listener and
+        // start populating the mclb
+        logWindow = new LogWindow();
+        logWindow.setModelAndController(model, controller);
         
         model.addLoginListener(new LoginListenerImplementation());
         
