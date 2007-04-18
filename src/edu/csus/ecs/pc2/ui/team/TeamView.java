@@ -19,6 +19,7 @@ import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
@@ -94,6 +95,8 @@ public class TeamView extends JFrame implements UIPlugin {
     
     private LogWindow logWindow = null;
 
+    private Log log = null;
+    
     /**
      * Nevermind this constructor, needed for VE and other reasons.
      * 
@@ -352,7 +355,7 @@ public class TeamView extends JFrame implements UIPlugin {
                 fileNameLabel.setText(filename);
             }
         } catch (Exception e) {
-            StaticLog.log("Exception logged ", e);
+            log.log(Log.WARNING, "Exception logged ", e);
         }
 
         try {
@@ -362,7 +365,7 @@ public class TeamView extends JFrame implements UIPlugin {
                 fileNameLabel.setText(filename);
             }
         } catch (Exception e) {
-            StaticLog.log("Exception logged ", e);
+            log.log(Log.WARNING, "Exception logged ", e);
         }
     }
 
@@ -573,7 +576,9 @@ public class TeamView extends JFrame implements UIPlugin {
     public void setModelAndController(IModel inModel, IController inController) {
         this.model = inModel;
         this.teamController = inController;
-
+        
+        this.log = teamController.getLog();
+        
         model.addRunListener(new RunListenerImplementation());
         model.addContestTimeListener(new ContestTimeListenerImplementation());
         model.addLanguageListener(new LanguageListenerImplementation());
