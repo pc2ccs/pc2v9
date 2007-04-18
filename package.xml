@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!-- $Id$ -->
 <!-- $HeadURL$ -->
-<project name="package-pc2v9" default="gzip" basedir=".">
+<project name="package-pc2v9" default="archives" basedir=".">
     <!-- import build.xml instead of duplicating properties -->
     <import file="build.xml"/>
 
@@ -19,9 +19,11 @@
     <property name="pc2jzip.name" value="pc2j-${version}.zip"/>
     <property name="pc2jzip.path" value="${build.dir}/${pc2jzip.name}"/>
     <property name="apizip.name" value="api-${version}.zip"/>
-    <property name="apizip.path" value="${build.dir}/${apizip.name}"/>
+    <property name="apizip.path" value="${dist.dir}/${apizip.name}"/>
 
     <target name="apizip" depends="javadocs" description="create zip of the javadocs">
+        <!-- in case we are run before jar -->
+        <mkdir dir="${dist.dir}" />
         <zip destfile="${apizip.path}">
             <zipfileset dir="${docs.dir}/api" filemode="644" prefix="${release}/docs/api"/>
         </zip>
@@ -132,5 +134,11 @@
         </tar>
         <checksum file="${gzip.path}" algorithm="MD5" fileext=".md5.txt"/>
         <checksum file="${gzip.path}" algorithm="SHA" fileext=".sha1.txt"/>
+    </target>
+    <target name="archives" description="public in dist, private in build">
+        <!-- start with api, only relies on the javadoc target -->
+        <antcall target="apizip"/> 
+        <antcall target="zip"/> 
+        <antcall target="gzip"/> 
     </target>
 </project>
