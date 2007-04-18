@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core;
 
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
@@ -85,5 +86,7 @@ public interface IController {
     void startContest(int inSiteNumber);
     
     void stopContest(int inSiteNumber);
+
+    Log getLog();
     
 }

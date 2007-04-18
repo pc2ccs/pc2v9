@@ -1250,4 +1250,8 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         }
     }
 
+    public final Log getLog() {
+        return log;
+    }
+
 }
