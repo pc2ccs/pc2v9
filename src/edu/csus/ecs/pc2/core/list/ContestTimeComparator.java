@@ -26,7 +26,7 @@ public class ContestTimeComparator implements Comparator<ContestTime>, Serializa
      * 
      * @param contestTime1
      * @param contestTime2
-     * @return
+     * @return a negative integer, zero, or a positive integer as the first argument is less than, equal to, or greater than the second.
      */
     public int compare(ContestTime contestTime1, ContestTime contestTime2) {
 

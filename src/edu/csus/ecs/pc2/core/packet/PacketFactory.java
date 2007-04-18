@@ -575,7 +575,7 @@ public final class PacketFactory {
     /** 
      * @param source
      * @param destination
-     * @param siteNumber
+     * @param contestTime
      */
     public static Packet createStartContestClock(ClientId source, ClientId destination, ContestTime contestTime) {
         Properties prop = new Properties();
@@ -592,7 +592,7 @@ public final class PacketFactory {
      * 
      * @param source
      * @param destination
-     * @param siteNumber
+     * @param contestTime
      */
     public static Packet createStopContestClock(ClientId source, ClientId destination, ContestTime contestTime) {
         Properties prop = new Properties();
