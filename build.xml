@@ -192,6 +192,6 @@
 
     <target name="javadocs" description="Creates javadocs">
         <mkdir dir="${docs.dir}/api" />
-        <javadoc sourcepath="${src.dir}" destdir="${docs.dir}/api" defaultexcludes="yes" packagenames="edu.csus.ecs.pc2.*" doctitle="PC^2 Version 9 Java Documentation" Use="yes" SplitIndex="yes" linkoffline="http://java.sun.com/j2se/1.5.0/docs/api/ ${api.url}"/>
+        <javadoc sourcepath="${src.dir}" destdir="${docs.dir}/api" defaultexcludes="yes" packagenames="edu.csus.ecs.pc2.*" doctitle="PC^2 Version 9 Java Documentation" Use="yes" SplitIndex="yes" linkoffline="http://java.sun.com/j2se/1.5.0/docs/api/ ${api.url}" classpathref="project.classpath"/>
     </target>
 </project>
