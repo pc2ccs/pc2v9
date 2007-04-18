@@ -14,7 +14,7 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
  * @author pc2@ecs.csus.edu
  * 
  */
-// $HeadURL: http://pc2.ecs.csus.edu/repos/pc2v9/trunk/src/edu/csus/ecs/pc2/ui/ClarificationsPane.java $
+// $HeadURL$
 public class ScoreboardView extends JFrame implements UIPlugin {
 
     /**
