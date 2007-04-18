@@ -69,7 +69,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
         this.model = inModel;
         this.controller = inController;
 
-        setTitle("PC^2 Server (Site " + model.getSiteNumber() + ")");
+        setTitle("PC^2 Scoreboard (Site " + model.getSiteNumber() + ")");
 
         setVisible(true);
     }
