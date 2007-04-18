@@ -17,6 +17,7 @@ import edu.csus.ecs.pc2.core.model.IModel;
 import edu.csus.ecs.pc2.ui.ClarificationsPane;
 import edu.csus.ecs.pc2.ui.ContestTimesPane;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
+import edu.csus.ecs.pc2.ui.GenerateAccountsPane;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
 import edu.csus.ecs.pc2.ui.LanguagesPane;
 import edu.csus.ecs.pc2.ui.LogWindow;
@@ -70,7 +71,7 @@ public class AdministratorView extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(562, 297));
+        this.setSize(new java.awt.Dimension(562,387));
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setContentPane(getJPanel());
         this.setTitle("PC^2 Administrator");
@@ -110,6 +111,9 @@ public class AdministratorView extends JFrame implements UIPlugin {
                 
                 ContestTimesPane contestTimesPane = new ContestTimesPane();
                 addUIPlugin(getMainTabbedPanel(), "Times", contestTimesPane);
+                
+                GenerateAccountsPane generateAccountsPane = new GenerateAccountsPane();
+                addUIPlugin(getMainTabbedPanel(), "Generate", generateAccountsPane);
                 
                 setTitle("PC^2 " + model.getTitle() + " Build " + new VersionInfo().getBuildNumber());
                 setVisible(true);

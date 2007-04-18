@@ -88,5 +88,25 @@ public interface IController {
     void stopContest(int inSiteNumber);
 
     Log getLog();
+
+    /**
+     * Generate new accounts on a server.
+     * 
+     * @param clientTypeName
+     * @param siteNumber site number to generate accounts.
+     * @param count
+     * @param startNumber
+     * @param active
+     */
+    void generateNewAccounts(String clientTypeName, int siteNumber, int count, int startNumber, boolean active);
+    
+    /**
+     * Generate new accounts for current site.
+     * @param clientTypeName
+     * @param count
+     * @param startNumber
+     * @param active
+     */
+    void generateNewAccounts(String clientTypeName, int count, int startNumber, boolean active);
     
 }

@@ -178,12 +178,12 @@ public class Model implements IModel {
         // Add root account 
         generateNewAccounts(ClientType.Type.ADMINISTRATOR.toString(), 1, true);
         
-        
-
         Site site = createFakeSite (1);
         site.setActive(true);
         siteList.add(site);
     }
+
+
 
     private Language createLanguageFromAutoFill(String key) {
         
@@ -444,12 +444,26 @@ public class Model implements IModel {
     }
 
 
-
+    /**
+     * Generate accounts.
+     * 
+     * @see edu.csus.ecs.pc2.core.model.IModel#generateNewAccounts(java.lang.String, int, int, boolean)
+     * @param clientTypeName
+     * @param count
+     * @param active
+     */
     public void generateNewAccounts(String clientTypeName, int count, boolean active) {
+        generateNewAccounts(clientTypeName, count, 1, active);
+    }
+
+    /**
+     * @see edu.csus.ecs.pc2.core.model.IModel#generateNewAccounts(java.lang.String, int, int, boolean)
+     */
+    public void generateNewAccounts(String clientTypeName, int count, int startNumber, boolean active) {
         ClientType.Type type = ClientType.Type.valueOf(clientTypeName.toUpperCase());
         int numberAccounts = accountList.getAccounts(type, siteNumber).size();
 
-        accountList.generateNewAccounts(type, count, PasswordType.JOE, siteNumber, active);
+        accountList.generateNewAccounts(type, count, startNumber, PasswordType.JOE, siteNumber, active);
 
         for (int i = 0; i < count; i++) {
             ClientId nextClientId = new ClientId(siteNumber, type, 1 + i + numberAccounts);
@@ -937,6 +951,5 @@ public class Model implements IModel {
         ConnectionEvent connectionEvent = new ConnectionEvent(ConnectionEvent.Action.DROPPED, connectionHandlerID);
         fireConnectionListener(connectionEvent);
     }
-
 
 }

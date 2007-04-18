@@ -1,6 +1,9 @@
 package edu.csus.ecs.pc2.core;
 
+import java.util.Vector;
+
 import edu.csus.ecs.pc2.core.log.StaticLog;
+import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
@@ -24,7 +27,7 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 /**
  * Process all incoming packets.
  * 
- * Process packets. In {@link #handlePacket(Packet, ConnectionHandlerID) handlePacket} a packet is unpacked, model is updated, and controller used to send packets as needed.
+ * Process packets. In {@link #handlePacket(IController, IModel, Packet, ConnectionHandlerID) handlePacket} a packet is unpacked, model is updated, and controller used to send packets as needed.
  * 
  * @author pc2@ecs.csus.edu
  */
@@ -122,6 +125,9 @@ public class PacketHandler {
 
         } else if (packetType.equals(Type.ADD_SETTING)) {
             addNewSetting(packet);
+            
+        } else if (packetType.equals(Type.GENERATE_ACCOUNTS)) {
+            generateAccounts (packet);
 
         } else if (packetType.equals(Type.UPDATE_SETTING)) {
             updateSetting(packet);
@@ -165,6 +171,35 @@ public class PacketHandler {
         }
     }
 
+    private void generateAccounts(Packet packet) {
+        
+        ClientType.Type type = (ClientType.Type) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_TYPE);
+        Integer siteNumber = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
+        Integer count = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.COUNT);
+        Integer startCount = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.START_COUNT);
+        Boolean active = (Boolean) PacketFactory.getObjectValue(packet, PacketFactory.CREATE_ACCOUNT_ACTIVE);
+        
+        if (isServer()){
+            
+            if (isThisSite(siteNumber)){
+                
+                model.generateNewAccounts(type.toString(),count.intValue(), startCount.intValue(), active);
+                Vector <Account> accountVector = model.getAccounts(type, siteNumber);
+                Account [] accounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
+                Packet newAccountsPacket = PacketFactory.createAddSetting(model.getClientId(), PacketFactory.ALL_SERVERS, accounts);
+                sendToJudgesAndOthers(newAccountsPacket, true);
+                
+            } else {
+                
+                // TODO: send run request to other server
+                info(" send generate account to other server " + model.getClientId());
+            }
+            
+        } else {
+            throw new SecurityException("Client "+model.getClientId()+" was send generate account packet "+packet);
+        }
+    }
+
     private void startContest(ContestTime contestTime, int siteNumber, ClientId sourceServerId) {
 
         if (model.getClientId().getClientType().equals(ClientType.Type.SERVER)) {
@@ -204,7 +239,7 @@ public class PacketHandler {
         Site site = (Site) PacketFactory.getObjectValue(packet, PacketFactory.SITE);
         if (site != null) {
             model.addSite(site);
-            if (isServer(model.getClientId())) {
+            if (isServer()) {
                 sendToJudgesAndOthers( packet, false);
             }
         }
@@ -212,7 +247,7 @@ public class PacketHandler {
         Language language = (Language) PacketFactory.getObjectValue(packet, PacketFactory.LANGUAGE);
         if (language != null) {
             model.addLanguage(language);
-            if (isServer(model.getClientId())) {
+            if (isServer()) {
                 sendToJudgesAndOthers( packet, false);
             }
         }
@@ -220,7 +255,7 @@ public class PacketHandler {
         Problem problem = (Problem) PacketFactory.getObjectValue(packet, PacketFactory.PROBLEM);
         if (problem != null) {
             model.addProblem(problem);
-            if (isServer(model.getClientId())) {
+            if (isServer()) {
                 sendToJudgesAndOthers( packet, false);
             }
         }
@@ -228,10 +263,27 @@ public class PacketHandler {
         ContestTime contestTime = (ContestTime) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME);
         if (contestTime != null) {
             model.addContestTime(contestTime);
-            if (isServer(model.getClientId())) {
+            if (isServer()) {
                 sendToJudgesAndOthers( packet, false);
             }
         }
+
+        Account [] accounts = (Account []) PacketFactory.getObjectValue(packet, PacketFactory.ACCOUNT_ARRAY);
+        if (accounts != null) {
+            for (Account account : accounts) {
+                if (model.getAccount(account.getClientId()) == null) {
+                    model.addAccount(account);
+                }
+            }
+            if (isServer()) {
+                sendToJudgesAndOthers(packet, false);
+            }
+        }
+
+        
+        
+        
+        
 
     }
 
@@ -240,7 +292,7 @@ public class PacketHandler {
         Site site = (Site) PacketFactory.getObjectValue(packet, PacketFactory.SITE);
         if (site != null) {
             model.updateSite(site);
-            if (isServer(model.getClientId())) {
+            if (isServer()) {
                 sendToJudgesAndOthers( packet, false);
             }
         }
@@ -248,7 +300,7 @@ public class PacketHandler {
         Language language = (Language) PacketFactory.getObjectValue(packet, PacketFactory.LANGUAGE);
         if (language != null) {
             model.updateLanguage(language);
-            if (isServer(model.getClientId())) {
+            if (isServer()) {
                 sendToJudgesAndOthers( packet, false);
             }
         }
@@ -256,7 +308,7 @@ public class PacketHandler {
         Problem problem = (Problem) PacketFactory.getObjectValue(packet, PacketFactory.PROBLEM);
         if (problem != null) {
             model.updateProblem(problem);
-            if (isServer(model.getClientId())) {
+            if (isServer()) {
                 sendToJudgesAndOthers( packet, false);
             }
         }
@@ -264,11 +316,15 @@ public class PacketHandler {
         ContestTime contestTime = (ContestTime) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME);
         if (contestTime != null) {
             model.updateContestTime(contestTime);
-            if (isServer(model.getClientId())) {
+            if (isServer()) {
                 sendToJudgesAndOthers( packet, false);
             }
         }
 
+    }
+    
+    private boolean isThisSite(int siteNumber) {
+        return siteNumber == model.getSiteNumber();
     }
 
     private boolean isThisSite(ISubmission submission) {
@@ -318,7 +374,7 @@ public class PacketHandler {
 
     private void cancelRun(Run run, ClientId whoCanceledRun) {
 
-        if (isServer(model.getClientId())) {
+        if (isServer()) {
 
             if (!isThisSite(run)) {
 
@@ -346,7 +402,7 @@ public class PacketHandler {
 
     private void judgeRun(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles, ClientId whoJudgedId) {
 
-        if (isServer(model.getClientId())) {
+        if (isServer()) {
 
             if (!isThisSite(run)) {
 
@@ -393,7 +449,7 @@ public class PacketHandler {
      */
     private void requestRun(Run run, ClientId whoRequestsRunId) {
 
-        if (isServer(model.getClientId())) {
+        if (isServer()) {
 
             if (!isThisSite(run)) {
 
@@ -656,8 +712,21 @@ public class PacketHandler {
 
     }
 
+    /**
+     * Is the input ClientId a server. 
+     * @param id
+     * @return
+     */
     private boolean isServer(ClientId id) {
         return id.getClientType().equals(ClientType.Type.SERVER);
+    }
+    
+    /**
+     * Is this client a server.
+     * @return true if is a server.
+     */
+    private boolean isServer(){
+        return isServer(model.getClientId());
     }
 
     /**

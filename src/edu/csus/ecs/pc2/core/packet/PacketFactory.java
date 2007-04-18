@@ -103,6 +103,14 @@ public final class PacketFactory {
 
     public static final String COUNT = "COUNT";
 
+    /**
+     * Used as a start count for generating accounts.
+     * 
+     * If start count is 0, will add accounts after max account number. <br>
+     * If start count is 100, will add accounts after max account number >= 100.
+     */
+    public static final String START_COUNT = "START_COUNT";
+
     public static final String CREATE_ACCOUNT_ACTIVE = "CREATE_ACCOUNT_ACTIVE";
 
     public static final String ELAPSED_TIME = "ELAPSED_TIME";
@@ -907,15 +915,19 @@ public final class PacketFactory {
      * @param source
      * @param destination
      * @param type
-     * @param count
+     * @param startNumber - a requested start client number
+     * @param count - number of accounts to add
      * @param isActive
+     * @return
      */
-    public static Packet createAddSetting(ClientId source, ClientId destination, ClientType.Type type, int count, boolean isActive) {
+    public static Packet createGenerateAccounts(ClientId source, ClientId destination, int siteNumber, ClientType.Type type, int startNumber, int count, boolean isActive) {
         Properties prop = new Properties();
         prop.put(CLIENT_TYPE, type);
+        prop.put(SITE_NUMBER, new Integer(siteNumber));
         prop.put(COUNT, new Integer(count));
+        prop.put(START_COUNT, new Integer(startNumber));
         prop.put(CREATE_ACCOUNT_ACTIVE, new Boolean(isActive));
-        Packet packet = new Packet(Type.ADD_SETTING, source, destination, prop);
+        Packet packet = new Packet(Type.GENERATE_ACCOUNTS, source, destination, prop);
         return packet;
     }
 
@@ -1361,6 +1373,14 @@ public final class PacketFactory {
         prop.put(PASSWORD, password);
         prop.put(SEND_SETTINGS, new Boolean(sendSettings));
         return createPacket(PacketType.Type.LOGIN_REQUEST, source, destination, prop);
+    }
+
+    public static Packet createAddSetting(ClientId source, ClientId destination, Account[] accounts) {
+        Properties prop = new Properties();
+        prop.put(CLIENT_ID, source);
+        prop.put(SITE_NUMBER, source.getSiteNumber());
+        prop.put(ACCOUNT_ARRAY, accounts);
+        return createPacket(PacketType.Type.ADD_SETTING, source, destination, prop);
     }
 
 }

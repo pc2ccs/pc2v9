@@ -107,18 +107,30 @@ public interface IModel {
     /**
      * Add new accounts.
      * 
+     * @see AccountList#generateNewAccounts(Type, int, int, PasswordType, int, boolean)
      * @param clientTypeName
      *            name of client type, "team", "judge", etc.
      * @param count
      *            number of accounts to add
      * @param active
      *            set to True if the accounts are active
+     *            
      */
     void generateNewAccounts(String clientTypeName, int count, boolean active);
 
     /**
+     * Add new accounts, client number starting at startNumber.
+     * @param clientTypeName
+     * @param count
+     * @param startNumber
+     * @param active
+     */
+    void generateNewAccounts(String clientTypeName, int count, int startNumber, boolean active);
+
+    /**
      * Add new sites.
      * 
+     * @see AccountList#generateNewAccounts(Type, int, int, PasswordType, int, boolean)
      * @param count
      * @param active
      */
@@ -386,4 +398,6 @@ public interface IModel {
     ConnectionHandlerID[] getConnectionHandleIDs();
 
     ContestTime getContestTime(ElementId elementId);
+
+
 }

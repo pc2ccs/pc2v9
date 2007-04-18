@@ -53,24 +53,67 @@ public class AccountList extends BaseElementList {
     }
 
     /**
-     * Generate/add new accounts.
+     * Generate accounts, start a client number 1.
+     * @param type
+     * @param count
+     * @param passwordType
+     * @param siteNumber
+     * @param isActive
+     */
+    public void generateNewAccounts(Type type, int count, PasswordType passwordType, int siteNumber, boolean isActive) {
+        generateNewAccounts(type, count, 1, passwordType, siteNumber, isActive);
+    }
+
+    /**
+     * Generate accounts, start client number at startNumber.
      * 
      * @param type
      * @param count
      * @param passwordType
      * @param siteNumber
      */
-    public void generateNewAccounts(Type type, int count, PasswordType passwordType, int siteNumber, boolean isActive) {
-        Vector accounts = getAccounts(type, siteNumber);
-        int total = accounts.size();
+    public void generateNewAccounts(Type type, int count, int startNumber, PasswordType passwordType, int siteNumber, boolean isActive) {
+        Vector <Account> accounts = getAccounts(type, siteNumber);
+
+        int offset = findNextAccountNumberToCreate(accounts, startNumber);
 
         for (int i = 0; i < count; i++) {
-            ClientId clientId = new ClientId(siteNumber, type, i + total + 1);
+            
+            /**
+             * Since the account can start at startNumber, we need to check
+             * that the accounts do not exist before we add them.
+             */
+            
+            ClientId clientId = new ClientId(siteNumber, type, i + offset + 1);
+            while (getAccount(clientId) != null){
+                offset ++;  // skip past existing accounts 
+                clientId = new ClientId(siteNumber, type, i + offset + 1);
+            }
+            
             String newPassword = generatePassword(passwordType, clientId);
             Account account = new Account(clientId, newPassword, siteNumber);
             account.setActive(isActive);
             super.add(account);
         }
+    }
+
+    /**
+     * Returns the next client number to be created.
+     * @param accounts
+     * @param startNumber next number is greater than or equal to this number.
+     * @return
+     */
+    private int findNextAccountNumberToCreate (Vector<Account> accounts, int startNumber) {
+        int nextId = startNumber - 1;
+
+        for (int i = 0; i < accounts.size(); i++) {
+            int clientNumber = accounts.elementAt(i).getClientId().getClientNumber();
+            if (clientNumber > nextId) {
+                nextId = clientNumber;
+            }
+        }
+
+        return nextId;
     }
 
     /**

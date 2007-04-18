@@ -488,6 +488,10 @@ public final class PacketType implements Serializable {
          */
         ADD_SETTING,
         /**
+         * Generate Accounts. 
+         */
+        GENERATE_ACCOUNTS,
+        /**
          * Stop Context Clock. Admin to Server. Containts: SITE_NUMBER
          */
         START_CONTEST_CLOCK,

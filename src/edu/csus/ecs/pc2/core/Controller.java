@@ -53,7 +53,7 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
  * Check out run
  * <ol>
  * <li> Judge: {@link #checkOutRun(Run)}
- * <li> Server: {@link edu.csus.ecs.pc2.core.PacketHandler#requestRun(Run, ClientId)}
+ * <li> Server: {@link edu.csus.ecs.pc2.core.PacketHandler#requestRun(Run, IModel, IController, ClientId)}
  * <li> Judge and clients: {@link edu.csus.ecs.pc2.core.model.IRunListener#runChanged(RunEvent)}, check
  * {@link edu.csus.ecs.pc2.core.model.RunEvent#getSentToClientId()} to learn if you are the judge/client to get the run. RunEvent
  * action is: {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#CHECKEDOUT_RUN}
@@ -62,7 +62,7 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
  * <ol>
  * <li> Judge: {@link #submitRunJudgement(Run, JudgementRecord, RunResultFiles)}
  * <li> Server:
- * {@link edu.csus.ecs.pc2.core.PacketHandler#judgeRun(Run, JudgementRecord, RunResultFiles, ClientId)}
+ * {@link edu.csus.ecs.pc2.core.PacketHandler#judgeRun(Run, IModel, IController, JudgementRecord, RunResultFiles, ClientId)}
  * <li> Team: {@link edu.csus.ecs.pc2.core.model.IRunListener#runChanged(RunEvent)} if {@link Run#isSendToTeams()} set true.
  * RunEvent action is: {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#CHANGED}
  * <li> Clients: {@link edu.csus.ecs.pc2.core.model.IRunListener#runChanged(RunEvent)} RunEvent action is:
@@ -71,7 +71,7 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
  * Cancel Run
  * <ol>
  * <li> Judge: {@link #cancelRun(Run)}
- * <li> Server: {@link edu.csus.ecs.pc2.core.PacketHandler#cancelRun(Run, ClientId)}
+ * <li> Server: {@link edu.csus.ecs.pc2.core.PacketHandler#cancelRun(Run, IModel, IController, ClientId)}
  * <li> Team: n/a
  * <li> Judge/Clients: {@link edu.csus.ecs.pc2.core.model.IRunListener#runChanged(RunEvent)}. RunEvent action is:
  * {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#RUN_AVIALABLE}
@@ -1267,6 +1267,17 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
     public final Log getLog() {
         return log;
+    }
+
+    public void generateNewAccounts(String clientTypeName, int siteNumber, int count, int startNumber, boolean active) {
+        ClientType.Type type = ClientType.Type.valueOf(clientTypeName);
+        Packet packet = PacketFactory.createGenerateAccounts(getServerClientId(), model.getClientId(), siteNumber, type, startNumber, count, active);
+        sendToServer(packet);
+    }
+
+    public void generateNewAccounts(String clientTypeName, int count, int startNumber, boolean active) {
+        generateNewAccounts(clientTypeName, model.getSiteNumber(), count, startNumber, active);
+        
     }
 
 }
