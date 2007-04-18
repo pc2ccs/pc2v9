@@ -108,8 +108,6 @@ public class Log extends Logger {
 
     private LogStreamHandler streamHandler = null;
     
-    private boolean isWindowVisible = false;
-
     /**
      * Start log to ?? // TODO what does this do? .
      *
