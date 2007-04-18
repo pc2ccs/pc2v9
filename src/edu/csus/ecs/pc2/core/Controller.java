@@ -295,6 +295,18 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         } else if (loginName.startsWith("administrator") && loginName.length() > 13) {
             int number = getIntegerValue(loginName.substring(13));
             return new ClientId(defaultSiteNumber, Type.ADMINISTRATOR, number);
+        } else if (loginName.startsWith("scoreboard") && loginName.length() > 10) {
+            int number = getIntegerValue(loginName.substring(10));
+            return new ClientId(defaultSiteNumber, Type.SCOREBOARD, number);
+        } else if (loginName.startsWith("board") && loginName.length() > 5) {
+            int number = getIntegerValue(loginName.substring(5));
+            return new ClientId(defaultSiteNumber, Type.SCOREBOARD, number);
+        } else if (loginName.startsWith("b") && loginName.length() > 1) {
+            int number = getIntegerValue(loginName.substring(1));
+            return new ClientId(defaultSiteNumber, Type.SCOREBOARD, number);
+        } else if (loginName.startsWith("a") && loginName.length() > 1) {
+            int number = getIntegerValue(loginName.substring(1));
+            return new ClientId(defaultSiteNumber, Type.ADMINISTRATOR, number);
         } else if (loginName.startsWith("j") && loginName.length() > 1) {
             int number = getIntegerValue(loginName.substring(1));
             return new ClientId(defaultSiteNumber, Type.JUDGE, number);
