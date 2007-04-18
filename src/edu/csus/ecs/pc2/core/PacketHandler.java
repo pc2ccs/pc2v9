@@ -24,44 +24,46 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 /**
  * Process all incoming packets.
  * 
- * Process packets. In {@link #handlePacket(IController, IModel, Packet, ConnectionHandlerID) handlePacket} a packet is unpacked, model is updated, and
- * controller used to send packets as needed.
+ * Process packets. In {@link #handlePacket(IController, IModel, Packet, ConnectionHandlerID) handlePacket} a packet is unpacked, model is updated, and controller used to send packets as needed.
  * 
  * @author pc2@ecs.csus.edu
  */
 
 // $HeadURL$
-public final class PacketHandler {
+public class PacketHandler {
 
-    private PacketHandler() {
+    private IModel model;
 
+    private IController controller;
+
+    public PacketHandler(IController controller, IModel model) {
+        this.controller = controller;
+        this.model = model;
     }
 
     /**
      * Take each input packet, update the model, send out packets as needed.
      * 
-     * @param controller
-     * @param model
      * @param packet
-     * @param connectionHandlerID 
+     * @param connectionHandlerID
      */
-    public static void handlePacket(IController controller, IModel model, Packet packet, ConnectionHandlerID connectionHandlerID) {
+    public void handlePacket(Packet packet, ConnectionHandlerID connectionHandlerID) {
 
         Type packetType = packet.getType();
 
         info("handlePacket " + packet);
         PacketFactory.dumpPacket(System.err, packet);
-        
+
         ClientId fromId = packet.getSourceId();
 
         if (packetType.equals(Type.MESSAGE)) {
             PacketFactory.dumpPacket(System.err, packet);
-            
+
         } else if (packetType.equals(Type.RUN_SUBMISSION_CONFIRM)) {
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
             model.addRun(run);
-            sendToJudgesAndOthers (model, controller, packet, isThisSite(model, run));
-            
+            sendToJudgesAndOthers( packet, isThisSite(run));
+
         } else if (packetType.equals(Type.RUN_SUBMISSION)) {
             // RUN submitted by team to server
 
@@ -72,176 +74,174 @@ public final class PacketHandler {
             // Send to team
             Packet confirmPacket = PacketFactory.createRunSubmissionConfirm(model.getClientId(), fromId, run);
             controller.sendToClient(confirmPacket);
-            
+
             // Send to clients and servers
-            sendToJudgesAndOthers(model, controller, confirmPacket, true);
+            sendToJudgesAndOthers( confirmPacket, true);
 
         } else if (packetType.equals(Type.LOGIN_FAILED)) {
             String message = PacketFactory.getStringValue(packet, PacketFactory.MESSAGE_STRING);
             model.loginDenied(packet.getDestinationId(), connectionHandlerID, message);
-            
+
         } else if (packetType.equals(Type.RUN_NOTAVAILABLE)) {
             // Run not available from server
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
             model.runNotAvailable(run);
-            
-            sendToJudgesAndOthers(model, controller, packet, isThisSite(model, run));
-            
+
+            sendToJudgesAndOthers( packet, isThisSite(run));
+
         } else if (packetType.equals(Type.RUN_AVAILABLE)) {
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
-            model.availableRun (run);
-            
-            sendToJudgesAndOthers(model, controller, packet, isThisSite(model,run));
-            
+            model.availableRun(run);
+
+            sendToJudgesAndOthers( packet, isThisSite(run));
+
         } else if (packetType.equals(Type.RUN_JUDGEMENT)) {
             // Judgement from judge to server
             // TODO security code insure that this judge/admin can make this change
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
             JudgementRecord judgementRecord = (JudgementRecord) PacketFactory.getObjectValue(packet, PacketFactory.JUDGEMENT_RECORD);
             RunResultFiles runResultFiles = (RunResultFiles) PacketFactory.getObjectValue(packet, PacketFactory.RUN_RESULTS_FILE);
-            ClientId whoJudgedRunId  = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-            judgeRun(run, model,controller,judgementRecord,runResultFiles, whoJudgedRunId);
+            ClientId whoJudgedRunId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+            judgeRun(run,  judgementRecord, runResultFiles, whoJudgedRunId);
 
         } else if (packetType.equals(Type.RUN_UNCHECKOUT)) {
             // Cancel run from requestor to server
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
             ClientId whoCanceledId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-            cancelRun (run, model, controller, whoCanceledId);
+            cancelRun(run,  whoCanceledId);
 
         } else if (packetType.equals(Type.START_CONTEST_CLOCK)) {
             ContestTime contestTime = (ContestTime) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME);
             ClientId sourceServerId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-            startContest (contestTime, model, controller, contestTime.getSiteNumber(),  sourceServerId);
+            startContest(contestTime,  contestTime.getSiteNumber(), sourceServerId);
 
         } else if (packetType.equals(Type.STOP_CONTEST_CLOCK)) {
             ContestTime contestTime = (ContestTime) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME);
             ClientId sourceServerId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-            stopContest (contestTime, model, controller, contestTime.getSiteNumber(),  sourceServerId);
-            
+            stopContest(contestTime,  contestTime.getSiteNumber(), sourceServerId);
+
         } else if (packetType.equals(Type.ADD_SETTING)) {
-            addNewSetting(packet, model, controller);
+            addNewSetting(packet);
 
         } else if (packetType.equals(Type.UPDATE_SETTING)) {
-            updateSetting(packet, model, controller);
- 
+            updateSetting(packet);
+
         } else if (packetType.equals(Type.RUN_CHECKOUT)) {
             // Run from server to judge
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
             RunFiles runFiles = (RunFiles) PacketFactory.getObjectValue(packet, PacketFactory.RUN_FILES);
             ClientId whoCheckedOut = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-            checkedOutRun (model, controller, run, runFiles, whoCheckedOut);
-            
-            sendToJudgesAndOthers(model, controller, packet, false);
-            
+            checkedOutRun( run, runFiles, whoCheckedOut);
+
+            sendToJudgesAndOthers( packet, false);
+
         } else if (packetType.equals(Type.RUN_REQUEST)) {
             // Request Run from requestor to server
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
             ClientId requestFromId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-            requestRun (run, model, controller, requestFromId);
-            
+            requestRun(run,  requestFromId);
+
         } else if (packetType.equals(Type.LOGIN_SUCCESS)) {
 
             if (isServer(packet.getDestinationId())) {
                 /**
-                 * Add the originating server into login list, if
-                 * this client is a server.
+                 * Add the originating server into login list, if this client is a server.
                  */
                 model.addLogin(fromId, connectionHandlerID);
             }
-            
-            if (! model.isLoggedIn()){
+
+            if (!model.isLoggedIn()) {
                 info(" handlePacket original LOGIN_SUCCESS before ");
-                loadDataIntoModel(packet, controller, model, connectionHandlerID);
-                info(" handlePacket original LOGIN_SUCCESS after -- all settings loaded "); 
+                loadDataIntoModel(packet, connectionHandlerID);
+                info(" handlePacket original LOGIN_SUCCESS after -- all settings loaded ");
             } else {
-                info(" handlePacket LOGIN_SUCCESS - from another site, no update of contest data: "+packet);
+                info(" handlePacket LOGIN_SUCCESS - from another site, no update of contest data: " + packet);
             }
 
         } else {
 
             Exception exception = new Exception("PacketHandler.handlePacket Unhandled packet " + packet);
-            StaticLog.unclassified("Unhandled Packet ",exception);
+            StaticLog.unclassified("Unhandled Packet ", exception);
         }
     }
-    
-    private static void startContest(ContestTime contestTime, IModel model, IController controller, int siteNumber, ClientId sourceServerId) {
 
-        if (model.getClientId().getClientType().equals(ClientType.Type.SERVER)){
-            
+    private void startContest(ContestTime contestTime, int siteNumber, ClientId sourceServerId) {
+
+        if (model.getClientId().getClientType().equals(ClientType.Type.SERVER)) {
+
             model.startContest(siteNumber);
-            
+
             Packet startClockPacket = PacketFactory.createStartContestClock(sourceServerId, PacketFactory.ALL_SERVERS, contestTime);
-            sendToJudgesAndOthers(model, controller, startClockPacket, false);
-            
+            sendToJudgesAndOthers( startClockPacket, false);
+
         } else {
             model.startContest(siteNumber);
         }
     }
 
-    private static void stopContest(ContestTime contestTime, IModel model, IController controller, int siteNumber, ClientId sourceServerId) {
+    private void stopContest(ContestTime contestTime, int siteNumber, ClientId sourceServerId) {
 
-        if (model.getClientId().getClientType().equals(ClientType.Type.SERVER)){
-            
+        if (model.getClientId().getClientType().equals(ClientType.Type.SERVER)) {
+
             model.stopContest(siteNumber);
-            
+
             Packet stopClockPacket = PacketFactory.createStopContestClock(sourceServerId, PacketFactory.ALL_SERVERS, contestTime);
-            sendToJudgesAndOthers(model, controller, stopClockPacket, false);
-            
+            sendToJudgesAndOthers( stopClockPacket, false);
+
         } else {
             model.stopContest(siteNumber);
         }
-        
+
     }
 
     /**
      * Add a new setting from another server.
+     * 
      * @param packet
-     * @param model
-     * @param controller
      */
-    private static void addNewSetting(Packet packet, IModel model, IController controller) {
-        
+    private void addNewSetting(Packet packet) {
+
         Site site = (Site) PacketFactory.getObjectValue(packet, PacketFactory.SITE);
-        if (site != null){
+        if (site != null) {
             model.addSite(site);
-            if (isServer(model.getClientId())){
-                sendToJudgesAndOthers(model, controller, packet, false);
+            if (isServer(model.getClientId())) {
+                sendToJudgesAndOthers( packet, false);
             }
         }
-        
+
         Language language = (Language) PacketFactory.getObjectValue(packet, PacketFactory.LANGUAGE);
-        if (language != null){
+        if (language != null) {
             model.addLanguage(language);
-            if (isServer(model.getClientId())){
-                sendToJudgesAndOthers(model, controller, packet, false);
+            if (isServer(model.getClientId())) {
+                sendToJudgesAndOthers( packet, false);
             }
         }
-        
+
         Problem problem = (Problem) PacketFactory.getObjectValue(packet, PacketFactory.PROBLEM);
-        if (problem != null){
+        if (problem != null) {
             model.addProblem(problem);
-            if (isServer(model.getClientId())){
-                sendToJudgesAndOthers(model, controller, packet, false);
+            if (isServer(model.getClientId())) {
+                sendToJudgesAndOthers( packet, false);
             }
         }
-        
+
         ContestTime contestTime = (ContestTime) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME);
-        if (contestTime != null){
+        if (contestTime != null) {
             model.addContestTime(contestTime);
-            if (isServer(model.getClientId())){
-                sendToJudgesAndOthers(model, controller, packet, false);
+            if (isServer(model.getClientId())) {
+                sendToJudgesAndOthers( packet, false);
             }
         }
-        
+
     }
-    
-    private static void updateSetting(Packet packet, IModel model, IController controller) {
+
+    private void updateSetting(Packet packet) {
 
         Site site = (Site) PacketFactory.getObjectValue(packet, PacketFactory.SITE);
         if (site != null) {
             model.updateSite(site);
             if (isServer(model.getClientId())) {
-                sendToJudgesAndOthers(model, controller, packet, false);
+                sendToJudgesAndOthers( packet, false);
             }
         }
 
@@ -249,7 +249,7 @@ public final class PacketHandler {
         if (language != null) {
             model.updateLanguage(language);
             if (isServer(model.getClientId())) {
-                sendToJudgesAndOthers(model, controller, packet, false);
+                sendToJudgesAndOthers( packet, false);
             }
         }
 
@@ -257,7 +257,7 @@ public final class PacketHandler {
         if (problem != null) {
             model.updateProblem(problem);
             if (isServer(model.getClientId())) {
-                sendToJudgesAndOthers(model, controller, packet, false);
+                sendToJudgesAndOthers( packet, false);
             }
         }
 
@@ -265,31 +265,28 @@ public final class PacketHandler {
         if (contestTime != null) {
             model.updateContestTime(contestTime);
             if (isServer(model.getClientId())) {
-                sendToJudgesAndOthers(model, controller, packet, false);
+                sendToJudgesAndOthers( packet, false);
             }
         }
 
     }
 
-    private static boolean isThisSite(IModel model, ISubmission submission) {
+    private boolean isThisSite(ISubmission submission) {
         return submission.getSiteNumber() == model.getSiteNumber();
     }
 
     /**
-     * Send to all logged in Judges, Admins, Boards and optionally sites.
+     * Send to all logged in Judges, Admins, Boards and optionally to other sites.
      * 
-     * This sends all sorts of packets to all logged in clients (other than
-     * teams).   Typically sendToServers is set if this is the originating
-     * site, if not done then a nasty circular path will occur.
+     * This sends all sorts of packets to all logged in clients (other than teams). Typically sendToServers is set if this is the originating site, if not done then a nasty circular path will occur.
      * 
-     * @param model
-     * @param controller
      * @param packet
-     * @param sendToServers send To other server.
+     * @param sendToServers
+     *            send To other server.
      */
-    public static void sendToJudgesAndOthers (IModel model, IController controller, Packet packet, boolean sendToServers) {
-        
-        if (model.getClientId().getClientType().equals(ClientType.Type.SERVER)){
+    public void sendToJudgesAndOthers(Packet packet, boolean sendToServers) {
+
+        if (model.getClientId().getClientType().equals(ClientType.Type.SERVER)) {
             // If I am a server
             // forward to clients on this site.
             controller.sendToAdministrators(packet);
@@ -303,26 +300,27 @@ public final class PacketHandler {
 
     /**
      * Handle Check out run, add to model, trigger listeners.
-     * @param model
+     * 
      * @param run
      * @param runFiles
+     * @param whoCheckedOutId
      */
-    private static void checkedOutRun(IModel model,IController controller, Run run, RunFiles runFiles, ClientId whoCheckedOutId) {
+    private void checkedOutRun( Run run, RunFiles runFiles, ClientId whoCheckedOutId) {
         model.addRun(run, runFiles, whoCheckedOutId);
-        
+
         // TODO code for if checkout run from another site.
 
     }
 
-    private static boolean isSuperUser (ClientId id){
+    private boolean isSuperUser(ClientId id) {
         return id.getClientType().equals(ClientType.Type.ADMINISTRATOR);
     }
-    
-    private static void cancelRun(Run run, IModel model, IController controller, ClientId whoCanceledRun) {
-        
+
+    private void cancelRun(Run run, ClientId whoCanceledRun) {
+
         if (isServer(model.getClientId())) {
 
-            if (!isThisSite(model, run)) {
+            if (!isThisSite(run)) {
 
                 // TODO: send cancel to other server, multi-site
                 System.out.println(" send cancel to other server ");
@@ -336,33 +334,33 @@ public final class PacketHandler {
                 Run availableRun = model.getRun(run.getElementId());
                 Packet availableRunPacket = PacketFactory.createRunAvailable(model.getClientId(), whoCanceledRun, availableRun);
 
-                sendToJudgesAndOthers(model, controller, availableRunPacket, true);
+                sendToJudgesAndOthers( availableRunPacket, true);
             }
 
         } else {
             // Client, update status and done.
-            
+
             model.updateRun(run, RunStates.NEW, whoCanceledRun);
         }
     }
 
-    private static void judgeRun(Run run, IModel model, IController controller, JudgementRecord judgementRecord, RunResultFiles runResultFiles, ClientId whoJudgedId) {
-        
-        if (isServer(model.getClientId())){
-            
-            if (! isThisSite(model, run)) {
-                
+    private void judgeRun(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles, ClientId whoJudgedId) {
+
+        if (isServer(model.getClientId())) {
+
+            if (!isThisSite(run)) {
+
                 // TODO: forward packet to other site
-                
+
                 info("TODO: forward packet to other site");
-                
+
             } else {
                 // This site's run
-                
+
                 judgementRecord.setWhenJudgedTime(model.getContestTime().getElapsedMins());
 
                 model.addRunJudgement(run, judgementRecord, runResultFiles, whoJudgedId);
-                
+
                 Run theRun = model.getRun(run.getElementId());
 
                 Packet judgementPacket = PacketFactory.createRunJudgement(model.getClientId(), run.getSubmitter(), theRun, judgementRecord, runResultFiles);
@@ -373,13 +371,12 @@ public final class PacketHandler {
 
                 // TODO: code - make work multi site
                 /**
-                 * To make this work multi site create a new packet type of RUN_JUDGEMENT_UPDATE
-                 * then when a server gets it send it to call clients as a RUN_JUDGEMENT.
-                 * Right now this just notifies local clients. 
+                 * To make this work multi site create a new packet type of RUN_JUDGEMENT_UPDATE then when a server gets it send it to call clients as a RUN_JUDGEMENT. Right now this just notifies
+                 * local clients.
                  */
-                sendToJudgesAndOthers(model, controller, judgementPacket, false);
+                sendToJudgesAndOthers( judgementPacket, false);
             }
-            
+
         } else {
             model.updateRun(run, run.getStatus(), judgementRecord.getJudgerClientId());
         }
@@ -392,15 +389,13 @@ public final class PacketHandler {
      * {@link edu.csus.ecs.pc2.core.packet.PacketType.Type#RUN_NOTAVAILABLE RUN_NOTAVAILABLE}.
      * 
      * @param run
-     * @param model
-     * @param controller
      * @param whoRequestsRunId
      */
-    private static void requestRun(Run run, IModel model, IController controller, ClientId whoRequestsRunId) {
+    private void requestRun(Run run, ClientId whoRequestsRunId) {
 
         if (isServer(model.getClientId())) {
 
-            if (!isThisSite(model, run)) {
+            if (!isThisSite(run)) {
 
                 ClientId serverClientId = new ClientId(run.getSiteNumber(), ClientType.Type.SERVER, 0);
                 if (model.isLoggedIn(serverClientId)) {
@@ -430,7 +425,7 @@ public final class PacketHandler {
                     Packet checkOutPacket = PacketFactory.createCheckedOutRun(model.getClientId(), whoRequestsRunId, theRun, runFiles, whoRequestsRunId);
                     controller.sendToClient(checkOutPacket);
 
-                    sendToJudgesAndOthers(model, controller, checkOutPacket, true);
+                    sendToJudgesAndOthers( checkOutPacket, true);
                 } else {
                     // Unavailable
                     Packet notAvailableRunPacket = PacketFactory.createRunNotAvailable(model.getClientId(), whoRequestsRunId, run);
@@ -448,15 +443,14 @@ public final class PacketHandler {
      * Unpack and add list of runs to model.
      * 
      * @param packet
-     * @param model
      */
-    private static void addRunsToModel(Packet packet, IModel model) {
+    private void addRunsToModel(Packet packet) {
 
         try {
             Run[] runs = (Run[]) PacketFactory.getObjectValue(packet, PacketFactory.RUN_LIST);
             if (runs != null) {
                 for (Run run : runs) {
-                    if (!isThisSite(model, run)) {
+                    if (!isThisSite(run)) {
                         model.addRun(run);
                     }
                 }
@@ -467,20 +461,19 @@ public final class PacketHandler {
             StaticLog.unclassified("Exception logged ", e);
         }
     }
-    
+
     /**
      * Unpack and add list of clarifications to model.
      * 
      * @param packet
-     * @param model
      */
-    private static void addClarificationsToModel(Packet packet, IModel model) {
+    private void addClarificationsToModel(Packet packet) {
 
         try {
             Clarification[] clarifications = (Clarification[]) PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION_LIST);
             if (clarifications != null) {
                 for (Clarification clarification : clarifications) {
-                    if (!isThisSite(model, clarification)) {
+                    if (!isThisSite(clarification)) {
                         model.addClarification(clarification);
                     }
                 }
@@ -495,10 +488,8 @@ public final class PacketHandler {
     /**
      * Add contest data into the model.
      * 
-     * This will read a packet and load the data into the model.
-     * <br>
-     * This should only be execute with the first LOGIN_SUCCESS that
-     * this module processes. 
+     * This will read a packet and load the data into the model. <br>
+     * This should only be execute with the first LOGIN_SUCCESS that this module processes.
      * <P>
      * It processes:
      * <ol>
@@ -512,11 +503,8 @@ public final class PacketHandler {
      * <ol>
      * 
      * @param packet
-     * @param controller
-     * @param model
      */
-    private static void loadDataIntoModel(Packet packet, IController controller, IModel model, ConnectionHandlerID connectionHandlerID) {
-
+    private void loadDataIntoModel(Packet packet, ConnectionHandlerID connectionHandlerID) {
 
         try {
             Language[] languages = (Language[]) PacketFactory.getObjectValue(packet, PacketFactory.LANGUAGE_LIST);
@@ -559,22 +547,22 @@ public final class PacketHandler {
             if (contestTime != null) {
                 model.addContestTime(contestTime);
             }
-            
+
         } catch (Exception e) {
             // TODO: log handle exception
             StaticLog.unclassified("Exception logged ", e);
         }
 
-        addContestTimesToModel (packet, model);
+        addContestTimesToModel(packet);
 
-        addSitesToModel (packet, model);
-        
-        addRunsToModel (packet, model);
-        
-        addClarificationsToModel (packet, model);
-        
+        addSitesToModel(packet);
+
+        addRunsToModel(packet);
+
+        addClarificationsToModel(packet);
+
         ClientId clientId = null;
-        
+
         try {
             clientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
             if (clientId != null) {
@@ -586,23 +574,23 @@ public final class PacketHandler {
         }
 
         controller.setSiteNumber(clientId.getSiteNumber());
-        
-        if (model.isLoggedIn()){
-            
+
+        if (model.isLoggedIn()) {
+
             // show main UI
             controller.startMainUI(model.getClientId());
- 
+
             // Login to other sites
-            loginToOtherSites (packet, model, controller);
-        }else{
+            loginToOtherSites(packet);
+        } else {
             String message = "Trouble logging in, check logs";
             model.loginDenied(packet.getDestinationId(), connectionHandlerID, message);
         }
     }
 
-    private static void addContestTimesToModel(Packet packet, IModel model) {
+    private void addContestTimesToModel(Packet packet) {
         try {
-            ContestTime [] contestTimes = (ContestTime[]) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME_LIST);
+            ContestTime[] contestTimes = (ContestTime[]) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME_LIST);
             if (contestTimes != null) {
                 for (ContestTime contestTime : contestTimes) {
                     if (model.getSiteNumber() != contestTime.getSiteNumber()) {
@@ -628,7 +616,7 @@ public final class PacketHandler {
      * @param packet
      * @param model
      */
-    private static void addSitesToModel(Packet packet, IModel model) {
+    private void addSitesToModel(Packet packet) {
         try {
             Site[] sites = (Site[]) PacketFactory.getObjectValue(packet, PacketFactory.SITE_LIST);
             if (sites != null) {
@@ -640,27 +628,24 @@ public final class PacketHandler {
             // TODO: log handle exception
             StaticLog.unclassified("Exception logged ", e);
         }
-        
-        
+
     }
 
     /**
      * Login to other servers.
      * 
-     * Sends a login request packet to sites that
-     * this server is nog logged into.
+     * Sends a login request packet to sites that this server is nog logged into.
      * 
-     * @param packet contains list of other servers
-     * @param model
-     * @param controller
+     * @param packet
+     *            contains list of other servers
      */
-    private static void loginToOtherSites(Packet packet, IModel model, IController controller) {
+    private void loginToOtherSites(Packet packet) {
         try {
-            ClientId [] listOfLoggedInUsers = (ClientId[]) PacketFactory.getObjectValue(packet, PacketFactory.LOGGED_IN_USERS);
-            for (ClientId id : listOfLoggedInUsers){
-                if (isServer (id)){
-                    if ( ! model.isLoggedIn(id)){
-                        controller.sendServerLoginRequest (id.getSiteNumber());
+            ClientId[] listOfLoggedInUsers = (ClientId[]) PacketFactory.getObjectValue(packet, PacketFactory.LOGGED_IN_USERS);
+            for (ClientId id : listOfLoggedInUsers) {
+                if (isServer(id)) {
+                    if (!model.isLoggedIn(id)) {
+                        controller.sendServerLoginRequest(id.getSiteNumber());
                     }
                 }
             }
@@ -668,27 +653,26 @@ public final class PacketHandler {
             // TODO: log handle exception
             StaticLog.unclassified("Exception logged ", e);
         }
-        
+
     }
 
-    private static boolean isServer(ClientId id) {
+    private boolean isServer(ClientId id) {
         return id.getClientType().equals(ClientType.Type.SERVER);
     }
 
     /**
      * TODO - a temporary logging routine.
-     * 
-     * @param s
      */
-    public static void info(String s) {
+    public void info(String s) {
         System.err.println(s);
-        StaticLog.unclassified(s) ;
+        StaticLog.unclassified(s);
     }
-    public static void info(String s, Exception ex) {
+
+    // TODO temporary logging routine
+    public void info(String s, Exception ex) {
         System.err.println(s);
         ex.printStackTrace();
-        StaticLog.unclassified(s, ex) ;
+        StaticLog.unclassified(s, ex);
     }
-    
-    
+
 }

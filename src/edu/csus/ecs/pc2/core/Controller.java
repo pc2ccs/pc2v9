@@ -167,10 +167,13 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * checked by login().
      */
     private boolean isStarted = false;
+
+    private PacketHandler packetHandler = null;
     
     public Controller(IModel model) {
         super();
         this.model = model;
+        packetHandler  = new PacketHandler(this, model);
     }
 
     /**
@@ -691,7 +694,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * @param connectionHandlerID
      */
     private void processPacket(Packet packet, ConnectionHandlerID connectionHandlerID) {
-        PacketHandler.handlePacket(this, model, packet, connectionHandlerID);
+        packetHandler.handlePacket(packet, connectionHandlerID);
 
     }
 
@@ -799,7 +802,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                 PacketFactory.dumpPacket(System.err, packet);
 
                 // TODO code put the server's connection handler id as 4th parameter
-                PacketHandler.handlePacket(this, model, packet, null);
+                packetHandler.handlePacket(packet, null);
             } else {
                 info("receiveObject(S) Unsupported class received: " + object.getClass().getName());
             }
@@ -1231,7 +1234,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
                 // send start to other sites
                 Packet stopContestTimePacket = PacketFactory.createContestStarted(getServerClientId(), PacketFactory.ALL_SERVERS, model.getContestTime());
-                PacketHandler.sendToJudgesAndOthers(model, this, stopContestTimePacket, true);
+                packetHandler.sendToJudgesAndOthers(stopContestTimePacket, true);
             } else {
                 // TODO send to the other server
                 System.err.println("TODO startContest to other server "+inSiteNumber);
@@ -1251,7 +1254,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                 
                 // send start to other sites
                 Packet startContestTimePacket = PacketFactory.createContestStopped(getServerClientId(), PacketFactory.ALL_SERVERS, model.getContestTime());
-                PacketHandler.sendToJudgesAndOthers(model, this, startContestTimePacket, true);
+                packetHandler.sendToJudgesAndOthers(startContestTimePacket, true);
             } else {
                 // TODO send to the other server
                 System.err.println("TODO stopContest to other server "+inSiteNumber);
