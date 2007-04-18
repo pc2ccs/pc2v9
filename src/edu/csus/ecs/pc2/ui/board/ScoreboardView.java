@@ -61,7 +61,6 @@ public class ScoreboardView extends JFrame implements UIPlugin {
         int result = FrameUtilities.yesNoCancelDialog("Are you sure you want to exit PC^2?", "Exit PC^2");
 
         if (result == JOptionPane.YES_OPTION) {
-            System.err.println("Server halting");
             System.exit(0);
         }
     }
