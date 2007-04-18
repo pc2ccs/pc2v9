@@ -64,6 +64,7 @@ public class RunFlowTest extends TestCase {
         controllerOne = new Controller(modelOne);
         controllerOne.setContactingRemoteServer(false);
         controllerOne.setUsingMainUI(false);
+        controllerOne.start(new String[0]);
         controllerOne.login("site1", "site1");
         assertTrue("Site 1 logged in", modelOne.isLoggedIn());
 
@@ -230,6 +231,7 @@ public class RunFlowTest extends TestCase {
         judgeModel = new Model();
         judgeController = new JudgeController(judgeModel);
         judgeController.setUsingMainUI(false);
+        judgeController.start(new String[0]);
         judgeController.login(judgeId.getName(), judgeId.getName());
         sleep(12, "judge logging in");
 
@@ -238,6 +240,7 @@ public class RunFlowTest extends TestCase {
         teamModel = new Model();
         teamController = new TeamController(teamModel);
         teamController.setUsingMainUI(false);
+        teamController.start(new String[0]);
         teamController.login(teamId.getName(), teamId.getName());
         sleep(12, "team logging in");
 
