@@ -78,9 +78,8 @@ public class InternalDump {
         try {
             PrintWriter log = new PrintWriter(new FileOutputStream(filename, false), true);
             log.println(new VersionInfo().getSystemName());
-            log.println("Build " + new VersionInfo().getBuildNumber());
-            log.println(new VersionInfo().getSystemVersionInfo());
             log.println("Date: " + new Date());
+            log.println(new VersionInfo().getSystemVersionInfo());
 
             log.println();
             log.println("-- Accounts --");
@@ -89,10 +88,10 @@ public class InternalDump {
                     log.println("Accounts " + ctype.toString() + " there are " + model.getAccounts(ctype).size());
                     Vector<Account> accounts = model.getAccounts(ctype);
                     for (int i = 0; i < accounts.size(); i++) {
-                        log.println("   " + accounts.elementAt(i));
+                        Account account = accounts.elementAt(i);
+                        log.println("   " + account+" Site "+account.getClientId().getSiteNumber()+" id="+account.getElementId());
                     }
                 }
-
             }
 
             // Sites
@@ -104,21 +103,21 @@ public class InternalDump {
                 String hostName = site1.getConnectionInfo().getProperty(Site.IP_KEY);
                 String portStr = site1.getConnectionInfo().getProperty(Site.PORT_KEY);
 
-                log.println("Site " + site1.getSiteNumber() + " " + hostName + ":" + portStr + " " + site1.getDisplayName() + "/" + site1.getPassword());
+                log.println("Site " + site1.getSiteNumber() + " " + hostName + ":" + portStr + " " + site1.getDisplayName() + "/" + site1.getPassword()+" id="+site1.getElementId());
             }
 
             // Problem
             log.println();
             log.println("-- " + model.getProblems().length + " problems --");
             for (Problem problem : model.getProblems()) {
-                log.println("  Problem " + problem);
+                log.println("  Problem " + problem+" id="+problem.getElementId());
             }
 
             // Language
             log.println();
             log.println("-- " + model.getLanguages().length + " languages --");
             for (Language language : model.getLanguages()) {
-                log.println("  Language " + language);
+                log.println("  Language " + language+" id="+language.getElementId());
             }
 
             // Runs
