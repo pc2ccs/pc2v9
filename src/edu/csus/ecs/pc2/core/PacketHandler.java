@@ -2,7 +2,7 @@ package edu.csus.ecs.pc2.core;
 
 import java.util.Vector;
 
-import edu.csus.ecs.pc2.core.log.StaticLog;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -54,7 +54,7 @@ public class PacketHandler {
 
         Type packetType = packet.getType();
 
-        info("handlePacket " + packet);
+        info("handlePacket start " + packet);
         PacketFactory.dumpPacket(System.err, packet);
 
         ClientId fromId = packet.getSourceId();
@@ -167,8 +167,11 @@ public class PacketHandler {
         } else {
 
             Exception exception = new Exception("PacketHandler.handlePacket Unhandled packet " + packet);
-            StaticLog.unclassified("Unhandled Packet ", exception);
+            controller.getLog().log(Log.WARNING,"Unhandled Packet ", exception);
         }
+        
+        info("handlePacket start " + packet);
+
     }
 
     private void generateAccounts(Packet packet) {
@@ -514,7 +517,7 @@ public class PacketHandler {
         } catch (Exception e) {
             // TODO: log handle exception
             e.printStackTrace();
-            StaticLog.unclassified("Exception logged ", e);
+            controller.getLog().log(Log.WARNING,"Exception logged ", e);
         }
     }
 
@@ -537,7 +540,7 @@ public class PacketHandler {
         } catch (Exception e) {
             // TODO: log handle exception
             e.printStackTrace();
-            StaticLog.unclassified("Exception logged ", e);
+            controller.getLog().log(Log.WARNING,"Exception logged ", e);
         }
     }
 
@@ -571,7 +574,7 @@ public class PacketHandler {
             }
         } catch (Exception e) {
             // TODO: log handle exception
-            StaticLog.unclassified("Exception logged ", e);
+            controller.getLog().log(Log.WARNING,"Exception logged ", e);
         }
 
         try {
@@ -583,7 +586,7 @@ public class PacketHandler {
             }
         } catch (Exception e) {
             // TODO: log handle exception
-            StaticLog.unclassified("Exception logged ", e);
+            controller.getLog().log(Log.WARNING,"Exception logged ", e);
         }
 
         try {
@@ -595,7 +598,7 @@ public class PacketHandler {
             }
         } catch (Exception e) {
             // TODO: log handle exception
-            StaticLog.unclassified("Exception logged ", e);
+            controller.getLog().log(Log.WARNING,"Exception logged ", e);
         }
 
         try {
@@ -606,7 +609,7 @@ public class PacketHandler {
 
         } catch (Exception e) {
             // TODO: log handle exception
-            StaticLog.unclassified("Exception logged ", e);
+            controller.getLog().log(Log.WARNING,"Exception logged ", e);
         }
 
         addContestTimesToModel(packet);
@@ -626,7 +629,7 @@ public class PacketHandler {
             }
         } catch (Exception e) {
             // TODO: log handle exception
-            StaticLog.unclassified("Exception logged ", e);
+            controller.getLog().log(Log.WARNING,"Exception logged ", e);
         }
 
         controller.setSiteNumber(clientId.getSiteNumber());
@@ -662,7 +665,7 @@ public class PacketHandler {
         } catch (Exception e) {
             // TODO: log handle exception
             e.printStackTrace();
-            StaticLog.unclassified("Exception logged ", e);
+            controller.getLog().log(Log.WARNING,"Exception logged ", e);
         }
     }
 
@@ -682,7 +685,7 @@ public class PacketHandler {
             }
         } catch (Exception e) {
             // TODO: log handle exception
-            StaticLog.unclassified("Exception logged ", e);
+            controller.getLog().log(Log.WARNING,"Exception logged ", e);
         }
 
     }
@@ -707,7 +710,7 @@ public class PacketHandler {
             }
         } catch (Exception e) {
             // TODO: log handle exception
-            StaticLog.unclassified("Exception logged ", e);
+            controller.getLog().log(Log.WARNING,"Exception logged ", e);
         }
 
     }
@@ -734,14 +737,14 @@ public class PacketHandler {
      */
     public void info(String s) {
         System.err.println(s);
-        StaticLog.unclassified(s);
+        controller.getLog().warning(s);
     }
 
     // TODO temporary logging routine
     public void info(String s, Exception ex) {
         System.err.println(s);
         ex.printStackTrace();
-        StaticLog.unclassified(s, ex);
+        controller.getLog().log(Log.WARNING, s, ex);
     }
 
 }
