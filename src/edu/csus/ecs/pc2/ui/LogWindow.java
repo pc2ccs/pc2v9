@@ -7,10 +7,14 @@ import com.ibm.webrunner.j2mclb.util.TableModel;
 
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.log.IStreamListener;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IModel;
 
 /**
  * This class is intended to register as a listener to the Log/LogWindowHandler and display the logs in a grid.
+ * 
+ * If {@link #setLog(Log)} is not used, will be a window for
+ * the {@link Controller#getLog() log}.
  * 
  */
 public class LogWindow extends JFrame implements UIPlugin {
@@ -27,7 +31,11 @@ public class LogWindow extends JFrame implements UIPlugin {
     private IController controller;
 
     private IModel model;
+    
+    private Log log = null;
 
+    private StreamListener streamListener = null;
+    
     public LogWindow() {
         super();
         initialize();
@@ -177,11 +185,27 @@ public class LogWindow extends JFrame implements UIPlugin {
        if (controller.getLog() == null) {
            System.err.println("controller.getLog() is null");
        }
-       controller.getLog().getStreamHandler().addStreamListener(new StreamListener());
+       if (log == null){
+           log = controller.getLog();
+       }
+       streamListener = new StreamListener();
+       log.getStreamHandler().addStreamListener(streamListener);
     }
 
     public String getPluginTitle() {
         return getTitle();
+    }
+
+    public Log getLog() {
+        return log;
+    }
+
+    public void setLog(Log log) {
+        this.log = log;
+    }
+    
+    public void dispose(){
+        log.getStreamHandler().removeStreamListener(streamListener);
     }
 
 }
