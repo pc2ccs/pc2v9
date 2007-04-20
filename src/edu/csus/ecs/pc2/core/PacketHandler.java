@@ -243,7 +243,8 @@ public class PacketHandler {
         if (site != null) {
             model.addSite(site);
             if (isServer()) {
-                sendToJudgesAndOthers( packet, false);
+                boolean sendToOtherServers = isThisSite(packet.getSourceId().getSiteNumber());
+                sendToJudgesAndOthers( packet, sendToOtherServers);
             }
         }
 
@@ -251,7 +252,8 @@ public class PacketHandler {
         if (language != null) {
             model.addLanguage(language);
             if (isServer()) {
-                sendToJudgesAndOthers( packet, false);
+                boolean sendToOtherServers = isThisSite(packet.getSourceId().getSiteNumber());
+                sendToJudgesAndOthers( packet, sendToOtherServers);
             }
         }
 
@@ -259,7 +261,8 @@ public class PacketHandler {
         if (problem != null) {
             model.addProblem(problem);
             if (isServer()) {
-                sendToJudgesAndOthers( packet, false);
+                boolean sendToOtherServers = isThisSite(packet.getSourceId().getSiteNumber());
+                sendToJudgesAndOthers( packet, sendToOtherServers);   
             }
         }
 
@@ -267,7 +270,8 @@ public class PacketHandler {
         if (contestTime != null) {
             model.addContestTime(contestTime);
             if (isServer()) {
-                sendToJudgesAndOthers( packet, false);
+                boolean sendToOtherServers = isThisSite(packet.getSourceId().getSiteNumber());
+                sendToJudgesAndOthers( packet, sendToOtherServers);   
             }
         }
 
@@ -737,14 +741,14 @@ public class PacketHandler {
      */
     public void info(String s) {
         System.err.println(s);
-        controller.getLog().warning(s);
+        controller.getLog().log(Log.INFO, s);
     }
 
     // TODO temporary logging routine
     public void info(String s, Exception ex) {
         System.err.println(s);
         ex.printStackTrace();
-        controller.getLog().log(Log.WARNING, s, ex);
+        controller.getLog().log(Log.INFO, s, ex);
     }
 
 }
