@@ -39,4 +39,10 @@ public interface IFileViewer extends UIPlugin {
      */
     void dispose();
 
+    /**
+     * Show window to user.
+     * @param b
+     */
+    void setVisible(boolean b);
+
 }
