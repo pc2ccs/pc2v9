@@ -84,14 +84,18 @@ public class AdministratorView extends JFrame implements UIPlugin {
 
         FrameUtilities.centerFrame(this);
 
-        if (logWindow == null) {
-            logWindow = new LogWindow();
-        }
+
     }
 
     public void setModelAndController(IModel inModel, IController inController) {
         this.model = inModel;
         this.controller = inController;
+        
+        if (logWindow == null) {
+            logWindow = new LogWindow();
+        }
+        logWindow.setModelAndController(model, controller);
+        logWindow.setTitle("Log "+model.getClientId().toString());
         
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {

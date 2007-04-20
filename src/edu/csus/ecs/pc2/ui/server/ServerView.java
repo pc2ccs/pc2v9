@@ -145,9 +145,6 @@ public class ServerView extends JFrame implements UIPlugin {
                 promptAndExit();
             }
         });
-        if (logWindow == null) {
-            logWindow = new LogWindow();
-        }
         setVisible(true);
 
         FrameUtilities.centerFrameTop(this);
@@ -559,6 +556,12 @@ public class ServerView extends JFrame implements UIPlugin {
         this.serverController = inController;
         setTitle("PC^2 Server (Site " + model.getSiteNumber() + ")");
         updateGenerateTitles();
+        
+        if (logWindow == null) {
+            logWindow = new LogWindow();
+        }
+        logWindow.setModelAndController(model, serverController);
+        logWindow.setTitle("Log "+model.getClientId().toString());
 
         model.addRunListener(new RunListenerImplementation());
         model.addAccountListener(new AccountListenerImplementation());
