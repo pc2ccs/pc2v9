@@ -129,6 +129,8 @@ public class Executable {
      * Overwrite judge's data and answer files.
      */
     private boolean overwriteJudgesDataFiles;
+    
+    private boolean testRunOnly = false;
 
     public Executable(IModel inModel, IController inController, Run run, RunFiles runFiles) {
         super();
@@ -162,16 +164,7 @@ public class Executable {
 //         }
     }
 
-    /**
-     * Is the pc2 module executing a team?
-     * 
-     * If the module is a team, then execute will not extract judge's data files nor will execute run a validation.
-     * 
-     * @return true if executor is a TEAM
-     */
-    private boolean isTeamExecutor() {
-        return executorId.getClientType() == ClientType.Type.TEAM;
-    }
+ 
 
     /**
      * Remove all files from specified directory, including subdirectories.
@@ -271,7 +264,7 @@ public class Executable {
 
          executionData = new ExecutionData();
 
-        if (isTeamExecutor()) {
+        if (isTestRunOnly()) {
             // Team, just compile and execute it.
 
             if (compileProgram()) {
@@ -569,7 +562,7 @@ public class Executable {
      * @return true if should be validated.
      */
     private boolean isValidated() {
-        return (problem.isValidated() && (!isTeamExecutor()));
+        return (problem.isValidated() && (!isTestRunOnly()));
     }
 
     public String getFileNameFromUser() {
@@ -635,7 +628,7 @@ public class Executable {
                 inputDataFileName = prefixExecuteDirname(problem.getDataFileName());
             }
 
-            if (isTeamExecutor()) {
+            if (isTestRunOnly()) {
 
                 if (problem.isReadInputDataFromSTDIN()) {
                     selectAndCopyDataFile(inputDataFileName);
@@ -1242,5 +1235,21 @@ public class Executable {
      */
     public void setOverwriteJudgesDataFiles(boolean overwriteDataFiles) {
         this.overwriteJudgesDataFiles = overwriteDataFiles;
+    }
+
+    public boolean isTestRunOnly() {
+        return testRunOnly || executorId.getClientType() == ClientType.Type.TEAM;
+    }
+
+    /**
+     * Is the pc2 module executing a team?
+     * 
+     * If the module is a team, then execute will not extract judge's data files nor will execute run a validation.
+     * 
+     * @return true if executor is a TEAM
+     */
+ 
+    public void setTestRunOnly(boolean testRunOnly) {
+        this.testRunOnly = testRunOnly || executorId.getClientType() == ClientType.Type.TEAM;
     }
 }

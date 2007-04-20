@@ -69,6 +69,9 @@ public class SubmitRunPane extends JPanePlugin {
     private JPanel languagePane = null;
 
     private JButton testButton = null;
+    
+    private Executable executable = null;
+
 
     /**
      * Nevermind this constructor, needed for VE and other reasons.
@@ -406,8 +409,8 @@ public class SubmitRunPane extends JPanePlugin {
             Run run = new Run(getModel().getClientId(), language, problem);
             RunFiles runFiles = new RunFiles(run, new SerializedFile(filename), null);
 
-            Executable executable;
             executable = new Executable(getModel(), getController(), run, runFiles);
+            executable.setTestRunOnly(true);
 
             IFileViewer fileViewer;
             fileViewer = executable.execute();

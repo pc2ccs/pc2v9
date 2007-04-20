@@ -23,6 +23,7 @@ import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
 import edu.csus.ecs.pc2.ui.LogWindow;
 import edu.csus.ecs.pc2.ui.RunsPanel;
+import edu.csus.ecs.pc2.ui.SubmitRunPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 import javax.swing.JCheckBox;
 
@@ -269,6 +270,9 @@ public class JudgeView extends JFrame implements UIPlugin {
         
         RunsPanel runsPanel = new RunsPanel();
         addUIPlugin(mainTabbedPane, "All Runs", runsPanel);
+        
+        SubmitRunPane submitRunPane = new SubmitRunPane();
+        addUIPlugin(getMainTabbedPane(), "Test Run", submitRunPane);
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
