@@ -152,7 +152,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     private boolean contactingRemoteServer = true;
     
     private boolean usingMainUI = true;
-
+    
     // TODO change this to UIPlugin
     /*
      * Difficulty with changing LoginFrame to UIPlugin, there
@@ -188,6 +188,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             info("Unable to send to Server  " + packet);
             e.printStackTrace();
         }
+        log.info("Sent    packet to server "+packet);
     }
 
     private void sendToClient(ConnectionHandlerID connectionHandlerID, Packet packet) {
@@ -346,7 +347,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             ClientId clientId = loginShortcutExpansion(0, id);
 
             log = new Log(clientId.toString());
-            StaticLog.setLog(log);
+            StaticLog.setLog (log);
 
             info(new VersionInfo().getSystemVersionInfo());
             info("Login: "+id+" (aka "+clientId.getName()+")");
@@ -403,7 +404,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                         transportManager.accecptConnections(port);
                         info("Started Server Transport listening on " + port);
                     } catch (Exception e) {
-                        StaticLog.log("Exception logged ", e);
+                        info("Exception logged ", e);
                         SecurityException securityException = new SecurityException("Port "+port+" in use, server already running?");
                         securityException.printStackTrace(System.err);
                         throw securityException;
@@ -436,17 +437,18 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                     transportManager.connectToMyServer();
                     info("Started Client Transport");
 
+                    info("Sending login request to Server as "+clientId); // TODO debug remove this
                     sendLoginRequest(transportManager, clientId, password);
                 } catch (TransportException e) {
                     // TODO: log make this a very silent log entry.
-                    StaticLog.log("Exception starting up ", e);
+                    info("Exception starting up ", e);
                     throw new SecurityException("Unable to contact server, contact staff");
                 }
             }
         } catch (TransportException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-            StaticLog.log("Exception on startup ", e);
+            info("Exception on startup ", e);
             throw new SecurityException("Unable to start server, check logs");
         }
     }
@@ -468,7 +470,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         return newId;
     }
 
-    private static void sendLoginRequest(ITransportManager manager, ConnectionHandlerID connectionHandlerID, ClientId clientId,
+    private void sendLoginRequest(ITransportManager manager, ConnectionHandlerID connectionHandlerID, ClientId clientId,
             String password) {
         try {
             info("sendLoginRequest ConId start - sending from " + clientId);
@@ -489,7 +491,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * @param clientId
      * @param password
      */
-    private static void sendLoginRequest(ITransportManager manager, ClientId clientId, String password) {
+    private void sendLoginRequest(ITransportManager manager, ClientId clientId, String password) {
         try {
             info("sendLoginRequest start - sending from "+clientId);
             ClientId serverClientId = new ClientId(0, Type.SERVER, 0);
@@ -610,7 +612,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             // TODO Archive the packet that had an exception for future review - soon.
 
             info("Exception in receiveObject(S,C): " + e.getMessage(),e);
-            StaticLog.unclassified("Exception in receiveObject ", e);
+            info("Exception in receiveObject ", e);
         }
         info("receiveObject (S,C) debug end   (by "+model.getClientId()+") got " + object.getClass().getName());
     }
@@ -814,8 +816,6 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                 FrameUtilities.regularCursor(loginUI);
             }
             model.loginDenied(null, null, message);
-
-            StaticLog.unclassified("Exception logged ", e);
             info ("Exception ", e);
         }
         info(" receiveObject(S) debug end   (by "+model.getClientId()+") "+ object);
@@ -843,13 +843,13 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
     }
 
-    public static void info(String s) {
-        StaticLog.unclassified(s);
+    public void info(String s) {
+        log.warning(s);
         System.err.println(Thread.currentThread().getName() + " " + s);
     }
 
-    public static void info(String s, Exception exception) {
-        StaticLog.unclassified (s, exception);
+    public void info(String s, Exception exception) {
+        log.log (Log.WARNING, s, exception);
         System.err.println(Thread.currentThread().getName() + " " + s);
         exception.printStackTrace(System.err);
     }
@@ -917,7 +917,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
         } catch (Exception e) {
             // TODO: log handle exception
-            StaticLog.log("Exception logged ", e);
+            info("Exception logged ", e);
             throw new SecurityException("Unable to determine port for site " + inSiteNumber);
         }
     }
@@ -968,7 +968,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             } catch (Exception e) {
                 // TODO: log handle exception
                 System.err.println("Error loading UI, check log, (class not found?)  " + e.getMessage());
-                StaticLog.log("Exception loading UI for (class not found?) " + clientId.getName(), e);
+                info("Exception loading UI for (class not found?) " + clientId.getName(), e);
                 throw new Exception("Unable to start main UI, contact staff");
             }
 
@@ -988,10 +988,18 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     public void start(String[] stringArray) {
 
         log = new Log("pc2.startup");
-        StaticLog.setLog(log);
+        StaticLog.setLog (log);
         
         String[] arguments = { "--login", "--id", "--password", "--loginUI", "--remoteServer", "--port" };
         parseArguments = new ParseArguments(stringArray, arguments);
+        
+        if (parseArguments.isOptPresent("--help")){
+            System.out.println("Usage: Starter [--login <login>] [--password <pass>] [--help]");
+            System.out.println("where <login> is a user name");
+            // TODO un-comment this when --server works. 
+//            System.out.println("Usage: Starter [--login <login>] [--help] [--server] ");
+            System.exit(0);
+        }
         
         for (String arg : stringArray){
             if (arg.equals("--first")){
@@ -1161,7 +1169,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             
         } catch (Exception e) {
             // TODO: log handle exception
-            StaticLog.log("Unable to login to site "+inSiteNumber, e);
+            info("Unable to login to site "+inSiteNumber, e);
         }
 
     }
