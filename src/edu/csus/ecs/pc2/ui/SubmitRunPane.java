@@ -12,6 +12,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.execute.Executable;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
@@ -23,7 +24,10 @@ import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.LanguageEvent;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemEvent;
+import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunEvent;
+import edu.csus.ecs.pc2.core.model.RunFiles;
+import edu.csus.ecs.pc2.core.model.SerializedFile;
 
 /**
  * A submit run pane.
@@ -36,10 +40,6 @@ import edu.csus.ecs.pc2.core.model.RunEvent;
 public class SubmitRunPane extends JPanePlugin {
 
     public static final String SVN_ID = "$Id$";
-
-    private IModel model = null;
-
-    private IController teamController = null;
 
     private String lastOpenedFile = null;
 
@@ -104,7 +104,7 @@ public class SubmitRunPane extends JPanePlugin {
         Problem problemN = new Problem("None Selected");
         getProblemComboBox().addItem(problemN);
 
-        for (Problem problem : model.getProblems()) {
+        for (Problem problem : getModel().getProblems()) {
             getProblemComboBox().addItem(problem);
         }
 
@@ -112,15 +112,15 @@ public class SubmitRunPane extends JPanePlugin {
         Language languageN = new Language("None Selected");
         getLanguageComboBox().addItem(languageN);
 
-        for (Language language : model.getLanguages()) {
+        for (Language language : getModel().getLanguages()) {
             getLanguageComboBox().addItem(language);
         }
 
-        setButtonsActive(model.getContestTime().isContestRunning());
+        setButtonsActive(getModel().getContestTime().isContestRunning());
     }
 
     private boolean isThisSite(int siteNumber) {
-        return siteNumber == model.getSiteNumber();
+        return siteNumber == getModel().getSiteNumber();
     }
 
     /**
@@ -377,7 +377,9 @@ public class SubmitRunPane extends JPanePlugin {
 
         if (submitTheRun){
             try {
-                teamController.submitRun(problem, language, filename);
+                log.info("submitRun for "+problem+" "+language+" file: "+filename);
+                getController().submitRun(problem, language, filename);
+                
             } catch (Exception e) {
                 // TODO need to make this cleaner
                 JOptionPane.showMessageDialog(this, "Exception " + e.getMessage());
@@ -388,9 +390,42 @@ public class SubmitRunPane extends JPanePlugin {
         }
     }
 
+    /**
+     * Execute a test run, show results to user.
+     * 
+     * @param problem
+     * @param language
+     * @param filename
+     */
     private void testRun(Problem problem, Language language, String filename) {
+
+        setButtonsActive(false);
+
+        try {
+            log.info("test run for "+problem+" "+language+" file: "+filename);
+            Run run = new Run(getModel().getClientId(), language, problem);
+            RunFiles runFiles = new RunFiles(run, new SerializedFile(filename), null);
+
+            Executable executable;
+            executable = new Executable(getModel(), getController(), run, runFiles);
+
+            IFileViewer fileViewer;
+            fileViewer = executable.execute();
+
+            final IFileViewer finalViewer = fileViewer;
+
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    finalViewer.setTitle("Test Program Output");
+                    finalViewer.setVisible(true);
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace(System.err); // TODO remove stacktrace
+            log.log(Log.SEVERE, "Exception during test run ", e);
+        }
         
-        System.err.println ("Would have tested a run ");
+        setButtonsActive(true);
     }
 
     /**
@@ -460,21 +495,20 @@ public class SubmitRunPane extends JPanePlugin {
     }
 
     public void setModelAndController(IModel inModel, IController inController) {
-        this.model = inModel;
-        this.teamController = inController;
+        super.setModelAndController(inModel, inController);
 
-        this.log = teamController.getLog();
+        this.log = getController().getLog();
         
-        model.addRunListener(new RunListenerImplementation());
-        model.addContestTimeListener(new ContestTimeListenerImplementation());
-        model.addLanguageListener(new LanguageListenerImplementation());
-        model.addProblemListener(new ProblemListenerImplementation());
+        getModel().addRunListener(new RunListenerImplementation());
+        getModel().addContestTimeListener(new ContestTimeListenerImplementation());
+        getModel().addLanguageListener(new LanguageListenerImplementation());
+        getModel().addProblemListener(new ProblemListenerImplementation());
 
         // TODO add listeners for accounts, login and site.
 
-        // model.addAccountListener(new AccountListenerImplementation());
-        // model.addLoginListener(new LoginListenerImplementation());
-        // model.addSiteListener(new SiteListenerImplementation());
+        // getModel().addAccountListener(new AccountListenerImplementation());
+        // getModel().addLoginListener(new LoginListenerImplementation());
+        // getModel().addSiteListener(new SiteListenerImplementation());
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
