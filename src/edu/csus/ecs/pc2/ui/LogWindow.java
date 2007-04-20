@@ -205,7 +205,10 @@ public class LogWindow extends JFrame implements UIPlugin {
     }
     
     public void dispose(){
-        log.getStreamHandler().removeStreamListener(streamListener);
+        if (streamListener != null){
+            log.getStreamHandler().removeStreamListener(streamListener);
+            streamListener = null;
+        }
     }
 
 }
