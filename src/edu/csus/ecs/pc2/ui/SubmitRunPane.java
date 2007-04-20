@@ -134,6 +134,7 @@ public class SubmitRunPane extends JPanePlugin {
             public void run() {
                 getSubmitRunButton().setEnabled(turnButtonsOn);
                 getPickFileButton().setEnabled(turnButtonsOn);
+                getTestButton().setEnabled(turnButtonsOn);
 
             }
         });
@@ -323,9 +324,8 @@ public class SubmitRunPane extends JPanePlugin {
             submitRunButton.setText("Submit");
             submitRunButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    submitRun();
+                    testOrSubmitRun(true);
                 }
-
             });
         }
         return submitRunButton;
@@ -335,8 +335,16 @@ public class SubmitRunPane extends JPanePlugin {
         File file = new File(fileName);
         return file.isFile();
     }
-
-    protected void submitRun() {
+    
+    /**
+     * Submit run or test run.
+     * 
+     * Validates that the user has selected problem,
+     * language and a valid filename.
+     * 
+     * @param submitTheRun if true, submits the run.
+     */
+    protected void testOrSubmitRun(boolean submitTheRun) {
 
         Problem problem = ((Problem) getProblemComboBox().getSelectedItem());
         Language language = ((Language) getLanguageComboBox().getSelectedItem());
@@ -367,12 +375,22 @@ public class SubmitRunPane extends JPanePlugin {
             return;
         }
 
-        try {
-            teamController.submitRun(problem, language, filename);
-        } catch (Exception e) {
-            // TODO need to make this cleaner
-            JOptionPane.showMessageDialog(this, "Exception " + e.getMessage());
+        if (submitTheRun){
+            try {
+                teamController.submitRun(problem, language, filename);
+            } catch (Exception e) {
+                // TODO need to make this cleaner
+                JOptionPane.showMessageDialog(this, "Exception " + e.getMessage());
+            }
+        } else {
+            // Test run
+            testRun (problem, language, filename);
         }
+    }
+
+    private void testRun(Problem problem, Language language, String filename) {
+        
+        System.err.println ("Would have tested a run ");
     }
 
     /**
@@ -547,6 +565,11 @@ public class SubmitRunPane extends JPanePlugin {
             testButton.setText("Test");
             testButton.setEnabled(false);
             testButton.setVisible(true);
+            testButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    testOrSubmitRun(false);
+                }
+            });
         }
         return testButton;
     }
