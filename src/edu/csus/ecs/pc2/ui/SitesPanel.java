@@ -15,6 +15,7 @@ import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IModel;
 import edu.csus.ecs.pc2.core.model.ISiteListener;
 import edu.csus.ecs.pc2.core.model.Site;
@@ -44,6 +45,8 @@ public class SitesPanel extends JPanePlugin {
     private JButton updateSiteButton = null;
 
     private JButton cancelSiteEditButton = null;
+    
+    private SiteList siteList = new SiteList();
 
     /**
      * This method initializes
@@ -294,14 +297,14 @@ public class SitesPanel extends JPanePlugin {
      */
     private String validateSiteListBox() {
 
-        SiteList siteList = new SiteList();
+        SiteList siteListToValidate = new SiteList();
         
         for (int i = 0; i < siteListBox.getRowCount(); i++) {
             Site newSite = createSiteFromRow(i);
-            siteList.add(newSite);
+            siteListToValidate.add(newSite);
         }
         
-        return validateSites(siteList);
+        return validateSites(siteListToValidate);
     }
 
     /**
@@ -314,14 +317,16 @@ public class SitesPanel extends JPanePlugin {
         Object [] objects = siteListBox.getRow(i);
         
 //        Object[] cols = { "Site Number", "Site Title", "Password", "IP", "Port" };
-        int siteNumber = i + 1;
+//        Integer siteNumberInteger = ((Integer) objects[0]);
         String siteTitle = ((JTextField) objects[1]).getText();
         String password = ((JTextField) objects[2]).getText();
         String hostName = ((JTextField) objects[3]).getText();
         String portString = ((JTextField) objects[4]).getText();
         int port = Integer.parseInt(portString);
         
-        Site site = new Site (siteTitle, siteNumber);
+        ElementId siteId = (ElementId) siteListBox.getKeys()[i];
+        Site site = (Site) siteList.get(siteId);
+        site.setDisplayName(siteTitle);
         site.setPassword(password);
         
         Properties props = new Properties();
@@ -351,7 +356,7 @@ public class SitesPanel extends JPanePlugin {
         return cancelSiteEditButton;
     }
 
-    private Object[] getSiteRow(Site site) {
+    private Object[] buildSiteRow(Site site) {
 
         // Object[] cols = { "Site Number", "Site Title", "Password", "IP", "Port" };
 
@@ -373,6 +378,8 @@ public class SitesPanel extends JPanePlugin {
 
     private void reloadListBox() {
         siteListBox.removeAllRows();
+        siteList = new SiteList();
+
         Site[] sites = getModel().getSites();
         Arrays.sort(sites, new SiteComparatorBySiteNumber());
 
@@ -415,31 +422,37 @@ public class SitesPanel extends JPanePlugin {
         return site;
     }
    
-    private void insertSiteRow (Site site) {
-        int row = site.getSiteNumber();
-        Object [] objects = getSiteRow(site);
-        siteListBox.insertRow(objects, row - 1);
-        siteListBox.autoSizeAllColumns();
-    }
-    
+    /**
+     * Add or update a site row
+     * @param site
+     */
     private void updateSiteRow (Site site) {
-        int row = site.getSiteNumber();
-        Object [] objects = getSiteRow(site);
-        siteListBox.replaceRow(objects, row);
+        int row = siteListBox.getIndexByKey(site.getElementId());
+        if (row == -1){
+            Object [] objects = buildSiteRow(site);
+            siteListBox.addRow(objects, site.getElementId());
+            siteList.add(site);
+        }else {
+            Object [] objects = buildSiteRow(site);
+            siteListBox.replaceRow(objects, row);
+            siteList.update(site);
+        }
         siteListBox.autoSizeAllColumns();
     }
 
+    /**
+     * Add a site row.
+     * @param site
+     */
     private void addSiteRow(Site site) {
-        Object[] objects = getSiteRow(site);
-        siteListBox.addRow(objects, site.getElementId());
-        siteListBox.autoSizeAllColumns();
+        updateSiteRow(site);
     }
 
     public void setModelAndController(IModel inModel, IController inController) {
         super.setModelAndController(inModel, inController);
         
         getModel().addSiteListener(new SiteListenerImplementation());
-
+        
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 reloadListBox();
@@ -495,17 +508,9 @@ public class SitesPanel extends JPanePlugin {
         
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                int siteNumber = site.getSiteNumber();
-                int numRows = siteListBox.getRowCount();
-
-                if (siteNumber <= numRows) {
-                    updateSiteRow(site);
-                } else {
-                    insertSiteRow(site);
-                }
+                updateSiteRow(site);
             }
         });
-            
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
