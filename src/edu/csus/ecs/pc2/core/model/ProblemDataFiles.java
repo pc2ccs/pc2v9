@@ -31,6 +31,8 @@ public class ProblemDataFiles implements IElementObject {
     private ElementId elementId = new ElementId("ProblemDF");
 
     private ElementId problemId = null;
+    
+    private SerializedFile validatorFile;
 
     public ProblemDataFiles(Problem problem) {
         problemId = problem.getElementId();
@@ -165,6 +167,14 @@ public class ProblemDataFiles implements IElementObject {
 
     protected void setProblemId(ElementId problemId) {
         this.problemId = problemId;
+    }
+
+    public SerializedFile getValidatorFile() {
+        return validatorFile;
+    }
+
+    public void setValidatorFile(SerializedFile validatorFile) {
+        this.validatorFile = validatorFile;
     }
 
 }
