@@ -553,7 +553,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                         sendLoginFailure(packet.getSourceId(), connectionHandlerID, message);
                     }
                 } else {
-                    // Security Failure
+                    // Security Failure??
 
                     if (clientId.getClientType().equals(Type.SERVER)) {
                         // Packet from a server.
@@ -594,7 +594,16 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                             PacketFactory.dumpPacket(System.err, packet);
                         }
                         return;
-                    }
+                    } else if ( clientId.getClientType().equals(Type.ADMINISTRATOR)) {
+                        
+                        // TODO code security kluge admin 
+                        // TODO KLUDGE HUGE KLUDGE - this block allows any admin to update stuff.
+                        
+                        // TODO code security double check by checking their clientId and
+                        // their connection id against what we have in the model.
+                        processPacket(packet, connectionHandlerID);
+                        
+                    } else {
                     // else
                     // We don't know why they send us these things...
 
@@ -602,6 +611,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                     info(message + " on " + connectionHandlerID);
                     PacketFactory.dumpPacket(System.err, packet);
                     sendSecurityVioation(clientId, connectionHandlerID, message);
+                    } 
                 }
             } else {
                 info("receiveObject(S,C): Unsupported class received: " + object);
