@@ -86,9 +86,6 @@ public class TeamView extends JFrame implements UIPlugin {
         FrameUtilities.centerFrame(this);
         setTitle("PC^2 Team - Not Logged In ");
 
-        if (logWindow == null) {
-            logWindow = new LogWindow();
-        }
     }
 
     protected void promptAndExit() {
@@ -192,6 +189,12 @@ public class TeamView extends JFrame implements UIPlugin {
     public void setModelAndController(IModel inModel, IController inController) {
         this.model = inModel;
         this.teamController = inController;
+        
+        if (logWindow == null) {
+            logWindow = new LogWindow();
+        }
+        logWindow.setModelAndController(model, teamController);
+        logWindow.setTitle("Log "+model.getClientId().toString());
         
         model.addContestTimeListener(new ContestTimeListenerImplementation());
 
