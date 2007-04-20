@@ -136,7 +136,6 @@ public class Executable {
         this.controller = inController;
         this.runFiles = runFiles;
         this.run = run;
-        initialize();
         language = inModel.getLanguage(run.getLanguageId());
         problem = inModel.getProblem(run.getProblemId());
 
@@ -148,17 +147,16 @@ public class Executable {
      */
     private void initialize() {
 
-        log = controller.getLog();
-
         this.executorId = model.getClientId();
         
         mainFileDirectory = getDirName(runFiles.getMainFile());
         executeDirectoryName = getExecuteDirectoryName();
-
+        
+        log = controller.getLog();
 
         // TODO code when model.getProblemDataFiles is implemented.
-        SecurityException dougsTodoException = new SecurityException ("TODO - must code model.getProblemDataFiles for this to work -- dal ");
-        throw dougsTodoException;
+        log.log(Log.WARNING, " Judge's execute will not work until  model.getProblemDataFiles(problem) is implemented, you've been warned");
+        
 //         if (executorId.getClientType() != ClientType.Type.TEAM) {
 //             this.problemDataFiles = model.getProblemDataFiles(problem);
 //         }
