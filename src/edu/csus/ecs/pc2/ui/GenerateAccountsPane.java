@@ -265,6 +265,9 @@ public class GenerateAccountsPane extends JPanePlugin {
 
         try {
             int startNumber = getIntegerValue(startNumberTextField.getText());
+            if (startNumber < 1){
+                startNumber = 1;
+            }
             
             int count = getIntegerValue(adminCountTextField.getText());
             if (count > 0) {
