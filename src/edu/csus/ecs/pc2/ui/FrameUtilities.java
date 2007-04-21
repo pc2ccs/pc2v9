@@ -133,5 +133,21 @@ public final class FrameUtilities {
                 null, options, options[2]);
         return result;
     }
+    
+    /**
+     * Create this lovely window with full height of screen
+     */
+    public static void centerFrameFullScreenHeight(Component component) {
+        java.awt.Dimension screenDim = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+
+        Dimension currDim = component.getSize();
+
+        int newHeight = screenDim.height - 120; // save some pixels on top and bottom
+
+        component.setSize(currDim.getSize().width, newHeight);
+
+        component.setLocation(screenDim.width / 2 - component.getSize().width / 2, screenDim.height / 2 - component.getSize().height / 2);
+
+    }
 
 }
