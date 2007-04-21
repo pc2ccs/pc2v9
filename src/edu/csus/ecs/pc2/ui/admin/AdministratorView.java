@@ -14,6 +14,7 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.ui.AccountsPane;
 import edu.csus.ecs.pc2.ui.ClarificationsPane;
 import edu.csus.ecs.pc2.ui.ContestTimesPane;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
@@ -119,6 +120,9 @@ public class AdministratorView extends JFrame implements UIPlugin {
                 
                 GenerateAccountsPane generateAccountsPane = new GenerateAccountsPane();
                 addUIPlugin(getMainTabbedPanel(), "Generate", generateAccountsPane);
+                
+                AccountsPane accountsPane = new AccountsPane();
+                addUIPlugin(getMainTabbedPanel(), "Accounts", accountsPane);
                 
                 InfoPane infoPane = new InfoPane();
                 addUIPlugin(getMainTabbedPanel(), "Dev", infoPane);
