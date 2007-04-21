@@ -13,6 +13,7 @@ import java.util.Vector;
 import javax.swing.JOptionPane;
 
 import edu.csus.ecs.pc2.VersionInfo;
+import edu.csus.ecs.pc2.core.list.ClarificationComparator;
 import edu.csus.ecs.pc2.core.list.ContestTimeComparator;
 import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
@@ -148,7 +149,7 @@ public class InternalDump {
             // Clarifications
             log.println();
             Clarification [] clarifications = model.getClarifications();
-//            Arrays.sort(clarifications, new ClarifcationComparator());
+            Arrays.sort(clarifications, new ClarificationComparator());
             log.println("-- " + clarifications.length + " clarifications --");
             for (Clarification clarification : clarifications) {
                 log.println("  " + clarification);
