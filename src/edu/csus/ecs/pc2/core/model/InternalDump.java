@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core.model;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -15,8 +16,11 @@ import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.list.ContestTimeComparator;
 import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
+import edu.csus.ecs.pc2.ui.FrameUtilities;
+import edu.csus.ecs.pc2.ui.MultipleFileViewer;
 
 /**
  * Internal Dump of model information.
@@ -36,18 +40,30 @@ public class InternalDump {
     }
     
     /**
-     * view the input file
+     * view the file.
+     * 
+     * If editor not found will put up a multiplefileviewer.
      * 
      * @param dumpFileName
      */
     protected void viewFile(String dumpFileName) {
         String editorName = editorNameFullPath;
-        String command = editorName + " " + dumpFileName;
-        try {
-            Runtime.getRuntime().exec(command);
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(null, "Unable to run command " + command + " " + e.getMessage());
-            e.printStackTrace();
+        File f = new File(editorName);
+        if (!f.exists()) {
+            Log log = new Log("viewFile");
+            MultipleFileViewer multipleFileViewer = new MultipleFileViewer(log);
+            multipleFileViewer.addFilePane("Internal Dump", dumpFileName);
+            FrameUtilities.centerFrameFullScreenHeight(multipleFileViewer);
+            multipleFileViewer.setVisible(true);
+        } else {
+
+            String command = editorName + " " + dumpFileName;
+            try {
+                Runtime.getRuntime().exec(command);
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(null, "Unable to run command " + command + " " + e.getMessage());
+                e.printStackTrace();
+            }
         }
     }
 
