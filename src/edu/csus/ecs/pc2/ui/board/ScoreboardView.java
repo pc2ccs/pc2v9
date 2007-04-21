@@ -7,7 +7,11 @@ import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.model.IModel;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
+import edu.csus.ecs.pc2.ui.JPanePlugin;
+import edu.csus.ecs.pc2.ui.LogWindow;
+import edu.csus.ecs.pc2.ui.OptionsPanel;
 import edu.csus.ecs.pc2.ui.UIPlugin;
+import javax.swing.JTabbedPane;
 
 /**
  * This class is the default scoreboard view (frame).
@@ -31,6 +35,10 @@ public class ScoreboardView extends JFrame implements UIPlugin {
     @SuppressWarnings("unused")
     private IController controller;
 
+    private LogWindow logWindow = null;
+
+    private JTabbedPane mainTabbedPane = null;
+
     /**
      * This method initializes
      * 
@@ -45,7 +53,8 @@ public class ScoreboardView extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(405, 227));
+        this.setSize(new java.awt.Dimension(405, 296));
+        this.setContentPane(getMainTabbedPane());
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setTitle("Scoreboard");
 
@@ -72,11 +81,38 @@ public class ScoreboardView extends JFrame implements UIPlugin {
 
         setTitle("PC^2 " + model.getTitle() + " Build " + new VersionInfo().getBuildNumber());
 
+        if (logWindow == null) {
+            logWindow = new LogWindow();
+        }
+        logWindow.setModelAndController(model, controller);
+        logWindow.setTitle("Log " + model.getClientId().toString());
+
+        OptionsPanel optionsPanel = new OptionsPanel();
+        addUIPlugin(mainTabbedPane, "Options", optionsPanel);
+        optionsPanel.setLogWindow(logWindow);
+
         setVisible(true);
     }
 
     public String getPluginTitle() {
         return "Scoreboard View";
+    }
+
+    protected void addUIPlugin(JTabbedPane tabbedPane, String tabTitle, JPanePlugin plugin) {
+        plugin.setModelAndController(model, controller);
+        tabbedPane.add(plugin, tabTitle);
+    }
+
+    /**
+     * This method initializes mainTabbedPane
+     * 
+     * @return javax.swing.JTabbedPane
+     */
+    private JTabbedPane getMainTabbedPane() {
+        if (mainTabbedPane == null) {
+            mainTabbedPane = new JTabbedPane();
+        }
+        return mainTabbedPane;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
