@@ -21,6 +21,7 @@ import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
 import edu.csus.ecs.pc2.ui.LogWindow;
 import edu.csus.ecs.pc2.ui.RunsPanel;
+import edu.csus.ecs.pc2.ui.SubmitClarificationPane;
 import edu.csus.ecs.pc2.ui.SubmitRunPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
@@ -206,6 +207,9 @@ public class TeamView extends JFrame implements UIPlugin {
         
         ClarificationsPane clarificationsPane = new ClarificationsPane();
         addUIPlugin(getMainTabbedPane(), "View Clarifications", clarificationsPane);
+        
+        SubmitClarificationPane submitClarificationPane = new SubmitClarificationPane();
+        addUIPlugin(getMainTabbedPane(), "Request Clarification", submitClarificationPane);
         
         updateFrameTitle(model.getContestTime().isContestRunning());
         

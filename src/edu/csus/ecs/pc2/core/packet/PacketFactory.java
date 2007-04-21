@@ -671,16 +671,17 @@ public final class PacketFactory {
     }
 
     /**
-     * Create a packet of {@link PacketType.Type#CLAR_SUBMISSION}.
+     * Create a packet of {@link PacketType.Type#CLARIFICATION_SUBMISSION}.
      * 
      * @param source
      * @param destination
      * @param clarification2
      */
-    public static Packet createClarSubmission(ClientId source, ClientId destination, Clarification clarification2) {
+    public static Packet createClarificationSubmission(ClientId source, ClientId destination, Clarification clarification2) {
         Properties prop = new Properties();
+        prop.put(CLIENT_ID, source);
         prop.put(CLARIFICATION, clarification2);
-        Packet packet = new Packet(Type.CLAR_SUBMISSION, source, destination, prop);
+        Packet packet = new Packet(Type.CLARIFICATION_SUBMISSION, source, destination, prop);
         return packet;
     }
 

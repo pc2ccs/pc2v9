@@ -223,7 +223,7 @@ public final class PacketType implements Serializable {
          * From judge to server <br>
          * Contents: ClarificationData
          */
-        CLAR_SUBMISSION,
+        CLARIFICATION_SUBMISSION,
 
         // CLAR_UPDATED - there is no Admin update feature for clars, but if
         // there were...

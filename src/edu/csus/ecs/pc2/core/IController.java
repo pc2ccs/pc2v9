@@ -108,5 +108,12 @@ public interface IController {
      * @param active
      */
     void generateNewAccounts(String clientTypeName, int count, int startNumber, boolean active);
+
+    /**
+     * Submit a clarification.
+     * @param problem
+     * @param question
+     */
+    void submitClarification(Problem problem, String question);
     
 }

@@ -9,6 +9,7 @@ import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
+import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestTime;
@@ -1296,6 +1297,16 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     public void generateNewAccounts(String clientTypeName, int count, int startNumber, boolean active) {
         generateNewAccounts(clientTypeName, model.getSiteNumber(), count, startNumber, active);
         
+    }
+
+    public void submitClarification(Problem problem, String question) {
+
+        ClientId serverClientId = new ClientId(model.getSiteNumber(), Type.SERVER, 0);
+        Clarification clarification = new Clarification(model.getClientId(), problem, question);
+
+        Packet packet = PacketFactory.createClarificationSubmission(model.getClientId(), serverClientId, clarification);
+
+        sendToServer(packet);
     }
 
 }
