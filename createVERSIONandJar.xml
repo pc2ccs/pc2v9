@@ -1,0 +1,135 @@
+<?xml version="1.0"?>
+<project name="v9VersionAndJarBuild" default="jar" basedir=".">	
+<!-- $Id$ -->
+<!-- $HeadURL$ -->
+<!-- 
+
+Purpose: Create of dist/pc2.jar and VERSION file, no testing, no code style, 
+just a .jar file that can be used for unit testing using
+pc2.jar (instead of inside eclipse).
+
+Dependencies: define JAVA_HOME to point to java directory,
+$JAVA_HOME/bin/java.exe should exist.
+
+To Use this:
+  To run/use this file, insure JAVA_HOME is defined and
+  then Run As... Ant Build
+  
+dal
+  
+-->
+	<description>
+         simple v9 build of pc2.jar and create VERSION file for testing.
+    </description>
+	<!-- set global properties for this build -->
+	<property name="src.dir" location="src" />
+	<property name="test.dir" location="test" />
+	<property name="build.dir" location="build" />
+	<property name="build.prod.dir" location="${build.dir}/prod" />
+	<property name="build.test.dir" location="${build.dir}/test" />
+	<property name="test.xml.dir" location="${build.dir}/test-results" />
+	<property name="docs.dir" location="${build.dir}/docs" />
+	<property name="dist.dir" location="dist" />
+	<!-- this should change one the location of mclb.jar changes -->
+	<property name="vendor.lib.dir" location="${basedir}/vendor/lib" />
+	<property name="scripts.dir" location="${basedir}" />
+	<property name="samps.dir" location="${basedir}/samps" />
+
+	<!-- Compiler settings. -->
+	<property name="javacFailOnError" value="false" />
+	<property name="javacDebugInfo" value="on" />
+	<property name="javacVerbose" value="false" />
+	<property name="logExtension" value=".log" />
+	<property name="compilerArg" value="" />
+	<property name="javacSource" value="1.5" />
+	<property name="javacTarget" value="1.5" />
+	<path id="path_bootclasspath">
+		<fileset dir="${java.home}/lib">
+			<include name="*.jar" />
+		</fileset>
+		<fileset dir="${vendor.lib.dir}">
+			<include name="*.jar" />
+		</fileset>
+	</path>
+
+	<property name="bootclasspath" refid="path_bootclasspath" />
+	<property name="bundleJavacSource" value="${javacSource}" />
+	<property name="bundleJavacTarget" value="${javacTarget}" />
+	<property name="bundleBootClasspath" value="${bootclasspath}" />
+
+	<property name="name" value="pc2" />
+	<property name="jar.name" value="${name}.jar" />
+	<property name="jar.path" value="${dist.dir}/${jar.name}" />
+
+	<tstamp>
+		<format property="date" pattern="yyyyMMdd" timezone="UTC" />
+	</tstamp>
+	<tstamp>
+		<format property="time" pattern="HHmm" timezone="UTC" />
+	</tstamp>
+	<property name="timestamp" value="${date}${time}" />
+	<!-- version is used in the jar manifest & in package.xml -->
+	<property name="version" value="9_0_${timestamp}" />
+
+	<target name="properties">
+		<available classname="org.eclipse.jdt.core.JDTCompilerAdapter" property="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter" />
+	</target>
+
+	<target name="init" depends="properties">
+		<!-- Create the time stamp -->
+		<tstamp />
+		<!-- Create the build directory structure used by compile -->
+		<mkdir dir="${build.prod.dir}" />
+		<mkdir dir="${build.test.dir}" />
+		<property name="repo.version" value="9" />
+	</target>
+
+	<target name="compile" depends="init" description="compile the source ">
+		<!-- Compile the java code from ${src.dir} into ${build.dir} -->
+		<javac srcdir="${src.dir}" destdir="${build.prod.dir}" failonerror="${javacFailOnError}" verbose="${javacVerbose}" debug="${javacDebugInfo}" includeAntRuntime="no" bootclasspath="${bundleBootClasspath}" source="${bundleJavacSource}" target="${bundleJavacTarget}">
+			<compilerarg line="${compilerArg}" compiler="${build.compiler}" />
+			<!-- classpath refid="project.classpath" /> -->
+			<!-- <compilerarg value="" compiler="org.eclipse.jdt.core.JDTCompilerAdapter"/> -->
+			<compilerarg line="-log '${build.dir}/${name}.prod${logExtension}'" compiler="org.eclipse.jdt.core.JDTCompilerAdapter" />
+		</javac>
+	</target>
+
+
+	<target name="jar" depends="compile" description="creates a jar of our classes">
+		<mkdir dir="${dist.dir}" />
+
+		<!-- consider doing the manifest in a separate target
+             then the Version can be ommitted if not set -->
+		<jar jarfile="${jar.path}" basedir="${build.prod.dir}">
+			<manifest>
+				<attribute name="Version" value="${version}" />
+				<attribute name="Package-Title" value="CSUS Programming Contest Control System" />
+				<attribute name="Package-Version" value="${repo.version}" />
+			</manifest>
+		</jar>
+		<tstamp>
+			<format property="longdate" pattern="EEEE, MMMM dd yyyy" timezone="UTC" />
+		</tstamp>
+		<tstamp>
+			<format property="miltime" pattern="HH:mm" timezone="UTC" />
+		</tstamp>
+		<tstamp>
+			<format property="millisecond" pattern="S" timezone="UTC" />
+		</tstamp>
+		<echo file="VERSION" message="CSUS Programming Contest Control System&#13;&#10;" />
+		<echo file="VERSION" message="Version ${repo.version} ${date} ${millisecond} (${longdate} ${miltime} UTC)" append="true" />
+		<echo>VERSION file is</echo>
+		<echo message="CSUS Programming Contest Control System&#13;&#10;" />
+		<echo message="Version ${repo.version} ${date} ${millisecond} (${longdate} ${miltime} UTC)" append="true" />
+	</target>
+
+	<target name="clean" description="clean up">
+		<!-- Delete the ${build.dir} and ${dist.dir} directory trees -->
+		<delete dir="${build.dir}" />
+		<delete dir="${dist.dir}" />
+	</target>
+
+
+</project>
+
+
