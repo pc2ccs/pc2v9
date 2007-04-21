@@ -1,31 +1,23 @@
 package edu.csus.ecs.pc2.ui.judge;
 
-import java.awt.BorderLayout;
+import java.util.logging.Logger;
 
-import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
-import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
-import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.core.model.IModel;
-import edu.csus.ecs.pc2.core.model.IRunListener;
-import edu.csus.ecs.pc2.core.model.Run;
-import edu.csus.ecs.pc2.core.model.RunEvent;
+import edu.csus.ecs.pc2.ui.ClarificationsPane;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
 import edu.csus.ecs.pc2.ui.LogWindow;
+import edu.csus.ecs.pc2.ui.OptionsPanel;
 import edu.csus.ecs.pc2.ui.RunsPanel;
 import edu.csus.ecs.pc2.ui.SubmitRunPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
-import javax.swing.JCheckBox;
 
 /**
  * Judge GUI.
@@ -48,25 +40,13 @@ public class JudgeView extends JFrame implements UIPlugin {
 
     private JTabbedPane mainTabbedPane = null;
 
-    private JPanel statusPane = null;
-
-    private JScrollPane scrollPane = null;
-
-    private JList runListBox = null;
-
-    private DefaultListModel runListModel = new DefaultListModel(); // @jve:decl-index=0:visual-constraint=""
-
-    private JPanel jPanel = null;
-
-    private JCheckBox showLogWindowCheckBox = null;
-
     private LogWindow logWindow = null;
+
+    private Logger log;
     
     public JudgeView() {
         super();
         initialize();
-
-        updateListBox(getPluginTitle() + " Build " + new VersionInfo().getBuildNumber());
     }
 
     /**
@@ -86,9 +66,6 @@ public class JudgeView extends JFrame implements UIPlugin {
         });
         FrameUtilities.centerFrame(this);
 
-        if (logWindow == null) {
-            logWindow = new LogWindow();
-        }
     }
 
     protected void promptAndExit() {
@@ -100,29 +77,6 @@ public class JudgeView extends JFrame implements UIPlugin {
     }
 
     /**
-     * 
-     * @author pc2@ecs.csus.edu
-     */
-    private class RunListenerImplementation implements IRunListener {
-
-        public void runAdded(RunEvent event) {
-            updateListBox("Added run " + event.getRun());
-        }
-
-        public void runChanged(RunEvent event) {
-            updateListBox(event.getRun() + " CHANGED ");
-        }
-
-        public void runRemoved(RunEvent event) {
-            updateListBox(event.getRun() + " REMOVED ");
-        }
-    }
-
-    private void updateListBox(String string) {
-        getRunListModel().addElement(string);
-    }
-
-    /**
      * This method initializes mainTabbedPane
      * 
      * @return javax.swing.JTabbedPane
@@ -130,27 +84,10 @@ public class JudgeView extends JFrame implements UIPlugin {
     private JTabbedPane getMainTabbedPane() {
         if (mainTabbedPane == null) {
             mainTabbedPane = new JTabbedPane();
-            mainTabbedPane.addTab("debug", null, getStatusPane(), null);
-            mainTabbedPane.addTab("Option", null, getJPanel(), null);
         }
         return mainTabbedPane;
     }
 
-    /**
-     * This method initializes allRunsPane
-     * 
-     * @return javax.swing.JPanel
-     */
-    private JPanel getStatusPane() {
-        if (statusPane == null) {
-            statusPane = new JPanel();
-            statusPane.setLayout(new BorderLayout());
-            statusPane.add(getScrollPane(), java.awt.BorderLayout.NORTH);
-            statusPane.add(getRunListBox(), java.awt.BorderLayout.CENTER);
-        }
-        return statusPane;
-    }
-    
     protected void addUIPlugin(JTabbedPane tabbedPane, String tabTitle, JPanePlugin plugin) {
 
         plugin.setModelAndController(model, controller);
@@ -158,43 +95,6 @@ public class JudgeView extends JFrame implements UIPlugin {
 
     }
 
-
-    /**
-     * This method initializes scrollPane
-     * 
-     * @return javax.swing.JScrollPane
-     */
-    private JScrollPane getScrollPane() {
-        if (scrollPane == null) {
-            scrollPane = new JScrollPane();
-        }
-        return scrollPane;
-    }
-
-    /**
-     * This method initializes runListBox
-     * 
-     * @return javax.swing.JList
-     */
-    private JList getRunListBox() {
-        if (runListBox == null) {
-            runListBox = new JList();
-            runListBox.setModel(runListModel);
-        }
-        return runListBox;
-    }
-
-    /**
-     * This method initializes runListModel1
-     * 
-     * @return javax.swing.DefaultListModel
-     */
-    private DefaultListModel getRunListModel() {
-        if (runListModel == null) {
-            runListModel = new DefaultListModel();
-        }
-        return runListModel;
-    }
 
     private void setFrameTitle(final boolean contestStarted) {
         SwingUtilities.invokeLater(new Runnable() {
@@ -213,117 +113,36 @@ public class JudgeView extends JFrame implements UIPlugin {
         return siteNumber == model.getSiteNumber();
     }
 
-    /**
-     * 
-     * @author pc2@ecs.csus.edu
-     * 
-     */
-    private class ContestTimeListenerImplementation implements IContestTimeListener {
-
-        public void contestTimeAdded(ContestTimeEvent event) {
-            updateListBox("ContestTime site " + event.getSiteNumber() + " ADDED " + event.getContestTime().getElapsedTimeStr());
-            if (isThisSite(event.getSiteNumber())) {
-                setFrameTitle(event.getContestTime().isContestRunning());
-            }
-        }
-
-        public void contestTimeRemoved(ContestTimeEvent event) {
-            updateListBox("ContestTime site " + event.getSiteNumber() + " REMOVED ");
-        }
-
-        public void contestTimeChanged(ContestTimeEvent event) {
-            updateListBox("ContestTime site " + event.getSiteNumber() + " CHANGED ");
-        }
-
-        public void contestStarted(ContestTimeEvent event) {
-            updateListBox("ContestTime site " + event.getSiteNumber() + " STARTED " + event.getContestTime().getElapsedTimeStr());
-            if (isThisSite(event.getSiteNumber())) {
-                setFrameTitle(event.getContestTime().isContestRunning());
-            }
-        }
-
-        public void contestStopped(ContestTimeEvent event) {
-            updateListBox("ContestTime site " + event.getSiteNumber() + " STOPPED " + event.getContestTime().getElapsedTimeStr());
-            if (isThisSite(event.getSiteNumber())) {
-                setFrameTitle(event.getContestTime().isContestRunning());
-            }
-        }
-    }
-
     public void setModelAndController(IModel inModel, IController inController) {
         this.model = inModel;
         this.controller = inController;
-
-        model.addRunListener(new RunListenerImplementation());
-        model.addContestTimeListener(new ContestTimeListenerImplementation());
-        // TODO add langauge and problem listeners
-        // model.addLanguageListener(new LanguageListenerImplementation());
-        // model.addProblemListener(new ProblemListenerImplementation());
-
-        // TODO add listeners for accounts, login and site.
-
-        // model.addAccountListener(new AccountListenerImplementation());
-        // model.addLoginListener(new LoginListenerImplementation());
-        // model.addSiteListener(new SiteListenerImplementation());
+        
+        log = controller.getLog();
+        
+        if (logWindow == null) {
+            logWindow = new LogWindow();
+        }
+        logWindow.setModelAndController(model, controller);
+        logWindow.setTitle("Log "+model.getClientId().toString());
 
         setFrameTitle(model.getContestTime().isContestRunning());
         
         RunsPanel runsPanel = new RunsPanel();
-        addUIPlugin(mainTabbedPane, "All Runs", runsPanel);
-        
+        addUIPlugin(getMainTabbedPane(), "All Runs", runsPanel);
+
+        ClarificationsPane clarificationsPane = new ClarificationsPane();
+        addUIPlugin(getMainTabbedPane(), "All clarifications", clarificationsPane);
+
         SubmitRunPane submitRunPane = new SubmitRunPane();
         addUIPlugin(getMainTabbedPane(), "Test Run", submitRunPane);
-
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                populateGUI();
-            }
-        });
-    }
-
-    private void populateGUI() {
-
-        for (Run run : model.getRuns()) {
-            updateListBox("Existing run " + run);
-        }
-
-        updateListBox("Contest Time elapsed: " + model.getContestTime().getElapsedTimeStr());
-
+        
+        OptionsPanel optionsPanel = new OptionsPanel();
+        addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
+        optionsPanel.setLogWindow(logWindow);
     }
 
     public String getPluginTitle() {
         return "Judge Main GUI";
-    }
-
-    /**
-     * This method initializes jPanel
-     * 
-     * @return javax.swing.JPanel
-     */
-    private JPanel getJPanel() {
-        if (jPanel == null) {
-            jPanel = new JPanel();
-            jPanel.add(getShowLogWindowCheckBox(), null);
-        }
-        return jPanel;
-    }
-
-    /**
-     * This method initializes jCheckBox
-     * 
-     * @return javax.swing.JCheckBox
-     */
-    private JCheckBox getShowLogWindowCheckBox() {
-        if (showLogWindowCheckBox == null) {
-            showLogWindowCheckBox = new JCheckBox();
-            showLogWindowCheckBox.setText("Show Log");
-            showLogWindowCheckBox.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    showLog(showLogWindowCheckBox.isSelected());
-                }
-            });
-        }
-        return showLogWindowCheckBox;
     }
 
     protected void showLog(boolean showLogWindow) {
