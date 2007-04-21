@@ -921,7 +921,7 @@ public final class PacketFactory {
      * @param isActive
      * @return
      */
-    public static Packet createGenerateAccounts(ClientId source, ClientId destination, int siteNumber, ClientType.Type type, int startNumber, int count, boolean isActive) {
+    public static Packet createGenerateAccounts(ClientId source, ClientId destination, int siteNumber, ClientType.Type type, int count, int startNumber, boolean isActive) {
         Properties prop = new Properties();
         prop.put(CLIENT_TYPE, type);
         prop.put(SITE_NUMBER, new Integer(siteNumber));
