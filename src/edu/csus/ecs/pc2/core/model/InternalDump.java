@@ -13,6 +13,7 @@ import java.util.Vector;
 import javax.swing.JOptionPane;
 
 import edu.csus.ecs.pc2.VersionInfo;
+import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.ClarificationComparator;
 import edu.csus.ecs.pc2.core.list.ContestTimeComparator;
 import edu.csus.ecs.pc2.core.list.RunComparator;
@@ -31,15 +32,15 @@ import edu.csus.ecs.pc2.ui.MultipleFileViewer;
 
 // $HeadURL$
 public class InternalDump {
-    
+
     private String editorNameFullPath =   "/windows/vi.bat";
-    
+
     private IModel model;
-    
+
     public InternalDump(IModel model){
         this.model = model;
     }
-    
+
     /**
      * view the file.
      * 
@@ -87,10 +88,12 @@ public class InternalDump {
 
     /**
      * Generate report file.
-     * @param filename output filename
+     * 
+     * @param filename
+     *            output filename
      * @return the filename if successful output, null if not.
      */
-    public String generateReportFile (String filename) {
+    public String generateReportFile(String filename) {
 
         try {
             PrintWriter log = new PrintWriter(new FileOutputStream(filename, false), true);
@@ -98,18 +101,32 @@ public class InternalDump {
             log.println("Date: " + new Date());
             log.println(new VersionInfo().getSystemVersionInfo());
 
+            Vector<Account> allAccounts = new Vector<Account>();
+
             log.println();
             log.println("-- Accounts --");
             for (ClientType.Type ctype : ClientType.Type.values()) {
                 if (model.getAccounts(ctype).size() > 0) {
                     log.println("Accounts " + ctype.toString() + " there are " + model.getAccounts(ctype).size());
                     Vector<Account> accounts = model.getAccounts(ctype);
+                    allAccounts.addAll(accounts);
                     for (int i = 0; i < accounts.size(); i++) {
                         Account account = accounts.elementAt(i);
-                        log.println("   " + account+" Site "+account.getClientId().getSiteNumber()+" id="+account.getElementId());
+                        log.println("   " + account + " Site " + account.getClientId().getSiteNumber() + " id=" + account.getElementId());
                     }
                 }
             }
+
+            Account[] accountList = (Account[]) allAccounts.toArray(new Account[allAccounts.size()]);
+            Arrays.sort(accountList, new AccountComparator());
+            
+            log.println();
+            log.println("-- "+accountList.length+" Accounts --");
+            for (int i = 0; i < accountList.length; i++) {
+                Account account = accountList[i];
+                log.println("   " + account + " Site " + account.getClientId().getSiteNumber() + " id=" + account.getElementId());
+            }
+
 
             // Sites
             log.println();
@@ -120,21 +137,21 @@ public class InternalDump {
                 String hostName = site1.getConnectionInfo().getProperty(Site.IP_KEY);
                 String portStr = site1.getConnectionInfo().getProperty(Site.PORT_KEY);
 
-                log.println("Site " + site1.getSiteNumber() + " " + hostName + ":" + portStr + " " + site1.getDisplayName() + "/" + site1.getPassword()+" id="+site1.getElementId());
+                log.println("Site " + site1.getSiteNumber() + " " + hostName + ":" + portStr + " " + site1.getDisplayName() + "/" + site1.getPassword() + " id=" + site1.getElementId());
             }
 
             // Problem
             log.println();
             log.println("-- " + model.getProblems().length + " problems --");
             for (Problem problem : model.getProblems()) {
-                log.println("  Problem " + problem+" id="+problem.getElementId());
+                log.println("  Problem " + problem + " id=" + problem.getElementId());
             }
 
             // Language
             log.println();
             log.println("-- " + model.getLanguages().length + " languages --");
             for (Language language : model.getLanguages()) {
-                log.println("  Language " + language+" id="+language.getElementId());
+                log.println("  Language " + language + " id=" + language.getElementId());
             }
 
             // Runs
@@ -148,7 +165,7 @@ public class InternalDump {
 
             // Clarifications
             log.println();
-            Clarification [] clarifications = model.getClarifications();
+            Clarification[] clarifications = model.getClarifications();
             Arrays.sort(clarifications, new ClarificationComparator());
             log.println("-- " + clarifications.length + " clarifications --");
             for (Clarification clarification : clarifications) {
@@ -175,7 +192,7 @@ public class InternalDump {
                 log.println("  Site " + contestTime.getSiteNumber() + " " + state + " " + contestTime.getElapsedTimeStr() + " " + contestTime.getRemainingTimeStr() + " "
                         + contestTime.getContestLengthStr());
             }
-            
+
             // Logins
             log.println();
             log.println("-- Logins -- ");
@@ -187,15 +204,15 @@ public class InternalDump {
                     while (enumeration.hasMoreElements()) {
                         ClientId aClientId = (ClientId) enumeration.nextElement();
                         ConnectionHandlerID connectionHandlerID = model.getConnectionHandleID(aClientId);
-                        log.println("   " + aClientId+" on "+connectionHandlerID);
+                        log.println("   " + aClientId + " on " + connectionHandlerID);
                     }
                 }
             }
-            
+
             // Connections
             log.println();
-            ConnectionHandlerID [] connectionHandlerIDs = model.getConnectionHandleIDs();
-//            Arrays.sort(connectionHandlerIDs, new ConnectionHanlderIDComparator());
+            ConnectionHandlerID[] connectionHandlerIDs = model.getConnectionHandleIDs();
+            // Arrays.sort(connectionHandlerIDs, new ConnectionHanlderIDComparator());
             log.println("-- " + connectionHandlerIDs.length + " Connections --");
             for (ConnectionHandlerID connectionHandlerID : connectionHandlerIDs) {
                 log.println("  " + connectionHandlerID);
