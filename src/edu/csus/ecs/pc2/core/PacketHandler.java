@@ -531,7 +531,7 @@ public class PacketHandler {
             Run[] runs = (Run[]) PacketFactory.getObjectValue(packet, PacketFactory.RUN_LIST);
             if (runs != null) {
                 for (Run run : runs) {
-                    if (!isThisSite(run)) {
+                    if ( (!isServer()) || (!isThisSite(run))) {
                         model.addRun(run);
                     }
                 }
@@ -554,7 +554,8 @@ public class PacketHandler {
             Clarification[] clarifications = (Clarification[]) PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION_LIST);
             if (clarifications != null) {
                 for (Clarification clarification : clarifications) {
-                    if (!isThisSite(clarification)) {
+
+                    if ( (!isServer()) || (!isThisSite(clarification))) {
                         model.addClarification(clarification);
                     }
                 }
@@ -587,6 +588,20 @@ public class PacketHandler {
      */
     private void loadDataIntoModel(Packet packet, ConnectionHandlerID connectionHandlerID) {
 
+        ClientId clientId = null;
+
+        try {
+            clientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+            if (clientId != null) {
+                model.setClientId(clientId);
+            }
+        } catch (Exception e) {
+            // TODO: log handle exception
+            controller.getLog().log(Log.WARNING,"Exception logged ", e);
+        }
+
+        controller.setSiteNumber(clientId.getSiteNumber());
+        
         try {
             Language[] languages = (Language[]) PacketFactory.getObjectValue(packet, PacketFactory.LANGUAGE_LIST);
             if (languages != null) {
@@ -642,20 +657,6 @@ public class PacketHandler {
 
         addClarificationsToModel(packet);
 
-        ClientId clientId = null;
-
-        try {
-            clientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-            if (clientId != null) {
-                model.setClientId(clientId);
-            }
-        } catch (Exception e) {
-            // TODO: log handle exception
-            controller.getLog().log(Log.WARNING,"Exception logged ", e);
-        }
-
-        controller.setSiteNumber(clientId.getSiteNumber());
-
         if (model.isLoggedIn()) {
 
             // show main UI
@@ -709,7 +710,6 @@ public class PacketHandler {
             // TODO: log handle exception
             controller.getLog().log(Log.WARNING,"Exception logged ", e);
         }
-
     }
 
     /**
