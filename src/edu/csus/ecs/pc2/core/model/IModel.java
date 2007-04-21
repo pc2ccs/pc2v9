@@ -81,7 +81,7 @@ public interface IModel {
      * Add a run into the contest data, return updated Submitted Run.
      * 
      * @param submittedRun
-     * @return Submitted Run with id and timestamps
+     * @return Submitted Run with id and elapsedtime
      */
     Run acceptRun(Run submittedRun, RunFiles runFiles);
 
@@ -372,6 +372,14 @@ public interface IModel {
      * @param clarification
      */
     void addClarification(Clarification clarification);
+    
+    /**
+     * add new clarification onto server. 
+     * 
+     * @param clarification
+     * @return clarification with new id and timestamp.
+     */
+    Clarification acceptClarification (Clarification clarification);
 
     /**
      * remove clarification from model.

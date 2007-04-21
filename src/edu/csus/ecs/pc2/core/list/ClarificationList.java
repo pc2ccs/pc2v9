@@ -69,13 +69,21 @@ public class ClarificationList implements Serializable {
      * 
      * @param clarification
      */
-    public Clarification add(Clarification clarification) {
+    public Clarification addNewClarification (Clarification clarification) {
         clarification.setNumber(nextClarificationNumber++);
+        add(clarification);
+        return clarification;
+    }
+
+    /**
+     * Add clarification to list.
+     * @param clarification
+     */
+    public void add (Clarification clarification) {
         clarHash.put(getClarificationKey(clarification), clarification);
         if (saveToDisk) {
             writeToDisk();
         }
-        return clarification;
     }
 
     /**

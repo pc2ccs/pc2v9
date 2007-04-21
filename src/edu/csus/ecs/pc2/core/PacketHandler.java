@@ -80,7 +80,25 @@ public class PacketHandler {
 
             // Send to clients and servers
             sendToJudgesAndOthers( confirmPacket, true);
+            
+        } else if (packetType.equals(Type.CLARIFICATION_SUBMISSION)) {
+            // Clarification submitted by team to server
+            
+            Clarification submittedClarification = (Clarification)  PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION);
+            Clarification clarification = model.acceptClarification(submittedClarification);
+            
+            // Send to team
+            Packet confirmPacket = PacketFactory.createClarSubmissionConfirm(model.getClientId(), fromId, clarification);
+            controller.sendToClient(confirmPacket);
+            
+            // Send to clients and other servers
+            sendToJudgesAndOthers(confirmPacket, true);
 
+        } else if (packetType.equals(Type.CLARIFICATION_SUBMISSION_CONFIRM)) {
+            Clarification clarification = (Clarification)  PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION);
+            model.addClarification(clarification);
+            sendToJudgesAndOthers( packet, isThisSite(clarification));
+            
         } else if (packetType.equals(Type.LOGIN_FAILED)) {
             String message = PacketFactory.getStringValue(packet, PacketFactory.MESSAGE_STRING);
             model.loginDenied(packet.getDestinationId(), connectionHandlerID, message);

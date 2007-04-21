@@ -148,7 +148,7 @@ public class Model implements IModel {
             ClientId clientId = new ClientId(1, Type.ADMINISTRATOR, 1);
             String question = "Why is problem "+problemName+" so hard ?";
             Clarification clarification = new Clarification(clientId, problem, question);
-            addClarification(clarification);
+            acceptClarification(clarification);
         }
 
         Language language = createLanguageFromAutoFill(LanguageAutoFill.JAVATITLE);
@@ -404,9 +404,7 @@ public class Model implements IModel {
     }
 
     /**
-     * Accept Run, add new run onto server.
-     * 
-     * On Server, adds run to run list, increments run number.
+     * Accept Run, add new run into server.
      */
     public Run acceptRun (Run run, RunFiles runFiles) {
         run.setElapsedMins(getContestTime().getElapsedMins());
@@ -417,6 +415,20 @@ public class Model implements IModel {
         }
         addRun(newRun);
         return newRun;
+    }
+    
+    /**
+     * Accept Clarification, add run into this server.
+     * 
+     * @param clarification
+     * @return
+     */
+    public Clarification acceptClarification (Clarification clarification){
+        clarification.setElapsedMins(getContestTime().getElapsedMins());
+        clarification.setSiteNumber(getSiteNumber());
+        Clarification newClarification = clarificationList.addNewClarification(clarification);
+        addClarification(clarification);
+        return newClarification;
     }
     
     /**
