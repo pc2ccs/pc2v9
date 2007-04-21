@@ -2,8 +2,6 @@ package edu.csus.ecs.pc2.ui.server;
 
 import java.awt.BorderLayout;
 
-import javax.swing.DefaultListModel;
-import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -26,6 +24,7 @@ import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.InfoPane;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
 import edu.csus.ecs.pc2.ui.LogWindow;
+import edu.csus.ecs.pc2.ui.OptionsPanel;
 import edu.csus.ecs.pc2.ui.SitesPanel;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
@@ -53,13 +52,7 @@ public class ServerView extends JFrame implements UIPlugin {
 
     private JPanel mainViewPane = null;
 
-    private DefaultListModel runListModel = new DefaultListModel();
-
     private JTabbedPane mainTabbedPane = null;
-
-    private JPanel optionsPanel = null;
-
-    private JCheckBox showLogWindowCheckBox = null;
 
     private LogWindow logWindow = null;
 
@@ -236,19 +229,9 @@ public class ServerView extends JFrame implements UIPlugin {
     private JTabbedPane getMainTabbedPane() {
         if (mainTabbedPane == null) {
             mainTabbedPane = new JTabbedPane();
-            mainTabbedPane.addTab("Options", null, getOptionsPanel(), null);
         }
         return mainTabbedPane;
     }
-
-    private int getIntegerValue(String s) {
-        try {
-            return Integer.parseInt(s);
-        } catch (Exception e) {
-            return 0;
-        }
-    }
-
 
     public void setModelAndController(IModel inModel, IController inController) {
         this.model = inModel;
@@ -276,7 +259,10 @@ public class ServerView extends JFrame implements UIPlugin {
         
         InfoPane infoPane = new InfoPane();
         addUIPlugin(getMainTabbedPane(), "Dev", infoPane);
- 
+        
+        OptionsPanel optionsPanel = new OptionsPanel();
+        addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
+        optionsPanel.setLogWindow(logWindow);
 
     }
 
@@ -284,39 +270,6 @@ public class ServerView extends JFrame implements UIPlugin {
         return "Server Main GUI";
     }
 
-
-    /**
-     * This method initializes optionsPanel
-     * 
-     * @return javax.swing.JPanel
-     */
-    private JPanel getOptionsPanel() {
-        if (optionsPanel == null) {
-            optionsPanel = new JPanel();
-            optionsPanel.add(getShowLogWindowCheckBox(), null);
-        }
-        return optionsPanel;
-    }
-
-    /**
-     * This method initializes showLogWindowCheckBox
-     * 
-     * @return javax.swing.JCheckBox
-     */
-    private JCheckBox getShowLogWindowCheckBox() {
-        if (showLogWindowCheckBox == null) {
-            showLogWindowCheckBox = new JCheckBox();
-            showLogWindowCheckBox.setText("Show Log");
-            showLogWindowCheckBox.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    showLog(showLogWindowCheckBox.isSelected());
-                }
-
-            });
-
-        }
-        return showLogWindowCheckBox;
-    }
 
     protected void showLog(boolean showLogWindow) {
        logWindow.setVisible(showLogWindow);
