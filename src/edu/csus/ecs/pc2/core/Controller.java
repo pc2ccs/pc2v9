@@ -9,6 +9,7 @@ import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
+import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
@@ -18,6 +19,7 @@ import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
@@ -765,8 +767,29 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         Packet packetToSend = PacketFactory.createLoginSuccess( model.getClientId(), clientId, model.getContestTime(),
                 model.getContestTimes(), model.getSiteNumber(),
                 model.getLanguages(), model.getProblems(), model.getJudgements(), model.getSites(),
-                model.getRuns(), model.getClarifications(), allLoggedInUsers(), model.getConnectionHandleIDs());
+                model.getRuns(), model.getClarifications(), allLoggedInUsers(), model.getConnectionHandleIDs(),
+                getAllAccounts());
         sendToClient(packetToSend);
+    }
+
+    /**
+     * Return all accounts for all sites.
+     * 
+     * @return Array of all accounts in model.
+     */
+    private Account[] getAllAccounts() {
+
+        Vector<Account> allAccounts = new Vector<Account>();
+
+        for (ClientType.Type ctype : ClientType.Type.values()) {
+            if (model.getAccounts(ctype).size() > 0) {
+                Vector<Account> accounts = model.getAccounts(ctype);
+                allAccounts.addAll(accounts);
+            }
+        }
+
+        Account[] accountList = (Account[]) allAccounts.toArray(new Account[allAccounts.size()]);
+        return accountList;
     }
 
     public void connectionEstablished(ConnectionHandlerID connectionHandlerID) {
@@ -1290,7 +1313,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
     public void generateNewAccounts(String clientTypeName, int siteNumber, int count, int startNumber, boolean active) {
         ClientType.Type type = ClientType.Type.valueOf(clientTypeName);
-        Packet packet = PacketFactory.createGenerateAccounts(getServerClientId(), model.getClientId(), siteNumber, type, startNumber, count, active);
+        Packet packet = PacketFactory.createGenerateAccounts(getServerClientId(), model.getClientId(), siteNumber, type, count, startNumber,  active);
         sendToServer(packet);
     }
 

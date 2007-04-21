@@ -464,25 +464,24 @@ public class Model implements IModel {
      * @param count
      * @param active
      */
-    public void generateNewAccounts(String clientTypeName, int count, boolean active) {
-        generateNewAccounts(clientTypeName, count, 1, active);
+    public Vector<Account> generateNewAccounts(String clientTypeName, int count, boolean active) {
+        return generateNewAccounts(clientTypeName, count, 1, active);
     }
 
     /**
      * @see edu.csus.ecs.pc2.core.model.IModel#generateNewAccounts(java.lang.String, int, int, boolean)
      */
-    public void generateNewAccounts(String clientTypeName, int count, int startNumber, boolean active) {
+    public Vector<Account> generateNewAccounts(String clientTypeName, int count, int startNumber, boolean active) {
         ClientType.Type type = ClientType.Type.valueOf(clientTypeName.toUpperCase());
-        int numberAccounts = accountList.getAccounts(type, siteNumber).size();
 
-        accountList.generateNewAccounts(type, count, startNumber, PasswordType.JOE, siteNumber, active);
+        Vector<Account> newAccounts = accountList.generateNewAccounts(type, count, startNumber, PasswordType.JOE, siteNumber, active);
 
-        for (int i = 0; i < count; i++) {
-            ClientId nextClientId = new ClientId(siteNumber, type, 1 + i + numberAccounts);
-            Account account = accountList.getAccount(nextClientId);
+        for (int i = 0; i < newAccounts.size(); i++) {
+            Account account = newAccounts.elementAt(i);
             AccountEvent accountEvent = new AccountEvent(AccountEvent.Action.ADDED, account);
             fireAccountListener(accountEvent);
         }
+        return newAccounts;
     }
     
     /**

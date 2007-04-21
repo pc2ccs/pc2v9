@@ -720,7 +720,7 @@ public final class PacketFactory {
      * @param connectionHandlerIDs
      */
     public static Packet createLoginSuccess(ClientId source, ClientId destination, ContestTime contestTime, ContestTime[] contestTimes, int siteNumber, Language[] languages, Problem[] problems,
-            Judgement[] judgements, Site[] sites, Run[] runs, Clarification[] clarifications, ClientId[] loggedInUsers, ConnectionHandlerID[] connectionHandlerIDs) {
+            Judgement[] judgements, Site[] sites, Run[] runs, Clarification[] clarifications, ClientId[] loggedInUsers, ConnectionHandlerID[] connectionHandlerIDs, Account [] accounts) {
         try {
             Properties prop = new Properties();
             prop.put(SITE_NUMBER, new Integer(siteNumber));
@@ -735,6 +735,7 @@ public final class PacketFactory {
             prop.put(CLARIFICATION_LIST, clarifications);
             prop.put(LOGGED_IN_USERS, loggedInUsers);
             prop.put(CONNECTION_HANDLE_ID_LIST, connectionHandlerIDs);
+            prop.put(ACCOUNT_ARRAY, accounts);
 
             Packet packet = new Packet(Type.LOGIN_SUCCESS, source, destination, prop);
             return packet;

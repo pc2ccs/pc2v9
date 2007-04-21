@@ -3,6 +3,8 @@ package edu.csus.ecs.pc2.core.model;
 import java.util.Enumeration;
 import java.util.Vector;
 
+import edu.csus.ecs.pc2.core.list.AccountList;
+import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
@@ -114,9 +116,9 @@ public interface IModel {
      *            number of accounts to add
      * @param active
      *            set to True if the accounts are active
-     *            
+     * @return Vector of Accounts created.
      */
-    void generateNewAccounts(String clientTypeName, int count, boolean active);
+    Vector <Account>  generateNewAccounts(String clientTypeName, int count, boolean active);
 
     /**
      * Add new accounts, client number starting at startNumber.
@@ -124,8 +126,9 @@ public interface IModel {
      * @param count
      * @param startNumber
      * @param active
+     * @return Vector of Accounts created.
      */
-    void generateNewAccounts(String clientTypeName, int count, int startNumber, boolean active);
+    Vector <Account>  generateNewAccounts(String clientTypeName, int count, int startNumber, boolean active);
 
     /**
      * Add new sites.

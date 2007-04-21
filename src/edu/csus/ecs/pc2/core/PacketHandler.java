@@ -204,9 +204,9 @@ public class PacketHandler {
             
             if (isThisSite(siteNumber)){
                 
-                model.generateNewAccounts(type.toString(),count.intValue(), startCount.intValue(), active);
-                Vector <Account> accountVector = model.getAccounts(type, siteNumber);
-                Account [] accounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
+                // get vector of new accounts.
+                Vector<Account> accountVector = model.generateNewAccounts(type.toString(), count.intValue(), startCount.intValue(), active);
+                Account[] accounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
                 Packet newAccountsPacket = PacketFactory.createAddSetting(model.getClientId(), PacketFactory.ALL_SERVERS, accounts);
                 sendToJudgesAndOthers(newAccountsPacket, true);
                 
@@ -304,12 +304,6 @@ public class PacketHandler {
                 sendToJudgesAndOthers(packet, false);
             }
         }
-
-        
-        
-        
-        
-
     }
 
     private void updateSetting(Packet packet) {
@@ -566,6 +560,35 @@ public class PacketHandler {
             controller.getLog().log(Log.WARNING,"Exception logged ", e);
         }
     }
+    
+    /**
+     * Unpack and add list of accounts to model.
+     * 
+     * @param packet
+     */
+    private void addAccountsToModel (Packet packet) {
+
+        try {
+            
+            Account [] accounts = (Account[]) PacketFactory.getObjectValue(packet, PacketFactory.ACCOUNT_ARRAY);
+            if (accounts != null) {
+                for (Account account : accounts) {
+
+                    if ( (!isServer()) || (!isThisSite(account))) {
+                        model.addAccount(account);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // TODO: log handle exception
+            e.printStackTrace();
+            controller.getLog().log(Log.WARNING,"Exception logged ", e);
+        }
+    }
+
+    private boolean isThisSite(Account account) {
+        return account.getSiteNumber() == model.getSiteNumber();
+    }
 
     /**
      * Add contest data into the model.
@@ -656,6 +679,8 @@ public class PacketHandler {
         addRunsToModel(packet);
 
         addClarificationsToModel(packet);
+        
+        addAccountsToModel (packet);
 
         if (model.isLoggedIn()) {
 
