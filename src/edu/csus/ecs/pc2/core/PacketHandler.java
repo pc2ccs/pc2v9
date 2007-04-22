@@ -749,7 +749,7 @@ public class PacketHandler {
         try {
             ClientId[] listOfLoggedInUsers = (ClientId[]) PacketFactory.getObjectValue(packet, PacketFactory.LOGGED_IN_USERS);
             for (ClientId id : listOfLoggedInUsers) {
-                if (isServer(id)) {
+                if (isServer(id) && !isThisSite(id.getSiteNumber())) {
                     if (!model.isLoggedIn(id)) {
                         controller.sendServerLoginRequest(id.getSiteNumber());
                     }

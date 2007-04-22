@@ -1179,11 +1179,10 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     public void sendServerLoginRequest(int inSiteNumber) {
         
         if (isThisSite(inSiteNumber)) {
-            // TODO this code should not be invoked, find root cause.
             /**
-             * Do not login to the server's site.
+             * We should not send a LOGIN_REQUEST from this site... to this site.
              */
-            System.err.println("Tried to send login request to ourselves, login to "+inSiteNumber);
+            log.log(Log.DEBUG, " Tried to send login request to ourselves, login to "+inSiteNumber+", ignored");
             return;
         }
 
