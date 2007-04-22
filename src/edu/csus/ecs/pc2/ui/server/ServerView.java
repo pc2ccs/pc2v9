@@ -17,6 +17,7 @@ import edu.csus.ecs.pc2.core.model.IModel;
 import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.ISiteListener;
 import edu.csus.ecs.pc2.core.model.LoginEvent;
+import edu.csus.ecs.pc2.core.model.ReportPane;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.SiteEvent;
 import edu.csus.ecs.pc2.ui.ContestTimesPane;
@@ -261,8 +262,8 @@ public class ServerView extends JFrame implements UIPlugin {
         LoginsPane loginsPane = new LoginsPane();
         addUIPlugin(getMainTabbedPane(), "Logins", loginsPane);
         
-        InfoPane infoPane = new InfoPane();
-        addUIPlugin(getMainTabbedPane(), "Dev", infoPane);
+        ReportPane reportPane = new ReportPane();
+        addUIPlugin(getMainTabbedPane(), "Reports", reportPane);
         
         OptionsPanel optionsPanel = new OptionsPanel();
         addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);

@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -14,6 +13,7 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.ReportPane;
 import edu.csus.ecs.pc2.ui.AccountsPane;
 import edu.csus.ecs.pc2.ui.ClarificationsPane;
 import edu.csus.ecs.pc2.ui.ContestTimesPane;
@@ -124,6 +124,9 @@ public class AdministratorView extends JFrame implements UIPlugin {
                 
                 AccountsPane accountsPane = new AccountsPane();
                 addUIPlugin(getMainTabbedPanel(), "Accounts", accountsPane);
+                
+                ReportPane reportPane = new ReportPane();
+                addUIPlugin(getMainTabbedPanel(), "Reports", reportPane);
                 
                 OptionsPanel optionsPanel = new OptionsPanel();
                 addUIPlugin(getMainTabbedPanel(), "Options", optionsPanel);
