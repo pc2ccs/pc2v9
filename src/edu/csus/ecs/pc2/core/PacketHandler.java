@@ -55,7 +55,7 @@ public class PacketHandler {
         Type packetType = packet.getType();
 
         info("handlePacket start " + packet);
-        PacketFactory.dumpPacket(System.err, packet);
+        PacketFactory.dumpPacket(System.err, packet); System.err.flush();
 
         ClientId fromId = packet.getSourceId();
 
@@ -125,11 +125,14 @@ public class PacketHandler {
             ClientId whoJudgedRunId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
             judgeRun(run,  judgementRecord, runResultFiles, whoJudgedRunId);
 
+        } else if (packetType.equals(Type.RUN_JUDGEMENT_UPDATE)) {
+            sendJudgementUpdate(packet);
+            
         } else if (packetType.equals(Type.RUN_UNCHECKOUT)) {
             // Cancel run from requestor to server
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
             ClientId whoCanceledId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-            cancelRun(run,  whoCanceledId);
+            cancelRun(packet, run,  whoCanceledId);
 
         } else if (packetType.equals(Type.START_CONTEST_CLOCK)) {
             ContestTime contestTime = (ContestTime) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME);
@@ -155,15 +158,15 @@ public class PacketHandler {
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
             RunFiles runFiles = (RunFiles) PacketFactory.getObjectValue(packet, PacketFactory.RUN_FILES);
             ClientId whoCheckedOut = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-            checkedOutRun( run, runFiles, whoCheckedOut);
-
+            model.addRun(run, runFiles, packet.getDestinationId());
+            
             sendToJudgesAndOthers( packet, false);
 
         } else if (packetType.equals(Type.RUN_REQUEST)) {
             // Request Run from requestor to server
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
             ClientId requestFromId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-            requestRun(run,  requestFromId);
+            requestRun(packet, run,  requestFromId);
 
         } else if (packetType.equals(Type.LOGIN_SUCCESS)) {
 
@@ -192,6 +195,23 @@ public class PacketHandler {
 
     }
 
+    /**
+     * Send judgement to judges, servers, admins and boards.
+     * @param packet
+     */
+    private void sendJudgementUpdate(Packet packet) {
+        
+        Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
+
+        if (isServer()){
+            model.updateRun(run);
+            sendToJudgesAndOthers(packet, false);
+        } else {
+            model.updateRun(run);
+        }
+        
+    }
+
     private void generateAccounts(Packet packet) {
         
         ClientType.Type type = (ClientType.Type) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_TYPE);
@@ -212,8 +232,7 @@ public class PacketHandler {
                 
             } else {
                 
-                // TODO: send run request to other server
-                info(" send generate account to other server " + model.getClientId());
+                controller.sendToRemoteServer(siteNumber.intValue(), packet);
             }
             
         } else {
@@ -381,9 +400,6 @@ public class PacketHandler {
      * @param whoCheckedOutId
      */
     private void checkedOutRun( Run run, RunFiles runFiles, ClientId whoCheckedOutId) {
-        model.addRun(run, runFiles, whoCheckedOutId);
-
-        // TODO code for if checkout run from another site.
 
     }
 
@@ -391,14 +407,13 @@ public class PacketHandler {
         return id.getClientType().equals(ClientType.Type.ADMINISTRATOR);
     }
 
-    private void cancelRun(Run run, ClientId whoCanceledRun) {
+    private void cancelRun(Packet packet, Run run, ClientId whoCanceledRun) {
 
         if (isServer()) {
 
             if (!isThisSite(run)) {
 
-                // TODO: send cancel to other server, multi-site
-                System.out.println(" send cancel to other server ");
+                controller.sendToRemoteServer(run.getSiteNumber(), packet);
 
             } else {
 
@@ -425,9 +440,8 @@ public class PacketHandler {
 
             if (!isThisSite(run)) {
 
-                // TODO: forward packet to other site
-
-                info("TODO: forward packet to other site");
+                Packet judgementPacket = PacketFactory.createRunJudgement(model.getClientId(), run.getSubmitter(), run, judgementRecord, runResultFiles);
+                controller.sendToRemoteServer(run.getSiteNumber(), judgementPacket);
 
             } else {
                 // This site's run
@@ -439,17 +453,13 @@ public class PacketHandler {
                 Run theRun = model.getRun(run.getElementId());
 
                 Packet judgementPacket = PacketFactory.createRunJudgement(model.getClientId(), run.getSubmitter(), theRun, judgementRecord, runResultFiles);
-
                 if (judgementRecord.isSendToTeam()) {
+                    // Send to team who sent it, send to other server if needed.
                     controller.sendToClient(judgementPacket);
                 }
-
-                // TODO: code - make work multi site
-                /**
-                 * To make this work multi site create a new packet type of RUN_JUDGEMENT_UPDATE then when a server gets it send it to call clients as a RUN_JUDGEMENT. Right now this just notifies
-                 * local clients.
-                 */
-                sendToJudgesAndOthers( judgementPacket, false);
+                
+                Packet judgementUpdatePacket = PacketFactory.createRunJudgmentUpdate(model.getClientId(), PacketFactory.ALL_SERVERS, theRun, whoJudgedId);
+                sendToJudgesAndOthers( judgementUpdatePacket, true);
             }
 
         } else {
@@ -462,11 +472,12 @@ public class PacketHandler {
      * 
      * Either checks out run (marks as {@link edu.csus.ecs.pc2.core.model.Run.RunStates#BEING_JUDGED BEING_JUDGED}) and send to everyone, or send a
      * {@link edu.csus.ecs.pc2.core.packet.PacketType.Type#RUN_NOTAVAILABLE RUN_NOTAVAILABLE}.
+     * @param packet 
      * 
      * @param run
      * @param whoRequestsRunId
      */
-    private void requestRun(Run run, ClientId whoRequestsRunId) {
+    private void requestRun(Packet packet, Run run, ClientId whoRequestsRunId) {
 
         if (isServer()) {
 
@@ -475,8 +486,8 @@ public class PacketHandler {
                 ClientId serverClientId = new ClientId(run.getSiteNumber(), ClientType.Type.SERVER, 0);
                 if (model.isLoggedIn(serverClientId)) {
 
-                    // TODO: send run request to other server
-                    info(" send run request to other server " + serverClientId);
+                    // send request to remote server
+                    controller.sendToRemoteServer(run.getSiteNumber(), packet);
 
                 } else {
 

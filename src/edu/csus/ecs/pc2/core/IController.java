@@ -33,14 +33,41 @@ public interface IController {
      */
     void sendToClient(Packet confirmPacket);
 
+    /**
+     * Send to all logged in servers.
+     * @param packet
+     */
     void sendToServers(Packet packet);
+    
+    /**
+     * Send to a remote server.
+     * @param siteNumber
+     * @param packet
+     */
+    void sendToRemoteServer (int siteNumber, Packet packet);
 
+    /**
+     * Send to all judges on local site.
+     * @param packet
+     */
     void sendToJudges(Packet packet);
 
+    /**
+     * Send to all administrators on local site.
+     * @param packet
+     */
     void sendToAdministrators(Packet packet);
 
+    /**
+     * Send to all scoreboard on local site.
+     * @param packet
+     */
     void sendToScoreboards(Packet packet);
 
+    /**
+     * Send to all teams on local site.
+     * @param packet
+     */
     void sendToTeams(Packet packet);
 
     void start(String[] stringArray);

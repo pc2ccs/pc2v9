@@ -433,6 +433,7 @@ public final class PacketFactory {
     public static Packet createRunJudgement(ClientId source, ClientId destination, Run run, JudgementRecord judgementRecord,
             RunResultFiles runResultFiles) {
         Properties prop = new Properties();
+        prop.put(CLIENT_ID, source);
         prop.put(RUN, run);
         prop.put(JUDGEMENT_RECORD, judgementRecord);
         if (runResultFiles != null) {
@@ -1383,6 +1384,13 @@ public final class PacketFactory {
         prop.put(SITE_NUMBER, source.getSiteNumber());
         prop.put(ACCOUNT_ARRAY, accounts);
         return createPacket(PacketType.Type.ADD_SETTING, source, destination, prop);
+    }
+
+    public static Packet createRunJudgmentUpdate(ClientId source, ClientId destination, Run run, ClientId whoJudgedId) {
+        Properties prop = new Properties();
+        prop.put(CLIENT_ID, whoJudgedId);
+        prop.put(RUN, run);
+        return createPacket(PacketType.Type.RUN_JUDGEMENT_UPDATE, source, destination, prop);
     }
 
 }

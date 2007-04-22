@@ -178,12 +178,12 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         this.model = model;
         packetHandler  = new PacketHandler(this, model);
     }
-
+    
     /**
      * Client send packet to server.
      * @param packet
      */
-    private void sendToServer(Packet packet) {
+    private void sendToLocalServer(Packet packet) {
         try {
             log.info("Sending packet to server "+packet);
             transportManager.send(packet);
@@ -203,12 +203,41 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         }
     }
 
+    /**
+     * 
+     * @param siteNumber
+     * @param packet
+     */
+    public void sendToRemoteServer (int siteNumber, Packet packet){
+        ClientId clientId = new ClientId(siteNumber, Type.SERVER, 0);
+
+        ConnectionHandlerID connectionHandlerID = model.getConnectionHandleID(clientId);
+
+        if (connectionHandlerID != null) {
+            
+            try {
+                transportManager.send(packet, connectionHandlerID);
+                System.err.println("debug22 sendToRemoteServer site "+siteNumber+" "+packet);
+            } catch (TransportException e) {
+                log.log(Log.SEVERE,"Exception sending packet to site "+siteNumber+" "+packet, e);
+            }
+            
+        } else {
+            log.log(Log.SEVERE,"Unable to send packet to site "+siteNumber+" ("+clientId+")" +packet);
+        }
+    }
+
     public void sendToClient(Packet packet) {
         info(" sendToClient b4 " + packet);
         ConnectionHandlerID connectionHandlerID = model.getConnectionHandleID(packet.getDestinationId());
         info("sendToClient " + packet.getSourceId() + " " + connectionHandlerID);
         if (connectionHandlerID == null) {
-            sendToServer(packet);
+            int destinationSiteNumber = packet.getDestinationId().getSiteNumber();
+            if (isThisSite(destinationSiteNumber)) {
+                sendToLocalServer(packet);
+            } else {
+                sendToRemoteServer(destinationSiteNumber, packet);
+            }
         } else {
             sendToClient(connectionHandlerID, packet);
         }
@@ -225,7 +254,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
         Packet packet = PacketFactory.createSubmittedRun(model.getClientId(), serverClientId, run, runFiles);
 
-        sendToServer(packet);
+        sendToLocalServer(packet);
     }
 
     /**
@@ -1107,9 +1136,19 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             if (isUsingMainUI()){
                 loginUI = new LoginFrame();
                 loginUI.setModelAndController(model, this); // this displays the login
+            } 
+            
+            try {
+
+                login (loginName, password);  // starts login attempt, will show failure to LoginFrame
+
+            } catch (Exception e) {
+                log.log(Log.INFO, "Exception logged ", e);
+                if (loginUI != null){
+                    loginUI.setStatusMessage(e.getMessage());
+                }
             }
             
-            login (loginName, password);  // starts login attempt, will show failure to LoginFrame
         }
     }
 
@@ -1123,7 +1162,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     public void checkOutRun(Run run) {
         ClientId clientId = model.getClientId();
         Packet packet = PacketFactory.createRunRequest(clientId,getServerClientId(),run, clientId);
-        sendToServer(packet);
+        sendToLocalServer(packet);
     }
 
     /**
@@ -1132,7 +1171,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     public void submitRunJudgement(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles) {
         ClientId clientId = model.getClientId();
         Packet packet = PacketFactory.createRunJudgement(clientId,getServerClientId(), run, judgementRecord, runResultFiles);
-        sendToServer(packet);
+        sendToLocalServer(packet);
     }
 
     /**
@@ -1141,7 +1180,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     public void cancelRun(Run run) {
         ClientId clientId = model.getClientId();
         Packet packet = PacketFactory.createUnCheckoutRun(clientId, getServerClientId(), run);
-        sendToServer(packet);
+        sendToLocalServer(packet);
     }
 
     /**
@@ -1158,7 +1197,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             sendToScoreboards(packet);
         } else {
             Packet packet = PacketFactory.createAddSetting(model.getClientId(), getServerClientId(), site);
-            sendToServer(packet);
+            sendToLocalServer(packet);
         }
     }
     
@@ -1257,7 +1296,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             sendToScoreboards(packet);
         } else {
             Packet packet = PacketFactory.createUpdateSetting(model.getClientId(), getServerClientId(), site);
-            sendToServer(packet);
+            sendToLocalServer(packet);
         }
     }
 
@@ -1316,7 +1355,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     public void generateNewAccounts(String clientTypeName, int siteNumber, int count, int startNumber, boolean active) {
         ClientType.Type type = ClientType.Type.valueOf(clientTypeName);
         Packet packet = PacketFactory.createGenerateAccounts(getServerClientId(), model.getClientId(), siteNumber, type, count, startNumber,  active);
-        sendToServer(packet);
+        sendToLocalServer(packet);
     }
 
     public void generateNewAccounts(String clientTypeName, int count, int startNumber, boolean active) {
@@ -1331,7 +1370,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
         Packet packet = PacketFactory.createClarificationSubmission(model.getClientId(), serverClientId, clarification);
 
-        sendToServer(packet);
+        sendToLocalServer(packet);
     }
 
 }

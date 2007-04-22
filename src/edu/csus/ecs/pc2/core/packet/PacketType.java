@@ -196,15 +196,23 @@ public final class PacketType implements Serializable {
          * <P>
          * A judge has rendered a judgement for the run, this packet contains the judgement to be sent to the server.
          * <P>
-         * From judge to server (server to team(s))<br>
-         * <br>
-         * <u>After accepted by the server </u> <br>
-         * From server to board (possibly conditional)<br>
-         * From server to Admin (possibly conditional)<br>
-         * From server to judge (future use?)<br>
+         * From judge to server <br>
+         * From server to server <br>
          * Contents: Run and judgement
          */
         RUN_JUDGEMENT,
+
+        /**
+         * Judgement from a server to all other servers and clients.
+         * 
+         *  A server has updated a run with a run judgement
+         *  <P>
+         *  From server to server<br>
+         *  From server to team (who submitted run) <br>
+         *  From server to admin, judge, board <br>
+         *  
+         */
+        RUN_JUDGEMENT_UPDATE,
 
         /**
          * Request run list from server.
@@ -567,7 +575,7 @@ public final class PacketType implements Serializable {
         /**
          * 
          */
-        CONTEST_PROPERTIES,
+        CONTEST_PROPERTIES, 
     }
 
     /**
