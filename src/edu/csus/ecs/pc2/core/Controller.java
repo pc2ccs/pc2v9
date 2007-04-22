@@ -507,7 +507,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         try {
             info("sendLoginRequest ConId start - sending from " + clientId);
             ClientId serverClientId = new ClientId(0, Type.SERVER, 0);
-            Packet loginPacket = PacketFactory.createLogin(clientId, password, serverClientId);
+            Packet loginPacket = PacketFactory.createLoginRequest(clientId, password, serverClientId);
             manager.send(loginPacket, connectionHandlerID);
             info("sendLoginRequest ConId end - packet sent.");
         } catch (TransportException e) {
@@ -527,7 +527,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         try {
             info("sendLoginRequest start - sending from "+clientId);
             ClientId serverClientId = new ClientId(0, Type.SERVER, 0);
-            Packet loginPacket = PacketFactory.createLogin(clientId, password, serverClientId);
+            Packet loginPacket = PacketFactory.createLoginRequest(clientId, password, serverClientId);
             manager.send(loginPacket);
             info("sendLoginRequest end - packet sent.");
         } catch (TransportException e) {
@@ -579,6 +579,13 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                         }
                         attemptToLogin(clientId, password, connectionHandlerID);
                         sendLoginSuccess(clientId, connectionHandlerID);
+
+                        // Send login notification to users.
+                        
+                        Packet loginConfirmedPacket  = PacketFactory.createLogin(model.getClientId(), PacketFactory.ALL_SERVERS, connectionHandlerID, clientId);
+                        sendToAdministrators(loginConfirmedPacket);
+                        sendToJudges(loginConfirmedPacket);
+                        sendToServers(loginConfirmedPacket);
 
                     } catch (SecurityException securityException) {
                         String message = securityException.getMessage();
@@ -837,6 +844,14 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         if (clientId != null) {
             info("connectionDropped: removed user " + clientId);
             model.removeLogin(clientId);
+            try {
+                Packet logoffPacket = PacketFactory.createLogoff(model.getClientId(), PacketFactory.ALL_SERVERS, clientId);
+                sendToAdministrators(logoffPacket);
+                sendToJudges(logoffPacket);
+                sendToServers(logoffPacket);
+            } catch (Exception e) {
+                log.log(Log.SEVERE, "Exception logged ", e);
+            }
         } else {
             info("connectionDropped: connection " + connectionHandlerID);
         }

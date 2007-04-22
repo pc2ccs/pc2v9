@@ -349,6 +349,14 @@ public final class PacketType implements Serializable {
          * Contents: Login information SessionId (partially filled in)
          */
         LOGOUT,
+        
+        /**
+         * User has loggged on.
+         * 
+         * From server to server<br>
+         * from server to admin<br>
+         */
+        LOGIN,
 
         /**
          * Will logoff or disconnect (clear) configuration.
@@ -417,6 +425,8 @@ public final class PacketType implements Serializable {
          * Contents: Server login: SiteData. Client: Settings, Runs, Clars.
          */
         LOGIN_SUCCESS,
+        
+         
 
         /**
          * Notify judges that a run has been submitted.

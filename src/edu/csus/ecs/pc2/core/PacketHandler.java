@@ -168,6 +168,12 @@ public class PacketHandler {
             ClientId requestFromId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
             requestRun(packet, run,  requestFromId);
 
+        } else if (packetType.equals(Type.LOGOUT)) {
+            logoutClient(packet);
+
+        } else if (packetType.equals(Type.LOGIN)) {
+            loginClient(packet); 
+            
         } else if (packetType.equals(Type.LOGIN_SUCCESS)) {
 
             if (isServer(packet.getDestinationId())) {
@@ -193,6 +199,32 @@ public class PacketHandler {
         
         info("handlePacket start " + packet);
 
+    }
+
+    private void loginClient(Packet packet) {
+        ClientId whoLoggedIn = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+        ConnectionHandlerID connectionHandlerID = (ConnectionHandlerID) PacketFactory.getObjectValue(packet, PacketFactory.CONNECTION_HANDLE_ID);
+
+        if (isServer()) {
+
+            // TODO add to login list 
+            
+            sendToJudgesAndOthers(packet, false);
+        } else {
+            model.addLogin(whoLoggedIn, connectionHandlerID);
+        }
+    }
+
+    private void logoutClient(Packet packet) {
+        
+        ClientId whoLoggedOff = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+        if (isServer()){
+            // TODO add login to login list
+            
+            sendToJudgesAndOthers(packet, false);
+        }else{
+            model.removeLogin(whoLoggedOff);
+        }
     }
 
     /**

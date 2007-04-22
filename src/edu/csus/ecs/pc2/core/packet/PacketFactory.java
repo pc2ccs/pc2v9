@@ -200,13 +200,13 @@ public final class PacketFactory {
      *            server to authenticate.
      * @return a {@link PacketType.Type#LOGIN_REQUEST} packet.
      */
-    public static Packet createLogin(ClientId source, String password, ClientId destination) {
+    public static Packet createLoginRequest(ClientId source, String password, ClientId destination) {
         Properties prop = new Properties();
         prop.put(LOGIN, source.getClientType() + "" + source.getClientNumber());
         prop.put(PASSWORD, password);
         return createPacket(PacketType.Type.LOGIN_REQUEST, source, destination, prop);
     }
-
+    
     /**
      * Create a packet.
      * 
@@ -701,6 +701,20 @@ public final class PacketFactory {
     }
 
     /**
+     * @param source
+     * @param destination
+     * @param connectionHandlerID
+     * @param loggedInClientId
+     */
+    public static Packet createLogin(ClientId source, ClientId destination, ConnectionHandlerID connectionHandlerID, ClientId loggedInClientId) {
+        Properties prop = new Properties();
+        prop.put(CLIENT_ID, loggedInClientId);
+        prop.put(CONNECTION_HANDLE_ID, connectionHandlerID);
+        Packet packet = new Packet(Type.LOGIN, source, destination, prop);
+        return packet;
+    }
+
+    /**
      * Create packet for {@link PacketType.Type#LOGIN_SUCCESS}.
      * 
      * Sent to a client or server on successful login.  This packet
@@ -747,6 +761,7 @@ public final class PacketFactory {
             throw new SecurityException(e.getMessage());
         }
     }
+    
 
     /**
      * Create a packet of {@link PacketType.Type#SETTINGS}.

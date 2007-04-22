@@ -23,6 +23,8 @@ import edu.csus.ecs.pc2.ui.InfoPane;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
 import edu.csus.ecs.pc2.ui.LanguagesPane;
 import edu.csus.ecs.pc2.ui.LogWindow;
+import edu.csus.ecs.pc2.ui.LoginsPane;
+import edu.csus.ecs.pc2.ui.OptionsPanel;
 import edu.csus.ecs.pc2.ui.ProblemsPane;
 import edu.csus.ecs.pc2.ui.RunsPanel;
 import edu.csus.ecs.pc2.ui.SitesPanel;
@@ -52,10 +54,6 @@ public class AdministratorView extends JFrame implements UIPlugin {
     private JPanel topPanel = null;
 
     private JButton exitButton = null;
-
-    private JPanel optionPanel = null;
-
-    private JCheckBox showLogWindowCheckBox = null;
 
     private LogWindow logWindow = null;
     
@@ -121,8 +119,15 @@ public class AdministratorView extends JFrame implements UIPlugin {
                 GenerateAccountsPane generateAccountsPane = new GenerateAccountsPane();
                 addUIPlugin(getMainTabbedPanel(), "Generate", generateAccountsPane);
                 
+                LoginsPane loginsPane = new LoginsPane();
+                addUIPlugin(getMainTabbedPanel(), "Logins", loginsPane);
+                
                 AccountsPane accountsPane = new AccountsPane();
                 addUIPlugin(getMainTabbedPanel(), "Accounts", accountsPane);
+                
+                OptionsPanel optionsPanel = new OptionsPanel();
+                addUIPlugin(getMainTabbedPanel(), "Options", optionsPanel);
+                optionsPanel.setLogWindow(logWindow);
                 
                 InfoPane infoPane = new InfoPane();
                 addUIPlugin(getMainTabbedPanel(), "Dev", infoPane);
@@ -161,7 +166,6 @@ public class AdministratorView extends JFrame implements UIPlugin {
     private JTabbedPane getMainTabbedPanel() {
         if (mainTabbedPanel == null) {
             mainTabbedPanel = new JTabbedPane();
-            mainTabbedPanel.addTab("Options", null, getOptionPanel(), null);
         }
         return mainTabbedPanel;
     }
@@ -230,37 +234,6 @@ public class AdministratorView extends JFrame implements UIPlugin {
 
     }
 
-    /**
-     * This method initializes optionPanel
-     * 
-     * @return javax.swing.JPanel
-     */
-    private JPanel getOptionPanel() {
-        if (optionPanel == null) {
-            optionPanel = new JPanel();
-            optionPanel.add(getShowLogWindowCheckBox(), null);
-        }
-        return optionPanel;
-    }
-
-    /**
-     * This method initializes showLogCheckBox
-     * 
-     * @return javax.swing.JCheckBox
-     */
-    private JCheckBox getShowLogWindowCheckBox() {
-        if (showLogWindowCheckBox == null) {
-            showLogWindowCheckBox = new JCheckBox();
-            showLogWindowCheckBox.setText("Show Log");
-            showLogWindowCheckBox.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    showLog(showLogWindowCheckBox.isSelected());
-                }
-            });
-        }
-        return showLogWindowCheckBox;
-    }
-    
     protected void showLog(boolean showLogWindow) {
         logWindow.setVisible(showLogWindow);
     }
