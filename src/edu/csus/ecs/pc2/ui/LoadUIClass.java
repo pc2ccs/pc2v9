@@ -1,7 +1,9 @@
 package edu.csus.ecs.pc2.ui;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Properties;
 
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -99,20 +101,19 @@ public final class LoadUIClass {
      * </pre>
      * @param clientId
      * @return name for the UI Class.
+     * @throws IOException 
      */
-    public static String getUIClassName(ClientId clientId) {
+    public static String getUIClassName(ClientId clientId) throws IOException {
 
         String className = null;
         
         Properties properties = new Properties();
-        try {
+        
+        if (new File(UI_PROPERTIES_FILENAME).exists()){
             FileInputStream fileInputStream = new FileInputStream (UI_PROPERTIES_FILENAME);
             properties.load(fileInputStream);
             fileInputStream.close();
             fileInputStream = null;
-        } catch (Exception e) {
-            // TODO: handle exception
-            System.err.println("Note: unable to read UI properties from "+UI_PROPERTIES_FILENAME);
         }
         
         className = properties.getProperty(clientId.getName());  // lookup by short/login name
