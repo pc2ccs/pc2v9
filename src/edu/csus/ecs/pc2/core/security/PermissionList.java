@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core.security;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Hashtable;
 
@@ -10,7 +11,7 @@ import java.util.Hashtable;
  */
 
 // $HeadURL$
-public class PermissionList {
+public class PermissionList implements Serializable {
 
     private Hashtable<Permission.Type, Date> hash = new Hashtable<Permission.Type, Date>();
 

@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core.security;
 
+import java.io.Serializable;
 import java.util.Hashtable;
 
 /**
@@ -14,7 +15,7 @@ import java.util.Hashtable;
  */
 
 // $HeadURL$
-public class Permission {
+public class Permission implements Serializable {
 
     /**
      * Permissions that user can perform.
@@ -168,9 +169,9 @@ public class Permission {
         hash.put(Type.EDIT_PERMISSIONS, "Edit Runs");
         hash.put(Type.EXECUTE_RUN, "Execute but not judge runs");
         hash.put(Type.JUDGE_RUN, "Judge runs");
-        hash.put(Type.LOGIN, "Login");
+        hash.put(Type.LOGIN, "Allowed to login");
         hash.put(Type.REJUDGE_RUN, "Re-judge runs");
-        hash.put(Type.TEST_RUN, "test run");
+        hash.put(Type.TEST_RUN, "can test run");
         hash.put(Type.VIEW_CLARIFICATIONS, "View Clarifications");
         hash.put(Type.VIEW_RUNS, "View Runs");
         hash.put(Type.ADD_PROBLEM, "Add a problem");
@@ -187,10 +188,10 @@ public class Permission {
         hash.put(Type.SUBMIT_RUN, "Submit a run");
         hash.put(Type.VIEW_ALL_JUDGEMENTS, "Execute but not judge runs");
         hash.put(Type.VIEW_STANDINGS, "View standings");
-        hash.put(Type.VIEW_SUMMARY_ATTEMPTS_GRID, "View Summary Attemps Grid");
+        hash.put(Type.VIEW_SUMMARY_ATTEMPTS_GRID, "View Summary Attempts Grid");
         hash.put(Type.FORCE_LOGOFF_CLIENT, "Force client logoff");
         hash.put(Type.FORCE_LOGOFF_SERVER, "Force server logoff");
-        hash.put(Type.DISPLAY_ON_SCOREBOARD, "Can be shown on socreboard displays");
+        hash.put(Type.DISPLAY_ON_SCOREBOARD, "Can be shown on scoreboard displays");
     }
 
     /**
