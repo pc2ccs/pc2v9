@@ -8,6 +8,7 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.IElementObject;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.security.Permission;
 
 /**
  * Maintain a list of {@link edu.csus.ecs.pc2.core.model.Account}s.
@@ -102,7 +103,12 @@ public class AccountList extends BaseElementList {
             
             String newPassword = generatePassword(passwordType, clientId);
             Account account = new Account(clientId, newPassword, siteNumber);
-            account.setActive(isActive);
+            if (isActive){
+                account.addPermission(Permission.Type.LOGIN);
+                account.addPermission(Permission.Type.DISPLAY_ON_SCOREBOARD);
+                // TODO give this account its other permissions
+                
+            }
             newAccountList.add(account);
             super.add(account);
         }
@@ -265,7 +271,7 @@ public class AccountList extends BaseElementList {
             throw new SecurityException("No such account");
         }
 
-        if (!account.isActive()) {
+        if (!account.isAllowed(Permission.Type.LOGIN)) {
             throw new SecurityException("Account inactive");
         }
 

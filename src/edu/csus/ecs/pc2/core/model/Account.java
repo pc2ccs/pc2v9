@@ -1,12 +1,15 @@
 package edu.csus.ecs.pc2.core.model;
 
+import edu.csus.ecs.pc2.core.security.Permission;
+import edu.csus.ecs.pc2.core.security.PermissionList;
+
 
 /**
  * Login Account.
- *
+ * 
  * @author pc2@ecs.csus.edu
- *
- *
+ * 
+ * 
  */
 
 // $HeadURL$
@@ -14,7 +17,7 @@ public class Account implements IElementObject {
     public static final String SVN_ID = "$Id$";
 
     /**
-     *
+     * 
      */
     private static final long serialVersionUID = -1098364914694875689L;
 
@@ -22,19 +25,19 @@ public class Account implements IElementObject {
 
     /**
      * Unique id, version and site number.
-     *
+     * 
      */
     private ElementId elementId;
 
     private String password;
 
-    private boolean active = true;
-
     private String displayName;
+    
+    private PermissionList permissionList = new PermissionList();
 
     /**
      * Create an account
-     *
+     * 
      * @param clientId
      *            ClientId
      * @param password
@@ -73,14 +76,6 @@ public class Account implements IElementObject {
 
     }
 
-    public boolean isActive() {
-        return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
-    }
-
     public String getDisplayName() {
         return displayName;
     }
@@ -113,9 +108,6 @@ public class Account implements IElementObject {
             if (!password.equals(account.getPassword())) {
                 return false;
             }
-            if (isActive() != account.isActive()) {
-                return false;
-            }
             if (getClientId().getClientNumber() != account.getClientId()
                     .getClientNumber()) {
                 return false;
@@ -133,5 +125,18 @@ public class Account implements IElementObject {
             return false;
         }
     }
+    
+    public void addPermission(Permission.Type type){
+        permissionList.addPermission(type);
+    }
 
+    public void removePermission(Permission.Type type){
+        permissionList.removePermission(type);
+    }
+
+    public boolean isAllowed (Permission.Type type){
+        return permissionList.isAllowed(type);
+    }
+
+    
 }

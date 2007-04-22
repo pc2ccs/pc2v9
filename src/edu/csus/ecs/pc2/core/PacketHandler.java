@@ -202,6 +202,8 @@ public class PacketHandler {
     }
 
     private void loginClient(Packet packet) {
+        
+        if ( model.isLoggedIn() ){
         ClientId whoLoggedIn = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
         ConnectionHandlerID connectionHandlerID = (ConnectionHandlerID) PacketFactory.getObjectValue(packet, PacketFactory.CONNECTION_HANDLE_ID);
 
@@ -213,6 +215,10 @@ public class PacketHandler {
         } else {
             model.addLogin(whoLoggedIn, connectionHandlerID);
         }
+        } else {
+            info("Note: got a LOGIN packet before LOGIN_SUCCESS "+packet);
+        }
+        
     }
 
     private void logoutClient(Packet packet) {
