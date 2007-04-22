@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
+import java.util.Arrays;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -10,11 +11,14 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.ISiteListener;
 import edu.csus.ecs.pc2.core.model.Site;
+import edu.csus.ecs.pc2.core.model.SiteEvent;
 
 /**
  * Generate accounts pane.
@@ -85,40 +89,61 @@ public class GenerateAccountsPane extends JPanePlugin {
         this.add(getGenerateButtonPanel(), java.awt.BorderLayout.SOUTH);
 
     }
+    
+    private void updateSiteComboBox() {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                int selectedIndex = getSiteSelectionComboBox().getSelectedIndex();
 
+                getSiteSelectionComboBox().removeAllItems();
+                
+                Site newSite = new Site("This Site", getModel().getSiteNumber());
+                getSiteSelectionComboBox().addItem(newSite);
+                Site[] sites = getModel().getSites();
+                Arrays.sort(sites, new SiteComparatorBySiteNumber());
+                for (Site site : sites) {
+                    getSiteSelectionComboBox().addItem(site);
+                }
+
+                if (selectedIndex != -1) {
+                    getSiteSelectionComboBox().setSelectedIndex(selectedIndex);
+                }
+
+            }
+        });
+    }
+
+    /**
+     * Update titles for client types.
+     * 
+     * 
+     */
     private void updateGenerateTitles() {
 
-        // Update the Number of accounts
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                int thisSiteNumber = getModel().getSiteNumber();
+                int theSiteNumber = thisSiteNumber;
 
-        int thisSiteNumber = getModel().getSiteNumber();
-        int theSiteNumber = thisSiteNumber;
-        
-        if ( getSiteSelectionComboBox().getItemCount() < 1){
-            Site newSite = new Site("This Site", getModel().getSiteNumber());
-            getSiteSelectionComboBox().addItem(newSite);
-            for (Site site : getModel().getSites()){
-                getSiteSelectionComboBox().addItem(site);
+                if (getSiteSelectionComboBox().getSelectedIndex() > 1) {
+                    theSiteNumber = getSiteSelectionComboBox().getSelectedIndex();
+                }
+
+                int number = getModel().getAccounts(ClientType.Type.SCOREBOARD, theSiteNumber).size();
+                genScoreboardLabel.setText("Scoreboards (" + number + ")");
+
+                number = getModel().getAccounts(ClientType.Type.TEAM, theSiteNumber).size();
+                genTeamLabels.setText("Teams (" + number + ")");
+
+                number = getModel().getAccounts(ClientType.Type.JUDGE, theSiteNumber).size();
+                genJudgeLabel.setText("Judges (" + number + ")");
+
+                number = getModel().getAccounts(ClientType.Type.ADMINISTRATOR, theSiteNumber).size();
+                genAdminLabel.setText("Administrators (" + number + ")");
+
+                generateButton.setText("Generate Accounts for Site " + theSiteNumber);
             }
-        }
-        
-        if (getSiteSelectionComboBox().getSelectedIndex() > 1){
-            theSiteNumber = getSiteSelectionComboBox().getSelectedIndex() - 1; 
-        }
-        
-        int number = getModel().getAccounts(ClientType.Type.SCOREBOARD, theSiteNumber).size();
-        genScoreboardLabel.setText("Scoreboards (" + number + ")");
-
-        number = getModel().getAccounts(ClientType.Type.TEAM, theSiteNumber).size();
-        genTeamLabels.setText("Teams (" + number + ")");
-
-        number = getModel().getAccounts(ClientType.Type.JUDGE, theSiteNumber).size();
-        genJudgeLabel.setText("Judges (" + number + ")");
-
-        number = getModel().getAccounts(ClientType.Type.ADMINISTRATOR, theSiteNumber).size();
-        genAdminLabel.setText("Administrators (" + number + ")");
-        
-        generateButton.setText("Generate Accounts for Site "+theSiteNumber);
-        
+        });
     }
 
 
@@ -274,24 +299,31 @@ public class GenerateAccountsPane extends JPanePlugin {
                 startNumber = 1;
             }
             
+            int thisSiteNumber = getModel().getSiteNumber();
+            int theSiteNumber = thisSiteNumber;
+
+            if (getSiteSelectionComboBox().getSelectedIndex() > 1) {
+                theSiteNumber = getSiteSelectionComboBox().getSelectedIndex();
+            }
+            
             int count = getIntegerValue(adminCountTextField.getText());
             if (count > 0) {
-                getController().generateNewAccounts(ClientType.Type.ADMINISTRATOR.toString(), count, startNumber, true);
+                getController().generateNewAccounts(ClientType.Type.ADMINISTRATOR.toString(), theSiteNumber, count, startNumber, true);
             }
 
             count = getIntegerValue(judgeCountTextField.getText());
             if (count > 0) {
-                getController().generateNewAccounts(ClientType.Type.JUDGE.toString(),  count, startNumber, true);
+                getController().generateNewAccounts(ClientType.Type.JUDGE.toString(), theSiteNumber, count, startNumber, true);
             }
 
             count = getIntegerValue(teamCountTextField.getText());
             if (count > 0) {
-                getController().generateNewAccounts(ClientType.Type.TEAM.toString(), count, startNumber,true);
+                getController().generateNewAccounts(ClientType.Type.TEAM.toString(), theSiteNumber, count, startNumber,true);
             }
 
             count = getIntegerValue(boardCountTextField.getText());
             if (count > 0) {
-                getController().generateNewAccounts(ClientType.Type.SCOREBOARD.toString(), count, startNumber, true);
+                getController().generateNewAccounts(ClientType.Type.SCOREBOARD.toString(), theSiteNumber, count, startNumber, true);
             }
 
         } catch (Exception e) {
@@ -335,13 +367,11 @@ public class GenerateAccountsPane extends JPanePlugin {
     public void setModelAndController(IModel inModel, IController inController) {
         super.setModelAndController(inModel, inController);
 
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                updateGenerateTitles();
-            }
-        });
+        updateGenerateTitles();
+        updateSiteComboBox();
         
         getModel().addAccountListener(new AccountListenerImplementation());
+        getModel().addSiteListener(new SiteListenerImplementation());
     }
     
     /**
@@ -371,5 +401,33 @@ public class GenerateAccountsPane extends JPanePlugin {
         
     }
 
+    /**
+     * Site Listener. 
+     * @author pc2@ecs.csus.edu
+     *
+     */
+    public class SiteListenerImplementation implements ISiteListener {
+
+        public void siteAdded(SiteEvent event) {
+            updateSiteComboBox();
+        }
+
+        public void siteRemoved(SiteEvent event) {
+            updateSiteComboBox();
+        }
+
+        public void siteChanged(SiteEvent event) {
+            updateSiteComboBox();
+        }
+
+        public void siteLoggedOn(SiteEvent event) {
+            updateSiteComboBox();
+        }
+
+        public void siteLoggedOff(SiteEvent event) {
+            updateSiteComboBox();
+        }
+        
+    }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
