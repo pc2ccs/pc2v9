@@ -5,8 +5,10 @@ import java.util.Hashtable;
 /**
  * User permissions.
  * 
- * Contains list of all tasks.
+ * Permission.Type is a enumeration of all the permissions that
+ * a client can have.
  * 
+ * @see PermissionList
  * @author pc2@ecs.csus.edu
  * 
  */
@@ -15,8 +17,9 @@ import java.util.Hashtable;
 public class Permission {
 
     /**
-     * List of tasks to give permission to perform..
+     * Permissions that user can perform.
      * 
+     * @see PermissionList
      * @author pc2@ecs.csus.edu
      * 
      */
@@ -43,13 +46,17 @@ public class Permission {
          */
         JUDGE_RUN,
         /**
-         * 
+         * Is client allowed to login ?
          */
         LOGIN,
         /**
+         * Can client be shown on scoreboard
+         */
+        DISPLAY_ON_SCOREBOARD,
+        /**
          * 
          */
-        REJUDGE,
+        REJUDGE_RUN,
         /**
          * 
          */
@@ -113,6 +120,10 @@ public class Permission {
         /**
          * 
          */
+        EDIT_CLARIFICATION,
+        /**
+         * 
+         */
         SUBMIT_RUN,
         /**
          * 
@@ -126,6 +137,14 @@ public class Permission {
          * 
          */
         VIEW_SUMMARY_ATTEMPTS_GRID,
+        /**
+         * Ability to force logoff a client
+         */
+        FORCE_LOGOFF_CLIENT,
+        /**
+         * Ability to force logoff server
+         */
+        FORCE_LOGOFF_SERVER,
     };
 
     private Hashtable<Type, String> hash = new Hashtable<Type, String>();
@@ -140,7 +159,6 @@ public class Permission {
      */
     private void loadDescription() {
 
-        // TODO replace entries that show description of todo
         hash.put(Type.BALLOON_EMAIL, "Allow balloon e-mail");
         hash.put(Type.BALLOON_OUTPUT_SHUTOFF, "Allowed to shutoff output");
         hash.put(Type.BALLOON_PRINT, "Allowed to do balloon print");
@@ -151,40 +169,38 @@ public class Permission {
         hash.put(Type.EXECUTE_RUN, "Execute but not judge runs");
         hash.put(Type.JUDGE_RUN, "Judge runs");
         hash.put(Type.LOGIN, "Login");
-        hash.put(Type.REJUDGE, "Re-judge runs");
+        hash.put(Type.REJUDGE_RUN, "Re-judge runs");
         hash.put(Type.TEST_RUN, "test run");
-        hash.put(Type.VIEW_CLARIFICATIONS, "todo");
-        hash.put(Type.VIEW_RUNS, "todo");
-        hash.put(Type.ADD_PROBLEM, "todo");
-        hash.put(Type.ADD_SITE, "todo");
-        hash.put(Type.ADD_SETTINGS, "todo");
-        hash.put(Type.ANSWER_CLARIFICATION, "todo");
-        hash.put(Type.EDIT_LANGUAGE, "todo");
-        hash.put(Type.EDIT_PROBLEM, "todo");
-        hash.put(Type.EDIT_SITE, "todo");
-        hash.put(Type.EDIT_SETTINGS, "todo");
-        hash.put(Type.SUBMIT_CLARIFICATION, "todo");
-        hash.put(Type.SUBMIT_RUN, "todo");
+        hash.put(Type.VIEW_CLARIFICATIONS, "View Clarifications");
+        hash.put(Type.VIEW_RUNS, "View Runs");
+        hash.put(Type.ADD_PROBLEM, "Add a problem");
+        hash.put(Type.ADD_SITE, "Add a site");
+        hash.put(Type.ADD_SETTINGS, "Add general settings");
+        hash.put(Type.ANSWER_CLARIFICATION, "Answer a clarification");
+        hash.put(Type.EDIT_LANGUAGE, "Edit a language");
+        hash.put(Type.EDIT_PROBLEM, "Edit a problem");
+        hash.put(Type.EDIT_SITE, "Edit a site");
+        hash.put(Type.EDIT_SETTINGS, "Edit general settings");
+        hash.put(Type.EDIT_RUN, "Edit a run");
+        hash.put(Type.EDIT_CLARIFICATION, "Edit a clarification");
+        hash.put(Type.SUBMIT_CLARIFICATION, "Submit a clarification");
+        hash.put(Type.SUBMIT_RUN, "Submit a run");
         hash.put(Type.VIEW_ALL_JUDGEMENTS, "Execute but not judge runs");
-        hash.put(Type.VIEW_STANDINGS, "todo");
-        hash.put(Type.VIEW_SUMMARY_ATTEMPTS_GRID, "todo");
-    }
-
-    public static void main(String[] args) {
-        Permission permissionCl = new Permission();
-        for (Type permission : Type.values()) {
-            System.out.println(permission + " is " + permissionCl.getDescription(permission));
-        }
+        hash.put(Type.VIEW_STANDINGS, "View standings");
+        hash.put(Type.VIEW_SUMMARY_ATTEMPTS_GRID, "View Summary Attemps Grid");
+        hash.put(Type.FORCE_LOGOFF_CLIENT, "Force client logoff");
+        hash.put(Type.FORCE_LOGOFF_SERVER, "Force server logoff");
+        hash.put(Type.DISPLAY_ON_SCOREBOARD, "Can be shown on socreboard displays");
     }
 
     /**
-     * Return description for permission.
+     * Return a description for permission type.
      * 
      * @param permission
-     * @return
+     * @return Description of type.
      */
-    public String getDescription(Type permission) {
-        return hash.get(permission);
+    public String getDescription(Type type) {
+        return hash.get(type);
     }
 
 }
