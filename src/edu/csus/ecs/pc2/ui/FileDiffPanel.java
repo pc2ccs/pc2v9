@@ -21,7 +21,7 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IModel;
 
 /**
- * A diff panel.
+ * A file diff (comparison) panel.
  * 
  * @author pc2@ecs.csus.edu
  */

@@ -19,7 +19,7 @@ import edu.csus.ecs.pc2.core.model.IModel;
 import edu.csus.ecs.pc2.core.model.Problem;
 
 /**
- * 
+ * Shows clarifications in a list box.
  * 
  * @author pc2@ecs.csus.edu
  */

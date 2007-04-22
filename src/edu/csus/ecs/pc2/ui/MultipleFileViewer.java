@@ -21,7 +21,7 @@ import edu.csus.ecs.pc2.core.model.IModel;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 
 /**
- * Multiple File Viewer (JFrame).
+ * Multiple File Viewer.
  * 
  * 
  * @author pc2@ecs.csus.edu

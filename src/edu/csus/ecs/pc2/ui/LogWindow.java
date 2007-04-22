@@ -12,9 +12,9 @@ import edu.csus.ecs.pc2.core.model.IModel;
 
 /**
  * This class is intended to register as a listener to the Log/LogWindowHandler and display the logs in a grid.
- * 
+ * <br>
  * If {@link #setLog(Log)} is not used, will be a window for
- * the {@link Controller#getLog() log}.
+ * the {@link Controller#getLog() Controller log}.
  * 
  */
 public class LogWindow extends JFrame implements UIPlugin {

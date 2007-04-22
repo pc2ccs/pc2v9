@@ -17,6 +17,11 @@ import edu.csus.ecs.pc2.core.model.IModel;
 import edu.csus.ecs.pc2.core.model.Site;
 
 /**
+ * Generate accounts pane.
+ * 
+ * Can generate panes on any site, for any client type.
+ * Can use a client start number to start the numbering of
+ * the accounts.  
  * 
  * @author pc2@ecs.csus.edu
  * 

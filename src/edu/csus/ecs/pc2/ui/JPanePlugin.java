@@ -6,7 +6,7 @@ import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.model.IModel;
 
 /**
- * Base JPanel class that can be added a JFrame.
+ * Base class for most UIPlugin panes.
  * 
  * 
  * @author pc2@ecs.csus.edu

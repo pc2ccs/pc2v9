@@ -24,7 +24,7 @@ import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 
 /**
- * 
+ * View runs.
  *
  * @author pc2@ecs.csus.edu
  */

@@ -12,7 +12,7 @@ import edu.csus.ecs.pc2.core.model.IModel;
 import edu.csus.ecs.pc2.core.model.Problem;
 
 /**
- * 
+ * View Problems.
  * 
  * @author pc2@ecs.csus.edu
  */

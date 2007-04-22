@@ -5,7 +5,7 @@ import edu.csus.ecs.pc2.core.model.IModel;
 import javax.swing.JCheckBox;
 
 /**
- * Options Pane.
+ * Options Pane, Show Log checkbox.
  * 
  * You must invoke {@link #setLogWindow(LogWindow)} for Show
  * Log checkbox to enable. 

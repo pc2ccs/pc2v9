@@ -13,7 +13,11 @@ import edu.csus.ecs.pc2.core.model.IModel;
 public interface UIPlugin {
 
     /**
-     * set the Model and Controller.
+     * Provide model and controller information.
+     * 
+     * The class that invokes this method will pass the
+     * contents of the model and controller to the class
+     * that implements this method.
      * 
      * @param model
      *            contest data

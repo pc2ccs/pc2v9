@@ -23,7 +23,7 @@ import edu.csus.ecs.pc2.core.model.SiteEvent;
 import edu.csus.ecs.pc2.core.model.SiteList;
 
 /**
- * A panel that displays the sides and edits the sites' settings.
+ * View, Add and change site's settings.
  * 
  * @author pc2@ecs.csus.edu
  */

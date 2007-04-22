@@ -8,7 +8,7 @@ import javax.swing.UIManager;
 
 /**
  * Methods to center frame, change cursor, etc.
- * 
+ * <br>
  * Contains method to change look and feel, set cursor state, center windows and a yes no dialog with cancel as default.
  * 
  * @author pc2@ecs.csus
