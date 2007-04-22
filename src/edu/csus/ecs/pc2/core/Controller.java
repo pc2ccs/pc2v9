@@ -983,17 +983,20 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             try {
                 if (isUsingMainUI()) {
                     if (uiPlugin == null) {
-                        // NO UI to display
+                        // NO UI to display, so let's find one to display
+                        
                         String uiClassName = LoadUIClass.getUIClassName(clientId);
                         if (uiClassName == null) {
                             info("Unable to find UI class for " + clientId.getClientType().toString().toLowerCase());
                         } else {
                             info("Attempting to load UI class " + uiClassName);
+                            uiPlugin = LoadUIClass.loadUIClass(uiClassName);
+                            info("Loaded UI class " + uiClassName);
                         }
-                        uiPlugin = LoadUIClass.loadUIClass(uiClassName);
                     }
 
                     uiPlugin.setModelAndController(model, this);
+                    
 
                     if (loginUI != null) {
                         loginUI.dispose();
