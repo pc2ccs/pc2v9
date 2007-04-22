@@ -1,13 +1,18 @@
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 
+import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import com.ibm.webrunner.j2mclb.util.HeapSorter;
 
 import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.ILanguageListener;
 import edu.csus.ecs.pc2.core.model.IModel;
 import edu.csus.ecs.pc2.core.model.Language;
@@ -31,6 +36,18 @@ public class LanguagesPane extends JPanePlugin {
 
     private MCLB languageListBox = null;
 
+    private JButton addButton = null;
+
+    private JButton editButton = null;
+
+    private JPanel messagePane = null;
+
+    private JLabel messageLabel = null;
+    
+    private EditLanguageFrame editLanguageFrame = null;
+    
+    private Log log;
+
     /**
      * This method initializes
      * 
@@ -48,7 +65,10 @@ public class LanguagesPane extends JPanePlugin {
         this.setLayout(new BorderLayout());
         this.setSize(new java.awt.Dimension(564, 229));
         this.add(getLanguageListBox(), java.awt.BorderLayout.CENTER);
+        this.add(getMessagePane(), java.awt.BorderLayout.NORTH);
         this.add(getLanguageButtonPane(), java.awt.BorderLayout.SOUTH);
+        
+        editLanguageFrame = new EditLanguageFrame();
 
     }
 
@@ -64,8 +84,13 @@ public class LanguagesPane extends JPanePlugin {
      */
     private JPanel getLanguageButtonPane() {
         if (languageButtonPane == null) {
+            FlowLayout flowLayout = new FlowLayout();
+            flowLayout.setHgap(25);
             languageButtonPane = new JPanel();
+            languageButtonPane.setLayout(flowLayout);
             languageButtonPane.setPreferredSize(new java.awt.Dimension(35, 35));
+            languageButtonPane.add(getAddButton(), null);
+            languageButtonPane.add(getEditButton(), null);
         }
         return languageButtonPane;
     }
@@ -150,16 +175,20 @@ public class LanguagesPane extends JPanePlugin {
     public void setModelAndController(IModel inModel, IController inController) {
         super.setModelAndController(inModel, inController);
 
+        editLanguageFrame.setModelAndController(inModel, inController);
+        
+        log = getController().getLog();
+        
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 reloadListBox();
             }
         });
     }
-    
+
     /**
      * 
-     *
+     * 
      * @author pc2@ecs.csus.edu
      */
     public class LanguageListenerImplementation implements ILanguageListener {
@@ -175,7 +204,100 @@ public class LanguagesPane extends JPanePlugin {
         public void languageRemoved(LanguageEvent event) {
             // TODO Auto-generated method stub
         }
-        
+
     }
 
+    /**
+     * This method initializes addButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getAddButton() {
+        if (addButton == null) {
+            addButton = new JButton();
+            addButton.setText("Add");
+            addButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    addNewLanguage();
+                }
+            });
+        }
+        return addButton;
+    }
+
+    protected void addNewLanguage() {
+        editLanguageFrame.setLanguage(null);
+        editLanguageFrame.setVisible(true);
+    }
+
+    /**
+     * This method initializes editButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getEditButton() {
+        if (editButton == null) {
+            editButton = new JButton();
+            editButton.setText("Edit");
+            editButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    editSelectedLanguage();
+                }
+            });
+        }
+        return editButton;
+    }
+
+    protected void editSelectedLanguage() {
+        
+        int selectedIndex = languageListBox.getSelectedIndex();
+        if(selectedIndex == -1){
+            showMessage("Select a language to edit");
+            return;
+        }
+        
+        try {
+            ElementId elementId = (ElementId) languageListBox.getKeys()[selectedIndex];
+            Language languageToEdit = getModel().getLanguage(elementId);
+
+            editLanguageFrame.setLanguage(languageToEdit);
+            editLanguageFrame.setVisible(true);
+        } catch (Exception e) {
+            log.log(Log.WARNING, "Exception logged ", e);
+            showMessage("Unable to edit language, check log");
+        }
+    }
+
+    /**
+     * This method initializes messagePane
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getMessagePane() {
+        if (messagePane == null) {
+            messageLabel = new JLabel();
+            messageLabel.setText("");
+            messageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+            messagePane = new JPanel();
+            messagePane.setLayout(new BorderLayout());
+            messagePane.setPreferredSize(new java.awt.Dimension(25,25));
+            messagePane.add(messageLabel, java.awt.BorderLayout.CENTER);
+        }
+        return messagePane;
+    }
+
+    /**
+     * show message to user
+     * 
+     * @param string
+     */
+    private void showMessage(final String string) {
+
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                messageLabel.setText(string);
+            }
+        });
+
+    }
 } // @jve:decl-index=0:visual-constraint="10,10"

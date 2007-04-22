@@ -1,19 +1,23 @@
 package edu.csus.ecs.pc2.ui;
 
-import edu.csus.ecs.pc2.core.IController;
-import edu.csus.ecs.pc2.core.model.IModel;
-import edu.csus.ecs.pc2.core.model.LanguageAutoFill;
-
 import java.awt.BorderLayout;
-import javax.swing.JPanel;
-import javax.swing.JButton;
-import java.awt.FlowLayout;
-import javax.swing.JLabel;
 import java.awt.Color;
 import java.awt.Dimension;
-import javax.swing.SwingConstants;
-import javax.swing.JTextField;
+import java.awt.FlowLayout;
+
+import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+
+import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.Language;
+import edu.csus.ecs.pc2.core.model.LanguageAutoFill;
 
 /**
  * Add/Edit Language Pane
@@ -64,6 +68,8 @@ public class LanguagePane extends JPanePlugin {
     private JComboBox autoPopulateLanguageComboBox = null;
     
     private static final String NO_CHANGE_TITLE = "No Change";
+    
+    private Language language = null;
 
     /**
      * This method initializes
@@ -153,11 +159,37 @@ public class LanguagePane extends JPanePlugin {
             addButton.setEnabled(false);
             addButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.out.println("actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+                    addLanguage();
                 }
             });
         }
         return addButton;
+    }
+
+    protected void addLanguage() {
+        
+        Language newLanguage = getLanguageFromFields();
+        
+        // TODO update language
+//        getController().addNewLanguage(newLanguage);
+        
+        cancelButton.setText("Close");
+        addButton.setEnabled(false);
+        updateButton.setEnabled(false);
+    }
+
+    private Language getLanguageFromFields() {
+        if (language == null) {
+            language = new Language(displayNameTextField.getText());
+        } else {
+            language.setDisplayName(displayNameTextField.getText());
+        }
+        
+        language.setCompileCommandLine(compileCommandLineTextField.getText());
+        language.setExecutableIdentifierMask(getExecutableFilenameTextField().getText());
+        language.setProgramExecuteCommandLine(programExecutionCommandLineTextField.getText());
+        
+        return language;
     }
 
     /**
@@ -173,11 +205,23 @@ public class LanguagePane extends JPanePlugin {
             updateButton.setMnemonic(java.awt.event.KeyEvent.VK_U);
             updateButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.out.println("actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+                    updateLanguage();
                 }
             });
         }
         return updateButton;
+    }
+
+    protected void updateLanguage() {
+        
+        Language newLanguage = getLanguageFromFields();
+        
+        // TODO update language
+//        getController().updateLanguage(newLanguage);
+        
+        cancelButton.setText("Close");
+        addButton.setEnabled(false);
+        updateButton.setEnabled(false);
     }
 
     /**
@@ -192,11 +236,29 @@ public class LanguagePane extends JPanePlugin {
             cancelButton.setMnemonic(java.awt.event.KeyEvent.VK_C);
             cancelButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.out.println("actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+                    handleCancelButton();
                 }
             });
         }
         return cancelButton;
+    }
+
+    protected void handleCancelButton() {
+
+        if (getAddButton().isEnabled() || getUpdateButton().isEnabled()){
+
+            // Something changed, are they sure ?
+            
+            int result = FrameUtilities.yesNoCancelDialog("Language modified, save changes?", "Confirm Choice");
+
+            if (result == JOptionPane.YES_OPTION) {
+                if (getAddButton().isEnabled()) {
+                    addLanguage();
+                } else {
+                    updateLanguage();
+                }
+            }
+        } 
     }
 
     /**
@@ -276,6 +338,11 @@ public class LanguagePane extends JPanePlugin {
             displayNameTextField.setBounds(new java.awt.Rectangle(209, 46, 263, 20));
             displayNameTextField.setToolTipText("Name to display to users");
             displayNameTextField.setName("displayNameTextField");
+            displayNameTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyPressed(java.awt.event.KeyEvent e) {
+                    enableUpdateButtons(true);
+                }
+            });
         }
         return displayNameTextField;
     }
@@ -291,6 +358,12 @@ public class LanguagePane extends JPanePlugin {
             compileCommandLineTextField.setBounds(new java.awt.Rectangle(208, 79, 264, 20));
             compileCommandLineTextField.setToolTipText("Command Line for compiler");
             compileCommandLineTextField.setName("commandLineTextField");
+            compileCommandLineTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyPressed(java.awt.event.KeyEvent e) {
+                    enableUpdateButtons(true);
+                }
+            });
+
         }
         return compileCommandLineTextField;
     }
@@ -306,6 +379,12 @@ public class LanguagePane extends JPanePlugin {
             executableFilenameTextField.setBounds(new java.awt.Rectangle(208, 112, 264, 20));
             executableFilenameTextField.setToolTipText("Form: exe");
             executableFilenameTextField.setName("programExeTextField");
+            executableFilenameTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyPressed(java.awt.event.KeyEvent e) {
+                    enableUpdateButtons(true);
+                }
+            });
+
         }
         return executableFilenameTextField;
     }
@@ -337,6 +416,12 @@ public class LanguagePane extends JPanePlugin {
             programExecutionCommandLineTextField.setBounds(new java.awt.Rectangle(274, 145, 198, 20));
             programExecutionCommandLineTextField.setToolTipText("Form: exe");
             programExecutionCommandLineTextField.setName("programCommandLine");
+            programExecutionCommandLineTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyPressed(java.awt.event.KeyEvent e) {
+                    enableUpdateButtons(true);
+                }
+            });
+
         }
         return programExecutionCommandLineTextField;
     }
@@ -383,6 +468,61 @@ public class LanguagePane extends JPanePlugin {
         executableFilenameTextField.setText(values[2]);
         programExecutionCommandLineTextField.setText(values[3]);
         
+        enableUpdateButtons(true);
+    }
+
+    public Language getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(final Language language) {
+        
+        this.language = language;
+        
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                populateGUI(language);
+                enableUpdateButtons(false);
+            }
+        });
+    }
+
+    private void populateGUI(Language language2) {
+
+        if (language2 != null) {
+            displayNameTextField.setText(language2.getDisplayName());
+            compileCommandLineTextField.setText(language2.getCompileCommandLine());
+            executableFilenameTextField.setText(language2.getExecutableIdentifierMask());
+            programExecutionCommandLineTextField.setText(language2.getProgramExecuteCommandLine());
+
+            getAutoPopulateLanguageComboBox().setSelectedIndex(0);
+            
+            getAddButton().setVisible(false);
+            getUpdateButton().setVisible(true);
+            
+        } else {
+            displayNameTextField.setText("");
+            compileCommandLineTextField.setText("");
+            executableFilenameTextField.setText("");
+            programExecutionCommandLineTextField.setText("");
+
+            getAutoPopulateLanguageComboBox().setSelectedIndex(0);
+
+            getAddButton().setVisible(true);
+            getUpdateButton().setVisible(false);
+        }
+    }
+    
+
+
+    protected void enableUpdateButtons(boolean editedText) {
+        if (editedText){
+            cancelButton.setText("Cancel");
+        }else{
+            cancelButton.setText("Close");
+        }
+        addButton.setEnabled(editedText);
+        updateButton.setEnabled(editedText);
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
