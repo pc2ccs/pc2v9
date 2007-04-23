@@ -9,6 +9,6 @@ if [ -f ../VERSION ] ; then
   cd ..
 fi 
 
-java  -cp lib/pc2.jar edu.csus.ecs.pc2.Starter
+java -cp lib\pc2.jar;lib\mclb.jar edu.csus.ecs.pc2.Starter $*
 
 # eof pc2team $Id$ 

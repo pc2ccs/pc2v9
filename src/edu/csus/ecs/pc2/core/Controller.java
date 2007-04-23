@@ -173,6 +173,11 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
     private PacketHandler packetHandler = null;
     
+    /**
+     * Is this a server module.
+     */
+    private boolean serverModule = false;
+    
     public Controller(IModel model) {
         super();
         this.model = model;
@@ -409,9 +414,6 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                     port = Integer.parseInt(getINIValue(SERVER_PORT_KEY));
                 }
 
-                info("Starting Server Transport...");
-                transportManager.startServerTransport(this);
-
                 if (isContactingRemoteServer()) {
 
                     // Contacting another server. "join"
@@ -435,6 +437,13 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                     sendLoginRequest(transportManager, remoteServerConnectionHandlerID, clientId, password);
 
                 } else {
+                    
+                    if (! serverModule){
+                        SecurityException securityException = new SecurityException("Can not login as server, check logs");
+                        getLog().log(Log.WARNING,"Can not login as server, must start this module with --server command line option");
+                        securityException.printStackTrace(System.err);
+                        throw securityException;
+                    }
 
                     clientId = authenticateFirstServer(password);
                     try {
@@ -456,24 +465,10 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
                 remoteHostName = "localhost";
 
-                if (containsINIKey(CLIENT_SERVER_KEY)) {
-                    remoteHostName = getINIValue(CLIENT_SERVER_KEY);
-                    int idx = remoteHostName.indexOf(":");
-                    if (idx > 2) {
-                        port = Integer.parseInt(remoteHostName.substring(idx + 1));
-                        remoteHostName = remoteHostName.substring(0, idx);
-                    }
-                }
-                if (containsINIKey(CLIENT_PORT_KEY)) {
-                    port = Integer.parseInt(getINIValue(CLIENT_PORT_KEY));
-                }
+
 
                 try {
-                    info("Contacting server at " + remoteHostName + ":" + port);
-                    transportManager.startClientTransport(remoteHostName, port, this);
                     transportManager.connectToMyServer();
-                    info("Started Client Transport");
-
                     info("Sending login request to Server as "+clientId); // TODO debug remove this
                     sendLoginRequest(transportManager, clientId, password);
                 } catch (TransportException e) {
@@ -505,6 +500,30 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         ConnectionHandlerID connectionHandlerID = new ConnectionHandlerID("Site " + newSiteNumber);
         model.addLogin(newId, connectionHandlerID);
         return newId;
+    }
+    
+    /**
+     * Reads .ini file and sets server and port.
+     * 
+     * Sets the server and port for client.
+     *
+     */
+    private void setClientServerAndPort (){
+        
+        port = Integer.parseInt(TransportManager.DEFAULT_PC2_PORT);
+        
+        if (containsINIKey(CLIENT_SERVER_KEY)) {
+            remoteHostName = getINIValue(CLIENT_SERVER_KEY);
+            int idx = remoteHostName.indexOf(":");
+            if (idx > 2) {
+                port = Integer.parseInt(remoteHostName.substring(idx + 1));
+                remoteHostName = remoteHostName.substring(0, idx);
+            }
+        }
+        
+        if (containsINIKey(CLIENT_PORT_KEY)) {
+            port = Integer.parseInt(getINIValue(CLIENT_PORT_KEY));
+        }
     }
 
     private void sendLoginRequest(ITransportManager manager, ConnectionHandlerID connectionHandlerID, ClientId clientId,
@@ -1117,11 +1136,21 @@ public class Controller implements IController, ITwoToOne, IBtoA {
          *   this.login (login,password)
          * 
          */
-
         
         log.info("Starting TransportManager...");
         transportManager = new TransportManager(log);
         log.info("Started TransportManager");
+
+        if ( parseArguments.isOptPresent("--server")) {
+            info("Starting Server Transport...");
+            transportManager.startServerTransport(this);
+            serverModule = true;
+        } else {
+            // Client contact server 
+            setClientServerAndPort();
+            info("Contacting server at " + remoteHostName + ":" + port);
+            transportManager.startClientTransport(remoteHostName, port, this);
+        }
         
         isStarted = true;
         
