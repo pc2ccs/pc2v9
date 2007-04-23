@@ -20,6 +20,7 @@ import edu.csus.ecs.pc2.core.model.LoginEvent;
 import edu.csus.ecs.pc2.core.model.ReportPane;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.SiteEvent;
+import edu.csus.ecs.pc2.ui.ConnectionsPane;
 import edu.csus.ecs.pc2.ui.ContestTimesPane;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
@@ -260,6 +261,9 @@ public class ServerView extends JFrame implements UIPlugin {
 
         LoginsPane loginsPane = new LoginsPane();
         addUIPlugin(getMainTabbedPane(), "Logins", loginsPane);
+        
+        ConnectionsPane connectionsPane = new ConnectionsPane();
+        addUIPlugin(getMainTabbedPane(), "Connections", connectionsPane);
         
         ReportPane reportPane = new ReportPane();
         addUIPlugin(getMainTabbedPane(), "Reports", reportPane);

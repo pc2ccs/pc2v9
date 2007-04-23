@@ -16,6 +16,7 @@ import edu.csus.ecs.pc2.core.model.IModel;
 import edu.csus.ecs.pc2.core.model.ReportPane;
 import edu.csus.ecs.pc2.ui.AccountsPane;
 import edu.csus.ecs.pc2.ui.ClarificationsPane;
+import edu.csus.ecs.pc2.ui.ConnectionsPane;
 import edu.csus.ecs.pc2.ui.ContestTimesPane;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.GenerateAccountsPane;
@@ -121,6 +122,9 @@ public class AdministratorView extends JFrame implements UIPlugin {
                 
                 LoginsPane loginsPane = new LoginsPane();
                 addUIPlugin(getMainTabbedPanel(), "Logins", loginsPane);
+                
+                ConnectionsPane connectionsPane = new ConnectionsPane();
+                addUIPlugin(getMainTabbedPanel(), "Connections", connectionsPane);
                 
                 AccountsPane accountsPane = new AccountsPane();
                 addUIPlugin(getMainTabbedPanel(), "Accounts", accountsPane);
