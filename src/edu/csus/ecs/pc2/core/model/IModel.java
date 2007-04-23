@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core.model;
 
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -283,6 +284,14 @@ public interface IModel {
      * @param clientId
      */
     void removeLogin(ClientId clientId);
+    
+    void addConnectionHandlerID (ConnectionHandlerID connectionHandlerID);
+
+    void addConnectionHandlerID (ConnectionHandlerID connectionHandlerID, Date connectDate);
+
+    ConnectionHandlerID [] getConnectionHandlerIDs();
+    
+    void removeConnectionHandlerID (ConnectionHandlerID connectionHandlerID);
 
     int getSiteNumber();
 
@@ -304,7 +313,7 @@ public interface IModel {
      * Fetch all runs.
      */
     Run[] getRuns();
-
+    
     void runUpdated(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles, ClientId whoUpdatedRun);
 
     /**
@@ -403,12 +412,11 @@ public interface IModel {
     Judgement getJudgement(ElementId elementId);
 
     Account getAccount(ClientId id);
-
+    
     ContestTime[] getContestTimes();
 
     ConnectionHandlerID[] getConnectionHandleIDs();
 
     ContestTime getContestTime(ElementId elementId);
-
 
 }

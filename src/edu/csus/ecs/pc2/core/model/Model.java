@@ -963,4 +963,20 @@ public class Model implements IModel {
         fireConnectionListener(connectionEvent);
     }
 
+    public void addConnectionHandlerID(ConnectionHandlerID connectionHandlerID) {
+        addConnectionHandlerID(connectionHandlerID, new Date());
+    }
+    
+    public ConnectionHandlerID[] getConnectionHandlerIDs() {
+        return connectionHandlerList.getList();
+    }
+
+    public void removeConnectionHandlerID(ConnectionHandlerID connectionHandlerID) {
+        connectionHandlerList.remove(connectionHandlerID);
+    }
+
+    public void addConnectionHandlerID(ConnectionHandlerID connectionHandlerID, Date connectDate) {
+        connectionHandlerList.add(connectionHandlerID, connectDate);
+    }
+
 }
