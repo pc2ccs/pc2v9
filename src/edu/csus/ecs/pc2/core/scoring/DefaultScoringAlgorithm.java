@@ -15,7 +15,7 @@ import edu.csus.ecs.pc2.core.model.IModel;
  * @author pc2@ecs.csus.edu
  *
  */
-public class StandardScoringAlgorithm implements IScoringAlgorithm {
+public class DefaultScoringAlgorithm implements IScoringAlgorithm {
 
     public String getStandings(IModel theContest) {
         // TODO replace hard-coded XML return string with computed one
