@@ -15,6 +15,7 @@ import edu.csus.ecs.pc2.core.list.ClarificationComparator;
 import edu.csus.ecs.pc2.core.list.ContestTimeComparator;
 import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
 /**
@@ -29,6 +30,7 @@ public class InternalDumpReport implements IReport {
     private IModel model;
     private IController controller;
 
+    private Log log;
 
     private void writeReport(PrintWriter printWriter) {
 
@@ -170,12 +172,18 @@ public class InternalDumpReport implements IReport {
     public void createReportFile(String filename, Filter filter) throws IOException {
         
         PrintWriter printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
+        
+        try {
+            printHeader(printWriter);
 
-        printHeader(printWriter);
+            writeReport(printWriter);
 
-        writeReport(printWriter);
-
-        printFooter(printWriter);
+            printFooter(printWriter);
+            
+        } catch (Exception e) {
+            log.log(Log.INFO, "Exception writing report", e);
+            printWriter.println("Exception generating report "+e.getMessage());
+        }
 
         printWriter.close();
         printWriter = null;
@@ -195,6 +203,7 @@ public class InternalDumpReport implements IReport {
     public void setModelAndController(IModel inModel, IController inController) {
         this.model = inModel;
         this.controller = inController;
+        log = controller.getLog();
     }
 
     public String getPluginTitle() {
