@@ -10,6 +10,7 @@ import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.packet.Packet;
+import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
 /**
  * Represents functions provided by modules comprising the contest engine.
@@ -142,5 +143,7 @@ public interface IController {
      * @param question
      */
     void submitClarification(Problem problem, String question);
+
+    void disconnectConnection(ConnectionHandlerID connectionHandlerID);
     
 }

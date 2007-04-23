@@ -212,6 +212,11 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         ClientId clientId = new ClientId(siteNumber, Type.SERVER, 0);
 
         ConnectionHandlerID connectionHandlerID = model.getConnectionHandleID(clientId);
+        
+        Type type = packet.getSourceId().getClientType();
+        if ((!type.equals(Type.ADMINISTRATOR)) && (! type.equals(Type.SERVER))){
+            log.log(Log.SEVERE, "Unexpected User sent packet to other ("+siteNumber+") site.  "+packet);
+        }
 
         if (connectionHandlerID != null) {
             
@@ -578,6 +583,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                             clientId = new ClientId(model.getSiteNumber(), clientId.getClientType(), clientId.getClientNumber());
                         }
                         attemptToLogin(clientId, password, connectionHandlerID);
+                        disconnectConnection(connectionHandlerID);
                         sendLoginSuccess(clientId, connectionHandlerID);
 
                         // Send login notification to users.
@@ -829,8 +835,12 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
 
     public void connectionEstablished(ConnectionHandlerID connectionHandlerID) {
-        // TODO code connectionEstablished
         info("connectionEstablished: "+ connectionHandlerID);
+        model.addConnectionHandlerID(connectionHandlerID);
+
+        Packet connectionPacket = PacketFactory.createEstablishedConnection(model.getClientId(), PacketFactory.ALL_SERVERS, connectionHandlerID);
+        sendToAdministrators(connectionPacket);
+        sendToServers(connectionPacket);
     }
 
     /**
@@ -838,7 +848,6 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      */
     public void connectionDropped(ConnectionHandlerID connectionHandlerID) {
         // TODO code connectionDropped reconnection logic
-        // TODO code create a packet and send it to servers and admins
 
         ClientId clientId = model.getLoginClientId(connectionHandlerID);
         if (clientId != null) {
@@ -1386,6 +1395,13 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         Packet packet = PacketFactory.createClarificationSubmission(model.getClientId(), serverClientId, clarification);
 
         sendToLocalServer(packet);
+    }
+
+    public void disconnectConnection(ConnectionHandlerID connectionHandlerID) {
+        model.removeConnectionHandlerID(connectionHandlerID);
+        Packet disconnectionPacket = PacketFactory.createDroppedConnection(model.getClientId(), PacketFactory.ALL_SERVERS, connectionHandlerID);
+        sendToAdministrators(disconnectionPacket);
+        sendToServers(disconnectionPacket);
     }
 
 }
