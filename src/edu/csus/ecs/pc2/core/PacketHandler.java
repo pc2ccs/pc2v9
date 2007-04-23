@@ -62,10 +62,20 @@ public class PacketHandler {
         if (packetType.equals(Type.MESSAGE)) {
             PacketFactory.dumpPacket(System.err, packet);
 
+            if (isThisSite(packet.getDestinationId().getSiteNumber())) {
+                if (!packet.getDestinationId().getClientType().equals(ClientType.Type.SERVER)) {
+                    controller.sendToClient(packet);
+                }
+            } else {
+                String message = (String) PacketFactory.getObjectValue(packet, PacketFactory.MESSAGE_STRING);
+                Packet messagePacket = PacketFactory.createMessage(model.getClientId(), packet.getDestinationId(), message);
+                int siteNumber = packet.getDestinationId().getSiteNumber();
+                controller.sendToRemoteServer(siteNumber, messagePacket);
+            }
         } else if (packetType.equals(Type.RUN_SUBMISSION_CONFIRM)) {
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
             model.addRun(run);
-            sendToJudgesAndOthers( packet, isThisSite(run));
+            sendToJudgesAndOthers(packet, isThisSite(run));
 
         } else if (packetType.equals(Type.RUN_SUBMISSION)) {
             // RUN submitted by team to server
@@ -109,6 +119,12 @@ public class PacketHandler {
             model.runNotAvailable(run);
 
             sendToJudgesAndOthers( packet, isThisSite(run));
+
+        } else if (packetType.equals(Type.ESTABLISHED_CONNECTION)) {
+            controller.sendToAdministrators(packet);
+
+        } else if (packetType.equals(Type.DROPPED_CONNECTION)) {
+            controller.sendToAdministrators(packet);
 
         } else if (packetType.equals(Type.RUN_AVAILABLE)) {
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
@@ -169,12 +185,15 @@ public class PacketHandler {
             requestRun(packet, run,  requestFromId);
 
         } else if (packetType.equals(Type.LOGOUT)) {
+            // client logged out
             logoutClient(packet);
 
         } else if (packetType.equals(Type.LOGIN)) {
+            // client logged in
             loginClient(packet); 
             
         } else if (packetType.equals(Type.LOGIN_SUCCESS)) {
+            // from server to client on a successful login
 
             if (isServer(packet.getDestinationId())) {
                 /**
@@ -208,9 +227,7 @@ public class PacketHandler {
         ConnectionHandlerID connectionHandlerID = (ConnectionHandlerID) PacketFactory.getObjectValue(packet, PacketFactory.CONNECTION_HANDLE_ID);
 
         if (isServer()) {
-
-            // TODO add to login list 
-            
+            model.addLogin(whoLoggedIn, connectionHandlerID);
             sendToJudgesAndOthers(packet, false);
         } else {
             model.addLogin(whoLoggedIn, connectionHandlerID);
@@ -225,8 +242,7 @@ public class PacketHandler {
         
         ClientId whoLoggedOff = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
         if (isServer()){
-            // TODO add login to login list
-            
+            model.removeLogin(whoLoggedOff);
             sendToJudgesAndOthers(packet, false);
         }else{
             model.removeLogin(whoLoggedOff);
@@ -525,6 +541,7 @@ public class PacketHandler {
                 if (model.isLoggedIn(serverClientId)) {
 
                     // send request to remote server
+                    Packet requestPacket = PacketFactory.createRunRequest(model.getClientId(), serverClientId, run, whoRequestsRunId);
                     controller.sendToRemoteServer(run.getSiteNumber(), packet);
 
                 } else {
@@ -634,6 +651,28 @@ public class PacketHandler {
             controller.getLog().log(Log.WARNING,"Exception logged ", e);
         }
     }
+    
+    /**
+     * Unpack and add list of connection ids to model.
+     * 
+     * @param packet
+     */
+    private void addConnectionIdsToModel(Packet packet) {
+
+        try {
+            ConnectionHandlerID[] connectionHandlerIDs = (ConnectionHandlerID[]) PacketFactory.getObjectValue(packet, PacketFactory.CONNECTION_HANDLE_ID_LIST);
+            if (connectionHandlerIDs != null) {
+                for (ConnectionHandlerID connectionHandlerID : connectionHandlerIDs) {
+                    model.addConnectionHandlerID(connectionHandlerID);
+                }
+            }
+        } catch (Exception e) {
+            // TODO: log handle exception
+            e.printStackTrace();
+            controller.getLog().log(Log.WARNING, "Exception logged ", e);
+        }
+
+    }
 
     private boolean isThisSite(Account account) {
         return account.getSiteNumber() == model.getSiteNumber();
@@ -730,6 +769,8 @@ public class PacketHandler {
         addClarificationsToModel(packet);
         
         addAccountsToModel (packet);
+        
+        addConnectionIdsToModel (packet);
 
         if (model.isLoggedIn()) {
 
