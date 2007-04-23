@@ -34,7 +34,7 @@ public class ConnectionHandlerList {
         return hashtable.remove(key);
     }
 
-    public ConnectionHandlerID [] getList(){
-        return (ConnectionHandlerID[]) hashtable.values().toArray(new ConnectionHandlerID[hashtable.size()]);
+    public ConnectionHandlerID[] getList() {
+        return (ConnectionHandlerID[]) hashtable.keySet().toArray(new ConnectionHandlerID[hashtable.size()]);
     }
 }
