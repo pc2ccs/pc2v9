@@ -1,13 +1,18 @@
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 
+import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import com.ibm.webrunner.j2mclb.util.HeapSorter;
 
 import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IModel;
 import edu.csus.ecs.pc2.core.model.Problem;
 
@@ -29,6 +34,16 @@ public class ProblemsPane extends JPanePlugin {
 
     private MCLB problemListBox = null;
 
+    private JButton addButton = null;
+
+    private JButton editButton = null;
+
+    private JPanel messagePanel = null;
+
+    private JLabel messageLabel = null;
+    
+    private Log log = null;
+
     /**
      * This method initializes
      * 
@@ -45,6 +60,7 @@ public class ProblemsPane extends JPanePlugin {
     private void initialize() {
         this.setLayout(new BorderLayout());
         this.setSize(new java.awt.Dimension(564, 229));
+        this.add(getMessagePanel(), java.awt.BorderLayout.NORTH);
         this.add(getProblemListBox(), java.awt.BorderLayout.CENTER);
         this.add(getProblemButtonPane(), java.awt.BorderLayout.SOUTH);
 
@@ -52,7 +68,7 @@ public class ProblemsPane extends JPanePlugin {
 
     @Override
     public String getPluginTitle() {
-       return "Problems Pane";
+        return "Problems Pane";
     }
 
     /**
@@ -62,8 +78,13 @@ public class ProblemsPane extends JPanePlugin {
      */
     private JPanel getProblemButtonPane() {
         if (problemButtonPane == null) {
+            FlowLayout flowLayout = new FlowLayout();
+            flowLayout.setHgap(25);
             problemButtonPane = new JPanel();
+            problemButtonPane.setLayout(flowLayout);
             problemButtonPane.setPreferredSize(new java.awt.Dimension(35, 35));
+            problemButtonPane.add(getAddButton(), null);
+            problemButtonPane.add(getEditButton(), null);
         }
         return problemButtonPane;
     }
@@ -156,6 +177,8 @@ public class ProblemsPane extends JPanePlugin {
 
     public void setModelAndController(IModel inModel, IController inController) {
         super.setModelAndController(inModel, inController);
+        
+        log = getController().getLog();
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -163,5 +186,100 @@ public class ProblemsPane extends JPanePlugin {
             }
         });
     }
+
+    /**
+     * This method initializes addButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getAddButton() {
+        if (addButton == null) {
+            addButton = new JButton();
+            addButton.setText("Add");
+            addButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    addProblem();
+                }
+            });
+        }
+        return addButton;
+    }
+
+    protected void addProblem() {
+        
+        // TODO add problem frame
+        
+        showMessage("Add new problem");
+    }
+
+    /**
+     * This method initializes editButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getEditButton() {
+        if (editButton == null) {
+            editButton = new JButton();
+            editButton.setText("Edit");
+            editButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    editSelectedProblem();
+                }
+            });
+        }
+        return editButton;
+    }
+
+    protected void editSelectedProblem() {
+
+        int selectedIndex = problemListBox.getSelectedIndex();
+        if(selectedIndex == -1){
+            showMessage("Select a problem to edit");
+            return;
+        }
+        
+        try {
+            ElementId elementId = (ElementId) problemListBox.getKeys()[selectedIndex];
+            Problem problemToEdit = getModel().getProblem(elementId);
+
+            showMessage("Would have edited "+problemToEdit.getDisplayName());
+            
+            // TODO code edit problem
+            
+//            editProblemFrame.setProblem(problemToEdit);
+//            editProblemFrame.setVisible(true);
+        } catch (Exception e) {
+            log.log(Log.WARNING, "Exception logged ", e);
+            showMessage("Unable to edit problem, check log");
+        }
+    }
+
+    /**
+     * This method initializes messagePanel
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getMessagePanel() {
+        if (messagePanel == null) {
+            messageLabel = new JLabel();
+            messageLabel.setText("");
+            messageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+            messagePanel = new JPanel();
+            messagePanel.setLayout(new BorderLayout());
+            messagePanel.setPreferredSize(new java.awt.Dimension(25, 25));
+            messagePanel.add(messageLabel, java.awt.BorderLayout.CENTER);
+        }
+        return messagePanel;
+    }
+    
+    private void showMessage(final String string) {
+
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                messageLabel.setText(string);
+            }
+        });
+    }
+
 
 } // @jve:decl-index=0:visual-constraint="10,10"
