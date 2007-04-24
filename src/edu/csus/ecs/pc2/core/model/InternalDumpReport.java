@@ -32,7 +32,7 @@ public class InternalDumpReport implements IReport {
 
     private Log log;
 
-    private void writeReport(PrintWriter printWriter) {
+    private  void writeReport(PrintWriter printWriter) {
 
             Vector<Account> allAccounts = new Vector<Account>();
 
@@ -176,7 +176,12 @@ public class InternalDumpReport implements IReport {
         try {
             printHeader(printWriter);
 
-            writeReport(printWriter);
+            try {
+                writeReport(printWriter);
+            } catch (Exception e) {
+                printWriter.println("Exception in report: "+e.getMessage());
+                e.printStackTrace(printWriter);
+            }            
 
             printFooter(printWriter);
             
