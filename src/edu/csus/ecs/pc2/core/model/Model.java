@@ -23,6 +23,7 @@ import edu.csus.ecs.pc2.core.list.RunList;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
 import edu.csus.ecs.pc2.core.log.StaticLog;
+import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
@@ -150,6 +151,14 @@ public class Model implements IModel {
             Clarification clarification = new Clarification(clientId, problem, question);
             acceptClarification(clarification);
         }
+
+        // TO ALL clar
+        ClientId clientId = new ClientId(1, Type.ADMINISTRATOR, 1);
+        String question = "Why are all the problems so hard so hard ?";
+        Problem problem = getProblems()[0];
+        Clarification clarification = new Clarification(clientId, problem, question);
+        Clarification newClar = acceptClarification(clarification);
+        answerClarification(newClar, "Because We say so", clientId, true);
 
         Language language = createLanguageFromAutoFill(LanguageAutoFill.JAVATITLE);
         addLanguage(language);
@@ -429,6 +438,18 @@ public class Model implements IModel {
         Clarification newClarification = clarificationList.addNewClarification(clarification);
         addClarification(clarification);
         return newClarification;
+    }
+    
+    public void answerClarification (Clarification clarification, String answer, ClientId whoAnsweredIt, boolean sendToAll){
+        Clarification updatedClarification = clarificationList.updateClarification(clarification, ClarificationStates.ANSWERED, whoAnsweredIt, answer, sendToAll);
+        ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.ANSWERED_CLARIFICATION, updatedClarification);
+        fireClarificationListener(clarificationEvent);
+    }
+    
+    public void updateClarification (Clarification clarification){
+        clarificationList.updateClarification(clarification);
+        ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.CHANGED, clarification);
+        fireClarificationListener(clarificationEvent);
     }
     
     /**
@@ -969,5 +990,32 @@ public class Model implements IModel {
 
     public ConnectionHandlerID[] getConnectionHandlerIDs() {
         return connectionHandlerList.getList();
+    }
+
+    public Clarification[] getClarifications(ClientId clientId) {
+
+        Vector<Clarification> clientClarifications = new Vector<Clarification>();
+        Enumeration<Clarification> enumeration = clarificationList.getClarList();
+        while (enumeration.hasMoreElements()) {
+            Clarification clarification = (Clarification) enumeration.nextElement();
+
+            if (clarification.isSendToAll() || clientId.equals(clarification.getSubmitter())) {
+                clientClarifications.add(clarification);
+            }
+        }
+        return (Clarification[]) clientClarifications.toArray(new Clarification[clientClarifications.size()]);
+    }
+
+    public Run[] getRuns(ClientId clientId) {
+        Vector<Run> clientClarifications = new Vector<Run>();
+        Enumeration<Run> enumeration = runList.getRunList();
+        while (enumeration.hasMoreElements()) {
+            Run clarification = (Run) enumeration.nextElement();
+
+            if (clientId.equals(clarification.getSubmitter())) {
+                clientClarifications.add(clarification);
+            }
+        }
+        return (Run[]) clientClarifications.toArray(new Run[clientClarifications.size()]);
     }
 }

@@ -201,7 +201,7 @@ public class RunList implements Serializable {
         writeToDisk();
     }
 
-    public Enumeration getRunList() {
+    public Enumeration <Run> getRunList() {
         return runHash.elements();
     }
 

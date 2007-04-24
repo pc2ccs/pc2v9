@@ -189,7 +189,7 @@ public class ClarificationList implements Serializable {
         }
     }
 
-    public void updateClarification(Clarification clarification, ClarificationStates newState, ClientId sourceId, String answer,
+    public Clarification updateClarification(Clarification clarification, ClarificationStates newState, ClientId sourceId, String answer,
             boolean sendToAll) {
         Clarification fetchedClarification = get(clarification);
         if (fetchedClarification != null) {
@@ -199,14 +199,15 @@ public class ClarificationList implements Serializable {
             fetchedClarification.setWhoJudgedItId(sourceId);
             fetchedClarification.setSendToAll(sendToAll);
             writeToDisk();
+            return fetchedClarification;
         } else {
             // TODO LOG could not find clarification in list
             System.err.println("debug - could not find clarification " + clarification);
-
+            return null;
         }
     }
 
-    public Enumeration getClarList() {
+    public Enumeration<Clarification> getClarList() {
         return clarHash.elements();
     }
 

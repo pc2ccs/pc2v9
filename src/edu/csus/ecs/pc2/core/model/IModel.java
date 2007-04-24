@@ -415,4 +415,8 @@ public interface IModel {
 
     ContestTime getContestTime(ElementId elementId);
 
+    Clarification[] getClarifications(ClientId clientId);
+
+    Run[] getRuns(ClientId clientId);
+
 }

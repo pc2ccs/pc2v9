@@ -110,6 +110,8 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     
     private static final String LOGIN_OPTION_STRING = "--login";
     private static final String PASSWORD_OPTION_STRING = "--password";
+    // TODO code implement --loginUI
+    @SuppressWarnings("unused")
     private static final String LOGIN_UI_OPTION_STRING = "--loginUI";
 
     /**
@@ -811,11 +813,24 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
 
     private void sendLoginSuccess(ClientId clientId, ConnectionHandlerID connectionHandlerID) {
-        Packet packetToSend = PacketFactory.createLoginSuccess( model.getClientId(), clientId, model.getContestTime(),
-                model.getContestTimes(), model.getSiteNumber(),
-                model.getLanguages(), model.getProblems(), model.getJudgements(), model.getSites(),
-                model.getRuns(), model.getClarifications(), allLoggedInUsers(), model.getConnectionHandleIDs(),
-                getAllAccounts());
+
+        Run[] runs = null;
+        Clarification[] clarifications = null;
+
+        if (clientId.getClientType().equals(ClientType.Type.TEAM)) {
+            runs = model.getRuns(clientId);
+            clarifications = model.getClarifications(clientId);
+
+        } else {
+            runs = model.getRuns();
+            clarifications = model.getClarifications();
+
+        }
+
+        Packet packetToSend = PacketFactory.createLoginSuccess(model.getClientId(), clientId, model.getContestTime(), model.getContestTimes(), model.getSiteNumber(), 
+                model.getLanguages(), model.getProblems(), model.getJudgements(), model.getSites(), runs, clarifications, 
+                allLoggedInUsers(), model.getConnectionHandleIDs(), getAllAccounts());
+        
         sendToClient(packetToSend);
     }
 
