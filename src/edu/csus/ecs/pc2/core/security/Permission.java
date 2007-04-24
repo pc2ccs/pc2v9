@@ -162,6 +162,18 @@ public class Permission implements Serializable {
          * 
          */
         EXTRACT_RUNS,
+        /**
+         * 
+         */
+        GIVE_CLARIFICATION,
+        /**
+         * 
+         */
+        TAKE_CLARIFICATION,
+        /**
+         * Generate a new clarification and answer
+         */
+        GENERATE_NEW_CLARIFICATION,
     };
 
     private Hashtable<Type, String> hash = new Hashtable<Type, String>();
@@ -213,6 +225,11 @@ public class Permission implements Serializable {
         hash.put(Type.TAKE_RUN, "Take runs from judges");
         hash.put(Type.VIEW_RUN_JUDGEMENT_HISTORIES, "View run judgement histories");
         hash.put(Type.EXTRACT_RUNS, "Extract run contents from runs database");
+        
+        hash.put(Type.GIVE_CLARIFICATION, "Give clarifications to judges");
+        hash.put(Type.TAKE_CLARIFICATION, "Take clarifications from judges");
+        hash.put(Type.GENERATE_NEW_CLARIFICATION, "Generate a clarification and answer");
+        
     }
 
     /**

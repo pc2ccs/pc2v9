@@ -67,6 +67,7 @@ public class PermissionGroup {
         judgePermissionList.addPermission(Type.VIEW_STANDINGS);
         judgePermissionList.addPermission(Type.VIEW_SUMMARY_ATTEMPTS_GRID);
         judgePermissionList.addPermission(Type.VIEW_RUN_JUDGEMENT_HISTORIES);
+        judgePermissionList.addPermission(Type.GENERATE_NEW_CLARIFICATION);
         
         /**
          * Board Permissions
