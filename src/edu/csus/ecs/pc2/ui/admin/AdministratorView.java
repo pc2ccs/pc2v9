@@ -29,6 +29,7 @@ import edu.csus.ecs.pc2.ui.OptionsPanel;
 import edu.csus.ecs.pc2.ui.ProblemsPane;
 import edu.csus.ecs.pc2.ui.RunsPanel;
 import edu.csus.ecs.pc2.ui.SitesPanel;
+import edu.csus.ecs.pc2.ui.StandingsPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
@@ -131,6 +132,9 @@ public class AdministratorView extends JFrame implements UIPlugin {
                 
                 ReportPane reportPane = new ReportPane();
                 addUIPlugin(getMainTabbedPanel(), "Reports", reportPane);
+                
+                StandingsPane standingsPane = new StandingsPane();
+                addUIPlugin(getMainTabbedPanel(), "Standings", standingsPane);
                 
                 OptionsPanel optionsPanel = new OptionsPanel();
                 addUIPlugin(getMainTabbedPanel(), "Options", optionsPanel);
