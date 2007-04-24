@@ -226,6 +226,8 @@ public class AccountsPane extends JPanePlugin {
         getModel().addAccountListener(new AccountListenerImplementation());
         
         initializePermissions();
+        
+        editAccountFrame.setModelAndController(inModel, inController);
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
