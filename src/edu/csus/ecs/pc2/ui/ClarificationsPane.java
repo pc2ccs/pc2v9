@@ -17,6 +17,8 @@ import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IClarificationListener;
 import edu.csus.ecs.pc2.core.model.IModel;
 import edu.csus.ecs.pc2.core.model.Problem;
+import javax.swing.JButton;
+import java.awt.FlowLayout;
 
 /**
  * Shows clarifications in a list box.
@@ -35,6 +37,16 @@ public class ClarificationsPane extends JPanePlugin {
     private JPanel clarificationButtonPane = null;
 
     private MCLB clarificationListBox = null;
+
+    private JButton giveButton = null;
+
+    private JButton takeButton = null;
+
+    private JButton editButton = null;
+
+    private JButton generateClarificationButton = null;
+
+    private JButton filterButton = null;
 
     /**
      * This method initializes
@@ -59,7 +71,7 @@ public class ClarificationsPane extends JPanePlugin {
 
     @Override
     public String getPluginTitle() {
-       return "Clarifications Pane";
+        return "Clarifications Pane";
     }
 
     /**
@@ -69,8 +81,16 @@ public class ClarificationsPane extends JPanePlugin {
      */
     private JPanel getClarificationButtonPane() {
         if (clarificationButtonPane == null) {
+            FlowLayout flowLayout = new FlowLayout();
+            flowLayout.setHgap(25);
             clarificationButtonPane = new JPanel();
+            clarificationButtonPane.setLayout(flowLayout);
             clarificationButtonPane.setPreferredSize(new java.awt.Dimension(35, 35));
+            clarificationButtonPane.add(getGiveButton(), null);
+            clarificationButtonPane.add(getTakeButton(), null);
+            clarificationButtonPane.add(getEditButton(), null);
+            clarificationButtonPane.add(getGenerateClarificationButton(), null);
+            clarificationButtonPane.add(getFilterButton(), null);
         }
         return clarificationButtonPane;
     }
@@ -84,7 +104,7 @@ public class ClarificationsPane extends JPanePlugin {
         if (clarificationListBox == null) {
             clarificationListBox = new MCLB();
 
-             Object[] cols = {"Site", "Team", "Clar Id", "Time", "Status", "Judge", "Sent to", "Problem", "Question", "Answer" };
+            Object[] cols = { "Site", "Team", "Clar Id", "Time", "Status", "Judge", "Sent to", "Problem", "Question", "Answer" };
             clarificationListBox.addColumns(cols);
 
             // Sorters
@@ -123,7 +143,6 @@ public class ClarificationsPane extends JPanePlugin {
             clarificationListBox.setColumnSorter(9, sorter, 10);
 
             clarificationListBox.autoSizeAllColumns();
-
 
         }
         return clarificationListBox;
@@ -195,15 +214,15 @@ public class ClarificationsPane extends JPanePlugin {
         clarificationListBox.autoSizeAllColumns();
         clarificationListBox.sort();
     }
-    
+
     /**
      * 
-     *
+     * 
      * @author pc2@ecs.csus.edu
      */
-    
+
     // $HeadURL$
-    public class ClarificationListenerImplementation implements IClarificationListener{
+    public class ClarificationListenerImplementation implements IClarificationListener {
 
         public void clarificationAdded(ClarificationEvent event) {
             updateClarificationRow(event.getClarification(), event.getWhoModifiedClarification());
@@ -216,12 +235,12 @@ public class ClarificationsPane extends JPanePlugin {
         public void clarificationRemoved(ClarificationEvent event) {
             // TODO Auto-generated method stub
         }
-        
+
     }
 
     public void setModelAndController(IModel inModel, IController inController) {
         super.setModelAndController(inModel, inController);
-        
+
         getModel().addClarificationListener(new ClarificationListenerImplementation());
 
         SwingUtilities.invokeLater(new Runnable() {
@@ -230,10 +249,10 @@ public class ClarificationsPane extends JPanePlugin {
             }
         });
     }
-    
+
     private String getProblemTitle(ElementId problemId) {
         Problem problem = getModel().getProblem(problemId);
-        if (problem != null){
+        if (problem != null) {
             return problem.toString();
         }
         return "Problem ?";
@@ -241,17 +260,81 @@ public class ClarificationsPane extends JPanePlugin {
 
     private String getSiteTitle(int siteNumber) {
         // TODO Auto-generated method stub
-        return "Site "+siteNumber;
+        return "Site " + siteNumber;
     }
 
     private String getTeamDisplayName(ClientId clientId) {
         Account account = getModel().getAccount(clientId);
-        if (account != null ){
+        if (account != null) {
             return account.getDisplayName();
         }
-        
-        return clientId.getName(); 
+
+        return clientId.getName();
     }
 
+    /**
+     * This method initializes getButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getGiveButton() {
+        if (giveButton == null) {
+            giveButton = new JButton();
+            giveButton.setText("Give");
+        }
+        return giveButton;
+    }
+
+    /**
+     * This method initializes takeButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getTakeButton() {
+        if (takeButton == null) {
+            takeButton = new JButton();
+            takeButton.setText("Take");
+        }
+        return takeButton;
+    }
+
+    /**
+     * This method initializes editButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getEditButton() {
+        if (editButton == null) {
+            editButton = new JButton();
+            editButton.setText("Edit");
+        }
+        return editButton;
+    }
+
+    /**
+     * This method initializes generateClarificationButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getGenerateClarificationButton() {
+        if (generateClarificationButton == null) {
+            generateClarificationButton = new JButton();
+            generateClarificationButton.setText("Generate New Clar");
+        }
+        return generateClarificationButton;
+    }
+
+    /**
+     * This method initializes filterButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getFilterButton() {
+        if (filterButton == null) {
+            filterButton = new JButton();
+            filterButton.setText("Filter");
+        }
+        return filterButton;
+    }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
