@@ -295,10 +295,10 @@ public class RunsPanel extends JPanePlugin {
         getModel().addAccountListener(new AccountListenerImplementation());
 
         initializePermissions();
-        updateGUIperPermissions();
         
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
+                updateGUIperPermissions();
                 reloadRunList();
             }
         });
