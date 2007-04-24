@@ -4,8 +4,6 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import edu.csus.ecs.pc2.core.list.AccountList;
-import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
@@ -112,7 +110,7 @@ public interface IModel {
     /**
      * Add new accounts.
      * 
-     * @see AccountList#generateNewAccounts(Type, int, int, PasswordType, int, boolean)
+     * @see edu.csus.ecs.pc2.core.list.AccountList#generateNewAccounts(Type, int, int, edu.csus.ecs.pc2.core.list.AccountList.PasswordType, int, boolean)
      * @param clientTypeName
      *            name of client type, "team", "judge", etc.
      * @param count
@@ -136,7 +134,7 @@ public interface IModel {
     /**
      * Add new sites.
      * 
-     * @see AccountList#generateNewAccounts(Type, int, int, PasswordType, int, boolean)
+     * @see edu.csus.ecs.pc2.core.list.AccountList#generateNewAccounts(Type, int, int, edu.csus.ecs.pc2.core.list.AccountList.PasswordType, int, boolean)
      * @param count
      * @param active
      */
