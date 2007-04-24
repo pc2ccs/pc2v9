@@ -841,7 +841,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
     public void connectionEstablished(ConnectionHandlerID connectionHandlerID) {
         info("connectionEstablished: "+ connectionHandlerID);
-        model.addConnectionHandlerID(connectionHandlerID);
+        model.connectionEstablished(connectionHandlerID);
 
         Packet connectionPacket = PacketFactory.createEstablishedConnection(model.getClientId(), PacketFactory.ALL_SERVERS, connectionHandlerID);
         sendToAdministrators(connectionPacket);
@@ -1438,7 +1438,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
 
     public void disconnectConnection(ConnectionHandlerID connectionHandlerID) {
-        model.removeConnectionHandlerID(connectionHandlerID);
+        model.connectionDropped(connectionHandlerID);
         Packet disconnectionPacket = PacketFactory.createDroppedConnection(model.getClientId(), PacketFactory.ALL_SERVERS, connectionHandlerID);
         sendToAdministrators(disconnectionPacket);
         sendToServers(disconnectionPacket);
