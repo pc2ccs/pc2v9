@@ -23,6 +23,8 @@ import edu.csus.ecs.pc2.core.model.Site;
 public class MultiSiteTest extends TestCase {
 
     private static final int SECS_TO_PAUSE_ON_LOGIN = 8;
+    
+    private static final String [] SERVER_COMMAND_LINE_OPTIONS = {"--server"};
 
     // Models for site 1, 2, 3
     private IModel modelOne;
@@ -103,7 +105,7 @@ public class MultiSiteTest extends TestCase {
         controllerOne = new Controller(modelOne);
         controllerOne.setContactingRemoteServer(false);
         controllerOne.setUsingMainUI(false);
-        controllerOne.start(new String[0]);
+        controllerOne.start(SERVER_COMMAND_LINE_OPTIONS);
 
 
     }
@@ -127,7 +129,7 @@ public class MultiSiteTest extends TestCase {
         controllerTwo = new Controller(modelTwo);
         controllerTwo.setContactingRemoteServer(true);
         controllerTwo.setUsingMainUI(false);
-        controllerTwo.start(new String[0]);
+        controllerTwo.start(SERVER_COMMAND_LINE_OPTIONS);
 
         // Site 2 Login
         controllerTwo.login("site2", "site2");
@@ -148,7 +150,7 @@ public class MultiSiteTest extends TestCase {
         controllerThree = new Controller(modelThree);
         controllerThree.setContactingRemoteServer(true);
         controllerThree.setUsingMainUI(false);
-        controllerThree.start(new String[0]);
+        controllerThree.start(SERVER_COMMAND_LINE_OPTIONS);
 
         controllerThree.login("site3", "site3");
         sleep(SECS_TO_PAUSE_ON_LOGIN, "site 3 login");
@@ -212,18 +214,18 @@ public class MultiSiteTest extends TestCase {
          */
 
         // For site 1 expect 2,3
-        assertTrue(" ", modelOne.isLoggedIn(clientIdTwo));
-        assertTrue(" ", modelOne.isLoggedIn(clientIdThree));
+        assertTrue("Site 2 not logged into 1", modelOne.isLoggedIn(clientIdTwo));
+        assertTrue("Site 3 not logged into 1", modelOne.isLoggedIn(clientIdThree));
 
         // For site 2 expect 1,3
 
-        assertTrue(" ", modelTwo.isLoggedIn(clientIdOne));
-        assertTrue(" ", modelTwo.isLoggedIn(clientIdThree));
+        assertTrue("Site 1 not logged into 2", modelTwo.isLoggedIn(clientIdOne));
+        assertTrue("Site 3 not logged into 2", modelTwo.isLoggedIn(clientIdThree));
 
         // For site 3 expect 1,2
 
-        assertTrue(" ", modelThree.isLoggedIn(clientIdOne));
-        assertTrue(" ", modelThree.isLoggedIn(clientIdTwo));
+        assertTrue("Site 1 not logged into 3", modelThree.isLoggedIn(clientIdOne));
+        assertTrue("Site 2 not logged into 3", modelThree.isLoggedIn(clientIdTwo));
     }
 
 }

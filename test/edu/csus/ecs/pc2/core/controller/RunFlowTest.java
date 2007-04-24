@@ -39,6 +39,8 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 // $HeadURL$
 public class RunFlowTest extends TestCase {
 
+    private static final String [] SERVER_COMMAND_LINE_OPTIONS = {"--server"};
+
     private IModel modelOne;
 
     private Controller controllerOne;
@@ -64,7 +66,7 @@ public class RunFlowTest extends TestCase {
         controllerOne = new Controller(modelOne);
         controllerOne.setContactingRemoteServer(false);
         controllerOne.setUsingMainUI(false);
-        controllerOne.start(new String[0]);
+        controllerOne.start(SERVER_COMMAND_LINE_OPTIONS);
         controllerOne.login("site1", "site1");
         assertTrue("Site 1 logged in", modelOne.isLoggedIn());
 
