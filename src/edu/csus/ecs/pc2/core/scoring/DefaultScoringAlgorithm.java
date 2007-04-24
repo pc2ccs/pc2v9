@@ -76,7 +76,8 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 + "<run><submitTime>\"44\"</submitTime><language>\"C++\"</language><problem>\"2\"</problem><result>\"NO\"</result></run>"
                 + "<run><submitTime>\"55\"</submitTime><language>\"C++\"</language><problem>\"2\"</problem><result>\"YES\"</result></run>"
             + "</runList>"
-            + "</teamStanding>" ;
+            + "</teamStanding>" 
+            + "</contestStandings>";
         return result ;
     }
 }
