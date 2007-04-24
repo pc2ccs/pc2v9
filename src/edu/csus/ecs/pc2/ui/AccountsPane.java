@@ -21,9 +21,10 @@ import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
-import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.security.Permission;
+import edu.csus.ecs.pc2.core.security.PermissionList;
 
 /**
  * Account Pane list.
@@ -54,6 +55,10 @@ public class AccountsPane extends JPanePlugin {
     private JPanel messagePanel = null;
 
     private JLabel messageLabel = null;
+    
+    private PermissionList permissionList = new PermissionList();
+    
+    private EditAccountFrame editAccountFrame = new EditAccountFrame();
     
     private Log log;
 
@@ -157,9 +162,9 @@ public class AccountsPane extends JPanePlugin {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 Object[] objects = buildAccountRow(account);
-                int rowNumber = accountListBox.getIndexByKey(account.getElementId());
+                int rowNumber = accountListBox.getIndexByKey(account.getClientId());
                 if (rowNumber == -1) {
-                    accountListBox.addRow(objects, account.getElementId());
+                    accountListBox.addRow(objects, account.getClientId());
                 } else {
                     accountListBox.replaceRow(objects, rowNumber);
                 }
@@ -200,22 +205,38 @@ public class AccountsPane extends JPanePlugin {
         }
     }
 
+    private boolean isAllowed (Permission.Type type){
+        return permissionList.isAllowed(type);
+    }
+    
+    private void initializePermissions() {
+        Account account = getModel().getAccount(getModel().getClientId());
+        permissionList.clearAndLoadPermissions(account.getPermissionList());
+    }
+
+    private void updateGUIperPermissions() {
+        addButton.setVisible(isAllowed(Permission.Type.EDIT_ACCOUNT));
+        editButton.setVisible(isAllowed(Permission.Type.EDIT_ACCOUNT));
+    }
+    
     public void setModelAndController(IModel inModel, IController inController) {
         super.setModelAndController(inModel, inController);
 
+        log = getController().getLog();
         getModel().addAccountListener(new AccountListenerImplementation());
         
-        log = getController().getLog();
+        initializePermissions();
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 reloadAccountList();
+                updateGUIperPermissions();
             }
         });
     }
 
     /**
-     * Account Listener Implemenation
+     * Account Listener Implementation
      * 
      * @author pc2@ecs.csus.edu
      * 
@@ -229,8 +250,24 @@ public class AccountsPane extends JPanePlugin {
 
         public void accountModified(AccountEvent accountEvent) {
             updateAccountRow(accountEvent.getAccount());
+            
+            // check if is this account
+            Account account = accountEvent.getAccount();
+            /**
+             * If this is the account then update the GUI display per
+             * the potential change in Permissions.
+             */
+            if (getModel().getClientId().equals(account.getClientId())) {
+                // They modified us!!
+                initializePermissions();
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        updateGUIperPermissions();
+                    }
+                });
+                
+            }
         }
-
     }
 
     /**
@@ -273,10 +310,8 @@ public class AccountsPane extends JPanePlugin {
     }
 
     protected void addAccount() {
-        // TODO code aa
-        
-        showMessage("Would have added account ");
-
+        editAccountFrame.setAccount(null);
+        editAccountFrame.setVisible(true);
     }
 
     /**
@@ -307,22 +342,14 @@ public class AccountsPane extends JPanePlugin {
         }
         
         try {
-            ElementId elementId = (ElementId) accountListBox.getKeys()[selectedIndex];
-//            Account accountToEdit = getModel().getAccount(elementId);
-
-            showMessage("Would have edited "+elementId);
-            
-//            editAccountFrame.setAccount(accountToEdit);
-//            editAccountFrame.setVisible(true);
+            ClientId clientId = (ClientId) accountListBox.getKeys()[selectedIndex];
+            Account accountToEdit = getModel().getAccount(clientId);
+            editAccountFrame.setAccount(accountToEdit);
+            editAccountFrame.setVisible(true);
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception logged ", e);
             showMessage("Unable to edit account, check log");
         }
-    
-
-
-        // TODO Auto-generated method stub
-        
     }
 
     /**
