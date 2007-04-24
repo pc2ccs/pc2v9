@@ -292,6 +292,7 @@ public class RunsPanel extends JPanePlugin {
         super.setModelAndController(inModel, inController);
 
         getModel().addRunListener(new RunListenerImplementation());
+        getModel().addAccountListener(new AccountListenerImplementation());
 
         initializePermissions();
         updateGUIperPermissions();
