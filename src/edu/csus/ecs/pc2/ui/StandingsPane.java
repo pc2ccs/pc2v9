@@ -20,6 +20,9 @@ import com.ibm.webrunner.j2mclb.MultiColumnListbox;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.IRunListener;
+import edu.csus.ecs.pc2.core.model.RunEvent;
+import edu.csus.ecs.pc2.core.model.RunEvent.Action;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 
 /**
@@ -75,6 +78,8 @@ public class StandingsPane extends JPanePlugin {
         super.setModelAndController(inModel, inController);
         
         log = getController().getLog();
+        
+        getModel().addRunListener(new RunListenerImplementation());
 
         refreshStandings();
     }
@@ -111,8 +116,14 @@ public class StandingsPane extends JPanePlugin {
         return outArray;
     }
     
+    /**
+     * Parse output of ScoringAlgorithm and display.
+     *
+     */
     protected void parseAndDisplay () {
 
+        standingsListbox.removeAllRows();
+        
         DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
         String xmlString = defaultScoringAlgorithm.getStandings(getModel());
     
@@ -226,6 +237,31 @@ public class StandingsPane extends JPanePlugin {
 
         return obj;
     }
+    
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     *
+     */
+    public class RunListenerImplementation implements IRunListener{
 
+        public void runAdded(RunEvent event) {
+            // TODO Auto-generated method stub
+            // ignore
+        }
 
+        public void runChanged(RunEvent event) {
+            // TODO Auto-generated method stub
+            if (event.getAction().equals(Action.CHANGED)){
+                refreshStandings();
+            }
+        }
+
+        public void runRemoved(RunEvent event) {
+            // TODO Auto-generated method stub
+            refreshStandings();
+        }
+        
+    }
+    
 } // @jve:decl-index=0:visual-constraint="10,10"
