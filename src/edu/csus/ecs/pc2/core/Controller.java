@@ -401,10 +401,6 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                 }
             }
 
-            if (IniFile.isFilePresent()) {
-                // Only read and load .ini file if it is present.
-                new IniFile();
-            }
 
             port = Integer.parseInt(TransportManager.DEFAULT_PC2_PORT);
 
@@ -462,20 +458,8 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             } else {
 
                 // Client login
-
-                remoteHostName = "localhost";
-
-
-
-                try {
-                    transportManager.connectToMyServer();
-                    info("Sending login request to Server as "+clientId); // TODO debug remove this
-                    sendLoginRequest(transportManager, clientId, password);
-                } catch (TransportException e) {
-                    // TODO: log make this a very silent log entry.
-                    info("Exception starting up ", e);
-                    throw new SecurityException("Unable to contact server, contact staff");
-                }
+                info("Sending login request to Server as "+clientId); // TODO debug remove this
+                sendLoginRequest(transportManager, clientId, password);
             }
         } catch (TransportException e) {
             // TODO Auto-generated catch block
@@ -510,6 +494,8 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      */
     private void setClientServerAndPort (){
         
+        remoteHostName = "localhost";
+
         port = Integer.parseInt(TransportManager.DEFAULT_PC2_PORT);
         
         if (containsINIKey(CLIENT_SERVER_KEY)) {
@@ -1099,6 +1085,14 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         log = new Log("pc2.startup");
         StaticLog.setLog (log);
         
+        /**
+         * Saved exception.
+         * 
+         * If TransportException thrown before UI has been created,
+         * save the exception and present it on the UI later.
+         */
+        TransportException savedTransportException = null;
+        
         String[] arguments = { "--login", "--id", "--password", "--loginUI", "--remoteServer", "--port" };
         parseArguments = new ParseArguments(stringArray, arguments);
         
@@ -1140,6 +1134,12 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         log.info("Starting TransportManager...");
         transportManager = new TransportManager(log);
         log.info("Started TransportManager");
+        
+        if (IniFile.isFilePresent()) {
+            // Only read and load .ini file if it is present.
+            new IniFile();
+        }
+
 
         if ( parseArguments.isOptPresent("--server")) {
             info("Starting Server Transport...");
@@ -1150,6 +1150,13 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             setClientServerAndPort();
             info("Contacting server at " + remoteHostName + ":" + port);
             transportManager.startClientTransport(remoteHostName, port, this);
+            try {
+                transportManager.connectToMyServer();
+            } catch (TransportException transportException) {
+                savedTransportException = transportException;
+                log.log(Log.INFO, "Exception logged ", transportException);
+                
+            }
         }
         
         isStarted = true;
@@ -1202,6 +1209,10 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                 }
             }
             
+            if (savedTransportException != null && loginUI != null){
+                loginUI.setStatusMessage("Unable to contact server, contact staff");
+            }
+        
         }
     }
 
