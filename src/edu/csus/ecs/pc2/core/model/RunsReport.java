@@ -10,6 +10,7 @@ import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.Run.RunStates;
 
 /**
  * Internal dump report.
@@ -26,6 +27,50 @@ public class RunsReport implements IReport {
     private IController controller;
 
     private Log log;
+    
+    private void writeRow (PrintWriter printWriter, Run run){
+        
+        ClientId clientId = run.getSubmitter();
+        printWriter.print("run "+run.getNumber()+"|");
+        printWriter.print("site "+run.getSiteNumber()+"|");
+        printWriter.print("proxy |");
+        printWriter.print("team "+clientId.getClientNumber()+"|");
+        printWriter.print(clientId.getName()+":"+getClientName(clientId)+"|");
+        
+        printWriter.print("prob "+run.getProblemId()+":"+model.getProblem(run.getProblemId())+"|");
+        printWriter.print("lang "+run.getLanguageId()+":"+model.getLanguage(run.getLanguageId())+"|");
+        
+        printWriter.print("tocj |");
+        printWriter.print("os "+run.getSystemOS()+"|");
+        printWriter.print("sel "+run.getStatus().equals(RunStates.BEING_JUDGED)+"|");
+        
+        printWriter.print("tocj false|");
+        printWriter.print("jc " + run.isJudged() + "|");
+        printWriter.print(run.getElapsedMins() + "|");
+        printWriter.print("rid " + run.getElementId() + "|");
+        printWriter.print("mmfr " + run.isSolved() + "|");
+        printWriter.print("del? " + run.isDeleted() + "|");
+        
+        String jciString = "";
+        String jbyString = "";
+        String jtString = "";
+        
+        if (run.isJudged()) {
+            
+            JudgementRecord judgementRecord = run.getJudgementRecord();
+
+            jciString = judgementRecord.getJudgementId().toString();
+            jbyString = judgementRecord.getJudgerClientId().getName();
+            jtString = new Long(judgementRecord.getJudgedMinutes()).toString();
+        }
+
+        printWriter.print("jt " + jtString + "|");
+        printWriter.print("jby " + jbyString + "|");
+        printWriter.print("jci " + jciString + "|");
+        
+        printWriter.println();
+    
+    }
 
     private void writeReport(PrintWriter printWriter) {
         
@@ -35,16 +80,16 @@ public class RunsReport implements IReport {
         Arrays.sort(runs, new RunComparator());
         printWriter.println("-- " + runs.length + " runs --");
         for (Run run : runs) {
-            printWriter.println("  Run " + run.getNumber()+" (Site "+run.getSiteNumber()+") "+run.getElementId());
-            printWriter.println("    At   : "+run.getElapsedMins());
-            printWriter.println("    State: "+run.getStatus());
-            if ( run.isJudged() ) {
-                printWriter.println("    Judgement   : "+run.getJudgementRecord().getJudgementId());
-                printWriter.println("    By          : "+run.getJudgementRecord().getJudgerClientId());
-                printWriter.println("    When judged : "+run.getJudgementRecord().getWhenJudgedTime());
-                printWriter.println("    Judg Mins   : "+run.getJudgementRecord().getJudgedMinutes());
-                printWriter.println("    Judgement Id: "+run.getJudgementRecord().getJudgementId());
-            }
+            writeRow(printWriter, run);
+        }
+    }
+
+    private String getClientName(ClientId clientId) {
+        Account account = model.getAccount(clientId);
+        if (account != null){
+            return account.getDisplayName();
+        }else {
+            return clientId.getName();
         }
     }
 
