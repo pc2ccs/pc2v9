@@ -184,16 +184,13 @@ public class ClarificationsPane extends JPanePlugin {
         obj[1] = getTeamDisplayName(clar.getSubmitter());
         obj[2] = clar.getNumber();
         obj[3] = clar.getElapsedMins();
+        
+        obj[5] = "";
         if (clar.isAnswered()) {
             obj[4] = "Answered";
+            obj[5] = getTeamDisplayName(clar.getWhoJudgedItId());
         } else {
             obj[4] = "Not Answered";
-        }
-
-        if (clientId != null) {
-            obj[5] = getTeamDisplayName(clientId);
-        } else {
-            obj[5] = "";
         }
 
         if (clar.isSendToAll()) {
