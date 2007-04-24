@@ -952,7 +952,11 @@ public class Model implements IModel {
     }
 
     public void connectionEstablished(ConnectionHandlerID connectionHandlerID) {
-        connectionHandlerList.add(connectionHandlerID, new Date());
+        connectionEstablished(connectionHandlerID, new Date());
+    }
+
+    public void connectionEstablished(ConnectionHandlerID connectionHandlerID, Date connectDate) {
+        connectionHandlerList.add(connectionHandlerID, connectDate);
         ConnectionEvent connectionEvent = new ConnectionEvent(ConnectionEvent.Action.ESTABLISHED, connectionHandlerID);
         fireConnectionListener(connectionEvent);
     }
@@ -963,20 +967,7 @@ public class Model implements IModel {
         fireConnectionListener(connectionEvent);
     }
 
-    public void addConnectionHandlerID(ConnectionHandlerID connectionHandlerID) {
-        addConnectionHandlerID(connectionHandlerID, new Date());
-    }
-    
     public ConnectionHandlerID[] getConnectionHandlerIDs() {
         return connectionHandlerList.getList();
     }
-
-    public void removeConnectionHandlerID(ConnectionHandlerID connectionHandlerID) {
-        connectionHandlerList.remove(connectionHandlerID);
-    }
-
-    public void addConnectionHandlerID(ConnectionHandlerID connectionHandlerID, Date connectDate) {
-        connectionHandlerList.add(connectionHandlerID, connectDate);
-    }
-
 }

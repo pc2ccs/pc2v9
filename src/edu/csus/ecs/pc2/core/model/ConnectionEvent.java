@@ -40,6 +40,7 @@ public class ConnectionEvent {
 
     public ConnectionEvent(Action action, ConnectionHandlerID connectionHandlerID) {
         this.connectionHandlerID = connectionHandlerID;
+        this.action = action;
     }
 
     public Action getAction() {

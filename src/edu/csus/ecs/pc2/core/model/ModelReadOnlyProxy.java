@@ -9,6 +9,13 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
+/**
+ * 
+ * @author pc2@ecs.csus.edu
+ *
+ */
+
+// $HeadURL$
 public final class ModelReadOnlyProxy implements IModel {
     private IModel theRealModel;
     
@@ -656,6 +663,11 @@ public final class ModelReadOnlyProxy implements IModel {
         } catch (IllegalModelAccessException e) {
             e.printStackTrace();
         }
+        
+    }
+
+    public void connectionEstablished(ConnectionHandlerID connectionHandlerID, Date connectDate) {
+        // TODO Auto-generated method stub
         
     }
 

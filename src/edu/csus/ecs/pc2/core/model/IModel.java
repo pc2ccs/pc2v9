@@ -30,9 +30,11 @@ public interface IModel {
 
     void addSite(Site site);
     
-    void connectionEstablished(ConnectionHandlerID connectionHandlerID) ;
+    void connectionEstablished(ConnectionHandlerID connectionHandlerID);
 
-    void connectionDropped(ConnectionHandlerID connectionHandlerID) ;
+    void connectionEstablished(ConnectionHandlerID connectionHandlerID, Date connectDate);
+
+    void connectionDropped(ConnectionHandlerID connectionHandlerID);
 
     /**
      * Update the run information.
@@ -285,14 +287,8 @@ public interface IModel {
      */
     void removeLogin(ClientId clientId);
     
-    void addConnectionHandlerID (ConnectionHandlerID connectionHandlerID);
-
-    void addConnectionHandlerID (ConnectionHandlerID connectionHandlerID, Date connectDate);
-
     ConnectionHandlerID [] getConnectionHandlerIDs();
     
-    void removeConnectionHandlerID (ConnectionHandlerID connectionHandlerID);
-
     int getSiteNumber();
 
     ContestTime getContestTime();

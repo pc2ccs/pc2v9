@@ -663,7 +663,7 @@ public class PacketHandler {
             ConnectionHandlerID[] connectionHandlerIDs = (ConnectionHandlerID[]) PacketFactory.getObjectValue(packet, PacketFactory.CONNECTION_HANDLE_ID_LIST);
             if (connectionHandlerIDs != null) {
                 for (ConnectionHandlerID connectionHandlerID : connectionHandlerIDs) {
-                    model.addConnectionHandlerID(connectionHandlerID);
+                    model.connectionEstablished(connectionHandlerID);
                 }
             }
         } catch (Exception e) {
