@@ -43,7 +43,9 @@ public class ProblemsPane extends JPanePlugin {
     private JLabel messageLabel = null;
     
     private Log log = null;
-
+    
+    private EditProblemFrame editProblemFrame = null;
+    
     /**
      * This method initializes
      * 
@@ -63,6 +65,8 @@ public class ProblemsPane extends JPanePlugin {
         this.add(getMessagePanel(), java.awt.BorderLayout.NORTH);
         this.add(getProblemListBox(), java.awt.BorderLayout.CENTER);
         this.add(getProblemButtonPane(), java.awt.BorderLayout.SOUTH);
+
+        editProblemFrame = new EditProblemFrame();
 
     }
 
@@ -179,6 +183,8 @@ public class ProblemsPane extends JPanePlugin {
         super.setModelAndController(inModel, inController);
         
         log = getController().getLog();
+        
+        editProblemFrame.setModelAndController(inModel, inController);
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -206,10 +212,8 @@ public class ProblemsPane extends JPanePlugin {
     }
 
     protected void addProblem() {
-        
-        // TODO add problem frame
-        
-        showMessage("Add new problem");
+        editProblemFrame.setProblem(null);
+        editProblemFrame.setVisible(true);
     }
 
     /**
@@ -242,12 +246,8 @@ public class ProblemsPane extends JPanePlugin {
             ElementId elementId = (ElementId) problemListBox.getKeys()[selectedIndex];
             Problem problemToEdit = getModel().getProblem(elementId);
 
-            showMessage("Would have edited "+problemToEdit.getDisplayName());
-            
-            // TODO code edit problem
-            
-//            editProblemFrame.setProblem(problemToEdit);
-//            editProblemFrame.setVisible(true);
+            editProblemFrame.setProblem(problemToEdit);
+            editProblemFrame.setVisible(true);
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception logged ", e);
             showMessage("Unable to edit problem, check log");

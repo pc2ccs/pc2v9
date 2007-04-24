@@ -183,6 +183,10 @@ public class ProblemPane extends JPanePlugin {
         cancelButton.setText("Close");
         addButton.setEnabled(false);
         updateButton.setEnabled(false);
+        
+        if ( getParentFrame() != null){
+            getParentFrame().setVisible(false);
+        }
     }
 
     private Problem getProblemFromFields() {
@@ -244,12 +248,16 @@ public class ProblemPane extends JPanePlugin {
 
         Problem newProblem = getProblemFromFields();
 
-        // TODO update problem
-        // getController().updateProblem(newProblem);
-
         cancelButton.setText("Close");
         addButton.setEnabled(false);
         updateButton.setEnabled(false);
+        
+        // TODO update problem
+        // getController().updateProblem(newProblem);
+        
+        if ( getParentFrame() != null){
+            getParentFrame().setVisible(false);
+        }
     }
 
     /**
@@ -285,6 +293,13 @@ public class ProblemPane extends JPanePlugin {
                 } else {
                     updateProblem();
                 }
+                if ( getParentFrame() != null){
+                    getParentFrame().setVisible(false);
+                }
+            }
+        } else {
+            if ( getParentFrame() != null){
+                getParentFrame().setVisible(false);
             }
         }
     }
@@ -311,11 +326,26 @@ public class ProblemPane extends JPanePlugin {
 
             getAddButton().setVisible(false);
             getUpdateButton().setVisible(true);
+            
+            problemNameTextField.setText(problem2.getDisplayName());
+            timeOutSecondTextField.setText(problem2.getTimeOutInSeconds()+"");
+//            judgesHaveDataFiles.setSelected(problem2.)
 
         } else {
 
+            
             getAddButton().setVisible(true);
             getUpdateButton().setVisible(false);
+            
+            problemNameTextField.setText("");
+            timeOutSecondTextField.setText("");
+            judgesHaveDataFiles.setSelected(false);
+            problemRequiresDataCheckBox.setSelected(false);
+            inputDataFileLabel.setText("");
+            answerFileNameLabel.setText("");
+            fileRadioButton.setSelected(true);
+            stdinRadioButton.setSelected(false);
+
         }
     }
 

@@ -53,6 +53,7 @@ public class EditLanguageFrame extends JFrame implements UIPlugin {
         this.controller = inController;
 
         getLanguagePane().setModelAndController(model, controller);
+        getLanguagePane().setParentFrame(this);
 
     }
 

@@ -176,6 +176,10 @@ public class LanguagePane extends JPanePlugin {
         cancelButton.setText("Close");
         addButton.setEnabled(false);
         updateButton.setEnabled(false);
+        
+        if ( getParentFrame() != null){
+            getParentFrame().setVisible(false);
+        }
     }
 
     private Language getLanguageFromFields() {
@@ -222,6 +226,10 @@ public class LanguagePane extends JPanePlugin {
         cancelButton.setText("Close");
         addButton.setEnabled(false);
         updateButton.setEnabled(false);
+        
+        if ( getParentFrame() != null){
+            getParentFrame().setVisible(false);
+        }
     }
 
     /**
@@ -257,8 +265,16 @@ public class LanguagePane extends JPanePlugin {
                 } else {
                     updateLanguage();
                 }
+                if ( getParentFrame() != null){
+                    getParentFrame().setVisible(false);
+                }
+                
             }
-        } 
+        } else {
+            if ( getParentFrame() != null){
+                getParentFrame().setVisible(false);
+            }
+        }
     }
 
     /**
