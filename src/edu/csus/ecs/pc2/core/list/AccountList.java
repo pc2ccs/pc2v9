@@ -3,12 +3,14 @@ package edu.csus.ecs.pc2.core.list;
 import java.util.Enumeration;
 import java.util.Vector;
 
+import edu.csus.ecs.pc2.core.PermissionGroup;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.IElementObject;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.security.Permission;
+import edu.csus.ecs.pc2.core.security.PermissionList;
 
 /**
  * Maintain a list of {@link edu.csus.ecs.pc2.core.model.Account}s.
@@ -30,6 +32,8 @@ public class AccountList extends BaseElementList {
     private static final long serialVersionUID = -9188551825072244360L;
 
     public static final String VALID_LOGIN = "Valid Login";
+    
+    private PermissionGroup permissionGroup = new PermissionGroup();
 
     /**
      * All password generation types
@@ -104,10 +108,14 @@ public class AccountList extends BaseElementList {
             String newPassword = generatePassword(passwordType, clientId);
             Account account = new Account(clientId, newPassword, siteNumber);
             if (isActive){
-                account.addPermission(Permission.Type.LOGIN);
-                account.addPermission(Permission.Type.DISPLAY_ON_SCOREBOARD);
-                // TODO give this account its other permissions
-                
+               
+                PermissionList permissionList = permissionGroup.getPermissionList (type);
+                if (permissionList != null){
+                    account.clearListAndLoadPermissions(permissionList);
+                } else {
+                    account.addPermission(Permission.Type.LOGIN);
+                    account.addPermission(Permission.Type.DISPLAY_ON_SCOREBOARD);
+                }
             }
             newAccountList.add(account);
             super.add(account);

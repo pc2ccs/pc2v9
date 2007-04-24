@@ -73,7 +73,7 @@ public class AdministratorView extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(562,387));
+        this.setSize(new java.awt.Dimension(754,387));
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setContentPane(getJPanel());
         this.setTitle("PC^2 Administrator");

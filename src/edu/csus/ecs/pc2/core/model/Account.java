@@ -126,6 +126,10 @@ public class Account implements IElementObject {
         }
     }
     
+    public void clearListAndLoadPermissions(PermissionList newPermissionList){
+        permissionList.clearAndLoadPermissions(newPermissionList);
+    }
+    
     public void addPermission(Permission.Type type){
         permissionList.addPermission(type);
     }
@@ -136,6 +140,10 @@ public class Account implements IElementObject {
 
     public boolean isAllowed (Permission.Type type){
         return permissionList.isAllowed(type);
+    }
+
+    public PermissionList getPermissionList() {
+        return permissionList;
     }
 
     

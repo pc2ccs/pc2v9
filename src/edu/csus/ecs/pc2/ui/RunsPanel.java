@@ -14,17 +14,20 @@ import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ElementId;
+import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IModel;
 import edu.csus.ecs.pc2.core.model.IRunListener;
-import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
+import edu.csus.ecs.pc2.core.security.Permission;
+import edu.csus.ecs.pc2.core.security.PermissionList;
 
 /**
  * View runs.
@@ -61,6 +64,8 @@ public class RunsPanel extends JPanePlugin {
     private JButton rejudgeRunButton = null;
 
     private JButton viewJudgementsButton = null;
+    
+    private PermissionList permissionList = new PermissionList();
 
     /**
      * This method initializes
@@ -261,12 +266,36 @@ public class RunsPanel extends JPanePlugin {
             updateRunRow(run, clientId);
         }
     }
+    
+    private boolean isAllowed (Permission.Type type){
+        return permissionList.isAllowed(type);
+    }
+    
+    
+    private void initializePermissions() {
+        Account account = getModel().getAccount(getModel().getClientId());
+        permissionList.clearAndLoadPermissions(account.getPermissionList());
+    }
+
+    private void updateGUIperPermissions() {
+        
+        requestRunButton.setVisible(isAllowed(Permission.Type.JUDGE_RUN));
+        editRunButton.setVisible(isAllowed(Permission.Type.EDIT_RUN));
+        extractButton.setVisible(isAllowed(Permission.Type.EXTRACT_RUNS));
+        giveButton.setVisible(isAllowed(Permission.Type.GIVE_RUN));
+        takeButton.setVisible(isAllowed(Permission.Type.TAKE_RUN));
+        rejudgeRunButton.setVisible(isAllowed(Permission.Type.REJUDGE_RUN));
+        viewJudgementsButton.setVisible(isAllowed(Permission.Type.VIEW_RUN_JUDGEMENT_HISTORIES));
+    }
 
     public void setModelAndController(IModel inModel, IController inController) {
         super.setModelAndController(inModel, inController);
 
         getModel().addRunListener(new RunListenerImplementation());
 
+        initializePermissions();
+        updateGUIperPermissions();
+        
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 reloadRunList();
@@ -294,10 +323,10 @@ public class RunsPanel extends JPanePlugin {
     private JPanel getButtonPanel() {
         if (buttonPanel == null) {
             FlowLayout flowLayout = new FlowLayout();
-            flowLayout.setHgap(25);
+            flowLayout.setHgap(5);
             buttonPanel = new JPanel();
             buttonPanel.setLayout(flowLayout);
-            buttonPanel.setPreferredSize(new java.awt.Dimension(70, 70));
+            buttonPanel.setPreferredSize(new java.awt.Dimension(35,35));
             buttonPanel.add(getGiveButton(), null);
             buttonPanel.add(getTakeButton(), null);
             buttonPanel.add(getEditRunButton(), null);
@@ -458,6 +487,38 @@ public class RunsPanel extends JPanePlugin {
             });
         }
         return viewJudgementsButton;
+    }
+    
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     */
+    public class AccountListenerImplementation implements IAccountListener {
+
+        public void accountAdded(AccountEvent accountEvent) {
+            // ignore doesn't affect this pane
+        }
+
+        public void accountModified(AccountEvent event) {
+            // check if is this account
+            Account account = event.getAccount();
+            /**
+             * If this is the account then update the GUI display per
+             * the potential change in Permissions.
+             */
+            if (getModel().getClientId().equals(account.getClientId())) {
+                // They modified us!!
+                initializePermissions();
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        updateGUIperPermissions();
+                    }
+                });
+                
+            }
+            
+        }
+        
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

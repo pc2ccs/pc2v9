@@ -146,6 +146,22 @@ public class Permission implements Serializable {
          * Ability to force logoff server
          */
         FORCE_LOGOFF_SERVER,
+        /**
+         * Give run to judges.
+         */
+        GIVE_RUN,
+        /**
+         * Take run from judges
+         */
+        TAKE_RUN,
+        /**
+         * View run judgements history
+         */
+        VIEW_RUN_JUDGEMENT_HISTORIES,
+        /**
+         * 
+         */
+        EXTRACT_RUNS,
     };
 
     private Hashtable<Type, String> hash = new Hashtable<Type, String>();
@@ -192,6 +208,11 @@ public class Permission implements Serializable {
         hash.put(Type.FORCE_LOGOFF_CLIENT, "Force client logoff");
         hash.put(Type.FORCE_LOGOFF_SERVER, "Force server logoff");
         hash.put(Type.DISPLAY_ON_SCOREBOARD, "Can be shown on scoreboard displays");
+        
+        hash.put(Type.GIVE_RUN, "Give runs to judges");
+        hash.put(Type.TAKE_RUN, "Take runs from judges");
+        hash.put(Type.VIEW_RUN_JUDGEMENT_HISTORIES, "View run judgement histories");
+        hash.put(Type.EXTRACT_RUNS, "Extract run contents from runs database");
     }
 
     /**
