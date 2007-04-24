@@ -671,4 +671,14 @@ public final class ModelReadOnlyProxy implements IModel {
         
     }
 
+    public Clarification[] getClarifications(ClientId clientId) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public Run[] getRuns(ClientId clientId) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }
