@@ -28,6 +28,7 @@ import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
+import javax.swing.JLabel;
 
 /**
  * View runs.
@@ -66,6 +67,12 @@ public class RunsPanel extends JPanePlugin {
     private JButton viewJudgementsButton = null;
     
     private PermissionList permissionList = new PermissionList();
+    
+    private EditRunFrame editRunFrame = null;
+
+    private JLabel messageLabel = null;
+    
+    private Log log = null;
 
     /**
      * This method initializes
@@ -86,6 +93,8 @@ public class RunsPanel extends JPanePlugin {
         this.add(getButtonPanel(), java.awt.BorderLayout.SOUTH);
         this.add(getRunsListBox(), java.awt.BorderLayout.CENTER);
         this.add(getMessagePanel(), java.awt.BorderLayout.NORTH);
+        
+        editRunFrame = new EditRunFrame();
     }
 
     @Override
@@ -290,6 +299,8 @@ public class RunsPanel extends JPanePlugin {
 
     public void setModelAndController(IModel inModel, IController inController) {
         super.setModelAndController(inModel, inController);
+        
+        log = getController().getLog();
 
         getModel().addRunListener(new RunListenerImplementation());
         getModel().addAccountListener(new AccountListenerImplementation());
@@ -311,7 +322,13 @@ public class RunsPanel extends JPanePlugin {
      */
     private JPanel getMessagePanel() {
         if (messagePanel == null) {
+            messageLabel = new JLabel();
+            messageLabel.setText("");
+            messageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
             messagePanel = new JPanel();
+            messagePanel.setLayout(new BorderLayout());
+            messagePanel.setPreferredSize(new java.awt.Dimension(25,25));
+            messagePanel.add(messageLabel, java.awt.BorderLayout.CENTER);
         }
         return messagePanel;
     }
@@ -390,11 +407,34 @@ public class RunsPanel extends JPanePlugin {
             editRunButton.setMnemonic(java.awt.event.KeyEvent.VK_E);
             editRunButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.out.println("actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+                    editSelectedRun();
                 }
             });
         }
         return editRunButton;
+    }
+
+    protected void editSelectedRun() {
+        
+        int [] selectedIndexes = runListBox.getSelectedIndexes();
+        
+        if (selectedIndexes.length < 1){
+            showMessage("Please select a run ");
+            return;
+        }
+        
+        try {
+            ElementId elementId = (ElementId) runListBox.getKeys()[selectedIndexes[0]];
+            Run runToEdit = getModel().getRun(elementId);
+
+            editRunFrame.setRun(runToEdit);
+            editRunFrame.setVisible(true);
+        } catch (Exception e) {
+            log.log(Log.WARNING, "Exception logged ", e);
+            showMessage("Unable to edit run, check log");
+        }
+        
+        
     }
 
     /**
@@ -520,6 +560,16 @@ public class RunsPanel extends JPanePlugin {
             
         }
         
+    }
+
+    private void showMessage(final String string) {
+
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                messageLabel.setText(string);
+            }
+        });
+
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
