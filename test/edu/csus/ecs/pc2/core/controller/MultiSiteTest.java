@@ -80,8 +80,8 @@ public class MultiSiteTest extends TestCase {
 
     @Override
     protected void setUp() throws Exception {
-        super.setUp();
-
+        super.setUp(); 
+        
         // Create Site 1 with
 
         String[] languages = { "Java", "C", "APL" };
@@ -226,6 +226,15 @@ public class MultiSiteTest extends TestCase {
 
         assertTrue("Site 1 not logged into 3", modelThree.isLoggedIn(clientIdOne));
         assertTrue("Site 2 not logged into 3", modelThree.isLoggedIn(clientIdTwo));
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        
+        super.tearDown();
+        controllerThree.shutdownTransport();
+        controllerTwo.shutdownTransport();
+        controllerOne.shutdownTransport();
     }
 
 }

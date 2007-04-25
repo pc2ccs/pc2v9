@@ -1481,4 +1481,8 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         return model.getProblemDataFiles(problem);
     }
 
+    public void shutdownTransport() {
+        transportManager.shutdownTransport();
+    }
+
 }

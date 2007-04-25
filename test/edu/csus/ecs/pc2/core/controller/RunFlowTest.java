@@ -326,4 +326,15 @@ public class RunFlowTest extends TestCase {
         System.exit(0);
         
     }
+
+    @Override
+    protected void tearDown() throws Exception {
+        
+        super.tearDown();
+        controllerOne.shutdownTransport();
+        sleep(10, "waiting for transport shutdown");
+    
+    }
+
+    
 }

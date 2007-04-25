@@ -76,4 +76,6 @@ public interface ITransportManager {
      * @param appCallBack
      */
     void startServerTransport(ITwoToOne appCallBack);
+    
+    void shutdownTransport();
 }

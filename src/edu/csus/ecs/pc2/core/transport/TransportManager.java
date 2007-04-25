@@ -4,6 +4,7 @@ import javax.crypto.SealedObject;
 import javax.crypto.SecretKey;
 import java.io.Serializable;
 import java.security.PublicKey;
+import java.util.Enumeration;
 
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.transport.crypto.Crypto;
@@ -133,6 +134,41 @@ public class TransportManager implements ITransportManager {
         setAppClientCallBack(appCallBack);
     }
 
+    /**
+     * Issues shutdown command to Transport. Closes all Connections and disposes everything. 
+     *
+     */
+    public void shutdownTransport() {
+        
+        System.out.println("******************* SHUTTING down transport on command ************************");
+        
+        if (getTmType() == tmTypes.CLIENT) { // we are a client transport
+            System.out.println("******************* SHUTTING down client ************************");
+            getMyConnection().getConnectionHandlerClientThread().setStillListening(false);
+        } else { // we are a server transport
+
+            System.out.println("******************* SHUTTING server stuff ************************");
+            
+            try {
+                for(ConnectionHandlerID connectionHandlerID: getServersConnectionHandlerList().getKeys()) {
+                    System.out.println("******************* SHUTTING enumerating servers!! ************************" + connectionHandlerID);
+                    unregisterConnection(connectionHandlerID);                }
+
+            } catch (Exception e) {
+                System.out.println("Exception shutting down a server connection ");
+            }
+
+            try {
+                for(ConnectionHandlerID connectionHandlerID: getConnectionHandlerThreadList().getKeys()) {
+                    unregisterConnection(connectionHandlerID);
+                }
+            } catch (Exception e) {
+                System.out.println("Exception shutting down a client connection ");
+            }
+            
+        }
+    }
+    
     /**
      * Used by Client to connect to it's server
      * 

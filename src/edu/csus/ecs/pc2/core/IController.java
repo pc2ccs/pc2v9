@@ -156,5 +156,6 @@ public interface IController {
     void submitClarification(Problem problem, String question);
 
     void disconnectConnection(ConnectionHandlerID connectionHandlerID);
-    
+
+    void shutdownTransport();
 }
