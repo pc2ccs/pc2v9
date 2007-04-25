@@ -258,6 +258,21 @@ public final class XMLMemento implements IMemento {
             return null;
         }
     }
+    /*
+     * @see IMemento
+     */
+    public Long getLong(String key) {
+        Attr attr = element.getAttributeNode(key);
+        if (attr == null) {
+            return null;
+        }
+        String strValue = attr.getValue();
+        try {
+            return new Long(strValue);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
 
     /*
      * @see IMemento
@@ -342,6 +357,13 @@ public final class XMLMemento implements IMemento {
      */
     public void putInteger(String key, int n) {
         element.setAttribute(key, String.valueOf(n));
+    }
+
+    /*
+     * @see IMemento
+     */
+    public void putLong(String key, long n) {
+        element.setAttribute(key, Long.toString(n));
     }
 
     /*

@@ -125,6 +125,15 @@ public interface IMemento {
     Integer getInteger(String key);
 
     /**
+     * Returns the long value of the given key.
+     * 
+     * @param key
+     *            the key
+     * @return the value, or <code>null</code> if the key was not found or was found but was not an integer
+     */
+    Long getLong(String key);
+
+    /**
      * Returns the string value of the given key.
      * 
      * @param key
@@ -168,6 +177,16 @@ public interface IMemento {
      *            the value
      */
     void putInteger(String key, int value);
+
+    /**
+     * Sets the value of the given key to the given long.
+     * 
+     * @param key
+     *            the key
+     * @param value
+     *            the value
+     */
+    void putLong(String key, long value);
 
     /**
      * Sets the value of the given key to the given boolean value.
