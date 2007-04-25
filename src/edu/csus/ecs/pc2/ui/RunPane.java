@@ -28,8 +28,6 @@ public class RunPane extends JPanePlugin {
 
     private JPanel buttonPane = null;
 
-    private JButton addButton = null;
-
     private JButton updateButton = null;
 
     private JButton cancelButton = null;
@@ -43,6 +41,12 @@ public class RunPane extends JPanePlugin {
     private JPanel generalPane = null;
 
     private Log log = null;
+
+    private JButton executeButton = null;
+
+    private JButton viewSourceButton = null;
+
+    private JButton extractButton = null;
 
     /**
      * This method initializes
@@ -105,30 +109,13 @@ public class RunPane extends JPanePlugin {
             flowLayout.setHgap(15);
             buttonPane = new JPanel();
             buttonPane.setLayout(flowLayout);
-            buttonPane.add(getAddButton(), null);
             buttonPane.add(getUpdateButton(), null);
+            buttonPane.add(getViewSourceButton(), null);
+            buttonPane.add(getExecuteButton(), null);
+            buttonPane.add(getExtractButton(), null);
             buttonPane.add(getCancelButton(), null);
         }
         return buttonPane;
-    }
-
-    /**
-     * This method initializes addButton
-     * 
-     * @return javax.swing.JButton
-     */
-    private JButton getAddButton() {
-        if (addButton == null) {
-            addButton = new JButton();
-            addButton.setText("Add");
-            addButton.setEnabled(false);
-            addButton.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    addRun();
-                }
-            });
-        }
-        return addButton;
     }
 
     protected void addRun() {
@@ -139,16 +126,15 @@ public class RunPane extends JPanePlugin {
         // getController().addNewRun(newRun);
 
         cancelButton.setText("Close");
-        addButton.setEnabled(false);
         updateButton.setEnabled(false);
-        
-        if ( getParentFrame() != null){
+
+        if (getParentFrame() != null) {
             getParentFrame().setVisible(false);
         }
     }
 
     private Run getRunFromFields() {
-        
+
         return run;
     }
 
@@ -177,13 +163,12 @@ public class RunPane extends JPanePlugin {
         Run newRun = getRunFromFields();
 
         cancelButton.setText("Close");
-        addButton.setEnabled(false);
         updateButton.setEnabled(false);
-        
+
         // TODO update run
         // getController().updateRun(newRun);
-        
-        if ( getParentFrame() != null){
+
+        if (getParentFrame() != null) {
             getParentFrame().setVisible(false);
         }
     }
@@ -209,24 +194,20 @@ public class RunPane extends JPanePlugin {
 
     protected void handleCancelButton() {
 
-        if (getAddButton().isEnabled() || getUpdateButton().isEnabled()) {
+        if (getUpdateButton().isEnabled()) {
 
             // Something changed, are they sure ?
 
             int result = FrameUtilities.yesNoCancelDialog("Run modified, save changes?", "Confirm Choice");
 
             if (result == JOptionPane.YES_OPTION) {
-                if (getAddButton().isEnabled()) {
-                    addRun();
-                } else {
-                    updateRun();
-                }
-                if ( getParentFrame() != null){
+                updateRun();
+                if (getParentFrame() != null) {
                     getParentFrame().setVisible(false);
                 }
             }
         } else {
-            if ( getParentFrame() != null){
+            if (getParentFrame() != null) {
                 getParentFrame().setVisible(false);
             }
         }
@@ -251,17 +232,10 @@ public class RunPane extends JPanePlugin {
     private void populateGUI(Run run2) {
 
         if (run2 != null) {
-
-            getAddButton().setVisible(false);
             getUpdateButton().setVisible(true);
-            
-
         } else {
-
-            
-            getAddButton().setVisible(true);
             getUpdateButton().setVisible(false);
-            
+
         }
     }
 
@@ -271,7 +245,6 @@ public class RunPane extends JPanePlugin {
         } else {
             cancelButton.setText("Close");
         }
-        addButton.setEnabled(editedText);
         updateButton.setEnabled(editedText);
     }
 
@@ -300,12 +273,74 @@ public class RunPane extends JPanePlugin {
         return generalPane;
     }
 
-    public void showMessage(final String message){
+    public void showMessage(final String message) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 messageLabel.setText(message);
             }
         });
+    }
+
+    /**
+     * This method initializes executeButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getExecuteButton() {
+        if (executeButton == null) {
+            executeButton = new JButton();
+            executeButton.setText("Execute");
+            executeButton.setMnemonic(java.awt.event.KeyEvent.VK_X);
+            executeButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    System.out.println("actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+                }
+            });
+        }
+        return executeButton;
+    }
+
+    /**
+     * This method initializes viewSourceButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getViewSourceButton() {
+        if (viewSourceButton == null) {
+            viewSourceButton = new JButton();
+            viewSourceButton.setText("View Source");
+            viewSourceButton.setMnemonic(java.awt.event.KeyEvent.VK_V);
+            viewSourceButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    System.out.println("actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+                }
+            });
+        }
+        return viewSourceButton;
+    }
+
+    /**
+     * This method initializes extractButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getExtractButton() {
+        if (extractButton == null) {
+            extractButton = new JButton();
+            extractButton.setText("Extract");
+            extractButton.setMnemonic(java.awt.event.KeyEvent.VK_T);
+            extractButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    executeRun();
+                }
+            });
+        }
+        return extractButton;
+    }
+
+    protected void executeRun() {
+        // TODO Auto-generated method stub
+        
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
