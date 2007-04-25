@@ -72,11 +72,12 @@ public class ReportPane extends JPanePlugin {
         this.add(getMainPane(), java.awt.BorderLayout.CENTER);
 
         // populate list of reports
-        listOfReports = new IReport[4];
-        listOfReports[0] = new ClarificationsReport();
-        listOfReports[1] = new RunsReport();
-        listOfReports[2] = new InternalDumpReport();
-        listOfReports[3] = new AccountPermissionReport();
+        listOfReports = new IReport[5];
+        listOfReports[0] = new RunsReport();
+        listOfReports[1] = new ClarificationsReport();
+        listOfReports[2] = new ProblemsReport();
+        listOfReports[3] = new InternalDumpReport();
+        listOfReports[4] = new AccountPermissionReport();
     }
 
     public void setModelAndController(IModel inModel, IController inController) {
