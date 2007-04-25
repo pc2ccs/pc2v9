@@ -189,8 +189,9 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         props = properties;
 
         XMLMemento mementoRoot = XMLMemento.createWriteRoot("contestStandings");
-        IMemento summaryMememento = mementoRoot.createChild("summary");
+        IMemento summaryMememento = mementoRoot.createChild("standingsHeader");
         summaryMememento.putString("title", theContest.getTitle());
+//        summaryMememento.putString("version", );
         Vector<Account> accountList = theContest.getAccounts(ClientType.Type.ALL);
         Problem[] problems = theContest.getProblems();
         Hashtable <ElementId, Integer> problemsIndexHash = new Hashtable<ElementId, Integer>();
@@ -244,6 +245,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 }
             }
             long oldTime = 0;
+            long youngTime = -1;
             if (!runTreeMap.isEmpty()) {
                 Collection runColl = runTreeMap.values();
                 Iterator runIterator = runColl.iterator();
@@ -265,7 +267,11 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                             if (psd.isSolved()) {
                                 sr.setNumberSolved(sr.getNumberSolved() + 1);
                                 oldTime = sr.getLastSolved();
+                                youngTime = sr.getFirstSolved();
                                 if (psd.getSolutionTime() > oldTime) {
+                                    sr.setLastSolved(psd.getSolutionTime());
+                                }
+                                if (youngTime < 0 || psd.getSolutionTime() < youngTime) {
                                     sr.setLastSolved(psd.getSolutionTime());
                                 }
                             }
@@ -289,10 +295,11 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                     if (psd.isSolved()) {
                         sr.setNumberSolved(sr.getNumberSolved() + 1);
                         oldTime = sr.getLastSolved();
+                        youngTime = sr.getFirstSolved();
                         if (psd.getSolutionTime() > oldTime) {
                             sr.setLastSolved(psd.getSolutionTime());
                         }
-                        if (psd.getSolutionTime() < sr.getFirstSolved()) {
+                        if (youngTime < 0 || psd.getSolutionTime() < youngTime) {
                             sr.setFirstSolved(psd.getSolutionTime());
                         }
                     }
@@ -333,28 +340,37 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                     sr.setRankNumber(rank);
                 }
 //                mementoRoot.putMemento(sr.toMemento());
-                IMemento standingsRecordMemento = mementoRoot.createChild("StandingsRecord");
+                IMemento standingsRecordMemento = mementoRoot.createChild("teamStanding");
                 standingsRecordMemento.putLong("firstSolved", sr.getFirstSolved());
                 standingsRecordMemento.putLong("lasstSolved", sr.getLastSolved());
-                standingsRecordMemento.putLong("penaltyPoints", sr.getPenaltyPoints());
-                standingsRecordMemento.putInteger("numberSolved", sr.getNumberSolved());
+                standingsRecordMemento.putLong("points", sr.getPenaltyPoints());
+                standingsRecordMemento.putInteger("solved", sr.getNumberSolved());
                 standingsRecordMemento.putInteger("rank", sr.getRankNumber());
                 standingsRecordMemento.putInteger("index", index);
                 Account account = accountList.get(accountList.indexOf(sr.getClientId()));
                 standingsRecordMemento.putString("teamName", account.getDisplayName()); 
+                standingsRecordMemento.putString("teamkey", account.getClientId().getTripletKey());
                 SummaryRow summaryRow = sr.getSummaryRow();
                 for (int i = 0; i < problems.length; i++) {
                     ProblemSummaryInfo psi = summaryRow.get(i + 1);
                     IMemento psiMemento = standingsRecordMemento.createChild("problemSummaryInfo");
                     psiMemento.putInteger("numberSubmitted", psi.getNumberSubmitted());
-                    psiMemento.putInteger("numberSubmitted", psi.getPenaltyPoints());
-                    psiMemento.putLong("numberSubmitted", psi.getSolutionTime());
+                    psiMemento.putInteger("points", psi.getPenaltyPoints());
+                    psiMemento.putLong("solutionTime", psi.getSolutionTime());
                     psiMemento.putBoolean("isSolved", psi.isSolved());
                     psiMemento.putInteger("problemId", problemsIndexHash.get(psi.getProblemId()));
                 }
                 srArray[index++] = sr;
             }
         } // mutex
+        IMemento child = mementoRoot.createChild("teamStanding");
+        child.putLong("firstSolved", 13);
+        child.putLong("lasstSolved", 272);
+        child.putLong("points", 1405);
+        child.putInteger("solved", 8);
+        child.putInteger("rank", 1);
+        child.putInteger("index", 1);
+        child.putString("teamName", "Warsaw University"); 
         String xmlString;
         try {
             xmlString = mementoRoot.saveToString();
