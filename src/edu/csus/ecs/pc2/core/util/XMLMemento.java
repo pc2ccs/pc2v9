@@ -86,6 +86,7 @@ public final class XMLMemento implements IMemento {
      * Create a Document from a Reader and answer a root memento for reading a document.
      */
     protected static XMLMemento createReadRoot(InputStream in) {
+        int errors = 0;
         Document document = null;
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -97,11 +98,13 @@ public final class XMLMemento implements IMemento {
             }
         } catch (Exception e) {
             // ignore
+            errors++;
         } finally {
             try {
                 in.close();
             } catch (Exception e) {
                 // ignore
+                errors++;
             }
         }
         return null;
@@ -164,7 +167,7 @@ public final class XMLMemento implements IMemento {
         }
 
         // Extract each node with given type.
-        ArrayList list = new ArrayList(size);
+        ArrayList <Element> list = new ArrayList<Element>(size);
         for (int nX = 0; nX < size; nX++) {
             Node node = nodes.item(nX);
             if (node instanceof Element) {
@@ -270,7 +273,7 @@ public final class XMLMemento implements IMemento {
     public List getNames() {
         NamedNodeMap map = element.getAttributes();
         int size = map.getLength();
-        List list = new ArrayList();
+        List<String> list = new ArrayList<String>();
         for (int i = 0; i < size; i++) {
             Node node = map.item(i);
             String name = node.getNodeName();
@@ -288,6 +291,7 @@ public final class XMLMemento implements IMemento {
      * @return a memento
      */
     public static IMemento loadMemento(String filename) throws IOException {
+        int errors = 0;
         InputStream in = null;
         try {
             in = new BufferedInputStream(new FileInputStream(filename));
@@ -299,6 +303,7 @@ public final class XMLMemento implements IMemento {
                 }
             } catch (Exception e) {
                 // ignore
+                errors++;
             }
         }
     }
@@ -388,6 +393,7 @@ public final class XMLMemento implements IMemento {
      * @exception java.io.IOException
      */
     public void saveToFile(String filename) throws IOException {
+        int errors = 0;
         FileOutputStream w = null;
         try {
             w = new FileOutputStream(filename);
@@ -402,6 +408,7 @@ public final class XMLMemento implements IMemento {
                     w.close();
                 } catch (Exception e) {
                     // ignore
+                    errors++;
                 }
             }
         }
