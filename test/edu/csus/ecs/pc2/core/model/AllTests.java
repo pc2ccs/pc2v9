@@ -18,9 +18,10 @@ public final class AllTests {
 
     public static Test suite() {
         TestSuite suite = new TestSuite("Test for edu.csus.ecs.pc2.core.model");
-        // $JUnit-BEGIN$
+        //$JUnit-BEGIN$
         suite.addTestSuite(SiteTest.class);
-        // $JUnit-END$
+        suite.addTestSuite(AccountListTest.class);
+        //$JUnit-END$
         return suite;
     }
 
