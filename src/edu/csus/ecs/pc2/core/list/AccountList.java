@@ -31,8 +31,6 @@ public class AccountList extends BaseElementList {
      */
     private static final long serialVersionUID = -9188551825072244360L;
 
-    public static final String VALID_LOGIN = "Valid Login";
-    
     private PermissionGroup permissionGroup = new PermissionGroup();
 
     /**
@@ -185,6 +183,15 @@ public class AccountList extends BaseElementList {
 
     public Vector<Account> getAccounts(Type type) {
         Vector<Account> v = new Vector<Account>();
+        
+        if (type.equals(ClientType.Type.ALL)) {
+            Enumeration enumeration = elements();
+            while (enumeration.hasMoreElements()) {
+                Account account = (Account) enumeration.nextElement();
+                v.addElement(account);
+            }
+            return v;
+        }
 
         Enumeration enumeration = elements();
         while (enumeration.hasMoreElements()) {
