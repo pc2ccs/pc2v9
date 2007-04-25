@@ -32,7 +32,7 @@ public class StandingsRecord {
     /**
      * When the 1st problem was solved
      */
-    private long firstSolved;
+    private long firstSolved  = -1;
 
     /**
      * When the last problem was solved
