@@ -18,6 +18,11 @@ import java.util.Hashtable;
 public class Permission implements Serializable {
 
     /**
+     * 
+     */
+    private static final long serialVersionUID = 530537916675047901L;
+
+    /**
      * Permissions that user can perform.
      * 
      * @see PermissionList

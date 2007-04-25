@@ -13,6 +13,11 @@ import java.util.Hashtable;
 // $HeadURL$
 public class PermissionList implements Serializable {
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -4160597559679295578L;
+    
     private Hashtable<Permission.Type, Date> hash = new Hashtable<Permission.Type, Date>();
 
     /**
