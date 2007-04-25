@@ -11,6 +11,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
@@ -97,18 +98,18 @@ public class StandingsPane extends JPanePlugin {
 
         String[] outArray = new String[4];
 
-        NodeList teamStandingList = node.getChildNodes();
-        for (int j = 0; j < teamStandingList.getLength(); j++) {
-            Node standingNode = (Node) teamStandingList.item(j);
-            String value = standingNode.getFirstChild().getNodeValue();
+        NamedNodeMap attributes = node.getAttributes();
+        for (int i = 0; i < attributes.getLength(); i++) {
+            Node standingNode = attributes.item(i);
+            String value = standingNode.getNodeValue();
             String name = standingNode.getNodeName();
-            if (name.equals("teamRank")) {
+            if (name.equals("rank")) {
                 outArray[0] = value;
             } else if (name.equals("teamName")) {
                 outArray[1] = value;
-            } else if (name.equals("teamSolved")) {
+            } else if (name.equals("solved")) {
                 outArray[2] = value;
-            } else if (name.equals("teamPoints")) {
+            } else if (name.equals("points")) {
                 outArray[3] = value;
             }
         }
