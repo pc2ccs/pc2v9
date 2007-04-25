@@ -124,20 +124,29 @@ public class StandingsPane extends JPanePlugin {
 
         standingsListbox.removeAllRows();
         
-        DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
-        String xmlString = defaultScoringAlgorithm.getStandings(getModel());
-    
+        Document document = null;
+        String xmlString = null;
+
         try {
+            DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
+
+            xmlString = defaultScoringAlgorithm.getStandings(getModel());
             DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-            Document document = documentBuilder.parse(new InputSource(new StringReader(xmlString)));
-
+            document = documentBuilder.parse(new InputSource(new StringReader(xmlString)));
             String rootNode = document.getDocumentElement().getNodeName();
-
-            System.out.println("Root is " + rootNode);
+            System.out.println("debug22 Root is " + rootNode);
             
+        } catch (Exception e) {
+            log.log(Log.WARNING, "Trouble creating or parsing SA XML ", e);
+            showMessage("Problem updating scoreboard (parse error), check log");
+            
+            return;  // ----------------------------- RETURN -------------------------------
+            
+        }
+    
+        try {
             // skip past nodes to find teamStanding node
-
             NodeList list = document.getDocumentElement().getChildNodes();
             
             for(int i=0; i<list.getLength(); i++) {
