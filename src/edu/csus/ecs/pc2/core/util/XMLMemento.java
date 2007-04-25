@@ -408,6 +408,17 @@ public final class XMLMemento implements IMemento {
     }
 
     /**
+     * Saves the memento to a String.
+     * 
+     * @exception java.io.IOException
+     */
+    public String saveToString() throws IOException {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        save(outputStream);
+        return outputStream.toString();
+    }
+    
+    /**
      * Saves the memento to the given file.
      * 
      * @param filename
