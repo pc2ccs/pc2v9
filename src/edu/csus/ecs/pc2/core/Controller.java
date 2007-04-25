@@ -953,11 +953,13 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     public void info(String s) {
         log.warning(s);
         System.err.println(Thread.currentThread().getName() + " " + s);
+        System.err.flush();
     }
 
     public void info(String s, Exception exception) {
         log.log (Log.WARNING, s, exception);
         System.err.println(Thread.currentThread().getName() + " " + s);
+        System.err.flush();
         exception.printStackTrace(System.err);
     }
 
@@ -1108,7 +1110,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
          */
         TransportException savedTransportException = null;
         
-        String[] arguments = { "--login", "--id", "--password", "--loginUI", "--remoteServer", "--port" };
+        String[] arguments = { "--login", "--id", "--password", "--loginUI", "--remoteServer", "--server", "--port" };
         parseArguments = new ParseArguments(stringArray, arguments);
         
         if (parseArguments.isOptPresent("--help")){
@@ -1237,12 +1239,9 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         return new ClientId (model.getSiteNumber(), Type.SERVER, 0);
     }
 
-    /**
-     * Send checkout run request to server.
-     */
-    public void checkOutRun(Run run) {
+    public void checkOutRun(Run run, boolean readOnly) {
         ClientId clientId = model.getClientId();
-        Packet packet = PacketFactory.createRunRequest(clientId,getServerClientId(),run, clientId);
+        Packet packet = PacketFactory.createRunRequest(clientId,getServerClientId(),run, clientId, readOnly);
         sendToLocalServer(packet);
     }
 

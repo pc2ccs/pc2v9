@@ -16,6 +16,32 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 /**
  * Represents functions provided by modules comprising the contest engine.
  * 
+ * Provides the methods to start PC<sup>2</sup> clients and servers.
+ * <P>
+ * An example of starting a server:
+ * 
+ * public static void main(String[] args) {<br>
+ * <br>
+ * <blockquote>
+ * IModel model = new Model();<br>
+ * IController controller = new Controller (model);<br>
+ * String serverArgs = "--server";
+ * controller.start(serverArgs);<br>
+ * </blockquote>
+ * } <br>
+ * <P>
+ * 
+ * To start a client: 
+ * <code>
+ * public static void main(String[] args) {<br>
+ * <blockquote>
+ *      <br>
+ *      IModel model = new Model();<br>
+ *      IController controller = new Controller (model);<br>
+ *      controller.start(args);<br>
+ * } <br>
+ * </blockquote>
+ * 
  * @see edu.csus.ecs.pc2.Starter
  * @author pc2@ecs.csus.edu
  */
@@ -23,6 +49,13 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 // $HeadURL$
 public interface IController {
 
+    /**
+     * Submit a run to the server.
+     * @param problem
+     * @param language
+     * @param filename
+     * @throws Exception
+     */
     void submitRun(Problem problem, Language language, String filename) throws Exception;
 
     void setSiteNumber(int i);
@@ -72,6 +105,10 @@ public interface IController {
      */
     void sendToTeams(Packet packet);
 
+    /**
+     * Start Controller with command line arguments.
+     * @param stringArray
+     */
     void start(String[] stringArray);
 
     /**
@@ -89,9 +126,10 @@ public interface IController {
     
     /**
      * Request a run from the server.
-     * @param run
+     * @param run - the run to retrieve
+     * @param readOnly - do not check out run just fetch the run.
      */
-    void checkOutRun (Run run);
+    void checkOutRun (Run run, boolean readOnly);
     
     /**
      * Submit judgement from run to judge.

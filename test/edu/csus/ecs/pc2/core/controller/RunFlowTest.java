@@ -59,7 +59,7 @@ public class RunFlowTest extends TestCase {
         modelOne = new Model();
         initializeModel(modelOne);
 
-        Site siteOne = SiteTest.createSite(1, "Site ONE", null, 0);
+        Site siteOne = SiteTest.createSite(12, "Site ONE", null, 0);
         modelOne.addSite(siteOne);
 
         // Start site 1
@@ -126,7 +126,7 @@ public class RunFlowTest extends TestCase {
                 
                 // Request the run
                 System.err.println("Judge - checking out run "+event.getRun());
-                checkOutRun (event.getRun());
+                checkOutRun (event.getRun(), false);
             }
 
             public void runChanged(RunEvent event) {

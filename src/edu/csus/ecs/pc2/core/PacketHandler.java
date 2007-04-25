@@ -109,6 +109,25 @@ public class PacketHandler {
             model.addClarification(clarification);
             sendToJudgesAndOthers( packet, isThisSite(clarification));
             
+        } else if (packetType.equals(Type.RUN_UPDATE)) {
+            // Update from admin to server, and server to clients
+            Run updateRun = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
+            
+            if (isThisSite(updateRun) && (! isServer(packet.getSourceId()))){
+                /**
+                 * If it is this site, and not a server (aka Admin) update it and send to all 
+                 */
+                model.updateRun(updateRun);
+                Run theRun = model.getRun(updateRun.getElementId());
+                Packet updatePacket = PacketFactory.createRunUpdated(model.getClientId(), PacketFactory.ALL_SERVERS, theRun);
+                sendToJudgesAndOthers(updatePacket, true);
+            } else {
+                model.updateRun(updateRun);
+                if (isServer()){
+                    sendToJudgesAndOthers(packet, false);
+                }
+            }
+            
         } else if (packetType.equals(Type.LOGIN_FAILED)) {
             String message = PacketFactory.getStringValue(packet, PacketFactory.MESSAGE_STRING);
             model.loginDenied(packet.getDestinationId(), connectionHandlerID, message);
@@ -170,11 +189,11 @@ public class PacketHandler {
             updateSetting(packet);
 
         } else if (packetType.equals(Type.RUN_CHECKOUT)) {
-            // Run from server to judge
+            // Run from server to clients
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
             RunFiles runFiles = (RunFiles) PacketFactory.getObjectValue(packet, PacketFactory.RUN_FILES);
             ClientId whoCheckedOut = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-            model.addRun(run, runFiles, packet.getDestinationId());
+            model.addRun(run, runFiles, whoCheckedOut);
             
             sendToJudgesAndOthers( packet, false);
 
@@ -182,7 +201,13 @@ public class PacketHandler {
             // Request Run from requestor to server
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
             ClientId requestFromId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-            requestRun(packet, run,  requestFromId);
+            Boolean readOnly = (Boolean) PacketFactory.getObjectValue(packet, PacketFactory.READ_ONLY);
+            if (readOnly != null) {
+                fetchRun(packet, run, requestFromId, readOnly.booleanValue());
+
+            } else {
+                requestRun(packet, run, requestFromId);
+            }
 
         } else if (packetType.equals(Type.LOGOUT)) {
             // client logged out
@@ -330,86 +355,120 @@ public class PacketHandler {
      */
     private void addNewSetting(Packet packet) {
 
+        boolean sendToTeams = false;
+
         Site site = (Site) PacketFactory.getObjectValue(packet, PacketFactory.SITE);
         if (site != null) {
             model.addSite(site);
-            if (isServer()) {
-                boolean sendToOtherServers = isThisSite(packet.getSourceId().getSiteNumber());
-                sendToJudgesAndOthers( packet, sendToOtherServers);
-            }
+            sendToTeams = true;
         }
 
         Language language = (Language) PacketFactory.getObjectValue(packet, PacketFactory.LANGUAGE);
         if (language != null) {
             model.addLanguage(language);
-            if (isServer()) {
-                boolean sendToOtherServers = isThisSite(packet.getSourceId().getSiteNumber());
-                sendToJudgesAndOthers( packet, sendToOtherServers);
-                controller.sendToTeams(packet);
-            }
+            sendToTeams = true;
         }
 
         Problem problem = (Problem) PacketFactory.getObjectValue(packet, PacketFactory.PROBLEM);
         if (problem != null) {
             model.addProblem(problem);
-            if (isServer()) {
-                boolean sendToOtherServers = isThisSite(packet.getSourceId().getSiteNumber());
-                sendToJudgesAndOthers( packet, sendToOtherServers);  
-                controller.sendToTeams(packet);
-            }
+            sendToTeams = true;
         }
 
         ContestTime contestTime = (ContestTime) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME);
         if (contestTime != null) {
             model.addContestTime(contestTime);
+            sendToTeams = true;
+        }
+
+        Account oneAccount = (Account) PacketFactory.getObjectValue(packet, PacketFactory.ACCOUNT);
+        if (oneAccount != null) {
             if (isServer()) {
-                boolean sendToOtherServers = isThisSite(packet.getSourceId().getSiteNumber());
-                sendToJudgesAndOthers( packet, sendToOtherServers);   
+                if (model.isLoggedIn(oneAccount.getClientId())) {
+                    controller.sendToClient(packet);
+                }
             }
         }
 
-        Account [] accounts = (Account []) PacketFactory.getObjectValue(packet, PacketFactory.ACCOUNT_ARRAY);
+        Account[] accounts = (Account[]) PacketFactory.getObjectValue(packet, PacketFactory.ACCOUNT_ARRAY);
         if (accounts != null) {
             for (Account account : accounts) {
                 if (model.getAccount(account.getClientId()) == null) {
                     model.addAccount(account);
                 }
-                if (isServer()){
-                    if (model.isLoggedIn(account.getClientId())){
+                if (isServer()) {
+                    if (model.isLoggedIn(account.getClientId())) {
                         controller.sendToClient(packet);
-                    }    
+                    }
                 }
             }
-            if (isServer()) {
-                sendToJudgesAndOthers(packet, false);
-            }
+        }
+
+        if (isServer()) {
+            boolean sendToOtherServers = isThisSite(packet.getSourceId().getSiteNumber());
+            sendToJudgesAndOthers(packet, sendToOtherServers);
+        }
+
+        if (sendToTeams) {
+            controller.sendToClient(packet);
         }
     }
 
     private void updateSetting(Packet packet) {
-        
+
+        boolean sendToTeams = false;
+
         Site site = (Site) PacketFactory.getObjectValue(packet, PacketFactory.SITE);
         if (site != null) {
             model.updateSite(site);
+            sendToTeams = true;
         }
 
         Language language = (Language) PacketFactory.getObjectValue(packet, PacketFactory.LANGUAGE);
         if (language != null) {
             model.updateLanguage(language);
+            sendToTeams = true;
         }
 
         Problem problem = (Problem) PacketFactory.getObjectValue(packet, PacketFactory.PROBLEM);
         if (problem != null) {
             model.updateProblem(problem);
+            sendToTeams = true;
         }
 
         ContestTime contestTime = (ContestTime) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME);
         if (contestTime != null) {
             model.updateContestTime(contestTime);
+            sendToTeams = true;
         }
-        
-        if (isServer()){
-            sendToJudgesAndOthers( packet, false);
+
+        Account oneAccount = (Account) PacketFactory.getObjectValue(packet, PacketFactory.ACCOUNT);
+        if (oneAccount != null) {
+            model.updateAccount(oneAccount);
+            if (isThisSite(oneAccount.getClientId().getSiteNumber())) {
+                controller.sendToClient(packet);
+            }
+        }
+        Account[] accounts = (Account[]) PacketFactory.getObjectValue(packet, PacketFactory.ACCOUNT_ARRAY);
+        if (accounts != null) {
+            for (Account account : accounts) {
+                if (model.getAccount(account.getClientId()) == null) {
+                    model.addAccount(account);
+                }
+                if (isServer()) {
+                    if (model.isLoggedIn(account.getClientId())) {
+                        controller.sendToClient(packet);
+                    }
+                }
+            }
+        }
+
+        if (isServer()) {
+            sendToJudgesAndOthers(packet, false);
+        }
+
+        if (sendToTeams) {
+            controller.sendToClient(packet);
         }
 
     }
@@ -443,17 +502,6 @@ public class PacketHandler {
                 controller.sendToServers(packet);
             }
         } // else not a server, just return.
-    }
-
-    /**
-     * Handle Check out run, add to model, trigger listeners.
-     * 
-     * @param run
-     * @param runFiles
-     * @param whoCheckedOutId
-     */
-    private void checkedOutRun( Run run, RunFiles runFiles, ClientId whoCheckedOutId) {
-
     }
 
     private boolean isSuperUser(ClientId id) {
@@ -519,18 +567,35 @@ public class PacketHandler {
             model.updateRun(run, run.getStatus(), judgementRecord.getJudgerClientId());
         }
     }
-
+    
     /**
-     * Checkout run.
+     * Checkout a run.
      * 
-     * Either checks out run (marks as {@link edu.csus.ecs.pc2.core.model.Run.RunStates#BEING_JUDGED BEING_JUDGED}) and send to everyone, or send a
-     * {@link edu.csus.ecs.pc2.core.packet.PacketType.Type#RUN_NOTAVAILABLE RUN_NOTAVAILABLE}.
-     * @param packet 
-     * 
+     * @see #fetchRun(Packet, Run, ClientId, boolean)
+     * @param packet
      * @param run
      * @param whoRequestsRunId
      */
     private void requestRun(Packet packet, Run run, ClientId whoRequestsRunId) {
+        fetchRun(packet,run,whoRequestsRunId, false);
+    }
+    
+    /**
+     * Fetch a run.
+     * 
+     * Either checks out run (marks as {@link edu.csus.ecs.pc2.core.model.Run.RunStates#BEING_JUDGED BEING_JUDGED}) and send to everyone, or send a
+     * {@link edu.csus.ecs.pc2.core.packet.PacketType.Type#RUN_NOTAVAILABLE RUN_NOTAVAILABLE}.
+     * <P>
+     * If readOnly is false, will checkout run. <br>
+     * if readOnly is true will fetch run without setting
+     * the run as "being judged".
+     * 
+     * @param packet 
+     * @param run
+     * @param whoRequestsRunId
+     * @param readOnly - get a read only copy (aka do not checkout/select run).
+     */
+    private void fetchRun(Packet packet, Run run, ClientId whoRequestsRunId, boolean readOnly) {
 
         if (isServer()) {
 
@@ -540,8 +605,8 @@ public class PacketHandler {
                 if (model.isLoggedIn(serverClientId)) {
 
                     // send request to remote server
-                    Packet requestPacket = PacketFactory.createRunRequest(model.getClientId(), serverClientId, run, whoRequestsRunId);
-                    controller.sendToRemoteServer(run.getSiteNumber(), packet);
+                    Packet requestPacket = PacketFactory.createRunRequest(model.getClientId(), serverClientId, run, whoRequestsRunId, readOnly);
+                    controller.sendToRemoteServer(run.getSiteNumber(), requestPacket);
 
                 } else {
 
@@ -551,10 +616,21 @@ public class PacketHandler {
                 }
 
             } else {
-                // This Site's run
+                // This Site's run, if we can check it out and send to client
 
                 Run theRun = model.getRun(run.getElementId());
-                if (run.getStatus() == RunStates.NEW || isSuperUser(whoRequestsRunId)) {
+                
+                if (readOnly) {
+                    // just get run and sent it to them.
+                    
+                    theRun = model.getRun(run.getElementId());
+                    RunFiles runFiles = model.getRunFiles(run);
+
+                    // send to Judge
+                    Packet checkOutPacket = PacketFactory.createCheckedOutRun(model.getClientId(), whoRequestsRunId, theRun, runFiles, whoRequestsRunId);
+                    controller.sendToClient(checkOutPacket);
+
+                } else if (run.getStatus() == RunStates.NEW || isSuperUser(whoRequestsRunId)) {
 
                     model.updateRun(theRun, RunStates.BEING_JUDGED, whoRequestsRunId);
 
@@ -565,7 +641,8 @@ public class PacketHandler {
                     Packet checkOutPacket = PacketFactory.createCheckedOutRun(model.getClientId(), whoRequestsRunId, theRun, runFiles, whoRequestsRunId);
                     controller.sendToClient(checkOutPacket);
 
-                    sendToJudgesAndOthers( checkOutPacket, true);
+                    sendToJudgesAndOthers(checkOutPacket, true);
+                    
                 } else {
                     // Unavailable
                     Packet notAvailableRunPacket = PacketFactory.createRunNotAvailable(model.getClientId(), whoRequestsRunId, run);

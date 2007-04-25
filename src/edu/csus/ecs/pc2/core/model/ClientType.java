@@ -23,7 +23,7 @@ public class ClientType {
          */
         UNKNOWN,
         /**
-         * All. (used for filtering and is not an actual file type)
+         * All accounts.
          */
         ALL,
         /**

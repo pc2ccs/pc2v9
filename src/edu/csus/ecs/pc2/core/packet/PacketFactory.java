@@ -182,11 +182,15 @@ public final class PacketFactory {
     public static final ClientId ALL_SERVERS = new ClientId(0, ClientType.Type.SERVER, 0);
 
     /**
+     * A boolean indicating fetching a read only copy of clar or run.
+     */
+    public static final String READ_ONLY = "READ_ONLY";
+
+    /**
      * Constructor is private as this is a utility class which should not be extended or invoked.
      */
     private PacketFactory() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     /**
@@ -797,11 +801,13 @@ public final class PacketFactory {
      * @param destination
      * @param run
      * @param requesingId
+     * @param readOnly - request a read only (fetch) of the run
      */
-    public static Packet createRunRequest(ClientId source, ClientId destination, Run run, ClientId requesingId) {
+    public static Packet createRunRequest(ClientId source, ClientId destination, Run run, ClientId requesingId, boolean readOnly) {
         Properties props = new Properties();
         props.put(PacketFactory.RUN, run);
         props.put(PacketFactory.CLIENT_ID, requesingId);
+        props.put(PacketFactory.READ_ONLY, new Boolean(readOnly));
         Packet packet = new Packet(Type.RUN_REQUEST, source, destination, props);
         return packet;
     }

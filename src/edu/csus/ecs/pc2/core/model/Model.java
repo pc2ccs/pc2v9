@@ -467,6 +467,7 @@ public class Model implements IModel {
     
     public void addRun(Run run, RunFiles runFiles, ClientId whoCheckedOutRunId) {
         runList.add(run); 
+        runFilesList.add(run, runFiles);
         RunEvent runEvent = new RunEvent(RunEvent.Action.CHECKEDOUT_RUN, run, runFiles);
         runEvent.setSentToClientId(whoCheckedOutRunId);
         fireRunListener(runEvent);
@@ -585,6 +586,9 @@ public class Model implements IModel {
 
     public String getTitle() {
         ClientId id = getClientId();
+        if (id == null){
+            return "(Client not logged in)";
+        }
         String titleCase = id.getClientType().toString();
         titleCase = titleCase.charAt(0) + titleCase.substring(1);
         return titleCase + " " + id.getClientNumber() + " (Site " + id.getSiteNumber() + ")";

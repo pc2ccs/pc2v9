@@ -118,7 +118,7 @@ public class SubmitRunPane extends JPanePlugin {
         for (Language language : getModel().getLanguages()) {
             getLanguageComboBox().addItem(language);
         }
-
+        
         setButtonsActive(getModel().getContestTime().isContestRunning());
     }
 
