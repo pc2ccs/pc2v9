@@ -21,6 +21,8 @@ public interface IModel {
     void addLanguage(Language language);
 
     void addProblem(Problem problem);
+    
+    void addProblem(Problem problem, ProblemDataFiles problemDataFiles);
 
     void addContestTime(ContestTime contestTime);
 
@@ -48,6 +50,10 @@ public interface IModel {
     void updateLanguage(Language language);
 
     void updateProblem(Problem problem);
+    
+    void updateProblem(Problem problem, ProblemDataFiles problemDataFiles);
+    
+    ProblemDataFiles getProblemDataFiles (Problem problem);
 
     void updateContestTime(ContestTime contestTime, int inSiteNumber);
     

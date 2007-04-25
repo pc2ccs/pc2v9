@@ -93,6 +93,8 @@ public class Model implements IModel {
      * List of all defined problems. Contains deleted problems too.
      */
     private ProblemList problemList = new ProblemList();
+    
+    private ProblemDataFilesList problemDataFilesList = new ProblemDataFilesList();
 
     /**
      * List of all problems displayed to users, in order. Does not contain deleted problems.
@@ -1017,5 +1019,24 @@ public class Model implements IModel {
             }
         }
         return (Run[]) clientClarifications.toArray(new Run[clientClarifications.size()]);
+    }
+
+    public void addProblem(Problem problem, ProblemDataFiles problemDataFiles) {
+        problemList.add(problem);
+        problemDataFilesList.add(problemDataFiles);
+        
+        ProblemEvent problemEvent = new ProblemEvent(ProblemEvent.Action.ADDED,problem, problemDataFiles);
+        fireProblemListener(problemEvent);
+    }
+
+    public void updateProblem(Problem problem, ProblemDataFiles problemDataFiles) {
+        problemList.update(problem);
+        problemDataFilesList.update(problemDataFiles);
+        ProblemEvent problemEvent = new ProblemEvent(ProblemEvent.Action.CHANGED,problem, problemDataFiles);
+        fireProblemListener(problemEvent);
+    }
+
+    public ProblemDataFiles getProblemDataFiles(Problem problem) {
+        return (ProblemDataFiles) problemDataFilesList.get(problem);
     }
 }

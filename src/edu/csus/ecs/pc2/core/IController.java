@@ -6,6 +6,7 @@ import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.Site;
@@ -106,6 +107,10 @@ public interface IController {
     void cancelRun (Run run);
     
     void addNewSite (Site site);
+    
+    void addNewProblem(Problem problem, ProblemDataFiles problemDataFiles);
+
+    void addProblem(Problem problem);
 
     void sendServerLoginRequest(int siteNumber);
 
@@ -114,6 +119,12 @@ public interface IController {
     void startContest(int inSiteNumber);
     
     void stopContest(int inSiteNumber);
+    
+    void updateProblem(Problem problem);
+    
+    void updateProblem(Problem problem, ProblemDataFiles problemDataFiles);
+    
+    ProblemDataFiles getProblemDataFiles (Problem problem);
 
     Log getLog();
 

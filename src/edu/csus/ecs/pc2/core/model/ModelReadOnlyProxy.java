@@ -681,4 +681,19 @@ public final class ModelReadOnlyProxy implements IModel {
         return null;
     }
 
+    public void addProblem(Problem problem, ProblemDataFiles problemDataFiles) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void updateProblem(Problem problem, ProblemDataFiles problemDataFiles) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public ProblemDataFiles getProblemDataFiles(Problem problem) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

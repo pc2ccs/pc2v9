@@ -36,11 +36,19 @@ public class ProblemEvent {
     private Action action;
 
     private Problem problem;
+    
+    private ProblemDataFiles problemDataFiles;
 
     public ProblemEvent(Action problemAction, Problem problem) {
         super();
         this.action = problemAction;
         this.problem = problem;
+    }
+
+    public ProblemEvent(Action problemAction, Problem problem, ProblemDataFiles problemDataFiles) {
+        this.action = problemAction;
+        this.problem = problem;
+        this.problemDataFiles = problemDataFiles;
     }
 
     public Action getAction() {

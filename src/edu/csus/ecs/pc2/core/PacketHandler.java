@@ -345,6 +345,7 @@ public class PacketHandler {
             if (isServer()) {
                 boolean sendToOtherServers = isThisSite(packet.getSourceId().getSiteNumber());
                 sendToJudgesAndOthers( packet, sendToOtherServers);
+                controller.sendToTeams(packet);
             }
         }
 
@@ -353,7 +354,8 @@ public class PacketHandler {
             model.addProblem(problem);
             if (isServer()) {
                 boolean sendToOtherServers = isThisSite(packet.getSourceId().getSiteNumber());
-                sendToJudgesAndOthers( packet, sendToOtherServers);   
+                sendToJudgesAndOthers( packet, sendToOtherServers);  
+                controller.sendToTeams(packet);
             }
         }
 
@@ -372,6 +374,11 @@ public class PacketHandler {
                 if (model.getAccount(account.getClientId()) == null) {
                     model.addAccount(account);
                 }
+                if (isServer()){
+                    if (model.isLoggedIn(account.getClientId())){
+                        controller.sendToClient(packet);
+                    }    
+                }
             }
             if (isServer()) {
                 sendToJudgesAndOthers(packet, false);
@@ -380,37 +387,29 @@ public class PacketHandler {
     }
 
     private void updateSetting(Packet packet) {
-
+        
         Site site = (Site) PacketFactory.getObjectValue(packet, PacketFactory.SITE);
         if (site != null) {
             model.updateSite(site);
-            if (isServer()) {
-                sendToJudgesAndOthers( packet, false);
-            }
         }
 
         Language language = (Language) PacketFactory.getObjectValue(packet, PacketFactory.LANGUAGE);
         if (language != null) {
             model.updateLanguage(language);
-            if (isServer()) {
-                sendToJudgesAndOthers( packet, false);
-            }
         }
 
         Problem problem = (Problem) PacketFactory.getObjectValue(packet, PacketFactory.PROBLEM);
         if (problem != null) {
             model.updateProblem(problem);
-            if (isServer()) {
-                sendToJudgesAndOthers( packet, false);
-            }
         }
 
         ContestTime contestTime = (ContestTime) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME);
         if (contestTime != null) {
             model.updateContestTime(contestTime);
-            if (isServer()) {
-                sendToJudgesAndOthers( packet, false);
-            }
+        }
+        
+        if (isServer()){
+            sendToJudgesAndOthers( packet, false);
         }
 
     }

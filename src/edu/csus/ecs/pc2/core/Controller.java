@@ -18,6 +18,7 @@ import edu.csus.ecs.pc2.core.model.IModel;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
@@ -1214,7 +1215,9 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             
             try {
 
-                login (loginName, password);  // starts login attempt, will show failure to LoginFrame
+                if (savedTransportException == null){
+                    login (loginName, password);  // starts login attempt, will show failure to LoginFrame
+                }
 
             } catch (Exception e) {
                 log.log(Log.INFO, "Exception logged ", e);
@@ -1456,6 +1459,26 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         Packet disconnectionPacket = PacketFactory.createDroppedConnection(model.getClientId(), PacketFactory.ALL_SERVERS, connectionHandlerID);
         sendToAdministrators(disconnectionPacket);
         sendToServers(disconnectionPacket);
+    }
+
+    public void addNewProblem(Problem problem, ProblemDataFiles problemDataFiles) {
+        model.addProblem(problem, problemDataFiles);
+    }
+
+    public void addProblem(Problem problem) {
+        model.addProblem(problem);
+    }
+
+    public void updateProblem(Problem problem) {
+        model.updateProblem(problem);
+    }
+
+    public void updateProblem(Problem problem, ProblemDataFiles problemDataFiles) {
+        model.updateProblem(problem, problemDataFiles);
+    }
+
+    public ProblemDataFiles getProblemDataFiles(Problem problem) {
+        return model.getProblemDataFiles(problem);
     }
 
 }
