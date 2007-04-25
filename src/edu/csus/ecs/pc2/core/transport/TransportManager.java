@@ -1,10 +1,10 @@
 package edu.csus.ecs.pc2.core.transport;
 
-import javax.crypto.SealedObject;
-import javax.crypto.SecretKey;
 import java.io.Serializable;
 import java.security.PublicKey;
-import java.util.Enumeration;
+
+import javax.crypto.SealedObject;
+import javax.crypto.SecretKey;
 
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.transport.crypto.Crypto;
