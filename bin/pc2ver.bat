@@ -4,8 +4,8 @@ rem Purpose: print pc2 version number
 rem Author : pc2@ecs.csus.edu
 rem $HeadURL$
 
-if exist ..\VERSION cd ..
+call %0\..\pc2env.bat
 
-java -cp lib\pc2.jar edu.csus.ecs.pc2.VersionInfo
+java -cp %libdir%\pc2.jar edu.csus.ecs.pc2.VersionInfo
 
 rem eof pc2ver.bat $Id$
