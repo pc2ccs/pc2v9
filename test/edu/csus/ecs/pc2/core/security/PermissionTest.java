@@ -1,6 +1,11 @@
 package edu.csus.ecs.pc2.core.security;
 
+import java.util.Vector;
+
 import junit.framework.TestCase;
+import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.Model;
 import edu.csus.ecs.pc2.core.security.Permission.Type;
 
 /**
@@ -43,4 +48,11 @@ public class PermissionTest extends TestCase {
 
     }
 
+    public void testTeamDefaultPermissions() {
+        Model model = new Model();
+        model.generateNewAccounts(ClientType.Type.TEAM.toString(), 1, true);
+        Vector<Account> accountVect = model.getAccounts(ClientType.Type.TEAM);
+        Account account = accountVect.get(0);
+        assertTrue("Team is allowed DISPLAY_ON_SCOREBOARD", account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD));
+    }
 }
