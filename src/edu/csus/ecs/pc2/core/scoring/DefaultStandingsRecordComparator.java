@@ -1,7 +1,6 @@
 package edu.csus.ecs.pc2.core.scoring;
 
-import java.util.Vector;
-
+import edu.csus.ecs.pc2.core.list.AccountList;
 import edu.csus.ecs.pc2.core.model.Account;
 
 /**
@@ -23,7 +22,7 @@ public class DefaultStandingsRecordComparator implements java.io.Serializable,
      */
     private static final long serialVersionUID = 2417425534254224622L;
 
-    private Vector<Account> cachedAccountList;
+    private AccountList cachedAccountList;
 
     /**
      * Compares its two arguments for order. Returns a negative integer, zero, or a positive integer as the first argument is less
@@ -67,13 +66,13 @@ public class DefaultStandingsRecordComparator implements java.io.Serializable,
         a1 = teamA.getNumberSolved();
         a2 = teamA.getPenaltyPoints();
         a3 = teamA.getLastSolved();
-        Account accountA = cachedAccountList.get(cachedAccountList.indexOf(teamA.getClientId()));
+        Account accountA = cachedAccountList.getAccount(teamA.getClientId());
         nameA = accountA.getDisplayName();
         a5 = teamA.getClientId().hashCode();
         b1 = teamB.getNumberSolved();
         b2 = teamB.getPenaltyPoints();
         b3 = teamB.getLastSolved();
-        Account accountB = cachedAccountList.get(cachedAccountList.indexOf(teamB.getClientId()));
+        Account accountB = cachedAccountList.getAccount(teamB.getClientId());
         nameB = accountB.getDisplayName();
         b5 = teamB.getClientId().hashCode();
         compare = nameA.toLowerCase().compareTo(nameB.toLowerCase());
@@ -106,7 +105,7 @@ public class DefaultStandingsRecordComparator implements java.io.Serializable,
      * @param accountList
      *            The cachedAccountList to set.
      */
-    public void setCachedAccountList(Vector<Account> accountList) {
+    public void setCachedAccountList(AccountList accountList) {
         this.cachedAccountList = accountList;
     }
 }

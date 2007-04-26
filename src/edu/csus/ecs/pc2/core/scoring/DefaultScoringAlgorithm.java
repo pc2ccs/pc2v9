@@ -3,12 +3,14 @@ package edu.csus.ecs.pc2.core.scoring;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import edu.csus.ecs.pc2.core.list.AccountList;
 import edu.csus.ecs.pc2.core.list.RunComparatorByTeam;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientType;
@@ -70,6 +72,16 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         // TODO populate default properties
     }
 
+    AccountList getAccountList(IModel theContest) {
+        Vector<Account> accountVect = theContest.getAccounts(ClientType.Type.ALL);
+        AccountList accountList = new AccountList();
+        Enumeration accountEnum = accountVect.elements();
+        while(accountEnum.hasMoreElements()) {
+            Account a = (Account)accountEnum.nextElement();
+            accountList.add(a);
+        }
+        return accountList;
+    }
     /**
      * Get the Score and Statistics information for one problem.
      * 
@@ -176,7 +188,6 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      * @see edu.csus.ecs.pc2.core.scoring.ScoringAlgorithm#getStandings(edu.csus.ecs.pc2.core.Run[], edu.csus.ecs.pc2.core.AccountList, edu.csus.ecs.pc2.core.ProblemDisplayList, java.util.Properties)
      */
     public String getStandings(IModel theContest) {
-//    public Vector<StandingsRecord> getStandings(Run[] runs, AccountList accountList, ProblemDisplayList problemDisplayList, Properties properties) throws Exception {
         if (theContest == null) {
             throw new InvalidParameterException("Invalid model (null)");
         }
@@ -184,15 +195,16 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         if (properties == null) {
             throw new InvalidParameterException("Invalid properties (null)");
         }
-
+        
         // TODO properties should be validated here
         props = properties;
 
         XMLMemento mementoRoot = XMLMemento.createWriteRoot("contestStandings");
         IMemento summaryMememento = mementoRoot.createChild("standingsHeader");
-        summaryMememento.putString("title", theContest.getTitle());
+        summaryMememento.putString("title", "this is not in the model");
+//        summaryMememento.putString("title", theContest.getTitle());
 //        summaryMememento.putString("version", );
-        Vector<Account> accountList = theContest.getAccounts(ClientType.Type.ALL);
+        AccountList accountList = getAccountList(theContest);
         Problem[] problems = theContest.getProblems();
         Hashtable <ElementId, Integer> problemsIndexHash = new Hashtable<ElementId, Integer>();
         for (int i = 0; i < problems.length; i++) {
@@ -205,7 +217,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         Run[] runs = theContest.getRuns();
         synchronized (mutex) {
             int numAccounts = accountList.size();
-            Account[] accounts = (Account[]) accountList.toArray(new Account[accountList.size()]);
+            Account[] accounts = accountList.getList();
             // used in the StandingsRank comparator
             Hashtable<String, StandingsRecord> srHash = new Hashtable<String, StandingsRecord>();
             RunComparatorByTeam runComparatorByTeam = new RunComparatorByTeam();
@@ -238,7 +250,12 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 // skip runs that are deleted and
                 // skip runs whose submitter is no longer active and
                 // skip runs whose problem are no longer active
-                Account account = accountList.get(accountList.indexOf(runs[i].getSubmitter()));
+                Account account = accountList.getAccount(runs[i].getSubmitter());
+                if (account == null) {
+                    // TODO change to LOg
+                    System.out.println("account could not be located for " + runs[i].getSubmitter());
+                    continue;
+                }
                 if (!runs[i].isDeleted() && account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD) 
                         && probHash.containsKey(runs[i].getProblemId().toString())) {
                     runTreeMap.put(runs[i], runs[i]);
@@ -347,22 +364,27 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 standingsRecordMemento.putInteger("solved", sr.getNumberSolved());
                 standingsRecordMemento.putInteger("rank", sr.getRankNumber());
                 standingsRecordMemento.putInteger("index", index);
-                Account account = accountList.get(accountList.indexOf(sr.getClientId()));
+                Account account = accountList.getAccount(sr.getClientId());
                 standingsRecordMemento.putString("teamName", account.getDisplayName()); 
                 standingsRecordMemento.putString("teamkey", account.getClientId().getTripletKey());
                 SummaryRow summaryRow = sr.getSummaryRow();
                 for (int i = 0; i < problems.length; i++) {
                     ProblemSummaryInfo psi = summaryRow.get(i + 1);
-                    IMemento psiMemento = standingsRecordMemento.createChild("problemSummaryInfo");
-                    psiMemento.putInteger("numberSubmitted", psi.getNumberSubmitted());
-                    psiMemento.putInteger("points", psi.getPenaltyPoints());
-                    psiMemento.putLong("solutionTime", psi.getSolutionTime());
-                    psiMemento.putBoolean("isSolved", psi.isSolved());
-                    psiMemento.putInteger("problemId", problemsIndexHash.get(psi.getProblemId()));
+                    if (psi == null) {
+                        System.out.println("error or normal? ProblemSummaryInfo not found for problem "+ i + 1);
+                    } else {
+                        IMemento psiMemento = standingsRecordMemento.createChild("problemSummaryInfo");
+                        psiMemento.putInteger("problemId", problemsIndexHash.get(psi.getProblemId()));
+                        psiMemento.putInteger("numberSubmitted", psi.getNumberSubmitted());
+                        psiMemento.putInteger("points", psi.getPenaltyPoints());
+                        psiMemento.putLong("solutionTime", psi.getSolutionTime());
+                        psiMemento.putBoolean("isSolved", psi.isSolved());
+                    }
                 }
                 srArray[index++] = sr;
             }
         } // mutex
+        /* XXX comment out now that we have JUnit tests
         IMemento child = mementoRoot.createChild("teamStanding");
         child.putLong("firstSolved", 13);
         child.putLong("lasstSolved", 272);
@@ -370,7 +392,8 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         child.putInteger("solved", 8);
         child.putInteger("rank", 1);
         child.putInteger("index", 1);
-        child.putString("teamName", "Warsaw University"); 
+        child.putString("teamName", "Warsaw University");
+        */ 
         String xmlString;
         try {
             xmlString = mementoRoot.saveToString();
@@ -379,42 +402,8 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             e.printStackTrace();
             xmlString = "";
         }
+        System.out.println(xmlString);
         return xmlString;
     }
 
-    public String getStandings2(IModel theContest) {
-        // TODO replace hard-coded XML return string with computed one
-        return getHardCodedResults();
-    }
-
-    private String getHardCodedResults() {
-        String result = "<?xml version='1.0' encoding='utf-8'?>" + "<contestStandings>" + "<standingsHeader>" + "<contestTitle> Sample Contest Title </contestTitle>"
-                + "<contestDate>   16 July 2008  </contestDate>" + "<contestElapsedMinutes>   150   </contestElapsedMinutes>" + "<contestRemainingMinutes>  30   </contestRemainingMinutes>"
-                + "<contestScoreboardUpdateState>  NO_MORE_UPDATES  </contestScoreboardUpdateState>" + "<problemList>"
-                + "<problem><problemTitle>\"Prob A\"</problemTitle><balloonColor>\"red\"</balloonColor></problem>"
-                + "<problem><problemTitle>\"Prob B\"</problemTitle><balloonColor>\"green\"</balloonColor></problem>" + "<problem><problemTitle>\"Prob C\"</problemTitle></problem>" + "</problemList>"
-                + "</standingsHeader>"
-
-                + "<teamStanding>" + "<teamName> Sparkles </teamName><teamRank> 1 </teamRank><teamNumber> 100 </teamNumber><teamPoints> 600 </teamPoints><teamGroup> 1 </teamGroup>" + "<runList>"
-                + "<run><submitTime>\"35\"</submitTime><language>\"Java\"</language><problem>\"1\"</problem><result>\"NO\"</result></run>"
-                + "<run><submitTime>\"40\"</submitTime><language>\"Java\"</language><problem>\"1\"</problem><result>\"YES\"</result></run>"
-                + "<run><submitTime>\"45\"</submitTime><language>\"C++\"</language><problem>\"2\"</problem><result>\"NO\"</result></run>"
-                + "<run><submitTime>\"50\"</submitTime><language>\"C++\"</language><problem>\"2\"</problem><result>\"BEING_JUDGED\"</result></run>"
-                + "<run><submitTime>\"55\"</submitTime><language>\"Java\"</language><problem>\"3\"</problem><result>\"PENDING\"</result></run>" + "</runList>" + "</teamStanding>"
-
-                + "<teamStanding>" + "<teamName> Diamonds </teamName><teamRank> 2 </teamRank><teamNumber> 200 </teamNumber><teamPoints> 700 </teamPoints><teamGroup> 1 </teamGroup>" + "<runList>"
-                + "<run><submitTime>\"28\"</submitTime><language>\"Java\"</language><problem>\"1\"</problem><result>\"YES\"</result></run>"
-                + "<run><submitTime>\"38\"</submitTime><language>\"C++\"</language><problem>\"2\"</problem><result>\"NO\"</result></run>" + "</runList>" + "</teamStanding>"
-
-                + "<teamStanding>" + "<teamName> Rubies </teamName><teamRank> 1 </teamRank><teamNumber> 200 </teamNumber><teamPoints> 400 </teamPoints><teamGroup> 2 </teamGroup>" + "<runList>"
-                + "<run><submitTime>\"20\"</submitTime><language>\"Java\"</language><problem>\"1\"</problem><result>\"YES\"</result></run>"
-                + "<run><submitTime>\"30\"</submitTime><language>\"C++\"</language><problem>\"2\"</problem><result>\"NO\"</result></run>"
-                + "<run><submitTime>\"40\"</submitTime><language>\"C++\"</language><problem>\"2\"</problem><result>\"BEING_JUDGED\"</result></run>" + "</runList>" + "</teamStanding>"
-
-                + "<teamStanding>" + "<teamName> Garnets </teamName><teamRank> 1 </teamRank><teamNumber> 250 </teamNumber><teamPoints> 475 </teamPoints><teamGroup> 1 </teamGroup>" + "<runList>"
-                + "<run><submitTime>\"33\"</submitTime><language>\"Java\"</language><problem>\"1\"</problem><result>\"NO\"</result></run>"
-                + "<run><submitTime>\"44\"</submitTime><language>\"C++\"</language><problem>\"2\"</problem><result>\"NO\"</result></run>"
-                + "<run><submitTime>\"55\"</submitTime><language>\"C++\"</language><problem>\"2\"</problem><result>\"YES\"</result></run>" + "</runList>" + "</teamStanding>" + "</contestStandings>";
-        return result;
-    }
 }
