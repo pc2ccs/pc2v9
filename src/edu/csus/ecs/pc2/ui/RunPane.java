@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.io.File;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -10,10 +11,14 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.Executable;
+import edu.csus.ecs.pc2.core.execute.ExecuteTimer;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ElementId;
@@ -23,8 +28,7 @@ import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
-import javax.swing.SwingConstants;
-import javax.swing.JTextField;
+import edu.csus.ecs.pc2.core.model.SerializedFile;
 
 /**
  * Add/Edit Run Pane
@@ -86,6 +90,8 @@ public class RunPane extends JPanePlugin {
     private JLabel jLabel = null;
 
     private JTextField elapsedTimeTextField = null;
+    
+    private IFileViewer sourceViewer;
 
     /**
      * This method initializes
@@ -525,18 +531,17 @@ public class RunPane extends JPanePlugin {
             viewSourceButton.setMnemonic(java.awt.event.KeyEvent.VK_V);
             viewSourceButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    viewSourceButton();
+                    viewSourceFile();
                 }
             });
         }
         return viewSourceButton;
     }
 
-    protected void viewSourceButton() {
-
-        // TODO View file.
-        showMessage("Would have viewed file "+runFiles.getMainFile());
-
+    protected void viewSourceFile() {
+        
+        createAndViewFile (runFiles.getMainFile(), "Team's source");
+        
     }
 
     /**
@@ -684,5 +689,27 @@ public class RunPane extends JPanePlugin {
         }
         return elapsedTimeTextField;
     }
-
+    
+    private void createAndViewFile (SerializedFile file, String title){
+        // TODO the executeable dir name should be from the model, eh ?
+        Executable tempEexecutable = new Executable(getModel(), getController(), run, runFiles);
+        String targetDirectory = tempEexecutable.getExecuteDirectoryName();
+        Utilities.insureDir(targetDirectory);
+        String targetFileName = targetDirectory + File.separator + file.getName();
+        showMessage("Create: "+targetFileName);
+        file.writeFile(targetFileName);
+        
+        if (sourceViewer != null){
+            sourceViewer.dispose();
+        }
+        sourceViewer = new MultipleFileViewer(getController().getLog());
+        
+        if ( new File(targetFileName).isFile()){
+            sourceViewer.addFilePane(title, targetFileName);
+            sourceViewer.setVisible(true);
+        } else {
+            sourceViewer.addFilePane(title, "Could not create file at "+targetFileName);
+            sourceViewer.setVisible(true);
+        }
+    }
 } // @jve:decl-index=0:visual-constraint="10,10"

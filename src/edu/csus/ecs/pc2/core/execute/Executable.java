@@ -12,7 +12,6 @@ import java.util.Date;
 import java.util.Hashtable;
 
 import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
 
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -344,11 +343,12 @@ public class Executable {
                 fileViewer.setInformationLabelText("");
             }
 
-            return fileViewer;
         } catch (Exception e) {
             log.log(Log.INFO, "Exception during execute() ", e);
             fileViewer.addTextPane("Error during execute", "Exception during execute, check log "+e.getMessage());
         }
+        
+        return fileViewer;
     }
 
     /**
