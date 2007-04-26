@@ -5,10 +5,8 @@
 # $HeadURL$
 #
 
-if [ -f ../VERSION ] ; then
-  cd ..
-fi 
+. `dirname $0`/pc2env
 
-java -cp lib\pc2.jar;lib\mclb.jar edu.csus.ecs.pc2.Starter $*
+java -cp $libdir/pc2.jar:$mclbdir/mclb.jar edu.csus.ecs.pc2.Starter $*
 
 # eof pc2team $Id$ 

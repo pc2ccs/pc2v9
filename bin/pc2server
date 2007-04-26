@@ -2,13 +2,11 @@
 #
 # Purpose: print version number
 # Author : pc2@ecs.csus.edu
-# $HeadURL: http://pc2.ecs.csus.edu/repos/pc2v9/trunk/bin/pc2team $
+# $HeadURL$
 #
 
-if [ -f ../VERSION ] ; then
-  cd ..
-fi 
+. `dirname $0`/pc2env
 
-java -cp lib\pc2.jar;lib\mclb.jar edu.csus.ecs.pc2.Starter --server $*
+java -cp $libdir/pc2.jar:$mclbdir/mclb.jar edu.csus.ecs.pc2.Starter --server $*
 
-# eof pc2team $Id: pc2team 79 2007-03-30 19:07:29Z boudreat $ 
+# eof pc2team $Id$ 
