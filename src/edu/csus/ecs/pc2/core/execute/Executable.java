@@ -156,12 +156,9 @@ public class Executable {
         
         log = controller.getLog();
 
-        // TODO code when model.getProblemDataFiles is implemented.
-        log.log(Log.WARNING, " Judge's execute will not work until  model.getProblemDataFiles(problem) is implemented, you've been warned");
-        
-//         if (executorId.getClientType() != ClientType.Type.TEAM) {
-//             this.problemDataFiles = model.getProblemDataFiles(problem);
-//         }
+         if (executorId.getClientType() != ClientType.Type.TEAM) {
+             this.problemDataFiles = model.getProblemDataFile(problem);
+         }
     }
 
  
@@ -220,55 +217,86 @@ public class Executable {
     public IFileViewer execute(boolean clearDirFirst) {
          fileViewer = new MultipleFileViewer(log);
 
-        boolean dirThere = insureDir(executeDirectoryName);
+        try {
+            boolean dirThere = insureDir(executeDirectoryName);
 
-        if (!dirThere) {
-            log.config("Directory could not be created: "+executeDirectoryName);
-            fileViewer.showMessage("Unable to create directory " + executeDirectoryName);
-            return fileViewer;
-        }
-        
-        if (clearDirFirst && (!overwriteJudgesDataFiles)) {
-            // Clear directory out before compiling.
-
-            /**
-             * Do not clear directory if writeJudgesDataFiles is false, because if we are not overwriting the judge's data file,
-             * then erasing the existing files makes no sense.
-             */
-
-            boolean cleared = clearDirectory(executeDirectoryName);
-            if (!cleared) {
-                // TODO LOG error Directory could not be cleared, other process running?
-                log.config("Directory could not be cleared, other process running? ");
-
-                fileViewer.showMessage("Unable to remove all files from directory " + executeDirectoryName);
+            if (!dirThere) {
+                log.config("Directory could not be created: " + executeDirectoryName);
+                fileViewer.showMessage("Unable to create directory " + executeDirectoryName);
                 return fileViewer;
             }
 
-        }
-        // Extract source file to name in Problem.getDataFileName().
+            if (clearDirFirst && (!overwriteJudgesDataFiles)) {
+                // Clear directory out before compiling.
 
-        if (runFiles.getMainFile() != null) {
-            createFile(runFiles.getMainFile(), prefixExecuteDirname(runFiles.getMainFile().getName()));
-        }
+                /**
+                 * Do not clear directory if writeJudgesDataFiles is false, because if we are not overwriting the judge's data file,
+                 * then erasing the existing files makes no sense.
+                 */
 
-        if (runFiles.getOtherFiles() != null) {
-            // Extract other submitted files.
+                boolean cleared = clearDirectory(executeDirectoryName);
+                if (!cleared) {
+                    // TODO LOG error Directory could not be cleared, other process running?
+                    log.config("Directory could not be cleared, other process running? ");
 
-            for (SerializedFile file : runFiles.getOtherFiles()) {
-                if (file != null) {
-                    createFile(file, prefixExecuteDirname(file.getName()));
+                    fileViewer.showMessage("Unable to remove all files from directory " + executeDirectoryName);
+                    return fileViewer;
+                }
+
+            }
+            // Extract source file to name in Problem.getDataFileName().
+
+            if (runFiles.getMainFile() != null) {
+                createFile(runFiles.getMainFile(), prefixExecuteDirname(runFiles.getMainFile().getName()));
+            }
+
+            if (runFiles.getOtherFiles() != null) {
+                // Extract other submitted files.
+
+                for (SerializedFile file : runFiles.getOtherFiles()) {
+                    if (file != null) {
+                        createFile(file, prefixExecuteDirname(file.getName()));
+                    }
                 }
             }
-        }
 
-         executionData = new ExecutionData();
+            executionData = new ExecutionData();
 
-        if (isTestRunOnly()) {
-            // Team, just compile and execute it.
+            if (isTestRunOnly()) {
+                // Team, just compile and execute it.
 
-            if (compileProgram()) {
-                executeProgram(0); // execute with first data set.
+                if (compileProgram()) {
+                    executeProgram(0); // execute with first data set.
+                } else {
+                    int errnoIndex = errorString.indexOf('=') + 1;
+                    if (errorString.substring(errnoIndex).equals("2")) {
+                        fileViewer.showMessage("Compiler not found, contact staff.");
+                    } else {
+                        fileViewer.showMessage("Problem executing compiler, contact staff.");
+                    }
+                }
+            } else if (compileProgram()) {
+                SerializedFile[] dataFiles = problemDataFiles.getJudgesDataFiles();
+                int dataSetNumber = 0;
+
+                if (dataFiles == null || dataFiles.length == 1) {
+                    // Only a single data set,
+                    if (executeProgram(dataSetNumber) && isValidated()) {
+                        validateProgram(dataSetNumber);
+                    }
+                } else {
+                    boolean passed = true;
+
+                    while (passed && dataSetNumber < dataFiles.length) {
+                        if (executeProgram(dataSetNumber) && isValidated()) {
+                            passed = validateProgram(dataSetNumber);
+                        } else {
+                            passed = false; // didn't execute.
+                        }
+
+                        dataSetNumber++;
+                    }
+                }
             } else {
                 int errnoIndex = errorString.indexOf('=') + 1;
                 if (errorString.substring(errnoIndex).equals("2")) {
@@ -277,76 +305,50 @@ public class Executable {
                     fileViewer.showMessage("Problem executing compiler, contact staff.");
                 }
             }
-        } else if (compileProgram()) {
-            SerializedFile[] dataFiles = problemDataFiles.getJudgesDataFiles();
-            int dataSetNumber = 0;
 
-            if (dataFiles == null || dataFiles.length == 1) {
-                // Only a single data set,
-                if (executeProgram(dataSetNumber) && isValidated()) {
-                    validateProgram(dataSetNumber);
-                }
-            } else {
-                boolean passed = true;
+            File file;
+            String outputFile;
 
-                while (passed && dataSetNumber < dataFiles.length) {
-                    if (executeProgram(dataSetNumber) && isValidated()) {
-                        passed = validateProgram(dataSetNumber);
-                    } else {
-                        passed = false; // didn't execute.
-                    }
+            fileViewer.setTitle("Executable");
 
-                    dataSetNumber++;
-                }
+            outputFile = prefixExecuteDirname(EXECUTE_STDOUT_FILENAME);
+            file = new File(outputFile);
+            if (file.isFile() && file.length() > 0) {
+                fileViewer.addFilePane("Program output", outputFile);
             }
-        } else {
-            int errnoIndex = errorString.indexOf('=') + 1;
-            if (errorString.substring(errnoIndex).equals("2")) {
-                fileViewer.showMessage("Compiler not found, contact staff.");
-            } else {
-                fileViewer.showMessage("Problem executing compiler, contact staff.");
+
+            outputFile = prefixExecuteDirname(EXECUTE_STDERR_FILENAME);
+            file = new File(outputFile);
+            if (file.isFile() && file.length() > 0) {
+                fileViewer.addFilePane("Program stderr", outputFile);
             }
+
+            outputFile = prefixExecuteDirname(COMPILER_STDOUT_FILENAME);
+            file = new File(outputFile);
+            if (file.isFile() && file.length() > 0) {
+                fileViewer.addFilePane("Compiler stdout", outputFile);
+            }
+
+            outputFile = prefixExecuteDirname(COMPILER_STDERR_FILENAME);
+            file = new File(outputFile);
+            if (file.isFile() && file.length() > 0) {
+                fileViewer.addFilePane("Compiler stderr", outputFile);
+            }
+
+            if (executionData.getExecuteExitValue() != 0) {
+                long returnValue = ((long) executionData.getExecuteExitValue() << 0x20) >>> 0x20;
+
+                fileViewer.setInformationLabelText("Team program exit code = 0x" + Long.toHexString(returnValue).toUpperCase());
+
+            } else {
+                fileViewer.setInformationLabelText("");
+            }
+
+            return fileViewer;
+        } catch (Exception e) {
+            log.log(Log.INFO, "Exception during execute() ", e);
+            fileViewer.addTextPane("Error during execute", "Exception during execute, check log "+e.getMessage());
         }
-
-        File file;
-        String outputFile;
-
-        fileViewer.setTitle("Executable");
-
-        outputFile = prefixExecuteDirname(EXECUTE_STDOUT_FILENAME);
-        file = new File(outputFile);
-        if (file.isFile() && file.length() > 0) {
-            fileViewer.addFilePane("Program output", outputFile);
-        }
-
-        outputFile = prefixExecuteDirname(EXECUTE_STDERR_FILENAME);
-        file = new File(outputFile);
-        if (file.isFile() && file.length() > 0) {
-            fileViewer.addFilePane("Program stderr", outputFile);
-        }
-
-        outputFile = prefixExecuteDirname(COMPILER_STDOUT_FILENAME);
-        file = new File(outputFile);
-        if (file.isFile() && file.length() > 0) {
-            fileViewer.addFilePane("Compiler stdout", outputFile);
-        }
-
-        outputFile = prefixExecuteDirname(COMPILER_STDERR_FILENAME);
-        file = new File(outputFile);
-        if (file.isFile() && file.length() > 0) {
-            fileViewer.addFilePane("Compiler stderr", outputFile);
-        }
-
-        if (executionData.getExecuteExitValue() != 0) {
-            long returnValue = ((long) executionData.getExecuteExitValue() << 0x20) >>> 0x20;
-
-            fileViewer.setInformationLabelText("Team program exit code = 0x" + Long.toHexString(returnValue).toUpperCase());
-
-        } else {
-            fileViewer.setInformationLabelText("");
-        }
-
-        return fileViewer;
     }
 
     /**
@@ -649,9 +651,8 @@ public class Executable {
                         if (executionTimer != null) {
                             executionTimer.stopTimer();
                         }
-                        // TODO design - throw exception here and handle in run() ?
-                        JOptionPane.showMessageDialog(null, "Can not find/read data file " + problem.getDataFileName());
-                        return false;
+                        
+                        throw new SecurityException("Expected data file, was not created, file name is " + problem.getDataFileName());
                     }
                 }
 
