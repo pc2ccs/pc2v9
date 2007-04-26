@@ -152,8 +152,9 @@ public class DefaultScoringAlgorithmTest extends TestCase {
         DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
         String xmlString = defaultScoringAlgorithm.getStandings(model);
 
-        assertTrue("With one run unjudged, no getStandings output ", xmlString == null);
-        assertTrue("With one run unjudged, empty string getStandings output ", xmlString.trim().length() == 0);
+        // getStandings should always return a well-formed xml
+        assertFalse("getStandings returned null ", xmlString == null);
+        assertFalse("getStandings returned empty string ", xmlString.trim().length() == 0);
 
         try {
             DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
