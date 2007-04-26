@@ -361,6 +361,9 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         } else if (loginName.startsWith("t") && loginName.length() > 4) {
             int number = getIntegerValue(loginName.substring(4));
             return new ClientId(defaultSiteNumber, Type.TEAM, number);
+        } else if (loginName.startsWith("t") && loginName.length() > 1) {
+            int number = getIntegerValue(loginName.substring(1));
+            return new ClientId(defaultSiteNumber, Type.TEAM, number);
         } else if (Character.isDigit(loginName.charAt(0))) {
             int number = getIntegerValue(loginName);
             return new ClientId(defaultSiteNumber, Type.TEAM, number);
@@ -386,88 +389,86 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             // TODO review this message
             throw new SecurityException("Invalid sequence, must call start(String[]) method before login(String, String).");
         }
-        try {
+        ClientId clientId = loginShortcutExpansion(0, id);
 
-            ClientId clientId = loginShortcutExpansion(0, id);
+        log = new Log(clientId.toString());
+        StaticLog.setLog(log);
 
-            log = new Log(clientId.toString());
-            StaticLog.setLog (log);
+        info(new VersionInfo().getSystemVersionInfo());
+        info("Login: " + id + " (aka " + clientId.getName() + ")");
 
-            info(new VersionInfo().getSystemVersionInfo());
-            info("Login: "+id+" (aka "+clientId.getName()+")");
+        if (password.length() < 1) {
+            password = clientId.getName(); // Joe password.
+            if (clientId.getClientType().equals(Type.SERVER)) {
+                password = "site" + clientId.getSiteNumber();
+            }
+        }
 
-            if (password.length() < 1) {
-                password = clientId.getName(); // Joe password.
-                if (clientId.getClientType().equals(Type.SERVER)) {
-                    password = "site" + clientId.getSiteNumber();
-                }
+        port = Integer.parseInt(TransportManager.DEFAULT_PC2_PORT);
+
+        if (clientId.getClientType().equals(Type.SERVER)) {
+
+            if (containsINIKey(SERVER_PORT_KEY)) {
+                port = Integer.parseInt(getINIValue(SERVER_PORT_KEY));
             }
 
+            if (isContactingRemoteServer()) {
 
-            port = Integer.parseInt(TransportManager.DEFAULT_PC2_PORT);
+                // Contacting another server. "join"
+                remoteHostName = getINIValue(REMOTE_SERVER_KEY);
 
-            if (clientId.getClientType().equals(Type.SERVER)) {
+                // Set port to default
+                remoteHostPort = Integer.parseInt(TransportManager.DEFAULT_PC2_PORT);
 
-                if (containsINIKey(SERVER_PORT_KEY)) {
-                    port = Integer.parseInt(getINIValue(SERVER_PORT_KEY));
+                int idx = remoteHostName.indexOf(":");
+                if (idx > 2) {
+                    remoteHostPort = Integer.parseInt(remoteHostName.substring(idx + 1));
+                    remoteHostName = remoteHostName.substring(0, idx);
                 }
 
-                if (isContactingRemoteServer()) {
-
-                    // Contacting another server. "join"
-                    remoteHostName = getINIValue(REMOTE_SERVER_KEY);
-
-                    // Set port to default
-                    remoteHostPort = Integer.parseInt(TransportManager.DEFAULT_PC2_PORT);
-
-                    int idx = remoteHostName.indexOf(":");
-                    if (idx > 2) {
-                        remoteHostPort = Integer.parseInt(remoteHostName.substring(idx + 1));
-                        remoteHostName = remoteHostName.substring(0, idx);
-                    }
-
-                    info("Contacting " + remoteHostName + ":" + remoteHostPort);
+                info("Contacting " + remoteHostName + ":" + remoteHostPort);
+                try {
                     remoteServerConnectionHandlerID = transportManager.connectToServer(remoteHostName, remoteHostPort);
-
-                    info("Contacted using connection id " + remoteServerConnectionHandlerID);
-
-                    info("Sending login request to " + remoteHostName + " as " + clientId + " " + password); // TODO remove this
-                    sendLoginRequest(transportManager, remoteServerConnectionHandlerID, clientId, password);
-
-                } else {
-                    
-                    if (! serverModule){
-                        SecurityException securityException = new SecurityException("Can not login as server, check logs");
-                        getLog().log(Log.WARNING,"Can not login as server, must start this module with --server command line option");
-                        securityException.printStackTrace(System.err);
-                        throw securityException;
-                    }
-
-                    clientId = authenticateFirstServer(password);
-                    try {
-                        transportManager.accecptConnections(port);
-                        info("Started Server Transport listening on " + port);
-                    } catch (Exception e) {
-                        info("Exception logged ", e);
-                        SecurityException securityException = new SecurityException("Port "+port+" in use, server already running?");
-                        securityException.printStackTrace(System.err);
-                        throw securityException;
-                    }
-                    info("Primary Server has started.");
-                    startMainUI(clientId);
+                } catch (TransportException e) {
+                    info("** ERROR ** Unable to contact server at " + remoteHostName + ":" + remoteHostPort);
+                    info("Server at " + remoteHostName + ":" + remoteHostPort + " not started or contacting wrong host or port ?");
+                    info("Transport Exception ", e);
+                    throw new SecurityException("Unable to contact server, check logs");
                 }
+
+                info("Contacted using connection id " + remoteServerConnectionHandlerID);
+
+                info("Sending login request to " + remoteHostName + " as " + clientId + " " + password); // TODO remove this
+                sendLoginRequest(transportManager, remoteServerConnectionHandlerID, clientId, password);
 
             } else {
 
-                // Client login
-                info("Sending login request to Server as "+clientId); // TODO debug remove this
-                sendLoginRequest(transportManager, clientId, password);
+                if (!serverModule) {
+                    SecurityException securityException = new SecurityException("Can not login as server, check logs");
+                    getLog().log(Log.WARNING, "Can not login as server, must start this module with --server command line option");
+                    securityException.printStackTrace(System.err);
+                    throw securityException;
+                }
+
+                clientId = authenticateFirstServer(password);
+                try {
+                    transportManager.accecptConnections(port);
+                    info("Started Server Transport listening on " + port);
+                } catch (Exception e) {
+                    info("Exception logged ", e);
+                    SecurityException securityException = new SecurityException("Port " + port + " in use, server already running?");
+                    securityException.printStackTrace(System.err);
+                    throw securityException;
+                }
+                info("Primary Server has started.");
+                startMainUI(clientId);
             }
-        } catch (TransportException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            info("Exception on startup ", e);
-            throw new SecurityException("Unable to start server, check logs");
+
+        } else {
+
+            // Client login
+            info("Sending login request to Server as " + clientId); // TODO debug remove this
+            sendLoginRequest(transportManager, clientId, password);
         }
     }
 
@@ -708,8 +709,13 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                 return site.getSiteNumber();
             }
         }
+        
+        if (model.getSites().length > 1 || model.isLoggedIn()){
+            throw new SecurityException("No such site or invalid site password");
+        } else {
+            throw new SecurityException("Does not match first site password");
+        }
 
-        throw new SecurityException("No such site or invalid password");
     }
 
     /**
