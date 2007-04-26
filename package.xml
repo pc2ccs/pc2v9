@@ -56,36 +56,17 @@
             <zipfileset dir="${build.dir}" filemode="644" prefix="${release}">
                 <include name="VERSION"/>
             </zipfileset>
-            <zipfileset dir="${scripts.dir}" filemode="755" prefix="${release}/bin">
-                <include name="pc2"/>
-                <include name="pc2.bat"/>
-                <include name="pc2admin"/>
-                <include name="pc2admin.bat"/>
-                <include name="pc2board"/>
-                <include name="pc2board.bat"/>
-                <include name="pc2judge"/>
-                <include name="pc2judge.bat"/>
-                <include name="pc2team"/>
-                <include name="pc2team.bat"/>
-                <include name="pc2server"/>
-                <include name="pc2server.bat"/>
-                <include name="pc2zip"/>
-                <include name="pc2zip.bat"/>
-                <include name="pc2reset"/>
-                <include name="pc2reset.bat"/>
-                <include name="pc2ver"/>
-                <include name="pc2ver.bat"/>
-            </zipfileset>
+            <zipfileset dir="${scripts.dir}" filemode="755" prefix="${release}/bin"/>
             <zipfileset dir="${dist.dir}" filemode="644" includes="${jar.name}" 
                                                  prefix="${release}/lib"/>
             <zipfileset dir="${vendor.lib.dir}" filemode="644" prefix="${release}/lib">
                 <include name="mclb.jar"/>
             </zipfileset>
-<!-- XXX comment out samps for now
             <zipfileset dir="${samps.dir}" filemode="644" prefix="${release}/samps">
                 <exclude name="compile*"/>
                 <exclude name="sleep.exe"/>
             </zipfileset>
+<!-- XXX comment out executable samps for now
             <zipfileset dir="${samps.dir}" filemode="755" prefix="${release}/samps">
                 <include name="compile*"/>
                 <include name="sleep.exe"/>
