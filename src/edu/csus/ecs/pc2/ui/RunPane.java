@@ -232,7 +232,7 @@ public class RunPane extends JPanePlugin {
         return cancelButton;
     }
 
-    protected void handleCancelButton() {
+    public void handleCancelButton() {
 
         if (getUpdateButton().isEnabled()) {
 
@@ -246,6 +246,12 @@ public class RunPane extends JPanePlugin {
                     getParentFrame().setVisible(false);
                 }
             }
+            if (result == JOptionPane.NO_OPTION) {
+                if (getParentFrame() != null) {
+                    getParentFrame().setVisible(false);
+                }
+            }
+            
         } else {
             if (getParentFrame() != null) {
                 getParentFrame().setVisible(false);
@@ -363,10 +369,56 @@ public class RunPane extends JPanePlugin {
         }
 
         // Can only run/extract if there are run files...
-        executeButton.setEnabled(runFiles != null);
-        extractButton.setEnabled(runFiles != null);
+        getExecuteButton().setEnabled(runFiles != null);
+        getExecuteButton().setEnabled(runFiles != null);
+        getViewSourceButton().setEnabled(runFiles != null);
 
         updateButton.setEnabled(editedText);
+    }
+    
+    private int getIntegerValue(String s) {
+        try {
+            return Integer.parseInt(s);
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+    
+    /**
+     * Enable or disable Update button based on comparison of run to fields.
+     *
+     */
+    public void enableUpdateButton() {
+        
+        boolean enableButton = false;
+
+        if (run != null) {
+            int elapsed = getIntegerValue(getElapsedTimeTextField().getText());
+            enableButton |= (elapsed != run.getElapsedMins());
+            
+            ElementId problemId = ((Problem)getProblemComboBox().getSelectedItem()).getElementId();
+            enableButton |= (! run.getProblemId().equals(problemId));
+            
+            ElementId languageId = ((Language)getLanguageComboBox().getSelectedItem()).getElementId();
+            enableButton |= (! run.getLanguageId().equals(languageId));
+            
+            enableButton |= (run.isDeleted() != getDeleteCheckBox().isSelected());
+            
+            if ( run.isJudged() ){
+                
+                Judgement judgement = (Judgement) getJudgementComboBox().getSelectedItem();
+                if (judgement != null) {
+                    enableButton |= (! run.getJudgementRecord().getJudgementId().equals(judgement.getElementId()));
+                }
+                
+            }else if (getJudgementComboBox().getSelectedIndex() > -1){
+                // Unjudged and a judgement is selected
+                enableButton = true;
+            }
+        }
+
+        getUpdateButton().setEnabled(enableButton);
+        
     }
 
     /**
@@ -481,7 +533,9 @@ public class RunPane extends JPanePlugin {
     }
 
     protected void viewSourceButton() {
-        // TODO Auto-generated method stub
+
+        // TODO View file.
+        showMessage("Would have viewed file "+runFiles.getMainFile());
 
     }
 
@@ -547,6 +601,11 @@ public class RunPane extends JPanePlugin {
             judgementComboBox = new JComboBox();
             judgementComboBox.setLocation(new java.awt.Point(224, 97));
             judgementComboBox.setSize(new java.awt.Dimension(263, 22));
+            judgementComboBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableUpdateButton();
+                }
+            });
         }
         return judgementComboBox;
     }
@@ -561,6 +620,11 @@ public class RunPane extends JPanePlugin {
             deleteCheckBox = new JCheckBox();
             deleteCheckBox.setBounds(new java.awt.Rectangle(224, 196, 114, 21));
             deleteCheckBox.setText("Delete Run");
+            deleteCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableUpdateButton();
+                }
+            });
         }
         return deleteCheckBox;
     }
@@ -574,6 +638,11 @@ public class RunPane extends JPanePlugin {
         if (problemComboBox == null) {
             problemComboBox = new JComboBox();
             problemComboBox.setBounds(new java.awt.Rectangle(224, 130, 263, 22));
+            problemComboBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableUpdateButton();
+                }
+            });
         }
         return problemComboBox;
     }
@@ -587,6 +656,11 @@ public class RunPane extends JPanePlugin {
         if (languageComboBox == null) {
             languageComboBox = new JComboBox();
             languageComboBox.setBounds(new java.awt.Rectangle(224, 163, 263, 22));
+            languageComboBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableUpdateButton();
+                }
+            });
         }
         return languageComboBox;
     }
@@ -601,6 +675,12 @@ public class RunPane extends JPanePlugin {
             elapsedTimeTextField = new JTextField();
             elapsedTimeTextField.setBounds(new java.awt.Rectangle(224, 65, 65, 21));
             elapsedTimeTextField.setDocument(new IntegerDocument());
+
+            elapsedTimeTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyTyped(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
         }
         return elapsedTimeTextField;
     }

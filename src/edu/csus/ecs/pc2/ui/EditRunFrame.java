@@ -46,9 +46,15 @@ public class EditRunFrame extends JFrame implements UIPlugin {
      */
     private void initialize() {
         this.setSize(new java.awt.Dimension(549,329));
+        this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setContentPane(getRunPane());
         this.setTitle("New Run");
 
+        this.addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                getRunPane().handleCancelButton();
+            }
+        });
         FrameUtilities.centerFrame(this);
 
     }
