@@ -4,6 +4,7 @@
 package edu.csus.ecs.pc2.core.util;
 
 import java.io.File;
+import java.io.InputStream;
 
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
@@ -45,13 +46,40 @@ public class XSLTransformer {
      * @param xmlFile
      * @param outFile
      */
-    void transform(String xslFile, String xmlFile, File outFile) throws Exception {
+    public void transform(String xslFile, String xmlFile, File outFile) throws Exception {
+        // Set up input documents
+        Source inputXSL = new StreamSource(new File(xslFile));
+        Source inputXML = new StreamSource(new File(xmlFile));
+        
+        transform(inputXSL, inputXML, outFile);
+    }
+
+    /**
+     * @param xslFile
+     * @param xmlStream
+     * @param outFile
+     */
+    public void transform(String xslFile, InputStream xmlStream, String xmlFile, File outFile) throws Exception {
+        if (xmlStream == null) {
+            throw new IllegalArgumentException("transform() Invalid xmlStream, cannot be null");
+        }
+        
+        // Set up input documents
+        Source inputXSL = new StreamSource(new File(xslFile));
+        Source inputXML = new StreamSource(xmlStream);
+        
+        transform(inputXSL, inputXML, outFile);
+    }
+
+    /**
+     * @param inputXSL
+     * @param imputXML
+     * @param outFile
+     */
+    public void transform(Source inputXSL, Source inputXML, File outFile) throws Exception {
         if (outFile == null) {
             throw new IllegalArgumentException("transform() Invalid outFile, cannot be null");
         }
-        // Set up input documents
-        Source inputXML = new StreamSource(new File(xmlFile));
-        Source inputXSL = new StreamSource(new File(xslFile));
 
         // Set up output sink
         Result output = new StreamResult(outFile);
