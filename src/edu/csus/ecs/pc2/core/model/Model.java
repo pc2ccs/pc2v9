@@ -146,7 +146,25 @@ public class Model implements IModel {
             problem.setAnswerFileName(baseName+".ans");
             problem.setReadInputDataFromSTDIN(false);
             problem.setTimeOutInSeconds(180);
-            addProblem(problem);
+            if (baseName.equals("sumit")){
+                ProblemDataFiles problemDataFiles = new ProblemDataFiles(problem);
+
+                try {
+                    SerializedFile judgesDataFile = new SerializedFile("samps/sumit.dat");
+                    SerializedFile judgesAnswerFile = new SerializedFile("samps/sumit.ans");
+                    problemDataFiles.setJudgesDataFile(judgesDataFile);
+                    problemDataFiles.setJudgesAnswerFile(judgesAnswerFile);
+                } catch (Exception e) {
+                    System.err.println("Exception trying to add judge's data/ans file ");
+                    e.printStackTrace(System.err);
+                }
+                
+                addProblem(problem, problemDataFiles);
+                
+            } else {
+                addProblem(problem);
+                
+            }
             
             ClientId clientId = new ClientId(1, Type.ADMINISTRATOR, 1);
             String question = "Why is problem "+problemName+" so hard ?";
@@ -1026,8 +1044,11 @@ public class Model implements IModel {
     }
 
     public void addProblem(Problem problem, ProblemDataFiles problemDataFiles) {
+        problemDisplayList.add(problem);
         problemList.add(problem);
-        problemDataFilesList.add(problemDataFiles);
+        if (problemDataFiles != null){
+            problemDataFilesList.add(problemDataFiles);
+        }
         
         ProblemEvent problemEvent = new ProblemEvent(ProblemEvent.Action.ADDED,problem, problemDataFiles);
         fireProblemListener(problemEvent);
@@ -1040,7 +1061,12 @@ public class Model implements IModel {
         fireProblemListener(problemEvent);
     }
 
-    public ProblemDataFiles getProblemDataFiles(Problem problem) {
+    public ProblemDataFiles getProblemDataFile(Problem problem) {
         return (ProblemDataFiles) problemDataFilesList.get(problem);
     }
+
+    public ProblemDataFiles[] getProblemDataFiles() {
+        return problemDataFilesList.getList();
+    }
+    
 }

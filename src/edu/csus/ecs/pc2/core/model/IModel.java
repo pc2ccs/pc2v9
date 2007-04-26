@@ -53,7 +53,9 @@ public interface IModel {
     
     void updateProblem(Problem problem, ProblemDataFiles problemDataFiles);
     
-    ProblemDataFiles getProblemDataFiles (Problem problem);
+    ProblemDataFiles getProblemDataFile (Problem problem);
+    
+    ProblemDataFiles [] getProblemDataFiles();
 
     void updateContestTime(ContestTime contestTime, int inSiteNumber);
     

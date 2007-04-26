@@ -14,6 +14,8 @@ import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
+import edu.csus.ecs.pc2.core.model.ProblemDataFilesList;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
@@ -749,6 +751,10 @@ public class PacketHandler {
         }
 
     }
+    
+    private void addProblemDataFiles (Packet packet){
+        
+    }
 
     private boolean isThisSite(Account account) {
         return account.getSiteNumber() == model.getSiteNumber();
@@ -800,19 +806,10 @@ public class PacketHandler {
             // TODO: log handle exception
             controller.getLog().log(Log.WARNING,"Exception logged ", e);
         }
+        
+        addProblemsToModel(packet);
 
-        try {
-            Problem[] problems = (Problem[]) PacketFactory.getObjectValue(packet, PacketFactory.PROBLEM_LIST);
-            if (problems != null) {
-                for (Problem problem : problems) {
-                    model.addProblem(problem);
-                }
-            }
-        } catch (Exception e) {
-            // TODO: log handle exception
-            controller.getLog().log(Log.WARNING,"Exception logged ", e);
-        }
-
+        
         try {
             Judgement[] judgements = (Judgement[]) PacketFactory.getObjectValue(packet, PacketFactory.JUDGEMENT_LIST);
             if (judgements != null) {
@@ -858,6 +855,45 @@ public class PacketHandler {
         } else {
             String message = "Trouble logging in, check logs";
             model.loginDenied(packet.getDestinationId(), connectionHandlerID, message);
+        }
+    }
+
+    /**
+     * Add both problems and problem data files into model.
+     * 
+     * @param packet
+     */
+    private void addProblemsToModel(Packet packet) {
+
+        // First add all the problem data files to a list.
+        
+        ProblemDataFilesList problemDataFilesList = new ProblemDataFilesList();
+        
+        try {
+            ProblemDataFiles[] problemDataFiles = (ProblemDataFiles[]) PacketFactory.getObjectValue(packet, PacketFactory.PROBLEM_DATA_FILES);
+            if (problemDataFiles != null) {
+                for (ProblemDataFiles problemDataFile : problemDataFiles) {
+                    problemDataFilesList.add(problemDataFile);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            controller.getLog().log(Log.WARNING, "Exception logged ", e);
+        }
+        
+        try {
+            Problem[] problems = (Problem[]) PacketFactory.getObjectValue(packet, PacketFactory.PROBLEM_LIST);
+            if (problems != null) {
+                for (Problem problem : problems) {
+                    
+                    // Now add both problem and potentially problem data files into model.
+                    
+                    model.addProblem(problem, (ProblemDataFiles) problemDataFilesList.get(problem));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            controller.getLog().log(Log.WARNING,"Exception logged ", e);
         }
     }
 

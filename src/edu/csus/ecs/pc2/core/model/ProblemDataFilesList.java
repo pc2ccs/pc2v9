@@ -26,4 +26,9 @@ public class ProblemDataFilesList extends BaseElementList {
             return files.getProblemId().toString();
         }
     }
+
+    @SuppressWarnings("unchecked")
+    public ProblemDataFiles[] getList() {
+        return (ProblemDataFiles[]) values().toArray(new ProblemDataFiles[values().size()]);
+    }
 }

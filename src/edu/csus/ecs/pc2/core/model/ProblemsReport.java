@@ -31,17 +31,45 @@ public class ProblemsReport implements IReport {
         printWriter.println("       And  file  " + problem.getAnswerFileName() );
         printWriter.println("     Val cmd line " + problem.getValidatorCommandLine() );
         printWriter.println("     Val option   " + problem.getWhichPC2Validator() );
+        
+        writeProblemDataFiles (printWriter, problemDataFiles);
+    }
+    
+    private void writeProblemDataFiles(PrintWriter printWriter, ProblemDataFiles problemDataFiles) {
         if (problemDataFiles != null){
             SerializedFile [] judgesDataFiles = problemDataFiles.getJudgesDataFiles();
             SerializedFile [] judgesAnswerFiles = problemDataFiles.getJudgesAnswerFiles();
+
+            if (judgesDataFiles != null) {
+
+                printWriter.println("                  "+judgesDataFiles.length+" judge data files");
+                
+                if (judgesDataFiles.length > 0) {
+                    for (SerializedFile serializedFile : judgesDataFiles) {
+                        printWriter.println("                    judge data file '" + serializedFile.getName() + "' " + serializedFile.getBuffer().length + " bytes");
+                    }
+                }
+            } else {
+                printWriter.println("                  * No judge's data files *");
+            }
             
-            printWriter.println("                  "+judgesDataFiles.length+" judge data files");
-            printWriter.println("                  "+judgesAnswerFiles.length+" judge answer files");
-            
-        }else {
-            printWriter.println("                  * No data files *");
+            if (judgesAnswerFiles != null) {
+                
+                printWriter.println("                  "+judgesAnswerFiles.length+" judge answer files");
+                if (judgesAnswerFiles.length > 0) {
+                    for (SerializedFile serializedFile : judgesAnswerFiles) {
+                        printWriter.println("                    judge ans. file '" + serializedFile.getName() + "' " + serializedFile.getBuffer().length + " bytes");
+                    }
+                }
+            } else {
+                printWriter.println("                  * No judge's answer files *");
+            }
+        } else {
+            printWriter.println("                  * No judge's files *");
         }
+        
     }
+
 
     private void writeReport(PrintWriter printWriter) {
         
@@ -50,10 +78,23 @@ public class ProblemsReport implements IReport {
         printWriter.println();
         printWriter.println("-- " + model.getProblems().length + " problems --");
         for (Problem problem : model.getProblems()) {
-            ProblemDataFiles problemDataFiles = model.getProblemDataFiles(problem);
+            printWriter.println();
+            ProblemDataFiles problemDataFiles = model.getProblemDataFile(problem);
             writeRow(printWriter, problem, problemDataFiles);
         }
+        
+        // Problemdata files
+        
+        printWriter.println();
+        printWriter.println("-- " + model.getProblemDataFiles().length + " problem data file sets --");
+        for (ProblemDataFiles problemDataFile : model.getProblemDataFiles()){
+            printWriter.println();
+            Problem problem = model.getProblem(problemDataFile.getProblemId());
+            printWriter.println("  Problem Data File set for " + problem + " id=" + problemDataFile.getProblemId());
+            writeProblemDataFiles (printWriter, problemDataFile);
+        }
     }
+
 
     private void printHeader(PrintWriter printWriter) {
         printWriter.println(new VersionInfo().getSystemName());

@@ -822,20 +822,20 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
         Run[] runs = null;
         Clarification[] clarifications = null;
+        ProblemDataFiles [] problemDataFiles = new ProblemDataFiles[0];
 
         if (clientId.getClientType().equals(ClientType.Type.TEAM)) {
             runs = model.getRuns(clientId);
             clarifications = model.getClarifications(clientId);
-
         } else {
             runs = model.getRuns();
             clarifications = model.getClarifications();
-
+            problemDataFiles = model.getProblemDataFiles();
         }
 
         Packet packetToSend = PacketFactory.createLoginSuccess(model.getClientId(), clientId, model.getContestTime(), model.getContestTimes(), model.getSiteNumber(), 
                 model.getLanguages(), model.getProblems(), model.getJudgements(), model.getSites(), runs, clarifications, 
-                allLoggedInUsers(), model.getConnectionHandleIDs(), getAllAccounts());
+                allLoggedInUsers(), model.getConnectionHandleIDs(), getAllAccounts(), problemDataFiles);
         
         sendToClient(packetToSend);
     }
@@ -1483,7 +1483,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
 
     public ProblemDataFiles getProblemDataFiles(Problem problem) {
-        return model.getProblemDataFiles(problem);
+        return model.getProblemDataFile(problem);
     }
 
     public void shutdownTransport() {
