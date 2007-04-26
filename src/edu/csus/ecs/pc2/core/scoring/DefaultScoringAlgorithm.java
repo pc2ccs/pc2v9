@@ -208,9 +208,10 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         Problem[] problems = theContest.getProblems();
         Hashtable <ElementId, Integer> problemsIndexHash = new Hashtable<ElementId, Integer>();
         for (int i = 0; i < problems.length; i++) {
-            problemsIndexHash.put(problems[i].getElementId(), new Integer(i + 1));
+            int id = i + 1;
+            problemsIndexHash.put(problems[i].getElementId(), new Integer(id));
             IMemento problemMemento = summaryMememento.createChild("problem");
-            problemMemento.putInteger("id", i + 1);
+            problemMemento.putInteger("id", id);
             problemMemento.putString("title", problems[i].getDisplayName());
             // problemMemento.putString("color", problems[i].get);
         }
@@ -238,8 +239,8 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                     for (int j = 0; j < problems.length; j++) {
                         ProblemSummaryInfo psi = new ProblemSummaryInfo();
                         psi.setProblemId(problems[j].getElementId());
-                        psi.setPenaltyPoints(1000);
-                        sumRow.put(j, psi);
+                        psi.setPenaltyPoints(0);
+                        sumRow.put(j + 1, psi);
                     }
                     sr.setSummaryRow(sumRow);
                     sr.setClientId(account.getClientId());
@@ -252,7 +253,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 // skip runs whose problem are no longer active
                 Account account = accountList.getAccount(runs[i].getSubmitter());
                 if (account == null) {
-                    // TODO change to LOg
+                    // TODO change to Log
                     System.out.println("account could not be located for " + runs[i].getSubmitter());
                     continue;
                 }
@@ -369,12 +370,15 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 standingsRecordMemento.putString("teamkey", account.getClientId().getTripletKey());
                 SummaryRow summaryRow = sr.getSummaryRow();
                 for (int i = 0; i < problems.length; i++) {
-                    ProblemSummaryInfo psi = summaryRow.get(i + 1);
+                    int id = i + 1;
+                    ProblemSummaryInfo psi = summaryRow.get(id);
                     if (psi == null) {
-                        System.out.println("error or normal? ProblemSummaryInfo not found for problem "+ i + 1);
+                        // TODO change to Log, cleanup message (leaning towards error)
+                        System.out.println("error or normal? ProblemSummaryInfo not found for problem "+ id);
                     } else {
                         IMemento psiMemento = standingsRecordMemento.createChild("problemSummaryInfo");
-                        psiMemento.putInteger("problemId", problemsIndexHash.get(psi.getProblemId()));
+                        psiMemento.putInteger("index", problemsIndexHash.get(psi.getProblemId()));
+                        psiMemento.putString("problemId", psi.getProblemId().toString());
                         psiMemento.putInteger("numberSubmitted", psi.getNumberSubmitted());
                         psiMemento.putInteger("points", psi.getPenaltyPoints());
                         psiMemento.putLong("solutionTime", psi.getSolutionTime());
@@ -398,7 +402,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         try {
             xmlString = mementoRoot.saveToString();
         } catch (IOException e) {
-            // XXX we need the controller so we can get log
+            // TODO Change to Log
             e.printStackTrace();
             xmlString = "";
         }
