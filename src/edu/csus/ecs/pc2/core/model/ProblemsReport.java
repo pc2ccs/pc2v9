@@ -25,40 +25,48 @@ public class ProblemsReport implements IReport {
 
     private Log log;
 
-    private void writeRow(PrintWriter printWriter, Problem problem, ProblemDataFiles problemDataFiles){
+    private void writeRow(PrintWriter printWriter, Problem problem, ProblemDataFiles problemDataFiles) {
         printWriter.println("  Problem   " + problem + " id=" + problem.getElementId());
-        printWriter.println("       Data file  " + problem.getDataFileName() );
-        printWriter.println("       And  file  " + problem.getAnswerFileName() );
-        printWriter.println("     Val cmd line " + problem.getValidatorCommandLine() );
-        printWriter.println("     Val option   " + problem.getWhichPC2Validator() );
-        
-        writeProblemDataFiles (printWriter, problemDataFiles);
+        printWriter.println("       Data file  " + problem.getDataFileName());
+        printWriter.println("       Ans. file  " + problem.getAnswerFileName());
+        printWriter.println("     Val cmd line " + problem.getValidatorCommandLine());
+        printWriter.println("     Val option   " + problem.getWhichPC2Validator());
+
+        writeProblemDataFiles(printWriter, problemDataFiles);
     }
-    
+
     private void writeProblemDataFiles(PrintWriter printWriter, ProblemDataFiles problemDataFiles) {
-        if (problemDataFiles != null){
-            SerializedFile [] judgesDataFiles = problemDataFiles.getJudgesDataFiles();
-            SerializedFile [] judgesAnswerFiles = problemDataFiles.getJudgesAnswerFiles();
+        if (problemDataFiles != null) {
+            SerializedFile[] judgesDataFiles = problemDataFiles.getJudgesDataFiles();
+            SerializedFile[] judgesAnswerFiles = problemDataFiles.getJudgesAnswerFiles();
 
             if (judgesDataFiles != null) {
 
-                printWriter.println("                  "+judgesDataFiles.length+" judge data files");
-                
+                printWriter.println("                  " + judgesDataFiles.length + " judge data files");
+
                 if (judgesDataFiles.length > 0) {
                     for (SerializedFile serializedFile : judgesDataFiles) {
-                        printWriter.println("                    judge data file '" + serializedFile.getName() + "' " + serializedFile.getBuffer().length + " bytes");
+                        int bytes = 0;
+                        if (serializedFile.getBuffer() != null) {
+                            bytes = serializedFile.getBuffer().length;
+                        }
+                        printWriter.println("                    judge data file '" + serializedFile.getName() + "' " + bytes + " bytes");
                     }
                 }
             } else {
                 printWriter.println("                  * No judge's data files *");
             }
-            
+
             if (judgesAnswerFiles != null) {
-                
-                printWriter.println("                  "+judgesAnswerFiles.length+" judge answer files");
+
+                printWriter.println("                  " + judgesAnswerFiles.length + " judge answer files");
                 if (judgesAnswerFiles.length > 0) {
                     for (SerializedFile serializedFile : judgesAnswerFiles) {
-                        printWriter.println("                    judge ans. file '" + serializedFile.getName() + "' " + serializedFile.getBuffer().length + " bytes");
+                        int bytes = 0;
+                        if (serializedFile.getBuffer() != null) {
+                            bytes = serializedFile.getBuffer().length;
+                        }
+                        printWriter.println("                    judge ans. file '" + serializedFile.getName() + "' " + bytes + " bytes");
                     }
                 }
             } else {
@@ -67,12 +75,10 @@ public class ProblemsReport implements IReport {
         } else {
             printWriter.println("                  * No judge's files *");
         }
-        
+
     }
 
-
     private void writeReport(PrintWriter printWriter) {
-        
 
         // Problem
         printWriter.println();
@@ -82,19 +88,17 @@ public class ProblemsReport implements IReport {
             ProblemDataFiles problemDataFiles = model.getProblemDataFile(problem);
             writeRow(printWriter, problem, problemDataFiles);
         }
-        
-        // Problemdata files
-        
+
+        // ProblemDataFiles
         printWriter.println();
         printWriter.println("-- " + model.getProblemDataFiles().length + " problem data file sets --");
-        for (ProblemDataFiles problemDataFile : model.getProblemDataFiles()){
+        for (ProblemDataFiles problemDataFile : model.getProblemDataFiles()) {
             printWriter.println();
             Problem problem = model.getProblem(problemDataFile.getProblemId());
             printWriter.println("  Problem Data File set for " + problem + " id=" + problemDataFile.getProblemId());
-            writeProblemDataFiles (printWriter, problemDataFile);
+            writeProblemDataFiles(printWriter, problemDataFile);
         }
     }
-
 
     private void printHeader(PrintWriter printWriter) {
         printWriter.println(new VersionInfo().getSystemName());
