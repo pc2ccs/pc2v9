@@ -59,7 +59,7 @@ public class XSLTransformer {
      * @param xmlStream
      * @param outFile
      */
-    public void transform(String xslFile, InputStream xmlStream, String xmlFile, File outFile) throws Exception {
+    public void transform(String xslFile, InputStream xmlStream, File outFile) throws Exception {
         if (xmlStream == null) {
             throw new IllegalArgumentException("transform() Invalid xmlStream, cannot be null");
         }
