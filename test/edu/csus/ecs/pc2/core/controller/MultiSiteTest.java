@@ -232,9 +232,11 @@ public class MultiSiteTest extends TestCase {
     protected void tearDown() throws Exception {
         
         super.tearDown();
+        /* not needed, should be using unique ports
         controllerThree.shutdownTransport();
         controllerTwo.shutdownTransport();
         controllerOne.shutdownTransport();
+        */
     }
 
 }
