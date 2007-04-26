@@ -27,7 +27,7 @@ public interface IFileViewer extends UIPlugin {
      * @param title title of frame
      * @param inMessage text message
      */
-    public boolean addTextPane(String title, String inMessage);
+    boolean addTextPane(String title, String inMessage);
 
     /**
      * Show information.
