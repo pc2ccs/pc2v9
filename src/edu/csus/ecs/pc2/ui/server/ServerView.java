@@ -6,7 +6,9 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.SwingUtilities;
 
+import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -234,13 +236,27 @@ public class ServerView extends JFrame implements UIPlugin {
         }
         return mainTabbedPane;
     }
+    
+    private void updateFrameTitle(final boolean turnButtonsOn) {
+
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                if (turnButtonsOn) {
+                    setTitle("PC^2 Site " + model.getSiteNumber() + " [STARTED] Build " + new VersionInfo().getBuildNumber());
+                } else {
+                    setTitle("PC^2 Site " + model.getSiteNumber() + " [STOPPED] Build " + new VersionInfo().getBuildNumber());
+                }
+            }
+        });
+    }
+
 
     public void setModelAndController(IModel inModel, IController inController) {
         this.model = inModel;
         this.controller = inController;
         this.log = controller.getLog();
         
-        setTitle("PC^2 Server (Site " + model.getSiteNumber() + ")");
+        updateFrameTitle (model.getContestTime().isContestRunning());
         
         if (logWindow == null) {
             logWindow = new LogWindow();
