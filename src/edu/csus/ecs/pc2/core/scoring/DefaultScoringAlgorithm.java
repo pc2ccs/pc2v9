@@ -207,11 +207,14 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
 //        summaryMememento.putString("title", theContest.getTitle());
 //        summaryMememento.putString("version", );
         VersionInfo versionInfo = new VersionInfo();
-        summaryMememento.putString("pc2version", versionInfo.getVersionNumber() + " " + versionInfo.getBuildNumber());
-        summaryMememento.putString("currentdate", new Date().toString());
+        summaryMememento.putString("systemName", versionInfo.getSystemName());
+        summaryMememento.putString("systemVersion", versionInfo.getVersionNumber() + " build " + versionInfo.getBuildNumber());
+        summaryMememento.putString("systemURL", versionInfo.getSystemURL());
+        summaryMememento.putString("currentDate", new Date().toString());
+        summaryMememento.putString("generatorId", "$Id$");
         AccountList accountList = getAccountList(theContest);
         Problem[] problems = theContest.getProblems();
-        summaryMememento.putLong("problemcount", problems.length);
+        summaryMememento.putLong("problemCount", problems.length);
         int[] problemAttempts=new int[problems.length + 1];
         int[] problemBestTime=new int[problems.length + 1];
         int[] problemLastTime=new int[problems.length + 1];
