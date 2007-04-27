@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.core.scoring;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -10,6 +11,7 @@ import java.util.Properties;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.list.AccountList;
 import edu.csus.ecs.pc2.core.list.RunComparatorByTeam;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -204,16 +206,20 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         summaryMememento.putString("title", "this is not in the model");
 //        summaryMememento.putString("title", theContest.getTitle());
 //        summaryMememento.putString("version", );
+        VersionInfo versionInfo = new VersionInfo();
+        summaryMememento.putString("pc2version", versionInfo.getVersionNumber() + " " + versionInfo.getBuildNumber());
+        summaryMememento.putString("currentdate", new Date().toString());
         AccountList accountList = getAccountList(theContest);
         Problem[] problems = theContest.getProblems();
+        summaryMememento.putLong("problemcount", problems.length);
+        int[] problemAttempts=new int[problems.length + 1];
+        int[] problemBestTime=new int[problems.length + 1];
+        int[] problemLastTime=new int[problems.length + 1];
+        int[] problemSolutions=new int[problems.length + 1];
         Hashtable <ElementId, Integer> problemsIndexHash = new Hashtable<ElementId, Integer>();
-        for (int i = 0; i < problems.length; i++) {
-            int id = i + 1;
-            problemsIndexHash.put(problems[i].getElementId(), new Integer(id));
-            IMemento problemMemento = summaryMememento.createChild("problem");
-            problemMemento.putInteger("id", id);
-            problemMemento.putString("title", problems[i].getDisplayName());
-            // problemMemento.putString("color", problems[i].get);
+        for (int p=1; p <= problems.length ; p++) {
+            problemBestTime[p]=-1;
+            problemsIndexHash.put(problems[p-1].getElementId(), new Integer(p));
         }
         Run[] runs = theContest.getRuns();
         synchronized (mutex) {
@@ -358,6 +364,10 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                     sr.setRankNumber(rank);
                 }
 //                mementoRoot.putMemento(sr.toMemento());
+                long timeOfFirstSolvedProblem = -1;
+                long timeOfLastSolvedProblem = -1;
+                long totalAttempts = 0;
+                long problemsAttempted = 0;
                 IMemento standingsRecordMemento = mementoRoot.createChild("teamStanding");
                 standingsRecordMemento.putLong("firstSolved", sr.getFirstSolved());
                 standingsRecordMemento.putLong("lasstSolved", sr.getLastSolved());
@@ -383,21 +393,43 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                         psiMemento.putInteger("points", psi.getPenaltyPoints());
                         psiMemento.putLong("solutionTime", psi.getSolutionTime());
                         psiMemento.putBoolean("isSolved", psi.isSolved());
+                        problemAttempts[id] += psi.getNumberSubmitted();
+                        totalAttempts += psi.getNumberSubmitted();
+                        if (psi.getNumberSubmitted() > 0) {
+                            problemsAttempted++;
+                        }
+                        if (psi.isSolved()) {
+                            problemSolutions[id]++;
+                            if (psi.getSolutionTime() > problemLastTime[id]) {
+                                problemLastTime[id] = new Long(psi.getSolutionTime()).intValue();
+                            }
+                            if (problemBestTime[id] < 0 || psi.getSolutionTime() < problemBestTime[id]) {
+                                problemBestTime[id] = new Long(psi.getSolutionTime()).intValue();                       
+                            }
+                        }
                     }
                 }
+                standingsRecordMemento.putLong("totalattempts",totalAttempts);
+                standingsRecordMemento.putLong("problemsattempted",problemsAttempted);
+
                 srArray[index++] = sr;
             }
         } // mutex
-        /* XXX comment out now that we have JUnit tests
-        IMemento child = mementoRoot.createChild("teamStanding");
-        child.putLong("firstSolved", 13);
-        child.putLong("lasstSolved", 272);
-        child.putLong("points", 1405);
-        child.putInteger("solved", 8);
-        child.putInteger("rank", 1);
-        child.putInteger("index", 1);
-        child.putString("teamName", "Warsaw University");
-        */ 
+        for (int i = 0; i < problems.length; i++) {
+            int id = i + 1;
+            problemsIndexHash.put(problems[i].getElementId(), new Integer(id));
+            IMemento problemMemento = summaryMememento.createChild("problem");
+            problemMemento.putInteger("id", id);
+            problemMemento.putString("title", problems[i].getDisplayName());
+            // problemMemento.putString("color", problems[i].get);
+            problemMemento.putLong("attempts", problemAttempts[id]);
+            problemMemento.putLong("numbersolved", problemSolutions[id]);
+            if (problemSolutions[id] > 0) {
+                problemMemento.putLong("bestsolutiontime",problemBestTime[id]);
+                problemMemento.putLong("lastsolutiontime",problemLastTime[id]);
+            }
+        }
+ 
         String xmlString;
         try {
             xmlString = mementoRoot.saveToString();
