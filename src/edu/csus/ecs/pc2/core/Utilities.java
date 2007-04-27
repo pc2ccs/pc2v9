@@ -12,7 +12,7 @@ import java.io.Serializable;
 import java.util.Vector;
 
 /**
- * Various common routines
+ * Various common routines.
  *
  * @author pc2@ecs.csus.edu
  */
@@ -150,4 +150,18 @@ public final class Utilities {
 
     }
 
+    /**
+     * Get Current Working Directory.
+     * @return current working directory.
+     */
+    public static String getCurrentDirectory() {
+        File curdir = new File(".");
+
+        try {
+            return curdir.getCanonicalPath();
+        } catch (Exception e) {
+            // ignore exception
+            return ".";
+        }
+    }
 }
