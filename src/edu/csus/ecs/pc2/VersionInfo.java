@@ -330,4 +330,8 @@ public class VersionInfo {
     public void setVersionNumber(String versionNumber) {
         this.versionNumber = versionNumber;
     }
+
+    public String getSystemURL() {
+        return "http://pc2.ecs.csus.edu/";
+    }
 }
