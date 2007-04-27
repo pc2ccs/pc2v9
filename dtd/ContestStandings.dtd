@@ -1,0 +1,54 @@
+<?xml version='1.0' encoding='utf-8'?>
+
+<!-- DTD for a simple "Contest Standings" document -->
+<!-- Every implementation of IScoringAlgorithm is responsible for
+	generating a "ContestStandings" XML document conforming to this DTD -->
+	
+<!-- $Id$ -->
+
+<!-- A "ContestStandings" consists of a header followed by one or more team standings -->
+<!ELEMENT contestStandings (standingsHeader, teamStanding+)>
+
+<!-- A "StandingsHeader" consists of a contest title followed by zero or more header items -->
+<!ELEMENT standingsHeader (contestTitle, standingsHeaderItem*)>
+
+	<!-- A "ContestTitle" consists of text ("Character Data") -->
+	<!ELEMENT contestTitle (#PCDATA)>
+	
+	<!-- A "StandingsHeaderItem" consists of any of the following, all text -->
+	<!ELEMENT standingsHeaderItem (contestDate | contestElapsedMinutes | contestRemainingMinutes 
+					| contestScoreboardUpdateState	| problemList )>
+	
+		<!ELEMENT contestDate (#PCDATA)>
+		<!ELEMENT contestElapsedMinutes (#PCDATA)>
+		<!ELEMENT contestRemainingMinutes (#PCDATA)>
+		<!ELEMENT contestScoreboardUpdateState (#PCDATA)>
+		<!ELEMENT problemList (problem+)>
+
+			<!-- A "problem" consists of a title and an optional balloon color, both text -->
+			<!ELEMENT problem (problemTitle, balloonColor?)>
+				<!ELEMENT problemTitle (#PCDATA)>
+				<!ELEMENT balloonColor (#PCDATA)>
+
+	
+
+<!-- A "teamStanding" consists of a team name, a rank, and zero or more additional text properties -->
+<!ELEMENT teamStanding (teamName, teamRank, teamNumber?, teamPoints?, teamGroup?, runList?)>
+
+	<!ELEMENT teamName (#PCDATA)>
+	<!ELEMENT teamRank (#PCDATA)>
+	<!ELEMENT teamNumber (#PCDATA)>
+	<!ELEMENT teamPoints (#PCDATA)>
+	<!ELEMENT teamGroup (#PCDATA)>
+
+	<!-- A "runList" consists of one or more runs  -->
+	<!ELEMENT runList (run+)>
+
+		<!-- A "run" consists of a submission time, language, problemID, and judgement status text  -->
+		<!ELEMENT run (submitTime, language, problemID, judgementStatus)>
+
+			<!ELEMENT submitTime (#PCDATA)>
+			<!ELEMENT language (#PCDATA)>
+			<!ELEMENT problemID (#PCDATA)>
+			<!ELEMENT judgementStatus (#PCDATA)>
+
