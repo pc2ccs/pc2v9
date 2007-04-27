@@ -364,20 +364,18 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                     sr.setRankNumber(rank);
                 }
 //                mementoRoot.putMemento(sr.toMemento());
-                long timeOfFirstSolvedProblem = -1;
-                long timeOfLastSolvedProblem = -1;
                 long totalAttempts = 0;
                 long problemsAttempted = 0;
                 IMemento standingsRecordMemento = mementoRoot.createChild("teamStanding");
                 standingsRecordMemento.putLong("firstSolved", sr.getFirstSolved());
-                standingsRecordMemento.putLong("lasstSolved", sr.getLastSolved());
+                standingsRecordMemento.putLong("lastSolved", sr.getLastSolved());
                 standingsRecordMemento.putLong("points", sr.getPenaltyPoints());
                 standingsRecordMemento.putInteger("solved", sr.getNumberSolved());
                 standingsRecordMemento.putInteger("rank", sr.getRankNumber());
                 standingsRecordMemento.putInteger("index", index);
                 Account account = accountList.getAccount(sr.getClientId());
                 standingsRecordMemento.putString("teamName", account.getDisplayName()); 
-                standingsRecordMemento.putString("teamkey", account.getClientId().getTripletKey());
+                standingsRecordMemento.putString("teamKey", account.getClientId().getTripletKey());
                 SummaryRow summaryRow = sr.getSummaryRow();
                 for (int i = 0; i < problems.length; i++) {
                     int id = i + 1;
@@ -409,8 +407,8 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                         }
                     }
                 }
-                standingsRecordMemento.putLong("totalattempts",totalAttempts);
-                standingsRecordMemento.putLong("problemsattempted",problemsAttempted);
+                standingsRecordMemento.putLong("totalAttempts",totalAttempts);
+                standingsRecordMemento.putLong("problemsAttempted",problemsAttempted);
 
                 srArray[index++] = sr;
             }
@@ -423,10 +421,10 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             problemMemento.putString("title", problems[i].getDisplayName());
             // problemMemento.putString("color", problems[i].get);
             problemMemento.putLong("attempts", problemAttempts[id]);
-            problemMemento.putLong("numbersolved", problemSolutions[id]);
+            problemMemento.putLong("numberSolved", problemSolutions[id]);
             if (problemSolutions[id] > 0) {
-                problemMemento.putLong("bestsolutiontime",problemBestTime[id]);
-                problemMemento.putLong("lastsolutiontime",problemLastTime[id]);
+                problemMemento.putLong("bestSolutionTime",problemBestTime[id]);
+                problemMemento.putLong("lastSolutionTime",problemLastTime[id]);
             }
         }
  
