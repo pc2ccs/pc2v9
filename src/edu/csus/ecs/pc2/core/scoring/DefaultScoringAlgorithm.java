@@ -390,7 +390,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                         IMemento psiMemento = standingsRecordMemento.createChild("problemSummaryInfo");
                         psiMemento.putInteger("index", problemsIndexHash.get(psi.getProblemId()));
                         psiMemento.putString("problemId", psi.getProblemId().toString());
-                        psiMemento.putInteger("numberSubmitted", psi.getNumberSubmitted());
+                        psiMemento.putInteger("attempts", psi.getNumberSubmitted());
                         psiMemento.putInteger("points", psi.getPenaltyPoints());
                         psiMemento.putLong("solutionTime", psi.getSolutionTime());
                         psiMemento.putBoolean("isSolved", psi.isSolved());
