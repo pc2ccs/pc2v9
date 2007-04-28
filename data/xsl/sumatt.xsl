@@ -36,6 +36,7 @@ Last updated
                 <tr>
 <td>Submitted/1st Yes/Total Yes</td>
                 <xsl:call-template name="problemsummary"/>
+<td><xsl:value-of select="@totalAttempts"/>/<xsl:value-of select="@totalSolved"/></td>
                 </tr>
             </xsl:for-each>
         </xsl:template>
