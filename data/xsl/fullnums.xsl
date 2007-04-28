@@ -27,7 +27,7 @@ Last updated
             <xsl:for-each select="teamStanding">
                 <tr>
 <td><xsl:value-of select="@rank"/></td>
-<td><xsl:value-of select="@userid"/> - <xsl:value-of select="@teamName"/></td>
+<td><xsl:value-of select="@teamId"/> - <xsl:value-of select="@teamName"/></td>
 <td align="center"><xsl:value-of select="@solved"/></td>
 <td align="right"><xsl:value-of select="@points"/></td>
                 </tr>
