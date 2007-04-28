@@ -40,7 +40,7 @@ public class PacketHandler {
     private IModel model;
 
     private IController controller;
-
+    
     public PacketHandler(IController controller, IModel model) {
         this.controller = controller;
         this.model = model;
@@ -111,25 +111,6 @@ public class PacketHandler {
             model.addClarification(clarification);
             sendToJudgesAndOthers( packet, isThisSite(clarification));
             
-        } else if (packetType.equals(Type.RUN_UPDATE)) {
-            // Update from admin to server, and server to clients
-            Run updateRun = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
-            
-            if (isThisSite(updateRun) && (! isServer(packet.getSourceId()))){
-                /**
-                 * If it is this site, and not a server (aka Admin) update it and send to all 
-                 */
-                model.updateRun(updateRun);
-                Run theRun = model.getRun(updateRun.getElementId());
-                Packet updatePacket = PacketFactory.createRunUpdated(model.getClientId(), PacketFactory.ALL_SERVERS, theRun);
-                sendToJudgesAndOthers(updatePacket, true);
-            } else {
-                model.updateRun(updateRun);
-                if (isServer()){
-                    sendToJudgesAndOthers(packet, false);
-                }
-            }
-            
         } else if (packetType.equals(Type.LOGIN_FAILED)) {
             String message = PacketFactory.getStringValue(packet, PacketFactory.MESSAGE_STRING);
             model.loginDenied(packet.getDestinationId(), connectionHandlerID, message);
@@ -164,6 +145,12 @@ public class PacketHandler {
 
         } else if (packetType.equals(Type.RUN_JUDGEMENT_UPDATE)) {
             sendJudgementUpdate(packet);
+            
+        } else if (packetType.equals(Type.RUN_UPDATE)) {
+            updateRun (packet);
+
+        } else if (packetType.equals(Type.RUN_UPDATE_NOTIFICATION)) {
+            sendRunUpdateNotification(packet);
             
         } else if (packetType.equals(Type.RUN_UNCHECKOUT)) {
             // Cancel run from requestor to server
@@ -247,6 +234,52 @@ public class PacketHandler {
 
     }
 
+    private void updateRun(Packet packet){
+        
+        Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
+        JudgementRecord judgementRecord = (JudgementRecord) PacketFactory.getObjectValue(packet, PacketFactory.JUDGEMENT_RECORD);
+        RunResultFiles runResultFiles = (RunResultFiles) PacketFactory.getObjectValue(packet, PacketFactory.RUN_RESULTS_FILE);
+        ClientId whoChangedRun = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+        
+        if (isServer()) {
+            if (isThisSite(run)) {
+
+                // TODO security check
+                // check permission, check user type
+                
+//                Account account = model.getAccount(packet.getSourceId());
+//                if (account.isAllowed(Permission.Type.EDIT_RUN)){
+//                    // ok to update run
+//                }
+                
+                if (isSuperUser(packet.getSourceId())) {
+                    info("updateRun by " + packet.getSourceId() + " " + run);
+                    if (judgementRecord != null) {
+                        model.addRunJudgement(run, judgementRecord, runResultFiles, whoChangedRun);
+                        model.updateRun(run, run.getStatus(), whoChangedRun);
+                    } else {
+                        model.updateRun(run, run.getStatus(), whoChangedRun);
+                    }
+                } else {
+                    throw new SecurityException("Non-admin user "+packet.getSourceId()+" attemped to update run "+run);
+                }
+                
+                Run theRun = model.getRun(run.getElementId());
+                Packet runUpdatedPacket = PacketFactory.createRunUpdateNotification(model.getClientId(), PacketFactory.ALL_SERVERS, theRun, whoChangedRun);
+                sendToJudgesAndOthers(runUpdatedPacket, true);
+                
+            } else {
+                controller.sendToRemoteServer(run.getSiteNumber(), packet);
+            }
+
+        } else {
+            if (model.isLoggedIn(run.getSubmitter())) {
+                controller.sendToClient(packet);
+            }
+            sendToJudgesAndOthers(packet, false);
+        }
+    }
+    
     private void loginClient(Packet packet) {
         
         if ( model.isLoggedIn() ){
@@ -283,14 +316,27 @@ public class PacketHandler {
     private void sendJudgementUpdate(Packet packet) {
         
         Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
+        ClientId whoModifiedRun = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
 
         if (isServer()){
-            model.updateRun(run);
+            model.updateRun(run, run.getStatus(), whoModifiedRun);
             sendToJudgesAndOthers(packet, false);
         } else {
-            model.updateRun(run);
+            model.updateRun(run, run.getStatus(), whoModifiedRun);
         }
+    }
+    
+    private void sendRunUpdateNotification (Packet packet){
         
+        Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
+        ClientId whoModifiedRun = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+
+        if (isServer()){
+            model.updateRun(run, run.getStatus(), whoModifiedRun);
+            sendToJudgesAndOthers(packet, false);
+        } else {
+            model.updateRun(run, run.getStatus(), whoModifiedRun);
+        }
     }
 
     private void generateAccounts(Packet packet) {
@@ -752,9 +798,6 @@ public class PacketHandler {
 
     }
     
-    private void addProblemDataFiles (Packet packet){
-        
-    }
 
     private boolean isThisSite(Account account) {
         return account.getSiteNumber() == model.getSiteNumber();

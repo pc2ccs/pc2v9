@@ -469,6 +469,14 @@ public final class PacketType implements Serializable {
          * beyond a rejudgement (like delete, change submission time, etc). It may also include a run re-judgement.
          */
         RUN_UPDATE,
+        
+        /**
+         * Run has been updated.
+         * 
+         * From server to server<br>
+         * From server to clients<br>
+         */
+        RUN_UPDATE_NOTIFICATION,
 
         /**
          * An update of a clarification from Admin.

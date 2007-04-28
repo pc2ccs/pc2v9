@@ -337,13 +337,32 @@ public final class PacketFactory {
      * @param source
      * @param destination
      * @param run
+     * @param judgementRecord optional
+     * @param runResultFiles optional
+     * @param whoModifiedRun
      */
-    public static Packet createRunUpdated(ClientId source, ClientId destination, Run run) {
+    public static Packet createRunUpdated(ClientId source, ClientId destination, Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles, ClientId whoModifiedRun) {
         Properties prop = new Properties();
+        prop.put(CLIENT_ID, whoModifiedRun);
         prop.put(RUN, run);
+        if (judgementRecord != null) {
+            prop.put(JUDGEMENT_RECORD, judgementRecord);
+        }
+        if (runResultFiles != null) {
+            prop.put(RUN_RESULTS_FILE, runResultFiles);
+        }
         Packet packet = new Packet(Type.RUN_UPDATE, source, destination, prop);
         return packet;
     }
+    
+    public static Packet createRunUpdateNotification(ClientId source, ClientId destination, Run run, ClientId whoModifiedRun) {
+        Properties prop = new Properties();
+        prop.put(CLIENT_ID, whoModifiedRun);
+        prop.put(RUN, run);
+        Packet packet = new Packet(Type.RUN_UPDATE_NOTIFICATION, source, destination, prop);
+        return packet;
+    }
+
 
     /**
      * Send checked out packet to judges.

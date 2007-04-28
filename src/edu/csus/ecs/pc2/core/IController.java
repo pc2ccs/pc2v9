@@ -149,6 +149,8 @@ public interface IController {
     void addNewProblem(Problem problem, ProblemDataFiles problemDataFiles);
 
     void addProblem(Problem problem);
+    
+    void updateRun(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles);
 
     void sendServerLoginRequest(int siteNumber);
 

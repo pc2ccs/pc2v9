@@ -827,11 +827,15 @@ public class Model implements IModel {
 
         } else if ( ! whoChangedItId.equals(whoCheckedOut))  {
             // The judge who submitted this judgement is different than who actually judged it ?
-
-            Exception ex = new Exception ("addRunJudgement - who checked out and who it is differ ");
-            StaticLog.log("debug ", ex);
-            info("Exception in log"+ex.getMessage());
-
+            
+            if (whoChangedItId.getClientType().equals(Type.ADMINISTRATOR)){
+                info("Admin updating run "+run);
+                
+            } else {
+                Exception ex = new Exception ("addRunJudgement - who checked out and who it is differ ");
+                StaticLog.log("debug ", ex);
+                info("Exception in log"+ex.getMessage());
+            }
             
         } else {
             // Judge is ok.

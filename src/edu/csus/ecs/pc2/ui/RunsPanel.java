@@ -115,7 +115,11 @@ public class RunsPanel extends JPanePlugin {
             s[3] = new Long(run.getElapsedMins()).toString();
             s[4] = run.getStatus().toString();
             if (judgeId != null) {
-                s[5] = judgeId.getName();
+                if (judgeId.equals(getModel().getClientId())){
+                    s[5] = "Me";
+                } else {
+                    s[5] = judgeId.getName();
+                }
             } else {
                 s[5] = "";
             }
@@ -242,7 +246,16 @@ public class RunsPanel extends JPanePlugin {
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                Object[] objects = buildRunRow(run, whoModifiedId);
+                
+                ClientId whoJudgedId = whoModifiedId;
+                if (run.isJudged() && whoJudgedId == null) {
+                    JudgementRecord judgementRecord = run.getJudgementRecord();
+                    if (judgementRecord != null) {
+                        whoJudgedId = judgementRecord.getJudgerClientId();
+                    }
+                }
+                
+                Object[] objects = buildRunRow(run, whoJudgedId);
                 int rowNumber = runListBox.getIndexByKey(run.getElementId());
                 if (rowNumber == -1) {
                     runListBox.addRow(objects, run.getElementId());

@@ -111,13 +111,14 @@ public class EditRunFrame extends JFrame implements UIPlugin {
         }
 
         public void runChanged(RunEvent event) {
-            // 
-            if (event.getRun().getElementId().equals(run.getElementId())){
-                
-                if (event.getAction().equals (Action.RUN_NOT_AVIALABLE)) {
-                    getRunPane().showMessage("Run "+run.getNumber()+" not available ");
-                }else {
-                    getRunPane().setRunAndFiles(event.getRun(), event.getRunFiles());
+            if (run != null) {
+                if (event.getRun().getElementId().equals(run.getElementId())) {
+
+                    if (event.getAction().equals(Action.RUN_NOT_AVIALABLE)) {
+                        getRunPane().showMessage("Run " + run.getNumber() + " not available ");
+                    } else {
+                        getRunPane().setRunAndFiles(event.getRun(), event.getRunFiles());
+                    }
                 }
             }
         }

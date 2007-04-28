@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.event.KeyAdapter;
 import java.io.File;
 
 import javax.swing.JButton;
@@ -18,17 +19,19 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.Executable;
-import edu.csus.ecs.pc2.core.execute.ExecuteTimer;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IModel;
 import edu.csus.ecs.pc2.core.model.Judgement;
+import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
+import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
+import edu.csus.ecs.pc2.core.model.Run.RunStates;
 
 /**
  * Add/Edit Run Pane
@@ -90,8 +93,12 @@ public class RunPane extends JPanePlugin {
     private JLabel jLabel = null;
 
     private JTextField elapsedTimeTextField = null;
-    
+
     private IFileViewer sourceViewer;
+
+    private JCheckBox notifyTeamCheckBox = null;
+
+    private boolean populatingGUI = true;
 
     /**
      * This method initializes
@@ -163,21 +170,6 @@ public class RunPane extends JPanePlugin {
         return buttonPane;
     }
 
-    protected void addRun() {
-
-        Run newRun = getRunFromFields();
-
-        // TODO update run
-        // getController().addNewRun(newRun);
-
-        cancelButton.setText("Close");
-        updateButton.setEnabled(false);
-
-        if (getParentFrame() != null) {
-            getParentFrame().setVisible(false);
-        }
-    }
-
     private Run getRunFromFields() {
 
         return run;
@@ -210,9 +202,23 @@ public class RunPane extends JPanePlugin {
         cancelButton.setText("Close");
         updateButton.setEnabled(false);
 
-        // TODO update run
-        // getController().updateRun(newRun);
-        showMessage("Would have updated run");
+        JudgementRecord judgementRecord = null;
+        RunResultFiles runResultFiles = null;
+
+        if (judgementChanged()) {
+            newRun.setStatus(RunStates.JUDGED);
+
+            boolean solved = getJudgementComboBox().getSelectedIndex() == 0;
+            Judgement judgement = (Judgement) getJudgementComboBox().getSelectedItem();
+
+            judgementRecord = new JudgementRecord(judgement.getElementId(), getModel().getClientId(), solved, false);
+            judgementRecord.setSendToTeam(getNotifyTeamCheckBox().isSelected());
+            
+            System.out.println("debug22 Run "+newRun);
+            System.out.println("debug22 judgement "+judgementRecord.isSolved()+" "+judgementRecord.isSendToTeam()+" "+judgement);
+        }
+
+        getController().updateRun(newRun, judgementRecord, runResultFiles);
 
         if (getParentFrame() != null) {
             getParentFrame().setVisible(false);
@@ -257,7 +263,7 @@ public class RunPane extends JPanePlugin {
                     getParentFrame().setVisible(false);
                 }
             }
-            
+
         } else {
             if (getParentFrame() != null) {
                 getParentFrame().setVisible(false);
@@ -285,6 +291,8 @@ public class RunPane extends JPanePlugin {
     }
 
     private void populateGUI(Run run2) {
+        
+        populatingGUI = true;
 
         if (run2 != null) {
             getUpdateButton().setVisible(true);
@@ -299,15 +307,17 @@ public class RunPane extends JPanePlugin {
 
         } else {
             getUpdateButton().setVisible(false);
-            
-            runInfoLabel.setText("Could not get run "+ + run2.getNumber() + " (Site " + run2.getSiteNumber() + ")");
+
+            runInfoLabel.setText("Could not get run " + +run2.getNumber() + " (Site " + run2.getSiteNumber() + ")");
             deleteCheckBox.setSelected(false);
             statusLabel.setText("");
             elapsedTimeTextField.setText("");
 
         }
-
         populateComboBoxes();
+        
+        populatingGUI = false;
+
     }
 
     private void populateComboBoxes() {
@@ -319,10 +329,10 @@ public class RunPane extends JPanePlugin {
         getLanguageComboBox().removeAllItems();
         getJudgementComboBox().removeAllItems();
 
-        if (run == null){
-            return;  // No run no combo boxes.
+        if (run == null) {
+            return; // No run no combo boxes.
         }
-        
+
         for (Problem problem : getModel().getProblems()) {
             getProblemComboBox().addItem(problem);
             if (problem.getElementId().equals(run.getProblemId())) {
@@ -381,7 +391,7 @@ public class RunPane extends JPanePlugin {
 
         updateButton.setEnabled(editedText);
     }
-    
+
     private int getIntegerValue(String s) {
         try {
             return Integer.parseInt(s);
@@ -389,42 +399,51 @@ public class RunPane extends JPanePlugin {
             return 0;
         }
     }
-    
+
     /**
      * Enable or disable Update button based on comparison of run to fields.
-     *
+     * 
      */
     public void enableUpdateButton() {
         
+        if (populatingGUI){
+            return;
+        }
+
         boolean enableButton = false;
 
         if (run != null) {
             int elapsed = getIntegerValue(getElapsedTimeTextField().getText());
             enableButton |= (elapsed != run.getElapsedMins());
-            
-            ElementId problemId = ((Problem)getProblemComboBox().getSelectedItem()).getElementId();
-            enableButton |= (! run.getProblemId().equals(problemId));
-            
-            ElementId languageId = ((Language)getLanguageComboBox().getSelectedItem()).getElementId();
-            enableButton |= (! run.getLanguageId().equals(languageId));
+
+            ElementId problemId = ((Problem) getProblemComboBox().getSelectedItem()).getElementId();
+            enableButton |= (!run.getProblemId().equals(problemId));
+
+            ElementId languageId = ((Language) getLanguageComboBox().getSelectedItem()).getElementId();
+                enableButton |= (!run.getLanguageId().equals(languageId));
             
             enableButton |= (run.isDeleted() != getDeleteCheckBox().isSelected());
-            
-            if ( run.isJudged() ){
-                
-                Judgement judgement = (Judgement) getJudgementComboBox().getSelectedItem();
-                if (judgement != null) {
-                    enableButton |= (! run.getJudgementRecord().getJudgementId().equals(judgement.getElementId()));
-                }
-                
-            }else if (getJudgementComboBox().getSelectedIndex() > -1){
-                // Unjudged and a judgement is selected
-                enableButton = true;
-            }
+
+            enableButton |= judgementChanged();
         }
 
         getUpdateButton().setEnabled(enableButton);
-        
+
+    }
+
+    private boolean judgementChanged() {
+        if (run.isJudged()) {
+
+            Judgement judgement = (Judgement) getJudgementComboBox().getSelectedItem();
+            if (judgement != null) {
+                return !run.getJudgementRecord().getJudgementId().equals(judgement.getElementId());
+            }
+
+        } else if (getJudgementComboBox().getSelectedIndex() > -1) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -488,6 +507,7 @@ public class RunPane extends JPanePlugin {
             generalPane.add(languageLabel, null);
             generalPane.add(jLabel, null);
             generalPane.add(getElapsedTimeTextField(), null);
+            generalPane.add(getNotifyTeamCheckBox(), null);
         }
         return generalPane;
     }
@@ -539,9 +559,9 @@ public class RunPane extends JPanePlugin {
     }
 
     protected void viewSourceFile() {
-        
-        createAndViewFile (runFiles.getMainFile(), "Team's source");
-        
+
+        createAndViewFile(runFiles.getMainFile(), "Team's source");
+
     }
 
     /**
@@ -564,7 +584,7 @@ public class RunPane extends JPanePlugin {
     }
 
     protected void extractRun() {
-        showMessage("Would have extracted run"); 
+        showMessage("Would have extracted run");
         // TODO code extract run
     }
 
@@ -581,9 +601,9 @@ public class RunPane extends JPanePlugin {
     public void setRunAndFiles(Run run2, RunFiles runFiles2) {
 
         FrameUtilities.regularCursor(this);
-        
+
         showMessage("");
-        log.info("Fetched run "+run2+" to edit");
+        log.info("Fetched run " + run2 + " to edit");
 
         run = run2;
         runFiles = runFiles2;
@@ -681,35 +701,51 @@ public class RunPane extends JPanePlugin {
             elapsedTimeTextField.setBounds(new java.awt.Rectangle(224, 65, 65, 21));
             elapsedTimeTextField.setDocument(new IntegerDocument());
 
-            elapsedTimeTextField.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyTyped(java.awt.event.KeyEvent e) {
+            elapsedTimeTextField.addKeyListener(new KeyAdapter() {
+                // public void keyPressed(java.awt.event.KeyEvent e) {
+                public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
                 }
             });
         }
         return elapsedTimeTextField;
     }
-    
-    private void createAndViewFile (SerializedFile file, String title){
+
+    private void createAndViewFile(SerializedFile file, String title) {
         // TODO the executeable dir name should be from the model, eh ?
         Executable tempEexecutable = new Executable(getModel(), getController(), run, runFiles);
         String targetDirectory = tempEexecutable.getExecuteDirectoryName();
         Utilities.insureDir(targetDirectory);
         String targetFileName = targetDirectory + File.separator + file.getName();
-        showMessage("Create: "+targetFileName);
+        showMessage("Create: " + targetFileName);
         file.writeFile(targetFileName);
-        
-        if (sourceViewer != null){
+
+        if (sourceViewer != null) {
             sourceViewer.dispose();
         }
         sourceViewer = new MultipleFileViewer(getController().getLog());
-        
-        if ( new File(targetFileName).isFile()){
+
+        if (new File(targetFileName).isFile()) {
             sourceViewer.addFilePane(title, targetFileName);
             sourceViewer.setVisible(true);
         } else {
-            sourceViewer.addFilePane(title, "Could not create file at "+targetFileName);
+            sourceViewer.addFilePane(title, "Could not create file at " + targetFileName);
             sourceViewer.setVisible(true);
         }
+    }
+
+    /**
+     * This method initializes notifyTeamCheckBox
+     * 
+     * @return javax.swing.JCheckBox
+     */
+    private JCheckBox getNotifyTeamCheckBox() {
+        if (notifyTeamCheckBox == null) {
+            notifyTeamCheckBox = new JCheckBox();
+            notifyTeamCheckBox.setBounds(new java.awt.Rectangle(347, 197, 134, 19));
+            notifyTeamCheckBox.setSelected(true);
+            notifyTeamCheckBox.setText("Notify Team");
+        }
+        return notifyTeamCheckBox;
     }
 } // @jve:decl-index=0:visual-constraint="10,10"

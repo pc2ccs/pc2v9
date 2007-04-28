@@ -764,7 +764,13 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * @param connectionHandlerID
      */
     private void processPacket(Packet packet, ConnectionHandlerID connectionHandlerID) {
-        packetHandler.handlePacket(packet, connectionHandlerID);
+        try {
+            packetHandler.handlePacket(packet, connectionHandlerID);
+            
+        } catch (Exception e) {
+            System.err.println("Exception in processPacket, check logs "); // TODO debug
+            log.log(Log.WARNING, "Exception processPacket ", e);
+        }
 
     }
 
@@ -1242,6 +1248,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
 
     private ClientId getServerClientId(){
+//      TODO s/new ClientId(model.getSiteNumber(), Type.SERVER, 0);/getServerClientId()/
         return new ClientId (model.getSiteNumber(), Type.SERVER, 0);
     }
 
@@ -1448,7 +1455,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         generateNewAccounts(clientTypeName, model.getSiteNumber(), count, startNumber, active);
         
     }
-
+    
     public void submitClarification(Problem problem, String question) {
 
         ClientId serverClientId = new ClientId(model.getSiteNumber(), Type.SERVER, 0);
@@ -1467,19 +1474,28 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
 
     public void addNewProblem(Problem problem, ProblemDataFiles problemDataFiles) {
-        model.addProblem(problem, problemDataFiles);
+        Packet updateProblemPacket = PacketFactory.createAddSetting(model.getClientId(), getServerClientId(), problem, problemDataFiles);
+        sendToLocalServer(updateProblemPacket);
+    }
+    
+    public void updateRun(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles) {
+        Packet updateProblemPacket = PacketFactory.createRunUpdated(model.getClientId(), getServerClientId(), run, judgementRecord, runResultFiles, model.getClientId());
+        sendToLocalServer(updateProblemPacket);
     }
 
     public void addProblem(Problem problem) {
-        model.addProblem(problem);
+        Packet updateProblemPacket = PacketFactory.createAddSetting(model.getClientId(), getServerClientId(), problem, null);
+        sendToLocalServer(updateProblemPacket);
     }
 
     public void updateProblem(Problem problem) {
-        model.updateProblem(problem);
+        Packet updateProblemPacket = PacketFactory.createUpdateSetting(model.getClientId(), getServerClientId(), problem, null);
+        sendToLocalServer(updateProblemPacket);
     }
 
     public void updateProblem(Problem problem, ProblemDataFiles problemDataFiles) {
-        model.updateProblem(problem, problemDataFiles);
+        Packet updateProblemPacket = PacketFactory.createUpdateSetting(model.getClientId(), getServerClientId(), problem, null);
+        sendToLocalServer(updateProblemPacket);
     }
 
     public ProblemDataFiles getProblemDataFiles(Problem problem) {
