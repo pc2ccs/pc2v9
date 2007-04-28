@@ -195,7 +195,17 @@ public interface IController {
      */
     void submitClarification(Problem problem, String question);
 
-    void disconnectConnection(ConnectionHandlerID connectionHandlerID);
+    /**
+     * Force connection off.
+     * 
+     * @param connectionHandlerID
+     */
+    void forceConnectionDrop(ConnectionHandlerID connectionHandlerID);
 
+    /**
+     * Remove connection from connection list.
+     */
+    void removeConnection(ConnectionHandlerID connectionHandlerID);
+    
     void shutdownTransport();
 }

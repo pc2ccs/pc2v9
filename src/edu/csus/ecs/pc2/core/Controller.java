@@ -591,7 +591,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                             clientId = new ClientId(model.getSiteNumber(), clientId.getClientType(), clientId.getClientNumber());
                         }
                         attemptToLogin(clientId, password, connectionHandlerID);
-                        disconnectConnection(connectionHandlerID);
+                        removeConnection(connectionHandlerID);
                         sendLoginSuccess(clientId, connectionHandlerID);
 
                         // Send login notification to users.
@@ -1466,7 +1466,8 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         sendToLocalServer(packet);
     }
 
-    public void disconnectConnection(ConnectionHandlerID connectionHandlerID) {
+    public void forceConnectionDrop(ConnectionHandlerID connectionHandlerID) {
+        transportManager.unregisterConnection(connectionHandlerID);
         model.connectionDropped(connectionHandlerID);
         Packet disconnectionPacket = PacketFactory.createDroppedConnection(model.getClientId(), PacketFactory.ALL_SERVERS, connectionHandlerID);
         sendToAdministrators(disconnectionPacket);
@@ -1504,6 +1505,10 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
     public void shutdownTransport() {
         transportManager.shutdownTransport();
+    }
+
+    public void removeConnection(ConnectionHandlerID connectionHandlerID) {
+        model.connectionDropped(connectionHandlerID);
     }
 
 }

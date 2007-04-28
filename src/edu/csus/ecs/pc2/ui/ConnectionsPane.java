@@ -42,7 +42,7 @@ public class ConnectionsPane extends JPanePlugin {
 
     private MCLB connectionsListBox = null;
 
-    private JButton logoffButton = null;
+    private JButton disconnectButton = null;
 
     private JPanel messagePane = null;
 
@@ -90,7 +90,7 @@ public class ConnectionsPane extends JPanePlugin {
             loginButtonPane = new JPanel();
             loginButtonPane.setLayout(flowLayout);
             loginButtonPane.setPreferredSize(new java.awt.Dimension(35, 35));
-            loginButtonPane.add(getLogoffButton(), null);
+            loginButtonPane.add(getDisconnectButton(), null);
         }
         return loginButtonPane;
     }
@@ -103,6 +103,7 @@ public class ConnectionsPane extends JPanePlugin {
     private MCLB getConnectionsListBox() {
         if (connectionsListBox == null) {
             connectionsListBox = new MCLB();
+            connectionsListBox.setMultipleSelections(true);
 
             Object[] cols = { "Connection" };
 
@@ -188,7 +189,7 @@ public class ConnectionsPane extends JPanePlugin {
             public void run() {
                 int row = connectionsListBox.getIndexByKey(connectionHandlerID);
                 if (row != -1) {
-                    connectionsListBox.remove(row);
+                    connectionsListBox.removeRow(row);
                 }
                 connectionsListBox.autoSizeAllColumns();
             }
@@ -239,17 +240,17 @@ public class ConnectionsPane extends JPanePlugin {
      * 
      * @return javax.swing.JButton
      */
-    private JButton getLogoffButton() {
-        if (logoffButton == null) {
-            logoffButton = new JButton();
-            logoffButton.setText("Logoff");
-            logoffButton.addActionListener(new java.awt.event.ActionListener() {
+    private JButton getDisconnectButton() {
+        if (disconnectButton == null) {
+            disconnectButton = new JButton();
+            disconnectButton.setText("Disconnect");
+            disconnectButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     logoffConnection();
                 }
             });
         }
-        return logoffButton;
+        return disconnectButton;
     }
 
     protected void logoffConnection() {
@@ -268,9 +269,10 @@ public class ConnectionsPane extends JPanePlugin {
                 ConnectionHandlerID connectionHandlerID = (ConnectionHandlerID) connectionsListBox.getKeys()[i];
                 if (connectionHandlerID != null) {
                     try {
-                        getController().disconnectConnection(connectionHandlerID);    
+                        getController().forceConnectionDrop(connectionHandlerID);    
                     } catch (Exception e) {
-                        log.log(Log.WARNING, "Unable to disconnect connection "+connectionHandlerID, e);
+                        log.log(Log.WARNING, "Unable to disconnect connection " + connectionHandlerID, e);
+                        showMessage("Connection may not be dropped: " + connectionHandlerID + " check log");
                     }
                     
                 }
