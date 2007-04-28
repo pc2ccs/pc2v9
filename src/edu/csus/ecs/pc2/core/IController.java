@@ -201,6 +201,8 @@ public interface IController {
      * @param connectionHandlerID
      */
     void forceConnectionDrop(ConnectionHandlerID connectionHandlerID);
+    
+    void removeLogin (ClientId clientId);
 
     /**
      * Remove connection from connection list.

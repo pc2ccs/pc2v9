@@ -272,6 +272,8 @@ public interface IModel {
      * @return true if logged in.
      */
     boolean isLoggedIn(ClientId sourceId);
+    
+    boolean isRemoteLoggedIn(ClientId clientId);
 
     /**
      * Has this module been logged in, loaded with data, authenticated.
@@ -279,12 +281,16 @@ public interface IModel {
     boolean isLoggedIn();
 
     /**
-     * Lookup ConnectionHandlerID for a given ClientId.
+     * Lookup ConnectionHandlerID for all sites.
      * 
      * @param clientId
      * @return ClientId or null if not found.
      */
     ConnectionHandlerID getConnectionHandleID(ClientId clientId);
+    
+    boolean isConnected (ConnectionHandlerID connectionHandlerID);
+
+    boolean isConnectedToRemoteSite (ConnectionHandlerID connectionHandlerID);
 
     /**
      * Logoff, remove user from login list.
@@ -293,6 +299,10 @@ public interface IModel {
      */
     void removeLogin(ClientId clientId);
     
+    /**
+     * Get all connection ids for all sites.
+     * @return all sites connection ids.
+     */
     ConnectionHandlerID [] getConnectionHandlerIDs();
     
     int getSiteNumber();
@@ -305,8 +315,9 @@ public interface IModel {
 
     void setSiteNumber(int number);
 
+    // TODO change to ClientId [] getLoggedInClients(Type type);
     Enumeration<ClientId> getLoggedInClients(Type type);
-
+    
     void loginDenied(ClientId clientId, ConnectionHandlerID connectionHandlerID, String message);
 
     void initializeWithFakeData();
@@ -417,6 +428,9 @@ public interface IModel {
     
     ContestTime[] getContestTimes();
 
+    /**
+     * Get both remote and local connection Ids.
+     */
     ConnectionHandlerID[] getConnectionHandleIDs();
 
     ContestTime getContestTime(ElementId elementId);

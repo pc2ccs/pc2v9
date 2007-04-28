@@ -122,11 +122,31 @@ public class PacketHandler {
 
             sendToJudgesAndOthers( packet, isThisSite(run));
 
+        } else if (packetType.equals(Type.FORCE_DISCONNECTION)) {
+            sendForceDisconnection (packet);
+
         } else if (packetType.equals(Type.ESTABLISHED_CONNECTION)) {
-            controller.sendToAdministrators(packet);
+            ConnectionHandlerID inConnectionHandlerID = (ConnectionHandlerID) PacketFactory.getObjectValue(packet, PacketFactory.CONNECTION_HANDLE_ID);
+
+            if (isServer()) {
+                controller.sendToAdministrators(packet);
+                if (isThisSite(packet.getSourceId())){
+                    controller.sendToServers(packet);
+                }
+            } else {
+                model.connectionEstablished(inConnectionHandlerID);
+            }
 
         } else if (packetType.equals(Type.DROPPED_CONNECTION)) {
-            controller.sendToAdministrators(packet);
+            ConnectionHandlerID inConnectionHandlerID = (ConnectionHandlerID) PacketFactory.getObjectValue(packet, PacketFactory.CONNECTION_HANDLE_ID);
+            if (isServer()) {
+                controller.sendToServers(packet);
+                if (isThisSite(packet.getSourceId())){
+                    controller.sendToServers(packet);
+                }
+            } else {
+                model.connectionEstablished(inConnectionHandlerID);
+            }
 
         } else if (packetType.equals(Type.RUN_AVAILABLE)) {
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
@@ -233,6 +253,44 @@ public class PacketHandler {
         info("handlePacket start " + packet);
 
     }
+    
+    private boolean isThisSite(ClientId sourceId) {
+        return isThisSite(sourceId.getSiteNumber());
+    }
+
+    private void sendForceDisconnection(Packet packet) {
+
+        ConnectionHandlerID connectionHandlerID = (ConnectionHandlerID) PacketFactory.getObjectValue(packet, PacketFactory.CONNECTION_HANDLE_ID);
+        ClientId clientToLogoffId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+
+        if (isServer()) {
+
+            if (clientToLogoffId != null) {
+                if (model.isRemoteLoggedIn(clientToLogoffId)) {
+                    // send logoff to other site
+                    controller.sendToRemoteServer(clientToLogoffId.getSiteNumber(), packet);
+                } else {
+                    controller.removeConnection(connectionHandlerID);
+                }
+
+            } else if (connectionHandlerID != null) {
+                if (model.isConnected(connectionHandlerID)) {
+                    // local connection, drop it now
+                    controller.forceConnectionDrop(connectionHandlerID);
+                } else {
+                    // send to all servers, could be connected anywhere
+                    controller.sendToServers(packet);
+                }
+            }
+        } else {
+
+            if (clientToLogoffId != null) {
+                controller.removeLogin(clientToLogoffId);
+            } else if (connectionHandlerID != null) {
+                controller.removeConnection(connectionHandlerID);
+            }
+        }
+    }
 
     private void updateRun(Packet packet){
         
@@ -281,21 +339,21 @@ public class PacketHandler {
     }
     
     private void loginClient(Packet packet) {
-        
-        if ( model.isLoggedIn() ){
-        ClientId whoLoggedIn = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-        ConnectionHandlerID connectionHandlerID = (ConnectionHandlerID) PacketFactory.getObjectValue(packet, PacketFactory.CONNECTION_HANDLE_ID);
 
-        if (isServer()) {
-            model.addLogin(whoLoggedIn, connectionHandlerID);
-            sendToJudgesAndOthers(packet, false);
+        if (model.isLoggedIn()) {
+            ClientId whoLoggedIn = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+            ConnectionHandlerID connectionHandlerID = (ConnectionHandlerID) PacketFactory.getObjectValue(packet, PacketFactory.CONNECTION_HANDLE_ID);
+
+            if (isServer()) {
+                model.addLogin(whoLoggedIn, connectionHandlerID);
+                sendToJudgesAndOthers(packet, false);
+            } else {
+                model.addLogin(whoLoggedIn, connectionHandlerID);
+            }
         } else {
-            model.addLogin(whoLoggedIn, connectionHandlerID);
+            info("Note: got a LOGIN packet before LOGIN_SUCCESS " + packet);
         }
-        } else {
-            info("Note: got a LOGIN packet before LOGIN_SUCCESS "+packet);
-        }
-        
+
     }
 
     private void logoutClient(Packet packet) {

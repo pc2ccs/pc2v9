@@ -1378,7 +1378,8 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
 
     public void updateSite(Site site) {
-        
+
+        // TODO seems to be circular, make finite.
         if (isServer ()){
             model.changeSite(site);
             Packet packet = PacketFactory.createUpdateSetting(model.getClientId(), PacketFactory.ALL_SERVERS, site);
@@ -1447,7 +1448,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
     public void generateNewAccounts(String clientTypeName, int siteNumber, int count, int startNumber, boolean active) {
         ClientType.Type type = ClientType.Type.valueOf(clientTypeName);
-        Packet packet = PacketFactory.createGenerateAccounts(getServerClientId(), model.getClientId(), siteNumber, type, count, startNumber,  active);
+        Packet packet = PacketFactory.createGenerateAccounts(model.getClientId(), getServerClientId(), siteNumber, type, count, startNumber,  active);
         sendToLocalServer(packet);
     }
 
@@ -1510,5 +1511,10 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     public void removeConnection(ConnectionHandlerID connectionHandlerID) {
         model.connectionDropped(connectionHandlerID);
     }
+
+    public void removeLogin(ClientId clientId) {
+        model.removeLogin(clientId);
+    }
+
 
 }

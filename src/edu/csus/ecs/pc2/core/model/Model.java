@@ -73,7 +73,26 @@ public class Model implements IModel {
 
     private Vector<IAccountListener> accountListenerList = new Vector<IAccountListener>();
 
-    private LoginList loginList = new LoginList();
+    /**
+     * Logins on this site.
+     */
+    private LoginList localLoginList = new LoginList();
+    
+    /**
+     * Logins on other sites.
+     */
+    private LoginList remoteLoginList = new LoginList();
+    
+    /**
+     * Connections on this site.
+     */
+    private ConnectionHandlerList localConnectionHandlerList = new ConnectionHandlerList();
+
+    /**
+     * Connections on other sites
+     */
+    private ConnectionHandlerList remoteConnectionHandlerList = new ConnectionHandlerList();
+
 
     private ContestTimeList contestTimeList = new ContestTimeList();
 
@@ -85,8 +104,6 @@ public class Model implements IModel {
 
     private SiteList siteList = new SiteList();
     
-    private ConnectionHandlerList connectionHandlerList = new ConnectionHandlerList();
-
     private int siteNumber = 1;
 
     /**
@@ -378,7 +395,11 @@ public class Model implements IModel {
 
 
     public void addLogin(ClientId inClientId, ConnectionHandlerID connectionHandlerID) {
-        loginList.add(inClientId, connectionHandlerID);
+        if (inClientId.getSiteNumber() == siteNumber){
+            localLoginList.add(inClientId, connectionHandlerID);
+        } else {
+            remoteLoginList.add(inClientId, connectionHandlerID);
+        }
         LoginEvent loginEvent = new LoginEvent(LoginEvent.Action.NEW_LOGIN, inClientId, connectionHandlerID, "New");
         fireLoginListener(loginEvent);
     }
@@ -669,28 +690,72 @@ public class Model implements IModel {
     }
 
     public ClientId getLoginClientId(ConnectionHandlerID connectionHandlerID) {
-        return loginList.getClientId(connectionHandlerID);
+        ClientId clientId = localLoginList.getClientId(connectionHandlerID);
+        if (clientId == null){
+            clientId = remoteLoginList.getClientId(connectionHandlerID);
+        }
+        return clientId;
     }
 
     public boolean isLoggedIn(ClientId sourceId) {
-        return loginList.isLoggedIn(sourceId);
+        boolean loggedIn = localLoginList.isLoggedIn(sourceId);
+        if (! loggedIn){
+            loggedIn = remoteLoginList.isLoggedIn(sourceId);
+        }
+        return loggedIn;
     }
     
     public boolean isLoggedIn(){
         return localClientId != null;
     }
+    
+    public boolean isRemoteLoggedIn(ClientId clientId){
+        return remoteLoginList.isLoggedIn(clientId);
+    }
 
     public ConnectionHandlerID getConnectionHandleID(ClientId sourceId) {
-        return loginList.getConnectionHandleID(sourceId);
+        ConnectionHandlerID connectionHandlerID = localLoginList.getConnectionHandleID(sourceId);
+        if (connectionHandlerID == null) {
+            connectionHandlerID = remoteLoginList.getConnectionHandleID(sourceId);
+        }
+        return connectionHandlerID;
     }
     
+    public boolean isConnected(ConnectionHandlerID connectionHandlerID) {
+        return localConnectionHandlerList.get(connectionHandlerID) != null;
+    }
+    
+
+    public boolean isConnectedToRemoteSite(ConnectionHandlerID connectionHandlerID) {
+        return remoteConnectionHandlerList.get(connectionHandlerID) != null;
+    }
+
+    
     public ConnectionHandlerID[] getConnectionHandleIDs() {
-        return connectionHandlerList.getList();
+
+        ConnectionHandlerID[] localList = localConnectionHandlerList.getList();
+        ConnectionHandlerID[] remoteList = remoteConnectionHandlerList.getList();
+
+        if (localList.length > 0 && remoteList.length > 0) {
+            // Add both list together
+            ConnectionHandlerID[] allConnections = new ConnectionHandlerID[localList.length + remoteList.length];
+            System.arraycopy(localList, 0, allConnections, 0, localList.length);
+            System.arraycopy(remoteList, 0, allConnections, localList.length, remoteList.length);
+            return allConnections;
+        } else if (localList.length > 0) {
+            return localList;
+        } else { // must either be only remoteList 
+            return remoteList;
+        }
     }
 
 
     public void removeLogin(ClientId sourceId) {
-        loginList.remove(sourceId);
+        if (sourceId.getSiteNumber() == siteNumber) {
+            localLoginList.remove(sourceId);
+        } else {
+            remoteLoginList.remove(sourceId);
+        }
         ConnectionHandlerID connectionHandlerID = getConnectionHandleID(sourceId);
         LoginEvent loginEvent = new LoginEvent(LoginEvent.Action.LOGOFF, sourceId, connectionHandlerID, "Logoff");
         fireLoginListener(loginEvent);
@@ -769,7 +834,22 @@ public class Model implements IModel {
     }
 
     public Enumeration<ClientId> getLoggedInClients(Type type) {
-        return loginList.getClients(type);
+        Enumeration<ClientId> localClients = localLoginList.getClients(type);
+        Enumeration<ClientId> remoteClients = remoteLoginList.getClients(type);
+
+        Vector <ClientId> v = new Vector<ClientId>();
+        
+        while (localClients.hasMoreElements()) {
+            ClientId element = (ClientId) localClients.nextElement();
+            v.addElement(element);
+        }
+        
+        while (remoteClients.hasMoreElements()) {
+            ClientId element = (ClientId) remoteClients.nextElement();
+            v.addElement(element);
+        }
+        
+        return v.elements();
     }
 
     public static void info(String s) {
@@ -1005,19 +1085,19 @@ public class Model implements IModel {
     }
 
     public void connectionEstablished(ConnectionHandlerID connectionHandlerID, Date connectDate) {
-        connectionHandlerList.add(connectionHandlerID, connectDate);
+        localConnectionHandlerList.add(connectionHandlerID, connectDate);
         ConnectionEvent connectionEvent = new ConnectionEvent(ConnectionEvent.Action.ESTABLISHED, connectionHandlerID);
         fireConnectionListener(connectionEvent);
     }
 
     public void connectionDropped(ConnectionHandlerID connectionHandlerID) {
-        connectionHandlerList.remove(connectionHandlerID);
+        localConnectionHandlerList.remove(connectionHandlerID);
         ConnectionEvent connectionEvent = new ConnectionEvent(ConnectionEvent.Action.DROPPED, connectionHandlerID);
         fireConnectionListener(connectionEvent);
     }
 
     public ConnectionHandlerID[] getConnectionHandlerIDs() {
-        return connectionHandlerList.getList();
+        return localConnectionHandlerList.getList();
     }
 
     public Clarification[] getClarifications(ClientId clientId) {
@@ -1072,5 +1152,7 @@ public class Model implements IModel {
     public ProblemDataFiles[] getProblemDataFiles() {
         return problemDataFilesList.getList();
     }
+
+
     
 }

@@ -706,4 +706,19 @@ public final class ModelReadOnlyProxy implements IModel {
         return null;
     }
 
+    public boolean isRemoteLoggedIn(ClientId clientId) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public boolean isConnected(ConnectionHandlerID connectionHandlerID) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public boolean isConnectedToRemoteSite(ConnectionHandlerID connectionHandlerID) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
 }
