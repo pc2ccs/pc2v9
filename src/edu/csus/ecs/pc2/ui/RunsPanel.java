@@ -69,10 +69,14 @@ public class RunsPanel extends JPanePlugin {
     private PermissionList permissionList = new PermissionList();
     
     private EditRunFrame editRunFrame = null;
+    
+    private ViewJudgementsFrame viewJudgementsFrame = null;
 
     private JLabel messageLabel = null;
     
     private Log log = null;
+
+    private JLabel rowCountLabel = null;
 
     /**
      * This method initializes
@@ -95,6 +99,8 @@ public class RunsPanel extends JPanePlugin {
         this.add(getMessagePanel(), java.awt.BorderLayout.NORTH);
         
         editRunFrame = new EditRunFrame();
+        viewJudgementsFrame = new ViewJudgementsFrame();
+
     }
 
     @Override
@@ -113,7 +119,19 @@ public class RunsPanel extends JPanePlugin {
             s[1] = getTeamDisplayName(run);
             s[2] = new Long(run.getNumber()).toString();
             s[3] = new Long(run.getElapsedMins()).toString();
-            s[4] = run.getStatus().toString();
+            if (run.isJudged()){
+                if (run.isSolved()){
+                    s[4] = run.getStatus().toString()+" Yes";
+                    
+                } else {
+                    s[4] = run.getStatus().toString()+" No";
+                }
+            } else {
+                s[4] = run.getStatus().toString();
+            }
+            if (run.isDeleted()){
+                s[4] = "DEL " + s[4];
+            }
             if (judgeId != null) {
                 if (judgeId.equals(getModel().getClientId())){
                     s[5] = "Me";
@@ -147,7 +165,6 @@ public class RunsPanel extends JPanePlugin {
 
     private String getProblemTitle(ElementId problemId) {
         Problem problem = getModel().getProblem(problemId);
-        System.out.println("debug getProblemTitle - " + problemId + " " + problem);
         if (problem != null) {
             return problem.toString();
         }
@@ -262,6 +279,8 @@ public class RunsPanel extends JPanePlugin {
                 } else {
                     runListBox.replaceRow(objects, rowNumber);
                 }
+                rowCountLabel.setText(""+runListBox.getRowCount());
+                rowCountLabel.setToolTipText("There are "+runListBox.getRowCount()+" runs");
                 runListBox.autoSizeAllColumns();
                 runListBox.sort();
             }
@@ -316,6 +335,7 @@ public class RunsPanel extends JPanePlugin {
         log = getController().getLog();
         
         editRunFrame.setModelAndController(inModel, inController);
+        viewJudgementsFrame.setModelAndController(getModel(), getController());
 
         getModel().addRunListener(new RunListenerImplementation());
         getModel().addAccountListener(new AccountListenerImplementation());
@@ -337,6 +357,8 @@ public class RunsPanel extends JPanePlugin {
      */
     private JPanel getMessagePanel() {
         if (messagePanel == null) {
+            rowCountLabel = new JLabel();
+            rowCountLabel.setText("###");
             messageLabel = new JLabel();
             messageLabel.setText("");
             messageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -344,6 +366,7 @@ public class RunsPanel extends JPanePlugin {
             messagePanel.setLayout(new BorderLayout());
             messagePanel.setPreferredSize(new java.awt.Dimension(25,25));
             messagePanel.add(messageLabel, java.awt.BorderLayout.CENTER);
+            messagePanel.add(rowCountLabel, java.awt.BorderLayout.EAST);
         }
         return messagePanel;
     }
@@ -538,13 +561,39 @@ public class RunsPanel extends JPanePlugin {
             viewJudgementsButton.setText("View Judgements");
             viewJudgementsButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.out.println("actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+                    viewSelectedRunJudgements();
                 }
             });
         }
         return viewJudgementsButton;
     }
     
+    protected void viewSelectedRunJudgements() {
+        
+        int [] selectedIndexes = runListBox.getSelectedIndexes();
+        
+        if (selectedIndexes.length < 1){
+            showMessage("Please select a run ");
+            return;
+        }
+        
+        try {
+            ElementId elementId = (ElementId) runListBox.getKeys()[selectedIndexes[0]];
+            Run theRun = getModel().getRun(elementId);
+
+            viewJudgementsFrame.setRun(theRun);
+            viewJudgementsFrame.setVisible(true);
+            
+        } catch (Exception e) {
+            log.log(Log.WARNING, "Exception logged ", e);
+            showMessage("Unable to edit run, check log");
+        }
+        
+        
+
+        
+    }
+
     /**
      * 
      * @author pc2@ecs.csus.edu
