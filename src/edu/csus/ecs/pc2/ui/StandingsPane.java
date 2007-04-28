@@ -135,9 +135,6 @@ public class StandingsPane extends JPanePlugin {
             DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
             document = documentBuilder.parse(new InputSource(new StringReader(xmlString)));
-            String rootNode = document.getDocumentElement().getNodeName();
-            System.out.println("debug22 Root is " + rootNode);
-            
         } catch (Exception e) {
             log.log(Log.WARNING, "Trouble creating or parsing SA XML ", e);
             showMessage("Problem updating scoreboard (parse error), check log");
@@ -153,7 +150,6 @@ public class StandingsPane extends JPanePlugin {
             for(int i=0; i<list.getLength(); i++) {
                 Node node = (Node)list.item(i);
                 String name = node.getNodeName();
-                System.out.println("Name: "+name);
                 if (name.equals("teamStanding")){
                     try {
                         String [] standingsRow = fetchStanding (node);
