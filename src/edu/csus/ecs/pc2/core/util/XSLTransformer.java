@@ -73,7 +73,7 @@ public class XSLTransformer {
 
     /**
      * @param inputXSL
-     * @param imputXML
+     * @param inputXML
      * @param outFile
      */
     public void transform(Source inputXSL, Source inputXML, File outFile) throws Exception {
