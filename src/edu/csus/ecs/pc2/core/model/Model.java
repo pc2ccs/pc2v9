@@ -224,6 +224,11 @@ public class Model implements IModel {
         // Add root account 
         generateNewAccounts(ClientType.Type.ADMINISTRATOR.toString(), 1, true);
         
+        generateNewAccounts(ClientType.Type.TEAM.toString(), 5, true);
+        generateNewAccounts(ClientType.Type.JUDGE.toString(), 4, true);
+        generateNewAccounts(ClientType.Type.SCOREBOARD.toString(), 1, true);
+        
+        
         Site site = createFakeSite (1);
         site.setActive(true);
         siteList.add(site);
@@ -279,6 +284,12 @@ public class Model implements IModel {
 
             if (runEvent.getAction() == RunEvent.Action.ADDED) {
                 runListenerList.elementAt(i).runAdded(runEvent);
+                
+                System.out.println(" "+runEvent.getAction()+" "+runEvent.getRun());
+                if (runEvent.getRun() == null){
+                    new Exception("debug22 RUN_SUBMISSION_CONFIRM ").printStackTrace();
+                }
+
             } else if (runEvent.getAction() == RunEvent.Action.DELETED) {
                 runListenerList.elementAt(i).runRemoved(runEvent);
             } else {
