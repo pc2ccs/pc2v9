@@ -20,6 +20,7 @@ import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IModel;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.util.IMemento;
 import edu.csus.ecs.pc2.core.util.XMLMemento;
@@ -98,6 +99,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         ElementId problemId = null;
         long solutionTime = -1;
         boolean solved = false;
+        boolean unJudgedRun = false;
 
         if (treeMap.isEmpty()) {
             psd = null; // ProblemScoreData must have ProblemId to be valid
@@ -126,6 +128,8 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                     // we should really only do this if it's been judged
                     if (run.isJudged()) {
                         score += getPenaltyPointsPerNo();
+                    } else {
+                        unJudgedRun = true;
                     }
                 }
             }
@@ -140,6 +144,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         psd.setProblemId(problemId);
         psd.setNumberSubmitted(attempts);
         psd.setPenaltyPoints(score);
+        psd.setUnJudgedRuns(unJudgedRun);
         return psd;
     }
 
@@ -215,6 +220,11 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         AccountList accountList = getAccountList(theContest);
         Problem[] problems = theContest.getProblems();
         summaryMememento.putLong("problemCount", problems.length);
+        Site[] sites = theContest.getSites();
+        summaryMememento.putInteger("siteCount", sites.length);
+        int grandTotalAttempts = 0;
+        int grandTotalSolutions = 0;
+        int grandTotalProblemAttempts = 0;
         int[] problemAttempts=new int[problems.length + 1];
         int[] problemBestTime=new int[problems.length + 1];
         int[] problemLastTime=new int[problems.length + 1];
@@ -378,6 +388,8 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 standingsRecordMemento.putInteger("index", index);
                 Account account = accountList.getAccount(sr.getClientId());
                 standingsRecordMemento.putString("teamName", account.getDisplayName()); 
+                standingsRecordMemento.putInteger("teamId", account.getClientId().getClientNumber());
+                standingsRecordMemento.putInteger("teamSiteId", account.getClientId().getSiteNumber());
                 standingsRecordMemento.putString("teamKey", account.getClientId().getTripletKey());
                 SummaryRow summaryRow = sr.getSummaryRow();
                 for (int i = 0; i < problems.length; i++) {
@@ -394,13 +406,16 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                         psiMemento.putInteger("points", psi.getPenaltyPoints());
                         psiMemento.putLong("solutionTime", psi.getSolutionTime());
                         psiMemento.putBoolean("isSolved", psi.isSolved());
+                        psiMemento.putBoolean("isPending", psi.isUnJudgedRuns());
                         problemAttempts[id] += psi.getNumberSubmitted();
                         totalAttempts += psi.getNumberSubmitted();
+                        grandTotalAttempts += psi.getNumberSubmitted();
                         if (psi.getNumberSubmitted() > 0) {
                             problemsAttempted++;
                         }
                         if (psi.isSolved()) {
                             problemSolutions[id]++;
+                            grandTotalSolutions++;
                             if (psi.getSolutionTime() > problemLastTime[id]) {
                                 problemLastTime[id] = new Long(psi.getSolutionTime()).intValue();
                             }
@@ -424,12 +439,18 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             problemMemento.putString("title", problems[i].getDisplayName());
             // problemMemento.putString("color", problems[i].get);
             problemMemento.putLong("attempts", problemAttempts[id]);
+            if (problemAttempts[id] > 0) {
+                grandTotalProblemAttempts++;
+            }
             problemMemento.putLong("numberSolved", problemSolutions[id]);
             if (problemSolutions[id] > 0) {
                 problemMemento.putLong("bestSolutionTime",problemBestTime[id]);
                 problemMemento.putLong("lastSolutionTime",problemLastTime[id]);
             }
         }
+        summaryMememento.putInteger("totalAttempts", grandTotalAttempts);
+        summaryMememento.putInteger("totalSolved", grandTotalSolutions);
+        summaryMememento.putInteger("problemsAttempted", grandTotalProblemAttempts);
  
         String xmlString;
         try {
