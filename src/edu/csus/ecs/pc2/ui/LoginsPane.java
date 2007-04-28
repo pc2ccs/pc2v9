@@ -189,7 +189,7 @@ public class LoginsPane extends JPanePlugin {
     private void removeLoginRow (ClientId clientId, ConnectionHandlerID connectionHandlerID) {
         int row = loginListBox.getIndexByKey(clientId);
         if (row != -1){
-            loginListBox.remove(row);
+            loginListBox.removeRow(row);
         }
         loginListBox.autoSizeAllColumns();
     }
