@@ -9,6 +9,7 @@
     <property name="src.dir" location="src" />
     <property name="test.dir" location="test" />
     <property name="build.dir" location="build" />
+    <property name="data.dir" location="data" />
     <property name="build.prod.dir" location="${build.dir}/prod" />
     <property name="build.test.dir" location="${build.dir}/test" />
     <property name="testresults.dir" location="${build.dir}/test-results" />

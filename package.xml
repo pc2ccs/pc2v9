@@ -56,6 +56,7 @@
             <zipfileset dir="${build.dir}" filemode="644" prefix="${release}">
                 <include name="VERSION"/>
             </zipfileset>
+            <zipfileset dir="${data.dir}" filemode="644" prefix="${release}/data"/>
             <zipfileset dir="${scripts.dir}" filemode="755" prefix="${release}/bin"/>
             <zipfileset dir="${dist.dir}" filemode="644" includes="${jar.name}" 
                                                  prefix="${release}/lib"/>
