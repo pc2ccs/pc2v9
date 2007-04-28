@@ -28,7 +28,7 @@ public class RunsReport implements IReport {
 
     private Log log;
     
-    private void writeRow (PrintWriter printWriter, Run run){
+    private void writeRowOld (PrintWriter printWriter, Run run){
         
         ClientId clientId = run.getSubmitter();
         printWriter.print("run "+run.getNumber()+"|");
@@ -71,7 +71,38 @@ public class RunsReport implements IReport {
         printWriter.println();
     
     }
+    
+    private void writeRow(PrintWriter printWriter, Run run) {
 
+        ClientId clientId = run.getSubmitter();
+        printWriter.print("run " + run.getNumber() + " ");
+        printWriter.print(run.getStatus() + " ");
+        printWriter.print("s" + run.getSiteNumber() + " ");
+        printWriter.print("at " + run.getElapsedMins() + " ");
+        printWriter.print(clientId.getName() + " (" + getClientName(clientId) + ") ");
+
+        printWriter.print(model.getProblem(run.getProblemId()) + " ");
+        printWriter.print(model.getLanguage(run.getLanguageId()) + " ");
+
+        if (run.isDeleted()) {
+            printWriter.print(" DELETED ");
+        }
+        printWriter.println();
+        if (run.isJudged()) {
+
+            for (JudgementRecord judgementRecord : run.getAllJudgementRecords()) {
+                Judgement judgement = model.getJudgement(judgementRecord.getJudgementId());
+                printWriter.print("     ");
+                printWriter.print(" '" + judgement + "'");
+                printWriter.print(" by " + judgementRecord.getJudgerClientId().getName());
+                printWriter.print(" at " + judgementRecord.getWhenJudgedTime());
+              
+            }
+            printWriter.println();
+        }
+
+    }
+    
     private void writeReport(PrintWriter printWriter) {
         
         // Runs
