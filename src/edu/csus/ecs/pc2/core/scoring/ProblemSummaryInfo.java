@@ -28,6 +28,8 @@ public class ProblemSummaryInfo implements Serializable {
 
     private int penaltyPoints = 0;
 
+    private boolean unJudgedRuns = false;
+    
     private ElementId problemId = null;
 
     /**
@@ -103,6 +105,14 @@ public class ProblemSummaryInfo implements Serializable {
      */
     public void setSolved(boolean solved) {
         this.solved = solved;
+    }
+
+    public boolean isUnJudgedRuns() {
+        return unJudgedRuns;
+    }
+
+    public void setUnJudgedRuns(boolean unJudgedRuns) {
+        this.unJudgedRuns = unJudgedRuns;
     }
 
 }
