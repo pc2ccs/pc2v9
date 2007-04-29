@@ -67,7 +67,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
 
         // Add accounts
         model.generateNewAccounts(ClientType.Type.TEAM.toString(), 1, true);
-        model.generateNewAccounts(ClientType.Type.TEAM.toString(), 1, false);
+        model.generateNewAccounts(ClientType.Type.TEAM.toString(), 1, true);
         
         model.generateNewAccounts(ClientType.Type.JUDGE.toString(), 1, true);
         
@@ -101,7 +101,28 @@ public class DefaultScoringAlgorithmTest extends TestCase {
         Account account = model.getAccounts(ClientType.Type.TEAM).firstElement();
 
         ClientId id = account.getClientId();
-        return new Run(id, language, problem);
+        Run run = new Run(id, language, problem);
+        run.setElapsedMins(5);
+        return run;
+    }
+
+    /**
+     * Create a new run in the model.
+     * 
+     * @param model
+     * @param elapsedMinutes
+     * @return created run.
+     */
+    private Run getARun(IModel model, int elapsedMinutes) {
+        Problem problem = model.getProblems()[0];
+        Language language = model.getLanguages()[0];
+        
+        Account account = model.getAccounts(ClientType.Type.TEAM).firstElement();
+
+        ClientId id = account.getClientId();
+        Run run = new Run(id, language, problem);
+        run.setElapsedMins(elapsedMinutes);
+        return run;
     }
 
     /**
@@ -119,6 +140,29 @@ public class DefaultScoringAlgorithmTest extends TestCase {
         
         checkOutputXML(model);
     }
+
+    /**
+     * Verify XML created for a single unjudged run.
+     */
+    public void testMixedjudged() {
+
+        Model model = new Model();
+        
+        initFakeData(model);
+        Run run = getARun(model, 5);
+        RunFiles runFiles = new RunFiles(run, "samps/Sumit.java");
+        
+        model.addRun(run, runFiles, null);
+
+        createJudgedRun(model, 0, false, 7);
+        
+        run = getARun(model, 10);
+        model.addRun(run, runFiles, null);
+
+        createJudgedRun(model, 0, true, 15);
+       
+        checkOutputXML(model);
+    }
     
     /**
      * Submit and judge a run.
@@ -127,14 +171,15 @@ public class DefaultScoringAlgorithmTest extends TestCase {
      * @param judgementIndex
      * @param solved
      */
-    public void createJudgedRun (IModel model, int judgementIndex, boolean solved){
+    public void createJudgedRun (IModel model, int judgementIndex, boolean solved) {
         Run run = getARun(model);
         RunFiles runFiles = new RunFiles(run, "samps/Sumit.java");
         
         model.addRun(run, runFiles, null);
         
         ClientId who = model.getAccounts(ClientType.Type.JUDGE).firstElement().getClientId();
-        model.updateRun(run, RunStates.BEING_JUDGED, who);
+        run.setStatus(RunStates.BEING_JUDGED);
+        model.updateRun(run, who);
         
         Judgement judgement = model.getJudgements()[judgementIndex]; // Judge as No
         
@@ -143,6 +188,29 @@ public class DefaultScoringAlgorithmTest extends TestCase {
         
     }
 
+    /**
+     * Submit and judge a run.
+     * 
+     * @param model
+     * @param judgementIndex
+     * @param solved
+     */
+    public void createJudgedRun (IModel model, int judgementIndex, boolean solved, int elapsedMinutes){
+        Run run = getARun(model, elapsedMinutes);
+        RunFiles runFiles = new RunFiles(run, "samps/Sumit.java");
+        
+        model.addRun(run, runFiles, null);
+        
+        ClientId who = model.getAccounts(ClientType.Type.JUDGE).firstElement().getClientId();
+        run.setStatus(RunStates.BEING_JUDGED);
+        model.updateRun(run, who);
+        
+        Judgement judgement = model.getJudgements()[judgementIndex]; // Judge as No
+        
+        JudgementRecord judgementRecord = new JudgementRecord(judgement.getElementId(), who, solved, false);
+        model.addRunJudgement(run, judgementRecord, null, who);
+        
+    }
     /**
      * Get XML from ScoringAlgorithm and test whether it can be parsed.
      * @param model
