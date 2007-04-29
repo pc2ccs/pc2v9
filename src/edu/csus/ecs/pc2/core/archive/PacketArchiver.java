@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 
+import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.IModel;
@@ -28,7 +29,7 @@ public class PacketArchiver implements UIPlugin {
 
     private static long serialNumber = ((new Date()).getTime()) % 10000;
 
-    private String dirname = "packets";
+    private String outputDirectroryName = "packets";
 
     @SuppressWarnings("unused")
     private IModel model;
@@ -42,16 +43,17 @@ public class PacketArchiver implements UIPlugin {
      * Default constructor.
      */
     public PacketArchiver() {
-        Utilities.insureDir(dirname);
+        outputDirectroryName = getPC2BaseDirectory() + File.separator + outputDirectroryName;
+        Utilities.insureDir(outputDirectroryName);
     }
 
     /**
      * 
-     * @param dirname
+     * @param outputDirectroryName
      */
-    public PacketArchiver(String dirname) {
-        this.dirname = dirname;
-        Utilities.insureDir(dirname);
+    public PacketArchiver(String outputDirectroryName) {
+        this.outputDirectroryName = outputDirectroryName;
+        Utilities.insureDir(outputDirectroryName);
     }
     
     public int packetsWritten (){
@@ -65,6 +67,11 @@ public class PacketArchiver implements UIPlugin {
     public String getLastArchiveFilename() {
         return lastArchiveFilename;
     }
+    
+    public String getPC2BaseDirectory () {
+        VersionInfo versionInfo = new VersionInfo();
+        return versionInfo.locateHome();
+    }
 
     /**
      * Write next packet file name.
@@ -76,7 +83,7 @@ public class PacketArchiver implements UIPlugin {
      * @throws IOException 
      */
     public boolean writeNextPacket(Packet packet) throws IOException {
-        lastArchiveFilename = dirname + File.separator + "packet" + serialNumber + "." + nextPacketNumber + ".packet";
+        lastArchiveFilename = outputDirectroryName + File.separator + "packet" + serialNumber + "." + nextPacketNumber + ".packet";
         boolean wasWritten = savePacket(lastArchiveFilename, packet);
         nextPacketNumber ++;
         System.err.println("debug writeNextPacket wrote to  "+lastArchiveFilename);
@@ -113,20 +120,14 @@ public class PacketArchiver implements UIPlugin {
     }
 
     /**
-     * Get the dirname where the packets will be written.
+     * Get the outputDirectroryName where the packets will be written.
      * @return the dir name where packet are written.
      */
-    protected String getDirname() {
-        return dirname;
+    protected String getOutputDirectroryName() {
+        return outputDirectroryName;
     }
 
-    /**
-     * @param dirname
-     *            directory for writeNextPacket to use
-     */
-    protected void setDirname(String dirname) {
-        this.dirname = dirname;
-    }
+ 
 
     public void setModelAndController(IModel inModel, IController inController) {
         this.model = inModel;
