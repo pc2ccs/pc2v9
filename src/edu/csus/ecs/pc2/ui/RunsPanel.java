@@ -330,7 +330,9 @@ public class RunsPanel extends JPanePlugin {
     
     private void initializePermissions() {
         Account account = getModel().getAccount(getModel().getClientId());
-        permissionList.clearAndLoadPermissions(account.getPermissionList());
+        if (account != null){
+            permissionList.clearAndLoadPermissions(account.getPermissionList());
+        }
     }
 
     private void updateGUIperPermissions() {
@@ -441,11 +443,23 @@ public class RunsPanel extends JPanePlugin {
             filterButton.setMnemonic(java.awt.event.KeyEvent.VK_F);
             filterButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.out.println("actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+                    filterRuns();
                 }
             });
         }
         return filterButton;
+    }
+
+    protected void filterRuns() {
+        
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                reloadRunList();
+                rowCountLabel.setText(""+runListBox.getRowCount());
+                rowCountLabel.setToolTipText("There are "+runListBox.getRowCount()+" runs");
+            }
+        });
+        
     }
 
     /**
