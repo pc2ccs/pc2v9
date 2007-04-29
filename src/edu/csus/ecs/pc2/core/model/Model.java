@@ -614,14 +614,15 @@ public class Model implements IModel {
         if (isServer()){
             
             /**
-             * These are actions that can only be taken when the server knows 
-             * which site number it is, until this point the server has been 
-             * not assigned a site number.
+             * Now that this model know its site number, we can now create
+             * the site specific database directories and files, or load
+             * them as needed. 
              */
             
 //            runList = new RunList(clientId.getSiteNumber(), true);
-//            runFilesList = new RunFilesList(clientId.getSiteNumber());
+            runFilesList = new RunFilesList(clientId.getSiteNumber());
 //            clarificationList = new ClarificationList(clientId.getSiteNumber(), true);
+            
             if (getContestTime() == null){
                 ContestTime contestTime = new ContestTime();
                 contestTime.setSiteNumber(getSiteNumber());
@@ -843,6 +844,10 @@ public class Model implements IModel {
         contestTimeList.add(contestTime);
         ContestTimeEvent contestTimeEvent = new ContestTimeEvent(ContestTimeEvent.Action.ADDED, contestTime, contestTime.getSiteNumber());
         fireContestTimeListener(contestTimeEvent);
+    }
+    
+    public Enumeration<ClientId> getLocalLoggedInClients(Type type) {
+        return localLoginList.getClients(type);
     }
 
     public Enumeration<ClientId> getLoggedInClients(Type type) {

@@ -205,6 +205,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
 
     private void sendToClient(ConnectionHandlerID connectionHandlerID, Packet packet) {
+        info("sendToClient "+connectionHandlerID+" " +packet);
         try {
             transportManager.send(packet, connectionHandlerID);
         } catch (TransportException e) {
@@ -1007,24 +1008,29 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
 
     public void sendToServers(Packet packet) {
-        sendPacketToClients(packet, ClientType.Type.SERVER);
+        Enumeration<ClientId> clientIds = model.getLoggedInClients(ClientType.Type.SERVER);
+        while (clientIds.hasMoreElements()) {
+            ClientId clientId = clientIds.nextElement();
+            ConnectionHandlerID connectionHandlerID = model.getConnectionHandleID(clientId);
+            boolean isThisServer = isThisSite(clientId.getSiteNumber());
+            if (!isThisServer) {
+                // only send to other servers
+                sendToClient(connectionHandlerID, packet);
+            }
+        }
     }
 
     /**
-     * Send packet to all logged in server.
+     * Send packet to all this sites logged in clients.
      * 
      * @param packet
      */
     private void sendPacketToClients(Packet packet, ClientType.Type type) {
-        Enumeration<ClientId> clientIds = model.getLoggedInClients(type);
+        Enumeration<ClientId> clientIds = model.getLocalLoggedInClients(type);
         while (clientIds.hasMoreElements()) {
             ClientId clientId = clientIds.nextElement();
-            ConnectionHandlerID connectionHandlerID = model.getConnectionHandleID(clientId);
-            boolean isThisServer = type.equals(Type.SERVER) && isThisSite(clientId.getSiteNumber());
-            if ( ! isThisServer ){
-                /**
-                 * Only send to a client that is not this site's server, ever.
-                 */
+            if (isThisSite(clientId.getSiteNumber())) {
+                ConnectionHandlerID connectionHandlerID = model.getConnectionHandleID(clientId);
                 sendToClient(connectionHandlerID, packet);
             }
         }
@@ -1047,7 +1053,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
 
     public void sendToTeams(Packet packet) {
-        sendPacketToClients(packet, ClientType.Type.SCOREBOARD);
+        sendPacketToClients(packet, ClientType.Type.TEAM);
     }
     
     private int getPortForSite(int inSiteNumber) {

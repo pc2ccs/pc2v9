@@ -307,7 +307,10 @@ public interface IModel {
 
     // TODO change to ClientId [] getLoggedInClients(Type type);
     Enumeration<ClientId> getLoggedInClients(Type type);
-    
+
+    // TODO change to ClientId [] getLoggedInClients(Type type);
+    Enumeration<ClientId> getLocalLoggedInClients(Type type);
+
     void loginDenied(ClientId clientId, ConnectionHandlerID connectionHandlerID, String message);
 
     void initializeWithFakeData();

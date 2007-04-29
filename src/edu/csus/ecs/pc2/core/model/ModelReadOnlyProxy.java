@@ -717,4 +717,9 @@ public final class ModelReadOnlyProxy implements IModel {
         // TODO Auto-generated method stub
     }
 
+    public Enumeration<ClientId> getLocalLoggedInClients(Type type) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

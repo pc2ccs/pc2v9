@@ -243,7 +243,8 @@ public class PacketHandler {
                 loadDataIntoModel(packet, connectionHandlerID);
                 info(" handlePacket original LOGIN_SUCCESS after -- all settings loaded ");
             } else {
-                info(" handlePacket LOGIN_SUCCESS - from another site, no update of contest data: " + packet);
+                loadSettingsFromRemoteServer(packet, connectionHandlerID);
+                info(" handlePacket LOGIN_SUCCESS - from another site -- all settings loaded " + packet);
             }
 
         } else {
@@ -252,7 +253,7 @@ public class PacketHandler {
             controller.getLog().log(Log.WARNING,"Unhandled Packet ", exception);
         }
         
-        info("handlePacket start " + packet);
+        info("handlePacket end " + packet);
 
     }
     
@@ -872,9 +873,56 @@ public class PacketHandler {
 
     }
     
+    /**
+     * Add logins to model.
+     * 
+     * @param packet
+     */
+    private void addLoginsToModel(Packet packet) {
+        
+        try {
+            
+            ClientId [] clientIds = (ClientId[]) PacketFactory.getObjectValue(packet, PacketFactory.LOGGED_IN_USERS);
+            if (clientIds != null){
+                for (ClientId clientId : clientIds){
+                    if ( (!isServer()) || (!isThisSite(clientId.getSiteNumber()))) {
+                        
+                        // TODO someday soon load logins with their connectionIds
+                        ConnectionHandlerID fakeId = new ConnectionHandlerID("Fake-Site"+clientId.getSiteNumber());
+                        model.addLogin(clientId, fakeId);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // TODO: log handle exception
+            e.printStackTrace();
+            controller.getLog().log(Log.WARNING, "Exception logged ", e);
+        }
+    }
 
     private boolean isThisSite(Account account) {
         return account.getSiteNumber() == model.getSiteNumber();
+    }
+    
+    private void loadSettingsFromRemoteServer(Packet packet, ConnectionHandlerID connectionHandlerID) {
+        
+        info("loadSettingsFromRemoteServer start debug22 ");
+        addContestTimesToModel(packet);
+
+        addSitesToModel(packet);
+
+        addRunsToModel(packet);
+
+        addClarificationsToModel(packet);
+
+        addAccountsToModel(packet);
+
+        // TODO debug from remote servers
+//        addConnectionIdsToModel(packet);
+//        
+//        addLoginsToModel (packet);
+        
+        info("loadSettingsFromRemoteServer end   debug22 ");
     }
 
     /**
@@ -961,6 +1009,8 @@ public class PacketHandler {
         addAccountsToModel (packet);
         
         addConnectionIdsToModel (packet);
+        
+//        addLoginsToModel(packet);
 
         if (model.isLoggedIn()) {
 
