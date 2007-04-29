@@ -171,7 +171,7 @@ public class RunList implements Serializable {
      * @param run
      * @param newState
      */
-    public void updateRun(Run run, RunStates newState) {
+    public void updateRunStatus(Run run, RunStates newState) {
         Run theRun = runHash.get(getRunKey(run));
         theRun.getElementId().incrementVersionNumber();
         theRun.setStatus(newState);
@@ -180,7 +180,7 @@ public class RunList implements Serializable {
     }
 
     /**
-     * Update run, increment version number.
+     * Replace run, increment version number.
      * @param run
      */
     public void updateRun(Run run) {

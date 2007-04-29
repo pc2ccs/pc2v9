@@ -77,7 +77,9 @@ public class PacketHandler {
         } else if (packetType.equals(Type.RUN_SUBMISSION_CONFIRM)) {
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
             model.addRun(run);
-            sendToJudgesAndOthers(packet, isThisSite(run));
+            if (isServer()){
+                sendToJudgesAndOthers(packet, isThisSite(run));
+            }
 
         } else if (packetType.equals(Type.RUN_SUBMISSION)) {
             // RUN submitted by team to server
@@ -292,6 +294,11 @@ public class PacketHandler {
         }
     }
 
+    /**
+     * Update from admin to server.
+     * 
+     * @param packet
+     */
     private void updateRun(Packet packet){
         
         Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
@@ -314,9 +321,9 @@ public class PacketHandler {
                     info("updateRun by " + packet.getSourceId() + " " + run);
                     if (judgementRecord != null) {
                         model.addRunJudgement(run, judgementRecord, runResultFiles, whoChangedRun);
-                        model.updateRun(run, run.getStatus(), whoChangedRun);
+                        model.updateRun(run, whoChangedRun);
                     } else {
-                        model.updateRun(run, run.getStatus(), whoChangedRun);
+                        model.updateRun(run, whoChangedRun);
                     }
                 } else {
                     throw new SecurityException("Non-admin user "+packet.getSourceId()+" attemped to update run "+run);
@@ -377,23 +384,29 @@ public class PacketHandler {
         ClientId whoModifiedRun = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
 
         if (isServer()){
-            model.updateRun(run, run.getStatus(), whoModifiedRun);
+            model.updateRun(run, whoModifiedRun);
             sendToJudgesAndOthers(packet, false);
         } else {
-            model.updateRun(run, run.getStatus(), whoModifiedRun);
+            model.updateRun(run, whoModifiedRun);
         }
     }
     
-    private void sendRunUpdateNotification (Packet packet){
-        
+    /**
+     * Update from server to everyone else.
+     * @param packet
+     */
+    private void sendRunUpdateNotification(Packet packet) {
+
         Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
         ClientId whoModifiedRun = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
 
-        if (isServer()){
-            model.updateRun(run, run.getStatus(), whoModifiedRun);
+        System.err.println(" debug22 sendRunUpdateNotification judgements = "+run.getJudgementRecord());
+        
+        if (isServer()) {
+            model.updateRun(run, whoModifiedRun);
             sendToJudgesAndOthers(packet, false);
         } else {
-            model.updateRun(run, run.getStatus(), whoModifiedRun);
+            model.updateRun(run, whoModifiedRun);
         }
     }
 
@@ -637,7 +650,8 @@ public class PacketHandler {
         } else {
             // Client, update status and done.
 
-            model.updateRun(run, RunStates.NEW, whoCanceledRun);
+            run.setStatus(RunStates.NEW);
+            model.updateRun(run, whoCanceledRun);
         }
     }
 
@@ -670,7 +684,7 @@ public class PacketHandler {
             }
 
         } else {
-            model.updateRun(run, run.getStatus(), judgementRecord.getJudgerClientId());
+            model.updateRun(run, judgementRecord.getJudgerClientId());
         }
     }
     
@@ -738,7 +752,8 @@ public class PacketHandler {
 
                 } else if (run.getStatus() == RunStates.NEW || isSuperUser(whoRequestsRunId)) {
 
-                    model.updateRun(theRun, RunStates.BEING_JUDGED, whoRequestsRunId);
+                    theRun.setStatus(RunStates.BEING_JUDGED);
+                    model.updateRun(theRun, whoRequestsRunId);
 
                     theRun = model.getRun(run.getElementId());
                     RunFiles runFiles = model.getRunFiles(run);
@@ -1081,20 +1096,18 @@ public class PacketHandler {
     private boolean isServer(){
         return isServer(model.getClientId());
     }
-
-    /**
-     * TODO - a temporary logging routine.
-     */
+    
     public void info(String s) {
-        System.err.println(s);
-        controller.getLog().log(Log.INFO, s);
+        controller.getLog().warning(s);
+        System.err.println(Thread.currentThread().getName() + " " + s);
+        System.err.flush();
     }
 
-    // TODO temporary logging routine
-    public void info(String s, Exception ex) {
-        System.err.println(s);
-        ex.printStackTrace();
-        controller.getLog().log(Log.INFO, s, ex);
+    public void info(String s, Exception exception) {
+        controller.getLog().log (Log.WARNING, s, exception);
+        System.err.println(Thread.currentThread().getName() + " " + s);
+        System.err.flush();
+        exception.printStackTrace(System.err);
     }
 
 }

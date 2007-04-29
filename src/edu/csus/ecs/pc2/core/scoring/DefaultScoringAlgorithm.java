@@ -460,7 +460,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             e.printStackTrace();
             xmlString = "";
         }
-        System.out.println(xmlString);
+//        System.out.println(xmlString);
         return xmlString;
     }
 

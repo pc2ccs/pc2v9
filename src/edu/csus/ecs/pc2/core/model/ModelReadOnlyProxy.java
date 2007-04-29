@@ -79,14 +79,6 @@ public final class ModelReadOnlyProxy implements IModel {
         }
     }
 
-    public void updateRun(Run run) {
-        try {
-            throw new IllegalModelAccessException("updateRun");
-        } catch (IllegalModelAccessException e) {
-            e.printStackTrace();
-        }
-    }
-
     public void updateSite(Site site) {
         try {
             throw new IllegalModelAccessException("updateSite");
@@ -719,6 +711,10 @@ public final class ModelReadOnlyProxy implements IModel {
     public boolean isConnectedToRemoteSite(ConnectionHandlerID connectionHandlerID) {
         // TODO Auto-generated method stub
         return false;
+    }
+
+    public void updateRun(Run run, ClientId whoChangedRun) {
+        // TODO Auto-generated method stub
     }
 
 }

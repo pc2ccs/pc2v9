@@ -287,7 +287,7 @@ public class Model implements IModel {
                 
                 System.out.println(" "+runEvent.getAction()+" "+runEvent.getRun());
                 if (runEvent.getRun() == null){
-                    new Exception("debug22 RUN_SUBMISSION_CONFIRM ").printStackTrace();
+                    new Exception("debug22 RUN_SUBMISSION_CONFIRM run is NULL ").printStackTrace();
                 }
 
             } else if (runEvent.getAction() == RunEvent.Action.DELETED) {
@@ -886,13 +886,13 @@ public class Model implements IModel {
     }
 
     // Check out run
-    public void updateRun (Run run, RunStates newState, ClientId whoChangedRun) {
-        runList.updateRun(run,newState);
-        if (newState.equals(RunStates.BEING_JUDGED)){
+    public void updateRun (Run run, ClientId whoChangedRun) {
+        runList.updateRun(run);
+        Run newRun = runList.get(run.getElementId());
+        if (newRun.getStatus().equals(RunStates.BEING_JUDGED)){
             runCheckOutList.put(run.getElementId(), whoChangedRun);
         }
 
-        Run newRun = runList.get(run.getElementId());
         RunEvent runEvent = new RunEvent(RunEvent.Action.CHANGED, newRun, null);
         runEvent.setWhoModifiedRun(whoChangedRun);
         fireRunListener(runEvent);
@@ -956,7 +956,8 @@ public class Model implements IModel {
 // }
         
         runCheckOutList.remove(whoCheckedOut);
-        runList.updateRun(run, RunStates.NEW);
+        run.setStatus(RunStates.NEW);
+        runList.updateRun(run);
         Run theRun = runList.get(run);
         
         RunEvent runEvent = new RunEvent(RunEvent.Action.RUN_AVIALABLE, theRun, null);
@@ -1016,12 +1017,6 @@ public class Model implements IModel {
         siteList.update(site);
         SiteEvent siteEvent = new SiteEvent(SiteEvent.Action.CHANGED, site);
         fireSiteListener(siteEvent);
-    }
-
-    public void updateRun(Run run) {
-        runList.updateRun(run);
-        RunEvent runEvent = new RunEvent(RunEvent.Action.CHANGED, run, null);
-        fireRunListener(runEvent);
     }
 
     public void updateAccount(Account account) {

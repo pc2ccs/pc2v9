@@ -1481,8 +1481,8 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
     
     public void updateRun(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles) {
-        Packet updateProblemPacket = PacketFactory.createRunUpdated(model.getClientId(), getServerClientId(), run, judgementRecord, runResultFiles, model.getClientId());
-        sendToLocalServer(updateProblemPacket);
+        Packet updateRunPacket = PacketFactory.createRunUpdated(model.getClientId(), getServerClientId(), run, judgementRecord, runResultFiles, model.getClientId());
+        sendToLocalServer(updateRunPacket);
     }
 
     public void addProblem(Problem problem) {

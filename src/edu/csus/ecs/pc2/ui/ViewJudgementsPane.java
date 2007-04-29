@@ -68,6 +68,7 @@ public class ViewJudgementsPane extends JPanePlugin implements UIPlugin {
                 setTitle("Run " + run.getNumber() + " elapsed " + run.getElapsedMins()+  deletedString);
 
                 JudgementRecord judgementRecord = run.getJudgementRecord();
+                System.out.println(" debug22 Judgements for run is "+judgementRecord);
 
                 judgementsListbox.removeAllRows();
 

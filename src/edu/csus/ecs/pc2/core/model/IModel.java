@@ -5,7 +5,6 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
-import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
 /**
@@ -36,15 +35,6 @@ public interface IModel {
 
     void connectionDropped(ConnectionHandlerID connectionHandlerID);
 
-    /**
-     * Update the run information.
-     * 
-     * To add a judgement, use {@link #addRunJudgement(Run, JudgementRecord, RunResultFiles, ClientId)}
-     * 
-     * @param run
-     */
-    void updateRun(Run run);
-    
     void updateSite (Site site);
 
     void updateLanguage(Language language);
@@ -339,13 +329,8 @@ public interface IModel {
     /**
      * Update the run.
      * 
-     * Check out run or just update state. 
-     * 
-     * @param run
-     * @param newState
-     * @param whoChangedRun
      */
-    void updateRun(Run run, RunStates newState, ClientId whoChangedRun);
+    void updateRun(Run run, ClientId whoChangedRun);
 
     /**
      * Get submitted files for input run.

@@ -580,9 +580,14 @@ public class RunsPanel extends JPanePlugin {
         try {
             ElementId elementId = (ElementId) runListBox.getKeys()[selectedIndexes[0]];
             Run theRun = getModel().getRun(elementId);
+            
+            if (theRun != null){
+                viewJudgementsFrame.setRun(theRun);
+                viewJudgementsFrame.setVisible(true);
+            } else {
+                showMessage("Can not display judgements for Run");
+            }
 
-            viewJudgementsFrame.setRun(theRun);
-            viewJudgementsFrame.setVisible(true);
             
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception logged ", e);
