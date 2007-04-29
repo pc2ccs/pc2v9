@@ -19,6 +19,8 @@ import com.ibm.webrunner.j2mclb.util.NumericStringComparator;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.Clarification;
+import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.IModel;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.packet.Packet;
@@ -272,7 +274,7 @@ public class PacketExplorerPane extends JPanePlugin {
      */
     private void addPacketToList(final Packet packet) {
 
-        Runnable updateTitle = new Runnable() {
+        SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 Object[] objArray = new Object[packetListBox.getColumnCount()];
                 // Object[] cols = {"Type", "Time", "From", "To", "Contains" };
@@ -292,13 +294,8 @@ public class PacketExplorerPane extends JPanePlugin {
 
                 objArray[0] = packet.getType().toString();
                 objArray[1] = new Long(elapsed).toString();
-                objArray[2] = packet.getSourceId().getName();
-
-                if (packet.getDestinationId() == null) {
-                    objArray[3] = "server";
-                } else {
-                    objArray[3] = packet.getDestinationId().getName();
-                }
+                objArray[2] = getClientName(packet.getSourceId());
+                objArray[3] = getClientName(packet.getDestinationId());
 
                 if (content instanceof Properties) {
                     Properties props = (Properties) content;
@@ -316,9 +313,29 @@ public class PacketExplorerPane extends JPanePlugin {
                 packetListBox.addRow(objArray, packet);
                 packetListBox.autoSizeAllColumns();
             }
-        };
-        SwingUtilities.invokeLater(updateTitle);
+        });
+    }
 
+    /**
+     * Name for client, especially servers.
+     * 
+     * @param clientId
+     * @return
+     */
+    protected Object getClientName(ClientId clientId) {
+        if (clientId == null) {
+            return "<null>";
+        } else {
+            if (clientId.getClientType().equals(ClientType.Type.SERVER)) {
+                if (clientId.equals(PacketFactory.ALL_SERVERS)) {
+                    return "All Servers";
+                } else {
+                    return "Site " + clientId.getSiteNumber();
+                }
+            } else {
+                return clientId.getName();
+            }
+        }
     }
 
     /**
