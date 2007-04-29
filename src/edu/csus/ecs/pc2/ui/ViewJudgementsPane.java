@@ -270,29 +270,20 @@ public class ViewJudgementsPane extends JPanePlugin implements UIPlugin {
     public class RunListenerImplementation implements IRunListener {
 
         public void runAdded(RunEvent event) {
-            System.err.println("debug22 Event "+event.getAction()+" " +run+" "+event.getRun());
-            if (run != null && event.getRun().getElementId().equals(run.getElementId())){
-                setRun (event.getRun());
-            } else {
-                new Exception("debug "+event.getAction()).printStackTrace();
+            if (run != null && event.getRun().getElementId().equals(run.getElementId())) {
+                setRun(event.getRun());
             }
         }
 
         public void runChanged(RunEvent event) {
-            System.err.println("debug22 Event "+event.getAction()+" " +run);
-            if (run != null && event.getRun().getElementId().equals(run.getElementId())){
-                setRun (event.getRun());
-            } else {
-                new Exception("debug "+event.getAction()).printStackTrace();
+            if (run != null && event.getRun().getElementId().equals(run.getElementId())) {
+                setRun(event.getRun());
             }
         }
 
         public void runRemoved(RunEvent event) {
-            System.err.println("debug22 Event "+event.getAction()+" " +run);
-            if (run != null && event.getRun().getElementId().equals(run.getElementId())){
-                setRun (event.getRun());
-            } else {
-                new Exception("debug "+event.getAction()).printStackTrace();
+            if (run != null && event.getRun().getElementId().equals(run.getElementId())) {
+                setRun(event.getRun());
             }
         }
     }

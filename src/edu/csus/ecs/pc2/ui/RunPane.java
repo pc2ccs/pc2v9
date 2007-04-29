@@ -218,6 +218,22 @@ public class RunPane extends JPanePlugin {
             System.out.println("debug22 judgement "+judgementRecord.isSolved()+" "+judgementRecord.isSendToTeam()+" "+judgement);
         }
 
+        newRun.setDeleted(deleteCheckBox.isSelected());
+        
+        int elapsed = getIntegerValue(getElapsedTimeTextField().getText());
+        newRun.setElapsedMins(elapsed);
+
+        ElementId problemId = ((Problem) getProblemComboBox().getSelectedItem()).getElementId();
+        if (problemId != null) {
+            run.setProblemId(problemId);
+        }
+        ElementId languageId = ((Language) getLanguageComboBox().getSelectedItem()).getElementId();
+        if (languageId != null) {
+            run.setLanguageId(languageId);
+        }
+        
+        newRun.setProblemId(problemId);
+
         getController().updateRun(newRun, judgementRecord, runResultFiles);
 
         if (getParentFrame() != null) {
@@ -405,8 +421,8 @@ public class RunPane extends JPanePlugin {
      * 
      */
     public void enableUpdateButton() {
-        
-        if (populatingGUI){
+
+        if (populatingGUI) {
             return;
         }
 
@@ -420,8 +436,8 @@ public class RunPane extends JPanePlugin {
             enableButton |= (!run.getProblemId().equals(problemId));
 
             ElementId languageId = ((Language) getLanguageComboBox().getSelectedItem()).getElementId();
-                enableButton |= (!run.getLanguageId().equals(languageId));
-            
+            enableButton |= (!run.getLanguageId().equals(languageId));
+
             enableButton |= (run.isDeleted() != getDeleteCheckBox().isSelected());
 
             enableButton |= judgementChanged();
