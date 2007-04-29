@@ -229,13 +229,14 @@ public class PacketHandler {
             loginClient(packet); 
             
         } else if (packetType.equals(Type.LOGIN_SUCCESS)) {
-            // from server to client on a successful login
+            // from server to client/server on a successful login
 
             if (isServer(packet.getDestinationId())) {
                 /**
-                 * Add the originating server into login list, if this client is a server.
+                 * Add server into login list.
                  */
                 model.addLogin(fromId, connectionHandlerID);
+                info("Added Login "+fromId);
             }
 
             if (!model.isLoggedIn()) {
@@ -340,7 +341,7 @@ public class PacketHandler {
             }
 
         } else {
-            if (model.isLoggedIn(run.getSubmitter())) {
+            if (model.isLocalLoggedIn(run.getSubmitter())) {
                 controller.sendToClient(packet);
             }
             sendToJudgesAndOthers(packet, false);
@@ -505,7 +506,7 @@ public class PacketHandler {
         Account oneAccount = (Account) PacketFactory.getObjectValue(packet, PacketFactory.ACCOUNT);
         if (oneAccount != null) {
             if (isServer()) {
-                if (model.isLoggedIn(oneAccount.getClientId())) {
+                if (model.isLocalLoggedIn(oneAccount.getClientId())) {
                     controller.sendToClient(packet);
                 }
             }
@@ -518,7 +519,7 @@ public class PacketHandler {
                     model.addAccount(account);
                 }
                 if (isServer()) {
-                    if (model.isLoggedIn(account.getClientId())) {
+                    if (model.isLocalLoggedIn(account.getClientId())) {
                         controller.sendToClient(packet);
                     }
                 }
@@ -577,7 +578,7 @@ public class PacketHandler {
                     model.addAccount(account);
                 }
                 if (isServer()) {
-                    if (model.isLoggedIn(account.getClientId())) {
+                    if (model.isLocalLoggedIn(account.getClientId())) {
                         controller.sendToClient(packet);
                     }
                 }
@@ -724,7 +725,7 @@ public class PacketHandler {
             if (!isThisSite(run)) {
 
                 ClientId serverClientId = new ClientId(run.getSiteNumber(), ClientType.Type.SERVER, 0);
-                if (model.isLoggedIn(serverClientId)) {
+                if (model.isLocalLoggedIn(serverClientId)) {
 
                     // send request to remote server
                     Packet requestPacket = PacketFactory.createRunRequest(model.getClientId(), serverClientId, run, whoRequestsRunId, readOnly);
@@ -999,7 +1000,7 @@ public class PacketHandler {
         }
 
         addContestTimesToModel(packet);
-
+        
         addSitesToModel(packet);
 
         addRunsToModel(packet);
@@ -1107,28 +1108,25 @@ public class PacketHandler {
     }
 
     /**
-     * Login to other servers.
+     * Login to all other servers.
      * 
-     * Sends a login request packet to sites that this server is nog logged into.
+     * 
      * 
      * @param packet
      *            contains list of other servers
      */
     private void loginToOtherSites(Packet packet) {
         try {
-            ClientId[] listOfLoggedInUsers = (ClientId[]) PacketFactory.getObjectValue(packet, PacketFactory.LOGGED_IN_USERS);
-            for (ClientId id : listOfLoggedInUsers) {
-                if (isServer(id) && !isThisSite(id.getSiteNumber())) {
-                    if (!model.isLoggedIn(id)) {
-                        controller.sendServerLoginRequest(id.getSiteNumber());
-                    }
+            for (Site site : model.getSites()) {
+                if (!isThisSite(site.getSiteNumber())) {
+                    // TODO code - do not log into servers that are already logged in.
+                    controller.sendServerLoginRequest(site.getSiteNumber());
                 }
             }
         } catch (Exception e) {
             // TODO: log handle exception
-            controller.getLog().log(Log.WARNING,"Exception logged ", e);
+            controller.getLog().log(Log.WARNING, "Exception logged ", e);
         }
-
     }
 
     /**

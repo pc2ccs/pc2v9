@@ -709,14 +709,6 @@ public class Model implements IModel {
         }
         return clientId;
     }
-
-    public boolean isLoggedIn(ClientId sourceId) {
-        boolean loggedIn = localLoginList.isLoggedIn(sourceId);
-        if (! loggedIn){
-            loggedIn = remoteLoginList.isLoggedIn(sourceId);
-        }
-        return loggedIn;
-    }
     
     public boolean isLoggedIn(){
         return localClientId != null;
@@ -724,6 +716,9 @@ public class Model implements IModel {
     
     public boolean isRemoteLoggedIn(ClientId clientId){
         return remoteLoginList.isLoggedIn(clientId);
+    }
+    public boolean isLocalLoggedIn(ClientId clientId) {
+        return localLoginList.isLoggedIn(clientId);
     }
 
     public ConnectionHandlerID getConnectionHandleID(ClientId sourceId) {

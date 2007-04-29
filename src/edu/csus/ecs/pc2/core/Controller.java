@@ -485,7 +485,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         int newSiteNumber = getServerSiteNumber(password);
 
         ClientId newId = new ClientId(newSiteNumber, ClientType.Type.SERVER, 0);
-        if (model.isLoggedIn(newId)) {
+        if (model.isLocalLoggedIn(newId)) {
             info("Note site " + newId + " site " + newSiteNumber + " already logged in, ignoring ");
         }
         ConnectionHandlerID connectionHandlerID = new ConnectionHandlerID("Site " + newSiteNumber);
@@ -572,7 +572,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                 ClientId clientId = packet.getSourceId();
 
                 info("receiveObject " + packet);
-                if (model.isLoggedIn(packet.getSourceId())) {
+                if (model.isLocalLoggedIn(packet.getSourceId())) {
 
                     /**
                      * This user is in the login list and we process their request.
@@ -758,7 +758,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             int newSiteNumber = getServerSiteNumber(password);
 
             ClientId newId = new ClientId(newSiteNumber, ClientType.Type.SERVER, 0);
-            if (model.isLoggedIn(newId)) {
+            if (model.isLocalLoggedIn(newId)) {
                 info("Note site " + clientId + " site " + newSiteNumber + " already logged in, ignoring ");
             }
             model.addLogin(newId, connectionHandlerID);
@@ -1343,6 +1343,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             /**
              * We should not send a LOGIN_REQUEST from this site... to this site.
              */
+            System.err.println(" Tried to send login request to ourselves, login to "+inSiteNumber+", ignored");
             log.log(Log.DEBUG, " Tried to send login request to ourselves, login to "+inSiteNumber+", ignored");
             return;
         }
@@ -1356,12 +1357,11 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             String portStr = remoteSite.getConnectionInfo().getProperty(Site.PORT_KEY);
             int portNumber = Integer.parseInt(portStr);
 
-            info("Contacting Site " + remoteSite.getSiteNumber() + " " + hostName + ":" + portStr);
+            info("Send login request to Site " + remoteSite.getSiteNumber() + " " + hostName + ":" + portStr);
             ConnectionHandlerID connectionHandlerID = transportManager.connectToServer(hostName, portNumber);
 
-            info("Contacted using connection id " + connectionHandlerID);
-
-            info("Sending login request to " + hostName + " as " + getServerClientId() + " " + localPassword); // TODO remove this
+            info("Contacted Site "+remoteSite.getSiteNumber()+ " using connection id " + connectionHandlerID);
+            info("Sending login request to Site "+remoteSite.getSiteNumber()+" " + hostName + " as " + getServerClientId() + " " + localPassword); // TODO remove this
             sendLoginRequest(transportManager, connectionHandlerID, getServerClientId(), localPassword);
             
         } catch (Exception e) {

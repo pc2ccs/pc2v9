@@ -434,8 +434,8 @@ public final class ModelReadOnlyProxy implements IModel {
         return theRealModel.getLoginClientId(connectionHandlerID);
     }
 
-    public boolean isLoggedIn(ClientId sourceId) {
-        return theRealModel.isLoggedIn(sourceId);
+    public boolean isLocalLoggedIn(ClientId sourceId) {
+        return theRealModel.isLocalLoggedIn(sourceId);
     }
 
     public boolean isLoggedIn() {

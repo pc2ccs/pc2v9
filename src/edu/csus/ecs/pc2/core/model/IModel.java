@@ -257,12 +257,17 @@ public interface IModel {
     ClientId getLoginClientId(ConnectionHandlerID connectionHandlerID);
 
     /**
-     * 
+     * is local login (login to this server).
      * @param sourceId
      * @return true if logged in.
      */
-    boolean isLoggedIn(ClientId sourceId);
+    boolean isLocalLoggedIn(ClientId sourceId);
     
+    /**
+     * Is logged into remote server.
+     * @param clientId
+     * @return
+     */
     boolean isRemoteLoggedIn(ClientId clientId);
 
     /**
