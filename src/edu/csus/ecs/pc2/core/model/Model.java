@@ -619,8 +619,9 @@ public class Model implements IModel {
              * not assigned a site number.
              */
             
-            runList = new RunList(clientId.getSiteNumber(), true);
-            runFilesList = new RunFilesList(clientId.getSiteNumber());
+//            runList = new RunList(clientId.getSiteNumber(), true);
+//            runFilesList = new RunFilesList(clientId.getSiteNumber());
+//            clarificationList = new ClarificationList(clientId.getSiteNumber(), true);
             if (getContestTime() == null){
                 ContestTime contestTime = new ContestTime();
                 contestTime.setSiteNumber(getSiteNumber());
