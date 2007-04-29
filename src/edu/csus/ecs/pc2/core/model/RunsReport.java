@@ -96,7 +96,7 @@ public class RunsReport implements IReport {
                 printWriter.print(" '" + judgement + "'");
                 printWriter.print(" by " + judgementRecord.getJudgerClientId().getName());
                 printWriter.print(" at " + judgementRecord.getWhenJudgedTime());
-              
+                printWriter.println();
             }
             printWriter.println();
         }

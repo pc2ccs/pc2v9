@@ -20,6 +20,7 @@ import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IModel;
 import edu.csus.ecs.pc2.core.model.IRunListener;
+import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
@@ -109,8 +110,8 @@ public class RunsPanel extends JPanePlugin {
     }
 
     protected Object[] buildRunRow(Run run, ClientId judgeId) {
-        // Object[] cols = {"Site","Team","Run Id","Time","Status", "Judge",
-        // "Problem","Language","OS"};
+//        Object[] cols = { "Site", "Team", "Run Id", "Time", "Status", "Problem", "Judge", "Language", "OS" };
+
         try {
             int cols = runListBox.getColumnCount();
             Object[] s = new String[cols];
@@ -119,30 +120,44 @@ public class RunsPanel extends JPanePlugin {
             s[1] = getTeamDisplayName(run);
             s[2] = new Long(run.getNumber()).toString();
             s[3] = new Long(run.getElapsedMins()).toString();
-            if (run.isJudged()){
-                if (run.isSolved()){
-                    s[4] = run.getStatus().toString()+" Yes";
-                    
+
+            if (run.isJudged()) {
+
+                if (run.isSolved()) {
+                    s[4] = run.getStatus().toString() + " Yes";
+
                 } else {
-                    s[4] = run.getStatus().toString()+" No";
+                    s[4] = run.getStatus().toString() + " No";
                 }
+
+                JudgementRecord judgementRecord = run.getJudgementRecord();
+                if (judgementRecord != null && judgementRecord.getJudgementId() != null) {
+                    Judgement judgement = getModel().getJudgement(judgementRecord.getJudgementId());
+                    if (judgement != null){
+                        s[4] = judgement.toString();
+                    }
+                }
+
             } else {
                 s[4] = run.getStatus().toString();
             }
-            if (run.isDeleted()){
+
+            if (run.isDeleted()) {
                 s[4] = "DEL " + s[4];
             }
+
+            s[5] = getProblemTitle(run.getProblemId());
+
             if (judgeId != null) {
-                if (judgeId.equals(getModel().getClientId())){
-                    s[5] = "Me";
+                if (judgeId.equals(getModel().getClientId())) {
+                    s[6] = "Me";
                 } else {
-                    s[5] = judgeId.getName();
+                    s[6] = judgeId.getName();
                 }
             } else {
-                s[5] = "";
+                s[6] = "";
             }
 
-            s[6] = getProblemTitle(run.getProblemId());
             s[7] = getLanguageTitle(run.getLanguageId());
             s[8] = run.getSystemOS();
 
@@ -216,7 +231,7 @@ public class RunsPanel extends JPanePlugin {
         if (runListBox == null) {
             runListBox = new MCLB();
 
-            Object[] cols = { "Site", "Team", "Run Id", "Time", "Status", "Judge", "Problem", "Language", "OS" };
+            Object[] cols = { "Site", "Team", "Id", "Time", "Status", "Problem", "Judge", "Language", "OS" };
             runListBox.addColumns(cols);
 
             // Sorters
@@ -239,10 +254,10 @@ public class RunsPanel extends JPanePlugin {
             // Status
             runListBox.setColumnSorter(4, sorter, 5);
 
-            // Judge
+            // Problem
             runListBox.setColumnSorter(5, sorter, 6);
 
-            // Problem
+            // Judge
             runListBox.setColumnSorter(6, sorter, 7);
 
             // Language
@@ -265,7 +280,7 @@ public class RunsPanel extends JPanePlugin {
             public void run() {
                 
                 ClientId whoJudgedId = whoModifiedId;
-                if (run.isJudged() && whoJudgedId == null) {
+                if (run.isJudged()) {
                     JudgementRecord judgementRecord = run.getJudgementRecord();
                     if (judgementRecord != null) {
                         whoJudgedId = judgementRecord.getJudgerClientId();
