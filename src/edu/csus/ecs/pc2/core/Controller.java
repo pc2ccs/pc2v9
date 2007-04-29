@@ -6,6 +6,7 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.VersionInfo;
+import edu.csus.ecs.pc2.core.archive.PacketArchiver;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
@@ -157,6 +158,8 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     private boolean contactingRemoteServer = true;
     
     private boolean usingMainUI = true;
+    
+    private PacketArchiver packetArchiver = new PacketArchiver();
     
     // TODO change this to UIPlugin
     /*
@@ -586,6 +589,8 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                          * Login request from client or other server. When this block is done, they are logged in and a login
                          * success is sent to them.
                          */
+                        
+                        packetArchiver.writeNextPacket(packet);
 
                         if (clientId.getSiteNumber() == ClientId.UNSET) {
                             clientId = new ClientId(model.getSiteNumber(), clientId.getClientType(), clientId.getClientNumber());
@@ -600,6 +605,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                         sendToAdministrators(loginConfirmedPacket);
                         sendToJudges(loginConfirmedPacket);
                         sendToServers(loginConfirmedPacket);
+                        packetArchiver.writeNextPacket(loginConfirmedPacket);
 
                     } catch (SecurityException securityException) {
                         String message = securityException.getMessage();
@@ -645,6 +651,16 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                             String message = "Security violation user " + clientId + " got a " + packet;
                             info(message + " on " + connectionHandlerID);
                             PacketFactory.dumpPacket(System.err, packet);
+                            
+                            try {
+                                
+                                packetArchiver.writeNextPacket(packet);
+                                log.info("Security violation possible spoof packet from "+clientId+" connection "+connectionHandlerID);
+                                log.info("Security violation wrote packet to "+packetArchiver+" packet "+packet);
+                            } catch (Exception e) {
+                                log.log(Log.WARNING, "Exception logged writing packet ", e);
+                            }
+                            
                         }
                         return;
                     } else if ( clientId.getClientType().equals(Type.ADMINISTRATOR)) {
@@ -682,6 +698,13 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
     private void handleServerLoginFailure(Packet packet) {
         // TODO rewrite handle this failure better
+        
+        try {
+            packetArchiver.writeNextPacket(packet);
+            log.info("Login failure packet written to " + packetArchiver.getLastArchiveFilename() + " " + packet);
+        } catch (Exception e) {
+            log.log(Log.WARNING, "Exception logged trying to write packet ", e);
+        }
         
         String message = PacketFactory.getStringValue(packet, PacketFactory.MESSAGE_STRING);
 
