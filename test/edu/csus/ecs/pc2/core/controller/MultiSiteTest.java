@@ -214,18 +214,18 @@ public class MultiSiteTest extends TestCase {
          */
 
         // For site 1 expect 2,3
-        assertTrue("Site 2 not logged into 1", modelOne.isLoggedIn(clientIdTwo));
-        assertTrue("Site 3 not logged into 1", modelOne.isLoggedIn(clientIdThree));
+        assertTrue("Site 2 not logged into 1", modelOne.isLocalLoggedIn(clientIdTwo));
+        assertTrue("Site 3 not logged into 1", modelOne.isLocalLoggedIn(clientIdThree));
 
         // For site 2 expect 1,3
 
-        assertTrue("Site 1 not logged into 2", modelTwo.isLoggedIn(clientIdOne));
-        assertTrue("Site 3 not logged into 2", modelTwo.isLoggedIn(clientIdThree));
+        assertTrue("Site 1 not logged into 2", modelTwo.isLocalLoggedIn(clientIdOne));
+        assertTrue("Site 3 not logged into 2", modelTwo.isLocalLoggedIn(clientIdThree));
 
         // For site 3 expect 1,2
 
-        assertTrue("Site 1 not logged into 3", modelThree.isLoggedIn(clientIdOne));
-        assertTrue("Site 2 not logged into 3", modelThree.isLoggedIn(clientIdTwo));
+        assertTrue("Site 1 not logged into 3", modelThree.isLocalLoggedIn(clientIdOne));
+        assertTrue("Site 2 not logged into 3", modelThree.isLocalLoggedIn(clientIdTwo));
     }
 
     @Override
