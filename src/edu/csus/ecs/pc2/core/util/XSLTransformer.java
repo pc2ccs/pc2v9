@@ -4,6 +4,7 @@
 package edu.csus.ecs.pc2.core.util;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 
 import javax.xml.transform.Result;
@@ -31,7 +32,7 @@ public class XSLTransformer {
         if (args.length == 3) {
             XSLTransformer me = new XSLTransformer();
             try {
-                me.transform(args[0], args[1], new File(args[2]));
+                me.transform(args[0], args[1], new FileOutputStream(args[2]));
             } catch (Exception e) {
                 System.err.println("Error doing tranform: " + e.getMessage());
                 e.printStackTrace();
@@ -46,7 +47,7 @@ public class XSLTransformer {
      * @param xmlFile
      * @param outFile
      */
-    public void transform(String xslFile, String xmlFile, File outFile) throws Exception {
+    public void transform(String xslFile, String xmlFile, FileOutputStream outFile) throws Exception {
         // Set up input documents
         Source inputXSL = new StreamSource(new File(xslFile));
         Source inputXML = new StreamSource(new File(xmlFile));
@@ -59,7 +60,7 @@ public class XSLTransformer {
      * @param xmlStream
      * @param outFile
      */
-    public void transform(String xslFile, InputStream xmlStream, File outFile) throws Exception {
+    public void transform(String xslFile, InputStream xmlStream, FileOutputStream outFile) throws Exception {
         if (xmlStream == null) {
             throw new IllegalArgumentException("transform() Invalid xmlStream, cannot be null");
         }
@@ -76,7 +77,7 @@ public class XSLTransformer {
      * @param inputXML
      * @param outFile
      */
-    public void transform(Source inputXSL, Source inputXML, File outFile) throws Exception {
+    public void transform(Source inputXSL, Source inputXML, FileOutputStream outFile) throws Exception {
         if (outFile == null) {
             throw new IllegalArgumentException("transform() Invalid outFile, cannot be null");
         }
