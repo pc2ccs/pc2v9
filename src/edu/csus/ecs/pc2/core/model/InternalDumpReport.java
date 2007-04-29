@@ -31,131 +31,175 @@ public class InternalDumpReport implements IReport {
     private IController controller;
 
     private Log log;
+    
+    private Filter accountFilter = new Filter();
 
-    private  void writeReport(PrintWriter printWriter) {
+    private void writeReport(PrintWriter printWriter) {
 
-            Vector<Account> allAccounts = new Vector<Account>();
+        Vector<Account> allAccounts = new Vector<Account>();
 
-            printWriter.println();
-            printWriter.println("-- Accounts --");
-            for (ClientType.Type ctype : ClientType.Type.values()) {
-                if (model.getAccounts(ctype).size() > 0) {
-                    printWriter.println("Accounts " + ctype.toString() + " there are " + model.getAccounts(ctype).size());
-                    Vector<Account> accounts = model.getAccounts(ctype);
-                    allAccounts.addAll(accounts);
-                    for (int i = 0; i < accounts.size(); i++) {
-                        Account account = accounts.elementAt(i);
-                        printWriter.println("   " + account + " Site " + account.getClientId().getSiteNumber() + " id=" + account.getElementId());
-                    }
+        printWriter.println();
+        printWriter.println("-- Accounts --");
+        for (ClientType.Type ctype : ClientType.Type.values()) {
+
+            Vector<Account> accounts;
+
+            if (accountFilter.isThisSiteOnly()) {
+                accounts = model.getAccounts(ctype, accountFilter.getSiteNumber());
+            } else {
+                accounts = model.getAccounts(ctype);
+            }
+
+            if (accounts.size() > 0) {
+                printWriter.print("Accounts " + ctype.toString() + " there are " + accounts.size());
+                if (accountFilter.isThisSiteOnly()) {
+                    printWriter.print(" for site " + accountFilter.getSiteNumber());
+                }
+                printWriter.println();
+
+                allAccounts.addAll(accounts);
+                
+                for (int i = 0; i < accounts.size(); i++) {
+                    Account account = accounts.elementAt(i);
+                    printWriter.println("   " + account + " Site " + account.getClientId().getSiteNumber() + " id=" + account.getElementId());
                 }
             }
+        }
 
-            Account[] accountList = (Account[]) allAccounts.toArray(new Account[allAccounts.size()]);
-            Arrays.sort(accountList, new AccountComparator());
+        Account[] accountList = (Account[]) allAccounts.toArray(new Account[allAccounts.size()]);
+        Arrays.sort(accountList, new AccountComparator());
+
+        printWriter.println();
+        printWriter.println("-- " + accountList.length + " Accounts --");
+        for (int i = 0; i < accountList.length; i++) {
+            Account account = accountList[i];
+            printWriter.println("   " + account + " Site " + account.getClientId().getSiteNumber() + " id=" + account.getElementId());
+        }
+
+        // Sites
+        printWriter.println();
+        printWriter.println("-- " + model.getSites().length + " sites --");
+        Site[] sites = model.getSites();
+        Arrays.sort(sites, new SiteComparatorBySiteNumber());
+        for (Site site1 : sites) {
+            String hostName = site1.getConnectionInfo().getProperty(Site.IP_KEY);
+            String portStr = site1.getConnectionInfo().getProperty(Site.PORT_KEY);
+
+            printWriter.println("Site " + site1.getSiteNumber() + " " + hostName + ":" + portStr + " " + site1.getDisplayName() + "/" + site1.getPassword() + " id=" + site1.getElementId());
+        }
+
+        // Problem
+        printWriter.println();
+        printWriter.println("-- " + model.getProblems().length + " problems --");
+        for (Problem problem : model.getProblems()) {
+            printWriter.println("  Problem " + problem + " id=" + problem.getElementId());
             
-            printWriter.println();
-            printWriter.println("-- "+accountList.length+" Accounts --");
-            for (int i = 0; i < accountList.length; i++) {
-                Account account = accountList[i];
-                printWriter.println("   " + account + " Site " + account.getClientId().getSiteNumber() + " id=" + account.getElementId());
+        }
+
+        // Language
+        printWriter.println();
+        printWriter.println("-- " + model.getLanguages().length + " languages --");
+        for (Language language : model.getLanguages()) {
+            printWriter.println("  Language " + language + " id=" + language.getElementId());
+        }
+
+        // Runs
+        printWriter.println();
+        Run[] runs = model.getRuns();
+        Arrays.sort(runs, new RunComparator());
+
+        int count = 0;
+        for (Run run : runs) {
+            if (accountFilter.matches(run)) {
+                count++;
             }
+        }
 
-
-            // Sites
-            printWriter.println();
-            printWriter.println("-- " + model.getSites().length + " sites --");
-            Site[] sites = model.getSites();
-            Arrays.sort(sites, new SiteComparatorBySiteNumber());
-            for (Site site1 : sites) {
-                String hostName = site1.getConnectionInfo().getProperty(Site.IP_KEY);
-                String portStr = site1.getConnectionInfo().getProperty(Site.PORT_KEY);
-
-                printWriter.println("Site " + site1.getSiteNumber() + " " + hostName + ":" + portStr + " " + site1.getDisplayName() + "/" + site1.getPassword() + " id=" + site1.getElementId());
-            }
-
-            // Problem
-            printWriter.println();
-            printWriter.println("-- " + model.getProblems().length + " problems --");
-            for (Problem problem : model.getProblems()) {
-                printWriter.println("  Problem " + problem + " id=" + problem.getElementId());
-            }
-
-            // Language
-            printWriter.println();
-            printWriter.println("-- " + model.getLanguages().length + " languages --");
-            for (Language language : model.getLanguages()) {
-                printWriter.println("  Language " + language + " id=" + language.getElementId());
-            }
-
-            // Runs
-            printWriter.println();
-            Run[] runs = model.getRuns();
-            Arrays.sort(runs, new RunComparator());
-            printWriter.println("-- " + runs.length + " runs --");
+        printWriter.print("-- " + count + " runs --");
+        if (accountFilter.isThisSiteOnly()) {
+            printWriter.print(" for site " + accountFilter.getSiteNumber());
+        }
+        printWriter.println();
+        if (count > 0) {
             for (Run run : runs) {
-                printWriter.println("  Run " + run);
+                if (accountFilter.matches(run)) {
+                    printWriter.println("  " + run);
+                }
             }
+        }
 
-            // Clarifications
-            printWriter.println();
-            Clarification[] clarifications = model.getClarifications();
-            Arrays.sort(clarifications, new ClarificationComparator());
-            printWriter.println("-- " + clarifications.length + " clarifications --");
-            for (Clarification clarification : clarifications) {
+        // Clarifications
+        printWriter.println();
+        Clarification[] clarifications = model.getClarifications();
+        Arrays.sort(clarifications, new ClarificationComparator());
+
+        count = 0;
+        for (Clarification clarification : clarifications) {
+            if (accountFilter.matches(clarification)) {
+                count++;
+            }
+        }
+
+        printWriter.print("-- " + clarifications.length + " clarifications --");
+        if (accountFilter.isThisSiteOnly()) {
+            printWriter.print(" for site " + accountFilter.getSiteNumber());
+        }
+        printWriter.println();
+        for (Clarification clarification : clarifications) {
+            if (accountFilter.matches(clarification)) {
                 printWriter.println("  " + clarification);
             }
+        }
 
-            // Contest Times
-            printWriter.println();
-            ContestTime[] contestTimes = model.getContestTimes();
-            Arrays.sort(contestTimes, new ContestTimeComparator());
-            printWriter.println("-- " + contestTimes.length + " Contest Times --");
-            for (ContestTime contestTime : contestTimes) {
+        // Contest Times
+        printWriter.println();
+        ContestTime[] contestTimes = model.getContestTimes();
+        Arrays.sort(contestTimes, new ContestTimeComparator());
+        printWriter.println("-- " + contestTimes.length + " Contest Times --");
+        for (ContestTime contestTime : contestTimes) {
 
-                if (model.getSiteNumber() == contestTime.getSiteNumber()) {
-                    printWriter.print("  * ");
-                } else {
-                    printWriter.print("    ");
-                }
-                String state = "STOPPED";
-                if (contestTime.isContestRunning()) {
-                    state = "STARTED";
-                }
-
-                printWriter.println("  Site " + contestTime.getSiteNumber() + " " + state + " " + contestTime.getElapsedTimeStr() + " " + contestTime.getRemainingTimeStr() + " "
-                        + contestTime.getContestLengthStr());
+            if (model.getSiteNumber() == contestTime.getSiteNumber()) {
+                printWriter.print("  * ");
+            } else {
+                printWriter.print("    ");
+            }
+            String state = "STOPPED";
+            if (contestTime.isContestRunning()) {
+                state = "STARTED";
             }
 
-            // Logins
-            printWriter.println();
-            printWriter.println("-- Logins -- ");
-            for (ClientType.Type ctype : ClientType.Type.values()) {
+            printWriter.println("  Site " + contestTime.getSiteNumber() + " " + state + " " + contestTime.getElapsedTimeStr() + " " + contestTime.getRemainingTimeStr() + " "
+                    + contestTime.getContestLengthStr());
+        }
 
-                Enumeration<ClientId> enumeration = model.getLoggedInClients(ctype);
-                if (model.getLoggedInClients(ctype).hasMoreElements()) {
-                    printWriter.println("Logged in " + ctype.toString());
-                    while (enumeration.hasMoreElements()) {
-                        ClientId aClientId = (ClientId) enumeration.nextElement();
-                        ConnectionHandlerID connectionHandlerID = model.getConnectionHandleID(aClientId);
-                        printWriter.println("   " + aClientId + " on " + connectionHandlerID);
-                    }
+        // Logins
+        printWriter.println();
+        printWriter.println("-- Logins -- ");
+        for (ClientType.Type ctype : ClientType.Type.values()) {
+
+            Enumeration<ClientId> enumeration = model.getLoggedInClients(ctype);
+            if (model.getLoggedInClients(ctype).hasMoreElements()) {
+                printWriter.println("Logged in " + ctype.toString());
+                while (enumeration.hasMoreElements()) {
+                    ClientId aClientId = (ClientId) enumeration.nextElement();
+                    ConnectionHandlerID connectionHandlerID = model.getConnectionHandleID(aClientId);
+                    printWriter.println("   " + aClientId + " on " + connectionHandlerID);
                 }
             }
+        }
 
-            // Connections
-            printWriter.println();
-            ConnectionHandlerID[] connectionHandlerIDs = model.getConnectionHandleIDs();
-            // Arrays.sort(connectionHandlerIDs, new ConnectionHanlderIDComparator());
-            printWriter.println("-- " + connectionHandlerIDs.length + " Connections --");
-            for (ConnectionHandlerID connectionHandlerID : connectionHandlerIDs) {
-                printWriter.println("  " + connectionHandlerID);
-            }
+        // Connections
+        printWriter.println();
+        ConnectionHandlerID[] connectionHandlerIDs = model.getConnectionHandleIDs();
+        // Arrays.sort(connectionHandlerIDs, new ConnectionHanlderIDComparator());
+        printWriter.println("-- " + connectionHandlerIDs.length + " Connections --");
+        for (ConnectionHandlerID connectionHandlerID : connectionHandlerIDs) {
+            printWriter.println("  " + connectionHandlerID);
+        }
 
-            printWriter.println();
-            printWriter.println("*end*");
+        printWriter.println();
+        printWriter.println("*end*");
 
-            printWriter.close();
-            printWriter = null;
     }
     
     private void printHeader(PrintWriter printWriter) {
@@ -170,6 +214,8 @@ public class InternalDumpReport implements IReport {
     }
 
     public void createReportFile(String filename, Filter filter) throws IOException {
+        
+        accountFilter = filter;
         
         PrintWriter printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
         

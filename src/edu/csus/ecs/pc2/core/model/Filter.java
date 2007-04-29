@@ -52,4 +52,8 @@ public class Filter {
         this.siteNumber = siteNumber;
     }
 
+    public int getSiteNumber() {
+        return siteNumber;
+    }
+
 }
