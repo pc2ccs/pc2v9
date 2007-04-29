@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.ui.board;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
@@ -10,6 +11,7 @@ import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
 import edu.csus.ecs.pc2.ui.LogWindow;
 import edu.csus.ecs.pc2.ui.OptionsPanel;
+import edu.csus.ecs.pc2.ui.StandingsPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 import javax.swing.JTabbedPane;
 
@@ -79,19 +81,26 @@ public class ScoreboardView extends JFrame implements UIPlugin {
         this.model = inModel;
         this.controller = inController;
 
-        setTitle("PC^2 " + model.getTitle() + " Build " + new VersionInfo().getBuildNumber());
-
-        if (logWindow == null) {
-            logWindow = new LogWindow();
-        }
-        logWindow.setModelAndController(model, controller);
-        logWindow.setTitle("Log " + model.getClientId().toString());
-
-        OptionsPanel optionsPanel = new OptionsPanel();
-        addUIPlugin(mainTabbedPane, "Options", optionsPanel);
-        optionsPanel.setLogWindow(logWindow);
-
-        setVisible(true);
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                setTitle("PC^2 " + model.getTitle() + " Build " + new VersionInfo().getBuildNumber());
+        
+                if (logWindow == null) {
+                    logWindow = new LogWindow();
+                }
+                logWindow.setModelAndController(model, controller);
+                logWindow.setTitle("Log " + model.getClientId().toString());
+        
+                StandingsPane standingsPane = new StandingsPane();
+                addUIPlugin(getMainTabbedPane(), "Standings", standingsPane);
+                
+                OptionsPanel optionsPanel = new OptionsPanel();
+                addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
+                optionsPanel.setLogWindow(logWindow);
+        
+                setVisible(true);
+            }
+        });
     }
 
     public String getPluginTitle() {
