@@ -320,13 +320,14 @@ public class PacketHandler {
                 if (isSuperUser(packet.getSourceId())) {
                     info("updateRun by " + packet.getSourceId() + " " + run);
                     if (judgementRecord != null) {
-                        model.addRunJudgement(run, judgementRecord, runResultFiles, whoChangedRun);
+                        // TODO code add runResultsFiles
+                        run.addJudgement(judgementRecord);
                         model.updateRun(run, whoChangedRun);
                     } else {
                         model.updateRun(run, whoChangedRun);
                     }
                 } else {
-                    throw new SecurityException("Non-admin user "+packet.getSourceId()+" attemped to update run "+run);
+                    throw new SecurityException("Non-admin user "+packet.getSourceId()+" attempted to update run "+run);
                 }
                 
                 Run theRun = model.getRun(run.getElementId());
