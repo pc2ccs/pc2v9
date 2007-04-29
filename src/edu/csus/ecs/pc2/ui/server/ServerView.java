@@ -31,6 +31,9 @@ import edu.csus.ecs.pc2.ui.LoginsPane;
 import edu.csus.ecs.pc2.ui.OptionsPanel;
 import edu.csus.ecs.pc2.ui.SitesPanel;
 import edu.csus.ecs.pc2.ui.UIPlugin;
+import javax.swing.JLabel;
+import javax.swing.JButton;
+import java.awt.FlowLayout;
 
 /**
  * GUI for Server.
@@ -61,7 +64,15 @@ public class ServerView extends JFrame implements UIPlugin {
     private LogWindow logWindow = null;
 
     private Log log = null;
-    
+
+    private JPanel messagePanel = null;
+
+    private JLabel messageLabel = null;
+
+    private JPanel exitPanel = null;
+
+    private JButton exitButton = null;
+
     /**
      * This method initializes
      * 
@@ -70,10 +81,10 @@ public class ServerView extends JFrame implements UIPlugin {
         super();
         initialize();
     }
-    
+
     private void logDebugMessage(String message) {
         System.err.println(message);
-        log.log(Log.DEBUG, message);        
+        log.log(Log.DEBUG, message);
     }
 
     /**
@@ -93,13 +104,16 @@ public class ServerView extends JFrame implements UIPlugin {
         setVisible(true);
 
         FrameUtilities.centerFrameTop(this);
+        
+        VersionInfo versionInfo = new VersionInfo();
+        showMessage("Version "+versionInfo.getVersionNumber()+" (Build "+versionInfo.getBuildNumber()+")");
     }
 
     protected void promptAndExit() {
-        int result = FrameUtilities.yesNoCancelDialog("Are you sure you want to exit PC^2?", "Exit PC^2");
+        int result = FrameUtilities.yesNoCancelDialog("Are you sure you want to exit PC^2?", "Exit PC^2 Server Module");
 
         if (result == JOptionPane.YES_OPTION) {
-            System.err.println("Server halting");
+            log.info("Server "+model.getSiteNumber()+" halted");
             System.exit(0);
         }
     }
@@ -211,6 +225,7 @@ public class ServerView extends JFrame implements UIPlugin {
             mainViewPane = new JPanel();
             mainViewPane.setLayout(new BorderLayout());
             mainViewPane.add(getMainTabbedPane(), java.awt.BorderLayout.CENTER);
+            mainViewPane.add(getMessagePanel(), java.awt.BorderLayout.NORTH);
         }
         return mainViewPane;
     }
@@ -236,7 +251,7 @@ public class ServerView extends JFrame implements UIPlugin {
         }
         return mainTabbedPane;
     }
-    
+
     private void updateFrameTitle(final boolean turnButtonsOn) {
 
         SwingUtilities.invokeLater(new Runnable() {
@@ -250,40 +265,39 @@ public class ServerView extends JFrame implements UIPlugin {
         });
     }
 
-
     public void setModelAndController(IModel inModel, IController inController) {
         this.model = inModel;
         this.controller = inController;
         this.log = controller.getLog();
-        
-        updateFrameTitle (model.getContestTime().isContestRunning());
-        
+
+        updateFrameTitle(model.getContestTime().isContestRunning());
+
         if (logWindow == null) {
             logWindow = new LogWindow();
         }
         logWindow.setModelAndController(model, controller);
-        logWindow.setTitle("Log "+model.getClientId().toString());
+        logWindow.setTitle("Log " + model.getClientId().toString());
 
         model.addRunListener(new RunListenerImplementation());
         model.addAccountListener(new AccountListenerImplementation());
         model.addLoginListener(new LoginListenerImplementation());
         model.addSiteListener(new SiteListenerImplementation());
-        
+
         SitesPanel sitesPanel = new SitesPanel();
         addUIPlugin(getMainTabbedPane(), "Sites", sitesPanel);
-        
+
         ContestTimesPane contestTimesPane = new ContestTimesPane();
         addUIPlugin(getMainTabbedPane(), "Times", contestTimesPane);
 
         LoginsPane loginsPane = new LoginsPane();
         addUIPlugin(getMainTabbedPane(), "Logins", loginsPane);
-        
+
         ConnectionsPane connectionsPane = new ConnectionsPane();
         addUIPlugin(getMainTabbedPane(), "Connections", connectionsPane);
-        
+
         ReportPane reportPane = new ReportPane();
         addUIPlugin(getMainTabbedPane(), "Reports", reportPane);
-        
+
         OptionsPanel optionsPanel = new OptionsPanel();
         addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
         optionsPanel.setLogWindow(logWindow);
@@ -294,11 +308,9 @@ public class ServerView extends JFrame implements UIPlugin {
         return "Server Main GUI";
     }
 
-
     protected void showLog(boolean showLogWindow) {
-       logWindow.setVisible(showLogWindow);
+        logWindow.setVisible(showLogWindow);
     }
-    
 
     protected void addUIPlugin(JTabbedPane tabbedPane, String tabTitle, JPanePlugin plugin) {
 
@@ -307,5 +319,71 @@ public class ServerView extends JFrame implements UIPlugin {
 
     }
 
+    /**
+     * This method initializes messagePanel
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getMessagePanel() {
+        if (messagePanel == null) {
+            BorderLayout borderLayout = new BorderLayout();
+            borderLayout.setHgap(5);
+            messageLabel = new JLabel();
+            messageLabel.setText("");
+            messageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+            messagePanel = new JPanel();
+            messagePanel.setLayout(borderLayout);
+            messagePanel.setPreferredSize(new java.awt.Dimension(40, 40));
+            messagePanel.add(messageLabel, java.awt.BorderLayout.CENTER);
+            messagePanel.add(getExitPanel(), java.awt.BorderLayout.EAST);
+        }
+        return messagePanel;
+    }
+
+    /**
+     * This method initializes exitPanel
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getExitPanel() {
+        if (exitPanel == null) {
+            FlowLayout flowLayout = new FlowLayout();
+            flowLayout.setHgap(10);
+            flowLayout.setVgap(5);
+            exitPanel = new JPanel();
+            exitPanel.setPreferredSize(new java.awt.Dimension(75, 36));
+            exitPanel.setLayout(flowLayout);
+            exitPanel.add(getExitButton(), null);
+        }
+        return exitPanel;
+    }
+
+    /**
+     * This method initializes exitButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getExitButton() {
+        if (exitButton == null) {
+            exitButton = new JButton();
+            exitButton.setText("Exit");
+            exitButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    promptAndExit();
+                }
+            });
+        }
+        return exitButton;
+    }
+
+    private void showMessage(final String string) {
+
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                messageLabel.setText(string);
+            }
+        });
+
+    }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
