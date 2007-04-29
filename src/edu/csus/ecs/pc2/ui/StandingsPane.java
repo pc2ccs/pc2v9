@@ -48,7 +48,8 @@ public class StandingsPane extends JPanePlugin {
     
     private Log log;
 
-
+    private String currentXMLString = "";
+    
     /**
      * This method initializes
      * 
@@ -160,7 +161,8 @@ public class StandingsPane extends JPanePlugin {
                 }
             }
             showMessage("Last update "+new Date());
-            
+            firePropertyChange("standings", currentXMLString, xmlString);
+            currentXMLString = xmlString;
         } catch (Exception e) {
             log.log(Log.WARNING, "Trouble parsing XML ", e);
             showMessage("Problem updating scoreboard, check log");
