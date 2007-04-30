@@ -404,6 +404,12 @@ public class Model implements IModel {
         }
     }
 
+    public void addLocalLogin(ClientId inClientId, ConnectionHandlerID connectionHandlerID) {
+        localLoginList.add(inClientId, connectionHandlerID);
+        LoginEvent loginEvent = new LoginEvent(LoginEvent.Action.NEW_LOGIN, inClientId, connectionHandlerID, "New");
+        fireLoginListener(loginEvent);
+    
+    }
 
     public void addLogin(ClientId inClientId, ConnectionHandlerID connectionHandlerID) {
         if (inClientId.getSiteNumber() == siteNumber){

@@ -722,4 +722,9 @@ public final class ModelReadOnlyProxy implements IModel {
         return null;
     }
 
+    public void addLocalLogin(ClientId clientId, ConnectionHandlerID connectionHandlerID) {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

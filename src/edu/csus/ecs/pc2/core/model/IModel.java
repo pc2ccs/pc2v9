@@ -241,12 +241,23 @@ public interface IModel {
     boolean isValidLoginAndPassword(ClientId clientId, String password);
 
     /**
-     * add a already validated login and connection to list.
+     * add any login from any site.
      * 
      * @param clientId
      * @param connectionHandlerID
      */
     void addLogin(ClientId clientId, ConnectionHandlerID connectionHandlerID);
+    
+    
+    /**
+     * Add only as a local login.
+     * 
+     * This is for servers who are locally logged in.
+     * 
+     * @param clientId
+     * @param connectionHandlerID
+     */
+    void addLocalLogin(ClientId clientId, ConnectionHandlerID connectionHandlerID);
 
     /**
      * Lookup a client id given a ConnectionHandlerID.
