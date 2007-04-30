@@ -605,35 +605,67 @@ public final class PacketFactory {
     }
 
     /** 
+     * Create start contest to send to server.
      * @param source
      * @param destination
      * @param contestTime
+     * @param who 
      */
-    public static Packet createStartContestClock(ClientId source, ClientId destination, ContestTime contestTime) {
+    public static Packet createStartContestClock(ClientId source, ClientId destination, int siteNumber, ClientId who) {
         Properties prop = new Properties();
-        prop.put(SITE_NUMBER, new Integer(contestTime.getSiteNumber()));
-        prop.put(CONTEST_TIME, contestTime);
-        prop.put(CLIENT_ID, source);
+        prop.put(SITE_NUMBER, new Integer(siteNumber));
+        prop.put(CLIENT_ID, who);
         Packet packet = new Packet(Type.START_CONTEST_CLOCK, source, destination, prop);
         return packet;
 
     }
 
     /**
-     * Create a packet of {@link PacketType.Type#STOP_CONTEST_CLOCK}.
+     * Create a stop contest to send to server.
      * 
      * @param source
      * @param destination
      * @param contestTime
+     * @param who 
      */
-    public static Packet createStopContestClock(ClientId source, ClientId destination, ContestTime contestTime) {
+    public static Packet createStopContestClock(ClientId source, ClientId destination, int siteNumber, ClientId who) {
         Properties prop = new Properties();
-        prop.put(SITE_NUMBER, new Integer(contestTime.getSiteNumber()));
-        prop.put(CONTEST_TIME, contestTime);
-        prop.put(CLIENT_ID, source);
+        prop.put(SITE_NUMBER, new Integer(siteNumber));
+        prop.put(CLIENT_ID, who);
         Packet packet = new Packet(Type.STOP_CONTEST_CLOCK, source, destination, prop);
         return packet;
     }
+    
+    /**
+     * Create a stop contest to send to clients.
+     * 
+     * @param source
+     * @param destination
+     * @param inSiteNumber
+     */
+    public static Packet createContestStopped(ClientId source, ClientId destination, int inSiteNumber, ClientId who) {
+        Properties prop = new Properties();
+        prop.put(PacketType.SITE_NUMBER, new Integer(inSiteNumber));
+        prop.put(CLIENT_ID, who);
+        Packet packet = new Packet(Type.CLOCK_STOPPED, source, destination, prop);
+        return packet;
+    }
+
+    /**
+     * Create a start contest to send to clients.
+     * 
+     * @param source
+     * @param destination
+     * @param inSiteNumber
+     */
+    public static Packet createContestStarted(ClientId source, ClientId destination, int inSiteNumber, ClientId who) {
+        Properties prop = new Properties();
+        prop.put(PacketType.SITE_NUMBER, new Integer(inSiteNumber));
+        prop.put(CLIENT_ID, who);
+        Packet packet = new Packet(Type.CLOCK_STARTED, source, destination, prop);
+        return packet;
+    }
+
 
     /**
      * Create a packet of {@link PacketType.Type#UPDATE_CLOCK}.
@@ -1377,33 +1409,6 @@ public final class PacketFactory {
         return packet;
     }
 
-    /**
-     * Create packet for {@link PacketType.Type#CONTEST_TIME}.
-     * 
-     * @param source
-     * @param destination
-     * @param contestTime
-     */
-    public static Packet createContestStopped(ClientId source, ClientId destination, ContestTime contestTime) {
-        Properties prop = new Properties();
-        prop.put(PacketType.CONTEST_TIME, contestTime);
-        Packet packet = new Packet(Type.CLOCK_STOPPED, source, destination, prop);
-        return packet;
-    }
-
-    /**
-     * Create packet for {@link PacketType.Type#CONTEST_TIME}.
-     * 
-     * @param source
-     * @param destination
-     * @param contestTime
-     */
-    public static Packet createContestStarted(ClientId source, ClientId destination, ContestTime contestTime) {
-        Properties prop = new Properties();
-        prop.put(PacketType.CONTEST_TIME, contestTime);
-        Packet packet = new Packet(Type.CLOCK_STARTED, source, destination, prop);
-        return packet;
-    }
 
     /**
      * Create packet for {@link PacketType.Type#LOGIN_REQUEST}.

@@ -156,6 +156,15 @@ public class Model implements IModel {
 
         String[] probNames = { "A - Sum of Squares", "B - Sumit", "C - Hello", "D - GoodBye" };
         
+        Site site = createFakeSite (1);
+        site.setActive(true);
+        siteList.add(site);
+        
+        ContestTime contestTime = new ContestTime();
+        contestTime.setSiteNumber(1);
+        contestTime.startContestClock();
+        addContestTime(contestTime);
+        
         runList = new RunList(1, false);
         runFilesList = new RunFilesList();
         clarificationList = new ClarificationList(1, false);
@@ -213,9 +222,6 @@ public class Model implements IModel {
         // Generate the server account
         generateNewAccounts(ClientType.Type.SERVER.toString(), 1, true);
 
-        ContestTime contestTime = new ContestTime();
-        contestTime.setElapsedMins(9);
-        contestTime.startContestClock();
 
         String[] judgementNames = { "Yes", "No - compilation error", "No - incorrect output", "No - It's just really bad",
                 "No - judges enjoyed a good laugh", "You've been bad - contact staff" };
@@ -232,10 +238,8 @@ public class Model implements IModel {
         generateNewAccounts(ClientType.Type.JUDGE.toString(), 4, true);
         generateNewAccounts(ClientType.Type.SCOREBOARD.toString(), 1, true);
         
-        
-        Site site = createFakeSite (1);
-        site.setActive(true);
-        siteList.add(site);
+
+
     }
 
 
@@ -615,7 +619,7 @@ public class Model implements IModel {
 
     public void setClientId(ClientId clientId) {
         this.localClientId = clientId;
-        if (isServer()){
+//        if (isServer()){
             
             /**
              * Now that this model know its site number, we can now create
@@ -627,13 +631,7 @@ public class Model implements IModel {
 //            runFilesList = new RunFilesList(clientId.getSiteNumber());
 //            clarificationList = new ClarificationList(clientId.getSiteNumber(), true);
             
-            if (getContestTime() == null){
-                ContestTime contestTime = new ContestTime();
-                contestTime.setSiteNumber(getSiteNumber());
-                contestTime.startContestClock(); // TODO remove this start contest, eventually
-                addContestTime(contestTime);
-            }
-        }
+//        }
     }
 
     public Site[] getSites() {
@@ -796,18 +794,7 @@ public class Model implements IModel {
     }
 
     public ContestTime getContestTime(int inSiteNumber) {
-        ContestTime contestTime2 = contestTimeList.get(inSiteNumber);
-        if (contestTime2 == null && inSiteNumber == getSiteNumber()){
-            /**
-             * Insure that this Contest Time is created.
-             */
-            StaticLog.info("Warning getContestTime time for "+inSiteNumber+" does not exist, created it. ");
-            contestTime2 = new ContestTime();
-            contestTime2.setSiteNumber(inSiteNumber);
-            contestTime2.startContestClock();
-            addContestTime(contestTime2);
-        }
-        return  contestTime2;
+        return contestTimeList.get(inSiteNumber);
     }
     
     public ContestTime[] getContestTimes() {
@@ -816,23 +803,23 @@ public class Model implements IModel {
 
     public void startContest(int inSiteNumber) {
         ContestTime contestTime = getContestTime(inSiteNumber);
+        contestTime.startContestClock();
         if (contestTime != null) {
-            ContestTimeEvent contestTimeEvent = new ContestTimeEvent(ContestTimeEvent.Action.CLOCK_STARTED, contestTime,
-                    inSiteNumber);
+            ContestTimeEvent contestTimeEvent = new ContestTimeEvent(ContestTimeEvent.Action.CLOCK_STARTED, contestTime, inSiteNumber);
             fireContestTimeListener(contestTimeEvent);
         } else {
-            throw new SecurityException("Attempted to start clock site " + inSiteNumber);
+            throw new SecurityException("Unable to start clock site " + inSiteNumber + " not found");
         }
     }
 
     public void stopContest(int inSiteNumber) {
         ContestTime contestTime = getContestTime(inSiteNumber);
+        contestTime.stopContestClock();
         if (contestTime != null) {
-            ContestTimeEvent contestTimeEvent = new ContestTimeEvent(ContestTimeEvent.Action.CLOCK_STOPPED, contestTime,
-                    inSiteNumber);
+            ContestTimeEvent contestTimeEvent = new ContestTimeEvent(ContestTimeEvent.Action.CLOCK_STOPPED, contestTime, inSiteNumber);
             fireContestTimeListener(contestTimeEvent);
         } else {
-            throw new SecurityException("Attempted to stop clock site " + inSiteNumber);
+            throw new SecurityException("Unable to stop clock site " + inSiteNumber + " not found");
         }
     }
 

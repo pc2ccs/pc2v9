@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 
 import javax.swing.JButton;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
@@ -17,6 +16,7 @@ import edu.csus.ecs.pc2.core.model.IModel;
 import edu.csus.ecs.pc2.core.model.ISiteListener;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.SiteEvent;
+import javax.swing.JLabel;
 
 /**
  * Contest Times Pane.
@@ -44,6 +44,10 @@ public class ContestTimesPane extends JPanePlugin {
 
     private JButton stopClockButton = null;
 
+    private JPanel messagePane = null;
+
+    private JLabel messageLabel = null;
+
     /**
      * This method initializes
      * 
@@ -63,12 +67,12 @@ public class ContestTimesPane extends JPanePlugin {
         this.add(getContestTimeListBox(), java.awt.BorderLayout.CENTER);
         this.add(getContestTimeButtonPane(), java.awt.BorderLayout.SOUTH);
 
+        this.add(getMessagePane(), java.awt.BorderLayout.NORTH);
     }
 
     @Override
     public String getPluginTitle() {
-        // TODO Auto-generated method stub
-        return null;
+        return "Contest Times";
     }
 
     /**
@@ -111,7 +115,7 @@ public class ContestTimesPane extends JPanePlugin {
     public void updateContestTimeRow(final ContestTime contestTime) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                Object[] objects = buildContestTimeRow(contestTime.getSiteNumber(), contestTime);
+                Object[] objects = buildContestTimeRow(contestTime);
                 int rowNumber = contestTimeListBox.getIndexByKey(contestTime.getElementId());
                 if (rowNumber == -1) {
                     contestTimeListBox.addRow(objects, contestTime.getElementId());
@@ -124,14 +128,14 @@ public class ContestTimesPane extends JPanePlugin {
         });
     }
 
-    protected Object[] buildContestTimeRow(int siteNumber, ContestTime contestTime) {
+    protected Object[] buildContestTimeRow(ContestTime contestTime) {
 
         // Object[] cols = { "Site", "Running", "Remaining", "Elapsed", "Length" };
 
         int numberColumns = contestTimeListBox.getColumnCount();
         Object[] c = new String[numberColumns];
 
-        c[0] = "Site " + siteNumber;
+        c[0] = "Site " + contestTime.getSiteNumber();
         c[1] = "NO CONTACT";
 
         if (contestTime != null) {
@@ -151,19 +155,20 @@ public class ContestTimesPane extends JPanePlugin {
 
     private void reloadListBox() {
 
+        showMessage("");
         contestTimeListBox.removeAllRows();
         Site[] sites = getModel().getSites();
 
         for (Site site : sites) {
             ContestTime contestTime = getModel().getContestTime(site.getSiteNumber());
             if (contestTime != null) {
-                addContestTimeRow(site.getSiteNumber(), contestTime);
+                addContestTimeRow(contestTime);
             }
         }
     }
 
-    private void addContestTimeRow(int siteNumber, ContestTime contestTime) {
-        Object[] objects = buildContestTimeRow(siteNumber, contestTime);
+    private void addContestTimeRow(ContestTime contestTime) {
+        Object[] objects = buildContestTimeRow(contestTime);
         if (contestTime != null) {
             contestTimeListBox.addRow(objects, contestTime.getElementId());
             contestTimeListBox.autoSizeAllColumns();
@@ -174,7 +179,7 @@ public class ContestTimesPane extends JPanePlugin {
         super.setModelAndController(inModel, inController);
 
         getModel().addContestTimeListener(new ContestTimeListenerImplementation());
-        
+
         getModel().addSiteListener(new SiteListenerImplementation());
 
         SwingUtilities.invokeLater(new Runnable() {
@@ -187,16 +192,16 @@ public class ContestTimesPane extends JPanePlugin {
     /**
      * 
      * @author pc2@ecs.csus.edu
-     *
+     * 
      */
     public class SiteListenerImplementation implements ISiteListener {
-        
-        protected void updateSiteInfo (int siteNumber){
+
+        protected void updateSiteInfo(int siteNumber) {
             ContestTime contestTime = getModel().getContestTime(siteNumber);
-            if (contestTime != null){
+            if (contestTime != null) {
                 updateContestTimeRow(contestTime);
             }
-            
+
         }
 
         public void siteAdded(SiteEvent event) {
@@ -206,7 +211,7 @@ public class ContestTimesPane extends JPanePlugin {
 
         public void siteRemoved(SiteEvent event) {
             // TODO Auto-generated method stub
-            
+
         }
 
         public void siteChanged(SiteEvent event) {
@@ -223,7 +228,7 @@ public class ContestTimesPane extends JPanePlugin {
             int siteNumber = event.getSite().getSiteNumber();
             updateSiteInfo(siteNumber);
         }
-        
+
     }
 
     /**
@@ -266,6 +271,8 @@ public class ContestTimesPane extends JPanePlugin {
         if (contestTimeRefreshButton == null) {
             contestTimeRefreshButton = new JButton();
             contestTimeRefreshButton.setText("Refresh");
+            contestTimeRefreshButton.setToolTipText("Refresh All Clocks");
+            contestTimeRefreshButton.setMnemonic(java.awt.event.KeyEvent.VK_R);
             contestTimeRefreshButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     reloadListBox();
@@ -281,9 +288,12 @@ public class ContestTimesPane extends JPanePlugin {
      * @return javax.swing.JButton
      */
     private JButton getStartClockButton() {
+        showMessage("");
+
         if (startClockButton == null) {
             startClockButton = new JButton();
             startClockButton.setText("Start");
+            startClockButton.setMnemonic(java.awt.event.KeyEvent.VK_S);
             startClockButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     startClockTimes();
@@ -296,14 +306,14 @@ public class ContestTimesPane extends JPanePlugin {
     protected void startClockTimes() {
         int[] selectedSites = contestTimeListBox.getSelectedIndexes();
         if (selectedSites.length == 0) {
-            JOptionPane.showMessageDialog(this, "No sites selected ");
+            showMessage("Please select site");
             return;
         }
-        
+
         for (int i = 0; i < selectedSites.length; i++) {
             ElementId contestTimeElementId = (ElementId) contestTimeListBox.getKeys()[i];
             ContestTime contestTime = getModel().getContestTime(contestTimeElementId);
-            if (contestTime != null){
+            if (contestTime != null) {
                 getController().startContest(contestTime.getSiteNumber());
             }
         }
@@ -316,9 +326,12 @@ public class ContestTimesPane extends JPanePlugin {
      * @return javax.swing.JButton
      */
     private JButton getStopClockButton() {
+        showMessage("");
+
         if (stopClockButton == null) {
             stopClockButton = new JButton();
             stopClockButton.setText("Stop");
+            stopClockButton.setMnemonic(java.awt.event.KeyEvent.VK_T);
             stopClockButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     stopClockTimes();
@@ -332,20 +345,48 @@ public class ContestTimesPane extends JPanePlugin {
 
         int[] selectedSites = contestTimeListBox.getSelectedIndexes();
         if (selectedSites.length == 0) {
-            JOptionPane.showMessageDialog(this, "No sites selected ");
+            showMessage("Please select site");
             return;
         }
 
         for (int i = 0; i < selectedSites.length; i++) {
             ElementId contestTimeElementId = (ElementId) contestTimeListBox.getKeys()[i];
             ContestTime contestTime = getModel().getContestTime(contestTimeElementId);
-            if (contestTime != null){
+            if (contestTime != null) {
                 getController().stopContest(contestTime.getSiteNumber());
             }
         }
+    }
 
-        // TODO Auto-generated method stub
+    /**
+     * This method initializes messagePane
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getMessagePane() {
+        if (messagePane == null) {
+            messageLabel = new JLabel();
+            messageLabel.setText("");
+            messageLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 14));
+            messageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+            messagePane = new JPanel();
+            messagePane.setLayout(new BorderLayout());
+            messagePane.setPreferredSize(new java.awt.Dimension(30, 30));
+            messagePane.add(messageLabel, java.awt.BorderLayout.CENTER);
+        }
+        return messagePane;
+    }
 
+    private void showMessage(final String string) {
+
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                if (messageLabel != null) {
+                    messageLabel.setText(string);
+                    messageLabel.setToolTipText(string);
+                }
+            }
+        });
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

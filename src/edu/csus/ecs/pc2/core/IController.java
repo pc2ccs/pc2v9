@@ -156,10 +156,6 @@ public interface IController {
 
     void updateSite(Site newSite);
 
-    void startContest(int inSiteNumber);
-    
-    void stopContest(int inSiteNumber);
-    
     void updateProblem(Problem problem);
     
     void updateProblem(Problem problem, ProblemDataFiles problemDataFiles);
@@ -210,4 +206,12 @@ public interface IController {
     void removeConnection(ConnectionHandlerID connectionHandlerID);
     
     void shutdownTransport();
+    
+    void startContest (int inSiteNumber);
+    
+    void stopContest (int inSiteNumber);
+    
+    void startAllContestTimes();
+    
+    void stopAllContestTimes();
 }

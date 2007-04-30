@@ -181,14 +181,26 @@ public class PacketHandler {
             cancelRun(packet, run,  whoCanceledId);
 
         } else if (packetType.equals(Type.START_CONTEST_CLOCK)) {
-            ContestTime contestTime = (ContestTime) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME);
-            ClientId sourceServerId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-            startContest(contestTime,  contestTime.getSiteNumber(), sourceServerId);
-
+            // Admin to server, start the clock
+            startContest(packet);
+            
         } else if (packetType.equals(Type.STOP_CONTEST_CLOCK)) {
-            ContestTime contestTime = (ContestTime) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME);
-            ClientId sourceServerId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-            stopContest(contestTime,  contestTime.getSiteNumber(), sourceServerId);
+            // Admin to server, stop the cloeck
+            stopContest(packet);
+            
+        } else if (packetType.equals(Type.CLOCK_STARTED)) {
+            Integer siteNumber = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
+            model.startContest(siteNumber);
+            ContestTime contestTime = model.getContestTime(siteNumber);
+            ClientId clientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+            info("Clock for site "+contestTime.getSiteNumber()+" started by "+clientId+" elapsed "+contestTime.getElapsedTimeStr());
+            
+        } else if (packetType.equals(Type.CLOCK_STOPPED)) {
+            Integer siteNumber = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
+            model.stopContest(siteNumber);
+            ClientId clientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+            ContestTime contestTime = model.getContestTime(siteNumber);
+            info("Clock for site "+contestTime.getSiteNumber()+" stopped by "+clientId+" elapsed "+contestTime.getElapsedTimeStr());
 
         } else if (packetType.equals(Type.ADD_SETTING)) {
             addNewSetting(packet);
@@ -438,33 +450,45 @@ public class PacketHandler {
         }
     }
 
-    private void startContest(ContestTime contestTime, int siteNumber, ClientId sourceServerId) {
+    /**
+     * This starts the contest and sends notification to other servers/clients.
+     * @param contestTime
+     * @param sourceServerId
+     */
+    private void startContest(Packet packet) {
+        
+        ClientId who = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+        Integer siteNumber = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
 
-        if (model.getClientId().getClientType().equals(ClientType.Type.SERVER)) {
-
+        if (isThisSite(siteNumber)){
             model.startContest(siteNumber);
-
-            Packet startClockPacket = PacketFactory.createStartContestClock(sourceServerId, PacketFactory.ALL_SERVERS, contestTime);
-            sendToJudgesAndOthers( startClockPacket, false);
-
+            ContestTime updatedContestTime = model.getContestTime(siteNumber);
+            controller.getLog().info("Clock STARTED by "+who+" elapsed = "+updatedContestTime.getElapsedTimeStr());
+            Packet startContestPacket = PacketFactory.createContestStarted(model.getClientId(), PacketFactory.ALL_SERVERS, updatedContestTime.getSiteNumber(), who);
+            controller.sendToTeams(startContestPacket);
+            sendToJudgesAndOthers(startContestPacket, true);
         } else {
-            model.startContest(siteNumber);
+            controller.sendToRemoteServer(siteNumber, packet);
         }
     }
 
-    private void stopContest(ContestTime contestTime, int siteNumber, ClientId sourceServerId) {
+    /**
+     *  This stops the contest and sends notification to other servers/clients.
+     */
+    private void stopContest(Packet packet) {
+        ClientId who = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+        Integer siteNumber = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
 
-        if (model.getClientId().getClientType().equals(ClientType.Type.SERVER)) {
-
+        if (isThisSite(siteNumber)){
             model.stopContest(siteNumber);
-
-            Packet stopClockPacket = PacketFactory.createStopContestClock(sourceServerId, PacketFactory.ALL_SERVERS, contestTime);
-            sendToJudgesAndOthers( stopClockPacket, false);
-
+            ContestTime updatedContestTime = model.getContestTime(siteNumber);
+            controller.getLog().info("Clock STOPPED by "+who+" elapsed = "+updatedContestTime.getElapsedTimeStr());
+            Packet stopContestPacket = PacketFactory.createContestStopped(model.getClientId(), PacketFactory.ALL_SERVERS, updatedContestTime.getSiteNumber(), who);
+            controller.sendToTeams(stopContestPacket);
+            sendToJudgesAndOthers(stopContestPacket, true);
         } else {
-            model.stopContest(siteNumber);
+            controller.sendToRemoteServer(siteNumber, packet);
         }
-
     }
 
     /**

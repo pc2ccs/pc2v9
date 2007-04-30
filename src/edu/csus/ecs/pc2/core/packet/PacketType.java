@@ -19,8 +19,6 @@ import java.io.Serializable;
 // TODO: Settings update from admin 
 // TODO: Run update from admin 
 // TODO: Clar update from admin 
-// TODO: contest start 
-// TODO: contest stop 
 // TODO: stop all sites 
 // TODO: start all sites 
 // TODO: Settings update 
@@ -55,6 +53,8 @@ public final class PacketType implements Serializable {
     public static final String RUN_LIST = "RUN_LIST";
 
     public static final String SITE_LIST = "SITE_LIST";
+    
+    public static final String SITE_NUMBER = "SITE_NUMBER";
 
     public static final String CONTEST_TIME = "CONTEST_TIME";
 
@@ -518,19 +518,19 @@ public final class PacketType implements Serializable {
          */
         GENERATE_ACCOUNTS,
         /**
-         * Stop Context Clock. Admin to Server. Containts: SITE_NUMBER
+         * Stop Context Clock. Admin to Server. Contains: SITE_NUMBER, CLIENT_ID
          */
         START_CONTEST_CLOCK,
         /**
-         * Stop Contest Clock. Admin to Server. Containts: SITE_NUMBER
+         * Stop Contest Clock. Admin to Server. Contains: SITE_NUMBER, CLIENT_ID
          */
         STOP_CONTEST_CLOCK,
         /**
-         * Clock has been stopped by Admin. Contents: CONTEST_TIME
+         * Clock has been stopped, from Server. Contents: CONTEST_TIME, CLIENT_ID
          */
         CLOCK_STOPPED,
         /**
-         * Clock has been started by Admin. Contents: CONTEST_TIME
+         * Clock has been started, from Server. Contents: CONTEST_TIME, CLIENT_ID
          */
         CLOCK_STARTED,
 
