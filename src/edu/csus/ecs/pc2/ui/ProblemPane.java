@@ -320,16 +320,28 @@ public class ProblemPane extends JPanePlugin {
         });
     }
 
-    private void populateGUI(Problem problem2) {
+    private void populateGUI(Problem inProblem) {
 
-        if (problem2 != null) {
+        if (inProblem != null) {
 
             getAddButton().setVisible(false);
             getUpdateButton().setVisible(true);
             
-            problemNameTextField.setText(problem2.getDisplayName());
-            timeOutSecondTextField.setText(problem2.getTimeOutInSeconds()+"");
-//            judgesHaveDataFiles.setSelected(problem2.)
+            problemNameTextField.setText(inProblem.getDisplayName());
+            timeOutSecondTextField.setText(inProblem.getTimeOutInSeconds()+"");
+            inputDataFileLabel.setText(inProblem.getDataFileName());
+            answerFileNameLabel.setText(inProblem.getAnswerFileName());
+            
+            judgesHaveDataFiles.setSelected(inProblem.getAnswerFileName()!=null);
+            problemRequiresDataCheckBox.setSelected(inProblem.getDataFileName()!=null);
+            
+            if (inProblem.isReadInputDataFromSTDIN()){
+                fileRadioButton.setEnabled(false);
+                stdinRadioButton.setEnabled(true);
+            } else {
+                fileRadioButton.setEnabled(true);
+                stdinRadioButton.setEnabled(false);
+            }
 
         } else {
 
