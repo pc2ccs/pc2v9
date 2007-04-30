@@ -142,6 +142,10 @@ public class Permission implements Serializable {
         /**
          * 
          */
+        VIEW_DELETED_RUNS,
+        /**
+         * 
+         */
         VIEW_SUMMARY_ATTEMPTS_GRID,
         /**
          * Ability to force logoff a client
@@ -234,7 +238,9 @@ public class Permission implements Serializable {
         hash.put(Type.GIVE_CLARIFICATION, "Give clarifications to judges");
         hash.put(Type.TAKE_CLARIFICATION, "Take clarifications from judges");
         hash.put(Type.GENERATE_NEW_CLARIFICATION, "Generate a clarification and answer");
-        
+
+        hash.put(Type.VIEW_DELETED_RUNS, "View deleted runs");
+
     }
 
     /**
