@@ -104,7 +104,7 @@ public class SelectJudgementPane extends JPanePlugin {
     private JCheckBox notifyTeamCheckBox = null;
 
     private PermissionList permissionList = new PermissionList();
-
+    
     /**
      * This method initializes
      * 
@@ -233,6 +233,9 @@ public class SelectJudgementPane extends JPanePlugin {
 
         getController().submitRunJudgement(newRun, judgementRecord, runResultFiles);
 
+        if (getParentFrame() != null) {
+            getParentFrame().setVisible(false);
+        }
     }
 
     /**
@@ -409,8 +412,7 @@ public class SelectJudgementPane extends JPanePlugin {
             enableButton |= judgementChanged();
         }
 
-        getUpdateButton().setEnabled(enableButton);
-
+        enableUpdateButtons(enableButton);
     }
 
     private boolean judgementChanged() {
