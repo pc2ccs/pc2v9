@@ -202,13 +202,20 @@ public class SelectJudgementPane extends JPanePlugin {
         }
         return updateButton;
     }
+    
+    private void cancelRun() {
+        
+        enableUpdateButtons(false);
+        Run newRun = getRunFromFields();
+        getController().cancelRun(newRun);
+        
+    }
 
     protected void updateRun() {
 
         Run newRun = getRunFromFields();
 
-        cancelButton.setText("Close");
-        updateButton.setEnabled(false);
+        enableUpdateButtons(false);
 
         JudgementRecord judgementRecord = null;
         RunResultFiles runResultFiles = null;
@@ -222,15 +229,10 @@ public class SelectJudgementPane extends JPanePlugin {
             judgementRecord = new JudgementRecord(judgement.getElementId(), getModel().getClientId(), solved, false);
             judgementRecord.setSendToTeam(getNotifyTeamCheckBox().isSelected());
 
-            System.out.println("debug22 Run " + newRun);
-            System.out.println("debug22 judgement " + judgementRecord.isSolved() + " " + judgementRecord.isSendToTeam() + " " + judgement);
         }
 
         getController().submitRunJudgement(newRun, judgementRecord, runResultFiles);
 
-        if (getParentFrame() != null) {
-            getParentFrame().setVisible(false);
-        }
     }
 
     /**
@@ -267,17 +269,21 @@ public class SelectJudgementPane extends JPanePlugin {
                 }
             }
             if (result == JOptionPane.NO_OPTION) {
+                cancelRun();
                 if (getParentFrame() != null) {
                     getParentFrame().setVisible(false);
                 }
             }
 
         } else {
+            cancelRun();
             if (getParentFrame() != null) {
                 getParentFrame().setVisible(false);
             }
         }
     }
+
+
 
     public Run getRun() {
         return run;
