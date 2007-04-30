@@ -214,9 +214,6 @@ public class RunPane extends JPanePlugin {
 
             judgementRecord = new JudgementRecord(judgement.getElementId(), getModel().getClientId(), solved, false);
             judgementRecord.setSendToTeam(getNotifyTeamCheckBox().isSelected());
-            
-            System.out.println("debug22 Run "+newRun);
-            System.out.println("debug22 judgement "+judgementRecord.isSolved()+" "+judgementRecord.isSendToTeam()+" "+judgement);
         }
 
         newRun.setDeleted(deleteCheckBox.isSelected());

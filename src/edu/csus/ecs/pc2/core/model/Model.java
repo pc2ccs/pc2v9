@@ -176,7 +176,7 @@ public class Model implements IModel {
                     problemDataFiles.setJudgesDataFile(judgesDataFile);
                     problemDataFiles.setJudgesAnswerFile(judgesAnswerFile);
                 } catch (Exception e) {
-                    System.err.println("Exception trying to add judge's data/ans file ");
+                    System.err.println("debug Exception trying to add judge's data/ans file ");
                     e.printStackTrace(System.err);
                 }
                 
@@ -288,12 +288,6 @@ public class Model implements IModel {
 
             if (runEvent.getAction() == RunEvent.Action.ADDED) {
                 runListenerList.elementAt(i).runAdded(runEvent);
-                
-                System.out.println(" "+runEvent.getAction()+" "+runEvent.getRun());
-                if (runEvent.getRun() == null){
-                    new Exception("debug22 RUN_SUBMISSION_CONFIRM run is NULL ").printStackTrace();
-                }
-
             } else if (runEvent.getAction() == RunEvent.Action.DELETED) {
                 runListenerList.elementAt(i).runRemoved(runEvent);
             } else {
@@ -935,13 +929,12 @@ public class Model implements IModel {
                 
             } else {
                 Exception ex = new Exception ("addRunJudgement - who checked out and who it is differ ");
-                StaticLog.log("debug ", ex);
                 info("Exception in log"+ex.getMessage());
             }
             
         } else {
             // Judge is ok.
-            info("debug all is well, continuing... ");
+            info("debug all is well in addRunJudgement, continuing... ");
             
         }
         runList.updateRun(theRun, judgementRecord); // this sets run to JUDGED

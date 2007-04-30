@@ -233,7 +233,6 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             
             try {
                 transportManager.send(packet, connectionHandlerID);
-                System.err.println("debug22 sendToRemoteServer site "+siteNumber+" "+packet);
             } catch (TransportException e) {
                 log.log(Log.SEVERE,"Exception sending packet to site "+siteNumber+" "+packet, e);
             }

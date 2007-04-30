@@ -182,10 +182,8 @@ public class ClarificationList implements Serializable {
             fetchedClarification.getElementId().incrementVersionNumber();
             fetchedClarification.setState(newState);
             writeToDisk();
-        } else {
-            // TODO LOG could not find clarification in list
-            System.err.println("debug - could not find clarification " + clarification);
-
+       } else {
+           throw new SecurityException("Unable to find/update clarifications "+clarification);
         }
     }
 
@@ -201,9 +199,7 @@ public class ClarificationList implements Serializable {
             writeToDisk();
             return fetchedClarification;
         } else {
-            // TODO LOG could not find clarification in list
-            System.err.println("debug - could not find clarification " + clarification);
-            return null;
+            throw new SecurityException("Unable to find/update clarifications "+clarification);
         }
     }
 

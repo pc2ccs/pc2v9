@@ -236,7 +236,6 @@ public class PacketHandler {
                  * Add server into login list.
                  */
                 model.addLogin(fromId, connectionHandlerID);
-                info("Added Login "+fromId);
             }
 
             if (!model.isLoggedIn()) {
@@ -403,8 +402,6 @@ public class PacketHandler {
         Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
         ClientId whoModifiedRun = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
 
-        System.err.println(" debug22 sendRunUpdateNotification judgements = "+run.getJudgementRecord());
-        
         if (isServer()) {
             model.updateRun(run, whoModifiedRun);
             sendToJudgesAndOthers(packet, false);
@@ -907,7 +904,6 @@ public class PacketHandler {
     
     private void loadSettingsFromRemoteServer(Packet packet, ConnectionHandlerID connectionHandlerID) {
         
-        info("loadSettingsFromRemoteServer start debug22 ");
         addContestTimesToModel(packet);
 
         addSitesToModel(packet);
@@ -923,7 +919,6 @@ public class PacketHandler {
 //        
 //        addLoginsToModel (packet);
         
-        info("loadSettingsFromRemoteServer end   debug22 ");
     }
 
     /**

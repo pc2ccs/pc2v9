@@ -86,7 +86,6 @@ public class PacketArchiver implements UIPlugin {
         lastArchiveFilename = outputDirectroryName + File.separator + "packet" + serialNumber + "." + nextPacketNumber + ".packet";
         boolean wasWritten = savePacket(lastArchiveFilename, packet);
         nextPacketNumber ++;
-        System.err.println("debug writeNextPacket wrote to  "+lastArchiveFilename);
         return wasWritten;
     }
 
