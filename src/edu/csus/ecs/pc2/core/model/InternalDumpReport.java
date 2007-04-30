@@ -35,6 +35,25 @@ public class InternalDumpReport implements IReport {
     private Filter accountFilter = new Filter();
 
     private void writeReport(PrintWriter printWriter) {
+        
+        ContestTime localContestTime = model.getContestTime();
+        
+        printWriter.println();
+        if (localContestTime != null){
+            if (localContestTime.isContestRunning()){
+                printWriter.print("Contest is RUNNING");
+            } else {
+                printWriter.print("Contest is STOPPED");
+            }
+            
+            printWriter.print(" elapsed = "+localContestTime.getElapsedTimeStr());
+            printWriter.print(" remaining = "+localContestTime.getRemainingTimeStr());
+            printWriter.print(" length = "+localContestTime.getContestLengthStr());
+            printWriter.println();
+        } else {
+            printWriter.println("Contest Time is undefined (null)");
+            
+        }
 
         Vector<Account> allAccounts = new Vector<Account>();
 
@@ -203,9 +222,12 @@ public class InternalDumpReport implements IReport {
     }
     
     private void printHeader(PrintWriter printWriter) {
-        printWriter.println(new VersionInfo().getSystemName());
+        VersionInfo versionInfo = new VersionInfo();
+        printWriter.println(versionInfo.getSystemName());
         printWriter.println("Date: " + new Date());
-        printWriter.println(new VersionInfo().getSystemVersionInfo());
+        printWriter.println(versionInfo.getSystemVersionInfo());
+        printWriter.println("Build "+versionInfo.getBuildNumber());
+        
     }
 
     private void printFooter(PrintWriter printWriter) {
