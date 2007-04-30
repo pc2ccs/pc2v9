@@ -636,31 +636,30 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                             processPacket(packet, connectionHandlerID);
 
                             // Add the other (server we logged into) into our logged in list.
-                            model.addLogin(clientId, connectionHandlerID);
-
-                        } else if (model.isLoggedIn() && packet.getType().equals(PacketType.Type.LOGIN_SUCCESS)) {
-
-                            /**
-                             * This server is logged in, so this must be from a server we attempted to login to. We don't want their
-                             * information because we are already connected to other servers in the contest.
-                             */
-
-                            // Add the other (server we logged into) into our logged in list.
-                            model.addLogin(clientId, connectionHandlerID);
+                            model.addLocalLogin(clientId, connectionHandlerID);
 
                         } else {
-                            String message = "Security violation user " + clientId + " got a " + packet;
-                            info(message + " on " + connectionHandlerID);
-                            PacketFactory.dumpPacket(System.err, packet);
                             
-                            try {
-                                
-                                packetArchiver.writeNextPacket(packet);
-                                log.info("Security violation possible spoof packet from "+clientId+" connection "+connectionHandlerID);
-                                log.info("Security violation wrote packet to "+packetArchiver+" packet "+packet);
-                            } catch (Exception e) {
-                                log.log(Log.WARNING, "Exception logged writing packet ", e);
-                            }
+                            
+                            // TODO find out why this happens
+                            log.log(Log.INFO, "Packet from non-logged in server, processed anyways " + packet);
+
+//                            // 
+//                            String message = "Security violation user " + clientId + " got a " + packet;
+//                            info(message + " on " + connectionHandlerID);
+//                            PacketFactory.dumpPacket(System.err, packet);
+                            
+//                            try {
+//                                
+//                                packetArchiver.writeNextPacket(packet);
+//                                log.info("Security violation possible spoof packet from "+clientId+" connection "+connectionHandlerID);
+//                                log.info("Security violation wrote packet to "+packetArchiver+" packet "+packet);
+//                            } catch (Exception e) {
+//                                log.log(Log.WARNING, "Exception logged writing packet ", e);
+//                            }
+                            
+                            
+                            processPacket(packet, connectionHandlerID);
                             
                         }
                         return;
@@ -674,13 +673,21 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                         processPacket(packet, connectionHandlerID);
                         
                     } else {
-                    // else
-                    // We don't know why they send us these things...
+                        // else
 
-                    String message = "Security violation user " + clientId + " got a " + packet;
-                    info(message + " on " + connectionHandlerID);
-                    PacketFactory.dumpPacket(System.err, packet);
-                    sendSecurityVioation(clientId, connectionHandlerID, message);
+                        // TODO warning got packet but client is not logged in
+
+                        log.log(Log.INFO, "Packet from non-logged in user, processed anyways " + packet);
+
+//                        if (packet.getSourceId().getClientType().equals(ClientType.Type.TEAM)) {
+//                            String message = "Security violation user " + clientId + " got a " + packet;
+//                            info(message + " on " + connectionHandlerID);
+//                            PacketFactory.dumpPacket(System.err, packet);
+//                            sendSecurityVioation(clientId, connectionHandlerID, message);
+//
+//                        } else {
+                            processPacket(packet, connectionHandlerID);
+
                     } 
                 }
             } else {
