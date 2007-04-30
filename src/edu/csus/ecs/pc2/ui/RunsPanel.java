@@ -72,6 +72,8 @@ public class RunsPanel extends JPanePlugin {
     private EditRunFrame editRunFrame = null;
     
     private ViewJudgementsFrame viewJudgementsFrame = null;
+    
+    private SelectJudgementFrame selectJudgementFrame = null;
 
     private JLabel messageLabel = null;
     
@@ -101,6 +103,7 @@ public class RunsPanel extends JPanePlugin {
         
         editRunFrame = new EditRunFrame();
         viewJudgementsFrame = new ViewJudgementsFrame();
+        selectJudgementFrame = new SelectJudgementFrame();
 
     }
 
@@ -351,8 +354,9 @@ public class RunsPanel extends JPanePlugin {
         
         log = getController().getLog();
         
-        editRunFrame.setModelAndController(inModel, inController);
+        editRunFrame.setModelAndController(getModel(), getController());
         viewJudgementsFrame.setModelAndController(getModel(), getController());
+        selectJudgementFrame.setModelAndController(getModel(), getController());
 
         getModel().addRunListener(new RunListenerImplementation());
         getModel().addAccountListener(new AccountListenerImplementation());
@@ -424,11 +428,32 @@ public class RunsPanel extends JPanePlugin {
             requestRunButton.setMnemonic(java.awt.event.KeyEvent.VK_R);
             requestRunButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.out.println("actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+                    requestSelectedRun();
                 }
             });
         }
         return requestRunButton;
+    }
+
+    protected void requestSelectedRun() {
+        
+        int [] selectedIndexes = runListBox.getSelectedIndexes();
+        
+        if (selectedIndexes.length < 1){
+            showMessage("Please select a run ");
+            return;
+        }
+        
+        try {
+            ElementId elementId = (ElementId) runListBox.getKeys()[selectedIndexes[0]];
+            Run runToEdit = getModel().getRun(elementId);
+
+            selectJudgementFrame.setRun(runToEdit);
+            selectJudgementFrame.setVisible(true);
+        } catch (Exception e) {
+            log.log(Log.WARNING, "Exception logged ", e);
+            showMessage("Unable to edit run, check log");
+        }   
     }
 
     /**
