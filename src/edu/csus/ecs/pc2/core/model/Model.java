@@ -156,9 +156,9 @@ public class Model implements IModel {
 
         String[] probNames = { "A - Sum of Squares", "B - Sumit", "C - Hello", "D - GoodBye" };
         
-      runList = new RunList(1, true);
-      runFilesList = new RunFilesList(1);
-      clarificationList = new ClarificationList(1, true);
+        runList = new RunList(1, false);
+        runFilesList = new RunFilesList();
+        clarificationList = new ClarificationList(1, false);
 
         for (String problemName : probNames) {
             Problem problem = new Problem(problemName);
