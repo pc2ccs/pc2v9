@@ -382,10 +382,11 @@ public class RunsPanel extends JPanePlugin {
             rowCountLabel.setText("###");
             messageLabel = new JLabel();
             messageLabel.setText("");
+            messageLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 14));
             messageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
             messagePanel = new JPanel();
             messagePanel.setLayout(new BorderLayout());
-            messagePanel.setPreferredSize(new java.awt.Dimension(25,25));
+            messagePanel.setPreferredSize(new java.awt.Dimension(30,30));
             messagePanel.add(messageLabel, java.awt.BorderLayout.CENTER);
             messagePanel.add(rowCountLabel, java.awt.BorderLayout.EAST);
         }
@@ -447,9 +448,47 @@ public class RunsPanel extends JPanePlugin {
         try {
             ElementId elementId = (ElementId) runListBox.getKeys()[selectedIndexes[0]];
             Run runToEdit = getModel().getRun(elementId);
+            
+            if ((! runToEdit.getStatus().equals(RunStates.NEW)) || runToEdit.isDeleted()){
+                showMessage("Now allowed to request run, already judged");
+                return;
+            }
 
             selectJudgementFrame.setRun(runToEdit);
             selectJudgementFrame.setVisible(true);
+        } catch (Exception e) {
+            log.log(Log.WARNING, "Exception logged ", e);
+            showMessage("Unable to edit run, check log");
+        }   
+    }
+    
+    protected void rejudgeSelectedRun () {
+        
+        int [] selectedIndexes = runListBox.getSelectedIndexes();
+        
+        if (selectedIndexes.length < 1){
+            showMessage("Please select a run ");
+            return;
+        }
+        
+        try {
+            ElementId elementId = (ElementId) runListBox.getKeys()[selectedIndexes[0]];
+            Run runToEdit = getModel().getRun(elementId);
+            
+            if (! runToEdit.isJudged()){
+                showMessage("Judge run before attempting to re-judge run");
+                return;
+            }
+            
+            if (runToEdit.isDeleted()){
+                showMessage("Now allowed to rejudge deleted run ");
+                return;
+            }
+
+            showMessage("Would have rejudged run "+runToEdit.getNumber());
+//            selectJudgementFrame.setRun(runToEdit);
+//            selectJudgementFrame.setVisible(true);
+            
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception logged ", e);
             showMessage("Unable to edit run, check log");
@@ -597,7 +636,7 @@ public class RunsPanel extends JPanePlugin {
             rejudgeRunButton.setText("Rejudge");
             rejudgeRunButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.out.println("actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+                    rejudgeSelectedRun();
                 }
             });
         }
@@ -690,6 +729,7 @@ public class RunsPanel extends JPanePlugin {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 messageLabel.setText(string);
+                messageLabel.setToolTipText(string);
             }
         });
 
