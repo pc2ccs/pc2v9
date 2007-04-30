@@ -1033,6 +1033,13 @@ public class PacketHandler {
 //        addLoginsToModel(packet);
 
         if (model.isLoggedIn()) {
+            
+            // insure that this site's contest time exists 
+            if (model.getContestTime() == null){
+                ContestTime contestTime = new ContestTime();
+                contestTime.setSiteNumber(model.getSiteNumber());
+                model.addContestTime(contestTime);
+            }
 
             // show main UI
             controller.startMainUI(model.getClientId());
