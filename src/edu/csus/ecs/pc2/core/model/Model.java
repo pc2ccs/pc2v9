@@ -155,6 +155,10 @@ public class Model implements IModel {
     public void initializeWithFakeData() {
 
         String[] probNames = { "A - Sum of Squares", "B - Sumit", "C - Hello", "D - GoodBye" };
+        
+      runList = new RunList(1, true);
+      runFilesList = new RunFilesList(1);
+      clarificationList = new ClarificationList(1, true);
 
         for (String problemName : probNames) {
             Problem problem = new Problem(problemName);
@@ -626,7 +630,7 @@ public class Model implements IModel {
              */
             
 //            runList = new RunList(clientId.getSiteNumber(), true);
-            runFilesList = new RunFilesList(clientId.getSiteNumber());
+//            runFilesList = new RunFilesList(clientId.getSiteNumber());
 //            clarificationList = new ClarificationList(clientId.getSiteNumber(), true);
             
             if (getContestTime() == null){

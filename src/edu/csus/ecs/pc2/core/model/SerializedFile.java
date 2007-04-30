@@ -2,12 +2,13 @@ package edu.csus.ecs.pc2.core.model;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.security.MessageDigest;
+
+import edu.csus.ecs.pc2.core.log.StaticLog;
 
 /**
  * A file that can be stored to disk or transported.
@@ -64,7 +65,7 @@ public class SerializedFile implements Serializable {
 //                generateFileType(buffer);
 
             } catch (Exception e) {
-                log("Exception in SerializeFile", e);
+                StaticLog.log("Exception in SerializeFile for file "+fileName, e);
             }
         }
     }
@@ -95,7 +96,7 @@ public class SerializedFile implements Serializable {
 //                generateFileType(buffer);
 
             } catch (Exception e) {
-                log("Exception in SerializeFile", e);
+                StaticLog.log("Exception in SerializeFile for file "+fileName, e);
             }
         }
     }
@@ -119,7 +120,7 @@ public class SerializedFile implements Serializable {
             outputStream.write(b, 0, b.length);
             outputStream.close();
         } catch (Exception e) {
-            log("Exception in buffer2file", e);
+            StaticLog.log("Exception in buffer2file for file "+fileName, e);
         }
     }
 
@@ -130,25 +131,17 @@ public class SerializedFile implements Serializable {
      *
      * @param fileName
      *            java.lang.String
+     * @throws IOException 
      */
-    public void writeFile(String fileName) {
+    public void writeFile(String fileName) throws IOException {
 
-        try {
-            if (buffer != null && buffer.length > 0) {
-                FileOutputStream outputStream = null;
-                outputStream = new FileOutputStream(fileName);
-                outputStream.write(buffer, 0, buffer.length);
-                outputStream.close();
-            } else {
-                System.out.println("buffer is null or buffer.length == 0");
-            }
-
-        } catch (FileNotFoundException e1) {
-            // TODO LOG log this exception
-            e1.printStackTrace();
-        } catch (IOException e) {
-            // TODO LOG log this exception
-            e.printStackTrace();
+        if (buffer != null && buffer.length > 0) {
+            FileOutputStream outputStream = null;
+            outputStream = new FileOutputStream(fileName);
+            outputStream.write(buffer, 0, buffer.length);
+            outputStream.close();
+        } else {
+            throw new IOException("Unable to write file, buffer is null or buffer.length is zero");
         }
     }
 
@@ -156,7 +149,7 @@ public class SerializedFile implements Serializable {
     
     /**
      * Read file and output buffer of bytes.
-     *
+     * 
      * @param fileName
      *            file to be read.
      * @return bytes from the input file.
@@ -170,8 +163,7 @@ public class SerializedFile implements Serializable {
             inputStream = new FileInputStream(fileName);
             len = inputStream.available();
         } catch (Exception e) {
-            // TODO log
-            e.printStackTrace();
+            StaticLog.log("Exception in file2buffer for file "+fileName, e);
         }
 
         b = new byte[len];
@@ -180,9 +172,7 @@ public class SerializedFile implements Serializable {
             inputStream.read(b);
             inputStream.close();
         } catch (Exception e) {
-            // TODO log
-            e.printStackTrace();
-
+            StaticLog.log("Exception in file2buffer for file "+fileName, e);
         }
 
         return b;
@@ -210,7 +200,7 @@ public class SerializedFile implements Serializable {
             inputStream = new FileInputStream(fileName);
             len = inputStream.available();
         } catch (Exception e) {
-            log("Exception in file2buffer", e);
+            StaticLog.log("Exception in file2buffer", e);
         }
 
         if (len > limit) {
@@ -223,7 +213,7 @@ public class SerializedFile implements Serializable {
             inputStream.read(b);
             inputStream.close();
         } catch (Exception e) {
-            log("Exception in file2buffer", e);
+            StaticLog.log("Exception in generateMD5", e);
         }
 
         return b;
@@ -247,14 +237,9 @@ public class SerializedFile implements Serializable {
             md5sum = out;
 
         } catch (Exception ex99) {
-            log("Exception in generateMD5", ex99);
+            StaticLog.log("Exception in generateMD5", ex99);
         }
 
-    }
-
-    private void log(String string, Exception ex99) {
-        // TODO Auto-generated method stub
-        
     }
 
     /**

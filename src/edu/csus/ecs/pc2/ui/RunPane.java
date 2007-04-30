@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.KeyAdapter;
 import java.io.File;
+import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -734,18 +735,22 @@ public class RunPane extends JPanePlugin {
         Utilities.insureDir(targetDirectory);
         String targetFileName = targetDirectory + File.separator + file.getName();
         showMessage("Create: " + targetFileName);
-        file.writeFile(targetFileName);
+        try {
+            file.writeFile(targetFileName);
+            if (sourceViewer != null) {
+                sourceViewer.dispose();
+            }
+            sourceViewer = new MultipleFileViewer(getController().getLog());
 
-        if (sourceViewer != null) {
-            sourceViewer.dispose();
-        }
-        sourceViewer = new MultipleFileViewer(getController().getLog());
-
-        if (new File(targetFileName).isFile()) {
-            sourceViewer.addFilePane(title, targetFileName);
-            sourceViewer.setVisible(true);
-        } else {
-            sourceViewer.addFilePane(title, "Could not create file at " + targetFileName);
+            if (new File(targetFileName).isFile()) {
+                sourceViewer.addFilePane(title, targetFileName);
+                sourceViewer.setVisible(true);
+            } else {
+                sourceViewer.addTextPane(title, "Could not create file at " + targetFileName);
+                sourceViewer.setVisible(true);
+            }
+        } catch (IOException e) {
+            sourceViewer.addTextPane(title, "Could not create file at " + targetFileName + "Exception "+e.getMessage());
             sourceViewer.setVisible(true);
         }
     }

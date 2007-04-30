@@ -127,7 +127,7 @@ public class Executable {
     /**
      * Overwrite judge's data and answer files.
      */
-    private boolean overwriteJudgesDataFiles;
+    private boolean overwriteJudgesDataFiles = true;
     
     private boolean testRunOnly = false;
 
@@ -377,7 +377,11 @@ public class Executable {
             // Create Validation Program
 
             String validatorFileName = problemDataFiles.getValidatorFile().getName();
-            createFile(problemDataFiles.getValidatorFile(), prefixExecuteDirname(validatorFileName));
+            String validatorUnpackName = prefixExecuteDirname(validatorFileName);
+            if ( ! createFile(problemDataFiles.getValidatorFile(),validatorUnpackName )){
+                log.info("Unable to create validator program "+validatorUnpackName);
+                throw new SecurityException("Unable to create validator, check logs");
+            }
 
             if (!validatorFileName.endsWith(".jar")) {
                 /**
@@ -441,8 +445,8 @@ public class Executable {
             }
 
         } catch (Exception e) {
-            // TODO LOG
-            log.log(Log.CONFIG, "Exception in validatorCall ", e);
+            log.log(Log.INFO, "Exception in validatorCall ", e);
+            throw new SecurityException(e);
         }
 
         try {
@@ -551,8 +555,8 @@ public class Executable {
                 // "+resultsFileName);
             }
         } catch (Exception ex) {
-            // TODO LOG
-            log.log(Log.CONFIG, "Exception in validation  ", ex);
+            log.log(Log.INFO, "Exception in validation  ", ex);
+            throw new SecurityException(ex);
         }
 
         return executionData.isValidationSuccess();
@@ -662,8 +666,9 @@ public class Executable {
 
                     if (overwriteJudgesDataFiles) {
                         // create the judges data file on disk.
-                        createFile(problemDataFiles.getJudgesDataFiles(), dataSetNumber, inputDataFileName);
-
+                        if ( ! createFile(problemDataFiles.getJudgesDataFiles(), dataSetNumber, inputDataFileName)){
+                            throw new SecurityException("Unable to create data file "+inputDataFileName);
+                        }
                     }
                     // Else, leave whatever data file is present.
                 }
@@ -755,7 +760,8 @@ public class Executable {
                 executionTimer.stopTimer();
             }
             // TODO: handle exception
-            log.log(Log.CONFIG, "executeProgram() Exception ", e);
+            log.log(Log.INFO, "executeProgram() Exception ", e);
+            throw new SecurityException(e);
         }
 
         return passed;
@@ -851,10 +857,9 @@ public class Executable {
                 executionTimer.stopTimer();
             }
             // TODO: handle exception
-            log.log(Log.CONFIG, "Exception ", e);
+            log.log(Log.INFO, "Exception ", e);
+            throw new SecurityException(e);
         }
-
-        return false;
     }
 
     private long getMaxFileSize() {
@@ -1164,11 +1169,16 @@ public class Executable {
      * @param file
      * @param outputFileName
      * @return true if file written to disk.
+     * @throws IOException 
      */
     boolean createFile(SerializedFile file, String outputFileName) {
-        if (file != null && outputFileName != null) {
-            file.writeFile(outputFileName);
-            return new File(outputFileName).isFile();
+        try {
+            if (file != null && outputFileName != null) {
+                file.writeFile(outputFileName);
+                return new File(outputFileName).isFile();
+            }
+        } catch (Exception e) {
+            log.log(Log.INFO, "Exception creating file "+outputFileName, e);
         }
 
         return false;
