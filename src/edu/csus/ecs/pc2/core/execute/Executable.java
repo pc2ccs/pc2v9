@@ -1241,7 +1241,7 @@ public class Executable {
     /**
      * Set whether to overwrite judge's data files, or leave them.
      * 
-     * @param overwriteJudgesDataFiles
+     * @param overwriteDataFiles
      *            if true, rewrite data files, if false do nothing.
      */
     public void setOverwriteJudgesDataFiles(boolean overwriteDataFiles) {

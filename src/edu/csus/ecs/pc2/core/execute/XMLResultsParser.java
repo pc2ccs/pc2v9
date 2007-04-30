@@ -116,8 +116,6 @@ public class XMLResultsParser implements IResultsParser {
      * 
      * @param resultsFileName
      *            input XML filename
-     * @param attributes
-     *            output attributes (name value pairs)
      * @return true if found results.
      */
     public boolean parseValidatorResultsFile(String resultsFileName) {

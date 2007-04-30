@@ -22,7 +22,7 @@ public class PermissionList implements Serializable {
 
     /**
      * Add a permission to list of permissions.
-     * @param permission
+     * @param type
      */
     public void addPermission(Permission.Type type) {
         hash.put(type, new Date());
@@ -30,8 +30,8 @@ public class PermissionList implements Serializable {
     
     /**
      * Return date when permission added.
-     * @param permission
-     * @return
+     * @param type
+     * @return Date when permission was added
      */
     public Date getWhenPermissionAdded (Permission.Type type){
         if (hash.containsKey(type)) {
@@ -43,7 +43,7 @@ public class PermissionList implements Serializable {
 
     /**
      * remove a permission from the list.
-     * @param permission
+     * @param type
      */
     public void removePermission(Permission.Type type) {
 
@@ -56,7 +56,7 @@ public class PermissionList implements Serializable {
      * Is user allowed to do this permission?.
      * 
      * 
-     * @param permission
+     * @param type
      * @return true if ok to do task, false otherwise.
      */
     public boolean isAllowed (Permission.Type type) {

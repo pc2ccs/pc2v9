@@ -246,7 +246,7 @@ public class Permission implements Serializable {
     /**
      * Return a description for permission type.
      * 
-     * @param permission
+     * @param type
      * @return Description of type.
      */
     public String getDescription(Type type) {

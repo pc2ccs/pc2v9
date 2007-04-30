@@ -608,7 +608,7 @@ public final class PacketFactory {
      * Create start contest to send to server.
      * @param source
      * @param destination
-     * @param contestTime
+     * @param siteNumber
      * @param who 
      */
     public static Packet createStartContestClock(ClientId source, ClientId destination, int siteNumber, ClientId who) {
@@ -625,7 +625,7 @@ public final class PacketFactory {
      * 
      * @param source
      * @param destination
-     * @param contestTime
+     * @param siteNumber
      * @param who 
      */
     public static Packet createStopContestClock(ClientId source, ClientId destination, int siteNumber, ClientId who) {
