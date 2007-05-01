@@ -177,6 +177,8 @@ public class LanguagesPane extends JPanePlugin {
 
         editLanguageFrame.setContestAndController(inContest, inController);
         
+        getContest().addLanguageListener(new LanguageListenerImplementation());
+        
         log = getController().getLog();
         
         SwingUtilities.invokeLater(new Runnable() {

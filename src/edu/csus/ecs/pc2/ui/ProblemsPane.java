@@ -14,7 +14,9 @@ import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IProblemListener;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.ProblemEvent;
 
 /**
  * View Problems.
@@ -185,6 +187,8 @@ public class ProblemsPane extends JPanePlugin {
         log = getController().getLog();
         
         editProblemFrame.setContestAndController(inContest, inController);
+        
+        getContest().addProblemListener(new ProblemListenerImplementation());
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -281,5 +285,32 @@ public class ProblemsPane extends JPanePlugin {
         });
     }
 
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     * 
+     */
+    private class ProblemListenerImplementation implements IProblemListener {
+
+        public void problemAdded(final ProblemEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    updateProblemRow(event.getProblem());
+                }
+            });
+        }
+
+        public void problemChanged(final ProblemEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    updateProblemRow(event.getProblem());
+                }
+            });
+        }
+
+        public void problemRemoved(ProblemEvent event) {
+            log.info("debug Problem REMOVED  " + event.getProblem());
+        }
+    }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
