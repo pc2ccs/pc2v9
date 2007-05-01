@@ -166,7 +166,7 @@ public class ProblemsPane extends JPanePlugin {
 
     private void reloadListBox() {
         problemListBox.removeAllRows();
-        Problem[] problems = getModel().getProblems();
+        Problem[] problems = getContest().getProblems();
 
         for (Problem problem : problems) {
             addProblemRow(problem);
@@ -244,7 +244,7 @@ public class ProblemsPane extends JPanePlugin {
         
         try {
             ElementId elementId = (ElementId) problemListBox.getKeys()[selectedIndex];
-            Problem problemToEdit = getModel().getProblem(elementId);
+            Problem problemToEdit = getContest().getProblem(elementId);
 
             editProblemFrame.setProblem(problemToEdit);
             editProblemFrame.setVisible(true);

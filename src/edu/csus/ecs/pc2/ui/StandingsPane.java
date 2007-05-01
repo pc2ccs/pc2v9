@@ -82,7 +82,7 @@ public class StandingsPane extends JPanePlugin {
         
         log = getController().getLog();
         
-        getModel().addRunListener(new RunListenerImplementation());
+        getContest().addRunListener(new RunListenerImplementation());
 
         refreshStandings();
     }
@@ -133,7 +133,7 @@ public class StandingsPane extends JPanePlugin {
         try {
             DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
 
-            xmlString = defaultScoringAlgorithm.getStandings(getModel(), new Properties(), getController().getLog());
+            xmlString = defaultScoringAlgorithm.getStandings(getContest(), new Properties(), getController().getLog());
             DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
             document = documentBuilder.parse(new InputSource(new StringReader(xmlString)));

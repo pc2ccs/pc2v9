@@ -195,7 +195,7 @@ public class SitesPanel extends JPanePlugin {
 
         if (message == null) {
 
-            Site[] sites = getModel().getSites();
+            Site[] sites = getContest().getSites();
 
             for (int i = 0; i < siteListBox.getRowCount(); i++) {
 
@@ -388,7 +388,7 @@ public class SitesPanel extends JPanePlugin {
         siteListBox.removeAllRows();
         siteList = new SiteList();
 
-        Site[] sites = getModel().getSites();
+        Site[] sites = getContest().getSites();
         Arrays.sort(sites, new SiteComparatorBySiteNumber());
 
         for (Site site : sites) {
@@ -461,7 +461,7 @@ public class SitesPanel extends JPanePlugin {
     public void setModelAndController(IContest inModel, IController inController) {
         super.setModelAndController(inModel, inController);
 
-        getModel().addSiteListener(new SiteListenerImplementation());
+        getContest().addSiteListener(new SiteListenerImplementation());
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {

@@ -107,7 +107,7 @@ public class SubmitRunPane extends JPanePlugin {
         Problem problemN = new Problem("None Selected");
         getProblemComboBox().addItem(problemN);
 
-        for (Problem problem : getModel().getProblems()) {
+        for (Problem problem : getContest().getProblems()) {
             getProblemComboBox().addItem(problem);
         }
 
@@ -115,15 +115,15 @@ public class SubmitRunPane extends JPanePlugin {
         Language languageN = new Language("None Selected");
         getLanguageComboBox().addItem(languageN);
 
-        for (Language language : getModel().getLanguages()) {
+        for (Language language : getContest().getLanguages()) {
             getLanguageComboBox().addItem(language);
         }
         
-        setButtonsActive(getModel().getContestTime().isContestRunning());
+        setButtonsActive(getContest().getContestTime().isContestRunning());
     }
 
     private boolean isThisSite(int siteNumber) {
-        return siteNumber == getModel().getSiteNumber();
+        return siteNumber == getContest().getSiteNumber();
     }
 
     /**
@@ -406,10 +406,10 @@ public class SubmitRunPane extends JPanePlugin {
 
         try {
             log.info("test run for "+problem+" "+language+" file: "+filename);
-            Run run = new Run(getModel().getClientId(), language, problem);
+            Run run = new Run(getContest().getClientId(), language, problem);
             RunFiles runFiles = new RunFiles(run, new SerializedFile(filename), null);
 
-            executable = new Executable(getModel(), getController(), run, runFiles);
+            executable = new Executable(getContest(), getController(), run, runFiles);
             executable.setTestRunOnly(true);
 
             IFileViewer fileViewer;
@@ -502,10 +502,10 @@ public class SubmitRunPane extends JPanePlugin {
 
         this.log = getController().getLog();
         
-        getModel().addRunListener(new RunListenerImplementation());
-        getModel().addContestTimeListener(new ContestTimeListenerImplementation());
-        getModel().addLanguageListener(new LanguageListenerImplementation());
-        getModel().addProblemListener(new ProblemListenerImplementation());
+        getContest().addRunListener(new RunListenerImplementation());
+        getContest().addContestTimeListener(new ContestTimeListenerImplementation());
+        getContest().addLanguageListener(new LanguageListenerImplementation());
+        getContest().addProblemListener(new ProblemListenerImplementation());
 
         // TODO add listeners for accounts, login and site.
 

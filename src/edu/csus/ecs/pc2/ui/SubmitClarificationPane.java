@@ -157,11 +157,11 @@ public class SubmitClarificationPane extends JPanePlugin {
         Problem generalProblem = new Problem("General");
         getProblemComboBox().addItem(generalProblem);
 
-        for (Problem problem : getModel().getProblems()) {
+        for (Problem problem : getContest().getProblems()) {
             getProblemComboBox().addItem(problem);
         }
 
-        setButtonsActive(getModel().getContestTime().isContestRunning());
+        setButtonsActive(getContest().getContestTime().isContestRunning());
     }
 
     /**
@@ -277,7 +277,7 @@ public class SubmitClarificationPane extends JPanePlugin {
 
     
     private boolean isThisSite(int siteNumber) {
-        return siteNumber == getModel().getSiteNumber();
+        return siteNumber == getContest().getSiteNumber();
     }
     
     private void showMessage(String string) {
@@ -295,8 +295,8 @@ public class SubmitClarificationPane extends JPanePlugin {
             }
         });
         
-        getModel().addContestTimeListener(new ContestTimeListenerImplementation());
-        getModel().addProblemListener(new ProblemListenerImplementation());
+        getContest().addContestTimeListener(new ContestTimeListenerImplementation());
+        getContest().addProblemListener(new ProblemListenerImplementation());
 
         setVisible(true);
         

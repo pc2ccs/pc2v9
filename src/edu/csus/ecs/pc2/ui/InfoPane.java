@@ -152,7 +152,7 @@ public class InfoPane extends JPanePlugin {
     }
 
     protected void viewDumpFile() {
-        InternalDump internalDump = new InternalDump(getModel());
+        InternalDump internalDump = new InternalDump(getContest());
         internalDump.setEditorNameFullPath(getEditorTextBox().getText());
         internalDump.viewContestData();
     }

@@ -212,7 +212,7 @@ public class RunPane extends JPanePlugin {
             boolean solved = getJudgementComboBox().getSelectedIndex() == 0;
             Judgement judgement = (Judgement) getJudgementComboBox().getSelectedItem();
 
-            judgementRecord = new JudgementRecord(judgement.getElementId(), getModel().getClientId(), solved, false);
+            judgementRecord = new JudgementRecord(judgement.getElementId(), getContest().getClientId(), solved, false);
             judgementRecord.setSendToTeam(getNotifyTeamCheckBox().isSelected());
         }
 
@@ -347,7 +347,7 @@ public class RunPane extends JPanePlugin {
             return; // No run no combo boxes.
         }
 
-        for (Problem problem : getModel().getProblems()) {
+        for (Problem problem : getContest().getProblems()) {
             getProblemComboBox().addItem(problem);
             if (problem.getElementId().equals(run.getProblemId())) {
                 selectedIndex = index;
@@ -360,7 +360,7 @@ public class RunPane extends JPanePlugin {
         selectedIndex = -1;
         index = 0;
 
-        for (Language language : getModel().getLanguages()) {
+        for (Language language : getContest().getLanguages()) {
             getLanguageComboBox().addItem(language);
             if (language.getElementId().equals(run.getLanguageId())) {
                 selectedIndex = index;
@@ -379,7 +379,7 @@ public class RunPane extends JPanePlugin {
             judgementId = run.getJudgementRecord().getJudgementId();
         }
 
-        for (Judgement judgement : getModel().getJudgements()) {
+        for (Judgement judgement : getContest().getJudgements()) {
             getJudgementComboBox().addItem(judgement);
             if (judgement.getElementId().equals(judgementId)) {
                 selectedIndex = index;
@@ -606,7 +606,7 @@ public class RunPane extends JPanePlugin {
 
         System.gc();
 
-        executable = new Executable(getModel(), getController(), run, runFiles);
+        executable = new Executable(getContest(), getController(), run, runFiles);
 
         IFileViewer fileViewer = executable.execute();
         fileViewer.setVisible(true);
@@ -727,7 +727,7 @@ public class RunPane extends JPanePlugin {
 
     private void createAndViewFile(SerializedFile file, String title) {
         // TODO the executeable dir name should be from the model, eh ?
-        Executable tempEexecutable = new Executable(getModel(), getController(), run, runFiles);
+        Executable tempEexecutable = new Executable(getContest(), getController(), run, runFiles);
         String targetDirectory = tempEexecutable.getExecuteDirectoryName();
         Utilities.insureDir(targetDirectory);
         String targetFileName = targetDirectory + File.separator + file.getName();

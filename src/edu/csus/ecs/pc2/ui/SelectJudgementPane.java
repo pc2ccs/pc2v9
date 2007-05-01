@@ -226,7 +226,7 @@ public class SelectJudgementPane extends JPanePlugin {
             boolean solved = getJudgementComboBox().getSelectedIndex() == 0;
             Judgement judgement = (Judgement) getJudgementComboBox().getSelectedItem();
 
-            judgementRecord = new JudgementRecord(judgement.getElementId(), getModel().getClientId(), solved, false);
+            judgementRecord = new JudgementRecord(judgement.getElementId(), getContest().getClientId(), solved, false);
             judgementRecord.setSendToTeam(getNotifyTeamCheckBox().isSelected());
 
         }
@@ -321,8 +321,8 @@ public class SelectJudgementPane extends JPanePlugin {
             statusLabel.setText(run.getStatus().toString());
             elapsedTimeLabel.setText(new Long(run.getElapsedMins()).toString());
             
-            problemNameLabel.setText(getModel().getProblem(run.getProblemId()).toString());            
-            languageNameLabel.setText(getModel().getLanguage(run.getLanguageId()).toString());            
+            problemNameLabel.setText(getContest().getProblem(run.getProblemId()).toString());            
+            languageNameLabel.setText(getContest().getLanguage(run.getLanguageId()).toString());            
 
         } else {
             getUpdateButton().setVisible(false);
@@ -361,7 +361,7 @@ public class SelectJudgementPane extends JPanePlugin {
             judgementId = run.getJudgementRecord().getJudgementId();
         }
 
-        for (Judgement judgement : getModel().getJudgements()) {
+        for (Judgement judgement : getContest().getJudgements()) {
             getJudgementComboBox().addItem(judgement);
             if (judgement.getElementId().equals(judgementId)) {
                 selectedIndex = index;
@@ -588,7 +588,7 @@ public class SelectJudgementPane extends JPanePlugin {
 
         System.gc();
 
-        executable = new Executable(getModel(), getController(), run, runFiles);
+        executable = new Executable(getContest(), getController(), run, runFiles);
 
         IFileViewer fileViewer = executable.execute();
         fileViewer.setVisible(true);
@@ -633,7 +633,7 @@ public class SelectJudgementPane extends JPanePlugin {
 
     private void createAndViewFile(SerializedFile file, String title) {
         // TODO the executeable dir name should be from the model, eh ?
-        Executable tempEexecutable = new Executable(getModel(), getController(), run, runFiles);
+        Executable tempEexecutable = new Executable(getContest(), getController(), run, runFiles);
         String targetDirectory = tempEexecutable.getExecuteDirectoryName();
         Utilities.insureDir(targetDirectory);
         String targetFileName = targetDirectory + File.separator + file.getName();
@@ -679,7 +679,7 @@ public class SelectJudgementPane extends JPanePlugin {
     
     
     private void initializePermissions() {
-        Account account = getModel().getAccount(getModel().getClientId());
+        Account account = getContest().getAccount(getContest().getClientId());
         if (account != null){
             permissionList.clearAndLoadPermissions(account.getPermissionList());
         }

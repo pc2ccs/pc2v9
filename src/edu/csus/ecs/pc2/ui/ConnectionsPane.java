@@ -142,7 +142,7 @@ public class ConnectionsPane extends JPanePlugin {
         Vector<ClientId> allAccounts = new Vector<ClientId>();
 
         for (ClientType.Type ctype : ClientType.Type.values()) {
-            Enumeration<ClientId> enumeration = getModel().getLoggedInClients(ctype);
+            Enumeration<ClientId> enumeration = getContest().getLoggedInClients(ctype);
             while (enumeration.hasMoreElements()) {
                 ClientId clientId = (ClientId) enumeration.nextElement();
                 allAccounts.addElement(clientId);
@@ -156,7 +156,7 @@ public class ConnectionsPane extends JPanePlugin {
     private void reloadListBox() {
         connectionsListBox.removeAllRows();
 
-        ConnectionHandlerID[] connectionHandlerIDs = getModel().getConnectionHandleIDs();
+        ConnectionHandlerID[] connectionHandlerIDs = getContest().getConnectionHandleIDs();
 
         for (ConnectionHandlerID connectionHandlerID : connectionHandlerIDs) {
             updateConnectionRow(connectionHandlerID);
@@ -199,7 +199,7 @@ public class ConnectionsPane extends JPanePlugin {
     public void setModelAndController(IContest inModel, IController inController) {
         super.setModelAndController(inModel, inController);
 
-        getModel().addConnectionListener(new ConnectionListenerImplementation());
+        getContest().addConnectionListener(new ConnectionListenerImplementation());
         
         log = getController().getLog();
 

@@ -92,7 +92,7 @@ public class ViewJudgementsPane extends JPanePlugin implements UIPlugin {
     }
 
     protected String getSiteTitle(int siteNumber) {
-        Site site = getModel().getSites()[siteNumber - 1];
+        Site site = getContest().getSites()[siteNumber - 1];
         if (site == null) {
             return "<missing>";
         }
@@ -164,7 +164,7 @@ public class ViewJudgementsPane extends JPanePlugin implements UIPlugin {
     }
 
     private String getJudgementTitle(ElementId judgementId) {
-        Judgement judgement = getModel().getJudgement(judgementId);
+        Judgement judgement = getContest().getJudgement(judgementId);
         if (judgement == null) {
             return "<missing>";
         }
@@ -257,7 +257,7 @@ public class ViewJudgementsPane extends JPanePlugin implements UIPlugin {
     public void setModelAndController(IContest inModel, IController inController) {
         super.setModelAndController(inModel, inController);
         
-        getModel().addRunListener(new RunListenerImplementation());
+        getContest().addRunListener(new RunListenerImplementation());
     }
     
     /**

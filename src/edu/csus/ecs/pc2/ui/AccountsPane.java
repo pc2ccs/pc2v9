@@ -184,8 +184,8 @@ public class AccountsPane extends JPanePlugin {
         Vector<Account> allAccounts = new Vector<Account>();
 
         for (ClientType.Type ctype : ClientType.Type.values()) {
-            if (getModel().getAccounts(ctype).size() > 0) {
-                Vector<Account> accounts = getModel().getAccounts(ctype);
+            if (getContest().getAccounts(ctype).size() > 0) {
+                Vector<Account> accounts = getContest().getAccounts(ctype);
                 allAccounts.addAll(accounts);
             }
         }
@@ -210,7 +210,7 @@ public class AccountsPane extends JPanePlugin {
     }
     
     private void initializePermissions() {
-        Account account = getModel().getAccount(getModel().getClientId());
+        Account account = getContest().getAccount(getContest().getClientId());
         permissionList.clearAndLoadPermissions(account.getPermissionList());
     }
 
@@ -223,7 +223,7 @@ public class AccountsPane extends JPanePlugin {
         super.setModelAndController(inModel, inController);
 
         log = getController().getLog();
-        getModel().addAccountListener(new AccountListenerImplementation());
+        getContest().addAccountListener(new AccountListenerImplementation());
         
         initializePermissions();
         
@@ -259,7 +259,7 @@ public class AccountsPane extends JPanePlugin {
              * If this is the account then update the GUI display per
              * the potential change in Permissions.
              */
-            if (getModel().getClientId().equals(account.getClientId())) {
+            if (getContest().getClientId().equals(account.getClientId())) {
                 // They modified us!!
                 initializePermissions();
                 SwingUtilities.invokeLater(new Runnable() {
@@ -345,7 +345,7 @@ public class AccountsPane extends JPanePlugin {
         
         try {
             ClientId clientId = (ClientId) accountListBox.getKeys()[selectedIndex];
-            Account accountToEdit = getModel().getAccount(clientId);
+            Account accountToEdit = getContest().getAccount(clientId);
             editAccountFrame.setAccount(accountToEdit);
             editAccountFrame.setVisible(true);
         } catch (Exception e) {

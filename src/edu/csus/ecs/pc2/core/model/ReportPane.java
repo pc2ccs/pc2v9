@@ -197,7 +197,7 @@ public class ReportPane extends JPanePlugin {
 
         // TODO code populate filter.
         Filter filter = new Filter();
-        filter.setSiteNumber(getModel().getSiteNumber());
+        filter.setSiteNumber(getContest().getSiteNumber());
         filter.setThisSiteOnly(getThisSiteCheckBox().isSelected());
 
         try {
@@ -213,7 +213,7 @@ public class ReportPane extends JPanePlugin {
                 }
             }
             
-            selectedReport.setModelAndController(getModel(), getController());
+            selectedReport.setModelAndController(getContest(), getController());
             selectedReport.createReportFile(filename, filter);
             viewFile (filename);
 

@@ -148,7 +148,7 @@ public class LoginsPane extends JPanePlugin {
         Vector<ClientId> allAccounts = new Vector<ClientId>();
 
         for (ClientType.Type ctype : ClientType.Type.values()) {
-            Enumeration<ClientId> enumeration = getModel().getLoggedInClients(ctype);
+            Enumeration<ClientId> enumeration = getContest().getLoggedInClients(ctype);
             while (enumeration.hasMoreElements()) {
                 ClientId clientId = (ClientId) enumeration.nextElement();
                 allAccounts.addElement(clientId);
@@ -165,7 +165,7 @@ public class LoginsPane extends JPanePlugin {
         ClientId [] clientList = getAllLoggedInUsers();
 
         for (ClientId clientId : clientList){
-            ConnectionHandlerID connectionHandlerID = getModel().getConnectionHandleID(clientId);
+            ConnectionHandlerID connectionHandlerID = getContest().getConnectionHandleID(clientId);
             updateLoginList(clientId, connectionHandlerID);
         }
     }
@@ -197,7 +197,7 @@ public class LoginsPane extends JPanePlugin {
     public void setModelAndController(IContest inModel, IController inController) {
         super.setModelAndController(inModel, inController);
         
-        getModel().addLoginListener(new LoginListenerImplementation());
+        getContest().addLoginListener(new LoginListenerImplementation());
         
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {

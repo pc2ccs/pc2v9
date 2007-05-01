@@ -207,7 +207,7 @@ public class ClarificationsPane extends JPanePlugin {
 
     private void reloadListBox() {
         clarificationListBox.removeAllRows();
-        Clarification[] clarifications = getModel().getClarifications();
+        Clarification[] clarifications = getContest().getClarifications();
 
         for (Clarification clarification : clarifications) {
             addClarificationRow(clarification);
@@ -249,8 +249,8 @@ public class ClarificationsPane extends JPanePlugin {
 
         initializePermissions();
         
-        getModel().addClarificationListener(new ClarificationListenerImplementation());
-        getModel().addAccountListener(new AccountListenerImplementation());
+        getContest().addClarificationListener(new ClarificationListenerImplementation());
+        getContest().addAccountListener(new AccountListenerImplementation());
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -261,7 +261,7 @@ public class ClarificationsPane extends JPanePlugin {
     }
 
     private String getProblemTitle(ElementId problemId) {
-        Problem problem = getModel().getProblem(problemId);
+        Problem problem = getContest().getProblem(problemId);
         if (problem != null) {
             return problem.toString();
         }
@@ -274,7 +274,7 @@ public class ClarificationsPane extends JPanePlugin {
     }
 
     private String getTeamDisplayName(ClientId clientId) {
-        Account account = getModel().getAccount(clientId);
+        Account account = getContest().getAccount(clientId);
         if (account != null) {
             return account.getDisplayName();
         }
@@ -376,7 +376,7 @@ public class ClarificationsPane extends JPanePlugin {
     }
 
     private void initializePermissions() {
-        Account account = getModel().getAccount(getModel().getClientId());
+        Account account = getContest().getAccount(getContest().getClientId());
         permissionList.clearAndLoadPermissions(account.getPermissionList());
     }
 
@@ -406,7 +406,7 @@ public class ClarificationsPane extends JPanePlugin {
             /**
              * If this is the account then update the GUI display per the potential change in Permissions.
              */
-            if (getModel().getClientId().equals(account.getClientId())) {
+            if (getContest().getClientId().equals(account.getClientId())) {
                 // They modified us!!
                 initializePermissions();
                 SwingUtilities.invokeLater(new Runnable() {

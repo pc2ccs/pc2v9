@@ -135,7 +135,7 @@ public class RunsPanel extends JPanePlugin {
 
                 JudgementRecord judgementRecord = run.getJudgementRecord();
                 if (judgementRecord != null && judgementRecord.getJudgementId() != null) {
-                    Judgement judgement = getModel().getJudgement(judgementRecord.getJudgementId());
+                    Judgement judgement = getContest().getJudgement(judgementRecord.getJudgementId());
                     if (judgement != null){
                         s[4] = judgement.toString();
                     }
@@ -152,7 +152,7 @@ public class RunsPanel extends JPanePlugin {
             s[5] = getProblemTitle(run.getProblemId());
 
             if (judgeId != null) {
-                if (judgeId.equals(getModel().getClientId())) {
+                if (judgeId.equals(getContest().getClientId())) {
                     s[6] = "Me";
                 } else {
                     s[6] = judgeId.getName();
@@ -173,7 +173,7 @@ public class RunsPanel extends JPanePlugin {
 
     private String getLanguageTitle(ElementId languageId) {
         // TODO Auto-generated method stub
-        for (Language language : getModel().getLanguages()) {
+        for (Language language : getContest().getLanguages()) {
             if (language.getElementId().equals(languageId)) {
                 return language.toString();
             }
@@ -182,7 +182,7 @@ public class RunsPanel extends JPanePlugin {
     }
 
     private String getProblemTitle(ElementId problemId) {
-        Problem problem = getModel().getProblem(problemId);
+        Problem problem = getContest().getProblem(problemId);
         if (problem != null) {
             return problem.toString();
         }
@@ -195,7 +195,7 @@ public class RunsPanel extends JPanePlugin {
     }
 
     private String getTeamDisplayName(Run run) {
-        Account account = getModel().getAccount(run.getSubmitter());
+        Account account = getContest().getAccount(run.getSubmitter());
         if (account != null) {
             return account.getDisplayName();
         }
@@ -307,7 +307,7 @@ public class RunsPanel extends JPanePlugin {
 
     public void reloadRunList() {
 
-        Run[] runs = getModel().getRuns();
+        Run[] runs = getContest().getRuns();
 
         // TODO bulk load these record
 
@@ -332,7 +332,7 @@ public class RunsPanel extends JPanePlugin {
     
     
     private void initializePermissions() {
-        Account account = getModel().getAccount(getModel().getClientId());
+        Account account = getContest().getAccount(getContest().getClientId());
         if (account != null){
             permissionList.clearAndLoadPermissions(account.getPermissionList());
         }
@@ -354,12 +354,12 @@ public class RunsPanel extends JPanePlugin {
         
         log = getController().getLog();
         
-        editRunFrame.setModelAndController(getModel(), getController());
-        viewJudgementsFrame.setModelAndController(getModel(), getController());
-        selectJudgementFrame.setModelAndController(getModel(), getController());
+        editRunFrame.setModelAndController(getContest(), getController());
+        viewJudgementsFrame.setModelAndController(getContest(), getController());
+        selectJudgementFrame.setModelAndController(getContest(), getController());
 
-        getModel().addRunListener(new RunListenerImplementation());
-        getModel().addAccountListener(new AccountListenerImplementation());
+        getContest().addRunListener(new RunListenerImplementation());
+        getContest().addAccountListener(new AccountListenerImplementation());
 
         initializePermissions();
         
@@ -447,7 +447,7 @@ public class RunsPanel extends JPanePlugin {
         
         try {
             ElementId elementId = (ElementId) runListBox.getKeys()[selectedIndexes[0]];
-            Run runToEdit = getModel().getRun(elementId);
+            Run runToEdit = getContest().getRun(elementId);
             
             if ((! runToEdit.getStatus().equals(RunStates.NEW)) || runToEdit.isDeleted()){
                 showMessage("Now allowed to request run, already judged");
@@ -473,7 +473,7 @@ public class RunsPanel extends JPanePlugin {
         
         try {
             ElementId elementId = (ElementId) runListBox.getKeys()[selectedIndexes[0]];
-            Run runToEdit = getModel().getRun(elementId);
+            Run runToEdit = getContest().getRun(elementId);
             
             if (! runToEdit.isJudged()){
                 showMessage("Judge run before attempting to re-judge run");
@@ -556,7 +556,7 @@ public class RunsPanel extends JPanePlugin {
         
         try {
             ElementId elementId = (ElementId) runListBox.getKeys()[selectedIndexes[0]];
-            Run runToEdit = getModel().getRun(elementId);
+            Run runToEdit = getContest().getRun(elementId);
 
             editRunFrame.setRun(runToEdit);
             editRunFrame.setVisible(true);
@@ -672,7 +672,7 @@ public class RunsPanel extends JPanePlugin {
         
         try {
             ElementId elementId = (ElementId) runListBox.getKeys()[selectedIndexes[0]];
-            Run theRun = getModel().getRun(elementId);
+            Run theRun = getContest().getRun(elementId);
             
             if (theRun != null){
                 viewJudgementsFrame.setRun(theRun);
@@ -709,7 +709,7 @@ public class RunsPanel extends JPanePlugin {
              * If this is the account then update the GUI display per
              * the potential change in Permissions.
              */
-            if (getModel().getClientId().equals(account.getClientId())) {
+            if (getContest().getClientId().equals(account.getClientId())) {
                 // They modified us!!
                 initializePermissions();
                 SwingUtilities.invokeLater(new Runnable() {

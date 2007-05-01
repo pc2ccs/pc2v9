@@ -97,9 +97,9 @@ public class GenerateAccountsPane extends JPanePlugin {
 
                 getSiteSelectionComboBox().removeAllItems();
                 
-                Site newSite = new Site("This Site", getModel().getSiteNumber());
+                Site newSite = new Site("This Site", getContest().getSiteNumber());
                 getSiteSelectionComboBox().addItem(newSite);
-                Site[] sites = getModel().getSites();
+                Site[] sites = getContest().getSites();
                 Arrays.sort(sites, new SiteComparatorBySiteNumber());
                 for (Site site : sites) {
                     getSiteSelectionComboBox().addItem(site);
@@ -122,23 +122,23 @@ public class GenerateAccountsPane extends JPanePlugin {
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                int thisSiteNumber = getModel().getSiteNumber();
+                int thisSiteNumber = getContest().getSiteNumber();
                 int theSiteNumber = thisSiteNumber;
 
                 if (getSiteSelectionComboBox().getSelectedIndex() > 1) {
                     theSiteNumber = getSiteSelectionComboBox().getSelectedIndex();
                 }
 
-                int number = getModel().getAccounts(ClientType.Type.SCOREBOARD, theSiteNumber).size();
+                int number = getContest().getAccounts(ClientType.Type.SCOREBOARD, theSiteNumber).size();
                 genScoreboardLabel.setText("Scoreboards (" + number + ")");
 
-                number = getModel().getAccounts(ClientType.Type.TEAM, theSiteNumber).size();
+                number = getContest().getAccounts(ClientType.Type.TEAM, theSiteNumber).size();
                 genTeamLabels.setText("Teams (" + number + ")");
 
-                number = getModel().getAccounts(ClientType.Type.JUDGE, theSiteNumber).size();
+                number = getContest().getAccounts(ClientType.Type.JUDGE, theSiteNumber).size();
                 genJudgeLabel.setText("Judges (" + number + ")");
 
-                number = getModel().getAccounts(ClientType.Type.ADMINISTRATOR, theSiteNumber).size();
+                number = getContest().getAccounts(ClientType.Type.ADMINISTRATOR, theSiteNumber).size();
                 genAdminLabel.setText("Administrators (" + number + ")");
 
                 generateButton.setText("Generate Accounts for Site " + theSiteNumber);
@@ -299,7 +299,7 @@ public class GenerateAccountsPane extends JPanePlugin {
                 startNumber = 1;
             }
             
-            int thisSiteNumber = getModel().getSiteNumber();
+            int thisSiteNumber = getContest().getSiteNumber();
             int theSiteNumber = thisSiteNumber;
 
             if (getSiteSelectionComboBox().getSelectedIndex() > 1) {
@@ -370,8 +370,8 @@ public class GenerateAccountsPane extends JPanePlugin {
         updateGenerateTitles();
         updateSiteComboBox();
         
-        getModel().addAccountListener(new AccountListenerImplementation());
-        getModel().addSiteListener(new SiteListenerImplementation());
+        getContest().addAccountListener(new AccountListenerImplementation());
+        getContest().addSiteListener(new SiteListenerImplementation());
     }
     
     /**

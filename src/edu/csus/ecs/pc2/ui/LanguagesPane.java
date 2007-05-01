@@ -159,7 +159,7 @@ public class LanguagesPane extends JPanePlugin {
 
     private void reloadListBox() {
         languageListBox.removeAllRows();
-        Language[] languages = getModel().getLanguages();
+        Language[] languages = getContest().getLanguages();
 
         for (Language language : languages) {
             addLanguageRow(language);
@@ -258,7 +258,7 @@ public class LanguagesPane extends JPanePlugin {
         
         try {
             ElementId elementId = (ElementId) languageListBox.getKeys()[selectedIndex];
-            Language languageToEdit = getModel().getLanguage(elementId);
+            Language languageToEdit = getContest().getLanguage(elementId);
 
             editLanguageFrame.setLanguage(languageToEdit);
             editLanguageFrame.setVisible(true);

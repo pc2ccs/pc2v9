@@ -157,10 +157,10 @@ public class ContestTimesPane extends JPanePlugin {
 
         showMessage("");
         contestTimeListBox.removeAllRows();
-        Site[] sites = getModel().getSites();
+        Site[] sites = getContest().getSites();
 
         for (Site site : sites) {
-            ContestTime contestTime = getModel().getContestTime(site.getSiteNumber());
+            ContestTime contestTime = getContest().getContestTime(site.getSiteNumber());
             if (contestTime != null) {
                 addContestTimeRow(contestTime);
             }
@@ -178,9 +178,9 @@ public class ContestTimesPane extends JPanePlugin {
     public void setModelAndController(IContest inModel, IController inController) {
         super.setModelAndController(inModel, inController);
 
-        getModel().addContestTimeListener(new ContestTimeListenerImplementation());
+        getContest().addContestTimeListener(new ContestTimeListenerImplementation());
 
-        getModel().addSiteListener(new SiteListenerImplementation());
+        getContest().addSiteListener(new SiteListenerImplementation());
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -197,7 +197,7 @@ public class ContestTimesPane extends JPanePlugin {
     public class SiteListenerImplementation implements ISiteListener {
 
         protected void updateSiteInfo(int siteNumber) {
-            ContestTime contestTime = getModel().getContestTime(siteNumber);
+            ContestTime contestTime = getContest().getContestTime(siteNumber);
             if (contestTime != null) {
                 updateContestTimeRow(contestTime);
             }
@@ -312,7 +312,7 @@ public class ContestTimesPane extends JPanePlugin {
 
         for (int i = 0; i < selectedSites.length; i++) {
             ElementId contestTimeElementId = (ElementId) contestTimeListBox.getKeys()[i];
-            ContestTime contestTime = getModel().getContestTime(contestTimeElementId);
+            ContestTime contestTime = getContest().getContestTime(contestTimeElementId);
             if (contestTime != null) {
                 getController().startContest(contestTime.getSiteNumber());
             }
@@ -351,7 +351,7 @@ public class ContestTimesPane extends JPanePlugin {
 
         for (int i = 0; i < selectedSites.length; i++) {
             ElementId contestTimeElementId = (ElementId) contestTimeListBox.getKeys()[i];
-            ContestTime contestTime = getModel().getContestTime(contestTimeElementId);
+            ContestTime contestTime = getContest().getContestTime(contestTimeElementId);
             if (contestTime != null) {
                 getController().stopContest(contestTime.getSiteNumber());
             }
