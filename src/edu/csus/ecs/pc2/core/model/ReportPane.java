@@ -11,6 +11,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
@@ -72,14 +73,15 @@ public class ReportPane extends JPanePlugin {
         this.add(getMainPane(), java.awt.BorderLayout.CENTER);
 
         // populate list of reports
-        listOfReports = new IReport[7];
-        listOfReports[0] = new RunsReport();
-        listOfReports[1] = new InternalDumpReport();
-        listOfReports[2] = new ClarificationsReport();
-        listOfReports[3] = new ProblemsReport();
-        listOfReports[4] = new LanguagesReport();
-        listOfReports[5] = new AccountPermissionReport();
-        listOfReports[6] = new StandingsReport();
+        listOfReports = new IReport[8];
+        listOfReports[0] = new AccountsReport();
+        listOfReports[1] = new RunsReport();
+        listOfReports[2] = new InternalDumpReport();
+        listOfReports[3] = new ClarificationsReport();
+        listOfReports[4] = new ProblemsReport();
+        listOfReports[5] = new LanguagesReport();
+        listOfReports[6] = new AccountPermissionReport();
+        listOfReports[7] = new StandingsReport();
     }
 
     public void setContestAndController(IContest inContest, IController inController) {
@@ -187,9 +189,10 @@ public class ReportPane extends JPanePlugin {
 
     }
     
-    private void viewFile (String filename){
+    private void viewFile (String filename, String title){
         MultipleFileViewer multipleFileViewer = new MultipleFileViewer(log);
-        multipleFileViewer.addFilePane("Internal Dump", filename);
+        multipleFileViewer.addFilePane(title, filename);
+        multipleFileViewer.setTitle("PC^2 Report (Build "+new VersionInfo().getBuildNumber()+")");
         FrameUtilities.centerFrameFullScreenHeight(multipleFileViewer);
         multipleFileViewer.setVisible(true);
     }
@@ -216,7 +219,7 @@ public class ReportPane extends JPanePlugin {
             
             selectedReport.setContestAndController(getContest(), getController());
             selectedReport.createReportFile(filename, filter);
-            viewFile (filename);
+            viewFile (filename, selectedReport.getReportTitle());
 
         } catch (Exception e) {
             // TODO: log handle exception
