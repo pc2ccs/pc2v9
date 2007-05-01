@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.util.Date;
+import java.util.Properties;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -52,7 +53,7 @@ public class StandingsReport implements IReport {
 
         printWriter.println();
         DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
-        String xmlString = defaultScoringAlgorithm.getStandings(model);
+        String xmlString = defaultScoringAlgorithm.getStandings(model, new Properties(), controller.getLog());
         printWriter.println(xmlString);
         printWriter.println();
         formatXML(printWriter, xmlString);
@@ -101,7 +102,7 @@ public class StandingsReport implements IReport {
 
     public String createReportXML(Filter filter) {
         DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
-        return defaultScoringAlgorithm.getStandings(model);
+        return defaultScoringAlgorithm.getStandings(model, new Properties(), controller.getLog());
     }
 
     public String getReportTitle() {

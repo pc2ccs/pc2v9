@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.ui;
 import java.awt.BorderLayout;
 import java.io.StringReader;
 import java.util.Date;
+import java.util.Properties;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -132,7 +133,7 @@ public class StandingsPane extends JPanePlugin {
         try {
             DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
 
-            xmlString = defaultScoringAlgorithm.getStandings(getModel());
+            xmlString = defaultScoringAlgorithm.getStandings(getModel(), new Properties(), getController().getLog());
             DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
             document = documentBuilder.parse(new InputSource(new StringReader(xmlString)));

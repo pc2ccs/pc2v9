@@ -14,6 +14,7 @@ import java.util.Vector;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.list.AccountList;
 import edu.csus.ecs.pc2.core.list.RunComparatorByTeam;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ElementId;
@@ -194,7 +195,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      * 
      * @see edu.csus.ecs.pc2.core.scoring.ScoringAlgorithm#getStandings(edu.csus.ecs.pc2.core.Run[], edu.csus.ecs.pc2.core.AccountList, edu.csus.ecs.pc2.core.ProblemDisplayList, java.util.Properties)
      */
-    public String getStandings(IModel theContest) {
+    public String getStandings(IModel theContest, Properties inputPrpoerties, Log log) {
         if (theContest == null) {
             throw new InvalidParameterException("Invalid model (null)");
         }
@@ -272,8 +273,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 // skip runs whose problem are no longer active
                 Account account = accountList.getAccount(runs[i].getSubmitter());
                 if (account == null) {
-                    // TODO change to Log
-                    System.out.println("account could not be located for " + runs[i].getSubmitter());
+                    log.info("account could not be located for " + runs[i].getSubmitter());
                     continue;
                 }
                 if (!runs[i].isDeleted() && account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD) 
@@ -281,6 +281,8 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                     runTreeMap.put(runs[i], runs[i]);
                 }
             }
+            
+            
             long oldTime = 0;
             long youngTime = -1;
             if (!runTreeMap.isEmpty()) {
@@ -397,6 +399,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                     ProblemSummaryInfo psi = summaryRow.get(id);
                     if (psi == null) {
                         // TODO change to Log, cleanup message (leaning towards error)
+                        log.log(Log.WARNING, "ProblemSummaryInfo not generated/found for problem "+id+" "+problems[i]);
                         System.out.println("error or normal? ProblemSummaryInfo not found for problem "+ id);
                     } else {
                         IMemento psiMemento = standingsRecordMemento.createChild("problemSummaryInfo");
@@ -456,8 +459,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         try {
             xmlString = mementoRoot.saveToString();
         } catch (IOException e) {
-            // TODO Change to Log
-            e.printStackTrace();
+            log.log(Log.WARNING,"Trouble saving momentoRoot to String ", e);
             xmlString = "";
         }
 //        System.out.println(xmlString);

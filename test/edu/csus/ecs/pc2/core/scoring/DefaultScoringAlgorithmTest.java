@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.core.scoring;
 
 import java.io.StringReader;
+import java.util.Properties;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -36,11 +37,13 @@ import edu.csus.ecs.pc2.core.model.Run.RunStates;
 
 // $HeadURL$
 public class DefaultScoringAlgorithmTest extends TestCase {
+    
+    private Log log = null;
 
     protected void setUp() throws Exception {
         super.setUp();
     
-        Log log = new Log("DefaultScoringAlgorithmTest");
+        log = new Log("DefaultScoringAlgorithmTest");
         StaticLog.setLog(log);
         
     }
@@ -218,7 +221,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
     public void checkOutputXML (IModel model) {
         
         DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
-        String xmlString = defaultScoringAlgorithm.getStandings(model);
+        String xmlString = defaultScoringAlgorithm.getStandings(model, new Properties(), log);
 
         // getStandings should always return a well-formed xml
         assertFalse("getStandings returned null ", xmlString == null);
