@@ -8,14 +8,21 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
 import edu.csus.ecs.pc2.core.model.ElementId;
+import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.ISiteListener;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.SiteEvent;
+import edu.csus.ecs.pc2.core.security.Permission;
+import edu.csus.ecs.pc2.core.security.PermissionList;
+import edu.csus.ecs.pc2.ui.RunsPanel.AccountListenerImplementation;
+
 import javax.swing.JLabel;
 
 /**
@@ -47,6 +54,8 @@ public class ContestTimesPane extends JPanePlugin {
     private JPanel messagePane = null;
 
     private JLabel messageLabel = null;
+    
+    private PermissionList permissionList = new PermissionList();
 
     /**
      * This method initializes
@@ -174,17 +183,42 @@ public class ContestTimesPane extends JPanePlugin {
             contestTimeListBox.autoSizeAllColumns();
         }
     }
+    
+
+    private boolean isAllowed (Permission.Type type){
+        return permissionList.isAllowed(type);
+    }
+    
+    
+    private void initializePermissions() {
+        Account account = getContest().getAccount(getContest().getClientId());
+        if (account != null){
+            permissionList.clearAndLoadPermissions(account.getPermissionList());
+        }
+    }
+
+    private void updateGUIperPermissions() {
+
+//        getContestTimeRefreshButton();
+        getStartClockButton().setVisible(isAllowed(Permission.Type.START_CONTEST_CLOCK));
+        getStopClockButton().setVisible(isAllowed(Permission.Type.STOP_CONTEST_CLOCK));
+    }
+
 
     public void setContestAndController(IContest inContest, IController inController) {
         super.setContestAndController(inContest, inController);
+        initializePermissions();
 
         getContest().addContestTimeListener(new ContestTimeListenerImplementation());
 
         getContest().addSiteListener(new SiteListenerImplementation());
+        
+        getContest().addAccountListener(new AccountListenerImplementation());
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 reloadListBox();
+                updateGUIperPermissions();
             }
         });
     }
@@ -387,6 +421,38 @@ public class ContestTimesPane extends JPanePlugin {
                 }
             }
         });
+    }
+    
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     */
+    public class AccountListenerImplementation implements IAccountListener {
+
+        public void accountAdded(AccountEvent accountEvent) {
+            // ignore doesn't affect this pane
+        }
+
+        public void accountModified(AccountEvent event) {
+            // check if is this account
+            Account account = event.getAccount();
+            /**
+             * If this is the account then update the GUI display per
+             * the potential change in Permissions.
+             */
+            if (getContest().getClientId().equals(account.getClientId())) {
+                // They modified us!!
+                initializePermissions();
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        updateGUIperPermissions();
+                    }
+                });
+                
+            }
+            
+        }
+        
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

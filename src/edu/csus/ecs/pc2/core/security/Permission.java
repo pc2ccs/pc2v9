@@ -183,6 +183,14 @@ public class Permission implements Serializable {
          * Generate a new clarification and answer
          */
         GENERATE_NEW_CLARIFICATION,
+        /**
+         * Start contest clock
+         */
+        START_CONTEST_CLOCK,
+        /**
+         * Stop contest clock
+         */
+        STOP_CONTEST_CLOCK,
     };
 
     private Hashtable<Type, String> hash = new Hashtable<Type, String>();
@@ -240,7 +248,9 @@ public class Permission implements Serializable {
         hash.put(Type.GENERATE_NEW_CLARIFICATION, "Generate a clarification and answer");
 
         hash.put(Type.VIEW_DELETED_RUNS, "View deleted runs");
-
+        
+        hash.put(Type.START_CONTEST_CLOCK, "Start contest clock");
+        hash.put(Type.STOP_CONTEST_CLOCK, "Stop contest clock");
     }
 
     /**
