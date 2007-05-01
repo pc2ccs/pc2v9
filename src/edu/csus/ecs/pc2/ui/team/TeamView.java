@@ -2,7 +2,6 @@ package edu.csus.ecs.pc2.ui.team;
 
 import java.awt.BorderLayout;
 
-import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -11,10 +10,9 @@ import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
-import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
-import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.ui.ClarificationsPane;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
@@ -24,6 +22,8 @@ import edu.csus.ecs.pc2.ui.RunsPanel;
 import edu.csus.ecs.pc2.ui.SubmitClarificationPane;
 import edu.csus.ecs.pc2.ui.SubmitRunPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
+import javax.swing.JLabel;
+import javax.swing.JButton;
 
 /**
  * Team Client View/GUI.
@@ -50,9 +50,21 @@ public class TeamView extends JFrame implements UIPlugin {
 
     private JTabbedPane mainTabbedPane = null;
 
-    private DefaultListModel runListModel = new DefaultListModel();
-
     private LogWindow logWindow = null;
+
+    private JPanel northPane = null;
+
+    private JPanel exitPane = null;
+
+    private JPanel messagePane = null;
+
+    private JPanel clockPane = null;
+
+    private JLabel clockLabel = null;
+
+    private JLabel messageLabel = null;
+
+    private JButton exitButton = null;
 
     /**
      * Nevermind this constructor, needed for VE and other reasons.
@@ -61,7 +73,6 @@ public class TeamView extends JFrame implements UIPlugin {
     public TeamView() {
         super();
         initialize();
-        updateListBox(getPluginTitle() + " Build " + new VersionInfo().getBuildNumber());
     }
 
     /**
@@ -69,11 +80,10 @@ public class TeamView extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(561,366));
+        this.setSize(new java.awt.Dimension(556,413));
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setContentPane(getMainViewPane());
         this.setTitle("The TeamView");
-        FrameUtilities.waitCursor(this);
         this.addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent e) {
                 promptAndExit();
@@ -82,6 +92,7 @@ public class TeamView extends JFrame implements UIPlugin {
 
         FrameUtilities.centerFrame(this);
         setTitle("PC^2 Team - Not Logged In ");
+        FrameUtilities.waitCursor(this);
 
     }
 
@@ -93,17 +104,10 @@ public class TeamView extends JFrame implements UIPlugin {
         }
     }
 
-
-    private void updateListBox(String string) {
-        runListModel.insertElementAt(string, 0);
-        StaticLog.unclassified(string);
-    }
-
     private boolean isThisSite(int siteNumber) {
         return siteNumber == model.getSiteNumber();
     }
 
-    
     private void updateFrameTitle(final boolean turnButtonsOn) {
 
         SwingUtilities.invokeLater(new Runnable() {
@@ -115,6 +119,13 @@ public class TeamView extends JFrame implements UIPlugin {
                 }
             }
         });
+
+        if (turnButtonsOn) {
+            updateClockLabel("");
+        } else {
+            updateClockLabel("STOPPED");
+        }
+        
         FrameUtilities.regularCursor(this);
 
     }
@@ -127,29 +138,28 @@ public class TeamView extends JFrame implements UIPlugin {
     private class ContestTimeListenerImplementation implements IContestTimeListener {
 
         public void contestTimeAdded(ContestTimeEvent event) {
-            updateListBox("ContestTime site " + event.getSiteNumber() + " ADDED " + event.getContestTime().getElapsedTimeStr());
             if (isThisSite(event.getSiteNumber())) {
                 updateFrameTitle(event.getContestTime().isContestRunning());
             }
         }
 
         public void contestTimeRemoved(ContestTimeEvent event) {
-            updateListBox("ContestTime site " + event.getSiteNumber() + " REMOVED ");
+            // ignore
         }
 
         public void contestTimeChanged(ContestTimeEvent event) {
-            updateListBox("ContestTime site " + event.getSiteNumber() + " CHANGED ");
+            if (isThisSite(event.getSiteNumber())) {
+                updateFrameTitle(event.getContestTime().isContestRunning());
+            }
         }
 
         public void contestStarted(ContestTimeEvent event) {
-            updateListBox("ContestTime site " + event.getSiteNumber() + " STARTED " + event.getContestTime().getElapsedTimeStr());
             if (isThisSite(event.getSiteNumber())) {
                 updateFrameTitle(event.getContestTime().isContestRunning());
             }
         }
 
         public void contestStopped(ContestTimeEvent event) {
-            updateListBox("ContestTime site " + event.getSiteNumber() + " STOPPED " + event.getContestTime().getElapsedTimeStr());
             if (isThisSite(event.getSiteNumber())) {
                 updateFrameTitle(event.getContestTime().isContestRunning());
             }
@@ -166,6 +176,7 @@ public class TeamView extends JFrame implements UIPlugin {
             mainViewPane = new JPanel();
             mainViewPane.setLayout(new BorderLayout());
             mainViewPane.add(getMainTabbedPane(), java.awt.BorderLayout.CENTER);
+            mainViewPane.add(getNorthPane(), java.awt.BorderLayout.NORTH);
         }
         return mainViewPane;
     }
@@ -185,33 +196,33 @@ public class TeamView extends JFrame implements UIPlugin {
     public void setContestAndController(IContest inContest, IController inController) {
         this.model = inContest;
         this.teamController = inController;
-        
+
         if (logWindow == null) {
             logWindow = new LogWindow();
         }
         logWindow.setContestAndController(model, teamController);
-        logWindow.setTitle("Log "+model.getClientId().toString());
-        
+        logWindow.setTitle("Log " + model.getClientId().toString());
+
         model.addContestTimeListener(new ContestTimeListenerImplementation());
 
         SubmitRunPane submitRunPane = new SubmitRunPane();
         addUIPlugin(getMainTabbedPane(), "Submit Run", submitRunPane);
-        
+
         RunsPanel runsPanel = new RunsPanel();
         addUIPlugin(getMainTabbedPane(), "View Runs", runsPanel);
 
         SubmitClarificationPane submitClarificationPane = new SubmitClarificationPane();
         addUIPlugin(getMainTabbedPane(), "Request Clarification", submitClarificationPane);
-        
+
         ClarificationsPane clarificationsPane = new ClarificationsPane();
         addUIPlugin(getMainTabbedPane(), "View Clarifications", clarificationsPane);
 
         OptionsPanel optionsPanel = new OptionsPanel();
         addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
         optionsPanel.setLogWindow(logWindow);
-        
+
         updateFrameTitle(model.getContestTime().isContestRunning());
-        
+
         setVisible(true);
     }
 
@@ -222,6 +233,116 @@ public class TeamView extends JFrame implements UIPlugin {
     protected void addUIPlugin(JTabbedPane tabbedPane, String tabTitle, JPanePlugin plugin) {
         plugin.setContestAndController(model, teamController);
         tabbedPane.add(plugin, tabTitle);
+    }
+
+    /**
+     * This method initializes northPane
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getNorthPane() {
+        if (northPane == null) {
+            northPane = new JPanel();
+            northPane.setLayout(new BorderLayout());
+            northPane.setPreferredSize(new java.awt.Dimension(40, 40));
+            northPane.add(getExitPane(), java.awt.BorderLayout.EAST);
+            northPane.add(getMessagePane(), java.awt.BorderLayout.CENTER);
+            northPane.add(getClockPane(), java.awt.BorderLayout.WEST);
+        }
+        return northPane;
+    }
+
+    /**
+     * This method initializes exitPane
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getExitPane() {
+        if (exitPane == null) {
+            exitPane = new JPanel();
+            exitPane.add(getExitButton(), null);
+        }
+        return exitPane;
+    }
+
+    /**
+     * This method initializes messagePane
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getMessagePane() {
+        if (messagePane == null) {
+            messageLabel = new JLabel();
+            messageLabel.setText("");
+            messageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+            messagePane = new JPanel();
+            messagePane.setLayout(new BorderLayout());
+            messagePane.add(messageLabel, java.awt.BorderLayout.CENTER);
+        }
+        return messagePane;
+    }
+
+    /**
+     * This method initializes clockPane
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getClockPane() {
+        if (clockPane == null) {
+            clockLabel = new JLabel();
+            clockLabel.setText("STOPPED");
+            clockLabel.setForeground(java.awt.Color.red);
+            clockLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 14));
+            clockLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+            clockPane = new JPanel();
+            clockPane.setLayout(new BorderLayout());
+            clockPane.setPreferredSize(new java.awt.Dimension(80, 34));
+            clockPane.add(clockLabel, java.awt.BorderLayout.CENTER);
+        }
+        return clockPane;
+    }
+
+    /**
+     * This method initializes exitButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getExitButton() {
+        if (exitButton == null) {
+            exitButton = new JButton();
+            exitButton.setText("Exit");
+            exitButton.setMnemonic(java.awt.event.KeyEvent.VK_X);
+            exitButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    promptAndExit();
+                }
+            });
+        }
+        return exitButton;
+    }
+
+    private void updateClockLabel(final String string) {
+
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                clockLabel.setText(string);
+                clockLabel.setToolTipText(string);
+            }
+        });
+
+    }
+
+    
+
+    private void showMessage(final String string) {
+
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                messageLabel.setText(string);
+                messageLabel.setToolTipText(string);
+            }
+        });
+
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
