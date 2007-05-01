@@ -29,7 +29,7 @@ public class PacketArchiver implements UIPlugin {
 
     private static long serialNumber = ((new Date()).getTime()) % 10000;
 
-    private String outputDirectroryName = "packets";
+    private String outputDirectoryName = "packets";
 
     @SuppressWarnings("unused")
     private IContest contest;
@@ -43,8 +43,8 @@ public class PacketArchiver implements UIPlugin {
      * Default constructor.
      */
     public PacketArchiver() {
-        outputDirectroryName = getPC2BaseDirectory() + File.separator + outputDirectroryName;
-        Utilities.insureDir(outputDirectroryName);
+        outputDirectoryName = getPC2BaseDirectory() + File.separator + outputDirectoryName;
+        Utilities.insureDir(outputDirectoryName);
     }
 
     /**
@@ -52,7 +52,7 @@ public class PacketArchiver implements UIPlugin {
      * @param outputDirectroryName
      */
     public PacketArchiver(String outputDirectroryName) {
-        this.outputDirectroryName = outputDirectroryName;
+        this.outputDirectoryName = outputDirectroryName;
         Utilities.insureDir(outputDirectroryName);
     }
     
@@ -83,7 +83,7 @@ public class PacketArchiver implements UIPlugin {
      * @throws IOException 
      */
     public boolean writeNextPacket(Packet packet) throws IOException {
-        lastArchiveFilename = outputDirectroryName + File.separator + "packet" + serialNumber + "." + nextPacketNumber + ".packet";
+        lastArchiveFilename = outputDirectoryName + File.separator + "packet" + serialNumber + "." + nextPacketNumber + ".packet";
         boolean wasWritten = savePacket(lastArchiveFilename, packet);
         nextPacketNumber ++;
         return wasWritten;
@@ -122,8 +122,8 @@ public class PacketArchiver implements UIPlugin {
      * Get the outputDirectroryName where the packets will be written.
      * @return the dir name where packet are written.
      */
-    protected String getOutputDirectroryName() {
-        return outputDirectroryName;
+    protected String getOutputDirectoryName() {
+        return outputDirectoryName;
     }
 
  
