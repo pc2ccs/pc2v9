@@ -1,16 +1,16 @@
 package edu.csus.ecs.pc2.core.controller;
 
+import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.Controller;
 import edu.csus.ecs.pc2.core.model.ClientType;
-import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.Contest;
+import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.Language;
-import edu.csus.ecs.pc2.core.model.Model;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.SiteTest;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
-import junit.framework.TestCase;
 
 /**
  * Tests to insure Controller.start must be called before Controller.login
@@ -18,7 +18,7 @@ import junit.framework.TestCase;
  */
 public class InvalidStartSequence extends TestCase {
 
-    private IModel modelOne;
+    private IContest modelOne;
 
     private Controller controllerOne;
 
@@ -35,7 +35,7 @@ public class InvalidStartSequence extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
-        modelOne = new Model();
+        modelOne = new Contest();
         initializeModel(modelOne);
 
         Site siteOne = SiteTest.createSite(1, "Site ONE", null, 0);
@@ -59,7 +59,7 @@ public class InvalidStartSequence extends TestCase {
         assertTrue("loginRequireStart", caughtException);
     }
     
-    public void initializeModel(IModel model) {
+    public void initializeModel(IContest contest) {
 
         String[] languages = { "Java", "C", "APL" };
         String[] problems = { "Sumit", "Quadrangles", "Routing" };
@@ -82,8 +82,8 @@ public class InvalidStartSequence extends TestCase {
             modelOne.addJudgement(new Judgement(judgementName));
         }
 
-        model.generateNewAccounts(ClientType.Type.TEAM.toString(), 10, true);
-        model.generateNewAccounts(ClientType.Type.JUDGE.toString(), 5, true);
+        contest.generateNewAccounts(ClientType.Type.TEAM.toString(), 10, true);
+        contest.generateNewAccounts(ClientType.Type.JUDGE.toString(), 5, true);
 
         assertTrue("Insure generate of 10 teams", modelOne.getAccounts(Type.TEAM).size() == 10);
         assertTrue("Insure generate of 5 teams", modelOne.getAccounts(Type.JUDGE).size() == 5);

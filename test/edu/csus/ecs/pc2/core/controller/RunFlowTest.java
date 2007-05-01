@@ -10,15 +10,15 @@ import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.Contest;
 import edu.csus.ecs.pc2.core.model.ContestTime;
+import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.IJudgementListener;
-import edu.csus.ecs.pc2.core.model.IModel;
 import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementEvent;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
-import edu.csus.ecs.pc2.core.model.Model;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunEvent;
@@ -41,22 +41,22 @@ public class RunFlowTest extends TestCase {
 
     private static final String [] SERVER_COMMAND_LINE_OPTIONS = {"--server"};
 
-    private IModel modelOne;
+    private IContest modelOne;
 
     private Controller controllerOne;
 
-    private IModel teamModel;
+    private IContest teamModel;
 
     private TeamController teamController;
 
-    private IModel judgeModel;
+    private IContest judgeModel;
 
     private JudgeController judgeController;
 
     protected void setUp() throws Exception {
         super.setUp();
 
-        modelOne = new Model();
+        modelOne = new Contest();
         initializeModel(modelOne);
 
         Site siteOne = SiteTest.createSite(12, "Site ONE", null, 0);
@@ -81,13 +81,13 @@ public class RunFlowTest extends TestCase {
 
         private Judgement yesJudgement;
 
-        private IModel theModel;
+        private IContest theModel;
 
-        JudgeController(IModel model) {
-            super(model);
-            model.addRunListener(new RunListenerImpl());
-            model.addJudgementListener(new JudgementListenerImpl());
-            theModel = model;
+        JudgeController(IContest contest) {
+            super(contest);
+            contest.addRunListener(new RunListenerImpl());
+            contest.addJudgementListener(new JudgementListenerImpl());
+            theModel = contest;
         }
 
         /**
@@ -153,9 +153,9 @@ public class RunFlowTest extends TestCase {
      * @author pc2@ecs.csus.edu
      */
     public class TeamController extends Controller {
-        TeamController(IModel model) {
-            super(model);
-            model.addRunListener(new RunListenerImpl());
+        TeamController(IContest contest) {
+            super(contest);
+            contest.addRunListener(new RunListenerImpl());
         }
 
         /**
@@ -183,7 +183,7 @@ public class RunFlowTest extends TestCase {
         }
     }
 
-    public void initializeModel(IModel model) {
+    public void initializeModel(IContest contest) {
 
         String[] languages = { "Java", "C", "APL" };
         String[] problems = { "Sumit", "Quadrangles", "Routing" };
@@ -206,8 +206,8 @@ public class RunFlowTest extends TestCase {
             modelOne.addJudgement(new Judgement(judgementName));
         }
 
-        model.generateNewAccounts(ClientType.Type.TEAM.toString(), 10, true);
-        model.generateNewAccounts(ClientType.Type.JUDGE.toString(), 5, true);
+        contest.generateNewAccounts(ClientType.Type.TEAM.toString(), 10, true);
+        contest.generateNewAccounts(ClientType.Type.JUDGE.toString(), 5, true);
 
         assertTrue("Insure generate of 10 teams", modelOne.getAccounts(Type.TEAM).size() == 10);
         assertTrue("Insure generate of 5 teams", modelOne.getAccounts(Type.JUDGE).size() == 5);
@@ -230,7 +230,7 @@ public class RunFlowTest extends TestCase {
         ClientId judgeId = account.getClientId();
 
         // Login a judge
-        judgeModel = new Model();
+        judgeModel = new Contest();
         judgeController = new JudgeController(judgeModel);
         judgeController.setUsingMainUI(false);
         judgeController.start(new String[0]);
@@ -239,7 +239,7 @@ public class RunFlowTest extends TestCase {
 
         // Login a team
 
-        teamModel = new Model();
+        teamModel = new Contest();
         teamController = new TeamController(teamModel);
         teamController.setUsingMainUI(false);
         teamController.start(new String[0]);

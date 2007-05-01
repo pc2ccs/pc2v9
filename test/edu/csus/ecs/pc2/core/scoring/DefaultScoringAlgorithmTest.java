@@ -16,11 +16,11 @@ import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
-import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.Contest;
+import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
-import edu.csus.ecs.pc2.core.model.Model;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
@@ -49,59 +49,59 @@ public class DefaultScoringAlgorithmTest extends TestCase {
     }
 
     /**
-     * Tests whether valid XML is generated with no data in the model.
+     * Tests whether valid XML is generated with no data in the contest.
      */
     public void testNoData() {
 
-        Model model = new Model();
+        Contest contest = new Contest();
 
-        checkOutputXML(model);
+        checkOutputXML(contest);
 
     }
 
     /**
-     * Initialize the model.
+     * Initialize the contest.
      * 
      * Initialize with problems, languages, accounts, judgements.
      * 
-     * @param model
+     * @param contest
      */
-    private void initFakeData(IModel model) {
+    private void initFakeData(IContest contest) {
 
         // Add accounts
-        model.generateNewAccounts(ClientType.Type.TEAM.toString(), 1, true);
-        model.generateNewAccounts(ClientType.Type.TEAM.toString(), 1, true);
+        contest.generateNewAccounts(ClientType.Type.TEAM.toString(), 1, true);
+        contest.generateNewAccounts(ClientType.Type.TEAM.toString(), 1, true);
         
-        model.generateNewAccounts(ClientType.Type.JUDGE.toString(), 1, true);
+        contest.generateNewAccounts(ClientType.Type.JUDGE.toString(), 1, true);
         
         // Add Problem
         Problem problem = new Problem("Problem One");
-        model.addProblem(problem);
+        contest.addProblem(problem);
         
         // Add Language
         Language language = new Language("Language One");
-        model.addLanguage(language);
+        contest.addLanguage(language);
         
         String[] judgementNames = { "Yes", "No - compilation error", "No - incorrect output", "No - It's just really bad",
                 "No - judges enjoyed a good laugh", "You've been bad - contact staff" };
 
         for (String judgementName : judgementNames) {
             Judgement judgement = new Judgement(judgementName);
-            model.addJudgement(judgement);
+            contest.addJudgement(judgement);
         }
     }
 
     /**
-     * Create a new run in the model.
+     * Create a new run in the contest.
      * 
-     * @param model
+     * @param contest
      * @return created run.
      */
-    private Run getARun(IModel model) {
-        Problem problem = model.getProblems()[0];
-        Language language = model.getLanguages()[0];
+    private Run getARun(IContest contest) {
+        Problem problem = contest.getProblems()[0];
+        Language language = contest.getLanguages()[0];
         
-        Account account = model.getAccounts(ClientType.Type.TEAM).firstElement();
+        Account account = contest.getAccounts(ClientType.Type.TEAM).firstElement();
 
         ClientId id = account.getClientId();
         Run run = new Run(id, language, problem);
@@ -110,17 +110,17 @@ public class DefaultScoringAlgorithmTest extends TestCase {
     }
 
     /**
-     * Create a new run in the model.
+     * Create a new run in the contest.
      * 
-     * @param model
+     * @param contest
      * @param elapsedMinutes
      * @return created run.
      */
-    private Run getARun(IModel model, int elapsedMinutes) {
-        Problem problem = model.getProblems()[0];
-        Language language = model.getLanguages()[0];
+    private Run getARun(IContest contest, int elapsedMinutes) {
+        Problem problem = contest.getProblems()[0];
+        Language language = contest.getLanguages()[0];
         
-        Account account = model.getAccounts(ClientType.Type.TEAM).firstElement();
+        Account account = contest.getAccounts(ClientType.Type.TEAM).firstElement();
 
         ClientId id = account.getClientId();
         Run run = new Run(id, language, problem);
@@ -133,15 +133,15 @@ public class DefaultScoringAlgorithmTest extends TestCase {
      */
     public void testOneRunUnjudged() {
 
-        Model model = new Model();
+        Contest contest = new Contest();
         
-        initFakeData(model);
-        Run run = getARun(model);
+        initFakeData(contest);
+        Run run = getARun(contest);
         RunFiles runFiles = new RunFiles(run, "samps/Sumit.java");
         
-        model.addRun(run, runFiles, null);
+        contest.addRun(run, runFiles, null);
         
-        checkOutputXML(model);
+        checkOutputXML(contest);
     }
 
     /**
@@ -149,79 +149,79 @@ public class DefaultScoringAlgorithmTest extends TestCase {
      */
     public void testMixedjudged() {
 
-        Model model = new Model();
+        Contest contest = new Contest();
         
-        initFakeData(model);
-        Run run = getARun(model, 5);
+        initFakeData(contest);
+        Run run = getARun(contest, 5);
         RunFiles runFiles = new RunFiles(run, "samps/Sumit.java");
         
-        model.addRun(run, runFiles, null);
+        contest.addRun(run, runFiles, null);
 
-        createJudgedRun(model, 0, false, 7);
+        createJudgedRun(contest, 0, false, 7);
         
-        run = getARun(model, 10);
-        model.addRun(run, runFiles, null);
+        run = getARun(contest, 10);
+        contest.addRun(run, runFiles, null);
 
-        createJudgedRun(model, 0, true, 15);
+        createJudgedRun(contest, 0, true, 15);
        
-        checkOutputXML(model);
+        checkOutputXML(contest);
     }
     
     /**
      * Submit and judge a run.
      * 
-     * @param model
+     * @param contest
      * @param judgementIndex
      * @param solved
      */
-    public void createJudgedRun (IModel model, int judgementIndex, boolean solved) {
-        Run run = getARun(model);
+    public void createJudgedRun (IContest contest, int judgementIndex, boolean solved) {
+        Run run = getARun(contest);
         RunFiles runFiles = new RunFiles(run, "samps/Sumit.java");
         
-        model.addRun(run, runFiles, null);
+        contest.addRun(run, runFiles, null);
         
-        ClientId who = model.getAccounts(ClientType.Type.JUDGE).firstElement().getClientId();
+        ClientId who = contest.getAccounts(ClientType.Type.JUDGE).firstElement().getClientId();
         run.setStatus(RunStates.BEING_JUDGED);
-        model.updateRun(run, who);
+        contest.updateRun(run, who);
         
-        Judgement judgement = model.getJudgements()[judgementIndex]; // Judge as No
+        Judgement judgement = contest.getJudgements()[judgementIndex]; // Judge as No
         
         JudgementRecord judgementRecord = new JudgementRecord(judgement.getElementId(), who, solved, false);
-        model.addRunJudgement(run, judgementRecord, null, who);
+        contest.addRunJudgement(run, judgementRecord, null, who);
         
     }
 
     /**
      * Submit and judge a run.
      * 
-     * @param model
+     * @param contest
      * @param judgementIndex
      * @param solved
      */
-    public void createJudgedRun (IModel model, int judgementIndex, boolean solved, int elapsedMinutes){
-        Run run = getARun(model, elapsedMinutes);
+    public void createJudgedRun (IContest contest, int judgementIndex, boolean solved, int elapsedMinutes){
+        Run run = getARun(contest, elapsedMinutes);
         RunFiles runFiles = new RunFiles(run, "samps/Sumit.java");
         
-        model.addRun(run, runFiles, null);
+        contest.addRun(run, runFiles, null);
         
-        ClientId who = model.getAccounts(ClientType.Type.JUDGE).firstElement().getClientId();
+        ClientId who = contest.getAccounts(ClientType.Type.JUDGE).firstElement().getClientId();
         run.setStatus(RunStates.BEING_JUDGED);
-        model.updateRun(run, who);
+        contest.updateRun(run, who);
         
-        Judgement judgement = model.getJudgements()[judgementIndex]; // Judge as No
+        Judgement judgement = contest.getJudgements()[judgementIndex]; // Judge as No
         
         JudgementRecord judgementRecord = new JudgementRecord(judgement.getElementId(), who, solved, false);
-        model.addRunJudgement(run, judgementRecord, null, who);
+        contest.addRunJudgement(run, judgementRecord, null, who);
         
     }
     /**
      * Get XML from ScoringAlgorithm and test whether it can be parsed.
-     * @param model
+     * @param contest
      */
-    public void checkOutputXML (IModel model) {
+    public void checkOutputXML (IContest contest) {
         
         DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
-        String xmlString = defaultScoringAlgorithm.getStandings(model, new Properties(), log);
+        String xmlString = defaultScoringAlgorithm.getStandings(contest, new Properties(), log);
 
         // getStandings should always return a well-formed xml
         assertFalse("getStandings returned null ", xmlString == null);
@@ -246,13 +246,13 @@ public class DefaultScoringAlgorithmTest extends TestCase {
      */
     public void testOneRunJudged() {
 
-        Model model = new Model();
+        Contest contest = new Contest();
         
-        initFakeData(model);
+        initFakeData(contest);
         
-        createJudgedRun(model, 2, false);
+        createJudgedRun(contest, 2, false);
 
-        checkOutputXML(model);
+        checkOutputXML(contest);
     }
     
     /**
@@ -260,16 +260,16 @@ public class DefaultScoringAlgorithmTest extends TestCase {
      */
     public void testFiveRunsJudged() {
 
-        Model model = new Model();
+        Contest contest = new Contest();
         
-        initFakeData(model);
+        initFakeData(contest);
         
-        createJudgedRun(model, 2, false);
-        createJudgedRun(model, 0, true);
-        createJudgedRun(model, 3, false);
-        createJudgedRun(model, 4, false);
+        createJudgedRun(contest, 2, false);
+        createJudgedRun(contest, 0, true);
+        createJudgedRun(contest, 3, false);
+        createJudgedRun(contest, 4, false);
 
-        checkOutputXML(model);
+        checkOutputXML(contest);
     }
     
 

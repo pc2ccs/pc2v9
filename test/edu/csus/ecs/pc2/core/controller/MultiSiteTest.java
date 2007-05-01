@@ -6,9 +6,9 @@ import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.Controller;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
-import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.Contest;
+import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.Language;
-import edu.csus.ecs.pc2.core.model.Model;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Site;
 
@@ -27,11 +27,11 @@ public class MultiSiteTest extends TestCase {
     private static final String [] SERVER_COMMAND_LINE_OPTIONS = {"--server"};
 
     // Models for site 1, 2, 3
-    private IModel modelOne;
+    private IContest modelOne;
 
-    private IModel modelTwo;
+    private IContest modelTwo;
 
-    private IModel modelThree;
+    private IContest modelThree;
 
     // Controllers for site 1,2,3
     private Controller controllerOne;
@@ -87,7 +87,7 @@ public class MultiSiteTest extends TestCase {
         String[] languages = { "Java", "C", "APL" };
         String[] problems = { "Sumit", "Quadrangles", "Routing" };
 
-        modelOne = new Model();
+        modelOne = new Contest();
         Site siteOne = createSite(1, "Site ONE", null, 0);
         modelOne.addSite(siteOne);
 
@@ -125,7 +125,7 @@ public class MultiSiteTest extends TestCase {
         assertTrue("Add site two  ", sites.length == 2);
 
         // Add Site 2
-        modelTwo = new Model();
+        modelTwo = new Contest();
         controllerTwo = new Controller(modelTwo);
         controllerTwo.setContactingRemoteServer(true);
         controllerTwo.setUsingMainUI(false);
@@ -146,7 +146,7 @@ public class MultiSiteTest extends TestCase {
         assertTrue("Add site three on site 1 ", sites.length == 3);
 
         // Site 3 Login
-        modelThree = new Model();
+        modelThree = new Contest();
         controllerThree = new Controller(modelThree);
         controllerThree.setContactingRemoteServer(true);
         controllerThree.setUsingMainUI(false);
