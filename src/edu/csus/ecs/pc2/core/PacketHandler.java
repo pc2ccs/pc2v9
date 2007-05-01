@@ -543,6 +543,12 @@ public class PacketHandler {
             sendToTeams = true;
         }
 
+        Judgement judgement = (Judgement) PacketFactory.getObjectValue(packet, PacketFactory.JUDGEMENT);
+        if (judgement != null) {
+            contest.addJudgement(judgement);
+            sendToTeams = true;
+        }
+
         Language language = (Language) PacketFactory.getObjectValue(packet, PacketFactory.LANGUAGE);
         if (language != null) {
             contest.addLanguage(language);
@@ -609,6 +615,12 @@ public class PacketHandler {
         Site site = (Site) PacketFactory.getObjectValue(packet, PacketFactory.SITE);
         if (site != null) {
             contest.updateSite(site);
+            sendToTeams = true;
+        }
+        
+        Judgement judgement = (Judgement) PacketFactory.getObjectValue(packet, PacketFactory.JUDGEMENT);
+        if (judgement != null) {
+            contest.updateJudgement(judgement);
             sendToTeams = true;
         }
 

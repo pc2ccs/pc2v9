@@ -16,6 +16,7 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
@@ -1534,10 +1535,20 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         Packet addLanguagePacket = PacketFactory.createAddSetting(contest.getClientId(), getServerClientId(), language);
         sendToLocalServer(addLanguagePacket); 
     }
+    
+    public void addNewJudgement(Judgement judgement) {
+        Packet addJudgementPacket = PacketFactory.createAddSetting(contest.getClientId(), getServerClientId(), judgement);
+        sendToLocalServer(addJudgementPacket); 
+    }
 
     public void updateLanguage(Language language) {
         Packet updateLanguagePacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), language);
         sendToLocalServer(updateLanguagePacket);
+    }
+    
+    public void updateJudgement (Judgement judgement) {
+        Packet updatePacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), judgement);
+        sendToLocalServer(updatePacket);
     }
     
 }
