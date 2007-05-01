@@ -258,6 +258,14 @@ public interface IContest {
      * @param connectionHandlerID
      */
     void addLocalLogin(ClientId clientId, ConnectionHandlerID connectionHandlerID);
+    
+    /**
+     * Add login as a remote login.
+     * 
+     * @param clientId
+     * @param connectionHandlerID
+     */
+    void addRemoteLogin(ClientId clientId, ConnectionHandlerID connectionHandlerID);
 
     /**
      * Lookup a client id given a ConnectionHandlerID.
@@ -442,5 +450,7 @@ public interface IContest {
     Clarification[] getClarifications(ClientId clientId);
 
     Run[] getRuns(ClientId clientId);
+
+ 
 
 }

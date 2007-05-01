@@ -75,11 +75,17 @@ public class Contest implements IContest {
 
     /**
      * Logins on this site.
+     * 
+     * These are all logins that have been authenticated by the
+     * local server.
      */
     private LoginList localLoginList = new LoginList();
     
     /**
      * Logins on other sites.
+     * 
+     * These are all the logins taht have been authenticated
+     * by a remote server.
      */
     private LoginList remoteLoginList = new LoginList();
     
@@ -407,6 +413,12 @@ public class Contest implements IContest {
         LoginEvent loginEvent = new LoginEvent(LoginEvent.Action.NEW_LOGIN, inClientId, connectionHandlerID, "New");
         fireLoginListener(loginEvent);
     
+    }
+
+    public void addRemoteLogin(ClientId inClientId, ConnectionHandlerID connectionHandlerID) {
+        remoteLoginList.add(inClientId, connectionHandlerID);
+        LoginEvent loginEvent = new LoginEvent(LoginEvent.Action.NEW_LOGIN, inClientId, connectionHandlerID, "New");
+        fireLoginListener(loginEvent);
     }
 
     public void addLogin(ClientId inClientId, ConnectionHandlerID connectionHandlerID) {
