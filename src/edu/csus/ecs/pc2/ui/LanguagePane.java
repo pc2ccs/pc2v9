@@ -70,6 +70,8 @@ public class LanguagePane extends JPanePlugin {
     private static final String NO_CHANGE_TITLE = "No Change";
     
     private Language language = null;
+    
+    private boolean populatingGUI = true;
 
     /**
      * This method initializes
@@ -219,8 +221,7 @@ public class LanguagePane extends JPanePlugin {
         
         Language newLanguage = getLanguageFromFields();
         
-        // TODO update language
-//        getController().updateLanguage(newLanguage);
+        getController().updateLanguage(newLanguage);
         
         cancelButton.setText("Close");
         addButton.setEnabled(false);
@@ -267,7 +268,10 @@ public class LanguagePane extends JPanePlugin {
                 if ( getParentFrame() != null){
                     getParentFrame().setVisible(false);
                 }
-                
+            } else if (result == JOptionPane.NO_OPTION) {
+                if ( getParentFrame() != null){
+                    getParentFrame().setVisible(false);
+                }
             }
         } else {
             if ( getParentFrame() != null){
@@ -354,8 +358,8 @@ public class LanguagePane extends JPanePlugin {
             displayNameTextField.setToolTipText("Name to display to users");
             displayNameTextField.setName("displayNameTextField");
             displayNameTextField.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyPressed(java.awt.event.KeyEvent e) {
-                    enableUpdateButtons(true);
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
                 }
             });
         }
@@ -374,8 +378,8 @@ public class LanguagePane extends JPanePlugin {
             compileCommandLineTextField.setToolTipText("Command Line for compiler");
             compileCommandLineTextField.setName("commandLineTextField");
             compileCommandLineTextField.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyPressed(java.awt.event.KeyEvent e) {
-                    enableUpdateButtons(true);
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
                 }
             });
 
@@ -395,8 +399,8 @@ public class LanguagePane extends JPanePlugin {
             executableFilenameTextField.setToolTipText("Form: exe");
             executableFilenameTextField.setName("programExeTextField");
             executableFilenameTextField.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyPressed(java.awt.event.KeyEvent e) {
-                    enableUpdateButtons(true);
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
                 }
             });
 
@@ -432,8 +436,8 @@ public class LanguagePane extends JPanePlugin {
             programExecutionCommandLineTextField.setToolTipText("Form: exe");
             programExecutionCommandLineTextField.setName("programCommandLine");
             programExecutionCommandLineTextField.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyPressed(java.awt.event.KeyEvent e) {
-                    enableUpdateButtons(true);
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
                 }
             });
 
@@ -485,6 +489,35 @@ public class LanguagePane extends JPanePlugin {
         
         enableUpdateButtons(true);
     }
+    
+    /**
+     * Enable or disable Update button based on comparison of run to fields.
+     * 
+     */
+    public void enableUpdateButton() {
+
+        if (populatingGUI) {
+            return;
+        }
+
+        boolean enableButton = false;
+
+        if (language != null) {
+
+            enableButton |= (!displayNameTextField.getText().equals(language.getDisplayName()));
+            enableButton |= (!compileCommandLineTextField.getText().equals(language.getCompileCommandLine()));
+            enableButton |= (!executableFilenameTextField.getText().equals(language.getExecutableIdentifierMask()));
+            enableButton |= (!programExecutionCommandLineTextField.getText().equals(language.getProgramExecuteCommandLine()));
+
+        } else {
+            if (getAddButton().isVisible()){
+                enableButton = true;
+            }
+        }
+
+        enableUpdateButtons(enableButton);
+    }
+
 
     public Language getLanguage() {
         return language;
@@ -503,6 +536,8 @@ public class LanguagePane extends JPanePlugin {
     }
 
     private void populateGUI(Language language2) {
+        
+        populatingGUI = true;
 
         if (language2 != null) {
             displayNameTextField.setText(language2.getDisplayName());
@@ -526,6 +561,8 @@ public class LanguagePane extends JPanePlugin {
             getAddButton().setVisible(true);
             getUpdateButton().setVisible(false);
         }
+        
+        populatingGUI = false;
     }
     
 
@@ -536,7 +573,7 @@ public class LanguagePane extends JPanePlugin {
         }else{
             cancelButton.setText("Close");
         }
-        addButton.setEnabled(editedText);
+        addButton.setEnabled(true);
         updateButton.setEnabled(editedText);
     }
 
