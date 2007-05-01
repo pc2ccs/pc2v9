@@ -142,10 +142,11 @@ public class RunPane extends JPanePlugin {
         if (messagePane == null) {
             messageLabel = new JLabel();
             messageLabel.setText("");
+            messageLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 14));
             messageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
             messagePane = new JPanel();
             messagePane.setLayout(new BorderLayout());
-            messagePane.setPreferredSize(new java.awt.Dimension(25, 25));
+            messagePane.setPreferredSize(new java.awt.Dimension(35,35));
             messagePane.add(messageLabel, java.awt.BorderLayout.CENTER);
         }
         return messagePane;
