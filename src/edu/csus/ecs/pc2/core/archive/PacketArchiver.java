@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 
-import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.IContest;
