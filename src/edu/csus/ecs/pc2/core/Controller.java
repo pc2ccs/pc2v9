@@ -815,18 +815,6 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         Packet packet = PacketFactory.createLoginDenied(contest.getClientId(), destinationId, message);
         sendToClient(connectionHandlerID, packet);
     }
-
-    /**
-     * Send login failure packet back to non-logged in user, via ConnectionHandlerID.
-     * 
-     * @param destinationId
-     * @param connectionHandlerID
-     * @param message
-     */
-    private void sendSecurityVioation(ClientId destinationId, ConnectionHandlerID connectionHandlerID, String message) {
-        Packet packet = PacketFactory.createMessage(contest.getClientId(), destinationId, message);
-        sendToClient(connectionHandlerID, packet);
-    }
     
     /**
      * Return an array of all logged in users.
@@ -1014,7 +1002,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
 
     public void sendToServers(Packet packet) {
-        Enumeration<ClientId> clientIds = contest.getLoggedInClients(ClientType.Type.SERVER);
+        Enumeration<ClientId> clientIds = contest.getLocalLoggedInClients(ClientType.Type.SERVER);
         while (clientIds.hasMoreElements()) {
             ClientId clientId = clientIds.nextElement();
             ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(clientId);

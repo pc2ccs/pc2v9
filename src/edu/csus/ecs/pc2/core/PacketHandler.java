@@ -185,11 +185,11 @@ public class PacketHandler {
             startContest(packet);
             
         } else if (packetType.equals(Type.STOP_CONTEST_CLOCK)) {
-            // Admin to server, stop the cloeck
+            // Admin to server, stop the clock
             stopContest(packet);
 
         } else if (packetType.equals(Type.UPDATE_CONTEST_CLOCK)) {
-            // Admin to server, stop the cloeck
+            // Admin to server, stop the clock
             updateContestClock(packet);
             
         } else if (packetType.equals(Type.CLOCK_STARTED)) {
@@ -345,7 +345,9 @@ public class PacketHandler {
         
         Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
         JudgementRecord judgementRecord = (JudgementRecord) PacketFactory.getObjectValue(packet, PacketFactory.JUDGEMENT_RECORD);
-        RunResultFiles runResultFiles = (RunResultFiles) PacketFactory.getObjectValue(packet, PacketFactory.RUN_RESULTS_FILE);
+        
+        // TODO add runResultsFiles to updated run results.
+//        RunResultFiles runResultFiles = (RunResultFiles) PacketFactory.getObjectValue(packet, PacketFactory.RUN_RESULTS_FILE);
         ClientId whoChangedRun = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
         
         if (isServer()) {
@@ -978,7 +980,7 @@ public class PacketHandler {
                         
                         // TODO someday soon load logins with their connectionIds
                         ConnectionHandlerID fakeId = new ConnectionHandlerID("Fake-Site"+clientId.getSiteNumber());
-                        contest.addLogin(clientId, fakeId);
+                        contest.addRemoteLogin(clientId, fakeId);
                     }
                 }
             }
@@ -1097,7 +1099,7 @@ public class PacketHandler {
         
         addConnectionIdsToModel (packet);
         
-//        addLoginsToModel(packet);
+        addLoginsToModel(packet);
 
         if (contest.isLoggedIn()) {
             
@@ -1209,21 +1211,26 @@ public class PacketHandler {
      *            contains list of other servers
      */
     private void loginToOtherSites(Packet packet) {
-        try {
-            for (Site site : contest.getSites()) {
-                if (!isThisSite(site.getSiteNumber())) {
-                    // TODO code - do not log into servers that are already logged in.
-                    controller.sendServerLoginRequest(site.getSiteNumber());
+        for (Site site : contest.getSites()) {
+            if (!isThisSite(site.getSiteNumber())) {
+                try {
+
+                    ClientId serverClientId = new ClientId(site.getSiteNumber(), ClientType.Type.SERVER, 0);
+                    if (contest.isRemoteLoggedIn(serverClientId)) {
+                        controller.sendServerLoginRequest(site.getSiteNumber());
+                    } else {
+                        info("Not logging into site " + site.getSiteNumber() + ", site not connected to contest");
+                    }
+                } catch (Exception e) {
+                    controller.getLog().log(Log.WARNING, "Exception logging into other site ", e);
                 }
             }
-        } catch (Exception e) {
-            // TODO: log handle exception
-            controller.getLog().log(Log.WARNING, "Exception logged ", e);
         }
     }
 
     /**
-     * Is the input ClientId a server. 
+     * Is the input ClientId a server.
+     * 
      * @param id
      * @return
      */
