@@ -10,10 +10,9 @@ import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.log.Log;
 
 /**
- * Internal dump report.
+ * Print all problems info.
  * 
  * @author pc2@ecs.csus.edu
- * 
  */
 
 // $HeadURL$
@@ -26,11 +25,11 @@ public class ProblemsReport implements IReport {
     private Log log;
 
     private void writeRow(PrintWriter printWriter, Problem problem, ProblemDataFiles problemDataFiles) {
-        printWriter.println("  Problem   " + problem + " id=" + problem.getElementId());
-        printWriter.println("       Data file  " + problem.getDataFileName());
-        printWriter.println("       Ans. file  " + problem.getAnswerFileName());
-        printWriter.println("     Val cmd line " + problem.getValidatorCommandLine());
-        printWriter.println("     Val option   " + problem.getWhichPC2Validator());
+        printWriter.println("  Problem '" + problem + "' ver="+ problem.getElementId().getVersionNumber()+" id=" + problem.getElementId());
+        printWriter.println("       Data file name   : " + problem.getDataFileName());
+        printWriter.println("       Answer file name : " + problem.getAnswerFileName());
+        printWriter.println("     Validator cmd line : " + problem.getValidatorCommandLine());
+        printWriter.println("     Validator option # : " + problem.getWhichPC2Validator());
 
         writeProblemDataFiles(printWriter, problemDataFiles);
     }

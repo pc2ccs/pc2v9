@@ -215,10 +215,6 @@ public class InternalDumpReport implements IReport {
         for (ConnectionHandlerID connectionHandlerID : connectionHandlerIDs) {
             printWriter.println("  " + connectionHandlerID);
         }
-
-        printWriter.println();
-        printWriter.println("*end*");
-
     }
     
     private void printHeader(PrintWriter printWriter) {
