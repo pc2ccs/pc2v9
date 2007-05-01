@@ -8,13 +8,11 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import com.ibm.webrunner.j2mclb.util.HeapSorter;
-
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ElementId;
-import edu.csus.ecs.pc2.core.model.ILanguageListener;
 import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.ILanguageListener;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.LanguageEvent;
 
@@ -106,20 +104,26 @@ public class LanguagesPane extends JPanePlugin {
 
             Object[] cols = { "Display Name", "Compiler Command Line", "Exe Name", "Execute Command Line" };
             languageListBox.addColumns(cols);
+            
+            /**
+             * No sorting at this time, the only way to know
+             * what order the languages are is to NOT sort them.
+             * Later we can add a sorter per LanguageDisplayList somehow.
+             */
 
-            // Sorters
-            HeapSorter sorter = new HeapSorter();
-            // HeapSorter numericStringSorter = new HeapSorter();
-            // numericStringSorter.setComparator(new NumericStringComparator());
-
-            // Display Name
-            languageListBox.setColumnSorter(0, sorter, 1);
-            // Compiler Command Line
-            languageListBox.setColumnSorter(1, sorter, 2);
-            // Exe Name
-            languageListBox.setColumnSorter(2, sorter, 3);
-            // Execute Command Line
-            languageListBox.setColumnSorter(3, sorter, 4);
+//            // Sorters
+//            HeapSorter sorter = new HeapSorter();
+//            // HeapSorter numericStringSorter = new HeapSorter();
+//            // numericStringSorter.setComparator(new NumericStringComparator());
+//
+//            // Display Name
+//            languageListBox.setColumnSorter(0, sorter, 1);
+//            // Compiler Command Line
+//            languageListBox.setColumnSorter(1, sorter, 2);
+//            // Exe Name
+//            languageListBox.setColumnSorter(2, sorter, 3);
+//            // Execute Command Line
+//            languageListBox.setColumnSorter(3, sorter, 4);
 
             languageListBox.autoSizeAllColumns();
 
@@ -138,7 +142,7 @@ public class LanguagesPane extends JPanePlugin {
                     languageListBox.replaceRow(objects, rowNumber);
                 }
                 languageListBox.autoSizeAllColumns();
-                languageListBox.sort();
+//                languageListBox.sort();
             }
         });
     }

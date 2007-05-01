@@ -8,8 +8,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import com.ibm.webrunner.j2mclb.util.HeapSorter;
-
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ElementId;
@@ -106,20 +104,27 @@ public class ProblemsPane extends JPanePlugin {
 
             Object[] cols = { "Problem Name", "Data File", "Input Method", "Answer File", "Run Time Limit", "Validator" };
             problemListBox.addColumns(cols);
+            
+            /**
+             * No sorting at this time, the only way to know
+             * what order the problems are is to NOT sort them.
+             * Later we can add a sorter per ProblemDisplayList somehow.
+             */
 
-            // Sorters
-            HeapSorter sorter = new HeapSorter();
-            // HeapSorter numericStringSorter = new HeapSorter();
-            // numericStringSorter.setComparator(new NumericStringComparator());
 
-            // Display Name
-            problemListBox.setColumnSorter(0, sorter, 1);
-            // Compiler Command Line
-            problemListBox.setColumnSorter(1, sorter, 2);
-            // Exe Name
-            problemListBox.setColumnSorter(2, sorter, 3);
-            // Execute Command Line
-            problemListBox.setColumnSorter(3, sorter, 4);
+//            // Sorters
+//            HeapSorter sorter = new HeapSorter();
+//            // HeapSorter numericStringSorter = new HeapSorter();
+//            // numericStringSorter.setComparator(new NumericStringComparator());
+//
+//            // Display Name
+//            problemListBox.setColumnSorter(0, sorter, 1);
+//            // Compiler Command Line
+//            problemListBox.setColumnSorter(1, sorter, 2);
+//            // Exe Name
+//            problemListBox.setColumnSorter(2, sorter, 3);
+//            // Execute Command Line
+//            problemListBox.setColumnSorter(3, sorter, 4);
 
             problemListBox.autoSizeAllColumns();
 
@@ -138,7 +143,7 @@ public class ProblemsPane extends JPanePlugin {
                     problemListBox.replaceRow(objects, rowNumber);
                 }
                 problemListBox.autoSizeAllColumns();
-                problemListBox.sort();
+//                problemListBox.sort();
             }
         });
     }
