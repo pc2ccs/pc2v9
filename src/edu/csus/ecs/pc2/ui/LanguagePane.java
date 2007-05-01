@@ -170,8 +170,7 @@ public class LanguagePane extends JPanePlugin {
         
         Language newLanguage = getLanguageFromFields();
         
-        // TODO update language
-//        getController().addNewLanguage(newLanguage);
+        getController().addNewLanguage(newLanguage);
         
         cancelButton.setText("Close");
         addButton.setEnabled(false);

@@ -1440,5 +1440,20 @@ public final class PacketFactory {
         prop.put(RUN, run);
         return createPacket(PacketType.Type.RUN_JUDGEMENT_UPDATE, source, destination, prop);
     }
+    
+    /**
+     * Clone packet from existing packet.
+     * 
+     * Can reassign source and destination
+     * 
+     * @param source
+     * @param destination
+     * @param packet
+     * @return
+     */
+    
+    public static Packet clonePacket(ClientId source, ClientId destination, Packet packet) {
+        return createPacket(packet.getType(), source, destination, (Properties) packet.getContent());
+    }
 
 }

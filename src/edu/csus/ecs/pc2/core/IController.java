@@ -214,4 +214,8 @@ public interface IController {
     void startAllContestTimes();
     
     void stopAllContestTimes();
+
+    void addNewLanguage(Language language);
+    
+    void updateLanguage(Language language);
 }

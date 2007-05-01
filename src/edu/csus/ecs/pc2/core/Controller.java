@@ -205,7 +205,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
 
     private void sendToClient(ConnectionHandlerID connectionHandlerID, Packet packet) {
-        info("sendToClient "+connectionHandlerID+" " +packet);
+        info("sendToClient (send) " +packet+" "+connectionHandlerID);
         try {
             transportManager.send(packet, connectionHandlerID);
         } catch (TransportException e) {
@@ -243,7 +243,8 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
 
     public void sendToClient(Packet packet) {
-        info(" sendToClient b4 " + packet);
+        info("sendToClient b4 to " + packet.getDestinationId() + " " + packet);
+
         ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(packet.getDestinationId());
         info("sendToClient " + packet.getSourceId() + " " + connectionHandlerID);
         if (connectionHandlerID == null) {
@@ -257,7 +258,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             sendToClient(connectionHandlerID, packet);
         }
 
-        info(" sendToClient af " + packet);
+        info("sendToClient af to " + packet.getDestinationId() + " " + packet);
     }
 
     public void submitRun(Problem problem, Language language, String filename) throws Exception {
@@ -487,8 +488,6 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         if (contest.isLocalLoggedIn(newId)) {
             info("Note site " + newId + " site " + newSiteNumber + " already logged in, ignoring ");
         }
-        ConnectionHandlerID connectionHandlerID = new ConnectionHandlerID("Site " + newSiteNumber);
-        contest.addLogin(newId, connectionHandlerID);
         return newId;
     }
     
@@ -1522,14 +1521,23 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
 
     public void startAllContestTimes() {
-        // TODO code
-        log.info("TODO startAllContestTimes");
+        Packet packet = PacketFactory.createStartAllClocks(contest.getClientId(), getServerClientId(),  contest.getClientId());
+        sendToLocalServer(packet);
     }
 
     public void stopAllContestTimes() {
-        // TODO code
-        log.info("TODO stopAllContestTimes");
+        Packet packet = PacketFactory.createStopAllClocks(contest.getClientId(), getServerClientId(),  contest.getClientId());
+        sendToLocalServer(packet);
     }
 
+    public void addNewLanguage(Language language) {
+        Packet addLanguagePacket = PacketFactory.createAddSetting(contest.getClientId(), getServerClientId(), language);
+        sendToLocalServer(addLanguagePacket); 
+    }
 
+    public void updateLanguage(Language language) {
+        Packet updateLanguagePacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), language);
+        sendToLocalServer(updateLanguagePacket);
+    }
+    
 }

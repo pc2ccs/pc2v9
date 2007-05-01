@@ -336,6 +336,8 @@ public class PacketHandler {
                         // TODO code add runResultsFiles
                         run.addJudgement(judgementRecord);
                         contest.updateRun(run, whoChangedRun);
+
+                        
                     } else {
                         contest.updateRun(run, whoChangedRun);
                     }
@@ -346,6 +348,12 @@ public class PacketHandler {
                 Run theRun = contest.getRun(run.getElementId());
                 Packet runUpdatedPacket = PacketFactory.createRunUpdateNotification(contest.getClientId(), PacketFactory.ALL_SERVERS, theRun, whoChangedRun);
                 sendToJudgesAndOthers(runUpdatedPacket, true);
+                
+                if (theRun.isJudged() && theRun.getJudgementRecord().isSendToTeam()) {
+                    // Send to team who sent it, send to other server if needed.
+                    Packet notifyPacket = PacketFactory.clonePacket(contest.getClientId(), run.getSubmitter(), runUpdatedPacket);
+                    controller.sendToClient(notifyPacket);
+                }
                 
             } else {
                 controller.sendToRemoteServer(run.getSiteNumber(), packet);
@@ -528,7 +536,8 @@ public class PacketHandler {
         if (oneAccount != null) {
             if (isServer()) {
                 if (contest.isLocalLoggedIn(oneAccount.getClientId())) {
-                    controller.sendToClient(packet);
+                    Packet addPacket = PacketFactory.clonePacket(contest.getClientId(), oneAccount.getClientId(), packet);
+                    controller.sendToClient(addPacket);
                 }
             }
         }
@@ -541,26 +550,29 @@ public class PacketHandler {
                 }
                 if (isServer()) {
                     if (contest.isLocalLoggedIn(account.getClientId())) {
-                        controller.sendToClient(packet);
+                        Packet addPacket = PacketFactory.clonePacket(contest.getClientId(), oneAccount.getClientId(), packet);
+                        controller.sendToClient(addPacket);
                     }
                 }
             }
         }
 
         if (isServer()) {
+            Packet addPacket = PacketFactory.clonePacket(contest.getClientId(), PacketFactory.ALL_SERVERS, packet);
             boolean sendToOtherServers = isThisSite(packet.getSourceId().getSiteNumber());
-            sendToJudgesAndOthers(packet, sendToOtherServers);
+            sendToJudgesAndOthers(addPacket, sendToOtherServers);
+            
+            if (sendToTeams) {
+                controller.sendToTeams(addPacket);
+            }
         }
 
-        if (sendToTeams) {
-            controller.sendToClient(packet);
-        }
     }
 
     private void updateSetting(Packet packet) {
 
         boolean sendToTeams = false;
-
+        
         Site site = (Site) PacketFactory.getObjectValue(packet, PacketFactory.SITE);
         if (site != null) {
             contest.updateSite(site);
@@ -589,7 +601,9 @@ public class PacketHandler {
         if (oneAccount != null) {
             contest.updateAccount(oneAccount);
             if (isThisSite(oneAccount.getClientId().getSiteNumber())) {
-                controller.sendToClient(packet);
+                if (isServer()) {
+                    controller.sendToClient(packet);
+                }
             }
         }
         Account[] accounts = (Account[]) PacketFactory.getObjectValue(packet, PacketFactory.ACCOUNT_ARRAY);
@@ -607,13 +621,14 @@ public class PacketHandler {
         }
 
         if (isServer()) {
-            sendToJudgesAndOthers(packet, false);
+            Packet updatePacket = PacketFactory.clonePacket(contest.getClientId(), PacketFactory.ALL_SERVERS, packet);
+            boolean sendToOtherServers = isThisSite(packet.getSourceId().getSiteNumber());
+            sendToJudgesAndOthers(updatePacket, sendToOtherServers);
+            
+            if (sendToTeams) {
+                controller.sendToTeams(updatePacket);
+            }
         }
-
-        if (sendToTeams) {
-            controller.sendToClient(packet);
-        }
-
     }
     
     private boolean isThisSite(int siteNumber) {
