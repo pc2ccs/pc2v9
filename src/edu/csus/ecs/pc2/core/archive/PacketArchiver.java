@@ -69,8 +69,8 @@ public class PacketArchiver implements UIPlugin {
     }
     
     public String getPC2BaseDirectory () {
-        VersionInfo versionInfo = new VersionInfo();
-        return versionInfo.locateHome();
+        // TODO this should be overridable via an ini entry and/or command line option
+        return ".";
     }
 
     /**
