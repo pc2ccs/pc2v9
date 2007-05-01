@@ -125,7 +125,7 @@ public class GenerateAccountsPane extends JPanePlugin {
                 int thisSiteNumber = getContest().getSiteNumber();
                 int theSiteNumber = thisSiteNumber;
 
-                if (getSiteSelectionComboBox().getSelectedIndex() > 1) {
+                if (getSiteSelectionComboBox().getSelectedIndex() > 0) {
                     theSiteNumber = getSiteSelectionComboBox().getSelectedIndex();
                 }
 
@@ -142,6 +142,7 @@ public class GenerateAccountsPane extends JPanePlugin {
                 genAdminLabel.setText("Administrators (" + number + ")");
 
                 generateButton.setText("Generate Accounts for Site " + theSiteNumber);
+                
             }
         });
     }
