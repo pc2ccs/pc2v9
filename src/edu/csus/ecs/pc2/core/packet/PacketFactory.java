@@ -1457,4 +1457,10 @@ public final class PacketFactory {
         return createPacket(packet.getType(), source, destination, (Properties) packet.getContent());
     }
 
+    public static Packet createUpdateSettings(ClientId source, ClientId destination, Judgement judgement) {
+        Properties prop = new Properties();
+        prop.put(JUDGEMENT, judgement);
+        return createPacket(PacketType.Type.RUN_JUDGEMENT_UPDATE, source, destination, prop);
+    }
+
 }

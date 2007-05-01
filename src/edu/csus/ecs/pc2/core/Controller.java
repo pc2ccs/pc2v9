@@ -1547,7 +1547,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
     
     public void updateJudgement (Judgement judgement) {
-        Packet updatePacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), judgement);
+        Packet updatePacket = PacketFactory.createUpdateSettings(contest.getClientId(), getServerClientId(), judgement);
         sendToLocalServer(updatePacket);
     }
     
