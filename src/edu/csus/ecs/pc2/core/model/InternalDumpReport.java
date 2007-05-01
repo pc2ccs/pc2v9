@@ -27,7 +27,7 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 // $HeadURL$
 public class InternalDumpReport implements IReport {
 
-    private IModel model;
+    private IContest model;
     private IController controller;
 
     private Log log;
@@ -273,7 +273,7 @@ public class InternalDumpReport implements IReport {
     public String getReportTitle() {
         return "Internal Dump";
     }
-    public void setModelAndController(IModel inModel, IController inController) {
+    public void setModelAndController(IContest inModel, IController inController) {
         this.model = inModel;
         this.controller = inController;
         log = controller.getLog();

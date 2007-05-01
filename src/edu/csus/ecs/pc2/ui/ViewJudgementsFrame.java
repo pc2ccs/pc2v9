@@ -7,7 +7,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import edu.csus.ecs.pc2.core.IController;
-import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunEvent;
@@ -26,7 +26,7 @@ public class ViewJudgementsFrame extends JFrame implements UIPlugin {
      */
     private static final long serialVersionUID = -3349295529036840178L;
 
-    private IModel model;
+    private IContest model;
 
     private IController controller;
 
@@ -68,7 +68,7 @@ public class ViewJudgementsFrame extends JFrame implements UIPlugin {
 
     }
 
-    public void setModelAndController(IModel inModel, IController inController) {
+    public void setModelAndController(IContest inModel, IController inController) {
         this.model = inModel;
         this.controller = inController;
 

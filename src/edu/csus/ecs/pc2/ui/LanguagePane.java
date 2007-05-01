@@ -15,7 +15,7 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IController;
-import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.LanguageAutoFill;
 
@@ -103,7 +103,7 @@ public class LanguagePane extends JPanePlugin {
         }
     }
 
-    public void setModelAndController(IModel inModel, IController inController) {
+    public void setModelAndController(IContest inModel, IController inController) {
         super.setModelAndController(inModel, inController);
     }
 

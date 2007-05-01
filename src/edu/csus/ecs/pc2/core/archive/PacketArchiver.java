@@ -7,7 +7,7 @@ import java.util.Date;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.Utilities;
-import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
@@ -32,7 +32,7 @@ public class PacketArchiver implements UIPlugin {
     private String outputDirectroryName = "packets";
 
     @SuppressWarnings("unused")
-    private IModel model;
+    private IContest model;
 
     @SuppressWarnings("unused")
     private IController controller;
@@ -128,7 +128,7 @@ public class PacketArchiver implements UIPlugin {
 
  
 
-    public void setModelAndController(IModel inModel, IController inController) {
+    public void setModelAndController(IContest inModel, IController inController) {
         this.model = inModel;
         this.controller = inController;
     }

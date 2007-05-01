@@ -21,7 +21,7 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ConnectionEvent;
 import edu.csus.ecs.pc2.core.model.IConnectionListener;
-import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
 /**
@@ -196,7 +196,7 @@ public class ConnectionsPane extends JPanePlugin {
         });
     }
 
-    public void setModelAndController(IModel inModel, IController inController) {
+    public void setModelAndController(IContest inModel, IController inController) {
         super.setModelAndController(inModel, inController);
 
         getModel().addConnectionListener(new ConnectionListenerImplementation());

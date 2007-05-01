@@ -16,7 +16,7 @@ import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ILoginListener;
-import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.LoginEvent;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
@@ -194,7 +194,7 @@ public class LoginsPane extends JPanePlugin {
         loginListBox.autoSizeAllColumns();
     }
 
-    public void setModelAndController(IModel inModel, IController inController) {
+    public void setModelAndController(IContest inModel, IController inController) {
         super.setModelAndController(inModel, inController);
         
         getModel().addLoginListener(new LoginListenerImplementation());

@@ -14,7 +14,7 @@ import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
-import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.ui.ClarificationsPane;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
@@ -37,7 +37,7 @@ public class TeamView extends JFrame implements UIPlugin {
 
     public static final String SVN_ID = "$Id$";
 
-    private IModel model = null;
+    private IContest model = null;
 
     private IController teamController = null;
 
@@ -182,7 +182,7 @@ public class TeamView extends JFrame implements UIPlugin {
         return mainTabbedPane;
     }
 
-    public void setModelAndController(IModel inModel, IController inController) {
+    public void setModelAndController(IContest inModel, IController inController) {
         this.model = inModel;
         this.teamController = inController;
         

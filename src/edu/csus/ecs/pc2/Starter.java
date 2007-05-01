@@ -2,15 +2,15 @@ package edu.csus.ecs.pc2;
 
 import edu.csus.ecs.pc2.core.Controller;
 import edu.csus.ecs.pc2.core.IController;
-import edu.csus.ecs.pc2.core.model.IModel;
-import edu.csus.ecs.pc2.core.model.Model;
+import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.Contest;
 
 /**
  * Starter class.
  * 
  * The Starter class is the main driver for all PC<sup>2</sup> modules.
  * <P>
- * This class creates a contest data {@link edu.csus.ecs.pc2.core.model.IModel}, then
+ * This class creates a contest data {@link edu.csus.ecs.pc2.core.model.IContest}, then
  * a  controller {@link edu.csus.ecs.pc2.core.IController}.   Then it passes the
  * command line arguments to {@link edu.csus.ecs.pc2.core.Controller#start(String[])} and
  * that starts a Login Frame. 
@@ -34,7 +34,7 @@ public final class Starter  {
      */
     public static void main(String[] args) {
         
-        IModel model = new Model();
+        IContest model = new Contest();
         IController controller = new Controller (model);
         controller.start(args);
     }

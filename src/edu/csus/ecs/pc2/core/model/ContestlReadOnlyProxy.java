@@ -16,10 +16,10 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
  */
 
 // $HeadURL$
-public final class ModelReadOnlyProxy implements IModel {
-    private IModel theRealModel;
+public final class ContestlReadOnlyProxy implements IContest {
+    private IContest theRealModel;
     
-    public ModelReadOnlyProxy (IModel model) {
+    public ContestlReadOnlyProxy (IContest model) {
         theRealModel = model;
     }
 

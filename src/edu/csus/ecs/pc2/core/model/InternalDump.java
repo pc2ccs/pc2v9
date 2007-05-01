@@ -35,9 +35,9 @@ public class InternalDump {
 
     private String editorNameFullPath =   "/windows/vi.bat";
 
-    private IModel model;
+    private IContest model;
 
-    public InternalDump(IModel model){
+    public InternalDump(IContest model){
         this.model = model;
     }
 

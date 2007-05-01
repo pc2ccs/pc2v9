@@ -21,7 +21,7 @@ import edu.csus.ecs.pc2.core.log.Log;
 // $HeadURL$
 public class ClarificationsReport implements IReport {
 
-    private IModel model;
+    private IContest model;
 
     private IController controller;
 
@@ -91,7 +91,7 @@ public class ClarificationsReport implements IReport {
         return "Clarifications";
     }
 
-    public void setModelAndController(IModel inModel, IController inController) {
+    public void setModelAndController(IContest inModel, IController inController) {
         this.model = inModel;
         this.controller = inController;
         log = controller.getLog();

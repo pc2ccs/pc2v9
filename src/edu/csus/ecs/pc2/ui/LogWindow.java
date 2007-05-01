@@ -8,7 +8,7 @@ import com.ibm.webrunner.j2mclb.util.TableModel;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.log.IStreamListener;
 import edu.csus.ecs.pc2.core.log.Log;
-import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.IContest;
 
 /**
  * This class is intended to register as a listener to the Log/LogWindowHandler and display the logs in a grid.
@@ -30,7 +30,7 @@ public class LogWindow extends JFrame implements UIPlugin {
 
     private IController controller;
 
-    private IModel model;
+    private IContest model;
     
     private Log log = null;
 
@@ -176,7 +176,7 @@ public class LogWindow extends JFrame implements UIPlugin {
         this.maxLines = maxLines;
     }
 
-    public void setModelAndController(IModel inModel, IController inController) {
+    public void setModelAndController(IContest inModel, IController inController) {
        model = inModel;
        controller = inController;
        if (controller == null) {

@@ -14,7 +14,7 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.log.Log;
-import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.util.XSLTransformer;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
@@ -38,7 +38,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
      */
     private static final long serialVersionUID = -8071477348056424178L;
 
-    private IModel model;
+    private IContest model;
 
     private IController controller;
 
@@ -106,7 +106,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
         }
     }
 
-    public void setModelAndController(IModel inModel, IController inController) {
+    public void setModelAndController(IContest inModel, IController inController) {
         this.model = inModel;
         this.controller = inController;
 

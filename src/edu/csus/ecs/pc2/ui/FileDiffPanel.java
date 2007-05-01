@@ -18,7 +18,7 @@ import javax.swing.WindowConstants;
 
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.log.Log;
-import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.IContest;
 
 /**
  * A file diff (comparison) panel.
@@ -747,7 +747,7 @@ public class FileDiffPanel implements IDiffPanel {
 
     }
 
-    public void setModelAndController(IModel inModel, IController inController) {
+    public void setModelAndController(IContest inModel, IController inController) {
         this.model = inModel;
         this.controller = inController;
         

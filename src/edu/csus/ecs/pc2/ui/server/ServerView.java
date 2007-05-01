@@ -15,7 +15,7 @@ import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.ILoginListener;
-import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.ISiteListener;
 import edu.csus.ecs.pc2.core.model.LoginEvent;
@@ -46,7 +46,7 @@ public class ServerView extends JFrame implements UIPlugin {
 
     public static final String SVN_ID = "$Id$";
 
-    private IModel model = null;
+    private IContest model = null;
 
     // TODO remove @SuppressWarnings for controller
     @SuppressWarnings("unused")
@@ -265,7 +265,7 @@ public class ServerView extends JFrame implements UIPlugin {
         });
     }
 
-    public void setModelAndController(IModel inModel, IController inController) {
+    public void setModelAndController(IContest inModel, IController inController) {
         this.model = inModel;
         this.controller = inController;
         this.log = controller.getLog();

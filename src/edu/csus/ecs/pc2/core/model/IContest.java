@@ -15,7 +15,7 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
  */
 
 // $HeadURL$
-public interface IModel {
+public interface IContest {
 
     void addLanguage(Language language);
 

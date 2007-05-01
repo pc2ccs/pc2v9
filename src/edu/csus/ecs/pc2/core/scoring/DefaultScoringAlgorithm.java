@@ -18,7 +18,7 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ElementId;
-import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.Site;
@@ -76,7 +76,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         // TODO populate default properties
     }
 
-    AccountList getAccountList(IModel theContest) {
+    AccountList getAccountList(IContest theContest) {
         Vector<Account> accountVect = theContest.getAccounts(ClientType.Type.ALL);
         AccountList accountList = new AccountList();
         Enumeration accountEnum = accountVect.elements();
@@ -195,7 +195,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      * 
      * @see edu.csus.ecs.pc2.core.scoring.ScoringAlgorithm#getStandings(edu.csus.ecs.pc2.core.Run[], edu.csus.ecs.pc2.core.AccountList, edu.csus.ecs.pc2.core.ProblemDisplayList, java.util.Properties)
      */
-    public String getStandings(IModel theContest, Properties inputPrpoerties, Log log) {
+    public String getStandings(IContest theContest, Properties inputPrpoerties, Log log) {
         if (theContest == null) {
             throw new InvalidParameterException("Invalid model (null)");
         }

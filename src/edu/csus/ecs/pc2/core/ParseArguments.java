@@ -48,7 +48,7 @@ public class ParseArguments {
 
     public static final String SVN_ID = "$Id$";
 
-    private Hashtable<String, String> argHash = new Hashtable <String, String>();
+    private Hashtable<String, String> argHash = new Hashtable<String, String>();
 
     private Vector<String> filelist = new Vector <String> ();
 

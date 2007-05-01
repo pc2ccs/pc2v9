@@ -11,7 +11,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 import edu.csus.ecs.pc2.core.IController;
-import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.InternalDump;
 
 /**
@@ -60,7 +60,7 @@ public class InfoPane extends JPanePlugin {
 
     }
 
-    public void setModelAndController(IModel inModel, IController inController) {
+    public void setModelAndController(IContest inModel, IController inController) {
         super.setModelAndController(inModel, inController);
 
         // getModel().addSiteListener(new SiteListenerImplementation());

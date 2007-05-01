@@ -3,7 +3,7 @@ package edu.csus.ecs.pc2.ui;
 import javax.swing.JFrame;
 
 import edu.csus.ecs.pc2.core.IController;
-import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 
 /**
@@ -20,7 +20,7 @@ public class EditProblemFrame extends JFrame implements UIPlugin {
      */
     private static final long serialVersionUID = -3349295529036840178L;
 
-    private IModel model;
+    private IContest model;
 
     private IController controller;
 
@@ -48,7 +48,7 @@ public class EditProblemFrame extends JFrame implements UIPlugin {
 
     }
 
-    public void setModelAndController(IModel inModel, IController inController) {
+    public void setModelAndController(IContest inModel, IController inController) {
         this.model = inModel;
         this.controller = inController;
 

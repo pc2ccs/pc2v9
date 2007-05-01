@@ -9,7 +9,7 @@ import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
-import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.ui.ClarificationsPane;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
@@ -33,7 +33,7 @@ public class JudgeView extends JFrame implements UIPlugin {
      */
     private static final long serialVersionUID = 5365837218548110171L;
 
-    private IModel model;
+    private IContest model;
 
     @SuppressWarnings("unused")
     private IController controller;
@@ -113,7 +113,7 @@ public class JudgeView extends JFrame implements UIPlugin {
         return siteNumber == model.getSiteNumber();
     }
 
-    public void setModelAndController(IModel inModel, IController inController) {
+    public void setModelAndController(IContest inModel, IController inController) {
         this.model = inModel;
         this.controller = inController;
         

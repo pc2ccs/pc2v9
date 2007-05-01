@@ -23,7 +23,7 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
  * public static void main(String[] args) {<br>
  * <br>
  * <blockquote>
- * IModel model = new Model();<br>
+ * IContest model = new Contest();<br>
  * IController controller = new Controller (model);<br>
  * String serverArgs = "--server";
  * controller.start(serverArgs);<br>
@@ -36,7 +36,7 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
  * public static void main(String[] args) {<br>
  * <blockquote>
  *      <br>
- *      IModel model = new Model();<br>
+ *      IContest model = new Contest();<br>
  *      IController controller = new Controller (model);<br>
  *      controller.start(args);<br>
  * } <br>

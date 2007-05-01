@@ -13,7 +13,7 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
-import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.IContest;
 
 /**
  * Add/Edit Account Pane
@@ -67,7 +67,7 @@ public class AccountPane extends JPanePlugin {
         this.add(getGeneralPane(), java.awt.BorderLayout.CENTER);
     }
 
-    public void setModelAndController(IModel inModel, IController inController) {
+    public void setModelAndController(IContest inModel, IController inController) {
         super.setModelAndController(inModel, inController);
         log = getController().getLog();
     }

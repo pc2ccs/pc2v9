@@ -21,7 +21,7 @@ import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
-import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.packet.PacketFactory;
@@ -62,7 +62,7 @@ public class PacketExplorerPane extends JPanePlugin {
 
     private JLabel messageLabel = null;
 
-    private IModel model;
+    private IContest model;
 
     private IController controller;
 
@@ -373,7 +373,7 @@ public class PacketExplorerPane extends JPanePlugin {
         listBox.getColumnInfo(columnNumber).getSorter().setSortOrder(sortRank);
     }
 
-    public void setModelAndController(IModel inModel, IController inController) {
+    public void setModelAndController(IContest inModel, IController inController) {
         this.model = inModel;
         this.controller = inController;
         setVisible (true);

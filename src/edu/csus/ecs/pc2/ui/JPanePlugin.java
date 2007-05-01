@@ -4,7 +4,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import edu.csus.ecs.pc2.core.IController;
-import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.IContest;
 
 /**
  * Base class for most UIPlugin panes.
@@ -18,11 +18,11 @@ public abstract class JPanePlugin extends JPanel implements UIPlugin {
 
     private IController controller;
 
-    private IModel model;
+    private IContest model;
     
     private JFrame parentFrame = null;
 
-    public void setModelAndController(IModel inModel, IController inController) {
+    public void setModelAndController(IContest inModel, IController inController) {
         this.controller = inController;
         this.model = inModel;
     }
@@ -38,11 +38,11 @@ public abstract class JPanePlugin extends JPanel implements UIPlugin {
         this.controller = controller;
     }
 
-    public IModel getModel() {
+    public IContest getModel() {
         return model;
     }
 
-    public void setModel(IModel model) {
+    public void setModel(IContest model) {
         this.model = model;
     }
 

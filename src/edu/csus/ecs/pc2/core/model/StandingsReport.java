@@ -32,7 +32,7 @@ import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 // $HeadURL$
 public class StandingsReport implements IReport {
 
-    private IModel model;
+    private IContest model;
 
     private IController controller;
 
@@ -109,7 +109,7 @@ public class StandingsReport implements IReport {
         return "Standings XML ";
     }
 
-    public void setModelAndController(IModel inModel, IController inController) {
+    public void setModelAndController(IContest inModel, IController inController) {
         this.model = inModel;
         this.controller = inController;
         log = controller.getLog();

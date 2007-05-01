@@ -17,7 +17,7 @@ import javax.swing.JTextArea;
 
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.log.Log;
-import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 
 /**
@@ -567,7 +567,7 @@ public class MultipleFileViewer extends JFrame implements IFileViewer {
     private IController controller;
 
     @SuppressWarnings("unused")
-    private IModel model;
+    private IContest model;
 
     /**
      * Center Frame
@@ -712,7 +712,7 @@ public class MultipleFileViewer extends JFrame implements IFileViewer {
         informationLabel.setText(text);
     }
 
-    public void setModelAndController(IModel inModel, IController inController) {
+    public void setModelAndController(IContest inModel, IController inController) {
         this.model = inModel;
         this.controller = inController;
     }

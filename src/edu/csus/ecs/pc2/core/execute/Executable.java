@@ -17,7 +17,7 @@ import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
-import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
@@ -113,7 +113,7 @@ public class Executable {
 
     private String errorString;
 
-    private IModel model;
+    private IContest model;
 
     private IController controller;
 
@@ -131,7 +131,7 @@ public class Executable {
     
     private boolean testRunOnly = false;
 
-    public Executable(IModel inModel, IController inController, Run run, RunFiles runFiles) {
+    public Executable(IContest inModel, IController inController, Run run, RunFiles runFiles) {
         super();
         this.model = inModel;
         this.controller = inController;

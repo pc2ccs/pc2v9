@@ -20,7 +20,7 @@ import edu.csus.ecs.pc2.core.security.Permission;
 // $HeadURL$
 public class AccountPermissionReport implements IReport {
 
-    private IModel model;
+    private IContest model;
 
     private IController controller;
 
@@ -86,7 +86,7 @@ public class AccountPermissionReport implements IReport {
         return "Account Permissions Report";
     }
 
-    public void setModelAndController(IModel inModel, IController inController) {
+    public void setModelAndController(IContest inModel, IController inController) {
         this.model = inModel;
         this.controller = inController;
 

@@ -1,7 +1,7 @@
 package edu.csus.ecs.pc2.ui;
 
 import edu.csus.ecs.pc2.core.IController;
-import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.IContest;
 
 /**
  * Interface for plugin UI or GUI.
@@ -24,7 +24,7 @@ public interface UIPlugin {
      * @param controller
      *            contest controller
      */
-    void setModelAndController(IModel model, IController controller);
+    void setModelAndController(IContest model, IController controller);
 
     /**
      * @return name of this plugin, used in choosing plugin.

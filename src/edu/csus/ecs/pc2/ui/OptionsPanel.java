@@ -1,7 +1,7 @@
 package edu.csus.ecs.pc2.ui;
 
 import edu.csus.ecs.pc2.core.IController;
-import edu.csus.ecs.pc2.core.model.IModel;
+import edu.csus.ecs.pc2.core.model.IContest;
 import javax.swing.JCheckBox;
 
 /**
@@ -44,7 +44,7 @@ public class OptionsPanel extends JPanePlugin {
 
     }
 
-    public void setModelAndController(IModel inModel, IController inController) {
+    public void setModelAndController(IContest inModel, IController inController) {
         super.setModelAndController(inModel, inController);
 
     }

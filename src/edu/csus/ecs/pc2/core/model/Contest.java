@@ -29,18 +29,18 @@ import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
 /**
- * Implementation of IModel.
+ * Implementation of IContest.
  * 
  * This model is not responsible for logic, just storage. So, for example, {@link #cancelRunCheckOut(Run, ClientId)} will simply
  * update the Run but will not check whether the run should be cancelled. The Controller should be used to check whether a Run
- * should be cancelled. Other logic of this sort is in the Controller, not the Model.
+ * should be cancelled. Other logic of this sort is in the Controller, not the Contest.
  * 
  * @author pc2@ecs.csus.edu
  * 
  */
 
 // $HeadURL$
-public class Model implements IModel {
+public class Contest implements IContest {
 
     public static final String SVN_ID = "$Id$";
 
@@ -150,7 +150,7 @@ public class Model implements IModel {
     }
 
     /**
-     * Initialize Model with data.
+     * Initialize Contest with data.
      */
     public void initializeWithFakeData() {
 
@@ -541,7 +541,7 @@ public class Model implements IModel {
     /**
      * Generate accounts.
      * 
-     * @see edu.csus.ecs.pc2.core.model.IModel#generateNewAccounts(java.lang.String, int, int, boolean)
+     * @see edu.csus.ecs.pc2.core.model.IContest#generateNewAccounts(java.lang.String, int, int, boolean)
      * @param clientTypeName
      * @param count
      * @param active
@@ -551,7 +551,7 @@ public class Model implements IModel {
     }
 
     /**
-     * @see edu.csus.ecs.pc2.core.model.IModel#generateNewAccounts(java.lang.String, int, int, boolean)
+     * @see edu.csus.ecs.pc2.core.model.IContest#generateNewAccounts(java.lang.String, int, int, boolean)
      */
     public Vector<Account> generateNewAccounts(String clientTypeName, int count, int startNumber, boolean active) {
         ClientType.Type type = ClientType.Type.valueOf(clientTypeName.toUpperCase());
