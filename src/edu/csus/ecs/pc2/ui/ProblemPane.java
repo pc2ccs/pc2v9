@@ -249,7 +249,7 @@ public class ProblemPane extends JPanePlugin {
             enableButton |= (!inputDataFileLabel.getText().equals(problem.getDataFileName()));
             enableButton |= (!answerFileNameLabel.getText().equals(problem.getAnswerFileName()));
 
-            boolean hasDataFile = problem.getAnswerFileName() != null;
+            boolean hasDataFile = problem.getDataFileName() != null;
             enableButton |= (hasDataFile == judgesHaveAnswerFiles.isSelected());
 
             boolean hasAnswerFile = problem.getAnswerFileName() != null;
@@ -258,6 +258,10 @@ public class ProblemPane extends JPanePlugin {
             enableButton |= (stdinRadioButton.isSelected() != problem.isReadInputDataFromSTDIN());
 
             enableButton |= (fileRadioButton.isSelected() && problem.isReadInputDataFromSTDIN());
+        } else {
+            if (getAddButton().isVisible()){
+                enableButton = true;
+            }
         }
 
         enableUpdateButtons(enableButton);
@@ -412,7 +416,12 @@ public class ProblemPane extends JPanePlugin {
                 if (getParentFrame() != null) {
                     getParentFrame().setVisible(false);
                 }
+            } else if (result == JOptionPane.NO_OPTION) {
+                if (getParentFrame() != null) {
+                    getParentFrame().setVisible(false);
+                }
             }
+
         } else {
             if (getParentFrame() != null) {
                 getParentFrame().setVisible(false);
@@ -455,11 +464,11 @@ public class ProblemPane extends JPanePlugin {
             problemRequiresDataCheckBox.setSelected(inProblem.getDataFileName() != null);
 
             if (inProblem.isReadInputDataFromSTDIN()) {
-                fileRadioButton.setEnabled(false);
-                stdinRadioButton.setEnabled(true);
+                fileRadioButton.setSelected(false);
+                stdinRadioButton.setSelected(true);
             } else {
-                fileRadioButton.setEnabled(true);
-                stdinRadioButton.setEnabled(false);
+                fileRadioButton.setSelected(true);
+                stdinRadioButton.setSelected(false);
             }
 
         } else {
@@ -490,6 +499,7 @@ public class ProblemPane extends JPanePlugin {
             cancelButton.setText("Close");
         }
         updateButton.setEnabled(editedText);
+        addButton.setEnabled(true);
     }
 
     /**
