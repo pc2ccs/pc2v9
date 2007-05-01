@@ -675,11 +675,12 @@ public final class PacketFactory {
      * @param contestTime
      * @param siteNumber
      */
-    public static Packet createUpdateContestTime(ClientId source, ClientId destination, ContestTime contestTime, int siteNumber) {
+    public static Packet createUpdateContestTime(ClientId source, ClientId destination, ContestTime contestTime, int siteNumber, ClientId whoModifiedIt) {
         Properties prop = new Properties();
+        prop.put(CLIENT_ID, whoModifiedIt);
         prop.put(SITE_NUMBER, new Integer(siteNumber));
         prop.put(CONTEST_TIME, contestTime);
-        Packet packet = new Packet(Type.UPDATE_CLOCK, source, destination, prop);
+        Packet packet = new Packet(Type.UPDATE_CONTEST_CLOCK, source, destination, prop);
         return packet;
     }
 

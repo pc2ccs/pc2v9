@@ -187,6 +187,10 @@ public class PacketHandler {
         } else if (packetType.equals(Type.STOP_CONTEST_CLOCK)) {
             // Admin to server, stop the cloeck
             stopContest(packet);
+
+        } else if (packetType.equals(Type.UPDATE_CONTEST_CLOCK)) {
+            // Admin to server, stop the cloeck
+            updateContestClock(packet);
             
         } else if (packetType.equals(Type.CLOCK_STARTED)) {
             Integer siteNumber = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
@@ -269,6 +273,31 @@ public class PacketHandler {
 
     }
     
+    private void updateContestClock(Packet packet) {
+
+        ClientId who = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+        Integer siteNumber = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
+        ContestTime contestTime = (ContestTime) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME);
+
+        if (isServer()) {
+            if (isThisSite(contestTime.getSiteNumber())) {
+                contest.updateContestTime(contestTime);
+                ContestTime updatedContestTime = contest.getContestTime(siteNumber);
+                controller.getLog().info(
+                        "Contest Settings updated by " + who + " running=" + updatedContestTime.isContestRunning() + " elapsed = " + updatedContestTime.getElapsedTimeStr() + " remaining= "
+                                + updatedContestTime.getRemainingTimeStr() + " length=" + updatedContestTime.getContestLengthStr());
+                Packet updatePacket = PacketFactory.clonePacket(contest.getClientId(), PacketFactory.ALL_SERVERS, packet);
+                controller.sendToTeams(updatePacket);
+                sendToJudgesAndOthers(updatePacket, true);
+            } else {
+                controller.sendToRemoteServer(siteNumber, packet);
+            }
+        } else {
+            controller.sendToTeams(packet);
+            sendToJudgesAndOthers(packet, true);
+        }
+    }
+
     private boolean isThisSite(ClientId sourceId) {
         return isThisSite(sourceId.getSiteNumber());
     }
@@ -521,8 +550,13 @@ public class PacketHandler {
         }
 
         Problem problem = (Problem) PacketFactory.getObjectValue(packet, PacketFactory.PROBLEM);
+        ProblemDataFiles problemDataFiles = (ProblemDataFiles) PacketFactory.getObjectValue(packet, PacketFactory.PROBLEM_DATA_FILES);
         if (problem != null) {
-            contest.addProblem(problem);
+            if (problemDataFiles != null){
+                contest.addProblem(problem, problemDataFiles);
+            } else {
+                contest.addProblem(problem);
+            }
             sendToTeams = true;
         }
 
@@ -566,7 +600,6 @@ public class PacketHandler {
                 controller.sendToTeams(addPacket);
             }
         }
-
     }
 
     private void updateSetting(Packet packet) {
@@ -586,8 +619,13 @@ public class PacketHandler {
         }
 
         Problem problem = (Problem) PacketFactory.getObjectValue(packet, PacketFactory.PROBLEM);
+        ProblemDataFiles problemDataFiles = (ProblemDataFiles) PacketFactory.getObjectValue(packet, PacketFactory.PROBLEM_DATA_FILES);
         if (problem != null) {
-            contest.updateProblem(problem);
+            if (problemDataFiles != null){
+                contest.updateProblem(problem, problemDataFiles);
+            } else {
+                contest.updateProblem(problem);
+            }
             sendToTeams = true;
         }
 
@@ -602,7 +640,8 @@ public class PacketHandler {
             contest.updateAccount(oneAccount);
             if (isThisSite(oneAccount.getClientId().getSiteNumber())) {
                 if (isServer()) {
-                    controller.sendToClient(packet);
+                    Packet updatePacket = PacketFactory.clonePacket(contest.getClientId(), oneAccount.getClientId(), packet);
+                    controller.sendToClient(updatePacket);
                 }
             }
         }
@@ -614,7 +653,8 @@ public class PacketHandler {
                 }
                 if (isServer()) {
                     if (contest.isLocalLoggedIn(account.getClientId())) {
-                        controller.sendToClient(packet);
+                        Packet updatePacket = PacketFactory.clonePacket(contest.getClientId(), account.getClientId(), packet);
+                        controller.sendToClient(updatePacket);
                     }
                 }
             }

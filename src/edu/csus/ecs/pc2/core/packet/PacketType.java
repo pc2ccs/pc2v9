@@ -539,7 +539,7 @@ public final class PacketType implements Serializable {
          * 
          * Update elapsed, remaining, contest length, running or not. Contains: Properties (ContestTime)
          */
-        UPDATE_CLOCK,
+        UPDATE_CONTEST_CLOCK,
         /**
          * User Login.
          * 
