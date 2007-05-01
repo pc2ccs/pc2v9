@@ -59,8 +59,8 @@ public class EditRunFrame extends JFrame implements UIPlugin {
 
     }
 
-    public void setContestAndController(IContest inModel, IController inController) {
-        this.contest = inModel;
+    public void setContestAndController(IContest inContest, IController inController) {
+        this.contest = inContest;
         this.controller = inController;
 
         getRunPane().setContestAndController(contest, controller);

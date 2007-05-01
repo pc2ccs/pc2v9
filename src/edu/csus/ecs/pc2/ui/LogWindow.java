@@ -30,7 +30,7 @@ public class LogWindow extends JFrame implements UIPlugin {
 
     private IController controller;
 
-    private IContest model;
+    private IContest contest;
     
     private Log log = null;
 
@@ -146,7 +146,7 @@ public class LogWindow extends JFrame implements UIPlugin {
     }
 
     /**
-     * Truncates the logMessageListBox data model.
+     * Truncates the logMessageListBox data contest.
      * 
      * @param numLines
      *            Number of lines to remove from the listbox
@@ -176,8 +176,8 @@ public class LogWindow extends JFrame implements UIPlugin {
         this.maxLines = maxLines;
     }
 
-    public void setContestAndController(IContest inModel, IController inController) {
-       model = inModel;
+    public void setContestAndController(IContest inContest, IController inController) {
+       contest = inContest;
        controller = inController;
        if (controller == null) {
            System.err.println("controller is null");

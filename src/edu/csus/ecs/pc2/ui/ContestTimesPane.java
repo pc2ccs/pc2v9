@@ -175,8 +175,8 @@ public class ContestTimesPane extends JPanePlugin {
         }
     }
 
-    public void setContestAndController(IContest inModel, IController inController) {
-        super.setContestAndController(inModel, inController);
+    public void setContestAndController(IContest inContest, IController inController) {
+        super.setContestAndController(inContest, inController);
 
         getContest().addContestTimeListener(new ContestTimeListenerImplementation());
 

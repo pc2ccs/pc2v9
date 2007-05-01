@@ -567,7 +567,7 @@ public class MultipleFileViewer extends JFrame implements IFileViewer {
     private IController controller;
 
     @SuppressWarnings("unused")
-    private IContest model;
+    private IContest contest;
 
     /**
      * Center Frame
@@ -712,8 +712,8 @@ public class MultipleFileViewer extends JFrame implements IFileViewer {
         informationLabel.setText(text);
     }
 
-    public void setContestAndController(IContest inModel, IController inController) {
-        this.model = inModel;
+    public void setContestAndController(IContest inContest, IController inController) {
+        this.contest = inContest;
         this.controller = inController;
     }
 

@@ -24,7 +24,7 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
      */
     private static final long serialVersionUID = -3349295529036840178L;
 
-    private IContest model;
+    private IContest contest;
 
     private IController controller;
 
@@ -60,14 +60,14 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
 
     }
 
-    public void setContestAndController(IContest inModel, IController inController) {
-        this.model = inModel;
+    public void setContestAndController(IContest inContest, IController inController) {
+        this.contest = inContest;
         this.controller = inController;
 
-        getSelectJudgementPane().setContestAndController(model, controller);
+        getSelectJudgementPane().setContestAndController(contest, controller);
         getSelectJudgementPane().setParentFrame(this);
 
-        model.addRunListener(new RunListenerImplementation());
+        contest.addRunListener(new RunListenerImplementation());
     }
 
     public void setRun(Run theRun) {

@@ -364,8 +364,8 @@ public class GenerateAccountsPane extends JPanePlugin {
         return startNumberTextField;
     }
     
-    public void setContestAndController(IContest inModel, IController inController) {
-        super.setContestAndController(inModel, inController);
+    public void setContestAndController(IContest inContest, IController inController) {
+        super.setContestAndController(inContest, inController);
 
         updateGenerateTitles();
         updateSiteComboBox();

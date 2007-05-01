@@ -182,8 +182,8 @@ public class TeamView extends JFrame implements UIPlugin {
         return mainTabbedPane;
     }
 
-    public void setContestAndController(IContest inModel, IController inController) {
-        this.model = inModel;
+    public void setContestAndController(IContest inContest, IController inController) {
+        this.model = inContest;
         this.teamController = inController;
         
         if (logWindow == null) {

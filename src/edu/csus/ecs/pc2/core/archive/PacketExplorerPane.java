@@ -62,7 +62,7 @@ public class PacketExplorerPane extends JPanePlugin {
 
     private JLabel messageLabel = null;
 
-    private IContest model;
+    private IContest contest;
 
     private IController controller;
 
@@ -373,8 +373,8 @@ public class PacketExplorerPane extends JPanePlugin {
         listBox.getColumnInfo(columnNumber).getSorter().setSortOrder(sortRank);
     }
 
-    public void setContestAndController(IContest inModel, IController inController) {
-        this.model = inModel;
+    public void setContestAndController(IContest inContest, IController inController) {
+        this.contest = inContest;
         this.controller = inController;
         setVisible (true);
    

@@ -20,8 +20,8 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.log.StaticLog;
-import edu.csus.ecs.pc2.core.model.ILoginListener;
 import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.ILoginListener;
 import edu.csus.ecs.pc2.core.model.LoginEvent;
 
 /**
@@ -38,7 +38,7 @@ public class LoginFrame extends JFrame implements UIPlugin {
     private static final long serialVersionUID = -6389607881992853161L;
     
     @SuppressWarnings("unused")
-    private IContest model;
+    private IContest contest;
     
     private IController controller;
 
@@ -410,15 +410,15 @@ public class LoginFrame extends JFrame implements UIPlugin {
         }
     }
 
-    public void setContestAndController(IContest inModel, IController inController) {
-        this.model = inModel;
+    public void setContestAndController(IContest inContest, IController inController) {
+        this.contest = inContest;
         this.controller = inController;
         // initialize logWindow so it can add itself as a listener and
         // start populating the mclb
         logWindow = new LogWindow();
-        logWindow.setContestAndController(model, controller);
+        logWindow.setContestAndController(contest, controller);
         
-        model.addLoginListener(new LoginListenerImplementation());
+        contest.addLoginListener(new LoginListenerImplementation());
         
         setVisible(true);
     }

@@ -33,7 +33,7 @@ public class JudgeView extends JFrame implements UIPlugin {
      */
     private static final long serialVersionUID = 5365837218548110171L;
 
-    private IContest model;
+    private IContest contest;
 
     @SuppressWarnings("unused")
     private IController controller;
@@ -90,7 +90,7 @@ public class JudgeView extends JFrame implements UIPlugin {
 
     protected void addUIPlugin(JTabbedPane tabbedPane, String tabTitle, JPanePlugin plugin) {
 
-        plugin.setContestAndController(model, controller);
+        plugin.setContestAndController(contest, controller);
         tabbedPane.add(plugin, tabTitle);
 
     }
@@ -100,9 +100,9 @@ public class JudgeView extends JFrame implements UIPlugin {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 if (contestStarted) {
-                    setTitle("PC^2 Judge " + model.getTitle() + " [STARTED] Build " + new VersionInfo().getBuildNumber());
+                    setTitle("PC^2 Judge " + contest.getTitle() + " [STARTED] Build " + new VersionInfo().getBuildNumber());
                 } else {
-                    setTitle("PC^2 Judge " + model.getTitle() + " [STOPPED] Build " + new VersionInfo().getBuildNumber());
+                    setTitle("PC^2 Judge " + contest.getTitle() + " [STOPPED] Build " + new VersionInfo().getBuildNumber());
                 }
             }
         });
@@ -110,11 +110,11 @@ public class JudgeView extends JFrame implements UIPlugin {
     }
 
     private boolean isThisSite(int siteNumber) {
-        return siteNumber == model.getSiteNumber();
+        return siteNumber == contest.getSiteNumber();
     }
 
-    public void setContestAndController(IContest inModel, IController inController) {
-        this.model = inModel;
+    public void setContestAndController(IContest inContest, IController inController) {
+        this.contest = inContest;
         this.controller = inController;
         
         log = controller.getLog();
@@ -122,10 +122,10 @@ public class JudgeView extends JFrame implements UIPlugin {
         if (logWindow == null) {
             logWindow = new LogWindow();
         }
-        logWindow.setContestAndController(model, controller);
-        logWindow.setTitle("Log "+model.getClientId().toString());
+        logWindow.setContestAndController(contest, controller);
+        logWindow.setTitle("Log "+contest.getClientId().toString());
 
-        setFrameTitle(model.getContestTime().isContestRunning());
+        setFrameTitle(contest.getContestTime().isContestRunning());
         
         RunsPanel runsPanel = new RunsPanel();
         addUIPlugin(getMainTabbedPane(), "All Runs", runsPanel);

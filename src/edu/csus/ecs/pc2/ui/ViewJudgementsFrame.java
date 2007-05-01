@@ -26,7 +26,7 @@ public class ViewJudgementsFrame extends JFrame implements UIPlugin {
      */
     private static final long serialVersionUID = -3349295529036840178L;
 
-    private IContest model;
+    private IContest contest;
 
     private IController controller;
 
@@ -68,13 +68,13 @@ public class ViewJudgementsFrame extends JFrame implements UIPlugin {
 
     }
 
-    public void setContestAndController(IContest inModel, IController inController) {
-        this.model = inModel;
+    public void setContestAndController(IContest inContest, IController inController) {
+        this.contest = inContest;
         this.controller = inController;
 
-        viewJudgementsPane.setContestAndController(model, controller);
+        viewJudgementsPane.setContestAndController(contest, controller);
 
-        model.addRunListener(new RunListenerImplementation());
+        contest.addRunListener(new RunListenerImplementation());
     }
 
     public void setRun(Run theRun) {

@@ -32,7 +32,7 @@ public class PacketArchiver implements UIPlugin {
     private String outputDirectroryName = "packets";
 
     @SuppressWarnings("unused")
-    private IContest model;
+    private IContest contest;
 
     @SuppressWarnings("unused")
     private IController controller;
@@ -128,8 +128,8 @@ public class PacketArchiver implements UIPlugin {
 
  
 
-    public void setContestAndController(IContest inModel, IController inController) {
-        this.model = inModel;
+    public void setContestAndController(IContest inContest, IController inController) {
+        this.contest = inContest;
         this.controller = inController;
     }
 

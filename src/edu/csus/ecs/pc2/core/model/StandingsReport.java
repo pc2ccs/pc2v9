@@ -109,8 +109,8 @@ public class StandingsReport implements IReport {
         return "Standings XML ";
     }
 
-    public void setContestAndController(IContest inModel, IController inController) {
-        this.contest = inModel;
+    public void setContestAndController(IContest inContest, IController inController) {
+        this.contest = inContest;
         this.controller = inController;
         log = controller.getLog();
     }

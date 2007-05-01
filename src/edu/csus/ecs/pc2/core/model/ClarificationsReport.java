@@ -91,8 +91,8 @@ public class ClarificationsReport implements IReport {
         return "Clarifications";
     }
 
-    public void setContestAndController(IContest inModel, IController inController) {
-        this.contest = inModel;
+    public void setContestAndController(IContest inContest, IController inController) {
+        this.contest = inContest;
         this.controller = inController;
         log = controller.getLog();
     }

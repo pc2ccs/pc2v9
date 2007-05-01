@@ -441,10 +441,10 @@ public class FileDiffPanel implements IDiffPanel {
     private JLabel ivjJLabel3 = null;
 
     @SuppressWarnings("unused")
-    private Object model;
+    private IContest contest;
 
     @SuppressWarnings("unused")
-    private Object controller;
+    private IController controller;
 
     /**
      * connEtoC3: (JList1.mouse.mousePressed(java.awt.event.MouseEvent) -->
@@ -747,8 +747,8 @@ public class FileDiffPanel implements IDiffPanel {
 
     }
 
-    public void setContestAndController(IContest inModel, IController inController) {
-        this.model = inModel;
+    public void setContestAndController(IContest inContest, IController inController) {
+        this.contest = inContest;
         this.controller = inController;
         
     }

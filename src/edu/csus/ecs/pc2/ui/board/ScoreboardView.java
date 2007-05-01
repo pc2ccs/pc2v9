@@ -9,6 +9,7 @@ import java.io.IOException;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.VersionInfo;
@@ -22,7 +23,6 @@ import edu.csus.ecs.pc2.ui.LogWindow;
 import edu.csus.ecs.pc2.ui.OptionsPanel;
 import edu.csus.ecs.pc2.ui.StandingsPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
-import javax.swing.JTabbedPane;
 
 /**
  * This class is the default scoreboard view (frame).
@@ -38,7 +38,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
      */
     private static final long serialVersionUID = -8071477348056424178L;
 
-    private IContest model;
+    private IContest contest;
 
     private IController controller;
 
@@ -106,8 +106,8 @@ public class ScoreboardView extends JFrame implements UIPlugin {
         }
     }
 
-    public void setContestAndController(IContest inModel, IController inController) {
-        this.model = inModel;
+    public void setContestAndController(IContest inContest, IController inController) {
+        this.contest = inContest;
         this.controller = inController;
 
         VersionInfo versionInfo = new VersionInfo();
@@ -118,13 +118,13 @@ public class ScoreboardView extends JFrame implements UIPlugin {
         
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                setTitle("PC^2 " + model.getTitle() + " Build " + new VersionInfo().getBuildNumber());
+                setTitle("PC^2 " + contest.getTitle() + " Build " + new VersionInfo().getBuildNumber());
         
                 if (logWindow == null) {
                     logWindow = new LogWindow();
                 }
-                logWindow.setContestAndController(model, controller);
-                logWindow.setTitle("Log " + model.getClientId().toString());
+                logWindow.setContestAndController(contest, controller);
+                logWindow.setTitle("Log " + contest.getClientId().toString());
         
                 StandingsPane standingsPane = new StandingsPane();
                 addUIPlugin(getMainTabbedPane(), "Standings", standingsPane);
@@ -143,7 +143,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
     }
 
     protected void addUIPlugin(JTabbedPane tabbedPane, String tabTitle, JPanePlugin plugin) {
-        plugin.setContestAndController(model, controller);
+        plugin.setContestAndController(contest, controller);
         tabbedPane.add(plugin, tabTitle);
     }
 

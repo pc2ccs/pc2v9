@@ -265,8 +265,8 @@ public class ServerView extends JFrame implements UIPlugin {
         });
     }
 
-    public void setContestAndController(IContest inModel, IController inController) {
-        this.model = inModel;
+    public void setContestAndController(IContest inContest, IController inController) {
+        this.model = inContest;
         this.controller = inController;
         this.log = controller.getLog();
 

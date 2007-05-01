@@ -113,7 +113,7 @@ public class Executable {
 
     private String errorString;
 
-    private IContest model;
+    private IContest contest;
 
     private IController controller;
 
@@ -131,14 +131,14 @@ public class Executable {
     
     private boolean testRunOnly = false;
 
-    public Executable(IContest inModel, IController inController, Run run, RunFiles runFiles) {
+    public Executable(IContest inContest, IController inController, Run run, RunFiles runFiles) {
         super();
-        this.model = inModel;
+        this.contest = inContest;
         this.controller = inController;
         this.runFiles = runFiles;
         this.run = run;
-        language = inModel.getLanguage(run.getLanguageId());
-        problem = inModel.getProblem(run.getProblemId());
+        language = inContest.getLanguage(run.getLanguageId());
+        problem = inContest.getProblem(run.getProblemId());
 
         initialize();
     }
@@ -148,7 +148,7 @@ public class Executable {
      */
     private void initialize() {
 
-        this.executorId = model.getClientId();
+        this.executorId = contest.getClientId();
         
         mainFileDirectory = getDirName(runFiles.getMainFile());
         executeDirectoryName = getExecuteDirectoryName();
@@ -156,7 +156,7 @@ public class Executable {
         log = controller.getLog();
 
          if (executorId.getClientType() != ClientType.Type.TEAM) {
-             this.problemDataFiles = model.getProblemDataFile(problem);
+             this.problemDataFiles = contest.getProblemDataFile(problem);
          }
     }
 
@@ -208,7 +208,7 @@ public class Executable {
      * </ol>
      * 
      * <br>
-     * Will only run the validation on a run if not a {@link edu.csus.ecs.pc2.core.execute.model.ClientType.Type#TEAM} client.
+     * Will only run the validation on a run if not a {@link edu.csus.ecs.pc2.core.execute.contest.ClientType.Type#TEAM} client.
      * 
      * @param clearDirFirst - clear the directory before unpacking and executing
      * @return
@@ -1219,7 +1219,7 @@ public class Executable {
      * @return the name of the execute directory for this client.
      */
     public String getExecuteDirectoryName() {
-        return "execute" + model.getClientId().getName();
+        return "execute" + contest.getClientId().getName();
     }
 
     /**
