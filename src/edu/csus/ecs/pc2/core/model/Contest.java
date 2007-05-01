@@ -154,8 +154,6 @@ public class Contest implements IContest {
      */
     public void initializeWithFakeData() {
 
-        String[] probNames = { "A - Sum of Squares", "B - Sumit", "C - Hello", "D - GoodBye" };
-        
         Site site = createFakeSite (1);
         site.setActive(true);
         siteList.add(site);
@@ -168,6 +166,8 @@ public class Contest implements IContest {
         runList = new RunList(1, false);
         runFilesList = new RunFilesList();
         clarificationList = new ClarificationList(1, false);
+        
+        String[] probNames = { "A - Sum of Squares", "B - Sumit", "C - Hello", "D - GoodBye" };
 
         for (String problemName : probNames) {
             Problem problem = new Problem(problemName);
@@ -222,9 +222,8 @@ public class Contest implements IContest {
         // Generate the server account
         generateNewAccounts(ClientType.Type.SERVER.toString(), 1, true);
 
-
-        String[] judgementNames = { "Yes", "No - compilation error", "No - incorrect output", "No - It's just really bad",
-                "No - judges enjoyed a good laugh", "You've been bad - contact staff" };
+        String[] judgementNames = { "Yes", "No - Compilation Error", "No - Run-time Error", "No - Time-limit Exceeded", "No - Wrong Answer", "No - Excessive Output", "No - Output Format Error",
+                "No - Other - Contact Staff" };
 
         for (String judgementName : judgementNames) {
             Judgement judgement = new Judgement(judgementName);
@@ -237,9 +236,6 @@ public class Contest implements IContest {
         generateNewAccounts(ClientType.Type.TEAM.toString(), 5, true);
         generateNewAccounts(ClientType.Type.JUDGE.toString(), 4, true);
         generateNewAccounts(ClientType.Type.SCOREBOARD.toString(), 1, true);
-        
-
-
     }
 
 
