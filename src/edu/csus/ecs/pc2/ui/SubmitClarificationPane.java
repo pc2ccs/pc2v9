@@ -284,8 +284,8 @@ public class SubmitClarificationPane extends JPanePlugin {
         JOptionPane.showMessageDialog(this, string);
     }
 
-    public void setModelAndController(IContest inModel, IController inController) {
-        super.setModelAndController(inModel, inController);
+    public void setContestAndController(IContest inModel, IController inController) {
+        super.setContestAndController(inModel, inController);
 
         this.log = getController().getLog();
         

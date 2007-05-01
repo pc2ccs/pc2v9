@@ -22,7 +22,7 @@ public abstract class JPanePlugin extends JPanel implements UIPlugin {
     
     private JFrame parentFrame = null;
 
-    public void setModelAndController(IContest inModel, IController inController) {
+    public void setContestAndController(IContest inModel, IController inController) {
         this.controller = inController;
         this.contest = inModel;
     }

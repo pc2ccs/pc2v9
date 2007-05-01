@@ -60,8 +60,8 @@ public class InfoPane extends JPanePlugin {
 
     }
 
-    public void setModelAndController(IContest inModel, IController inController) {
-        super.setModelAndController(inModel, inController);
+    public void setContestAndController(IContest inModel, IController inController) {
+        super.setContestAndController(inModel, inController);
 
         // getModel().addSiteListener(new SiteListenerImplementation());
 

@@ -24,7 +24,7 @@ public interface UIPlugin {
      * @param controller
      *            contest controller
      */
-    void setModelAndController(IContest model, IController controller);
+    void setContestAndController(IContest model, IController controller);
 
     /**
      * @return name of this plugin, used in choosing plugin.

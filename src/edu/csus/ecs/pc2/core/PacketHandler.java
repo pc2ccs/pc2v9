@@ -29,7 +29,7 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 /**
  * Process all incoming packets.
  * 
- * Process packets. In {@link #handlePacket(IController, IContest, Packet, ConnectionHandlerID) handlePacket} a packet is unpacked, model is updated, and controller used to send packets as needed.
+ * Process packets. In {@link #handlePacket(IController, IContest, Packet, ConnectionHandlerID) handlePacket} a packet is unpacked, contest is updated, and controller used to send packets as needed.
  * 
  * @author pc2@ecs.csus.edu
  */
@@ -37,17 +37,17 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 // $HeadURL$
 public class PacketHandler {
 
-    private IContest model;
+    private IContest contest;
 
     private IController controller;
     
-    public PacketHandler(IController controller, IContest model) {
+    public PacketHandler(IController controller, IContest contest) {
         this.controller = controller;
-        this.model = model;
+        this.contest = contest;
     }
 
     /**
-     * Take each input packet, update the model, send out packets as needed.
+     * Take each input packet, update the contest, send out packets as needed.
      * 
      * @param packet
      * @param connectionHandlerID
@@ -70,13 +70,13 @@ public class PacketHandler {
                 }
             } else {
                 String message = (String) PacketFactory.getObjectValue(packet, PacketFactory.MESSAGE_STRING);
-                Packet messagePacket = PacketFactory.createMessage(model.getClientId(), packet.getDestinationId(), message);
+                Packet messagePacket = PacketFactory.createMessage(contest.getClientId(), packet.getDestinationId(), message);
                 int siteNumber = packet.getDestinationId().getSiteNumber();
                 controller.sendToRemoteServer(siteNumber, messagePacket);
             }
         } else if (packetType.equals(Type.RUN_SUBMISSION_CONFIRM)) {
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
-            model.addRun(run);
+            contest.addRun(run);
             if (isServer()){
                 sendToJudgesAndOthers(packet, isThisSite(run));
             }
@@ -86,10 +86,10 @@ public class PacketHandler {
 
             Run submittedRun = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
             RunFiles runFiles = (RunFiles) PacketFactory.getObjectValue(packet, PacketFactory.RUN_FILES);
-            Run run = model.acceptRun(submittedRun, runFiles);
+            Run run = contest.acceptRun(submittedRun, runFiles);
 
             // Send to team
-            Packet confirmPacket = PacketFactory.createRunSubmissionConfirm(model.getClientId(), fromId, run);
+            Packet confirmPacket = PacketFactory.createRunSubmissionConfirm(contest.getClientId(), fromId, run);
             controller.sendToClient(confirmPacket);
 
             // Send to clients and servers
@@ -99,10 +99,10 @@ public class PacketHandler {
             // Clarification submitted by team to server
             
             Clarification submittedClarification = (Clarification)  PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION);
-            Clarification clarification = model.acceptClarification(submittedClarification);
+            Clarification clarification = contest.acceptClarification(submittedClarification);
             
             // Send to team
-            Packet confirmPacket = PacketFactory.createClarSubmissionConfirm(model.getClientId(), fromId, clarification);
+            Packet confirmPacket = PacketFactory.createClarSubmissionConfirm(contest.getClientId(), fromId, clarification);
             controller.sendToClient(confirmPacket);
             
             // Send to clients and other servers
@@ -110,17 +110,17 @@ public class PacketHandler {
 
         } else if (packetType.equals(Type.CLARIFICATION_SUBMISSION_CONFIRM)) {
             Clarification clarification = (Clarification)  PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION);
-            model.addClarification(clarification);
+            contest.addClarification(clarification);
             sendToJudgesAndOthers( packet, isThisSite(clarification));
             
         } else if (packetType.equals(Type.LOGIN_FAILED)) {
             String message = PacketFactory.getStringValue(packet, PacketFactory.MESSAGE_STRING);
-            model.loginDenied(packet.getDestinationId(), connectionHandlerID, message);
+            contest.loginDenied(packet.getDestinationId(), connectionHandlerID, message);
 
         } else if (packetType.equals(Type.RUN_NOTAVAILABLE)) {
             // Run not available from server
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
-            model.runNotAvailable(run);
+            contest.runNotAvailable(run);
 
             sendToJudgesAndOthers( packet, isThisSite(run));
 
@@ -136,7 +136,7 @@ public class PacketHandler {
                     controller.sendToServers(packet);
                 }
             } else {
-                model.connectionEstablished(inConnectionHandlerID);
+                contest.connectionEstablished(inConnectionHandlerID);
             }
 
         } else if (packetType.equals(Type.DROPPED_CONNECTION)) {
@@ -147,12 +147,12 @@ public class PacketHandler {
                     controller.sendToServers(packet);
                 }
             } else {
-                model.connectionEstablished(inConnectionHandlerID);
+                contest.connectionEstablished(inConnectionHandlerID);
             }
 
         } else if (packetType.equals(Type.RUN_AVAILABLE)) {
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
-            model.availableRun(run);
+            contest.availableRun(run);
 
             sendToJudgesAndOthers( packet, isThisSite(run));
 
@@ -190,16 +190,16 @@ public class PacketHandler {
             
         } else if (packetType.equals(Type.CLOCK_STARTED)) {
             Integer siteNumber = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
-            model.startContest(siteNumber);
-            ContestTime contestTime = model.getContestTime(siteNumber);
+            contest.startContest(siteNumber);
+            ContestTime contestTime = contest.getContestTime(siteNumber);
             ClientId clientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
             info("Clock for site "+contestTime.getSiteNumber()+" started by "+clientId+" elapsed "+contestTime.getElapsedTimeStr());
             
         } else if (packetType.equals(Type.CLOCK_STOPPED)) {
             Integer siteNumber = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
-            model.stopContest(siteNumber);
+            contest.stopContest(siteNumber);
             ClientId clientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-            ContestTime contestTime = model.getContestTime(siteNumber);
+            ContestTime contestTime = contest.getContestTime(siteNumber);
             info("Clock for site "+contestTime.getSiteNumber()+" stopped by "+clientId+" elapsed "+contestTime.getElapsedTimeStr());
 
         } else if (packetType.equals(Type.ADD_SETTING)) {
@@ -216,7 +216,7 @@ public class PacketHandler {
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
             RunFiles runFiles = (RunFiles) PacketFactory.getObjectValue(packet, PacketFactory.RUN_FILES);
             ClientId whoCheckedOut = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-            model.addRun(run, runFiles, whoCheckedOut);
+            contest.addRun(run, runFiles, whoCheckedOut);
             
             sendToJudgesAndOthers( packet, false);
 
@@ -247,10 +247,10 @@ public class PacketHandler {
                 /**
                  * Add server into login list.
                  */
-                model.addLogin(fromId, connectionHandlerID);
+                contest.addLogin(fromId, connectionHandlerID);
             }
 
-            if (!model.isLoggedIn()) {
+            if (!contest.isLoggedIn()) {
                 info(" handlePacket original LOGIN_SUCCESS before ");
                 loadDataIntoModel(packet, connectionHandlerID);
                 info(" handlePacket original LOGIN_SUCCESS after -- all settings loaded ");
@@ -281,7 +281,7 @@ public class PacketHandler {
         if (isServer()) {
 
             if (clientToLogoffId != null) {
-                if (model.isRemoteLoggedIn(clientToLogoffId)) {
+                if (contest.isRemoteLoggedIn(clientToLogoffId)) {
                     // send logoff to other site
                     controller.sendToRemoteServer(clientToLogoffId.getSiteNumber(), packet);
                 } else {
@@ -289,7 +289,7 @@ public class PacketHandler {
                 }
 
             } else if (connectionHandlerID != null) {
-                if (model.isConnected(connectionHandlerID)) {
+                if (contest.isConnected(connectionHandlerID)) {
                     // local connection, drop it now
                     controller.forceConnectionDrop(connectionHandlerID);
                 } else {
@@ -325,7 +325,7 @@ public class PacketHandler {
                 // TODO security check
                 // check permission, check user type
                 
-//                Account account = model.getAccount(packet.getSourceId());
+//                Account account = contest.getAccount(packet.getSourceId());
 //                if (account.isAllowed(Permission.Type.EDIT_RUN)){
 //                    // ok to update run
 //                }
@@ -335,16 +335,16 @@ public class PacketHandler {
                     if (judgementRecord != null) {
                         // TODO code add runResultsFiles
                         run.addJudgement(judgementRecord);
-                        model.updateRun(run, whoChangedRun);
+                        contest.updateRun(run, whoChangedRun);
                     } else {
-                        model.updateRun(run, whoChangedRun);
+                        contest.updateRun(run, whoChangedRun);
                     }
                 } else {
                     throw new SecurityException("Non-admin user "+packet.getSourceId()+" attempted to update run "+run);
                 }
                 
-                Run theRun = model.getRun(run.getElementId());
-                Packet runUpdatedPacket = PacketFactory.createRunUpdateNotification(model.getClientId(), PacketFactory.ALL_SERVERS, theRun, whoChangedRun);
+                Run theRun = contest.getRun(run.getElementId());
+                Packet runUpdatedPacket = PacketFactory.createRunUpdateNotification(contest.getClientId(), PacketFactory.ALL_SERVERS, theRun, whoChangedRun);
                 sendToJudgesAndOthers(runUpdatedPacket, true);
                 
             } else {
@@ -352,7 +352,7 @@ public class PacketHandler {
             }
 
         } else {
-            if (model.isLocalLoggedIn(run.getSubmitter())) {
+            if (contest.isLocalLoggedIn(run.getSubmitter())) {
                 controller.sendToClient(packet);
             }
             sendToJudgesAndOthers(packet, false);
@@ -361,15 +361,15 @@ public class PacketHandler {
     
     private void loginClient(Packet packet) {
 
-        if (model.isLoggedIn()) {
+        if (contest.isLoggedIn()) {
             ClientId whoLoggedIn = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
             ConnectionHandlerID connectionHandlerID = (ConnectionHandlerID) PacketFactory.getObjectValue(packet, PacketFactory.CONNECTION_HANDLE_ID);
 
             if (isServer()) {
-                model.addLogin(whoLoggedIn, connectionHandlerID);
+                contest.addLogin(whoLoggedIn, connectionHandlerID);
                 sendToJudgesAndOthers(packet, false);
             } else {
-                model.addLogin(whoLoggedIn, connectionHandlerID);
+                contest.addLogin(whoLoggedIn, connectionHandlerID);
             }
         } else {
             info("Note: got a LOGIN packet before LOGIN_SUCCESS " + packet);
@@ -381,10 +381,10 @@ public class PacketHandler {
         
         ClientId whoLoggedOff = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
         if (isServer()){
-            model.removeLogin(whoLoggedOff);
+            contest.removeLogin(whoLoggedOff);
             sendToJudgesAndOthers(packet, false);
         }else{
-            model.removeLogin(whoLoggedOff);
+            contest.removeLogin(whoLoggedOff);
         }
     }
 
@@ -398,10 +398,10 @@ public class PacketHandler {
         ClientId whoModifiedRun = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
 
         if (isServer()){
-            model.updateRun(run, whoModifiedRun);
+            contest.updateRun(run, whoModifiedRun);
             sendToJudgesAndOthers(packet, false);
         } else {
-            model.updateRun(run, whoModifiedRun);
+            contest.updateRun(run, whoModifiedRun);
         }
     }
     
@@ -415,10 +415,10 @@ public class PacketHandler {
         ClientId whoModifiedRun = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
 
         if (isServer()) {
-            model.updateRun(run, whoModifiedRun);
+            contest.updateRun(run, whoModifiedRun);
             sendToJudgesAndOthers(packet, false);
         } else {
-            model.updateRun(run, whoModifiedRun);
+            contest.updateRun(run, whoModifiedRun);
         }
     }
 
@@ -435,9 +435,9 @@ public class PacketHandler {
             if (isThisSite(siteNumber)){
                 
                 // get vector of new accounts.
-                Vector<Account> accountVector = model.generateNewAccounts(type.toString(), count.intValue(), startCount.intValue(), active);
+                Vector<Account> accountVector = contest.generateNewAccounts(type.toString(), count.intValue(), startCount.intValue(), active);
                 Account[] accounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
-                Packet newAccountsPacket = PacketFactory.createAddSetting(model.getClientId(), PacketFactory.ALL_SERVERS, accounts);
+                Packet newAccountsPacket = PacketFactory.createAddSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, accounts);
                 sendToJudgesAndOthers(newAccountsPacket, true);
                 
             } else {
@@ -446,7 +446,7 @@ public class PacketHandler {
             }
             
         } else {
-            throw new SecurityException("Client "+model.getClientId()+" was send generate account packet "+packet);
+            throw new SecurityException("Client "+contest.getClientId()+" was send generate account packet "+packet);
         }
     }
 
@@ -461,10 +461,10 @@ public class PacketHandler {
         Integer siteNumber = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
 
         if (isThisSite(siteNumber)){
-            model.startContest(siteNumber);
-            ContestTime updatedContestTime = model.getContestTime(siteNumber);
+            contest.startContest(siteNumber);
+            ContestTime updatedContestTime = contest.getContestTime(siteNumber);
             controller.getLog().info("Clock STARTED by "+who+" elapsed = "+updatedContestTime.getElapsedTimeStr());
-            Packet startContestPacket = PacketFactory.createContestStarted(model.getClientId(), PacketFactory.ALL_SERVERS, updatedContestTime.getSiteNumber(), who);
+            Packet startContestPacket = PacketFactory.createContestStarted(contest.getClientId(), PacketFactory.ALL_SERVERS, updatedContestTime.getSiteNumber(), who);
             controller.sendToTeams(startContestPacket);
             sendToJudgesAndOthers(startContestPacket, true);
         } else {
@@ -480,10 +480,10 @@ public class PacketHandler {
         Integer siteNumber = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
 
         if (isThisSite(siteNumber)){
-            model.stopContest(siteNumber);
-            ContestTime updatedContestTime = model.getContestTime(siteNumber);
+            contest.stopContest(siteNumber);
+            ContestTime updatedContestTime = contest.getContestTime(siteNumber);
             controller.getLog().info("Clock STOPPED by "+who+" elapsed = "+updatedContestTime.getElapsedTimeStr());
-            Packet stopContestPacket = PacketFactory.createContestStopped(model.getClientId(), PacketFactory.ALL_SERVERS, updatedContestTime.getSiteNumber(), who);
+            Packet stopContestPacket = PacketFactory.createContestStopped(contest.getClientId(), PacketFactory.ALL_SERVERS, updatedContestTime.getSiteNumber(), who);
             controller.sendToTeams(stopContestPacket);
             sendToJudgesAndOthers(stopContestPacket, true);
         } else {
@@ -502,32 +502,32 @@ public class PacketHandler {
 
         Site site = (Site) PacketFactory.getObjectValue(packet, PacketFactory.SITE);
         if (site != null) {
-            model.addSite(site);
+            contest.addSite(site);
             sendToTeams = true;
         }
 
         Language language = (Language) PacketFactory.getObjectValue(packet, PacketFactory.LANGUAGE);
         if (language != null) {
-            model.addLanguage(language);
+            contest.addLanguage(language);
             sendToTeams = true;
         }
 
         Problem problem = (Problem) PacketFactory.getObjectValue(packet, PacketFactory.PROBLEM);
         if (problem != null) {
-            model.addProblem(problem);
+            contest.addProblem(problem);
             sendToTeams = true;
         }
 
         ContestTime contestTime = (ContestTime) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME);
         if (contestTime != null) {
-            model.addContestTime(contestTime);
+            contest.addContestTime(contestTime);
             sendToTeams = true;
         }
 
         Account oneAccount = (Account) PacketFactory.getObjectValue(packet, PacketFactory.ACCOUNT);
         if (oneAccount != null) {
             if (isServer()) {
-                if (model.isLocalLoggedIn(oneAccount.getClientId())) {
+                if (contest.isLocalLoggedIn(oneAccount.getClientId())) {
                     controller.sendToClient(packet);
                 }
             }
@@ -536,11 +536,11 @@ public class PacketHandler {
         Account[] accounts = (Account[]) PacketFactory.getObjectValue(packet, PacketFactory.ACCOUNT_ARRAY);
         if (accounts != null) {
             for (Account account : accounts) {
-                if (model.getAccount(account.getClientId()) == null) {
-                    model.addAccount(account);
+                if (contest.getAccount(account.getClientId()) == null) {
+                    contest.addAccount(account);
                 }
                 if (isServer()) {
-                    if (model.isLocalLoggedIn(account.getClientId())) {
+                    if (contest.isLocalLoggedIn(account.getClientId())) {
                         controller.sendToClient(packet);
                     }
                 }
@@ -563,31 +563,31 @@ public class PacketHandler {
 
         Site site = (Site) PacketFactory.getObjectValue(packet, PacketFactory.SITE);
         if (site != null) {
-            model.updateSite(site);
+            contest.updateSite(site);
             sendToTeams = true;
         }
 
         Language language = (Language) PacketFactory.getObjectValue(packet, PacketFactory.LANGUAGE);
         if (language != null) {
-            model.updateLanguage(language);
+            contest.updateLanguage(language);
             sendToTeams = true;
         }
 
         Problem problem = (Problem) PacketFactory.getObjectValue(packet, PacketFactory.PROBLEM);
         if (problem != null) {
-            model.updateProblem(problem);
+            contest.updateProblem(problem);
             sendToTeams = true;
         }
 
         ContestTime contestTime = (ContestTime) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME);
         if (contestTime != null) {
-            model.updateContestTime(contestTime);
+            contest.updateContestTime(contestTime);
             sendToTeams = true;
         }
 
         Account oneAccount = (Account) PacketFactory.getObjectValue(packet, PacketFactory.ACCOUNT);
         if (oneAccount != null) {
-            model.updateAccount(oneAccount);
+            contest.updateAccount(oneAccount);
             if (isThisSite(oneAccount.getClientId().getSiteNumber())) {
                 controller.sendToClient(packet);
             }
@@ -595,11 +595,11 @@ public class PacketHandler {
         Account[] accounts = (Account[]) PacketFactory.getObjectValue(packet, PacketFactory.ACCOUNT_ARRAY);
         if (accounts != null) {
             for (Account account : accounts) {
-                if (model.getAccount(account.getClientId()) == null) {
-                    model.addAccount(account);
+                if (contest.getAccount(account.getClientId()) == null) {
+                    contest.addAccount(account);
                 }
                 if (isServer()) {
-                    if (model.isLocalLoggedIn(account.getClientId())) {
+                    if (contest.isLocalLoggedIn(account.getClientId())) {
                         controller.sendToClient(packet);
                     }
                 }
@@ -617,11 +617,11 @@ public class PacketHandler {
     }
     
     private boolean isThisSite(int siteNumber) {
-        return siteNumber == model.getSiteNumber();
+        return siteNumber == contest.getSiteNumber();
     }
 
     private boolean isThisSite(ISubmission submission) {
-        return submission.getSiteNumber() == model.getSiteNumber();
+        return submission.getSiteNumber() == contest.getSiteNumber();
     }
 
     /**
@@ -635,7 +635,7 @@ public class PacketHandler {
      */
     public void sendToJudgesAndOthers(Packet packet, boolean sendToServers) {
 
-        if (model.getClientId().getClientType().equals(ClientType.Type.SERVER)) {
+        if (contest.getClientId().getClientType().equals(ClientType.Type.SERVER)) {
             // If I am a server
             // forward to clients on this site.
             controller.sendToAdministrators(packet);
@@ -663,10 +663,10 @@ public class PacketHandler {
 
                 // TODO: insure that this client checked out the run or send back a "oh no you didn't!"
 
-                model.cancelRunCheckOut(run, whoCanceledRun);
+                contest.cancelRunCheckOut(run, whoCanceledRun);
 
-                Run availableRun = model.getRun(run.getElementId());
-                Packet availableRunPacket = PacketFactory.createRunAvailable(model.getClientId(), whoCanceledRun, availableRun);
+                Run availableRun = contest.getRun(run.getElementId());
+                Packet availableRunPacket = PacketFactory.createRunAvailable(contest.getClientId(), whoCanceledRun, availableRun);
 
                 sendToJudgesAndOthers( availableRunPacket, true);
             }
@@ -675,7 +675,7 @@ public class PacketHandler {
             // Client, update status and done.
 
             run.setStatus(RunStates.NEW);
-            model.updateRun(run, whoCanceledRun);
+            contest.updateRun(run, whoCanceledRun);
         }
     }
 
@@ -685,30 +685,30 @@ public class PacketHandler {
 
             if (!isThisSite(run)) {
 
-                Packet judgementPacket = PacketFactory.createRunJudgement(model.getClientId(), run.getSubmitter(), run, judgementRecord, runResultFiles);
+                Packet judgementPacket = PacketFactory.createRunJudgement(contest.getClientId(), run.getSubmitter(), run, judgementRecord, runResultFiles);
                 controller.sendToRemoteServer(run.getSiteNumber(), judgementPacket);
 
             } else {
                 // This site's run
 
-                judgementRecord.setWhenJudgedTime(model.getContestTime().getElapsedMins());
+                judgementRecord.setWhenJudgedTime(contest.getContestTime().getElapsedMins());
 
-                model.addRunJudgement(run, judgementRecord, runResultFiles, whoJudgedId);
+                contest.addRunJudgement(run, judgementRecord, runResultFiles, whoJudgedId);
 
-                Run theRun = model.getRun(run.getElementId());
+                Run theRun = contest.getRun(run.getElementId());
 
-                Packet judgementPacket = PacketFactory.createRunJudgement(model.getClientId(), run.getSubmitter(), theRun, judgementRecord, runResultFiles);
+                Packet judgementPacket = PacketFactory.createRunJudgement(contest.getClientId(), run.getSubmitter(), theRun, judgementRecord, runResultFiles);
                 if (judgementRecord.isSendToTeam()) {
                     // Send to team who sent it, send to other server if needed.
                     controller.sendToClient(judgementPacket);
                 }
                 
-                Packet judgementUpdatePacket = PacketFactory.createRunJudgmentUpdate(model.getClientId(), PacketFactory.ALL_SERVERS, theRun, whoJudgedId);
+                Packet judgementUpdatePacket = PacketFactory.createRunJudgmentUpdate(contest.getClientId(), PacketFactory.ALL_SERVERS, theRun, whoJudgedId);
                 sendToJudgesAndOthers( judgementUpdatePacket, true);
             }
 
         } else {
-            model.updateRun(run, judgementRecord.getJudgerClientId());
+            contest.updateRun(run, judgementRecord.getJudgerClientId());
         }
     }
     
@@ -727,7 +727,7 @@ public class PacketHandler {
     /**
      * Fetch a run.
      * 
-     * Either checks out run (marks as {@link edu.csus.ecs.pc2.core.model.Run.RunStates#BEING_JUDGED BEING_JUDGED}) and send to everyone, or send a
+     * Either checks out run (marks as {@link edu.csus.ecs.pc2.core.contest.Run.RunStates#BEING_JUDGED BEING_JUDGED}) and send to everyone, or send a
      * {@link edu.csus.ecs.pc2.core.packet.PacketType.Type#RUN_NOTAVAILABLE RUN_NOTAVAILABLE}.
      * <P>
      * If readOnly is false, will checkout run. <br>
@@ -746,63 +746,63 @@ public class PacketHandler {
             if (!isThisSite(run)) {
 
                 ClientId serverClientId = new ClientId(run.getSiteNumber(), ClientType.Type.SERVER, 0);
-                if (model.isLocalLoggedIn(serverClientId)) {
+                if (contest.isLocalLoggedIn(serverClientId)) {
 
                     // send request to remote server
-                    Packet requestPacket = PacketFactory.createRunRequest(model.getClientId(), serverClientId, run, whoRequestsRunId, readOnly);
+                    Packet requestPacket = PacketFactory.createRunRequest(contest.getClientId(), serverClientId, run, whoRequestsRunId, readOnly);
                     controller.sendToRemoteServer(run.getSiteNumber(), requestPacket);
 
                 } else {
 
                     // send NOT_AVAILABLE back to client
-                    Packet notAvailableRunPacket = PacketFactory.createRunNotAvailable(model.getClientId(), whoRequestsRunId, run);
+                    Packet notAvailableRunPacket = PacketFactory.createRunNotAvailable(contest.getClientId(), whoRequestsRunId, run);
                     controller.sendToClient(notAvailableRunPacket);
                 }
 
             } else {
                 // This Site's run, if we can check it out and send to client
 
-                Run theRun = model.getRun(run.getElementId());
+                Run theRun = contest.getRun(run.getElementId());
                 
                 if (readOnly) {
                     // just get run and sent it to them.
                     
-                    theRun = model.getRun(run.getElementId());
-                    RunFiles runFiles = model.getRunFiles(run);
+                    theRun = contest.getRun(run.getElementId());
+                    RunFiles runFiles = contest.getRunFiles(run);
 
                     // send to Judge
-                    Packet checkOutPacket = PacketFactory.createCheckedOutRun(model.getClientId(), whoRequestsRunId, theRun, runFiles, whoRequestsRunId);
+                    Packet checkOutPacket = PacketFactory.createCheckedOutRun(contest.getClientId(), whoRequestsRunId, theRun, runFiles, whoRequestsRunId);
                     controller.sendToClient(checkOutPacket);
 
                 } else if (run.getStatus() == RunStates.NEW || isSuperUser(whoRequestsRunId)) {
 
                     theRun.setStatus(RunStates.BEING_JUDGED);
-                    model.updateRun(theRun, whoRequestsRunId);
+                    contest.updateRun(theRun, whoRequestsRunId);
 
-                    theRun = model.getRun(run.getElementId());
-                    RunFiles runFiles = model.getRunFiles(run);
+                    theRun = contest.getRun(run.getElementId());
+                    RunFiles runFiles = contest.getRunFiles(run);
 
                     // send to Judge
-                    Packet checkOutPacket = PacketFactory.createCheckedOutRun(model.getClientId(), whoRequestsRunId, theRun, runFiles, whoRequestsRunId);
+                    Packet checkOutPacket = PacketFactory.createCheckedOutRun(contest.getClientId(), whoRequestsRunId, theRun, runFiles, whoRequestsRunId);
                     controller.sendToClient(checkOutPacket);
 
                     sendToJudgesAndOthers(checkOutPacket, true);
                     
                 } else {
                     // Unavailable
-                    Packet notAvailableRunPacket = PacketFactory.createRunNotAvailable(model.getClientId(), whoRequestsRunId, run);
+                    Packet notAvailableRunPacket = PacketFactory.createRunNotAvailable(contest.getClientId(), whoRequestsRunId, run);
                     controller.sendToClient(notAvailableRunPacket);
                 }
             }
         } else {
 
-            throw new SecurityException("requestRun - sent to client " + model.getClientId());
+            throw new SecurityException("requestRun - sent to client " + contest.getClientId());
 
         }
     }
 
     /**
-     * Unpack and add list of runs to model.
+     * Unpack and add list of runs to contest.
      * 
      * @param packet
      */
@@ -813,7 +813,7 @@ public class PacketHandler {
             if (runs != null) {
                 for (Run run : runs) {
                     if ( (!isServer()) || (!isThisSite(run))) {
-                        model.addRun(run);
+                        contest.addRun(run);
                     }
                 }
             }
@@ -825,7 +825,7 @@ public class PacketHandler {
     }
 
     /**
-     * Unpack and add list of clarifications to model.
+     * Unpack and add list of clarifications to contest.
      * 
      * @param packet
      */
@@ -837,7 +837,7 @@ public class PacketHandler {
                 for (Clarification clarification : clarifications) {
 
                     if ( (!isServer()) || (!isThisSite(clarification))) {
-                        model.addClarification(clarification);
+                        contest.addClarification(clarification);
                     }
                 }
             }
@@ -849,7 +849,7 @@ public class PacketHandler {
     }
     
     /**
-     * Unpack and add list of accounts to model.
+     * Unpack and add list of accounts to contest.
      * 
      * @param packet
      */
@@ -862,7 +862,7 @@ public class PacketHandler {
                 for (Account account : accounts) {
 
                     if ( (!isServer()) || (!isThisSite(account))) {
-                        model.addAccount(account);
+                        contest.addAccount(account);
                     }
                 }
             }
@@ -874,7 +874,7 @@ public class PacketHandler {
     }
     
     /**
-     * Unpack and add list of connection ids to model.
+     * Unpack and add list of connection ids to contest.
      * 
      * @param packet
      */
@@ -884,7 +884,7 @@ public class PacketHandler {
             ConnectionHandlerID[] connectionHandlerIDs = (ConnectionHandlerID[]) PacketFactory.getObjectValue(packet, PacketFactory.CONNECTION_HANDLE_ID_LIST);
             if (connectionHandlerIDs != null) {
                 for (ConnectionHandlerID connectionHandlerID : connectionHandlerIDs) {
-                    model.connectionEstablished(connectionHandlerID);
+                    contest.connectionEstablished(connectionHandlerID);
                 }
             }
         } catch (Exception e) {
@@ -896,7 +896,7 @@ public class PacketHandler {
     }
     
     /**
-     * Add logins to model.
+     * Add logins to contest.
      * 
      * @param packet
      */
@@ -911,7 +911,7 @@ public class PacketHandler {
                         
                         // TODO someday soon load logins with their connectionIds
                         ConnectionHandlerID fakeId = new ConnectionHandlerID("Fake-Site"+clientId.getSiteNumber());
-                        model.addLogin(clientId, fakeId);
+                        contest.addLogin(clientId, fakeId);
                     }
                 }
             }
@@ -923,7 +923,7 @@ public class PacketHandler {
     }
 
     private boolean isThisSite(Account account) {
-        return account.getSiteNumber() == model.getSiteNumber();
+        return account.getSiteNumber() == contest.getSiteNumber();
     }
     
     private void loadSettingsFromRemoteServer(Packet packet, ConnectionHandlerID connectionHandlerID) {
@@ -946,9 +946,9 @@ public class PacketHandler {
     }
 
     /**
-     * Add contest data into the model.
+     * Add contest data into the contest.
      * 
-     * This will read a packet and load the data into the model. <br>
+     * This will read a packet and load the data into the contest. <br>
      * This should only be execute with the first LOGIN_SUCCESS that this module processes.
      * <P>
      * It processes:
@@ -971,7 +971,7 @@ public class PacketHandler {
         try {
             clientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
             if (clientId != null) {
-                model.setClientId(clientId);
+                contest.setClientId(clientId);
             }
         } catch (Exception e) {
             // TODO: log handle exception
@@ -984,7 +984,7 @@ public class PacketHandler {
             Language[] languages = (Language[]) PacketFactory.getObjectValue(packet, PacketFactory.LANGUAGE_LIST);
             if (languages != null) {
                 for (Language language : languages) {
-                    model.addLanguage(language);
+                    contest.addLanguage(language);
                 }
             }
         } catch (Exception e) {
@@ -999,7 +999,7 @@ public class PacketHandler {
             Judgement[] judgements = (Judgement[]) PacketFactory.getObjectValue(packet, PacketFactory.JUDGEMENT_LIST);
             if (judgements != null) {
                 for (Judgement judgement : judgements) {
-                    model.addJudgement(judgement);
+                    contest.addJudgement(judgement);
                 }
             }
         } catch (Exception e) {
@@ -1010,7 +1010,7 @@ public class PacketHandler {
         try {
             ContestTime contestTime = (ContestTime) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME);
             if (contestTime != null) {
-                model.addContestTime(contestTime);
+                contest.addContestTime(contestTime);
             }
 
         } catch (Exception e) {
@@ -1032,28 +1032,28 @@ public class PacketHandler {
         
 //        addLoginsToModel(packet);
 
-        if (model.isLoggedIn()) {
+        if (contest.isLoggedIn()) {
             
             // insure that this site's contest time exists 
-            if (model.getContestTime() == null){
+            if (contest.getContestTime() == null){
                 ContestTime contestTime = new ContestTime();
-                contestTime.setSiteNumber(model.getSiteNumber());
-                model.addContestTime(contestTime);
+                contestTime.setSiteNumber(contest.getSiteNumber());
+                contest.addContestTime(contestTime);
             }
 
             // show main UI
-            controller.startMainUI(model.getClientId());
+            controller.startMainUI(contest.getClientId());
 
             // Login to other sites
             loginToOtherSites(packet);
         } else {
             String message = "Trouble logging in, check logs";
-            model.loginDenied(packet.getDestinationId(), connectionHandlerID, message);
+            contest.loginDenied(packet.getDestinationId(), connectionHandlerID, message);
         }
     }
 
     /**
-     * Add both problems and problem data files into model.
+     * Add both problems and problem data files into contest.
      * 
      * @param packet
      */
@@ -1080,9 +1080,9 @@ public class PacketHandler {
             if (problems != null) {
                 for (Problem problem : problems) {
                     
-                    // Now add both problem and potentially problem data files into model.
+                    // Now add both problem and potentially problem data files into contest.
                     
-                    model.addProblem(problem, (ProblemDataFiles) problemDataFilesList.get(problem));
+                    contest.addProblem(problem, (ProblemDataFiles) problemDataFilesList.get(problem));
                 }
             }
         } catch (Exception e) {
@@ -1096,12 +1096,12 @@ public class PacketHandler {
             ContestTime[] contestTimes = (ContestTime[]) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME_LIST);
             if (contestTimes != null) {
                 for (ContestTime contestTime : contestTimes) {
-                    if (model.getSiteNumber() != contestTime.getSiteNumber()) {
+                    if (contest.getSiteNumber() != contestTime.getSiteNumber()) {
                         // Update other sites contestTime, do not touch ours.
-                        if (model.getContestTime(contestTime.getSiteNumber()) != null) {
-                            model.updateContestTime(contestTime);
+                        if (contest.getContestTime(contestTime.getSiteNumber()) != null) {
+                            contest.updateContestTime(contestTime);
                         } else {
-                            model.addContestTime(contestTime);
+                            contest.addContestTime(contestTime);
                         }
                     }
                 }
@@ -1114,17 +1114,17 @@ public class PacketHandler {
     }
 
     /**
-     * Unpack and add a list of sites to the model.
+     * Unpack and add a list of sites to the contest.
      * 
      * @param packet
-     * @param model
+     * @param contest
      */
     private void addSitesToModel(Packet packet) {
         try {
             Site[] sites = (Site[]) PacketFactory.getObjectValue(packet, PacketFactory.SITE_LIST);
             if (sites != null) {
                 for (Site site : sites) {
-                    model.addSite(site);
+                    contest.addSite(site);
                 }
             }
         } catch (Exception e) {
@@ -1143,7 +1143,7 @@ public class PacketHandler {
      */
     private void loginToOtherSites(Packet packet) {
         try {
-            for (Site site : model.getSites()) {
+            for (Site site : contest.getSites()) {
                 if (!isThisSite(site.getSiteNumber())) {
                     // TODO code - do not log into servers that are already logged in.
                     controller.sendServerLoginRequest(site.getSiteNumber());
@@ -1169,7 +1169,7 @@ public class PacketHandler {
      * @return true if is a server.
      */
     private boolean isServer(){
-        return isServer(model.getClientId());
+        return isServer(contest.getClientId());
     }
     
     public void info(String s) {

@@ -254,8 +254,8 @@ public class ViewJudgementsPane extends JPanePlugin implements UIPlugin {
         return "Run Judgement View";
     }
     
-    public void setModelAndController(IContest inModel, IController inController) {
-        super.setModelAndController(inModel, inController);
+    public void setContestAndController(IContest inModel, IController inController) {
+        super.setContestAndController(inModel, inController);
         
         getContest().addRunListener(new RunListenerImplementation());
     }

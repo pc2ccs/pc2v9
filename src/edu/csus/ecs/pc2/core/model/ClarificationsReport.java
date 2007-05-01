@@ -21,7 +21,7 @@ import edu.csus.ecs.pc2.core.log.Log;
 // $HeadURL$
 public class ClarificationsReport implements IReport {
 
-    private IContest model;
+    private IContest contest;
 
     private IController controller;
 
@@ -31,7 +31,7 @@ public class ClarificationsReport implements IReport {
         
         // Clarifications
         printWriter.println();
-        Clarification[] clarifications = model.getClarifications();
+        Clarification[] clarifications = contest.getClarifications();
         Arrays.sort(clarifications, new ClarificationComparator());
         printWriter.println("-- " + clarifications.length + " clarifications --");
         for (Clarification clarification : clarifications) {
@@ -91,8 +91,8 @@ public class ClarificationsReport implements IReport {
         return "Clarifications";
     }
 
-    public void setModelAndController(IContest inModel, IController inController) {
-        this.model = inModel;
+    public void setContestAndController(IContest inModel, IController inController) {
+        this.contest = inModel;
         this.controller = inController;
         log = controller.getLog();
     }

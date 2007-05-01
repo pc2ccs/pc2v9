@@ -103,8 +103,8 @@ public class LanguagePane extends JPanePlugin {
         }
     }
 
-    public void setModelAndController(IContest inModel, IController inController) {
-        super.setModelAndController(inModel, inController);
+    public void setContestAndController(IContest inModel, IController inController) {
+        super.setContestAndController(inModel, inController);
     }
 
     public String getPluginTitle() {

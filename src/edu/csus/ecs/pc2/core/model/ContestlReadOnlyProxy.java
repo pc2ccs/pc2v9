@@ -19,8 +19,8 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 public final class ContestlReadOnlyProxy implements IContest {
     private IContest theRealModel;
     
-    public ContestlReadOnlyProxy (IContest model) {
-        theRealModel = model;
+    public ContestlReadOnlyProxy (IContest contest) {
+        theRealModel = contest;
     }
 
     public void addLanguage(Language language) {

@@ -22,7 +22,7 @@ import edu.csus.ecs.pc2.core.model.Run.RunStates;
 // $HeadURL$
 public class RunsReport implements IReport {
 
-    private IContest model;
+    private IContest contest;
 
     private IController controller;
 
@@ -37,8 +37,8 @@ public class RunsReport implements IReport {
         printWriter.print("team "+clientId.getClientNumber()+"|");
         printWriter.print(clientId.getName()+":"+getClientName(clientId)+"|");
         
-        printWriter.print("prob "+run.getProblemId()+":"+model.getProblem(run.getProblemId())+"|");
-        printWriter.print("lang "+run.getLanguageId()+":"+model.getLanguage(run.getLanguageId())+"|");
+        printWriter.print("prob "+run.getProblemId()+":"+contest.getProblem(run.getProblemId())+"|");
+        printWriter.print("lang "+run.getLanguageId()+":"+contest.getLanguage(run.getLanguageId())+"|");
         
         printWriter.print("tocj |");
         printWriter.print("os "+run.getSystemOS()+"|");
@@ -81,8 +81,8 @@ public class RunsReport implements IReport {
         printWriter.print("at " + run.getElapsedMins() + " ");
         printWriter.print(clientId.getName() + " (" + getClientName(clientId) + ") ");
 
-        printWriter.print(model.getProblem(run.getProblemId()) + " ");
-        printWriter.print(model.getLanguage(run.getLanguageId()) + " ");
+        printWriter.print(contest.getProblem(run.getProblemId()) + " ");
+        printWriter.print(contest.getLanguage(run.getLanguageId()) + " ");
 
         if (run.isDeleted()) {
             printWriter.print(" DELETED ");
@@ -91,7 +91,7 @@ public class RunsReport implements IReport {
         if (run.isJudged()) {
 
             for (JudgementRecord judgementRecord : run.getAllJudgementRecords()) {
-                Judgement judgement = model.getJudgement(judgementRecord.getJudgementId());
+                Judgement judgement = contest.getJudgement(judgementRecord.getJudgementId());
                 printWriter.print("     ");
                 printWriter.print(" '" + judgement + "'");
                 printWriter.print(" by " + judgementRecord.getJudgerClientId().getName());
@@ -107,7 +107,7 @@ public class RunsReport implements IReport {
         
         // Runs
         printWriter.println();
-        Run[] runs = model.getRuns();
+        Run[] runs = contest.getRuns();
         Arrays.sort(runs, new RunComparator());
         printWriter.println("-- " + runs.length + " runs --");
         for (Run run : runs) {
@@ -116,7 +116,7 @@ public class RunsReport implements IReport {
     }
 
     private String getClientName(ClientId clientId) {
-        Account account = model.getAccount(clientId);
+        Account account = contest.getAccount(clientId);
         if (account != null){
             return account.getDisplayName();
         }else {
@@ -172,8 +172,8 @@ public class RunsReport implements IReport {
         return "Runs";
     }
 
-    public void setModelAndController(IContest inModel, IController inController) {
-        this.model = inModel;
+    public void setContestAndController(IContest inModel, IController inController) {
+        this.contest = inModel;
         this.controller = inController;
         log = controller.getLog();
     }

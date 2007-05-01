@@ -3,8 +3,8 @@ package edu.csus.ecs.pc2.ui;
 import javax.swing.JFrame;
 
 import edu.csus.ecs.pc2.core.IController;
-import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.IContest;
 
 /**
  * 
@@ -20,7 +20,7 @@ public class EditAccountFrame extends JFrame implements UIPlugin {
      */
     private static final long serialVersionUID = -3349295529036840178L;
 
-    private IContest model;
+    private IContest contest;
 
     private IController controller;
 
@@ -48,11 +48,11 @@ public class EditAccountFrame extends JFrame implements UIPlugin {
 
     }
 
-    public void setModelAndController(IContest inModel, IController inController) {
-        this.model = inModel;
+    public void setContestAndController(IContest inModel, IController inController) {
+        this.contest = inModel;
         this.controller = inController;
 
-        getAccountPane().setModelAndController(model, controller);
+        getAccountPane().setContestAndController(contest, controller);
         getAccountPane().setParentFrame(this);
     }
 

@@ -25,7 +25,7 @@ import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.MultipleFileViewer;
 
 /**
- * Internal Dump of model information.
+ * Internal Dump of  information.
  * 
  * @author pc2@ecs.csus.edu
  */
@@ -35,10 +35,10 @@ public class InternalDump {
 
     private String editorNameFullPath =   "/windows/vi.bat";
 
-    private IContest model;
+    private IContest contest;
 
-    public InternalDump(IContest model){
-        this.model = model;
+    public InternalDump(IContest contest){
+        this.contest = contest;
     }
 
     /**
@@ -106,9 +106,9 @@ public class InternalDump {
             log.println();
             log.println("-- Accounts --");
             for (ClientType.Type ctype : ClientType.Type.values()) {
-                if (model.getAccounts(ctype).size() > 0) {
-                    log.println("Accounts " + ctype.toString() + " there are " + model.getAccounts(ctype).size());
-                    Vector<Account> accounts = model.getAccounts(ctype);
+                if (contest.getAccounts(ctype).size() > 0) {
+                    log.println("Accounts " + ctype.toString() + " there are " + contest.getAccounts(ctype).size());
+                    Vector<Account> accounts = contest.getAccounts(ctype);
                     allAccounts.addAll(accounts);
                     for (int i = 0; i < accounts.size(); i++) {
                         Account account = accounts.elementAt(i);
@@ -130,8 +130,8 @@ public class InternalDump {
 
             // Sites
             log.println();
-            log.println("-- " + model.getSites().length + " sites --");
-            Site[] sites = model.getSites();
+            log.println("-- " + contest.getSites().length + " sites --");
+            Site[] sites = contest.getSites();
             Arrays.sort(sites, new SiteComparatorBySiteNumber());
             for (Site site1 : sites) {
                 String hostName = site1.getConnectionInfo().getProperty(Site.IP_KEY);
@@ -142,21 +142,21 @@ public class InternalDump {
 
             // Problem
             log.println();
-            log.println("-- " + model.getProblems().length + " problems --");
-            for (Problem problem : model.getProblems()) {
+            log.println("-- " + contest.getProblems().length + " problems --");
+            for (Problem problem : contest.getProblems()) {
                 log.println("  Problem " + problem + " id=" + problem.getElementId());
             }
 
             // Language
             log.println();
-            log.println("-- " + model.getLanguages().length + " languages --");
-            for (Language language : model.getLanguages()) {
+            log.println("-- " + contest.getLanguages().length + " languages --");
+            for (Language language : contest.getLanguages()) {
                 log.println("  Language " + language + " id=" + language.getElementId());
             }
 
             // Runs
             log.println();
-            Run[] runs = model.getRuns();
+            Run[] runs = contest.getRuns();
             Arrays.sort(runs, new RunComparator());
             log.println("-- " + runs.length + " runs --");
             for (Run run : runs) {
@@ -165,7 +165,7 @@ public class InternalDump {
 
             // Clarifications
             log.println();
-            Clarification[] clarifications = model.getClarifications();
+            Clarification[] clarifications = contest.getClarifications();
             Arrays.sort(clarifications, new ClarificationComparator());
             log.println("-- " + clarifications.length + " clarifications --");
             for (Clarification clarification : clarifications) {
@@ -174,12 +174,12 @@ public class InternalDump {
 
             // Contest Times
             log.println();
-            ContestTime[] contestTimes = model.getContestTimes();
+            ContestTime[] contestTimes = contest.getContestTimes();
             Arrays.sort(contestTimes, new ContestTimeComparator());
             log.println("-- " + contestTimes.length + " Contest Times --");
             for (ContestTime contestTime : contestTimes) {
 
-                if (model.getSiteNumber() == contestTime.getSiteNumber()) {
+                if (contest.getSiteNumber() == contestTime.getSiteNumber()) {
                     log.print("  * ");
                 } else {
                     log.print("    ");
@@ -198,12 +198,12 @@ public class InternalDump {
             log.println("-- Logins -- ");
             for (ClientType.Type ctype : ClientType.Type.values()) {
 
-                Enumeration<ClientId> enumeration = model.getLoggedInClients(ctype);
-                if (model.getLoggedInClients(ctype).hasMoreElements()) {
+                Enumeration<ClientId> enumeration = contest.getLoggedInClients(ctype);
+                if (contest.getLoggedInClients(ctype).hasMoreElements()) {
                     log.println("Logged in " + ctype.toString());
                     while (enumeration.hasMoreElements()) {
                         ClientId aClientId = (ClientId) enumeration.nextElement();
-                        ConnectionHandlerID connectionHandlerID = model.getConnectionHandleID(aClientId);
+                        ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(aClientId);
                         log.println("   " + aClientId + " on " + connectionHandlerID);
                     }
                 }
@@ -211,7 +211,7 @@ public class InternalDump {
 
             // Connections
             log.println();
-            ConnectionHandlerID[] connectionHandlerIDs = model.getConnectionHandleIDs();
+            ConnectionHandlerID[] connectionHandlerIDs = contest.getConnectionHandleIDs();
             // Arrays.sort(connectionHandlerIDs, new ConnectionHanlderIDComparator());
             log.println("-- " + connectionHandlerIDs.length + " Connections --");
             for (ConnectionHandlerID connectionHandlerID : connectionHandlerIDs) {

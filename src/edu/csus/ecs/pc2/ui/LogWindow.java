@@ -176,7 +176,7 @@ public class LogWindow extends JFrame implements UIPlugin {
         this.maxLines = maxLines;
     }
 
-    public void setModelAndController(IContest inModel, IController inController) {
+    public void setContestAndController(IContest inModel, IController inController) {
        model = inModel;
        controller = inController;
        if (controller == null) {

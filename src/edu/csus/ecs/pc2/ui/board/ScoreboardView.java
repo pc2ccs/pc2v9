@@ -106,7 +106,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
         }
     }
 
-    public void setModelAndController(IContest inModel, IController inController) {
+    public void setContestAndController(IContest inModel, IController inController) {
         this.model = inModel;
         this.controller = inController;
 
@@ -123,7 +123,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
                 if (logWindow == null) {
                     logWindow = new LogWindow();
                 }
-                logWindow.setModelAndController(model, controller);
+                logWindow.setContestAndController(model, controller);
                 logWindow.setTitle("Log " + model.getClientId().toString());
         
                 StandingsPane standingsPane = new StandingsPane();
@@ -143,7 +143,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
     }
 
     protected void addUIPlugin(JTabbedPane tabbedPane, String tabTitle, JPanePlugin plugin) {
-        plugin.setModelAndController(model, controller);
+        plugin.setContestAndController(model, controller);
         tabbedPane.add(plugin, tabTitle);
     }
 

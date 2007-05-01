@@ -23,7 +23,7 @@ public class EditRunFrame extends JFrame implements UIPlugin {
      */
     private static final long serialVersionUID = -3349295529036840178L;
 
-    private IContest model;
+    private IContest contest;
 
     private IController controller;
 
@@ -59,14 +59,14 @@ public class EditRunFrame extends JFrame implements UIPlugin {
 
     }
 
-    public void setModelAndController(IContest inModel, IController inController) {
-        this.model = inModel;
+    public void setContestAndController(IContest inModel, IController inController) {
+        this.contest = inModel;
         this.controller = inController;
 
-        getRunPane().setModelAndController(model, controller);
+        getRunPane().setContestAndController(contest, controller);
         getRunPane().setParentFrame(this);
         
-        model.addRunListener(new RunListenerImplementation());
+        contest.addRunListener(new RunListenerImplementation());
     }
 
     public void setRun(Run theRun) {

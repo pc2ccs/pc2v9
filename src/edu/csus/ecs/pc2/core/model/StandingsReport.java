@@ -32,7 +32,7 @@ import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 // $HeadURL$
 public class StandingsReport implements IReport {
 
-    private IContest model;
+    private IContest contest;
 
     private IController controller;
 
@@ -53,7 +53,7 @@ public class StandingsReport implements IReport {
 
         printWriter.println();
         DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
-        String xmlString = defaultScoringAlgorithm.getStandings(model, new Properties(), controller.getLog());
+        String xmlString = defaultScoringAlgorithm.getStandings(contest, new Properties(), controller.getLog());
         printWriter.println(xmlString);
         printWriter.println();
         formatXML(printWriter, xmlString);
@@ -102,15 +102,15 @@ public class StandingsReport implements IReport {
 
     public String createReportXML(Filter filter) {
         DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
-        return defaultScoringAlgorithm.getStandings(model, new Properties(), controller.getLog());
+        return defaultScoringAlgorithm.getStandings(contest, new Properties(), controller.getLog());
     }
 
     public String getReportTitle() {
         return "Standings XML ";
     }
 
-    public void setModelAndController(IContest inModel, IController inController) {
-        this.model = inModel;
+    public void setContestAndController(IContest inModel, IController inController) {
+        this.contest = inModel;
         this.controller = inController;
         log = controller.getLog();
     }

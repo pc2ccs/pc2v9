@@ -20,7 +20,7 @@ public class EditLanguageFrame extends JFrame implements UIPlugin {
      */
     private static final long serialVersionUID = -3349295529036840178L;
 
-    private IContest model;
+    private IContest contest;
 
     private IController controller;
 
@@ -48,11 +48,11 @@ public class EditLanguageFrame extends JFrame implements UIPlugin {
 
     }
 
-    public void setModelAndController(IContest inModel, IController inController) {
-        this.model = inModel;
+    public void setContestAndController(IContest inModel, IController inController) {
+        this.contest = inModel;
         this.controller = inController;
 
-        getLanguagePane().setModelAndController(model, controller);
+        getLanguagePane().setContestAndController(contest, controller);
         getLanguagePane().setParentFrame(this);
 
     }

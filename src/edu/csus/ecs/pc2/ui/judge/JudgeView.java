@@ -90,7 +90,7 @@ public class JudgeView extends JFrame implements UIPlugin {
 
     protected void addUIPlugin(JTabbedPane tabbedPane, String tabTitle, JPanePlugin plugin) {
 
-        plugin.setModelAndController(model, controller);
+        plugin.setContestAndController(model, controller);
         tabbedPane.add(plugin, tabTitle);
 
     }
@@ -113,7 +113,7 @@ public class JudgeView extends JFrame implements UIPlugin {
         return siteNumber == model.getSiteNumber();
     }
 
-    public void setModelAndController(IContest inModel, IController inController) {
+    public void setContestAndController(IContest inModel, IController inController) {
         this.model = inModel;
         this.controller = inController;
         
@@ -122,7 +122,7 @@ public class JudgeView extends JFrame implements UIPlugin {
         if (logWindow == null) {
             logWindow = new LogWindow();
         }
-        logWindow.setModelAndController(model, controller);
+        logWindow.setContestAndController(model, controller);
         logWindow.setTitle("Log "+model.getClientId().toString());
 
         setFrameTitle(model.getContestTime().isContestRunning());

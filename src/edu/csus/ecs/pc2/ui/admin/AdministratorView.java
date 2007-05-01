@@ -43,7 +43,7 @@ public class AdministratorView extends JFrame implements UIPlugin {
 
     private static final long serialVersionUID = 1L;
 
-    private IContest model;
+    private IContest contest;
 
     private IController controller;
 
@@ -88,15 +88,15 @@ public class AdministratorView extends JFrame implements UIPlugin {
 
     }
 
-    public void setModelAndController(IContest inModel, IController inController) {
-        this.model = inModel;
+    public void setContestAndController(IContest inModel, IController inController) {
+        this.contest = inModel;
         this.controller = inController;
         
         if (logWindow == null) {
             logWindow = new LogWindow();
         }
-        logWindow.setModelAndController(model, controller);
-        logWindow.setTitle("Log "+model.getClientId().toString());
+        logWindow.setContestAndController(contest, controller);
+        logWindow.setTitle("Log "+contest.getClientId().toString());
         
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -143,7 +143,7 @@ public class AdministratorView extends JFrame implements UIPlugin {
                 InfoPane infoPane = new InfoPane();
                 addUIPlugin(getMainTabbedPanel(), "Dev", infoPane);
                 
-                setTitle("PC^2 " + model.getTitle() + " Build " + new VersionInfo().getBuildNumber());
+                setTitle("PC^2 " + contest.getTitle() + " Build " + new VersionInfo().getBuildNumber());
                 setVisible(true);
             }
         });
@@ -240,7 +240,7 @@ public class AdministratorView extends JFrame implements UIPlugin {
 
     protected void addUIPlugin(JTabbedPane tabbedPane, String tabTitle, JPanePlugin plugin) {
 
-        plugin.setModelAndController(model, controller);
+        plugin.setContestAndController(contest, controller);
         tabbedPane.add(plugin, tabTitle);
 
     }

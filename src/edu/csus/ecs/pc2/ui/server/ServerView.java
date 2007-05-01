@@ -265,7 +265,7 @@ public class ServerView extends JFrame implements UIPlugin {
         });
     }
 
-    public void setModelAndController(IContest inModel, IController inController) {
+    public void setContestAndController(IContest inModel, IController inController) {
         this.model = inModel;
         this.controller = inController;
         this.log = controller.getLog();
@@ -275,7 +275,7 @@ public class ServerView extends JFrame implements UIPlugin {
         if (logWindow == null) {
             logWindow = new LogWindow();
         }
-        logWindow.setModelAndController(model, controller);
+        logWindow.setContestAndController(model, controller);
         logWindow.setTitle("Log " + model.getClientId().toString());
 
         model.addRunListener(new RunListenerImplementation());
@@ -314,7 +314,7 @@ public class ServerView extends JFrame implements UIPlugin {
 
     protected void addUIPlugin(JTabbedPane tabbedPane, String tabTitle, JPanePlugin plugin) {
 
-        plugin.setModelAndController(model, controller);
+        plugin.setContestAndController(model, controller);
         tabbedPane.add(plugin, tabTitle);
 
     }

@@ -410,13 +410,13 @@ public class LoginFrame extends JFrame implements UIPlugin {
         }
     }
 
-    public void setModelAndController(IContest inModel, IController inController) {
+    public void setContestAndController(IContest inModel, IController inController) {
         this.model = inModel;
         this.controller = inController;
         // initialize logWindow so it can add itself as a listener and
         // start populating the mclb
         logWindow = new LogWindow();
-        logWindow.setModelAndController(model, controller);
+        logWindow.setContestAndController(model, controller);
         
         model.addLoginListener(new LoginListenerImplementation());
         

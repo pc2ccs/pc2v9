@@ -349,14 +349,14 @@ public class RunsPanel extends JPanePlugin {
         viewJudgementsButton.setVisible(isAllowed(Permission.Type.VIEW_RUN_JUDGEMENT_HISTORIES));
     }
 
-    public void setModelAndController(IContest inModel, IController inController) {
-        super.setModelAndController(inModel, inController);
+    public void setContestAndController(IContest inModel, IController inController) {
+        super.setContestAndController(inModel, inController);
         
         log = getController().getLog();
         
-        editRunFrame.setModelAndController(getContest(), getController());
-        viewJudgementsFrame.setModelAndController(getContest(), getController());
-        selectJudgementFrame.setModelAndController(getContest(), getController());
+        editRunFrame.setContestAndController(getContest(), getController());
+        viewJudgementsFrame.setContestAndController(getContest(), getController());
+        selectJudgementFrame.setContestAndController(getContest(), getController());
 
         getContest().addRunListener(new RunListenerImplementation());
         getContest().addAccountListener(new AccountListenerImplementation());

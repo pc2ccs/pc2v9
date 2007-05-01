@@ -124,8 +124,8 @@ public class RunPane extends JPanePlugin {
         this.add(getGeneralPane(), java.awt.BorderLayout.CENTER);
     }
 
-    public void setModelAndController(IContest inModel, IController inController) {
-        super.setModelAndController(inModel, inController);
+    public void setContestAndController(IContest inModel, IController inController) {
+        super.setContestAndController(inModel, inController);
         log = getController().getLog();
     }
 

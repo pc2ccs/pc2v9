@@ -373,7 +373,7 @@ public class PacketExplorerPane extends JPanePlugin {
         listBox.getColumnInfo(columnNumber).getSorter().setSortOrder(sortRank);
     }
 
-    public void setModelAndController(IContest inModel, IController inController) {
+    public void setContestAndController(IContest inModel, IController inController) {
         this.model = inModel;
         this.controller = inController;
         setVisible (true);

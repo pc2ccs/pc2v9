@@ -182,14 +182,14 @@ public class TeamView extends JFrame implements UIPlugin {
         return mainTabbedPane;
     }
 
-    public void setModelAndController(IContest inModel, IController inController) {
+    public void setContestAndController(IContest inModel, IController inController) {
         this.model = inModel;
         this.teamController = inController;
         
         if (logWindow == null) {
             logWindow = new LogWindow();
         }
-        logWindow.setModelAndController(model, teamController);
+        logWindow.setContestAndController(model, teamController);
         logWindow.setTitle("Log "+model.getClientId().toString());
         
         model.addContestTimeListener(new ContestTimeListenerImplementation());
@@ -220,7 +220,7 @@ public class TeamView extends JFrame implements UIPlugin {
     }
 
     protected void addUIPlugin(JTabbedPane tabbedPane, String tabTitle, JPanePlugin plugin) {
-        plugin.setModelAndController(model, teamController);
+        plugin.setContestAndController(model, teamController);
         tabbedPane.add(plugin, tabTitle);
     }
 

@@ -458,8 +458,8 @@ public class SitesPanel extends JPanePlugin {
         updateSiteRow(site);
     }
 
-    public void setModelAndController(IContest inModel, IController inController) {
-        super.setModelAndController(inModel, inController);
+    public void setContestAndController(IContest inModel, IController inController) {
+        super.setContestAndController(inModel, inController);
 
         getContest().addSiteListener(new SiteListenerImplementation());
 

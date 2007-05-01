@@ -219,15 +219,15 @@ public class AccountsPane extends JPanePlugin {
         editButton.setVisible(isAllowed(Permission.Type.EDIT_ACCOUNT));
     }
     
-    public void setModelAndController(IContest inModel, IController inController) {
-        super.setModelAndController(inModel, inController);
+    public void setContestAndController(IContest inModel, IController inController) {
+        super.setContestAndController(inModel, inController);
 
         log = getController().getLog();
         getContest().addAccountListener(new AccountListenerImplementation());
         
         initializePermissions();
         
-        editAccountFrame.setModelAndController(inModel, inController);
+        editAccountFrame.setContestAndController(inModel, inController);
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {

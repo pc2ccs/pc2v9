@@ -60,11 +60,11 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
 
     }
 
-    public void setModelAndController(IContest inModel, IController inController) {
+    public void setContestAndController(IContest inModel, IController inController) {
         this.model = inModel;
         this.controller = inController;
 
-        getSelectJudgementPane().setModelAndController(model, controller);
+        getSelectJudgementPane().setContestAndController(model, controller);
         getSelectJudgementPane().setParentFrame(this);
 
         model.addRunListener(new RunListenerImplementation());

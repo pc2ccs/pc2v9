@@ -19,7 +19,7 @@ import edu.csus.ecs.pc2.core.log.Log;
 // $HeadURL$
 public class ProblemsReport implements IReport {
 
-    private IContest model;
+    private IContest contest;
 
     private IController controller;
 
@@ -82,19 +82,19 @@ public class ProblemsReport implements IReport {
 
         // Problem
         printWriter.println();
-        printWriter.println("-- " + model.getProblems().length + " problems --");
-        for (Problem problem : model.getProblems()) {
+        printWriter.println("-- " + contest.getProblems().length + " problems --");
+        for (Problem problem : contest.getProblems()) {
             printWriter.println();
-            ProblemDataFiles problemDataFiles = model.getProblemDataFile(problem);
+            ProblemDataFiles problemDataFiles = contest.getProblemDataFile(problem);
             writeRow(printWriter, problem, problemDataFiles);
         }
 
         // ProblemDataFiles
         printWriter.println();
-        printWriter.println("-- " + model.getProblemDataFiles().length + " problem data file sets --");
-        for (ProblemDataFiles problemDataFile : model.getProblemDataFiles()) {
+        printWriter.println("-- " + contest.getProblemDataFiles().length + " problem data file sets --");
+        for (ProblemDataFiles problemDataFile : contest.getProblemDataFiles()) {
             printWriter.println();
-            Problem problem = model.getProblem(problemDataFile.getProblemId());
+            Problem problem = contest.getProblem(problemDataFile.getProblemId());
             printWriter.println("  Problem Data File set for " + problem + " id=" + problemDataFile.getProblemId());
             writeProblemDataFiles(printWriter, problemDataFile);
         }
@@ -148,8 +148,8 @@ public class ProblemsReport implements IReport {
         return "Problems";
     }
 
-    public void setModelAndController(IContest inModel, IController inController) {
-        this.model = inModel;
+    public void setContestAndController(IContest inModel, IController inController) {
+        this.contest = inModel;
         this.controller = inController;
         log = controller.getLog();
     }

@@ -81,8 +81,8 @@ public class ReportPane extends JPanePlugin {
         listOfReports[5] = new StandingsReport();
     }
 
-    public void setModelAndController(IContest inModel, IController inController) {
-        super.setModelAndController(inModel, inController);
+    public void setContestAndController(IContest inModel, IController inController) {
+        super.setContestAndController(inModel, inController);
 
         this.log = getController().getLog();
         refreshGUI();
@@ -213,7 +213,7 @@ public class ReportPane extends JPanePlugin {
                 }
             }
             
-            selectedReport.setModelAndController(getContest(), getController());
+            selectedReport.setContestAndController(getContest(), getController());
             selectedReport.createReportFile(filename, filter);
             viewFile (filename);
 

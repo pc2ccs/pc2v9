@@ -172,10 +172,10 @@ public class LanguagesPane extends JPanePlugin {
         languageListBox.autoSizeAllColumns();
     }
 
-    public void setModelAndController(IContest inModel, IController inController) {
-        super.setModelAndController(inModel, inController);
+    public void setContestAndController(IContest inModel, IController inController) {
+        super.setContestAndController(inModel, inController);
 
-        editLanguageFrame.setModelAndController(inModel, inController);
+        editLanguageFrame.setContestAndController(inModel, inController);
         
         log = getController().getLog();
         

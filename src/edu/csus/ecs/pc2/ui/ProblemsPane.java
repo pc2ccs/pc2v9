@@ -179,12 +179,12 @@ public class ProblemsPane extends JPanePlugin {
         problemListBox.autoSizeAllColumns();
     }
 
-    public void setModelAndController(IContest inModel, IController inController) {
-        super.setModelAndController(inModel, inController);
+    public void setContestAndController(IContest inModel, IController inController) {
+        super.setContestAndController(inModel, inController);
         
         log = getController().getLog();
         
-        editProblemFrame.setModelAndController(inModel, inController);
+        editProblemFrame.setContestAndController(inModel, inController);
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {

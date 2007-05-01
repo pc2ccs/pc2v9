@@ -91,7 +91,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     /**
      * Contest data.
      */
-    private IContest model;
+    private IContest contest;
 
     /**
      * Transport.
@@ -183,10 +183,10 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      */
     private boolean serverModule = false;
     
-    public Controller(IContest model) {
+    public Controller(IContest contest) {
         super();
-        this.model = model;
-        packetHandler  = new PacketHandler(this, model);
+        this.contest = contest;
+        packetHandler  = new PacketHandler(this, contest);
     }
     
     /**
@@ -222,7 +222,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     public void sendToRemoteServer (int siteNumber, Packet packet){
         ClientId clientId = new ClientId(siteNumber, Type.SERVER, 0);
 
-        ConnectionHandlerID connectionHandlerID = model.getConnectionHandleID(clientId);
+        ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(clientId);
         
         Type type = packet.getSourceId().getClientType();
         if ((!type.equals(Type.ADMINISTRATOR)) && (! type.equals(Type.SERVER))){
@@ -244,7 +244,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
     public void sendToClient(Packet packet) {
         info(" sendToClient b4 " + packet);
-        ConnectionHandlerID connectionHandlerID = model.getConnectionHandleID(packet.getDestinationId());
+        ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(packet.getDestinationId());
         info("sendToClient " + packet.getSourceId() + " " + connectionHandlerID);
         if (connectionHandlerID == null) {
             int destinationSiteNumber = packet.getDestinationId().getSiteNumber();
@@ -263,11 +263,11 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     public void submitRun(Problem problem, Language language, String filename) throws Exception {
         SerializedFile serializedFile = new SerializedFile(filename);
 
-        ClientId serverClientId = new ClientId(model.getSiteNumber(), Type.SERVER, 0);
-        Run run = new Run(model.getClientId(), language, problem);
+        ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
+        Run run = new Run(contest.getClientId(), language, problem);
         RunFiles runFiles = new RunFiles(run, serializedFile, null);
 
-        Packet packet = PacketFactory.createSubmittedRun(model.getClientId(), serverClientId, run, runFiles);
+        Packet packet = PacketFactory.createSubmittedRun(contest.getClientId(), serverClientId, run, runFiles);
 
         sendToLocalServer(packet);
     }
@@ -477,18 +477,18 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
     private ClientId authenticateFirstServer(String password) {
         
-        if (model.getSites().length == 0){
+        if (contest.getSites().length == 0){
             // TODO remove this when we can populate with real data.
-            model.initializeWithFakeData();
+            contest.initializeWithFakeData();
         }
         int newSiteNumber = getServerSiteNumber(password);
 
         ClientId newId = new ClientId(newSiteNumber, ClientType.Type.SERVER, 0);
-        if (model.isLocalLoggedIn(newId)) {
+        if (contest.isLocalLoggedIn(newId)) {
             info("Note site " + newId + " site " + newSiteNumber + " already logged in, ignoring ");
         }
         ConnectionHandlerID connectionHandlerID = new ConnectionHandlerID("Site " + newSiteNumber);
-        model.addLogin(newId, connectionHandlerID);
+        contest.addLogin(newId, connectionHandlerID);
         return newId;
     }
     
@@ -561,7 +561,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     public void receiveObject(Serializable object, ConnectionHandlerID connectionHandlerID) {
 
         // TODO code check the input connection to insure they are valid connection
-        info("receiveObject (S,C) debug start (by "+model.getClientId()+") got " + object);
+        info("receiveObject (S,C) debug start (by "+contest.getClientId()+") got " + object);
 
         try {
 
@@ -571,14 +571,14 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                 ClientId clientId = packet.getSourceId();
 
                 info("receiveObject " + packet);
-                if (model.isLocalLoggedIn(packet.getSourceId())) {
+                if (contest.isLocalLoggedIn(packet.getSourceId())) {
 
                     /**
                      * This user is in the login list and we process their request.
                      */
 
                     // TODO code security double check by checking their clientId and
-                    // their connection id against what we have in the model.
+                    // their connection id against what we have in the contest.
                     processPacket(packet, connectionHandlerID);
 
                 } else if (packet.getType().equals(PacketType.Type.LOGIN_REQUEST)) {
@@ -593,7 +593,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                         packetArchiver.writeNextPacket(packet);
 
                         if (clientId.getSiteNumber() == ClientId.UNSET) {
-                            clientId = new ClientId(model.getSiteNumber(), clientId.getClientType(), clientId.getClientNumber());
+                            clientId = new ClientId(contest.getSiteNumber(), clientId.getClientType(), clientId.getClientNumber());
                         }
                         attemptToLogin(clientId, password, connectionHandlerID);
                         removeConnection(connectionHandlerID);
@@ -601,7 +601,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
                         // Send login notification to users.
                         
-                        Packet loginConfirmedPacket  = PacketFactory.createLogin(model.getClientId(), PacketFactory.ALL_SERVERS, connectionHandlerID, clientId);
+                        Packet loginConfirmedPacket  = PacketFactory.createLogin(contest.getClientId(), PacketFactory.ALL_SERVERS, connectionHandlerID, clientId);
                         sendToAdministrators(loginConfirmedPacket);
                         sendToJudges(loginConfirmedPacket);
                         sendToServers(loginConfirmedPacket);
@@ -619,7 +619,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
                         if (packet.getType() == PacketType.Type.LOGIN_FAILED) {
                             handleServerLoginFailure(packet);
-                        } else if (!model.isLoggedIn() && packet.getType().equals(PacketType.Type.LOGIN_SUCCESS)) {
+                        } else if (!contest.isLoggedIn() && packet.getType().equals(PacketType.Type.LOGIN_SUCCESS)) {
 
                             /**
                              * Since this module is not logged in, this packet should only be a LOGIN_SUCCESS from a server we just
@@ -631,11 +631,11 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                             // sent the login request packet to. If we don't add this, then some other
                             // server could send us a LOGIN_SUCCESS packet, which would be bad. Highly
                             // unlikely but potentially bad.
-                            // Add data from packet into model.
+                            // Add data from packet into contest.
                             processPacket(packet, connectionHandlerID);
 
                             // Add the other (server we logged into) into our logged in list.
-                            model.addLocalLogin(clientId, connectionHandlerID);
+                            contest.addLocalLogin(clientId, connectionHandlerID);
 
                         } else {
                             
@@ -668,7 +668,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                         // TODO KLUDGE HUGE KLUDGE - this block allows any admin to update stuff.
                         
                         // TODO code security double check by checking their clientId and
-                        // their connection id against what we have in the model.
+                        // their connection id against what we have in the contest.
                         processPacket(packet, connectionHandlerID);
                         
                     } else {
@@ -700,7 +700,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             info("Exception in receiveObject(S,C): " + e.getMessage(),e);
             info("Exception in receiveObject ", e);
         }
-        info("receiveObject (S,C) debug end   (by "+model.getClientId()+") got " + object.getClass().getName());
+        info("receiveObject (S,C) debug end   (by "+contest.getClientId()+") got " + object.getClass().getName());
     }
 
     private void handleServerLoginFailure(Packet packet) {
@@ -723,7 +723,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         if (loginUI != null ){
             FrameUtilities.regularCursor(loginUI);
         }
-        model.loginDenied(packet.getDestinationId(), null, message);
+        contest.loginDenied(packet.getDestinationId(), null, message);
 
     }
 
@@ -734,13 +734,13 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * @return site number or throws SecurityException if nothing matches.
      */
     private int getServerSiteNumber(String password) {
-        for (Site site : model.getSites()) {
+        for (Site site : contest.getSites()) {
             if (site.getPassword().equals(password)) {
                 return site.getSiteNumber();
             }
         }
         
-        if (model.getSites().length > 1 || model.isLoggedIn()){
+        if (contest.getSites().length > 1 || contest.isLoggedIn()){
             throw new SecurityException("No such site or invalid site password");
         } else {
             throw new SecurityException("Does not match first site password");
@@ -764,14 +764,14 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             int newSiteNumber = getServerSiteNumber(password);
 
             ClientId newId = new ClientId(newSiteNumber, ClientType.Type.SERVER, 0);
-            if (model.isLocalLoggedIn(newId)) {
+            if (contest.isLocalLoggedIn(newId)) {
                 info("Note site " + clientId + " site " + newSiteNumber + " already logged in, ignoring ");
             }
-            model.addLogin(newId, connectionHandlerID);
+            contest.addLogin(newId, connectionHandlerID);
 
-        } else if (model.isValidLoginAndPassword(clientId, password)) {
+        } else if (contest.isValidLoginAndPassword(clientId, password)) {
             info("Added " + clientId);
-            model.addLogin(clientId, connectionHandlerID);
+            contest.addLogin(clientId, connectionHandlerID);
             info("attemptToLogin debug logged on: " + clientId);
 
         } else {
@@ -812,7 +812,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * @param message
      */
     private void sendLoginFailure(ClientId destinationId, ConnectionHandlerID connectionHandlerID, String message) {
-        Packet packet = PacketFactory.createLoginDenied(model.getClientId(), destinationId, message);
+        Packet packet = PacketFactory.createLoginDenied(contest.getClientId(), destinationId, message);
         sendToClient(connectionHandlerID, packet);
     }
 
@@ -824,7 +824,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * @param message
      */
     private void sendSecurityVioation(ClientId destinationId, ConnectionHandlerID connectionHandlerID, String message) {
-        Packet packet = PacketFactory.createMessage(model.getClientId(), destinationId, message);
+        Packet packet = PacketFactory.createMessage(contest.getClientId(), destinationId, message);
         sendToClient(connectionHandlerID, packet);
     }
     
@@ -838,8 +838,8 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
         for (ClientType.Type ctype : ClientType.Type.values()) {
 
-            Enumeration<ClientId> enumeration = model.getLoggedInClients(ctype);
-            if (model.getLoggedInClients(ctype).hasMoreElements()) {
+            Enumeration<ClientId> enumeration = contest.getLoggedInClients(ctype);
+            if (contest.getLoggedInClients(ctype).hasMoreElements()) {
                 while (enumeration.hasMoreElements()) {
                     ClientId aClientId = (ClientId) enumeration.nextElement();
                     clientList.addElement(aClientId);
@@ -861,17 +861,17 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         ProblemDataFiles [] problemDataFiles = new ProblemDataFiles[0];
 
         if (clientId.getClientType().equals(ClientType.Type.TEAM)) {
-            runs = model.getRuns(clientId);
-            clarifications = model.getClarifications(clientId);
+            runs = contest.getRuns(clientId);
+            clarifications = contest.getClarifications(clientId);
         } else {
-            runs = model.getRuns();
-            clarifications = model.getClarifications();
-            problemDataFiles = model.getProblemDataFiles();
+            runs = contest.getRuns();
+            clarifications = contest.getClarifications();
+            problemDataFiles = contest.getProblemDataFiles();
         }
 
-        Packet packetToSend = PacketFactory.createLoginSuccess(model.getClientId(), clientId, model.getContestTime(), model.getContestTimes(), model.getSiteNumber(), 
-                model.getLanguages(), model.getProblems(), model.getJudgements(), model.getSites(), runs, clarifications, 
-                allLoggedInUsers(), model.getConnectionHandleIDs(), getAllAccounts(), problemDataFiles);
+        Packet packetToSend = PacketFactory.createLoginSuccess(contest.getClientId(), clientId, contest.getContestTime(), contest.getContestTimes(), contest.getSiteNumber(), 
+                contest.getLanguages(), contest.getProblems(), contest.getJudgements(), contest.getSites(), runs, clarifications, 
+                allLoggedInUsers(), contest.getConnectionHandleIDs(), getAllAccounts(), problemDataFiles);
         
         sendToClient(packetToSend);
     }
@@ -879,15 +879,15 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     /**
      * Return all accounts for all sites.
      * 
-     * @return Array of all accounts in model.
+     * @return Array of all accounts in contest.
      */
     private Account[] getAllAccounts() {
 
         Vector<Account> allAccounts = new Vector<Account>();
 
         for (ClientType.Type ctype : ClientType.Type.values()) {
-            if (model.getAccounts(ctype).size() > 0) {
-                Vector<Account> accounts = model.getAccounts(ctype);
+            if (contest.getAccounts(ctype).size() > 0) {
+                Vector<Account> accounts = contest.getAccounts(ctype);
                 allAccounts.addAll(accounts);
             }
         }
@@ -898,9 +898,9 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
     public void connectionEstablished(ConnectionHandlerID connectionHandlerID) {
         info("connectionEstablished: "+ connectionHandlerID);
-        model.connectionEstablished(connectionHandlerID);
+        contest.connectionEstablished(connectionHandlerID);
 
-        Packet connectionPacket = PacketFactory.createEstablishedConnection(model.getClientId(), PacketFactory.ALL_SERVERS, connectionHandlerID);
+        Packet connectionPacket = PacketFactory.createEstablishedConnection(contest.getClientId(), PacketFactory.ALL_SERVERS, connectionHandlerID);
         sendToAdministrators(connectionPacket);
         sendToServers(connectionPacket);
     }
@@ -911,12 +911,12 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     public void connectionDropped(ConnectionHandlerID connectionHandlerID) {
         // TODO code connectionDropped reconnection logic
 
-        ClientId clientId = model.getLoginClientId(connectionHandlerID);
+        ClientId clientId = contest.getLoginClientId(connectionHandlerID);
         if (clientId != null) {
             info("connectionDropped: removed user " + clientId);
-            model.removeLogin(clientId);
+            contest.removeLogin(clientId);
             try {
-                Packet logoffPacket = PacketFactory.createLogoff(model.getClientId(), PacketFactory.ALL_SERVERS, clientId);
+                Packet logoffPacket = PacketFactory.createLogoff(contest.getClientId(), PacketFactory.ALL_SERVERS, clientId);
                 sendToAdministrators(logoffPacket);
                 sendToJudges(logoffPacket);
                 sendToServers(logoffPacket);
@@ -933,7 +933,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         // TODO code create a packet and send it to servers and admins
 
         // TODO code connectionError
-        info("connectionError: " + model.getTitle() + " " + connectionHandlerID + " " + causeDescription + " "
+        info("connectionError: " + contest.getTitle() + " " + connectionHandlerID + " " + causeDescription + " "
                 + object.getClass().getName());
 
     }
@@ -945,7 +945,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      */
     public void receiveObject(Serializable object) {
 
-        info(" receiveObject(S) debug start (by "+model.getClientId()+") "+ object);
+        info(" receiveObject(S) debug start (by "+contest.getClientId()+") "+ object);
 
         try {
             if (object instanceof Packet) {
@@ -964,10 +964,10 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             if (loginUI != null ){
                 FrameUtilities.regularCursor(loginUI);
             }
-            model.loginDenied(null, null, message);
+            contest.loginDenied(null, null, message);
             info ("Exception ", e);
         }
-        info(" receiveObject(S) debug end   (by "+model.getClientId()+") "+ object);
+        info(" receiveObject(S) debug end   (by "+contest.getClientId()+") "+ object);
     }
 
     /**
@@ -978,9 +978,9 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         
         // Connection dropped, countdown and die.
         CountDownMessage countDownMessage = new CountDownMessage("Shutting down PC^2 in ", 10);
-        if (model.getClientId() != null) {
-            info("connectionDropped: " + model.getClientId());
-            countDownMessage.setTitle("Shutting down PC^2 " + model.getClientId().getClientType() + " " + model.getTitle());
+        if (contest.getClientId() != null) {
+            info("connectionDropped: " + contest.getClientId());
+            countDownMessage.setTitle("Shutting down PC^2 " + contest.getClientId().getClientType() + " " + contest.getTitle());
         } else {
             info("connectionDropped: <non-logged in client>");
             countDownMessage.setTitle("Shutting down PC^2 Client");
@@ -1006,18 +1006,18 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
 
     public void setSiteNumber(int number) {
-        model.setSiteNumber(number);
+        contest.setSiteNumber(number);
     }
 
     public void setContestTime(ContestTime contestTime) {
-        model.updateContestTime(contestTime);
+        contest.updateContestTime(contestTime);
     }
 
     public void sendToServers(Packet packet) {
-        Enumeration<ClientId> clientIds = model.getLoggedInClients(ClientType.Type.SERVER);
+        Enumeration<ClientId> clientIds = contest.getLoggedInClients(ClientType.Type.SERVER);
         while (clientIds.hasMoreElements()) {
             ClientId clientId = clientIds.nextElement();
-            ConnectionHandlerID connectionHandlerID = model.getConnectionHandleID(clientId);
+            ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(clientId);
             boolean isThisServer = isThisSite(clientId.getSiteNumber());
             if (!isThisServer) {
                 // only send to other servers
@@ -1032,18 +1032,18 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * @param packet
      */
     private void sendPacketToClients(Packet packet, ClientType.Type type) {
-        Enumeration<ClientId> clientIds = model.getLocalLoggedInClients(type);
+        Enumeration<ClientId> clientIds = contest.getLocalLoggedInClients(type);
         while (clientIds.hasMoreElements()) {
             ClientId clientId = clientIds.nextElement();
             if (isThisSite(clientId.getSiteNumber())) {
-                ConnectionHandlerID connectionHandlerID = model.getConnectionHandleID(clientId);
+                ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(clientId);
                 sendToClient(connectionHandlerID, packet);
             }
         }
     }
 
     private boolean isThisSite(int siteNumber) {
-        return siteNumber == model.getSiteNumber();
+        return siteNumber == contest.getSiteNumber();
     }
 
     public void sendToJudges(Packet packet) {
@@ -1065,9 +1065,9 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     private int getPortForSite(int inSiteNumber) {
 
         try {
-            Site []  sites = model.getSites();
+            Site []  sites = contest.getSites();
             Arrays.sort(sites, new SiteComparatorBySiteNumber());
-            Site thisSite = sites[model.getSiteNumber() - 1];
+            Site thisSite = sites[contest.getSiteNumber() - 1];
             String portStr = thisSite.getConnectionInfo().getProperty(Site.PORT_KEY);
             return Integer.parseInt(portStr);
 
@@ -1088,18 +1088,18 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
         try {
 
-            model.setClientId(clientId);
+            contest.setClientId(clientId);
             
             boolean isServer = clientId.getClientType().equals(ClientType.Type.SERVER);
 
             if (isServer && isContactingRemoteServer()) {
                 // secondary server logged in, start listening.
         
-                port = getPortForSite(model.getSiteNumber());
+                port = getPortForSite(contest.getSiteNumber());
                 info("Started Server Transport listening on " + port);
                 transportManager.accecptConnections(port);
 
-                info("Secondary Server has started " + model.getTitle());
+                info("Secondary Server has started " + contest.getTitle());
             }
 
             try {
@@ -1117,7 +1117,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                         }
                     }
 
-                    uiPlugin.setModelAndController(model, this);
+                    uiPlugin.setContestAndController(contest, this);
                     
 
                     if (loginUI != null) {
@@ -1137,7 +1137,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             if (loginUI != null ){
                 FrameUtilities.regularCursor(loginUI);
             }
-            model.loginDenied(clientId, null, e.getMessage());
+            contest.loginDenied(clientId, null, e.getMessage());
         }
     }
 
@@ -1188,7 +1188,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
          *        s = pc2 LoginFrame
          *    }
          *    UIPlugin l = classloader (s);
-         *    l.setModelAndListener (model, this);
+         *    l.setModelAndListener (contest, this);
          * }
          * else {
          *   this.login (login,password)
@@ -1238,7 +1238,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 //            }
             if (isUsingMainUI()){
                 loginUI = new LoginFrame();
-                loginUI.setModelAndController(model, this);
+                loginUI.setContestAndController(contest, this);
             }
             
         } else {
@@ -1259,7 +1259,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             
             if (isUsingMainUI()){
                 loginUI = new LoginFrame();
-                loginUI.setModelAndController(model, this); // this displays the login
+                loginUI.setContestAndController(contest, this); // this displays the login
             } 
             
             try {
@@ -1283,12 +1283,12 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
 
     private ClientId getServerClientId(){
-//      TODO s/new ClientId(model.getSiteNumber(), Type.SERVER, 0);/getServerClientId()/
-        return new ClientId (model.getSiteNumber(), Type.SERVER, 0);
+//      TODO s/new ClientId(contest.getSiteNumber(), Type.SERVER, 0);/getServerClientId()/
+        return new ClientId (contest.getSiteNumber(), Type.SERVER, 0);
     }
 
     public void checkOutRun(Run run, boolean readOnly) {
-        ClientId clientId = model.getClientId();
+        ClientId clientId = contest.getClientId();
         Packet packet = PacketFactory.createRunRequest(clientId,getServerClientId(),run, clientId, readOnly);
         sendToLocalServer(packet);
     }
@@ -1297,7 +1297,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * Send run judgement to server.
      */
     public void submitRunJudgement(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles) {
-        ClientId clientId = model.getClientId();
+        ClientId clientId = contest.getClientId();
         Packet packet = PacketFactory.createRunJudgement(clientId,getServerClientId(), run, judgementRecord, runResultFiles);
         sendToLocalServer(packet);
     }
@@ -1306,25 +1306,25 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * Send cancel run to server.
      */
     public void cancelRun(Run run) {
-        ClientId clientId = model.getClientId();
+        ClientId clientId = contest.getClientId();
         Packet packet = PacketFactory.createUnCheckoutRun(clientId, getServerClientId(), run);
         sendToLocalServer(packet);
     }
 
     /**
-     * Add a new site into model, send update to other servers.
+     * Add a new site into contest, send update to other servers.
      */
     public void addNewSite(Site site) {
         if (isServer ()){
-            model.addSite(site);
-            Packet packet = PacketFactory.createAddSetting(model.getClientId(), PacketFactory.ALL_SERVERS, site);
+            contest.addSite(site);
+            Packet packet = PacketFactory.createAddSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, site);
             sendToServers(packet);
             
             sendToJudges(packet);
             sendToAdministrators(packet);
             sendToScoreboards(packet);
         } else {
-            Packet packet = PacketFactory.createAddSetting(model.getClientId(), getServerClientId(), site);
+            Packet packet = PacketFactory.createAddSetting(contest.getClientId(), getServerClientId(), site);
             sendToLocalServer(packet);
         }
     }
@@ -1333,7 +1333,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * Modify an existing site, send update to other servers.
      */
     public void modifySite (Site site) {
-        model.changeSite(site);
+        contest.changeSite(site);
         Packet packet = PacketFactory.createUpdateSetting(getServerClientId(), PacketFactory.ALL_SERVERS, site);
         sendToServers(packet);
     }
@@ -1355,8 +1355,8 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         }
 
         try {
-            Site remoteSite = model.getSite(inSiteNumber);
-            Site localSite = model.getSite(model.getSiteNumber());
+            Site remoteSite = contest.getSite(inSiteNumber);
+            Site localSite = contest.getSite(contest.getSiteNumber());
             String localPassword = localSite.getPassword();
 
             String hostName = remoteSite.getConnectionInfo().getProperty(Site.IP_KEY);
@@ -1416,15 +1416,15 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
         // TODO seems to be circular, make finite.
         if (isServer ()){
-            model.changeSite(site);
-            Packet packet = PacketFactory.createUpdateSetting(model.getClientId(), PacketFactory.ALL_SERVERS, site);
+            contest.changeSite(site);
+            Packet packet = PacketFactory.createUpdateSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, site);
             sendToServers(packet);
             
             sendToJudges(packet);
             sendToAdministrators(packet);
             sendToScoreboards(packet);
         } else {
-            Packet packet = PacketFactory.createUpdateSetting(model.getClientId(), getServerClientId(), site);
+            Packet packet = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), site);
             sendToLocalServer(packet);
         }
     }
@@ -1434,7 +1434,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * @return true if logged in client is a server.
      */
     private boolean isServer() {
-        return model.getClientId().getClientType().equals(ClientType.Type.SERVER);
+        return contest.getClientId().getClientType().equals(ClientType.Type.SERVER);
     }
 
     public final Log getLog() {
@@ -1443,60 +1443,60 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
     public void generateNewAccounts(String clientTypeName, int siteNumber, int count, int startNumber, boolean active) {
         ClientType.Type type = ClientType.Type.valueOf(clientTypeName);
-        Packet packet = PacketFactory.createGenerateAccounts(model.getClientId(), getServerClientId(), siteNumber, type, count, startNumber,  active);
+        Packet packet = PacketFactory.createGenerateAccounts(contest.getClientId(), getServerClientId(), siteNumber, type, count, startNumber,  active);
         sendToLocalServer(packet);
     }
 
     public void generateNewAccounts(String clientTypeName, int count, int startNumber, boolean active) {
-        generateNewAccounts(clientTypeName, model.getSiteNumber(), count, startNumber, active);
+        generateNewAccounts(clientTypeName, contest.getSiteNumber(), count, startNumber, active);
         
     }
     
     public void submitClarification(Problem problem, String question) {
 
-        ClientId serverClientId = new ClientId(model.getSiteNumber(), Type.SERVER, 0);
-        Clarification clarification = new Clarification(model.getClientId(), problem, question);
+        ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
+        Clarification clarification = new Clarification(contest.getClientId(), problem, question);
 
-        Packet packet = PacketFactory.createClarificationSubmission(model.getClientId(), serverClientId, clarification);
+        Packet packet = PacketFactory.createClarificationSubmission(contest.getClientId(), serverClientId, clarification);
 
         sendToLocalServer(packet);
     }
 
     public void forceConnectionDrop(ConnectionHandlerID connectionHandlerID) {
         transportManager.unregisterConnection(connectionHandlerID);
-        model.connectionDropped(connectionHandlerID);
-        Packet disconnectionPacket = PacketFactory.createDroppedConnection(model.getClientId(), PacketFactory.ALL_SERVERS, connectionHandlerID);
+        contest.connectionDropped(connectionHandlerID);
+        Packet disconnectionPacket = PacketFactory.createDroppedConnection(contest.getClientId(), PacketFactory.ALL_SERVERS, connectionHandlerID);
         sendToAdministrators(disconnectionPacket);
         sendToServers(disconnectionPacket);
     }
 
     public void addNewProblem(Problem problem, ProblemDataFiles problemDataFiles) {
-        Packet updateProblemPacket = PacketFactory.createAddSetting(model.getClientId(), getServerClientId(), problem, problemDataFiles);
+        Packet updateProblemPacket = PacketFactory.createAddSetting(contest.getClientId(), getServerClientId(), problem, problemDataFiles);
         sendToLocalServer(updateProblemPacket);
     }
     
     public void updateRun(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles) {
-        Packet updateRunPacket = PacketFactory.createRunUpdated(model.getClientId(), getServerClientId(), run, judgementRecord, runResultFiles, model.getClientId());
+        Packet updateRunPacket = PacketFactory.createRunUpdated(contest.getClientId(), getServerClientId(), run, judgementRecord, runResultFiles, contest.getClientId());
         sendToLocalServer(updateRunPacket);
     }
 
     public void addProblem(Problem problem) {
-        Packet updateProblemPacket = PacketFactory.createAddSetting(model.getClientId(), getServerClientId(), problem, null);
+        Packet updateProblemPacket = PacketFactory.createAddSetting(contest.getClientId(), getServerClientId(), problem, null);
         sendToLocalServer(updateProblemPacket);
     }
 
     public void updateProblem(Problem problem) {
-        Packet updateProblemPacket = PacketFactory.createUpdateSetting(model.getClientId(), getServerClientId(), problem, null);
+        Packet updateProblemPacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), problem, null);
         sendToLocalServer(updateProblemPacket);
     }
 
     public void updateProblem(Problem problem, ProblemDataFiles problemDataFiles) {
-        Packet updateProblemPacket = PacketFactory.createUpdateSetting(model.getClientId(), getServerClientId(), problem, null);
+        Packet updateProblemPacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), problem, null);
         sendToLocalServer(updateProblemPacket);
     }
 
     public ProblemDataFiles getProblemDataFiles(Problem problem) {
-        return model.getProblemDataFile(problem);
+        return contest.getProblemDataFile(problem);
     }
 
     public void shutdownTransport() {
@@ -1504,20 +1504,20 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
 
     public void removeConnection(ConnectionHandlerID connectionHandlerID) {
-        model.connectionDropped(connectionHandlerID);
+        contest.connectionDropped(connectionHandlerID);
     }
 
     public void removeLogin(ClientId clientId) {
-        model.removeLogin(clientId);
+        contest.removeLogin(clientId);
     }
 
     public void startContest(int inSiteNumber) {
-        Packet packet = PacketFactory.createStartContestClock(model.getClientId(), getServerClientId(), inSiteNumber, model.getClientId());
+        Packet packet = PacketFactory.createStartContestClock(contest.getClientId(), getServerClientId(), inSiteNumber, contest.getClientId());
         sendToLocalServer(packet);
     }
 
     public void stopContest(int inSiteNumber) {
-        Packet packet = PacketFactory.createStopContestClock(model.getClientId(), getServerClientId(), inSiteNumber, model.getClientId());
+        Packet packet = PacketFactory.createStopContestClock(contest.getClientId(), getServerClientId(), inSiteNumber, contest.getClientId());
         sendToLocalServer(packet);
     }
 

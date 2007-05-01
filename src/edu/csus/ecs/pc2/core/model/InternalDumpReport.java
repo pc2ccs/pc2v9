@@ -27,7 +27,7 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 // $HeadURL$
 public class InternalDumpReport implements IReport {
 
-    private IContest model;
+    private IContest contest;
     private IController controller;
 
     private Log log;
@@ -36,7 +36,7 @@ public class InternalDumpReport implements IReport {
 
     private void writeReport(PrintWriter printWriter) {
         
-        ContestTime localContestTime = model.getContestTime();
+        ContestTime localContestTime = contest.getContestTime();
         
         printWriter.println();
         if (localContestTime != null){
@@ -64,9 +64,9 @@ public class InternalDumpReport implements IReport {
             Vector<Account> accounts;
 
             if (accountFilter.isThisSiteOnly()) {
-                accounts = model.getAccounts(ctype, accountFilter.getSiteNumber());
+                accounts = contest.getAccounts(ctype, accountFilter.getSiteNumber());
             } else {
-                accounts = model.getAccounts(ctype);
+                accounts = contest.getAccounts(ctype);
             }
 
             if (accounts.size() > 0) {
@@ -97,8 +97,8 @@ public class InternalDumpReport implements IReport {
 
         // Sites
         printWriter.println();
-        printWriter.println("-- " + model.getSites().length + " sites --");
-        Site[] sites = model.getSites();
+        printWriter.println("-- " + contest.getSites().length + " sites --");
+        Site[] sites = contest.getSites();
         Arrays.sort(sites, new SiteComparatorBySiteNumber());
         for (Site site1 : sites) {
             String hostName = site1.getConnectionInfo().getProperty(Site.IP_KEY);
@@ -109,22 +109,22 @@ public class InternalDumpReport implements IReport {
 
         // Problem
         printWriter.println();
-        printWriter.println("-- " + model.getProblems().length + " problems --");
-        for (Problem problem : model.getProblems()) {
+        printWriter.println("-- " + contest.getProblems().length + " problems --");
+        for (Problem problem : contest.getProblems()) {
             printWriter.println("  Problem " + problem + " id=" + problem.getElementId());
             
         }
 
         // Language
         printWriter.println();
-        printWriter.println("-- " + model.getLanguages().length + " languages --");
-        for (Language language : model.getLanguages()) {
+        printWriter.println("-- " + contest.getLanguages().length + " languages --");
+        for (Language language : contest.getLanguages()) {
             printWriter.println("  Language " + language + " id=" + language.getElementId());
         }
 
         // Runs
         printWriter.println();
-        Run[] runs = model.getRuns();
+        Run[] runs = contest.getRuns();
         Arrays.sort(runs, new RunComparator());
 
         int count = 0;
@@ -149,7 +149,7 @@ public class InternalDumpReport implements IReport {
 
         // Clarifications
         printWriter.println();
-        Clarification[] clarifications = model.getClarifications();
+        Clarification[] clarifications = contest.getClarifications();
         Arrays.sort(clarifications, new ClarificationComparator());
 
         count = 0;
@@ -172,12 +172,12 @@ public class InternalDumpReport implements IReport {
 
         // Contest Times
         printWriter.println();
-        ContestTime[] contestTimes = model.getContestTimes();
+        ContestTime[] contestTimes = contest.getContestTimes();
         Arrays.sort(contestTimes, new ContestTimeComparator());
         printWriter.println("-- " + contestTimes.length + " Contest Times --");
         for (ContestTime contestTime : contestTimes) {
 
-            if (model.getSiteNumber() == contestTime.getSiteNumber()) {
+            if (contest.getSiteNumber() == contestTime.getSiteNumber()) {
                 printWriter.print("  * ");
             } else {
                 printWriter.print("    ");
@@ -196,12 +196,12 @@ public class InternalDumpReport implements IReport {
         printWriter.println("-- Logins -- ");
         for (ClientType.Type ctype : ClientType.Type.values()) {
 
-            Enumeration<ClientId> enumeration = model.getLoggedInClients(ctype);
-            if (model.getLoggedInClients(ctype).hasMoreElements()) {
+            Enumeration<ClientId> enumeration = contest.getLoggedInClients(ctype);
+            if (contest.getLoggedInClients(ctype).hasMoreElements()) {
                 printWriter.println("Logged in " + ctype.toString());
                 while (enumeration.hasMoreElements()) {
                     ClientId aClientId = (ClientId) enumeration.nextElement();
-                    ConnectionHandlerID connectionHandlerID = model.getConnectionHandleID(aClientId);
+                    ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(aClientId);
                     printWriter.println("   " + aClientId + " on " + connectionHandlerID);
                 }
             }
@@ -209,7 +209,7 @@ public class InternalDumpReport implements IReport {
 
         // Connections
         printWriter.println();
-        ConnectionHandlerID[] connectionHandlerIDs = model.getConnectionHandleIDs();
+        ConnectionHandlerID[] connectionHandlerIDs = contest.getConnectionHandleIDs();
         // Arrays.sort(connectionHandlerIDs, new ConnectionHanlderIDComparator());
         printWriter.println("-- " + connectionHandlerIDs.length + " Connections --");
         for (ConnectionHandlerID connectionHandlerID : connectionHandlerIDs) {
@@ -273,8 +273,8 @@ public class InternalDumpReport implements IReport {
     public String getReportTitle() {
         return "Internal Dump";
     }
-    public void setModelAndController(IContest inModel, IController inController) {
-        this.model = inModel;
+    public void setContestAndController(IContest inModel, IController inController) {
+        this.contest = inModel;
         this.controller = inController;
         log = controller.getLog();
     }

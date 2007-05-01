@@ -747,7 +747,7 @@ public class FileDiffPanel implements IDiffPanel {
 
     }
 
-    public void setModelAndController(IContest inModel, IController inController) {
+    public void setContestAndController(IContest inModel, IController inController) {
         this.model = inModel;
         this.controller = inController;
         

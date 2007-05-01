@@ -194,8 +194,8 @@ public class LoginsPane extends JPanePlugin {
         loginListBox.autoSizeAllColumns();
     }
 
-    public void setModelAndController(IContest inModel, IController inController) {
-        super.setModelAndController(inModel, inController);
+    public void setContestAndController(IContest inModel, IController inController) {
+        super.setContestAndController(inModel, inController);
         
         getContest().addLoginListener(new LoginListenerImplementation());
         

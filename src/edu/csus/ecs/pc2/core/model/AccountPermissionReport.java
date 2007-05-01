@@ -20,7 +20,7 @@ import edu.csus.ecs.pc2.core.security.Permission;
 // $HeadURL$
 public class AccountPermissionReport implements IReport {
 
-    private IContest model;
+    private IContest contest;
 
     private IController controller;
 
@@ -86,8 +86,8 @@ public class AccountPermissionReport implements IReport {
         return "Account Permissions Report";
     }
 
-    public void setModelAndController(IContest inModel, IController inController) {
-        this.model = inModel;
+    public void setContestAndController(IContest inModel, IController inController) {
+        this.contest = inModel;
         this.controller = inController;
 
     }
@@ -99,15 +99,15 @@ public class AccountPermissionReport implements IReport {
     /**
      * Return all accounts for all sites.
      * 
-     * @return Array of all accounts in model.
+     * @return Array of all accounts incontest.
      */
     private Account[] getAllAccounts() {
 
         Vector<Account> allAccounts = new Vector<Account>();
 
         for (ClientType.Type ctype : ClientType.Type.values()) {
-            if (model.getAccounts(ctype).size() > 0) {
-                Vector<Account> accounts = model.getAccounts(ctype);
+            if (contest.getAccounts(ctype).size() > 0) {
+                Vector<Account> accounts = contest.getAccounts(ctype);
                 allAccounts.addAll(accounts);
             }
         }
