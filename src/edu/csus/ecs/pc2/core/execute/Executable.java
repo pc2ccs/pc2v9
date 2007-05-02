@@ -225,7 +225,7 @@ public class Executable {
                 return fileViewer;
             }
 
-            if (clearDirFirst && (!overwriteJudgesDataFiles)) {
+            if (clearDirFirst && overwriteJudgesDataFiles) {
                 // Clear directory out before compiling.
 
                 /**
