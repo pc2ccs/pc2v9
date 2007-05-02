@@ -323,7 +323,9 @@ public class SubmitRunPane extends JPanePlugin {
         if (submitRunButton == null) {
             submitRunButton = new JButton();
             submitRunButton.setEnabled(false);
-            submitRunButton.setBounds(new java.awt.Rectangle(381, 254, 74, 26));
+            submitRunButton.setLocation(new java.awt.Point(355,254));
+            submitRunButton.setSize(new java.awt.Dimension(100,26));
+            submitRunButton.setPreferredSize(new java.awt.Dimension(100,26));
             submitRunButton.setText("Submit");
             submitRunButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -598,9 +600,11 @@ public class SubmitRunPane extends JPanePlugin {
     private JButton getTestButton() {
         if (testButton == null) {
             testButton = new JButton();
-            testButton.setBounds(new java.awt.Rectangle(20, 254, 74, 26));
             testButton.setText("Test");
             testButton.setEnabled(false);
+            testButton.setLocation(new java.awt.Point(20,254));
+            testButton.setSize(new java.awt.Dimension(100,26));
+            testButton.setPreferredSize(new java.awt.Dimension(100,26));
             testButton.setVisible(true);
             testButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
