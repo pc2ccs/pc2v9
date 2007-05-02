@@ -450,7 +450,7 @@ public class RunsPanel extends JPanePlugin {
             Run runToEdit = getContest().getRun(elementId);
             
             if ((! runToEdit.getStatus().equals(RunStates.NEW)) || runToEdit.isDeleted()){
-                showMessage("Now allowed to request run, already judged");
+                showMessage("Not allowed to request run, already judged");
                 return;
             }
 
@@ -481,7 +481,7 @@ public class RunsPanel extends JPanePlugin {
             }
             
             if (runToEdit.isDeleted()){
-                showMessage("Now allowed to rejudge deleted run ");
+                showMessage("Not allowed to rejudge deleted run ");
                 return;
             }
 
