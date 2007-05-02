@@ -382,9 +382,24 @@ public class SubmitRunPane extends JPanePlugin {
 
         if (submitTheRun){
             try {
-                log.info("submitRun for "+problem+" "+language+" file: "+filename);
-                getController().submitRun(problem, language, filename);
-                
+                String confirmQuestion = "<HTML><FONT SIZE=+1>Do you wish to submit run for<BR><BR>"
+                    + "Problem:  <FONT COLOR=BLUE>"
+                    + problem
+                    + "</FONT><BR><BR>"
+                    + "Language:  <FONT COLOR=BLUE>"
+                    + language
+                    + "</FONT><BR><BR>"
+                    + "File: <FONT COLOR=BLUE>"
+                    + filename + "</FONT><BR><BR></FONT>";
+
+                int result = FrameUtilities.yesNoCancelDialog(confirmQuestion, "Confirm Submisson");
+    
+                if (result == JOptionPane.YES_OPTION) {
+    
+                    log.info("submitRun for "+problem+" "+language+" file: "+filename);
+                    getController().submitRun(problem, language, filename);
+                }
+
             } catch (Exception e) {
                 // TODO need to make this cleaner
                 JOptionPane.showMessageDialog(this, "Exception " + e.getMessage());
