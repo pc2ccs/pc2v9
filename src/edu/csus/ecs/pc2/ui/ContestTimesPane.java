@@ -112,7 +112,7 @@ public class ContestTimesPane extends JPanePlugin {
         if (contestTimeListBox == null) {
             contestTimeListBox = new MCLB();
 
-            Object[] cols = { "Site", "Running", "Remaining", "Elapsed", "Length" };
+            Object[] cols = { "Site", "State", "Remaining", "Elapsed", "Length" };
 
             contestTimeListBox.addColumns(cols);
             contestTimeListBox.autoSizeAllColumns();
@@ -139,7 +139,7 @@ public class ContestTimesPane extends JPanePlugin {
 
     protected Object[] buildContestTimeRow(ContestTime contestTime) {
 
-        // Object[] cols = { "Site", "Running", "Remaining", "Elapsed", "Length" };
+        // Object[] cols = { "Site", "State", "Remaining", "Elapsed", "Length" };
 
         int numberColumns = contestTimeListBox.getColumnCount();
         Object[] c = new String[numberColumns];
