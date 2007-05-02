@@ -16,10 +16,10 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
  */
 
 // $HeadURL$
-public final class ContestlReadOnlyProxy implements IContest {
+public final class ContestReadOnlyProxy implements IContest {
     private IContest theRealModel;
     
-    public ContestlReadOnlyProxy (IContest contest) {
+    public ContestReadOnlyProxy (IContest contest) {
         theRealModel = contest;
     }
 
@@ -723,6 +723,11 @@ public final class ContestlReadOnlyProxy implements IContest {
     }
 
     public void addLocalLogin(ClientId clientId, ConnectionHandlerID connectionHandlerID) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void addRemoteLogin(ClientId clientId, ConnectionHandlerID connectionHandlerID) {
         // TODO Auto-generated method stub
         
     }

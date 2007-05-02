@@ -2,7 +2,7 @@ package edu.csus.ecs.pc2.core.exception;
 
 /**
  * This class represents the exception which is thrown whenever
- * a ContestlReadOnlyProxy object detects an attempt to modify the
+ * a ContestReadOnlyProxy object detects an attempt to modify the
  * underlying Contest object.
  * @author pc2.ecs.csus.edu
  *
