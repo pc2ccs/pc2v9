@@ -36,6 +36,7 @@
                 <include name="LICENSE"/>
                 <include name="${version.path}"/>
                 <include name="pc2v9.ini"/>
+                <include name="pc2.ico"/>
             </zipfileset>
             <zipfileset dir="${basedir}/src" filemode="644" prefix="${release}/src">
             </zipfileset>
