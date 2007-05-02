@@ -92,19 +92,32 @@ public class AdministratorView extends JFrame implements UIPlugin {
         this.contest = inContest;
         this.controller = inController;
         
-        if (logWindow == null) {
-            logWindow = new LogWindow();
-        }
-        logWindow.setContestAndController(contest, controller);
-        logWindow.setTitle("Log "+contest.getClientId().toString());
         
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
+                if (logWindow == null) {
+                    logWindow = new LogWindow();
+                }
+                logWindow.setContestAndController(contest, controller);
+                logWindow.setTitle("Log "+contest.getClientId().toString());
+
                 RunsPanel runsPane = new RunsPanel();
                 addUIPlugin(getMainTabbedPanel(), "Runs", runsPane);
                 
-                SitesPanel sitesPanel = new SitesPanel();
-                addUIPlugin(getMainTabbedPanel(), "Sites", sitesPanel);
+                ClarificationsPane clarificationsPane = new ClarificationsPane();
+                addUIPlugin(getMainTabbedPanel(), "Clarifications", clarificationsPane);
+                
+                StandingsPane standingsPane = new StandingsPane();
+                addUIPlugin(getMainTabbedPanel(), "Standings", standingsPane);
+                
+                ReportPane reportPane = new ReportPane();
+                addUIPlugin(getMainTabbedPanel(), "Reports", reportPane);
+                
+                GenerateAccountsPane generateAccountsPane = new GenerateAccountsPane();
+                addUIPlugin(getMainTabbedPanel(), "Generate", generateAccountsPane);
+                
+                AccountsPane accountsPane = new AccountsPane();
+                addUIPlugin(getMainTabbedPanel(), "Accounts", accountsPane);
                 
                 LanguagesPane languagesPane = new LanguagesPane();
                 addUIPlugin(getMainTabbedPanel(), "Languages", languagesPane);
@@ -112,29 +125,17 @@ public class AdministratorView extends JFrame implements UIPlugin {
                 ProblemsPane problemsPane = new ProblemsPane();
                 addUIPlugin(getMainTabbedPanel(), "Problems", problemsPane);
                 
-                ClarificationsPane clarificationsPane = new ClarificationsPane();
-                addUIPlugin(getMainTabbedPanel(), "Clarifications", clarificationsPane);
-                
                 ContestTimesPane contestTimesPane = new ContestTimesPane();
                 addUIPlugin(getMainTabbedPanel(), "Times", contestTimesPane);
                 
-                GenerateAccountsPane generateAccountsPane = new GenerateAccountsPane();
-                addUIPlugin(getMainTabbedPanel(), "Generate", generateAccountsPane);
+                SitesPanel sitesPanel = new SitesPanel();
+                addUIPlugin(getMainTabbedPanel(), "Sites", sitesPanel);
                 
                 LoginsPane loginsPane = new LoginsPane();
                 addUIPlugin(getMainTabbedPanel(), "Logins", loginsPane);
                 
                 ConnectionsPane connectionsPane = new ConnectionsPane();
                 addUIPlugin(getMainTabbedPanel(), "Connections", connectionsPane);
-                
-                AccountsPane accountsPane = new AccountsPane();
-                addUIPlugin(getMainTabbedPanel(), "Accounts", accountsPane);
-                
-                ReportPane reportPane = new ReportPane();
-                addUIPlugin(getMainTabbedPanel(), "Reports", reportPane);
-                
-                StandingsPane standingsPane = new StandingsPane();
-                addUIPlugin(getMainTabbedPanel(), "Standings", standingsPane);
                 
                 OptionsPanel optionsPanel = new OptionsPanel();
                 addUIPlugin(getMainTabbedPanel(), "Options", optionsPanel);
