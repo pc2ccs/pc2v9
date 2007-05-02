@@ -184,6 +184,7 @@ public class ProblemPane extends JPanePlugin {
         if (addButton == null) {
             addButton = new JButton();
             addButton.setText("Add");
+            addButton.setMnemonic(java.awt.event.KeyEvent.VK_A);
             addButton.setEnabled(false);
             addButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -204,7 +205,7 @@ public class ProblemPane extends JPanePlugin {
         Problem newProblem = getProblemFromFields();
 
         if (newProblem == null) {
-            // new problem invalid, just reutrn, message issued earlier
+            // new problem invalid, just return, message issued earlier
             return;
         }
 
@@ -246,14 +247,17 @@ public class ProblemPane extends JPanePlugin {
             int timeOutSeconds = getIntegerValue(timeOutSecondTextField.getText());
             enableButton |= (timeOutSeconds != problem.getTimeOutInSeconds());
 
-            enableButton |= (!inputDataFileLabel.getText().equals(problem.getDataFileName()));
-            enableButton |= (!answerFileNameLabel.getText().equals(problem.getAnswerFileName()));
-
             boolean hasDataFile = problem.getDataFileName() != null;
             enableButton |= (hasDataFile == judgesHaveAnswerFiles.isSelected());
+            if (hasDataFile){
+                enableButton |= (!inputDataFileLabel.getText().equals(problem.getDataFileName()));
+            }
 
             boolean hasAnswerFile = problem.getAnswerFileName() != null;
             enableButton |= (hasAnswerFile == problemRequiresDataCheckBox.isSelected());
+            if (hasAnswerFile){
+                enableButton |= (!answerFileNameLabel.getText().equals(problem.getAnswerFileName()));
+            }
 
             enableButton |= (stdinRadioButton.isSelected() != problem.isReadInputDataFromSTDIN());
 
@@ -282,8 +286,6 @@ public class ProblemPane extends JPanePlugin {
             problem.setDisplayName(problemNameTextField.getText());
         }
         
-        ProblemDataFiles problemDataFiles = getContest().getProblemDataFile(problem);
-        
         newProblemDataFiles = new ProblemDataFiles(problem);
 
         int secs = getIntegerValue(timeOutSecondTextField.getText());
@@ -293,19 +295,21 @@ public class ProblemPane extends JPanePlugin {
 
             String fileName = inputDataFileLabel.getText();
             if (fileName.trim().length() == 0) {
-                
                 showMessage("Problem Requires Input Data checked, select a file ");
                 return null;
             }
 
             SerializedFile serializedFile = new SerializedFile(fileName);
             
-            if (serializedFile.getBuffer() != null){
-                problem.setDataFileName(serializedFile.getName());
-                newProblemDataFiles.setJudgesDataFile(serializedFile);
-            } else if (problemDataFiles.getJudgesDataFile() != null){
-                newProblemDataFiles.setJudgesDataFile(problemDataFiles.getJudgesDataFile());
+            if (serializedFile.getBuffer() == null) {
+                showMessage("Unable to read file "+fileName+" choose data file again");
+                return null;
             }
+
+            problem.setDataFileName(serializedFile.getName());
+            newProblemDataFiles.setJudgesDataFile(serializedFile);
+        } else {
+            problem.setDataFileName(null);
         }
 
         if (judgesHaveAnswerFiles.isSelected()) {
@@ -319,12 +323,15 @@ public class ProblemPane extends JPanePlugin {
 
             SerializedFile serializedFile = new SerializedFile(fileName);
             
-            if (serializedFile.getBuffer() != null){
-                problem.setAnswerFileName(serializedFile.getName());
-                newProblemDataFiles.setJudgesAnswerFile(serializedFile);
-            } else if (problemDataFiles.getJudgesAnswerFile() != null){
-                newProblemDataFiles.setJudgesAnswerFile(problemDataFiles.getJudgesAnswerFile());
+            if (serializedFile.getBuffer() == null) {
+                showMessage("Unable to read file "+fileName+" choose answer file again");
+                return null;
             }
+            
+            problem.setAnswerFileName(serializedFile.getName());
+            newProblemDataFiles.setJudgesAnswerFile(serializedFile);
+        } else {
+            problem.setAnswerFileName(null);
         }
 
         
