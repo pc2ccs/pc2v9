@@ -168,9 +168,9 @@ public class Contest implements IContest {
         contestTime.setSiteNumber(1);
         addContestTime(contestTime);
         
-        runList = new RunList(1, false);
-        runFilesList = new RunFilesList();
-        clarificationList = new ClarificationList(1, false);
+        runList = new RunList(1, true);
+        runFilesList = new RunFilesList(1);
+        clarificationList = new ClarificationList(1, true);
         
         generateNewAccounts(ClientType.Type.SERVER.toString(), 1, true);
 
