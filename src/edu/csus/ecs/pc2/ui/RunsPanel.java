@@ -234,7 +234,7 @@ public class RunsPanel extends JPanePlugin {
         if (runListBox == null) {
             runListBox = new MCLB();
 
-            Object[] cols = { "Site", "Team", "Id", "Time", "Status", "Problem", "Judge", "Language", "OS" };
+            Object[] cols = { "Site", "Team", "RunId", "Time", "Status", "Problem", "Judge", "Language", "OS" };
             runListBox.addColumns(cols);
 
             // Sorters
