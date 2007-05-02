@@ -99,7 +99,7 @@ public class ProblemPane extends JPanePlugin {
      * last directory where searched for files.
      */
     private String lastDirectory;
-
+    
     private ProblemDataFiles newProblemDataFiles;
 
     private JCheckBox useInternalValidatorCheckBox = null;
@@ -281,6 +281,9 @@ public class ProblemPane extends JPanePlugin {
         } else {
             problem.setDisplayName(problemNameTextField.getText());
         }
+        
+        ProblemDataFiles problemDataFiles = getContest().getProblemDataFile(problem);
+        
         newProblemDataFiles = new ProblemDataFiles(problem);
 
         int secs = getIntegerValue(timeOutSecondTextField.getText());
@@ -296,8 +299,13 @@ public class ProblemPane extends JPanePlugin {
             }
 
             SerializedFile serializedFile = new SerializedFile(fileName);
-            problem.setDataFileName(serializedFile.getName());
-            newProblemDataFiles.setJudgesDataFile(serializedFile);
+            
+            if (serializedFile.getBuffer() != null){
+                problem.setDataFileName(serializedFile.getName());
+                newProblemDataFiles.setJudgesDataFile(serializedFile);
+            } else if (problemDataFiles.getJudgesDataFile() != null){
+                newProblemDataFiles.setJudgesDataFile(problemDataFiles.getJudgesDataFile());
+            }
         }
 
         if (judgesHaveAnswerFiles.isSelected()) {
@@ -310,8 +318,13 @@ public class ProblemPane extends JPanePlugin {
             }
 
             SerializedFile serializedFile = new SerializedFile(fileName);
-            problem.setAnswerFileName(serializedFile.getName());
-            newProblemDataFiles.setJudgesAnswerFile(serializedFile);
+            
+            if (serializedFile.getBuffer() != null){
+                problem.setAnswerFileName(serializedFile.getName());
+                newProblemDataFiles.setJudgesAnswerFile(serializedFile);
+            } else if (problemDataFiles.getJudgesAnswerFile() != null){
+                newProblemDataFiles.setJudgesAnswerFile(problemDataFiles.getJudgesAnswerFile());
+            }
         }
 
         
@@ -365,7 +378,7 @@ public class ProblemPane extends JPanePlugin {
         Problem newProblem = getProblemFromFields();
 
         if (newProblem == null) {
-            // new problem invalid, just reutrn, message issued earlier
+            // new problem invalid, just return, message issued earlier
             return;
         }
 

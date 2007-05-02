@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.core.packet;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import edu.csus.ecs.pc2.core.model.ClientId;
 
@@ -36,6 +37,8 @@ public class Packet implements Serializable {
     private PacketType.Type type = PacketType.Type.UNKNOWN;
 
     private Serializable content = null;
+    
+    private Date createDate = new Date();
 
     // TODO change this back to protected, soon.
     public Packet(PacketType.Type type, ClientId source, ClientId destination, Serializable content) {
@@ -89,6 +92,14 @@ public class Packet implements Serializable {
 
     public String toString() {
         return "Packet[" + type + "] " + sourceId + " -> " + destinationId;
+    }
+
+    private Date getCreateDate() {
+        return createDate;
+    }
+
+    private void setCreateDate(Date createDate) {
+        this.createDate = createDate;
     }
 
 }

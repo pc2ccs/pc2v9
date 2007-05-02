@@ -1479,7 +1479,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
 
     public void updateProblem(Problem problem, ProblemDataFiles problemDataFiles) {
-        Packet updateProblemPacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), problem, null);
+        Packet updateProblemPacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), problem, problemDataFiles);
         sendToLocalServer(updateProblemPacket);
     }
 
