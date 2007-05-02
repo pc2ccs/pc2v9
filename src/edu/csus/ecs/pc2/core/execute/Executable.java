@@ -1220,7 +1220,7 @@ public class Executable {
      * @return the name of the execute directory for this client.
      */
     public String getExecuteDirectoryName() {
-        return "execute" + contest.getClientId().getName();
+        return "executesite" +contest.getClientId().getSiteNumber() + contest.getClientId().getName();
     }
 
     /**
