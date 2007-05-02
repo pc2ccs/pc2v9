@@ -166,66 +166,12 @@ public class Contest implements IContest {
         
         ContestTime contestTime = new ContestTime();
         contestTime.setSiteNumber(1);
-        contestTime.startContestClock();
         addContestTime(contestTime);
         
         runList = new RunList(1, false);
         runFilesList = new RunFilesList();
         clarificationList = new ClarificationList(1, false);
         
-        String[] probNames = { "A - Sum of Squares", "B - Sumit", "C - Hello", "D - GoodBye" };
-
-        for (String problemName : probNames) {
-            Problem problem = new Problem(problemName);
-            String baseName = problemName.substring(4).toLowerCase();
-            problem.setDataFileName(baseName +".dat");
-            problem.setAnswerFileName(baseName+".ans");
-            problem.setReadInputDataFromSTDIN(false);
-            problem.setTimeOutInSeconds(180);
-            if (baseName.equals("sumit")){
-                ProblemDataFiles problemDataFiles = new ProblemDataFiles(problem);
-
-                try {
-                    SerializedFile judgesDataFile = new SerializedFile("samps/sumit.dat");
-                    SerializedFile judgesAnswerFile = new SerializedFile("samps/sumit.ans");
-                    problemDataFiles.setJudgesDataFile(judgesDataFile);
-                    problemDataFiles.setJudgesAnswerFile(judgesAnswerFile);
-                } catch (Exception e) {
-                    System.err.println("debug Exception trying to add judge's data/ans file ");
-                    e.printStackTrace(System.err);
-                }
-                
-                addProblem(problem, problemDataFiles);
-                
-            } else {
-                addProblem(problem);
-                
-            }
-            
-            ClientId clientId = new ClientId(1, Type.ADMINISTRATOR, 1);
-            String question = "Why is problem "+problemName+" so hard ?";
-            Clarification clarification = new Clarification(clientId, problem, question);
-            acceptClarification(clarification);
-        }
-
-        // TO ALL clar
-        ClientId clientId = new ClientId(1, Type.ADMINISTRATOR, 1);
-        String question = "Why are all the problems so hard so hard ?";
-        Problem problem = getProblems()[0];
-        Clarification clarification = new Clarification(clientId, problem, question);
-        Clarification newClar = acceptClarification(clarification);
-        answerClarification(newClar, "Because We say so", clientId, true);
-
-        Language language = createLanguageFromAutoFill(LanguageAutoFill.JAVATITLE);
-        addLanguage(language);
-
-        language = createLanguageFromAutoFill(LanguageAutoFill.GNUCTITLE);
-        addLanguage(language);
-
-        language = createLanguageFromAutoFill(LanguageAutoFill.MSCTITLE);
-        addLanguage(language);
-        
-        // Generate the server account
         generateNewAccounts(ClientType.Type.SERVER.toString(), 1, true);
 
         String[] judgementNames = { "Yes", "No - Compilation Error", "No - Run-time Error", "No - Time-limit Exceeded", "No - Wrong Answer", "No - Excessive Output", "No - Output Format Error",
@@ -238,10 +184,6 @@ public class Contest implements IContest {
         
         // Add root account 
         generateNewAccounts(ClientType.Type.ADMINISTRATOR.toString(), 1, true);
-        
-        generateNewAccounts(ClientType.Type.TEAM.toString(), 5, true);
-        generateNewAccounts(ClientType.Type.JUDGE.toString(), 4, true);
-        generateNewAccounts(ClientType.Type.SCOREBOARD.toString(), 1, true);
     }
 
 
