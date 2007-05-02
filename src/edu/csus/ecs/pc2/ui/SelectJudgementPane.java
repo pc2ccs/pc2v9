@@ -671,6 +671,7 @@ public class SelectJudgementPane extends JPanePlugin {
         if (notifyTeamCheckBox == null) {
             notifyTeamCheckBox = new JCheckBox();
             notifyTeamCheckBox.setBounds(new java.awt.Rectangle(223, 174, 134, 21));
+            notifyTeamCheckBox.setSelected(true);
             notifyTeamCheckBox.setText("Notify Team");
         }
         return notifyTeamCheckBox;
