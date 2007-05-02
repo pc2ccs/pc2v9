@@ -604,7 +604,11 @@ public class SubmitRunPane extends JPanePlugin {
             testButton.setVisible(true);
             testButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    testOrSubmitRun(false);
+                    new Thread(new Runnable() {
+                        public void run() {
+                            testOrSubmitRun(false);
+                        }
+                    }).start();
                 }
             });
         }

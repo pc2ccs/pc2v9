@@ -547,7 +547,11 @@ public class RunPane extends JPanePlugin {
             executeButton.setMnemonic(java.awt.event.KeyEvent.VK_X);
             executeButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    executeRun();
+                    new Thread(new Runnable() {
+                        public void run() {
+                            executeRun();
+                        }
+                    }).start();
                 }
             });
         }
