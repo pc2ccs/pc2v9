@@ -4,6 +4,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -164,6 +165,17 @@ public class ScoreboardView extends JFrame implements UIPlugin {
             return;
         } else {
             log.fine("Sending output to " + outputDirFile.getAbsolutePath());
+        }
+        try {
+            FileOutputStream outputXML = new FileOutputStream("results.xml");
+            outputXML.write(xmlString.getBytes());
+            outputXML.close();
+        } catch (FileNotFoundException e1) {
+            log.log(Log.WARNING, "Could not write to " + "results.xml", e1);
+            e1.printStackTrace();
+        } catch (IOException e) {
+            log.log(Log.WARNING, "Problem writing to " + "results.xml", e);
+            e.printStackTrace();
         }
         // TODO consider changing this to use a filenameFilter
         String[] inputFiles = inputDir.list();
