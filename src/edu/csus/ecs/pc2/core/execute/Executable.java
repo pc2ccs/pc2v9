@@ -744,7 +744,8 @@ public class Executable {
             }
 
             if (process != null) {
-                executionData.setExecuteExitValue(process.exitValue());
+                int returnValue = process.waitFor();
+                executionData.setExecuteExitValue(returnValue);
                 process.destroy();
             }
 
