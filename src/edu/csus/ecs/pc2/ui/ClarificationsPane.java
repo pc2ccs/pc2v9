@@ -258,6 +258,7 @@ public class ClarificationsPane extends JPanePlugin {
 
     public void setContestAndController(IContest inContest, IController inController) {
         super.setContestAndController(inContest, inController);
+        answerClarificationFrame.setContestAndController(inContest, inController);
 
         initializePermissions();
         
