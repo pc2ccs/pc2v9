@@ -194,6 +194,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
         // TODO Auto-generated method stub
         int lineCount = 0;
         String[] columns;
+        showMessage("");
         try {
             FileReader fileReader = new FileReader(filename);
             BufferedReader in = new BufferedReader(fileReader);
@@ -263,6 +264,11 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
             fileReader = null;
         } catch (Exception e) {
             e.printStackTrace();
+        }
+        if (accountMap.size() > 0) {
+            getAcceptButton().setEnabled(true);
+        } else {
+            getAcceptButton().setEnabled(false);
         }
         setVisible(true);
     }
@@ -383,6 +389,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
         for (Iterator iter = accountMap.keySet().iterator(); iter.hasNext();) {
             ClientId element = (ClientId) iter.next();
             accounts[i] = accountMap.get(element);
+            i++;
         }
         controller.updateAccounts(accounts);
         this.dispose();
