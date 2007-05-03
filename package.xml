@@ -68,13 +68,11 @@
                 <exclude name="compile*"/>
                 <exclude name="sleep.exe"/>
             </zipfileset>
-<!-- XXX comment out executable samps for now
             <zipfileset dir="${samps.dir}" filemode="755" prefix="${release}/samps">
                 <include name="compile*"/>
                 <include name="sleep.exe"/>
             </zipfileset>
--->
- 
+            <zipfileset dir="${data.dir}" filemode="755" prefix="${release}/samps/data"/>
         </zip>
         <checksum file="${zip.path}" algorithm="MD5" fileext=".md5.txt"/>
         <checksum file="${zip.path}" algorithm="SHA" fileext=".sha1.txt"/>
