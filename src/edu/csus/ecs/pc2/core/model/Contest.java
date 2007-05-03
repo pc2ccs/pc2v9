@@ -916,6 +916,7 @@ public class Contest implements IContest {
     
     public void updateLanguage(Language language) {
         languageList.update(language);
+        languageDisplayList.update(language);
         LanguageEvent languageEvent = new LanguageEvent(LanguageEvent.Action.CHANGED, language);
         fireLanguageListener(languageEvent);
     }
@@ -1088,6 +1089,7 @@ public class Contest implements IContest {
     public void updateProblem(Problem problem, ProblemDataFiles problemDataFiles) {
         problemList.update(problem);
         problemDataFilesList.update(problemDataFiles);
+        problemDisplayList.update(problem);
         ProblemEvent problemEvent = new ProblemEvent(ProblemEvent.Action.CHANGED,problem, problemDataFiles);
         fireProblemListener(problemEvent);
     }
