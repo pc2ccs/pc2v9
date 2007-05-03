@@ -3,9 +3,12 @@ package edu.csus.ecs.pc2.ui;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.io.File;
+import java.io.IOException;
 import java.util.Vector;
 
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
@@ -61,6 +64,10 @@ public class AccountsPane extends JPanePlugin {
     private EditAccountFrame editAccountFrame = new EditAccountFrame();
     
     private Log log;
+
+    private String lastDir = ".";
+
+    private ReviewAccountLoadFrame reviewAccountLoadFrame;
 
     /**
      * This method initializes
@@ -398,9 +405,44 @@ public class AccountsPane extends JPanePlugin {
     }
 
     protected void loadAccountsFromDisk() {
-        // TODO Auto-generated method stub
-        showMessage("Would have loaded from disk ");
+        JFileChooser chooser = new JFileChooser(lastDir);
+//        ExtensionFileFilter filter = new ExtensionFileFilter();
+//        filter.addExtension("txt");
+//        filter.addDescription("Text Files");
+//        chooser.addChoosableFileFilter(filter);
+//        or??
+//        chooser.setFileFilter(filter);
+        int returnVal = chooser.showOpenDialog(this);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            lastDir = chooser.getCurrentDirectory().toString();
+            try {
+                File selectedFile = chooser.getSelectedFile().getCanonicalFile();
+                if (selectedFile.exists()) {
+                    if (selectedFile.isFile()) {
+                        if (selectedFile.canRead()) {
+                            getReviewAccountLoadFrame().setFile(selectedFile.toString());
+//                            showMessage("<HTML><FONT COLOR='red'>Would have loaded from disk</FONT></HTML> ");
+                        } else {
+                            log.log(Log.WARNING, "File is not readable (" + selectedFile.toString() + ")");
+                        }
+                    } else {
+                        log.log(Log.WARNING, "Selected file is not a file (" + selectedFile.toString() + ")");
+                    }
+                } else {
+                    log.log(Log.WARNING, "File does not exist (" + selectedFile.toString() + ")");
+                }
+            } catch (IOException e) {
+                log.log(Log.WARNING, "Trouble retrieving selected file (" + chooser.getSelectedFile().toString() + ")", e);
+            }
+        }
+    }
 
+    private ReviewAccountLoadFrame getReviewAccountLoadFrame() {
+        if (reviewAccountLoadFrame == null) {
+            reviewAccountLoadFrame = new ReviewAccountLoadFrame();
+            reviewAccountLoadFrame.setContestAndController(getContest(), getController());
+        }
+        return reviewAccountLoadFrame;
     }
 
     /**
