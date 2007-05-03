@@ -664,6 +664,9 @@ public class PacketHandler {
             for (Account account : accounts) {
                 if (contest.getAccount(account.getClientId()) == null) {
                     contest.addAccount(account);
+                } else {
+                    // existing account
+                    contest.updateAccount(account);
                 }
                 if (isServer()) {
                     if (contest.isLocalLoggedIn(account.getClientId())) {
