@@ -200,7 +200,11 @@ public class ClarificationsPane extends JPanePlugin {
         obj[5] = "";
         if (clar.isAnswered()) {
             obj[4] = "Answered";
-            obj[5] = getTeamDisplayName(clar.getWhoJudgedItId());
+            if (clar.getWhoJudgedItId() == null) {
+                obj[5] = "Unknown";
+            } else {
+                obj[5] = getTeamDisplayName(clar.getWhoJudgedItId());
+            }
         } else {
             obj[4] = "Not Answered";
         }

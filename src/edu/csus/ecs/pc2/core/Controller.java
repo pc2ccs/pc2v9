@@ -1490,8 +1490,10 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
 
     public void submitClarificationAnswer(Clarification clarification) {
-        // TODO Auto-generated method stub
-        
+        ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
+        Packet packet = PacketFactory.createClarificationSubmission(contest.getClientId(), serverClientId, clarification);
+
+        sendToLocalServer(packet);
     }
 
 
