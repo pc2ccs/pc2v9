@@ -19,12 +19,17 @@ import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.util.TabSeparatedValueParser;
 import javax.swing.JButton;
 
 /**
- * View Languages pane.
+ * Review Account Load Frame
  * 
+ * 1st line of load file are the column headers.
+ * Required columns are:  account, site, & password
+ * Optional columns are: displayname, group, permdisplay, & permlogin
+ * perm* are booleans, but ignored if empty
  * @author pc2@ecs.csus.edu
  */
 
@@ -59,7 +64,10 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
     private int passwordColumn = -1;
 
     private int groupColumn = -1;
+    
+    private int permDisplayColumn = -1;
 
+    private int permLoginColumn = -1;
     private static final String CHANGE_BEGIN = "";
 
     private static final String CHANGE_END = "*";
@@ -120,7 +128,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
         if (accountListBox == null) {
             accountListBox = new MCLB();
 
-            Object[] cols = { "Site", "Type", "Account Id", "Display Name", "Password" };
+            Object[] cols = { "Site", "Type", "Account Id", "Display Name", "Password", "Permissions" };
             accountListBox.addColumns(cols);
 
             /**
@@ -223,6 +231,12 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
                     if (columns[i].equalsIgnoreCase("group")) {
                         groupColumn = i;
                     }
+                    if (columns[i].equalsIgnoreCase("permdisplay")) {
+                        permDisplayColumn = i;
+                    }
+                    if (columns[i].equalsIgnoreCase("permlogin")) {
+                        permLoginColumn = i;
+                    }
                 }
                 if (accountColumn == -1 || siteColumn == -1 || passwordColumn == -1) {
                     // TODO change this to a popup
@@ -289,15 +303,30 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
             return null;
         }
         Account account = new Account(clientId, password, clientId.getSiteNumber());
-        account.setDisplayName(accountClean.getDisplayName());
+        account.clearListAndLoadPermissions(accountClean.getPermissionList());
         // TODO uncomment once account has group
         // account.setGroup(accountClean.getGroup());
+        account.setPassword(password);
         if (displayNameColumn != -1 && values.length > displayNameColumn) {
             account.setDisplayName(values[displayNameColumn]);
         }
         // if (groupColumn != -1) {
         // account.setGroup(values[groupColumn] && values.length >= groupColumn);
         // }
+        if (permDisplayColumn != -1 && values.length > permDisplayColumn && values[permDisplayColumn].length() > 0) {
+            if (Boolean.parseBoolean(values[permDisplayColumn])) {
+                account.addPermission(Permission.Type.DISPLAY_ON_SCOREBOARD);
+            } else {
+                account.removePermission(Permission.Type.DISPLAY_ON_SCOREBOARD);
+            }
+        }
+        if (permLoginColumn != -1 && values.length > permLoginColumn && values[permLoginColumn].length() > 0) {
+            if (Boolean.parseBoolean(values[permLoginColumn])) {
+                account.addPermission(Permission.Type.LOGIN);
+            } else {
+                account.removePermission(Permission.Type.LOGIN);
+            }
+        }
         return account;
     }
 
@@ -344,6 +373,15 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
             // } else {
             // s[5] = CHANGE_BEGIN + account.getGroup() + CHANGE_END;
             // }
+            s[5] = "";
+            String perms = "";
+            if (account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD)) {
+                perms = perms + "DISPLAY_ON_SCOREBOARD ";
+            }
+            if (account.isAllowed(Permission.Type.LOGIN)) {
+                perms = perms + "LOGIN ";
+            }
+            s[5] = perms.trim();
             return s;
         } catch (Exception exception) {
             StaticLog.getLog().log(Log.INFO, "Exception in buildAccountRow()", exception);
