@@ -732,4 +732,9 @@ public final class ContestReadOnlyProxy implements IContest {
         
     }
 
+    public Clarification getClarification(ElementId id) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }
