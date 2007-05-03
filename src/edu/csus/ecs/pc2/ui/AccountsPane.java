@@ -413,6 +413,7 @@ public class AccountsPane extends JPanePlugin {
 //        or??
 //        chooser.setFileFilter(filter);
         int returnVal = chooser.showOpenDialog(this);
+        String msg = "";
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             lastDir = chooser.getCurrentDirectory().toString();
             try {
@@ -421,18 +422,25 @@ public class AccountsPane extends JPanePlugin {
                     if (selectedFile.isFile()) {
                         if (selectedFile.canRead()) {
                             getReviewAccountLoadFrame().setFile(selectedFile.toString());
-//                            showMessage("<HTML><FONT COLOR='red'>Would have loaded from disk</FONT></HTML> ");
                         } else {
-                            log.log(Log.WARNING, "File is not readable (" + selectedFile.toString() + ")");
+                            msg = "File is not readable (" + selectedFile.toString() + ")";
+                            log.log(Log.WARNING, msg);
+                            showMessage("<HTML><FONT color='red'>" + msg + "</FONT></HTML>");
                         }
                     } else {
-                        log.log(Log.WARNING, "Selected file is not a file (" + selectedFile.toString() + ")");
+                        msg = "Selected file is not a file (" + selectedFile.toString() + ")";
+                        log.log(Log.WARNING, msg);
+                        showMessage("<HTML><FONT color='red'>" + msg + "</FONT></HTML>");
                     }
                 } else {
-                    log.log(Log.WARNING, "File does not exist (" + selectedFile.toString() + ")");
+                    msg = "File does not exist (" + selectedFile.toString() + ")";
+                    log.log(Log.WARNING, msg);
+                    showMessage("<HTML><FONT color='red'>" + msg + "</FONT></HTML>");
                 }
             } catch (IOException e) {
-                log.log(Log.WARNING, "Trouble retrieving selected file (" + chooser.getSelectedFile().toString() + ")", e);
+                msg = "Trouble retrieving selected file (" + chooser.getSelectedFile().toString() + ") " + e.toString();
+                log.log(Log.WARNING, msg, e);
+                showMessage("<HTML><FONT color='red'>" + msg + "</FONT></HTML>");
             }
         }
     }
