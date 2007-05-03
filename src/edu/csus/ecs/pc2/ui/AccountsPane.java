@@ -412,6 +412,7 @@ public class AccountsPane extends JPanePlugin {
 //        chooser.addChoosableFileFilter(filter);
 //        or??
 //        chooser.setFileFilter(filter);
+        showMessage("");
         int returnVal = chooser.showOpenDialog(this);
         String msg = "";
         if (returnVal == JFileChooser.APPROVE_OPTION) {

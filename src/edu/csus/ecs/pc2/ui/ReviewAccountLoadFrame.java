@@ -101,6 +101,11 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
         this.setTitle("Review Account Loading");
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setContentPane(getJPanel());
+        this.addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                handleCancel();
+            }
+        });
         
         FrameUtilities.centerFrameTop(this);
     }
@@ -174,7 +179,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
         if (messagePane == null) {
             messageLabel = new JLabel();
             messageLabel.setText("");
-            messageLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 14));
+            messageLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 12));
             messageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
             messagePane = new JPanel();
             messagePane.setLayout(new BorderLayout());
@@ -194,6 +199,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 messageLabel.setText(string);
+                messageLabel.setToolTipText(string);
             }
         });
 
@@ -267,6 +273,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
             while (line != null) {
                 try {
                     if (line.startsWith("#")) {
+                        line = in.readLine();
                         lineCount++;
                         continue;
                     }
