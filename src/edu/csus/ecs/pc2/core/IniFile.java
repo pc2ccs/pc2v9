@@ -263,6 +263,23 @@ public class IniFile {
     }
 
     /**
+    * This will try newIni as an URL 1st, if it is not a valid URL attempt as a regular file.
+    *
+    * @param newIni
+    *            name of new .ini file.
+     * @throws MalformedURLException 
+    */
+   public static void setIniURLorFile(String newIni) throws MalformedURLException {
+       try {
+           URL url = new URL(newIni);
+           setIniFileURL(url);
+       } catch (java.net.MalformedURLException e) {
+           // it better be a normal file then...
+           setIniFile(newIni);
+       }
+   }
+
+    /**
      * set a new input filename. 
      * @param newIniFile
      * @throws MalformedURLException
