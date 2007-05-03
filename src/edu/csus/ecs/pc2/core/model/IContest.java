@@ -337,7 +337,16 @@ public interface IContest {
 
     void loginDenied(ClientId clientId, ConnectionHandlerID connectionHandlerID, String message);
 
+    /**
+     * Initialize with startup data
+     */
     void initializeWithFakeData();
+
+    /**
+     * Load all submissions off disk.
+     * Intializes runs and clars into Contest.
+     */
+    void initializeSubmissions();
 
     /**
      * Fetch all runs.

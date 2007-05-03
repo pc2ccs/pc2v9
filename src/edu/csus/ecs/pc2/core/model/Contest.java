@@ -154,6 +154,24 @@ public class Contest implements IContest {
         site.setPassword("site"+nextSiteNumber);
         return site;
     }
+    
+    public void initializeSubmissions() {
+        runList = new RunList(1, true);
+        runFilesList = new RunFilesList(1);
+        clarificationList = new ClarificationList(1, true);
+        
+        try {
+            runList.loadFromDisk(1);
+        } catch (Exception e) {
+            StaticLog.log("Trouble loading runs from disk ", e);
+        }
+        try {
+            clarificationList.loadFromDisk(1);
+        } catch (Exception e) {
+            StaticLog.log("Trouble loading clarifications from disk ", e);
+        }
+        
+    }
 
     /**
      * Initialize Contest with data.

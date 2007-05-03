@@ -247,4 +247,6 @@ public interface IController {
     void updateAccount (Account account);
     
     void updateAccounts (Account [] account);
+    
+    void writeConfigToDisk ();
 }

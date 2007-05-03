@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -14,6 +15,7 @@ import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ConfigurationIO;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
@@ -183,6 +185,13 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * Is this a server module.
      */
     private boolean serverModule = false;
+    
+    private ConfigurationIO configurationIO = new ConfigurationIO(1);
+
+    /**
+     * Load and Save configuration to disk
+     */
+    private boolean saveCofigurationToDisk = true;
     
     public Controller(IContest contest) {
         super();
@@ -480,8 +489,22 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     private ClientId authenticateFirstServer(String password) {
         
         if (contest.getSites().length == 0){
-            // TODO remove this when we can populate with real data.
-            contest.initializeWithFakeData();
+            
+            boolean loadedConfiguration = false;
+            
+            if (saveCofigurationToDisk){
+                loadedConfiguration = configurationIO.loadFromDisk(1, contest, getLog());
+                contest.initializeSubmissions(); // load submissions from disk too.
+            }
+            
+            if (! loadedConfiguration){
+                contest.initializeWithFakeData();
+                log.info("initializing controller with default settings");
+                writeConfigToDisk();
+            } else {
+                log.info("Loaded configuration from disk");
+            }
+            
         }
         int newSiteNumber = getServerSiteNumber(password);
 
@@ -1145,7 +1168,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
          */
         TransportException savedTransportException = null;
         
-        String[] arguments = { "--login", "--id", "--password", "--loginUI", "--remoteServer", "--server", "--port" };
+        String[] arguments = { "--login", "--id", "--password", "--loginUI", "--remoteServer", "--server", "--port", "--nosave" };
         parseArguments = new ParseArguments(stringArray, arguments);
         
         if (parseArguments.isOptPresent("--help")){
@@ -1190,6 +1213,10 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         if (IniFile.isFilePresent()) {
             // Only read and load .ini file if it is present.
             new IniFile();
+        }
+        
+        if (parseArguments.isOptPresent("--nosave")){
+            saveCofigurationToDisk = false;
         }
 
 
@@ -1305,6 +1332,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     public void addNewSite(Site site) {
         if (isServer ()){
             contest.addSite(site);
+            writeConfigToDisk();
             Packet packet = PacketFactory.createAddSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, site);
             sendToServers(packet);
             
@@ -1574,7 +1602,18 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     public void addNewAccounts(Account[] accounts) {
         Packet addAccountPacket = PacketFactory.createAddSetting(contest.getClientId(), getServerClientId(), accounts);
         sendToLocalServer(addAccountPacket); 
+    }
+    
+    public void writeConfigToDisk (){
         
+        if (saveCofigurationToDisk) {
+            try {
+                configurationIO.saveToDisk(1, contest, getLog());
+            } catch (IOException e) {
+                System.err.println("Unable to write configuration to disk " + e.getMessage());
+                getLog().log(Log.SEVERE, "Error logging to disk ", e);
+            }
+        }
     }
     
 }

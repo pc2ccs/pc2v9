@@ -292,6 +292,9 @@ public class PacketHandler {
             } else {
                 controller.sendToRemoteServer(siteNumber, packet);
             }
+            
+            controller.writeConfigToDisk();
+
         } else {
             controller.sendToTeams(packet);
             sendToJudgesAndOthers(packet, true);
@@ -498,6 +501,10 @@ public class PacketHandler {
         
         ClientId who = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
         Integer siteNumber = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
+        
+        if (isServer()){
+            controller.writeConfigToDisk();
+        }
 
         if (isThisSite(siteNumber)){
             contest.startContest(siteNumber);
@@ -518,6 +525,11 @@ public class PacketHandler {
         ClientId who = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
         Integer siteNumber = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
 
+        if (isServer()){
+            controller.writeConfigToDisk();
+        }
+
+        
         if (isThisSite(siteNumber)){
             contest.stopContest(siteNumber);
             ContestTime updatedContestTime = contest.getContestTime(siteNumber);
@@ -600,6 +612,9 @@ public class PacketHandler {
         }
 
         if (isServer()) {
+            
+            controller.writeConfigToDisk();
+            
             Packet addPacket = PacketFactory.clonePacket(contest.getClientId(), PacketFactory.ALL_SERVERS, packet);
             boolean sendToOtherServers = isThisSite(packet.getSourceId().getSiteNumber());
             sendToJudgesAndOthers(addPacket, sendToOtherServers);
@@ -678,6 +693,9 @@ public class PacketHandler {
         }
 
         if (isServer()) {
+            
+            controller.writeConfigToDisk();
+
             Packet updatePacket = PacketFactory.clonePacket(contest.getClientId(), PacketFactory.ALL_SERVERS, packet);
             boolean sendToOtherServers = isThisSite(packet.getSourceId().getSiteNumber());
             sendToJudgesAndOthers(updatePacket, sendToOtherServers);

@@ -1,5 +1,7 @@
 package edu.csus.ecs.pc2.core.model;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Hashtable;
@@ -82,7 +84,7 @@ public class ConfigurationIO {
         this("db." + siteNumber);
     }
 
-    public void loadFromDisk(int siteNumber, IContest contest, Log log) {
+    public boolean loadFromDisk(int siteNumber, IContest contest, Log log) {
 
         Configuration configuration = new Configuration();
         
@@ -203,9 +205,18 @@ public class ConfigurationIO {
                     log.log(Log.WARNING, "Exception while loading sites ", e);
                 }   
                 
+                return true;
+                
+            } else {
+                return false;
             }
+            
+        } catch (FileNotFoundException fileNotFoundException){
+            log.info("No configuration file exists "+getFileName());
+            return false;
         } catch (Exception e) {
             log.log(Log.WARNING, "Loading configuration from disk", e);
+            return false;
         }
     }
 
@@ -268,7 +279,7 @@ public class ConfigurationIO {
         }
 
         public boolean containsKey(ConfigKeys key) {
-            return configItemHash.containsKey(key);
+            return configItemHash.containsKey(key.toString());
         }
 
         public Object get(String key) {
@@ -296,7 +307,7 @@ public class ConfigurationIO {
     }
 
     public String getFileName() {
-        return getDirectoryName() + "settings.dat";
+        return getDirectoryName() + File.separator + "settings.dat";
     }
 
 }

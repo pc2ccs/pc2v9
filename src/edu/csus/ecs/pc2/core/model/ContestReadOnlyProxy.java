@@ -737,4 +737,9 @@ public final class ContestReadOnlyProxy implements IContest {
         return null;
     }
 
+    public void initializeSubmissions() {
+        // TODO Auto-generated method stub
+        
+    }
+
 }
