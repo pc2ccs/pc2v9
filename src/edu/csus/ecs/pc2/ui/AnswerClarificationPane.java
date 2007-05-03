@@ -168,6 +168,7 @@ public class AnswerClarificationPane extends JPanePlugin {
 
         clarification.setAnswer(getAnswerTextArea().getText());
         clarification.setWhoJudgedItId(getContest().getClientId());
+        clarification.setSendToAll(getSendToAllCheckBox().isSelected());
         return clarification;
     }
 
