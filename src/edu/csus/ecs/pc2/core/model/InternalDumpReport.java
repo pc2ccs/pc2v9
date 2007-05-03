@@ -115,7 +115,8 @@ public class InternalDumpReport implements IReport {
             String hostName = site1.getConnectionInfo().getProperty(Site.IP_KEY);
             String portStr = site1.getConnectionInfo().getProperty(Site.PORT_KEY);
 
-            printWriter.println("Site " + site1.getSiteNumber() + " " + hostName + ":" + portStr + " " + site1.getDisplayName() + "/" + site1.getPassword() + " id=" + site1.getElementId());
+            printWriter.println("Site " + site1.getSiteNumber() + " " + hostName + ":" + portStr + " '" + site1.getDisplayName() + "' " 
+                    + " password='" + site1.getPassword() + "' id=" + site1.getElementId());
         }
         
         // Contest Times

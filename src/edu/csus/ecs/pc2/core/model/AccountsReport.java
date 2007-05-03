@@ -11,6 +11,7 @@ import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.security.Permission;
 
 /**
  * Print all languages info.
@@ -26,6 +27,8 @@ public class AccountsReport implements IReport {
     private IController controller;
 
     private Log log;
+    
+    private Filter accountFilter = new Filter();
 
     private void writeSummaryRow(PrintWriter printWriter, int site) {
 
@@ -44,12 +47,13 @@ public class AccountsReport implements IReport {
         printWriter.format("%7s", total);
         printWriter.println();
     }
-
-    private void writeReport(PrintWriter printWriter) {
+    
+    private void printAccountSummaryBySite (PrintWriter printWriter){
 
         Site[] sites = contest.getSites();
         Arrays.sort(sites, new SiteComparatorBySiteNumber());
 
+        // print header for summary
         printWriter.println();
         ClientType.Type[] types = ClientType.Type.values();
         printWriter.print("Site # ");
@@ -64,7 +68,57 @@ public class AccountsReport implements IReport {
             printWriter.print("Site " + site.getSiteNumber());
             writeSummaryRow(printWriter, site.getSiteNumber());
         }
+    }
 
+    private void writeReport(PrintWriter printWriter) {
+        printAccountSummaryBySite (printWriter);
+        printAccountsByGroup (printWriter);
+    }
+
+    private void printAccountsByGroup(PrintWriter printWriter) {
+
+        printWriter.println();
+        printWriter.println("-- Accounts --");
+        for (ClientType.Type ctype : ClientType.Type.values()) {
+
+            Vector<Account> accounts;
+
+            if (accountFilter.isThisSiteOnly()) {
+                accounts = contest.getAccounts(ctype, accountFilter.getSiteNumber());
+            } else {
+                accounts = contest.getAccounts(ctype);
+            }
+
+            if (accounts.size() > 0) {
+                printWriter.println();
+                printWriter.print("Accounts " + ctype.toString() + " there are " + accounts.size());
+                if (accountFilter.isThisSiteOnly()) {
+                    printWriter.print(" for site " + accountFilter.getSiteNumber());
+                }
+                printWriter.println();
+
+                for (int i = 0; i < accounts.size(); i++) {
+                    Account account = accounts.elementAt(i);
+                    printWriter.print("   Site " + account.getSiteNumber());
+                    printWriter.format(" %-15s", account.getClientId().getName());
+                    printWriter.println(" id=" + account.getElementId());
+                    
+                    printWriter.format("%22s"," ");
+                    printWriter.print("'"+account.getDisplayName()+"' password '"+account.getPassword()+"' ");
+
+                    Permission.Type type = Permission.Type.LOGIN;
+                    if (account.isAllowed(type)){
+                        printWriter.print(type+" ");
+                    }
+                    type = Permission.Type.DISPLAY_ON_SCOREBOARD;
+                    if (account.isAllowed(type)){
+                        printWriter.print(type+" ");
+                    }
+                    
+                    printWriter.println();
+                }
+            }
+        }
     }
 
     private void printHeader(PrintWriter printWriter) {
