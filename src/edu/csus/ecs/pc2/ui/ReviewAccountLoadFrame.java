@@ -257,11 +257,6 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
                 }
                 if (accountColumn == -1 || siteColumn == -1 || passwordColumn == -1) {
                     // TODO change this to a popup
-                    
-                    System.out.println("debug22 a "+accountColumn);
-                    System.out.println("debug22 s "+siteColumn);
-                    System.out.println("debug22 p "+passwordColumn);
-                    
                     String msg = "1st line should be the row headers (account, password, and site are required)";
                     showMessage(msg);
                     log.info(msg);
