@@ -422,6 +422,7 @@ public class AccountsPane extends JPanePlugin {
                     if (selectedFile.isFile()) {
                         if (selectedFile.canRead()) {
                             getReviewAccountLoadFrame().setFile(selectedFile.toString());
+                            getReviewAccountLoadFrame().setVisible(true);
                         } else {
                             msg = "File is not readable (" + selectedFile.toString() + ")";
                             log.log(Log.WARNING, msg);

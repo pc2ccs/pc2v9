@@ -79,6 +79,8 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
     private JButton cancelButton = null;
 
     private HashMap<ClientId, Account> accountMap = new HashMap<ClientId, Account>();
+
+    private String loadedFileName;
     
     /**
      * This method initializes
@@ -99,6 +101,8 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
         this.setTitle("Review Account Loading");
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setContentPane(getJPanel());
+        
+        FrameUtilities.centerFrameTop(this);
     }
 
     /**
@@ -170,6 +174,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
         if (messagePane == null) {
             messageLabel = new JLabel();
             messageLabel.setText("");
+            messageLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 14));
             messageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
             messagePane = new JPanel();
             messagePane.setLayout(new BorderLayout());
@@ -199,7 +204,9 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
     }
 
     public void setFile(String filename) {
-        // TODO Auto-generated method stub
+        
+        loadedFileName = filename;
+        log.info("Attempting to load accounts from file: "+filename);
         int lineCount = 0;
         String[] columns;
         showMessage("");
@@ -207,6 +214,10 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
             FileReader fileReader = new FileReader(filename);
             BufferedReader in = new BufferedReader(fileReader);
             String line = in.readLine();
+            while (line != null && line.startsWith("#")){
+                line = in.readLine();
+                lineCount++;
+            }
             lineCount++;
             if (line != null) {
                 columns = TabSeparatedValueParser.parseLine(line);
@@ -240,6 +251,11 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
                 }
                 if (accountColumn == -1 || siteColumn == -1 || passwordColumn == -1) {
                     // TODO change this to a popup
+                    
+                    System.out.println("debug22 a "+accountColumn);
+                    System.out.println("debug22 s "+siteColumn);
+                    System.out.println("debug22 p "+passwordColumn);
+                    
                     String msg = "1st line should be the row headers (account, password, and site are required)";
                     showMessage(msg);
                     log.info(msg);
@@ -250,12 +266,16 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
             lineCount++;
             while (line != null) {
                 try {
+                    if (line.startsWith("#")) {
+                        lineCount++;
+                        continue;
+                    }
                     String[] values = TabSeparatedValueParser.parseLine(line);
                     Account account = getAccount(values);
                     if (account == null) {
                         // TODO change this to a popup
                         String msg = filename + ":" + lineCount + ": " + " please create the account first (" + values[accountColumn] + ")";
-                        showMessage("<HTML><FONT COLOR='red'>" + msg + "</FONT></HTML>");
+                        showErrorMessage(msg);
                         log.info(msg);
                         break;
                     }
@@ -264,8 +284,8 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
                 } catch (Exception e) {
                     // TODO change this to a popup
                     String msg = filename + ":" + lineCount + ": " + e.getMessage();
-                    e.printStackTrace();
-                    showMessage("<HTML><FONT COLOR='red'>" + msg + "</FONT></HTML>");
+                    log.log(Log.INFO,"Error " + filename + ":" + lineCount + ": " + e.getMessage(), e);
+                    showErrorMessage(msg);
                     log.info(msg);
                     break;
                 }
@@ -277,7 +297,8 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
             in = null;
             fileReader = null;
         } catch (Exception e) {
-            e.printStackTrace();
+            showErrorMessage("Error in loading accounts, check log");
+            log.log(Log.WARNING, "Exception in load accounts", e);
         }
         if (accountMap.size() > 0) {
             getAcceptButton().setEnabled(true);
@@ -285,6 +306,10 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
             getAcceptButton().setEnabled(false);
         }
         setVisible(true);
+    }
+    
+    private void showErrorMessage(String msg){
+        showMessage("<HTML><FONT COLOR='red'>" + msg + "</FONT></HTML>");
     }
 
     Account getAccount(String[] values) {
@@ -411,6 +436,8 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
         if (acceptButton == null) {
             acceptButton = new JButton();
             acceptButton.setText("Accept");
+            acceptButton.setMnemonic(java.awt.event.KeyEvent.VK_A);
+            acceptButton.setEnabled(false);
             acceptButton.setPreferredSize(new java.awt.Dimension(100, 26));
             acceptButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -430,6 +457,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
             i++;
         }
         controller.updateAccounts(accounts);
+        log.info("Loaded "+accounts.length+" from file "+loadedFileName);
         this.dispose();
     }
 
@@ -458,6 +486,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
         if (cancelButton == null) {
             cancelButton = new JButton();
             cancelButton.setText("Cancel");
+            cancelButton.setMnemonic(java.awt.event.KeyEvent.VK_C);
             cancelButton.setPreferredSize(new java.awt.Dimension(100, 26));
             cancelButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {

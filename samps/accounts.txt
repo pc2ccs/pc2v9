@@ -1,0 +1,12 @@
+#
+# Account load sample file
+#
+# $HeadURL$
+#
+site	account	password	displayname	permlogin
+1	team1	first	Team ONE from CSUS	true
+1	team3	first	Team THREE from CSUS	true
+1	team4	first	Team FOUR from CSUS	false
+1	administrator1	hookie	root	true
+1	judge4	jfour	I am THE Judge	true
+# eof $Id$
