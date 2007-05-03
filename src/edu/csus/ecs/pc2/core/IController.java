@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.core;
 
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
@@ -218,4 +219,12 @@ public interface IController {
     void addNewLanguage(Language language);
     
     void updateLanguage(Language language);
+
+    void addNewAccount (Account account);
+    
+    void addNewAccounts (Account [] account);
+    
+    void updateAccount (Account account);
+    
+    void updateAccounts (Account [] account);
 }

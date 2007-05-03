@@ -987,6 +987,16 @@ public final class PacketFactory {
         Packet packet = new Packet(Type.ADD_SETTING, source, destination, prop);
         return packet;
     }
+    
+    public static Packet createUpdateSetting(ClientId source, ClientId destination, Account [] accounts) {
+        Properties prop = new Properties();
+        prop.put(CLIENT_ID, source);
+        prop.put(SITE_NUMBER, source.getSiteNumber());
+        prop.put(ACCOUNT_ARRAY, accounts);
+        Packet packet = new Packet(Type.UPDATE_SETTING, source, destination, prop);
+        return packet;
+    }
+
 
     /**
      * Create packet for {@link PacketType.Type#ADD_SETTING }.
@@ -1403,7 +1413,7 @@ public final class PacketFactory {
      * @param destination
      * @param inContestTime
      */
-    public static Packet createUpdateSettings(ClientId source, ClientId destination, ContestTime inContestTime) {
+    public static Packet createUpdateSetting(ClientId source, ClientId destination, ContestTime inContestTime) {
         Properties prop = new Properties();
         prop.put(PacketType.CONTEST_TIME, inContestTime);
         Packet packet = new Packet(Type.UPDATE_SETTING, source, destination, prop);
@@ -1434,7 +1444,7 @@ public final class PacketFactory {
         prop.put(ACCOUNT_ARRAY, accounts);
         return createPacket(PacketType.Type.ADD_SETTING, source, destination, prop);
     }
-
+    
     public static Packet createRunJudgmentUpdate(ClientId source, ClientId destination, Run run, ClientId whoJudgedId) {
         Properties prop = new Properties();
         prop.put(CLIENT_ID, whoJudgedId);
@@ -1445,19 +1455,18 @@ public final class PacketFactory {
     /**
      * Clone packet from existing packet.
      * 
-     * Can reassign source and destination
+     * Can reassign source and destination with affecting contents.
      * 
      * @param source
      * @param destination
      * @param packet
      * @return
      */
-    
     public static Packet clonePacket(ClientId source, ClientId destination, Packet packet) {
         return createPacket(packet.getType(), source, destination, (Properties) packet.getContent());
     }
 
-    public static Packet createUpdateSettings(ClientId source, ClientId destination, Judgement judgement) {
+    public static Packet createUpdateSetting(ClientId source, ClientId destination, Judgement judgement) {
         Properties prop = new Properties();
         prop.put(JUDGEMENT, judgement);
         return createPacket(PacketType.Type.RUN_JUDGEMENT_UPDATE, source, destination, prop);

@@ -1535,8 +1535,29 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
     
     public void updateJudgement (Judgement judgement) {
-        Packet updatePacket = PacketFactory.createUpdateSettings(contest.getClientId(), getServerClientId(), judgement);
+        Packet updatePacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), judgement);
         sendToLocalServer(updatePacket);
+    }
+
+    public void updateAccount(Account account) {
+        Packet updatePacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), account);
+        sendToLocalServer(updatePacket);
+    }
+
+    public void updateAccounts(Account[] accounts) {
+        Packet updatePacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), accounts);
+        sendToLocalServer(updatePacket);
+    }
+
+    public void addNewAccount(Account account) {
+        Packet addAccountPacket = PacketFactory.createAddSetting(contest.getClientId(), getServerClientId(), account);
+        sendToLocalServer(addAccountPacket); 
+    }
+
+    public void addNewAccounts(Account[] accounts) {
+        Packet addAccountPacket = PacketFactory.createAddSetting(contest.getClientId(), getServerClientId(), accounts);
+        sendToLocalServer(addAccountPacket); 
+        
     }
     
 }
