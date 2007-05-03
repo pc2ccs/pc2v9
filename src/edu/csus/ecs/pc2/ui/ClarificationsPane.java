@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
@@ -11,6 +12,7 @@ import com.ibm.webrunner.j2mclb.util.HeapSorter;
 import com.ibm.webrunner.j2mclb.util.NumericStringComparator;
 
 import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.Clarification;
@@ -21,6 +23,7 @@ import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IClarificationListener;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
 
@@ -56,6 +59,12 @@ public class ClarificationsPane extends JPanePlugin {
 
     private JButton answerButton = null;
 
+    private JPanel messagePane = null;
+
+    private JLabel messageLabel = null;
+    
+    private AnswerClarificationFrame answerClarificationFrame;
+    
     /**
      * This method initializes
      * 
@@ -73,7 +82,10 @@ public class ClarificationsPane extends JPanePlugin {
         this.setLayout(new BorderLayout());
         this.setSize(new java.awt.Dimension(622,229));
         this.add(getClarificationListBox(), java.awt.BorderLayout.CENTER);
+        this.add(getMessagePane(), java.awt.BorderLayout.NORTH);
         this.add(getClarificationButtonPane(), java.awt.BorderLayout.SOUTH);
+        
+        answerClarificationFrame = new AnswerClarificationFrame();
 
     }
 
@@ -294,7 +306,8 @@ public class ClarificationsPane extends JPanePlugin {
             giveButton.setMnemonic(java.awt.event.KeyEvent.VK_G);
             giveButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.out.println("actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+                    // TODO code give
+                    showMessage("Give not implemented");
                 }
             });
         }
@@ -313,7 +326,8 @@ public class ClarificationsPane extends JPanePlugin {
             takeButton.setMnemonic(java.awt.event.KeyEvent.VK_T);
             takeButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.out.println("actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+                    // TODO code take clar
+                    showMessage("Take not implemented");
                 }
             });
         }
@@ -332,7 +346,8 @@ public class ClarificationsPane extends JPanePlugin {
             editButton.setMnemonic(java.awt.event.KeyEvent.VK_E);
             editButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.out.println("actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+                    // TODO code edit clarification
+                    showMessage("Edit not implemented");
                 }
             });
         }
@@ -351,7 +366,8 @@ public class ClarificationsPane extends JPanePlugin {
             generateClarificationButton.setMnemonic(java.awt.event.KeyEvent.VK_N);
             generateClarificationButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.out.println("actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+                    // TODO code generate new clar
+                    showMessage("Generate New Clar not implemented, yet");
                 }
             });
         }
@@ -367,6 +383,12 @@ public class ClarificationsPane extends JPanePlugin {
         if (filterButton == null) {
             filterButton = new JButton();
             filterButton.setText("Filter");
+            filterButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    reloadListBox();
+                    showMessage("");
+                }
+            });
         }
         return filterButton;
     }
@@ -431,11 +453,67 @@ public class ClarificationsPane extends JPanePlugin {
             answerButton.setMnemonic(java.awt.event.KeyEvent.VK_A);
             answerButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.out.println("actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+                    requestSelectedClarification();
                 }
             });
         }
         return answerButton;
     }
 
+    protected void requestSelectedClarification() {
+
+        int [] selectedIndexes = clarificationListBox.getSelectedIndexes();
+        
+        if (selectedIndexes.length < 1){
+            showMessage("Please select a run ");
+            return;
+        }
+        
+        try {
+            ElementId elementId = (ElementId) clarificationListBox.getKeys()[selectedIndexes[0]];
+            Clarification clarificationToAnswer  = getContest().getClarification(elementId);
+            
+            
+            if ((! clarificationToAnswer.getState().equals(ClarificationStates.NEW)) || clarificationToAnswer.isDeleted()){
+                showMessage("Not allowed to request run, already judged");
+                return;
+            }
+
+            answerClarificationFrame.setClarification(clarificationToAnswer);
+            answerClarificationFrame.setVisible(true);
+        } catch (Exception e) {
+            getController().getLog().log(Log.WARNING, "Exception logged ", e);
+            showMessage("Unable to answer clarification, check log");
+        }   
+    }
+
+    /**
+     * This method initializes messagePane
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getMessagePane() {
+        if (messagePane == null) {
+            messageLabel = new JLabel();
+            messageLabel.setText("JLabel");
+            messageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+            messagePane = new JPanel();
+            messagePane.setLayout(new BorderLayout());
+            messagePane.setPreferredSize(new java.awt.Dimension(32,32));
+            messagePane.add(messageLabel, java.awt.BorderLayout.CENTER);
+        }
+        return messagePane;
+    }
+    
+    private void showMessage(final String string) {
+
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                messageLabel.setText(string);
+                messageLabel.setToolTipText(string);
+            }
+        });
+    }
+    
+    
 } // @jve:decl-index=0:visual-constraint="10,10"

@@ -399,6 +399,8 @@ public interface IContest {
      */
     void availableRun(Run run);
     
+    Clarification getClarification(ElementId id);
+    
     /**
      * Fetch all clarifications.
      */

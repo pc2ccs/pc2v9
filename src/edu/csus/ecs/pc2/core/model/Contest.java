@@ -641,6 +641,10 @@ public class Contest implements IContest {
     public Run getRun(ElementId id) {
         return runList.get(id);
     }
+    
+    public Clarification getClarification(ElementId id){
+        return clarificationList.get(id);
+    }
 
     public Vector<Account> getAccounts(Type type, int inSiteNumber) {
         return accountList.getAccounts(type, inSiteNumber);
