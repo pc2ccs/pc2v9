@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.core;
 
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
@@ -191,7 +192,26 @@ public interface IController {
      * @param question
      */
     void submitClarification(Problem problem, String question);
-
+    
+    /**
+     * Request clarification to answer.
+     * @param clarification
+     * @param readOnly
+     */
+    void checkOutClarification (Clarification clarification, boolean readOnly);
+    
+    /**
+     * Cancel requested clarification.
+     * @param clarification
+     */
+    void cancelClarification (Clarification clarification);
+    
+    /**
+     * Answer a clarification.
+     * @param clarification
+     */
+    void submitClarificationAnswer (Clarification clarification);
+    
     /**
      * Force connection off.
      * 

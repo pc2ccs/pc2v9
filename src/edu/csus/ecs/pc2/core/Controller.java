@@ -1449,6 +1449,23 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
         sendToLocalServer(packet);
     }
+    
+
+    public void checkOutClarification(Clarification clarification, boolean readOnly) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void cancelClarification(Clarification clarification) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void submitClarificationAnswer(Clarification clarification) {
+        // TODO Auto-generated method stub
+        
+    }
+
 
     public void forceConnectionDrop(ConnectionHandlerID connectionHandlerID) {
         transportManager.unregisterConnection(connectionHandlerID);
