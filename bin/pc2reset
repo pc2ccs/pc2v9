@@ -1,0 +1,12 @@
+#!/bin/sh
+#
+# Purpose: resets contest status.
+# Author : pc2@ecs.csus.edu
+# $HeadURL$
+#
+
+. `dirname $0`/pc2env
+
+pc2zip
+
+# eof pc2reset $Id$ 
