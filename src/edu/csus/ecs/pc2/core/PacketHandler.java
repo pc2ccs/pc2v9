@@ -299,6 +299,10 @@ public class PacketHandler {
             controller.sendToTeams(packet);
             sendToJudgesAndOthers(packet, true);
         }
+        
+        if (isServer()){
+            controller.writeConfigToDisk();
+        }
     }
 
     private boolean isThisSite(ClientId sourceId) {
@@ -502,10 +506,6 @@ public class PacketHandler {
         ClientId who = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
         Integer siteNumber = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
         
-        if (isServer()){
-            controller.writeConfigToDisk();
-        }
-
         if (isThisSite(siteNumber)){
             contest.startContest(siteNumber);
             ContestTime updatedContestTime = contest.getContestTime(siteNumber);
@@ -513,8 +513,13 @@ public class PacketHandler {
             Packet startContestPacket = PacketFactory.createContestStarted(contest.getClientId(), PacketFactory.ALL_SERVERS, updatedContestTime.getSiteNumber(), who);
             controller.sendToTeams(startContestPacket);
             sendToJudgesAndOthers(startContestPacket, true);
+            
         } else {
             controller.sendToRemoteServer(siteNumber, packet);
+        }
+        
+        if (isServer()){
+            controller.writeConfigToDisk();
         }
     }
 
@@ -524,11 +529,6 @@ public class PacketHandler {
     private void stopContest(Packet packet) {
         ClientId who = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
         Integer siteNumber = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
-
-        if (isServer()){
-            controller.writeConfigToDisk();
-        }
-
         
         if (isThisSite(siteNumber)){
             contest.stopContest(siteNumber);
@@ -537,8 +537,13 @@ public class PacketHandler {
             Packet stopContestPacket = PacketFactory.createContestStopped(contest.getClientId(), PacketFactory.ALL_SERVERS, updatedContestTime.getSiteNumber(), who);
             controller.sendToTeams(stopContestPacket);
             sendToJudgesAndOthers(stopContestPacket, true);
+            
         } else {
             controller.sendToRemoteServer(siteNumber, packet);
+        }
+        
+        if (isServer()){
+            controller.writeConfigToDisk();
         }
     }
 
