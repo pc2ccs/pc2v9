@@ -7,6 +7,17 @@
 
 . `dirname $0`/pc2env
 
-pc2zip
+if [ -f VERSION ] ; then
+	if [ -f bin/pc2zip ] ; then
+	   bin/pc2zip
+	   rm -fr logs packets db.* execute*
+	   rm -fr reports*.txt
+	else
+	   echo could not find bin/pc2zip
+	fi 
+else
+	echo Not in directory to reset, should be run from dir with VERSION
+fi 
+
 
 # eof pc2reset $Id$ 
