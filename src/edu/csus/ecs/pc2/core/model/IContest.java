@@ -420,7 +420,9 @@ public interface IContest {
      * @param clarification
      */
     void addClarification(Clarification clarification);
-    
+
+    void addClarification(Clarification clarification, ClientId whoCheckedOutId);
+
     /**
      * add new clarification onto server. 
      * 
@@ -431,6 +433,8 @@ public interface IContest {
     
     void answerClarification (Clarification clarification, String answer, ClientId whoAnsweredIt, boolean sendToAll);
 
+    void updateClarification (Clarification clarification, ClientId whoChangedIt);
+    
     /**
      * remove clarification from model.
      * @param clarification
@@ -463,6 +467,8 @@ public interface IContest {
     Clarification[] getClarifications(ClientId clientId);
 
     Run[] getRuns(ClientId clientId);
+
+    void cancelClarificationCheckOut(Clarification clarification, ClientId whoCancelledIt);
 
  
 

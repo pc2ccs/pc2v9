@@ -270,8 +270,13 @@ public class AnswerClarificationPane extends JPanePlugin {
         this.clarification = inClarification;
         this.fetchedFromServer = checkedOut;
 
-        showMessage("Waiting for clarification...");
-        FrameUtilities.waitCursor(this);
+        if (checkedOut){
+            showMessage("");
+            FrameUtilities.regularCursor(this);
+        }else{
+            showMessage("Waiting for clarification...");
+            FrameUtilities.waitCursor(this);
+        }
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -311,13 +316,21 @@ public class AnswerClarificationPane extends JPanePlugin {
     }
 
     protected void enableUpdateButtons(boolean editedText) {
-        if (editedText) {
-            cancelButton.setText("Cancel");
-        } else {
-            cancelButton.setText("Close");
-        }
+        
+        if (fetchedFromServer){
+            if (editedText) {
+                cancelButton.setText("Cancel");
+            } else {
+                cancelButton.setText("Close");
+            }
 
-        okButton.setEnabled(editedText);
+            okButton.setEnabled(editedText);
+            defaultAnswerButton.setEnabled(false);
+        } else  {
+            okButton.setEnabled(editedText);
+            defaultAnswerButton.setEnabled(true);
+
+        }
     }
 
     /**
@@ -379,23 +392,6 @@ public class AnswerClarificationPane extends JPanePlugin {
         // TODO code extract clarification
     }
 
-    public void setClarificationAndFiles(Clarification theClarification) {
-
-        FrameUtilities.regularCursor(this);
-
-        showMessage("");
-        log.info("Fetched clarification " + theClarification + " to edit");
-
-        clarification = theClarification;
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                populateGUI(clarification);
-                enableUpdateButtons(false);
-            }
-        });
-
-    }
-
     private boolean isAllowed(Permission.Type type) {
         return permissionList.isAllowed(type);
     }
@@ -440,8 +436,10 @@ public class AnswerClarificationPane extends JPanePlugin {
         if (defaultAnswerButton == null) {
             defaultAnswerButton = new JButton();
             defaultAnswerButton.setText("Default Answer");
+            defaultAnswerButton.setToolTipText("No response, read problem statement");
             defaultAnswerButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
+                    answerTextArea.setText("No response, read problem statement");
                     updateClarification();
                 }
             });

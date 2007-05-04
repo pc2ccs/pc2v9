@@ -481,6 +481,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         } else {
 
             // Client login
+            info("Contacting server at " + remoteHostName + ":" + remoteHostPort);
             info("Sending login request to Server as " + clientId); // TODO debug remove this
             sendLoginRequest(transportManager, clientId, password);
         }
@@ -550,8 +551,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             manager.send(loginPacket, connectionHandlerID);
             info("sendLoginRequest ConId end - packet sent.");
         } catch (TransportException e) {
-            // TODO log exception
-            e.printStackTrace();
+            info("Exception sendLoginRequest",e);
         }
     }
 
@@ -570,8 +570,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             manager.send(loginPacket);
             info("sendLoginRequest end - packet sent.");
         } catch (TransportException e) {
-            // TODO log exception
-            e.printStackTrace();
+            info (" sendLoginRequest exception ",e);
         }
     }
 
@@ -969,7 +968,6 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                 info("receiveObject(S) Unsupported class received: " + object.getClass().getName());
             }
         } catch (Exception e) {
-            // TODO: log handle exception
             String message = "Unable to start main UI, contact staff";
             
             if (loginUI != null ){
@@ -1083,7 +1081,6 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             return Integer.parseInt(portStr);
 
         } catch (Exception e) {
-            // TODO: log handle exception
             info("Exception logged ", e);
             throw new SecurityException("Unable to determine port for site " + inSiteNumber);
         }
@@ -1387,7 +1384,6 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             sendLoginRequest(transportManager, connectionHandlerID, getServerClientId(), localPassword);
             
         } catch (Exception e) {
-            // TODO: log handle exception
             info("Unable to login to site "+inSiteNumber, e);
         }
 
@@ -1480,13 +1476,15 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     
 
     public void checkOutClarification(Clarification clarification, boolean readOnly) {
-        // TODO Auto-generated method stub
-        
+        ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
+        Packet packet = PacketFactory.createClarificationRequest(contest.getClientId(), serverClientId, clarification.getElementId(), contest.getClientId());
+        sendToLocalServer(packet);
     }
 
     public void cancelClarification(Clarification clarification) {
-        // TODO Auto-generated method stub
-        
+        ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
+        Packet packet = PacketFactory.createUnCheckoutClarification(contest.getClientId(), serverClientId, clarification);
+        sendToLocalServer(packet);
     }
 
     public void submitClarificationAnswer(Clarification clarification) {

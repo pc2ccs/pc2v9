@@ -882,6 +882,8 @@ public final class PacketFactory {
         Packet packet = new Packet(Type.CLARIFICATION_REQUEST, source, destination, props);
         return packet;
     }
+    
+    
 
     /**
      * Create packet for {@link PacketType.Type#CLARIFICATION_CHECKOUT}.
@@ -956,6 +958,7 @@ public final class PacketFactory {
         Properties prop = new Properties();
         prop.put(CLARIFICATION, clarification);
         prop.put(CLARIFICATION_ANSWER, answer);
+        prop.put(CLIENT_ID, source);
         Packet packet = new Packet(Type.CLARIFICATION_ANSWER, source, destination, prop);
         return packet;
     }
@@ -1478,6 +1481,14 @@ public final class PacketFactory {
         prop.put(CLARIFICATION, clarification);
         prop.put(CLARIFICATION_ANSWER, answer);
         Packet packet = new Packet(Type.CLARIFICATION_ANSWER_UPDATE, source, destination, prop);
+        return packet;
+    }
+
+    public static Packet createClarificationNotAvailable(ClientId source, ClientId destination, Clarification clarification, ClientId requestFromId2) {
+        Properties prop = new Properties();
+        prop.put(CLIENT_ID, requestFromId2);
+        prop.put(CLARIFICATION, clarification);
+        Packet packet = new Packet(Type.CLARIFICATION_NOT_AVAILABLE, source, destination, prop);
         return packet;
     }
 

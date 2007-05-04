@@ -18,6 +18,7 @@ import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClarificationEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IClarificationListener;
@@ -197,16 +198,25 @@ public class ClarificationsPane extends JPanePlugin {
         obj[2] = clar.getNumber();
         obj[3] = clar.getElapsedMins();
         
+        boolean isTeam = getContest().getClientId().getClientType().equals(ClientType.Type.TEAM);
+        
+        if (isTeam) {
+            obj[4] = "New";
+            if (clar.isAnswered()){
+                obj[4] = "Answered";
+            }
+        } else {
+            obj[4] = clar.getState();
+        }
+        
         obj[5] = "";
         if (clar.isAnswered()) {
-            obj[4] = "Answered";
-            if (clar.getWhoJudgedItId() == null) {
-                obj[5] = "Unknown";
+            
+            if (clar.getWhoJudgedItId() == null || isTeam) {
+                obj[5] = "";
             } else {
                 obj[5] = getTeamDisplayName(clar.getWhoJudgedItId());
             }
-        } else {
-            obj[4] = "Not Answered";
         }
 
         if (clar.isSendToAll()) {

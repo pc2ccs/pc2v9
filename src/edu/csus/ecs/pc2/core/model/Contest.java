@@ -474,9 +474,10 @@ public class Contest implements IContest {
         fireClarificationListener(clarificationEvent);
     }
     
-    public void updateClarification (Clarification clarification){
+    public void updateClarification (Clarification clarification, ClientId whoChangedIt) {
         clarificationList.updateClarification(clarification);
         ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.CHANGED, clarification);
+        clarificationEvent.setWhoModifiedClarification(whoChangedIt);
         fireClarificationListener(clarificationEvent);
     }
     
@@ -1037,6 +1038,14 @@ public class Contest implements IContest {
         ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.ADDED, clarification);
         fireClarificationListener(clarificationEvent);
     }
+    
+    public void addClarification(Clarification clarification, ClientId whoCheckedOutId) {
+        clarificationList.add(clarification);
+        ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.CHANGED, clarification);
+        clarificationEvent.setWhoModifiedClarification(whoCheckedOutId);
+        fireClarificationListener(clarificationEvent);
+    }
+
 
     public void removeClarification(Clarification clarification) {
         clarificationList.delete(clarification);
@@ -1124,6 +1133,10 @@ public class Contest implements IContest {
         return problemDataFilesList.getList();
     }
 
-
-    
+    public void cancelClarificationCheckOut(Clarification clarification, ClientId whoCancelledIt) {
+        clarificationList.updateClarification(clarification, ClarificationStates.NEW, whoCancelledIt);
+        Clarification theClarification = clarificationList.get(clarification);
+        ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.CLARIFICATION_AVIALABLE, theClarification);
+        fireClarificationListener(clarificationEvent);
+    }
 }

@@ -8,6 +8,7 @@ import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestTime;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.ISubmission;
 import edu.csus.ecs.pc2.core.model.Judgement;
@@ -20,6 +21,7 @@ import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.Site;
+import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.packet.PacketFactory;
@@ -108,16 +110,36 @@ public class PacketHandler {
             // Send to clients and other servers
             sendToJudgesAndOthers(confirmPacket, true);
 
-        } else if (packetType.equals(Type.CLARIFICATION_SUBMISSION)) {
+        } else if (packetType.equals(Type.CLARIFICATION_ANSWER)) {
+            // Answer from client to server
             answerClarification (packet);
             
         } else if (packetType.equals(Type.CLARIFICATION_ANSWER_UPDATE)) {
+            // Answer from server to client
             sendAnswerClarification (packet);
             
         } else if (packetType.equals(Type.CLARIFICATION_SUBMISSION_CONFIRM)) {
             Clarification clarification = (Clarification)  PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION);
             contest.addClarification(clarification);
             sendToJudgesAndOthers( packet, isThisSite(clarification));
+            
+        } else if (packetType.equals(Type.CLARIFICATION_UNCHECKOUT)) {
+            // Clarification cancel or uncheckout, client to server
+            cancelClarificationCheckOut(packet);
+
+        } else if (packetType.equals(Type.CLARIFICATION_CHECKOUT)) {
+            // The clarification that was checked out, sent from server to clients
+            Clarification clarification = (Clarification)  PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION);
+            ClientId whoCheckedOut = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+            
+            contest.updateClarification(clarification, whoCheckedOut);
+            if (isServer()){
+                sendToJudgesAndOthers( packet, false);
+            }
+            
+        } else if (packetType.equals(Type.CLARIFICATION_AVAILABLE)) {
+            // Server to client, run was canceled, now available
+            sendClarificationAvailable(packet);
             
         } else if (packetType.equals(Type.LOGIN_FAILED)) {
             String message = PacketFactory.getStringValue(packet, PacketFactory.MESSAGE_STRING);
@@ -160,7 +182,9 @@ public class PacketHandler {
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
             contest.availableRun(run);
 
-            sendToJudgesAndOthers( packet, isThisSite(run));
+            if (isServer()){
+                sendToJudgesAndOthers( packet, isThisSite(run));
+            }
 
         } else if (packetType.equals(Type.RUN_JUDGEMENT)) {
             // Judgement from judge to server
@@ -230,6 +254,9 @@ public class PacketHandler {
             
             sendToJudgesAndOthers( packet, false);
 
+        } else if (packetType.equals(Type.CLARIFICATION_REQUEST)) {
+            requestClarification(packet);
+
         } else if (packetType.equals(Type.RUN_REQUEST)) {
             // Request Run from requestor to server
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
@@ -278,7 +305,6 @@ public class PacketHandler {
         info("handlePacket end " + packet);
 
     }
-    
 
     private void updateContestClock(Packet packet) {
 
@@ -458,13 +484,24 @@ public class PacketHandler {
         }
     }
     
-    private void sendAnswerClarification (Packet packet){
-        Clarification clarification = (Clarification)  PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION);
+    private void sendAnswerClarification(Packet packet) {
+        Clarification clarification = (Clarification) PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION);
         ClientId whoModifiedClarification = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
 
-        if (isServer()){
+        if (isServer()) {
             contest.answerClarification(clarification, clarification.getAnswer(), whoModifiedClarification, clarification.isSendToAll());
             sendToJudgesAndOthers(packet, false);
+
+            if (clarification.isSendToAll()) {
+                // Send to all teams
+                controller.sendToTeams(packet);
+
+            } else if (isThisSite(clarification)) {
+                // Send to team
+                Packet answerPacket = PacketFactory.clonePacket(contest.getClientId(), clarification.getSubmitter(), packet);
+                controller.sendToClient(answerPacket);
+
+            }
         } else {
             contest.answerClarification(clarification, clarification.getAnswer(), whoModifiedClarification, clarification.isSendToAll());
         }
@@ -472,6 +509,7 @@ public class PacketHandler {
     
     /**
      * Update from server to everyone else.
+     * 
      * @param packet
      */
     private void sendRunUpdateNotification(Packet packet) {
@@ -766,7 +804,7 @@ public class PacketHandler {
     private boolean isSuperUser(ClientId id) {
         return id.getClientType().equals(ClientType.Type.ADMINISTRATOR);
     }
-
+    
     private void cancelRun(Packet packet, Run run, ClientId whoCanceledRun) {
 
         if (isServer()) {
@@ -784,7 +822,7 @@ public class PacketHandler {
                 Run availableRun = contest.getRun(run.getElementId());
                 Packet availableRunPacket = PacketFactory.createRunAvailable(contest.getClientId(), whoCanceledRun, availableRun);
 
-                sendToJudgesAndOthers( availableRunPacket, true);
+                sendToJudgesAndOthers(availableRunPacket, true);
             }
 
         } else {
@@ -795,35 +833,82 @@ public class PacketHandler {
         }
     }
     
-    private void answerClarification(Packet packet) {
-        
-        Clarification clarification = (Clarification)  PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION);
-        ClientId whoAnsweredIt = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-        
+
+    /**
+     * UN checkout or cancel clarification checkout.
+     * 
+     * @param packet
+     */
+    private void cancelClarificationCheckOut(Packet packet) {
+        Clarification clarification = (Clarification) PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION);
+        ClientId whoCancelledIt = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+
         if (isServer()) {
 
             if (!isThisSite(clarification)) {
-                
+
+                ClientId destinationId = new ClientId(clarification.getSiteNumber(), ClientType.Type.SERVER, 0);
+                Packet cancelPacket = PacketFactory.clonePacket(contest.getClientId(), destinationId, packet);
+                controller.sendToRemoteServer(clarification.getSiteNumber(), cancelPacket);
+
+            } else {
+                // This site's clarification
+
+                contest.cancelClarificationCheckOut(clarification, whoCancelledIt);
+
+                Clarification theClarification = contest.getClarification(clarification.getElementId());
+
+                Packet cancelPacket = PacketFactory.createClarificationAvailable(contest.getClientId(), PacketFactory.ALL_SERVERS, theClarification);
+
+                sendToJudgesAndOthers(cancelPacket, true);
+
+            }
+        } else {
+            contest.cancelClarificationCheckOut(clarification, whoCancelledIt);
+        }
+    }
+    
+
+    private void sendClarificationAvailable(Packet packet) {
+        Clarification clarification = (Clarification) PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION);
+        ClientId whoCancelledIt = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+
+        if (isServer()) {
+            contest.cancelClarificationCheckOut(clarification, whoCancelledIt);
+            sendToJudgesAndOthers(packet, false);
+        } else {
+            contest.cancelClarificationCheckOut(clarification, whoCancelledIt);
+        }
+
+    }
+    
+    private void answerClarification(Packet packet) {
+
+        Clarification clarification = (Clarification) PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION);
+        ClientId whoAnsweredIt = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+
+        if (isServer()) {
+
+            if (!isThisSite(clarification)) {
+
                 ClientId destinationId = new ClientId(clarification.getSiteNumber(), ClientType.Type.SERVER, 0);
                 Packet answerPacket = PacketFactory.clonePacket(contest.getClientId(), destinationId, packet);
                 controller.sendToRemoteServer(clarification.getSiteNumber(), answerPacket);
 
             } else {
                 // This site's clarification
-                
+
                 contest.answerClarification(clarification, clarification.getAnswer(), whoAnsweredIt, clarification.isSendToAll());
-                
                 Clarification theClarification = contest.getClarification(clarification.getElementId());
-                
                 Packet answerPacket = PacketFactory.createAnsweredClarificationUpdate(contest.getClientId(), PacketFactory.ALL_SERVERS, theClarification, theClarification.getAnswer(), whoAnsweredIt);
-                
+
                 sendToJudgesAndOthers(answerPacket, true);
                 if (clarification.isSendToAll()) {
                     controller.sendToTeams(answerPacket);
                 } else {
                     controller.sendToClient(answerPacket);
                 }
-                
+
             }
         } else {
             contest.answerClarification(clarification, clarification.getAnswer(), whoAnsweredIt, clarification.isSendToAll());
@@ -875,6 +960,67 @@ public class PacketHandler {
     private void requestRun(Packet packet, Run run, ClientId whoRequestsRunId) {
         fetchRun(packet,run,whoRequestsRunId, false);
     }
+    
+    private void requestClarification(Packet packet) {
+        ElementId clarificationId = (ElementId) PacketFactory.getObjectValue(packet, PacketFactory.REQUESTED_CLARIFICATION_ELEMENT_ID);
+        ClientId requestFromId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+//        Boolean readOnly = (Boolean) PacketFactory.getObjectValue(packet, PacketFactory.READ_ONLY);
+        boolean readOnly = false;
+
+        if (isServer()) {
+
+            Clarification clarification = contest.getClarification(clarificationId);
+            if (!isThisSite(clarification)) {
+
+                ClientId serverClientId = new ClientId(clarification.getSiteNumber(), ClientType.Type.SERVER, 0);
+                if (contest.isLocalLoggedIn(serverClientId)) {
+
+                    // send request to remote server
+                    Packet requestPacket = PacketFactory.clonePacket(contest.getClientId(), serverClientId, packet);
+                    controller.sendToRemoteServer(clarification.getSiteNumber(), requestPacket);
+
+                } else {
+
+                    // send NOT_AVAILABLE back to client
+                    Packet notAvailableRunPacket = PacketFactory.createClarificationNotAvailable(contest.getClientId(), requestFromId, clarification, requestFromId);
+                    controller.sendToClient(notAvailableRunPacket);
+                }
+
+            } else {
+                // This Site's run, if we can check it out and send to client
+
+                Clarification theClarification = contest.getClarification(clarification.getElementId());
+                
+                if (readOnly) {
+                    // just get run and sent it to them.
+                    
+                    info ("// TODO  send read only clar to them ");
+
+                } else if (theClarification.getState() == ClarificationStates.NEW || isSuperUser(requestFromId)) {
+
+                    theClarification.setState(ClarificationStates.BEING_ANSWERED);
+                    contest.updateClarification(theClarification, requestFromId);
+
+                    theClarification = contest.getClarification(clarification.getElementId());
+
+                    // send to Judge
+                    Packet checkOutPacket = PacketFactory.createCheckedOutClarification(contest.getClientId(), requestFromId, theClarification, requestFromId);
+                    controller.sendToClient(checkOutPacket);
+                    
+                    sendToJudgesAndOthers(checkOutPacket, true);
+                    
+                } else {
+                    // Unavailable
+                    Packet notAvailableRunPacket = PacketFactory.createClarificationNotAvailable(contest.getClientId(), requestFromId, theClarification, requestFromId);
+                    controller.sendToClient(notAvailableRunPacket);
+                }
+            }
+        } else {
+
+            throw new SecurityException("requestClarification - sent to client " + contest.getClientId());
+        }
+    }
+
     
     /**
      * Fetch a run.

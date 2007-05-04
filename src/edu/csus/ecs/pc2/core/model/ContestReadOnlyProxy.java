@@ -747,4 +747,19 @@ public final class ContestReadOnlyProxy implements IContest {
         
     }
 
+    public void cancelClarificationCheckOut(Clarification clarification, ClientId whoCancelledIt) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void addClarification(Clarification clarification, ClientId whoCheckedOutId) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void updateClarification(Clarification clarification, ClientId whoChangedIt) {
+        // TODO Auto-generated method stub
+        
+    }
+
 }
