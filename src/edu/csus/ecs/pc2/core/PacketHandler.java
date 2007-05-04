@@ -500,7 +500,6 @@ public class PacketHandler {
                 // Send to team
                 Packet answerPacket = PacketFactory.clonePacket(contest.getClientId(), clarification.getSubmitter(), packet);
                 controller.sendToClient(answerPacket);
-
             }
         } else {
             contest.answerClarification(clarification, clarification.getAnswer(), whoModifiedClarification, clarification.isSendToAll());
@@ -906,7 +905,8 @@ public class PacketHandler {
                 if (clarification.isSendToAll()) {
                     controller.sendToTeams(answerPacket);
                 } else {
-                    controller.sendToClient(answerPacket);
+                    Packet answerForTeamPacket = PacketFactory.clonePacket(contest.getClientId(), clarification.getSubmitter(), answerPacket);
+                    controller.sendToClient(answerForTeamPacket);
                 }
 
             }

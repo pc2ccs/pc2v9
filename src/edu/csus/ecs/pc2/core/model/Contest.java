@@ -468,10 +468,18 @@ public class Contest implements IContest {
         return newClarification;
     }
     
-    public void answerClarification (Clarification clarification, String answer, ClientId whoAnsweredIt, boolean sendToAll){
-        Clarification updatedClarification = clarificationList.updateClarification(clarification, ClarificationStates.ANSWERED, whoAnsweredIt, answer, sendToAll);
-        ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.ANSWERED_CLARIFICATION, updatedClarification);
-        fireClarificationListener(clarificationEvent);
+    public void answerClarification(Clarification clarification, String answer, ClientId whoAnsweredIt, boolean sendToAll) {
+
+        if (clarificationList.get(clarification) != null) {
+            Clarification answerClarification = clarificationList.updateClarification(clarification, ClarificationStates.ANSWERED, whoAnsweredIt, answer, sendToAll);
+            ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.ANSWERED_CLARIFICATION, answerClarification);
+            fireClarificationListener(clarificationEvent);
+        } else {
+            clarificationList.add(clarification);
+            Clarification updatedClarification =  clarificationList.get(clarification);
+            ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.ANSWERED_CLARIFICATION, updatedClarification);
+            fireClarificationListener(clarificationEvent);
+        }
     }
     
     public void updateClarification (Clarification clarification, ClientId whoChangedIt) {
