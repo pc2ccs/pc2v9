@@ -3,7 +3,6 @@ package edu.csus.ecs.pc2.core.model;
 /**
  * Language auto fill values.
  * 
- * 
  * List of language (titles) {@link #getLanguageList()}, to
  * get individual values {@link #getAutoFillValues(String)}.
  *
@@ -22,6 +21,8 @@ public final class LanguageAutoFill {
     public static final String GNUCPPTITLE = "GNU C++";
 
     public static final String GNUCTITLE = "GNU C";
+    
+    public static final String PERLTITLE = "Perl";
 
     public static final String MSCTITLE = "Microsoft C++";
 
@@ -32,7 +33,7 @@ public final class LanguageAutoFill {
     public static final String FPCTITLE = "Free Pascal";
 
     private static String[] languageList = { DEFAULTTITLE, JAVATITLE,
-            GNUCPPTITLE, GNUCTITLE, MSCTITLE, KYLIXTITLE, KYLIXCPPTITLE,
+            GNUCPPTITLE, GNUCTITLE, PERLTITLE, MSCTITLE, KYLIXTITLE, KYLIXCPPTITLE,
             FPCTITLE };
 
     /**
@@ -98,6 +99,11 @@ public final class LanguageAutoFill {
 
             String[] dVals = { FPCTITLE, "fpc {:mainfile}", "{:basename}",
                     "." + fs + "{:basename}" };
+            return dVals;
+        } else if (key.equals(PERLTITLE)) {
+
+            String[] dVals = { PERLTITLE, "compilePerl {:mainfile}", "OK",
+                    "perl {:mainfile}" };
             return dVals;
         } else {
             // default / DEFAULTTITLE
