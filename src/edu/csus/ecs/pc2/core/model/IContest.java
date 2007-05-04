@@ -428,6 +428,8 @@ public interface IContest {
      * @return clarification with new id and timestamp.
      */
     Clarification acceptClarification (Clarification clarification);
+    
+    void answerClarification (Clarification clarification, String answer, ClientId whoAnsweredIt, boolean sendToAll);
 
     /**
      * remove clarification from model.

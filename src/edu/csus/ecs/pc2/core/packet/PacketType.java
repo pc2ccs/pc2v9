@@ -593,7 +593,11 @@ public final class PacketType implements Serializable {
         /**
          * 
          */
-        CONTEST_PROPERTIES, 
+        CONTEST_PROPERTIES,
+        /**
+         * 
+         */
+        CLARIFICATION_ANSWER_UPDATE, 
     }
 
     /**

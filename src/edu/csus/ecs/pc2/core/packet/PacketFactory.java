@@ -466,7 +466,7 @@ public final class PacketFactory {
         return packet;
 
     }
-
+    
     /**
      * Return the value (Object) inside a packet.
      * 
@@ -1470,6 +1470,15 @@ public final class PacketFactory {
         Properties prop = new Properties();
         prop.put(JUDGEMENT, judgement);
         return createPacket(PacketType.Type.RUN_JUDGEMENT_UPDATE, source, destination, prop);
+    }
+
+    public static Packet createAnsweredClarificationUpdate(ClientId source, ClientId destination, Clarification clarification, String answer, ClientId whoAnsweredIt) {
+        Properties prop = new Properties();
+        prop.put(CLIENT_ID, whoAnsweredIt);
+        prop.put(CLARIFICATION, clarification);
+        prop.put(CLARIFICATION_ANSWER, answer);
+        Packet packet = new Packet(Type.CLARIFICATION_ANSWER_UPDATE, source, destination, prop);
+        return packet;
     }
 
 }

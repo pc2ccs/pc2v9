@@ -108,6 +108,12 @@ public class PacketHandler {
             // Send to clients and other servers
             sendToJudgesAndOthers(confirmPacket, true);
 
+        } else if (packetType.equals(Type.CLARIFICATION_SUBMISSION)) {
+            answerClarification (packet);
+            
+        } else if (packetType.equals(Type.CLARIFICATION_ANSWER_UPDATE)) {
+            sendAnswerClarification (packet);
+            
         } else if (packetType.equals(Type.CLARIFICATION_SUBMISSION_CONFIRM)) {
             Clarification clarification = (Clarification)  PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION);
             contest.addClarification(clarification);
@@ -273,6 +279,7 @@ public class PacketHandler {
 
     }
     
+
     private void updateContestClock(Packet packet) {
 
         ClientId who = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
@@ -451,6 +458,18 @@ public class PacketHandler {
         }
     }
     
+    private void sendAnswerClarification (Packet packet){
+        Clarification clarification = (Clarification)  PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION);
+        ClientId whoModifiedClarification = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+
+        if (isServer()){
+            contest.answerClarification(clarification, clarification.getAnswer(), whoModifiedClarification, clarification.isSendToAll());
+            sendToJudgesAndOthers(packet, false);
+        } else {
+            contest.answerClarification(clarification, clarification.getAnswer(), whoModifiedClarification, clarification.isSendToAll());
+        }
+    }
+    
     /**
      * Update from server to everyone else.
      * @param packet
@@ -485,6 +504,8 @@ public class PacketHandler {
                 Account[] accounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
                 Packet newAccountsPacket = PacketFactory.createAddSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, accounts);
                 sendToJudgesAndOthers(newAccountsPacket, true);
+                
+                controller.writeConfigToDisk();
                 
             } else {
                 
@@ -773,6 +794,42 @@ public class PacketHandler {
             contest.updateRun(run, whoCanceledRun);
         }
     }
+    
+    private void answerClarification(Packet packet) {
+        
+        Clarification clarification = (Clarification)  PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION);
+        ClientId whoAnsweredIt = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+        
+        if (isServer()) {
+
+            if (!isThisSite(clarification)) {
+                
+                ClientId destinationId = new ClientId(clarification.getSiteNumber(), ClientType.Type.SERVER, 0);
+                Packet answerPacket = PacketFactory.clonePacket(contest.getClientId(), destinationId, packet);
+                controller.sendToRemoteServer(clarification.getSiteNumber(), answerPacket);
+
+            } else {
+                // This site's clarification
+                
+                contest.answerClarification(clarification, clarification.getAnswer(), whoAnsweredIt, clarification.isSendToAll());
+                
+                Clarification theClarification = contest.getClarification(clarification.getElementId());
+                
+                Packet answerPacket = PacketFactory.createAnsweredClarificationUpdate(contest.getClientId(), PacketFactory.ALL_SERVERS, theClarification, theClarification.getAnswer(), whoAnsweredIt);
+                
+                sendToJudgesAndOthers(answerPacket, true);
+                if (clarification.isSendToAll()) {
+                    controller.sendToTeams(answerPacket);
+                } else {
+                    controller.sendToClient(answerPacket);
+                }
+                
+            }
+        } else {
+            contest.answerClarification(clarification, clarification.getAnswer(), whoAnsweredIt, clarification.isSendToAll());
+        }
+    }
+
 
     private void judgeRun(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles, ClientId whoJudgedId) {
 

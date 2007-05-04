@@ -742,4 +742,9 @@ public final class ContestReadOnlyProxy implements IContest {
         
     }
 
+    public void answerClarification(Clarification clarification, String answer, ClientId whoAnsweredIt, boolean sendToAll) {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

@@ -1491,8 +1491,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
     public void submitClarificationAnswer(Clarification clarification) {
         ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
-        Packet packet = PacketFactory.createClarificationSubmission(contest.getClientId(), serverClientId, clarification);
-
+        Packet packet = PacketFactory.createAnsweredClarification(contest.getClientId(), serverClientId, clarification, clarification.getAnswer());
         sendToLocalServer(packet);
     }
 
