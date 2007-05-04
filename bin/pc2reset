@@ -7,16 +7,12 @@
 
 . `dirname $0`/pc2env
 
-if [ -f VERSION ] ; then
-	if [ -f bin/pc2zip ] ; then
-	   bin/pc2zip
-	   rm -fr logs packets db.* execute*
-	   rm -fr reports*.txt
-	else
-	   echo could not find bin/pc2zip
-	fi 
+if [ -d logs -a -d packets ] ; then
+    `dirname $0`/pc2zip
+    rm -fr logs packets db.* execute*
+    rm -fr reports*.txt
 else
-	echo Not in directory to reset, should be run from dir with VERSION
+    echo Not in directory to reset, should be run from dir with logs and packets
 fi 
 
 
