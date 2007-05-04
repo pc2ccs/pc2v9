@@ -221,62 +221,73 @@ public class RunsPanel extends JPanePlugin {
         public void runChanged(RunEvent event) {
             updateRunRow(event.getRun(), event.getWhoModifiedRun());
             
-            //check if this is a team 
+            //check if this is a team; if so, pop up a response dialog
             if (getContest().getClientId().getClientType()==ClientType.Type.TEAM) {
+                showResponseToTeam(event);
+            }
+        }
                 
-                //it's a team; check if the run has been judged 
-                Run theRun = event.getRun();
-                if (theRun.isJudged()) {
+        public void runRemoved(RunEvent event) {
+            // TODO Auto-generated method stub
+        }
+        
+        /**
+         * Checks the run in the specified run event and (potentially) displays a results
+         * dialog.  If the run has been judged,
+         * has a valid judgement record, and is the "active" judgement for scoring
+         * purposes, displays a modal MessageDialog to the Team containing the judgement
+         * results.  This method assumes the caller has already verified this is a TEAM
+         * client; failure to do that on the caller's part will cause other clients to
+         * see the Run Response dialog...
+         */
+        private void showResponseToTeam (RunEvent event) {
+            
+            //check if the run has been judged 
+            Run theRun = event.getRun();
+            if (theRun.isJudged()) {
+                
+                //check if there's a legit judgement
+                JudgementRecord judgementRecord = theRun.getJudgementRecord();
+                if (judgementRecord != null) {
                     
-                    //it's a judgement for a team; check if there's a legit judgement
-                    JudgementRecord judgementRecord = theRun.getJudgementRecord();
-                    if (judgementRecord != null) {
+                    //check if this is the scoreable judgement
+                    boolean isActive = judgementRecord.isActive ();
+                    if (isActive) {
                         
-                        //check if this is the scoreable judgement
-                        boolean isActive = judgementRecord.isActive ();
-                        if (isActive) {
-                            
-                            //it's a valid judging response to a team; 
-                            //  get the info from the run and display it in a modal popup
-                            String problemName = getContest().getProblem(theRun.getProblemId()).toString() ;
-                            String languageName = getContest().getLanguage(theRun.getLanguageId()).toString() ;
-                            int runId = theRun.getNumber() ;
-                            String setResponseColor =  "<FONT COLOR=RED>";
-                            if (judgementRecord.isSolved()){
-                                setResponseColor= "<FONT COLOR=GREEN>";
-                            }
-                            String response = getContest().getJudgement(judgementRecord.getJudgementId()).toString() ;
-                            String judgeComment = theRun.getCommentsForTeam();
-                           try {
-                                String displayString =
-                                    "<HTML><FONT SIZE=+1>Judge's Response<BR><BR>"
-                                    + "Problem: <FONT COLOR=BLUE>" +  problemName + "</FONT><BR><BR>" 
-                                    + "Language: <FONT COLOR=BLUE>" + languageName   + "</FONT><BR><BR>" 
-                                    + "Run Id: <FONT COLOR=BLUE>" + runId + "</FONT><BR><BR><BR>" 
-                                    + "Judge's Response: " + setResponseColor + response + "</FONT><BR><BR><BR>" ;
-  
-                                if (judgeComment!=null) {
-                                    if (judgeComment.length() > 0) {
-                                        displayString += "Judge's Comment: " + judgeComment + "<BR><BR><BR>";
-                                    }
-                                displayString += "</FONT></HTML>" ;
-                                }
-                                
-                                JOptionPane.showMessageDialog(null, displayString, 
-                                            "Run Judgement Received", JOptionPane.INFORMATION_MESSAGE );
+                        //it's a valid judging response (presumably to a team); 
+                        //  get the info from the run and display it in a modal popup
+                        String problemName = getContest().getProblem(theRun.getProblemId()).toString() ;
+                        String languageName = getContest().getLanguage(theRun.getLanguageId()).toString() ;
+                        int runId = theRun.getNumber() ;
+                        String setResponseFormat = judgementRecord.isSolved()?"<FONT COLOR=\"00FF00\" SIZE=+2>":"<FONT COLOR=RED>";
+                        String response = getContest().getJudgement(judgementRecord.getJudgementId()).toString() ;
+                        String judgeComment = theRun.getCommentsForTeam();
+                       try {
+                            String displayString =
+                                "<HTML><FONT SIZE=+1>Judge's Response<BR><BR>"
+                                + "Problem: <FONT COLOR=BLUE>" +  problemName + "</FONT><BR><BR>" 
+                                + "Language: <FONT COLOR=BLUE>" + languageName   + "</FONT><BR><BR>" 
+                                + "Run Id: <FONT COLOR=BLUE>" + runId + "</FONT><BR><BR><BR>" 
+                                + "Judge's Response: " + setResponseFormat + response + "</FONT><BR><BR><BR>" ;
     
-                            } catch (Exception e) {
-                                // TODO need to make this cleaner
-                                JOptionPane.showMessageDialog(null, "Exception " + e.getMessage());
+                            if (judgeComment!=null) {
+                                if (judgeComment.length() > 0) {
+                                    displayString += "Judge's Comment: " + judgeComment + "<BR><BR><BR>";
+                                }
                             }
+                                
+                            displayString += "</FONT></HTML>" ;
+
+                            JOptionPane.showMessageDialog(null, displayString, 
+                                        "Run Judgement Received", JOptionPane.INFORMATION_MESSAGE );
+    
+                        } catch (Exception e) {
+                            // TODO need to make this cleaner
+                            JOptionPane.showMessageDialog(null, "Exception handling Run Response on Team: " + e.getMessage());
                         }
                     }
                 }
             }
-        }
-
-        public void runRemoved(RunEvent event) {
-            // TODO Auto-generated method stub
         }
     }
 
