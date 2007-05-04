@@ -241,7 +241,10 @@ public class RunsPanel extends JPanePlugin {
                             String problemName = getContest().getProblem(theRun.getProblemId()).toString() ;
                             String languageName = getContest().getLanguage(theRun.getLanguageId()).toString() ;
                             int runId = theRun.getNumber() ;
-                            String setResponseColor = judgementRecord.isSolved()?"<FONT COLOR=GREEN>":"<FONT COLOR=RED>";
+                            String setResponseColor =  "<FONT COLOR=RED>";
+                            if (judgementRecord.isSolved()){
+                                setResponseColor= "<FONT COLOR=GREEN>";
+                            }
                             String response = getContest().getJudgement(judgementRecord.getJudgementId()).toString() ;
                             String judgeComment = theRun.getCommentsForTeam();
                            try {
