@@ -263,8 +263,7 @@ public class RunsPanel extends JPanePlugin {
                         String responseFormat = "";
                         if (judgementRecord.isSolved()) {
                             responseFormat += "<FONT COLOR=\"00FF00\" SIZE=+2>" ;  //green, larger
-                        }
-                        else {
+                        } else {
                             responseFormat += "<FONT COLOR=RED>";               //red, current size
                         }
                         String response = getContest().getJudgement(judgementRecord.getJudgementId()).toString() ;
