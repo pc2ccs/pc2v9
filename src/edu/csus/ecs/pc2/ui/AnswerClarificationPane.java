@@ -310,6 +310,7 @@ public class AnswerClarificationPane extends JPanePlugin {
         }
         
         getAnswerTextArea().setText("");
+        getSendToAllCheckBox().setSelected(false);
 
         populatingGUI = false;
 
