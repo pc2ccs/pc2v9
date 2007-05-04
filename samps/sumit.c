@@ -34,7 +34,7 @@ int main (int argc, char **argv)
 	else
 	{
 		printf("Could not read from file sumit.dat \n");
-		return(22)
+		return(22);
 	}
 
 	return(0);

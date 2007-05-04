@@ -22,4 +22,4 @@ if ($? == 0) then
     touch OK
 endif 
 
-# eof compilePerl $Id: compilePerl 326 2006-10-25 02:53:57Z laned $
+# eof compilePerl $Id$
