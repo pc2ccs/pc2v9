@@ -6,6 +6,7 @@ import java.awt.FlowLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.JOptionPane;
 
 import com.ibm.webrunner.j2mclb.util.HeapSorter;
 import com.ibm.webrunner.j2mclb.util.NumericStringComparator;
@@ -16,6 +17,7 @@ import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IContest;
@@ -218,6 +220,56 @@ public class RunsPanel extends JPanePlugin {
 
         public void runChanged(RunEvent event) {
             updateRunRow(event.getRun(), event.getWhoModifiedRun());
+            
+            //check if this is a team 
+            if (getContest().getClientId().getClientType()==ClientType.Type.TEAM) {
+                
+                //it's a team; check if the run has been judged 
+                Run theRun = event.getRun();
+                if (theRun.isJudged()) {
+                    
+                    //it's a judgement for a team; check if there's a legit judgement
+                    JudgementRecord judgementRecord = theRun.getJudgementRecord();
+                    if (judgementRecord != null) {
+                        
+                        //check if this is the scoreable judgement
+                        boolean isActive = judgementRecord.isActive ();
+                        if (isActive) {
+                            
+                            //it's a valid judging response to a team; 
+                            //  get the info from the run and display it in a modal popup
+                            String problemName = getContest().getProblem(theRun.getProblemId()).toString() ;
+                            String languageName = getContest().getLanguage(theRun.getLanguageId()).toString() ;
+                            int runId = theRun.getNumber() ;
+                            String setResponseColor = judgementRecord.isSolved()?"<FONT COLOR=GREEN>":"<FONT COLOR=RED>";
+                            String response = getContest().getJudgement(judgementRecord.getJudgementId()).toString() ;
+                            String judgeComment = theRun.getCommentsForTeam();
+                           try {
+                                String displayString =
+                                    "<HTML><FONT SIZE=+1>Judge's Response<BR><BR>"
+                                    + "Problem: <FONT COLOR=BLUE>" +  problemName + "</FONT><BR><BR>" 
+                                    + "Language: <FONT COLOR=BLUE>" + languageName   + "</FONT><BR><BR>" 
+                                    + "Run Id: <FONT COLOR=BLUE>" + runId + "</FONT><BR><BR><BR>" 
+                                    + "Judge's Response: " + setResponseColor + response + "</FONT><BR><BR><BR>" ;
+  
+                                if (judgeComment!=null) {
+                                    if (judgeComment.length() > 0) {
+                                        displayString += "Judge's Comment: " + judgeComment + "<BR><BR><BR>";
+                                    }
+                                displayString += "</FONT></HTML>" ;
+                                }
+                                
+                                JOptionPane.showMessageDialog(null, displayString, 
+                                            "Run Judgement Received", JOptionPane.INFORMATION_MESSAGE );
+    
+                            } catch (Exception e) {
+                                // TODO need to make this cleaner
+                                JOptionPane.showMessageDialog(null, "Exception " + e.getMessage());
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         public void runRemoved(RunEvent event) {

@@ -43,6 +43,11 @@ import edu.csus.ecs.pc2.core.model.Run.RunStates;
 // $HeadURL$
 public class RunPane extends JPanePlugin {
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 8747938709622932819L;
+
     private JPanel messagePane = null;
 
     private JPanel buttonPane = null;
