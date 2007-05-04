@@ -500,7 +500,7 @@ public class ClarificationsPane extends JPanePlugin {
     private JPanel getMessagePane() {
         if (messagePane == null) {
             messageLabel = new JLabel();
-            messageLabel.setText("JLabel");
+            messageLabel.setText("");
             messageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
             messagePane = new JPanel();
             messagePane.setLayout(new BorderLayout());

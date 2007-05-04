@@ -154,9 +154,6 @@ public class SubmitClarificationPane extends JPanePlugin {
         Problem problemN = new Problem("None Selected");
         getProblemComboBox().addItem(problemN);
         
-        Problem generalProblem = new Problem("General");
-        getProblemComboBox().addItem(generalProblem);
-
         for (Problem problem : getContest().getProblems()) {
             getProblemComboBox().addItem(problem);
         }
