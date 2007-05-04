@@ -259,7 +259,14 @@ public class RunsPanel extends JPanePlugin {
                         String problemName = getContest().getProblem(theRun.getProblemId()).toString() ;
                         String languageName = getContest().getLanguage(theRun.getLanguageId()).toString() ;
                         int runId = theRun.getNumber() ;
-                        String setResponseFormat = judgementRecord.isSolved()?"<FONT COLOR=\"00FF00\" SIZE=+2>":"<FONT COLOR=RED>";
+                        //build an HTML tag that sets the font size and color for the answer
+                        String responseFormat = "";
+                        if (judgementRecord.isSolved()) {
+                            responseFormat += "<FONT COLOR=\"00FF00\" SIZE=+2>" ;  //green, larger
+                        }
+                        else {
+                            responseFormat += "<FONT COLOR=RED>";               //red, current size
+                        }
                         String response = getContest().getJudgement(judgementRecord.getJudgementId()).toString() ;
                         String judgeComment = theRun.getCommentsForTeam();
                        try {
@@ -268,7 +275,7 @@ public class RunsPanel extends JPanePlugin {
                                 + "Problem: <FONT COLOR=BLUE>" +  problemName + "</FONT><BR><BR>" 
                                 + "Language: <FONT COLOR=BLUE>" + languageName   + "</FONT><BR><BR>" 
                                 + "Run Id: <FONT COLOR=BLUE>" + runId + "</FONT><BR><BR><BR>" 
-                                + "Judge's Response: " + setResponseFormat + response + "</FONT><BR><BR><BR>" ;
+                                + "Judge's Response: " + responseFormat + response + "</FONT><BR><BR><BR>" ;
     
                             if (judgeComment!=null) {
                                 if (judgeComment.length() > 0) {
