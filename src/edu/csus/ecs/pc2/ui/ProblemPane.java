@@ -521,7 +521,7 @@ public class ProblemPane extends JPanePlugin {
             cancelButton.setText("Close");
         }
         updateButton.setEnabled(editedText);
-        addButton.setEnabled(true);
+        addButton.setEnabled(editedText);
     }
 
     /**
