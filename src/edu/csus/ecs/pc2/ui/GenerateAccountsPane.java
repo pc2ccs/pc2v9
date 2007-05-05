@@ -310,21 +310,25 @@ public class GenerateAccountsPane extends JPanePlugin {
             int count = getIntegerValue(adminCountTextField.getText());
             if (count > 0) {
                 getController().generateNewAccounts(ClientType.Type.ADMINISTRATOR.toString(), theSiteNumber, count, startNumber, true);
+                adminCountTextField.setText("");
             }
 
             count = getIntegerValue(judgeCountTextField.getText());
             if (count > 0) {
                 getController().generateNewAccounts(ClientType.Type.JUDGE.toString(), theSiteNumber, count, startNumber, true);
+                judgeCountTextField.setText("");
             }
 
             count = getIntegerValue(teamCountTextField.getText());
             if (count > 0) {
                 getController().generateNewAccounts(ClientType.Type.TEAM.toString(), theSiteNumber, count, startNumber,true);
+                teamCountTextField.setText("");
             }
 
             count = getIntegerValue(boardCountTextField.getText());
             if (count > 0) {
                 getController().generateNewAccounts(ClientType.Type.SCOREBOARD.toString(), theSiteNumber, count, startNumber, true);
+                boardCountTextField.setText("");
             }
 
         } catch (Exception e) {
