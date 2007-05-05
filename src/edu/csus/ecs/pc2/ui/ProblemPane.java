@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.ui;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.io.File;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -379,11 +380,10 @@ public class ProblemPane extends JPanePlugin {
 
     protected void updateProblem() {
 
-        if (problemNameTextField.getText().trim().length() < 1) {
-            showMessage("Enter a problem name");
+        if (!ensureProblem()) {
+            // new problem is invalid, just return, message issued earlier
             return;
         }
-
         Problem newProblem = getProblemFromFields();
 
         if (newProblem == null) {
@@ -400,6 +400,97 @@ public class ProblemPane extends JPanePlugin {
         if (getParentFrame() != null) {
             getParentFrame().setVisible(false);
         }
+    }
+
+    private boolean ensureProblem() {
+        if (problemNameTextField.getText().trim().length() < 1) {
+            showMessage("Enter a problem name");
+            return false;
+        }
+        String fileName = inputDataFileLabel.getText();
+        if (getProblemRequiresDataTextField().isSelected()) {
+            // this check is outside so we can provide a specific message
+            if (fileName.trim().length() == 0) {
+                showMessage("Problem Requires Input Data checked, select a file ");
+                return false;
+            }
+            if (!checkFile(fileName)) {
+                return false;
+            }
+        } else {
+            if (fileName.trim().length() > 0) {
+                // file selected, but checkbox not clicked
+                int verifyInputDataFile = JOptionPane.showConfirmDialog(getParent(), "Use selected data file?");
+                switch (verifyInputDataFile) {
+                    case JOptionPane.CANCEL_OPTION:
+                        showMessage("Update cancelled");
+                        return false;
+                    case JOptionPane.YES_OPTION:
+                        getProblemRequiresDataTextField().setSelected(true);
+                        break;
+                    case JOptionPane.NO_OPTION:
+                        inputDataFileLabel.setText("");
+                        break;
+                    default:
+                        return false;
+                }
+            }
+        }
+        fileName = answerFileNameLabel.getText();
+        if (getJudgesHaveAnswerFiles().isSelected()) {
+            // this check is outside so we can provide a specific message
+            if (fileName.trim().length() == 0) {
+                showMessage("Problem Requires Judges' Answer File checked, select a file ");
+                return false;
+            }
+            if (!checkFile(fileName)) {
+                return false;
+            }
+            if (fileName.trim().length() > 0) {
+                // file selected, but checkbox not clicked
+                int verifyAnswerFile = JOptionPane.showConfirmDialog(getParent(), "Use selected answer file?");
+                switch (verifyAnswerFile) {
+                    case JOptionPane.CANCEL_OPTION:
+                        showMessage("Update cancelled");
+                        return false;
+                    case JOptionPane.YES_OPTION:
+                        getJudgesHaveAnswerFiles().setSelected(true);
+                        break;
+                    case JOptionPane.NO_OPTION:
+                        answerFileNameLabel.setText("");
+                        break;
+                    default:
+                        return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Checks to ensure the fileName exists, is a file, and is readable.
+     * 
+     * @param fileName the file to check
+     * @return true if the is readable
+     */
+    private boolean checkFile(String fileName) {
+        File file = new File(fileName);
+        if (file.exists()) {
+            if (file.isFile()) {
+                if (!file.canRead()) {
+                    showMessage("Could not read file " + fileName);
+                    return false;
+                } // else exists, is a file, and is readable
+            } else {
+                // not a file
+                showMessage(fileName + " is not a file");
+                return false;
+            }
+        } else {
+            showMessage(fileName + " does not exist");
+            return false;
+        }
+        return true;
     }
 
     /**
