@@ -408,7 +408,7 @@ public class ProblemPane extends JPanePlugin {
             return false;
         }
         String fileName = inputDataFileLabel.getText();
-        if (getProblemRequiresDataTextField().isSelected()) {
+        if (getProblemRequiresDataCheckBox().isSelected()) {
             // this check is outside so we can provide a specific message
             if (fileName.trim().length() == 0) {
                 showMessage("Problem Requires Input Data checked, select a file ");
@@ -426,7 +426,7 @@ public class ProblemPane extends JPanePlugin {
                         showMessage("Update cancelled");
                         return false;
                     case JOptionPane.YES_OPTION:
-                        getProblemRequiresDataTextField().setSelected(true);
+                        getProblemRequiresDataCheckBox().setSelected(true);
                         break;
                     case JOptionPane.NO_OPTION:
                         inputDataFileLabel.setText("");
@@ -644,7 +644,7 @@ public class ProblemPane extends JPanePlugin {
             generalPane.setLayout(null);
             generalPane.add(getProblemNameTextField(), null);
             generalPane.add(getJTextField(), null);
-            generalPane.add(getProblemRequiresDataTextField(), null);
+            generalPane.add(getProblemRequiresDataCheckBox(), null);
             generalPane.add(getDataProblemPane(), null);
             generalPane.add(getJudgesHaveAnswerFiles(), null);
             generalPane.add(getAnswerFilePane(), null);
@@ -700,7 +700,7 @@ public class ProblemPane extends JPanePlugin {
      * 
      * @return javax.swing.JCheckBox
      */
-    private JCheckBox getProblemRequiresDataTextField() {
+    private JCheckBox getProblemRequiresDataCheckBox() {
         if (problemRequiresDataCheckBox == null) {
             problemRequiresDataCheckBox = new JCheckBox();
             problemRequiresDataCheckBox.setBounds(new java.awt.Rectangle(23, 76, 257, 26));
