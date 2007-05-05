@@ -21,6 +21,7 @@ import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
+import javax.swing.ButtonGroup;
 
 /**
  * Add/Edit Problem Pane
@@ -99,10 +100,12 @@ public class ProblemPane extends JPanePlugin {
      * last directory where searched for files.
      */
     private String lastDirectory;
-    
+
     private ProblemDataFiles newProblemDataFiles;
 
     private JCheckBox useInternalValidatorCheckBox = null;
+
+    private ButtonGroup teamReadsFrombuttonGroup = null; // @jve:decl-index=0:visual-constraint="598,159"
 
     /**
      * This method initializes
@@ -249,13 +252,13 @@ public class ProblemPane extends JPanePlugin {
 
             boolean hasDataFile = problem.getDataFileName() != null;
             enableButton |= (hasDataFile == judgesHaveAnswerFiles.isSelected());
-            if (hasDataFile){
+            if (hasDataFile) {
                 enableButton |= (!inputDataFileLabel.getText().equals(problem.getDataFileName()));
             }
 
             boolean hasAnswerFile = problem.getAnswerFileName() != null;
             enableButton |= (hasAnswerFile == problemRequiresDataCheckBox.isSelected());
-            if (hasAnswerFile){
+            if (hasAnswerFile) {
                 enableButton |= (!answerFileNameLabel.getText().equals(problem.getAnswerFileName()));
             }
 
@@ -263,7 +266,7 @@ public class ProblemPane extends JPanePlugin {
 
             enableButton |= (fileRadioButton.isSelected() && problem.isReadInputDataFromSTDIN());
         } else {
-            if (getAddButton().isVisible()){
+            if (getAddButton().isVisible()) {
                 enableButton = true;
             }
         }
@@ -285,7 +288,7 @@ public class ProblemPane extends JPanePlugin {
         } else {
             problem.setDisplayName(problemNameTextField.getText());
         }
-        
+
         newProblemDataFiles = new ProblemDataFiles(problem);
 
         int secs = getIntegerValue(timeOutSecondTextField.getText());
@@ -300,9 +303,9 @@ public class ProblemPane extends JPanePlugin {
             }
 
             SerializedFile serializedFile = new SerializedFile(fileName);
-            
+
             if (serializedFile.getBuffer() == null) {
-                showMessage("Unable to read file "+fileName+" choose data file again");
+                showMessage("Unable to read file " + fileName + " choose data file again");
                 return null;
             }
 
@@ -322,34 +325,33 @@ public class ProblemPane extends JPanePlugin {
             }
 
             SerializedFile serializedFile = new SerializedFile(fileName);
-            
+
             if (serializedFile.getBuffer() == null) {
-                showMessage("Unable to read file "+fileName+" choose answer file again");
+                showMessage("Unable to read file " + fileName + " choose answer file again");
                 return null;
             }
-            
+
             problem.setAnswerFileName(serializedFile.getName());
             newProblemDataFiles.setJudgesAnswerFile(serializedFile);
         } else {
             problem.setAnswerFileName(null);
         }
 
-        
-        if (stdinRadioButton.isSelected() && fileRadioButton.isSelected()){
+        if (stdinRadioButton.isSelected() && fileRadioButton.isSelected()) {
             // TODO make radio button group to obviate this message
             showMessage("Pick just one radio button TODO fix all TODOs!");
             return null;
         }
 
-        if (fileRadioButton.isSelected()){
-            
+        if (fileRadioButton.isSelected()) {
+
             problem.setReadInputDataFromSTDIN(false);
-            
-        } else if (stdinRadioButton.isSelected()){
-            
+
+        } else if (stdinRadioButton.isSelected()) {
+
             problem.setReadInputDataFromSTDIN(true);
         }
-        
+
         problem.setUsingPC2Validator(useInternalValidatorCheckBox.isSelected());
 
         return problem;
@@ -658,6 +660,7 @@ public class ProblemPane extends JPanePlugin {
                     javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Dialog", java.awt.Font.BOLD, 12), new java.awt.Color(51, 51, 51)));
             readsFromPane.add(getFileRadioButton(), null);
             readsFromPane.add(getStdinRadioButton(), null);
+            getTeamReadsFrombuttonGroup().setSelected(getFileRadioButton().getModel(), true);
         }
         return readsFromPane;
     }
@@ -875,6 +878,20 @@ public class ProblemPane extends JPanePlugin {
             useInternalValidatorCheckBox.setText("Use PC^2 Validator");
         }
         return useInternalValidatorCheckBox;
+    }
+
+    /**
+     * This method initializes teamReadsFrombuttonGroup
+     * 
+     * @return javax.swing.ButtonGroup
+     */
+    private ButtonGroup getTeamReadsFrombuttonGroup() {
+        if (teamReadsFrombuttonGroup == null) {
+            teamReadsFrombuttonGroup = new ButtonGroup();
+            teamReadsFrombuttonGroup.add(getStdinRadioButton());
+            teamReadsFrombuttonGroup.add(getFileRadioButton());
+        }
+        return teamReadsFrombuttonGroup;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
