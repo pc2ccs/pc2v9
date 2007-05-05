@@ -32,8 +32,17 @@ import java.awt.FlowLayout;
 /**
  * Team Status Pane.
  * 
- * @author pc2@ecs.csus.edu
+ * This presents the user with a grid of all local teams
+ * and whether the team has logged in, submitted a clarification,
+ * submitted a run or submitted a run and clarification by color.
+ * <P>
+ * There is a legend at the top which shows the color of each
+ * state of submission or login.
+ * <P>
+ * If one hovers over a team name will display the number
+ * of clarifications and runs that the team has submitted.
  * 
+ * @author pc2@ecs.csus.edu
  */
 
 // $HeadURL$
@@ -52,11 +61,11 @@ public class TeamStatusPane extends JPanePlugin {
 
     public static final java.awt.Color NO_CONTACT_COLOR = java.awt.Color.red;
 
-    public static final java.awt.Color HAS_LOGGED_IN_COLOR = java.awt.Color.yellow;
+    public static final java.awt.Color HAS_LOGGED_IN_COLOR = java.awt.Color.pink;
 
-    public static final java.awt.Color HAS_SUBMITTED_RUNS_ONLY_COLOR = java.awt.Color.magenta;
+    public static final java.awt.Color HAS_SUBMITTED_RUNS_ONLY_COLOR = java.awt.Color.blue;
 
-    public static final java.awt.Color HAS_SUBMITTED_CLARS_ONLY_COLOR = java.awt.Color.blue;
+    public static final java.awt.Color HAS_SUBMITTED_CLARS_ONLY_COLOR = java.awt.Color.orange;
 
     public static final java.awt.Color HAS_SUBMITTED_RUNS_AND_CLARS_COLOR = java.awt.Color.green;
 
@@ -181,18 +190,21 @@ public class TeamStatusPane extends JPanePlugin {
             JLabel teamLabel = new JLabel();
             ClientId clientId = account.getClientId();
             String teamName = clientId.getName();
-            String teamSubmittions = teamName;
+            String teamSubmittions = "No submissions";
 
             Color teamStatusColor = NO_CONTACT_COLOR;
 
             if (populate) {
+                
+                teamSubmittions = teamName;
+                
                 Run[] runs = getContest().getRuns(clientId);
                 if (runs.length > 0) {
                     teamSubmittions = teamSubmittions + " " + runs.length + " runs";
                 }
                 Clarification[] clarifications = getContest().getClarifications(clientId);
                 if (clarifications.length > 0) {
-                    teamSubmittions = teamSubmittions + " " + clarifications.length + " clarififications ";
+                    teamSubmittions = teamSubmittions + " " + clarifications.length + " clarifications ";
                 }
 
                 teamStatusColor = getStatusColor(clientId, runs, clarifications);
