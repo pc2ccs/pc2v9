@@ -426,5 +426,9 @@ public class LoginFrame extends JFrame implements UIPlugin {
     public String getPluginTitle() {
         return "Login";
     }
+    
+    public void disableLoginButton(){
+        getLoginButton().setEnabled(false);
+    }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

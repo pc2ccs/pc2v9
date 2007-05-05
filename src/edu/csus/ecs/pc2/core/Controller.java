@@ -1231,6 +1231,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             } catch (TransportException transportException) {
                 savedTransportException = transportException;
                 log.log(Log.INFO, "Exception logged ", transportException);
+                info("Unable to contact server at " + remoteHostName + ":" + port+" "+transportException.getMessage());
                 
             }
         }
@@ -1273,24 +1274,24 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                 loginUI = new LoginFrame();
                 loginUI.setContestAndController(contest, this); // this displays the login
             } 
-            
-            try {
 
+            try {
+                
                 if (savedTransportException == null){
                     login (loginName, password);  // starts login attempt, will show failure to LoginFrame
                 }
-
+                
             } catch (Exception e) {
                 log.log(Log.INFO, "Exception logged ", e);
                 if (loginUI != null){
                     loginUI.setStatusMessage(e.getMessage());
                 }
             }
-            
-            if (savedTransportException != null && loginUI != null){
-                loginUI.setStatusMessage("Unable to contact server, contact staff");
-            }
+        }
         
+        if (savedTransportException != null && loginUI != null){
+            loginUI.disableLoginButton();
+            loginUI.setStatusMessage("Unable to contact server, contact staff");
         }
     }
 
