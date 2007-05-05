@@ -73,7 +73,7 @@ public class ReportPane extends JPanePlugin {
         this.add(getMainPane(), java.awt.BorderLayout.CENTER);
 
         // populate list of reports
-        listOfReports = new IReport[8];
+        listOfReports = new IReport[9];
         listOfReports[0] = new AccountsReport();
         listOfReports[1] = new RunsReport();
         listOfReports[2] = new InternalDumpReport();
@@ -82,6 +82,7 @@ public class ReportPane extends JPanePlugin {
         listOfReports[5] = new LanguagesReport();
         listOfReports[6] = new AccountPermissionReport();
         listOfReports[7] = new StandingsReport();
+        listOfReports[8] = new RunsByTeamReport();
     }
 
     public void setContestAndController(IContest inContest, IController inController) {

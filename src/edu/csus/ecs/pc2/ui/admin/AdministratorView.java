@@ -30,6 +30,7 @@ import edu.csus.ecs.pc2.ui.ProblemsPane;
 import edu.csus.ecs.pc2.ui.RunsPanel;
 import edu.csus.ecs.pc2.ui.SitesPanel;
 import edu.csus.ecs.pc2.ui.StandingsPane;
+import edu.csus.ecs.pc2.ui.TeamStatusPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
@@ -143,6 +144,9 @@ public class AdministratorView extends JFrame implements UIPlugin {
                 
                 InfoPane infoPane = new InfoPane();
                 addUIPlugin(getMainTabbedPanel(), "Dev", infoPane);
+                
+                TeamStatusPane teamStatusPane = new TeamStatusPane();
+                addUIPlugin(getMainTabbedPanel(), "Team Status", teamStatusPane);
                 
                 setTitle("PC^2 " + contest.getTitle() + " Build " + new VersionInfo().getBuildNumber());
                 setVisible(true);
