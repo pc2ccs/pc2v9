@@ -213,7 +213,7 @@ public class SerializedFile implements Serializable {
             inputStream.read(b);
             inputStream.close();
         } catch (Exception e) {
-            StaticLog.log("Exception in generateMD5", e);
+            StaticLog.log("Exception in generateSHA1", e);
         }
 
         return b;
@@ -267,7 +267,7 @@ public class SerializedFile implements Serializable {
 
 
     /**
-     * A unique checksum for this file (MD5).
+     * A unique checksum for this file (SHA1).
      *
      * @return java.lang.String
      */
@@ -289,13 +289,13 @@ public class SerializedFile implements Serializable {
     }
 
     /**
-     * set MD5 for this file.
+     * set SHA1 for this file.
      *
-     * @param newMd5sum
-     *            md5 string.
+     * @param newSHA1sum
+     *            SHA1 string.
      */
-    void setSHA1sum(java.lang.String newMd5sum) {
-        sha1sum = newMd5sum;
+    void setSHA1sum(java.lang.String newSHA1sum) {
+        sha1sum = newSHA1sum;
     }
 
     private void setName(String name) {
