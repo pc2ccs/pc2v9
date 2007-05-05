@@ -463,6 +463,8 @@ public class Executable {
 
             if (process == null) {
                 executionTimer.stopTimer();
+                stderrlog.close();
+                stdoutlog.close();
                 return false;
             }
 
@@ -703,6 +705,8 @@ public class Executable {
             Process process = runProgram(cmdline, "Executing...");
             if (process == null) {
                 executionTimer.stopTimer();
+                stderrlog.close();
+                stdoutlog.close();
                 return false;
             }
 
@@ -799,6 +803,8 @@ public class Executable {
             Process process = runProgram(cmdline, "Compiling...");
             if (process == null) {
                 executionTimer.stopTimer();
+                stderrlog.close();
+                stdoutlog.close();
                 return false;
             }
             // This reads from the stdout of the child process
