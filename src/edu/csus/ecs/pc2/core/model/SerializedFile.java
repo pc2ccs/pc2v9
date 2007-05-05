@@ -33,7 +33,7 @@ public class SerializedFile implements Serializable {
 
     private String absolutePath;
 
-    private String md5sum;
+    private String sha1sum;
 
 //    private PC2Constants.FileTypes fileType = PC2Constants.FileTypes.BINARY;
 
@@ -61,7 +61,7 @@ public class SerializedFile implements Serializable {
             try {
                 buffer = file2buffer(fileName);
                 absolutePath = file.getAbsolutePath();
-                generateMD5(buffer);
+                generateSHA1(buffer);
 //                generateFileType(buffer);
 
             } catch (Exception e) {
@@ -92,7 +92,7 @@ public class SerializedFile implements Serializable {
             try {
                 buffer = file2buffer(fileName, limit);
                 absolutePath = file.getAbsolutePath();
-                generateMD5(buffer);
+                generateSHA1(buffer);
 //                generateFileType(buffer);
 
             } catch (Exception e) {
@@ -223,7 +223,7 @@ public class SerializedFile implements Serializable {
     /**
      * Generates a unique checksum for this file.
      */
-    public void generateMD5(byte[] buf) {
+    public void generateSHA1(byte[] buf) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA");
             md.reset();
@@ -234,10 +234,10 @@ public class SerializedFile implements Serializable {
             for (int i = 0; i < digested.length; i++) {
                 out = out + new Integer(digested[i]).toString();
             }
-            md5sum = out;
+            sha1sum = out;
 
         } catch (Exception ex99) {
-            StaticLog.log("Exception in generateMD5", ex99);
+            StaticLog.log("Exception in generateSHA1", ex99);
         }
 
     }
@@ -271,8 +271,8 @@ public class SerializedFile implements Serializable {
      *
      * @return java.lang.String
      */
-    public java.lang.String getMd5sum() {
-        return md5sum;
+    public java.lang.String getSHA1sum() {
+        return sha1sum;
     }
 
     /**
@@ -294,8 +294,8 @@ public class SerializedFile implements Serializable {
      * @param newMd5sum
      *            md5 string.
      */
-    void setMd5sum(java.lang.String newMd5sum) {
-        md5sum = newMd5sum;
+    void setSHA1sum(java.lang.String newMd5sum) {
+        sha1sum = newMd5sum;
     }
 
     private void setName(String name) {
