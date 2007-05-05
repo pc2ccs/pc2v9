@@ -251,13 +251,13 @@ public class ProblemPane extends JPanePlugin {
             enableButton |= (timeOutSeconds != problem.getTimeOutInSeconds());
 
             boolean hasDataFile = problem.getDataFileName() != null;
-            enableButton |= (hasDataFile == judgesHaveAnswerFiles.isSelected());
+            enableButton |= (hasDataFile != problemRequiresDataCheckBox.isSelected());
             if (hasDataFile) {
                 enableButton |= (!inputDataFileLabel.getText().equals(problem.getDataFileName()));
             }
 
             boolean hasAnswerFile = problem.getAnswerFileName() != null;
-            enableButton |= (hasAnswerFile == problemRequiresDataCheckBox.isSelected());
+            enableButton |= (hasAnswerFile != judgesHaveAnswerFiles.isSelected());
             if (hasAnswerFile) {
                 enableButton |= (!answerFileNameLabel.getText().equals(problem.getAnswerFileName()));
             }
