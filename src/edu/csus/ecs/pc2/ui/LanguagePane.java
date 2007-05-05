@@ -573,7 +573,7 @@ public class LanguagePane extends JPanePlugin {
         }else{
             cancelButton.setText("Close");
         }
-        addButton.setEnabled(true);
+        addButton.setEnabled(editedText);
         updateButton.setEnabled(editedText);
     }
 
