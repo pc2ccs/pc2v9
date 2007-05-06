@@ -418,7 +418,7 @@ public class ProblemPane extends JPanePlugin {
                 return false;
             }
         } else {
-            if (fileName.trim().length() > 0) {
+            if (fileName != null && fileName.trim().length() > 0) {
                 // file selected, but checkbox not clicked
                 int verifyInputDataFile = JOptionPane.showConfirmDialog(getParent(), "Use selected data file?");
                 switch (verifyInputDataFile) {
@@ -446,7 +446,7 @@ public class ProblemPane extends JPanePlugin {
             if (!checkFile(fileName)) {
                 return false;
             }
-            if (fileName.trim().length() > 0) {
+            if (fileName != null && fileName.trim().length() > 0) {
                 // file selected, but checkbox not clicked
                 int verifyAnswerFile = JOptionPane.showConfirmDialog(getParent(), "Use selected answer file?");
                 switch (verifyAnswerFile) {
