@@ -216,6 +216,10 @@ public class RunsPanel extends JPanePlugin {
 
         public void runAdded(RunEvent event) {
             updateRunRow(event.getRun(), event.getWhoModifiedRun());
+            //check if this is a team; if so, pop up a confirmation dialog
+            if (getContest().getClientId().getClientType()==ClientType.Type.TEAM) {
+                showResponseToTeam(event);
+            }
         }
 
         public void runChanged(RunEvent event) {
@@ -242,8 +246,14 @@ public class RunsPanel extends JPanePlugin {
          */
         private void showResponseToTeam (RunEvent event) {
             
-            //check if the run has been judged 
             Run theRun = event.getRun();
+            String problemName = getContest().getProblem(theRun.getProblemId()).toString() ;
+            String languageName = getContest().getLanguage(theRun.getLanguageId()).toString() ;
+            int runId = theRun.getNumber() ;
+            //build an HTML tag that sets the font size and color for the answer
+            String responseFormat = "";
+
+            //check if the run has been judged 
             if (theRun.isJudged()) {
                 
                 //check if there's a legit judgement
@@ -256,11 +266,6 @@ public class RunsPanel extends JPanePlugin {
                         
                         //it's a valid judging response (presumably to a team); 
                         //  get the info from the run and display it in a modal popup
-                        String problemName = getContest().getProblem(theRun.getProblemId()).toString() ;
-                        String languageName = getContest().getLanguage(theRun.getLanguageId()).toString() ;
-                        int runId = theRun.getNumber() ;
-                        //build an HTML tag that sets the font size and color for the answer
-                        String responseFormat = "";
                         if (judgementRecord.isSolved()) {
                             responseFormat += "<FONT COLOR=\"00FF00\" SIZE=+2>" ;  //green, larger
                         } else {
@@ -289,9 +294,28 @@ public class RunsPanel extends JPanePlugin {
     
                         } catch (Exception e) {
                             // TODO need to make this cleaner
-                            JOptionPane.showMessageDialog(null, "Exception handling Run Response on Team: " + e.getMessage());
+                            JOptionPane.showMessageDialog(null, "Exception handling Run Response: " + e.getMessage());
+                            log.warning("Exception handling Run Response: " + e.getMessage());
                         }
                     }
+                }
+            } else {
+                // not judged
+                try {
+                    String displayString =
+                        "<HTML><FONT SIZE=+1>Confirmation of Run Receipt<BR><BR>"
+                        + "Problem: <FONT COLOR=BLUE>" +  problemName + "</FONT><BR><BR>" 
+                        + "Language: <FONT COLOR=BLUE>" + languageName   + "</FONT><BR><BR>" 
+                        + "Run Id: <FONT COLOR=BLUE>" + runId + "</FONT><BR><BR><BR>";
+                        
+                    displayString += "</FONT></HTML>" ;
+
+                    JOptionPane.showMessageDialog(null, displayString, 
+                                "Run Received", JOptionPane.INFORMATION_MESSAGE );
+
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(null, "Exception handling Run Confirmation: " + e.getMessage());
+                    log.warning("Exception handling Run Confirmation: " + e.getMessage());
                 }
             }
         }
