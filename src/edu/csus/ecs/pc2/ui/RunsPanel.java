@@ -105,9 +105,7 @@ public class RunsPanel extends JPanePlugin {
         
         editRunFrame = new EditRunFrame();
         viewJudgementsFrame = new ViewJudgementsFrame();
-        if (isAllowed(Permission.Type.JUDGE_RUN)) {
-            selectJudgementFrame = new SelectJudgementFrame();
-        }
+        selectJudgementFrame = new SelectJudgementFrame();
 
     }
 
@@ -471,6 +469,8 @@ public class RunsPanel extends JPanePlugin {
         super.setContestAndController(inContest, inController);
         
         log = getController().getLog();
+
+        initializePermissions();
         
         editRunFrame.setContestAndController(getContest(), getController());
         viewJudgementsFrame.setContestAndController(getContest(), getController());
@@ -481,8 +481,6 @@ public class RunsPanel extends JPanePlugin {
         getContest().addRunListener(new RunListenerImplementation());
         getContest().addAccountListener(new AccountListenerImplementation());
 
-        initializePermissions();
-        
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 updateGUIperPermissions();
