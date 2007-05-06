@@ -419,6 +419,34 @@ public class SubmitRunPane extends JPanePlugin {
      */
     private void testRun(Problem problem, Language language, String filename) {
 
+        String dataFileName = problem.getDataFileName();
+        String message = "";
+        boolean needsData = false;
+        if (dataFileName != null) {
+            if (dataFileName.trim().length() > 0 && !problem.isReadInputDataFromSTDIN()) {
+                // verify presence of data file
+                File sourceFile = new File(filename);
+                File dataFile = new File(sourceFile.getParent() + File.separator + dataFileName);
+                if (dataFile.exists()) {
+                    if (dataFile.isFile()) {
+                        if (!dataFile.canRead()) {
+                            message = "Cannot read file.";
+                            needsData = true;
+                        }
+                    } else {
+                        message = "Is not a file";
+                        needsData = true;
+                    }
+                } else {
+                    message = "Cannot find file in " + sourceFile.getParent();
+                    needsData = true;
+                }
+                if (needsData) {
+                    JOptionPane.showMessageDialog(getParent(), "Problem with data file: " + dataFileName + "\n\n" + message, "Problem with data file", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            }
+        }
         setButtonsActive(false);
 
         try {
