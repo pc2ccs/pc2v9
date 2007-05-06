@@ -13,7 +13,9 @@ import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
+import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
+import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.core.model.ILoginListener;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.IRunListener;
@@ -216,6 +218,36 @@ public class ServerView extends JFrame implements UIPlugin {
     }
 
     /**
+     * Contest Time for use by ServerView.
+     * 
+     * @author pc2@ecs.csus.edu
+     *
+     */
+    public class ContestTimeListenerImplementation implements IContestTimeListener {
+
+        private int ignoreEvent = 0;
+        public void contestTimeAdded(ContestTimeEvent event) {
+            ignoreEvent++;
+        }
+
+        public void contestTimeRemoved(ContestTimeEvent event) {
+            ignoreEvent++;
+        }
+
+        public void contestTimeChanged(ContestTimeEvent event) {
+            ignoreEvent++;
+        }
+
+        public void contestStarted(ContestTimeEvent event) {
+            updateFrameTitle(event.getContestTime().isContestRunning());
+        }
+
+        public void contestStopped(ContestTimeEvent event) {
+            updateFrameTitle(event.getContestTime().isContestRunning());
+        }
+        
+    }
+    /**
      * This method initializes mainViewPane
      * 
      * @return javax.swing.JPanel
@@ -252,7 +284,7 @@ public class ServerView extends JFrame implements UIPlugin {
         return mainTabbedPane;
     }
 
-    private void updateFrameTitle(final boolean turnButtonsOn) {
+    void updateFrameTitle(final boolean turnButtonsOn) {
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -282,7 +314,8 @@ public class ServerView extends JFrame implements UIPlugin {
         model.addAccountListener(new AccountListenerImplementation());
         model.addLoginListener(new LoginListenerImplementation());
         model.addSiteListener(new SiteListenerImplementation());
-
+        model.addContestTimeListener(new ContestTimeListenerImplementation());
+        
         SitesPanel sitesPanel = new SitesPanel();
         addUIPlugin(getMainTabbedPane(), "Sites", sitesPanel);
 
