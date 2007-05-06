@@ -19,12 +19,12 @@ public interface UIPlugin {
      * contents of the model and controller to the class
      * that implements this method.
      * 
-     * @param model
+     * @param inContest
      *            contest data
-     * @param controller
+     * @param inController
      *            contest controller
      */
-    void setContestAndController(IContest model, IController controller);
+    void setContestAndController(IContest inContest, IController inController);
 
     /**
      * @return name of this plugin, used in choosing plugin.
