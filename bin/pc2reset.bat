@@ -9,31 +9,29 @@ rem
 set RMCMD=rmdir /s /q
 if %OS%. == . set RMCMD=deltree /y
 
-if not exist bin\pc2zip.bat goto wrongdir
+if not exist %0\..\..\logs goto wrongdir
+if not exist %0\..\..\packets goto wrongdir
 
 echo Backing up settings to archive 
-call bin\pc2zip.bat
+call %0\..\pc2zip.bat
 
+%RMCMD% logs
+%RMCMD% packets
 %RMCMD% db
 %RMCMD% db.1
 %RMCMD% db.2
 %RMCMD% db.3
 
-%RMCMD% logs
-%RMCMD% packets
+rem TODO execute*
 
-del report*.txt
-del *.log
+
+rem not yet del report*.txt
 
 goto end
 :wrongdir
 
 echo.
-echo Can not find bin\pc2zip.bat
-echo.
-rem // TODO better message or handle this better
-echo Run pc2reset from other dir...
-echo
+echo Not in directory to reset, should be run from dir with logs and packets
 echo.
 
 
