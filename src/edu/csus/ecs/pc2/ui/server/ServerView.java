@@ -101,9 +101,9 @@ public class ServerView extends JFrame implements UIPlugin {
                 promptAndExit();
             }
         });
-        setVisible(true);
 
         FrameUtilities.centerFrameTop(this);
+        setVisible(true);
         
         VersionInfo versionInfo = new VersionInfo();
         showMessage("Version "+versionInfo.getVersionNumber()+" (Build "+versionInfo.getBuildNumber()+")");
