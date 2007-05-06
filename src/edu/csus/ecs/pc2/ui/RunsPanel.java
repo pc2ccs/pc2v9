@@ -105,7 +105,9 @@ public class RunsPanel extends JPanePlugin {
         
         editRunFrame = new EditRunFrame();
         viewJudgementsFrame = new ViewJudgementsFrame();
-        selectJudgementFrame = new SelectJudgementFrame();
+        if (isAllowed(Permission.Type.JUDGE_RUN)) {
+            selectJudgementFrame = new SelectJudgementFrame();
+        }
 
     }
 
@@ -330,6 +332,15 @@ public class RunsPanel extends JPanePlugin {
         if (runListBox == null) {
             runListBox = new MCLB();
 
+            runListBox.addListboxListener(new com.ibm.webrunner.j2mclb.event.ListboxListener() {
+                public void rowSelected(com.ibm.webrunner.j2mclb.event.ListboxEvent e) {
+                    if (isAllowed(Permission.Type.JUDGE_RUN) && e.getClickCount() >= 2) {
+                        requestSelectedRun();
+                    }
+                }
+                public void rowDeselected(com.ibm.webrunner.j2mclb.event.ListboxEvent e) {
+                }
+            });
             Object[] cols = { "Site", "Team", "Run Id", "Time", "Status", "Problem", "Judge", "Language", "OS" };
             runListBox.addColumns(cols);
 
@@ -397,6 +408,17 @@ public class RunsPanel extends JPanePlugin {
                 rowCountLabel.setToolTipText("There are "+runListBox.getRowCount()+" runs");
                 runListBox.autoSizeAllColumns();
                 runListBox.sort();
+                if (selectJudgementFrame != null) {
+                    // return focus to the other frame if it is around
+                    /*
+                     * XXX this is hack which causes the frame to flicker
+                     * when coming from the listbox double click
+                     * as it comes in front, goes behind, then comes back in front. 
+                     * But could not find another way to keep focus on the selectJudgementFrame,
+                     * otherwise it would be beind the RunsPanel
+                     */
+                    selectJudgementFrame.requestFocus();
+                }
             }
         });
     }
@@ -452,7 +474,9 @@ public class RunsPanel extends JPanePlugin {
         
         editRunFrame.setContestAndController(getContest(), getController());
         viewJudgementsFrame.setContestAndController(getContest(), getController());
-        selectJudgementFrame.setContestAndController(getContest(), getController());
+        if (isAllowed(Permission.Type.JUDGE_RUN)) {
+            selectJudgementFrame.setContestAndController(getContest(), getController());
+        }
 
         getContest().addRunListener(new RunListenerImplementation());
         getContest().addAccountListener(new AccountListenerImplementation());
@@ -533,7 +557,11 @@ public class RunsPanel extends JPanePlugin {
     }
 
     protected void requestSelectedRun() {
-        
+        if (!isAllowed(Permission.Type.JUDGE_RUN)) {
+            log.log(Log.WARNING, "Account does not have permission to JUDGE_RUN, cannot requestSelectedRun.");
+            showMessage("Unable to request run, check log");
+            return;
+        }
         int [] selectedIndexes = runListBox.getSelectedIndexes();
         
         if (selectedIndexes.length < 1){
@@ -554,7 +582,7 @@ public class RunsPanel extends JPanePlugin {
             selectJudgementFrame.setVisible(true);
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception logged ", e);
-            showMessage("Unable to edit run, check log");
+            showMessage("Unable to request run, check log");
         }   
     }
     
@@ -587,7 +615,7 @@ public class RunsPanel extends JPanePlugin {
             
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception logged ", e);
-            showMessage("Unable to edit run, check log");
+            showMessage("Unable to rejudge run, check log");
         }   
     }
 
@@ -780,7 +808,7 @@ public class RunsPanel extends JPanePlugin {
             
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception logged ", e);
-            showMessage("Unable to edit run, check log");
+            showMessage("Unable to view run, check log");
         }
         
         
