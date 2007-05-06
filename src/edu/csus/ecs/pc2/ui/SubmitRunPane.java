@@ -101,8 +101,12 @@ public class SubmitRunPane extends JPanePlugin {
         }
     }
 
-    private void populateGUI() {
-
+    /**
+     * Reloads the Problem Combo Box.
+     * 
+     * Invoker is responsible for ensuring this is run on the AWT thread.
+     */
+    private void reloadProblems() {
         getProblemComboBox().removeAllItems();
         Problem problemN = new Problem("None Selected");
         getProblemComboBox().addItem(problemN);
@@ -110,7 +114,14 @@ public class SubmitRunPane extends JPanePlugin {
         for (Problem problem : getContest().getProblems()) {
             getProblemComboBox().addItem(problem);
         }
+    }
 
+    /**
+     * Reloads the Language Combo Box.
+     * 
+     * Invoker is responsible for ensuring this is run on the AWT thread.
+     */
+    private void reloadLanguages() {
         getLanguageComboBox().removeAllItems();
         Language languageN = new Language("None Selected");
         getLanguageComboBox().addItem(languageN);
@@ -118,6 +129,10 @@ public class SubmitRunPane extends JPanePlugin {
         for (Language language : getContest().getLanguages()) {
             getLanguageComboBox().addItem(language);
         }
+    }
+    private void populateGUI() {
+        reloadProblems();
+        reloadLanguages();
         
         setButtonsActive(getContest().getContestTime().isContestRunning());
     }
@@ -196,12 +211,24 @@ public class SubmitRunPane extends JPanePlugin {
             });
         }
 
-        public void problemChanged(ProblemEvent event) {
-            log.info("debug Problem CHANGED  " + event.getProblem());
+        public void problemChanged(final ProblemEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    int selectedIndex = getProblemComboBox().getSelectedIndex();
+                    reloadProblems();
+                    if (selectedIndex > -1) {
+                        getProblemComboBox().setSelectedIndex(selectedIndex);
+                    }
+                }
+            });
         }
 
         public void problemRemoved(ProblemEvent event) {
-            log.info("debug Problem REMOVED  " + event.getProblem());
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadProblems();
+                }
+            });
         }
     }
 
@@ -221,11 +248,23 @@ public class SubmitRunPane extends JPanePlugin {
         }
 
         public void languageChanged(LanguageEvent event) {
-            log.info("debug Language CHANGED  " + event.getLanguage());
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    int selectedIndex = getLanguageComboBox().getSelectedIndex();
+                    reloadLanguages();
+                    if (selectedIndex > -1) {
+                        getLanguageComboBox().setSelectedIndex(selectedIndex);
+                    }
+                }
+            });
         }
 
         public void languageRemoved(LanguageEvent event) {
-            log.info("debug Language REMOVED  " + event.getLanguage());
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadLanguages();
+                }
+            });
         }
     }
 
