@@ -567,10 +567,22 @@ public class SubmitRunPane extends JPanePlugin {
         try {
             int returnVal = chooser.showOpenDialog(this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
-                lastOpenedFile = chooser.getCurrentDirectory().toString();
-                fileNameLabel.setText(chooser.getSelectedFile().getCanonicalFile().toString());
-                fileNameLabel.setToolTipText(chooser.getSelectedFile().getCanonicalFile().toString());
-
+                File newFile = chooser.getSelectedFile().getCanonicalFile();
+                boolean newFileProblem = true;
+                if (newFile.exists()) {
+                    if (newFile.isFile()) {
+                        if (newFile.canRead()) {
+                            lastOpenedFile = chooser.getCurrentDirectory().toString();
+                            fileNameLabel.setText(newFile.getCanonicalFile().toString());
+                            fileNameLabel.setToolTipText(newFile.getCanonicalFile().toString());
+                            newFileProblem = false;
+                        }
+                    }
+                }
+                if (newFileProblem) {
+                    // TODO show message in the messageLabel or a popup?
+                    log.warning("Problem reading new main file selection " + newFile.getCanonicalPath() + ", staying with previous selection");
+                }
             }
         } catch (Exception e) {
             System.err.println("Error getting selected file, try again.");
