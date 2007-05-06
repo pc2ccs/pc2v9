@@ -8,6 +8,7 @@ import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.RunEvent.Action;
+import edu.csus.ecs.pc2.core.security.Permission;
 
 /**
  * 
@@ -64,6 +65,9 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
         this.contest = inContest;
         this.controller = inController;
 
+        if (!inContest.getAccount(inContest.getClientId()).getPermissionList().isAllowed(Permission.Type.JUDGE_RUN)) {
+            throw new SecurityException("SelectJudgementFame requires JUDGE_RUN permission");
+        }
         getSelectJudgementPane().setContestAndController(contest, controller);
         getSelectJudgementPane().setParentFrame(this);
 
