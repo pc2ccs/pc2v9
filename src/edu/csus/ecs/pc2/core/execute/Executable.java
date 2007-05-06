@@ -275,15 +275,19 @@ public class Executable {
                     }
                 }
             } else if (compileProgram()) {
-                SerializedFile[] dataFiles = problemDataFiles.getJudgesDataFiles();
+                SerializedFile[] dataFiles = null;
+                if (problemDataFiles != null) {
+                    dataFiles = problemDataFiles.getJudgesDataFiles();
+                } // else problem has no data files
                 int dataSetNumber = 0;
 
-                if (dataFiles == null || dataFiles.length == 1) {
-                    // Only a single data set,
+                if (dataFiles == null || dataFiles.length <= 1) {
+                    // Only a single (at most) data set,
                     if (executeProgram(dataSetNumber) && isValidated()) {
                         validateProgram(dataSetNumber);
                     }
                 } else {
+                    // getting here when not in validator mode results in a blank execute results window
                     boolean passed = true;
 
                     while (passed && dataSetNumber < dataFiles.length) {
