@@ -144,8 +144,8 @@ public class ZipPC2 {
                 }
             }
 
-            if (dirEntryName.startsWith("logs")) {
-                addFileToList(dirEntryName);
+            if (dirEntryName.equalsIgnoreCase("logs")) {
+                addDirToList(dirEntryName);
             } else if (dirEntryName.equalsIgnoreCase("packets")) {
                 addDirToList(dirEntryName);
             } else if (dirEntryName.equalsIgnoreCase("html")) {
