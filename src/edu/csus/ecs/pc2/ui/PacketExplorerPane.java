@@ -1,4 +1,4 @@
-package edu.csus.ecs.pc2.core.archive;
+package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.io.File;
@@ -25,8 +25,6 @@ import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.packet.PacketFactory;
-import edu.csus.ecs.pc2.ui.JPanePlugin;
-import edu.csus.ecs.pc2.ui.MCLB;
 
 /**
  * Packet Explorer, stand alone app.
@@ -44,8 +42,6 @@ public class PacketExplorerPane extends JPanePlugin {
 
     public static final String SVN_ID = "$Id$";
 
-    private JPanel mainPanel = null;
-
     private JPanel centerPane = null;
 
     private JPanel southPane = null;
@@ -62,8 +58,10 @@ public class PacketExplorerPane extends JPanePlugin {
 
     private JLabel messageLabel = null;
 
+    @SuppressWarnings("unused")
     private IContest contest;
 
+    @SuppressWarnings("unused")
     private IController controller;
 
     public PacketExplorerPane() {
