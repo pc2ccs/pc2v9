@@ -1,4 +1,4 @@
-package edu.csus.ecs.pc2.core.model;
+package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.io.File;
@@ -15,9 +15,18 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.log.Log;
-import edu.csus.ecs.pc2.ui.FrameUtilities;
-import edu.csus.ecs.pc2.ui.JPanePlugin;
-import edu.csus.ecs.pc2.ui.MultipleFileViewer;
+import edu.csus.ecs.pc2.core.model.AccountPermissionReport;
+import edu.csus.ecs.pc2.core.model.AccountsReport;
+import edu.csus.ecs.pc2.core.model.ClarificationsReport;
+import edu.csus.ecs.pc2.core.model.Filter;
+import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IReport;
+import edu.csus.ecs.pc2.core.model.InternalDumpReport;
+import edu.csus.ecs.pc2.core.model.LanguagesReport;
+import edu.csus.ecs.pc2.core.model.ProblemsReport;
+import edu.csus.ecs.pc2.core.model.RunsByTeamReport;
+import edu.csus.ecs.pc2.core.model.RunsReport;
+import edu.csus.ecs.pc2.core.model.StandingsReport;
 
 /**
  * 
