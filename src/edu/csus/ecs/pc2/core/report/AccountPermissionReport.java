@@ -27,6 +27,7 @@ public class AccountPermissionReport implements IReport {
 
     private IContest contest;
 
+    @SuppressWarnings("unused")
     private IController controller;
 
     public void createReportFile(String filename, Filter filter) throws IOException {

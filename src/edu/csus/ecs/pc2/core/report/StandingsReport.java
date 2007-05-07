@@ -1,4 +1,4 @@
-package edu.csus.ecs.pc2.core.model;
+package edu.csus.ecs.pc2.core.report;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -20,6 +20,9 @@ import org.xml.sax.SAXException;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.Filter;
+import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IReport;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 
 /**

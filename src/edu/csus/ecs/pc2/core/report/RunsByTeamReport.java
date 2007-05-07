@@ -109,6 +109,7 @@ public class RunsByTeamReport implements IReport {
         return "UndefProb";
     }
 
+    @SuppressWarnings("unused")
     private String getSiteTitle(String string) {
         return "Site " + string;
     }

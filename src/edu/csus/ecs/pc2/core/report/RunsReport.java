@@ -1,4 +1,4 @@
-package edu.csus.ecs.pc2.core.model;
+package edu.csus.ecs.pc2.core.report;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -10,6 +10,14 @@ import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.Filter;
+import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IReport;
+import edu.csus.ecs.pc2.core.model.Judgement;
+import edu.csus.ecs.pc2.core.model.JudgementRecord;
+import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 
 /**
@@ -28,6 +36,7 @@ public class RunsReport implements IReport {
 
     private Log log;
     
+    @SuppressWarnings("unused")
     private void writeRowOld (PrintWriter printWriter, Run run){
         
         ClientId clientId = run.getSubmitter();
