@@ -17,15 +17,13 @@ call %0\..\pc2zip.bat
 
 %RMCMD% logs
 %RMCMD% packets
+%RMCMD% reports
 %RMCMD% db
 %RMCMD% db.1
 %RMCMD% db.2
 %RMCMD% db.3
 
 rem TODO execute*
-
-
-rem not yet del report*.txt
 
 goto end
 :wrongdir

@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.core.model;
 
 import java.awt.BorderLayout;
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -51,6 +52,22 @@ public class ReportPane extends JPanePlugin {
     private IReport[] listOfReports;
 
     private Log log;
+
+    private String reportDirectory = "reports";
+    
+    public String getReportDirectory() {
+        return reportDirectory;
+    }
+
+    /**
+     * This method can change the directory that the reports will be written to.
+     * The default is "reports".
+     * 
+     * @param reportDirectory what directory to write the reports to
+     */
+    public void setReportDirectory(String reportDirectory) {
+        this.reportDirectory = reportDirectory;
+    }
 
     /**
      * This method initializes
@@ -208,7 +225,16 @@ public class ReportPane extends JPanePlugin {
         try {
             
             String filename = getFileName();
-
+            File reportDirectoryFile = new File(getReportDirectory());
+            if (reportDirectoryFile.exists()) {
+                if (reportDirectoryFile.isDirectory()) {
+                    filename = reportDirectoryFile.getCanonicalPath() + File.separator + filename;
+                }
+            } else {
+                if (reportDirectoryFile.mkdirs()) {
+                    filename = reportDirectoryFile.getCanonicalPath() + File.separator + filename;
+                }
+            }
             IReport selectedReport = null;
             
             String selectedReportTitle = (String) getReportsComboBox().getSelectedItem();
