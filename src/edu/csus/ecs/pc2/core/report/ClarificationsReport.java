@@ -13,7 +13,6 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IContest;
-import edu.csus.ecs.pc2.core.model.IReport;
 
 /**
  * Internal dump report.

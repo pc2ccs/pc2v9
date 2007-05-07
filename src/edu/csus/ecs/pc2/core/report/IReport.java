@@ -1,7 +1,8 @@
-package edu.csus.ecs.pc2.core.model;
+package edu.csus.ecs.pc2.core.report;
 
 import java.io.IOException;
 
+import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
