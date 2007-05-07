@@ -161,7 +161,7 @@ public class ProblemDataFiles implements IElementObject {
         elementId.setSiteNumber(siteNumber);
     }
 
-    protected ElementId getProblemId() {
+    public ElementId getProblemId() {
         return problemId;
     }
 

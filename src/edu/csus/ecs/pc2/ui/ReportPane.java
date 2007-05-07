@@ -15,18 +15,18 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.log.Log;
-import edu.csus.ecs.pc2.core.model.AccountPermissionReport;
 import edu.csus.ecs.pc2.core.model.AccountsReport;
-import edu.csus.ecs.pc2.core.model.ClarificationsReport;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.IReport;
 import edu.csus.ecs.pc2.core.model.InternalDumpReport;
 import edu.csus.ecs.pc2.core.model.LanguagesReport;
-import edu.csus.ecs.pc2.core.model.ProblemsReport;
-import edu.csus.ecs.pc2.core.model.RunsByTeamReport;
 import edu.csus.ecs.pc2.core.model.RunsReport;
 import edu.csus.ecs.pc2.core.model.StandingsReport;
+import edu.csus.ecs.pc2.core.report.AccountPermissionReport;
+import edu.csus.ecs.pc2.core.report.ClarificationsReport;
+import edu.csus.ecs.pc2.core.report.ProblemsReport;
+import edu.csus.ecs.pc2.core.report.RunsByTeamReport;
 
 /**
  * 
