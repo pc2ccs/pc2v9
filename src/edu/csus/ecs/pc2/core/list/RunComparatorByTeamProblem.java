@@ -34,7 +34,15 @@ public class RunComparatorByTeamProblem implements Comparator<Run>, Serializable
             ClientId team2 = run2.getSubmitter();
 
             if (team1.getClientNumber() == team2.getClientNumber()) {
-                return run1.getProblemId().toString().compareTo(run2.getProblemId().toString());
+                if (run1.getProblemId().equals(run2.getProblemId())){
+                    if (run1.getElapsedMins() < run2.getElapsedMins()){
+                        return -1;
+                    } else {
+                        return 1;
+                    }
+                } else {
+                    return run1.getProblemId().toString().compareTo(run2.getProblemId().toString());
+                }
             } else {
                 return team1.getClientNumber() - team2.getClientNumber();
             }

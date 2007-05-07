@@ -101,14 +101,37 @@ public class RunsByTeamReport implements IReport {
     private String getSiteTitle(String string) {
         return "Site " + string;
     }
+    
+    private void printProblemSummary(PrintWriter printWriter, int attempts, int solved, int deleteCount){
+        printWriter.print("             " + attempts + " attempts. ");
+        if (deleteCount > 0) {
+            printWriter.print(" "+deleteCount+" deleted");
+        }
+        if (solved > 0) {
+            printWriter.print(" SOLVED");
+        } else {
+            printWriter.print(" NOT solved");
+        }
 
+    }
+
+    /**
+     * Print run by problem for team.
+     * 
+     * @param printWriter
+     * @param currentTeam
+     * @param accumRuns
+     */
     private void printRuns(PrintWriter printWriter, ClientId currentTeam, Vector<Run> accumRuns) {
 
         printWriter.println();
+        printWriter.println();
         printWriter.println(currentTeam.getName() + " Site " + currentTeam.getSiteNumber() + " - '" + getClientName(currentTeam) + "'");
-
+        
+        long firstSolveTime = 0;
         int solved = 0;
         int attempts = 0;
+        int deleteCount = 0;
         ElementId lastProblemId = null;
 
         for (int i = 0; i < accumRuns.size(); i++) {
@@ -116,23 +139,26 @@ public class RunsByTeamReport implements IReport {
 
             if (!run.getProblemId().equals(lastProblemId)) {
                 if (solved > 0 || attempts > 0) {
-                    printWriter.print("             " + attempts + " attempts. ");
-                    if (solved > 0) {
-                        printWriter.print(" SOLVED");
-                    } else {
-                        printWriter.print(" NOT solved");
-                    }
+                    
+                    printProblemSummary(printWriter, attempts, solved, deleteCount);
                     printWriter.println();
                     printWriter.println();
                 }
+                    
                 lastProblemId = run.getProblemId();
                 printWriter.println("   Problem " + getProblemTitle(run.getProblemId()));
                 solved = 0;
                 attempts = 0;
+                firstSolveTime = 0;
+                deleteCount = 0;
             }
 
-            printWriter.format("     %3d %3d ", run.getNumber(), run.getElapsedMins());
-            printWriter.print(run.getStatus());
+            printWriter.format("     %3d %3d", run.getNumber(), run.getElapsedMins());
+            if (run.isDeleted()){
+                printWriter.print(" DELETED");
+                deleteCount++;
+            }
+            printWriter.print(" " +run.getStatus());
             attempts++;
             if (run.isJudged()) {
 
@@ -140,7 +166,10 @@ public class RunsByTeamReport implements IReport {
                 Judgement judgement = contest.getJudgement(judgementRecord.getJudgementId());
                 printWriter.print(" " + judgement.toString().substring(0, 3));
 
-                if (run.isSolved()) {
+                if (run.isSolved() && (! run.isDeleted())) {
+                    if (firstSolveTime == 0){
+                        firstSolveTime = run.getElapsedMins();
+                    }
                     solved++;
                 }
 
@@ -150,13 +179,7 @@ public class RunsByTeamReport implements IReport {
         }
 
         if (solved > 0 || attempts > 0) {
-            printWriter.print("             " + attempts + " attempts. ");
-            if (solved > 0) {
-                printWriter.print(" SOLVED");
-            } else {
-                printWriter.print(" NOT solved");
-            }
-            printWriter.println();
+            printProblemSummary(printWriter, attempts, solved, deleteCount);
         }
     }
 
