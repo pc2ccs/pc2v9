@@ -36,7 +36,7 @@ public class AccountComparator implements Comparator<Account>, Serializable {
             if (clientId1.getClientType().equals(clientId2.getClientType())){
                 return clientId1.getClientNumber() - clientId2.getClientNumber();
             } else {
-                return clientId1.getClientType().compareTo(clientId1.getClientType());
+                return clientId1.getClientType().compareTo(clientId2.getClientType());
             }
             
         } else {
