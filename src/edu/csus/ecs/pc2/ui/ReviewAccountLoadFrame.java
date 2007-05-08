@@ -2,10 +2,9 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Vector;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -13,14 +12,15 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.IContest;
-import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.imports.LoadAccounts;
 import edu.csus.ecs.pc2.core.security.Permission;
-import edu.csus.ecs.pc2.core.util.TabSeparatedValueParser;
 import javax.swing.JButton;
 
 /**
@@ -55,21 +55,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
 
     private IContest contest;
 
-    private int siteColumn = -1;
-
-    private int accountColumn = -1;
-
-    private int displayNameColumn = -1;
-
-    private int passwordColumn = -1;
-
-    // TODO undo @SuppressWarnings when groupColumn used.
-    @SuppressWarnings("unused")
-    private int groupColumn = -1;
-    
-    private int permDisplayColumn = -1;
-
-    private int permLoginColumn = -1;
+    private Account[] accounts;
     private static final String CHANGE_BEGIN = "";
 
     private static final String CHANGE_END = "*";
@@ -79,8 +65,6 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
     private JPanel jPanel = null;
 
     private JButton cancelButton = null;
-
-    private HashMap<ClientId, Account> accountMap = new HashMap<ClientId, Account>();
 
     private String loadedFileName;
     
@@ -211,103 +195,51 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
         return "Review Account Load Frame";
     }
 
+    /**
+     * Return all accounts for all sites.
+     * TODO: consider making getAllAccounts public in controller
+     * 
+     * @return Array of all accounts in contest.
+     */
+    private Account[] getAllAccounts() {
+
+        ArrayList<Account> allAccounts = new ArrayList<Account>();
+
+        for (ClientType.Type ctype : ClientType.Type.values()) {
+            if (contest.getAccounts(ctype).size() > 0) {
+                Vector<Account> accountsOfType = contest.getAccounts(ctype);
+                allAccounts.addAll(accountsOfType);
+            }
+        }
+
+        Account[] accountList = (Account[]) allAccounts.toArray(new Account[allAccounts.size()]);
+        return accountList;
+    }
+
     public void setFile(String filename) {
         
         loadedFileName = filename;
+        showMessage("Loaded " + filename);
+        getAccountListBox().removeAllRows();
         log.info("Attempting to load accounts from file: "+filename);
-        int lineCount = 0;
-        String[] columns;
-        showMessage("");
+        LoadAccounts loadAccounts = new LoadAccounts();
+        getAcceptButton().setEnabled(false);
         try {
-            FileReader fileReader = new FileReader(filename);
-            BufferedReader in = new BufferedReader(fileReader);
-            String line = in.readLine();
-            while (line != null && line.startsWith("#")){
-                line = in.readLine();
-                lineCount++;
-            }
-            lineCount++;
-            if (line != null) {
-                columns = TabSeparatedValueParser.parseLine(line);
-                siteColumn = -1;
-                accountColumn = -1;
-                displayNameColumn = -1;
-                passwordColumn = -1;
-                groupColumn = -1;
-                for (int i = 0; i < columns.length; i++) {
-                    if (columns[i].equalsIgnoreCase("site")) {
-                        siteColumn = i;
-                    }
-                    if (columns[i].equalsIgnoreCase("account")) {
-                        accountColumn = i;
-                    }
-                    if (columns[i].equalsIgnoreCase("displayname")) {
-                        displayNameColumn = i;
-                    }
-                    if (columns[i].equalsIgnoreCase("password")) {
-                        passwordColumn = i;
-                    }
-                    if (columns[i].equalsIgnoreCase("group")) {
-                        groupColumn = i;
-                    }
-                    if (columns[i].equalsIgnoreCase("permdisplay")) {
-                        permDisplayColumn = i;
-                    }
-                    if (columns[i].equalsIgnoreCase("permlogin")) {
-                        permLoginColumn = i;
-                    }
-                }
-                if (accountColumn == -1 || siteColumn == -1 || passwordColumn == -1) {
-                    // TODO change this to a popup
-                    String msg = "1st line should be the row headers (account, password, and site are required)";
-                    showMessage(msg);
-                    log.info(msg);
-                    return;
-                }
-            }
-            line = in.readLine();
-            lineCount++;
-            while (line != null) {
-                try {
-                    if (line.startsWith("#")) {
-                        line = in.readLine();
-                        lineCount++;
-                        continue;
-                    }
-                    String[] values = TabSeparatedValueParser.parseLine(line);
-                    Account account = getAccount(values);
-                    if (account == null) {
-                        // TODO change this to a popup
-                        String msg = filename + ":" + lineCount + ": " + " please create the account first (" + values[accountColumn] + ")";
-                        showErrorMessage(msg);
-                        log.info(msg);
-                        break;
-                    }
-                    accountMap.put(account.getClientId(), account);
+            accounts = loadAccounts.fromTSVFile(filename, getAllAccounts());
+            if (accounts != null) {
+                // TODO sort accounts
+                Arrays.sort(accounts, new AccountComparator());
+                for (Account account : accounts) {
                     updateAccountRow(account);
-                } catch (Exception e) {
-                    // TODO change this to a popup
-                    String msg = filename + ":" + lineCount + ": " + e.getMessage();
-                    log.log(Log.INFO,"Error " + filename + ":" + lineCount + ": " + e.getMessage(), e);
-                    showErrorMessage(msg);
-                    log.info(msg);
-                    break;
                 }
-                line = in.readLine();
-                lineCount++;
+                log.info("found " + accounts.length + " account(s)");
+                if (accounts.length > 0) {
+                    getAcceptButton().setEnabled(true);
+                }
             }
-            in.close();
-            fileReader.close();
-            in = null;
-            fileReader = null;
         } catch (Exception e) {
-            showErrorMessage("Error in loading accounts, check log");
-            log.log(Log.WARNING, "Exception in load accounts", e);
-        }
-        if (accountMap.size() > 0) {
-            getAcceptButton().setEnabled(true);
-        } else {
-            getAcceptButton().setEnabled(false);
+            log.warning(e.getMessage());
+            showErrorMessage(e.getMessage());
         }
         setVisible(true);
     }
@@ -316,48 +248,6 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
         showMessage("<HTML><FONT COLOR='red'>" + msg + "</FONT></HTML>");
     }
 
-    Account getAccount(String[] values) {
-        String accountString = values[accountColumn];
-        String[] accountSplit = accountString.split("[0-9]+$");
-        String accountName = accountString.substring(0, accountSplit[0].length());
-        Type type = Type.valueOf(accountName.toUpperCase());
-        int clientNumber = Integer.parseInt(accountString.substring(accountSplit[0].length()));
-        String siteString = values[siteColumn];
-        String password = values[passwordColumn];
-        ClientId clientId = new ClientId(Integer.parseInt(siteString), type, clientNumber);
-        Account accountClean = contest.getAccount(clientId);
-        if (accountClean == null) {
-            // would be nice if we could create the account... not now though...
-//            accountClean = new Account(clientId, password, clientId.getSiteNumber());
-            return null;
-        }
-        Account account = new Account(clientId, password, clientId.getSiteNumber());
-        account.clearListAndLoadPermissions(accountClean.getPermissionList());
-        // TODO uncomment once account has group
-        // account.setGroup(accountClean.getGroup());
-        account.setPassword(password);
-        if (displayNameColumn != -1 && values.length > displayNameColumn) {
-            account.setDisplayName(values[displayNameColumn]);
-        }
-        // if (groupColumn != -1) {
-        // account.setGroup(values[groupColumn] && values.length >= groupColumn);
-        // }
-        if (permDisplayColumn != -1 && values.length > permDisplayColumn && values[permDisplayColumn].length() > 0) {
-            if (Boolean.parseBoolean(values[permDisplayColumn])) {
-                account.addPermission(Permission.Type.DISPLAY_ON_SCOREBOARD);
-            } else {
-                account.removePermission(Permission.Type.DISPLAY_ON_SCOREBOARD);
-            }
-        }
-        if (permLoginColumn != -1 && values.length > permLoginColumn && values[permLoginColumn].length() > 0) {
-            if (Boolean.parseBoolean(values[permLoginColumn])) {
-                account.addPermission(Permission.Type.LOGIN);
-            } else {
-                account.removePermission(Permission.Type.LOGIN);
-            }
-        }
-        return account;
-    }
 
     public void updateAccountRow(final Account account) {
 
@@ -371,7 +261,6 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
                     accountListBox.replaceRow(objects, rowNumber);
                 }
                 accountListBox.autoSizeAllColumns();
-                accountListBox.sort();
             }
         });
     }
@@ -419,7 +308,6 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
     }
 
     private String getSiteTitle(String string) {
-        // TODO Auto-generated method stub
         return "Site " + string;
     }
 
@@ -453,13 +341,6 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
     }
 
     protected void handleAccept() {
-        Account[] accounts = new Account[accountMap.size()];
-        int i = 0;
-        for (Iterator iter = accountMap.keySet().iterator(); iter.hasNext();) {
-            ClientId element = (ClientId) iter.next();
-            accounts[i] = accountMap.get(element);
-            i++;
-        }
         controller.updateAccounts(accounts);
         log.info("Loaded "+accounts.length+" from file "+loadedFileName);
         this.dispose();
