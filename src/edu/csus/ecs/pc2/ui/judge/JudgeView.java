@@ -105,10 +105,6 @@ public class JudgeView extends JFrame implements UIPlugin {
         FrameUtilities.regularCursor(this);
     }
 
-    private boolean isThisSite(int siteNumber) {
-        return siteNumber == contest.getSiteNumber();
-    }
-
     public void setContestAndController(IContest inContest, IController inController) {
         this.contest = inContest;
         this.controller = inController;

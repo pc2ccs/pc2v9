@@ -63,6 +63,8 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
 
     private int passwordColumn = -1;
 
+    // TODO undo @SuppressWarnings when groupColumn used.
+    @SuppressWarnings("unused")
     private int groupColumn = -1;
     
     private int permDisplayColumn = -1;

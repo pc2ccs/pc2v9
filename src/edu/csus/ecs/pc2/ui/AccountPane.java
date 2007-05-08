@@ -24,6 +24,11 @@ import edu.csus.ecs.pc2.core.model.IContest;
 // $HeadURL$
 public class AccountPane extends JPanePlugin {
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -1572390105202179281L;
+
     private JPanel messagePane = null;
 
     private JPanel buttonPane = null;
@@ -42,6 +47,8 @@ public class AccountPane extends JPanePlugin {
 
     private JPanel generalPane = null;
 
+    // May be used sometime later.
+    @SuppressWarnings("unused")
     private Log log = null;
 
     /**
@@ -133,7 +140,7 @@ public class AccountPane extends JPanePlugin {
 
     protected void addAccount() {
 
-        Account newAccount = getAccountFromFields();
+//        Account newAccount = getAccountFromFields();
 
         // TODO update account
         // getController().addNewAccount(newAccount);
@@ -147,10 +154,10 @@ public class AccountPane extends JPanePlugin {
         }
     }
 
-    private Account getAccountFromFields() {
-        
-        return account;
-    }
+    // TODO uncomment getAccountFromFields
+//    private Account getAccountFromFields() {
+//        return account;
+//    }
 
     /**
      * This method initializes updateButton
@@ -174,7 +181,7 @@ public class AccountPane extends JPanePlugin {
 
     protected void updateAccount() {
 
-        Account newAccount = getAccountFromFields();
+//        Account newAccount = getAccountFromFields();
 
         cancelButton.setText("Close");
         addButton.setEnabled(false);

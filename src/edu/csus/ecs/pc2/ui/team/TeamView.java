@@ -332,8 +332,7 @@ public class TeamView extends JFrame implements UIPlugin {
 
     }
 
-    
-
+    @SuppressWarnings("unused")
     private void showMessage(final String string) {
 
         SwingUtilities.invokeLater(new Runnable() {
@@ -342,7 +341,6 @@ public class TeamView extends JFrame implements UIPlugin {
                 messageLabel.setToolTipText(string);
             }
         });
-
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

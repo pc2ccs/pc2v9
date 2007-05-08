@@ -94,12 +94,7 @@ public class Packet implements Serializable {
         return "Packet[" + type + "] " + sourceId + " -> " + destinationId;
     }
 
-    private Date getCreateDate() {
+    public Date getCreateDate() {
         return createDate;
     }
-
-    private void setCreateDate(Date createDate) {
-        this.createDate = createDate;
-    }
-
 }

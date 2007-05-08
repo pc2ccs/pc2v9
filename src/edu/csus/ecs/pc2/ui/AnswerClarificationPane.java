@@ -55,6 +55,7 @@ public class AnswerClarificationPane extends JPanePlugin {
 
     private JPanel generalPane = null;
 
+    @SuppressWarnings("unused")
     private Log log = null;
 
     private boolean populatingGUI = true;

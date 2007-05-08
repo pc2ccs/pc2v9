@@ -3,8 +3,6 @@ package edu.csus.ecs.pc2.ui;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.util.Enumeration;
-import java.util.Vector;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -17,8 +15,6 @@ import com.ibm.webrunner.j2mclb.util.HeapSorter;
 
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.log.Log;
-import edu.csus.ecs.pc2.core.model.ClientId;
-import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ConnectionEvent;
 import edu.csus.ecs.pc2.core.model.IConnectionListener;
 import edu.csus.ecs.pc2.core.model.IContest;
@@ -132,25 +128,6 @@ public class ConnectionsPane extends JPanePlugin {
         obj[0] = connectionHandlerID.toString();
 
         return obj;
-    }
-
-    /**
-     * Return array of all logged in users.
-     */
-    private ClientId[] getAllLoggedInUsers() {
-
-        Vector<ClientId> allAccounts = new Vector<ClientId>();
-
-        for (ClientType.Type ctype : ClientType.Type.values()) {
-            Enumeration<ClientId> enumeration = getContest().getLoggedInClients(ctype);
-            while (enumeration.hasMoreElements()) {
-                ClientId clientId = (ClientId) enumeration.nextElement();
-                allAccounts.addElement(clientId);
-            }
-        }
-
-        ClientId[] list = (ClientId[]) allAccounts.toArray(new ClientId[allAccounts.size()]);
-        return list;
     }
 
     private void reloadListBox() {

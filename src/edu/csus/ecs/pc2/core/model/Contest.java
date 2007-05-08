@@ -204,19 +204,6 @@ public class Contest implements IContest {
         generateNewAccounts(ClientType.Type.ADMINISTRATOR.toString(), 1, true);
     }
 
-
-
-    private Language createLanguageFromAutoFill(String key) {
-        
-        String [] values = LanguageAutoFill.getAutoFillValues(key);
-        Language language = new Language(key);
-        language.setCompileCommandLine(values[1]);
-        language.setExecutableIdentifierMask(values[2]);
-        language.setProgramExecuteCommandLine(values[3]);
-        language.setSiteNumber(getSiteNumber());
-        return language;
-    }
-
     public void addRunListener(IRunListener runListener) {
         runListenerList.addElement(runListener);
     }

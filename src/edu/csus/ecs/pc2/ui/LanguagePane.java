@@ -29,6 +29,11 @@ import edu.csus.ecs.pc2.core.model.LanguageAutoFill;
 // $HeadURL$
 public class LanguagePane extends JPanePlugin {
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 6229906311932197623L;
+
     private JPanel messagePane = null;
 
     private JPanel buttonPane = null;
