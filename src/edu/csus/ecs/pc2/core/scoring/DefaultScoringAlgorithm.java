@@ -60,6 +60,23 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
     private Properties props = new Properties();
 
     private Object mutex = new Object();
+    
+    private int grandTotalAttempts;
+
+    private int grandTotalSolutions;
+
+    private int grandTotalProblemAttempts;
+
+    private int[] problemBestTime = null;
+
+    private int[] problemLastTime = null;
+
+    private int[] problemSolutions = null;
+
+    private int[] problemAttempts = null;
+
+    private Log log;
+
 
     public DefaultScoringAlgorithm() {
         super();
@@ -94,7 +111,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      *            java.util.TreeMap
      */
     private ProblemSummaryInfo calcProblemScoreData(TreeMap treeMap) {
-        ProblemSummaryInfo psd = new ProblemSummaryInfo();
+        ProblemSummaryInfo problemSummaryInfo = new ProblemSummaryInfo();
         int score = 0;
         int attempts = 0;
         ElementId problemId = null;
@@ -103,7 +120,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         boolean unJudgedRun = false;
 
         if (treeMap.isEmpty()) {
-            psd = null; // ProblemScoreData must have ProblemId to be valid
+            problemSummaryInfo = null; // ProblemScoreData must have ProblemId to be valid
         } else {
             Collection coll = treeMap.values();
             Object[] o;
@@ -140,13 +157,13 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         if (!solved) {
             score = 0;
         }
-        psd.setSolved(solved);
-        psd.setSolutionTime(solutionTime);
-        psd.setProblemId(problemId);
-        psd.setNumberSubmitted(attempts);
-        psd.setPenaltyPoints(score);
-        psd.setUnJudgedRuns(unJudgedRun);
-        return psd;
+        problemSummaryInfo.setSolved(solved);
+        problemSummaryInfo.setSolutionTime(solutionTime);
+        problemSummaryInfo.setProblemId(problemId);
+        problemSummaryInfo.setNumberSubmitted(attempts);
+        problemSummaryInfo.setPenaltyPoints(score);
+        problemSummaryInfo.setUnJudgedRuns(unJudgedRun);
+        return problemSummaryInfo;
     }
 
     /**
@@ -195,7 +212,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      * 
      * @see edu.csus.ecs.pc2.core.scoring.ScoringAlgorithm#getStandings(edu.csus.ecs.pc2.core.Run[], edu.csus.ecs.pc2.core.AccountList, edu.csus.ecs.pc2.core.ProblemDisplayList, java.util.Properties)
      */
-    public String getStandings(IContest theContest, Properties inputPrpoerties, Log log) {
+    public String getStandings(IContest theContest, Properties inputPrpoerties, Log inputLog) {
         if (theContest == null) {
             throw new InvalidParameterException("Invalid model (null)");
         }
@@ -204,69 +221,47 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             throw new InvalidParameterException("Invalid properties (null)");
         }
         
+        this.log = inputLog;
+        
         // TODO properties should be validated here
         props = properties;
 
         XMLMemento mementoRoot = XMLMemento.createWriteRoot("contestStandings");
-        IMemento summaryMememento = mementoRoot.createChild("standingsHeader");
-        summaryMememento.putString("title", "this is not in the model");
-//        summaryMememento.putString("title", theContest.getTitle());
-//        summaryMememento.putString("version", );
-        VersionInfo versionInfo = new VersionInfo();
-        summaryMememento.putString("systemName", versionInfo.getSystemName());
-        summaryMememento.putString("systemVersion", versionInfo.getVersionNumber() + " build " + versionInfo.getBuildNumber());
-        summaryMememento.putString("systemURL", versionInfo.getSystemURL());
-        summaryMememento.putString("currentDate", new Date().toString());
-        summaryMememento.putString("generatorId", "$Id$");
+        IMemento summaryMememento = createSummaryMomento (mementoRoot);
+        
         AccountList accountList = getAccountList(theContest);
         Problem[] problems = theContest.getProblems();
         summaryMememento.putLong("problemCount", problems.length);
         Site[] sites = theContest.getSites();
         summaryMememento.putInteger("siteCount", sites.length);
-        int grandTotalAttempts = 0;
-        int grandTotalSolutions = 0;
-        int grandTotalProblemAttempts = 0;
-        int[] problemAttempts=new int[problems.length + 1];
-        int[] problemBestTime=new int[problems.length + 1];
-        int[] problemLastTime=new int[problems.length + 1];
-        int[] problemSolutions=new int[problems.length + 1];
+
+
         Hashtable <ElementId, Integer> problemsIndexHash = new Hashtable<ElementId, Integer>();
         for (int p=1; p <= problems.length ; p++) {
-            problemBestTime[p]=-1;
             problemsIndexHash.put(problems[p-1].getElementId(), new Integer(p));
         }
         Run[] runs = theContest.getRuns();
         synchronized (mutex) {
-            int numAccounts = accountList.size();
             Account[] accounts = accountList.getList();
-            // used in the StandingsRank comparator
-            Hashtable<String, StandingsRecord> srHash = new Hashtable<String, StandingsRecord>();
+            
+            /**
+             * This contains the standings records, key is ClientId.toString() value is StandingsRecord
+             */
+            Hashtable<String, StandingsRecord> standingsRecordHash = new Hashtable<String, StandingsRecord>();
+            
             RunComparatorByTeam runComparatorByTeam = new RunComparatorByTeam();
             TreeMap<Run, Run> runTreeMap = new TreeMap<Run, Run>(runComparatorByTeam);
-            Hashtable<String, Problem> probHash = new Hashtable<String, Problem>();
+            
+            Hashtable<String, Problem> problemHash = new Hashtable<String, Problem>();
             for (int i = 0; i < problems.length; i++) {
                 Problem problem = problems[i];
                 if (problem.isActive()) {
-                    probHash.put(problem.getElementId().toString(), problem);
+                    problemHash.put(problem.getElementId().toString(), problem);
                 }
             }
-            for (int i = 0; i < numAccounts; i++) {
-                Account account = accounts[i];
-                if (account.getClientId().getClientType() == ClientType.Type.TEAM && account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD)) {
-                    StandingsRecord sr = new StandingsRecord();
-                    SummaryRow sumRow = sr.getSummaryRow();
-                    // populate summaryRow with problems
-                    for (int j = 0; j < problems.length; j++) {
-                        ProblemSummaryInfo psi = new ProblemSummaryInfo();
-                        psi.setProblemId(problems[j].getElementId());
-                        psi.setPenaltyPoints(0);
-                        sumRow.put(j + 1, psi);
-                    }
-                    sr.setSummaryRow(sumRow);
-                    sr.setClientId(account.getClientId());
-                    srHash.put(account.getClientId().toString(), sr);
-                }
-            }
+            
+           initializeStandingsRecordHash (accountList, accounts, problems, standingsRecordHash);
+            
             for (int i = 0; i < runs.length; i++) {
                 // skip runs that are deleted and
                 // skip runs whose submitter is no longer active and
@@ -277,163 +272,163 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                     continue;
                 }
                 if (!runs[i].isDeleted() && account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD) 
-                        && probHash.containsKey(runs[i].getProblemId().toString())) {
+                        && problemHash.containsKey(runs[i].getProblemId().toString())) {
                     runTreeMap.put(runs[i], runs[i]);
                 }
             }
             
-            
-            long oldTime = 0;
-            long youngTime = -1;
             if (!runTreeMap.isEmpty()) {
-                Collection runColl = runTreeMap.values();
-                Iterator runIterator = runColl.iterator();
-                // cannot be null for 1st run
-                String lastUser = "";
-                String lastProblem = "";
-                TreeMap<Run, Run> problemTreeMap = new TreeMap<Run, Run>(runComparatorByTeam);
-                while (runIterator.hasNext()) {
-                    Object o = runIterator.next();
-                    Run run = (Run) o;
-                    if (!lastUser.equals(run.getSubmitter().toString()) || !lastProblem.equals(run.getProblemId().toString())) {
-                        if (!problemTreeMap.isEmpty()) {
-                            ProblemSummaryInfo psd = calcProblemScoreData(problemTreeMap);
-                            StandingsRecord sr = (StandingsRecord) srHash.get(lastUser);
-                            SummaryRow sumRow = sr.getSummaryRow();
-                            sumRow.put(problemsIndexHash.get(psd.getProblemId()), psd);
-                            sr.setSummaryRow(sumRow);
-                            sr.setPenaltyPoints(sr.getPenaltyPoints() + psd.getPenaltyPoints());
-                            if (psd.isSolved()) {
-                                sr.setNumberSolved(sr.getNumberSolved() + 1);
-                                oldTime = sr.getLastSolved();
-                                youngTime = sr.getFirstSolved();
-                                if (psd.getSolutionTime() > oldTime) {
-                                    sr.setLastSolved(psd.getSolutionTime());
-                                }
-                                if (youngTime < 0 || psd.getSolutionTime() < youngTime) {
-                                    sr.setLastSolved(psd.getSolutionTime());
-                                }
-                            }
-                            srHash.put(lastUser, sr);
-                            // now clear the TreeMap
-                            problemTreeMap.clear();
-                        }
-                        lastUser = run.getSubmitter().toString();
-                        lastProblem = run.getProblemId().toString();
-                    }
-                    problemTreeMap.put(run, run);
-                }
-                // handle last run
-                if (!problemTreeMap.isEmpty()) {
-                    ProblemSummaryInfo psd = calcProblemScoreData(problemTreeMap);
-                    StandingsRecord sr = (StandingsRecord) srHash.get(lastUser);
-                    SummaryRow sumRow = sr.getSummaryRow();
-                    sumRow.put(problemsIndexHash.get(psd.getProblemId()), psd);
-                    sr.setSummaryRow(sumRow);
-                    sr.setPenaltyPoints(sr.getPenaltyPoints() + psd.getPenaltyPoints());
-                    if (psd.isSolved()) {
-                        sr.setNumberSolved(sr.getNumberSolved() + 1);
-                        oldTime = sr.getLastSolved();
-                        youngTime = sr.getFirstSolved();
-                        if (psd.getSolutionTime() > oldTime) {
-                            sr.setLastSolved(psd.getSolutionTime());
-                        }
-                        if (youngTime < 0 || psd.getSolutionTime() < youngTime) {
-                            sr.setFirstSolved(psd.getSolutionTime());
-                        }
-                    }
-                    srHash.put(lastUser, sr);
-                }
-                problemTreeMap.clear();
-                problemTreeMap = null;
+                
+                generateStandingsValues (runTreeMap, standingsRecordHash, problemsIndexHash);
+                    
             } // else no runs
 
             // use TreeMap to sort
             DefaultStandingsRecordComparator src = new DefaultStandingsRecordComparator();
             src.setCachedAccountList(accountList);
             TreeMap<StandingsRecord, StandingsRecord> treeMap = new TreeMap<StandingsRecord, StandingsRecord>(src);
-            Collection<StandingsRecord> enumeration = srHash.values();
+            Collection<StandingsRecord> enumeration = standingsRecordHash.values();
             for (StandingsRecord record : enumeration) {
                 treeMap.put(record, record);
             }
-            StandingsRecord[] srArray = new StandingsRecord[treeMap.size()];
-            Collection<StandingsRecord> coll = treeMap.values();
-            Iterator iterator = coll.iterator();
+            
+            createStandingXML(treeMap, mementoRoot, accountList, problems, problemsIndexHash, summaryMememento);
+            
+        } // mutex
+ 
+        String xmlString;
+        try {
+            xmlString = mementoRoot.saveToString();
+        } catch (IOException e) {
+            log.log(Log.WARNING,"Trouble saving momentoRoot to String ", e);
+            xmlString = "";
+        }
+//        System.out.println(xmlString);
+        return xmlString;
+    }
 
-            // assign the ranks
-            long numSolved = -1, score = 0, lastSolved = 0;
-            int rank = 0, indexRank = 0;
-            int index = 0;
-            while (iterator.hasNext()) {
-                Object o = iterator.next();
-                StandingsRecord sr = (StandingsRecord) o;
-                indexRank++;
-                if (numSolved != sr.getNumberSolved() || score != sr.getPenaltyPoints() || lastSolved != sr.getLastSolved()) {
-                    numSolved = sr.getNumberSolved();
-                    score = sr.getPenaltyPoints();
-                    lastSolved = sr.getLastSolved();
-                    rank = indexRank;
-                    sr.setRankNumber(rank);
+    /**
+     * Ranks standings records and add standings XML to mementoRoot.
+     * 
+     * Loops through the standings records and problem summary information
+     * creating XML blocks: teamStanding and problemSummaryInfo.
+     * 
+     * @param treeMap
+     * @param mementoRoot
+     * @param accountList
+     * @param problems
+     * @param problemsIndexHash
+     * @param summaryMememento
+     */
+    private void createStandingXML (TreeMap<StandingsRecord, StandingsRecord> treeMap, XMLMemento mementoRoot, 
+            AccountList accountList, Problem[] problems, Hashtable<ElementId, Integer> problemsIndexHash, IMemento summaryMememento) {
+   
+        StandingsRecord[] srArray = new StandingsRecord[treeMap.size()];
+        Collection<StandingsRecord> coll = treeMap.values();
+        Iterator iterator = coll.iterator();
+        
+        problemBestTime = new int[problems.length + 1];
+        problemLastTime = new int[problems.length + 1];
+        problemSolutions = new int[problems.length + 1];
+        problemAttempts = new int[problems.length + 1];
+        for (int p = 1; p <= problems.length; p++) {
+            problemBestTime[p] = -1;
+        }
+        
+        grandTotalAttempts = 0;
+        grandTotalSolutions = 0;
+        grandTotalProblemAttempts = 0;
+         
+        // assign the ranks
+        long numSolved = -1, score = 0, lastSolved = 0;
+        int rank = 0, indexRank = 0;
+        int index = 0;
+        while (iterator.hasNext()) {
+            Object o = iterator.next();
+            StandingsRecord standingsRecord = (StandingsRecord) o;
+            indexRank++;
+            if (numSolved != standingsRecord.getNumberSolved() || score != standingsRecord.getPenaltyPoints() || lastSolved != standingsRecord.getLastSolved()) {
+                numSolved = standingsRecord.getNumberSolved();
+                score = standingsRecord.getPenaltyPoints();
+                lastSolved = standingsRecord.getLastSolved();
+                rank = indexRank;
+                standingsRecord.setRankNumber(rank);
+            } else {
+                // current user tied with last user, so same rank
+                standingsRecord.setRankNumber(rank);
+            }
+//            mementoRoot.putMemento(standingsRecord.toMemento());
+            long totalAttempts = 0;
+            long problemsAttempted = 0;
+            IMemento standingsRecordMemento = mementoRoot.createChild("teamStanding");
+            standingsRecordMemento.putLong("firstSolved", standingsRecord.getFirstSolved());
+            standingsRecordMemento.putLong("lastSolved", standingsRecord.getLastSolved());
+            standingsRecordMemento.putLong("points", standingsRecord.getPenaltyPoints());
+            standingsRecordMemento.putInteger("solved", standingsRecord.getNumberSolved());
+            standingsRecordMemento.putInteger("rank", standingsRecord.getRankNumber());
+            standingsRecordMemento.putInteger("index", index);
+            Account account = accountList.getAccount(standingsRecord.getClientId());
+            standingsRecordMemento.putString("teamName", account.getDisplayName()); 
+            standingsRecordMemento.putInteger("teamId", account.getClientId().getClientNumber());
+            standingsRecordMemento.putInteger("teamSiteId", account.getClientId().getSiteNumber());
+            standingsRecordMemento.putString("teamKey", account.getClientId().getTripletKey());
+            SummaryRow summaryRow = standingsRecord.getSummaryRow();
+            for (int i = 0; i < problems.length; i++) {
+                int id = i + 1;
+                ProblemSummaryInfo psi = summaryRow.get(id);
+                if (psi == null) {
+                    // TODO change to Log, cleanup message (leaning towards error)
+                    log.log(Log.WARNING, "ProblemSummaryInfo not generated/found for problem "+id+" "+problems[i]);
+                    System.out.println("error or normal? ProblemSummaryInfo not found for problem "+ id);
                 } else {
-                    // current user tied with last user, so same rank
-                    sr.setRankNumber(rank);
-                }
-//                mementoRoot.putMemento(sr.toMemento());
-                long totalAttempts = 0;
-                long problemsAttempted = 0;
-                IMemento standingsRecordMemento = mementoRoot.createChild("teamStanding");
-                standingsRecordMemento.putLong("firstSolved", sr.getFirstSolved());
-                standingsRecordMemento.putLong("lastSolved", sr.getLastSolved());
-                standingsRecordMemento.putLong("points", sr.getPenaltyPoints());
-                standingsRecordMemento.putInteger("solved", sr.getNumberSolved());
-                standingsRecordMemento.putInteger("rank", sr.getRankNumber());
-                standingsRecordMemento.putInteger("index", index);
-                Account account = accountList.getAccount(sr.getClientId());
-                standingsRecordMemento.putString("teamName", account.getDisplayName()); 
-                standingsRecordMemento.putInteger("teamId", account.getClientId().getClientNumber());
-                standingsRecordMemento.putInteger("teamSiteId", account.getClientId().getSiteNumber());
-                standingsRecordMemento.putString("teamKey", account.getClientId().getTripletKey());
-                SummaryRow summaryRow = sr.getSummaryRow();
-                for (int i = 0; i < problems.length; i++) {
-                    int id = i + 1;
-                    ProblemSummaryInfo psi = summaryRow.get(id);
-                    if (psi == null) {
-                        // TODO change to Log, cleanup message (leaning towards error)
-                        log.log(Log.WARNING, "ProblemSummaryInfo not generated/found for problem "+id+" "+problems[i]);
-                        System.out.println("error or normal? ProblemSummaryInfo not found for problem "+ id);
-                    } else {
-                        IMemento psiMemento = standingsRecordMemento.createChild("problemSummaryInfo");
-                        psiMemento.putInteger("index", problemsIndexHash.get(psi.getProblemId()));
-                        psiMemento.putString("problemId", psi.getProblemId().toString());
-                        psiMemento.putInteger("attempts", psi.getNumberSubmitted());
-                        psiMemento.putInteger("points", psi.getPenaltyPoints());
-                        psiMemento.putLong("solutionTime", psi.getSolutionTime());
-                        psiMemento.putBoolean("isSolved", psi.isSolved());
-                        psiMemento.putBoolean("isPending", psi.isUnJudgedRuns());
-                        problemAttempts[id] += psi.getNumberSubmitted();
-                        totalAttempts += psi.getNumberSubmitted();
-                        grandTotalAttempts += psi.getNumberSubmitted();
-                        if (psi.getNumberSubmitted() > 0) {
-                            problemsAttempted++;
+                    IMemento psiMemento = standingsRecordMemento.createChild("problemSummaryInfo");
+                    psiMemento.putInteger("index", problemsIndexHash.get(psi.getProblemId()));
+                    psiMemento.putString("problemId", psi.getProblemId().toString());
+                    psiMemento.putInteger("attempts", psi.getNumberSubmitted());
+                    psiMemento.putInteger("points", psi.getPenaltyPoints());
+                    psiMemento.putLong("solutionTime", psi.getSolutionTime());
+                    psiMemento.putBoolean("isSolved", psi.isSolved());
+                    psiMemento.putBoolean("isPending", psi.isUnJudgedRuns());
+                    problemAttempts[id] += psi.getNumberSubmitted();
+                    totalAttempts += psi.getNumberSubmitted();
+                    grandTotalAttempts += psi.getNumberSubmitted();
+                    if (psi.getNumberSubmitted() > 0) {
+                        problemsAttempted++;
+                    }
+                    if (psi.isSolved()) {
+                        problemSolutions[id]++;
+                        grandTotalSolutions++;
+                        if (psi.getSolutionTime() > problemLastTime[id]) {
+                            problemLastTime[id] = new Long(psi.getSolutionTime()).intValue();
                         }
-                        if (psi.isSolved()) {
-                            problemSolutions[id]++;
-                            grandTotalSolutions++;
-                            if (psi.getSolutionTime() > problemLastTime[id]) {
-                                problemLastTime[id] = new Long(psi.getSolutionTime()).intValue();
-                            }
-                            if (problemBestTime[id] < 0 || psi.getSolutionTime() < problemBestTime[id]) {
-                                problemBestTime[id] = new Long(psi.getSolutionTime()).intValue();                       
-                            }
+                        if (problemBestTime[id] < 0 || psi.getSolutionTime() < problemBestTime[id]) {
+                            problemBestTime[id] = new Long(psi.getSolutionTime()).intValue();                       
                         }
                     }
                 }
-                standingsRecordMemento.putLong("totalAttempts",totalAttempts);
-                standingsRecordMemento.putLong("problemsAttempted",problemsAttempted);
-
-                srArray[index++] = sr;
             }
-        } // mutex
+            standingsRecordMemento.putLong("totalAttempts",totalAttempts);
+            standingsRecordMemento.putLong("problemsAttempted",problemsAttempted);
+
+            srArray[index++] = standingsRecord;
+        }
+     
+        generateSummaryTotalsForProblem (problems, problemsIndexHash, summaryMememento);
+        
+    }
+    
+    /**
+     * Add Problem Summary totals/info for each problem.
+     * 
+     * Generate all "problem" blocks in "standingsHeader" block (summaryMemento) 
+     * 
+     * @param problems
+     * @param problemsIndexHash
+     * @param summaryMememento
+     */
+    
+    private void generateSummaryTotalsForProblem(Problem[] problems, Hashtable<ElementId, Integer> problemsIndexHash, IMemento summaryMememento) {
+        
         for (int i = 0; i < problems.length; i++) {
             int id = i + 1;
             problemsIndexHash.put(problems[i].getElementId(), new Integer(id));
@@ -454,16 +449,144 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         summaryMememento.putInteger("totalAttempts", grandTotalAttempts);
         summaryMememento.putInteger("totalSolved", grandTotalSolutions);
         summaryMememento.putInteger("problemsAttempted", grandTotalProblemAttempts);
- 
-        String xmlString;
-        try {
-            xmlString = mementoRoot.saveToString();
-        } catch (IOException e) {
-            log.log(Log.WARNING,"Trouble saving momentoRoot to String ", e);
-            xmlString = "";
-        }
-//        System.out.println(xmlString);
-        return xmlString;
+        
+        
     }
 
+    /**
+     * Calculate standings raw data, set values into standingsRecordHash.
+     * 
+     * Loops through runTreeMap and puts calculated values into standingsRecords in hash.
+     * 
+     * @param runTreeMap
+     * @param standingsRecordHash
+     * @param problemsIndexHash
+     */
+    private void generateStandingsValues (final TreeMap<Run, Run> runTreeMap, Hashtable<String, StandingsRecord> standingsRecordHash, Hashtable<ElementId, Integer> problemsIndexHash) {
+
+        long oldTime = 0;
+        long youngTime = -1;
+
+        RunComparatorByTeam runComparatorByTeam = new RunComparatorByTeam();
+        TreeMap<Run, Run> problemTreeMap = new TreeMap<Run, Run>(runComparatorByTeam);
+
+        Collection runColl = runTreeMap.values();
+        Iterator runIterator = runColl.iterator();
+        // cannot be null for 1st run
+        String lastUser = "";
+        String lastProblem = "";
+
+        while (runIterator.hasNext()) {
+            Object o = runIterator.next();
+            Run run = (Run) o;
+            if (!lastUser.equals(run.getSubmitter().toString()) || !lastProblem.equals(run.getProblemId().toString())) {
+                if (!problemTreeMap.isEmpty()) {
+                    ProblemSummaryInfo problemSummaryInfo = calcProblemScoreData(problemTreeMap);
+                    StandingsRecord standingsRecord = (StandingsRecord) standingsRecordHash.get(lastUser);
+                    SummaryRow summaryRow = standingsRecord.getSummaryRow();
+                    summaryRow.put(problemsIndexHash.get(problemSummaryInfo.getProblemId()), problemSummaryInfo);
+                    standingsRecord.setSummaryRow(summaryRow);
+                    standingsRecord.setPenaltyPoints(standingsRecord.getPenaltyPoints() + problemSummaryInfo.getPenaltyPoints());
+                    if (problemSummaryInfo.isSolved()) {
+                        standingsRecord.setNumberSolved(standingsRecord.getNumberSolved() + 1);
+                        oldTime = standingsRecord.getLastSolved();
+                        youngTime = standingsRecord.getFirstSolved();
+                        if (problemSummaryInfo.getSolutionTime() > oldTime) {
+                            standingsRecord.setLastSolved(problemSummaryInfo.getSolutionTime());
+                        }
+                        if (youngTime < 0 || problemSummaryInfo.getSolutionTime() < youngTime) {
+                            standingsRecord.setLastSolved(problemSummaryInfo.getSolutionTime());
+                        }
+                    }
+                    standingsRecordHash.put(lastUser, standingsRecord);
+                    // now clear the TreeMap
+                    problemTreeMap.clear();
+                }
+                lastUser = run.getSubmitter().toString();
+                lastProblem = run.getProblemId().toString();
+            }
+            problemTreeMap.put(run, run);
+        }
+
+        // handle last run
+        if (!problemTreeMap.isEmpty()) {
+            ProblemSummaryInfo problemSummaryInfo = calcProblemScoreData(problemTreeMap);
+            StandingsRecord standingsRecord = (StandingsRecord) standingsRecordHash.get(lastUser);
+            SummaryRow summaryRow = standingsRecord.getSummaryRow();
+            summaryRow.put(problemsIndexHash.get(problemSummaryInfo.getProblemId()), problemSummaryInfo);
+            standingsRecord.setSummaryRow(summaryRow);
+            standingsRecord.setPenaltyPoints(standingsRecord.getPenaltyPoints() + problemSummaryInfo.getPenaltyPoints());
+            if (problemSummaryInfo.isSolved()) {
+                standingsRecord.setNumberSolved(standingsRecord.getNumberSolved() + 1);
+                oldTime = standingsRecord.getLastSolved();
+                youngTime = standingsRecord.getFirstSolved();
+                if (problemSummaryInfo.getSolutionTime() > oldTime) {
+                    standingsRecord.setLastSolved(problemSummaryInfo.getSolutionTime());
+                }
+                if (youngTime < 0 || problemSummaryInfo.getSolutionTime() < youngTime) {
+                    standingsRecord.setFirstSolved(problemSummaryInfo.getSolutionTime());
+                }
+            }
+            standingsRecordHash.put(lastUser, standingsRecord);
+        }
+
+        problemTreeMap.clear();
+        problemTreeMap = null;
+
+    }
+
+    /**
+     * Initialize the standingsRecordHash.
+     * 
+     * @param accountList
+     * @param accounts
+     * @param problems
+     * @param standingsRecordHash
+     */
+    private void initializeStandingsRecordHash(AccountList accountList, Account[] accounts, Problem[] problems, Hashtable<String, StandingsRecord> standingsRecordHash) {
+
+        for (int i = 0; i < accountList.size(); i++) {
+            Account account = accounts[i];
+            if (account.getClientId().getClientType() == ClientType.Type.TEAM && account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD)) {
+
+                StandingsRecord standingsRecord = new StandingsRecord();
+                SummaryRow summaryRow = standingsRecord.getSummaryRow();
+                // populate summaryRow with problems
+
+                for (int j = 0; j < problems.length; j++) {
+                    ProblemSummaryInfo problemSummaryInfo = new ProblemSummaryInfo();
+                    problemSummaryInfo.setProblemId(problems[j].getElementId());
+                    problemSummaryInfo.setPenaltyPoints(0);
+                    summaryRow.put(j + 1, problemSummaryInfo);
+                }
+                standingsRecord.setSummaryRow(summaryRow);
+                standingsRecord.setClientId(account.getClientId());
+                standingsRecordHash.put(account.getClientId().toString(), standingsRecord);
+            }
+        }
+
+    }
+
+    /**
+     * Create Summary Momento.
+     * 
+     * This creates the standingsHeader block.  Later other
+     * methods add problem summaries ("problem" blocks) to this block.
+     * 
+     * @param mementoRoot
+     */
+    private IMemento createSummaryMomento(XMLMemento mementoRoot) {
+        IMemento memento = mementoRoot.createChild("standingsHeader");
+        memento.putString("title", "this is not in the model");
+//        memento.putString("title", theContest.getTitle());
+//        memento.putString("version", );
+        VersionInfo versionInfo = new VersionInfo();
+        memento.putString("systemName", versionInfo.getSystemName());
+        memento.putString("systemVersion", versionInfo.getVersionNumber() + " build " + versionInfo.getBuildNumber());
+        memento.putString("systemURL", versionInfo.getSystemURL());
+        memento.putString("currentDate", new Date().toString());
+        memento.putString("generatorId", "$Id$");
+
+        return memento;
+    }
 }
