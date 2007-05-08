@@ -30,6 +30,7 @@ public class LogWindow extends JFrame implements UIPlugin {
 
     private IController controller;
 
+    @SuppressWarnings("unused")
     private IContest contest;
     
     private Log log = null;

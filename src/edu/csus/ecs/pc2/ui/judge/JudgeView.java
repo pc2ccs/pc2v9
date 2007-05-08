@@ -1,7 +1,5 @@
 package edu.csus.ecs.pc2.ui.judge;
 
-import java.util.logging.Logger;
-
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
@@ -41,8 +39,6 @@ public class JudgeView extends JFrame implements UIPlugin {
     private JTabbedPane mainTabbedPane = null;
 
     private LogWindow logWindow = null;
-
-    private Logger log;
     
     public JudgeView() {
         super();
@@ -116,8 +112,6 @@ public class JudgeView extends JFrame implements UIPlugin {
     public void setContestAndController(IContest inContest, IController inController) {
         this.contest = inContest;
         this.controller = inController;
-        
-        log = controller.getLog();
         
         if (logWindow == null) {
             logWindow = new LogWindow();

@@ -37,6 +37,7 @@ public class ProblemEvent {
 
     private Problem problem;
     
+    @SuppressWarnings("unused")
     private ProblemDataFiles problemDataFiles;
 
     public ProblemEvent(Action problemAction, Problem problem) {

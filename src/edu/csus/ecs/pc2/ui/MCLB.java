@@ -21,6 +21,9 @@ public class MCLB extends MultiColumnListbox {
 
     public static final String SVN_ID = "$Id$";
 
+    
+    // TODO what is this used for ?  dal
+    @SuppressWarnings("unused")
     private void bulkUpdateMclb(Object[] rowKeys, Object[][] rowObjects, MCLB mclb) {
         final Object[] fRowKeys = rowKeys;
         final Object[][] fRowObjects = rowObjects;

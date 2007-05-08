@@ -20,8 +20,10 @@ import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.Executable;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ElementId;
+import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
@@ -388,14 +390,6 @@ public class SelectJudgementPane extends JPanePlugin {
         updateButton.setEnabled(editedText);
     }
 
-    private int getIntegerValue(String s) {
-        try {
-            return Integer.parseInt(s);
-        } catch (Exception e) {
-            return 0;
-        }
-    }
-
     /**
      * Enable or disable Update button based on comparison of run to fields.
      * 
@@ -690,9 +684,34 @@ public class SelectJudgementPane extends JPanePlugin {
         }
     }
 
+    /**
+     * Update GUI permissions.
+     * 
+     * Invoked if account permission changes.
+     */
     private void updateGUIperPermissions() {
         
         extractButton.setVisible(isAllowed(Permission.Type.EXTRACT_RUNS));
+    }
+    
+    /**
+     * Account Listener Implementation.
+     *  
+     * @author pc2@ecs.csus.edu
+     */
+    public class AccountListenerImplementation implements IAccountListener {
+
+        public void accountAdded(AccountEvent accountEvent) {
+            // ignore
+        }
+
+        public void accountModified(AccountEvent accountEvent) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    updateGUIperPermissions();
+                }
+            });
+        }
     }
     
 } // @jve:decl-index=0:visual-constraint="10,10"
