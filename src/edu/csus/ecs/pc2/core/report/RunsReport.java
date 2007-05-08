@@ -84,6 +84,9 @@ public class RunsReport implements IReport {
 
         ClientId clientId = run.getSubmitter();
         printWriter.print("run " + run.getNumber() + " ");
+        if (run.isDeleted()){
+            printWriter.print("DELETED ");
+        }
         printWriter.print(run.getStatus() + " ");
         printWriter.print("s" + run.getSiteNumber() + " ");
         printWriter.print("at " + run.getElapsedMins() + " ");
