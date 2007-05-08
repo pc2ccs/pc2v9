@@ -83,7 +83,8 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new java.awt.Dimension(564, 229));
+        this.setSize(new java.awt.Dimension(600,800));
+        this.setPreferredSize(new java.awt.Dimension(600,1000));
         this.setTitle("Review Account Loading");
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setContentPane(getJPanel());
@@ -241,6 +242,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
             log.warning(e.getMessage());
             showErrorMessage(e.getMessage());
         }
+        FrameUtilities.centerFrameTop(this);
         setVisible(true);
     }
     
