@@ -58,7 +58,7 @@ public class ClarificationsPane extends JPanePlugin {
 
     private PermissionList permissionList = new PermissionList();
 
-    private JButton answerButton = null;
+    private JButton requestButton = null;
 
     private JPanel messagePane = null;
 
@@ -107,7 +107,7 @@ public class ClarificationsPane extends JPanePlugin {
             clarificationButtonPane = new JPanel();
             clarificationButtonPane.setLayout(flowLayout);
             clarificationButtonPane.setPreferredSize(new java.awt.Dimension(35, 35));
-            clarificationButtonPane.add(getAnswerButton(), null);
+            clarificationButtonPane.add(getRequestButton(), null);
             clarificationButtonPane.add(getGiveButton(), null);
             clarificationButtonPane.add(getTakeButton(), null);
             clarificationButtonPane.add(getFilterButton(), null);
@@ -419,7 +419,7 @@ public class ClarificationsPane extends JPanePlugin {
 
     private void updateGUIperPermissions() {
 
-        answerButton.setVisible(isAllowed(Permission.Type.ANSWER_CLARIFICATION));
+        requestButton.setVisible(isAllowed(Permission.Type.ANSWER_CLARIFICATION));
         editButton.setVisible(isAllowed(Permission.Type.EDIT_CLARIFICATION));
         giveButton.setVisible(isAllowed(Permission.Type.GIVE_CLARIFICATION));
         takeButton.setVisible(isAllowed(Permission.Type.TAKE_CLARIFICATION));
@@ -457,22 +457,22 @@ public class ClarificationsPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes answerButton
+     * This method initializes requestButton
      * 
      * @return javax.swing.JButton
      */
-    private JButton getAnswerButton() {
-        if (answerButton == null) {
-            answerButton = new JButton();
-            answerButton.setText("Answer");
-            answerButton.setMnemonic(java.awt.event.KeyEvent.VK_A);
-            answerButton.addActionListener(new java.awt.event.ActionListener() {
+    private JButton getRequestButton() {
+        if (requestButton == null) {
+            requestButton = new JButton();
+            requestButton.setText("Request");
+            requestButton.setMnemonic(java.awt.event.KeyEvent.VK_A);
+            requestButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     requestSelectedClarification();
                 }
             });
         }
-        return answerButton;
+        return requestButton;
     }
 
     protected void requestSelectedClarification() {
