@@ -1,6 +1,10 @@
 package edu.csus.ecs.pc2.core.scoring;
 
+import java.io.Serializable;
+import java.util.Comparator;
+
 import edu.csus.ecs.pc2.core.list.AccountList;
+import edu.csus.ecs.pc2.core.list.AccountNameComparator;
 import edu.csus.ecs.pc2.core.model.Account;
 
 /**
@@ -10,10 +14,9 @@ import edu.csus.ecs.pc2.core.model.Account;
  */
 
 // $HeadURL$
-public class DefaultStandingsRecordComparator implements java.io.Serializable,
-        java.util.Comparator<StandingsRecord> {
+public class DefaultStandingsRecordComparator implements Serializable, Comparator<StandingsRecord> {
     /**
-     *
+     * 
      */
     public static final String SVN_ID = "$Id$";
 
@@ -21,6 +24,8 @@ public class DefaultStandingsRecordComparator implements java.io.Serializable,
      *
      */
     private static final long serialVersionUID = 2417425534254224622L;
+    
+    private AccountNameComparator accountNameComparator = new AccountNameComparator();
 
     private AccountList cachedAccountList;
 
@@ -59,7 +64,7 @@ public class DefaultStandingsRecordComparator implements java.io.Serializable,
         long a2, b2;
         int a5, b5;
         String nameA, nameB;
-        int compare;
+        int nameComparison;
 
         StandingsRecord teamA = (StandingsRecord) o1;
         StandingsRecord teamB = (StandingsRecord) o2;
@@ -75,24 +80,26 @@ public class DefaultStandingsRecordComparator implements java.io.Serializable,
         Account accountB = cachedAccountList.getAccount(teamB.getClientId());
         nameB = accountB.getDisplayName();
         b5 = teamB.getClientId().hashCode();
-        compare = nameA.toLowerCase().compareTo(nameB.toLowerCase());
+//        nameComparison = nameA.toLowerCase().compareTo(nameB.toLowerCase());
+        nameComparison = accountNameComparator.compare(nameA.toLowerCase(), nameB.toLowerCase());
 
-        // Standard problem
+        // 
         // Primary Sort = number of solved problems (high to low)
         // Secondary Sort = score (low to high)
         // Tertiary Sort = earliest submittal of last submission (low to high)
         // Forth Sort = teamName (low to high)
         // Fifth Sort = clientId (low to high)
-        if ((b1 == a1) && (b2 == a2) && (b3 == a3) && (compare == 0)
+        
+        if ((b1 == a1) && (b2 == a2) && (b3 == a3) && (nameComparison == 0)
                 && (b5 == a5)) {
             status = 0; // elements equal, this shouldn't happen...
         } else {
             if ((b1 > a1)
                     || ((b1 == a1) && (b2 < a2))
                     || ((b1 == a1) && (b2 == a2) && (b3 < a3))
-                    || ((b1 == a1) && (b2 == a2) && (b3 == a3) && (compare > 0))
+                    || ((b1 == a1) && (b2 == a2) && (b3 == a3) && (nameComparison > 0))
                     || ((b1 == a1) && (b2 == a2) && (b3 == a3)
-                            && (compare == 0) && (b5 < a5))) {
+                            && (nameComparison == 0) && (b5 < a5))) {
                 status = 1; // a greater then b
             } else {
                 status = -1; // a less then b
