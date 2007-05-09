@@ -23,7 +23,11 @@ import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IClarificationListener;
 import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.ILanguageListener;
+import edu.csus.ecs.pc2.core.model.IProblemListener;
+import edu.csus.ecs.pc2.core.model.LanguageEvent;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.ProblemEvent;
 import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
@@ -75,6 +79,53 @@ public class ClarificationsPane extends JPanePlugin {
         initialize();
     }
 
+    /**
+     * @author pc2@ecs.csus.edu
+     *
+     */
+    public class LanguageListenerImplementation implements ILanguageListener {
+
+        public void languageAdded(LanguageEvent event) {
+            // ignore, does not affect this pane
+        }
+
+        public void languageChanged(LanguageEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                }
+            });
+        }
+
+        public void languageRemoved(LanguageEvent event) {
+            // ignore, does not affect this pane
+        }
+        
+    }
+    /**
+     * @author pc2@ecs.csus.edu
+     *
+     */
+    public class ProblemListenerImplementation implements IProblemListener {
+
+        public void problemAdded(ProblemEvent event) {
+            // ignore, does not affect this pane
+        }
+
+        public void problemChanged(ProblemEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                }
+            });
+        }
+
+        public void problemRemoved(ProblemEvent event) {
+            // ignore, does not affect this pane
+        }
+        
+    }
+    
     /**
      * This method initializes this
      * 
@@ -231,7 +282,7 @@ public class ClarificationsPane extends JPanePlugin {
         return obj;
     }
 
-    private void reloadListBox() {
+    void reloadListBox() {
         clarificationListBox.removeAllRows();
         Clarification[] clarifications = getContest().getClarifications();
 
@@ -278,6 +329,8 @@ public class ClarificationsPane extends JPanePlugin {
         
         getContest().addClarificationListener(new ClarificationListenerImplementation());
         getContest().addAccountListener(new AccountListenerImplementation());
+        getContest().addProblemListener(new ProblemListenerImplementation());
+        getContest().addLanguageListener(new LanguageListenerImplementation());
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -449,6 +502,14 @@ public class ClarificationsPane extends JPanePlugin {
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
                         updateGUIperPermissions();
+                        reloadListBox();
+                    }
+                });
+
+            } else {
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        reloadListBox();
                     }
                 });
 
