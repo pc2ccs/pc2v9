@@ -440,6 +440,14 @@ public class RunsPanel extends JPanePlugin {
             }
             updateRunRow(run, clientId);
         }
+        if (runs.length < 1) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    rowCountLabel.setText(""+runListBox.getRowCount());
+                    rowCountLabel.setToolTipText("There are "+runListBox.getRowCount()+" runs");
+                }
+            });
+        }
     }
     
     private boolean isAllowed (Permission.Type type){
