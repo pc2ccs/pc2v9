@@ -34,6 +34,8 @@ public class PermissionGroup {
         for (Type type : Permission.Type.values()) {
             administratorPermissionList.addPermission(type);
         }
+        
+        administratorPermissionList.removePermission(Type.DISPLAY_ON_SCOREBOARD);
 
 
         /**
