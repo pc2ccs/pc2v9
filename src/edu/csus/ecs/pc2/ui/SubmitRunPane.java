@@ -580,8 +580,8 @@ public class SubmitRunPane extends JPanePlugin {
                     }
                 }
                 if (newFileProblem) {
-                    // TODO show message in the messageLabel or a popup?
-                    log.warning("Problem reading new main file selection " + newFile.getCanonicalPath() + ", staying with previous selection");
+                    log.warning("Problem reading new main file selection " + newFile.getCanonicalPath() + ", main file not changed");
+                    JOptionPane.showMessageDialog(null, "Main file not changed, could not open file " + newFile, "Warning", JOptionPane.WARNING_MESSAGE);
                 }
             }
         } catch (Exception e) {
