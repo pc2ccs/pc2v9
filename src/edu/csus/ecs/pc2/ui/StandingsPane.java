@@ -21,8 +21,12 @@ import com.ibm.webrunner.j2mclb.MultiColumnListbox;
 
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.AccountEvent;
+import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IProblemListener;
 import edu.csus.ecs.pc2.core.model.IRunListener;
+import edu.csus.ecs.pc2.core.model.ProblemEvent;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.RunEvent.Action;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
@@ -82,6 +86,8 @@ public class StandingsPane extends JPanePlugin {
         
         log = getController().getLog();
         
+        getContest().addAccountListener(new AccountListenerImplementation());
+        getContest().addProblemListener(new ProblemListenerImplementation());
         getContest().addRunListener(new RunListenerImplementation());
 
         refreshStandings();
@@ -247,6 +253,41 @@ public class StandingsPane extends JPanePlugin {
         return obj;
     }
     
+    /**
+     * @author pc2@ecs.csus.edu
+     *
+     */
+    public class AccountListenerImplementation implements IAccountListener {
+
+        public void accountAdded(AccountEvent accountEvent) {
+            refreshStandings();
+        }
+
+        public void accountModified(AccountEvent event) {
+            refreshStandings();
+        }
+        
+    }
+
+    /**
+     * @author pc2@ecs.csus.edu
+     *
+     */
+    public class ProblemListenerImplementation implements IProblemListener {
+
+        public void problemAdded(ProblemEvent event) {
+            refreshStandings();
+        }
+
+        public void problemChanged(ProblemEvent event) {
+            refreshStandings();
+        }
+
+        public void problemRemoved(ProblemEvent event) {
+            refreshStandings();
+        }
+        
+    }
     /**
      * 
      * @author pc2@ecs.csus.edu
