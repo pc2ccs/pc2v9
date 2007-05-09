@@ -129,7 +129,7 @@
                 <formatter type="brief" usefile="false"/>
                 <formatter type="xml"/>
                 <batchtest todir="${testresults.xml.dir}">
-                    <fileset dir="${build.test.dir}" includes="**/*Test.class"/>
+                    <fileset dir="${build.test.dir}" includes="**/AllTests.class"/>
                 </batchtest>
         </junit>
         <!-- remove TEST- from filenames  -->
