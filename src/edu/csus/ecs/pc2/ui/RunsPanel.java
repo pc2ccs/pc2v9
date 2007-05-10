@@ -22,11 +22,15 @@ import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.ILanguageListener;
+import edu.csus.ecs.pc2.core.model.IProblemListener;
 import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
+import edu.csus.ecs.pc2.core.model.LanguageEvent;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.ProblemEvent;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
@@ -541,6 +545,8 @@ public class RunsPanel extends JPanePlugin {
 
         getContest().addRunListener(new RunListenerImplementation());
         getContest().addAccountListener(new AccountListenerImplementation());
+        getContest().addProblemListener(new ProblemListenerImplementation());
+        getContest().addLanguageListener(new LanguageListenerImplementation());
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -898,13 +904,68 @@ public class RunsPanel extends JPanePlugin {
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
                         updateGUIperPermissions();
+                        reloadRunList();
                     }
                 });
                 
+            } else {
+                // not us, but update the grid anyways
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        reloadRunList();
+                    }
+                });
+
             }
             
         }
         
+    }
+
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     */
+    public class ProblemListenerImplementation implements IProblemListener {
+
+        public void problemAdded(ProblemEvent event) {
+            // ignore does not affect this pane
+        }
+
+        public void problemChanged(ProblemEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadRunList();
+                }
+            });
+        }
+
+        public void problemRemoved(ProblemEvent event) {
+            // ignore does not affect this pane
+        }
+    }
+
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     */
+    public class LanguageListenerImplementation implements ILanguageListener {
+
+        public void languageAdded(LanguageEvent event) {
+            // ignore does not affect this pane
+        }
+
+        public void languageChanged(LanguageEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadRunList();
+                }
+            });
+        }
+
+        public void languageRemoved(LanguageEvent event) {
+            // ignore does not affect this pane
+        }
     }
 
     private void showMessage(final String string) {
