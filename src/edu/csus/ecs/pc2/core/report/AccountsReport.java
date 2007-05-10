@@ -9,6 +9,7 @@ import java.util.Vector;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -102,8 +103,11 @@ public class AccountsReport implements IReport {
                 }
                 printWriter.println();
 
-                for (int i = 0; i < accounts.size(); i++) {
-                    Account account = accounts.elementAt(i);
+                Account [] sortedAccounts = (Account[]) accounts.toArray(new Account[accounts.size()]);
+                
+                Arrays.sort(sortedAccounts, new AccountComparator());
+
+                for (Account account : sortedAccounts){
                     printWriter.print("   Site " + account.getSiteNumber());
                     printWriter.format(" %-15s", account.getClientId().getName());
                     printWriter.println(" id=" + account.getElementId());
