@@ -19,6 +19,7 @@ import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ElementId;
+import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.IRunListener;
@@ -82,6 +83,10 @@ public class RunsPanel extends JPanePlugin {
     private Log log = null;
 
     private JLabel rowCountLabel = null;
+    
+    private boolean showNewRunsOnly = false;
+    
+    private Filter filter = null;
 
     /**
      * This method initializes
@@ -382,7 +387,34 @@ public class RunsPanel extends JPanePlugin {
         return runListBox;
     }
 
+    /**
+     * Remove run from grid.
+     * @param run
+     */
+    private void removeRunRow(final Run run) {
+
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+
+                int rowNumber = runListBox.getIndexByKey(run.getElementId());
+                if (rowNumber != -1) {
+                    runListBox.removeRow(rowNumber);
+                }
+            }
+        });
+    }
+
     public void updateRunRow(final Run run, final ClientId whoModifiedId) {
+        
+        if (filter != null){
+            
+            if (! filter.matches(run)){
+                // if run does not match filter, be sure to remove it from grid
+                // This applies when a run is New then BEING_JUDGED and other conditions.
+                removeRunRow(run);
+                return;
+            }
+        }
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -428,6 +460,12 @@ public class RunsPanel extends JPanePlugin {
         // TODO bulk load these record
 
         for (Run run : runs) {
+            
+            if (filter != null){
+                if (! filter.matches(run)){
+                    continue;
+                }
+            }
 
             ClientId clientId = null;
 
@@ -464,13 +502,28 @@ public class RunsPanel extends JPanePlugin {
 
     private void updateGUIperPermissions() {
         
-        requestRunButton.setVisible(isAllowed(Permission.Type.JUDGE_RUN));
-        editRunButton.setVisible(isAllowed(Permission.Type.EDIT_RUN));
-        extractButton.setVisible(isAllowed(Permission.Type.EXTRACT_RUNS));
-        giveButton.setVisible(isAllowed(Permission.Type.GIVE_RUN));
-        takeButton.setVisible(isAllowed(Permission.Type.TAKE_RUN));
-        rejudgeRunButton.setVisible(isAllowed(Permission.Type.REJUDGE_RUN));
-        viewJudgementsButton.setVisible(isAllowed(Permission.Type.VIEW_RUN_JUDGEMENT_HISTORIES));
+        if (showNewRunsOnly){
+
+            requestRunButton.setVisible(true);
+            requestRunButton.setEnabled(isAllowed(Permission.Type.JUDGE_RUN));
+            editRunButton.setVisible(false);
+            extractButton.setVisible(false);
+            giveButton.setVisible(false);
+            takeButton.setVisible(false);
+            rejudgeRunButton.setVisible(false);
+            viewJudgementsButton.setVisible(false);
+
+        } else {
+        
+            requestRunButton.setVisible(isAllowed(Permission.Type.JUDGE_RUN));
+            editRunButton.setVisible(isAllowed(Permission.Type.EDIT_RUN));
+            extractButton.setVisible(isAllowed(Permission.Type.EXTRACT_RUNS));
+            giveButton.setVisible(isAllowed(Permission.Type.GIVE_RUN));
+            takeButton.setVisible(isAllowed(Permission.Type.TAKE_RUN));
+            rejudgeRunButton.setVisible(isAllowed(Permission.Type.REJUDGE_RUN));
+            viewJudgementsButton.setVisible(isAllowed(Permission.Type.VIEW_RUN_JUDGEMENT_HISTORIES));
+            
+        }
     }
 
     public void setContestAndController(IContest inContest, IController inController) {
@@ -863,6 +916,23 @@ public class RunsPanel extends JPanePlugin {
             }
         });
 
+    }
+
+    public boolean isShowNewRunsOnly() {
+        return showNewRunsOnly;
+    }
+
+    public void setShowNewRunsOnly(boolean showNewRunsOnly) {
+        this.showNewRunsOnly = showNewRunsOnly;
+
+        if (showNewRunsOnly){
+            if (filter == null){
+                filter = new Filter();
+            }
+            filter.addRunState(RunStates.NEW);
+        }
+        // TODO code handle if they turn off the show new runs only.
+        
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
