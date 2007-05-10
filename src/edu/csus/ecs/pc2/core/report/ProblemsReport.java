@@ -33,6 +33,11 @@ public class ProblemsReport implements IReport {
         printWriter.println("  Problem '" + problem + "' ver="+ problem.getElementId().getVersionNumber()+" id=" + problem.getElementId());
         printWriter.println("       Data file name   : " + problem.getDataFileName());
         printWriter.println("       Answer file name : " + problem.getAnswerFileName());
+        printWriter.print("   Execution time limit : " + problem.getTimeOutInSeconds() + " seconds");
+        if (problem.getTimeOutInSeconds() == 0) {
+            printWriter.print(" (no time limit when zero seconds)");
+        }
+        printWriter.println();
         printWriter.println("     Validator cmd line : " + problem.getValidatorCommandLine());
         printWriter.println("     Validator option # : " + problem.getWhichPC2Validator());
 
