@@ -42,8 +42,15 @@ public class AccountNameComparator implements Comparator<String>, Serializable {
 
             int lastNumberIndexOne = findLastNumberIndex(displayNameOne);
             int lastNumberIndexTwo = findLastNumberIndex(displayNameTwo);
-
+            
             if (lastNumberIndexOne == lastNumberIndexTwo && lastNumberIndexOne > 0) {
+
+                // If the text preceeding the final number on the string are different, just compare
+                if (!displayNameOne.substring(0, lastNumberIndexOne + 1).equals(displayNameTwo.substring(0, lastNumberIndexOne + 1))) {
+                    return displayNameOne.compareTo(displayNameTwo);
+                }
+                
+                // Else compare the number on the end of the strings.
                 int numberOne = Integer.parseInt(displayNameOne.substring(lastNumberIndexOne+1));
                 int numberTwo = Integer.parseInt(displayNameTwo.substring(lastNumberIndexOne+1));
                 return numberOne - numberTwo;
