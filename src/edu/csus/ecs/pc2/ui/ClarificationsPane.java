@@ -5,6 +5,7 @@ import java.awt.FlowLayout;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
@@ -289,6 +290,32 @@ public class ClarificationsPane extends JPanePlugin {
         getClarificationSplitPane().setVisible(true);
     }
 
+    /**
+     * 
+     * @param clarification the clarification to show
+     */
+    private void showClarificationAnswer(Clarification clarification) {
+        // do not show deleted clars
+
+        if (clarification.isDeleted()) {
+            return;
+        }
+
+        String problemName = getProblemTitle(clarification.getProblemId());
+        String displayString =
+            "<HTML><FONT SIZE=+1>Judge's Response<BR><BR>"
+            + "Problem: <FONT COLOR=BLUE>" +  problemName + "</FONT><BR><BR>" 
+            + "Clar Id: <FONT COLOR=BLUE>" + clarification.getNumber() + "</FONT><BR><BR><BR>" 
+            + "Question: <FONT COLOR=BLUE> "  + clarification.getQuestion() + "</FONT><BR><BR><BR>"
+            + "Answer: <FONT COLOR=BLUE>" + clarification.getAnswer() + "</FONT><BR><BR><BR>" ;
+
+        if (clarification.isSendToAll()) {
+            displayString = displayString + "* For All Teams *" + "\n";
+        }
+
+        JOptionPane.showMessageDialog(this, displayString, "Clarification " + clarification.getNumber(), JOptionPane.INFORMATION_MESSAGE);
+    }
+
     public void updateClarificationRow(final Clarification clarification, final ClientId whoChangedId) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -377,10 +404,21 @@ public class ClarificationsPane extends JPanePlugin {
 
         public void clarificationAdded(ClarificationEvent event) {
             updateClarificationRow(event.getClarification(), event.getWhoModifiedClarification());
+            if (event.getClarification().isAnswered()) {
+                if (getContest().getClientId().getClientType()==ClientType.Type.TEAM) {
+                    showClarificationAnswer(event.getClarification());
+                }
+            }
+        
         }
 
         public void clarificationChanged(ClarificationEvent event) {
             updateClarificationRow(event.getClarification(), event.getWhoModifiedClarification());
+            if (event.getClarification().isAnswered()) {
+                if (getContest().getClientId().getClientType()==ClientType.Type.TEAM) {
+                    showClarificationAnswer(event.getClarification());
+                }
+            }
         }
 
         public void clarificationRemoved(ClarificationEvent event) {
