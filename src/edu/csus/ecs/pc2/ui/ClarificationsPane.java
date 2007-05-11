@@ -461,12 +461,11 @@ public class ClarificationsPane extends JPanePlugin {
 
     private String getTeamDisplayName(ClientId clientId) {
         // TODO code change this depending on how to display team names
-        
-//        Account account = getContest().getAccount(clientId);
-//        if (account != null) {
-//            return account.getDisplayName();
-//        }
-        
+        Account account = getContest().getAccount(clientId);
+        if (account != null) {
+            return account.getDisplayName();
+        }
+
         return clientId.getName();
     }
 
