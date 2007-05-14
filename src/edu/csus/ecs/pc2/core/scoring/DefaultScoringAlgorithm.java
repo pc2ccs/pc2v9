@@ -17,6 +17,7 @@ import edu.csus.ecs.pc2.core.list.RunComparatorByTeam;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.Problem;
@@ -76,7 +77,6 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
     private int[] problemAttempts = null;
 
     private Log log;
-
 
     public DefaultScoringAlgorithm() {
         super();
@@ -227,7 +227,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         props = properties;
 
         XMLMemento mementoRoot = XMLMemento.createWriteRoot("contestStandings");
-        IMemento summaryMememento = createSummaryMomento (mementoRoot);
+        IMemento summaryMememento = createSummaryMomento (theContest.getContestInformation(), mementoRoot);
         
         AccountList accountList = getAccountList(theContest);
         Problem[] problems = theContest.getProblems();
@@ -575,11 +575,13 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      * 
      * @param mementoRoot
      */
-    private IMemento createSummaryMomento(XMLMemento mementoRoot) {
+    private IMemento createSummaryMomento(ContestInformation contestInformation, XMLMemento mementoRoot) {
         IMemento memento = mementoRoot.createChild("standingsHeader");
-        memento.putString("title", "this is not in the model");
-//        memento.putString("title", theContest.getTitle());
-//        memento.putString("version", );
+        String title = contestInformation.getContestTitle();
+        if (title == null || title.length() == 0) {
+            title = "Contest";
+        }
+        memento.putString("title", title);
         VersionInfo versionInfo = new VersionInfo();
         memento.putString("systemName", versionInfo.getSystemName());
         memento.putString("systemVersion", versionInfo.getVersionNumber() + " build " + versionInfo.getBuildNumber());
