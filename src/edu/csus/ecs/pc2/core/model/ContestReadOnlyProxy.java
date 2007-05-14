@@ -762,4 +762,59 @@ public final class ContestReadOnlyProxy implements IContest {
         
     }
 
+    public void addClientSettings(ClientSettings clientSettings) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void updateClientSettings(ClientSettings clientSettings) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void addClientSettingsListener(IClientSettingsListener clientSettingsListener) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void removeClientSettingsListener(IClientSettingsListener clientSettingsListener) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void addContestInformation(ContestInformation contestInformation) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void updateContestInformation(ContestInformation contestInformation) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void addContestInformationListener(IContestInformationListener contestInformationListener) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void removeContestInformationListener(IContestInformationListener contestInformationListener) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public ContestInformation getContestInformation() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public ClientSettings getClientSettings() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public ClientSettings getClientSettings(ClientId clientId) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

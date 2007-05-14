@@ -9,6 +9,7 @@ import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.list.AccountList;
 import edu.csus.ecs.pc2.core.list.ClarificationList;
+import edu.csus.ecs.pc2.core.list.ClientSettingsList;
 import edu.csus.ecs.pc2.core.list.ConnectionHandlerList;
 import edu.csus.ecs.pc2.core.list.ContestTimeList;
 import edu.csus.ecs.pc2.core.list.JudgementDisplayList;
@@ -64,6 +65,10 @@ public class Contest implements IContest {
 
     private Vector<IConnectionListener> connectionListenerList = new Vector<IConnectionListener>();
  
+    private Vector<IClientSettingsListener> clientSettingsListenerList = new Vector<IClientSettingsListener>();
+    
+    private Vector<IContestInformationListener> contestInformationListenerList = new Vector<IContestInformationListener>();
+
     /**
      * Contains name of client (judge or admin) who checks out the run.
      */
@@ -99,7 +104,6 @@ public class Contest implements IContest {
      */
     private ConnectionHandlerList remoteConnectionHandlerList = new ConnectionHandlerList();
 
-
     private ContestTimeList contestTimeList = new ContestTimeList();
 
     private RunList runList = new RunList();
@@ -109,6 +113,16 @@ public class Contest implements IContest {
     private ClarificationList clarificationList = new ClarificationList();
 
     private SiteList siteList = new SiteList();
+    
+    /**
+     * List of all settings for client.
+     */
+    private ClientSettingsList clientSettingsList = new ClientSettingsList();
+    
+    /**
+     * Contest Information (like title).
+     */
+    private ContestInformation contestInformation = new ContestInformation();
     
     private int siteNumber = 1;
 
@@ -202,6 +216,8 @@ public class Contest implements IContest {
         
         // Add root account 
         generateNewAccounts(ClientType.Type.ADMINISTRATOR.toString(), 1, true);
+        
+        contestInformation.setContestTitle("Default Contest Title");
     }
 
     public void addRunListener(IRunListener runListener) {
@@ -1134,4 +1150,84 @@ public class Contest implements IContest {
         ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.CLARIFICATION_AVIALABLE, theClarification);
         fireClarificationListener(clarificationEvent);
     }
+    
+    private void fireClientSettingsListener(ClientSettingsEvent clientSettingsEvent) {
+        for (int i = 0; i < clientSettingsListenerList.size(); i++) {
+
+            if (clientSettingsEvent.getAction() == ClientSettingsEvent.Action.ADDED) {
+                clientSettingsListenerList.elementAt(i).clientSettingsAdded(clientSettingsEvent);
+            } else if (clientSettingsEvent.getAction() == ClientSettingsEvent.Action.DELETED) {
+                clientSettingsListenerList.elementAt(i).clientSettingsRemoved(clientSettingsEvent);
+            } else {
+                clientSettingsListenerList.elementAt(i).clientSettingsChanged(clientSettingsEvent);
+            }
+        }
+    }
+
+    public void addClientSettings(ClientSettings clientSettings) {
+        clientSettingsList.add(clientSettings);
+        ClientSettingsEvent clientSettingsEvent = new ClientSettingsEvent(ClientSettingsEvent.Action.ADDED, clientSettings.getClientId(), clientSettings);
+        fireClientSettingsListener(clientSettingsEvent);
+    }
+    
+    public ClientSettings getClientSettings() {
+        return (ClientSettings) clientSettingsList.get(getClientId());
+    }
+    
+    public ClientSettings getClientSettings(ClientId clientId) {
+        return (ClientSettings) clientSettingsList.get(clientId);
+    }
+    
+    public void updateClientSettings(ClientSettings clientSettings) {
+        clientSettingsList.update(clientSettings);
+        ClientSettingsEvent clientSettingsEvent = new ClientSettingsEvent(ClientSettingsEvent.Action.CHANGED, clientSettings.getClientId(), clientSettings);
+        fireClientSettingsListener(clientSettingsEvent);
+    }
+
+    public void addClientSettingsListener(IClientSettingsListener clientSettingsListener) {
+        clientSettingsListenerList.addElement(clientSettingsListener);
+    }
+
+    public void removeClientSettingsListener(IClientSettingsListener clientSettingsListener) {
+        clientSettingsListenerList.remove(clientSettingsListener);
+    }
+
+    private void fireContestInformationListener(ContestInformationEvent contestInformationEvent) {
+        for (int i = 0; i < contestInformationListenerList.size(); i++) {
+
+            if (contestInformationEvent.getAction() == ContestInformationEvent.Action.ADDED) {
+                contestInformationListenerList.elementAt(i).contestInformationAdded(contestInformationEvent);
+            } else if (contestInformationEvent.getAction() == ContestInformationEvent.Action.DELETED) {
+                contestInformationListenerList.elementAt(i).contestInformationRemoved(contestInformationEvent);
+            } else {
+                contestInformationListenerList.elementAt(i).contestInformationChanged(contestInformationEvent);
+            }
+        }
+    }
+
+    
+    public void addContestInformation(ContestInformation inContestInformation) {
+        this.contestInformation = inContestInformation;
+        ContestInformationEvent contestInformationEvent = new ContestInformationEvent(ContestInformationEvent.Action.ADDED, contestInformation);
+        fireContestInformationListener(contestInformationEvent);
+    }
+
+    public void updateContestInformation(ContestInformation inContestInformation) {
+        this.contestInformation = inContestInformation;
+        ContestInformationEvent contestInformationEvent = new ContestInformationEvent(ContestInformationEvent.Action.CHANGED, contestInformation);
+        fireContestInformationListener(contestInformationEvent);
+    }
+
+    public void addContestInformationListener(IContestInformationListener contestInformationListener) {
+        contestInformationListenerList.addElement(contestInformationListener);
+    }
+
+    public void removeContestInformationListener(IContestInformationListener contestInformationListener) {
+        contestInformationListenerList.remove(contestInformationListener);
+    }
+
+    public ContestInformation getContestInformation() {
+        return contestInformation;
+    }
+    
 }

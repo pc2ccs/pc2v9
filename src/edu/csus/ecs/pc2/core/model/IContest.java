@@ -20,7 +20,7 @@ public interface IContest {
     void addLanguage(Language language);
 
     void addProblem(Problem problem);
-    
+
     void addProblem(Problem problem, ProblemDataFiles problemDataFiles);
 
     void addContestTime(ContestTime contestTime);
@@ -28,27 +28,27 @@ public interface IContest {
     void addJudgement(Judgement judgement);
 
     void addSite(Site site);
-    
+
     void connectionEstablished(ConnectionHandlerID connectionHandlerID);
 
     void connectionEstablished(ConnectionHandlerID connectionHandlerID, Date connectDate);
 
     void connectionDropped(ConnectionHandlerID connectionHandlerID);
 
-    void updateSite (Site site);
+    void updateSite(Site site);
 
     void updateLanguage(Language language);
 
     void updateProblem(Problem problem);
-    
+
     void updateProblem(Problem problem, ProblemDataFiles problemDataFiles);
-    
-    ProblemDataFiles getProblemDataFile (Problem problem);
-    
-    ProblemDataFiles [] getProblemDataFiles();
+
+    ProblemDataFiles getProblemDataFile(Problem problem);
+
+    ProblemDataFiles[] getProblemDataFiles();
 
     void updateContestTime(ContestTime contestTime, int inSiteNumber);
-    
+
     void addAccount(Account account);
 
     /**
@@ -117,17 +117,18 @@ public interface IContest {
      *            set to True if the accounts are active
      * @return Vector of Accounts created.
      */
-    Vector <Account>  generateNewAccounts(String clientTypeName, int count, boolean active);
+    Vector<Account> generateNewAccounts(String clientTypeName, int count, boolean active);
 
     /**
      * Add new accounts, client number starting at startNumber.
+     * 
      * @param clientTypeName
      * @param count
      * @param startNumber
      * @param active
      * @return Vector of Accounts created.
      */
-    Vector <Account>  generateNewAccounts(String clientTypeName, int count, int startNumber, boolean active);
+    Vector<Account> generateNewAccounts(String clientTypeName, int count, int startNumber, boolean active);
 
     /**
      * Add new sites.
@@ -189,7 +190,7 @@ public interface IContest {
     void addRunListener(IRunListener runListener);
 
     void removeRunListener(IRunListener runListener);
-    
+
     void addClarificationListener(IClarificationListener clarificationListener);
 
     void removeClarificationListener(IClarificationListener clarificationListener);
@@ -217,19 +218,18 @@ public interface IContest {
     void addSiteListener(ISiteListener siteListener);
 
     void removeSiteListener(ISiteListener siteListener);
-    
-    void addConnectionListener(IConnectionListener connectionListener) ;
+
+    void addConnectionListener(IConnectionListener connectionListener);
 
     void removeConnectionListener(IConnectionListener connectionListener);
-
 
     Run getRun(ElementId id);
 
     Vector<Account> getAccounts(Type type, int siteNumber);
 
     Vector<Account> getAccounts(Type type);
-    
-    Site getSite (int siteNumber);
+
+    Site getSite(int siteNumber);
 
     /**
      * return true if account exists and valid password matches.
@@ -247,8 +247,7 @@ public interface IContest {
      * @param connectionHandlerID
      */
     void addLogin(ClientId clientId, ConnectionHandlerID connectionHandlerID);
-    
-    
+
     /**
      * Add only as a local login.
      * 
@@ -258,7 +257,7 @@ public interface IContest {
      * @param connectionHandlerID
      */
     void addLocalLogin(ClientId clientId, ConnectionHandlerID connectionHandlerID);
-    
+
     /**
      * Add login as a remote login.
      * 
@@ -277,13 +276,15 @@ public interface IContest {
 
     /**
      * is local login (login to this server).
+     * 
      * @param sourceId
      * @return true if logged in.
      */
     boolean isLocalLoggedIn(ClientId sourceId);
-    
+
     /**
      * Is logged into remote server.
+     * 
      * @param clientId
      * @return
      */
@@ -301,10 +302,10 @@ public interface IContest {
      * @return ClientId or null if not found.
      */
     ConnectionHandlerID getConnectionHandleID(ClientId clientId);
-    
-    boolean isConnected (ConnectionHandlerID connectionHandlerID);
 
-    boolean isConnectedToRemoteSite (ConnectionHandlerID connectionHandlerID);
+    boolean isConnected(ConnectionHandlerID connectionHandlerID);
+
+    boolean isConnectedToRemoteSite(ConnectionHandlerID connectionHandlerID);
 
     /**
      * Logoff, remove user from login list.
@@ -312,13 +313,14 @@ public interface IContest {
      * @param clientId
      */
     void removeLogin(ClientId clientId);
-    
+
     /**
      * Get all connection ids for all sites.
+     * 
      * @return all sites connection ids.
      */
-    ConnectionHandlerID [] getConnectionHandlerIDs();
-    
+    ConnectionHandlerID[] getConnectionHandlerIDs();
+
     int getSiteNumber();
 
     ContestTime getContestTime();
@@ -343,8 +345,7 @@ public interface IContest {
     void initializeWithFakeData();
 
     /**
-     * Load all submissions off disk.
-     * Intializes runs and clars into Contest.
+     * Load all submissions off disk. Intializes runs and clars into Contest.
      */
     void initializeSubmissions();
 
@@ -352,7 +353,7 @@ public interface IContest {
      * Fetch all runs.
      */
     Run[] getRuns();
-    
+
     void runUpdated(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles, ClientId whoUpdatedRun);
 
     /**
@@ -407,16 +408,17 @@ public interface IContest {
      * @param run
      */
     void availableRun(Run run);
-    
+
     Clarification getClarification(ElementId id);
-    
+
     /**
      * Fetch all clarifications.
      */
-    Clarification [] getClarifications();
-    
+    Clarification[] getClarifications();
+
     /**
      * add clarification into model.
+     * 
      * @param clarification
      */
     void addClarification(Clarification clarification);
@@ -424,25 +426,27 @@ public interface IContest {
     void addClarification(Clarification clarification, ClientId whoCheckedOutId);
 
     /**
-     * add new clarification onto server. 
+     * add new clarification onto server.
      * 
      * @param clarification
      * @return clarification with new id and timestamp.
      */
-    Clarification acceptClarification (Clarification clarification);
-    
-    void answerClarification (Clarification clarification, String answer, ClientId whoAnsweredIt, boolean sendToAll);
+    Clarification acceptClarification(Clarification clarification);
 
-    void updateClarification (Clarification clarification, ClientId whoChangedIt);
-    
+    void answerClarification(Clarification clarification, String answer, ClientId whoAnsweredIt, boolean sendToAll);
+
+    void updateClarification(Clarification clarification, ClientId whoChangedIt);
+
     /**
      * remove clarification from model.
+     * 
      * @param clarification
      */
     void removeClarification(Clarification clarification);
 
     /**
      * change/update clarification in model.
+     * 
      * @param clarification
      */
     void changeClarification(Clarification clarification);
@@ -454,7 +458,7 @@ public interface IContest {
     Judgement getJudgement(ElementId elementId);
 
     Account getAccount(ClientId id);
-    
+
     ContestTime[] getContestTimes();
 
     /**
@@ -470,6 +474,26 @@ public interface IContest {
 
     void cancelClarificationCheckOut(Clarification clarification, ClientId whoCancelledIt);
 
- 
+    void addClientSettings(ClientSettings clientSettings);
+
+    void updateClientSettings(ClientSettings clientSettings);
+
+    void addClientSettingsListener(IClientSettingsListener clientSettingsListener);
+
+    void removeClientSettingsListener(IClientSettingsListener clientSettingsListener);
+
+    void addContestInformation(ContestInformation contestInformation);
+
+    void updateContestInformation(ContestInformation contestInformation);
+
+    void addContestInformationListener(IContestInformationListener contestInformationListener);
+
+    void removeContestInformationListener(IContestInformationListener contestInformationListener);
+
+    ContestInformation getContestInformation();
+
+    ClientSettings getClientSettings();
+
+    ClientSettings getClientSettings(ClientId clientId);
 
 }

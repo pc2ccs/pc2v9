@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core.list;
 
+import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.IElementObject;
 
@@ -50,5 +51,9 @@ public class ClientSettingsList extends BaseElementList {
     public String getKey(IElementObject elementObject) {
         ClientSettings clientSettings = (ClientSettings) elementObject;
         return clientSettings.getClientId().toString();
+    }
+    
+    public ClientSettings get(ClientId clientId){
+        return (ClientSettings) super.get(new ClientSettings(clientId));
     }
 }
