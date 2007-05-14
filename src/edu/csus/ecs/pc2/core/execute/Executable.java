@@ -26,6 +26,7 @@ import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.ui.IFileViewer;
 import edu.csus.ecs.pc2.ui.MultipleFileViewer;
+import edu.csus.ecs.pc2.validator.Validator;
 
 /**
  * Compile, execute and validate a run.
@@ -427,6 +428,15 @@ public class Executable {
          */
         
         String commandPattern = problem.getValidatorCommandLine();
+        
+        if (commandPattern == null && problem.isUsingPC2Validator()){
+            int validatorOption = problem.getWhichPC2Validator();
+            if (validatorOption == 0){
+                validatorOption = 1;
+            }
+            boolean ignoreCase = false;
+            commandPattern = new Validator().getInternalValidatorCommandLine(1, ignoreCase);
+        }
 
         String cmdLine = substituteAllStrings(run, commandPattern);
         cmdLine = replaceString(cmdLine, "{:resfile}", resultsFileName);
@@ -574,6 +584,7 @@ public class Executable {
      * @return true if should be validated.
      */
     private boolean isValidated() {
+        System.err.println("debug 22 isVal "+problem.isValidated()+" "+isTestRunOnly());
         return (problem.isValidated() && (!isTestRunOnly()));
     }
 
