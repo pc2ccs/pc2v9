@@ -354,7 +354,8 @@ public class ProblemPane extends JPanePlugin {
         }
 
         problem.setUsingPC2Validator(useInternalValidatorCheckBox.isSelected());
-
+        problem.setValidated(useInternalValidatorCheckBox.isSelected());
+        
         return problem;
     }
 
