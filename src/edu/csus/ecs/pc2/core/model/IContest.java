@@ -490,10 +490,20 @@ public interface IContest {
 
     void removeContestInformationListener(IContestInformationListener contestInformationListener);
 
+    /**
+     * Get contest info, like title.
+     * 
+     * @return
+     */
     ContestInformation getContestInformation();
 
+    /**
+     * Get individual client settings
+     * @return
+     */
     ClientSettings getClientSettings();
 
     ClientSettings getClientSettings(ClientId clientId);
 
+    ClientSettings [] getClientSettingsList();
 }

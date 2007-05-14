@@ -817,4 +817,9 @@ public final class ContestReadOnlyProxy implements IContest {
         return null;
     }
 
+    public ClientSettings[] getClientSettingsList() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

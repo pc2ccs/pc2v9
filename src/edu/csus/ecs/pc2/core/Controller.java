@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.core;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -14,6 +15,7 @@ import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ConfigurationIO;
 import edu.csus.ecs.pc2.core.model.ContestTime;
@@ -869,19 +871,35 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         Run[] runs = null;
         Clarification[] clarifications = null;
         ProblemDataFiles [] problemDataFiles = new ProblemDataFiles[0];
+        ClientSettings [] clientSettings = null;
+        
+        if (contest.getClientSettings(clientId) == null){
+            ClientSettings clientSettings2 = new ClientSettings(clientId);
+            clientSettings2.put("LoginDate", new Date().toString());
+            contest.addClientSettings(clientSettings2);
+        }
+        
+        /**
+         * This is where client specific settings are created before
+         * sending them to client.
+         */
 
         if (clientId.getClientType().equals(ClientType.Type.TEAM)) {
             runs = contest.getRuns(clientId);
             clarifications = contest.getClarifications(clientId);
+            clientSettings = new ClientSettings[1];
+            clientSettings[0] = contest.getClientSettings(clientId);
         } else {
             runs = contest.getRuns();
             clarifications = contest.getClarifications();
             problemDataFiles = contest.getProblemDataFiles();
+            clientSettings = contest.getClientSettingsList();
         }
 
         Packet packetToSend = PacketFactory.createLoginSuccess(contest.getClientId(), clientId, contest.getContestTime(), contest.getContestTimes(), contest.getSiteNumber(), 
                 contest.getLanguages(), contest.getProblems(), contest.getJudgements(), contest.getSites(), runs, clarifications, 
-                allLoggedInUsers(), contest.getConnectionHandleIDs(), getAllAccounts(), problemDataFiles);
+                allLoggedInUsers(), contest.getConnectionHandleIDs(), getAllAccounts(), problemDataFiles,
+                contest.getContestInformation(), clientSettings);
         
         sendToClient(packetToSend);
     }

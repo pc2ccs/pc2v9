@@ -6,7 +6,9 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IContest;
@@ -1315,6 +1317,19 @@ public class PacketHandler {
             // TODO: log handle exception
             controller.getLog().log(Log.WARNING,"Exception logged ", e);
         }
+        
+        try {
+            ContestInformation contestInformation = (ContestInformation) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_INFORMATION);
+            if (contestInformation != null) {
+                contest.updateContestInformation(contestInformation);
+            }
+
+        } catch (Exception e) {
+            // TODO: log handle exception
+            controller.getLog().log(Log.WARNING,"Exception logged ", e);
+        }
+
+        addClientSettingsToModel (packet);
 
         addContestTimesToModel(packet);
         
@@ -1348,6 +1363,29 @@ public class PacketHandler {
             String message = "Trouble logging in, check logs";
             contest.loginDenied(packet.getDestinationId(), connectionHandlerID, message);
         }
+    }
+
+    private void addClientSettingsToModel(Packet packet) {
+        try {
+            ClientSettings[] clientSettings = (ClientSettings[]) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_SETTINGS_LIST);
+            if (clientSettings != null) {
+                for (ClientSettings clientSettings2 : clientSettings) {
+
+                    ClientId clientId = clientSettings2.getClientId();
+
+                    if (contest.getClientSettings(clientId) != null) {
+                        contest.updateClientSettings(clientSettings2);
+                    } else {
+                        contest.addClientSettings(clientSettings2);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // TODO: log handle exception
+            e.printStackTrace();
+            controller.getLog().log(Log.WARNING, "Exception logged ", e);
+        }
+
     }
 
     /**

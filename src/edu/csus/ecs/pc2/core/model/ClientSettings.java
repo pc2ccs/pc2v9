@@ -1,6 +1,8 @@
 package edu.csus.ecs.pc2.core.model;
 
+import java.util.Enumeration;
 import java.util.Properties;
+import java.util.Vector;
 
 /**
  * Settings specific for each client.
@@ -30,6 +32,7 @@ public class ClientSettings implements IElementObject {
     }
 
     public ClientSettings(ClientId clientId) {
+        this.clientId = clientId;
         elementId = new ElementId("ClientS" + clientId);
     }
 
@@ -61,7 +64,18 @@ public class ClientSettings implements IElementObject {
         properties.put(name, value);
     }
 
-    public String getProperty(String name, String value) {
+    public String getProperty(String name) {
         return properties.getProperty(name);
+    }
+    
+    public String [] getKeys () {
+        
+        Vector<String> v = new Vector<String>();
+        for (Enumeration e = properties.propertyNames() ; e.hasMoreElements() ;) {
+            String key = (String)e.nextElement();
+            v.addElement(key);
+        }
+        
+        return (String[]) v.toArray(new String[v.size()]);
     }
 }

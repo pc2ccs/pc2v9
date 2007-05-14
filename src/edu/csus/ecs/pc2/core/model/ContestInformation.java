@@ -1,5 +1,7 @@
 package edu.csus.ecs.pc2.core.model;
 
+import java.io.Serializable;
+
 /**
  * Contest Wide Information.
  * 
@@ -10,7 +12,7 @@ package edu.csus.ecs.pc2.core.model;
  */
 
 // $HeadURL$
-public class ContestInformation {
+public class ContestInformation implements Serializable{
 
     public static final String SVN_ID = "$Id$";
 

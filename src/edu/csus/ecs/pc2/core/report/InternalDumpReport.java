@@ -4,6 +4,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Vector;
@@ -19,7 +20,9 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IContest;
@@ -47,6 +50,68 @@ public class InternalDumpReport implements IReport {
     private Log log;
 
     private Filter accountFilter = new Filter();
+
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     *
+     */
+    private class ClientSettingsComparator implements Comparator<ClientSettings> {
+
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 1402498954732267609L;
+
+        public static final String SVN_ID = "$Id$";
+
+        public int compare(ClientSettings clientSettings1, ClientSettings clientSettings2) {
+            int site1 = clientSettings1.getSiteNumber();
+            int site2 = clientSettings2.getSiteNumber();
+
+            if (site1 == site2) {
+                
+                ClientId clientId1 = clientSettings1.getClientId();
+                ClientId clientId2 = clientSettings2.getClientId();
+                
+                if (clientId1.getClientType().equals(clientId2.getClientType())){
+                    return clientId1.getClientNumber() - clientId2.getClientNumber();
+                } else {
+                    return clientId1.getClientType().compareTo(clientId2.getClientType());
+                }
+                
+            } else {
+                return site1 - site2;
+            }
+        }
+    }
+
+    private void printClientSettings(PrintWriter printWriter) {
+      
+        ClientSettings [] clientSettingsArray = contest.getClientSettingsList();
+        
+        printWriter.println();
+        printWriter.println("-- Client Settigs --");
+        
+        Arrays.sort(clientSettingsArray, new ClientSettingsComparator());
+        
+        for (ClientSettings clientSettings : clientSettingsArray){
+            printWriter.println("    For: "+clientSettings.getClientId());
+            for (String key : clientSettings.getKeys()){
+                printWriter.println("      "+key+" = "+clientSettings.getProperty(key));
+            }
+        }
+    }
+    
+    private void printContestInformation(PrintWriter printWriter) {
+      
+        ContestInformation contestInformation = contest.getContestInformation();
+        
+        printWriter.println();
+        printWriter.println("-- Contest Information --");
+        printWriter.println("  Title : '" + contestInformation.getContestTitle()+"'");
+        printWriter.println("  URL   : '" + contestInformation.getContestURL()+"'");
+    }
 
     private void printAccounts(PrintWriter printWriter) {
 
@@ -96,6 +161,7 @@ public class InternalDumpReport implements IReport {
             printWriter.println(" id=" + account.getElementId());
         }
     }
+    
 
     private void writeReport(PrintWriter printWriter) {
 
@@ -151,8 +217,10 @@ public class InternalDumpReport implements IReport {
             printWriter.println("  Site " + contestTime.getSiteNumber() + " " + state + " " + contestTime.getElapsedTimeStr() + " " + contestTime.getRemainingTimeStr() + " "
                     + contestTime.getContestLengthStr());
         }
-
-
+        
+        // Contest Information 
+        printContestInformation(printWriter);
+        
         // Problem
         printWriter.println();
         printWriter.println("-- " + contest.getProblems().length + " problems --");
@@ -194,6 +262,8 @@ public class InternalDumpReport implements IReport {
         }
 
         printConnections(printWriter);
+        
+        printClientSettings(printWriter);
 
     }
 

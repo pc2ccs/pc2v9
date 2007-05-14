@@ -13,7 +13,9 @@ import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Judgement;
@@ -136,6 +138,10 @@ public final class PacketFactory {
     public static final String SITE_LIST = "SITE_LIST";
 
     public static final String MESSAGE_STRING = "MESSAGE_STRING";
+    
+    public static final String CONTEST_INFORMATION = "CONTEST_INFORMATION";
+    
+    public static final String CLIENT_SETTINGS_LIST = "CLIENT_SETTINGS_LIST";
 
     /**
      * On login, send settings to server.
@@ -790,10 +796,12 @@ public final class PacketFactory {
      * @param loggedInUsers
      * @param connectionHandlerIDs
      * @param problemDataFiles 
+     * @param clientSettings 
+     * @param information 
      */
     public static Packet createLoginSuccess(ClientId source, ClientId destination, ContestTime contestTime, ContestTime[] contestTimes, int siteNumber, Language[] languages, Problem[] problems,
             Judgement[] judgements, Site[] sites, Run[] runs, Clarification[] clarifications, ClientId[] loggedInUsers, ConnectionHandlerID[] connectionHandlerIDs, 
-            Account [] accounts, ProblemDataFiles[] problemDataFiles) {
+            Account [] accounts, ProblemDataFiles[] problemDataFiles, ContestInformation information, ClientSettings[] clientSettings) {
         try {
             Properties prop = new Properties();
             prop.put(SITE_NUMBER, new Integer(siteNumber));
@@ -810,6 +818,8 @@ public final class PacketFactory {
             prop.put(CONNECTION_HANDLE_ID_LIST, connectionHandlerIDs);
             prop.put(ACCOUNT_ARRAY, accounts);
             prop.put(PROBLEM_DATA_FILES, problemDataFiles);
+            prop.put(CONTEST_INFORMATION, information);
+            prop.put(CLIENT_SETTINGS_LIST, clientSettings);
 
             Packet packet = new Packet(Type.LOGIN_SUCCESS, source, destination, prop);
             return packet;

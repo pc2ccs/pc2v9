@@ -1178,6 +1178,10 @@ public class Contest implements IContest {
         return (ClientSettings) clientSettingsList.get(clientId);
     }
     
+    public ClientSettings [] getClientSettingsList() {
+        return clientSettingsList.getList();
+    }
+    
     public void updateClientSettings(ClientSettings clientSettings) {
         clientSettingsList.update(clientSettings);
         ClientSettingsEvent clientSettingsEvent = new ClientSettingsEvent(ClientSettingsEvent.Action.CHANGED, clientSettings.getClientId(), clientSettings);
