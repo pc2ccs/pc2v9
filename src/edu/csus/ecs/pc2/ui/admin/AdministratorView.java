@@ -16,6 +16,7 @@ import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.ui.AccountsPane;
 import edu.csus.ecs.pc2.ui.ClarificationsPane;
 import edu.csus.ecs.pc2.ui.ConnectionsPane;
+import edu.csus.ecs.pc2.ui.ContestInformationPane;
 import edu.csus.ecs.pc2.ui.ContestTimesPane;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.GenerateAccountsPane;
@@ -40,6 +41,8 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
  */
 
 // $HeadURL$
+// $Id$
+
 public class AdministratorView extends JFrame implements UIPlugin {
 
     private static final long serialVersionUID = 1L;
@@ -147,6 +150,9 @@ public class AdministratorView extends JFrame implements UIPlugin {
                 
                 TeamStatusPane teamStatusPane = new TeamStatusPane();
                 addUIPlugin(getMainTabbedPanel(), "Team Status", teamStatusPane);
+                
+                ContestInformationPane contestInformationPane = new ContestInformationPane();
+                addUIPlugin(getMainTabbedPanel(), "Title", contestInformationPane);
                 
                 setTitle("PC^2 " + contest.getTitle() + " Build " + new VersionInfo().getBuildNumber());
                 setVisible(true);
