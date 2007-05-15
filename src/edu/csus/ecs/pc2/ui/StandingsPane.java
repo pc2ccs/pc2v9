@@ -22,8 +22,10 @@ import com.ibm.webrunner.j2mclb.MultiColumnListbox;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
+import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IContestInformationListener;
 import edu.csus.ecs.pc2.core.model.IProblemListener;
 import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.ProblemEvent;
@@ -89,6 +91,7 @@ public class StandingsPane extends JPanePlugin {
         getContest().addAccountListener(new AccountListenerImplementation());
         getContest().addProblemListener(new ProblemListenerImplementation());
         getContest().addRunListener(new RunListenerImplementation());
+        getContest().addContestInformationListener(new ContestInformationListenerImplementation());
 
         refreshStandings();
     }
@@ -313,5 +316,30 @@ public class StandingsPane extends JPanePlugin {
         }
         
     }
+    
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     * 
+     */
+    class ContestInformationListenerImplementation implements IContestInformationListener {
+
+        public void contestInformationAdded(ContestInformationEvent event) {
+            refreshStandings();
+
+        }
+
+        public void contestInformationChanged(ContestInformationEvent event) {
+            refreshStandings();
+
+        }
+
+        public void contestInformationRemoved(ContestInformationEvent event) {
+            // TODO Auto-generated method stub
+
+        }
+
+    }
+
     
 } // @jve:decl-index=0:visual-constraint="10,10"
