@@ -63,6 +63,14 @@ public class ConfigurationIO {
          * A list per site of Balloon Settings.
          */
         CONTEST_TIME_LIST,
+        /**
+         * Contest Information
+         */
+        CONTEST_INFORMATION,
+        /**
+         * Contest Client Settings
+         */
+        CLIENT_SETTINGS_LIST
     }
 
     private String directoryName = "db";
@@ -205,6 +213,30 @@ public class ConfigurationIO {
                     log.log(Log.WARNING, "Exception while loading sites ", e);
                 }   
                 
+                try {
+                    key = ConfigKeys.CONTEST_INFORMATION;
+                    if (configuration.containsKey(key)) {
+                        ContestInformation contestInformation = (ContestInformation) configuration.get(key.toString());
+                        contest.addContestInformation(contestInformation);
+                        log.info("Loaded Contest Information " + contestInformation.getContestTitle());
+                    } 
+                } catch (Exception e) {
+                    log.log(Log.WARNING, "Exception while loading contest information/title ", e);
+                } 
+                
+                try {
+                    key = ConfigKeys.CLIENT_SETTINGS_LIST;
+                    if (configuration.containsKey(key)) {
+                        ClientSettings [] clientSettingsList =  (ClientSettings[]) configuration.get(key.toString());
+                        for (ClientSettings clientSettings : clientSettingsList) {
+                            contest.addClientSettings(clientSettings);
+                        }
+                        log.info("Loaded " + clientSettingsList.length + " " + key.toString().toLowerCase());
+                    } 
+                } catch (Exception e) {
+                    log.log(Log.WARNING, "Exception while updating client settings ", e);
+                }   
+
                 return true;
                 
             } else {
@@ -253,6 +285,9 @@ public class ConfigurationIO {
         configuration.add(ConfigKeys.LANGUAGES, contest.getLanguages());
         configuration.add(ConfigKeys.PROBLEMS, contest.getProblems());
         configuration.add(ConfigKeys.SITES, contest.getSites());
+        
+        configuration.add(ConfigKeys.CONTEST_INFORMATION, contest.getContestInformation());
+        configuration.add(ConfigKeys.CLIENT_SETTINGS_LIST, contest.getClientSettingsList());
 
         configuration.writeToDisk(getFileName());
 

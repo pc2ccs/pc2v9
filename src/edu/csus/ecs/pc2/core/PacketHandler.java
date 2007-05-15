@@ -690,6 +690,11 @@ public class PacketHandler {
         }
     }
 
+    /**
+     * Handle a UPDATE_SETTING packet.
+     * 
+     * @param packet
+     */
     private void updateSetting(Packet packet) {
 
         boolean sendToTeams = false;
@@ -753,6 +758,23 @@ public class PacketHandler {
                         Packet updatePacket = PacketFactory.clonePacket(contest.getClientId(), account.getClientId(), packet);
                         controller.sendToClient(updatePacket);
                     }
+                }
+            }
+        }
+        
+        ContestInformation contestInformation = (ContestInformation) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_INFORMATION);
+        if (contestInformation != null) {
+            contest.updateContestInformation(contestInformation);
+            sendToTeams = true;
+        }
+        
+        ClientSettings clientSettings = (ClientSettings)PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_SETTINGS);
+        if (clientSettings != null){
+            contest.updateClientSettings(clientSettings);
+            if (isServer()) {
+                if (contest.isLocalLoggedIn(clientSettings.getClientId())) {
+                    Packet updatePacket = PacketFactory.clonePacket(contest.getClientId(), clientSettings.getClientId(), packet);
+                    controller.sendToClient(updatePacket);
                 }
             }
         }

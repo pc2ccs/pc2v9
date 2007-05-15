@@ -4,6 +4,8 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientSettings;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
@@ -218,6 +220,10 @@ public interface IController {
      * @param connectionHandlerID
      */
     void forceConnectionDrop(ConnectionHandlerID connectionHandlerID);
+    
+    void updateClientSettings (ClientSettings clientSettings);
+    
+    void updateContestInformation (ContestInformation contestInformation);
     
     void removeLogin (ClientId clientId);
 

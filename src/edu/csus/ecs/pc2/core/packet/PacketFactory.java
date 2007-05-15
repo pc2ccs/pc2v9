@@ -142,6 +142,9 @@ public final class PacketFactory {
     public static final String CONTEST_INFORMATION = "CONTEST_INFORMATION";
     
     public static final String CLIENT_SETTINGS_LIST = "CLIENT_SETTINGS_LIST";
+    
+    public static final String CLIENT_SETTINGS = "CLIENT_SETTINGS";
+    
 
     /**
      * On login, send settings to server.
@@ -1499,6 +1502,20 @@ public final class PacketFactory {
         prop.put(CLIENT_ID, requestFromId2);
         prop.put(CLARIFICATION, clarification);
         Packet packet = new Packet(Type.CLARIFICATION_NOT_AVAILABLE, source, destination, prop);
+        return packet;
+    }
+
+    public static Packet createUpdateSetting(ClientId source, ClientId destination, ClientSettings clientSettings) {
+        Properties prop = new Properties();
+        prop.put(CLIENT_SETTINGS, clientSettings);
+        Packet packet = new Packet(Type.UPDATE_SETTING, source, destination, prop);
+        return packet;
+    }
+
+    public static Packet createUpdateSetting(ClientId source, ClientId destination, ContestInformation contestInformation) {
+        Properties prop = new Properties();
+        prop.put(CONTEST_INFORMATION, contestInformation);
+        Packet packet = new Packet(Type.UPDATE_SETTING, source, destination, prop);
         return packet;
     }
 

@@ -18,6 +18,7 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ConfigurationIO;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
@@ -1632,6 +1633,17 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                 getLog().log(Log.SEVERE, "Error logging to disk ", e);
             }
         }
+    }
+
+    public void updateClientSettings(ClientSettings clientSettings) {
+        Packet addAccountPacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), clientSettings);
+        sendToLocalServer(addAccountPacket); 
+    }
+
+    public void updateContestInformation(ContestInformation contestInformation) {
+        Packet addAccountPacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), contestInformation);
+        sendToLocalServer(addAccountPacket); 
+        
     }
     
 }
