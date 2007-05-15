@@ -86,7 +86,7 @@ public class Filter {
      * @return
      */
     public boolean matches(Clarification clarification) {
-        return isThisSite(clarification) && matchClarificationState(clarification.getState()) && matchesProblem(clarification.getProblemId());
+        return isThisSite(clarification) && matchesClarificationState(clarification.getState()) && matchesProblem(clarification.getProblemId());
     }
 
     /**
@@ -212,7 +212,7 @@ public class Filter {
     
     // TODO code add removelarificationState(ClarificationStates)
 
-    public boolean matchClarificationState(ClarificationStates clarificationStates) {
+    public boolean matchesClarificationState(ClarificationStates clarificationStates) {
         if (filteringClarificationStates) {
             return clarificationStateHash.containsKey(clarificationStates);
         } else {
@@ -222,6 +222,7 @@ public class Filter {
 
     public void addClarificationState(ClarificationStates clarificationStates) {
         clarificationStateHash.put(clarificationStates, new Date());
+        filteringClarificationStates = true;
     }
     
     public void clearClarificationStateList(){

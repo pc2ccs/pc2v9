@@ -1,13 +1,19 @@
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.GridLayout;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
+import javax.swing.border.TitledBorder;
 
 import com.ibm.webrunner.j2mclb.util.HeapSorter;
 import com.ibm.webrunner.j2mclb.util.NumericStringComparator;
@@ -21,6 +27,7 @@ import edu.csus.ecs.pc2.core.model.ClarificationEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ElementId;
+import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IClarificationListener;
 import edu.csus.ecs.pc2.core.model.IContest;
@@ -32,12 +39,6 @@ import edu.csus.ecs.pc2.core.model.ProblemEvent;
 import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
-import java.awt.GridLayout;
-import javax.swing.JSplitPane;
-import java.awt.Dimension;
-import javax.swing.JTextArea;
-import javax.swing.BorderFactory;
-import javax.swing.border.TitledBorder;
 
 /**
  * Shows clarifications in a list box.
@@ -46,6 +47,8 @@ import javax.swing.border.TitledBorder;
  */
 
 // $HeadURL$
+// $Id$
+
 public class ClarificationsPane extends JPanePlugin {
 
     /**
@@ -88,6 +91,10 @@ public class ClarificationsPane extends JPanePlugin {
     private JPanel answerPane = null;
 
     private JTextArea answerTextArea = null;
+    
+    private boolean showNewClarificationsOnly = false;
+    
+    private Filter filter = null;
 
     /**
      * This method initializes
@@ -315,8 +322,33 @@ public class ClarificationsPane extends JPanePlugin {
 
         JOptionPane.showMessageDialog(this, displayString, "Clarification " + clarification.getNumber(), JOptionPane.INFORMATION_MESSAGE);
     }
+ 
+    
+    private void removeClarificationRow(final Clarification clarification) {
+
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+
+                int rowNumber = clarificationListBox.getIndexByKey(clarification.getElementId());
+                if (rowNumber != -1) {
+                    clarificationListBox.removeRow(rowNumber);
+                }
+            }
+        });
+    }
 
     public void updateClarificationRow(final Clarification clarification, final ClientId whoChangedId) {
+        
+        if (filter != null){
+            
+            if (! filter.matches(clarification)){
+                // if run does not match filter, be sure to remove it from grid
+                // This applies when a run is New then BEING_ANSWERED and other conditions.
+                removeClarificationRow(clarification);
+                return;
+            }
+        }
+        
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 Object[] objects = buildClarificationRow(clarification, whoChangedId);
@@ -382,6 +414,13 @@ public class ClarificationsPane extends JPanePlugin {
         Clarification[] clarifications = getContest().getClarifications();
 
         for (Clarification clarification : clarifications) {
+            
+            if (filter != null){
+                if (! filter.matches(clarification)){
+                    continue;
+                }
+            }
+            
             addClarificationRow(clarification);
         }
     }
@@ -578,13 +617,21 @@ public class ClarificationsPane extends JPanePlugin {
     }
 
     private void updateGUIperPermissions() {
-
-        requestButton.setVisible(isAllowed(Permission.Type.ANSWER_CLARIFICATION));
-        editButton.setVisible(isAllowed(Permission.Type.EDIT_CLARIFICATION));
-        giveButton.setVisible(isAllowed(Permission.Type.GIVE_CLARIFICATION));
-        takeButton.setVisible(isAllowed(Permission.Type.TAKE_CLARIFICATION));
-        generateClarificationButton.setVisible(isAllowed(Permission.Type.GENERATE_NEW_CLARIFICATION));
-
+        
+        if (showNewClarificationsOnly){
+            requestButton.setVisible(isAllowed(Permission.Type.ANSWER_CLARIFICATION));
+            editButton.setVisible(false);
+            giveButton.setVisible(false);
+            takeButton.setVisible(false);
+            generateClarificationButton.setVisible(isAllowed(Permission.Type.GENERATE_NEW_CLARIFICATION));
+            
+        } else {
+            requestButton.setVisible(isAllowed(Permission.Type.ANSWER_CLARIFICATION));
+            editButton.setVisible(isAllowed(Permission.Type.EDIT_CLARIFICATION));
+            giveButton.setVisible(isAllowed(Permission.Type.GIVE_CLARIFICATION));
+            takeButton.setVisible(isAllowed(Permission.Type.TAKE_CLARIFICATION));
+            generateClarificationButton.setVisible(isAllowed(Permission.Type.GENERATE_NEW_CLARIFICATION));
+        }
     }
 
     /**
@@ -783,6 +830,21 @@ public class ClarificationsPane extends JPanePlugin {
             answerTextArea = new JTextArea();
         }
         return answerTextArea;
+    }
+
+    public boolean isShowNewClarificationsOnly() {
+        return showNewClarificationsOnly;
+    }
+
+    public void setShowNewClarificationsOnly(boolean showNewClarificationsOnly) {
+        this.showNewClarificationsOnly = showNewClarificationsOnly;
+        
+        if (showNewClarificationsOnly){
+            if (filter == null){
+                filter = new Filter();
+            }
+            filter.addClarificationState(ClarificationStates.NEW);
+        }
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

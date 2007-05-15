@@ -992,7 +992,7 @@ public class RunsPanel extends JPanePlugin {
             }
             filter.addRunState(RunStates.NEW);
         }
-        // TODO code handle if they turn off the show new runs only.
+        // TODO code handle if they turn off the show new clarifications only.
         
     }
 

@@ -16,6 +16,10 @@ import edu.csus.ecs.pc2.ui.OptionsPanel;
 import edu.csus.ecs.pc2.ui.RunsPanel;
 import edu.csus.ecs.pc2.ui.SubmitRunPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
+import javax.swing.JPanel;
+import java.awt.BorderLayout;
+import javax.swing.JLabel;
+import javax.swing.JButton;
 
 /**
  * Judge GUI.
@@ -23,6 +27,9 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
  * @author pc2@ecs.csus.edu
  * 
  */
+
+// $Header$
+// $Id$
 
 public class JudgeView extends JFrame implements UIPlugin {
 
@@ -39,20 +46,30 @@ public class JudgeView extends JFrame implements UIPlugin {
     private JTabbedPane mainTabbedPane = null;
 
     private LogWindow logWindow = null;
-    
+
+    private JPanel messagePane = null;
+
+    private JPanel centerPane = null;
+
+    private JPanel mainPane = null;
+
+    private JLabel messageLabel = null;
+
+    private JPanel exitPane = null;
+
+    private JButton exitButton = null;
+
+    private JLabel timeLabel = null;
+
     public JudgeView() {
         super();
         initialize();
     }
 
-    /**
-     * This method initializes this
-     * 
-     */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(569, 299));
+        this.setSize(new java.awt.Dimension(800, 420));
+        this.setContentPane(getMainPane());
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
-        this.setContentPane(getMainTabbedPane());
         setTitle("PC^2 Judge - Not Logged In ");
         FrameUtilities.centerFrame(this);
         setVisible(true);
@@ -91,14 +108,15 @@ public class JudgeView extends JFrame implements UIPlugin {
 
     }
 
-
     private void setFrameTitle(final boolean contestStarted) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 if (contestStarted) {
                     setTitle("PC^2 Judge " + contest.getTitle() + " [STARTED] Build " + new VersionInfo().getBuildNumber());
+                    timeLabel.setText("");
                 } else {
                     setTitle("PC^2 Judge " + contest.getTitle() + " [STOPPED] Build " + new VersionInfo().getBuildNumber());
+                    timeLabel.setText("STOPPED");
                 }
             }
         });
@@ -108,28 +126,33 @@ public class JudgeView extends JFrame implements UIPlugin {
     public void setContestAndController(IContest inContest, IController inController) {
         this.contest = inContest;
         this.controller = inController;
-        
+
         if (logWindow == null) {
             logWindow = new LogWindow();
         }
         logWindow.setContestAndController(contest, controller);
-        logWindow.setTitle("Log "+contest.getClientId().toString());
+        logWindow.setTitle("Log " + contest.getClientId().toString());
 
         setFrameTitle(contest.getContestTime().isContestRunning());
-        
+        showMessage("");
+
         RunsPanel newRunsPane = new RunsPanel();
         newRunsPane.setShowNewRunsOnly(true);
         addUIPlugin(getMainTabbedPane(), "New Runs", newRunsPane);
-        
+
         RunsPanel runsPanel = new RunsPanel();
         addUIPlugin(getMainTabbedPane(), "All Runs", runsPanel);
+
+        ClarificationsPane newClarificationsPane = new ClarificationsPane();
+        newClarificationsPane.setShowNewClarificationsOnly(true);
+        addUIPlugin(getMainTabbedPane(), "New Clars", newClarificationsPane);
 
         ClarificationsPane clarificationsPane = new ClarificationsPane();
         addUIPlugin(getMainTabbedPane(), "All clarifications", clarificationsPane);
 
         SubmitRunPane submitRunPane = new SubmitRunPane();
         addUIPlugin(getMainTabbedPane(), "Test Run", submitRunPane);
-        
+
         OptionsPanel optionsPanel = new OptionsPanel();
         addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
         optionsPanel.setLogWindow(logWindow);
@@ -141,6 +164,98 @@ public class JudgeView extends JFrame implements UIPlugin {
 
     protected void showLog(boolean showLogWindow) {
         logWindow.setVisible(showLogWindow);
+    }
+
+    /**
+     * This method initializes messagePane
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getMessagePane() {
+        if (messagePane == null) {
+            timeLabel = new JLabel();
+            timeLabel.setText("STOPPED ");
+            messageLabel = new JLabel();
+            messageLabel.setText("JLabel");
+            messageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+            messagePane = new JPanel();
+            messagePane.setLayout(new BorderLayout());
+            messagePane.add(timeLabel, java.awt.BorderLayout.WEST);
+            messagePane.add(messageLabel, java.awt.BorderLayout.CENTER);
+            messagePane.add(getExitPane(), java.awt.BorderLayout.EAST);
+        }
+        return messagePane;
+    }
+
+    /**
+     * This method initializes centerPane
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getCenterPane() {
+        if (centerPane == null) {
+            centerPane = new JPanel();
+            centerPane.setLayout(new BorderLayout());
+            centerPane.add(getMainTabbedPane(), java.awt.BorderLayout.CENTER);
+        }
+        return centerPane;
+    }
+
+    /**
+     * This method initializes mainPane
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getMainPane() {
+        if (mainPane == null) {
+            mainPane = new JPanel();
+            mainPane.setLayout(new BorderLayout());
+            mainPane.add(getMessagePane(), java.awt.BorderLayout.NORTH);
+            mainPane.add(getCenterPane(), java.awt.BorderLayout.CENTER);
+        }
+        return mainPane;
+    }
+
+    /**
+     * This method initializes exitPane
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getExitPane() {
+        if (exitPane == null) {
+            exitPane = new JPanel();
+            exitPane.add(getExitButton(), null);
+        }
+        return exitPane;
+    }
+
+    /**
+     * This method initializes exitButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getExitButton() {
+        if (exitButton == null) {
+            exitButton = new JButton();
+            exitButton.setText("Exit");
+            exitButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    promptAndExit();
+                }
+            });
+        }
+        return exitButton;
+    }
+
+    private void showMessage(final String string) {
+
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                messageLabel.setText(string);
+                messageLabel.setToolTipText(string);
+            }
+        });
+
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
