@@ -1,7 +1,7 @@
 package edu.csus.ecs.pc2.core.scoring;
 
 import java.io.StringReader;
-import java.util.Date;
+import java.util.Arrays;
 import java.util.Properties;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -15,6 +15,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -344,22 +345,22 @@ public class DefaultScoringAlgorithmTest extends TestCase {
         };
 
         Contest contest = new Contest();
-        
+
         initData(contest, 2, 2);
-        
-        Problem [] problemList = contest.getProblems();
+
+        Problem[] problemList = contest.getProblems();
         Language languageId = contest.getLanguages()[0];
-        
+
         Judgement yesJudgement = contest.getJudgements()[0];
         Judgement noJudgement = contest.getJudgements()[1];
-        
+
         // get 5th judge
         ClientId judgeId = contest.getAccounts(Type.JUDGE).elementAt(4).getClientId();
-        
+
         for (String runInfoLine : runsData) {
-            
+
             String[] data = runInfoLine.split(",");
-            
+
             int runId = getIntegerValue(data[0]);
             int teamId = getIntegerValue(data[1]);
             String probLet = data[2];
@@ -370,8 +371,8 @@ public class DefaultScoringAlgorithmTest extends TestCase {
             Problem problem = problemList[problemIndex];
             ClientId clientId = new ClientId(contest.getSiteNumber(), Type.TEAM, teamId);
 
-//            System.out.println(runInfoLine);
-//            System.out.println(runId + " " + teamId + " " + probLet + " " + elapsed + " " + (solved ? "Yes" : "No"));
+            // System.out.println(runInfoLine);
+            // System.out.println(runId + " " + teamId + " " + probLet + " " + elapsed + " " + (solved ? "Yes" : "No"));
 
             Run run = new Run(clientId, languageId, problem);
             run.setNumber(runId);
@@ -383,14 +384,21 @@ public class DefaultScoringAlgorithmTest extends TestCase {
             JudgementRecord judgementRecord = new JudgementRecord(judgementId, judgeId, solved, false);
             run.addJudgement(judgementRecord);
             contest.addRun(run);
-
-            System.out.println("debug run "+run.getNumber() + "," + run.getSubmitter().getClientNumber() + "," 
-                    + contest.getProblem(run.getProblemId()) + "," + run.getElapsedMins() + "," + run.isSolved());
         }
-        
+
+        System.out.println();
+        System.out.println("Contest Runs");
+
+        Run[] runs = contest.getRuns();
+        Arrays.sort(runs, new RunComparator());
+        for (Run run : runs) {
+            System.out.println("debug2 run " + run.getNumber() + "," + run.getSubmitter().getClientNumber() + "," + contest.getProblem(run.getProblemId()) + "," + run.getElapsedMins() + ","
+                    + run.isSolved());
+        }
+
         checkOutputXML(contest);
-        
-        confirmRanks (contest, rankData);
+
+        confirmRanks(contest, rankData);
     }
     
     /**
