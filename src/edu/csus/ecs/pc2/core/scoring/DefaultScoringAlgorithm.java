@@ -134,7 +134,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 }
                 attempts++;
                 problemId = run.getProblemId();
-                if (run.isSolved()) {
+                if (run.isJudged() && run.isSolved()) {
                     // TODO: we might want some differing logic here if all
                     // yes's are counted
                     // and/or no's after yes's are counted
@@ -212,13 +212,17 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      * 
      * @see edu.csus.ecs.pc2.core.scoring.ScoringAlgorithm#getStandings(edu.csus.ecs.pc2.core.Run[], edu.csus.ecs.pc2.core.AccountList, edu.csus.ecs.pc2.core.ProblemDisplayList, java.util.Properties)
      */
-    public String getStandings(IContest theContest, Properties inputPrpoerties, Log inputLog) {
+    public String getStandings(IContest theContest, Properties properties, Log inputLog) {
         if (theContest == null) {
             throw new InvalidParameterException("Invalid model (null)");
         }
-        Properties properties = getProperties();
         if (properties == null) {
             throw new InvalidParameterException("Invalid properties (null)");
+        }
+        if (properties.isEmpty()) {
+            // TODO is properties is empty, should we throw an exception?
+            // grab the default properties
+            properties = getProperties();
         }
         
         this.log = inputLog;
