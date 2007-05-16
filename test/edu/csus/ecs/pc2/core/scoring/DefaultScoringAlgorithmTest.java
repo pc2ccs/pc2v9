@@ -341,7 +341,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
         
         String [] rankData = {
                 "1,team1,1,23",
-                "1,team2,1,30"
+                "2,team2,1,30"
         };
 
         Contest contest = new Contest();
@@ -382,8 +382,8 @@ public class DefaultScoringAlgorithmTest extends TestCase {
                 judgementId = yesJudgement.getElementId();
             }
             JudgementRecord judgementRecord = new JudgementRecord(judgementId, judgeId, solved, false);
-            run.addJudgement(judgementRecord);
             contest.addRun(run);
+            contest.addRunJudgement(run, judgementRecord, null, judgeId);
         }
 
         System.out.println();
@@ -393,7 +393,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
         Arrays.sort(runs, new RunComparator());
         for (Run run : runs) {
             System.out.println("debug2 run " + run.getNumber() + "," + run.getSubmitter().getClientNumber() + "," + contest.getProblem(run.getProblemId()) + "," + run.getElapsedMins() + ","
-                    + run.isSolved());
+                    + run.isSolved()+" judged "+run.isJudged());
         }
 
         checkOutputXML(contest);
