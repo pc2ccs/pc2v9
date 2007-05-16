@@ -252,15 +252,16 @@ public class DefaultScoringAlgorithmTest extends TestCase {
      * @param contest
      */
     public void checkOutputXML (IContest contest) {
-        
-        DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
-        String xmlString = defaultScoringAlgorithm.getStandings(contest, new Properties(), log);
-
-        // getStandings should always return a well-formed xml
-        assertFalse("getStandings returned null ", xmlString == null);
-        assertFalse("getStandings returned empty string ", xmlString.trim().length() == 0);
-
+       
         try {
+            DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
+            String xmlString = defaultScoringAlgorithm.getStandings(contest, new Properties(), log);
+            
+            // getStandings should always return a well-formed xml
+            assertFalse("getStandings returned null ", xmlString == null);
+            assertFalse("getStandings returned empty string ", xmlString.trim().length() == 0);
+            
+            
             DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
             Document document = documentBuilder.parse(new InputSource(new StringReader(xmlString)));
@@ -446,20 +447,20 @@ public class DefaultScoringAlgorithmTest extends TestCase {
      */
     private void confirmRanks(Contest contest, String[] rankData) {
         
+        Document document = null;
+        
         // Rank  Solved Penalty TeamId
         
-        DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
-        String xmlString = defaultScoringAlgorithm.getStandings(contest, new Properties(), log);
-        
-//        System.out.println("debug XML is "+xmlString);
-
-        // getStandings should always return a well-formed xml
-        assertFalse("getStandings returned null ", xmlString == null);
-        assertFalse("getStandings returned empty string ", xmlString.trim().length() == 0);
-        
-        Document document = null;
-
         try {
+            DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
+            String xmlString = defaultScoringAlgorithm.getStandings(contest, new Properties(), log);
+            
+//          System.out.println("debug XML is "+xmlString);
+            
+            // getStandings should always return a well-formed xml
+            assertFalse("getStandings returned null ", xmlString == null);
+            assertFalse("getStandings returned empty string ", xmlString.trim().length() == 0);
+
             DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
             document = documentBuilder.parse(new InputSource(new StringReader(xmlString)));
