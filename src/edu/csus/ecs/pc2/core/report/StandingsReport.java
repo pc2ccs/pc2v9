@@ -19,6 +19,7 @@ import org.xml.sax.SAXException;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IContest;
@@ -51,7 +52,7 @@ public class StandingsReport implements IReport {
         
     }
 
-    private void writeReport(PrintWriter printWriter) throws ParserConfigurationException, SAXException, IOException  {
+    private void writeReport(PrintWriter printWriter) throws ParserConfigurationException, SAXException, IOException, IllegalContestState  {
 
         printWriter.println();
         DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
@@ -104,7 +105,12 @@ public class StandingsReport implements IReport {
 
     public String createReportXML(Filter filter) {
         DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
-        return defaultScoringAlgorithm.getStandings(contest, new Properties(), controller.getLog());
+        try {
+            return defaultScoringAlgorithm.getStandings(contest, new Properties(), controller.getLog());
+        } catch (IllegalContestState e) {
+            e.printStackTrace();
+            return "Exception in report: " + e.getMessage();
+        }
     }
 
     public String getReportTitle() {

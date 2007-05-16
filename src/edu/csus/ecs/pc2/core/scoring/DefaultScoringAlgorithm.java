@@ -12,6 +12,8 @@ import java.util.TreeMap;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.VersionInfo;
+import edu.csus.ecs.pc2.core.exception.IllegalContestState;
+import edu.csus.ecs.pc2.core.exception.IllegalRunState;
 import edu.csus.ecs.pc2.core.list.AccountList;
 import edu.csus.ecs.pc2.core.list.RunComparatorByTeam;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -110,7 +112,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      * @param treeMap
      *            java.util.TreeMap
      */
-    private ProblemSummaryInfo calcProblemScoreData(TreeMap treeMap) {
+    private ProblemSummaryInfo calcProblemScoreData(TreeMap treeMap) throws IllegalContestState {
         ProblemSummaryInfo problemSummaryInfo = new ProblemSummaryInfo();
         int score = 0;
         int attempts = 0;
@@ -134,7 +136,10 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 }
                 attempts++;
                 problemId = run.getProblemId();
-                if (run.isJudged() && run.isSolved()) {
+                if (run.isSolved()) {
+                    if(!run.isJudged()) {
+                        throw new IllegalRunState("");
+                    }
                     // TODO: we might want some differing logic here if all
                     // yes's are counted
                     // and/or no's after yes's are counted
@@ -212,7 +217,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      * 
      * @see edu.csus.ecs.pc2.core.scoring.ScoringAlgorithm#getStandings(edu.csus.ecs.pc2.core.Run[], edu.csus.ecs.pc2.core.AccountList, edu.csus.ecs.pc2.core.ProblemDisplayList, java.util.Properties)
      */
-    public String getStandings(IContest theContest, Properties properties, Log inputLog) {
+    public String getStandings(IContest theContest, Properties properties, Log inputLog) throws IllegalContestState {
         if (theContest == null) {
             throw new InvalidParameterException("Invalid model (null)");
         }
@@ -466,7 +471,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      * @param standingsRecordHash
      * @param problemsIndexHash
      */
-    private void generateStandingsValues (final TreeMap<Run, Run> runTreeMap, Hashtable<String, StandingsRecord> standingsRecordHash, Hashtable<ElementId, Integer> problemsIndexHash) {
+    private void generateStandingsValues (final TreeMap<Run, Run> runTreeMap, Hashtable<String, StandingsRecord> standingsRecordHash, Hashtable<ElementId, Integer> problemsIndexHash) throws IllegalContestState {
 
         long oldTime = 0;
         long youngTime = -1;
