@@ -39,7 +39,9 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 // $HeadURL$
 public class RunFlowTest extends TestCase {
 
-    private static final String [] SERVER_COMMAND_LINE_OPTIONS = {"--server"};
+    private static final String [] SERVER_COMMAND_LINE_OPTIONS = {"--server", "--port", "42000"};
+
+    private static final String [] CLIENT_COMMAND_LINE_OPTIONS = {"--port", "42000"};
 
     private IContest modelOne;
 
@@ -53,14 +55,14 @@ public class RunFlowTest extends TestCase {
 
     private JudgeController judgeController;
 
+    private int siteNumber = 1;
+
     protected void setUp() throws Exception {
         super.setUp();
 
         modelOne = new Contest();
-        initializeModel(modelOne);
-
-        Site siteOne = SiteTest.createSite(12, "Site ONE", null, 0);
-        modelOne.addSite(siteOne);
+        Site siteTwelve = SiteTest.createSite(siteNumber, "Site 1", null, 42000);
+        modelOne.addSite(siteTwelve);
 
         // Start site 1
         controllerOne = new Controller(modelOne);
@@ -68,7 +70,8 @@ public class RunFlowTest extends TestCase {
         controllerOne.setUsingMainUI(false);
         controllerOne.start(SERVER_COMMAND_LINE_OPTIONS);
         controllerOne.login("site1", "site1");
-        assertTrue("Site 1 logged in", modelOne.isLoggedIn());
+        initializeModel(modelOne);
+        assertTrue("Site "+modelOne.getSiteNumber()+" logged in", modelOne.isLoggedIn());
 
         startContestTime();
     }
@@ -206,11 +209,13 @@ public class RunFlowTest extends TestCase {
             modelOne.addJudgement(new Judgement(judgementName));
         }
 
+        contest.setSiteNumber(siteNumber);
         contest.generateNewAccounts(ClientType.Type.TEAM.toString(), 10, true);
         contest.generateNewAccounts(ClientType.Type.JUDGE.toString(), 5, true);
+        contest.setSiteNumber(1);
 
-        assertTrue("Insure generate of 10 teams", modelOne.getAccounts(Type.TEAM).size() == 10);
-        assertTrue("Insure generate of 5 teams", modelOne.getAccounts(Type.JUDGE).size() == 5);
+        assertTrue("10 teams at site " + siteNumber + " not generated", modelOne.getAccounts(Type.TEAM, siteNumber).size() == 10);
+        assertTrue("5 teams at site " + siteNumber + " not generated", modelOne.getAccounts(Type.JUDGE, siteNumber).size() == 5);
     }
 
     private void startContestTime() {
@@ -233,7 +238,7 @@ public class RunFlowTest extends TestCase {
         judgeModel = new Contest();
         judgeController = new JudgeController(judgeModel);
         judgeController.setUsingMainUI(false);
-        judgeController.start(new String[0]);
+        judgeController.start(CLIENT_COMMAND_LINE_OPTIONS);
         judgeController.login(judgeId.getName(), judgeId.getName());
         sleep(12, "judge logging in");
 
@@ -242,7 +247,7 @@ public class RunFlowTest extends TestCase {
         teamModel = new Contest();
         teamController = new TeamController(teamModel);
         teamController.setUsingMainUI(false);
-        teamController.start(new String[0]);
+        teamController.start(CLIENT_COMMAND_LINE_OPTIONS);
         teamController.login(teamId.getName(), teamId.getName());
         sleep(12, "team logging in");
 

@@ -421,13 +421,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             }
         }
 
-        port = Integer.parseInt(TransportManager.DEFAULT_PC2_PORT);
-
         if (clientId.getClientType().equals(Type.SERVER)) {
-
-            if (containsINIKey(SERVER_PORT_KEY)) {
-                port = Integer.parseInt(getINIValue(SERVER_PORT_KEY));
-            }
 
             if (isContactingRemoteServer()) {
 
@@ -523,9 +517,10 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * Reads .ini file and sets server and port.
      * 
      * Sets the server and port for client.
+     * @param portString 
      *
      */
-    private void setClientServerAndPort (){
+    private void setClientServerAndPort (String portString){
         
         remoteHostName = "localhost";
 
@@ -543,6 +538,27 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         if (containsINIKey(CLIENT_PORT_KEY)) {
             port = Integer.parseInt(getINIValue(CLIENT_PORT_KEY));
         }
+        
+        if (portString != null){
+            getLog().log(Log.INFO, "Attempting to use port from --port '"+portString+"'");
+            port = Integer.parseInt(portString);
+        }
+        
+    }
+    
+    private void setServerPort(String portString){
+        
+        port = Integer.parseInt(TransportManager.DEFAULT_PC2_PORT);
+        
+        if (containsINIKey(SERVER_PORT_KEY)) {
+            port = Integer.parseInt(getINIValue(SERVER_PORT_KEY));
+        }
+
+        if (portString != null) {
+            getLog().log(Log.INFO, "Attempting to use port from --port '" + portString + "'");
+            port = Integer.parseInt(portString);
+        }
+        
     }
 
     private void sendLoginRequest(ITransportManager manager, ConnectionHandlerID connectionHandlerID, ClientId clientId,
@@ -1038,7 +1054,11 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
 
     public void setContestTime(ContestTime contestTime) {
-        contest.updateContestTime(contestTime);
+        if (contest.getContestTime() != null){
+            contest.updateContestTime(contestTime);
+        } else {        
+            contest.addContestTime(contestTime);
+        }
     }
 
     public void sendToServers(Packet packet) {
@@ -1123,6 +1143,13 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                 // secondary server logged in, start listening.
         
                 port = getPortForSite(contest.getSiteNumber());
+                
+                if (parseArguments.getOptValue("--port") != null){
+                    String portString = parseArguments.getOptValue("--port") ;
+                    getLog().log(Log.INFO, "Attempting to use port from --port '"+portString+"'");
+                    port = Integer.parseInt(portString);
+                }
+                
                 info("Started Server Transport listening on " + port);
                 transportManager.accecptConnections(port);
 
@@ -1234,24 +1261,44 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         if (parseArguments.isOptPresent("--nosave")){
             saveCofigurationToDisk = false;
         }
-
+        
 
         if ( parseArguments.isOptPresent("--server")) {
             info("Starting Server Transport...");
             transportManager.startServerTransport(this);
             serverModule = true;
+            
+          
+            try {
+                
+                setServerPort(parseArguments.getOptValue("--port"));
+            } catch (NumberFormatException numException) {
+                savedTransportException = new TransportException("Unable to parse value after --port '"+parseArguments.getOptValue("--port")+"'");
+                log.log(Log.WARNING, "Exception logged ", numException);
+            }
+       
+            
+
         } else {
             // Client contact server 
-            setClientServerAndPort();
-            info("Contacting server at " + remoteHostName + ":" + port);
-            transportManager.startClientTransport(remoteHostName, port, this);
+            
+            try {
+                
+                setClientServerAndPort(parseArguments.getOptValue("--port"));
+                
+                info("Contacting server at " + remoteHostName + ":" + port);
+                transportManager.startClientTransport(remoteHostName, port, this);
+            } catch (NumberFormatException numException) {
+                savedTransportException = new TransportException("Unable to parse value after --port '"+parseArguments.getOptValue("--port")+"'");
+                log.log(Log.WARNING, "Exception logged ", numException);
+            }
+       
             try {
                 transportManager.connectToMyServer();
             } catch (TransportException transportException) {
                 savedTransportException = transportException;
                 log.log(Log.INFO, "Exception logged ", transportException);
                 info("Unable to contact server at " + remoteHostName + ":" + port+" "+transportException.getMessage());
-                
             }
         }
         
