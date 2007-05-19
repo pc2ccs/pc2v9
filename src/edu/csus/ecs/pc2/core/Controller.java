@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.core;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Enumeration;
@@ -425,17 +426,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
             if (isContactingRemoteServer()) {
 
-                // Contacting another server. "join"
-                remoteHostName = getINIValue(REMOTE_SERVER_KEY);
-
-                // Set port to default
-                remoteHostPort = Integer.parseInt(TransportManager.DEFAULT_PC2_PORT);
-
-                int idx = remoteHostName.indexOf(":");
-                if (idx > 2) {
-                    remoteHostPort = Integer.parseInt(remoteHostName.substring(idx + 1));
-                    remoteHostName = remoteHostName.substring(0, idx);
-                }
+                // remoteHostName and remoteHostPort set using huh
 
                 info("Contacting " + remoteHostName + ":" + remoteHostPort);
                 try {
@@ -523,8 +514,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     private void setClientServerAndPort (String portString){
         
         remoteHostName = "localhost";
-
-        port = Integer.parseInt(TransportManager.DEFAULT_PC2_PORT);
+        remoteHostPort = Integer.parseInt(TransportManager.DEFAULT_PC2_PORT);
         
         if (containsINIKey(CLIENT_SERVER_KEY)) {
             remoteHostName = getINIValue(CLIENT_SERVER_KEY);
@@ -536,14 +526,42 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         }
         
         if (containsINIKey(CLIENT_PORT_KEY)) {
-            port = Integer.parseInt(getINIValue(CLIENT_PORT_KEY));
+            remoteHostPort = Integer.parseInt(getINIValue(CLIENT_PORT_KEY));
         }
         
         if (portString != null){
             getLog().log(Log.INFO, "Attempting to use port from --port '"+portString+"'");
-            port = Integer.parseInt(portString);
+            remoteHostPort = Integer.parseInt(portString);
         }
         
+        
+    }
+    
+    private void setServerRemoteHostAndPort (String remoteServerValue) {
+
+        // Contacting another server. "join"
+        String hostName = getINIValue(REMOTE_SERVER_KEY);
+        if (hostName != null && hostName.length() > 4){
+            remoteHostName = hostName;
+            contactingRemoteServer = true;
+        }
+        
+        if (remoteServerValue != null){
+            remoteHostName = remoteServerValue;
+            contactingRemoteServer = true;
+        }
+        
+        if (contactingRemoteServer){
+            
+            // Set port to default
+            remoteHostPort = Integer.parseInt(TransportManager.DEFAULT_PC2_PORT);
+            
+            int idx = remoteHostName.indexOf(":");
+            if (idx > 2) {
+                remoteHostPort = Integer.parseInt(remoteHostName.substring(idx + 1));
+                remoteHostName = remoteHostName.substring(0, idx);
+            }
+        }
     }
     
     private void setServerPort(String portString){
@@ -602,7 +620,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     public void receiveObject(Serializable object, ConnectionHandlerID connectionHandlerID) {
 
         // TODO code check the input connection to insure they are valid connection
-        info("receiveObject (S,C) debug start (by "+contest.getClientId()+") got " + object);
+        info("receiveObject (S,C) debug start got " + object);
 
         try {
 
@@ -637,6 +655,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                             clientId = new ClientId(contest.getSiteNumber(), clientId.getClientType(), clientId.getClientNumber());
                         }
                         attemptToLogin(clientId, password, connectionHandlerID);
+                        
                         removeConnection(connectionHandlerID);
                         sendLoginSuccess(clientId, connectionHandlerID);
 
@@ -741,7 +760,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             info("Exception in receiveObject(S,C): " + e.getMessage(),e);
             info("Exception in receiveObject ", e);
         }
-        info("receiveObject (S,C) debug end   (by "+contest.getClientId()+") got " + object.getClass().getName());
+        info("receiveObject (S,C) debug end   got " + object.getClass().getName());
     }
 
     private void handleServerLoginFailure(Packet packet) {
@@ -792,13 +811,13 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     /**
      * Attempt to login, if login success add to login list.
      * 
+     * If login fails will throw SecurityException.
+     * 
      * @param clientId
      * @param password
      * @param connectionHandlerID
      */
     private void attemptToLogin(ClientId clientId, String password, ConnectionHandlerID connectionHandlerID) {
-
-        info("attemptToLogin debug " + clientId + " pass:" + password + " " + connectionHandlerID);
 
         if (clientId.getClientType().equals(Type.SERVER)) {
 
@@ -811,13 +830,21 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             contest.addLogin(newId, connectionHandlerID);
 
         } else if (contest.isValidLoginAndPassword(clientId, password)) {
-            info("Added " + clientId);
+            
+            if (contest.isLocalLoggedIn(clientId)){
+                
+                // Already logged in, log them off
+                ConnectionHandlerID connectionHandlerID2 = contest.getConnectionHandleID(clientId);
+                log.info("login - "+clientId+" already logged in, will logoff client at connection "+connectionHandlerID2);
+                logoffUser(clientId);
+                
+            }
             contest.addLogin(clientId, connectionHandlerID);
-            info("attemptToLogin debug logged on: " + clientId);
+            info("LOGIN logged in " + clientId + " at "+connectionHandlerID);
 
         } else {
 
-            info("attemptToLogin debug FAILED logged on: " + clientId);
+            info("attemptToLogin FAILED logged on: " + clientId);
             // this code will never be executed, if invalid login
             // isValidLogin will throw a SecurityException.
             throw new SecurityException("Failed attempt to login");
@@ -954,22 +981,40 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * Connection to client lost.
      */
     public void connectionDropped(ConnectionHandlerID connectionHandlerID) {
-        // TODO code connectionDropped reconnection logic
-
         ClientId clientId = contest.getLoginClientId(connectionHandlerID);
         if (clientId != null) {
-            info("connectionDropped: removed user " + clientId);
-            contest.removeLogin(clientId);
-            try {
-                Packet logoffPacket = PacketFactory.createLogoff(contest.getClientId(), PacketFactory.ALL_SERVERS, clientId);
-                sendToAdministrators(logoffPacket);
-                sendToJudges(logoffPacket);
-                sendToServers(logoffPacket);
-            } catch (Exception e) {
-                log.log(Log.SEVERE, "Exception logged ", e);
-            }
+            // is logged in
+            logoffUser (clientId);
+            
+        } else if (contest.isConnected(connectionHandlerID)) {
+
+            removeConnection(connectionHandlerID);
+            
         } else {
             info("connectionDropped: connection " + connectionHandlerID);
+        }
+    }
+    
+    public void logoffUser(ClientId clientId) {
+
+        if (contest.isLocalLoggedIn(clientId)){
+            
+            ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(clientId);
+
+            info ("LOGOFF "+clientId+" "+connectionHandlerID);
+            removeLogin(clientId);
+            
+            try {
+                transportManager.unregisterConnection(connectionHandlerID);
+                log.info("logoffUser: Unregister connection for "+clientId+" conn id "+connectionHandlerID);
+
+            } catch (Exception e) {
+                log.log(Log.WARNING, "Exception attempting to unregisterConnection for "+clientId, e);
+            }
+            
+        } else {
+            info ("LOGOFF remote "+clientId);
+            contest.removeLogin(clientId); // remove from remote login list
         }
     }
 
@@ -990,7 +1035,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      */
     public void receiveObject(Serializable object) {
 
-        info(" receiveObject(S) debug start (by "+contest.getClientId()+") "+ object);
+        info(" receiveObject(S) debug start got "+ object);
 
         try {
             if (object instanceof Packet) {
@@ -1011,22 +1056,22 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             contest.loginDenied(null, null, message);
             info ("Exception ", e);
         }
-        info(" receiveObject(S) debug end   (by "+contest.getClientId()+") "+ object);
+        info(" receiveObject(S) debug end   got "+ object);
     }
 
     /**
      * Connection Dropped on client.
      */
     public void connectionDropped() {
-        // TODO code handle client dropped
         
-        // Connection dropped, countdown and die.
+        // Connection dropped, countdown and halt client
+
         CountDownMessage countDownMessage = new CountDownMessage("Shutting down PC^2 in ", 10);
         if (contest.getClientId() != null) {
-            info("connectionDropped: " + contest.getClientId());
+            info("connectionDropped: shutting down " + contest.getClientId());
             countDownMessage.setTitle("Shutting down PC^2 " + contest.getClientId().getClientType() + " " + contest.getTitle());
         } else {
-            info("connectionDropped: <non-logged in client>");
+            info("connectionDropped: shutting down <non-logged in client>");
             countDownMessage.setTitle("Shutting down PC^2 Client");
         }
         countDownMessage.setExitOnClose(true);
@@ -1211,7 +1256,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
          */
         TransportException savedTransportException = null;
         
-        String[] arguments = { "--login", "--id", "--password", "--loginUI", "--remoteServer", "--server", "--port", "--nosave" };
+        String[] arguments = { "--login", "--id", "--password", "--loginUI", "--remoteServer", "--server", "--port", "--ini", "--nosave" };
         parseArguments = new ParseArguments(stringArray, arguments);
         
         if (parseArguments.isOptPresent("--help")){
@@ -1253,6 +1298,18 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         transportManager = new TransportManager(log);
         log.info("Started TransportManager");
         
+        if ( parseArguments.isOptPresent("--ini")) {
+            // TODO handle URL too
+            String iniName = parseArguments.getOptValue("--ini");
+            try {
+                IniFile.setIniFile(iniName);
+            } catch (MalformedURLException e) {
+                getLog().log (Log.WARNING, "Unable to read ini URL "+iniName, e);
+                savedTransportException = new TransportException("Unable to read ini file "+iniName);
+            }
+            
+        }
+        
         if (IniFile.isFilePresent()) {
             // Only read and load .ini file if it is present.
             new IniFile();
@@ -1268,6 +1325,8 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             transportManager.startServerTransport(this);
             serverModule = true;
             
+            contactingRemoteServer = false;
+            setServerRemoteHostAndPort(parseArguments.getOptValue("--remoteServer"));
           
             try {
                 
@@ -1286,8 +1345,8 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                 
                 setClientServerAndPort(parseArguments.getOptValue("--port"));
                 
-                info("Contacting server at " + remoteHostName + ":" + port);
-                transportManager.startClientTransport(remoteHostName, port, this);
+                info("Contacting server at " + remoteHostName + ":" + remoteHostPort);
+                transportManager.startClientTransport(remoteHostName, remoteHostPort, this);
             } catch (NumberFormatException numException) {
                 savedTransportException = new TransportException("Unable to parse value after --port '"+parseArguments.getOptValue("--port")+"'");
                 log.log(Log.WARNING, "Exception logged ", numException);
@@ -1461,7 +1520,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * @return true if joining contest, false if first server
      */
     public boolean isContactingRemoteServer() {
-        return contactingRemoteServer && containsINIKey(REMOTE_SERVER_KEY);
+        return contactingRemoteServer;
     }
 
     public void setContactingRemoteServer(boolean contactingRemoteServer) {
@@ -1564,9 +1623,6 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     public void forceConnectionDrop(ConnectionHandlerID connectionHandlerID) {
         transportManager.unregisterConnection(connectionHandlerID);
         contest.connectionDropped(connectionHandlerID);
-        Packet disconnectionPacket = PacketFactory.createDroppedConnection(contest.getClientId(), PacketFactory.ALL_SERVERS, connectionHandlerID);
-        sendToAdministrators(disconnectionPacket);
-        sendToServers(disconnectionPacket);
     }
 
     public void addNewProblem(Problem problem, ProblemDataFiles problemDataFiles) {
@@ -1602,12 +1658,34 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         transportManager.shutdownTransport();
     }
 
+    /**
+     * Removes connection from list and sends packet.
+     */
     public void removeConnection(ConnectionHandlerID connectionHandlerID) {
+        
         contest.connectionDropped(connectionHandlerID);
+        
+        Packet disconnectionPacket = PacketFactory.createDroppedConnection(contest.getClientId(), PacketFactory.ALL_SERVERS, connectionHandlerID);
+        sendToAdministrators(disconnectionPacket);
+        sendToServers(disconnectionPacket);
+
     }
 
+    /**
+     * Removed login from system and sends packet.
+     */
     public void removeLogin(ClientId clientId) {
+        
         contest.removeLogin(clientId);
+        
+        try {
+            Packet logoffPacket = PacketFactory.createLogoff(contest.getClientId(), PacketFactory.ALL_SERVERS, clientId);
+            sendToAdministrators(logoffPacket);
+            sendToJudges(logoffPacket);
+            sendToServers(logoffPacket);
+        } catch (Exception e) {
+            log.log(Log.SEVERE, "Exception removeLogin ", e);
+        }
     }
 
     public void startContest(int inSiteNumber) {

@@ -447,6 +447,7 @@ public class PacketHandler {
             ConnectionHandlerID connectionHandlerID = (ConnectionHandlerID) PacketFactory.getObjectValue(packet, PacketFactory.CONNECTION_HANDLE_ID);
 
             if (isServer()) {
+                info("LOGIN remote "+whoLoggedIn);
                 contest.addLogin(whoLoggedIn, connectionHandlerID);
                 sendToJudgesAndOthers(packet, false);
             } else {
@@ -459,18 +460,25 @@ public class PacketHandler {
     }
 
     private void logoutClient(Packet packet) {
-        
+
         ClientId whoLoggedOff = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-        if (isServer()){
-            contest.removeLogin(whoLoggedOff);
-            sendToJudgesAndOthers(packet, false);
-        }else{
+        if (isServer()) {
+
+            if (contest.isLocalLoggedIn(whoLoggedOff)) {
+                controller.logoffUser(whoLoggedOff);
+            } else {
+                // Logoff from other site
+                contest.removeLogin(whoLoggedOff);
+                sendToJudgesAndOthers(packet, false);
+            }
+        } else {
             contest.removeLogin(whoLoggedOff);
         }
     }
 
     /**
      * Send judgement to judges, servers, admins and boards.
+     * 
      * @param packet
      */
     private void sendJudgementUpdate(Packet packet) {
@@ -1524,7 +1532,7 @@ public class PacketHandler {
      * @return
      */
     private boolean isServer(ClientId id) {
-        return id.getClientType().equals(ClientType.Type.SERVER);
+        return id != null && id.getClientType().equals(ClientType.Type.SERVER);
     }
     
     /**

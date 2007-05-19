@@ -121,6 +121,14 @@ public interface IController {
      * @param password
      */
     void login(String loginName, String password);
+    
+    /**
+     * Logoff a client.
+     * 
+     * Either a force logoff or the client themselves logs off.
+     * @param clientId
+     */
+    void logoffUser(ClientId clientId);
 
     /**
      * Start the UI for the input client.
