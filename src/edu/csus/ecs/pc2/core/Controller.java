@@ -6,6 +6,7 @@ import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.Properties;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.VersionInfo;
@@ -87,6 +88,8 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
  * <li> Judge/Clients: {@link edu.csus.ecs.pc2.core.model.IRunListener#runChanged(edu.csus.ecs.pc2.core.model.RunEvent)}. RunEvent action is:
  * {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#RUN_AVIALABLE}
  * </ol>
+ * <P>
+ * 
  * 
  * @author pc2@ecs.csus.edu *
  */
@@ -123,32 +126,50 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     private static final String LOGIN_UI_OPTION_STRING = "--loginUI";
 
     /**
-     * The port to contact and for the server to listen on.
+     * The port that the server will listen on.
+     * 
+     * This is the port where all clients will contact this server/site. 
      */
     private static int port;
 
     /**
-     * The host/IP for a server to login to/contact.
+     * The host/IP for a client or server to contact.
+     * 
+     * Both client and server who are connecting a server use
+     * this host as the host to contact.
      */
     private static String remoteHostName = "127.0.0.1";
 
     /**
-     * The port for a server to login to/contact.
+     * The port for a client or server to login to/contact.
+     * 
+     * Both client and server who are connecting a server use
+     * this port  as the portt to contact.
      */
     private static int remoteHostPort;
 
     /**
-     * Key in .ini for the server port.
+     * .ini key for an override port for the server to listen on.
+     * 
      */
     private static final String SERVER_PORT_KEY = "server.port";
     
     /**
      * Key in the .ini for the remote server host name.
+     * <P>
+     * The form of the value is: host:port.
+     * <P>
+     * port is optional.
      */
     private static final String REMOTE_SERVER_KEY = "server.remoteServer";
 
     /**
-     * Key in the .ini for the client server name.
+     * Host/IP for the client to contact.
+     * 
+     * The form of the value is: host:port.
+     * <P>
+     * port is optional.
+     * 
      */
     private static final String CLIENT_SERVER_KEY = "client.server";
 
@@ -240,7 +261,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         
         Type type = packet.getSourceId().getClientType();
         if ((!type.equals(Type.ADMINISTRATOR)) && (! type.equals(Type.SERVER))){
-            log.log(Log.SEVERE, "Unexpected User sent packet to other ("+siteNumber+") site.  "+packet);
+            log.log(Log.WARNING, "Unexpected User sent packet to other ("+siteNumber+") site.  "+packet);
         }
 
         if (connectionHandlerID != null) {
@@ -441,7 +462,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                 info("Contacted using connection id " + remoteServerConnectionHandlerID);
 
                 info("Sending login request to " + remoteHostName + " as " + clientId + " " + password); // TODO remove this
-                sendLoginRequest(transportManager, remoteServerConnectionHandlerID, clientId, password);
+                sendLoginRequestFromServerToServer(transportManager, remoteServerConnectionHandlerID, clientId, password);
 
             } else {
 
@@ -471,7 +492,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             // Client login
             info("Contacting server at " + remoteHostName + ":" + remoteHostPort);
             info("Sending login request to Server as " + clientId); // TODO debug remove this
-            sendLoginRequest(transportManager, clientId, password);
+            sendLoginRequest(transportManager, clientId, id, password);
         }
     }
 
@@ -487,8 +508,13 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             }
             
             if (! loadedConfiguration){
-                contest.initializeWithFakeData();
+                
                 log.info("initializing controller with default settings");
+                Site site = createFirstSite (1, "localhost", port);
+                contest.addSite(site);
+                
+                contest.initializeStartupData();
+                log.info("initialized  controller with default settings");
                 writeConfigToDisk();
             } else {
                 log.info("Loaded configuration from disk");
@@ -504,6 +530,16 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         return newId;
     }
     
+    private Site createFirstSite(int siteNumber, String hostName, int portNumber) {
+        Site site = new Site("Site " + siteNumber, siteNumber);
+        Properties props = new Properties();
+        props.put(Site.IP_KEY, hostName);
+        props.put(Site.PORT_KEY, "" + portNumber);
+        site.setConnectionInfo(props);
+        site.setPassword("site" + siteNumber);
+        return site;
+    }
+
     /**
      * Reads .ini file and sets server and port.
      * 
@@ -520,7 +556,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             remoteHostName = getINIValue(CLIENT_SERVER_KEY);
             int idx = remoteHostName.indexOf(":");
             if (idx > 2) {
-                port = Integer.parseInt(remoteHostName.substring(idx + 1));
+                remoteHostPort = Integer.parseInt(remoteHostName.substring(idx + 1));
                 remoteHostName = remoteHostName.substring(0, idx);
             }
         }
@@ -579,12 +615,22 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         
     }
 
-    private void sendLoginRequest(ITransportManager manager, ConnectionHandlerID connectionHandlerID, ClientId clientId,
+    /**
+     * Send login request from server to another server.
+     * 
+     * Send login request directly to connectionHandlerId.
+     * @param manager
+     * @param connectionHandlerID
+     * @param clientId
+     * @param password
+     */
+    private void sendLoginRequestFromServerToServer(ITransportManager manager, ConnectionHandlerID connectionHandlerID, ClientId clientId,
             String password) {
         try {
             info("sendLoginRequest ConId start - sending from " + clientId);
             ClientId serverClientId = new ClientId(0, Type.SERVER, 0);
-            Packet loginPacket = PacketFactory.createLoginRequest(clientId, password, serverClientId);
+            String joeLoginName = password;
+            Packet loginPacket = PacketFactory.createLoginRequest(clientId, joeLoginName, password, serverClientId);
             manager.send(loginPacket, connectionHandlerID);
             info("sendLoginRequest ConId end - packet sent.");
         } catch (TransportException e) {
@@ -599,16 +645,12 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * @param clientId
      * @param password
      */
-    private void sendLoginRequest(ITransportManager manager, ClientId clientId, String password) {
-        try {
-            info("sendLoginRequest start - sending from "+clientId);
-            ClientId serverClientId = new ClientId(0, Type.SERVER, 0);
-            Packet loginPacket = PacketFactory.createLoginRequest(clientId, password, serverClientId);
-            manager.send(loginPacket);
-            info("sendLoginRequest end - packet sent.");
-        } catch (TransportException e) {
-            info (" sendLoginRequest exception ",e);
-        }
+    private void sendLoginRequest(ITransportManager manager, ClientId clientId, String loginName, String password) {
+        info("sendLoginRequest start - sending from "+clientId);
+        ClientId serverClientId = new ClientId(0, Type.SERVER, 0);
+        Packet loginPacket = PacketFactory.createLoginRequest(clientId, loginName, password, serverClientId);
+        sendToLocalServer(loginPacket);
+        info("sendLoginRequest end - packet sent.");
     }
 
     /**
@@ -1507,7 +1549,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
             info("Contacted Site "+remoteSite.getSiteNumber()+ " using connection id " + connectionHandlerID);
             info("Sending login request to Site "+remoteSite.getSiteNumber()+" " + hostName + " as " + getServerClientId() + " " + localPassword); // TODO remove this
-            sendLoginRequest(transportManager, connectionHandlerID, getServerClientId(), localPassword);
+            sendLoginRequestFromServerToServer(transportManager, connectionHandlerID, getServerClientId(), localPassword);
             
         } catch (Exception e) {
             info("Unable to login to site "+inSiteNumber, e);

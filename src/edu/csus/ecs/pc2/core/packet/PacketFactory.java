@@ -209,13 +209,15 @@ public final class PacketFactory {
      *            who is logging in.
      * @param password -
      *            password for login authentication.
+     * @param password2 
      * @param destination -
      *            server to authenticate.
      * @return a {@link PacketType.Type#LOGIN_REQUEST} packet.
      */
-    public static Packet createLoginRequest(ClientId source, String password, ClientId destination) {
+    public static Packet createLoginRequest(ClientId source, String loginName, String password, ClientId destination) {
         Properties prop = new Properties();
-        prop.put(LOGIN, source.getClientType() + "" + source.getClientNumber());
+        prop.put(CLIENT_ID, source);
+        prop.put(LOGIN, loginName);
         prop.put(PASSWORD, password);
         return createPacket(PacketType.Type.LOGIN_REQUEST, source, destination, prop);
     }

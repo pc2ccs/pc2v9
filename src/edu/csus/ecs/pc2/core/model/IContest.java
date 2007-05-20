@@ -342,7 +342,7 @@ public interface IContest {
     /**
      * Initialize with startup data
      */
-    void initializeWithFakeData();
+    void initializeStartupData();
 
     /**
      * Load all submissions off disk. Intializes runs and clars into Contest.

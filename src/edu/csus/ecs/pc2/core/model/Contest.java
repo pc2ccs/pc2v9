@@ -190,11 +190,13 @@ public class Contest implements IContest {
     /**
      * Initialize Contest with data.
      */
-    public void initializeWithFakeData() {
+    public void initializeStartupData() {
 
-        Site site = createFakeSite (1);
-        site.setActive(true);
-        siteList.add(site);
+        if (siteList.size() == 0){
+            Site site = createFakeSite (1);
+            site.setActive(true);
+            siteList.add(site);
+        }
         
         ContestTime contestTime = new ContestTime();
         contestTime.setSiteNumber(1);

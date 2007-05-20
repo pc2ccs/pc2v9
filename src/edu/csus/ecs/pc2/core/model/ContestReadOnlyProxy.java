@@ -494,7 +494,7 @@ public final class ContestReadOnlyProxy implements IContest {
         }
     }
 
-    public void initializeWithFakeData() {
+    public void initializeStartupData() {
         try {
             throw new IllegalModelAccessException("initializeWithFakeData");
         } catch (IllegalModelAccessException e) {
