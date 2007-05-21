@@ -28,6 +28,10 @@ public class ConfigurationIO {
         /**
          * 
          */
+        SITE_NUMBER,
+        /**
+         * 
+         */
         PROBLEMS,
         /**
          * 
@@ -101,6 +105,24 @@ public class ConfigurationIO {
             if (configuration.loadFromDisk(getFileName())) {
                 
                 ConfigKeys key;
+                
+                key = ConfigKeys.SITE_NUMBER;
+                if (configuration.containsKey(key)) {
+                    Integer diskSiteNumber = (Integer) configuration.get(key.toString());
+                    
+                    if (diskSiteNumber.intValue() != siteNumber) {
+                        System.err.println("FATAL ERROR Attempted to load site "+siteNumber+" from Site "+diskSiteNumber);
+                        log.info("FATAL ERROR Attempted to load site "+siteNumber+" from Site "+diskSiteNumber);
+                        System.exit(22);
+                    }
+                    
+                    contest.setSiteNumber(diskSiteNumber);
+                    log.info("Loading site number " + diskSiteNumber);
+                } else {
+                    System.err.println("FATAL ERROR Attempted to load site "+siteNumber+" but key "+ConfigKeys.SITE_NUMBER+" not found");
+                    log.info("FATAL ERROR Attempted to load site "+siteNumber+" but key "+ConfigKeys.SITE_NUMBER+" not found");
+                    System.exit(22);
+                }
 
                 try {
                     key = ConfigKeys.LANGUAGES;
@@ -272,10 +294,11 @@ public class ConfigurationIO {
         return accounts;
     }
 
-    public void saveToDisk(int siteNumber, IContest contest, Log log) throws IOException {
+    public void saveToDisk(IContest contest, Log log) throws IOException {
 
         Configuration configuration = new Configuration();
-
+        
+        configuration.add(ConfigKeys.SITE_NUMBER, new Integer(contest.getSiteNumber()));
         configuration.add(ConfigKeys.ACCOUNTS, getAllAccounts(contest));
         configuration.add(ConfigKeys.CONTEST_TIME, contest.getContestTime());
         configuration.add(ConfigKeys.CONTEST_TIME_LIST, contest.getContestTimes());

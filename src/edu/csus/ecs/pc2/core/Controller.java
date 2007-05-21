@@ -1794,7 +1794,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         
         if (saveCofigurationToDisk) {
             try {
-                configurationIO.saveToDisk(1, contest, getLog());
+                configurationIO.saveToDisk(contest, getLog());
             } catch (IOException e) {
                 System.err.println("Unable to write configuration to disk " + e.getMessage());
                 getLog().log(Log.SEVERE, "Error logging to disk ", e);
