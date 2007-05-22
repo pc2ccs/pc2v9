@@ -40,7 +40,7 @@ public class RunFilesList implements Serializable {
     }
     
     public RunFilesList() {
-        this("db");
+       
     }
 
     private String getDirectoryName() {
