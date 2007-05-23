@@ -677,9 +677,9 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                     /**
                      * This user is in the login list and we process their request.
                      */
-
-                    // TODO code security double check by checking their clientId and
-                    // their connection id against what we have in the contest.
+                    
+                    securityCheck (packet, connectionHandlerID);
+                    
                     processPacket(packet, connectionHandlerID);
 
                 } else if (packet.getType().equals(PacketType.Type.LOGIN_REQUEST)) {
@@ -741,8 +741,6 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
                         } else {
                             
-                            
-                            // TODO find out why this happens
                             log.log(Log.INFO, "Packet from non-logged in server, processed anyways " + packet);
 
 //                            // 
@@ -769,40 +767,56 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                         // TODO code security kluge admin 
                         // TODO KLUDGE HUGE KLUDGE - this block allows any admin to update stuff.
                         
-                        // TODO code security double check by checking their clientId and
-                        // their connection id against what we have in the contest.
+                        securityCheck(packet, connectionHandlerID);
+                        
                         processPacket(packet, connectionHandlerID);
                         
                     } else {
-                        // else
 
                         // TODO warning got packet but client is not logged in
+                        
 
-                        log.log(Log.INFO, "Packet from non-logged in user, processed anyways " + packet);
+                        log.log(Log.WARNING, "Packet from non-logged in user, processed anyways " + packet);
 
-//                        if (packet.getSourceId().getClientType().equals(ClientType.Type.TEAM)) {
-//                            String message = "Security violation user " + clientId + " got a " + packet;
-//                            info(message + " on " + connectionHandlerID);
-//                            PacketFactory.dumpPacket(System.err, packet);
-//                            sendSecurityVioation(clientId, connectionHandlerID, message);
-//
-//                        } else {
-                            processPacket(packet, connectionHandlerID);
+                        securityCheck(packet, connectionHandlerID);
+
+                        // TODO remove processPacket when security is in place.
+                        processPacket(packet, connectionHandlerID);
 
                     } 
                 }
             } else {
+                // TODO code archive packet, send security violation to notification system.
+                
                 info("receiveObject(S,C): Unsupported class received: " + object);
             }
 
         } catch (Exception e) {
 
-            // TODO Archive the packet that had an exception for future review - soon.
+            // TODO code archive packet, send security violation to notification system.
 
             info("Exception in receiveObject(S,C): " + e.getMessage(),e);
             info("Exception in receiveObject ", e);
         }
         info("receiveObject (S,C) debug end   got " + object.getClass().getName());
+    }
+
+    private void securityCheck(Packet packet, ConnectionHandlerID connectionHandlerID) {
+        // TODO code throw an exception if the security fails. 
+        
+        ConnectionHandlerID connectionHandlerIDAuthen = contest.getConnectionHandleID(packet.getSourceId());
+        if (! connectionHandlerID.equals(connectionHandlerIDAuthen)){
+            // TODO code security violation handling
+            
+            /**
+             * Security Violation - their login does not match the connectionID
+             */
+            
+            info("Note: security violation in packet: connectionIDs do not match, check log");
+            log.info("Security Violation for packet "+packet);
+            log.info("User "+packet.getSourceId()+" expected "+connectionHandlerIDAuthen);
+            log.info("User "+packet.getSourceId()+" found    "+connectionHandlerID);
+        }
     }
 
     private void handleServerLoginFailure(Packet packet) {
