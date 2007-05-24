@@ -21,6 +21,7 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
  */
 
 // $HeadURL$
+// $Id$
 public class ProblemsReport implements IReport {
 
     private IContest contest;
@@ -43,6 +44,26 @@ public class ProblemsReport implements IReport {
         printWriter.println("     Validator cmd line : " + problem.getValidatorCommandLine());
         printWriter.println("     Validator option # : " + problem.getWhichPC2Validator());
         printWriter.println("    Using pc2 validator : " + problem.isUsingPC2Validator());
+        
+        if (problem.getAnswerFileName() != null) {
+            if (problemDataFiles != null) {
+                if (problemDataFiles.getJudgesAnswerFiles().length == 0) {
+                    printWriter.println("                          Warning - no answer files defined (no contents) ");
+                }
+            } else {
+                printWriter.println("                          Warning - no data/answer files defined (null problemDataFiles) ");
+            }
+        }
+
+        if (problem.getAnswerFileName() != null) {
+            if (problemDataFiles != null) {
+                if (problemDataFiles.getJudgesDataFiles().length == 0) {
+                    printWriter.println("                          Warning - no judges data files defined (no contents) ");
+                }
+            } else {
+                printWriter.println("                          Warning - no data/judge files defined (null problemDataFiles) ");
+            }
+        }
 
         writeProblemDataFiles(printWriter, problemDataFiles);
     }
