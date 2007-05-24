@@ -10,13 +10,17 @@ import edu.csus.ecs.pc2.core.model.RunFiles;
 /**
  * Access to submitted files (@link edu.csus.ecs.pc2.core.RunFiles}.
  * 
- * This stores the run files to disk.
+ * This stores the run files to disk if site or dirname specified.
+ * Default constructor only stores last RunFiles added.
  *
  * @author pc2@ecs.csus.edu
  */
 
 // $HeadURL$
+// $Id$
 public class RunFilesList implements Serializable {
+    
+    // TODO talk about how the caching strategy for RunsFiles
 
     /**
      *
@@ -24,6 +28,21 @@ public class RunFilesList implements Serializable {
     private static final long serialVersionUID = -15984887352160586L;
 
     public static final String SVN_ID = "$Id$";
+    
+    /**
+     * Write runs files to disk.
+     * <P>
+     * If true then writes and reads run files from db directory.
+     * This is intended for pc2 server modules.
+     * <P>
+     * if false then only caches a single RunFiles for the last
+     * added run files.  This is intended for non-server pc2 modules.
+     * 
+     * 
+     */
+    private boolean writeToDisk = false;
+    
+    private RunFiles singleRunFiles = null;
 
     /**
      * Directory where files are written
@@ -33,6 +52,7 @@ public class RunFilesList implements Serializable {
     private RunFilesList(String dirname) {
         this.dirname = dirname;
         Utilities.insureDir(dirname);
+        writeToDisk = true;
     }
 
     public RunFilesList(int siteNumber) {
@@ -57,27 +77,36 @@ public class RunFilesList implements Serializable {
     }
 
     public RunFiles add(Run run, RunFiles runFiles) {
-        String filename = getFileName(run);
-        try {
-            Utilities.writeObjectToFile(filename, runFiles);
-            return runFiles;
-        } catch (Exception e) {
-            // TODO log could not write object to file.
-            System.err.println("Unable to write file " + filename);
-            e.printStackTrace();
-            return null;
+        if (writeToDisk) {
+            String filename = getFileName(run);
+            try {
+                Utilities.writeObjectToFile(filename, runFiles);
+                return runFiles;
+            } catch (Exception e) {
+                // TODO log could not write object to file.
+                System.err.println("Unable to write file " + filename);
+                e.printStackTrace();
+                return null;
+            }
+        } else {
+            singleRunFiles = runFiles;
+            return singleRunFiles;
         }
     }
 
     private RunFiles getRunFiles(int siteNumber, int runNumber) {
-        String filename = getFileName(siteNumber, runNumber);
-        try {
-            Object obj = Utilities.readObjectFromFile(filename);
-            return (RunFiles) obj;
-        } catch (Exception e) {
-            // TODO log info - could not read RunFiles from disk.
-            System.err.println("Unable to read object from file " + filename);
-            e.printStackTrace();
+        if (writeToDisk) {
+            String filename = getFileName(siteNumber, runNumber);
+            try {
+                Object obj = Utilities.readObjectFromFile(filename);
+                return (RunFiles) obj;
+            } catch (Exception e) {
+                // TODO log info - could not read RunFiles from disk.
+                System.err.println("Unable to read object from file " + filename);
+                e.printStackTrace();
+                return null;
+            }
+        } else {
             return null;
         }
     }
@@ -89,7 +118,16 @@ public class RunFilesList implements Serializable {
      * @return RunFiles submitted files by team for run
      */
     public RunFiles getRunFiles(Run run) {
-        return getRunFiles(run.getSiteNumber(), run.getNumber());
+
+        if (writeToDisk) {
+            return getRunFiles(run.getSiteNumber(), run.getNumber());
+        } else {
+            if (singleRunFiles.getRunId().equals(run)) {
+                return singleRunFiles;
+            } else {
+                return null;
+            }
+        }
     }
 
     /**
