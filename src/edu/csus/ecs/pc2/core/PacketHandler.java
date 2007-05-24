@@ -36,9 +36,11 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
  * Process packets. In {@link #handlePacket(IController, IContest, Packet, ConnectionHandlerID) handlePacket} a packet is unpacked, contest is updated, and controller used to send packets as needed.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
+// $Id$
 public class PacketHandler {
 
     private IContest contest;
@@ -1339,7 +1341,7 @@ public class PacketHandler {
 
         try {
             ContestTime contestTime = (ContestTime) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME);
-            if (contestTime != null) {
+            if (contestTime != null && (! isThisSite(contestTime.getSiteNumber()))) {
                 contest.addContestTime(contestTime);
             }
 
