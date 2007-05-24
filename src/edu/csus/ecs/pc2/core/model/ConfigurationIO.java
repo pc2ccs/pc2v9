@@ -207,15 +207,15 @@ public class ConfigurationIO {
                         int count = 0;
 
                         for (ProblemDataFiles problemDataFiles2 : problemDataFiles) {
-                            Problem problem = contest.getProblem(problemDataFiles2.getElementId());
+                            Problem problem = contest.getProblem(problemDataFiles2.getProblemId());
                             if (problem != null) {
-                                contest.addProblem(problem, problemDataFiles2);
+                                contest.updateProblem(problem, problemDataFiles2);
                                 count++;
                             } else {
-                                log.warning("Could not find problem for problemDataFiles id=" + problemDataFiles2.getElementId());
+                                log.warning("Could not find problem for problemDataFiles problem id=" + problemDataFiles2.getProblemId());
                             }
 
-                            log.info("Loaded " + count + " " + key.toString().toLowerCase());
+                            log.info("Loaded " + count + " of " + problemDataFiles.length + " " + key.toString().toLowerCase());
                         }
                     }
                 } catch (Exception e) {
