@@ -627,11 +627,6 @@ public final class ContestReadOnlyProxy implements IContest {
         return theRealModel.getContestTime(elementId);
     }
 
-    public void addConnectionHandlerID(ConnectionHandlerID connectionHandlerID) {
-        // TODO Auto-generated method stub
-        
-    }
-
     public void addConnectionHandlerID(ConnectionHandlerID connectionHandlerID, Date connectDate) {
         try {
             throw new IllegalModelAccessException("addConnectionHandlerID");
@@ -683,11 +678,6 @@ public final class ContestReadOnlyProxy implements IContest {
         
     }
 
-    public ProblemDataFiles getProblemDataFiles(Problem problem) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
     public ProblemDataFiles getProblemDataFile(Problem problem) {
         // TODO Auto-generated method stub
         return null;
@@ -735,11 +725,6 @@ public final class ContestReadOnlyProxy implements IContest {
     public Clarification getClarification(ElementId id) {
         // TODO Auto-generated method stub
         return null;
-    }
-
-    public void initializeSubmissions() {
-        // TODO Auto-generated method stub
-        
     }
 
     public void answerClarification(Clarification clarification, String answer, ClientId whoAnsweredIt, boolean sendToAll) {
@@ -820,6 +805,11 @@ public final class ContestReadOnlyProxy implements IContest {
     public ClientSettings[] getClientSettingsList() {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    public void initializeSubmissions(int siteNumber) {
+        // TODO Auto-generated method stub
+        
     }
 
 }

@@ -37,10 +37,11 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
  * should be cancelled. Other logic of this sort is in the Controller, not the Contest.
  * 
  * @author pc2@ecs.csus.edu
- * 
+ * @version $Id$
  */
 
 // $HeadURL$
+// $Id$
 public class Contest implements IContest {
 
     public static final String SVN_ID = "$Id$";
@@ -169,18 +170,19 @@ public class Contest implements IContest {
         return site;
     }
     
-    public void initializeSubmissions() {
-        runList = new RunList(1, true);
-        runFilesList = new RunFilesList(1);
-        clarificationList = new ClarificationList(1, true);
+    public void initializeSubmissions(int siteNum) {
+        
+        runList = new RunList(siteNum, true);
+        runFilesList = new RunFilesList(siteNum);
+        clarificationList = new ClarificationList(siteNum, true);
         
         try {
-            runList.loadFromDisk(1);
+            runList.loadFromDisk(siteNum);
         } catch (Exception e) {
             StaticLog.log("Trouble loading runs from disk ", e);
         }
         try {
-            clarificationList.loadFromDisk(1);
+            clarificationList.loadFromDisk(siteNum);
         } catch (Exception e) {
             StaticLog.log("Trouble loading clarifications from disk ", e);
         }
@@ -201,10 +203,6 @@ public class Contest implements IContest {
         ContestTime contestTime = new ContestTime();
         contestTime.setSiteNumber(1);
         addContestTime(contestTime);
-        
-        runList = new RunList(1, true);
-        runFilesList = new RunFilesList(1);
-        clarificationList = new ClarificationList(1, true);
         
         generateNewAccounts(ClientType.Type.SERVER.toString(), 1, true);
 

@@ -92,8 +92,10 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
  * 
  * 
  * @author pc2@ecs.csus.edu *
+ * @version $Id$
  */
 // $HeadURL$
+// $Id$
 public class Controller implements IController, ITwoToOne, IBtoA {
 
     public static final String SVN_ID = "$Id$";
@@ -504,7 +506,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             
             if (saveCofigurationToDisk){
                 loadedConfiguration = configurationIO.loadFromDisk(1, contest, getLog());
-                contest.initializeSubmissions(); // load submissions from disk too.
+                contest.initializeSubmissions(1);
             }
             
             if (! loadedConfiguration){
@@ -514,6 +516,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                 contest.addSite(site);
                 
                 contest.initializeStartupData();
+                contest.initializeSubmissions(1);
                 log.info("initialized  controller with default settings");
                 writeConfigToDisk();
             } else {

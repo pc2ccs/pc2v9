@@ -15,6 +15,7 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
  */
 
 // $HeadURL$
+//$Id$
 public interface IContest {
 
     void addLanguage(Language language);
@@ -345,9 +346,10 @@ public interface IContest {
     void initializeStartupData();
 
     /**
-     * Load all submissions off disk. Intializes runs and clars into Contest.
+     * Load all submissions off disk. 
+     * 
      */
-    void initializeSubmissions();
+    void initializeSubmissions(int siteNumber);
 
     /**
      * Fetch all runs.
