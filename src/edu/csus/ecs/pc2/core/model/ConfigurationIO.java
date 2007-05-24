@@ -17,6 +17,7 @@ import edu.csus.ecs.pc2.core.log.Log;
  */
 
 // $HeadURL$
+// $Id$
 public class ConfigurationIO {
 
     /**
@@ -119,9 +120,8 @@ public class ConfigurationIO {
                     contest.setSiteNumber(diskSiteNumber);
                     log.info("Loading site number " + diskSiteNumber);
                 } else {
-                    System.err.println("FATAL ERROR Attempted to load site "+siteNumber+" but key "+ConfigKeys.SITE_NUMBER+" not found");
-                    log.info("FATAL ERROR Attempted to load site "+siteNumber+" but key "+ConfigKeys.SITE_NUMBER+" not found");
-                    System.exit(22);
+                    System.err.println("WARNING Attempted to load site "+siteNumber+" but key "+ConfigKeys.SITE_NUMBER+" not found");
+                    log.info("WARNING Attempted to load site "+siteNumber+" but key "+ConfigKeys.SITE_NUMBER+" not found");
                 }
 
                 try {
