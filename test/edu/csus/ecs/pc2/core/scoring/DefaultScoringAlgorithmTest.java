@@ -1,7 +1,6 @@
 package edu.csus.ecs.pc2.core.scoring;
 
 import java.io.StringReader;
-import java.util.Arrays;
 import java.util.Properties;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -15,7 +14,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -34,7 +32,7 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 
 /**
- * Test Scoring Alogorithm.
+ * Test Scoring Algorithm.
  * 
  * The inital tests were to insure that proper XML
  * is created on startup.
@@ -73,7 +71,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
      * 
      * @param contest
      */
-    private void initFakeData(IContest contest) {
+    private void initContestData(IContest contest) {
 
         // Add accounts
         contest.generateNewAccounts(ClientType.Type.TEAM.toString(), 1, true);
@@ -168,7 +166,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
 
         Contest contest = new Contest();
         
-        initFakeData(contest);
+        initContestData(contest);
         Run run = getARun(contest);
         RunFiles runFiles = new RunFiles(run, "samps/Sumit.java");
         
@@ -184,7 +182,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
 
         Contest contest = new Contest();
         
-        initFakeData(contest);
+        initContestData(contest);
         Run run = getARun(contest, 5);
         RunFiles runFiles = new RunFiles(run, "samps/Sumit.java");
         
@@ -261,14 +259,10 @@ public class DefaultScoringAlgorithmTest extends TestCase {
             assertFalse("getStandings returned null ", xmlString == null);
             assertFalse("getStandings returned empty string ", xmlString.trim().length() == 0);
             
-            
             DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
             Document document = documentBuilder.parse(new InputSource(new StringReader(xmlString)));
 
-            String rootNodeName = document.getDocumentElement().getNodeName();
-
-//            System.out.println("Root node is " + rootNodeName);
         } catch (Exception e) {
             assertTrue("Error in XML output " + e.getMessage(), true);
             e.printStackTrace();
@@ -282,7 +276,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
 
         Contest contest = new Contest();
         
-        initFakeData(contest);
+        initContestData(contest);
         
         createJudgedRun(contest, 2, false);
 
@@ -296,7 +290,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
 
         Contest contest = new Contest();
         
-        initFakeData(contest);
+        initContestData(contest);
         
         createJudgedRun(contest, 2, false);
         createJudgedRun(contest, 0, true);
@@ -372,9 +366,6 @@ public class DefaultScoringAlgorithmTest extends TestCase {
             Problem problem = problemList[problemIndex];
             ClientId clientId = new ClientId(contest.getSiteNumber(), Type.TEAM, teamId);
 
-            // System.out.println(runInfoLine);
-            // System.out.println(runId + " " + teamId + " " + probLet + " " + elapsed + " " + (solved ? "Yes" : "No"));
-
             Run run = new Run(clientId, languageId, problem);
             run.setNumber(runId);
             run.setElapsedMins(elapsed);
@@ -385,16 +376,6 @@ public class DefaultScoringAlgorithmTest extends TestCase {
             JudgementRecord judgementRecord = new JudgementRecord(judgementId, judgeId, solved, false);
             contest.addRun(run);
             contest.addRunJudgement(run, judgementRecord, null, judgeId);
-        }
-
-        System.out.println();
-        System.out.println("Contest Runs");
-
-        Run[] runs = contest.getRuns();
-        Arrays.sort(runs, new RunComparator());
-        for (Run run : runs) {
-            System.out.println("debug2 run " + run.getNumber() + "," + run.getSubmitter().getClientNumber() + "," + contest.getProblem(run.getProblemId()) + "," + run.getElapsedMins() + ","
-                    + run.isSolved()+" judged "+run.isJudged());
         }
 
         checkOutputXML(contest);
@@ -455,8 +436,6 @@ public class DefaultScoringAlgorithmTest extends TestCase {
             DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
             String xmlString = defaultScoringAlgorithm.getStandings(contest, new Properties(), log);
             
-//          System.out.println("debug XML is "+xmlString);
-            
             // getStandings should always return a well-formed xml
             assertFalse("getStandings returned null ", xmlString == null);
             assertFalse("getStandings returned empty string ", xmlString.trim().length() == 0);
@@ -499,6 +478,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
      * @param expectedRow
      */
     private void compareRanking(int rankIndex, String[] standingsRow, String [] expectedRow) {
+        
 //        Object[] cols = { "Rank", "Name", "Solved", "Points" };
         
         int idx = 0;
