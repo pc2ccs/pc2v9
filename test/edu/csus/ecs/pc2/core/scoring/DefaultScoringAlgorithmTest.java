@@ -261,7 +261,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
             
             DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-            Document document = documentBuilder.parse(new InputSource(new StringReader(xmlString)));
+            documentBuilder.parse(new InputSource(new StringReader(xmlString)));
 
         } catch (Exception e) {
             assertTrue("Error in XML output " + e.getMessage(), true);
