@@ -230,4 +230,28 @@ public class Filter {
         clarificationStateHash = new Hashtable<ClarificationStates, Date>();
     }
 
+    public String toString() {
+     
+        if (thisSiteOnly || filteringClarificationStates || filteringProblems ||
+                filteringRunStates )
+        {
+            String filterInfo = "Filter ON";
+            if (thisSiteOnly){
+                filterInfo += " Site "+siteNumber;
+            }
+            if (filteringProblems){
+                filterInfo += " problem(s) ";
+            }
+            if (filteringRunStates){
+                filterInfo += " run state(s)";
+            }
+            if (filteringClarificationStates){
+                filterInfo += " clar state(s)";
+            }
+            return filterInfo;
+        } else
+        {
+            return "";
+        }
+    }
 }
