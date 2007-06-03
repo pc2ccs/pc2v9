@@ -37,7 +37,7 @@ public class RunsByTeamReport implements IReport {
 
     private Log log;
 
-    private Filter accountFilter = new Filter();
+    private Filter reportFilter = new Filter();
 
     private void writeReport(PrintWriter printWriter) {
 
@@ -47,38 +47,43 @@ public class RunsByTeamReport implements IReport {
 
         int count = 0;
         for (Run run : runs) {
-            if (accountFilter.matches(run)) {
+            if (reportFilter.matches(run)) {
                 count++;
             }
         }
 
-        if (accountFilter.isThisSiteOnly()) {
-            printWriter.print(" for site " + accountFilter.getSiteNumber());
+        if (reportFilter.isThisSiteOnly()) {
+            printWriter.print(" for site " + reportFilter.getSiteNumber());
         }
 
         ClientId currentTeam = null;
 
-        Vector<Run> accumRuns = new Vector<Run>();
+        /** 
+         * Each team's runs.
+         */
+        Vector<Run> teamsRuns = new Vector<Run>();
+        
         printWriter.println();
         if (count > 0) {
             for (Run run : runs) {
-                if (accountFilter.matches(run)) {
+                if (reportFilter.matches(run)) {
                     if (run.getSubmitter().equals(currentTeam)) {
-                        accumRuns.add(run);
+                        // accumulate all team's runs into teamsRuns
+                        teamsRuns.add(run);
 
                     } else {
-                        if (accumRuns.size() > 0) {
-                            printRuns(printWriter, currentTeam, accumRuns);
+                        if (teamsRuns.size() > 0) {
+                            printTeamsRuns(printWriter, currentTeam, teamsRuns);
                         }
                         currentTeam = run.getSubmitter();
-                        accumRuns = new Vector<Run>();
-                        accumRuns.add(run);
+                        teamsRuns = new Vector<Run>();
+                        teamsRuns.add(run);
                     }
                 }
             }
 
-            if (accumRuns.size() > 0) {
-                printRuns(printWriter, currentTeam, accumRuns);
+            if (teamsRuns.size() > 0) {
+                printTeamsRuns(printWriter, currentTeam, teamsRuns);
             }
         }
     }
@@ -113,17 +118,23 @@ public class RunsByTeamReport implements IReport {
         return "Site " + string;
     }
     
-    private void printProblemSummary(PrintWriter printWriter, int attempts, int solved, int deleteCount){
-        printWriter.print("             " + attempts + " attempts. ");
-        if (deleteCount > 0) {
-            printWriter.print(" "+deleteCount+" deleted");
+    /**
+     * Returns list of runs for input problemId.
+     * @param runs
+     * @param problemElementId
+     * @return
+     */
+    private Run [] getRunsForProblem (Vector<Run> runs, ElementId problemElementId){
+        
+        Vector <Run> listOfRuns = new Vector<Run>();
+        
+        for (int i = 0; i < runs.size(); i ++){
+            if (runs.elementAt(i).getProblemId().equals(problemElementId)){
+                listOfRuns.add(runs.elementAt(i));
+            }
         }
-        if (solved > 0) {
-            printWriter.print(" SOLVED");
-        } else {
-            printWriter.print(" NOT solved");
-        }
-
+        
+        return (Run[]) listOfRuns.toArray(new Run[listOfRuns.size()]);
     }
 
     /**
@@ -131,66 +142,76 @@ public class RunsByTeamReport implements IReport {
      * 
      * @param printWriter
      * @param currentTeam
-     * @param accumRuns
+     * @param teamsRuns
      */
-    private void printRuns(PrintWriter printWriter, ClientId currentTeam, Vector<Run> accumRuns) {
+    private void printTeamsRuns(PrintWriter printWriter, ClientId currentTeam, Vector<Run> teamsRuns) {
 
-        printWriter.println();
-        printWriter.println();
         printWriter.println(currentTeam.getName() + " Site " + currentTeam.getSiteNumber() + " - '" + getClientName(currentTeam) + "'");
         
         long firstSolveTime = 0;
         int solved = 0;
         int attempts = 0;
         int deleteCount = 0;
-        ElementId lastProblemId = null;
+        
+        int totalSolved = 0;
+        
+        Problem [] problems = contest.getProblems();
+        
+        for (Problem problem : problems){
+            
+            Run [] runs = getRunsForProblem(teamsRuns, problem.getElementId());
+            
+            solved = 0;
+            attempts = 0;
+            firstSolveTime = 0;
+            deleteCount = 0;
+            
+            printWriter.println("   Problem " + getProblemTitle(problem.getElementId()));
 
-        for (int i = 0; i < accumRuns.size(); i++) {
-            Run run = accumRuns.elementAt(i);
+            for (Run run : runs){
+                printWriter.format("     %3d %3d", run.getNumber(), run.getElapsedMins());
+                if (run.isDeleted()){
+                    printWriter.print(" DELETED");
+                    deleteCount++;
+                } 
+                printWriter.print(" " +run.getStatus());
+                attempts++;
+                if (run.isJudged()) {
 
-            if (!run.getProblemId().equals(lastProblemId)) {
-                if (solved > 0 || attempts > 0) {
-                    
-                    printProblemSummary(printWriter, attempts, solved, deleteCount);
-                    printWriter.println();
-                    printWriter.println();
-                }
-                    
-                lastProblemId = run.getProblemId();
-                printWriter.println("   Problem " + getProblemTitle(run.getProblemId()));
-                solved = 0;
-                attempts = 0;
-                firstSolveTime = 0;
-                deleteCount = 0;
-            }
+                    JudgementRecord judgementRecord = run.getJudgementRecord();
+                    Judgement judgement = contest.getJudgement(judgementRecord.getJudgementId());
+                    printWriter.print(" " + judgement.toString().substring(0, 3));
 
-            printWriter.format("     %3d %3d", run.getNumber(), run.getElapsedMins());
-            if (run.isDeleted()){
-                printWriter.print(" DELETED");
-                deleteCount++;
-            }
-            printWriter.print(" " +run.getStatus());
-            attempts++;
-            if (run.isJudged()) {
-
-                JudgementRecord judgementRecord = run.getJudgementRecord();
-                Judgement judgement = contest.getJudgement(judgementRecord.getJudgementId());
-                printWriter.print(" " + judgement.toString().substring(0, 3));
-
-                if (run.isSolved() && (! run.isDeleted())) {
-                    if (firstSolveTime == 0){
-                        firstSolveTime = run.getElapsedMins();
+                    if (run.isSolved() && (! run.isDeleted())) {
+                        
+                        if (firstSolveTime == 0){
+                            firstSolveTime = run.getElapsedMins();
+                            totalSolved++;
+                        }
+                        solved++;
                     }
-                    solved++;
+
                 }
-
+                printWriter.print(" " + getLanguageTitle(run.getLanguageId()));
+                printWriter.println();
             }
-            printWriter.print(" " + getLanguageTitle(run.getLanguageId()));
+            
+            if (solved > 0 || attempts > 0) {
+                printWriter.print("             " + attempts + " submissions. ");
+                if (deleteCount > 0) {
+                    printWriter.print(" "+deleteCount+" deleted");
+                }
+                if (solved > 0) {
+                    printWriter.print(" SOLVED @ "+firstSolveTime+" mins.");
+                } else {
+                    printWriter.print(" NOT solved");
+                }
+                printWriter.println();
+            } else {
+                printWriter.println("             No submissions.");
+            }
+            
             printWriter.println();
-        }
-
-        if (solved > 0 || attempts > 0) {
-            printProblemSummary(printWriter, attempts, solved, deleteCount);
         }
     }
 
@@ -200,6 +221,13 @@ public class RunsByTeamReport implements IReport {
         printWriter.println(new VersionInfo().getSystemVersionInfo());
         printWriter.println();
         printWriter.println(getReportTitle());
+        
+        if (reportFilter != null){
+            String filterInfo = reportFilter.toString();
+            if (! filterInfo.equals("")){
+                printWriter.println("Filter: " + filterInfo);
+            }
+        }
     }
 
     private void printFooter(PrintWriter printWriter) {
@@ -253,5 +281,4 @@ public class RunsByTeamReport implements IReport {
     public String getPluginTitle() {
         return "Runs grouped by team Report";
     }
-
 }
