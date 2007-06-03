@@ -17,11 +17,15 @@ import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.security.Permission;
 
 /**
+ * Report listing all permissions for clients.
  * 
+ *  
  * @author pc2@ecs.csus.edu
  */
 
 // $HeadURL$
+// $Id$
+
 public class AccountPermissionReport implements IReport {
 
     private IContest contest;

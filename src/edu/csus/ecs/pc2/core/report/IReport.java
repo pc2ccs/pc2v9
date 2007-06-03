@@ -12,6 +12,8 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
  */
 
 // $HeadURL$
+// $Id$
+
 public interface IReport extends UIPlugin {
 
     /**

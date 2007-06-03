@@ -26,13 +26,14 @@ import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 
 /**
- * Internal dump report.
+ * Print Standings XML from DefaultScoringAlgorithm.
  * 
  * @author pc2@ecs.csus.edu
- * 
  */
 
 // $HeadURL$
+// $Id$
+
 public class StandingsReport implements IReport {
 
     private IContest contest;

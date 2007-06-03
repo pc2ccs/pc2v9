@@ -34,13 +34,14 @@ import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
 /**
- * Internal dump report.
+ * Dumps lots of internal lists and such.
  * 
  * @author pc2@ecs.csus.edu
  * 
  */
 
 // $HeadURL$
+// $Id$
 public class InternalDumpReport implements IReport {
 
     private IContest contest;

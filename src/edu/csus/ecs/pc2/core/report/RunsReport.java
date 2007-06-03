@@ -20,13 +20,14 @@ import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 
 /**
- * Internal dump report.
+ * Print Run lists.
  * 
  * @author pc2@ecs.csus.edu
- * 
  */
 
 // $HeadURL$
+// $Id$
+
 public class RunsReport implements IReport {
 
     private IContest contest;

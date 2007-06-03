@@ -19,6 +19,7 @@ import edu.csus.ecs.pc2.core.model.Language;
  */
 
 // $HeadURL$
+// $Id$
 public class LanguagesReport implements IReport {
 
     private IContest contest;

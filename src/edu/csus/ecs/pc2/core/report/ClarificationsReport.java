@@ -15,13 +15,14 @@ import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IContest;
 
 /**
- * Internal dump report.
+ * Print list of clarifications.
  * 
  * @author pc2@ecs.csus.edu
- * 
  */
 
 // $HeadURL$
+// $Id$
+
 public class ClarificationsReport implements IReport {
 
     private IContest contest;

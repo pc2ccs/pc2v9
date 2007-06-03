@@ -20,12 +20,14 @@ import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.security.Permission;
 
 /**
- * Print all languages info.
+ * Print all account info.
  * 
  * @author pc2@ecs.csus.edu
  */
 
 // $HeadURL$
+// $Id$
+
 public class AccountsReport implements IReport {
 
     private IContest contest;
