@@ -90,6 +90,12 @@ public class RunsPanel extends JPanePlugin {
     
     private boolean showNewRunsOnly = false;
     
+    /**
+     * Show who is judging column and status.
+     * 
+     */
+    private boolean showJudgesInfo = true;
+    
     private Filter filter = null;
 
     /**
@@ -153,7 +159,11 @@ public class RunsPanel extends JPanePlugin {
                 }
 
             } else {
-                s[4] = run.getStatus().toString();
+                if (showJudgesInfo){
+                    s[4] = run.getStatus().toString();
+                } else {
+                    s[4] = RunStates.NEW.toString();
+                }
             }
 
             if (run.isDeleted()) {
@@ -161,19 +171,23 @@ public class RunsPanel extends JPanePlugin {
             }
 
             s[5] = getProblemTitle(run.getProblemId());
-
-            if (judgeId != null) {
-                if (judgeId.equals(getContest().getClientId())) {
-                    s[6] = "Me";
+            
+            int idx = 6;
+            
+            if (showJudgesInfo){
+                if (judgeId != null) {
+                    if (judgeId.equals(getContest().getClientId())) {
+                        s[6] = "Me";
+                    } else {
+                        s[6] = judgeId.getName();
+                    }
                 } else {
-                    s[6] = judgeId.getName();
+                    s[6] = "";
                 }
-            } else {
-                s[6] = "";
-            }
-
-            s[7] = getLanguageTitle(run.getLanguageId());
-            s[8] = run.getSystemOS();
+                idx++;
+            }                
+            s[idx++] = getLanguageTitle(run.getLanguageId());
+            s[idx++] = run.getSystemOS();
 
             return s;
         } catch (Exception exception) {
@@ -206,10 +220,13 @@ public class RunsPanel extends JPanePlugin {
     }
 
     private String getTeamDisplayName(Run run) {
-        Account account = getContest().getAccount(run.getSubmitter());
-        if (account != null) {
-            return account.getDisplayName();
-        }
+        // TODO when team display configuration is in a GUI somewhere
+        // modify this code to show the configured way of showing the team.
+        
+//        Account account = getContest().getAccount(run.getSubmitter());
+//        if (account != null) {
+//            return account.getDisplayName();
+//        }
 
         return run.getSubmitter().getName();
     }
@@ -348,47 +365,72 @@ public class RunsPanel extends JPanePlugin {
                 public void rowDeselected(com.ibm.webrunner.j2mclb.event.ListboxEvent e) {
                 }
             });
-            Object[] cols = { "Site", "Team", "Run Id", "Time", "Status", "Problem", "Judge", "Language", "OS" };
-            runListBox.addColumns(cols);
-
-            // Sorters
-            HeapSorter sorter = new HeapSorter();
-            HeapSorter numericStringSorter = new HeapSorter();
-            numericStringSorter.setComparator(new NumericStringComparator());
-
-            // Site
-            runListBox.setColumnSorter(0, sorter, 3);
-
-            // Team
-            runListBox.setColumnSorter(1, sorter, 2);
-
-            // Run Id
-            runListBox.setColumnSorter(2, numericStringSorter, 1);
-
-            // Time
-            runListBox.setColumnSorter(3, numericStringSorter, 4);
-
-            // Status
-            runListBox.setColumnSorter(4, sorter, 5);
-
-            // Problem
-            runListBox.setColumnSorter(5, sorter, 6);
-
-            // Judge
-            runListBox.setColumnSorter(6, sorter, 7);
-
-            // Language
-            runListBox.setColumnSorter(7, sorter, 8);
-
-            // OS
-            runListBox.setColumnSorter(8, sorter, 9);
-
-            cols = null;
-
-            runListBox.autoSizeAllColumns();
-
+         
+            resetRunsListBoxColumns ();
         }
         return runListBox;
+    }
+
+    private void resetRunsListBoxColumns() {
+        
+        runListBox.removeAllRows();
+        runListBox.removeAllColumns();
+        
+        runListBox.addColumn("Site");
+        runListBox.addColumn("Team");
+        runListBox.addColumn("Run Id");
+        runListBox.addColumn("Time");
+        runListBox.addColumn("Status");
+        runListBox.addColumn("Problem");
+        if (showJudgesInfo) {
+            runListBox.addColumn("Judge");
+        }
+        runListBox.addColumn("Language");
+        runListBox.addColumn("OS");
+
+        // Sorters
+        HeapSorter sorter = new HeapSorter();
+        HeapSorter numericStringSorter = new HeapSorter();
+        numericStringSorter.setComparator(new NumericStringComparator());
+
+        // Site
+        runListBox.setColumnSorter(0, sorter, 3);
+
+        // Team
+        runListBox.setColumnSorter(1, sorter, 2);
+
+        // Run Id
+        runListBox.setColumnSorter(2, numericStringSorter, 1);
+
+        // Time
+        runListBox.setColumnSorter(3, numericStringSorter, 4);
+
+        // Status
+        runListBox.setColumnSorter(4, sorter, 5);
+
+        // Problem
+        runListBox.setColumnSorter(5, sorter, 6);
+
+        if (showJudgesInfo) {
+            // Judge
+            runListBox.setColumnSorter(6, sorter, 7);
+            
+            // Language
+            runListBox.setColumnSorter(7, sorter, 8);
+            
+            // OS
+            runListBox.setColumnSorter(8, sorter, 9);
+            
+        } else {
+            
+            // Language
+            runListBox.setColumnSorter(6, sorter, 7);
+            
+            // OS
+            runListBox.setColumnSorter(7, sorter, 8);
+        }
+
+        runListBox.autoSizeAllColumns();
     }
 
     /**
@@ -994,6 +1036,15 @@ public class RunsPanel extends JPanePlugin {
         }
         // TODO code handle if they turn off the show new clarifications only.
         
+    }
+
+    public boolean isShowJudgesInfo() {
+        return showJudgesInfo;
+    }
+
+    public void setShowJudgesInfo(boolean showJudgesInfo) {
+        this.showJudgesInfo = showJudgesInfo;
+        resetRunsListBoxColumns();
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

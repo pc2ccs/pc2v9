@@ -209,6 +209,7 @@ public class TeamView extends JFrame implements UIPlugin {
         addUIPlugin(getMainTabbedPane(), "Submit Run", submitRunPane);
 
         RunsPanel runsPanel = new RunsPanel();
+        runsPanel.setShowJudgesInfo(false);
         addUIPlugin(getMainTabbedPane(), "View Runs", runsPanel);
 
         SubmitClarificationPane submitClarificationPane = new SubmitClarificationPane();
