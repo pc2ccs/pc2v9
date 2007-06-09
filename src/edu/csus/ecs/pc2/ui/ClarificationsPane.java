@@ -54,7 +54,7 @@ public class ClarificationsPane extends JPanePlugin {
     /**
      * 
      */
-    private static final long serialVersionUID = -7483784815760107250L;
+    private static final long serialVersionUID = 5354454906850587233L;
 
     private JPanel clarificationButtonPane = null;
 

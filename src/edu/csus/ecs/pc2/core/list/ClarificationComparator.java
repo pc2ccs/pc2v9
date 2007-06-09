@@ -12,14 +12,13 @@ import edu.csus.ecs.pc2.core.model.Clarification;
  */
 
 // $HeadURL$
+// $Id$ 
 public class ClarificationComparator implements Comparator<Clarification>, Serializable {
-
+    
     /**
-     *
+     * 
      */
-    private static final long serialVersionUID = 1402498954732267609L;
-
-    public static final String SVN_ID = "$Id$";
+    private static final long serialVersionUID = -7714495596349725729L;
 
     public int compare(Clarification clarification1, Clarification clarification2) {
 

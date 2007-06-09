@@ -7,18 +7,20 @@ import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 
 /**
+ * Edit Problem.
  * 
  * @author pc2@ecs.csus.edu
- * 
  */
 
 // $HeadURL$
+// $Id$
+
 public class EditProblemFrame extends JFrame implements UIPlugin {
 
     /**
      * 
      */
-    private static final long serialVersionUID = -3349295529036840178L;
+    private static final long serialVersionUID = -5684386608226303728L;
 
     private IContest contest;
 

@@ -37,16 +37,16 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
  */
 
 // $HeadURL$
+// $Id$
+
 public class SubmitRunPane extends JPanePlugin {
-
-    public static final String SVN_ID = "$Id$";
-
-    private String lastOpenedFile = null;
 
     /**
      * 
      */
-    private static final long serialVersionUID = 8225187691479543638L;
+    private static final long serialVersionUID = 5700304771581849261L;
+
+    private String lastOpenedFile = null;
 
     private JPanel mainViewPane = null;
 

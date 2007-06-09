@@ -31,12 +31,14 @@ import java.awt.Dimension;
  */
 
 // $HeadURL${date}
+// $Id$
+
 public class SitesPanel extends JPanePlugin {
 
     /**
      * 
      */
-    private static final long serialVersionUID = -5590899142044283529L;
+    private static final long serialVersionUID = 8567214090568964720L;
 
     private JPanel siteButtonPanel = null;
 

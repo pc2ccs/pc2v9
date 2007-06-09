@@ -19,14 +19,14 @@ import java.util.Comparator;
  */
 
 // $HeadURL$
+// $Id$
+
 public class AccountNameComparator implements Comparator<String>, Serializable {
 
     /**
      * 
      */
-    private static final long serialVersionUID = 6254851774817221276L;
-
-    public static final String SVN_ID = "$Id$";
+    private static final long serialVersionUID = 5842577552526394242L;
 
     public int compare(String displayNameOne, String displayNameTwo) {
 

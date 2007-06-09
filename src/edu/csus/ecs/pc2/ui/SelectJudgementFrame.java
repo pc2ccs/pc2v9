@@ -11,19 +11,20 @@ import edu.csus.ecs.pc2.core.model.RunEvent.Action;
 import edu.csus.ecs.pc2.core.security.Permission;
 
 /**
+ * Judge can chose judgement and execute run.
  * 
  * @author pc2@ecs.csus.edu
- * 
  */
 
 // $HeadURL$
-public class SelectJudgementFrame extends JFrame implements UIPlugin {
+// $Id$
 
+public class SelectJudgementFrame extends JFrame implements UIPlugin {
 
     /**
      * 
      */
-    private static final long serialVersionUID = -3349295529036840178L;
+    private static final long serialVersionUID = 6532349396307812235L;
 
     private IContest contest;
 

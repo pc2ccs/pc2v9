@@ -13,12 +13,14 @@ import edu.csus.ecs.pc2.core.model.IContest;
  */
 
 // $HeadURL$
+// $Id$
+
 public class EditAccountFrame extends JFrame implements UIPlugin {
 
     /**
      * 
      */
-    private static final long serialVersionUID = -3349295529036840178L;
+    private static final long serialVersionUID = -2154916224530006165L;
 
     private IContest contest;
 

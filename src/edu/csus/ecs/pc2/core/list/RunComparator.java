@@ -12,14 +12,14 @@ import edu.csus.ecs.pc2.core.model.Run;
  */
 
 // $HeadURL$
+// $Id$
+
 public class RunComparator implements Comparator<Run>, Serializable {
 
     /**
-     *
+     * 
      */
-    private static final long serialVersionUID = 1402498954732267609L;
-
-    public static final String SVN_ID = "$Id$";
+    private static final long serialVersionUID = 2539446475650710249L;
 
     public int compare(Run run1, Run run2) {
 

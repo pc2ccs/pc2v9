@@ -16,12 +16,14 @@ import edu.csus.ecs.pc2.core.model.RunEvent.Action;
  */
 
 // $HeadURL$
+// $Id$
+
 public class EditRunFrame extends JFrame implements UIPlugin {
 
     /**
      * 
      */
-    private static final long serialVersionUID = -3349295529036840178L;
+    private static final long serialVersionUID = 6716035052687410328L;
 
     private IContest contest;
 

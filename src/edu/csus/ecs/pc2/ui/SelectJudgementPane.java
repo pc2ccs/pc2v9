@@ -42,12 +42,14 @@ import edu.csus.ecs.pc2.core.security.PermissionList;
  */
 
 // $HeadURL$
+// $Id$
+
 public class SelectJudgementPane extends JPanePlugin {
 
     /**
      * 
      */
-    private static final long serialVersionUID = -4185051421490716684L;
+    private static final long serialVersionUID = 4560827389735037513L;
 
     private JPanel messagePane = null;
 

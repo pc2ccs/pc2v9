@@ -23,12 +23,14 @@ import edu.csus.ecs.pc2.core.model.LanguageEvent;
  */
 
 // $HeadURL$
+// $Id$
+
 public class LanguagesPane extends JPanePlugin {
 
     /**
      * 
      */
-    private static final long serialVersionUID = -172535000039944166L;
+    private static final long serialVersionUID = -5837850150714301616L;
 
     private JPanel languageButtonPane = null;
 

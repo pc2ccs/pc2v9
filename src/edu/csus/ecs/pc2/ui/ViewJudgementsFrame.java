@@ -19,12 +19,14 @@ import edu.csus.ecs.pc2.core.model.RunEvent;
  */
 
 // $HeadURL$
-public class ViewJudgementsFrame extends JFrame implements UIPlugin {
+// $Id$
 
+public class ViewJudgementsFrame extends JFrame implements UIPlugin {
+    
     /**
      * 
      */
-    private static final long serialVersionUID = -3349295529036840178L;
+    private static final long serialVersionUID = 3591229492456973289L;
 
     private IContest contest;
 

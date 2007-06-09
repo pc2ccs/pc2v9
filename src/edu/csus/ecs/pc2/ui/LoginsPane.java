@@ -27,12 +27,14 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
  */
 
 // $HeadURL${date}
+// $Id$
+
 public class LoginsPane extends JPanePlugin {
 
     /**
      * 
      */
-    private static final long serialVersionUID = -5590899142044283529L;
+    private static final long serialVersionUID = -3609625972816987570L;
 
     private JPanel loginButtonPane = null;
 

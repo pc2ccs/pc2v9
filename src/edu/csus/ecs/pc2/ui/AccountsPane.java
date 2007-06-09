@@ -36,12 +36,14 @@ import edu.csus.ecs.pc2.core.security.PermissionList;
  */
 
 // $HeadURL$$
+// $Id$ 
+
 public class AccountsPane extends JPanePlugin {
 
     /**
      * 
      */
-    private static final long serialVersionUID = 114647004580210428L;
+    private static final long serialVersionUID = 2297963114219167947L;
 
     private MCLB accountListBox = null;
 
