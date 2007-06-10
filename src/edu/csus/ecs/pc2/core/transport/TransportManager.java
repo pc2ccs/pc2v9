@@ -140,32 +140,41 @@ public class TransportManager implements ITransportManager {
      */
     public void shutdownTransport() {
         
-        System.out.println("******************* SHUTTING down transport on command ************************");
+        info("******************* SHUTTING down transport on command ************************");
         
         if (getTmType() == tmTypes.CLIENT) { // we are a client transport
-            System.out.println("******************* SHUTTING down client ************************");
+            info("******************* SHUTTING down client ************************");
             getMyConnection().getConnectionHandlerClientThread().setStillListening(false);
         } else { // we are a server transport
 
-            System.out.println("******************* SHUTTING server stuff ************************");
+            info("******************* SHUTTING server connection down ************************");
             
             try {
                 for(ConnectionHandlerID connectionHandlerID: getServersConnectionHandlerList().getKeys()) {
-                    System.out.println("******************* SHUTTING enumerating servers!! ************************" + connectionHandlerID);
-                    unregisterConnection(connectionHandlerID);                }
+                    info("***** SHUTTING connections on server !! **** handle id = " + connectionHandlerID);
+                    try {
+                        unregisterConnection(connectionHandlerID);                
+                    } catch (Exception e) {
+                        info("Exception shutting down a server connection ("+connectionHandlerID+") ", e);
+                    }
+                }
 
             } catch (Exception e) {
-                System.out.println("Exception shutting down a server connection ");
+                info("Exception shutting down a server connection ", e);
             }
 
             try {
                 for(ConnectionHandlerID connectionHandlerID: getConnectionHandlerThreadList().getKeys()) {
-                    unregisterConnection(connectionHandlerID);
+                    info("***** SHUTTING client connections on server !! **** handle id = " + connectionHandlerID);
+                    try {
+                        unregisterConnection(connectionHandlerID);
+                    } catch (Exception e) {
+                        info("Exception shutting down a client connection ("+connectionHandlerID+") ", e);
+                    }
                 }
-            } catch (Exception e) {
-                System.out.println("Exception shutting down a client connection ");
+            } catch (Exception ex) {
+                info("Exception shutting down a client connection ", ex);
             }
-            
         }
     }
     
@@ -632,6 +641,19 @@ public class TransportManager implements ITransportManager {
      */
     private void setServersConnectionHandlerList(ConnectionHandlerList serversConnectionHandlerList) {
         this.serversConnectionHandlerList = serversConnectionHandlerList;
+    }
+    
+    private void info(String s) {
+        getLog().info(s);
+        System.out.println(Thread.currentThread().getName() + " " + s);
+        System.out.flush();
+    }
+    
+    public void info(String s, Exception exception) {
+        getLog().log (Log.INFO, s, exception);
+        System.out.println(Thread.currentThread().getName() + " " + s);
+        exception.printStackTrace(System.out);
+        System.out.flush();
     }
 
 }
