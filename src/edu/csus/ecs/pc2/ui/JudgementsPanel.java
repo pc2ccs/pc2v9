@@ -73,6 +73,8 @@ public class JudgementsPanel extends JPanePlugin {
                 reloadJudgementList();
             }
         });
+        
+        showMessage("");
     }
 
     protected void updateGUIperPermissions() {
