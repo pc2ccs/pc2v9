@@ -3,9 +3,6 @@ package edu.csus.ecs.pc2.core.controller;
 import java.util.Properties;
 
 import junit.framework.TestCase;
-import edu.csus.ecs.pc2.core.Controller;
-import edu.csus.ecs.pc2.core.model.ClientId;
-import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.Contest;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.Language;
@@ -22,29 +19,12 @@ import edu.csus.ecs.pc2.core.model.Site;
 // $HeadURL$
 public class MultiSiteTest extends TestCase {
 
-    private static final int SECS_TO_PAUSE_ON_LOGIN = 8;
-    
-    private static final String [] SERVER_COMMAND_LINE_OPTIONS = {"--server"};
-
     // Models for site 1, 2, 3
     private IContest modelOne;
 
-    private IContest modelTwo;
-
-    private IContest modelThree;
 
     // Controllers for site 1,2,3
-    private Controller controllerOne;
-
-    private Controller controllerTwo;
-
-    private Controller controllerThree;
-
-    private ClientId clientIdOne = new ClientId(1, ClientType.Type.SERVER, 0);
-
-    private ClientId clientIdTwo = new ClientId(2, ClientType.Type.SERVER, 0);
-
-    private ClientId clientIdThree = new ClientId(3, ClientType.Type.SERVER, 0);
+//    private Controller controllerOne;
 
     /**
      * Create a new Site class instance.
@@ -102,11 +82,11 @@ public class MultiSiteTest extends TestCase {
         }
 
         // Start site 1
-        controllerOne = new Controller(modelOne);
-        controllerOne.setContactingRemoteServer(false);
-        controllerOne.setUsingMainUI(false);
-        controllerOne.start(SERVER_COMMAND_LINE_OPTIONS);
-
+//        controllerOne = new Controller(modelOne);
+//        controllerOne.setContactingRemoteServer(false);
+//        controllerOne.setUsingMainUI(false);
+//        String [] argsSiteOne = {"--server"};
+//        controllerOne.start(argsSiteOne);
 
     }
 
@@ -115,128 +95,6 @@ public class MultiSiteTest extends TestCase {
         Site[] sites = modelOne.getSites();
         assertTrue("Add site one ", sites.length == 1);
 
-        controllerOne.login("site1", "site1");
-        assertTrue("Site 1 logged in", modelOne.isLoggedIn());
-
-        Site siteTwo = createSite(2, "Site TWO", null, 0);
-        modelOne.addSite(siteTwo);
-
-        sites = modelOne.getSites();
-        assertTrue("Add site two  ", sites.length == 2);
-
-        // Add Site 2
-        modelTwo = new Contest();
-        controllerTwo = new Controller(modelTwo);
-        controllerTwo.setContactingRemoteServer(true);
-        controllerTwo.setUsingMainUI(false);
-        controllerTwo.start(SERVER_COMMAND_LINE_OPTIONS);
-
-        // Site 2 Login
-        controllerTwo.login("site2", "site2");
-        sleep(SECS_TO_PAUSE_ON_LOGIN, "site 2 login");
-        assertTrue("Site 1 logged in", modelTwo.isLoggedIn());
-
-        // Add site 3 to site 2
-        Site siteThree = createSite(3, "Site THREE", null, 0);
-        controllerTwo.addNewSite(siteThree);
-
-        sleep(SECS_TO_PAUSE_ON_LOGIN, "add site 3 def to site 1");
-        // Check site 1 for site 3
-        sites = modelOne.getSites();
-        assertTrue("Add site three on site 1 ", sites.length == 3);
-
-        // Site 3 Login
-        modelThree = new Contest();
-        controllerThree = new Controller(modelThree);
-        controllerThree.setContactingRemoteServer(true);
-        controllerThree.setUsingMainUI(false);
-        controllerThree.start(SERVER_COMMAND_LINE_OPTIONS);
-
-        controllerThree.login("site3", "site3");
-        sleep(SECS_TO_PAUSE_ON_LOGIN, "site 3 login");
-
-        checkAllSitesPresent(3);
-
-        checkSiteLogins();
-
-        addTeamsAndRuns();
-    }
-
-    /**
-     * Sleep for secs seconds, print comment before and after sleep.
-     * 
-     * @param secs
-     * @param comment
-     */
-    private void sleep(int secs, String comment) {
-
-        System.out.println(" Pausing "+secs+" seconds for "+comment);
-        try {
-            Thread.sleep(secs * 1000);
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        System.out.println(" Paused  "+secs+" seconds (end) for "+comment);
-
-    }
-
-    private void addTeamsAndRuns() {
-
-    }
-
-    /**
-     * Check that all sites are defined on all sites.
-     * 
-     * @param numSites
-     */
-    private void checkAllSitesPresent(int numSites) {
-        // test all sites insure they all have 3 sites.
-
-        Site[] sites = modelOne.getSites();
-        assertTrue("Add site three on site 1, sites="+sites.length, sites.length == numSites);
-
-        sites = modelTwo.getSites();
-        assertTrue("Add site three on site 2, sites="+sites.length, sites.length == numSites);
-
-        sites = modelThree.getSites();
-        assertTrue("Add site three on site 3, sites="+sites.length, sites.length == numSites);
-
-    }
-
-    /**
-     * Check that all sites are logged into all other sites.
-     *
-     */
-    private void checkSiteLogins() {
-        /**
-         * Test whether the sites are all logged into other sites.
-         */
-
-        // For site 1 expect 2,3
-        assertTrue("Site 2 not logged into 1", modelOne.isLocalLoggedIn(clientIdTwo));
-        assertTrue("Site 3 not logged into 1", modelOne.isLocalLoggedIn(clientIdThree));
-
-        // For site 2 expect 1,3
-
-        assertTrue("Site 1 not logged into 2", modelTwo.isLocalLoggedIn(clientIdOne));
-        assertTrue("Site 3 not logged into 2", modelTwo.isLocalLoggedIn(clientIdThree));
-
-        // For site 3 expect 1,2
-
-        assertTrue("Site 1 not logged into 3", modelThree.isLocalLoggedIn(clientIdOne));
-        assertTrue("Site 2 not logged into 3", modelThree.isLocalLoggedIn(clientIdTwo));
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        
-        super.tearDown();
-        /* not needed, should be using unique ports
-        controllerThree.shutdownTransport();
-        controllerTwo.shutdownTransport();
-        controllerOne.shutdownTransport();
-        */
     }
 
 }
