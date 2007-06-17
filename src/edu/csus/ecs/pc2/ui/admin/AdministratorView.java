@@ -22,6 +22,7 @@ import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.GenerateAccountsPane;
 import edu.csus.ecs.pc2.ui.InfoPane;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
+import edu.csus.ecs.pc2.ui.JudgementsPanel;
 import edu.csus.ecs.pc2.ui.LanguagesPane;
 import edu.csus.ecs.pc2.ui.LogWindow;
 import edu.csus.ecs.pc2.ui.LoginsPane;
@@ -153,6 +154,10 @@ public class AdministratorView extends JFrame implements UIPlugin {
                 
                 ContestInformationPane contestInformationPane = new ContestInformationPane();
                 addUIPlugin(getMainTabbedPanel(), "Title", contestInformationPane);
+                
+                JudgementsPanel judgementsPanel = new JudgementsPanel();
+                addUIPlugin(getMainTabbedPanel(), "Judgements", judgementsPanel);
+                
                 
                 setTitle("PC^2 " + contest.getTitle() + " Build " + new VersionInfo().getBuildNumber());
                 setVisible(true);
