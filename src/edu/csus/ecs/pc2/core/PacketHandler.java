@@ -1341,8 +1341,15 @@ public class PacketHandler {
 
         try {
             ContestTime contestTime = (ContestTime) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME);
-            if (contestTime != null && (! isThisSite(contestTime.getSiteNumber()))) {
-                contest.addContestTime(contestTime);
+            if (contestTime != null) {
+                if (isServer()) {
+                    if ( isThisSite(contestTime.getSiteNumber())) {
+                        // Add update contest time if this is from another server
+                        contest.addContestTime(contestTime);
+                    }                        
+                } else {
+                    contest.addContestTime(contestTime);
+                }
             }
 
         } catch (Exception e) {
