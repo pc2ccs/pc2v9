@@ -22,6 +22,7 @@ import edu.csus.ecs.pc2.core.report.AccountsReport;
 import edu.csus.ecs.pc2.core.report.ClarificationsReport;
 import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.core.report.InternalDumpReport;
+import edu.csus.ecs.pc2.core.report.JudgementReport;
 import edu.csus.ecs.pc2.core.report.LanguagesReport;
 import edu.csus.ecs.pc2.core.report.ProblemsReport;
 import edu.csus.ecs.pc2.core.report.RunsByTeamReport;
@@ -29,18 +30,19 @@ import edu.csus.ecs.pc2.core.report.RunsReport;
 import edu.csus.ecs.pc2.core.report.StandingsReport;
 
 /**
+ * Report Pane, allows picking and viewing reports.
  * 
  * @author pc2@ecs.csus.edu
- * 
  */
 
 // $HeadURL$
+// $Id$
 public class ReportPane extends JPanePlugin {
 
     /**
      * 
      */
-    private static final long serialVersionUID = -1206899817603554760L;
+    private static final long serialVersionUID = -5165297328068331675L;
 
     private JPanel jPanel = null;
 
@@ -58,6 +60,9 @@ public class ReportPane extends JPanePlugin {
 
     private JLabel messageLabel = null;
 
+    /**
+     * List of reports.
+     */
     private IReport[] listOfReports;
 
     private Log log;
@@ -99,16 +104,17 @@ public class ReportPane extends JPanePlugin {
         this.add(getMainPane(), java.awt.BorderLayout.CENTER);
 
         // populate list of reports
-        listOfReports = new IReport[9];
+        listOfReports = new IReport[10];
         listOfReports[0] = new AccountsReport();
         listOfReports[1] = new RunsReport();
         listOfReports[2] = new InternalDumpReport();
         listOfReports[3] = new ClarificationsReport();
         listOfReports[4] = new ProblemsReport();
         listOfReports[5] = new LanguagesReport();
-        listOfReports[6] = new AccountPermissionReport();
-        listOfReports[7] = new StandingsReport();
-        listOfReports[8] = new RunsByTeamReport();
+        listOfReports[6] = new JudgementReport();
+        listOfReports[7] = new AccountPermissionReport();
+        listOfReports[8] = new StandingsReport();
+        listOfReports[9] = new RunsByTeamReport();
     }
 
     public void setContestAndController(IContest inContest, IController inController) {
@@ -258,7 +264,6 @@ public class ReportPane extends JPanePlugin {
             viewFile (filename, selectedReport.getReportTitle());
 
         } catch (Exception e) {
-            // TODO: log handle exception
             log.log(Log.WARNING, "Exception logged ", e);
             showMessage("Unable to output report, check logs");
         }
