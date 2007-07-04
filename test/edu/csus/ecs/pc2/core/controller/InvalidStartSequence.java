@@ -34,7 +34,6 @@ public class InvalidStartSequence extends TestCase {
 
     protected void setUp() throws Exception {
         super.setUp();
-        System.out.println("InvalidStartSequence.testInvalidStartSequence setUp START ");
 
         modelOne = new Contest();
         initializeModel(modelOne);
@@ -46,10 +45,8 @@ public class InvalidStartSequence extends TestCase {
         controllerOne = new Controller(modelOne);
         controllerOne.setContactingRemoteServer(false);
         controllerOne.setUsingMainUI(false);
-        System.out.println("InvalidStartSequence.testInvalidStartSequence setUp END ");
     }
     public void testInvalidStartSequence() {
-        System.out.println("InvalidStartSequence.testInvalidStartSequence START ");
         boolean caughtException = false;
         try {
             controllerOne.login("site1", "site1");
@@ -60,7 +57,6 @@ public class InvalidStartSequence extends TestCase {
             e.printStackTrace();
         }
         assertTrue("loginRequireStart", caughtException);
-        System.out.println("InvalidStartSequence.testInvalidStartSequence END ");
     }
     
     public void initializeModel(IContest contest) {
@@ -91,15 +87,6 @@ public class InvalidStartSequence extends TestCase {
 
         assertTrue("Insure generate of 10 teams", modelOne.getAccounts(Type.TEAM).size() == 10);
         assertTrue("Insure generate of 5 teams", modelOne.getAccounts(Type.JUDGE).size() == 5);
-    }
-    
-    @Override
-    protected void tearDown() throws Exception {
-        // TODO Auto-generated method stub
-        System.out.println("InvalidStartSequence.tearDown START ");
-        super.tearDown();
-        System.out.println("InvalidStartSequence.tearDown END ");
-
     }
 
 }
