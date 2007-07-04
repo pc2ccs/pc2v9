@@ -59,6 +59,7 @@ public class RunFlowTest extends TestCase {
 
     protected void setUp() throws Exception {
         super.setUp();
+        System.out.println("RunFlowTest.testOneRun setup START ");
 
         modelOne = new Contest();
         Site siteTwelve = SiteTest.createSite(siteNumber, "Site 1", null, 42000);
@@ -74,6 +75,9 @@ public class RunFlowTest extends TestCase {
         assertTrue("Site "+modelOne.getSiteNumber()+" logged in", modelOne.isLoggedIn());
 
         startContestTime();
+        
+        System.out.println("RunFlowTest.testOneRun setup END ");
+
     }
 
     /**
@@ -227,6 +231,8 @@ public class RunFlowTest extends TestCase {
     }
 
     public void testOneRun() {
+        
+        System.out.println("RunFlowTest.testOneRun START");
 
         Account account = modelOne.getAccounts(Type.TEAM).firstElement();
         ClientId teamId = account.getClientId();
@@ -293,6 +299,8 @@ public class RunFlowTest extends TestCase {
         assertTrue ("No runs found, should be at least one run ", runs.length != 0);
         
         System.err.println(new Date()+" tests done.");
+        System.out.println("RunFlowTest.testOneRun END");
+
     }
 
     /**
@@ -336,10 +344,14 @@ public class RunFlowTest extends TestCase {
     protected void tearDown() throws Exception {
         
         super.tearDown();
-        controllerOne.shutdownTransport();
-        sleep(10, "waiting for transport shutdown");
-    
-    }
+        System.out.println("RunFlowTest.testOneRun tearDown START ");
 
-    
+//        try {
+//            controllerOne.shutdownTransport();
+//            sleep(10, "waiting for transport shutdown");
+//        } catch (Exception e) {
+//            e.printStackTrace(System.err);
+//        } 
+            System.out.println("RunFlowTest.testOneRun tearDown END ");
+    }
 }
