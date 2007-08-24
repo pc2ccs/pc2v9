@@ -1233,5 +1233,37 @@ public class Contest implements IContest {
     public ContestInformation getContestInformation() {
         return contestInformation;
     }
+
+    public void setJudgementList(Judgement[] judgements) {
+
+        // Remove all judgements from display list and fire listeners
+        for (Judgement judgement : judgementDisplayList.getList()) {
+            JudgementEvent judgementEvent = new JudgementEvent(JudgementEvent.Action.DELETED, judgement);
+            fireJudgementListener(judgementEvent);
+        }
+
+        judgementDisplayList = new JudgementDisplayList();
+
+        for (Judgement judgement : judgements) {
+            Judgement judgementFromList = (Judgement) judgementList.get(judgement.getElementId());
+            if (judgementFromList == null) {
+                // if not in list add to list.
+                judgementList.add(judgement);
+            }
+            judgementDisplayList.add(judgement);
+            JudgementEvent judgementEvent = new JudgementEvent(JudgementEvent.Action.ADDED, judgement);
+            fireJudgementListener(judgementEvent);
+        }
+    }
+
+    public void removeJudgement(Judgement judgement) {
+
+        int idx = judgementDisplayList.indexOf(judgement);
+        if (idx != -1){
+            judgementDisplayList.remove(idx);
+            JudgementEvent judgementEvent = new JudgementEvent(JudgementEvent.Action.DELETED, judgement);
+            fireJudgementListener(judgementEvent);
+        }
+    }
     
 }

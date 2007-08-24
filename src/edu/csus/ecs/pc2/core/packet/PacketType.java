@@ -502,7 +502,7 @@ public final class PacketType implements Serializable {
         /**
          * Update one or more settings <br>
          * from Admin to server<br>
-         * from server to servfer<br>
+         * from server to server<br>
          * Contains: Properties
          */
         UPDATE_SETTING,
@@ -513,6 +513,18 @@ public final class PacketType implements Serializable {
          * Contains: Properties (one or more properties to add to config).
          */
         ADD_SETTING,
+        
+        /**
+         * Remove setting.
+         * 
+         * This packet contains a setting or list of settings to
+         * remove from the settings ({@link Contest}
+         * <P>
+         * from Admin to server<br>
+         * from server to server<br>
+         * Contains: Properties (one or more properties to add to config).
+         */
+        DELETE_SETTING,
         /**
          * Generate Accounts. 
          */
@@ -525,10 +537,12 @@ public final class PacketType implements Serializable {
          * Stop Contest Clock. Admin to Server. Contains: SITE_NUMBER, CLIENT_ID
          */
         STOP_CONTEST_CLOCK,
+        
         /**
          * Clock has been stopped, from Server. Contents: CONTEST_TIME, CLIENT_ID
          */
         CLOCK_STOPPED,
+        
         /**
          * Clock has been started, from Server. Contents: CONTEST_TIME, CLIENT_ID
          */
@@ -537,7 +551,8 @@ public final class PacketType implements Serializable {
         /**
          * Update Contest Clock.
          * 
-         * Update elapsed, remaining, contest length, running or not. Contains: Properties (ContestTime)
+         * Update elapsed, remaining, contest length, running or not. <br>
+         * Contains: Properties (ContestTime)
          */
         UPDATE_CONTEST_CLOCK,
         /**

@@ -1821,13 +1821,21 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
     public void updateClientSettings(ClientSettings clientSettings) {
         Packet addAccountPacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), clientSettings);
-        sendToLocalServer(addAccountPacket); 
+        sendToLocalServer(addAccountPacket);
     }
 
     public void updateContestInformation(ContestInformation contestInformation) {
         Packet addAccountPacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), contestInformation);
-        sendToLocalServer(addAccountPacket); 
-        
+        sendToLocalServer(addAccountPacket);
     }
-    
+
+    public void setJudgementList(Judgement[] judgementList) {
+        Packet updatePacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), judgementList);
+        sendToLocalServer(updatePacket);
+    }
+
+    public void removeJudgement(Judgement judgement) {
+        Packet deleteJudgmentPacket = PacketFactory.createDeleteSetting(contest.getClientId(), getServerClientId(), judgement);
+        sendToLocalServer(deleteJudgmentPacket);
+    }
 }

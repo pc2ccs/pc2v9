@@ -1520,5 +1520,34 @@ public final class PacketFactory {
         Packet packet = new Packet(Type.UPDATE_SETTING, source, destination, prop);
         return packet;
     }
+    
+    public static Packet createUpdateSetting(ClientId source, ClientId destination, Judgement[] judgements) {
+        Properties prop = new Properties();
+        prop.put(JUDGEMENT_LIST, judgements);
+        Packet packet = new Packet(Type.UPDATE_SETTING, source, destination, prop);
+        return packet;
+    }
 
+    public static Packet createDeleteSetting (ClientId source, ClientId destination, Judgement judgement) {
+        Properties prop = new Properties();
+        prop.put(JUDGEMENT, judgement);
+        Packet packet = new Packet(Type.DELETE_SETTING, source, destination, prop);
+        return packet;
+    }
+
+    public static Packet createDeleteSetting (ClientId source, ClientId destination, Problem problem) {
+        Properties prop = new Properties();
+        prop.put(PROBLEM, problem);
+        Packet packet = new Packet(Type.DELETE_SETTING, source, destination, prop);
+        return packet;
+    }
+
+    public static Packet createDeleteSetting (ClientId source, ClientId destination, Language language) {
+        Properties prop = new Properties();
+        prop.put(LANGUAGE, language);
+        Packet packet = new Packet(Type.DELETE_SETTING, source, destination, prop);
+        return packet;
+    }
+
+    
 }

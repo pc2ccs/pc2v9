@@ -23,10 +23,19 @@ public interface IContest {
     void addProblem(Problem problem);
 
     void addProblem(Problem problem, ProblemDataFiles problemDataFiles);
-
+    
     void addContestTime(ContestTime contestTime);
 
     void addJudgement(Judgement judgement);
+    
+    /**
+     * Replace judgement list.
+     * 
+     * @param judgementList
+     */
+    void setJudgementList (Judgement [] judgementList);
+    
+    void removeJudgement(Judgement judgement);
 
     void addSite(Site site);
 

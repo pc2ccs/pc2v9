@@ -812,4 +812,14 @@ public final class ContestReadOnlyProxy implements IContest {
         
     }
 
+    public void setJudgementList(Judgement[] judgementList) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void removeJudgement(Judgement judgement) {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

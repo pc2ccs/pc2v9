@@ -7,6 +7,7 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
+import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
@@ -161,7 +162,21 @@ public interface IController {
     void addNewProblem(Problem problem, ProblemDataFiles problemDataFiles);
 
     void addProblem(Problem problem);
+
+    /**
+     * Add a new Judgement.
+     * @param judgement
+     */
+    void addNewJudgement(Judgement judgement);
     
+    /**
+     * Replace judgement list with new judgement list.
+     * @param judgementList
+     */
+    void setJudgementList (Judgement [] judgementList);
+
+    void removeJudgement (Judgement judgement);
+
     void updateRun(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles);
 
     void sendServerLoginRequest(int siteNumber);

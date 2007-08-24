@@ -243,6 +243,9 @@ public class PacketHandler {
         } else if (packetType.equals(Type.ADD_SETTING)) {
             addNewSetting(packet);
             
+        } else if (packetType.equals(Type.DELETE_SETTING)) {
+            deleteSetting(packet);
+            
         } else if (packetType.equals(Type.GENERATE_ACCOUNTS)) {
             generateAccounts (packet);
 
@@ -616,7 +619,13 @@ public class PacketHandler {
             controller.writeConfigToDisk();
         }
     }
-
+    
+    private void deleteSetting(Packet packet) {
+        
+        // TODO code
+        
+    }
+    
     /**
      * Add a new setting from another server.
      * 
