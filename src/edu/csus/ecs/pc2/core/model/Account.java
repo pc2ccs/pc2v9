@@ -33,6 +33,23 @@ public class Account implements IElementObject {
 
     private String displayName;
     
+    /**
+     * An alias that may be displayed to judges to keep
+     * the identity of a team consistent yet anonymous.
+     */
+    private String aliasName;
+    
+    /**
+     * An external identifier, ex: an ICPC id
+     */
+    private String externalId;
+    
+    /**
+     * Group id
+     * TODO consider replacing with ElementId
+     */
+    private String groupId;
+    
     private PermissionList permissionList = new PermissionList();
 
     /**
@@ -144,6 +161,30 @@ public class Account implements IElementObject {
 
     public PermissionList getPermissionList() {
         return permissionList;
+    }
+
+    public final String getAliasName() {
+        return aliasName;
+    }
+
+    public final void setAliasName(String aliasName) {
+        this.aliasName = aliasName;
+    }
+
+    public final String getExternalId() {
+        return externalId;
+    }
+
+    public final void setExternalId(String externalId) {
+        this.externalId = externalId;
+    }
+
+    public final String getGroupId() {
+        return groupId;
+    }
+
+    public final void setGroupId(String groupId) {
+        this.groupId = groupId;
     }
 
     

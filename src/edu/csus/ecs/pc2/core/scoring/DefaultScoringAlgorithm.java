@@ -381,6 +381,9 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             standingsRecordMemento.putInteger("teamId", account.getClientId().getClientNumber());
             standingsRecordMemento.putInteger("teamSiteId", account.getClientId().getSiteNumber());
             standingsRecordMemento.putString("teamKey", account.getClientId().getTripletKey());
+            standingsRecordMemento.putString("teamExternalId", account.getExternalId());
+            // TODO may want groupName here too, in future might to lookup this id in a sep table
+            standingsRecordMemento.putString("teamGroupId", account.getGroupId());
             SummaryRow summaryRow = standingsRecord.getSummaryRow();
             for (int i = 0; i < problems.length; i++) {
                 int id = i + 1;

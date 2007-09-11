@@ -29,13 +29,15 @@ public class LoadAccounts {
 
     private int passwordColumn = -1;
 
-    // TODO undo @SuppressWarnings when groupColumn used.
-    @SuppressWarnings("unused")
     private int groupColumn = -1;
 
     private int permDisplayColumn = -1;
 
     private int permLoginColumn = -1;
+    
+    private int aliasColumn = -1;
+    
+    private int externalIdColumn = -1;
 
     private HashMap<ClientId, Account> existingAccountsMap = new HashMap<ClientId, Account>();
     
@@ -65,15 +67,21 @@ public class LoadAccounts {
         // TODO would be nice if Account had a deep clone
         Account account = new Account(clientId, password, clientId.getSiteNumber());
         account.clearListAndLoadPermissions(accountClean.getPermissionList());
-        // TODO uncomment once account has group
-        // account.setGroup(accountClean.getGroup());
+        account.setGroupId(accountClean.getGroupId());
         account.setPassword(password);
         if (displayNameColumn != -1 && values.length > displayNameColumn) {
             account.setDisplayName(values[displayNameColumn]);
         }
-        // if (groupColumn != -1) {
-        // account.setGroup(values[groupColumn] && values.length >= groupColumn);
-        // }
+        if (aliasColumn != -1 && values.length > aliasColumn) {
+            account.setAliasName(values[aliasColumn]);
+        }
+        if (externalIdColumn != -1 && values.length > externalIdColumn) {
+            account.setAliasName(values[externalIdColumn]);
+        }
+        if (groupColumn != -1 && values.length >= groupColumn && values.length > 0) {
+            // TODO in the future, may need to convert this id to an elementId
+            account.setGroupId(values[groupColumn]);
+        }
         if (permDisplayColumn != -1 && values.length > permDisplayColumn && values[permDisplayColumn].length() > 0) {
             if (Boolean.parseBoolean(values[permDisplayColumn])) {
                 account.addPermission(Permission.Type.DISPLAY_ON_SCOREBOARD);
@@ -91,6 +99,24 @@ public class LoadAccounts {
         return account;
     }
 
+    /**
+     * Read a tab-separated values from a file.
+     * 1st line should contain the column headers.
+     * Supported column headers are:
+     * account (required)
+     * alias
+     * displayname
+     * group
+     * password
+     * permdisplay
+     * permlogin
+     * site
+     * 
+     * @param filename
+     * @param existingAccounts
+     * @return an array of accounts
+     * @throws Exception
+     */
     public Account[] fromTSVFile(String filename, Account[] existingAccounts) throws Exception {
         if (existingAccounts != null && existingAccounts.length > 0) {
             for (int i = 0; i < existingAccounts.length; i++) {
@@ -114,6 +140,8 @@ public class LoadAccounts {
             displayNameColumn = -1;
             passwordColumn = -1;
             groupColumn = -1;
+            aliasColumn = -1;
+            externalIdColumn = -1;
             for (int i = 0; i < columns.length; i++) {
                 if (columns[i].equalsIgnoreCase("site")) {
                     siteColumn = i;
@@ -135,6 +163,12 @@ public class LoadAccounts {
                 }
                 if (columns[i].equalsIgnoreCase("permlogin")) {
                     permLoginColumn = i;
+                }
+                if (columns[i].equalsIgnoreCase("externalid")) {
+                    groupColumn = i;
+                }
+                if (columns[i].equalsIgnoreCase("alias")) {
+                    groupColumn = i;
                 }
             }
             if (accountColumn == -1 || siteColumn == -1 || passwordColumn == -1) {
