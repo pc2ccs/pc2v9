@@ -232,9 +232,10 @@ public class Filter {
 
     public String toString() {
      
-        if (thisSiteOnly || filteringClarificationStates || filteringProblems ||
-                filteringRunStates )
-        {
+        if (thisSiteOnly 
+                || filteringClarificationStates 
+                || filteringProblems 
+                || filteringRunStates ) {
             String filterInfo = "Filter ON";
             if (thisSiteOnly){
                 filterInfo += " Site "+siteNumber;
@@ -249,8 +250,7 @@ public class Filter {
                 filterInfo += " clar state(s)";
             }
             return filterInfo;
-        } else
-        {
+        } else {
             return "";
         }
     }
