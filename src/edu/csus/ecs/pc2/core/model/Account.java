@@ -52,6 +52,12 @@ public class Account implements IElementObject {
     
     private PermissionList permissionList = new PermissionList();
 
+    private String shortSchoolName;
+
+    private String longSchoolName;
+
+    private String externalName;
+
     /**
      * Create an account
      * 
@@ -163,28 +169,57 @@ public class Account implements IElementObject {
         return permissionList;
     }
 
-    public final String getAliasName() {
+    public String getAliasName() {
         return aliasName;
     }
 
-    public final void setAliasName(String aliasName) {
+    public void setAliasName(String aliasName) {
         this.aliasName = aliasName;
     }
 
-    public final String getExternalId() {
+    public String getExternalId() {
         return externalId;
     }
 
-    public final void setExternalId(String externalId) {
+    public void setExternalId(String externalId) {
         this.externalId = externalId;
     }
 
-    public final String getGroupId() {
+    public String getGroupId() {
         return groupId;
     }
 
-    public final void setGroupId(String groupId) {
+    public void setGroupId(String groupId) {
         this.groupId = groupId;
+    }
+
+    public void setShortSchoolName(String shortSchoolName) {
+        this.shortSchoolName = shortSchoolName;
+    }
+
+    public void setLongSchoolName(String longSchoolName) {
+        this.longSchoolName = longSchoolName;
+    }
+
+    /**
+     * E.g. the team name from the icpc data
+     * 
+     * @param externalName
+     */
+    public void setExternalName(String externalName) {
+        this.externalName = externalName;
+    }
+
+    public String getExternalName() {
+        return externalName;
+    }
+
+    public String getLongSchoolName() {
+        return longSchoolName;
+    }
+
+    public String getShortSchoolName() {
+        return shortSchoolName;
     }
 
     
