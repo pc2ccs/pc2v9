@@ -1,5 +1,7 @@
 package edu.csus.ecs.pc2.core;
 
+import java.util.Random;
+
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.packet.Packet;
 
@@ -17,9 +19,15 @@ import edu.csus.ecs.pc2.core.packet.Packet;
 // TODO Make this handle all connections and reconnectons ??
 
 //$HeadURL$
-public class Reconnector {
+public class Reconnector implements Runnable {
 
-    private int maxRetry = 3;
+    private RetryDialog retryDialog = null;
+    
+    private IContest contest = null;
+
+    private int maxConnectionRetries = 3;
+    
+    private Random r = new Random();
 
     /**
      * Is Connection currently active?
@@ -31,12 +39,14 @@ public class Reconnector {
 
     private String password = null;
 
-    private int retryCount;
+    private int retryCount = 0;
 
     public Reconnector(String loginName, String password) {
         super();
         this.loginName = loginName;
         this.password = password;
+        
+        r.setSeed(System.nanoTime());
     }
 
     // required to access contest settings, like retry times and duration
@@ -57,9 +67,13 @@ public class Reconnector {
 
     private void attemptReconnection(String loginName2, String password2) {
         
-        // TODO get maxRetry from IContest
-
-        while (!connected && retryCount < maxRetry) {
+        connected = false;
+        
+        maxConnectionRetries = contest.getMaxConnectionRetries();
+        
+        retryCount = 0;
+        
+        while (!connected && retryCount < maxConnectionRetries) {
 
             retryConnection();
         }
@@ -67,23 +81,51 @@ public class Reconnector {
 
     private void showRetryDialog() {
         
-        // TODO display Retry dialog
+        if (retryDialog == null){
+            retryDialog = new RetryDialog();
+            retryDialog.setReconnectRunnable(this);
+        }
         
+        retryDialog.setTitle("Disconnected from server");
+        retryDialog.setMessage("Disconnected from server");
+        
+        retryDialog.setVisible(true);
     }
 
     private void addPacketToList(Packet packet) {
 
-        // TOD add packet to list of to be sent packets
+        // TODO add packet to list of to be sent packets
 
     }
 
     private void retryConnection() {
 
-        // TODO fetch msecs to pause, pause for msecs
+        // TODO fetch msecs to pause
+        
+        int maxMSecs = contest.getMaxRetryMSecs();
+        
+        try {
+            int msec = r.nextInt(maxMSecs);
+            System.out.println("debug msecs = "+msec);
+            Thread.sleep(msec);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
         // TODO attempt connection
 
-        // if NOT connected increment retry count
+        retryCount++;
+    }
 
+    public void run() {
+        retryDialog.setTitle("Attempting to reconnect...");
+        retryDialog.setMessage("Attempting to reconnect to server");
+        attemptReconnection (loginName, password);
+    }
+    
+    public static void main(String[] args) {
+        Reconnector reconnector = new Reconnector("login","password");
+        reconnector.handleDisconnection(null);
     }
 }

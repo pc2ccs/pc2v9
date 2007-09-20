@@ -1265,5 +1265,13 @@ public class Contest implements IContest {
             fireJudgementListener(judgementEvent);
         }
     }
+
+    public int getMaxRetryMSecs() {
+        return 700;
+    }
+
+    public int getMaxConnectionRetries() {
+        return 5;
+    }
     
 }

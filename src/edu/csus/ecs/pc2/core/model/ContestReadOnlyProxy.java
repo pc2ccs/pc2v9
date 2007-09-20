@@ -822,4 +822,14 @@ public final class ContestReadOnlyProxy implements IContest {
         
     }
 
+    public int getMaxRetryMSecs() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    public int getMaxConnectionRetries() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
 }

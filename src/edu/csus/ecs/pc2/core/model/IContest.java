@@ -517,4 +517,21 @@ public interface IContest {
     ClientSettings getClientSettings(ClientId clientId);
 
     ClientSettings [] getClientSettingsList();
+
+    /**
+     * Maximum MSecs for each retry.
+     * 
+     * Used to calculate a "random" connection retry, when
+     * client disconnected.
+     * @return
+     */
+    int getMaxRetryMSecs();
+
+    /**
+     * Maximum number of connection retries before taking action.
+     * 
+     * Action might be putting a GUI in front of the user.
+     * @return
+     */
+    int getMaxConnectionRetries();
 }
