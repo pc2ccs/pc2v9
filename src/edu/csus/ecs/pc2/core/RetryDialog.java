@@ -3,43 +3,75 @@
  */
 package edu.csus.ecs.pc2.core;
 
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+
+import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import java.awt.BorderLayout;
-import javax.swing.JLabel;
-import javax.swing.JButton;
+import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 
-import java.awt.FlowLayout;
-
 /**
+ * Retry Dialog.
+ * 
+ * Present user with dialog which shows Retry button or exit button.
+ * <P>
+ * The retry action invokes a Runnable.run method, the Runnable should
+ * be set using {link #setRunnable}.
+ * <P>
+ * A typical use is:
+ * <pre>
+ * RetryDialog retryDialog = new RetryDialog();
+ * retryDialog.setMessage("Something failed.");
+ * retryDialog.setReconnectRunnable(new Runnable() {
+ *     public void run() {
+ *     // this method is called when Retry button hit.
+ *     }
+ * });
+ * retryDialog.setVisible(true);
+ * </pre>
+ * <P>
+ * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
 
 // $HeadURL$
 public class RetryDialog extends JDialog {
+    
+    /**
+     * When retry button is selected, run this runnable.
+     */
+    private Runnable reconnectRunnable = null;
 
     /**
      * 
      */
     private static final long serialVersionUID = 1L;
+
     private JPanel mainPanel = null;
+
     private JPanel buttonPanel = null;
-    private JPanel MessagePanel = null;
+
+    private JPanel messagePanel = null;
+
     private JLabel messageLabel = null;
+
     private JButton retryButton = null;
+
     private JButton exitButton = null;
 
     /**
-     * This method initializes 
+     * This method initializes
      * 
      */
     public RetryDialog() {
-    	super();
-    	initialize();
+        super();
+        initialize();
     }
 
     /**
@@ -47,18 +79,17 @@ public class RetryDialog extends JDialog {
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(496,209));
+        this.setSize(new java.awt.Dimension(496, 209));
         this.setContentPane(getMainPanel());
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setTitle("Disconnected");
         FrameUtilities.centerFrame(this);
-    		
     }
 
     /**
-     * This method initializes mainPanel	
-     * 	
-     * @return javax.swing.JPanel	
+     * This method initializes mainPanel
+     * 
+     * @return javax.swing.JPanel
      */
     private JPanel getMainPanel() {
         if (mainPanel == null) {
@@ -71,9 +102,9 @@ public class RetryDialog extends JDialog {
     }
 
     /**
-     * This method initializes buttonPanel	
-     * 	
-     * @return javax.swing.JPanel	
+     * This method initializes buttonPanel
+     * 
+     * @return javax.swing.JPanel
      */
     private JPanel getButtonPanel() {
         if (buttonPanel == null) {
@@ -81,7 +112,7 @@ public class RetryDialog extends JDialog {
             flowLayout.setHgap(60);
             buttonPanel = new JPanel();
             buttonPanel.setLayout(flowLayout);
-            buttonPanel.setPreferredSize(new java.awt.Dimension(35,35));
+            buttonPanel.setPreferredSize(new java.awt.Dimension(35, 35));
             buttonPanel.add(getRetryButton(), null);
             buttonPanel.add(getExitButton(), null);
         }
@@ -89,27 +120,27 @@ public class RetryDialog extends JDialog {
     }
 
     /**
-     * This method initializes MessagePanel	
-     * 	
-     * @return javax.swing.JPanel	
+     * This method initializes messagePanel
+     * 
+     * @return javax.swing.JPanel
      */
     private JPanel getMessagePanel() {
-        if (MessagePanel == null) {
+        if (messagePanel == null) {
             messageLabel = new JLabel();
             messageLabel.setText("Disconnected from server");
             messageLabel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
             messageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-            MessagePanel = new JPanel();
-            MessagePanel.setLayout(new BorderLayout());
-            MessagePanel.add(messageLabel, java.awt.BorderLayout.CENTER);
+            messagePanel = new JPanel();
+            messagePanel.setLayout(new BorderLayout());
+            messagePanel.add(messageLabel, java.awt.BorderLayout.CENTER);
         }
-        return MessagePanel;
+        return messagePanel;
     }
 
     /**
-     * This method initializes retryButton	
-     * 	
-     * @return javax.swing.JButton	
+     * This method initializes retryButton
+     * 
+     * @return javax.swing.JButton
      */
     private JButton getRetryButton() {
         if (retryButton == null) {
@@ -119,6 +150,9 @@ public class RetryDialog extends JDialog {
             retryButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     setTitle("Retrying... ");
+                    if (reconnectRunnable != null){
+                        reconnectRunnable.run();
+                    }
                 }
             });
         }
@@ -126,9 +160,9 @@ public class RetryDialog extends JDialog {
     }
 
     /**
-     * This method initializes exitButton	
-     * 	
-     * @return javax.swing.JButton	
+     * This method initializes exitButton
+     * 
+     * @return javax.swing.JButton
      */
     private JButton getExitButton() {
         if (exitButton == null) {
@@ -143,7 +177,7 @@ public class RetryDialog extends JDialog {
         }
         return exitButton;
     }
-    
+
     protected void promptAndExit() {
         int result = FrameUtilities.yesNoCancelDialog("Are you sure you want to exit PC^2?", "Exit PC^2");
 
@@ -153,12 +187,27 @@ public class RetryDialog extends JDialog {
     }
 
     /**
-     * @param args
+     * Update message on dialog.
+     * @param message
      */
-    public static void main(String[] args) {
-        RetryDialog retryDialog = new RetryDialog();
-        retryDialog.setVisible(true);
-
+    public void setMessage(final String message) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                messageLabel.setText(message);
+            }
+        });
     }
 
-}  //  @jve:decl-index=0:visual-constraint="10,10"
+    public Runnable getReconnectRunnable() {
+        return reconnectRunnable;
+    }
+
+    /**
+     * 
+     * @param reconnectRunnable
+     */
+    public void setReconnectRunnable(Runnable reconnectRunnable) {
+        this.reconnectRunnable = reconnectRunnable;
+    }
+
+} // @jve:decl-index=0:visual-constraint="10,10"
