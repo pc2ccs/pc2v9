@@ -1275,4 +1275,8 @@ public class Contest implements IContest {
         return null;
     }
 
+    public BalloonSettings[] getBalloonSettings() {
+        return balloonSettingsList.getList();
+    }
+    
 }

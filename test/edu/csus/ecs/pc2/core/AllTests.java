@@ -19,6 +19,7 @@ public final class AllTests {
     public static Test suite() {
         TestSuite suite = new TestSuite("Test for edu.csus.ecs.pc2.core");
         //$JUnit-BEGIN$
+        suite.addTestSuite(BalloonSettingsTest.class);
         suite.addTestSuite(TestAccountNameComparator.class);
         suite.addTestSuite(ElementIdTest.class);
         suite.addTestSuite(ClientIdTest.class);

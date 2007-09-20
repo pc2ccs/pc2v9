@@ -541,4 +541,12 @@ public interface IContest {
      * @return
      */
     int getMaxConnectionRetries();
+
+    /**
+     * Get all Balloon Settings.
+     * @return
+     */
+    BalloonSettings[] getBalloonSettings();
+    
+    
 }

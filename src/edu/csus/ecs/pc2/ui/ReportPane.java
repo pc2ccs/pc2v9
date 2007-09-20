@@ -19,6 +19,7 @@ import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.report.AccountPermissionReport;
 import edu.csus.ecs.pc2.core.report.AccountsReport;
+import edu.csus.ecs.pc2.core.report.BalloonSettingsReport;
 import edu.csus.ecs.pc2.core.report.ClarificationsReport;
 import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.core.report.InternalDumpReport;
@@ -104,7 +105,7 @@ public class ReportPane extends JPanePlugin {
         this.add(getMainPane(), java.awt.BorderLayout.CENTER);
 
         // populate list of reports
-        listOfReports = new IReport[10];
+        listOfReports = new IReport[11];
         listOfReports[0] = new AccountsReport();
         listOfReports[1] = new RunsReport();
         listOfReports[2] = new InternalDumpReport();
@@ -115,6 +116,7 @@ public class ReportPane extends JPanePlugin {
         listOfReports[7] = new AccountPermissionReport();
         listOfReports[8] = new StandingsReport();
         listOfReports[9] = new RunsByTeamReport();
+        listOfReports[10] = new BalloonSettingsReport();
     }
 
     public void setContestAndController(IContest inContest, IController inController) {
