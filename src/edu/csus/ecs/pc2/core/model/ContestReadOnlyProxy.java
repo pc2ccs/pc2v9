@@ -832,4 +832,19 @@ public final class ContestReadOnlyProxy implements IContest {
         return 0;
     }
 
+    public void updateBalloonSettings(BalloonSettings balloonSettings) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void addBalloonSettings(BalloonSettings balloonSettings) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public BalloonSettings getBalloonSettings(int siteNumber) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

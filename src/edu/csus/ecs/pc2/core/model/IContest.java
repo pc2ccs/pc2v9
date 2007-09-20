@@ -52,6 +52,8 @@ public interface IContest {
     void updateProblem(Problem problem);
 
     void updateProblem(Problem problem, ProblemDataFiles problemDataFiles);
+    
+    void updateBalloonSettings (BalloonSettings balloonSettings);
 
     ProblemDataFiles getProblemDataFile(Problem problem);
 
@@ -60,6 +62,9 @@ public interface IContest {
     void updateContestTime(ContestTime contestTime, int inSiteNumber);
 
     void addAccount(Account account);
+    
+    void addBalloonSettings (BalloonSettings balloonSettings);
+
 
     /**
      * Update current contest time values.
@@ -238,6 +243,8 @@ public interface IContest {
     Vector<Account> getAccounts(Type type, int siteNumber);
 
     Vector<Account> getAccounts(Type type);
+    
+    BalloonSettings getBalloonSettings(int siteNumber);
 
     Site getSite(int siteNumber);
 
