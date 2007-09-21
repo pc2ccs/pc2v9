@@ -14,10 +14,10 @@ import edu.csus.ecs.pc2.core.log.Log;
  * Routines to safe and load configuration/Contest.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
-// $Id$
 public class ConfigurationIO {
 
     /**
@@ -75,7 +75,11 @@ public class ConfigurationIO {
         /**
          * Contest Client Settings
          */
-        CLIENT_SETTINGS_LIST
+        CLIENT_SETTINGS_LIST,
+        /**
+         * Balloon Settings List
+         */
+        BALLOON_SETTINGS_LIST
     }
 
     private String directoryName = "db";
@@ -162,6 +166,20 @@ public class ConfigurationIO {
                 } catch (Exception e) {
                     log.log(Log.WARNING, "Exception while loading contest times ", e);
                 }
+                
+
+                try {
+                    key = ConfigKeys.BALLOON_SETTINGS_LIST;
+                    if (configuration.containsKey(key)) {
+                        BalloonSettings [] balloonSettings = (BalloonSettings []) configuration.get(key.toString());
+                        for (BalloonSettings balloonSetting : balloonSettings){
+                            contest.addBalloonSettings(balloonSetting);
+                        }
+                        log.info("Loaded " + balloonSettings.length + " " + key.toString().toLowerCase());
+                    } 
+                } catch (Exception e) {
+                    log.log(Log.WARNING, "Exception while loading contest information/title ", e);
+                } 
 
                 try {
                     key = ConfigKeys.CONTEST_TIME;
@@ -246,6 +264,8 @@ public class ConfigurationIO {
                     log.log(Log.WARNING, "Exception while loading contest information/title ", e);
                 } 
                 
+
+                
                 try {
                     key = ConfigKeys.CLIENT_SETTINGS_LIST;
                     if (configuration.containsKey(key)) {
@@ -302,6 +322,7 @@ public class ConfigurationIO {
         configuration.add(ConfigKeys.ACCOUNTS, getAllAccounts(contest));
         configuration.add(ConfigKeys.CONTEST_TIME, contest.getContestTime());
         configuration.add(ConfigKeys.CONTEST_TIME_LIST, contest.getContestTimes());
+        configuration.add(ConfigKeys.BALLOON_SETTINGS_LIST, contest.getBalloonSettings());
         // configuration.add(ConfigKeys.GENERAL_PROBLEM, contest.huh());
         configuration.add(ConfigKeys.PROBLEM_DATA_FILES, contest.getProblemDataFiles());
         configuration.add(ConfigKeys.JUDGEMENTS, contest.getJudgements());
