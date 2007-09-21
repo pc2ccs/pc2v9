@@ -23,6 +23,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import javax.swing.ButtonGroup;
+import javax.swing.JComboBox;
 
 /**
  * Add/Edit Problem Pane
@@ -33,6 +34,8 @@ import javax.swing.ButtonGroup;
 
 // $HeadURL$
 public class ProblemPane extends JPanePlugin {
+
+    private String defaultInternationalValidatorCommand = "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
 
     /**
      * 
@@ -104,9 +107,43 @@ public class ProblemPane extends JPanePlugin {
 
     private ProblemDataFiles newProblemDataFiles;
 
-    private JCheckBox useInternalValidatorCheckBox = null;
+    private ButtonGroup teamReadsFrombuttonGroup = null; // @jve:decl-index=0:visual-constraint="586,61"
 
-    private ButtonGroup teamReadsFrombuttonGroup = null; // @jve:decl-index=0:visual-constraint="598,159"
+    private JPanel validatorPane = null;
+
+    private JRadioButton useNOValidatator = null;
+
+    private JRadioButton usePC2ValidatorButton = null;
+
+    private JRadioButton useExternalValidatorButton = null;
+
+    private JCheckBox showValidatorToJudges = null;
+
+    private JPanel pc2ValidatorFrame = null;
+
+    private JPanel externalValidatorFrame = null;
+
+    private JLabel validatorOptionsLabel = null;
+
+    private JComboBox comboPC2ValidatorOptions = null;
+
+    private JCheckBox ignoreCaseInOutputCheckBox = null;
+
+    private JLabel validatorProgramLabel = null;
+
+    private JPanel externalValidatorPane = null;
+
+    private JButton validatorProgramJButton = null;
+
+    private JLabel jLabel = null;
+
+    private JTextField validatorCommandLineTextBox = null;
+
+    private JLabel externalValidatorLabel1 = null;
+
+    private JCheckBox showComareCheckBox = null;
+
+    private JCheckBox doNotShowOutputWindowCheckBox = null;
 
     /**
      * This method initializes
@@ -123,12 +160,11 @@ public class ProblemPane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new java.awt.Dimension(536, 405));
+        this.setSize(new java.awt.Dimension(539,536));
 
         this.add(getMessagePane(), java.awt.BorderLayout.NORTH);
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
-        this.add(getMainTabbedPane(), java.awt.BorderLayout.EAST);
-        this.add(getGeneralPane(), java.awt.BorderLayout.CENTER);
+        this.add(getMainTabbedPane(), java.awt.BorderLayout.CENTER);
     }
 
     public void setContestAndController(IContest inContest, IController inController) {
@@ -353,9 +389,14 @@ public class ProblemPane extends JPanePlugin {
             problem.setReadInputDataFromSTDIN(true);
         }
 
-        problem.setUsingPC2Validator(useInternalValidatorCheckBox.isSelected());
-        problem.setValidated(useInternalValidatorCheckBox.isSelected());
-        
+        problem.setValidatedProblem(!useNOValidatator.isSelected());
+        if (problem.isValidatedProblem()) {
+            problem.setUsingPC2Validator(usePC2ValidatorButton.isSelected());
+        }
+
+        problem.setValidatorCommandLine(validatorCommandLineTextBox.getText());
+        problem.setShowValidationToJudges(showValidatorToJudges.isSelected());
+
         return problem;
     }
 
@@ -471,7 +512,8 @@ public class ProblemPane extends JPanePlugin {
     /**
      * Checks to ensure the fileName exists, is a file, and is readable.
      * 
-     * @param fileName the file to check
+     * @param fileName
+     *            the file to check
      * @return true if the is readable
      */
     private boolean checkFile(String fileName) {
@@ -585,6 +627,20 @@ public class ProblemPane extends JPanePlugin {
                 stdinRadioButton.setSelected(false);
             }
 
+            if (problem.isValidatedProblem()) {
+
+                if (problem.isUsingPC2Validator()) {
+                    usePC2ValidatorButton.setSelected(true);
+                } else {
+                    useExternalValidatorButton.setSelected(true);
+                }
+
+            } else {
+                useNOValidatator.setSelected(true);
+            }
+
+            validatorCommandLineTextBox.setEnabled(useExternalValidatorButton.isSelected());
+
         } else {
 
             getAddButton().setVisible(true);
@@ -600,7 +656,9 @@ public class ProblemPane extends JPanePlugin {
             answerFileNameLabel.setText("");
             fileRadioButton.setSelected(true);
             stdinRadioButton.setSelected(false);
-
+            validatorCommandLineTextBox.setText(defaultInternationalValidatorCommand);
+            useNOValidatator.setSelected(true);
+            validatorCommandLineTextBox.setEnabled(useExternalValidatorButton.isSelected());
         }
 
         populatingGUI = false;
@@ -624,6 +682,9 @@ public class ProblemPane extends JPanePlugin {
     private JTabbedPane getMainTabbedPane() {
         if (mainTabbedPane == null) {
             mainTabbedPane = new JTabbedPane();
+            mainTabbedPane.setPreferredSize(new java.awt.Dimension(400, 400));
+            mainTabbedPane.addTab("General", null, getGeneralPane(), null);
+            mainTabbedPane.addTab("Validator", null, getValidatorPane(), null);
         }
         return mainTabbedPane;
     }
@@ -651,7 +712,8 @@ public class ProblemPane extends JPanePlugin {
             generalPane.add(getAnswerFilePane(), null);
             generalPane.add(problemNameLabel, null);
             generalPane.add(timeoutLabel, null);
-            generalPane.add(getUseInternalValidatorCheckBox(), null);
+            generalPane.add(getShowComareCheckBox(), null);
+            generalPane.add(getDoNotShowOutputWindowCheckBox(), null);
         }
         return generalPane;
     }
@@ -959,20 +1021,6 @@ public class ProblemPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes useInternalValidator
-     * 
-     * @return javax.swing.JCheckBox
-     */
-    private JCheckBox getUseInternalValidatorCheckBox() {
-        if (useInternalValidatorCheckBox == null) {
-            useInternalValidatorCheckBox = new JCheckBox();
-            useInternalValidatorCheckBox.setBounds(new java.awt.Rectangle(23, 357, 340, 16));
-            useInternalValidatorCheckBox.setText("Use PC^2 Validator");
-        }
-        return useInternalValidatorCheckBox;
-    }
-
-    /**
      * This method initializes teamReadsFrombuttonGroup
      * 
      * @return javax.swing.ButtonGroup
@@ -984,6 +1032,243 @@ public class ProblemPane extends JPanePlugin {
             teamReadsFrombuttonGroup.add(getFileRadioButton());
         }
         return teamReadsFrombuttonGroup;
+    }
+
+    /**
+     * This method initializes validatorPane
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getValidatorPane() {
+        if (validatorPane == null) {
+            validatorPane = new JPanel();
+            validatorPane.setLayout(null);
+            validatorPane.add(getUseNOValidatator(), null);
+            validatorPane.add(getUsePC2ValidatorButton(), null);
+            validatorPane.add(getJRadioButton(), null);
+            validatorPane.add(getShowValidatorToJudges(), null);
+            validatorPane.add(getPc2ValidatorFrame(), null);
+            validatorPane.add(getExternalValidatorFrame(), null);
+        }
+        return validatorPane;
+    }
+
+    /**
+     * This method initializes useValidatorRadioButton
+     * 
+     * @return javax.swing.JRadioButton
+     */
+    private JRadioButton getUseNOValidatator() {
+        if (useNOValidatator == null) {
+            useNOValidatator = new JRadioButton();
+            useNOValidatator.setBounds(new java.awt.Rectangle(20, 15, 246, 23));
+            useNOValidatator.setText("Do not use Validator");
+        }
+        return useNOValidatator;
+    }
+
+    /**
+     * This method initializes jRadioButton
+     * 
+     * @return javax.swing.JRadioButton
+     */
+    private JRadioButton getUsePC2ValidatorButton() {
+        if (usePC2ValidatorButton == null) {
+            usePC2ValidatorButton = new JRadioButton();
+            usePC2ValidatorButton.setBounds(new java.awt.Rectangle(21, 49, 246, 23));
+            usePC2ValidatorButton.setText("Use PC^2 Validator");
+        }
+        return usePC2ValidatorButton;
+    }
+
+    /**
+     * This method initializes jRadioButton
+     * 
+     * @return javax.swing.JRadioButton
+     */
+    private JRadioButton getJRadioButton() {
+        if (useExternalValidatorButton == null) {
+            useExternalValidatorButton = new JRadioButton();
+            useExternalValidatorButton.setBounds(new java.awt.Rectangle(17, 196, 246, 23));
+            useExternalValidatorButton.setText("Use External Validator");
+        }
+        return useExternalValidatorButton;
+    }
+
+    /**
+     * This method initializes showValidatorToJudges
+     * 
+     * @return javax.swing.JCheckBox
+     */
+    private JCheckBox getShowValidatorToJudges() {
+        if (showValidatorToJudges == null) {
+            showValidatorToJudges = new JCheckBox();
+            showValidatorToJudges.setBounds(new java.awt.Rectangle(38,368,306,24));
+            showValidatorToJudges.setText("Show Validator To Judges (SVTJ)");
+        }
+        return showValidatorToJudges;
+    }
+
+    /**
+     * This method initializes pc2ValidatorFrame
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getPc2ValidatorFrame() {
+        if (pc2ValidatorFrame == null) {
+            validatorOptionsLabel = new JLabel();
+            validatorOptionsLabel.setText("Validator Option");
+            validatorOptionsLabel.setBounds(new java.awt.Rectangle(22, 26, 123, 23));
+            pc2ValidatorFrame = new JPanel();
+            pc2ValidatorFrame.setLayout(null);
+            pc2ValidatorFrame.setBounds(new java.awt.Rectangle(40, 80, 471, 108));
+            pc2ValidatorFrame.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "PC^2 Validator", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+                    javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
+            pc2ValidatorFrame.add(validatorOptionsLabel, null);
+            pc2ValidatorFrame.add(getPc2ValidatorComboBox(), null);
+            pc2ValidatorFrame.add(getIgnoreCaseInOutputCheckBox(), null);
+        }
+        return pc2ValidatorFrame;
+    }
+
+    /**
+     * This method initializes externalValidatorFrame
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getExternalValidatorFrame() {
+        if (externalValidatorFrame == null) {
+            jLabel = new JLabel();
+            jLabel.setBounds(new java.awt.Rectangle(14, 53, 177, 16));
+            jLabel.setText("Validator Command Line");
+            validatorProgramLabel = new JLabel();
+            validatorProgramLabel.setText("Validator Program");
+            validatorProgramLabel.setBounds(new java.awt.Rectangle(13, 26, 121, 16));
+            externalValidatorFrame = new JPanel();
+            externalValidatorFrame.setLayout(null);
+            externalValidatorFrame.setBounds(new java.awt.Rectangle(39, 231, 470, 127));
+            externalValidatorFrame.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "External Validator", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+                    javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
+            externalValidatorFrame.add(validatorProgramLabel, null);
+            externalValidatorFrame.add(getExternalValidatorLabel(), null);
+            externalValidatorFrame.add(getValidatorProgramJButton(), null);
+            externalValidatorFrame.add(jLabel, null);
+            externalValidatorFrame.add(getValidatorCommandLineTextBox(), null);
+        }
+        return externalValidatorFrame;
+    }
+
+    /**
+     * This method initializes pc2ValidatorJOption
+     * 
+     * @return javax.swing.JComboBox
+     */
+    private JComboBox getPc2ValidatorComboBox() {
+        if (comboPC2ValidatorOptions == null) {
+            comboPC2ValidatorOptions = new JComboBox();
+            comboPC2ValidatorOptions.setBounds(new java.awt.Rectangle(158, 24, 255, 26));
+
+            comboPC2ValidatorOptions.addItem("1 - diff");
+            comboPC2ValidatorOptions.addItem("2 - ignore whitespace at start of file");
+            comboPC2ValidatorOptions.addItem("3 - ignore leading whitespace on lines");
+            comboPC2ValidatorOptions.addItem("4 - ignore all whitespace on lines");
+            comboPC2ValidatorOptions.addItem("5 - ignore empty lines");
+
+        }
+        return comboPC2ValidatorOptions;
+    }
+
+    /**
+     * This method initializes jCheckBox
+     * 
+     * @return javax.swing.JCheckBox
+     */
+    private JCheckBox getIgnoreCaseInOutputCheckBox() {
+        if (ignoreCaseInOutputCheckBox == null) {
+            ignoreCaseInOutputCheckBox = new JCheckBox();
+            ignoreCaseInOutputCheckBox.setBounds(new java.awt.Rectangle(27, 62, 263, 24));
+            ignoreCaseInOutputCheckBox.setText("Ignore Case In Output");
+        }
+        return ignoreCaseInOutputCheckBox;
+    }
+
+    /**
+     * This method initializes externalValidatorPane
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getExternalValidatorLabel() {
+        if (externalValidatorLabel1 == null) {
+            externalValidatorLabel1 = new JLabel();
+            externalValidatorLabel1.setText("JLabel");
+            externalValidatorPane = new JPanel();
+            externalValidatorPane.setLayout(new BorderLayout());
+            externalValidatorPane.setBounds(new java.awt.Rectangle(140, 21, 267, 22));
+            externalValidatorPane.add(externalValidatorLabel1, java.awt.BorderLayout.CENTER);
+        }
+        return externalValidatorPane;
+    }
+
+    /**
+     * This method initializes validatorProgramJButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getValidatorProgramJButton() {
+        if (validatorProgramJButton == null) {
+            validatorProgramJButton = new JButton();
+            validatorProgramJButton.setBounds(new java.awt.Rectangle(425, 21, 34, 25));
+            validatorProgramJButton.setText("...");
+            validatorProgramJButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    if (selectFile(externalValidatorLabel1)) {
+                        externalValidatorLabel1.setToolTipText(externalValidatorLabel1.getText());
+                    }
+                }
+            });
+        }
+        return validatorProgramJButton;
+    }
+
+    /**
+     * This method initializes validatorCommandLineTextBox
+     * 
+     * @return javax.swing.JTextField
+     */
+    private JTextField getValidatorCommandLineTextBox() {
+        if (validatorCommandLineTextBox == null) {
+            validatorCommandLineTextBox = new JTextField();
+            validatorCommandLineTextBox.setBounds(new java.awt.Rectangle(17, 78, 432, 29));
+        }
+        return validatorCommandLineTextBox;
+    }
+
+    /**
+     * This method initializes showComareCheckBox	
+     * 	
+     * @return javax.swing.JCheckBox	
+     */
+    private JCheckBox getShowComareCheckBox() {
+        if (showComareCheckBox == null) {
+            showComareCheckBox = new JCheckBox();
+            showComareCheckBox.setBounds(new java.awt.Rectangle(51,342,207,21));
+            showComareCheckBox.setText("Show Compare");
+        }
+        return showComareCheckBox;
+    }
+
+    /**
+     * This method initializes jCheckBox	
+     * 	
+     * @return javax.swing.JCheckBox	
+     */
+    private JCheckBox getDoNotShowOutputWindowCheckBox() {
+        if (doNotShowOutputWindowCheckBox == null) {
+            doNotShowOutputWindowCheckBox = new JCheckBox();
+            doNotShowOutputWindowCheckBox.setBounds(new java.awt.Rectangle(50,369,303,24));
+            doNotShowOutputWindowCheckBox.setText("Do not show the output window");
+        }
+        return doNotShowOutputWindowCheckBox;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

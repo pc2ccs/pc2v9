@@ -584,8 +584,8 @@ public class Executable {
      * @return true if should be validated.
      */
     private boolean isValidated() {
-        System.err.println("debug 22 isVal "+problem.isValidated()+" "+isTestRunOnly());
-        return (problem.isValidated() && (!isTestRunOnly()));
+        System.err.println("debug 22 isVal "+problem.isValidatedProblem()+" "+isTestRunOnly());
+        return (problem.isValidatedProblem() && (!isTestRunOnly()));
     }
 
     public String getFileNameFromUser() {

@@ -73,13 +73,16 @@ public class Problem implements IElementObject {
     /**
      * Is this problem using a validator?
      */
-    private boolean validated = false;
+    private boolean validatedProblem = false;
 
     /**
      * Using the internal (default) validator ?
      */
     private boolean usingPC2Validator = false;
 
+    /**
+     * Which PC2 Validator Option
+     */
     private int whichPC2Validator = 0;
 
     /**
@@ -96,6 +99,9 @@ public class Problem implements IElementObject {
      */
     private String validatorProgramName;
 
+    /**
+     * Uses international judgement method.
+     */
     private boolean internationalJudgementReadMethod = true;
 
     // TODO Implement Commands to be executed before a problem is run
@@ -110,7 +116,9 @@ public class Problem implements IElementObject {
     // */
     // private SerializedFile executeionPrepFile;
 
-
+    /**
+     * PC2 option to ignore spaces on validation.
+     */
     private boolean ignoreSpacesOnValidation = false;
 
     /**
@@ -243,10 +251,10 @@ public class Problem implements IElementObject {
     }
 
     /**
-     * @return Returns the validated.
+     * @return Returns the validatedProblem.
      */
-    public boolean isValidated() {
-        return validated;
+    public boolean isValidatedProblem() {
+        return validatedProblem;
     }
 
     /**
@@ -337,11 +345,11 @@ public class Problem implements IElementObject {
     }
 
     /**
-     * @param validated
-     *            The validated to set.
+     * @param validatedProblem
+     *            The validatedProblem to set.
      */
-    public void setValidated(boolean validated) {
-        this.validated = validated;
+    public void setValidatedProblem(boolean validated) {
+        this.validatedProblem = validated;
     }
 
     /**
@@ -426,7 +434,7 @@ public class Problem implements IElementObject {
             if (timeOutInSeconds != problem.getTimeOutInSeconds()) {
                 return false;
             }
-            if (validated != problem.isValidated()) {
+            if (validatedProblem != problem.isValidatedProblem()) {
                 return false;
             }
             if (usingPC2Validator != problem.isUsingPC2Validator()) {

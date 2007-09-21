@@ -40,7 +40,7 @@ public class ProblemsReport implements IReport {
         }
         printWriter.println();
         
-        printWriter.println("        Using validator : " + problem.isValidated());
+        printWriter.println("        Using validator : " + problem.isValidatedProblem());
         printWriter.println("     Validator cmd line : " + problem.getValidatorCommandLine());
         printWriter.println("     Validator option # : " + problem.getWhichPC2Validator());
         printWriter.println("    Using pc2 validator : " + problem.isUsingPC2Validator());
