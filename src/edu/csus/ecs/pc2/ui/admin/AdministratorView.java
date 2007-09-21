@@ -16,6 +16,7 @@ import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.ui.AccountsPane;
 import edu.csus.ecs.pc2.ui.ClarificationsPane;
 import edu.csus.ecs.pc2.ui.ConnectionsPane;
+import edu.csus.ecs.pc2.ui.ContestClockPane;
 import edu.csus.ecs.pc2.ui.ContestInformationPane;
 import edu.csus.ecs.pc2.ui.ContestTimesPane;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
@@ -158,6 +159,8 @@ public class AdministratorView extends JFrame implements UIPlugin {
                 JudgementsPanel judgementsPanel = new JudgementsPanel();
                 addUIPlugin(getMainTabbedPanel(), "Judgements", judgementsPanel);
                 
+                ContestClockPane contestClockPane = new ContestClockPane();
+                addUIPlugin(getMainTabbedPanel(), "Clock", contestClockPane);
                 
                 setTitle("PC^2 " + contest.getTitle() + " Build " + new VersionInfo().getBuildNumber());
                 setVisible(true);
