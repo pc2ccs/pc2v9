@@ -42,7 +42,7 @@ public class EditProblemFrame extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(549, 433));
+        this.setSize(new java.awt.Dimension(549,535));
         this.setContentPane(getProblemPane());
         this.setTitle("New Problem");
 
