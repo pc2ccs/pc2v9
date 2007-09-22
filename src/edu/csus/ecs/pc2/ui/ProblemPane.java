@@ -317,14 +317,19 @@ public class ProblemPane extends JPanePlugin {
 
             try {
                 Problem changedProblem = getProblemFromFields(null);
-                if (problem == null || problem.isSameAs(changedProblem)) {
+                System.out.println("debug enableUpdateButton same as " + problem.isSameAs(changedProblem));
+                if (!problem.isSameAs(changedProblem)) {
                     enableButton = true;
                 }
+                System.out.println("debug enableUpdateButton BUTTON ON = " + enableButton);
+                
             } catch (InvalidFieldValue e) {
                 // invalid field, but that is ok as they are entering data
                 // will be caught and reported when they hit update or add.
-                ;
+                System.out.println("debug "+e.getMessage());
+                enableButton = true;
             }
+            System.out.println("debug enableUpdateBu     BUTTON ON = " + enableButton);
 
         } else {
             if (getAddButton().isVisible()) {
@@ -341,7 +346,8 @@ public class ProblemPane extends JPanePlugin {
      * 
      * This also populates newProblemDataFiles for the data files.
      * 
-     * @param checkProblem will update this Problem if supplied, if null creates a new Problem
+     * @param checkProblem
+     *            will update this Problem if supplied, if null creates a new Problem
      * @return Problem based on fields
      * @throws InvalidFieldValue
      */
@@ -714,6 +720,16 @@ public class ProblemPane extends JPanePlugin {
             getShowValidatorToJudges().setSelected(problem.isShowValidationToJudges());
             getDoNotShowOutputWindowCheckBox().setSelected(problem.isHideOutputWindow());
             getShowCompareCheckBox().setSelected(problem.isShowCompareWindow());
+
+            // debug
+            Problem changedProblem;
+            try {
+                changedProblem = getProblemFromFields(null);
+                System.out.println("debug enableUpdateButton same as " + problem.isSameAs(changedProblem));
+            } catch (InvalidFieldValue e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
 
         } else {
 
@@ -1316,7 +1332,7 @@ public class ProblemPane extends JPanePlugin {
     private JPanel getExternalValidatorLabel() {
         if (externalValidatorLabel == null) {
             externalValidatorLabel = new JLabel();
-            externalValidatorLabel.setText("JLabel");
+            externalValidatorLabel.setText("");
             externalValidatorPane = new JPanel();
             externalValidatorPane.setLayout(new BorderLayout());
             externalValidatorPane.setBounds(new java.awt.Rectangle(140, 21, 267, 22));
