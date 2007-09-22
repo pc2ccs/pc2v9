@@ -1,5 +1,7 @@
 package edu.csus.ecs.pc2.core.model;
 
+import java.awt.image.SampleModel;
+
 
 /**
  * Single Problem Definition.
@@ -433,11 +435,32 @@ public class Problem implements IElementObject {
     public int hashCode() {
         return getElementId().toString().hashCode();
     }
+    
+    /**
+     * Compares string, handles if either string is null.
+     * 
+     * @param s1
+     * @param s2
+     * @return true if both null or equal, false otherwise
+     */
+    // TODO move this into a string utility class.
+    private boolean stringSame (String s1, String s2){
+        if (s1 == null && s2 == null) {
+            return true;
+        }
+        
+        if (s1 == null && s2 != null){
+            return false;
+        }
+        
+        return s1.equals(s2);
+            
+    }
 
     public boolean isSameAs(Problem problem) {
 
         try {
-            if (!displayName.equals(problem.getDisplayName())) {
+            if (! stringSame(displayName, problem.getDisplayName())){
                 return false;
             }
             if (isActive() != problem.isActive()) {
@@ -447,10 +470,10 @@ public class Problem implements IElementObject {
                 return false;
             }
 
-            if (!dataFileName.equals(problem.getDataFileName())) {
+            if (! stringSame(dataFileName, problem.getDataFileName())) {
                 return false;
             }
-            if (!answerFileName.equals(problem.getAnswerFileName())) {
+            if (! stringSame(answerFileName, problem.getAnswerFileName())) {
                 return false;
             }
             if (!readInputDataFromSTDIN == problem.isReadInputDataFromSTDIN()) {
@@ -466,10 +489,10 @@ public class Problem implements IElementObject {
             if (whichPC2Validator != problem.getWhichPC2Validator()) {
                 return false;
             }
-            if (!validatorProgramName.equals(problem.getValidatorProgramName())) {
+            if (! stringSame(validatorProgramName, problem.getValidatorProgramName())) {
                 return false;
             }
-            if (!validatorCommandLine.equals(problem.getValidatorCommandLine())) {
+            if (! stringSame(validatorCommandLine, problem.getValidatorCommandLine())) {
                 return false;
             }
             if (ignoreSpacesOnValidation != problem.isIgnoreSpacesOnValidation()) {
@@ -490,10 +513,10 @@ public class Problem implements IElementObject {
                 return false;
             }
 
-
             return true;
         } catch (Exception e) {
             // TODO Log to static exception Log
+            e.printStackTrace();
             return false;
         }
     }
