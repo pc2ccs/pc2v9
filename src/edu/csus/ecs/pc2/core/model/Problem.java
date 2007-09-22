@@ -20,6 +20,12 @@ public class Problem implements IElementObject {
     public static final String SVN_ID = "$Id$";
 
     /**
+     * PC<sup>2 Validator Command Line.
+     */
+    public static final String INTERNAL_VALIDATOR_NAME = "pc2.jar edu.csus.ecs.pc2.validator.Validator";
+
+
+    /**
      * 
      */
     private static final long serialVersionUID = 1708763261096488240L;
@@ -440,40 +446,50 @@ public class Problem implements IElementObject {
             if (timeOutInSeconds != problem.getTimeOutInSeconds()) {
                 return false;
             }
-            if (validatedProblem != problem.isValidatedProblem()) {
-                return false;
-            }
-            if (usingPC2Validator != problem.isUsingPC2Validator()) {
-                return false;
-            }
-            if (ignoreSpacesOnValidation != problem.isIgnoreSpacesOnValidation()) {
-                return false;
-            }
-            if (hideOutputWindow != problem.isHideOutputWindow()) {
-                return false;
-            }
-            if (showValidationToJudges != problem.isShowValidationToJudges()) {
-                return false;
-            }
-            if (whichPC2Validator != problem.getWhichPC2Validator()) {
-                return false;
-            }
+
             if (!dataFileName.equals(problem.getDataFileName())) {
                 return false;
             }
             if (!answerFileName.equals(problem.getAnswerFileName())) {
                 return false;
             }
-            if (!validatorCommandLine.equals(problem.getValidatorCommandLine())) {
+            if (!readInputDataFromSTDIN == problem.isReadInputDataFromSTDIN()) {
+                return false;
+            }
+            
+            if (validatedProblem != problem.isValidatedProblem()) {
+                return false;
+            }
+            if (usingPC2Validator != problem.isUsingPC2Validator()) {
+                return false;
+            }
+            if (whichPC2Validator != problem.getWhichPC2Validator()) {
                 return false;
             }
             if (!validatorProgramName.equals(problem.getValidatorProgramName())) {
                 return false;
             }
-
+            if (!validatorCommandLine.equals(problem.getValidatorCommandLine())) {
+                return false;
+            }
+            if (ignoreSpacesOnValidation != problem.isIgnoreSpacesOnValidation()) {
+                return false;
+            }
+            if (showValidationToJudges != problem.isShowValidationToJudges()) {
+                return false;
+            }
+            
+            if (hideOutputWindow != problem.isHideOutputWindow()) {
+                return false;
+            }
             if (showCompareWindow != problem.isShowCompareWindow()) {
                 return false;
             }
+            
+            if (getSiteNumber() != problem.getSiteNumber()){
+                return false;
+            }
+
 
             return true;
         } catch (Exception e) {
