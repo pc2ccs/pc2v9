@@ -26,10 +26,10 @@ import javax.swing.ButtonGroup;
 import javax.swing.JComboBox;
 
 /**
- * Add/Edit Problem Pane
+ * Add/Edit Problem Pane.
  * 
  * @author pc2@ecs.csus.edu
- * 
+ * @version $Id$
  */
 
 // $HeadURL$
@@ -139,9 +139,9 @@ public class ProblemPane extends JPanePlugin {
 
     private JTextField validatorCommandLineTextBox = null;
 
-    private JLabel externalValidatorLabel1 = null;
+    private JLabel externalValidatorLabel = null;
 
-    private JCheckBox showComareCheckBox = null;
+    private JCheckBox showCompareCheckBox = null;
 
     private JCheckBox doNotShowOutputWindowCheckBox = null;
 
@@ -162,7 +162,7 @@ public class ProblemPane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new java.awt.Dimension(539, 536));
+        this.setSize(new java.awt.Dimension(539,511));
 
         this.add(getMessagePane(), java.awt.BorderLayout.NORTH);
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
@@ -284,26 +284,32 @@ public class ProblemPane extends JPanePlugin {
 
         if (problem != null) {
 
-            enableButton |= (!problem.getDisplayName().equals(getProblemNameTextField().getText()));
-
-            int timeOutSeconds = getIntegerValue(timeOutSecondTextField.getText());
-            enableButton |= (timeOutSeconds != problem.getTimeOutInSeconds());
-
-            boolean hasDataFile = problem.getDataFileName() != null;
-            enableButton |= (hasDataFile != problemRequiresDataCheckBox.isSelected());
-            if (hasDataFile) {
-                enableButton |= (!inputDataFileLabel.getText().equals(problem.getDataFileName()));
+//            enableButton |= (!problem.getDisplayName().equals(getProblemNameTextField().getText()));
+//
+//            int timeOutSeconds = getIntegerValue(timeOutSecondTextField.getText());
+//            enableButton |= (timeOutSeconds != problem.getTimeOutInSeconds());
+//
+//            boolean hasDataFile = problem.getDataFileName() != null;
+//            enableButton |= (hasDataFile != problemRequiresDataCheckBox.isSelected());
+//            if (hasDataFile) {
+//                enableButton |= (!inputDataFileLabel.getText().equals(problem.getDataFileName()));
+//            }
+//
+//            boolean hasAnswerFile = problem.getAnswerFileName() != null;
+//            enableButton |= (hasAnswerFile != judgesHaveAnswerFiles.isSelected());
+//            if (hasAnswerFile) {
+//                enableButton |= (!answerFileNameLabel.getText().equals(problem.getAnswerFileName()));
+//            }
+//
+//            enableButton |= (stdinRadioButton.isSelected() != problem.isReadInputDataFromSTDIN());
+//
+//            enableButton |= (fileRadioButton.isSelected() && problem.isReadInputDataFromSTDIN());
+          
+            Problem changedProblem = getProblemFromFields();
+            if (problem.isSameAs(changedProblem)) {
+                enableButton = true;
             }
-
-            boolean hasAnswerFile = problem.getAnswerFileName() != null;
-            enableButton |= (hasAnswerFile != judgesHaveAnswerFiles.isSelected());
-            if (hasAnswerFile) {
-                enableButton |= (!answerFileNameLabel.getText().equals(problem.getAnswerFileName()));
-            }
-
-            enableButton |= (stdinRadioButton.isSelected() != problem.isReadInputDataFromSTDIN());
-
-            enableButton |= (fileRadioButton.isSelected() && problem.isReadInputDataFromSTDIN());
+            
         } else {
             if (getAddButton().isVisible()) {
                 enableButton = true;
@@ -391,6 +397,11 @@ public class ProblemPane extends JPanePlugin {
             problem.setReadInputDataFromSTDIN(true);
         }
 
+        /**
+         * The 3 radio buttons for which validator are fit into 2 boolean fields in problem. If the problem is validated and usePC2 validator then use pc2validator if the problem is validated and NOT
+         * usePC2 validator then use external validator if the problem is not validated, well, the problem is not validated.
+         */
+
         problem.setValidatedProblem(!useNOValidatatorRadioButton.isSelected());
         if (problem.isValidatedProblem()) {
             problem.setUsingPC2Validator(usePC2ValidatorRadioButton.isSelected());
@@ -398,6 +409,9 @@ public class ProblemPane extends JPanePlugin {
 
         problem.setValidatorCommandLine(validatorCommandLineTextBox.getText());
         problem.setShowValidationToJudges(showValidatorToJudges.isSelected());
+
+        problem.setHideOutputWindow(getDoNotShowOutputWindowCheckBox().isSelected());
+        problem.setShowCompareWindow(getShowCompareCheckBox().isSelected());
 
         return problem;
     }
@@ -628,11 +642,16 @@ public class ProblemPane extends JPanePlugin {
                 fileRadioButton.setSelected(true);
                 stdinRadioButton.setSelected(false);
             }
+            
+            comboPC2ValidatorOptions.setSelectedIndex(0);
+            ignoreCaseInOutputCheckBox.setSelected(false);
 
-            if (problem.isValidatedProblem()) {
+            if (inProblem.isValidatedProblem()) {
 
-                if (problem.isUsingPC2Validator()) {
+                if (inProblem.isUsingPC2Validator()) {
                     usePC2ValidatorRadioButton.setSelected(true);
+                    comboPC2ValidatorOptions.setSelectedIndex(inProblem.getWhichPC2Validator());
+                    ignoreCaseInOutputCheckBox.setSelected(inProblem.isIgnoreSpacesOnValidation());
                 } else {
                     useExternalValidatorRadioButton.setSelected(true);
                 }
@@ -640,8 +659,14 @@ public class ProblemPane extends JPanePlugin {
             } else {
                 useNOValidatatorRadioButton.setSelected(true);
             }
+            
+            getPc2ValidatorComboBox().setSelectedIndex(0);
+            getIgnoreCaseInOutputCheckBox().setSelected(true);
 
-            validatorCommandLineTextBox.setEnabled(useExternalValidatorRadioButton.isSelected());
+            getValidatorCommandLineTextBox().setText(problem.getValidatorCommandLine());
+            getShowValidatorToJudges().setSelected(problem.isShowValidationToJudges());
+            getDoNotShowOutputWindowCheckBox().setSelected(problem.isHideOutputWindow());
+            getShowCompareCheckBox().setSelected(problem.isShowCompareWindow());
 
         } else {
 
@@ -658,9 +683,18 @@ public class ProblemPane extends JPanePlugin {
             answerFileNameLabel.setText("");
             fileRadioButton.setSelected(true);
             stdinRadioButton.setSelected(false);
-            validatorCommandLineTextBox.setText(defaultInternationalValidatorCommand);
             useNOValidatatorRadioButton.setSelected(true);
+            comboPC2ValidatorOptions.setSelectedIndex(0);
+            ignoreCaseInOutputCheckBox.setSelected(false);
             validatorCommandLineTextBox.setEnabled(useExternalValidatorRadioButton.isSelected());
+
+            externalValidatorLabel.setText("");
+
+            getValidatorCommandLineTextBox().setText(defaultInternationalValidatorCommand);
+            getShowValidatorToJudges().setSelected(true);
+            getDoNotShowOutputWindowCheckBox().setSelected(false);
+            getShowCompareCheckBox().setSelected(true);
+
         }
 
         populatingGUI = false;
@@ -714,7 +748,7 @@ public class ProblemPane extends JPanePlugin {
             generalPane.add(getAnswerFilePane(), null);
             generalPane.add(problemNameLabel, null);
             generalPane.add(timeoutLabel, null);
-            generalPane.add(getShowComareCheckBox(), null);
+            generalPane.add(getShowCompareCheckBox(), null);
             generalPane.add(getDoNotShowOutputWindowCheckBox(), null);
         }
         return generalPane;
@@ -1171,6 +1205,7 @@ public class ProblemPane extends JPanePlugin {
             comboPC2ValidatorOptions = new JComboBox();
             comboPC2ValidatorOptions.setBounds(new java.awt.Rectangle(158, 24, 255, 26));
 
+            comboPC2ValidatorOptions.addItem("None Selected");
             comboPC2ValidatorOptions.addItem("1 - diff");
             comboPC2ValidatorOptions.addItem("2 - ignore whitespace at start of file");
             comboPC2ValidatorOptions.addItem("3 - ignore leading whitespace on lines");
@@ -1201,13 +1236,13 @@ public class ProblemPane extends JPanePlugin {
      * @return javax.swing.JPanel
      */
     private JPanel getExternalValidatorLabel() {
-        if (externalValidatorLabel1 == null) {
-            externalValidatorLabel1 = new JLabel();
-            externalValidatorLabel1.setText("JLabel");
+        if (externalValidatorLabel == null) {
+            externalValidatorLabel = new JLabel();
+            externalValidatorLabel.setText("JLabel");
             externalValidatorPane = new JPanel();
             externalValidatorPane.setLayout(new BorderLayout());
             externalValidatorPane.setBounds(new java.awt.Rectangle(140, 21, 267, 22));
-            externalValidatorPane.add(externalValidatorLabel1, java.awt.BorderLayout.CENTER);
+            externalValidatorPane.add(externalValidatorLabel, java.awt.BorderLayout.CENTER);
         }
         return externalValidatorPane;
     }
@@ -1224,8 +1259,8 @@ public class ProblemPane extends JPanePlugin {
             validatorProgramJButton.setText("...");
             validatorProgramJButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    if (selectFile(externalValidatorLabel1)) {
-                        externalValidatorLabel1.setToolTipText(externalValidatorLabel1.getText());
+                    if (selectFile(externalValidatorLabel)) {
+                        externalValidatorLabel.setToolTipText(externalValidatorLabel.getText());
                     }
                 }
             });
@@ -1251,13 +1286,13 @@ public class ProblemPane extends JPanePlugin {
      * 
      * @return javax.swing.JCheckBox
      */
-    private JCheckBox getShowComareCheckBox() {
-        if (showComareCheckBox == null) {
-            showComareCheckBox = new JCheckBox();
-            showComareCheckBox.setBounds(new java.awt.Rectangle(51, 342, 207, 21));
-            showComareCheckBox.setText("Show Compare");
+    private JCheckBox getShowCompareCheckBox() {
+        if (showCompareCheckBox == null) {
+            showCompareCheckBox = new JCheckBox();
+            showCompareCheckBox.setBounds(new java.awt.Rectangle(51, 342, 207, 21));
+            showCompareCheckBox.setText("Show Compare");
         }
-        return showComareCheckBox;
+        return showCompareCheckBox;
     }
 
     /**
