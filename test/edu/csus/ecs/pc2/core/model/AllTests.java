@@ -7,10 +7,11 @@ import junit.framework.TestSuite;
  * All JUnit tests for core.model package.
  * 
  * @author pc2@ecs.csus.edu
+ * $version $Id$
  */
 
 // $HeadURL$
-// $Id$
+
 public final class AllTests {
 
     private AllTests() {
@@ -23,6 +24,7 @@ public final class AllTests {
         suite.addTestSuite(TimeFormatTest.class);
         suite.addTestSuite(SiteTest.class);
         suite.addTestSuite(AccountListTest.class);
+        suite.addTestSuite(ProblemTest.class);
         //$JUnit-END$
         return suite;
     }
