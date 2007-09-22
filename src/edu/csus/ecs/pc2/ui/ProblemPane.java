@@ -35,7 +35,7 @@ import javax.swing.JComboBox;
 // $HeadURL$
 public class ProblemPane extends JPanePlugin {
 
-    private String defaultInternationalValidatorCommand = "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
+    public final String DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND = "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
 
     /**
      * 
@@ -54,6 +54,9 @@ public class ProblemPane extends JPanePlugin {
 
     private JLabel messageLabel = null;
 
+    /**
+     * The input problem.
+     */
     private Problem problem = null;
 
     private JTabbedPane mainTabbedPane = null;
@@ -162,7 +165,7 @@ public class ProblemPane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new java.awt.Dimension(539,511));
+        this.setSize(new java.awt.Dimension(539, 511));
 
         this.add(getMessagePane(), java.awt.BorderLayout.NORTH);
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
@@ -237,6 +240,10 @@ public class ProblemPane extends JPanePlugin {
         return addButton;
     }
 
+    /**
+     * Add Problem to the fields.
+     * 
+     */
     protected void addProblem() {
 
         if (problemNameTextField.getText().trim().length() < 1) {
@@ -244,10 +251,11 @@ public class ProblemPane extends JPanePlugin {
             return;
         }
 
-        Problem newProblem = getProblemFromFields();
-
-        if (newProblem == null) {
-            // new problem invalid, just return, message issued earlier
+        Problem newProblem = null;
+        try {
+            newProblem = getProblemFromFields(null);
+        } catch (InvalidFieldValue e) {
+            showMessage(e.getMessage());
             return;
         }
 
@@ -280,36 +288,44 @@ public class ProblemPane extends JPanePlugin {
             return;
         }
 
+        System.out.println("debug enableUpdateButton");
+
         boolean enableButton = false;
 
         if (problem != null) {
 
-//            enableButton |= (!problem.getDisplayName().equals(getProblemNameTextField().getText()));
-//
-//            int timeOutSeconds = getIntegerValue(timeOutSecondTextField.getText());
-//            enableButton |= (timeOutSeconds != problem.getTimeOutInSeconds());
-//
-//            boolean hasDataFile = problem.getDataFileName() != null;
-//            enableButton |= (hasDataFile != problemRequiresDataCheckBox.isSelected());
-//            if (hasDataFile) {
-//                enableButton |= (!inputDataFileLabel.getText().equals(problem.getDataFileName()));
-//            }
-//
-//            boolean hasAnswerFile = problem.getAnswerFileName() != null;
-//            enableButton |= (hasAnswerFile != judgesHaveAnswerFiles.isSelected());
-//            if (hasAnswerFile) {
-//                enableButton |= (!answerFileNameLabel.getText().equals(problem.getAnswerFileName()));
-//            }
-//
-//            enableButton |= (stdinRadioButton.isSelected() != problem.isReadInputDataFromSTDIN());
-//
-//            enableButton |= (fileRadioButton.isSelected() && problem.isReadInputDataFromSTDIN());
-          
-            Problem changedProblem = getProblemFromFields();
-            if (problem.isSameAs(changedProblem)) {
-                enableButton = true;
+            // enableButton |= (!problem.getDisplayName().equals(getProblemNameTextField().getText()));
+            //
+            // int timeOutSeconds = getIntegerValue(timeOutSecondTextField.getText());
+            // enableButton |= (timeOutSeconds != problem.getTimeOutInSeconds());
+            //
+            // boolean hasDataFile = problem.getDataFileName() != null;
+            // enableButton |= (hasDataFile != problemRequiresDataCheckBox.isSelected());
+            // if (hasDataFile) {
+            // enableButton |= (!inputDataFileLabel.getText().equals(problem.getDataFileName()));
+            // }
+            //
+            // boolean hasAnswerFile = problem.getAnswerFileName() != null;
+            // enableButton |= (hasAnswerFile != judgesHaveAnswerFiles.isSelected());
+            // if (hasAnswerFile) {
+            // enableButton |= (!answerFileNameLabel.getText().equals(problem.getAnswerFileName()));
+            // }
+            //
+            // enableButton |= (stdinRadioButton.isSelected() != problem.isReadInputDataFromSTDIN());
+            //
+            // enableButton |= (fileRadioButton.isSelected() && problem.isReadInputDataFromSTDIN());
+
+            try {
+                Problem changedProblem = getProblemFromFields(null);
+                if (problem == null || problem.isSameAs(changedProblem)) {
+                    enableButton = true;
+                }
+            } catch (InvalidFieldValue e) {
+                // invalid field, but that is ok as they are entering data
+                // will be caught and reported when they hit update or add.
+                ;
             }
-            
+
         } else {
             if (getAddButton().isVisible()) {
                 enableButton = true;
@@ -325,95 +341,102 @@ public class ProblemPane extends JPanePlugin {
      * 
      * This also populates newProblemDataFiles for the data files.
      * 
-     * @return
+     * @param checkProblem will update this Problem if supplied, if null creates a new Problem
+     * @return Problem based on fields
+     * @throws InvalidFieldValue
      */
-    private Problem getProblemFromFields() {
-        if (problem == null) {
-            problem = new Problem(problemNameTextField.getText());
-        } else {
-            problem.setDisplayName(problemNameTextField.getText());
+    public Problem getProblemFromFields(Problem checkProblem) throws InvalidFieldValue {
+
+        if (checkProblem == null) {
+            checkProblem = new Problem(problemNameTextField.getText());
         }
 
-        newProblemDataFiles = new ProblemDataFiles(problem);
+        newProblemDataFiles = new ProblemDataFiles(checkProblem);
 
         int secs = getIntegerValue(timeOutSecondTextField.getText());
-        problem.setTimeOutInSeconds(secs);
+        checkProblem.setTimeOutInSeconds(secs);
 
         if (problemRequiresDataCheckBox.isSelected()) {
 
-            String fileName = inputDataFileLabel.getText();
+            String fileName = inputDataFileLabel.getText() + "";
             if (fileName.trim().length() == 0) {
-                showMessage("Problem Requires Input Data checked, select a file ");
-                return null;
+                throw new InvalidFieldValue("Problem Requires Input Data checked, select a file ");
             }
 
             SerializedFile serializedFile = new SerializedFile(fileName);
 
             if (serializedFile.getBuffer() == null) {
-                showMessage("Unable to read file " + fileName + " choose data file again");
-                return null;
+                throw new InvalidFieldValue("Unable to read file " + fileName + " choose data file again");
             }
 
-            problem.setDataFileName(serializedFile.getName());
+            checkProblem.setDataFileName(serializedFile.getName());
             newProblemDataFiles.setJudgesDataFile(serializedFile);
         } else {
-            problem.setDataFileName(null);
+            checkProblem.setDataFileName(null);
         }
 
         if (judgesHaveAnswerFiles.isSelected()) {
-            String fileName = answerFileNameLabel.getText();
+            String fileName = answerFileNameLabel.getText() + "";
 
             if (fileName.trim().length() == 0) {
                 // TODO more specific message about which file is required
-                showMessage("Judges Have Provided Answer File checked, select a file ");
-                return null;
+                throw new InvalidFieldValue("Judges Have Provided Answer File checked, select a file ");
             }
 
             SerializedFile serializedFile = new SerializedFile(fileName);
 
             if (serializedFile.getBuffer() == null) {
-                showMessage("Unable to read file " + fileName + " choose answer file again");
-                return null;
+                throw new InvalidFieldValue("Unable to read file " + fileName + " choose answer file again");
             }
 
-            problem.setAnswerFileName(serializedFile.getName());
+            checkProblem.setAnswerFileName(serializedFile.getName());
             newProblemDataFiles.setJudgesAnswerFile(serializedFile);
         } else {
-            problem.setAnswerFileName(null);
+            checkProblem.setAnswerFileName(null);
         }
 
         if (stdinRadioButton.isSelected() && fileRadioButton.isSelected()) {
             // TODO make radio button group to obviate this message
-            showMessage("Pick just one radio button TODO fix all TODOs!");
-            return null;
+            throw new InvalidFieldValue("Pick just one radio button TODO fix all TODOs!");
         }
 
         if (fileRadioButton.isSelected()) {
 
-            problem.setReadInputDataFromSTDIN(false);
+            checkProblem.setReadInputDataFromSTDIN(false);
 
         } else if (stdinRadioButton.isSelected()) {
 
-            problem.setReadInputDataFromSTDIN(true);
+            checkProblem.setReadInputDataFromSTDIN(true);
         }
 
         /**
-         * The 3 radio buttons for which validator are fit into 2 boolean fields in problem. If the problem is validated and usePC2 validator then use pc2validator if the problem is validated and NOT
-         * usePC2 validator then use external validator if the problem is not validated, well, the problem is not validated.
+         * The 3 radio buttons for which validator are fit into 2 boolean fields in checkProblem. If the checkProblem is validated and usePC2 validator then use pc2validator if the checkProblem is
+         * validated and NOT usePC2 validator then use external validator if the checkProblem is not validated, well, the checkProblem is not validated.
          */
 
-        problem.setValidatedProblem(!useNOValidatatorRadioButton.isSelected());
-        if (problem.isValidatedProblem()) {
-            problem.setUsingPC2Validator(usePC2ValidatorRadioButton.isSelected());
+        checkProblem.setValidatedProblem(!useNOValidatatorRadioButton.isSelected());
+        if (checkProblem.isValidatedProblem()) {
+            checkProblem.setUsingPC2Validator(usePC2ValidatorRadioButton.isSelected());
         }
 
-        problem.setValidatorCommandLine(validatorCommandLineTextBox.getText());
-        problem.setShowValidationToJudges(showValidatorToJudges.isSelected());
+        checkProblem.setValidatorCommandLine(validatorCommandLineTextBox.getText());
 
-        problem.setHideOutputWindow(getDoNotShowOutputWindowCheckBox().isSelected());
-        problem.setShowCompareWindow(getShowCompareCheckBox().isSelected());
+        if (checkProblem.isUsingPC2Validator()) {
 
-        return problem;
+            // java -cp ..\..\lib\pc2.jar edu.csus.ecs.pc2.validator.Validator sumit.dat estdout.pc2 sumit.ans 212XRSAM.txt -pc2 1 false
+            // "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
+
+            checkProblem.setValidatorCommandLine(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + checkProblem.getWhichPC2Validator() + " " + checkProblem.isIgnoreSpacesOnValidation());
+            checkProblem.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);
+        }
+
+        checkProblem.setShowValidationToJudges(showValidatorToJudges.isSelected());
+
+        checkProblem.setHideOutputWindow(getDoNotShowOutputWindowCheckBox().isSelected());
+        checkProblem.setShowCompareWindow(getShowCompareCheckBox().isSelected());
+
+        return checkProblem;
+
     }
 
     /**
@@ -438,14 +461,17 @@ public class ProblemPane extends JPanePlugin {
 
     protected void updateProblem() {
 
-        if (!ensureProblem()) {
-            // new problem is invalid, just return, message issued earlier
+        if (!validateProblemFields()) {
+            // new problem is invalid, just return, message issued by validateProblemFields
             return;
         }
-        Problem newProblem = getProblemFromFields();
 
-        if (newProblem == null) {
-            // new problem invalid, just return, message issued earlier
+        Problem newProblem = null;
+
+        try {
+            newProblem = getProblemFromFields(problem);
+        } catch (InvalidFieldValue e) {
+            showMessage(e.getMessage());
             return;
         }
 
@@ -460,12 +486,19 @@ public class ProblemPane extends JPanePlugin {
         }
     }
 
-    private boolean ensureProblem() {
+    /**
+     * Validate that all problem fields are ok.
+     * 
+     * @return
+     */
+    private boolean validateProblemFields() {
+
         if (problemNameTextField.getText().trim().length() < 1) {
             showMessage("Enter a problem name");
             return false;
         }
-        String fileName = inputDataFileLabel.getText();
+
+        String fileName = inputDataFileLabel.getText() + "";
         if (getProblemRequiresDataCheckBox().isSelected()) {
             // this check is outside so we can provide a specific message
             if (fileName.trim().length() == 0) {
@@ -473,6 +506,7 @@ public class ProblemPane extends JPanePlugin {
                 return false;
             }
             if (!checkFile(fileName)) {
+                // note: if error, then checkFile will showMessage
                 return false;
             }
         } else {
@@ -481,7 +515,7 @@ public class ProblemPane extends JPanePlugin {
                 int verifyInputDataFile = JOptionPane.showConfirmDialog(getParent(), "Use selected data file?");
                 switch (verifyInputDataFile) {
                     case JOptionPane.CANCEL_OPTION:
-                        showMessage("Update cancelled");
+                        showMessage("Update canceled");
                         return false;
                     case JOptionPane.YES_OPTION:
                         getProblemRequiresDataCheckBox().setSelected(true);
@@ -494,7 +528,8 @@ public class ProblemPane extends JPanePlugin {
                 }
             }
         }
-        fileName = answerFileNameLabel.getText();
+
+        fileName = answerFileNameLabel.getText() + "";
         if (getJudgesHaveAnswerFiles().isSelected()) {
             // this check is outside so we can provide a specific message
             if (fileName.trim().length() == 0) {
@@ -502,6 +537,7 @@ public class ProblemPane extends JPanePlugin {
                 return false;
             }
             if (!checkFile(fileName)) {
+                // note: if error, then checkFile will showMessage
                 return false;
             }
             if (fileName != null && fileName.trim().length() > 0) {
@@ -509,7 +545,7 @@ public class ProblemPane extends JPanePlugin {
                 int verifyAnswerFile = JOptionPane.showConfirmDialog(getParent(), "Use selected answer file?");
                 switch (verifyAnswerFile) {
                     case JOptionPane.CANCEL_OPTION:
-                        showMessage("Update cancelled");
+                        showMessage("Update canceled");
                         return false;
                     case JOptionPane.YES_OPTION:
                         getJudgesHaveAnswerFiles().setSelected(true);
@@ -522,11 +558,22 @@ public class ProblemPane extends JPanePlugin {
                 }
             }
         }
+
+        System.out.println("debug ensureProblem " + getUsePC2ValidatorRadioButton().isSelected() + " " + comboPC2ValidatorOptions.getSelectedIndex());
+        if (getUsePC2ValidatorRadioButton().isSelected()) {
+            if (comboPC2ValidatorOptions.getSelectedIndex() < 1) {
+                showMessage("Select a Validator option");
+                return false;
+            }
+        }
+
         return true;
     }
 
     /**
      * Checks to ensure the fileName exists, is a file, and is readable.
+     * <P>
+     * If error found will show Message to user.
      * 
      * @param fileName
      *            the file to check
@@ -642,7 +689,7 @@ public class ProblemPane extends JPanePlugin {
                 fileRadioButton.setSelected(true);
                 stdinRadioButton.setSelected(false);
             }
-            
+
             comboPC2ValidatorOptions.setSelectedIndex(0);
             ignoreCaseInOutputCheckBox.setSelected(false);
 
@@ -659,7 +706,7 @@ public class ProblemPane extends JPanePlugin {
             } else {
                 useNOValidatatorRadioButton.setSelected(true);
             }
-            
+
             getPc2ValidatorComboBox().setSelectedIndex(0);
             getIgnoreCaseInOutputCheckBox().setSelected(true);
 
@@ -676,7 +723,7 @@ public class ProblemPane extends JPanePlugin {
             updateButton.setEnabled(false);
 
             problemNameTextField.setText("");
-            timeOutSecondTextField.setText("");
+            timeOutSecondTextField.setText("120");
             judgesHaveAnswerFiles.setSelected(false);
             problemRequiresDataCheckBox.setSelected(false);
             inputDataFileLabel.setText("");
@@ -690,7 +737,7 @@ public class ProblemPane extends JPanePlugin {
 
             externalValidatorLabel.setText("");
 
-            getValidatorCommandLineTextBox().setText(defaultInternationalValidatorCommand);
+            getValidatorCommandLineTextBox().setText(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
             getShowValidatorToJudges().setSelected(true);
             getDoNotShowOutputWindowCheckBox().setSelected(false);
             getShowCompareCheckBox().setSelected(true);
@@ -700,14 +747,14 @@ public class ProblemPane extends JPanePlugin {
         populatingGUI = false;
     }
 
-    protected void enableUpdateButtons(boolean editedText) {
-        if (editedText) {
+    protected void enableUpdateButtons(boolean fieldsChanged) {
+        if (fieldsChanged) {
             cancelButton.setText("Cancel");
         } else {
             cancelButton.setText("Close");
         }
-        updateButton.setEnabled(editedText);
-        addButton.setEnabled(editedText);
+        updateButton.setEnabled(fieldsChanged);
+        addButton.setEnabled(fieldsChanged);
     }
 
     /**
@@ -1100,6 +1147,11 @@ public class ProblemPane extends JPanePlugin {
             useNOValidatatorRadioButton = new JRadioButton();
             useNOValidatatorRadioButton.setBounds(new java.awt.Rectangle(20, 15, 246, 23));
             useNOValidatatorRadioButton.setText("Do not use Validator");
+            useNOValidatatorRadioButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableUpdateButton();
+                }
+            });
         }
         return useNOValidatatorRadioButton;
     }
@@ -1114,6 +1166,11 @@ public class ProblemPane extends JPanePlugin {
             usePC2ValidatorRadioButton = new JRadioButton();
             usePC2ValidatorRadioButton.setBounds(new java.awt.Rectangle(21, 49, 246, 23));
             usePC2ValidatorRadioButton.setText("Use PC^2 Validator");
+            usePC2ValidatorRadioButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableUpdateButton();
+                }
+            });
         }
         return usePC2ValidatorRadioButton;
     }
@@ -1128,6 +1185,11 @@ public class ProblemPane extends JPanePlugin {
             useExternalValidatorRadioButton = new JRadioButton();
             useExternalValidatorRadioButton.setBounds(new java.awt.Rectangle(17, 196, 246, 23));
             useExternalValidatorRadioButton.setText("Use External Validator");
+            useExternalValidatorRadioButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableUpdateButton();
+                }
+            });
         }
         return useExternalValidatorRadioButton;
     }
@@ -1142,6 +1204,11 @@ public class ProblemPane extends JPanePlugin {
             showValidatorToJudges = new JCheckBox();
             showValidatorToJudges.setBounds(new java.awt.Rectangle(38, 368, 306, 24));
             showValidatorToJudges.setText("Show Validator To Judges (SVTJ)");
+            showValidatorToJudges.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableUpdateButton();
+                }
+            });
         }
         return showValidatorToJudges;
     }
@@ -1205,6 +1272,12 @@ public class ProblemPane extends JPanePlugin {
             comboPC2ValidatorOptions = new JComboBox();
             comboPC2ValidatorOptions.setBounds(new java.awt.Rectangle(158, 24, 255, 26));
 
+            comboPC2ValidatorOptions.addItemListener(new java.awt.event.ItemListener() {
+                public void itemStateChanged(java.awt.event.ItemEvent e) {
+                    enableUpdateButton();
+
+                }
+            });
             comboPC2ValidatorOptions.addItem("None Selected");
             comboPC2ValidatorOptions.addItem("1 - diff");
             comboPC2ValidatorOptions.addItem("2 - ignore whitespace at start of file");
@@ -1226,6 +1299,11 @@ public class ProblemPane extends JPanePlugin {
             ignoreCaseInOutputCheckBox = new JCheckBox();
             ignoreCaseInOutputCheckBox.setBounds(new java.awt.Rectangle(27, 62, 263, 24));
             ignoreCaseInOutputCheckBox.setText("Ignore Case In Output");
+            ignoreCaseInOutputCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableUpdateButton();
+                }
+            });
         }
         return ignoreCaseInOutputCheckBox;
     }
@@ -1261,6 +1339,7 @@ public class ProblemPane extends JPanePlugin {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     if (selectFile(externalValidatorLabel)) {
                         externalValidatorLabel.setToolTipText(externalValidatorLabel.getText());
+                        enableUpdateButton();
                     }
                 }
             });
@@ -1277,6 +1356,11 @@ public class ProblemPane extends JPanePlugin {
         if (validatorCommandLineTextBox == null) {
             validatorCommandLineTextBox = new JTextField();
             validatorCommandLineTextBox.setBounds(new java.awt.Rectangle(17, 78, 432, 29));
+            validatorCommandLineTextBox.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyTyped(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
         }
         return validatorCommandLineTextBox;
     }
@@ -1291,6 +1375,11 @@ public class ProblemPane extends JPanePlugin {
             showCompareCheckBox = new JCheckBox();
             showCompareCheckBox.setBounds(new java.awt.Rectangle(51, 342, 207, 21));
             showCompareCheckBox.setText("Show Compare");
+            showCompareCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableUpdateButton();
+                }
+            });
         }
         return showCompareCheckBox;
     }
@@ -1305,6 +1394,11 @@ public class ProblemPane extends JPanePlugin {
             doNotShowOutputWindowCheckBox = new JCheckBox();
             doNotShowOutputWindowCheckBox.setBounds(new java.awt.Rectangle(50, 369, 303, 24));
             doNotShowOutputWindowCheckBox.setText("Do not show the output window");
+            doNotShowOutputWindowCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableUpdateButton();
+                }
+            });
         }
         return doNotShowOutputWindowCheckBox;
     }

@@ -26,16 +26,12 @@ import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.ui.IFileViewer;
 import edu.csus.ecs.pc2.ui.MultipleFileViewer;
-import edu.csus.ecs.pc2.validator.Validator;
 
 /**
  * Compile, execute and validate a run.
  * 
- * Before execute, one can use {@link #setLanguage(Language)},
- * {@link #setProblem(Problem)} to use a different language or problem.
- * <br>
- * To not overwrite the judge's data files, use {@link #setOverwriteJudgesDataFiles(boolean)}
- * to false.
+ * Before execute, one can use {@link #setLanguage(Language)}, {@link #setProblem(Problem)} to use a different language or problem. <br>
+ * To not overwrite the judge's data files, use {@link #setOverwriteJudgesDataFiles(boolean)} to false.
  * 
  * @see #execute()
  * @author pc2@ecs.csus.edu
@@ -43,10 +39,8 @@ import edu.csus.ecs.pc2.validator.Validator;
 
 // TODO this class contains a number of Utility methods like: baseName, replaceString... etc
 // should these routines be placed in a static way in a static class ?
-
 // TODO design decision how to handle MultipleFileViewer, display here, on TeamClient??
-
-//$HeadURL$
+// $HeadURL$
 public class Executable {
 
     public static final String SVN_ID = "$Id$";
@@ -129,7 +123,7 @@ public class Executable {
      * Overwrite judge's data and answer files.
      */
     private boolean overwriteJudgesDataFiles = true;
-    
+
     private boolean testRunOnly = false;
 
     public Executable(IContest inContest, IController inController, Run run, RunFiles runFiles) {
@@ -150,18 +144,16 @@ public class Executable {
     private void initialize() {
 
         this.executorId = contest.getClientId();
-        
+
         mainFileDirectory = getDirName(runFiles.getMainFile());
         executeDirectoryName = getExecuteDirectoryName();
-        
+
         log = controller.getLog();
 
-         if (executorId.getClientType() != ClientType.Type.TEAM) {
-             this.problemDataFiles = contest.getProblemDataFile(problem);
-         }
+        if (executorId.getClientType() != ClientType.Type.TEAM) {
+            this.problemDataFiles = contest.getProblemDataFile(problem);
+        }
     }
-
- 
 
     /**
      * Remove all files from specified directory, including subdirectories.
@@ -211,11 +203,12 @@ public class Executable {
      * <br>
      * Will only run the validation on a run if not a {@link edu.csus.ecs.pc2.core.execute.contest.ClientType.Type#TEAM} client.
      * 
-     * @param clearDirFirst - clear the directory before unpacking and executing
+     * @param clearDirFirst -
+     *            clear the directory before unpacking and executing
      * @return
      */
     public IFileViewer execute(boolean clearDirFirst) {
-         fileViewer = new MultipleFileViewer(log);
+        fileViewer = new MultipleFileViewer(log);
 
         try {
             boolean dirThere = insureDir(executeDirectoryName);
@@ -230,8 +223,7 @@ public class Executable {
                 // Clear directory out before compiling.
 
                 /**
-                 * Do not clear directory if writeJudgesDataFiles is false, because if we are not overwriting the judge's data file,
-                 * then erasing the existing files makes no sense.
+                 * Do not clear directory if writeJudgesDataFiles is false, because if we are not overwriting the judge's data file, then erasing the existing files makes no sense.
                  */
 
                 boolean cleared = clearDirectory(executeDirectoryName);
@@ -350,9 +342,9 @@ public class Executable {
 
         } catch (Exception e) {
             log.log(Log.INFO, "Exception during execute() ", e);
-            fileViewer.addTextPane("Error during execute", "Exception during execute, check log "+e.getMessage());
+            fileViewer.addTextPane("Error during execute", "Exception during execute, check log " + e.getMessage());
         }
-        
+
         return fileViewer;
     }
 
@@ -383,8 +375,8 @@ public class Executable {
 
             String validatorFileName = problemDataFiles.getValidatorFile().getName();
             String validatorUnpackName = prefixExecuteDirname(validatorFileName);
-            if ( ! createFile(problemDataFiles.getValidatorFile(),validatorUnpackName )){
-                log.info("Unable to create validator program "+validatorUnpackName);
+            if (!createFile(problemDataFiles.getValidatorFile(), validatorUnpackName)) {
+                log.info("Unable to create validator program " + validatorUnpackName);
                 throw new SecurityException("Unable to create validator, check logs");
             }
 
@@ -422,20 +414,26 @@ public class Executable {
          */
 
         /**
-         *  Standard command line pattern
-         *  
-         *  String commandPattern = "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
+         * Standard command line pattern
+         * 
+         * String commandPattern = "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
          */
-        
+
         String commandPattern = problem.getValidatorCommandLine();
-        
-        if (commandPattern == null && problem.isUsingPC2Validator()){
-            int validatorOption = problem.getWhichPC2Validator();
-            if (validatorOption == 0){
-                validatorOption = 1;
-            }
-            boolean ignoreCase = false;
-            commandPattern = new Validator().getInternalValidatorCommandLine(1, ignoreCase);
+
+        if (problem.isUsingPC2Validator()) {
+
+            /**
+             * The internal command is set to: <validator> <input_filename> <output_filename> <answer_filename> <results_file> -pc2|-appes [other files] Where validator is
+             * Problem.INTERNAL_VALIDATOR_NAME aka "pc2.jar edu.csus.ecs.pc2.validator.Validator"
+             * 
+             * So we need to prefix the command with java -jar <path to jar>
+             */
+
+            String fs = File.separator;
+            String pathToPC2Jar = ".." + fs + "lib" + fs;
+            commandPattern = "java -jar " + pathToPC2Jar + " " + problem.getValidatorCommandLine();
+
         }
 
         String cmdLine = substituteAllStrings(run, commandPattern);
@@ -535,7 +533,7 @@ public class Executable {
                 IResultsParser parser = new XMLResultsParser();
                 parser.setLog(log);
                 boolean done = parser.parseValidatorResultsFile(prefixExecuteDirname(resultsFileName));
-                Hashtable<String, String> results = parser.getResults(); 
+                Hashtable<String, String> results = parser.getResults();
 
                 if (done && results != null && results.containsKey("outcome")) {
                     if (problem.isInternationalJudgementReadMethod() || (results.containsKey("security") && resultsFileName.equals(results.get("security")))) {
@@ -584,7 +582,7 @@ public class Executable {
      * @return true if should be validated.
      */
     private boolean isValidated() {
-        System.err.println("debug 22 isVal "+problem.isValidatedProblem()+" "+isTestRunOnly());
+        System.err.println("debug 22 isVal " + problem.isValidatedProblem() + " " + isTestRunOnly());
         return (problem.isValidatedProblem() && (!isTestRunOnly()));
     }
 
@@ -672,7 +670,7 @@ public class Executable {
                         if (executionTimer != null) {
                             executionTimer.stopTimer();
                         }
-                        
+
                         throw new SecurityException("Expected data file, was not created, file name is " + problem.getDataFileName());
                     }
                 }
@@ -683,8 +681,8 @@ public class Executable {
 
                     if (overwriteJudgesDataFiles) {
                         // create the judges data file on disk.
-                        if ( ! createFile(problemDataFiles.getJudgesDataFiles(), dataSetNumber, inputDataFileName)){
-                            throw new SecurityException("Unable to create data file "+inputDataFileName);
+                        if (!createFile(problemDataFiles.getJudgesDataFiles(), dataSetNumber, inputDataFileName)) {
+                            throw new SecurityException("Unable to create data file " + inputDataFileName);
                         }
                     }
                     // Else, leave whatever data file is present.
@@ -948,18 +946,18 @@ public class Executable {
      * Each variable will be filled in with values.
      * 
      * <pre>
-     *         valid fields are:
-     *          {:mainfile} - submitted file (hello.java)
-     *          {:basename} - mainfile without extension (hello)
-     *          {:validator} - validator program name
-     *          {:language}
-     *          {:problem}
-     *          {:teamid}
-     *          {:siteid}
-     *          {:infile}
-     *          {:outfile}
-     *          {:ansfile}
-     *          {:pc2home}
+     *            valid fields are:
+     *             {:mainfile} - submitted file (hello.java)
+     *             {:basename} - mainfile without extension (hello)
+     *             {:validator} - validator program name
+     *             {:language}
+     *             {:problem}
+     *             {:teamid}
+     *             {:siteid}
+     *             {:infile}
+     *             {:outfile}
+     *             {:ansfile}
+     *             {:pc2home}
      * </pre>
      * 
      * @param inRun
@@ -976,7 +974,7 @@ public class Executable {
             if (inRun == null) {
                 throw new IllegalArgumentException("Run is null");
             }
-            
+
             if (runFiles.getMainFile() == null) {
                 log.config("substituteAllStrings() main file is null (no contents)");
                 return origString;
@@ -1048,8 +1046,7 @@ public class Executable {
 
     /**
      * Return string minus last extension. <br>
-     * Finds last . (period) in input string, strips that period and all other characters after that last period. If no period is
-     * found in string, will return a copy of the original string. <br>
+     * Finds last . (period) in input string, strips that period and all other characters after that last period. If no period is found in string, will return a copy of the original string. <br>
      * Unlike the Unix basename program, no extension is supplied.
      * 
      * @param original
@@ -1134,20 +1131,17 @@ public class Executable {
     /**
      * Set executable (+x) bit for input filename.
      * <P>
-     * This will only set the x bit on a Unix OS. It checks for /bin/chmod, 
-     * if that file does not exist, no change will be made.
+     * This will only set the x bit on a Unix OS. It checks for /bin/chmod, if that file does not exist, no change will be made.
      */
     private void setExecuteBit(String filename) {
-        log.config("setExecuteBit for "+ filename);
+        log.config("setExecuteBit for " + filename);
         try {
 
             File chmodFile = new File("/bin/chmod");
             if (chmodFile.exists()) {
-                
+
                 /**
-                 * We are likely under Unix, since files may be unpacked
-                 * without the execute bit set, we force that bit to 
-                 * be set to we can execute the file under Unix.
+                 * We are likely under Unix, since files may be unpacked without the execute bit set, we force that bit to be set to we can execute the file under Unix.
                  */
 
                 String cmdline = "/bin/chmod +x " + filename;
@@ -1191,7 +1185,7 @@ public class Executable {
      * @param file
      * @param outputFileName
      * @return true if file written to disk.
-     * @throws IOException 
+     * @throws IOException
      */
     boolean createFile(SerializedFile file, String outputFileName) {
         try {
@@ -1200,7 +1194,7 @@ public class Executable {
                 return new File(outputFileName).isFile();
             }
         } catch (Exception e) {
-            log.log(Log.INFO, "Exception creating file "+outputFileName, e);
+            log.log(Log.INFO, "Exception creating file " + outputFileName, e);
         }
 
         return false;
@@ -1241,7 +1235,7 @@ public class Executable {
      * @return the name of the execute directory for this client.
      */
     public String getExecuteDirectoryName() {
-        return "executesite" +contest.getClientId().getSiteNumber() + contest.getClientId().getName();
+        return "executesite" + contest.getClientId().getSiteNumber() + contest.getClientId().getName();
     }
 
     /**
@@ -1281,7 +1275,7 @@ public class Executable {
      * 
      * @return true if executor is a TEAM
      */
- 
+
     public void setTestRunOnly(boolean testRunOnly) {
         this.testRunOnly = testRunOnly || executorId.getClientType() == ClientType.Type.TEAM;
     }
