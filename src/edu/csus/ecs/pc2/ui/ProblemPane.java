@@ -111,11 +111,11 @@ public class ProblemPane extends JPanePlugin {
 
     private JPanel validatorPane = null;
 
-    private JRadioButton useNOValidatator = null;
+    private JRadioButton useNOValidatatorRadioButton = null;
 
-    private JRadioButton usePC2ValidatorButton = null;
+    private JRadioButton usePC2ValidatorRadioButton = null;
 
-    private JRadioButton useExternalValidatorButton = null;
+    private JRadioButton useExternalValidatorRadioButton = null;
 
     private JCheckBox showValidatorToJudges = null;
 
@@ -145,6 +145,8 @@ public class ProblemPane extends JPanePlugin {
 
     private JCheckBox doNotShowOutputWindowCheckBox = null;
 
+    private ButtonGroup validatorChoiceButtonGroup = null; // @jve:decl-index=0:visual-constraint="595,128"
+
     /**
      * This method initializes
      * 
@@ -160,7 +162,7 @@ public class ProblemPane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new java.awt.Dimension(539,536));
+        this.setSize(new java.awt.Dimension(539, 536));
 
         this.add(getMessagePane(), java.awt.BorderLayout.NORTH);
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
@@ -389,9 +391,9 @@ public class ProblemPane extends JPanePlugin {
             problem.setReadInputDataFromSTDIN(true);
         }
 
-        problem.setValidatedProblem(!useNOValidatator.isSelected());
+        problem.setValidatedProblem(!useNOValidatatorRadioButton.isSelected());
         if (problem.isValidatedProblem()) {
-            problem.setUsingPC2Validator(usePC2ValidatorButton.isSelected());
+            problem.setUsingPC2Validator(usePC2ValidatorRadioButton.isSelected());
         }
 
         problem.setValidatorCommandLine(validatorCommandLineTextBox.getText());
@@ -630,16 +632,16 @@ public class ProblemPane extends JPanePlugin {
             if (problem.isValidatedProblem()) {
 
                 if (problem.isUsingPC2Validator()) {
-                    usePC2ValidatorButton.setSelected(true);
+                    usePC2ValidatorRadioButton.setSelected(true);
                 } else {
-                    useExternalValidatorButton.setSelected(true);
+                    useExternalValidatorRadioButton.setSelected(true);
                 }
 
             } else {
-                useNOValidatator.setSelected(true);
+                useNOValidatatorRadioButton.setSelected(true);
             }
 
-            validatorCommandLineTextBox.setEnabled(useExternalValidatorButton.isSelected());
+            validatorCommandLineTextBox.setEnabled(useExternalValidatorRadioButton.isSelected());
 
         } else {
 
@@ -657,8 +659,8 @@ public class ProblemPane extends JPanePlugin {
             fileRadioButton.setSelected(true);
             stdinRadioButton.setSelected(false);
             validatorCommandLineTextBox.setText(defaultInternationalValidatorCommand);
-            useNOValidatator.setSelected(true);
-            validatorCommandLineTextBox.setEnabled(useExternalValidatorButton.isSelected());
+            useNOValidatatorRadioButton.setSelected(true);
+            validatorCommandLineTextBox.setEnabled(useExternalValidatorRadioButton.isSelected());
         }
 
         populatingGUI = false;
@@ -815,6 +817,7 @@ public class ProblemPane extends JPanePlugin {
             readsFromPane.add(getFileRadioButton(), null);
             readsFromPane.add(getStdinRadioButton(), null);
             getTeamReadsFrombuttonGroup().setSelected(getFileRadioButton().getModel(), true);
+            getValidatorChoiceButtonGroup().setSelected(getUseNOValidatatorRadioButton().getModel(), true);
         }
         return readsFromPane;
     }
@@ -1043,9 +1046,9 @@ public class ProblemPane extends JPanePlugin {
         if (validatorPane == null) {
             validatorPane = new JPanel();
             validatorPane.setLayout(null);
-            validatorPane.add(getUseNOValidatator(), null);
-            validatorPane.add(getUsePC2ValidatorButton(), null);
-            validatorPane.add(getJRadioButton(), null);
+            validatorPane.add(getUseNOValidatatorRadioButton(), null);
+            validatorPane.add(getUsePC2ValidatorRadioButton(), null);
+            validatorPane.add(getUseExternalValidatorRadioButton(), null);
             validatorPane.add(getShowValidatorToJudges(), null);
             validatorPane.add(getPc2ValidatorFrame(), null);
             validatorPane.add(getExternalValidatorFrame(), null);
@@ -1058,13 +1061,13 @@ public class ProblemPane extends JPanePlugin {
      * 
      * @return javax.swing.JRadioButton
      */
-    private JRadioButton getUseNOValidatator() {
-        if (useNOValidatator == null) {
-            useNOValidatator = new JRadioButton();
-            useNOValidatator.setBounds(new java.awt.Rectangle(20, 15, 246, 23));
-            useNOValidatator.setText("Do not use Validator");
+    private JRadioButton getUseNOValidatatorRadioButton() {
+        if (useNOValidatatorRadioButton == null) {
+            useNOValidatatorRadioButton = new JRadioButton();
+            useNOValidatatorRadioButton.setBounds(new java.awt.Rectangle(20, 15, 246, 23));
+            useNOValidatatorRadioButton.setText("Do not use Validator");
         }
-        return useNOValidatator;
+        return useNOValidatatorRadioButton;
     }
 
     /**
@@ -1072,13 +1075,13 @@ public class ProblemPane extends JPanePlugin {
      * 
      * @return javax.swing.JRadioButton
      */
-    private JRadioButton getUsePC2ValidatorButton() {
-        if (usePC2ValidatorButton == null) {
-            usePC2ValidatorButton = new JRadioButton();
-            usePC2ValidatorButton.setBounds(new java.awt.Rectangle(21, 49, 246, 23));
-            usePC2ValidatorButton.setText("Use PC^2 Validator");
+    private JRadioButton getUsePC2ValidatorRadioButton() {
+        if (usePC2ValidatorRadioButton == null) {
+            usePC2ValidatorRadioButton = new JRadioButton();
+            usePC2ValidatorRadioButton.setBounds(new java.awt.Rectangle(21, 49, 246, 23));
+            usePC2ValidatorRadioButton.setText("Use PC^2 Validator");
         }
-        return usePC2ValidatorButton;
+        return usePC2ValidatorRadioButton;
     }
 
     /**
@@ -1086,13 +1089,13 @@ public class ProblemPane extends JPanePlugin {
      * 
      * @return javax.swing.JRadioButton
      */
-    private JRadioButton getJRadioButton() {
-        if (useExternalValidatorButton == null) {
-            useExternalValidatorButton = new JRadioButton();
-            useExternalValidatorButton.setBounds(new java.awt.Rectangle(17, 196, 246, 23));
-            useExternalValidatorButton.setText("Use External Validator");
+    private JRadioButton getUseExternalValidatorRadioButton() {
+        if (useExternalValidatorRadioButton == null) {
+            useExternalValidatorRadioButton = new JRadioButton();
+            useExternalValidatorRadioButton.setBounds(new java.awt.Rectangle(17, 196, 246, 23));
+            useExternalValidatorRadioButton.setText("Use External Validator");
         }
-        return useExternalValidatorButton;
+        return useExternalValidatorRadioButton;
     }
 
     /**
@@ -1103,7 +1106,7 @@ public class ProblemPane extends JPanePlugin {
     private JCheckBox getShowValidatorToJudges() {
         if (showValidatorToJudges == null) {
             showValidatorToJudges = new JCheckBox();
-            showValidatorToJudges.setBounds(new java.awt.Rectangle(38,368,306,24));
+            showValidatorToJudges.setBounds(new java.awt.Rectangle(38, 368, 306, 24));
             showValidatorToJudges.setText("Show Validator To Judges (SVTJ)");
         }
         return showValidatorToJudges;
@@ -1244,31 +1247,46 @@ public class ProblemPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes showComareCheckBox	
-     * 	
-     * @return javax.swing.JCheckBox	
+     * This method initializes showComareCheckBox
+     * 
+     * @return javax.swing.JCheckBox
      */
     private JCheckBox getShowComareCheckBox() {
         if (showComareCheckBox == null) {
             showComareCheckBox = new JCheckBox();
-            showComareCheckBox.setBounds(new java.awt.Rectangle(51,342,207,21));
+            showComareCheckBox.setBounds(new java.awt.Rectangle(51, 342, 207, 21));
             showComareCheckBox.setText("Show Compare");
         }
         return showComareCheckBox;
     }
 
     /**
-     * This method initializes jCheckBox	
-     * 	
-     * @return javax.swing.JCheckBox	
+     * This method initializes jCheckBox
+     * 
+     * @return javax.swing.JCheckBox
      */
     private JCheckBox getDoNotShowOutputWindowCheckBox() {
         if (doNotShowOutputWindowCheckBox == null) {
             doNotShowOutputWindowCheckBox = new JCheckBox();
-            doNotShowOutputWindowCheckBox.setBounds(new java.awt.Rectangle(50,369,303,24));
+            doNotShowOutputWindowCheckBox.setBounds(new java.awt.Rectangle(50, 369, 303, 24));
             doNotShowOutputWindowCheckBox.setText("Do not show the output window");
         }
         return doNotShowOutputWindowCheckBox;
+    }
+
+    /**
+     * This method initializes validatorChoiceButtonGroup
+     * 
+     * @return javax.swing.ButtonGroup
+     */
+    private ButtonGroup getValidatorChoiceButtonGroup() {
+        if (validatorChoiceButtonGroup == null) {
+            validatorChoiceButtonGroup = new ButtonGroup();
+            validatorChoiceButtonGroup.add(getUseNOValidatatorRadioButton());
+            validatorChoiceButtonGroup.add(getUsePC2ValidatorRadioButton());
+            validatorChoiceButtonGroup.add(getUseExternalValidatorRadioButton());
+        }
+        return validatorChoiceButtonGroup;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
