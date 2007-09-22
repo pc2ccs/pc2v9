@@ -81,7 +81,7 @@ public class Problem implements IElementObject {
     private boolean usingPC2Validator = false;
 
     /**
-     * Which PC2 Validator Option
+     * Which PC2 Validator Option?.
      */
     private int whichPC2Validator = 0;
 
@@ -93,14 +93,14 @@ public class Problem implements IElementObject {
     private String validatorCommandLine;
 
     /**
-     * /** The validator command.
-     * 
+     * The validator command.
+     * <P>
      * Ex. java -cp Validator.jar Validator.
      */
     private String validatorProgramName;
 
     /**
-     * Uses international judgement method.
+     * Use international judgement method.
      */
     private boolean internationalJudgementReadMethod = true;
 
@@ -130,6 +130,12 @@ public class Problem implements IElementObject {
      * Hide Output window from Judges.
      */
     private boolean hideOutputWindow = false;
+    
+    /**
+     * Show PC2 Compare Window?.
+     * 
+     */
+    private boolean showCompareWindow = false;
 
     /**
      * Create a problem with the display name.
@@ -464,11 +470,24 @@ public class Problem implements IElementObject {
             if (!validatorProgramName.equals(problem.getValidatorProgramName())) {
                 return false;
             }
+
+            if (showCompareWindow != problem.isShowCompareWindow()) {
+                return false;
+            }
+
             return true;
         } catch (Exception e) {
             // TODO Log to static exception Log
             return false;
         }
+    }
+
+    public boolean isShowCompareWindow() {
+        return showCompareWindow;
+    }
+
+    public void setShowCompareWindow(boolean showCompareWindow) {
+        this.showCompareWindow = showCompareWindow;
     }
 
 }
