@@ -41,11 +41,11 @@ public class ProblemsPane extends JPanePlugin {
     private JPanel messagePanel = null;
 
     private JLabel messageLabel = null;
-    
+
     private Log log = null;
-    
+
     private EditProblemFrame editProblemFrame = null;
-    
+
     /**
      * This method initializes
      * 
@@ -102,30 +102,26 @@ public class ProblemsPane extends JPanePlugin {
         if (problemListBox == null) {
             problemListBox = new MCLB();
 
-            Object[] cols = { "Problem Name", "Data File", "Input Method", "Answer File", "Run Time Limit", "Validator" };
+            Object[] cols = { "Problem Name", "Data File", "Input Method", "Answer File", "Run Time Limit", "SVTJ", "Validator" };
             problemListBox.addColumns(cols);
-            
+
             /**
-             * No sorting at this time, the only way to know
-             * what order the problems are is to NOT sort them.
-             * Later we can add a sorter per ProblemDisplayList somehow.
+             * No sorting at this time, the only way to know what order the problems are is to NOT sort them. Later we can add a sorter per ProblemDisplayList somehow.
              */
 
-
-//            // Sorters
-//            HeapSorter sorter = new HeapSorter();
-//            // HeapSorter numericStringSorter = new HeapSorter();
-//            // numericStringSorter.setComparator(new NumericStringComparator());
-//
-//            // Display Name
-//            problemListBox.setColumnSorter(0, sorter, 1);
-//            // Compiler Command Line
-//            problemListBox.setColumnSorter(1, sorter, 2);
-//            // Exe Name
-//            problemListBox.setColumnSorter(2, sorter, 3);
-//            // Execute Command Line
-//            problemListBox.setColumnSorter(3, sorter, 4);
-
+            // // Sorters
+            // HeapSorter sorter = new HeapSorter();
+            // // HeapSorter numericStringSorter = new HeapSorter();
+            // // numericStringSorter.setComparator(new NumericStringComparator());
+            //
+            // // Display Name
+            // problemListBox.setColumnSorter(0, sorter, 1);
+            // // Compiler Command Line
+            // problemListBox.setColumnSorter(1, sorter, 2);
+            // // Exe Name
+            // problemListBox.setColumnSorter(2, sorter, 3);
+            // // Execute Command Line
+            // problemListBox.setColumnSorter(3, sorter, 4);
             problemListBox.autoSizeAllColumns();
 
         }
@@ -143,14 +139,21 @@ public class ProblemsPane extends JPanePlugin {
                     problemListBox.replaceRow(objects, rowNumber);
                 }
                 problemListBox.autoSizeAllColumns();
-//                problemListBox.sort();
+                // problemListBox.sort();
             }
         });
     }
 
-    protected Object[] buildProblemRow(Problem problem) {
+    private String yesNoString(boolean b) {
+        if (b) {
+            return "Yes";
+        } else {
+            return "No";
+        }
+    }
 
-        // Object[] cols = { "Problem Name", "Data File", "Input Method", "Answer File", "Run Time Limit", "Validator" };
+    protected Object[] buildProblemRow(Problem problem) {
+        // Object[] cols = { "Problem Name", "Data File", "Input Method", "Answer File", "Run Time Limit", "SVTJ", "Validator" };
 
         int numberColumns = problemListBox.getColumnCount();
         Object[] c = new String[numberColumns];
@@ -166,7 +169,8 @@ public class ProblemsPane extends JPanePlugin {
         c[2] = inputMethod;
         c[3] = problem.getAnswerFileName();
         c[4] = Integer.toString(problem.getTimeOutInSeconds());
-        c[5] = problem.getValidatorProgramName();
+        c[5] = yesNoString(problem.isShowValidationToJudges());
+        c[6] = problem.getValidatorProgramName();
 
         return c;
     }
@@ -188,11 +192,11 @@ public class ProblemsPane extends JPanePlugin {
 
     public void setContestAndController(IContest inContest, IController inController) {
         super.setContestAndController(inContest, inController);
-        
+
         log = getController().getLog();
-        
+
         editProblemFrame.setContestAndController(inContest, inController);
-        
+
         getContest().addProblemListener(new ProblemListenerImplementation());
 
         SwingUtilities.invokeLater(new Runnable() {
@@ -246,11 +250,11 @@ public class ProblemsPane extends JPanePlugin {
     protected void editSelectedProblem() {
 
         int selectedIndex = problemListBox.getSelectedIndex();
-        if(selectedIndex == -1){
+        if (selectedIndex == -1) {
             showMessage("Select a problem to edit");
             return;
         }
-        
+
         try {
             ElementId elementId = (ElementId) problemListBox.getKeys()[selectedIndex];
             Problem problemToEdit = getContest().getProblem(elementId);
@@ -280,7 +284,7 @@ public class ProblemsPane extends JPanePlugin {
         }
         return messagePanel;
     }
-    
+
     private void showMessage(final String string) {
 
         SwingUtilities.invokeLater(new Runnable() {
