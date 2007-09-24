@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.Hashtable;
 
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -367,6 +368,10 @@ public class Executable {
     }
 
     private boolean validateProgram(int dataSetNumber) {
+
+        // TODO Handle the error messages better, log and put them before the user to
+        // help with debugging
+
         executionData.setValidationReturnCode(-1);
         executionData.setValidationSuccess(false);
 
@@ -430,14 +435,17 @@ public class Executable {
              * So we need to prefix the command with java -jar <path to jar>
              */
 
-            String fs = File.separator;
-            String pathToPC2Jar = ".." + fs + "lib" + fs;
-            commandPattern = "java -jar " + pathToPC2Jar + " " + problem.getValidatorCommandLine();
+            String pathToPC2Jar = findPC2JarPath ("pc2.jar");
+            commandPattern = "java -cp " + pathToPC2Jar + problem.getValidatorCommandLine();
 
         }
 
+        log.log(Log.DEBUG, "before substitution: " + commandPattern);
+
         String cmdLine = substituteAllStrings(run, commandPattern);
         cmdLine = replaceString(cmdLine, "{:resfile}", resultsFileName);
+
+        log.log(Log.DEBUG, "after  substitution: " + cmdLine);
 
         try {
             String actFilename = new String(cmdLine);
@@ -562,11 +570,8 @@ public class Executable {
                 }
             } else {
                 // TODO LOG
-                // TODO show user message
                 log.config("validationCall - Did not produce output results file " + resultsFileName);
-                // javax.swing.JOptionPane.showMessageDialog(new
-                // javax.swing.JFrame(), "Did not produce output results file
-                // "+resultsFileName);
+                JOptionPane.showMessageDialog(null, "Did not produce output results file " + resultsFileName + " contact staff");
             }
         } catch (Exception ex) {
             log.log(Log.INFO, "Exception in validation  ", ex);
@@ -574,6 +579,25 @@ public class Executable {
         }
 
         return executionData.isValidationSuccess();
+    }
+
+    private String findPC2JarPath(String string) {
+        
+        // TODO this need to be done with respect to PC2HOME or more elagantly
+        
+        String fs = File.separator;
+        String path = ".." + fs + "lib" + fs;
+        
+        if (new File(path+string).exists()){
+            return ".." + fs + path;
+        }
+        
+        path = ".." + fs + ".." + fs + "lib" + fs;
+        if (new File(path+string).exists()){
+            return ".." + fs + path;
+        }
+        
+        return path;
     }
 
     /**
@@ -695,8 +719,10 @@ public class Executable {
             PrintWriter stderrlog = new PrintWriter(new FileOutputStream(prefixExecuteDirname(EXECUTE_STDERR_FILENAME), false), true);
 
             String cmdline = language.getProgramExecuteCommandLine();
+            log.log(Log.DEBUG, "before substitution: " + cmdline);
 
             cmdline = substituteAllStrings(run, cmdline);
+            log.log(Log.DEBUG, "after  substitution: " + cmdline);
 
             // TODO comment why actfilename code is needed.
 
@@ -793,6 +819,7 @@ public class Executable {
     private boolean compileProgram() {
 
         try {
+
             String programName = replaceString(language.getExecutableIdentifierMask(), "{:basename}", removeExtension(runFiles.getMainFile().getName()));
 
             // Check whether the team submitted a executable, if they did remove
@@ -805,7 +832,9 @@ public class Executable {
                 program.delete();
             }
 
+            log.log(Log.DEBUG, "before substitution: " + language.getCompileCommandLine());
             String cmdline = substituteAllStrings(run, language.getCompileCommandLine());
+            log.log(Log.DEBUG, "after  substitution: " + cmdline);
 
             PrintWriter stdoutlog = new PrintWriter(new FileOutputStream(prefixExecuteDirname(COMPILER_STDOUT_FILENAME), false), true);
             PrintWriter stderrlog = new PrintWriter(new FileOutputStream(prefixExecuteDirname(COMPILER_STDERR_FILENAME), false), true);
@@ -946,18 +975,18 @@ public class Executable {
      * Each variable will be filled in with values.
      * 
      * <pre>
-     *            valid fields are:
-     *             {:mainfile} - submitted file (hello.java)
-     *             {:basename} - mainfile without extension (hello)
-     *             {:validator} - validator program name
-     *             {:language}
-     *             {:problem}
-     *             {:teamid}
-     *             {:siteid}
-     *             {:infile}
-     *             {:outfile}
-     *             {:ansfile}
-     *             {:pc2home}
+     *             valid fields are:
+     *              {:mainfile} - submitted file (hello.java)
+     *              {:basename} - mainfile without extension (hello)
+     *              {:validator} - validator program name
+     *              {:language}
+     *              {:problem}
+     *              {:teamid}
+     *              {:siteid}
+     *              {:infile}
+     *              {:outfile}
+     *              {:ansfile}
+     *              {:pc2home}
      * </pre>
      * 
      * @param inRun
@@ -981,17 +1010,21 @@ public class Executable {
             }
             newString = replaceString(origString, "{:mainfile}", runFiles.getMainFile().getName());
             newString = replaceString(newString, "{:basename}", removeExtension(runFiles.getMainFile().getName()));
-            SerializedFile validatorFile = null;
-            if (problemDataFiles != null) {
-                validatorFile = problemDataFiles.getValidatorFile();
-            }
-            if (validatorFile != null) {
-                String validatorCommand = validatorFile.getName(); // validator
-                if (problem.getValidatorProgramName() != null) {
-                    validatorCommand = problem.getValidatorProgramName();
-                }
 
-                // command
+            String validatorCommand = null;
+
+            if (problem.getValidatorProgramName() != null) {
+                validatorCommand = problem.getValidatorProgramName();
+            }
+
+            if (problemDataFiles != null) {
+                SerializedFile validatorFile = problemDataFiles.getValidatorFile();
+                if (validatorFile != null) {
+                    validatorCommand = validatorFile.getName(); // validator
+                }
+            }
+            
+            if (validatorCommand != null) {
                 newString = replaceString(newString, "{:validator}", validatorCommand);
             }
 
@@ -1278,5 +1311,9 @@ public class Executable {
 
     public void setTestRunOnly(boolean testRunOnly) {
         this.testRunOnly = testRunOnly || executorId.getClientType() == ClientType.Type.TEAM;
+    }
+
+    public boolean isValidationSuccess() {
+        return executionData.isValidationSuccess();
     }
 }

@@ -18,6 +18,7 @@ import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
@@ -128,9 +129,9 @@ public class ProblemPane extends JPanePlugin {
 
     private JLabel validatorOptionsLabel = null;
 
-    private JComboBox comboPC2ValidatorOptions = null;
+    private JComboBox pc2ValidatorOptionComboBox = null;
 
-    private JCheckBox ignoreCaseInOutputCheckBox = null;
+    private JCheckBox ignoreCaseCheckBox = null;
 
     private JLabel validatorProgramLabel = null;
 
@@ -288,8 +289,6 @@ public class ProblemPane extends JPanePlugin {
             return;
         }
 
-        System.out.println("debug enableUpdateButton");
-
         boolean enableButton = false;
 
         if (problem != null) {
@@ -317,19 +316,16 @@ public class ProblemPane extends JPanePlugin {
 
             try {
                 Problem changedProblem = getProblemFromFields(null);
-                System.out.println("debug enableUpdateButton same as " + problem.isSameAs(changedProblem));
                 if (!problem.isSameAs(changedProblem)) {
                     enableButton = true;
                 }
-                System.out.println("debug enableUpdateButton BUTTON ON = " + enableButton);
                 
             } catch (InvalidFieldValue e) {
                 // invalid field, but that is ok as they are entering data
                 // will be caught and reported when they hit update or add.
-                System.out.println("debug "+e.getMessage());
+                StaticLog.getLog().log(Log.DEBUG, "Input Problem (but not saving) ",e);
                 enableButton = true;
             }
-            System.out.println("debug enableUpdateBu     BUTTON ON = " + enableButton);
 
         } else {
             if (getAddButton().isVisible()) {
@@ -426,6 +422,9 @@ public class ProblemPane extends JPanePlugin {
         }
 
         checkProblem.setValidatorCommandLine(validatorCommandLineTextBox.getText());
+        
+        checkProblem.setWhichPC2Validator(0);
+        checkProblem.setIgnoreSpacesOnValidation(false);
 
         if (checkProblem.isUsingPC2Validator()) {
 
@@ -434,6 +433,9 @@ public class ProblemPane extends JPanePlugin {
 
             checkProblem.setValidatorCommandLine(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + checkProblem.getWhichPC2Validator() + " " + checkProblem.isIgnoreSpacesOnValidation());
             checkProblem.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);
+            
+            checkProblem.setWhichPC2Validator(getPc2ValidatorComboBox().getSelectedIndex());
+            checkProblem.setIgnoreSpacesOnValidation(getIgnoreCaseCheckBox().isSelected());
         }
 
         checkProblem.setShowValidationToJudges(showValidatorToJudges.isSelected());
@@ -565,9 +567,8 @@ public class ProblemPane extends JPanePlugin {
             }
         }
 
-        System.out.println("debug ensureProblem " + getUsePC2ValidatorRadioButton().isSelected() + " " + comboPC2ValidatorOptions.getSelectedIndex());
         if (getUsePC2ValidatorRadioButton().isSelected()) {
-            if (comboPC2ValidatorOptions.getSelectedIndex() < 1) {
+            if (pc2ValidatorOptionComboBox.getSelectedIndex() < 1) {
                 showMessage("Select a Validator option");
                 return false;
             }
@@ -696,15 +697,15 @@ public class ProblemPane extends JPanePlugin {
                 stdinRadioButton.setSelected(false);
             }
 
-            comboPC2ValidatorOptions.setSelectedIndex(0);
-            ignoreCaseInOutputCheckBox.setSelected(false);
+            pc2ValidatorOptionComboBox.setSelectedIndex(0);
+            ignoreCaseCheckBox.setSelected(false);
 
             if (inProblem.isValidatedProblem()) {
 
                 if (inProblem.isUsingPC2Validator()) {
                     usePC2ValidatorRadioButton.setSelected(true);
-                    comboPC2ValidatorOptions.setSelectedIndex(inProblem.getWhichPC2Validator());
-                    ignoreCaseInOutputCheckBox.setSelected(inProblem.isIgnoreSpacesOnValidation());
+                    pc2ValidatorOptionComboBox.setSelectedIndex(inProblem.getWhichPC2Validator());
+                    ignoreCaseCheckBox.setSelected(inProblem.isIgnoreSpacesOnValidation());
                 } else {
                     useExternalValidatorRadioButton.setSelected(true);
                 }
@@ -714,18 +715,15 @@ public class ProblemPane extends JPanePlugin {
             }
 
             getPc2ValidatorComboBox().setSelectedIndex(0);
-            getIgnoreCaseInOutputCheckBox().setSelected(true);
+            getIgnoreCaseCheckBox().setSelected(true);
 
             getValidatorCommandLineTextBox().setText(problem.getValidatorCommandLine());
             getShowValidatorToJudges().setSelected(problem.isShowValidationToJudges());
             getDoNotShowOutputWindowCheckBox().setSelected(problem.isHideOutputWindow());
             getShowCompareCheckBox().setSelected(problem.isShowCompareWindow());
 
-            // debug
-            Problem changedProblem;
             try {
-                changedProblem = getProblemFromFields(null);
-                System.out.println("debug enableUpdateButton same as " + problem.isSameAs(changedProblem));
+                @SuppressWarnings("unused") Problem changedProblem = getProblemFromFields(null);
             } catch (InvalidFieldValue e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -747,8 +745,8 @@ public class ProblemPane extends JPanePlugin {
             fileRadioButton.setSelected(true);
             stdinRadioButton.setSelected(false);
             useNOValidatatorRadioButton.setSelected(true);
-            comboPC2ValidatorOptions.setSelectedIndex(0);
-            ignoreCaseInOutputCheckBox.setSelected(false);
+            pc2ValidatorOptionComboBox.setSelectedIndex(0);
+            ignoreCaseCheckBox.setSelected(false);
             validatorCommandLineTextBox.setEnabled(useExternalValidatorRadioButton.isSelected());
 
             externalValidatorLabel.setText("");
@@ -1246,7 +1244,7 @@ public class ProblemPane extends JPanePlugin {
                     javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
             pc2ValidatorFrame.add(validatorOptionsLabel, null);
             pc2ValidatorFrame.add(getPc2ValidatorComboBox(), null);
-            pc2ValidatorFrame.add(getIgnoreCaseInOutputCheckBox(), null);
+            pc2ValidatorFrame.add(getIgnoreCaseCheckBox(), null);
         }
         return pc2ValidatorFrame;
     }
@@ -1284,25 +1282,25 @@ public class ProblemPane extends JPanePlugin {
      * @return javax.swing.JComboBox
      */
     private JComboBox getPc2ValidatorComboBox() {
-        if (comboPC2ValidatorOptions == null) {
-            comboPC2ValidatorOptions = new JComboBox();
-            comboPC2ValidatorOptions.setBounds(new java.awt.Rectangle(158, 24, 255, 26));
+        if (pc2ValidatorOptionComboBox == null) {
+            pc2ValidatorOptionComboBox = new JComboBox();
+            pc2ValidatorOptionComboBox.setBounds(new java.awt.Rectangle(158, 24, 255, 26));
 
-            comboPC2ValidatorOptions.addItemListener(new java.awt.event.ItemListener() {
+            pc2ValidatorOptionComboBox.addItemListener(new java.awt.event.ItemListener() {
                 public void itemStateChanged(java.awt.event.ItemEvent e) {
                     enableUpdateButton();
 
                 }
             });
-            comboPC2ValidatorOptions.addItem("None Selected");
-            comboPC2ValidatorOptions.addItem("1 - diff");
-            comboPC2ValidatorOptions.addItem("2 - ignore whitespace at start of file");
-            comboPC2ValidatorOptions.addItem("3 - ignore leading whitespace on lines");
-            comboPC2ValidatorOptions.addItem("4 - ignore all whitespace on lines");
-            comboPC2ValidatorOptions.addItem("5 - ignore empty lines");
+            pc2ValidatorOptionComboBox.addItem("None Selected");
+            pc2ValidatorOptionComboBox.addItem("1 - diff");
+            pc2ValidatorOptionComboBox.addItem("2 - ignore whitespace at start of file");
+            pc2ValidatorOptionComboBox.addItem("3 - ignore leading whitespace on lines");
+            pc2ValidatorOptionComboBox.addItem("4 - ignore all whitespace on lines");
+            pc2ValidatorOptionComboBox.addItem("5 - ignore empty lines");
 
         }
-        return comboPC2ValidatorOptions;
+        return pc2ValidatorOptionComboBox;
     }
 
     /**
@@ -1310,18 +1308,18 @@ public class ProblemPane extends JPanePlugin {
      * 
      * @return javax.swing.JCheckBox
      */
-    private JCheckBox getIgnoreCaseInOutputCheckBox() {
-        if (ignoreCaseInOutputCheckBox == null) {
-            ignoreCaseInOutputCheckBox = new JCheckBox();
-            ignoreCaseInOutputCheckBox.setBounds(new java.awt.Rectangle(27, 62, 263, 24));
-            ignoreCaseInOutputCheckBox.setText("Ignore Case In Output");
-            ignoreCaseInOutputCheckBox.addActionListener(new java.awt.event.ActionListener() {
+    private JCheckBox getIgnoreCaseCheckBox() {
+        if (ignoreCaseCheckBox == null) {
+            ignoreCaseCheckBox = new JCheckBox();
+            ignoreCaseCheckBox.setBounds(new java.awt.Rectangle(27, 62, 263, 24));
+            ignoreCaseCheckBox.setText("Ignore Case In Output");
+            ignoreCaseCheckBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableUpdateButton();
                 }
             });
         }
-        return ignoreCaseInOutputCheckBox;
+        return ignoreCaseCheckBox;
     }
 
     /**

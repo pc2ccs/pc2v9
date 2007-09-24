@@ -48,7 +48,7 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(549, 312));
+        this.setSize(new java.awt.Dimension(569,334));
         this.setContentPane(getSelectJudgementPane());
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setTitle("Select Run Judgement");

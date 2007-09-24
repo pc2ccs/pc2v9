@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.FlowLayout;
 import java.io.File;
 import java.io.IOException;
@@ -43,7 +44,6 @@ import edu.csus.ecs.pc2.core.security.PermissionList;
 
 // $HeadURL$
 // $Id$
-
 public class SelectJudgementPane extends JPanePlugin {
 
     /**
@@ -108,7 +108,13 @@ public class SelectJudgementPane extends JPanePlugin {
     private JCheckBox notifyTeamCheckBox = null;
 
     private PermissionList permissionList = new PermissionList();
-    
+
+    private JLabel validatorRecommendsLabel = null;
+
+    private JLabel validatorJudgementLabel = null;
+
+    private JButton acceptValidatorJudgementButton = null;
+
     /**
      * This method initializes
      * 
@@ -124,7 +130,7 @@ public class SelectJudgementPane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new java.awt.Dimension(536, 269));
+        this.setSize(new java.awt.Dimension(536, 294));
 
         this.add(getMessagePane(), java.awt.BorderLayout.NORTH);
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
@@ -135,9 +141,9 @@ public class SelectJudgementPane extends JPanePlugin {
     public void setContestAndController(IContest inContest, IController inController) {
         super.setContestAndController(inContest, inController);
         log = getController().getLog();
-        
+
         initializePermissions();
-        
+
     }
 
     public String getPluginTitle() {
@@ -206,13 +212,13 @@ public class SelectJudgementPane extends JPanePlugin {
         }
         return updateButton;
     }
-    
+
     private void cancelRun() {
-        
+
         enableUpdateButtons(false);
         Run newRun = getRunFromFields();
         getController().cancelRun(newRun);
-        
+
     }
 
     protected void updateRun() {
@@ -290,8 +296,6 @@ public class SelectJudgementPane extends JPanePlugin {
         }
     }
 
-
-
     public Run getRun() {
         return run;
     }
@@ -315,6 +319,8 @@ public class SelectJudgementPane extends JPanePlugin {
 
         populatingGUI = true;
 
+        showValidatorControls(false);
+
         if (theRun != null) {
             getUpdateButton().setVisible(true);
 
@@ -324,9 +330,9 @@ public class SelectJudgementPane extends JPanePlugin {
             runInfoLabel.setText("Run " + theRun.getNumber() + " (Site " + theRun.getSiteNumber() + ") from " + teamName);
             statusLabel.setText(run.getStatus().toString());
             elapsedTimeLabel.setText(new Long(run.getElapsedMins()).toString());
-            
-            problemNameLabel.setText(getContest().getProblem(run.getProblemId()).toString());            
-            languageNameLabel.setText(getContest().getLanguage(run.getLanguageId()).toString());            
+
+            problemNameLabel.setText(getContest().getProblem(run.getProblemId()).toString());
+            languageNameLabel.setText(getContest().getLanguage(run.getLanguageId()).toString());
 
         } else {
             getUpdateButton().setVisible(false);
@@ -334,9 +340,9 @@ public class SelectJudgementPane extends JPanePlugin {
             runInfoLabel.setText("Could not get run " + +theRun.getNumber() + " (Site " + theRun.getSiteNumber() + ")");
             statusLabel.setText("");
             elapsedTimeLabel.setText("");
-            
-            problemNameLabel.setText("");            
-            languageNameLabel.setText("");            
+
+            problemNameLabel.setText("");
+            languageNameLabel.setText("");
 
         }
         populateComboBoxes();
@@ -445,6 +451,16 @@ public class SelectJudgementPane extends JPanePlugin {
      */
     private JPanel getGeneralPane() {
         if (generalPane == null) {
+            validatorJudgementLabel = new JLabel();
+            validatorJudgementLabel.setBounds(new java.awt.Rectangle(223, 172, 282, 19));
+            validatorJudgementLabel.setText("Validator Judgement");
+            validatorJudgementLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+            validatorJudgementLabel.setForeground(Color.BLUE);
+            validatorRecommendsLabel = new JLabel();
+            validatorRecommendsLabel.setBounds(new java.awt.Rectangle(69, 172, 142, 19));
+            validatorRecommendsLabel.setText("Validator Recommends");
+            validatorRecommendsLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+            validatorRecommendsLabel.setForeground(Color.BLUE);
             elapsedTimeLabel = new JLabel();
             elapsedTimeLabel.setBounds(new java.awt.Rectangle(223, 61, 254, 19));
             elapsedTimeLabel.setText("Elapsed");
@@ -500,6 +516,9 @@ public class SelectJudgementPane extends JPanePlugin {
             generalPane.add(languageNameLabel, null);
             generalPane.add(elapsedTimeLabel, null);
             generalPane.add(getNotifyTeamCheckBox(), null);
+            generalPane.add(validatorRecommendsLabel, null);
+            generalPane.add(validatorJudgementLabel, null);
+            generalPane.add(getAcceptValidatorJudgementButton(), null);
         }
         return generalPane;
     }
@@ -591,6 +610,20 @@ public class SelectJudgementPane extends JPanePlugin {
         executable = new Executable(getContest(), getController(), run, runFiles);
 
         IFileViewer fileViewer = executable.execute();
+
+        // Show validator results, if there are any.
+
+        showValidatorControls(false);
+        if (executable.isValidationSuccess()) {
+            String results = executable.getValidationResults();
+            if (results != null && results.trim().length() > 1) {
+                validatorJudgementLabel.setText(executable.getValidationResults());
+                showValidatorControls(true);
+            } else {
+                log.warning("execute indicated validator success but getValidationResults returns \"\" or null");
+            }
+        }
+
         fileViewer.setVisible(true);
     }
 
@@ -666,22 +699,20 @@ public class SelectJudgementPane extends JPanePlugin {
     private JCheckBox getNotifyTeamCheckBox() {
         if (notifyTeamCheckBox == null) {
             notifyTeamCheckBox = new JCheckBox();
-            notifyTeamCheckBox.setBounds(new java.awt.Rectangle(223, 174, 134, 21));
+            notifyTeamCheckBox.setBounds(new java.awt.Rectangle(223, 200, 112, 21));
             notifyTeamCheckBox.setSelected(true);
             notifyTeamCheckBox.setText("Notify Team");
         }
         return notifyTeamCheckBox;
     }
-    
-    
-    private boolean isAllowed (Permission.Type type){
+
+    private boolean isAllowed(Permission.Type type) {
         return permissionList.isAllowed(type);
     }
-    
-    
+
     private void initializePermissions() {
         Account account = getContest().getAccount(getContest().getClientId());
-        if (account != null){
+        if (account != null) {
             permissionList.clearAndLoadPermissions(account.getPermissionList());
         }
     }
@@ -692,13 +723,13 @@ public class SelectJudgementPane extends JPanePlugin {
      * Invoked if account permission changes.
      */
     private void updateGUIperPermissions() {
-        
+
         extractButton.setVisible(isAllowed(Permission.Type.EXTRACT_RUNS));
     }
-    
+
     /**
      * Account Listener Implementation.
-     *  
+     * 
      * @author pc2@ecs.csus.edu
      */
     public class AccountListenerImplementation implements IAccountListener {
@@ -715,5 +746,37 @@ public class SelectJudgementPane extends JPanePlugin {
             });
         }
     }
-    
+
+    /**
+     * This method initializes acceptValidatorJudgementButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getAcceptValidatorJudgementButton() {
+        if (acceptValidatorJudgementButton == null) {
+            acceptValidatorJudgementButton = new JButton();
+            acceptValidatorJudgementButton.setBounds(new java.awt.Rectangle(365, 200, 140, 23));
+            acceptValidatorJudgementButton.setText("Accept Validator");
+            acceptValidatorJudgementButton.setForeground(Color.BLUE);
+            acceptValidatorJudgementButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    acceptValidatorJudgement();
+                }
+            });
+        }
+        return acceptValidatorJudgementButton;
+    }
+
+    private void showValidatorControls(boolean showControls) {
+        getAcceptValidatorJudgementButton().setVisible(showControls);
+        validatorJudgementLabel.setVisible(showControls);
+        validatorRecommendsLabel.setVisible(showControls);
+    }
+
+    protected void acceptValidatorJudgement() {
+        // TODO accept validator judgement
+        JOptionPane.showMessageDialog(null,"Can not accept validator judgement at this time");
+
+    }
+
 } // @jve:decl-index=0:visual-constraint="10,10"

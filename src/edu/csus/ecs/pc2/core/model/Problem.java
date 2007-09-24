@@ -1,6 +1,5 @@
 package edu.csus.ecs.pc2.core.model;
 
-import java.awt.image.SampleModel;
 
 
 /**
