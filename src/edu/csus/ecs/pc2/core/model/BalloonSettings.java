@@ -12,8 +12,6 @@ import java.util.Hashtable;
 // $HeadURL$
 public class BalloonSettings implements IElementObject {
 
-    // TODO Add Balloon Color list
-
     private Hashtable<ElementId, String> colorList = new Hashtable<ElementId, String>();
 
     private static final long serialVersionUID = 4208771943370594478L;
@@ -222,10 +220,19 @@ public class BalloonSettings implements IElementObject {
         }
     }
 
+    /**
+     * Completely reset/erase list.
+     *
+     */
     private void clearList() {
         colorList = new Hashtable<ElementId, String>();
     }
 
+    /**
+     * Add balloon color for problem.
+     * @param problem
+     * @param colorName
+     */
     public void addColor(Problem problem, String colorName) {
         addColor(problem.getElementId(), colorName);
     }
@@ -233,8 +240,102 @@ public class BalloonSettings implements IElementObject {
     private void addColor(ElementId id, String colorName) {
         colorList.put(id, colorName);
     }
+    
+    /**
+     * Update color in list.
+     * @param problem
+     * @param colorName
+     */
+    public void updateColor (Problem problem, String colorName){
+        colorList.put(problem.getElementId(), colorName);
+    }
 
     public String getColor(ElementId id) {
         return colorList.get(id);
+    }
+    
+    protected ElementId [] getProblemIDList() {
+        return (ElementId[]) colorList.keySet().toArray(new ElementId[colorList.keySet().size()]);
+    }
+    
+    /**
+     * Compares string, handles if either string is null.
+     * 
+     * @param s1
+     * @param s2
+     * @return true if both null or equal, false otherwise
+     */
+    // TODO move this into a string utility class.
+    private boolean stringSame (String s1, String s2){
+        if (s1 == null && s2 == null) {
+            return true;
+        }
+        
+        if (s1 == null && s2 != null){
+            return false;
+        }
+        
+        return s1.equals(s2);
+            
+    }
+
+    /**
+     * Are classes the same?
+     * 
+     * @param balloonSettings
+     * @return true if all fields are identical.
+     */
+    public boolean isSameAs(BalloonSettings balloonSettings) {
+
+        try {
+            if (balloonSettings == null){
+                return false;
+            }
+            if (getSiteNumber() != balloonSettings.getSiteNumber()) {
+                return false;
+            }
+
+            if (isEmailBalloons() != balloonSettings.isEmailBalloons()) {
+                return false;
+            }
+            if (isPrintBalloons() != balloonSettings.isPrintBalloons()) {
+                return false;
+            }
+            if (! stringSame(getPrintDevice(),balloonSettings.getPrintDevice())) {
+                return false;
+            }
+            if (! stringSame(getEmailContact(),balloonSettings.getEmailContact())) {
+                return false;
+            }
+            if (getLinesPerPage() != balloonSettings.getLinesPerPage()) {
+                return false;
+            }
+            if (! stringSame(getMailServer(),balloonSettings.getMailServer())) {
+                return false;
+            }
+
+            // If balloon color lists are different sizes, then false.
+            if (balloonSettings.getProblemIDList().length != getProblemIDList().length){
+                return false;
+            }
+
+            // Loop through colors
+            for (ElementId problemId : getProblemIDList()) {
+                String colorName = getColor(problemId);
+                if (colorName == null) {
+                    return false;
+                }
+                if (! colorName.equals(balloonSettings.getColor(problemId))){
+                    return false;
+                }
+            }
+
+            return true;
+            
+        } catch (Exception e) {
+            // TODO Log to static exception Log
+            e.printStackTrace();
+            return false;
+        }
     }
 }
