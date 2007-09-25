@@ -39,6 +39,10 @@ public class Packet implements Serializable {
     private Serializable content = null;
     
     private Date createDate = new Date();
+    
+    private static int packetCounter = 0;
+    
+    private int packetNumber = 0;
 
     // TODO change this back to protected, soon.
     public Packet(PacketType.Type type, ClientId source, ClientId destination, Serializable content) {
@@ -46,6 +50,8 @@ public class Packet implements Serializable {
         destinationId = destination;
         this.content = content;
         this.type = type;
+        packetCounter++;
+        packetNumber = packetCounter;
     }
 
     /**
@@ -60,6 +66,8 @@ public class Packet implements Serializable {
         destinationId = destination;
         this.content = null;
         this.type = type;
+        packetCounter++;
+        packetNumber = packetCounter;
     }
 
     public Object getContent() {
@@ -96,5 +104,13 @@ public class Packet implements Serializable {
 
     public Date getCreateDate() {
         return createDate;
+    }
+
+    public int getPacketNumber() {
+        return packetNumber;
+    }
+
+    public void setPacketNumber(int packetNumber) {
+        this.packetNumber = packetNumber;
     }
 }
