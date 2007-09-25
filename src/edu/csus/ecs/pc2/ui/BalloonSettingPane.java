@@ -11,7 +11,6 @@ import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.log.Log;
-import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.BalloonSettings;
 import edu.csus.ecs.pc2.core.model.IContest;
 
@@ -46,8 +45,10 @@ public class BalloonSettingPane extends JPanePlugin {
      */
     private BalloonSettings balloonSettings = null;
 
+    @SuppressWarnings("unused")
     private Log log = null;
 
+    @SuppressWarnings("unused")
     private boolean populatingGUI = true;
 
     /**
@@ -164,52 +165,45 @@ public class BalloonSettingPane extends JPanePlugin {
         }
     }
 
-    private int getIntegerValue(String s) {
-        try {
-            return Integer.parseInt(s);
-        } catch (Exception e) {
-            return 0;
-        }
-    }
-
     /**
      * Enable or disable Update button based on comparison of run to fields.
      * 
      */
     public void enableUpdateButton() {
-
-        if (populatingGUI) {
-            return;
-        }
-
-        boolean enableButton = false;
-
-        if (balloonSettings != null) {
-
-            try {
-                BalloonSettings changedProblem = getProblemFromFields(null);
-                
-                // TODO 
-//                if (!balloonSettings.isSameAs(changedProblem)) {
-//                    enableButton = true;
-//                }
-
-            } catch (InvalidFieldValue e) {
-                // invalid field, but that is ok as they are entering data
-                // will be caught and reported when they hit update or add.
-                StaticLog.getLog().log(Log.DEBUG, "Input BalloonSettings (but not saving) ", e);
-                enableButton = true;
-            }
-
-        } else {
-            if (getAddButton().isVisible()) {
-                enableButton = true;
-            }
-        }
-
-        // TODO enable 
-//        enableUpdateButtons(enableButton);
-
+//
+//        if (populatingGUI) {
+//            return;
+//        }
+//
+//        boolean enableButton = false;
+//
+//        if (balloonSettings != null) {
+//
+//            try {
+//                BalloonSettings changedProblem = getProblemFromFields(null);
+//                
+//                // TODO 
+////                if (!balloonSettings.isSameAs(changedProblem)) {
+////                    enableButton = true;
+////                }
+//
+//            } catch (InvalidFieldValue e) {
+//                // invalid field, but that is ok as they are entering data
+//                // will be caught and reported when they hit update or add.
+//                StaticLog.getLog().log(Log.DEBUG, "Input BalloonSettings (but not saving) ", e);
+//                enableButton = true;
+//            }
+//
+//        } else {
+//            if (getAddButton().isVisible()) {
+//                enableButton = true;
+//            }
+//        }
+//
+//        // TODO enable 
+////        enableUpdateButtons(enableButton);
+//
+//    
     }
 
     /**

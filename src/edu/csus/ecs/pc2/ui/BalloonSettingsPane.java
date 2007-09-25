@@ -145,14 +145,6 @@ public class BalloonSettingsPane extends JPanePlugin {
         });
     }
 
-    private String yesNoString(boolean b) {
-        if (b) {
-            return "Yes";
-        } else {
-            return "No";
-        }
-    }
-
     protected Object[] buildBalloonSettingsRow(BalloonSettings balloonSettings) {
         // TODO 
         return null;
