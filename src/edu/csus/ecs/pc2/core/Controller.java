@@ -11,10 +11,12 @@ import java.util.Vector;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.archive.PacketArchiver;
+import edu.csus.ecs.pc2.core.list.BalloonSettingsList;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.BalloonSettings;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
@@ -1837,5 +1839,17 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     public void removeJudgement(Judgement judgement) {
         Packet deleteJudgmentPacket = PacketFactory.createDeleteSetting(contest.getClientId(), getServerClientId(), judgement);
         sendToLocalServer(deleteJudgmentPacket);
+    }
+
+    public void addNewBalloonSettings(BalloonSettings newBalloonSettings) {
+        // TODO send packet to server
+        Packet newBalloonSettingsPacket = null;
+        sendToLocalServer(newBalloonSettingsPacket);
+    }
+
+    public void updateBalloonSettings(BalloonSettings balloonSettings) {
+        // TODO send packet to server
+        Packet balloonSettingsPacket = null;
+        sendToLocalServer(balloonSettingsPacket);
     }
 }

@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.core;
 
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.BalloonSettings;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
@@ -278,4 +279,8 @@ public interface IController {
     void updateAccounts (Account [] account);
     
     void writeConfigToDisk ();
+
+    void addNewBalloonSettings(BalloonSettings newBalloonSettings);
+
+    void updateBalloonSettings(BalloonSettings newBalloonSettings);
 }

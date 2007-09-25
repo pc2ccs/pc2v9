@@ -547,6 +547,8 @@ public interface IContest {
      * @return
      */
     BalloonSettings[] getBalloonSettings();
-    
-    
+
+    BalloonSettings getBalloonSettings(ElementId elementId);
+
+    void addBalloonSettingsListener(IBalloonSettingsListener implementation);
 }

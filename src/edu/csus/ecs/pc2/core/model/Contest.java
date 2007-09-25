@@ -69,6 +69,8 @@ public class Contest implements IContest {
     private Vector<IClientSettingsListener> clientSettingsListenerList = new Vector<IClientSettingsListener>();
 
     private Vector<IContestInformationListener> contestInformationListenerList = new Vector<IContestInformationListener>();
+    
+    private Vector<IBalloonSettingsListener> balloonSettingsListenerList = new Vector<IBalloonSettingsListener>();
 
     /**
      * Contains name of client (judge or admin) who checks out the run.
@@ -370,6 +372,21 @@ public class Contest implements IContest {
         }
     }
 
+    private void fireBalloonSettingsListener(BalloonSettingsEvent balloonSettingsEvent) {
+        for (int i = 0; i < balloonSettingsListenerList.size(); i++) {
+
+            if (balloonSettingsEvent.getAction() == BalloonSettingsEvent.Action.ADDED) {
+                balloonSettingsListenerList.elementAt(i).balloonSettingsAdded(balloonSettingsEvent);
+            } else if (balloonSettingsEvent.getAction() == BalloonSettingsEvent.Action.DELETED) {
+                balloonSettingsListenerList.elementAt(i).balloonSettingsRemoved(balloonSettingsEvent);
+            } else {
+                balloonSettingsListenerList.elementAt(i).balloonSettingsChanged(balloonSettingsEvent);
+            }
+        }
+    }
+
+
+
     public void addLocalLogin(ClientId inClientId, ConnectionHandlerID connectionHandlerID) {
         localLoginList.add(inClientId, connectionHandlerID);
         LoginEvent loginEvent = new LoginEvent(LoginEvent.Action.NEW_LOGIN, inClientId, connectionHandlerID, "New");
@@ -431,6 +448,7 @@ public class Contest implements IContest {
         fireSiteListener(siteEvent);
 
     }
+    
 
     public void addAccount(Account account) {
         accountList.add(account);
@@ -631,6 +649,7 @@ public class Contest implements IContest {
         problemListenerList.remove(problemListener);
     }
 
+
     public void addLanguageListener(ILanguageListener languageListener) {
         languageListenerList.addElement(languageListener);
     }
@@ -661,6 +680,14 @@ public class Contest implements IContest {
 
     public void removeConnectionListener(IConnectionListener connectionListener) {
         connectionListenerList.remove(connectionListener);
+    }
+    
+    public void addBalloonSettingsListener(IBalloonSettingsListener balloonSettingsListener) {
+        balloonSettingsListenerList.addElement(balloonSettingsListener);
+    }
+    
+    public void removeBalloonSettingsListener(IBalloonSettingsListener balloonSettingsListener) {
+        balloonSettingsListenerList.remove(balloonSettingsListener);
     }
 
     public Run getRun(ElementId id) {
@@ -1258,12 +1285,16 @@ public class Contest implements IContest {
         return 5;
     }
 
-    public void updateBalloonSettings(BalloonSettings balloonSettings) {
-        balloonSettingsList.update(balloonSettings);
-    }
-
     public void addBalloonSettings(BalloonSettings balloonSettings) {
         balloonSettingsList.add(balloonSettings);
+        BalloonSettingsEvent balloonSettingsEvent = new BalloonSettingsEvent(BalloonSettingsEvent.Action.ADDED, balloonSettings);
+        fireBalloonSettingsListener(balloonSettingsEvent);
+    }
+
+    public void updateBalloonSettings(BalloonSettings balloonSettings) {
+        balloonSettingsList.add(balloonSettings);
+        BalloonSettingsEvent balloonSettingsEvent = new BalloonSettingsEvent(BalloonSettingsEvent.Action.CHANGED, balloonSettings);
+        fireBalloonSettingsListener(balloonSettingsEvent);
     }
 
     public BalloonSettings getBalloonSettings(int siteNum) {
@@ -1278,5 +1309,10 @@ public class Contest implements IContest {
     public BalloonSettings[] getBalloonSettings() {
         return balloonSettingsList.getList();
     }
-    
+
+    public BalloonSettings getBalloonSettings(ElementId elementId) {
+        return balloonSettingsList.get(elementId);
+    }
+
+
 }
