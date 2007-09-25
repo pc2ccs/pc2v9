@@ -42,7 +42,7 @@ public class EditBalloonSettingsFrame extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(572, 307));
+        this.setSize(new java.awt.Dimension(618,339));
         this.setContentPane(getBalloonSettingPane());
         this.setTitle("Edit Balloon Settings");
 
@@ -53,9 +53,8 @@ public class EditBalloonSettingsFrame extends JFrame implements UIPlugin {
         this.contest = inContest;
         this.controller = inController;
 
-        // TODO
-        // getProblemPane().setContestAndController(contest, controller);
-        // problemPane.setParentFrame(this);
+        getBalloonSettingPane().setContestAndController(contest, controller);
+        getBalloonSettingPane().setParentFrame(this);
     }
 
     public String getPluginTitle() {
@@ -75,7 +74,7 @@ public class EditBalloonSettingsFrame extends JFrame implements UIPlugin {
     }
 
     public void setBalloonSettings(BalloonSettings balloonSettings) {
-        // TODO Auto-generated method stub
+        getBalloonSettingPane().setBalloonSettings(balloonSettings);
 
     }
 

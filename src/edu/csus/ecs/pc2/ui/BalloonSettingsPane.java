@@ -20,7 +20,7 @@ import edu.csus.ecs.pc2.core.model.IBalloonSettingsListener;
 import edu.csus.ecs.pc2.core.model.IContest;
 
 /**
- * View Balloon Settings.
+ * View List (Grid) of Balloon Settings.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$

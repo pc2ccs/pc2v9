@@ -2,25 +2,24 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.Panel;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.BalloonSettings;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Site;
-
-import java.awt.Panel;
-import javax.swing.JCheckBox;
-import javax.swing.JTextField;
-import javax.swing.JComboBox;
-import com.ibm.webrunner.j2mclb.MultiColumnListbox;
 
 /**
  * Add/Edit BalloonSettings Pane.
@@ -85,7 +84,7 @@ public class BalloonSettingPane extends JPanePlugin {
 
     private JLabel siteLabel = null;
 
-    private MultiColumnListbox colorListBox = null;
+    private MCLB colorListBox = null;
 
     /**
      * This method initializes
@@ -207,40 +206,49 @@ public class BalloonSettingPane extends JPanePlugin {
      * 
      */
     public void enableUpdateButton() {
-        //
-        // if (populatingGUI) {
-        // return;
-        // }
-        //
-        // boolean enableButton = false;
-        //
-        // if (balloonSettings != null) {
-        //
-        // try {
-        // BalloonSettings changedBalloonSettings = getBalloonSettingsFromFields(null);
-        //                
-        // // TODO
-        // // if (!balloonSettings.isSameAs(changedBalloonSettings)) {
-        // // enableButton = true;
-        // // }
-        //
-        // } catch (InvalidFieldValue e) {
-        // // invalid field, but that is ok as they are entering data
-        // // will be caught and reported when they hit update or add.
-        // StaticLog.getLog().log(Log.DEBUG, "Input BalloonSettings (but not saving) ", e);
-        // enableButton = true;
-        // }
-        //
-        // } else {
-        // if (getAddButton().isVisible()) {
-        // enableButton = true;
-        // }
-        // }
-        //
-        // // TODO enable
-        // // enableUpdateButtons(enableButton);
-        //
-        //    
+
+        if (populatingGUI) {
+            return;
+        }
+
+        boolean enableButton = false;
+
+        if (balloonSettings != null) {
+
+            try {
+                BalloonSettings changedBalloonSettings = getBalloonSettingsFromFields(null);
+
+                // TODO
+                 if (!balloonSettings.isSameAs(changedBalloonSettings)) {
+                     enableButton = true;
+                 }
+
+            } catch (InvalidFieldValue e) {
+                // invalid field, but that is ok as they are entering data
+                // will be caught and reported when they hit update or add.
+                StaticLog.getLog().log(Log.DEBUG, "Input BalloonSettings (but not saving) ", e);
+                enableButton = true;
+            }
+
+        } else {
+            if (getAddButton().isVisible()) {
+                enableButton = true;
+            }
+        }
+
+//         TODO enable
+         enableUpdateButtons(enableButton);
+
+    }
+
+    protected void enableUpdateButtons(boolean fieldsChanged) {
+        if (fieldsChanged) {
+            cancelButton.setText("Cancel");
+        } else {
+            cancelButton.setText("Close");
+        }
+        updateButton.setEnabled(fieldsChanged);
+        addButton.setEnabled(fieldsChanged);
     }
 
     /**
@@ -251,9 +259,16 @@ public class BalloonSettingPane extends JPanePlugin {
      * @throws InvalidFieldValue
      */
     public BalloonSettings getBalloonSettingsFromFields(BalloonSettings checkBalloonSettings) throws InvalidFieldValue {
+        
+        BalloonSettings newBalloonSettings = new BalloonSettings("New", 0);
+        
+        newBalloonSettings.setPrintBalloons(getPrintNotificationsCheckBox().isSelected());
+        newBalloonSettings.setEmailBalloons(getSendEmailNotificationsCheckBox().isSelected());
+        
+        // TODO get and add colors
+        // TODO get and add text fields
 
-        // TODO get fields from fields
-        return null;
+        return newBalloonSettings;
     }
 
     /**
@@ -432,6 +447,7 @@ public class BalloonSettingPane extends JPanePlugin {
             colorListBox.addRow(row);
 
         }
+        colorListBox.autoSizeAllColumns();
     }
 
     public void showMessage(final String message) {
@@ -489,8 +505,45 @@ public class BalloonSettingPane extends JPanePlugin {
             sendEmailNotificationsCheckBox = new JCheckBox();
             sendEmailNotificationsCheckBox.setBounds(new java.awt.Rectangle(25, 48, 185, 21));
             sendEmailNotificationsCheckBox.setText("Send Email Notifications");
+            sendEmailNotificationsCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableButtons();
+                }
+            });
         }
         return sendEmailNotificationsCheckBox;
+    }
+
+    protected void enableButtons() {
+        
+        if (populatingGUI) {
+            return;
+        }
+
+        boolean enableButton = false;
+
+        if (balloonSettings != null) {
+
+            try {
+                BalloonSettings changedBalloonSettings = getBalloonSettingsFromFields(null);
+                if (!balloonSettings.isSameAs(changedBalloonSettings)) {
+                    enableButton = true;
+                }
+                
+            } catch (InvalidFieldValue e) {
+                // invalid field, but that is ok as they are entering data
+                // will be caught and reported when they hit update or add.
+                StaticLog.getLog().log(Log.DEBUG, "Input Balloon Setting (but not saving) ",e);
+                enableButton = true;
+            }
+
+        } else {
+            if (getAddButton().isVisible()) {
+                enableButton = true;
+            }
+        }
+
+        enableUpdateButtons(enableButton);
     }
 
     /**
@@ -503,6 +556,11 @@ public class BalloonSettingPane extends JPanePlugin {
             printNotificationsCheckBox = new JCheckBox();
             printNotificationsCheckBox.setBounds(new java.awt.Rectangle(25, 147, 162, 24));
             printNotificationsCheckBox.setText("Print Notifications");
+            printNotificationsCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableButtons();
+                }
+            });
         }
         return printNotificationsCheckBox;
     }
@@ -516,6 +574,11 @@ public class BalloonSettingPane extends JPanePlugin {
         if (emailContactTextBox == null) {
             emailContactTextBox = new JTextField();
             emailContactTextBox.setBounds(new java.awt.Rectangle(183, 80, 179, 21));
+            emailContactTextBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableButtons();
+                }
+            });
         }
         return emailContactTextBox;
     }
@@ -529,6 +592,11 @@ public class BalloonSettingPane extends JPanePlugin {
         if (emailServerTextBox == null) {
             emailServerTextBox = new JTextField();
             emailServerTextBox.setBounds(new java.awt.Rectangle(183, 115, 179, 21));
+            emailServerTextBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableButtons();
+                }
+            });
         }
         return emailServerTextBox;
     }
@@ -543,6 +611,11 @@ public class BalloonSettingPane extends JPanePlugin {
             postScriptEnabledCheckBox = new JCheckBox();
             postScriptEnabledCheckBox.setBounds(new java.awt.Rectangle(52, 205, 212, 24));
             postScriptEnabledCheckBox.setText("PostScript enabled printer");
+            postScriptEnabledCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableButtons();
+                }
+            });
         }
         return postScriptEnabledCheckBox;
     }
@@ -556,6 +629,11 @@ public class BalloonSettingPane extends JPanePlugin {
         if (printDeviceTextBox == null) {
             printDeviceTextBox = new JTextField();
             printDeviceTextBox.setBounds(new java.awt.Rectangle(183, 177, 179, 21));
+            printDeviceTextBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableButtons();
+                }
+            });
         }
         return printDeviceTextBox;
     }
@@ -569,6 +647,11 @@ public class BalloonSettingPane extends JPanePlugin {
         if (siteComboBox == null) {
             siteComboBox = new JComboBox();
             siteComboBox.setBounds(new java.awt.Rectangle(91, 18, 265, 24));
+            siteComboBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableButtons();
+                }
+            });
         }
         return siteComboBox;
     }
@@ -576,15 +659,17 @@ public class BalloonSettingPane extends JPanePlugin {
     /**
      * This method initializes colorListBox
      * 
-     * @return com.ibm.webrunner.j2mclb.MultiColumnListbox
+     * @return com.ibm.webrunner.j2mclb.MCLB
      */
-    private MultiColumnListbox getColorListBox() {
+    private MCLB getColorListBox() {
         if (colorListBox == null) {
-            colorListBox = new MultiColumnListbox();
+            colorListBox = new MCLB();
             colorListBox.setBounds(new java.awt.Rectangle(379, 15, 208, 210));
             String cols[] = { "Problem", "Color" };
             colorListBox.addColumns(cols);
+            colorListBox.autoSizeAllColumns();
         }
+
         return colorListBox;
     }
 
