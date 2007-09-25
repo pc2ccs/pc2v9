@@ -459,6 +459,9 @@ public class Problem implements IElementObject {
     public boolean isSameAs(Problem problem) {
 
         try {
+            if (problem == null){
+                return false;
+            }
             if (! stringSame(displayName, problem.getDisplayName())){
                 return false;
             }
