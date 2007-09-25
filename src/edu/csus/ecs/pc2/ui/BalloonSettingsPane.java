@@ -8,6 +8,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import com.ibm.webrunner.j2mclb.util.HeapSorter;
+import com.ibm.webrunner.j2mclb.util.NumericStringComparator;
+
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.BalloonSettings;
@@ -64,8 +67,8 @@ public class BalloonSettingsPane extends JPanePlugin {
         this.setLayout(new BorderLayout());
         this.setSize(new java.awt.Dimension(564, 229));
         this.add(getMessagePanel(), java.awt.BorderLayout.NORTH);
-        this.add(getProblemListBox(), java.awt.BorderLayout.CENTER);
-        this.add(getProblemButtonPane(), java.awt.BorderLayout.SOUTH);
+        this.add(getBalloonSettingsListBox(), java.awt.BorderLayout.CENTER);
+        this.add(getBalloonSettingsButtonPane(), java.awt.BorderLayout.SOUTH);
 
         editBalloonSettingsFrame = new EditBalloonSettingsFrame();
 
@@ -73,7 +76,7 @@ public class BalloonSettingsPane extends JPanePlugin {
 
     @Override
     public String getPluginTitle() {
-        return "Problems Pane";
+        return "BalloonSettingss Pane";
     }
 
     /**
@@ -81,7 +84,7 @@ public class BalloonSettingsPane extends JPanePlugin {
      * 
      * @return javax.swing.JPanel
      */
-    private JPanel getProblemButtonPane() {
+    private JPanel getBalloonSettingsButtonPane() {
         if (balloonSettingsButtonPane == null) {
             FlowLayout flowLayout = new FlowLayout();
             flowLayout.setHgap(25);
@@ -99,30 +102,36 @@ public class BalloonSettingsPane extends JPanePlugin {
      * 
      * @return edu.csus.ecs.pc2.core.log.MCLB
      */
-    private MCLB getProblemListBox() {
+    private MCLB getBalloonSettingsListBox() {
         if (balloonSettingsListBox == null) {
             balloonSettingsListBox = new MCLB();
 
-            Object[] cols = { "BalloonSettings Name", "Data File", "Input Method", "Answer File", "Run Time Limit", "SVTJ", "Validator" };
+            Object[] cols = { "Site", "Print", "E-mail", "Printer", "Send To", "Mail Server" };
+
             balloonSettingsListBox.addColumns(cols);
 
             /**
-             * No sorting at this time, the only way to know what order the balloonSettingss are is to NOT sort them. Later we can add a sorter per ProblemDisplayList somehow.
+             * No sorting at this time, the only way to know what order the balloonSettingss are is to NOT sort them. Later we can add a sorter per BalloonSettingsDisplayList somehow.
              */
 
-            // // Sorters
-            // HeapSorter sorter = new HeapSorter();
-            // // HeapSorter numericStringSorter = new HeapSorter();
-            // // numericStringSorter.setComparator(new NumericStringComparator());
-            //
-            // // Display Name
-            // balloonSettingsListBox.setColumnSorter(0, sorter, 1);
-            // // Compiler Command Line
-            // balloonSettingsListBox.setColumnSorter(1, sorter, 2);
-            // // Exe Name
-            // balloonSettingsListBox.setColumnSorter(2, sorter, 3);
-            // // Execute Command Line
-            // balloonSettingsListBox.setColumnSorter(3, sorter, 4);
+            // Sorters
+            HeapSorter sorter = new HeapSorter();
+            HeapSorter numericStringSorter = new HeapSorter();
+            numericStringSorter.setComparator(new NumericStringComparator());
+
+            // Site # (String)
+            balloonSettingsListBox.setColumnSorter(0, sorter, 1);
+            // Print
+            balloonSettingsListBox.setColumnSorter(1, sorter, 2);
+            // E-mail
+            balloonSettingsListBox.setColumnSorter(2, sorter, 3);
+            // Printer
+            balloonSettingsListBox.setColumnSorter(3, sorter, 4);
+            // Send To
+            balloonSettingsListBox.setColumnSorter(4, sorter, 4);
+            // Mail Server
+            balloonSettingsListBox.setColumnSorter(5, sorter, 6);
+
             balloonSettingsListBox.autoSizeAllColumns();
 
         }
@@ -140,35 +149,33 @@ public class BalloonSettingsPane extends JPanePlugin {
                     balloonSettingsListBox.replaceRow(objects, rowNumber);
                 }
                 balloonSettingsListBox.autoSizeAllColumns();
-                // balloonSettingsListBox.sort();
+                balloonSettingsListBox.sort();
             }
         });
     }
+    
+
+    private String yesNoString(boolean b) {
+        if (b) {
+            return "Yes";
+        } else {
+            return "No";
+        }
+    }
 
     protected Object[] buildBalloonSettingsRow(BalloonSettings balloonSettings) {
-        // TODO 
-        return null;
-        
-//        // Object[] cols = { "BalloonSettings Name", "Data File", "Input Method", "Answer File", "Run Time Limit", "SVTJ", "Validator" };
-//
-//        int numberColumns = balloonSettingsListBox.getColumnCount();
-//        Object[] c = new String[numberColumns];
-//
-//        c[0] = balloonSettings.getDisplayName();
-//        c[1] = balloonSettings.getDataFileName();
-//        String inputMethod = "";
-//        if (balloonSettings.isReadInputDataFromSTDIN()) {
-//            inputMethod = "STDIN";
-//        } else {
-//            inputMethod = "File I/O";
-//        }
-//        c[2] = inputMethod;
-//        c[3] = balloonSettings.getAnswerFileName();
-//        c[4] = Integer.toString(balloonSettings.getTimeOutInSeconds());
-//        c[5] = yesNoString(balloonSettings.isShowValidationToJudges());
-//        c[6] = balloonSettings.getValidatorProgramName();
-//
-//        return c;
+//        Object[] cols = { "Site", "Print", "E-mail", "Printer", "Sent To", "Mail Server" };
+        int numberColumns = balloonSettingsListBox.getColumnCount();
+        Object[] c = new String[numberColumns];
+
+        c[0] = "Site " + balloonSettings.getSiteNumber();
+        c[1] = yesNoString(balloonSettings.isPrintBalloons());
+        c[2] = yesNoString(balloonSettings.isEmailBalloons());
+        c[3] = balloonSettings.getPrintDevice();
+        c[4] = balloonSettings.getEmailContact();
+        c[5] = balloonSettings.getMailServer();
+
+        return c;
     }
 
     private void reloadListBox() {
@@ -176,11 +183,11 @@ public class BalloonSettingsPane extends JPanePlugin {
         BalloonSettings[] balloonSettingsArray = getContest().getBalloonSettings();
 
         for (BalloonSettings balloonSettings : balloonSettingsArray) {
-            addProblemRow(balloonSettings);
+            addBalloonSettingsRow(balloonSettings);
         }
     }
 
-    private void addProblemRow(BalloonSettings balloonSettings) {
+    private void addBalloonSettingsRow(BalloonSettings balloonSettings) {
         Object[] objects = buildBalloonSettingsRow(balloonSettings);
         balloonSettingsListBox.addRow(objects, balloonSettings.getElementId());
         balloonSettingsListBox.autoSizeAllColumns();
@@ -213,14 +220,14 @@ public class BalloonSettingsPane extends JPanePlugin {
             addButton.setText("Add");
             addButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    addProblem();
+                    addBalloonSettings();
                 }
             });
         }
         return addButton;
     }
 
-    protected void addProblem() {
+    protected void addBalloonSettings() {
         editBalloonSettingsFrame.setBalloonSettings(null);
         editBalloonSettingsFrame.setVisible(true);
     }
@@ -236,14 +243,14 @@ public class BalloonSettingsPane extends JPanePlugin {
             editButton.setText("Edit");
             editButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    editSelectedProblem();
+                    editSelectedBalloonSettings();
                 }
             });
         }
         return editButton;
     }
 
-    protected void editSelectedProblem() {
+    protected void editSelectedBalloonSettings() {
 
         int selectedIndex = balloonSettingsListBox.getSelectedIndex();
         if (selectedIndex == -1) {
@@ -291,9 +298,10 @@ public class BalloonSettingsPane extends JPanePlugin {
     }
 
     /**
+     * Balloon Settings Listener.
      * 
      * @author pc2@ecs.csus.edu
-     * 
+     * @version $Id$
      */
     private class BalloonSettingsListenerImplementation implements IBalloonSettingsListener {
 
