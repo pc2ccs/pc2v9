@@ -14,6 +14,7 @@ import java.util.Hashtable;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
+import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -435,7 +436,7 @@ public class Executable {
              * So we need to prefix the command with java -jar <path to jar>
              */
 
-            String pathToPC2Jar = findPC2JarPath ("pc2.jar");
+            String pathToPC2Jar = findPC2JarPath ();
             commandPattern = "java -cp " + pathToPC2Jar + problem.getValidatorCommandLine();
 
         }
@@ -581,23 +582,10 @@ public class Executable {
         return executionData.isValidationSuccess();
     }
 
-    private String findPC2JarPath(String string) {
-        
-        // TODO this need to be done with respect to PC2HOME or more elagantly
-        
+    private String findPC2JarPath() {
         String fs = File.separator;
-        String path = ".." + fs + "lib" + fs;
-        
-        if (new File(path+string).exists()){
-            return ".." + fs + path;
-        }
-        
-        path = ".." + fs + ".." + fs + "lib" + fs;
-        if (new File(path+string).exists()){
-            return ".." + fs + path;
-        }
-        
-        return path;
+        VersionInfo versionInfo = new VersionInfo();
+        return versionInfo.locateHome()+fs+"lib"+fs;
     }
 
     /**
