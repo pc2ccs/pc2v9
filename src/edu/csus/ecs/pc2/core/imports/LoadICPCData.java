@@ -7,10 +7,13 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.HashMap;
+import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.exception.IllegalTSVFormatException;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.Group;
+import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.util.TabSeparatedValueParser;
@@ -25,6 +28,9 @@ public class LoadICPCData {
     private static final int TEAM_TAB = 11;
     private static final int SITE_TAB = 22;
     private static final int CONTEST_TAB = 33;
+    
+    private ICPCImportData importData;
+    private Site[] sites;
     
     private int clientNumber = 0;
     
@@ -106,8 +112,10 @@ public class LoadICPCData {
         return account;
     }
 
-    boolean fromDirectory(String directory, Account[] existingAccounts) throws Exception {
+    boolean fromDirectory(String directory, Account[] existingAccounts, Site[] existingSites) throws Exception {
+        this.sites = existingSites;
         boolean result = false;
+        importData = new ICPCImportData();
         if (existingAccounts != null && existingAccounts.length > 0) {
             for (int i = 0; i < existingAccounts.length; i++) {
                 existingAccountsMap.put(existingAccounts[i].getClientId(), existingAccounts[i]);
@@ -128,6 +136,8 @@ public class LoadICPCData {
     }
     
     void readFile(String filename, int fileType) throws Exception {
+        Vector<ICPCAccount> accounts = new Vector<ICPCAccount>();
+        Vector<Group> groups = new Vector<Group>();
         String line;
         int lineCount = 0;
         FileReader fileReader = new FileReader(filename);
@@ -144,27 +154,21 @@ public class LoadICPCData {
                 String[] values = TabSeparatedValueParser.parseLine(line);
                 switch (fileType) {
                     case 11:
-                        processTeam(values);                      
+                        accounts.add(processTeam(values));                      
                         break;
 
                     case 22:
-                        processSite(values);
+                        groups.add(processSite(values));
                         break;
                         
                     case 33:
-                        processContest(values);
+                        importData.setContestTitle(processContest(values));
                         break;
                         
                     default:
                         new Exception("Unknown file type");
                         break;
                 }
-                Account account = getAccount(values);
-                if (account == null) {
-                    String msg = filename + ":" + lineCount + ": " + " please create the account first (" + values[accountColumn] + ")";
-                    throw new IllegalTSVFormatException(msg);
-                }
-                accountMap.put(account.getClientId(), account);
             } catch (IllegalTSVFormatException e2) {
                 // already a properly formatted exception
                 throw e2;
@@ -179,9 +183,14 @@ public class LoadICPCData {
         fileReader.close();
         in = null;
         fileReader = null;
+        if (fileType == TEAM_TAB) {
+            importData.setAccounts(accounts.toArray(new ICPCAccount[accounts.size()]));                      
+        } else if (fileType == SITE_TAB) {
+            importData.setGroups(accounts.toArray(new Group[groups.size()]));                      
+        }
     }
     
-    private Account processTeam(String[] values) {
+    private ICPCAccount processTeam(String[] values) {
         int offset = 0;
         switch(values.length) {
             case 10:
@@ -222,14 +231,34 @@ public class LoadICPCData {
         return account;
     }
 
-    private void processSite(String[] values) {
-        // TODO Auto-generated method stub
+    private Group processSite(String[] values) {
+        Group group = new Group();
+        int offset;
         
+        if (values.length == 7) {
+            // we have no pc2 site info
+            offset = 1;
+        } else {
+            offset = 0;
+            // we have the pc2 site info
+        }
+        // 0 is the pc2 site id
+        // 1 is the contest Id
+        group.setGroupId(Integer.parseInt(values[2-offset]));
+        group.setGroupTitle(values[3-offset]);
+        if (values.length == 9) {
+            int siteNum = Integer.parseInt(values[0]);
+            group.setSite(sites[siteNum-1].getElementId());
+        }
+        return group;
     }
 
-    private void processContest(String[] values) {
-        // TODO Auto-generated method stub
-        
+    private String processContest(String[] values) {
+        String title = "";
+        if (values.length > 0) {
+            title = values[1];
+        }
+        return title;
     }
 
     /**
