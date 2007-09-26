@@ -5,6 +5,7 @@ package edu.csus.ecs.pc2.core.imports;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.HashMap;
 import java.util.Vector;
@@ -116,21 +117,42 @@ public class LoadICPCData {
         this.sites = existingSites;
         boolean result = false;
         importData = new ICPCImportData();
+        
+        // TODO use or delete
         if (existingAccounts != null && existingAccounts.length > 0) {
             for (int i = 0; i < existingAccounts.length; i++) {
                 existingAccountsMap.put(existingAccounts[i].getClientId(), existingAccounts[i]);
             }
         }
-        // TODO add file exists checks before attempting read
-        readFile(directory+File.separator+"PC2_Contest.tab", CONTEST_TAB);
-        // if
-        readFile(directory+File.separator+"_PC2_Site.tab", SITE_TAB);
-        // else
-        readFile(directory+File.separator+"PC2_Site.tab", SITE_TAB);
-        // if
-        readFile(directory+File.separator+"_PC2_Team.tab", TEAM_TAB);
-        // else
-        readFile(directory+File.separator+"PC2_Team.tab", TEAM_TAB);
+        
+        String fs = File.separator;
+        String path = directory + fs;
+        String file = "PC2_Contest.tab";
+        if (new File(path+file).exists()){
+            readFile(path+file, CONTEST_TAB);
+        } else {
+            throw new FileNotFoundException(path+file);
+        }
+
+        file = "_PC2_Site.tab";
+        if (!new File(path+file).exists()){
+            file = "PC2_Site.tab";
+            if (!new File(path+file).exists()){
+                throw new FileNotFoundException(path+file);
+            }
+        }
+        readFile(path+file, SITE_TAB);
+
+        file = "_PC2_Team.tab";
+        if (!new File(path+file).exists()){
+            file = "PC2_Team.tab";
+            if (!new File(path+file).exists()){
+                throw new FileNotFoundException(path+file);
+            }
+        }
+        readFile(path+file, TEAM_TAB);
+        // we made it to the end successfully
+        result = true;
         
         return result;
     }
@@ -244,115 +266,5 @@ public class LoadICPCData {
             title = values[1];
         }
         return title;
-    }
-
-    /**
-     * Read a tab-separated values from a file.
-     * 1st line should contain the column headers.
-     * Supported column headers are:
-     * account (required)
-     * alias
-     * displayname
-     * group
-     * password
-     * permdisplay
-     * permlogin
-     * site
-     * 
-     * @param filename
-     * @param existingAccounts
-     * @return an array of accounts
-     * @throws Exception
-     */
-    public Account[] fromTSVFile(String filename, Account[] existingAccounts) throws Exception {
-        if (existingAccounts != null && existingAccounts.length > 0) {
-            for (int i = 0; i < existingAccounts.length; i++) {
-                existingAccountsMap.put(existingAccounts[i].getClientId(), existingAccounts[i]);
-            }
-        }
-        int lineCount = 0;
-        String[] columns;
-        FileReader fileReader = new FileReader(filename);
-        BufferedReader in = new BufferedReader(fileReader);
-        String line = in.readLine();
-        while (line != null && line.startsWith("#")) {
-            line = in.readLine();
-            lineCount++;
-        }
-        lineCount++;
-        if (line != null) {
-            columns = TabSeparatedValueParser.parseLine(line);
-            siteColumn = -1;
-            accountColumn = -1;
-            displayNameColumn = -1;
-            passwordColumn = -1;
-            groupColumn = -1;
-            aliasColumn = -1;
-            externalIdColumn = -1;
-            for (int i = 0; i < columns.length; i++) {
-                if (columns[i].equalsIgnoreCase("site")) {
-                    siteColumn = i;
-                }
-                if (columns[i].equalsIgnoreCase("account")) {
-                    accountColumn = i;
-                }
-                if (columns[i].equalsIgnoreCase("displayname")) {
-                    displayNameColumn = i;
-                }
-                if (columns[i].equalsIgnoreCase("password")) {
-                    passwordColumn = i;
-                }
-                if (columns[i].equalsIgnoreCase("group")) {
-                    groupColumn = i;
-                }
-                if (columns[i].equalsIgnoreCase("permdisplay")) {
-                    permDisplayColumn = i;
-                }
-                if (columns[i].equalsIgnoreCase("permlogin")) {
-                    permLoginColumn = i;
-                }
-                if (columns[i].equalsIgnoreCase("externalid")) {
-                    groupColumn = i;
-                }
-                if (columns[i].equalsIgnoreCase("alias")) {
-                    groupColumn = i;
-                }
-            }
-            if (accountColumn == -1 || siteColumn == -1 || passwordColumn == -1) {
-                String msg = "1st line should be the row headers (account, password, and site are required)";
-                throw new IllegalTSVFormatException(msg);
-            }
-        }
-        line = in.readLine();
-        lineCount++;
-        while (line != null) {
-            try {
-                if (line.startsWith("#")) {
-                    line = in.readLine();
-                    lineCount++;
-                    continue;
-                }
-                String[] values = TabSeparatedValueParser.parseLine(line);
-                Account account = getAccount(values);
-                if (account == null) {
-                    String msg = filename + ":" + lineCount + ": " + " please create the account first (" + values[accountColumn] + ")";
-                    throw new IllegalTSVFormatException(msg);
-                }
-                accountMap.put(account.getClientId(), account);
-            } catch (IllegalTSVFormatException e2) {
-                // already a properly formatted exception
-                throw e2;
-            } catch (Exception e) {
-                String msg = "Error " + filename + ":" + lineCount + ": " + e.getMessage();
-                throw new Exception(msg);
-            }
-            line = in.readLine();
-            lineCount++;
-        }
-        in.close();
-        fileReader.close();
-        in = null;
-        fileReader = null;
-        return accountMap.values().toArray(new Account[accountMap.size()]);
     }
 }
