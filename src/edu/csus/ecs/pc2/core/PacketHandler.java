@@ -1405,6 +1405,8 @@ public class PacketHandler {
         addConnectionIdsToModel (packet);
         
         addLoginsToModel(packet);
+        
+        addBalloonSettingsToModel (packet);
 
         if (contest.isLoggedIn()) {
             
@@ -1426,6 +1428,31 @@ public class PacketHandler {
         }
     }
 
+    /**
+     * Add Balloon Settings to model.
+     * @param packet
+     */
+    private void addBalloonSettingsToModel(Packet packet) {
+        try {
+            BalloonSettings[] balloonSettings = (BalloonSettings[]) PacketFactory.getObjectValue(packet, PacketFactory.BALLOON_SETTINGS_LIST);
+            if (balloonSettings != null) {
+                for (BalloonSettings balloonSettings2 : balloonSettings) {
+                    if ( (!isServer()) ) {
+                        contest.addBalloonSettings(balloonSettings2);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // TODO: log handle exception
+            e.printStackTrace();
+            controller.getLog().log(Log.WARNING, "Exception logged ", e);
+        }
+    }
+
+    /**
+     * 
+     * @param packet
+     */
     private void addClientSettingsToModel(Packet packet) {
         try {
             ClientSettings[] clientSettings = (ClientSettings[]) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_SETTINGS_LIST);
