@@ -205,23 +205,8 @@ public class LoadICPCData {
                 break;
         }
         // TODO convert icpc site to pc2 site
-        String siteString = values[siteColumn];
-        ClientId clientId = new ClientId(Integer.parseInt(siteString), Type.TEAM, clientNumber);
-        Account accountClean = existingAccountsMap.get(clientId);
-        if (accountClean == null) {
-            // would be nice if we could create the account... not now though...
-            // accountClean = new Account(clientId, password, clientId.getSiteNumber());
-            return null;
-        }
-        // TODO would be nice if Account had a deep clone
-        Account account = new Account(clientId, accountClean.getPassword(), clientId.getSiteNumber());
-        account.clearListAndLoadPermissions(accountClean.getPermissionList());
-        // TODO consider blanking these out
-        account.setGroupId(accountClean.getGroupId());
-        account.setExternalId(accountClean.getExternalId());
-        account.setExternalName(accountClean.getExternalName());
-        account.setLongSchoolName(accountClean.getLongSchoolName());
-        account.setShortSchoolName(accountClean.getShortSchoolName());
+//        String siteString = values[siteColumn];
+        ICPCAccount account = new ICPCAccount();
         
         account.setExternalId(values[2+offset]);
         account.setGroupId(values[3+offset]);
