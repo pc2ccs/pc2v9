@@ -4,6 +4,7 @@ import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.BalloonSettings;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
@@ -669,6 +670,12 @@ public class PacketHandler {
             contest.addContestTime(contestTime);
             sendToTeams = true;
         }
+        
+        BalloonSettings balloonSettings = (BalloonSettings) PacketFactory.getObjectValue(packet, PacketFactory.BALLOON_SETTINGS);
+        if (balloonSettings != null) {
+            contest.addBalloonSettings(balloonSettings);
+            sendToTeams = true;
+        }
 
         Account oneAccount = (Account) PacketFactory.getObjectValue(packet, PacketFactory.ACCOUNT);
         if (oneAccount != null) {
@@ -750,6 +757,12 @@ public class PacketHandler {
         ContestTime contestTime = (ContestTime) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME);
         if (contestTime != null) {
             contest.updateContestTime(contestTime);
+            sendToTeams = true;
+        }
+        
+        BalloonSettings balloonSettings = (BalloonSettings) PacketFactory.getObjectValue(packet, PacketFactory.BALLOON_SETTINGS);
+        if (balloonSettings != null) {
+            contest.updateBalloonSettings(balloonSettings);
             sendToTeams = true;
         }
 

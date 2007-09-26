@@ -464,7 +464,6 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
                 info("Contacted using connection id " + remoteServerConnectionHandlerID);
 
-                info("Sending login request to " + remoteHostName + " as " + clientId + " " + password); // TODO remove this
                 sendLoginRequestFromServerToServer(transportManager, remoteServerConnectionHandlerID, clientId, password);
 
             } else {
@@ -1003,7 +1002,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         Packet packetToSend = PacketFactory.createLoginSuccess(contest.getClientId(), clientId, contest.getContestTime(), contest.getContestTimes(), contest.getSiteNumber(), 
                 contest.getLanguages(), contest.getProblems(), contest.getJudgements(), contest.getSites(), runs, clarifications, 
                 allLoggedInUsers(), contest.getConnectionHandleIDs(), getAllAccounts(), problemDataFiles,
-                contest.getContestInformation(), clientSettings);
+                contest.getContestInformation(), contest.getBalloonSettings(), clientSettings);
         
         sendToClient(packetToSend);
     }
@@ -1841,14 +1840,12 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
 
     public void addNewBalloonSettings(BalloonSettings newBalloonSettings) {
-        // TODO send packet to server
-        Packet newBalloonSettingsPacket = null;
+        Packet newBalloonSettingsPacket = PacketFactory.createAddSetting(contest.getClientId(), getServerClientId(), newBalloonSettings);
         sendToLocalServer(newBalloonSettingsPacket);
     }
 
     public void updateBalloonSettings(BalloonSettings balloonSettings) {
-        // TODO send packet to server
-        Packet balloonSettingsPacket = null;
+        Packet balloonSettingsPacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), balloonSettings);
         sendToLocalServer(balloonSettingsPacket);
     }
 }

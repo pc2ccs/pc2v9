@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.ui;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.Panel;
+import java.util.Arrays;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -14,6 +15,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.BalloonSettings;
@@ -30,8 +32,6 @@ import edu.csus.ecs.pc2.core.model.Site;
 
 // $HeadURL$
 public class BalloonSettingPane extends JPanePlugin {
-
-    public final String DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND = "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
 
     private static final long serialVersionUID = -1060536964672397704L;
 
@@ -57,7 +57,6 @@ public class BalloonSettingPane extends JPanePlugin {
     @SuppressWarnings("unused")
     private Log log = null;
 
-    @SuppressWarnings("unused")
     private boolean populatingGUI = true;
 
     private Panel centerPane = null;
@@ -80,11 +79,11 @@ public class BalloonSettingPane extends JPanePlugin {
 
     private JLabel printDeviceLabel = null;
 
-    private JComboBox siteComboBox = null;
-
     private JLabel siteLabel = null;
 
     private MCLB colorListBox = null;
+
+    private JComboBox siteComboBox = null;
 
     /**
      * This method initializes
@@ -110,8 +109,6 @@ public class BalloonSettingPane extends JPanePlugin {
 
     public void setContestAndController(IContest inContest, IController inController) {
         super.setContestAndController(inContest, inController);
-
-        // getContest().addBalloonSettingsListener(new Proble)
 
         log = getController().getLog();
     }
@@ -182,6 +179,11 @@ public class BalloonSettingPane extends JPanePlugin {
      */
     protected void addBalloonSettings() {
 
+        if (!validateBalloonSettingsFields()) {
+            // new balloonSettings is invalid, just return, message issued by validateBalloonSettingsFields
+            return;
+        }
+
         BalloonSettings newBalloonSettings = null;
         try {
             newBalloonSettings = getBalloonSettingsFromFields(null);
@@ -218,10 +220,9 @@ public class BalloonSettingPane extends JPanePlugin {
             try {
                 BalloonSettings changedBalloonSettings = getBalloonSettingsFromFields(null);
 
-                // TODO
-                 if (!balloonSettings.isSameAs(changedBalloonSettings)) {
-                     enableButton = true;
-                 }
+                if (!balloonSettings.isSameAs(changedBalloonSettings)) {
+                    enableButton = true;
+                }
 
             } catch (InvalidFieldValue e) {
                 // invalid field, but that is ok as they are entering data
@@ -236,8 +237,7 @@ public class BalloonSettingPane extends JPanePlugin {
             }
         }
 
-//         TODO enable
-         enableUpdateButtons(enableButton);
+        enableUpdateButtons(enableButton);
 
     }
 
@@ -259,16 +259,42 @@ public class BalloonSettingPane extends JPanePlugin {
      * @throws InvalidFieldValue
      */
     public BalloonSettings getBalloonSettingsFromFields(BalloonSettings checkBalloonSettings) throws InvalidFieldValue {
-        
-        BalloonSettings newBalloonSettings = new BalloonSettings("New", 0);
-        
-        newBalloonSettings.setPrintBalloons(getPrintNotificationsCheckBox().isSelected());
-        newBalloonSettings.setEmailBalloons(getSendEmailNotificationsCheckBox().isSelected());
-        
-        // TODO get and add colors
-        // TODO get and add text fields
 
-        return newBalloonSettings;
+        if (checkBalloonSettings == null){
+            // TODO populate site and title from site combo box
+            checkBalloonSettings =  new BalloonSettings("New Site 1", 1);
+        }
+
+        checkBalloonSettings.setPrintBalloons(getPrintNotificationsCheckBox().isSelected());
+        checkBalloonSettings.setEmailBalloons(getSendEmailNotificationsCheckBox().isSelected());
+
+        if (checkBalloonSettings.isPrintBalloons()) {
+            checkBalloonSettings.setPostscriptCapable(getPostScriptEnabledCheckBox().isSelected());
+            checkBalloonSettings.setPrintDevice(getPrintDeviceTextBox().getText());
+        }
+        if (checkBalloonSettings.isEmailBalloons()) {
+            checkBalloonSettings.setEmailContact(getEmailContactTextBox().getText());
+            checkBalloonSettings.setMailServer(getEmailServerTextBox().getText());
+        }
+
+        for (int row = 0; row < colorListBox.getRowCount(); row ++)        {
+            
+            Object [] colValues = colorListBox.getRow(row);
+            try {
+                Problem problem = (Problem) colValues[0];
+                JTextField textField = (JTextField) colValues[1];
+                String color = textField.getText();
+                
+                checkBalloonSettings.addColor(problem, color);
+                
+            } catch (Exception e) {
+                // TODO: log handle exception
+                log.log(Log.WARNING, "Exception logged ", e);
+            }
+            
+        }
+
+        return checkBalloonSettings;
     }
 
     /**
@@ -321,11 +347,38 @@ public class BalloonSettingPane extends JPanePlugin {
     /**
      * Validate that all balloonSettings fields are ok.
      * 
-     * @return
+     * @return true if all fields are valid
      */
     private boolean validateBalloonSettingsFields() {
+        
+        // TODO code validateBalloonSettingsFields
 
-        return false; // TODO
+        if (getPrintNotificationsCheckBox().isSelected()) {
+
+            if (getPrintDeviceTextBox().getText().length() < 1) {
+                showMessage("You must specify a print device");
+                return false;
+            }
+        }
+        if (getSendEmailNotificationsCheckBox().isSelected()) {
+            if (getEmailContactTextBox().getText().length() < 1) {
+                showMessage("You must specify a email address/contact");
+                return false;
+            }
+            if (getEmailServerTextBox().getText().length() < 1) {
+                showMessage("You must specify a SMTP (e-mail) server");
+                return false;
+            }
+        }
+
+        // TODO validate site combo working
+//        if (getSiteComboBox().getSelectedIndex() < 1) {
+//            showMessage("You must specify a site number");
+//            return false;
+//        }
+
+       
+        return true;
 
     }
 
@@ -382,24 +435,27 @@ public class BalloonSettingPane extends JPanePlugin {
         return balloonSettings;
     }
 
-    public void setBalloonSettings(final BalloonSettings balloonSettings) {
+    public void setBalloonSettings(final BalloonSettings inBalloonSettings) {
 
-        this.balloonSettings = balloonSettings;
+        this.balloonSettings = inBalloonSettings;
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 populateGUI(balloonSettings);
-                // enableUpdateButtons(false);
+                enableUpdateButtons(false);
                 showMessage("");
             }
         });
     }
 
+    /**
+     * Populate GUI
+     * 
+     * @param inBalloonSettings
+     */
     private void populateGUI(BalloonSettings inBalloonSettings) {
 
-        // TODO set site number
-
-        populateSiteJCombo();
+        populatingGUI = true;
 
         if (inBalloonSettings == null) {
             getSendEmailNotificationsCheckBox().setSelected(false);
@@ -409,9 +465,13 @@ public class BalloonSettingPane extends JPanePlugin {
             getPrintDeviceTextBox().setText("");
             getPostScriptEnabledCheckBox().setSelected(false);
 
-            clearBallonColors();
+            getAddButton().setVisible(true);
+            getAddButton().setEnabled(true);
+            getUpdateButton().setVisible(false);
+            populateSiteJCombo(0);
 
         } else {
+            populateSiteJCombo(balloonSettings.getSiteNumber());
 
             getSendEmailNotificationsCheckBox().setSelected(inBalloonSettings.isEmailBalloons());
             getPrintNotificationsCheckBox().setSelected(inBalloonSettings.isPrintBalloons());
@@ -419,31 +479,71 @@ public class BalloonSettingPane extends JPanePlugin {
             getEmailContactTextBox().setText(inBalloonSettings.getEmailContact());
             getPrintDeviceTextBox().setText(inBalloonSettings.getPrintDevice());
             getPostScriptEnabledCheckBox().setSelected(inBalloonSettings.isPostscriptCapable());
+            getAddButton().setVisible(false);
+            getUpdateButton().setVisible(true);
         }
+        
+        setBalloonColors(inBalloonSettings);
+
+        populatingGUI = false;
+
+        enableButtons();
 
     }
 
-    private void populateSiteJCombo() {
+    /**
+     * Populate site combo box.
+     * 
+     * @param siteNumber
+     */
+    private void populateSiteJCombo(int siteNumber) {
 
-        siteComboBox.removeAllItems();
+        int siteIndex = 0;
 
-        siteComboBox.addItem(noneSelected);
+        getSiteComboBox().addItem(noneSelected);
+        
+        // TODO Get this to work.
 
-        for (Site site : getContest().getSites()) {
-            siteComboBox.addItem(site);
+        int i = 0;
+        Site[] sites = getContest().getSites();
+        Arrays.sort(sites, new SiteComparatorBySiteNumber());
+        for (Site site : sites) {
+            getSiteComboBox().addItem(site);
+            System.out.println(" debug  added "+site); 
+            getSiteComboBox().addItem(noneSelected);
+
+            if (siteNumber == site.getSiteNumber()) {
+                siteIndex = i;
+            }
+            i++;
         }
+        
+        for (i = 0; i < getSiteComboBox().getItemCount(); i++) {
+            System.out.println(i + " debug " + getSiteComboBox().getItemAt(i));
+        }
+        getSiteComboBox().setSelectedIndex(siteIndex);
 
     }
 
-    private void clearBallonColors() {
+    private void setBalloonColors(BalloonSettings inBalloonSettings) {
 
         colorListBox.removeAllRows();
 
         for (Problem problem : getContest().getProblems()) {
 
             Object[] row = new Object[2];
-            row[0] = problem.getDisplayName();
-            row[1] = new JTextField("");
+            row[0] = problem;
+            String color = "";
+            if (inBalloonSettings != null){
+                color = inBalloonSettings.getColor(problem);
+            }
+            JTextField editField = new JTextField(color);
+            editField.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyTyped(java.awt.event.KeyEvent e) {
+                    enableButtons();
+                }
+            });
+            row[1] = editField;
             colorListBox.addRow(row);
 
         }
@@ -488,9 +588,9 @@ public class BalloonSettingPane extends JPanePlugin {
             centerPane.add(getPostScriptEnabledCheckBox(), null);
             centerPane.add(getPrintDeviceTextBox(), null);
             centerPane.add(printDeviceLabel, null);
-            centerPane.add(getSiteComboBox(), null);
             centerPane.add(siteLabel, null);
             centerPane.add(getColorListBox(), null);
+            centerPane.add(getSiteComboBox(), null);
         }
         return centerPane;
     }
@@ -515,10 +615,18 @@ public class BalloonSettingPane extends JPanePlugin {
     }
 
     protected void enableButtons() {
-        
+
         if (populatingGUI) {
             return;
         }
+        // Handle enabling email fields
+
+        getEmailContactTextBox().setEnabled(getSendEmailNotificationsCheckBox().isSelected());
+        getEmailServerTextBox().setEnabled(getSendEmailNotificationsCheckBox().isSelected());
+
+        // Handle Print notification fields
+        getPrintDeviceTextBox().setEnabled(getPrintNotificationsCheckBox().isSelected());
+        getPostScriptEnabledCheckBox().setEnabled(getPrintNotificationsCheckBox().isSelected());
 
         boolean enableButton = false;
 
@@ -529,11 +637,11 @@ public class BalloonSettingPane extends JPanePlugin {
                 if (!balloonSettings.isSameAs(changedBalloonSettings)) {
                     enableButton = true;
                 }
-                
+
             } catch (InvalidFieldValue e) {
                 // invalid field, but that is ok as they are entering data
                 // will be caught and reported when they hit update or add.
-                StaticLog.getLog().log(Log.DEBUG, "Input Balloon Setting (but not saving) ",e);
+                StaticLog.getLog().log(Log.DEBUG, "Input Balloon Setting (but not saving) ", e);
                 enableButton = true;
             }
 
@@ -579,6 +687,7 @@ public class BalloonSettingPane extends JPanePlugin {
                     enableButtons();
                 }
             });
+      
         }
         return emailContactTextBox;
     }
@@ -639,24 +748,6 @@ public class BalloonSettingPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes siteComboBox
-     * 
-     * @return javax.swing.JComboBox
-     */
-    private JComboBox getSiteComboBox() {
-        if (siteComboBox == null) {
-            siteComboBox = new JComboBox();
-            siteComboBox.setBounds(new java.awt.Rectangle(91, 18, 265, 24));
-            siteComboBox.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    enableButtons();
-                }
-            });
-        }
-        return siteComboBox;
-    }
-
-    /**
      * This method initializes colorListBox
      * 
      * @return com.ibm.webrunner.j2mclb.MCLB
@@ -665,12 +756,31 @@ public class BalloonSettingPane extends JPanePlugin {
         if (colorListBox == null) {
             colorListBox = new MCLB();
             colorListBox.setBounds(new java.awt.Rectangle(379, 15, 208, 210));
-            String cols[] = { "Problem", "Color" };
+            String[] cols = { "Problem", "Color" };
             colorListBox.addColumns(cols);
             colorListBox.autoSizeAllColumns();
         }
 
         return colorListBox;
+    }
+
+    /**
+     * This method initializes siteCombobox
+     * 
+     * @return javax.swing.JComboBox
+     */
+    private JComboBox getSiteComboBox() {
+        if (siteComboBox == null) {
+            siteComboBox = new JComboBox();
+            siteComboBox.setBounds(new java.awt.Rectangle(96, 18, 254, 25));
+            siteComboBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    System.out.println("getSiteComboBox actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+                    enableButtons();
+                }
+            });
+        }
+        return siteComboBox;
     }
 
 } // @jve:decl-index=0:visual-constraint="28,22"

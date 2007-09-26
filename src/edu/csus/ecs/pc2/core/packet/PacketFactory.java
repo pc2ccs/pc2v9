@@ -11,6 +11,7 @@ import edu.csus.ecs.pc2.core.list.LanguageDisplayList;
 import edu.csus.ecs.pc2.core.list.ProblemDisplayList;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.BalloonSettings;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
@@ -133,8 +134,6 @@ public final class PacketFactory {
 
     public static final String CONTEST_SETTINGS = "CONTEST_SETTINGS";
 
-    public static final String BALOON_SETTINGS = "BALOON_SETTINGS";
-
     public static final String SITE_LIST = "SITE_LIST";
 
     public static final String MESSAGE_STRING = "MESSAGE_STRING";
@@ -144,6 +143,9 @@ public final class PacketFactory {
     public static final String CLIENT_SETTINGS_LIST = "CLIENT_SETTINGS_LIST";
     
     public static final String CLIENT_SETTINGS = "CLIENT_SETTINGS";
+    
+    public static final String BALLOON_SETTINGS_LIST = "BALLOON_SETTINGS_LIST";
+    
     
 
     /**
@@ -194,6 +196,8 @@ public final class PacketFactory {
      * A boolean indicating fetching a read only copy of clar or run.
      */
     public static final String READ_ONLY = "READ_ONLY";
+
+    public static final String  BALLOON_SETTINGS = "BALLOON_SETTINGS";
 
     /**
      * Constructor is private as this is a utility class which should not be extended or invoked.
@@ -549,6 +553,14 @@ public final class PacketFactory {
         Packet packet = new Packet(Type.UPDATE_SETTING, source, destination, prop);
         return packet;
     }
+    
+    public static Packet createUpdateSetting(ClientId source, ClientId destination, BalloonSettings balloonSettings) {
+        Properties prop = new Properties();
+        prop.put(BALLOON_SETTINGS, balloonSettings);
+        Packet packet = new Packet(Type.UPDATE_SETTING, source, destination, prop);
+        return packet;
+    }
+
 
      public static Packet createUpdateSetting(ClientId source, ClientId destination, Problem problem,
             ProblemDataFiles problemDataFiles) {
@@ -561,14 +573,12 @@ public final class PacketFactory {
         return packet;
     }
 
-     // TODO code add BalloonSettings settings packet
-    // public static Packet createAddSetting(ClientId source, ClientId destination, BalloonSettings balloonSettings,
-    // ClientId userLoginId) {
-    // Properties prop = new Properties();
-    // prop.put(BALOON_SETTINGS, balloonSettings);
-    // Packet packet = new Packet(Type.ADD_SETTING, source, destination, prop);
-    // return packet;
-    // }
+     public static Packet createAddSetting(ClientId source, ClientId destination, BalloonSettings balloonSettings) {
+         Properties prop = new Properties();
+         prop.put(BALLOON_SETTINGS, balloonSettings);
+         Packet packet = new Packet(Type.ADD_SETTING, source, destination, prop);
+         return packet;
+     }
 
     /**
      * Create a packet of {@link PacketType.Type#ADD_SETTING}.
@@ -806,7 +816,7 @@ public final class PacketFactory {
      */
     public static Packet createLoginSuccess(ClientId source, ClientId destination, ContestTime contestTime, ContestTime[] contestTimes, int siteNumber, Language[] languages, Problem[] problems,
             Judgement[] judgements, Site[] sites, Run[] runs, Clarification[] clarifications, ClientId[] loggedInUsers, ConnectionHandlerID[] connectionHandlerIDs, 
-            Account [] accounts, ProblemDataFiles[] problemDataFiles, ContestInformation information, ClientSettings[] clientSettings) {
+            Account [] accounts, ProblemDataFiles[] problemDataFiles, ContestInformation information, BalloonSettings [] balloonSettingsArray, ClientSettings[] clientSettings) {
         try {
             Properties prop = new Properties();
             prop.put(SITE_NUMBER, new Integer(siteNumber));
@@ -825,6 +835,7 @@ public final class PacketFactory {
             prop.put(PROBLEM_DATA_FILES, problemDataFiles);
             prop.put(CONTEST_INFORMATION, information);
             prop.put(CLIENT_SETTINGS_LIST, clientSettings);
+            prop.put(BALLOON_SETTINGS_LIST, balloonSettingsArray);
 
             Packet packet = new Packet(Type.LOGIN_SUCCESS, source, destination, prop);
             return packet;
