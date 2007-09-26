@@ -9,7 +9,8 @@ import java.awt.BorderLayout;
 import javax.swing.JButton;
 
 /**
- * A Frame that shows contest time(s). 
+ * A Frame that shows contest time(s).
+ * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -21,18 +22,22 @@ public class ContestClockFrame extends JFrame implements UIPlugin {
      * 
      */
     private static final long serialVersionUID = -3280581230202123658L;
+
     private JPanel mainPanel1 = null;
+
     private JPanel buttonPane = null;
+
     private JButton closeButton = null;
+
     private ContestClockPane contestClockPane = null;
 
     /**
-     * This method initializes 
+     * This method initializes
      * 
      */
     public ContestClockFrame() {
-    	super();
-    	initialize();
+        super();
+        initialize();
     }
 
     /**
@@ -40,7 +45,7 @@ public class ContestClockFrame extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(474,287));
+        this.setSize(new java.awt.Dimension(474, 287));
         this.setTitle("Contest Clock");
         this.setContentPane(getMainPanel1());
         this.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -48,16 +53,15 @@ public class ContestClockFrame extends JFrame implements UIPlugin {
                 dispose();
             }
         });
-    		
+
     }
 
-   
     public void setContestAndController(IContest model, IController controller) {
-        
+
         contestClockPane.setContestAndController(model, controller);
-        
+
         contestClockPane.setClientFrame(this);
-        
+
     }
 
     public String getPluginTitle() {
@@ -65,9 +69,9 @@ public class ContestClockFrame extends JFrame implements UIPlugin {
     }
 
     /**
-     * This method initializes mainPanel1	
-     * 	
-     * @return javax.swing.JPanel	
+     * This method initializes mainPanel1
+     * 
+     * @return javax.swing.JPanel
      */
     private JPanel getMainPanel1() {
         if (mainPanel1 == null) {
@@ -80,9 +84,9 @@ public class ContestClockFrame extends JFrame implements UIPlugin {
     }
 
     /**
-     * This method initializes buttonPane	
-     * 	
-     * @return javax.swing.JPanel	
+     * This method initializes buttonPane
+     * 
+     * @return javax.swing.JPanel
      */
     private JPanel getButtonPane() {
         if (buttonPane == null) {
@@ -93,9 +97,9 @@ public class ContestClockFrame extends JFrame implements UIPlugin {
     }
 
     /**
-     * This method initializes closeButton	
-     * 	
-     * @return javax.swing.JButton	
+     * This method initializes closeButton
+     * 
+     * @return javax.swing.JButton
      */
     private JButton getCloseButton() {
         if (closeButton == null) {
@@ -112,9 +116,9 @@ public class ContestClockFrame extends JFrame implements UIPlugin {
     }
 
     /**
-     * This method initializes contestClockPane	
-     * 	
-     * @return edu.csus.ecs.pc2.ui.ContestClockPane	
+     * This method initializes contestClockPane
+     * 
+     * @return edu.csus.ecs.pc2.ui.ContestClockPane
      */
     private ContestClockPane getContestClockPane() {
         if (contestClockPane == null) {
@@ -124,4 +128,4 @@ public class ContestClockFrame extends JFrame implements UIPlugin {
         return contestClockPane;
     }
 
-}  //  @jve:decl-index=0:visual-constraint="10,10"
+} // @jve:decl-index=0:visual-constraint="10,10"

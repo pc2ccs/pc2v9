@@ -29,6 +29,7 @@ import edu.csus.ecs.pc2.core.model.IContestTimeListener;
  * 
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
@@ -83,6 +84,12 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
     @SuppressWarnings("unused")
     private IContest contest;
     
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     * 
+     */
     public enum DisplayTimes {
         /**
          * Show elapsed time.
@@ -428,6 +435,12 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
         return "Contest Clock Display";
     }
     
+    /**
+     * Implementor.
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
     public class ContestTimeListenerImplementation implements IContestTimeListener {
 
         public void contestTimeAdded(ContestTimeEvent event) {
