@@ -36,7 +36,7 @@ import javax.swing.JComboBox;
 // $HeadURL$
 public class ProblemPane extends JPanePlugin {
 
-    public final String DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND = "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
+    public static final String DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND = "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
 
     /**
      * 
