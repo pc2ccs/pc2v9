@@ -15,8 +15,6 @@ import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.Site;
-import edu.csus.ecs.pc2.core.model.ClientType.Type;
-import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.util.TabSeparatedValueParser;
 
 /**
@@ -32,26 +30,6 @@ public class LoadICPCData {
     
     private ICPCImportData importData;
     private Site[] sites;
-    
-    private int clientNumber = 0;
-    
-    private int siteColumn = -1;
-
-    private int accountColumn = -1;
-
-    private int displayNameColumn = -1;
-
-    private int passwordColumn = -1;
-
-    private int groupColumn = -1;
-
-    private int permDisplayColumn = -1;
-
-    private int permLoginColumn = -1;
-    
-    private int aliasColumn = -1;
-    
-    private int externalIdColumn = -1;
 
     private HashMap<ClientId, Account> existingAccountsMap = new HashMap<ClientId, Account>();
     
@@ -63,59 +41,8 @@ public class LoadICPCData {
         // TODO Auto-generated constructor stub
     }
 
-    Account getAccount(String[] values) {
-        String accountString = values[accountColumn];
-        String[] accountSplit = accountString.split("[0-9]+$");
-        String accountName = accountString.substring(0, accountSplit[0].length());
-        Type type = Type.valueOf(accountName.toUpperCase());
-        clientNumber = Integer.parseInt(accountString.substring(accountSplit[0].length()));
-        String siteString = values[siteColumn];
-        String password = values[passwordColumn];
-        ClientId clientId = new ClientId(Integer.parseInt(siteString), type, clientNumber);
-        Account accountClean = existingAccountsMap.get(clientId);
-        if (accountClean == null) {
-            // would be nice if we could create the account... not now though...
-            // accountClean = new Account(clientId, password, clientId.getSiteNumber());
-            return null;
-        }
-        // TODO would be nice if Account had a deep clone
-        Account account = new Account(clientId, password, clientId.getSiteNumber());
-        account.clearListAndLoadPermissions(accountClean.getPermissionList());
-        account.setGroupId(accountClean.getGroupId());
-        account.setPassword(password);
-        if (displayNameColumn != -1 && values.length > displayNameColumn) {
-            account.setDisplayName(values[displayNameColumn]);
-        }
-        if (aliasColumn != -1 && values.length > aliasColumn) {
-            account.setAliasName(values[aliasColumn]);
-        }
-        if (externalIdColumn != -1 && values.length > externalIdColumn) {
-            account.setAliasName(values[externalIdColumn]);
-        }
-        if (groupColumn != -1 && values.length >= groupColumn && values.length > 0) {
-            // TODO in the future, may need to convert this id to an elementId
-            account.setGroupId(values[groupColumn]);
-        }
-        if (permDisplayColumn != -1 && values.length > permDisplayColumn && values[permDisplayColumn].length() > 0) {
-            if (Boolean.parseBoolean(values[permDisplayColumn])) {
-                account.addPermission(Permission.Type.DISPLAY_ON_SCOREBOARD);
-            } else {
-                account.removePermission(Permission.Type.DISPLAY_ON_SCOREBOARD);
-            }
-        }
-        if (permLoginColumn != -1 && values.length > permLoginColumn && values[permLoginColumn].length() > 0) {
-            if (Boolean.parseBoolean(values[permLoginColumn])) {
-                account.addPermission(Permission.Type.LOGIN);
-            } else {
-                account.removePermission(Permission.Type.LOGIN);
-            }
-        }
-        return account;
-    }
-
-    boolean fromDirectory(String directory, Account[] existingAccounts, Site[] existingSites) throws Exception {
+    public ICPCImportData fromDirectory(String directory, Account[] existingAccounts, Site[] existingSites) throws Exception {
         this.sites = existingSites;
-        boolean result = false;
         importData = new ICPCImportData();
         
         // TODO use or delete
@@ -151,10 +78,8 @@ public class LoadICPCData {
             }
         }
         readFile(path+file, TEAM_TAB);
-        // we made it to the end successfully
-        result = true;
         
-        return result;
+        return importData;
     }
     
     void readFile(String filename, int fileType) throws Exception {
@@ -196,7 +121,9 @@ public class LoadICPCData {
                 throw e2;
             } catch (Exception e) {
                 String msg = "Error " + filename + ":" + lineCount + ": " + e.getMessage();
-                throw new Exception(msg);
+                Exception sendException = new Exception(msg);
+                sendException.setStackTrace(e.getStackTrace());
+                throw sendException;
             }
             line = in.readLine();
             lineCount++;
@@ -214,27 +141,35 @@ public class LoadICPCData {
     
     private ICPCAccount processTeam(String[] values) {
         int offset = 0;
+        int clientNumber = 0;
+        
         switch(values.length) {
             case 10:
-                clientNumber = Integer.parseInt(values[0]);
+                if (values[0].length() > 0) {
+                    clientNumber = Integer.parseInt(values[0]);
+                }
                 offset = 0;
                 break;
             case 9:
-                clientNumber++;
+//                clientNumber++;
                 offset = -1;
                 break;
             default:
+                // TODO consider throwing exception here
                 break;
         }
         // TODO convert icpc site to pc2 site
 //        String siteString = values[siteColumn];
         ICPCAccount account = new ICPCAccount();
         
-        account.setExternalId(values[2+offset]);
-        account.setGroupId(values[3+offset]);
-        account.setExternalName(values[5+offset]);
-        account.setLongSchoolName(values[6+offset]);
-        account.setShortSchoolName(values[7+offset]);
+        if (clientNumber != 0) {
+            account.setAccountNumber(clientNumber);
+        }
+        account.setExternalId(values[1+offset]);
+        account.setGroupId(values[2+offset]);
+        account.setExternalName(values[4+offset]);
+        account.setLongSchoolName(values[5+offset]);
+        account.setShortSchoolName(values[6+offset]);
         return account;
     }
 
@@ -242,20 +177,21 @@ public class LoadICPCData {
         Group group = new Group();
         int offset;
         
-        if (values.length == 7) {
+        if (values.length == 8) {
             // we have no pc2 site info
-            offset = 1;
+            offset = -1;
         } else {
             offset = 0;
             // we have the pc2 site info
         }
         // 0 is the pc2 site id
         // 1 is the contest Id
-        group.setGroupId(Integer.parseInt(values[2-offset]));
-        group.setGroupTitle(values[3-offset]);
+        group.setGroupId(Integer.parseInt(values[2+offset]));
+        group.setGroupTitle(values[3+offset]);
         if (values.length == 9) {
             int siteNum = Integer.parseInt(values[0]);
-            group.setSite(sites[siteNum-1].getElementId());
+            // TODO populate site if given sitelist
+//            group.setSite(sites[siteNum-1].getElementId());
         }
         return group;
     }
