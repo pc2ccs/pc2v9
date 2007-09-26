@@ -13,7 +13,7 @@ import junit.framework.TestCase;
 // $HeadURL$
 public class ProblemTest extends TestCase {
 
-    public final String DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND = "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
+    public static final String DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND = "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
 
     protected void setUp() throws Exception {
         super.setUp();
