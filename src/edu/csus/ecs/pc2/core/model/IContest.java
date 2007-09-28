@@ -1,7 +1,6 @@
 package edu.csus.ecs.pc2.core.model;
 
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
@@ -348,11 +347,26 @@ public interface IContest {
 
     void setSiteNumber(int number);
 
-    // TODO change to ClientId [] getLoggedInClients(Type type);
-    Enumeration<ClientId> getLoggedInClients(Type type);
+    /**
+     * Get all logins in contest.
+     * @param type
+     * @return
+     */
+    ClientId [] getAllLoggedInClients(Type type);
 
-    // TODO change to ClientId [] getLoggedInClients(Type type);
-    Enumeration<ClientId> getLocalLoggedInClients(Type type);
+    /**
+     * Get all locally logged in clients.
+     * @param type
+     * @return
+     */
+    ClientId [] getLocalLoggedInClients(Type type);
+    
+    /**
+     * Get clients logged into other servers.
+     * @param type
+     * @return
+     */
+    ClientId [] getRemoteLoggedInClients(Type type);
 
     void loginDenied(ClientId clientId, ConnectionHandlerID connectionHandlerID, String message);
 

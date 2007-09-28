@@ -3,7 +3,6 @@ package edu.csus.ecs.pc2.ui;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.Vector;
 
 import javax.swing.JPanel;
@@ -15,8 +14,8 @@ import com.ibm.webrunner.j2mclb.util.NumericStringComparator;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
-import edu.csus.ecs.pc2.core.model.ILoginListener;
 import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.ILoginListener;
 import edu.csus.ecs.pc2.core.model.LoginEvent;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
@@ -146,19 +145,22 @@ public class LoginsPane extends JPanePlugin {
      * Return array of all logged in users.
      */
     private ClientId [] getAllLoggedInUsers() {
-
-        Vector<ClientId> allAccounts = new Vector<ClientId>();
+        
+        Vector<ClientId> clientList = new Vector<ClientId>();
 
         for (ClientType.Type ctype : ClientType.Type.values()) {
-            Enumeration<ClientId> enumeration = getContest().getLoggedInClients(ctype);
-            while (enumeration.hasMoreElements()) {
-                ClientId clientId = (ClientId) enumeration.nextElement();
-                allAccounts.addElement(clientId);
+
+            ClientId [] users = getContest().getAllLoggedInClients(ctype);
+            for (ClientId clientId : users){
+                clientList.addElement(clientId);
             }
         }
-
-        ClientId[] list = (ClientId[]) allAccounts.toArray(new ClientId[allAccounts.size()]);
-        return list;
+        if (clientList.size() == 0) {
+            return new ClientId[0];
+        } else {
+            ClientId [] clients = (ClientId[]) clientList.toArray(new ClientId[clientList.size()]);
+            return clients;
+        }
     }
 
     private void reloadListBox() {

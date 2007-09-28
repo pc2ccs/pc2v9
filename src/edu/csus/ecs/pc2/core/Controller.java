@@ -5,7 +5,6 @@ import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -622,22 +621,23 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * Send login request from server to another server.
      * 
      * Send login request directly to connectionHandlerId.
-     * @param manager
-     * @param connectionHandlerID
-     * @param clientId
-     * @param password
+     * 
+     * @param manager transmission manager
+     * @param targetConnectionHandlerID target connectionId
+     * @param clientId from clientid
+     * @param password site password
      */
-    private void sendLoginRequestFromServerToServer(ITransportManager manager, ConnectionHandlerID connectionHandlerID, ClientId clientId,
+    private void sendLoginRequestFromServerToServer(ITransportManager manager, ConnectionHandlerID targetConnectionHandlerID, ClientId clientId,
             String password) {
         try {
-            info("sendLoginRequest ConId start - sending from " + clientId);
+            info("sendLoginRequestFromServerToServer ConId start - sending from " + clientId);
             ClientId serverClientId = new ClientId(0, Type.SERVER, 0);
             String joeLoginName = password;
             Packet loginPacket = PacketFactory.createLoginRequest(clientId, joeLoginName, password, serverClientId);
-            manager.send(loginPacket, connectionHandlerID);
-            info("sendLoginRequest ConId end - packet sent.");
+            manager.send(loginPacket, targetConnectionHandlerID);
+            info("sendLoginRequestFromServerToServer ConId end - packet sent.");
         } catch (TransportException e) {
-            info("Exception sendLoginRequest",e);
+            info("Exception sendLoginRequestFromServerToServer ",e);
         }
     }
 
@@ -703,7 +703,15 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                         
                         removeConnection(connectionHandlerID);
                         sendLoginSuccess(clientId, connectionHandlerID);
-
+                        
+                        if (isServer(clientId)){
+                            // Get this site's password
+                            Site localSite = contest.getSite(contest.getSiteNumber());
+                            String localPassword = localSite.getPassword();
+                            // Send request directly back to calling server.
+                            sendLoginRequestFromServerToServer (transportManager, connectionHandlerID, getServerClientId(), localPassword); 
+                        }
+                        
                         // Send login notification to users.
                         
                         Packet loginConfirmedPacket  = PacketFactory.createLogin(contest.getClientId(), PacketFactory.ALL_SERVERS, connectionHandlerID, clientId);
@@ -949,16 +957,14 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * @return array of clientId's.
      */
     private ClientId [] allLoggedInUsers() {
+        
         Vector<ClientId> clientList = new Vector<ClientId>();
 
         for (ClientType.Type ctype : ClientType.Type.values()) {
 
-            Enumeration<ClientId> enumeration = contest.getLoggedInClients(ctype);
-            if (contest.getLoggedInClients(ctype).hasMoreElements()) {
-                while (enumeration.hasMoreElements()) {
-                    ClientId aClientId = (ClientId) enumeration.nextElement();
-                    clientList.addElement(aClientId);
-                }
+            ClientId [] users = contest.getAllLoggedInClients(ctype);
+            for (ClientId clientId : users){
+                clientList.addElement(clientId);
             }
         }
         if (clientList.size() == 0) {
@@ -1040,18 +1046,17 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * Connection to client lost.
      */
     public void connectionDropped(ConnectionHandlerID connectionHandlerID) {
-        ClientId clientId = contest.getLoginClientId(connectionHandlerID);
-        if (clientId != null) {
-            // is logged in
-            logoffUser (clientId);
-            
-        } else if (contest.isConnected(connectionHandlerID)) {
 
-            removeConnection(connectionHandlerID);
-            
-        } else {
-            info("connectionDropped: connection " + connectionHandlerID);
+        ClientId clientId = contest.getLoginClientId(connectionHandlerID);
+        if (clientId != null){
+            // Logged in
+            removeLogin(clientId);
         }
+        
+        if (contest.isConnected(connectionHandlerID)) {
+            removeConnection(connectionHandlerID);
+        }
+        // else nothing to do.
     }
     
     public void logoffUser(ClientId clientId) {
@@ -1062,14 +1067,6 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
             info ("LOGOFF "+clientId+" "+connectionHandlerID);
             removeLogin(clientId);
-            
-            try {
-                transportManager.unregisterConnection(connectionHandlerID);
-                log.info("logoffUser: Unregister connection for "+clientId+" conn id "+connectionHandlerID);
-
-            } catch (Exception e) {
-                log.log(Log.WARNING, "Exception attempting to unregisterConnection for "+clientId, e);
-            }
             
         } else {
             info ("LOGOFF remote "+clientId);
@@ -1119,7 +1116,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
 
     /**
-     * Connection Dropped on client.
+     * This client lost connection.
      */
     public void connectionDropped() {
         
@@ -1166,9 +1163,8 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
 
     public void sendToServers(Packet packet) {
-        Enumeration<ClientId> clientIds = contest.getLocalLoggedInClients(ClientType.Type.SERVER);
-        while (clientIds.hasMoreElements()) {
-            ClientId clientId = clientIds.nextElement();
+        ClientId [] clientIds = contest.getLocalLoggedInClients(ClientType.Type.SERVER);
+        for (ClientId clientId : clientIds){
             ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(clientId);
             boolean isThisServer = isThisSite(clientId.getSiteNumber());
             if (!isThisServer) {
@@ -1184,9 +1180,9 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * @param packet
      */
     private void sendPacketToClients(Packet packet, ClientType.Type type) {
-        Enumeration<ClientId> clientIds = contest.getLocalLoggedInClients(type);
-        while (clientIds.hasMoreElements()) {
-            ClientId clientId = clientIds.nextElement();
+        
+        ClientId [] clientIds = contest.getLocalLoggedInClients(type);
+        for (ClientId clientId : clientIds){
             if (isThisSite(clientId.getSiteNumber())) {
                 ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(clientId);
                 sendToClient(connectionHandlerID, packet);
@@ -1536,11 +1532,6 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         sendToServers(packet);
     }
 
-    /**
-     * Server login to other sites.
-     * 
-     * Contacts the other site and sends a login request.
-     */
     public void sendServerLoginRequest(int inSiteNumber) {
         
         if (isThisSite(inSiteNumber)) {
@@ -1631,7 +1622,11 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * @return true if logged in client is a server.
      */
     private boolean isServer() {
-        return contest.getClientId().getClientType().equals(ClientType.Type.SERVER);
+        return isServer(contest.getClientId());
+    }
+    
+    private boolean isServer (ClientId clientId){
+        return clientId.getClientType().equals(ClientType.Type.SERVER);
     }
 
     public final Log getLog() {

@@ -835,11 +835,33 @@ public class Contest implements IContest {
         fireContestTimeListener(contestTimeEvent);
     }
 
-    public Enumeration<ClientId> getLocalLoggedInClients(Type type) {
-        return localLoginList.getClients(type);
+    public ClientId[] getLocalLoggedInClients(Type type) {
+        Enumeration<ClientId> localClients = localLoginList.getClients(type);
+
+        Vector<ClientId> v = new Vector<ClientId>();
+
+        while (localClients.hasMoreElements()) {
+            ClientId element = (ClientId) localClients.nextElement();
+            v.addElement(element);
+        }
+        return (ClientId[]) v.toArray(new ClientId[v.size()]);
     }
 
-    public Enumeration<ClientId> getLoggedInClients(Type type) {
+    public ClientId[] getRemoteLoggedInClients(Type type) {
+
+        Enumeration<ClientId> remoteClients = remoteLoginList.getClients(type);
+
+        Vector<ClientId> v = new Vector<ClientId>();
+
+        while (remoteClients.hasMoreElements()) {
+            ClientId element = (ClientId) remoteClients.nextElement();
+            v.addElement(element);
+        }
+
+        return (ClientId[]) v.toArray(new ClientId[v.size()]);
+    }
+
+    public ClientId[] getAllLoggedInClients(Type type) {
         Enumeration<ClientId> localClients = localLoginList.getClients(type);
         Enumeration<ClientId> remoteClients = remoteLoginList.getClients(type);
 
@@ -855,7 +877,7 @@ public class Contest implements IContest {
             v.addElement(element);
         }
 
-        return v.elements();
+        return (ClientId[]) v.toArray(new ClientId[v.size()]);
     }
 
     public static void info(String s) {

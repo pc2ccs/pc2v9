@@ -7,7 +7,6 @@ import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.Vector;
 
 import javax.swing.JOptionPane;
@@ -198,13 +197,14 @@ public class InternalDump {
             log.println("-- Logins -- ");
             for (ClientType.Type ctype : ClientType.Type.values()) {
 
-                Enumeration<ClientId> enumeration = contest.getLoggedInClients(ctype);
-                if (contest.getLoggedInClients(ctype).hasMoreElements()) {
+                ClientId[] clientIds = contest.getAllLoggedInClients(ctype);
+                if (clientIds.length > 0) {
+
                     log.println("Logged in " + ctype.toString());
-                    while (enumeration.hasMoreElements()) {
-                        ClientId aClientId = (ClientId) enumeration.nextElement();
-                        ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(aClientId);
-                        log.println("   " + aClientId + " on " + connectionHandlerID);
+
+                    for (ClientId clientId : clientIds) {
+                        ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(clientId);
+                        log.println("   " + clientId + " on " + connectionHandlerID);
                     }
                 }
             }
