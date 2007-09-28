@@ -7,11 +7,11 @@ package edu.csus.ecs.pc2.core.model;
  * @see edu.csus.ecs.pc2.core.model.ISiteListener
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
-// $HeadURL
-public class SiteEvent {
+// $HeadURL$
 
-    public static final String SVN_ID = "$Id$";
+public class SiteEvent {
 
     /**
      * Run Event States(s).

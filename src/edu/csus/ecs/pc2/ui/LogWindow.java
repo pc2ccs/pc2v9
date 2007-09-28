@@ -16,7 +16,11 @@ import edu.csus.ecs.pc2.core.model.IContest;
  * If {@link #setLog(Log)} is not used, will be a window for
  * the {@link Controller#getLog() Controller log}.
  * 
+ * @version $Id$
  */
+
+//$HeadURL$$
+
 public class LogWindow extends JFrame implements UIPlugin {
 
     /**

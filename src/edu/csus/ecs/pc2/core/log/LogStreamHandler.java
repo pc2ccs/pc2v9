@@ -8,8 +8,13 @@ import java.util.logging.StreamHandler;
 
 /**
  * This class will handle notifying registered IStreamListeners of new log messages.
- *
+ * 
+ * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
+
+//$HeadURL$
+
 public class LogStreamHandler extends StreamHandler {
 
     private Vector<IStreamListener> streamListenerList = new Vector<IStreamListener>();

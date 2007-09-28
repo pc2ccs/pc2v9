@@ -15,6 +15,9 @@ import edu.csus.ecs.pc2.core.packet.PacketFactory;
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
+
+//$HeadURL$
+
 public final class MessageFactory {
 
     private MessageFactory() {

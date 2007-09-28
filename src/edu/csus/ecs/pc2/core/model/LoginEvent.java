@@ -7,12 +7,12 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
  * A login/logoff event.
  *
  * @author pc2@ecs.csus.edu
+ * @version $Id$
+ * 
  */
-// $HeadURL
+// $HeadURL$
 
 public class LoginEvent {
-
-    public static final String SVN_ID = "$Id$";
 
     /**
      * Run Event States(s).

@@ -29,8 +29,9 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
  * This class is the default scoreboard view (frame).
  * 
  * @author pc2@ecs.csus.edu
- * 
+ * @version $Id$
  */
+ 
 // $HeadURL$
 public class ScoreboardView extends JFrame implements UIPlugin {
 

@@ -7,6 +7,7 @@ import edu.csus.ecs.pc2.core.model.IContest;
  * Interface for plugin UI or GUI.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$

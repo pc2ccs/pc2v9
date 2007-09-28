@@ -12,6 +12,7 @@ import javax.swing.UIManager;
  * Contains method to change look and feel, set cursor state, center windows and a yes no dialog with cancel as default.
  * 
  * @author pc2@ecs.csus
+ * @version $Id$
  */
 
 // $HeadURL$

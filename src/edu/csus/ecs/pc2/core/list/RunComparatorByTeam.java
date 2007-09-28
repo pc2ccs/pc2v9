@@ -10,7 +10,11 @@ import edu.csus.ecs.pc2.core.model.Run;
  * @see edu.csus.ecs.pc2.core.list.RunComparator
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
+
+//$HeadURL$
+
 public class RunComparatorByTeam implements java.io.Serializable, java.util.Comparator<Run> {
     public static final String SVN_ID = "$Id$";
 

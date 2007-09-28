@@ -42,6 +42,7 @@ import javax.swing.JLabel;
  * View runs.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$$

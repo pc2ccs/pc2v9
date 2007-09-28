@@ -28,6 +28,7 @@ import edu.csus.ecs.pc2.core.model.LoginEvent;
  * Login frame for all clients.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 // $HeadURL$
 public class LoginFrame extends JFrame implements UIPlugin {

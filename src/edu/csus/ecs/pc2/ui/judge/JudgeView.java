@@ -25,11 +25,10 @@ import javax.swing.JButton;
  * Judge GUI.
  * 
  * @author pc2@ecs.csus.edu
- * 
+ * @version $Id$ 
  */
 
-// $Header$
-// $Id$
+//$HeadURL$
 
 public class JudgeView extends JFrame implements UIPlugin {
 

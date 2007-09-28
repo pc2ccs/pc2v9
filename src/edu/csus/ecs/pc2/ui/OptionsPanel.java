@@ -11,6 +11,7 @@ import javax.swing.JCheckBox;
  * Log checkbox to enable. 
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
