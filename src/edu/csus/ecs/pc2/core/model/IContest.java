@@ -331,6 +331,12 @@ public interface IContest {
     void removeLogin(ClientId clientId);
 
     /**
+     * Remove client from remote login list
+     * @param fromId
+     */
+    void removeRemoteLogin(ClientId clientId);
+
+    /**
      * Get all connection ids for all sites.
      * 
      * @return all sites connection ids.
@@ -565,4 +571,5 @@ public interface IContest {
     BalloonSettings getBalloonSettings(ElementId elementId);
 
     void addBalloonSettingsListener(IBalloonSettingsListener implementation);
+
 }

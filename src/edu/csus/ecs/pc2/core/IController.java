@@ -69,7 +69,7 @@ public interface IController {
     void setContestTime(ContestTime contestTime);
 
     /**
-     * Send to client, if necessary forward to another server.
+     * Send to client (or server), if necessary forward to another server.
      * @param confirmPacket
      */
     void sendToClient(Packet confirmPacket);

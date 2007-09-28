@@ -4,9 +4,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Properties;
-import java.util.Vector;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.archive.PacketArchiver;
@@ -704,14 +702,6 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                         removeConnection(connectionHandlerID);
                         sendLoginSuccess(clientId, connectionHandlerID);
                         
-                        if (isServer(clientId)){
-                            // Get this site's password
-                            Site localSite = contest.getSite(contest.getSiteNumber());
-                            String localPassword = localSite.getPassword();
-                            // Send request directly back to calling server.
-                            sendLoginRequestFromServerToServer (transportManager, connectionHandlerID, getServerClientId(), localPassword); 
-                        }
-                        
                         // Send login notification to users.
                         
                         Packet loginConfirmedPacket  = PacketFactory.createLogin(contest.getClientId(), PacketFactory.ALL_SERVERS, connectionHandlerID, clientId);
@@ -930,8 +920,9 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      */
     private void processPacket(Packet packet, ConnectionHandlerID connectionHandlerID) {
         try {
+
             packetHandler.handlePacket(packet, connectionHandlerID);
-            
+
         } catch (Exception e) {
             System.err.println("Exception in processPacket, check logs "); // TODO debug
             log.log(Log.WARNING, "Exception processPacket ", e);
@@ -951,87 +942,18 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         sendToClient(connectionHandlerID, packet);
     }
     
+
+ 
     /**
-     * Return an array of all logged in users.
-     * 
-     * @return array of clientId's.
+     * Send Login Success packet to client.
+     * @param clientId
+     * @param connectionHandlerID
      */
-    private ClientId [] allLoggedInUsers() {
-        
-        Vector<ClientId> clientList = new Vector<ClientId>();
-
-        for (ClientType.Type ctype : ClientType.Type.values()) {
-
-            ClientId [] users = contest.getAllLoggedInClients(ctype);
-            for (ClientId clientId : users){
-                clientList.addElement(clientId);
-            }
-        }
-        if (clientList.size() == 0) {
-            return new ClientId[0];
-        } else {
-            ClientId [] clients = (ClientId[]) clientList.toArray(new ClientId[clientList.size()]);
-            return clients;
-        }
-    }
-
     private void sendLoginSuccess(ClientId clientId, ConnectionHandlerID connectionHandlerID) {
-
-        Run[] runs = null;
-        Clarification[] clarifications = null;
-        ProblemDataFiles [] problemDataFiles = new ProblemDataFiles[0];
-        ClientSettings [] clientSettings = null;
         
-        if (contest.getClientSettings(clientId) == null){
-            ClientSettings clientSettings2 = new ClientSettings(clientId);
-            clientSettings2.put("LoginDate", new Date().toString());
-            contest.addClientSettings(clientSettings2);
-        }
-        
-        /**
-         * This is where client specific settings are created before
-         * sending them to client.
-         */
-
-        if (clientId.getClientType().equals(ClientType.Type.TEAM)) {
-            runs = contest.getRuns(clientId);
-            clarifications = contest.getClarifications(clientId);
-            clientSettings = new ClientSettings[1];
-            clientSettings[0] = contest.getClientSettings(clientId);
-        } else {
-            runs = contest.getRuns();
-            clarifications = contest.getClarifications();
-            problemDataFiles = contest.getProblemDataFiles();
-            clientSettings = contest.getClientSettingsList();
-        }
-
-        Packet packetToSend = PacketFactory.createLoginSuccess(contest.getClientId(), clientId, contest.getContestTime(), contest.getContestTimes(), contest.getSiteNumber(), 
-                contest.getLanguages(), contest.getProblems(), contest.getJudgements(), contest.getSites(), runs, clarifications, 
-                allLoggedInUsers(), contest.getConnectionHandleIDs(), getAllAccounts(), problemDataFiles,
-                contest.getContestInformation(), contest.getBalloonSettings(), clientSettings);
-        
-        sendToClient(packetToSend);
+        sendToClient(packetHandler.createLoginSuccessPacket(clientId));
     }
 
-    /**
-     * Return all accounts for all sites.
-     * 
-     * @return Array of all accounts in contest.
-     */
-    private Account[] getAllAccounts() {
-
-        Vector<Account> allAccounts = new Vector<Account>();
-
-        for (ClientType.Type ctype : ClientType.Type.values()) {
-            if (contest.getAccounts(ctype).size() > 0) {
-                Vector<Account> accounts = contest.getAccounts(ctype);
-                allAccounts.addAll(accounts);
-            }
-        }
-
-        Account[] accountList = (Account[]) allAccounts.toArray(new Account[allAccounts.size()]);
-        return accountList;
-    }
 
     public void connectionEstablished(ConnectionHandlerID connectionHandlerID) {
         info("connectionEstablished: "+ connectionHandlerID);
@@ -1622,7 +1544,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * @return true if logged in client is a server.
      */
     private boolean isServer() {
-        return isServer(contest.getClientId());
+        return contest.getClientId() != null && isServer(contest.getClientId());
     }
     
     private boolean isServer (ClientId clientId){

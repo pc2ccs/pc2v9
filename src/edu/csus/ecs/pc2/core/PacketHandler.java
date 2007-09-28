@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core;
 
+import java.util.Date;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.log.Log;
@@ -289,10 +290,16 @@ public class PacketHandler {
             // from server to client/server on a successful login
 
             if (isServer(packet.getDestinationId())) {
+                
+                // Remove server from remote login list
+                if (contest.isRemoteLoggedIn(fromId)) {
+                    contest.removeRemoteLogin(fromId);
+                }
                 /**
                  * Add server into login list.
                  */
                 contest.addLogin(fromId, connectionHandlerID);
+                
             }
 
             if (!contest.isLoggedIn()) {
@@ -303,12 +310,18 @@ public class PacketHandler {
                 loadSettingsFromRemoteServer(packet, connectionHandlerID);
                 info(" handlePacket LOGIN_SUCCESS - from another site -- all settings loaded " + packet);
             }
-
+            
         } else {
 
             Exception exception = new Exception("PacketHandler.handlePacket Unhandled packet " + packet);
             controller.getLog().log(Log.WARNING,"Unhandled Packet ", exception);
         }
+        
+        // TODO handle sending other server our settings
+        
+        // Send Server that we just logged into our settings
+        // controller.sendToClient(createLoginSuccessPacket(packet.getSourceId()));
+
         
         info("handlePacket end " + packet);
 
@@ -1582,6 +1595,98 @@ public class PacketHandler {
             }
         }
     }
+    
+    /**
+     * Return all accounts for all sites.
+     * 
+     * @return Array of all accounts in contest.
+     */
+    private Account[] getAllAccounts() {
+
+        Vector<Account> allAccounts = new Vector<Account>();
+
+        for (ClientType.Type ctype : ClientType.Type.values()) {
+            if (contest.getAccounts(ctype).size() > 0) {
+                Vector<Account> accounts = contest.getAccounts(ctype);
+                allAccounts.addAll(accounts);
+            }
+        }
+
+        Account[] accountList = (Account[]) allAccounts.toArray(new Account[allAccounts.size()]);
+        return accountList;
+    }
+    
+    /**
+     * Return an array of all logged in users.
+     * 
+     * @return array of clientId's.
+     */
+    private ClientId [] getAllLoggedInUsers() {
+        
+        Vector<ClientId> clientList = new Vector<ClientId>();
+
+        for (ClientType.Type ctype : ClientType.Type.values()) {
+
+            ClientId [] users = contest.getAllLoggedInClients(ctype);
+            for (ClientId clientId : users){
+                clientList.addElement(clientId);
+            }
+        }
+        if (clientList.size() == 0) {
+            return new ClientId[0];
+        } else {
+            ClientId [] clients = (ClientId[]) clientList.toArray(new ClientId[clientList.size()]);
+            return clients;
+        }
+    }
+    
+
+    
+    /**
+     * Create a login success packet.
+     * 
+     * 
+     * @param clientId
+     * @return Packet containing contest settings
+     */
+    public Packet createLoginSuccessPacket (ClientId clientId){
+
+        Run[] runs = null;
+        Clarification[] clarifications = null;
+        ProblemDataFiles [] problemDataFiles = new ProblemDataFiles[0];
+        ClientSettings [] clientSettings = null;
+        
+        if (contest.getClientSettings(clientId) == null){
+            ClientSettings clientSettings2 = new ClientSettings(clientId);
+            clientSettings2.put("LoginDate", new Date().toString());
+            contest.addClientSettings(clientSettings2);
+        }
+        
+        /**
+         * This is where client specific settings are created before
+         * sending them to client.
+         */
+
+        if (clientId.getClientType().equals(ClientType.Type.TEAM)) {
+            runs = contest.getRuns(clientId);
+            clarifications = contest.getClarifications(clientId);
+            clientSettings = new ClientSettings[1];
+            clientSettings[0] = contest.getClientSettings(clientId);
+        } else {
+            runs = contest.getRuns();
+            clarifications = contest.getClarifications();
+            problemDataFiles = contest.getProblemDataFiles();
+            clientSettings = contest.getClientSettingsList();
+        }
+
+        Packet loginSuccessPacket = PacketFactory.createLoginSuccess(contest.getClientId(), clientId, contest.getContestTime(), contest.getContestTimes(), contest.getSiteNumber(), 
+                contest.getLanguages(), contest.getProblems(), contest.getJudgements(), contest.getSites(), runs, clarifications, 
+                getAllLoggedInUsers(), contest.getConnectionHandleIDs(), getAllAccounts(), problemDataFiles,
+                contest.getContestInformation(), contest.getBalloonSettings(), clientSettings);
+     
+        return loginSuccessPacket;
+    }
+
 
     /**
      * Is the input ClientId a server.
