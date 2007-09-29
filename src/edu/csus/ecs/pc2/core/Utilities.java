@@ -164,4 +164,17 @@ public final class Utilities {
             return ".";
         }
     }
+    
+    /**
+     * Returns Yes if true, No if false.
+     * @param b
+     * @return
+     */
+    public static String yesNoString(boolean b) {
+        if (b) {
+            return "Yes";
+        } else {
+            return "No";
+        }
+    }
 }

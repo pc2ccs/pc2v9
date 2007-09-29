@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.core.model;
 
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.Hashtable;
 
 import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
@@ -9,14 +10,9 @@ import edu.csus.ecs.pc2.core.model.Run.RunStates;
 /**
  * A filter for runs, clients, etc.
  * 
- * Provides a way to determine whether a run, clarification, etc. matches
- * a list of problems, sites, etc.
- * <br>
- * Use the add methods to add items (Problems, RunStates, etc) to match against.
- * <br>
- * Use the match and matches methods to determine if the Run, Clarification, etc matches
- * the filter.
- * <br>
+ * Provides a way to determine whether a run, clarification, etc. matches a list of problems, sites, etc. <br>
+ * Use the add methods to add items (Problems, RunStates, etc) to match against. <br>
+ * Use the match and matches methods to determine if the Run, Clarification, etc matches the filter. <br>
  * Use the setUsing methods to turn on and off filtering of Problems, RunStates, etc.
  * 
  * @author pc2@ecs.csus.edu
@@ -25,7 +21,10 @@ import edu.csus.ecs.pc2.core.model.Run.RunStates;
 // $HeadURL$
 public class Filter {
 
-    // TODO code filters for account, elapsed time, site, permissions, etc.
+    // TODO filter for elapsed time
+    // TODO filter for site
+    // TODO filter for permissions, etc.
+    // TODO filter on account types
 
     /**
      * collection of chosen run states
@@ -73,7 +72,8 @@ public class Filter {
     }
 
     /**
-     * Match criteria against a run. 
+     * Match criteria against a run.
+     * 
      * @param run
      */
     public boolean matches(Run run) {
@@ -82,6 +82,7 @@ public class Filter {
 
     /**
      * Match criteria against a run.
+     * 
      * @param clarification
      * @return
      */
@@ -91,6 +92,7 @@ public class Filter {
 
     /**
      * Match criteria against a clientId.
+     * 
      * @param clientId
      * @return
      */
@@ -117,48 +119,53 @@ public class Filter {
     public int getSiteNumber() {
         return siteNumber;
     }
-    
-    public void setUsingProblemFilter (boolean turnOn){
+
+    public void setUsingProblemFilter(boolean turnOn) {
         filteringProblems = turnOn;
     }
 
     /**
      * Is filtering using problem list.
+     * 
      * @return true if filter problems.
      */
-    public boolean isFilteringProblems () {
+    public boolean isFilteringProblems() {
         return filteringProblems;
     }
-  
+
     /**
      * Add a problem to match against.
+     * 
      * @param problem
      */
-    public void addProblem (Problem problem) {
-        addProblem (problem.getElementId());
+    public void addProblem(Problem problem) {
+        addProblem(problem.getElementId());
     }
 
     /**
      * Add a problem to match against.
      * 
      * Also turns filtering on for problem list.
+     * 
      * @param elementId
      */
-    public void addProblem (ElementId elementId) {
-        problemIdHash.put( elementId,new Date());
+    private void addProblem(ElementId elementId) {
+        problemIdHash.put(elementId, new Date());
         filteringProblems = true;
     }
 
     /**
      * Return true if problem filter ON and matches a problem in the filter list.
+     * 
      * @param problem
      */
-    public boolean matchesProblem(Problem problem){
+    public boolean matchesProblem(Problem problem) {
         return matchesProblem(problem.getElementId());
     }
 
     /**
      * Return true if problem filter ON and matches a problem in the filter list.
+     * 
      * @param problemId
      */
     public boolean matchesProblem(ElementId problemId) {
@@ -168,17 +175,45 @@ public class Filter {
             return true;
         }
     }
-    
+
+    public void clearAccountList() {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * Clears all problems from filter, sets to not filtering Problems.
      */
-    public void clearProblemList(){
+    public void clearProblemList() {
         filteringProblems = false;
         problemIdHash = new Hashtable<ElementId, Date>();
     }
-    
-    // TODO code add removeProblem(Problem)
-    
+
+    public void removeProblem(Problem problem) {
+        if (problemIdHash.containsKey(problem.getElementId())) {
+            problemIdHash.remove(problem.getElementId());
+        }
+    }
+
+    /**
+     * Get list of ElementIds for the problems in the filter list.
+     * 
+     * @return list of element ids.
+     */
+    public ElementId[] getProblemIdList() {
+        ElementId[] elementIds = new ElementId[problemIdHash.size()];
+        Enumeration<ElementId> enumeration = problemIdHash.keys();
+        int i = 0;
+        while (enumeration.hasMoreElements()) {
+            ElementId element = (ElementId) enumeration.nextElement();
+            elementIds[i] = element;
+            i++;
+        }
+        return elementIds;
+    }
+
+    public Account[] getAccountList() {
+        throw new UnsupportedOperationException();
+    }
 
     public void setUsingRunStatesFilter(boolean turnOn) {
         filteringRunStates = turnOn;
@@ -186,6 +221,22 @@ public class Filter {
 
     public boolean isFilteringRunStates() {
         return filteringRunStates;
+    }
+
+    public void addAccount(Account account) {
+        throw new UnsupportedOperationException(); // TODO code
+    }
+
+    public void addAccounts(Account[] account) {
+        throw new UnsupportedOperationException(); // TODO code
+    }
+
+    public void removeAccount(Account account) {
+        throw new UnsupportedOperationException(); // TODO code
+    }
+
+    public void removeAccounts(Account[] account) {
+        throw new UnsupportedOperationException(); // TODO code
     }
 
     public void addRunState(RunStates runStates) {
@@ -200,17 +251,31 @@ public class Filter {
             return true;
         }
     }
-    
-    public void clearRunStatesList(){
+
+    public void clearRunStatesList() {
         filteringRunStates = false;
         runStateHash = new Hashtable<RunStates, Date>();
     }
 
-    // TODO code add removeRunState(RunStates)
+    public void removeRunState(RunStates runStates) {
+        throw new UnsupportedOperationException(); // TODO code
+    }
 
-    // TODO code add accessors for filteringClarificationStates
-    
-    // TODO code add removelarificationState(ClarificationStates)
+    public ElementId[] getClarificationStateList() {
+        throw new UnsupportedOperationException(); // TODO code
+    }
+
+    public void removeClarificationStates(ClarificationStates clarificationStates) {
+        throw new UnsupportedOperationException(); // TODO code
+    }
+
+    public ClarificationStates[] getClarificationStatesList() {
+        throw new UnsupportedOperationException(); // TODO code
+    }
+
+    public RunStates[] getRunStates() {
+        throw new UnsupportedOperationException(); // TODO code
+    }
 
     public boolean matchesClarificationState(ClarificationStates clarificationStates) {
         if (filteringClarificationStates) {
@@ -224,29 +289,26 @@ public class Filter {
         clarificationStateHash.put(clarificationStates, new Date());
         filteringClarificationStates = true;
     }
-    
-    public void clearClarificationStateList(){
+
+    public void clearClarificationStateList() {
         filteringClarificationStates = false;
         clarificationStateHash = new Hashtable<ClarificationStates, Date>();
     }
 
     public String toString() {
-     
-        if (thisSiteOnly 
-                || filteringClarificationStates 
-                || filteringProblems 
-                || filteringRunStates ) {
+
+        if (thisSiteOnly || filteringClarificationStates || filteringProblems || filteringRunStates) {
             String filterInfo = "Filter ON";
-            if (thisSiteOnly){
-                filterInfo += " Site "+siteNumber;
+            if (thisSiteOnly) {
+                filterInfo += " Site " + siteNumber;
             }
-            if (filteringProblems){
+            if (filteringProblems) {
                 filterInfo += " problem(s) ";
             }
-            if (filteringRunStates){
+            if (filteringRunStates) {
                 filterInfo += " run state(s)";
             }
-            if (filteringClarificationStates){
+            if (filteringClarificationStates) {
                 filterInfo += " clar state(s)";
             }
             return filterInfo;
