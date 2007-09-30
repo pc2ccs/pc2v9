@@ -847,6 +847,36 @@ public final class PacketFactory {
         }
     }
     
+    /**
+     * A contest settings packet.
+     * 
+     * @param source
+     * @param destination
+     * @param loginSuccessPacket
+     * @return
+     */
+    public static Packet createContestSettingsPacket(ClientId source, ClientId destination, Packet loginSuccessPacket) {
+
+        try {
+
+            if (loginSuccessPacket.getType().equals(Type.LOGIN_SUCCESS)) {
+                Properties properties = (Properties) loginSuccessPacket.getContent();
+                Packet contestSettingsPacket = new Packet(Type.SERVER_SETTINGS, source, destination, properties);
+                return contestSettingsPacket;
+            } else {
+                throw new IllegalArgumentException("Packet loginSuccessPacket is not LOGIN_SUCCESS " + loginSuccessPacket);
+            }
+
+        } catch (Exception e) {
+            System.err.println("Exception creating SERVER_SETTINGS ");
+            e.printStackTrace(System.err);
+            StaticLog.log("Exception in createContestUpdate ", e);
+            throw new SecurityException(e.getMessage());
+        }
+
+    }
+    
+    
 
     /**
      * Create a packet of {@link PacketType.Type#SETTINGS}.

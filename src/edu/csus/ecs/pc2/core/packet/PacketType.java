@@ -612,7 +612,11 @@ public final class PacketType implements Serializable {
         /**
          * 
          */
-        CLARIFICATION_ANSWER_UPDATE, 
+        CLARIFICATION_ANSWER_UPDATE,
+        /**
+         * Server settings.
+         */
+        SERVER_SETTINGS, 
     }
 
     /**
