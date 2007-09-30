@@ -22,6 +22,7 @@ import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunEvent;
+import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.SiteTest;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
@@ -43,15 +44,15 @@ public class RunFlowTest extends TestCase {
 
     private static final String [] CLIENT_COMMAND_LINE_OPTIONS = {"--port", "42000"};
 
-    private IContest modelOne;
+    private IContest contestOne;
 
     private Controller controllerOne;
 
-    private IContest teamModel;
+    private IContest teamContest;
 
     private TeamController teamController;
 
-    private IContest judgeModel;
+    private IContest judgeContest;
 
     private JudgeController judgeController;
 
@@ -60,18 +61,18 @@ public class RunFlowTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
-        modelOne = new Contest();
+        contestOne = new Contest();
         Site siteTwelve = SiteTest.createSite(siteNumber, "Site 1", null, 42000);
-        modelOne.addSite(siteTwelve);
+        contestOne.addSite(siteTwelve);
 
         // Start site 1
-        controllerOne = new Controller(modelOne);
-        controllerOne.setContactingRemoteServer(false);
-        controllerOne.setUsingMainUI(false);
-        controllerOne.start(SERVER_COMMAND_LINE_OPTIONS);
-        controllerOne.login("site1", "site1");
-        initializeModel(modelOne);
-        assertTrue("Site "+modelOne.getSiteNumber()+" logged in", modelOne.isLoggedIn());
+//        controllerOne = new Controller(contestOne);
+//        controllerOne.setContactingRemoteServer(false);
+//        controllerOne.setUsingMainUI(false);
+//        controllerOne.start(SERVER_COMMAND_LINE_OPTIONS);
+//        controllerOne.login("site1", "site1");
+        initializeModel(contestOne);
+//        assertTrue("Site "+contestOne.getSiteNumber()+" logged in", contestOne.isLoggedIn());
 
         startContestTime();
     }
@@ -84,13 +85,13 @@ public class RunFlowTest extends TestCase {
 
         private Judgement yesJudgement;
 
-        private IContest theModel;
+        private IContest theContest;
 
         JudgeController(IContest contest) {
             super(contest);
             contest.addRunListener(new RunListenerImpl());
             contest.addJudgementListener(new JudgementListenerImpl());
-            theModel = contest;
+            theContest = contest;
         }
 
         /**
@@ -137,7 +138,7 @@ public class RunFlowTest extends TestCase {
 
                 if (event.getAction().equals(RunEvent.Action.CHECKEDOUT_RUN)) {
                     // Every run gets a yes!
-                    JudgementRecord judgementRecord = new JudgementRecord(yesJudgement.getElementId(), theModel.getClientId(), true, false);
+                    JudgementRecord judgementRecord = new JudgementRecord(yesJudgement.getElementId(), theContest.getClientId(), true, false);
                     judgementRecord.setSendToTeam(true);
                     System.err.println("Judge - sending judgement for run " + event.getRun());
                     submitRunJudgement(event.getRun(), judgementRecord, null);
@@ -194,19 +195,19 @@ public class RunFlowTest extends TestCase {
 
         for (String langName : languages) {
             Language language = new Language(langName);
-            modelOne.addLanguage(language);
+            contestOne.addLanguage(language);
         }
 
         for (String probName : problems) {
             Problem problem = new Problem(probName);
-            modelOne.addProblem(problem);
+            contestOne.addProblem(problem);
         }
 
         Judgement judgementYes = new Judgement("Yes");
-        modelOne.addJudgement(judgementYes);
+        contestOne.addJudgement(judgementYes);
 
         for (String judgementName : judgements) {
-            modelOne.addJudgement(new Judgement(judgementName));
+            contestOne.addJudgement(new Judgement(judgementName));
         }
 
         contest.setSiteNumber(siteNumber);
@@ -214,29 +215,50 @@ public class RunFlowTest extends TestCase {
         contest.generateNewAccounts(ClientType.Type.JUDGE.toString(), 5, true);
         contest.setSiteNumber(1);
 
-        assertTrue("10 teams at site " + siteNumber + " not generated", modelOne.getAccounts(Type.TEAM, siteNumber).size() == 10);
-        assertTrue("5 teams at site " + siteNumber + " not generated", modelOne.getAccounts(Type.JUDGE, siteNumber).size() == 5);
+        assertTrue("10 teams at site " + siteNumber + " not generated", contestOne.getAccounts(Type.TEAM, siteNumber).size() == 10);
+        assertTrue("5 teams at site " + siteNumber + " not generated", contestOne.getAccounts(Type.JUDGE, siteNumber).size() == 5);
     }
 
     private void startContestTime() {
         ContestTime contestTime = new ContestTime();
-        contestTime.setSiteNumber(modelOne.getSiteNumber());
+        contestTime.setSiteNumber(contestOne.getSiteNumber());
         contestTime.setElapsedMins(20);
         contestTime.startContestClock();
-        controllerOne.setContestTime(contestTime);
+        contestOne.addContestTime(contestTime);
+        
+//        controllerOne.setContestTime(contestTime);
     }
-
+    
     public void testOneRun() {
-
-        Account account = modelOne.getAccounts(Type.TEAM).firstElement();
+        Account account = contestOne.getAccounts(Type.TEAM).firstElement();
         ClientId teamId = account.getClientId();
 
-        account = modelOne.getAccounts(Type.JUDGE).firstElement();
+        account = contestOne.getAccounts(Type.JUDGE).firstElement();
+        ClientId judgeId = account.getClientId();
+        
+        Run run = new Run(teamId, contestOne.getLanguages()[0],
+                contestOne.getProblems()[0]);
+
+        RunFiles runFiles = new RunFiles(run,"pc2v9.ini");
+        
+        contestOne.acceptRun(run, runFiles);
+        
+        assertTrue ("Should be "+contestOne.getRuns(), contestOne.getRuns().length == 1);
+
+        
+    }
+
+    public void oneRun() {
+
+        Account account = contestOne.getAccounts(Type.TEAM).firstElement();
+        ClientId teamId = account.getClientId();
+
+        account = contestOne.getAccounts(Type.JUDGE).firstElement();
         ClientId judgeId = account.getClientId();
 
         // Login a judge
-        judgeModel = new Contest();
-        judgeController = new JudgeController(judgeModel);
+        judgeContest = new Contest();
+        judgeController = new JudgeController(judgeContest);
         judgeController.setUsingMainUI(false);
         judgeController.start(CLIENT_COMMAND_LINE_OPTIONS);
         judgeController.login(judgeId.getName(), judgeId.getName());
@@ -244,15 +266,15 @@ public class RunFlowTest extends TestCase {
 
         // Login a team
 
-        teamModel = new Contest();
-        teamController = new TeamController(teamModel);
+        teamContest = new Contest();
+        teamController = new TeamController(teamContest);
         teamController.setUsingMainUI(false);
         teamController.start(CLIENT_COMMAND_LINE_OPTIONS);
         teamController.login(teamId.getName(), teamId.getName());
         sleep(12, "team logging in");
 
-        Problem firstProblem = modelOne.getProblems()[0];
-        Language firstLanguage = modelOne.getLanguages()[0];
+        Problem firstProblem = contestOne.getProblems()[0];
+        Language firstLanguage = contestOne.getLanguages()[0];
 
         try {
             teamController.submitRun(firstProblem, firstLanguage, "pc2v9.ini");
@@ -273,7 +295,7 @@ public class RunFlowTest extends TestCase {
          */
         sleep(8, "pausing while run goes through system");
         
-        Run [] runs = teamModel.getRuns();
+        Run [] runs = teamContest.getRuns();
         Arrays.sort(runs,new RunComparator());
         System.err.println("There are "+runs.length+" runs submitted");
         
@@ -336,8 +358,8 @@ public class RunFlowTest extends TestCase {
     protected void tearDown() throws Exception {
         
         super.tearDown();
-        controllerOne.shutdownTransport();
-        sleep(10, "waiting for transport shutdown");
+//        controllerOne.shutdownTransport();
+//        sleep(10, "waiting for transport shutdown");
     
     }
 
