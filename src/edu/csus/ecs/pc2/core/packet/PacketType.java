@@ -418,16 +418,16 @@ public final class PacketType implements Serializable {
         /**
          * Successful Login.
          * 
+         * In all cases this contains the contest settings. <P>
+         * 
          * From client to server<br>
          * From server to server <br>
          * Note: server login as well.
          * <P>
-         * Contents: Server login: SiteData. Client: Settings, Runs, Clars.
+         * Contents: Contest Settings.
          */
         LOGIN_SUCCESS,
         
-         
-
         /**
          * Notify judges that a run has been submitted.
          * 

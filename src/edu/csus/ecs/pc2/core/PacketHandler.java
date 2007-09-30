@@ -288,43 +288,100 @@ public class PacketHandler {
             
         } else if (packetType.equals(Type.LOGIN_SUCCESS)) {
             // from server to client/server on a successful login
-
-            if (isServer(packet.getDestinationId())) {
-                
-                // Remove server from remote login list
-                if (contest.isRemoteLoggedIn(fromId)) {
-                    contest.removeRemoteLogin(fromId);
-                }
-                /**
-                 * Add server into login list.
-                 */
-                contest.addLogin(fromId, connectionHandlerID);
-                
-            }
-
-            if (!contest.isLoggedIn()) {
-                info(" handlePacket original LOGIN_SUCCESS before ");
-                loadDataIntoModel(packet, connectionHandlerID);
-                info(" handlePacket original LOGIN_SUCCESS after -- all settings loaded ");
-            } else {
-                loadSettingsFromRemoteServer(packet, connectionHandlerID);
-                info(" handlePacket LOGIN_SUCCESS - from another site -- all settings loaded " + packet);
-            }
             
+            loginSuccess(packet, connectionHandlerID, fromId);
+
         } else {
 
             Exception exception = new Exception("PacketHandler.handlePacket Unhandled packet " + packet);
             controller.getLog().log(Log.WARNING,"Unhandled Packet ", exception);
         }
         
-        // TODO handle sending other server our settings
         
-        // Send Server that we just logged into our settings
-        // controller.sendToClient(createLoginSuccessPacket(packet.getSourceId()));
 
-        
         info("handlePacket end " + packet);
+    }
+    
+    private void loginSuccess (Packet packet, ConnectionHandlerID connectionHandlerID, ClientId fromId){
 
+        if (isServer(packet.getDestinationId())) {
+
+            dumpServerLoginLists("before local login of site " + fromId.getSiteNumber()); // TOOD remove code
+
+            if (contest.isLocalLoggedIn(fromId)) {
+                /**
+                 * if other site is logged into this site, then just load settings from other site.
+                 */
+
+                loadSettingsFromRemoteServer(packet, connectionHandlerID);
+                info(" handlePacket LOGIN_SUCCESS - from another site -- all settings loaded " + packet);
+
+            } else {
+
+                // Remove server from remote login list
+                if (contest.isRemoteLoggedIn(fromId)) {
+                    contest.removeRemoteLogin(fromId);
+                }
+
+                // Add the other site as a local login
+                contest.addLogin(fromId, connectionHandlerID);
+
+                /**
+                 * There can be two cases, where this is the first LOGIN_SUCCESS in which case we load contest settings from other server. Or, this site is already up in which case we merge/add
+                 * settings from other server.
+                 */
+
+                if (!contest.isLoggedIn()) {
+                    info(" handlePacket original LOGIN_SUCCESS before ");
+                    loadDataIntoModel(packet, connectionHandlerID);
+                    info(" handlePacket original LOGIN_SUCCESS after -- all settings loaded ");
+                } else {
+                    loadSettingsFromRemoteServer(packet, connectionHandlerID);
+                    info(" handlePacket LOGIN_SUCCESS - from another site -- all settings loaded " + packet);
+                }
+
+                dumpServerLoginLists("before send LOGIN_SUCC     " + fromId.getSiteNumber()); // TOOD remove code
+                // Send Server that we just logged into our settings
+                controller.sendToClient(createLoginSuccessPacket(packet.getSourceId()));
+            }
+
+            dumpServerLoginLists("after  local login of site " + fromId.getSiteNumber()); // TOOD remove code
+
+        } else {
+
+            if (!contest.isLoggedIn()) {
+                info(" handlePacket original LOGIN_SUCCESS before ");
+                loadDataIntoModel(packet, connectionHandlerID);
+                info(" handlePacket original LOGIN_SUCCESS after -- all settings loaded ");
+            } else {
+                // If logged in client, should not get another LOGIN_SUCCESS
+                Exception ex = new Exception("Client "+contest.getClientId()+" received unexpected packet, already logged in but got a "+packet);
+                controller.getLog().log(Log.WARNING, ex.getMessage(), ex);
+            }
+        }
+    }
+
+    /**
+     * Dump both local and remote  server logins.
+     * @param comment
+     */
+    private void dumpServerLoginLists(String comment) {
+        
+        System.out.println("dumpLoginLists ("+contest.getSiteNumber()+" "+comment);
+        
+        ClientId [] clientIds =  contest.getRemoteLoggedInClients(edu.csus.ecs.pc2.core.model.ClientType.Type.SERVER);
+        System.out.print("   "+clientIds.length+" remote logins: ");
+        for (ClientId clientId :clientIds){
+            System.out.print("Site " + clientId.getSiteNumber()+" - ");
+        }
+        System.out.println();
+        
+        clientIds =  contest.getLocalLoggedInClients(edu.csus.ecs.pc2.core.model.ClientType.Type.SERVER);
+        System.out.print("   "+clientIds.length+"  local logins: ");
+        for (ClientId clientId :clientIds){
+            System.out.print("Site " + clientId.getSiteNumber()+" - ");
+        }
+        System.out.println();
     }
 
     private void updateContestClock(Packet packet) {
@@ -1263,7 +1320,7 @@ public class PacketHandler {
     }
     
     /**
-     * Add logins to contest.
+     * Add Logins into model.
      * 
      * @param packet
      */
@@ -1274,11 +1331,24 @@ public class PacketHandler {
             ClientId [] clientIds = (ClientId[]) PacketFactory.getObjectValue(packet, PacketFactory.LOGGED_IN_USERS);
             if (clientIds != null){
                 for (ClientId clientId : clientIds){
-                    if ( (!isServer()) || (!isThisSite(clientId.getSiteNumber()))) {
+                    if ( isServer()) {
+                        // Is a server, only add remote logins
+                        
+                        if (! contest.isLocalLoggedIn(clientId) && !isThisSite(clientId.getSiteNumber())) {
+                            // Only add into remote list on server, if they are not already logged in
+                            // TODO someday soon load logins with their connectionIds
+                            ConnectionHandlerID fakeId = new ConnectionHandlerID("Fake-Site"+clientId.getSiteNumber());
+                            
+                            System.out.println("DEBUG adding remote login "+clientId);
+                            contest.addRemoteLogin(clientId, fakeId);
+                        }
+                        
+                    } else if (!isThisSite(clientId.getSiteNumber())) {
+                        // Not a server Controller - add everything
                         
                         // TODO someday soon load logins with their connectionIds
-                        ConnectionHandlerID fakeId = new ConnectionHandlerID("Fake-Site"+clientId.getSiteNumber());
-                        contest.addRemoteLogin(clientId, fakeId);
+                        ConnectionHandlerID fakeId = new ConnectionHandlerID("Fake-Site" + clientId.getSiteNumber());
+                        contest.addLogin(clientId, fakeId);
                     }
                 }
             }
@@ -1305,10 +1375,9 @@ public class PacketHandler {
 
         addAccountsToModel(packet);
 
-        // TODO debug from remote servers
-//        addConnectionIdsToModel(packet);
-//        
-//        addLoginsToModel (packet);
+        addConnectionIdsToModel(packet);
+        
+        addLoginsToModel (packet);
         
     }
 
