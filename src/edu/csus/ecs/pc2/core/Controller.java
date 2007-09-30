@@ -93,7 +93,6 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
  * @version $Id$
  */
 // $HeadURL$
-// $Id$
 public class Controller implements IController, ITwoToOne, IBtoA {
 
     public static final String SVN_ID = "$Id$";
@@ -118,7 +117,8 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     private UIPlugin uiPlugin = null;
 
     private Log log;
-    
+
+    private static final String SITE_OPTION_STRING = "--site";
     private static final String LOGIN_OPTION_STRING = "--login";
     private static final String PASSWORD_OPTION_STRING = "--password";
     // TODO code implement --loginUI
@@ -217,7 +217,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * Load and Save configuration to disk
      */
     private boolean saveCofigurationToDisk = true;
-    
+
     public Controller(IContest contest) {
         super();
         this.contest = contest;
@@ -240,7 +240,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
 
     private void sendToClient(ConnectionHandlerID connectionHandlerID, Packet packet) {
-        info("sendToClient (send) " +packet+" "+connectionHandlerID);
+        info("sendToClient (send) "+packet.getDestinationId()+" " +packet+" "+connectionHandlerID);
         try {
             transportManager.send(packet, connectionHandlerID);
         } catch (TransportException e) {
@@ -255,9 +255,11 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * @param packet
      */
     public void sendToRemoteServer (int siteNumber, Packet packet){
+
         ClientId clientId = new ClientId(siteNumber, Type.SERVER, 0);
 
         ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(clientId);
+        info("sendToRemoteServer "+clientId+" " +packet+" "+connectionHandlerID);
         
         Type type = packet.getSourceId().getClientType();
         if ((!type.equals(Type.ADMINISTRATOR)) && (! type.equals(Type.SERVER))){
@@ -462,7 +464,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                 info("Contacted using connection id " + remoteServerConnectionHandlerID);
 
                 sendLoginRequestFromServerToServer(transportManager, remoteServerConnectionHandlerID, clientId, password);
-
+                
             } else {
 
                 if (!serverModule) {
@@ -494,33 +496,38 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             sendLoginRequest(transportManager, clientId, id, password);
         }
     }
+    
+    public void initializeServer() {
 
-    private ClientId authenticateFirstServer(String password) {
-        
-        if (contest.getSites().length == 0){
-            
-            boolean loadedConfiguration = false;
-            
-            if (saveCofigurationToDisk){
-                loadedConfiguration = configurationIO.loadFromDisk(1, contest, getLog());
-                contest.initializeSubmissions(1);
+        if (contest.getSites().length == 0) { 
+
+            if (contest.getSiteNumber() == 0){
+                contest.setSiteNumber(1);
             }
             
-            if (! loadedConfiguration){
-                
+            boolean loadedConfiguration = readConfigFromDisk(contest.getSiteNumber());
+
+            if (!loadedConfiguration) {
+                // No configuration on disk, initialize settings.
+
                 log.info("initializing controller with default settings");
-                Site site = createFirstSite (1, "localhost", port);
+                Site site = createFirstSite(contest.getSiteNumber(), "localhost", port);
                 contest.addSite(site);
-                
+
                 contest.initializeStartupData();
-                contest.initializeSubmissions(1);
-                log.info("initialized  controller with default settings");
+                contest.initializeSubmissions(contest.getSiteNumber());
+                log.info("initialized controller Site "+contest.getSiteNumber()+" with default settings");
                 writeConfigToDisk();
             } else {
                 log.info("Loaded configuration from disk");
             }
-            
         }
+    }
+
+    private ClientId authenticateFirstServer(String password) {
+        
+        initializeServer();
+    
         int newSiteNumber = getServerSiteNumber(password);
 
         ClientId newId = new ClientId(newSiteNumber, ClientType.Type.SERVER, 0);
@@ -655,7 +662,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
 
     /**
-     * Server receive object.
+     * Server receives Packet from client or server.
      * 
      * @see edu.csus.ecs.pc2.core.transport.ITwoToOne#receiveObject(java.io.Serializable,
      *      edu.csus.ecs.pc2.core.transport.ConnectionHandlerID)
@@ -807,16 +814,26 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         
         ConnectionHandlerID connectionHandlerIDAuthen = contest.getConnectionHandleID(packet.getSourceId());
         if (! connectionHandlerID.equals(connectionHandlerIDAuthen)){
-            // TODO code security violation handling
-            
             /**
              * Security Violation - their login does not match the connectionID
              */
             
-            info("Note: security violation in packet: connectionIDs do not match, check log");
+            info("Note: security violation in packet: ConnectionHandlerID do not match, check log");
             log.info("Security Violation for packet "+packet);
             log.info("User "+packet.getSourceId()+" expected "+connectionHandlerIDAuthen);
             log.info("User "+packet.getSourceId()+" found    "+connectionHandlerID);
+        }
+        
+        ClientId fromId = packet.getSourceId();
+        
+        if (! isThisSite(fromId.getSiteNumber())) {
+            // Not from this site, should only come from a server.
+            
+            if (! isServer(fromId)){
+                
+                info("Security Violation expecting only server from site "+fromId.getSiteNumber()+" for packet "+packet);
+                log.info("Security Violation expecting only server from site "+fromId.getSiteNumber()+" for packet "+packet);
+            }
         }
     }
 
@@ -1090,7 +1107,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(clientId);
             boolean isThisServer = isThisSite(clientId.getSiteNumber());
             if (!isThisServer) {
-                // only send to other servers
+                // Send to other servers
                 sendToClient(connectionHandlerID, packet);
             }
         }
@@ -1237,10 +1254,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         parseArguments = new ParseArguments(stringArray, arguments);
         
         if (parseArguments.isOptPresent("--help")){
-            System.out.println("Usage: Starter [--login <login>] [--password <pass>] [--help]");
-            System.out.println("where <login> is a user name");
-            // TODO un-comment this when --server works. 
-//            System.out.println("Usage: Starter [--login <login>] [--help] [--server] ");
+            System.out.println("Usage: Starter [--help] [--server] [--first] [--login <login>] [--password <pass>] [--site ##] [--ini filename] ");
             System.exit(0);
         }
         
@@ -1275,6 +1289,8 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         transportManager = new TransportManager(log);
         log.info("Started TransportManager");
         
+        
+        // TODO code add INI_FILENAME_OPTION_STRING
         if ( parseArguments.isOptPresent("--ini")) {
             // TODO handle URL too
             String iniName = parseArguments.getOptValue("--ini");
@@ -1287,11 +1303,35 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             
         }
         
+        contest.setSiteNumber(0);
+        
+        if ( parseArguments.isOptPresent(SITE_OPTION_STRING)) {
+            
+            String siteNumberParam = parseArguments.getOptValue(SITE_OPTION_STRING);
+            
+            if (siteNumberParam == null || siteNumberParam.trim().length() == 0){
+                savedTransportException = new TransportException("No site found after "+SITE_OPTION_STRING);
+            }
+            
+            try {
+                int siteNumber = Integer.parseInt(siteNumberParam);
+                contest.setSiteNumber(siteNumber);
+                
+            } catch (Exception e) {
+                getLog().log (Log.WARNING, "Expecting a number after "+SITE_OPTION_STRING+" found "+siteNumberParam, e);
+                savedTransportException = new TransportException("Invalid site after "+SITE_OPTION_STRING);
+            }
+        }
+        
+        log.log(Log.DEBUG, "Site Number is set as "+contest.getSiteNumber()+" (0 means unset)");
+        
+        
         if (IniFile.isFilePresent()) {
             // Only read and load .ini file if it is present.
             new IniFile();
         }
         
+        // TODO code add NO_SAVE_OPTION_STRING
         if (parseArguments.isOptPresent("--nosave")){
             saveCofigurationToDisk = false;
         }
@@ -1724,6 +1764,19 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         sendToLocalServer(addAccountPacket); 
     }
     
+    public boolean readConfigFromDisk (int siteNum){
+        
+        boolean loadedConfiguration = false;
+        
+        if (saveCofigurationToDisk){
+            loadedConfiguration = configurationIO.loadFromDisk(siteNum, contest, getLog());
+            contest.initializeSubmissions(1);
+        }
+
+        return loadedConfiguration;
+
+    }
+    
     public void writeConfigToDisk (){
         
         if (saveCofigurationToDisk) {
@@ -1764,5 +1817,9 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     public void updateBalloonSettings(BalloonSettings balloonSettings) {
         Packet balloonSettingsPacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), balloonSettings);
         sendToLocalServer(balloonSettingsPacket);
+    }
+
+    public int getSiteNumber() {
+        return contest.getSiteNumber();
     }
 }

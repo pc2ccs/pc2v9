@@ -42,7 +42,6 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
  */
 
 // $HeadURL$
-// $Id$
 public class PacketHandler {
 
     private IContest contest;
@@ -310,7 +309,7 @@ public class PacketHandler {
     private void loginSuccess(Packet packet, ConnectionHandlerID connectionHandlerID, ClientId fromId) {
 
         if (!contest.isLoggedIn()) {
-            // Got the first LOGIN_SUCCESS, first connection into server. 
+            // Got the first LOGIN_SUCCESS, first connection into server.
             
             info(" handlePacket original LOGIN_SUCCESS before ");
             loadDataIntoModel(packet, connectionHandlerID);
@@ -597,6 +596,10 @@ public class PacketHandler {
         }
     }
 
+    /**
+     * Generate local accounts for forward this request to another server.
+     * @param packet
+     */
     private void generateAccounts(Packet packet) {
         
         ClientType.Type type = (ClientType.Type) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_TYPE);
@@ -605,6 +608,8 @@ public class PacketHandler {
         Integer startCount = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.START_COUNT);
         Boolean active = (Boolean) PacketFactory.getObjectValue(packet, PacketFactory.CREATE_ACCOUNT_ACTIVE);
         
+        info("debug generateAccounts ");
+        
         if (isServer()){
             
             if (isThisSite(siteNumber)){
@@ -612,10 +617,16 @@ public class PacketHandler {
                 // get vector of new accounts.
                 Vector<Account> accountVector = contest.generateNewAccounts(type.toString(), count.intValue(), startCount.intValue(), active);
                 Account[] accounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
-                Packet newAccountsPacket = PacketFactory.createAddSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, accounts);
-                sendToJudgesAndOthers(newAccountsPacket, true);
+                
+                System.out.flush();
+                System.out.println("debug account generate ");
+                PacketFactory.dumpPacket(System.out, packet);
+                System.out.flush();
                 
                 controller.writeConfigToDisk();
+                
+                Packet newAccountsPacket = PacketFactory.createAddSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, accounts);
+                sendToJudgesAndOthers(newAccountsPacket, true);
                 
             } else {
                 
@@ -623,7 +634,7 @@ public class PacketHandler {
             }
             
         } else {
-            throw new SecurityException("Client "+contest.getClientId()+" was send generate account packet "+packet);
+            throw new SecurityException("Client "+contest.getClientId()+" was sent generate account packet "+packet);
         }
     }
 
@@ -901,16 +912,19 @@ public class PacketHandler {
      */
     public void sendToJudgesAndOthers(Packet packet, boolean sendToServers) {
 
-        if (contest.getClientId().getClientType().equals(ClientType.Type.SERVER)) {
-            // If I am a server
-            // forward to clients on this site.
+        if (isServer()){
+            // If I am a server forward to clients on this site.
+            
             controller.sendToAdministrators(packet);
             controller.sendToJudges(packet);
             controller.sendToScoreboards(packet);
             if (sendToServers) {
                 controller.sendToServers(packet);
             }
-        } // else not a server, just return.
+        } else {
+            SecurityException securityException = new SecurityException("Client "+contest.getClientId()+" tried to send to judge and others "+packet);
+            info("Tried to send packet to others ",securityException);
+        }
     }
 
     private boolean isSuperUser(ClientId id) {
@@ -1402,6 +1416,9 @@ public class PacketHandler {
         }
 
         controller.setSiteNumber(clientId.getSiteNumber());
+        
+        // Load local settings
+        controller.initializeServer();
         
         try {
             Language[] languages = (Language[]) PacketFactory.getObjectValue(packet, PacketFactory.LANGUAGE_LIST);

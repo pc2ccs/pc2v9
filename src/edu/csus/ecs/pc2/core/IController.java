@@ -50,6 +50,7 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
  * 
  * @see edu.csus.ecs.pc2.Starter
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
@@ -283,4 +284,10 @@ public interface IController {
     void addNewBalloonSettings(BalloonSettings newBalloonSettings);
 
     void updateBalloonSettings(BalloonSettings newBalloonSettings);
+
+    /**
+     * Load contest settings from disk and initialize Contest. 
+     */
+    void initializeServer();
+    
 }
