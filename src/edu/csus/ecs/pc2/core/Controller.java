@@ -677,17 +677,8 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                 ClientId clientId = packet.getSourceId();
 
                 info("receiveObject " + packet);
-                if (contest.isLocalLoggedIn(packet.getSourceId())) {
-
-                    /**
-                     * This user is in the login list and we process their request.
-                     */
-                    
-                    securityCheck (packet, connectionHandlerID);
-                    
-                    processPacket(packet, connectionHandlerID);
-
-                } else if (packet.getType().equals(PacketType.Type.LOGIN_REQUEST)) {
+                
+                if (packet.getType().equals(PacketType.Type.LOGIN_REQUEST)) {
                     String password = PacketFactory.getStringValue(packet, PacketFactory.PASSWORD);
                     try {
 
@@ -718,6 +709,15 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                         String message = securityException.getMessage();
                         sendLoginFailure(packet.getSourceId(), connectionHandlerID, message);
                     }
+                } else if (contest.isLocalLoggedIn(packet.getSourceId())) {
+
+                    /**
+                     * This user is in the login list and we process their request.
+                     */
+
+                    securityCheck(packet, connectionHandlerID);
+
+                    processPacket(packet, connectionHandlerID);
                 } else {
                     // Security Failure??
 
@@ -742,7 +742,8 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                             processPacket(packet, connectionHandlerID);
 
                             // Add the other (server we logged into) into our logged in list.
-                            contest.addLocalLogin(clientId, connectionHandlerID);
+                            
+                            loginServer (clientId, connectionHandlerID);
 
                         } else {
                             
@@ -804,6 +805,25 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             info("Exception in receiveObject ", e);
         }
         info("receiveObject (S,C) debug end   got " + object.getClass().getName());
+    }
+
+    /**
+     * This logs server into local logins and out of remote logins, if needed.
+     * 
+     * @param clientId
+     * @param connectionHandlerID
+     */
+    private void loginServer(ClientId clientId, ConnectionHandlerID connectionHandlerID) {
+
+       if (contest.isLocalLoggedIn(clientId)) {
+           contest.removeLogin(clientId);
+       }
+       
+       if (contest.isRemoteLoggedIn(clientId)){
+           contest.removeRemoteLogin(clientId);
+       }
+       
+       contest.addLocalLogin(clientId, connectionHandlerID);
     }
 
     private void securityCheck(Packet packet, ConnectionHandlerID connectionHandlerID) {
@@ -891,18 +911,15 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     private void attemptToLogin(ClientId clientId, String password, ConnectionHandlerID connectionHandlerID) {
 
         if (clientId.getClientType().equals(Type.SERVER)) {
+            // Server login
 
             int newSiteNumber = getServerSiteNumber(password);
             
             if (newSiteNumber == clientId.getSiteNumber()) {
                 // matching password, ok.
                 
-                if (contest.isLocalLoggedIn(clientId)) {
-                    info("Note site " + clientId + " site " + newSiteNumber + " already logged in, logging them in again ");
-                    contest.removeLogin(clientId);
-                }
+                loginServer(clientId, connectionHandlerID);
                 
-                contest.addLocalLogin(clientId, connectionHandlerID);    
             } else {
                 
                 throw new SecurityException("Failed attempt to login");
@@ -910,6 +927,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             }
             
         } else if (contest.isValidLoginAndPassword(clientId, password)) {
+            // Client login
             
             if (contest.isLocalLoggedIn(clientId)){
                 
@@ -946,8 +964,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             packetHandler.handlePacket(packet, connectionHandlerID);
 
         } catch (Exception e) {
-            System.err.println("Exception in processPacket, check logs "); // TODO debug
-            log.log(Log.WARNING, "Exception processPacket ", e);
+            info("Exception in processPacket, check logs ", e); 
         }
 
     }
@@ -1085,6 +1102,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         log.warning(s);
         System.err.println(Thread.currentThread().getName() + " " + s);
         System.err.flush();
+        log.log(Log.INFO, s);
     }
 
     public void info(String s, Exception exception) {
@@ -1092,6 +1110,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         System.err.println(Thread.currentThread().getName() + " " + s);
         System.err.flush();
         exception.printStackTrace(System.err);
+        log.log(Log.INFO, s, exception);
     }
 
     public void setSiteNumber(int number) {

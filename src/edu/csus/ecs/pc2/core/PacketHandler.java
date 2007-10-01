@@ -330,13 +330,19 @@ public class PacketHandler {
             info(" handlePacket original LOGIN_SUCCESS after -- all settings loaded ");
             
             if (isServer()) {
-                if (contest.isRemoteLoggedIn(fromId)) {
+                
+                if (contest.isLocalLoggedIn(fromId)) {
+                    contest.removeLogin(fromId);
+                }
+                
+                if (contest.isRemoteLoggedIn(fromId)){
                     contest.removeRemoteLogin(fromId);
                 }
 
                 // Add the other site as a local login
                 contest.addLocalLogin(fromId, connectionHandlerID);
                 
+                // Send settings packet to the server we logged into
                 controller.sendToClient(createContestSettingsPacket(packet.getSourceId()));
             }
             
@@ -526,11 +532,17 @@ public class PacketHandler {
         if (contest.isLoggedIn()) {
             ClientId whoLoggedIn = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
             ConnectionHandlerID connectionHandlerID = (ConnectionHandlerID) PacketFactory.getObjectValue(packet, PacketFactory.CONNECTION_HANDLE_ID);
-
+            
             if (isServer()) {
                 info("LOGIN from other site "+whoLoggedIn);
-                contest.addRemoteLogin(whoLoggedIn, connectionHandlerID);
-                sendToJudgesAndOthers(packet, false);
+                
+                if (! contest.isLocalLoggedIn(whoLoggedIn)) {
+                    contest.addRemoteLogin(whoLoggedIn, connectionHandlerID);
+                    sendToJudgesAndOthers(packet, false);
+                } else {
+                    controller.getLog().log(Log.DEBUG, "LOGIN packet, server site "+whoLoggedIn+" logged onto "+packet.getSourceId()+", already logged in on this site");
+                }
+                
             } else {
                 contest.addLogin(whoLoggedIn, connectionHandlerID);
             }
