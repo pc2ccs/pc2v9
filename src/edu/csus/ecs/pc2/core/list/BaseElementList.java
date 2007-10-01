@@ -13,6 +13,7 @@ import edu.csus.ecs.pc2.core.model.IElementObject;
  * Maintains a list of {@link edu.csus.ecs.pc2.core.model.IElementObject}
  *
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
@@ -115,8 +116,8 @@ public abstract class BaseElementList implements Serializable {
             return true;
         } else {
             // TODO design better way to handle this ?
-            System.err.println("BaseElementList.update - did not find "
-                    + elementObject.getElementId() + " added to list");
+//            System.err.println("BaseElementList.update - did not find "
+//                    + elementObject.getElementId() + " added to list");
             hash.put(getKey(elementObject), elementObject);
             return false;
         }
