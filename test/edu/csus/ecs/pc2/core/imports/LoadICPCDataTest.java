@@ -21,6 +21,7 @@ public class LoadICPCDataTest extends TestCase {
     }
     protected void setUp() throws Exception {
         // TODO update loadDir to find the testdata
+        System.err.println("loadDir="+new File(loadDir).getAbsolutePath());
     }
 
     public void testOne() {
