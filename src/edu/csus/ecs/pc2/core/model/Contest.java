@@ -1,6 +1,5 @@
 package edu.csus.ecs.pc2.core.model;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -22,7 +21,6 @@ import edu.csus.ecs.pc2.core.list.ProblemDisplayList;
 import edu.csus.ecs.pc2.core.list.ProblemList;
 import edu.csus.ecs.pc2.core.list.RunFilesList;
 import edu.csus.ecs.pc2.core.list.RunList;
-import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
@@ -443,10 +441,9 @@ public class Contest implements IContest {
     }
 
     public void updateSite(Site site) {
-        siteList.add(site);
+        siteList.update(site);
         SiteEvent siteEvent = new SiteEvent(SiteEvent.Action.CHANGED, site);
         fireSiteListener(siteEvent);
-
     }
     
 
@@ -1070,8 +1067,12 @@ public class Contest implements IContest {
 
     public Site getSite(int number) {
         Site[] sites = siteList.getList();
-        Arrays.sort(sites, new SiteComparatorBySiteNumber());
-        return sites[number - 1];
+        for (Site site : sites){
+            if (site.getSiteNumber() == number){
+                return site;
+            }
+        }
+        return null;
     }
 
     private void fireClarificationListener(ClarificationEvent clarificationEvent) {
@@ -1322,7 +1323,7 @@ public class Contest implements IContest {
     }
 
     public void updateBalloonSettings(BalloonSettings balloonSettings) {
-        balloonSettingsList.add(balloonSettings);
+        balloonSettingsList.update(balloonSettings);
         BalloonSettingsEvent balloonSettingsEvent = new BalloonSettingsEvent(BalloonSettingsEvent.Action.CHANGED, balloonSettings);
         fireBalloonSettingsListener(balloonSettingsEvent);
     }
