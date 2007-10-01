@@ -20,8 +20,16 @@ public class LoadICPCDataTest extends TestCase {
         super(arg0);
     }
     protected void setUp() throws Exception {
-        // TODO update loadDir to find the testdata
-        System.err.println("loadDir="+new File(loadDir).getAbsolutePath());
+        File dir = new File(loadDir);
+        if (!dir.exists()) {
+            // TODO, try to find this path in the environment
+            dir = new File(loadDir + "projects" + File.separator +"pc2v9" + File.separator);
+            if (dir.exists()) {
+                loadDir=dir.toString();
+            } else {
+                System.err.println("could not find " + loadDir);
+            }
+        }
     }
 
     public void testOne() {
