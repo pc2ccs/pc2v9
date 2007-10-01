@@ -214,7 +214,21 @@ public class PacketHandler {
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
             ClientId whoCanceledId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
             cancelRun(packet, run,  whoCanceledId);
-
+            
+        } else if (packetType.equals(Type.START_ALL_CLOCKS)) {
+            startContest(packet);
+            
+            if (isThisSite(packet.getSourceId())){
+                controller.sendToServers(packet);
+            }
+            
+        } else if (packetType.equals(Type.STOP_ALL_CLOCKS)) {
+            stopContest(packet);
+            
+            if (isThisSite(packet.getSourceId())){
+                controller.sendToServers(packet);
+            }
+            
         } else if (packetType.equals(Type.START_CONTEST_CLOCK)) {
             // Admin to server, start the clock
             startContest(packet);
@@ -1517,9 +1531,10 @@ public class PacketHandler {
         }
 
         addClientSettingsToModel (packet);
+        
+        initializeContestTime();
 
         addContestTimesToModel(packet);
-        
 
         addRunsToModel(packet);
 
@@ -1550,6 +1565,21 @@ public class PacketHandler {
         } else {
             String message = "Trouble logging in, check logs";
             contest.loginDenied(packet.getDestinationId(), connectionHandlerID, message);
+        }
+    }
+
+    /**
+     * Initialize this sites contest time.
+     *
+     */
+    private void initializeContestTime() {
+        
+        if (isServer()) {
+            if (contest.getContestTime() == null) {
+                ContestTime contestTime = new ContestTime(contest.getSiteNumber());
+                contest.addContestTime(contestTime);
+                info("Initialized contest time "+contestTime.getRemainingTimeStr()+" for site "+contestTime.getSiteNumber());
+            }
         }
     }
 

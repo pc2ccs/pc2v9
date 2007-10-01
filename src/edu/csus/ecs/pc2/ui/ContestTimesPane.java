@@ -5,6 +5,7 @@ import java.awt.FlowLayout;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
@@ -29,6 +30,7 @@ import edu.csus.ecs.pc2.core.security.PermissionList;
  * Shows contest times at all sites.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
@@ -52,8 +54,12 @@ public class ContestTimesPane extends JPanePlugin {
     private JPanel messagePane = null;
 
     private JLabel messageLabel = null;
-    
+
     private PermissionList permissionList = new PermissionList();
+
+    private JButton startAllButton = null;
+
+    private JButton stopAllButton = null;
 
     /**
      * This method initializes
@@ -97,6 +103,8 @@ public class ContestTimesPane extends JPanePlugin {
             contestTimeButtonPane.add(getStartClockButton(), null);
             contestTimeButtonPane.add(getContestTimeRefreshButton(), null);
             contestTimeButtonPane.add(getStopClockButton(), null);
+            contestTimeButtonPane.add(getStartAllButton(), null);
+            contestTimeButtonPane.add(getStopAllButton(), null);
         }
         return contestTimeButtonPane;
     }
@@ -181,27 +189,24 @@ public class ContestTimesPane extends JPanePlugin {
             contestTimeListBox.autoSizeAllColumns();
         }
     }
-    
 
-    private boolean isAllowed (Permission.Type type){
+    private boolean isAllowed(Permission.Type type) {
         return permissionList.isAllowed(type);
     }
-    
-    
+
     private void initializePermissions() {
         Account account = getContest().getAccount(getContest().getClientId());
-        if (account != null){
+        if (account != null) {
             permissionList.clearAndLoadPermissions(account.getPermissionList());
         }
     }
 
     private void updateGUIperPermissions() {
 
-//        getContestTimeRefreshButton();
+        // getContestTimeRefreshButton();
         getStartClockButton().setVisible(isAllowed(Permission.Type.START_CONTEST_CLOCK));
         getStopClockButton().setVisible(isAllowed(Permission.Type.STOP_CONTEST_CLOCK));
     }
-
 
     public void setContestAndController(IContest inContest, IController inController) {
         super.setContestAndController(inContest, inController);
@@ -210,7 +215,7 @@ public class ContestTimesPane extends JPanePlugin {
         getContest().addContestTimeListener(new ContestTimeListenerImplementation());
 
         getContest().addSiteListener(new SiteListenerImplementation());
-        
+
         getContest().addAccountListener(new AccountListenerImplementation());
 
         SwingUtilities.invokeLater(new Runnable() {
@@ -222,9 +227,9 @@ public class ContestTimesPane extends JPanePlugin {
     }
 
     /**
-     * 
+     * Site Listener Implementation. 
      * @author pc2@ecs.csus.edu
-     * 
+     * @version $Id$
      */
     public class SiteListenerImplementation implements ISiteListener {
 
@@ -267,9 +272,9 @@ public class ContestTimesPane extends JPanePlugin {
      * ContestTime Listener
      * 
      * @author pc2@ecs.csus.edu
+     * @version $Id$
      */
 
-    // $HeadURL$
     public class ContestTimeListenerImplementation implements IContestTimeListener {
 
         public void contestTimeAdded(ContestTimeEvent event) {
@@ -337,6 +342,7 @@ public class ContestTimesPane extends JPanePlugin {
 
     protected void startClockTimes() {
         int[] selectedSites = contestTimeListBox.getSelectedIndexes();
+        showMessage("");
         if (selectedSites.length == 0) {
             showMessage("Please select site");
             return;
@@ -420,7 +426,7 @@ public class ContestTimesPane extends JPanePlugin {
             }
         });
     }
-    
+
     /**
      * 
      * @author pc2@ecs.csus.edu
@@ -435,8 +441,7 @@ public class ContestTimesPane extends JPanePlugin {
             // check if is this account
             Account account = event.getAccount();
             /**
-             * If this is the account then update the GUI display per
-             * the potential change in Permissions.
+             * If this is the account then update the GUI display per the potential change in Permissions.
              */
             if (getContest().getClientId().equals(account.getClientId())) {
                 // They modified us!!
@@ -446,11 +451,63 @@ public class ContestTimesPane extends JPanePlugin {
                         updateGUIperPermissions();
                     }
                 });
-                
+
             }
-            
+
         }
-        
+
+    }
+
+    /**
+     * This method initializes startAllButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getStartAllButton() {
+        if (startAllButton == null) {
+            startAllButton = new JButton();
+            startAllButton.setText("Start ALL");
+            startAllButton.setToolTipText("Start All sites' clocks");
+            startAllButton.setMnemonic(java.awt.event.KeyEvent.VK_A);
+            startAllButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    startAllClocks();
+                }
+            });
+        }
+        return startAllButton;
+    }
+
+    protected void startAllClocks() {
+        getController().startAllContestTimes();
+    }
+
+    /**
+     * This method initializes stopAllButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getStopAllButton() {
+        if (stopAllButton == null) {
+            stopAllButton = new JButton();
+            stopAllButton.setText("Stop ALL");
+            stopAllButton.setToolTipText("Stop all sites' clocks");
+            stopAllButton.setMnemonic(java.awt.event.KeyEvent.VK_P);
+            stopAllButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    stopAllContestTimes();
+                }
+            });
+        }
+        return stopAllButton;
+    }
+
+    protected void stopAllContestTimes() {
+        int result = FrameUtilities.yesNoCancelDialog("Are you sure you want to stop all contest clocks?", "Confirm stop all clocks");
+
+        if (result == JOptionPane.YES_OPTION) {
+            getController().stopAllContestTimes();
+        }
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
