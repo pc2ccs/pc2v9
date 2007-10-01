@@ -1285,9 +1285,13 @@ public class PacketHandler {
             Account [] accounts = (Account[]) PacketFactory.getObjectValue(packet, PacketFactory.ACCOUNT_ARRAY);
             if (accounts != null) {
                 for (Account account : accounts) {
-
-                    if ( (!isServer()) || (!isThisSite(account))) {
-                        contest.addAccount(account);
+                    
+                    if (isServer()){
+                        if (! isThisSite(account)) {
+                            contest.updateAccount(account);
+                        }
+                    } else {
+                        contest.updateAccount(account);
                     }
                 }
             }
@@ -1368,7 +1372,7 @@ public class PacketHandler {
         
         addContestTimesToModel(packet);
 
-        addSitesToModel(packet);
+        updateSitesToModel(packet);
 
         addRunsToModel(packet);
 
@@ -1380,6 +1384,25 @@ public class PacketHandler {
         
         addLoginsToModel (packet);
         
+    }
+
+    private void updateSitesToModel(Packet packet) {
+
+        try {
+            Site[] sites = (Site[]) PacketFactory.getObjectValue(packet, PacketFactory.SITE_LIST);
+            if (sites != null) {
+                for (Site site : sites) {
+                    if (contest.getSite(site.getSiteNumber()) == null){
+                        // Only add site if site does not exist on this server.
+                        contest.addSite(site);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // TODO: log handle exception
+            controller.getLog().log(Log.WARNING, "Exception logged ", e);
+        }
+
     }
 
     /**
@@ -1416,7 +1439,9 @@ public class PacketHandler {
         }
 
         controller.setSiteNumber(clientId.getSiteNumber());
-        
+
+        addSitesToModel(packet);
+
         // Load local settings
         controller.initializeServer();
         
@@ -1480,7 +1505,6 @@ public class PacketHandler {
 
         addContestTimesToModel(packet);
         
-        addSitesToModel(packet);
 
         addRunsToModel(packet);
 
@@ -1523,9 +1547,7 @@ public class PacketHandler {
             BalloonSettings[] balloonSettings = (BalloonSettings[]) PacketFactory.getObjectValue(packet, PacketFactory.BALLOON_SETTINGS_LIST);
             if (balloonSettings != null) {
                 for (BalloonSettings balloonSettings2 : balloonSettings) {
-                    if ( (!isServer()) ) {
-                        contest.addBalloonSettings(balloonSettings2);
-                    }
+                    contest.updateBalloonSettings(balloonSettings2);
                 }
             }
         } catch (Exception e) {
@@ -1546,11 +1568,14 @@ public class PacketHandler {
                 for (ClientSettings clientSettings2 : clientSettings) {
 
                     ClientId clientId = clientSettings2.getClientId();
-
-                    if (contest.getClientSettings(clientId) != null) {
-                        contest.updateClientSettings(clientSettings2);
+                    
+                    if (isServer()) {
+                        if (!isThisSite(clientId)) {
+                            // only add settings if not this site.
+                            contest.updateClientSettings(clientSettings2);
+                        }
                     } else {
-                        contest.addClientSettings(clientSettings2);
+                        contest.updateClientSettings(clientSettings2);
                     }
                 }
             }
@@ -1624,7 +1649,7 @@ public class PacketHandler {
     }
 
     /**
-     * Unpack and add a list of sites to the contest.
+     * Unconditionally add sites to model.
      * 
      * @param packet
      * @param contest
@@ -1634,12 +1659,13 @@ public class PacketHandler {
             Site[] sites = (Site[]) PacketFactory.getObjectValue(packet, PacketFactory.SITE_LIST);
             if (sites != null) {
                 for (Site site : sites) {
-                    contest.addSite(site);
+                    info("addSitesToModel " + site);
+                    contest.updateSite(site);
                 }
             }
         } catch (Exception e) {
             // TODO: log handle exception
-            controller.getLog().log(Log.WARNING,"Exception logged ", e);
+            controller.getLog().log(Log.WARNING, "Exception logged ", e);
         }
     }
 

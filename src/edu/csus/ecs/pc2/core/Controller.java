@@ -3,12 +3,10 @@ package edu.csus.ecs.pc2.core;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.MalformedURLException;
-import java.util.Arrays;
 import java.util.Properties;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.archive.PacketArchiver;
-import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -94,8 +92,6 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
  */
 // $HeadURL$
 public class Controller implements IController, ITwoToOne, IBtoA {
-
-    public static final String SVN_ID = "$Id$";
 
     /**
      * Contest data.
@@ -498,7 +494,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
     
     public void initializeServer() {
-
+        
         if (contest.getSites().length == 0) { 
 
             if (contest.getSiteNumber() == 0){
@@ -511,6 +507,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                 // No configuration on disk, initialize settings.
 
                 log.info("initializing controller with default settings");
+                
                 Site site = createFirstSite(contest.getSiteNumber(), "localhost", port);
                 contest.addSite(site);
 
@@ -1153,15 +1150,19 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
         try {
             Site []  sites = contest.getSites();
-            Arrays.sort(sites, new SiteComparatorBySiteNumber());
-            Site thisSite = sites[contest.getSiteNumber() - 1];
-            String portStr = thisSite.getConnectionInfo().getProperty(Site.PORT_KEY);
-            return Integer.parseInt(portStr);
+            for (Site site : sites) {
+                if (site.getSiteNumber() == inSiteNumber) {
+                    String portStr = site.getConnectionInfo().getProperty(Site.PORT_KEY);
+                    return Integer.parseInt(portStr);
+                }
+            }
 
         } catch (Exception e) {
             info("Exception logged ", e);
             throw new SecurityException("Unable to determine port for site " + inSiteNumber);
         }
+        
+        throw new SecurityException("Could not find site "+inSiteNumber+" in site list, there are "+contest.getSites().length+" sites.");
     }
 
     /**
@@ -1225,12 +1226,12 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             }
 
         } catch (Exception e) {
-            // TODO log this
-            info("Trouble showing frame ", e);
+            // TODO separate the showing main Frame and listening to port exception messages
+            info("Error showing frame or listening to port ", e);
             if (loginUI != null ){
                 FrameUtilities.regularCursor(loginUI);
             }
-            contest.loginDenied(clientId, null, e.getMessage());
+            contest.loginDenied(clientId, null, e.getMessage()+" (port "+port+")");
         }
     }
 
@@ -1346,14 +1347,11 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             setServerRemoteHostAndPort(parseArguments.getOptValue("--remoteServer"));
           
             try {
-                
                 setServerPort(parseArguments.getOptValue("--port"));
             } catch (NumberFormatException numException) {
                 savedTransportException = new TransportException("Unable to parse value after --port '"+parseArguments.getOptValue("--port")+"'");
                 log.log(Log.WARNING, "Exception logged ", numException);
             }
-       
-            
 
         } else {
             // Client contact server 
@@ -1564,7 +1562,6 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
     public void updateSite(Site site) {
 
-        // TODO seems to be circular, make finite.
         if (isServer ()){
             contest.changeSite(site);
             Packet packet = PacketFactory.createUpdateSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, site);
