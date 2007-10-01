@@ -3,9 +3,10 @@ package edu.csus.ecs.pc2.core.model;
 import edu.csus.ecs.pc2.core.list.ElementList;
 
 /**
- * List of Sites.
+ * Maintain list of Sites.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
@@ -13,21 +14,20 @@ public class SiteList extends ElementList {
 
     private static final long serialVersionUID = 7601290893650237279L;
 
-    public static final String SVN_ID = "$Id$";
-
-    // private SiteComparator siteComparator = new SiteComparator();
-
     /**
      * @param site
      *            {@link Site} to be added.
      */
     public void add(Site site) {
         super.add(site);
+    }
 
+    public void update(Site site) {
+        super.update(site);
     }
 
     /**
-     * Return list of Languages.
+     * Return list of Sites.
      * 
      * @return list of {@link Site}.
      */
