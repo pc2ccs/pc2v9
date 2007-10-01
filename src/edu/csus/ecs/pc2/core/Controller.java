@@ -893,13 +893,22 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         if (clientId.getClientType().equals(Type.SERVER)) {
 
             int newSiteNumber = getServerSiteNumber(password);
-
-            ClientId newId = new ClientId(newSiteNumber, ClientType.Type.SERVER, 0);
-            if (contest.isLocalLoggedIn(newId)) {
-                info("Note site " + clientId + " site " + newSiteNumber + " already logged in, ignoring ");
+            
+            if (newSiteNumber == clientId.getSiteNumber()) {
+                // matching password, ok.
+                
+                if (contest.isLocalLoggedIn(clientId)) {
+                    info("Note site " + clientId + " site " + newSiteNumber + " already logged in, logging them in again ");
+                    contest.removeLogin(clientId);
+                }
+                
+                contest.addLocalLogin(clientId, connectionHandlerID);    
+            } else {
+                
+                throw new SecurityException("Failed attempt to login");
+                
             }
-            contest.addLogin(newId, connectionHandlerID);
-
+            
         } else if (contest.isValidLoginAndPassword(clientId, password)) {
             
             if (contest.isLocalLoggedIn(clientId)){
@@ -907,10 +916,9 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                 // Already logged in, log them off
                 ConnectionHandlerID connectionHandlerID2 = contest.getConnectionHandleID(clientId);
                 log.info("login - "+clientId+" already logged in, will logoff client at connection "+connectionHandlerID2);
-                logoffUser(clientId);
-                
+                contest.removeLogin(clientId);
             }
-            contest.addLogin(clientId, connectionHandlerID);
+            contest.addLocalLogin(clientId, connectionHandlerID);
             info("LOGIN logged in " + clientId + " at "+connectionHandlerID);
 
         } else {
@@ -1694,8 +1702,10 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         try {
             Packet logoffPacket = PacketFactory.createLogoff(contest.getClientId(), PacketFactory.ALL_SERVERS, clientId);
             sendToAdministrators(logoffPacket);
-            sendToJudges(logoffPacket);
-            sendToServers(logoffPacket);
+            if (! isServer(clientId)){
+                // Each server tracks its own list of server logins.
+                sendToServers(logoffPacket);
+            }
         } catch (Exception e) {
             log.log(Log.SEVERE, "Exception removeLogin ", e);
         }

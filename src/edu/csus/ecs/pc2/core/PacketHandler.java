@@ -175,12 +175,12 @@ public class PacketHandler {
         } else if (packetType.equals(Type.DROPPED_CONNECTION)) {
             ConnectionHandlerID inConnectionHandlerID = (ConnectionHandlerID) PacketFactory.getObjectValue(packet, PacketFactory.CONNECTION_HANDLE_ID);
             if (isServer()) {
-                controller.sendToServers(packet);
                 if (isThisSite(packet.getSourceId())){
                     controller.sendToServers(packet);
                 }
+                sendToJudgesAndOthers (packet, false);
             } else {
-                contest.connectionEstablished(inConnectionHandlerID);
+                contest.connectionDropped(inConnectionHandlerID);
             }
 
         } else if (packetType.equals(Type.RUN_AVAILABLE)) {
@@ -321,7 +321,7 @@ public class PacketHandler {
                 }
 
                 // Add the other site as a local login
-                contest.addLogin(fromId, connectionHandlerID);
+                contest.addLocalLogin(fromId, connectionHandlerID);
                 
                 controller.sendToClient(createContestSettingsPacket(packet.getSourceId()));
             }
@@ -333,7 +333,7 @@ public class PacketHandler {
             }
 
             // Add the other site as a local login
-            contest.addLogin(fromId, connectionHandlerID);
+            contest.addLocalLogin(fromId, connectionHandlerID);
 
             loadSettingsFromRemoteServer(packet, connectionHandlerID);
             
@@ -502,6 +502,11 @@ public class PacketHandler {
         }
     }
     
+    /**
+     * Login from a remote server.
+     * 
+     * @param packet
+     */
     private void loginClient(Packet packet) {
 
         if (contest.isLoggedIn()) {
@@ -509,14 +514,14 @@ public class PacketHandler {
             ConnectionHandlerID connectionHandlerID = (ConnectionHandlerID) PacketFactory.getObjectValue(packet, PacketFactory.CONNECTION_HANDLE_ID);
 
             if (isServer()) {
-                info("LOGIN remote "+whoLoggedIn);
-                contest.addLogin(whoLoggedIn, connectionHandlerID);
+                info("LOGIN from other site "+whoLoggedIn);
+                contest.addRemoteLogin(whoLoggedIn, connectionHandlerID);
                 sendToJudgesAndOthers(packet, false);
             } else {
                 contest.addLogin(whoLoggedIn, connectionHandlerID);
             }
         } else {
-            info("Note: got a LOGIN packet before LOGIN_SUCCESS " + packet);
+            info("Note: got a LOGIN packet before this site was logged in " + packet);
         }
 
     }
@@ -528,10 +533,20 @@ public class PacketHandler {
 
             if (contest.isLocalLoggedIn(whoLoggedOff)) {
                 controller.logoffUser(whoLoggedOff);
-            } else {
-                // Logoff from other site
-                contest.removeLogin(whoLoggedOff);
+                // Only send to servers if this clientId is NOT a server
+                
+                // TODO look at this logic, see if isServer(whoLoggedOff) is ok to use.
                 sendToJudgesAndOthers(packet, false);
+//                sendToJudgesAndOthers(packet, !isServer(whoLoggedOff));
+            } else if (!isServer(whoLoggedOff)) {
+                // if not a sever log in, forward packet to other server
+                controller.sendToRemoteServer(whoLoggedOff.getSiteNumber(), packet);
+            } else {
+                // This is a server logoff from another server
+                if (contest.isRemoteLoggedIn(whoLoggedOff)) {
+                    contest.removeRemoteLogin(whoLoggedOff);
+                    sendToJudgesAndOthers(packet, false);
+                }
             }
         } else {
             contest.removeLogin(whoLoggedOff);
@@ -1353,7 +1368,7 @@ public class PacketHandler {
                         
                         // TODO someday soon load logins with their connectionIds
                         ConnectionHandlerID fakeId = new ConnectionHandlerID("Fake-Site" + clientId.getSiteNumber());
-                        contest.addLogin(clientId, fakeId);
+                        contest.addRemoteLogin(clientId, fakeId);
                     }
                 }
             }
