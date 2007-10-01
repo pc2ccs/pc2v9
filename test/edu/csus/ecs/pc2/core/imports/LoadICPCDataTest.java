@@ -25,7 +25,7 @@ public class LoadICPCDataTest extends TestCase {
             // TODO, try to find this path in the environment
             dir = new File("projects" + File.separator +"pc2v9" + File.separator + loadDir);
             if (dir.exists()) {
-                loadDir=dir.toString();
+                loadDir=dir.toString() + File.separator;
             } else {
                 System.err.println("could not find " + loadDir);
             }
