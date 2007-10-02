@@ -819,7 +819,33 @@ public class PacketHandler {
                 }
             }
         }
+        
+        ClientSettings clientSettings = (ClientSettings)PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_SETTINGS);
+        if (clientSettings != null) {
+            contest.addClientSettings(clientSettings);
+            
+            ClientId toId = clientSettings.getClientId();
+            if (isJudge(toId)) {
+                // judge settings update send to judges and admins with auto judge settings (too)
+                try {
+                    // Only send to other servers if this client is at this site
+                    // otherwise just send to judges and admins
+                    sendToJudgesAndOthers(packet, isThisSite(toId));  
+                } catch (Exception e) {
+                    controller.getLog().log(Log.WARNING, "Exception logged ", e);
+                }
+            }
 
+            if (contest.isLocalLoggedIn(clientSettings.getClientId())) {
+                try {
+                    Packet newSettingsPacket = PacketFactory.clonePacket(contest.getClientId(), toId, packet);
+                    controller.sendToClient(newSettingsPacket);
+                } catch (Exception e) {
+                    controller.getLog().log(Log.WARNING, "Exception logged ", e);
+                }
+            }
+        }
+        
         if (isServer()) {
             
             controller.writeConfigToDisk();
@@ -922,8 +948,21 @@ public class PacketHandler {
         if (clientSettings != null){
             contest.updateClientSettings(clientSettings);
             if (isServer()) {
+
+                ClientId toId = clientSettings.getClientId();
+                if (isJudge(toId)) {
+                    // judge settings update send to judges and admins with auto judge settings (too)
+                    try {
+                        // Only send to other servers if this client is at this site
+                        // otherwise just send to judges and admins
+                        sendToJudgesAndOthers(packet, isThisSite(toId));  
+                    } catch (Exception e) {
+                        controller.getLog().log(Log.WARNING, "Exception logged ", e);
+                    }
+                }
+                
                 if (contest.isLocalLoggedIn(clientSettings.getClientId())) {
-                    Packet updatePacket = PacketFactory.clonePacket(contest.getClientId(), clientSettings.getClientId(), packet);
+                    Packet updatePacket = PacketFactory.clonePacket(contest.getClientId(), toId, packet);
                     controller.sendToClient(updatePacket);
                 }
             }
@@ -1434,6 +1473,8 @@ public class PacketHandler {
         
         addLoginsToModel (packet);
         
+        addClientSettingsToModel (packet);
+        
     }
 
     private void updateSitesToModel(Packet packet) {
@@ -1867,6 +1908,10 @@ public class PacketHandler {
      */
     private boolean isServer(ClientId id) {
         return id != null && id.getClientType().equals(ClientType.Type.SERVER);
+    }
+    
+    private boolean isJudge(ClientId id) {
+        return id != null && id.getClientType().equals(ClientType.Type.JUDGE);
     }
     
     /**
