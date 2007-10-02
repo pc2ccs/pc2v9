@@ -1,5 +1,7 @@
 package edu.csus.ecs.pc2.ui;
 
+import java.io.Serializable;
+
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.model.IContest;
 
@@ -11,7 +13,7 @@ import edu.csus.ecs.pc2.core.model.IContest;
  */
 
 // $HeadURL$
-public interface UIPlugin {
+public interface UIPlugin extends Serializable {
 
     /**
      * Provide model and controller information.

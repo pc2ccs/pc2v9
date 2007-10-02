@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core.model;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -19,7 +20,7 @@ import edu.csus.ecs.pc2.core.model.Run.RunStates;
  */
 
 // $HeadURL$
-public class Filter {
+public class Filter implements Serializable {
 
     // TODO filter for elapsed time
     // TODO filter for site
