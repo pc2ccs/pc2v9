@@ -206,6 +206,8 @@ public class ContestTimesPane extends JPanePlugin {
         // getContestTimeRefreshButton();
         getStartClockButton().setVisible(isAllowed(Permission.Type.START_CONTEST_CLOCK));
         getStopClockButton().setVisible(isAllowed(Permission.Type.STOP_CONTEST_CLOCK));
+        getStartAllButton().setVisible(isAllowed(Permission.Type.START_CONTEST_CLOCK));
+        getStopAllButton().setVisible(isAllowed(Permission.Type.STOP_CONTEST_CLOCK));
     }
 
     public void setContestAndController(IContest inContest, IController inController) {
@@ -352,6 +354,7 @@ public class ContestTimesPane extends JPanePlugin {
             ElementId contestTimeElementId = (ElementId) contestTimeListBox.getKeys()[i];
             ContestTime contestTime = getContest().getContestTime(contestTimeElementId);
             if (contestTime != null) {
+                showMessage("START site "+contestTime.getSiteNumber());
                 getController().startContest(contestTime.getSiteNumber());
             }
         }
