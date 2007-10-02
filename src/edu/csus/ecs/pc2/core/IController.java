@@ -289,5 +289,7 @@ public interface IController {
      * Load contest settings from disk and initialize Contest. 
      */
     void initializeServer();
+
+    void addNewClientSettings(ClientSettings newClientSettings);
     
 }

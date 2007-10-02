@@ -1815,9 +1815,13 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         }
     }
 
+    public void addNewClientSettings(ClientSettings clientSettings) {
+        Packet addClientSettingsPacket = PacketFactory.createAddSetting(contest.getClientId(), getServerClientId(), clientSettings);
+        sendToLocalServer(addClientSettingsPacket);
+    }
     public void updateClientSettings(ClientSettings clientSettings) {
-        Packet addAccountPacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), clientSettings);
-        sendToLocalServer(addAccountPacket);
+        Packet updateClientSettingsPacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), clientSettings);
+        sendToLocalServer(updateClientSettingsPacket);
     }
 
     public void updateContestInformation(ContestInformation contestInformation) {

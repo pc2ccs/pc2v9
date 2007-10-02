@@ -1504,6 +1504,13 @@ public final class PacketFactory {
         return createPacket(PacketType.Type.ADD_SETTING, source, destination, prop);
     }
     
+    public static Packet createAddSetting(ClientId source, ClientId destination, ClientSettings clientSettings) {
+        Properties prop = new Properties();
+        prop.put(CLIENT_SETTINGS, clientSettings);
+        Packet packet = new Packet(Type.ADD_SETTING, source, destination, prop);
+        return packet;
+    }
+    
     public static Packet createRunJudgmentUpdate(ClientId source, ClientId destination, Run run, ClientId whoJudgedId) {
         Properties prop = new Properties();
         prop.put(CLIENT_ID, whoJudgedId);
