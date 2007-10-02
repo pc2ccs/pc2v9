@@ -1,8 +1,11 @@
 package edu.csus.ecs.pc2.ui.server;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
@@ -15,9 +18,9 @@ import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
+import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.core.model.ILoginListener;
-import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.ISiteListener;
 import edu.csus.ecs.pc2.core.model.LoginEvent;
@@ -33,9 +36,6 @@ import edu.csus.ecs.pc2.ui.OptionsPanel;
 import edu.csus.ecs.pc2.ui.ReportPane;
 import edu.csus.ecs.pc2.ui.SitesPanel;
 import edu.csus.ecs.pc2.ui.UIPlugin;
-import javax.swing.JLabel;
-import javax.swing.JButton;
-import java.awt.FlowLayout;
 
 /**
  * GUI for Server.
@@ -85,7 +85,6 @@ public class ServerView extends JFrame implements UIPlugin {
     }
 
     private void logDebugMessage(String message) {
-        System.err.println(message);
         log.log(Log.DEBUG, message);
     }
 
@@ -129,15 +128,15 @@ public class ServerView extends JFrame implements UIPlugin {
     private class RunListenerImplementation implements IRunListener {
 
         public void runAdded(RunEvent event) {
-            logDebugMessage(event.getRun() + " ADDED ");
+            logDebugMessage("Run Event " + event.getRun() + " ADDED ");
         }
 
         public void runChanged(RunEvent event) {
-            logDebugMessage(event.getRun() + " CHANGED ");
+            logDebugMessage("Run Event " + event.getRun() + " CHANGED ");
         }
 
         public void runRemoved(RunEvent event) {
-            logDebugMessage(event.getRun() + " REMOVED ");
+            logDebugMessage("Run Event " + event.getRun() + " REMOVED ");
         }
     }
 
@@ -157,20 +156,20 @@ public class ServerView extends JFrame implements UIPlugin {
     public class LoginListenerImplementation implements ILoginListener {
 
         public void loginAdded(LoginEvent event) {
-            logDebugMessage("Login " + event.getAction() + " " + event.getClientId());
+            logDebugMessage("Login Event " + event.getAction() + " " + event.getClientId());
         }
 
         public void loginRemoved(LoginEvent event) {
-            logDebugMessage("Login " + event.getAction() + " " + event.getClientId());
+            logDebugMessage("Login Event " + event.getAction() + " " + event.getClientId());
         }
 
         public void loginDenied(LoginEvent event) {
-            logDebugMessage("Login " + event.getAction() + " " + event.getClientId());
+            logDebugMessage("Login Event " + event.getAction() + " " + event.getClientId());
         }
     }
 
     /**
-     * Implementation for a Account Listener.
+     * Implementation for a Account Event Listener.
      * 
      * @author pc2@ecs.csus.edu
      * 
@@ -178,12 +177,12 @@ public class ServerView extends JFrame implements UIPlugin {
     public class AccountListenerImplementation implements IAccountListener {
 
         public void accountAdded(AccountEvent accountEvent) {
-            logDebugMessage("Account " + accountEvent.getAction() + " " + accountText(accountEvent.getAccount()));
+            logDebugMessage("Account Event Event " + accountEvent.getAction() + " " + accountText(accountEvent.getAccount()));
 
         }
 
         public void accountModified(AccountEvent accountEvent) {
-            logDebugMessage("Account " + accountEvent.getAction() + " " + accountText(accountEvent.getAccount()));
+            logDebugMessage("Account Event Event " + accountEvent.getAction() + " " + accountText(accountEvent.getAccount()));
 
         }
     }
@@ -197,23 +196,23 @@ public class ServerView extends JFrame implements UIPlugin {
     public class SiteListenerImplementation implements ISiteListener {
 
         public void siteAdded(SiteEvent event) {
-            logDebugMessage("Site " + event.getAction() + " " + event.getSite());
+            logDebugMessage("Site Event Event " + event.getAction() + " " + event.getSite());
         }
 
         public void siteRemoved(SiteEvent event) {
-            logDebugMessage("Site " + event.getAction() + " " + event.getSite());
+            logDebugMessage("Site Event " + event.getAction() + " " + event.getSite());
         }
 
         public void siteLoggedOn(SiteEvent event) {
-            logDebugMessage("Site " + event.getAction() + " " + event.getSite());
+            logDebugMessage("Site Event " + event.getAction() + " " + event.getSite());
         }
 
         public void siteLoggedOff(SiteEvent event) {
-            logDebugMessage("Site " + event.getAction() + " " + event.getSite());
+            logDebugMessage("Site Event " + event.getAction() + " " + event.getSite());
         }
 
         public void siteChanged(SiteEvent event) {
-            logDebugMessage("Site " + event.getAction() + " " + event.getSite());
+            logDebugMessage("Site Event " + event.getAction() + " " + event.getSite());
         }
     }
 
