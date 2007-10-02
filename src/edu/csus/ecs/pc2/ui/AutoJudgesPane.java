@@ -8,8 +8,13 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import com.ibm.webrunner.j2mclb.util.Comparator;
+import com.ibm.webrunner.j2mclb.util.HeapSorter;
+import com.ibm.webrunner.j2mclb.util.NumericStringComparator;
+
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.list.AccountNameComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -107,16 +112,32 @@ public class AutoJudgesPane extends JPanePlugin {
     protected void reloadAutoJudgeList() {
 
         getAutoJudgeListBox().removeAllRows();
-        
-        for (Account account : getContest().getAccounts(ClientType.Type.JUDGE)) {
-            updateAutoJudgeRow(account.getClientId());
-        }
-        
-        for (ClientSettings clientSettings : getContest().getClientSettingsList()) {
-            updateAutoJudgeRow(clientSettings);
-        }
-        
 
+        for (Account account : getContest().getAccounts(ClientType.Type.JUDGE)) {
+            
+            ClientSettings clientSettings = getContest().getClientSettings(account.getClientId());
+            if (clientSettings != null) {
+                updateAutoJudgeRow(clientSettings);
+
+            } else {
+                updateAutoJudgeRow(account.getClientId());
+            }
+        }
+    }
+    
+    /**
+     * MCLB account name comparator.
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    
+    protected class AccountNameComparatorMCLB implements Comparator {
+
+        private AccountNameComparator accountNameComparator = new AccountNameComparator();
+
+        public int compare(Object arg0, Object arg1) {
+            return accountNameComparator.compare((String) arg0, (String) arg1);
+        }
     }
 
     /**
@@ -129,8 +150,29 @@ public class AutoJudgesPane extends JPanePlugin {
             autoJudgeListBox = new MCLB();
 
             autoJudgeListBox.add(getStatusPanel(), java.awt.BorderLayout.NORTH);
-            Object[] cols = { "Judge", "Site", "On", "Problems" };
+            Object[] cols = { "Site", "Judge", "On", "Problems" };
             autoJudgeListBox.addColumns(cols);
+            
+            // Sorters
+            HeapSorter sorter = new HeapSorter();
+            HeapSorter numericStringSorter = new HeapSorter();
+            numericStringSorter.setComparator(new NumericStringComparator());
+            HeapSorter accountNameSorter = new HeapSorter();
+            accountNameSorter.setComparator(new AccountNameComparatorMCLB());
+
+            // Site
+            autoJudgeListBox.setColumnSorter(0, numericStringSorter, 1);
+
+            // Judge name
+            autoJudgeListBox.setColumnSorter(1, accountNameSorter, 2);
+
+            // On (Auto Judge enabled)
+            autoJudgeListBox.setColumnSorter(2, sorter, 3);
+
+            // Problem List
+            autoJudgeListBox.setColumnSorter(3, sorter, 4);
+
+            cols = null;
         }
         return autoJudgeListBox;
     }
@@ -207,20 +249,22 @@ public class AutoJudgesPane extends JPanePlugin {
 
     private Object[] buildAutoJudgeRow(ClientSettings clientSettings) {
 
-        // Object[] cols = { "Judge", "Site", "Enabled", "Problems" };
+//        Object[] cols = { "Site", "Judge", "On", "Problems" };
+
 
         try {
             int cols = autoJudgeListBox.getColumnCount();
             Object[] s = new String[cols];
 
-            s[0] = clientSettings.getClientId().getName();
-            s[1] = clientSettings.getClientId().getSiteNumber();
+            s[0] = new Integer(clientSettings.getClientId().getSiteNumber()).toString();
+            s[1] = clientSettings.getClientId().getName();
             s[2] = Utilities.yesNoString(clientSettings.isAutoJudging());
             s[3] = getProblemlist(clientSettings.getAutoJudgeFilter());
-
+            
             return s;
         } catch (Exception exception) {
             StaticLog.getLog().log(Log.INFO, "Exception in buildRunRow()", exception);
+            exception.printStackTrace(System.err); // TODO remove line
         }
         return null;
     }
@@ -252,7 +296,7 @@ public class AutoJudgesPane extends JPanePlugin {
             }
         }
 
-        if (stringBuffer.length() > 0) {
+        if (stringBuffer.length() > 3) {
             // stringBuffer.length() - 2 used to strip off trailing ", "
             return new String(stringBuffer).substring(0, stringBuffer.length() - 2);
         } else {
@@ -289,6 +333,10 @@ public class AutoJudgesPane extends JPanePlugin {
         try {
             ClientId clientId = (ClientId) autoJudgeListBox.getKeys()[selectedIndex];
             ClientSettings clientSettings = getContest().getClientSettings(clientId);
+            
+            if (clientSettings == null) {
+                clientSettings = new ClientSettings(clientId);
+            }
 
             autoJudgeSettingsPane.setClientSettings(clientSettings);
             autoJudgeSettingsPane.setVisible(true);

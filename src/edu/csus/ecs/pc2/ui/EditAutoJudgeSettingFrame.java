@@ -72,6 +72,7 @@ public class EditAutoJudgeSettingFrame extends JFrame implements UIPlugin {
 
         setTitle("Edit Auto Judge Settings ");
         getEditAutoJudgePane().setClientSettings(clientSettings);
+        getEditAutoJudgePane().setVisible(true);
     }
 
     /**
