@@ -8,7 +8,7 @@ import java.util.Vector;
  * Settings specific for each client.
  * 
  * @author pc2@ecs.csus.edu
- * 
+ * @version $Id$
  */
 
 // $HeadURL$
@@ -19,13 +19,37 @@ public class ClientSettings implements IElementObject {
      */
     private static final long serialVersionUID = 2225749134503510088L;
 
-    public static final String SVN_ID = "$Id$";
-
     private ClientId clientId;
 
     private ElementId elementId;
 
     private Properties properties = new Properties();
+    
+    /**
+     * Is this client auto judging, auto judging enabled ?.
+     */
+    private boolean autoJudging = false;
+    
+    /**
+     * List of problems which judge can autojudge.
+     */
+    private Filter autoJudgeFilter = new Filter();
+
+    public Filter getAutoJudgeFilter() {
+        return autoJudgeFilter;
+    }
+
+    public void setAutoJudgeFilter(Filter autoJudgeFilter) {
+        this.autoJudgeFilter = autoJudgeFilter;
+    }
+
+    public boolean isAutoJudging() {
+        return autoJudging;
+    }
+
+    public void setAutoJudging(boolean autoJudging) {
+        this.autoJudging = autoJudging;
+    }
 
     public ClientSettings() {
         elementId = new ElementId("ClientS");
