@@ -534,15 +534,24 @@ public class PacketHandler {
             ConnectionHandlerID connectionHandlerID = (ConnectionHandlerID) PacketFactory.getObjectValue(packet, PacketFactory.CONNECTION_HANDLE_ID);
             
             if (isServer()) {
-                info("LOGIN from other site "+whoLoggedIn);
-                
-                if (! contest.isLocalLoggedIn(whoLoggedIn)) {
-                    contest.addRemoteLogin(whoLoggedIn, connectionHandlerID);
-                    sendToJudgesAndOthers(packet, false);
+                info("LOGIN from other site " + whoLoggedIn);
+
+                if (!contest.isLocalLoggedIn(whoLoggedIn)) {
+                    // if client not already logged in 
+                    
+                    boolean isThisServer = isServer(whoLoggedIn) && isThisSite(whoLoggedIn);
+
+                    if (!isThisServer) {
+                        // if client is not this server, add to remote list
+                        contest.addRemoteLogin(whoLoggedIn, connectionHandlerID);
+                        sendToJudgesAndOthers(packet, false);
+                    } else {
+                        controller.getLog().log(Log.DEBUG, "LOGIN packet, ignored LOGIN of this server (" + whoLoggedIn.getSiteNumber() + " from other server " + packet.getSourceId());
+                    }
                 } else {
-                    controller.getLog().log(Log.DEBUG, "LOGIN packet, server site "+whoLoggedIn+" logged onto "+packet.getSourceId()+", already logged in on this site");
+                    controller.getLog().log(Log.DEBUG, "LOGIN packet, server site " + whoLoggedIn + " logged onto " + packet.getSourceId() + ", already logged in on this site");
                 }
-                
+
             } else {
                 contest.addLogin(whoLoggedIn, connectionHandlerID);
             }
