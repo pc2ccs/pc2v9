@@ -1796,7 +1796,14 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         
         if (saveCofigurationToDisk){
             loadedConfiguration = configurationIO.loadFromDisk(siteNum, contest, getLog());
-            contest.initializeSubmissions(1);
+            contest.initializeSubmissions(siteNum);
+            // Initialize contest time if necessary
+            ContestTime contestTime = contest.getContestTime(siteNum);
+            if (contestTime == null){
+                contestTime = new ContestTime(siteNum);
+                contest.addContestTime(contestTime);
+            }
+            
         }
 
         return loadedConfiguration;

@@ -200,14 +200,18 @@ public class Contest implements IContest {
             siteList.add(site);
         }
 
-        ContestTime contestTime = new ContestTime();
-        contestTime.setSiteNumber(1);
-        addContestTime(contestTime);
+        if (getContestTime(1) == null){
+            ContestTime contestTime = new ContestTime();
+            contestTime.setSiteNumber(1);
+            addContestTime(contestTime);
+        }
 
         generateNewAccounts(ClientType.Type.SERVER.toString(), 1, true);
 
         String[] judgementNames = { "Yes", "No - Compilation Error", "No - Run-time Error", "No - Time-limit Exceeded", "No - Wrong Answer", "No - Excessive Output", "No - Output Format Error",
                 "No - Other - Contact Staff" };
+        
+        // TODO load judgements from reject.ini
 
         for (String judgementName : judgementNames) {
             Judgement judgement = new Judgement(judgementName);
