@@ -14,6 +14,7 @@ import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.ui.AccountsPane;
+import edu.csus.ecs.pc2.ui.AutoJudgesPane;
 import edu.csus.ecs.pc2.ui.BalloonSettingsPane;
 import edu.csus.ecs.pc2.ui.ClarificationsPane;
 import edu.csus.ecs.pc2.ui.ConnectionsPane;
@@ -165,6 +166,9 @@ public class AdministratorView extends JFrame implements UIPlugin {
 
                 BalloonSettingsPane balloonSettingsPane = new BalloonSettingsPane();
                 addUIPlugin(getMainTabbedPanel(), "Notifications", balloonSettingsPane);
+              
+                AutoJudgesPane autoJudgesPane = new AutoJudgesPane();
+                addUIPlugin(getMainTabbedPanel(), "Auto Judge", autoJudgesPane);
                 
                 setTitle("PC^2 " + contest.getTitle() + " Build " + new VersionInfo().getBuildNumber());
                 setVisible(true);
