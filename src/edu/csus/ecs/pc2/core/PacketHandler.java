@@ -274,7 +274,9 @@ public class PacketHandler {
             ClientId whoCheckedOut = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
             contest.addRun(run, runFiles, whoCheckedOut);
             
-            sendToJudgesAndOthers( packet, false);
+            if (isServer()){
+                sendToJudgesAndOthers( packet, false);
+            }
 
         } else if (packetType.equals(Type.CLARIFICATION_REQUEST)) {
             requestClarification(packet);
@@ -694,33 +696,47 @@ public class PacketHandler {
      * @param sourceServerId
      */
     private void startContest(Packet packet) {
-        
+
         ClientId who = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
         Integer siteNumber = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
-        
-        if (isThisSite(siteNumber)){
+        if (packet.getType().equals(Type.START_ALL_CLOCKS)) {
+            siteNumber = new Integer(contest.getSiteNumber());
+        }
+
+        if (isThisSite(siteNumber)) {
             contest.startContest(siteNumber);
             ContestTime updatedContestTime = contest.getContestTime(siteNumber);
-            controller.getLog().info("Clock STARTED by "+who+" elapsed = "+updatedContestTime.getElapsedTimeStr());
+            controller.getLog().info("Clock STARTED by " + who + " elapsed = " + updatedContestTime.getElapsedTimeStr());
             Packet startContestPacket = PacketFactory.createContestStarted(contest.getClientId(), PacketFactory.ALL_SERVERS, updatedContestTime.getSiteNumber(), who);
             controller.sendToTeams(startContestPacket);
             sendToJudgesAndOthers(startContestPacket, true);
-            
+
         } else {
-            controller.sendToRemoteServer(siteNumber, packet);
+            if (packet.getType().equals(Type.START_ALL_CLOCKS)) {
+                ClientId[] clientIds = contest.getLocalLoggedInClients(ClientType.Type.SERVER);
+                for (ClientId clientId : clientIds) {
+                    Packet startContestPacket = PacketFactory.createStartContestClock(contest.getClientId(), PacketFactory.ALL_SERVERS, siteNumber, packet.getSourceId());
+                    controller.sendToRemoteServer(clientId.getSiteNumber(), startContestPacket);
+                }
+            } else {
+                controller.sendToRemoteServer(siteNumber, packet);
+            }
         }
-        
-        if (isServer()){
+
+        if (isServer()) {
             controller.writeConfigToDisk();
         }
     }
 
     /**
-     *  This stops the contest and sends notification to other servers/clients.
+     * This stops the contest and sends notification to other servers/clients.
      */
     private void stopContest(Packet packet) {
         ClientId who = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
         Integer siteNumber = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
+        if (packet.getType().equals(Type.STOP_ALL_CLOCKS)) {
+            siteNumber = new Integer(contest.getSiteNumber());
+        }
         
         if (isThisSite(siteNumber)){
             contest.stopContest(siteNumber);
@@ -731,7 +747,16 @@ public class PacketHandler {
             sendToJudgesAndOthers(stopContestPacket, true);
             
         } else {
-            controller.sendToRemoteServer(siteNumber, packet);
+
+            if (packet.getType().equals(Type.STOP_ALL_CLOCKS)) {
+                ClientId[] clientIds = contest.getLocalLoggedInClients(ClientType.Type.SERVER);
+                for (ClientId clientId : clientIds) {
+                    Packet startContestPacket = PacketFactory.createStopContestClock(contest.getClientId(), PacketFactory.ALL_SERVERS, siteNumber, packet.getSourceId());
+                    controller.sendToRemoteServer(clientId.getSiteNumber(), startContestPacket);
+                }
+            } else {
+                controller.sendToRemoteServer(siteNumber, packet);
+            }
         }
         
         if (isServer()){
