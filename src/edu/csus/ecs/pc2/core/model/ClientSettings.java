@@ -58,6 +58,7 @@ public class ClientSettings implements IElementObject {
     public ClientSettings(ClientId clientId) {
         this.clientId = clientId;
         elementId = new ElementId("ClientS" + clientId);
+        setSiteNumber(clientId.getSiteNumber());
     }
 
     public ElementId getElementId() {
