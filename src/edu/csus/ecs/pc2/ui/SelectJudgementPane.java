@@ -390,10 +390,15 @@ public class SelectJudgementPane extends JPanePlugin {
             cancelButton.setText("Close");
         }
 
-        // Can only run/extract if there are run files...
+        // Can only run or extract if there are run files...
         getExecuteButton().setEnabled(runFiles != null);
         getExecuteButton().setEnabled(runFiles != null);
         getViewSourceButton().setEnabled(runFiles != null);
+        
+        if (runFiles == null){
+            log.log(Log.WARNING, "No run files in requested run "+run);
+            showMessage("No Run Files in requested run");
+        }
 
         updateButton.setEnabled(editedText);
     }
