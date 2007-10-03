@@ -536,7 +536,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                 contest.addSite(site);
             }
             
-            contest.initializeStartupData();
+            contest.initializeStartupData(contest.getSiteNumber());
             
             contest.initializeSubmissions(contest.getSiteNumber());
             
