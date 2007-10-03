@@ -36,11 +36,10 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
  * Dumps lots of internal lists and such.
  * 
  * @author pc2@ecs.csus.edu
- * 
+ * @version $Id$ 
  */
 
 // $HeadURL$
-// $Id$
 public class InternalDumpReport implements IReport {
 
     private IContest contest;
@@ -52,10 +51,12 @@ public class InternalDumpReport implements IReport {
     private Filter accountFilter = new Filter();
 
     /**
-     * 
+     * Comparor for ClientSettings, by site, client type then client id.
      * @author pc2@ecs.csus.edu
-     *
+     * @version $Id$
      */
+    
+    // TOOD make this its own java file
     private class ClientSettingsComparator implements Comparator<ClientSettings> {
 
         /**
@@ -91,7 +92,7 @@ public class InternalDumpReport implements IReport {
         ClientSettings [] clientSettingsArray = contest.getClientSettingsList();
         
         printWriter.println();
-        printWriter.println("-- Client Settigs --");
+        printWriter.println("-- Client Settings --");
         
         Arrays.sort(clientSettingsArray, new ClientSettingsComparator());
         
@@ -216,6 +217,9 @@ public class InternalDumpReport implements IReport {
 
             printWriter.println("  Site " + contestTime.getSiteNumber() + " " + state + " " + contestTime.getElapsedTimeStr() + " " + contestTime.getRemainingTimeStr() + " "
                     + contestTime.getContestLengthStr());
+            
+            printWriter.println("         past end " + contestTime.isPastEndOfContest() + ", halt at end " + contestTime.isHaltContestAtTimeZero() + ", offset " + contestTime.getLocalClockOffset()
+                    + ", id=" + contestTime.getElementId() + " site " + contestTime.getElementId().getSiteNumber());
         }
         
         // Contest Information 
