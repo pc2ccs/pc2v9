@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.util.Arrays;
 
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -10,6 +11,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestTime;
@@ -192,6 +194,7 @@ public class ContestClockPane extends JPanePlugin {
     private void populateGUI() {
 
         Site[] sites = getContest().getSites();
+        Arrays.sort(sites,new SiteComparatorBySiteNumber());
 
         getSiteSelectComboBox().removeAllItems();
 
