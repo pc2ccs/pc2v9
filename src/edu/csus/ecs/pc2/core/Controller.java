@@ -543,7 +543,9 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             log.info("initialized controller Site "+contest.getSiteNumber());
             writeConfigToDisk();
         } else {
-            contest.initializeSubmissions(contest.getSiteNumber());
+            if (saveCofigurationToDisk){
+                contest.initializeSubmissions(contest.getSiteNumber());
+            }
             log.info("Loaded configuration from disk");
         }
     }

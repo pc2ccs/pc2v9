@@ -312,6 +312,8 @@ public class PacketHandler {
             
             loadSettingsFromRemoteServer(packet, connectionHandlerID);
             info(" handlePacket SERVER_SETTINGS - from another site -- all settings loaded " + packet);
+            
+            sendToJudgesAndOthers(packet, false);
 
         } else {
 
@@ -1345,7 +1347,7 @@ public class PacketHandler {
      * 
      * @param packet
      */
-    private void addRunsToModel(Packet packet) {
+    private void addAllRunsToModel(Packet packet) {
 
         try {
             Run[] runs = (Run[]) PacketFactory.getObjectValue(packet, PacketFactory.RUN_LIST);
@@ -1362,13 +1364,14 @@ public class PacketHandler {
             controller.getLog().log(Log.WARNING,"Exception logged ", e);
         }
     }
-
+    
+   
     /**
      * Unpack and add list of clarifications to contest.
      * 
      * @param packet
      */
-    private void addClarificationsToModel(Packet packet) {
+    private void addAllClarificationsToModel(Packet packet) {
 
         try {
             Clarification[] clarifications = (Clarification[]) PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION_LIST);
@@ -1392,7 +1395,7 @@ public class PacketHandler {
      * 
      * @param packet
      */
-    private void addAccountsToModel (Packet packet) {
+    private void addAllAccountsToModel (Packet packet) {
 
         try {
             
@@ -1421,7 +1424,7 @@ public class PacketHandler {
      * 
      * @param packet
      */
-    private void addConnectionIdsToModel(Packet packet) {
+    private void addAllConnectionIdsToModel(Packet packet) {
 
         try {
             ConnectionHandlerID[] connectionHandlerIDs = (ConnectionHandlerID[]) PacketFactory.getObjectValue(packet, PacketFactory.CONNECTION_HANDLE_ID_LIST);
@@ -1482,24 +1485,181 @@ public class PacketHandler {
         return account.getSiteNumber() == contest.getSiteNumber();
     }
     
+    /**
+     * Loads only the settings from the remote server into this server.
+     * @param packet
+     * @param connectionHandlerID
+     */
     private void loadSettingsFromRemoteServer(Packet packet, ConnectionHandlerID connectionHandlerID) {
         
-        addContestTimesToModel(packet);
-
-        updateSitesToModel(packet);
-
-        addRunsToModel(packet);
-
-        addClarificationsToModel(packet);
-
-        addAccountsToModel(packet);
-
-        addConnectionIdsToModel(packet);
         
-        addLoginsToModel (packet);
+        int remoteSiteNumber = packet.getSourceId().getSiteNumber();
         
-        addClientSettingsToModel (packet);
+        addRemoteContestTimesToModel(packet, remoteSiteNumber);
         
+//        updateSitesToModel(packet);
+        
+        addRemoteRunsToModel(packet, remoteSiteNumber);
+        
+        addRemoteClarificationsToModel(packet, remoteSiteNumber);
+        
+        addRemoteAccountsToModel(packet, remoteSiteNumber);
+        
+        // difficult to know which site these connections are for...
+//        addConnectionIdsToModel(packet);
+        
+        addRemoteAllClientSettingsToModel (packet, remoteSiteNumber);
+        
+        addRemoteLoginsToModel (packet, remoteSiteNumber);
+    }
+
+   
+
+    private void addRemoteLoginsToModel(Packet packet, int remoteSiteNumber) {
+
+        try {
+
+            ClientId[] clientIds = (ClientId[]) PacketFactory.getObjectValue(packet, PacketFactory.LOGGED_IN_USERS);
+            if (clientIds != null) {
+                for (ClientId clientId : clientIds) {
+                    if (remoteSiteNumber == clientId.getSiteNumber()) {
+
+                        // TODO someday soon load logins with their connectionIds
+                        ConnectionHandlerID fakeId = new ConnectionHandlerID("Fake-Site" + clientId.getSiteNumber());
+                        contest.addRemoteLogin(clientId, fakeId);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // TODO: log handle exception
+            e.printStackTrace();
+            controller.getLog().log(Log.WARNING, "Exception logged ", e);
+        }
+    }
+    
+    private void addRemoteAllClientSettingsToModel(Packet packet, int remoteSiteNumber) {
+
+        try {
+            ClientSettings[] clientSettings = (ClientSettings[]) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_SETTINGS_LIST);
+            if (clientSettings != null) {
+                for (ClientSettings clientSettings2 : clientSettings) {
+
+                    if (remoteSiteNumber == clientSettings2.getSiteNumber()){
+                        contest.updateClientSettings(clientSettings2);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // TODO: log handle exception
+            e.printStackTrace();
+            controller.getLog().log(Log.WARNING, "Exception logged ", e);
+        }
+    }
+
+    private void addRemoteAccountsToModel(Packet packet, int remoteSiteNumber) {
+        try {
+
+            Account[] accounts = (Account[]) PacketFactory.getObjectValue(packet, PacketFactory.ACCOUNT_ARRAY);
+            if (accounts != null) {
+                for (Account account : accounts) {
+                    if (remoteSiteNumber == account.getSiteNumber()) {
+                        contest.updateAccount(account);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // TODO: log handle exception
+            e.printStackTrace();
+            controller.getLog().log(Log.WARNING,"Exception logged ", e);
+        }
+    
+    }
+
+    private void addRemoteClarificationsToModel(Packet packet, int remoteSiteNumber) {
+        try {
+            Clarification[] clarifications = (Clarification[]) PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION_LIST);
+            if (clarifications != null) {
+                for (Clarification clarification : clarifications) {
+
+                    if (remoteSiteNumber == clarification.getSiteNumber()) {
+                        contest.addClarification(clarification);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // TODO: log handle exception
+            e.printStackTrace();
+            controller.getLog().log(Log.WARNING,"Exception logged ", e);
+        }
+    }
+
+    /**
+     * @param packet
+     * @param remoteSiteNumber 
+     */
+    private void addRemoteRunsToModel(Packet packet, int remoteSiteNumber) {
+
+        try {
+            Run[] runs = (Run[]) PacketFactory.getObjectValue(packet, PacketFactory.RUN_LIST);
+            if (runs != null) {
+                for (Run run : runs) {
+                    if ( remoteSiteNumber == run.getSiteNumber()) {
+                        // TODO will this update work properly ?
+                        contest.updateRun(run, packet.getSourceId());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // TODO: log handle exception
+            e.printStackTrace();
+            controller.getLog().log(Log.WARNING,"Exception logged ", e);
+        }
+    }
+
+    
+    private void addRemoteContestTimesToModel (Packet packet, int remoteSiteNumber) {
+        try {
+            ContestTime[] contestTimes = (ContestTime[]) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME_LIST);
+            if (contestTimes != null) {
+                for (ContestTime contestTime : contestTimes) {
+                    if (remoteSiteNumber == contestTime.getSiteNumber()) {
+                        // Update only other site's time
+                        if (contest.getContestTime(contestTime.getSiteNumber()) != null) {
+                            contest.updateContestTime(contestTime);
+                        } else {
+                            contest.addContestTime(contestTime);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // TODO: log handle exception
+            e.printStackTrace();
+            controller.getLog().log(Log.WARNING,"Exception logged ", e);
+        }
+    }
+
+    
+    private void addRemoteContestTimes(Packet packet) {
+        try {
+            ContestTime[] contestTimes = (ContestTime[]) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME_LIST);
+            if (contestTimes != null) {
+                for (ContestTime contestTime : contestTimes) {
+                    if (contest.getSiteNumber() != contestTime.getSiteNumber()) {
+                        // Update other sites contestTime, do not touch ours.
+                        if (contest.getContestTime(contestTime.getSiteNumber()) != null) {
+                            contest.updateContestTime(contestTime);
+                        } else {
+                            contest.addContestTime(contestTime);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // TODO: log handle exception
+            e.printStackTrace();
+            controller.getLog().log(Log.WARNING,"Exception logged ", e);
+        }
     }
 
     private void updateSitesToModel(Packet packet) {
@@ -1617,19 +1777,19 @@ public class PacketHandler {
             controller.getLog().log(Log.WARNING,"Exception logged ", e);
         }
 
-        addClientSettingsToModel (packet);
+        addAllClientSettingsToModel (packet);
         
         initializeContestTime();
 
-        addContestTimesToModel(packet);
+        addAllContestTimesToModel(packet);
 
-        addRunsToModel(packet);
+        addAllRunsToModel(packet);
 
-        addClarificationsToModel(packet);
+        addAllClarificationsToModel(packet);
         
-        addAccountsToModel (packet);
+        addAllAccountsToModel (packet);
         
-        addConnectionIdsToModel (packet);
+        addAllConnectionIdsToModel (packet);
         
         addLoginsToModel(packet);
         
@@ -1695,7 +1855,7 @@ public class PacketHandler {
      * 
      * @param packet
      */
-    private void addClientSettingsToModel(Packet packet) {
+    private void addAllClientSettingsToModel(Packet packet) {
         try {
             ClientSettings[] clientSettings = (ClientSettings[]) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_SETTINGS_LIST);
             if (clientSettings != null) {
@@ -1759,8 +1919,9 @@ public class PacketHandler {
             controller.getLog().log(Log.WARNING,"Exception logged ", e);
         }
     }
-
-    private void addContestTimesToModel(Packet packet) {
+    
+  
+    private void addAllContestTimesToModel(Packet packet) {
         try {
             ContestTime[] contestTimes = (ContestTime[]) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME_LIST);
             if (contestTimes != null) {
@@ -1781,7 +1942,7 @@ public class PacketHandler {
             controller.getLog().log(Log.WARNING,"Exception logged ", e);
         }
     }
-
+   
     /**
      * Unconditionally add sites to model.
      * 

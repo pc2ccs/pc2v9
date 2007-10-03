@@ -171,7 +171,7 @@ public class Contest implements IContest {
     }
 
     public void initializeSubmissions(int siteNum) {
-
+        
         runList = new RunList(siteNum, true);
         runFilesList = new RunFilesList(siteNum);
         clarificationList = new ClarificationList(siteNum, true);
@@ -205,7 +205,7 @@ public class Contest implements IContest {
         }
 
         if (getAccounts(Type.SERVER) == null){
-            generateNewAccounts(Type.SERVER.toString(), siteNum, true);
+            generateNewAccounts(Type.SERVER.toString(), 1, true);
         }
         
         if (getJudgements().length == 0){
@@ -820,8 +820,8 @@ public class Contest implements IContest {
 
     public void startContest(int inSiteNumber) {
         ContestTime contestTime = getContestTime(inSiteNumber);
-        contestTime.startContestClock();
         if (contestTime != null) {
+            contestTime.startContestClock();
             ContestTimeEvent contestTimeEvent = new ContestTimeEvent(ContestTimeEvent.Action.CLOCK_STARTED, contestTime, inSiteNumber);
             fireContestTimeListener(contestTimeEvent);
         } else {
@@ -831,8 +831,8 @@ public class Contest implements IContest {
 
     public void stopContest(int inSiteNumber) {
         ContestTime contestTime = getContestTime(inSiteNumber);
-        contestTime.stopContestClock();
         if (contestTime != null) {
+            contestTime.stopContestClock();
             ContestTimeEvent contestTimeEvent = new ContestTimeEvent(ContestTimeEvent.Action.CLOCK_STOPPED, contestTime, inSiteNumber);
             fireContestTimeListener(contestTimeEvent);
         } else {
