@@ -21,13 +21,13 @@ public class EditAutoJudgeSettingFrame extends JFrame implements UIPlugin {
     /**
      * 
      */
-    private static final long serialVersionUID = -3366149177414867115L;
-
-    private AutoJudgeSettingsPane editAutoJudgePane = null;
+    private static final long serialVersionUID = 7466524895460714723L;
 
     private IContest contest;
 
     private IController controller;
+
+    private AutoJudgeSettingsPane autoJudgeSettingsPane = null;
 
     /**
      * This method initializes
@@ -43,17 +43,17 @@ public class EditAutoJudgeSettingFrame extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(499, 233));
-        this.setContentPane(getEditAutoJudgePane());
-
+        this.setSize(new java.awt.Dimension(551, 280));
+        this.setContentPane(getAutoJudgeSettingsPane());
+        FrameUtilities.centerFrame(this);
     }
 
     public void setContestAndController(IContest inContest, IController inController) {
         this.contest = inContest;
         this.controller = inController;
 
-        getEditAutoJudgePane().setContestAndController(contest, controller);
-        getEditAutoJudgePane().setParentFrame(this);
+        getAutoJudgeSettingsPane().setContestAndController(contest, controller);
+        getAutoJudgeSettingsPane().setParentFrame(this);
     }
 
     public String getPluginTitle() {
@@ -70,21 +70,21 @@ public class EditAutoJudgeSettingFrame extends JFrame implements UIPlugin {
             clientSettings = new ClientSettings(clientId);
         }
 
-        setTitle("Edit Auto Judge Settings ");
-        getEditAutoJudgePane().setClientSettings(clientSettings);
-        getEditAutoJudgePane().setVisible(true);
+        getAutoJudgeSettingsPane().setClientSettings(clientSettings);
+        getAutoJudgeSettingsPane().setVisible(true);
     }
 
     /**
-     * This method initializes editAutoJudgePane
+     * This method initializes autoJudgeSettingsPane
      * 
      * @return edu.csus.ecs.pc2.ui.AutoJudgeSettingsPane
      */
-    private AutoJudgeSettingsPane getEditAutoJudgePane() {
-        if (editAutoJudgePane == null) {
-            editAutoJudgePane = new AutoJudgeSettingsPane();
+    private AutoJudgeSettingsPane getAutoJudgeSettingsPane() {
+        if (autoJudgeSettingsPane == null) {
+            autoJudgeSettingsPane = new AutoJudgeSettingsPane();
         }
-        return editAutoJudgePane;
+        return autoJudgeSettingsPane;
     }
 
-} // @jve:decl-index=0:visual-constraint="10,10"
+} // @jve:decl-index=0:visual-constraint="13,15"
+

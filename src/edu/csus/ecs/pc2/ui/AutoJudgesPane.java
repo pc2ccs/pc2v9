@@ -53,7 +53,7 @@ public class AutoJudgesPane extends JPanePlugin {
 
     private JButton editButton = null;
 
-    private AutoJudgeSettingsPane autoJudgeSettingsPane = new AutoJudgeSettingsPane();
+    private EditAutoJudgeSettingFrame editAutoJudgeSettingFrame = new EditAutoJudgeSettingFrame();
 
     private Log log;
 
@@ -88,7 +88,7 @@ public class AutoJudgesPane extends JPanePlugin {
 
         log = getController().getLog();
 
-        autoJudgeSettingsPane.setContestAndController(inContest, inController);
+        editAutoJudgeSettingFrame.setContestAndController(inContest, inController);
 
         getContest().addClientSettingsListener(new ClientSettingsListenerImplementation());
         
@@ -338,8 +338,8 @@ public class AutoJudgesPane extends JPanePlugin {
                 clientSettings = new ClientSettings(clientId);
             }
 
-            autoJudgeSettingsPane.setClientSettings(clientSettings);
-            autoJudgeSettingsPane.setVisible(true);
+            editAutoJudgeSettingFrame.setClientSetting(clientId, clientSettings);
+            editAutoJudgeSettingFrame.setVisible(true);
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception logged ", e);
             showMessage("Unable to edit client settings, check log");
