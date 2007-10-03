@@ -1648,7 +1648,9 @@ public class PacketHandler {
             controller.startMainUI(contest.getClientId());
 
             // Login to other sites
-            loginToOtherSites(packet);
+            if (isServer()){
+                loginToOtherSites(packet);
+            }
         } else {
             String message = "Trouble logging in, check logs";
             contest.loginDenied(packet.getDestinationId(), connectionHandlerID, message);
@@ -1803,8 +1805,6 @@ public class PacketHandler {
 
     /**
      * Login to all other servers.
-     * 
-     * 
      * 
      * @param packet
      *            contains list of other servers
