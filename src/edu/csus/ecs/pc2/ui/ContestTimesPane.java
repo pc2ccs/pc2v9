@@ -9,7 +9,11 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import com.ibm.webrunner.j2mclb.util.Comparator;
+import com.ibm.webrunner.j2mclb.util.HeapSorter;
+
 import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.list.AccountNameComparator;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ContestTime;
@@ -19,7 +23,6 @@ import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.core.model.ISiteListener;
-import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.SiteEvent;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
@@ -110,6 +113,20 @@ public class ContestTimesPane extends JPanePlugin {
     }
 
     /**
+     * MCLB account name comparator.
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    
+    protected class AccountNameComparatorMCLB implements Comparator {
+
+        private AccountNameComparator accountNameComparator = new AccountNameComparator();
+
+        public int compare(Object arg0, Object arg1) {
+            return accountNameComparator.compare((String) arg0, (String) arg1);
+        }
+    }
+    /**
      * This method initializes contestTimeListBox
      * 
      * @return edu.csus.ecs.pc2.core.log.MCLB
@@ -121,6 +138,21 @@ public class ContestTimesPane extends JPanePlugin {
             Object[] cols = { "Site", "State", "Remaining", "Elapsed", "Length" };
 
             contestTimeListBox.addColumns(cols);
+            
+            HeapSorter sorter = new HeapSorter();
+//            HeapSorter numericStringSorter = new HeapSorter();
+//            numericStringSorter.setComparator(new NumericStringComparator());
+            HeapSorter accountNameSorter = new HeapSorter();
+            accountNameSorter.setComparator(new AccountNameComparatorMCLB());
+
+            // Site
+            contestTimeListBox.setColumnSorter(0, accountNameSorter, 1);
+            
+            // State
+            contestTimeListBox.setColumnSorter(1, sorter, 2);
+            
+            // TODO sort by times 
+            
             contestTimeListBox.autoSizeAllColumns();
 
         }
@@ -172,22 +204,15 @@ public class ContestTimesPane extends JPanePlugin {
 
         showMessage("");
         contestTimeListBox.removeAllRows();
-        Site[] sites = getContest().getSites();
+        ContestTime [] contestTimes = getContest().getContestTimes();
 
-        for (Site site : sites) {
-            ContestTime contestTime = getContest().getContestTime(site.getSiteNumber());
-            if (contestTime != null) {
-                addContestTimeRow(contestTime);
-            }
+        for (ContestTime contestTime : contestTimes) {
+            addContestTimeRow(contestTime);
         }
     }
 
     private void addContestTimeRow(ContestTime contestTime) {
-        Object[] objects = buildContestTimeRow(contestTime);
-        if (contestTime != null) {
-            contestTimeListBox.addRow(objects, contestTime.getElementId());
-            contestTimeListBox.autoSizeAllColumns();
-        }
+        updateContestTimeRow (contestTime);
     }
 
     private boolean isAllowed(Permission.Type type) {
@@ -354,7 +379,7 @@ public class ContestTimesPane extends JPanePlugin {
             ElementId contestTimeElementId = (ElementId) contestTimeListBox.getKeys()[i];
             ContestTime contestTime = getContest().getContestTime(contestTimeElementId);
             if (contestTime != null) {
-                showMessage("START site "+contestTime.getSiteNumber());
+                showMessage("START site "+contestTime.getSiteNumber()+" debug "+contestTime.getElementId());
                 getController().startContest(contestTime.getSiteNumber());
             }
         }
