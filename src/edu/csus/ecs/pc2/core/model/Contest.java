@@ -189,39 +189,44 @@ public class Contest implements IContest {
 
     }
 
-    /**
-     * Initialize Contest with data.
-     */
-    public void initializeStartupData() {
+    public void initializeStartupData(int siteNum) {
 
         if (siteList.size() == 0) {
             Site site = createFakeSite(1);
             site.setActive(true);
             siteList.add(site);
+            contestInformation.setContestTitle("Default Contest Title");
         }
 
-        if (getContestTime(1) == null){
+        if (getContestTime(siteNum) == null){
             ContestTime contestTime = new ContestTime();
-            contestTime.setSiteNumber(1);
+            contestTime.setSiteNumber(siteNum);
             addContestTime(contestTime);
         }
 
-        generateNewAccounts(ClientType.Type.SERVER.toString(), 1, true);
+        if (getAccounts(Type.SERVER) == null){
+            generateNewAccounts(Type.SERVER.toString(), siteNum, true);
+        }
+        
+        if (getJudgements().length == 0){
+            loadJudgements();
+        }
 
+        if (getAccounts(Type.ADMINISTRATOR) != null){
+            generateNewAccounts(ClientType.Type.ADMINISTRATOR.toString(), siteNum, true);
+        }
+    }
+
+    private void loadJudgements() {
         String[] judgementNames = { "Yes", "No - Compilation Error", "No - Run-time Error", "No - Time-limit Exceeded", "No - Wrong Answer", "No - Excessive Output", "No - Output Format Error",
                 "No - Other - Contact Staff" };
-        
+
         // TODO load judgements from reject.ini
 
         for (String judgementName : judgementNames) {
             Judgement judgement = new Judgement(judgementName);
             addJudgement(judgement);
         }
-
-        // Add root account
-        generateNewAccounts(ClientType.Type.ADMINISTRATOR.toString(), 1, true);
-
-        contestInformation.setContestTitle("Default Contest Title");
     }
 
     public void addRunListener(IRunListener runListener) {

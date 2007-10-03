@@ -520,25 +520,31 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
             if (contest.getSiteNumber() == 0){
                 contest.setSiteNumber(1);
+                info("initializeServer STARTED this site as Site 1");
             }
+        }
             
-            boolean loadedConfiguration = readConfigFromDisk(contest.getSiteNumber());
-
-            if (!loadedConfiguration) {
-                // No configuration on disk, initialize settings.
-
-                log.info("initializing controller with default settings");
-                
+        boolean loadedConfiguration = readConfigFromDisk(contest.getSiteNumber());
+        
+        if (!loadedConfiguration) {
+            // No configuration on disk, initialize settings.
+            
+            log.info("initializing controller with default settings");
+            
+            if (contest.getSite(1) == null){
                 Site site = createFirstSite(contest.getSiteNumber(), "localhost", port);
                 contest.addSite(site);
-
-                contest.initializeStartupData();
-                contest.initializeSubmissions(contest.getSiteNumber());
-                log.info("initialized controller Site "+contest.getSiteNumber()+" with default settings");
-                writeConfigToDisk();
-            } else {
-                log.info("Loaded configuration from disk");
             }
+            
+            contest.initializeStartupData();
+            
+            contest.initializeSubmissions(contest.getSiteNumber());
+            
+            log.info("initialized controller Site "+contest.getSiteNumber());
+            writeConfigToDisk();
+        } else {
+            contest.initializeSubmissions(contest.getSiteNumber());
+            log.info("Loaded configuration from disk");
         }
     }
 

@@ -379,7 +379,7 @@ public interface IContest {
     /**
      * Initialize with startup data
      */
-    void initializeStartupData();
+    void initializeStartupData(int siteNumber);
 
     /**
      * Load all submissions off disk. 
