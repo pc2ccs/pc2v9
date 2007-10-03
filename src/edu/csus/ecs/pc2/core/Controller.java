@@ -277,19 +277,40 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
     public void sendToClient(Packet packet) {
         info("sendToClient b4 to " + packet.getDestinationId() + " " + packet);
+        
+        ClientId toClientId = packet.getDestinationId();
+        
+        if (isThisSite(toClientId.getSiteNumber())){
 
-        ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(packet.getDestinationId());
-        info("sendToClient " + packet.getSourceId() + " " + connectionHandlerID);
-        if (connectionHandlerID == null) {
-            int destinationSiteNumber = packet.getDestinationId().getSiteNumber();
-            if (isThisSite(destinationSiteNumber)) {
-                sendToLocalServer(packet);
+            if (contest.isLocalLoggedIn(toClientId)){
+                ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(toClientId);
+                info("sendToClient " + packet.getSourceId() + " " + connectionHandlerID);
+                sendToClient(connectionHandlerID, packet);
             } else {
-                sendToRemoteServer(destinationSiteNumber, packet);
+                try {
+                    packetArchiver.writeNextPacket(packet);
+                    info("Unable to send packet to " + toClientId + " not logged in.  Packet saved in: " + packetArchiver.getLastArchiveFilename());
+                } catch (Exception e) {
+                    info("Unable to send packet to " + toClientId + " could not save packet",e);
+                }
             }
+            
         } else {
-            sendToClient(connectionHandlerID, packet);
+            
+            sendToRemoteServer(toClientId.getSiteNumber(), packet);
         }
+
+        // dal old code: (bad code?)
+//        if (connectionHandlerID == null) {
+//            int destinationSiteNumber = packet.getDestinationId().getSiteNumber();
+//            if (isThisSite(destinationSiteNumber)) {
+//                sendToLocalServer(packet);
+//            } else {
+//                sendToRemoteServer(destinationSiteNumber, packet);
+//            }
+//        } else {
+//            sendToClient(connectionHandlerID, packet);
+//        }
 
         info("sendToClient af to " + packet.getDestinationId() + " " + packet);
     }
