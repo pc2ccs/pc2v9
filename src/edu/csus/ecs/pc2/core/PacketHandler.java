@@ -100,8 +100,9 @@ public class PacketHandler {
             controller.sendToClient(confirmPacket);
 
             // Send to clients and servers
-            sendToJudgesAndOthers( confirmPacket, true);
-            
+            if (isServer()) {
+                sendToJudgesAndOthers( confirmPacket, true);
+            }            
         } else if (packetType.equals(Type.CLARIFICATION_SUBMISSION)) {
             // Clarification submitted by team to server
             
@@ -113,7 +114,9 @@ public class PacketHandler {
             controller.sendToClient(confirmPacket);
             
             // Send to clients and other servers
-            sendToJudgesAndOthers(confirmPacket, true);
+            if (isServer()) {
+                sendToJudgesAndOthers(confirmPacket, true);
+            }
 
         } else if (packetType.equals(Type.CLARIFICATION_ANSWER)) {
             // Answer from client to server
@@ -126,7 +129,9 @@ public class PacketHandler {
         } else if (packetType.equals(Type.CLARIFICATION_SUBMISSION_CONFIRM)) {
             Clarification clarification = (Clarification)  PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION);
             contest.addClarification(clarification);
-            sendToJudgesAndOthers( packet, isThisSite(clarification));
+            if (isServer()) {
+                sendToJudgesAndOthers( packet, isThisSite(clarification));
+            }
             
         } else if (packetType.equals(Type.CLARIFICATION_UNCHECKOUT)) {
             // Clarification cancel or uncheckout, client to server
@@ -155,7 +160,9 @@ public class PacketHandler {
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
             contest.runNotAvailable(run);
 
-            sendToJudgesAndOthers( packet, isThisSite(run));
+            if (isServer()) {
+                sendToJudgesAndOthers( packet, isThisSite(run));
+            }
 
         } else if (packetType.equals(Type.FORCE_DISCONNECTION)) {
             sendForceDisconnection (packet);
@@ -313,7 +320,9 @@ public class PacketHandler {
             loadSettingsFromRemoteServer(packet, connectionHandlerID);
             info(" handlePacket SERVER_SETTINGS - from another site -- all settings loaded " + packet);
             
-            sendToJudgesAndOthers(packet, false);
+            if (isServer()) {
+                sendToJudgesAndOthers(packet, false);
+            }
 
         } else {
 
@@ -418,7 +427,9 @@ public class PacketHandler {
 
         } else {
             controller.sendToTeams(packet);
-            sendToJudgesAndOthers(packet, true);
+            if (isServer()) {
+                sendToJudgesAndOthers(packet, true);
+            }
         }
         
         if (isServer()){
@@ -1038,8 +1049,9 @@ public class PacketHandler {
                 controller.sendToServers(packet);
             }
         } else {
-            SecurityException securityException = new SecurityException("Client "+contest.getClientId()+" tried to send to judge and others "+packet);
-            info("Tried to send packet to others ",securityException);
+            info("Warning - tried to send packet to others (as non server) "+packet);
+            Exception ex = new Exception("User "+packet.getSourceId()+" tried to send packet to judges and others");
+            controller.getLog().log(Log.WARNING, "Warning - tried to send packet to others (as non server) "+packet, ex);
         }
     }
 
@@ -1064,7 +1076,9 @@ public class PacketHandler {
                 Run availableRun = contest.getRun(run.getElementId());
                 Packet availableRunPacket = PacketFactory.createRunAvailable(contest.getClientId(), whoCanceledRun, availableRun);
 
-                sendToJudgesAndOthers(availableRunPacket, true);
+                if (isServer()) {
+                    sendToJudgesAndOthers(availableRunPacket, true);
+                }
             }
 
         } else {
@@ -1102,8 +1116,9 @@ public class PacketHandler {
 
                 Packet cancelPacket = PacketFactory.createClarificationAvailable(contest.getClientId(), PacketFactory.ALL_SERVERS, theClarification);
 
-                sendToJudgesAndOthers(cancelPacket, true);
-
+                if (isServer()) {
+                    sendToJudgesAndOthers(cancelPacket, true);
+                }
             }
         } else {
             contest.cancelClarificationCheckOut(clarification, whoCancelledIt);
