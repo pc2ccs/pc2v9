@@ -51,7 +51,7 @@ public class ContestTimesPane extends JPanePlugin {
 
     private MCLB contestTimeListBox = null;
 
-    private JButton contestTimeRefreshButton = null;
+    private JButton refreshButton = null;
 
     private JButton startClockButton = null;
 
@@ -109,7 +109,7 @@ public class ContestTimesPane extends JPanePlugin {
             contestTimeButtonPane.setLayout(flowLayout);
             contestTimeButtonPane.setPreferredSize(new java.awt.Dimension(35, 35));
             contestTimeButtonPane.add(getStartClockButton(), null);
-            contestTimeButtonPane.add(getContestTimeRefreshButton(), null);
+            contestTimeButtonPane.add(getRefreshButton(), null);
             contestTimeButtonPane.add(getEditButton(), null);
             contestTimeButtonPane.add(getStopClockButton(), null);
             contestTimeButtonPane.add(getStartAllButton(), null);
@@ -355,19 +355,19 @@ public class ContestTimesPane extends JPanePlugin {
      * 
      * @return javax.swing.JButton
      */
-    private JButton getContestTimeRefreshButton() {
-        if (contestTimeRefreshButton == null) {
-            contestTimeRefreshButton = new JButton();
-            contestTimeRefreshButton.setText("Refresh");
-            contestTimeRefreshButton.setToolTipText("Refresh All Clocks");
-            contestTimeRefreshButton.setMnemonic(java.awt.event.KeyEvent.VK_R);
-            contestTimeRefreshButton.addActionListener(new java.awt.event.ActionListener() {
+    private JButton getRefreshButton() {
+        if (refreshButton == null) {
+            refreshButton = new JButton();
+            refreshButton.setText("Refresh");
+            refreshButton.setToolTipText("Refresh All Clocks");
+            refreshButton.setMnemonic(java.awt.event.KeyEvent.VK_R);
+            refreshButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     reloadListBox();
                 }
             });
         }
-        return contestTimeRefreshButton;
+        return refreshButton;
     }
 
     /**
@@ -400,10 +400,10 @@ public class ContestTimesPane extends JPanePlugin {
         }
 
         for (int i = 0; i < selectedSites.length; i++) {
-            ElementId contestTimeElementId = (ElementId) contestTimeListBox.getKeys()[i];
+            ElementId contestTimeElementId = (ElementId) contestTimeListBox.getKeys()[selectedSites[i]];
             ContestTime contestTime = getContest().getContestTime(contestTimeElementId);
             if (contestTime != null) {
-                showMessage("START site " + contestTime.getSiteNumber() + " debug " + contestTime.getElementId());
+                showMessage("START site " + contestTime.getSiteNumber());
                 getController().startContest(contestTime.getSiteNumber());
             }
         }
@@ -440,9 +440,10 @@ public class ContestTimesPane extends JPanePlugin {
         }
 
         for (int i = 0; i < selectedSites.length; i++) {
-            ElementId contestTimeElementId = (ElementId) contestTimeListBox.getKeys()[i];
+            ElementId contestTimeElementId = (ElementId) contestTimeListBox.getKeys()[selectedSites[i]];
             ContestTime contestTime = getContest().getContestTime(contestTimeElementId);
             if (contestTime != null) {
+                showMessage("STOP site " + contestTime.getSiteNumber());
                 getController().stopContest(contestTime.getSiteNumber());
             }
         }
@@ -531,6 +532,7 @@ public class ContestTimesPane extends JPanePlugin {
     }
 
     protected void startAllClocks() {
+        showMessage("START ALL sites");
         getController().startAllContestTimes();
     }
 
@@ -558,6 +560,7 @@ public class ContestTimesPane extends JPanePlugin {
         int result = FrameUtilities.yesNoCancelDialog("Are you sure you want to stop all contest clocks?", "Confirm stop all clocks");
 
         if (result == JOptionPane.YES_OPTION) {
+            showMessage("STOP ALL sites");
             getController().stopAllContestTimes();
         }
     }
@@ -581,8 +584,11 @@ public class ContestTimesPane extends JPanePlugin {
         return editButton;
     }
 
+    /**
+     * Edit the first selected site.
+     *
+     */
     protected void editSelectedContestTime() {
-        // TODO Auto-generated method stub
         int[] selectedSites = contestTimeListBox.getSelectedIndexes();
         showMessage("");
         if (selectedSites.length == 0) {
@@ -590,7 +596,7 @@ public class ContestTimesPane extends JPanePlugin {
             return;
         }
 
-        ElementId contestTimeElementId = (ElementId) contestTimeListBox.getKeys()[0];
+        ElementId contestTimeElementId = (ElementId) contestTimeListBox.getKeys()[selectedSites[0]];
         ContestTime contestTime = getContest().getContestTime(contestTimeElementId);
 
         editContestTimeFrame.setContestTime(contestTime);
