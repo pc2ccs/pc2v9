@@ -40,12 +40,14 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 // $HeadURL$
 public class RunFlowTest extends TestCase {
 
+    @SuppressWarnings("unused")
     private static final String [] SERVER_COMMAND_LINE_OPTIONS = {"--server", "--port", "42000"};
 
     private static final String [] CLIENT_COMMAND_LINE_OPTIONS = {"--port", "42000"};
 
     private IContest contestOne;
 
+    @SuppressWarnings("unused")
     private Controller controllerOne;
 
     private IContest teamContest;
@@ -234,7 +236,7 @@ public class RunFlowTest extends TestCase {
         ClientId teamId = account.getClientId();
 
         account = contestOne.getAccounts(Type.JUDGE).firstElement();
-        ClientId judgeId = account.getClientId();
+//        ClientId judgeId = account.getClientId();
         
         Run run = new Run(teamId, contestOne.getLanguages()[0],
                 contestOne.getProblems()[0]);
