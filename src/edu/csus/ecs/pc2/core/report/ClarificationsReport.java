@@ -18,12 +18,17 @@ import edu.csus.ecs.pc2.core.model.IContest;
  * Print list of clarifications.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
-// $Id$
 
 public class ClarificationsReport implements IReport {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -273649856656225241L;
 
     private IContest contest;
 

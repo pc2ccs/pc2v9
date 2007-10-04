@@ -17,10 +17,16 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
  * @see #getLastArchiveFilename()
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL: http://pc2.ecs.csus.edu/repos/v9wip/trunk/src/edu/csus/ecs/pc2/archive/PacketArchiver.java$
 public class PacketArchiver implements UIPlugin {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 5563690515605317578L;
 
     public static final String SVN_ID = "$Id$";
 

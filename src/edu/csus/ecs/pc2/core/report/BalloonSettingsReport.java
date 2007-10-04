@@ -25,6 +25,11 @@ import edu.csus.ecs.pc2.core.model.Problem;
 // $HeadURL$
 public class BalloonSettingsReport implements IReport {
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -2481037621846733149L;
+
     private IContest contest;
 
     private IController controller;

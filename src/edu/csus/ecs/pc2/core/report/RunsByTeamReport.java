@@ -26,12 +26,17 @@ import edu.csus.ecs.pc2.core.model.Run;
  * Print all runs grouped by team.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
-// $Id$
 
 public class RunsByTeamReport implements IReport {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1672921503320671214L;
 
     private IContest contest;
 

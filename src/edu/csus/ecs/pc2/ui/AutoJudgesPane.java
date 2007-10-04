@@ -133,6 +133,10 @@ public class AutoJudgesPane extends JPanePlugin {
     
     protected class AccountNameComparatorMCLB implements Comparator {
 
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 109218643807182860L;
         private AccountNameComparator accountNameComparator = new AccountNameComparator();
 
         public int compare(Object arg0, Object arg1) {

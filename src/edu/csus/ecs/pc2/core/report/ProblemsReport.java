@@ -18,11 +18,16 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
  * Print all problems info.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
-// $Id$
 public class ProblemsReport implements IReport {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 977130815676827828L;
 
     private IContest contest;
 

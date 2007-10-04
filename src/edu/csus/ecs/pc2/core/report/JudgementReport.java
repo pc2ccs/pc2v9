@@ -16,12 +16,17 @@ import edu.csus.ecs.pc2.core.model.Judgement;
  * Print All Judgement Information.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
-// $Id$
 
 public class JudgementReport implements IReport {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -287199138291014045L;
 
     private IContest contest;
 

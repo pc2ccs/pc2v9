@@ -18,11 +18,16 @@ import edu.csus.ecs.pc2.core.model.Run.RunStates;
  * Print All Filter Information.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
-// $Id$
 public class FilterReport implements IReport {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -1515524938023295459L;
 
     private IContest contest;
 

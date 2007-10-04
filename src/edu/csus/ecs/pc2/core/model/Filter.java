@@ -17,6 +17,7 @@ import edu.csus.ecs.pc2.core.model.Run.RunStates;
  * Use the setUsing methods to turn on and off filtering of Problems, RunStates, etc.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
@@ -26,6 +27,11 @@ public class Filter implements Serializable {
     // TODO filter for site
     // TODO filter for permissions, etc.
     // TODO filter on account types
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -8373119928926075959L;
 
     /**
      * collection of chosen run states

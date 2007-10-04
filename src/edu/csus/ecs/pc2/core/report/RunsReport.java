@@ -23,12 +23,17 @@ import edu.csus.ecs.pc2.core.model.Run.RunStates;
  * Print Run lists.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
-// $Id$
 
 public class RunsReport implements IReport {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 2758681678568110981L;
 
     private IContest contest;
 

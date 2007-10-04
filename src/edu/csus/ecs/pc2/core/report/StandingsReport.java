@@ -29,12 +29,17 @@ import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
  * Print Standings XML from DefaultScoringAlgorithm.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
-// $Id$
 
 public class StandingsReport implements IReport {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -914245980900707408L;
 
     private IContest contest;
 

@@ -19,14 +19,18 @@ import edu.csus.ecs.pc2.core.security.Permission;
 /**
  * Report listing all permissions for clients.
  * 
- *  
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
-// $Id$
 
 public class AccountPermissionReport implements IReport {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 240824146830266565L;
 
     private IContest contest;
 

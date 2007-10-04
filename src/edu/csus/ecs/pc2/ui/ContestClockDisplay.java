@@ -35,7 +35,10 @@ import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 // $HeadURL$
 public class ContestClockDisplay implements ActionListener, UIPlugin {
 
-    public static final String SVN_ID = "$Id$";
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 8137635697344335832L;
 
     /**
      * Labels to be updated with contest time.

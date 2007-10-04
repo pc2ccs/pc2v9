@@ -42,6 +42,11 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 // $HeadURL$
 public class InternalDumpReport implements IReport {
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -82937493006891083L;
+
     private IContest contest;
 
     private IController controller;

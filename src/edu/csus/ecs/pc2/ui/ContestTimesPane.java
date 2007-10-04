@@ -14,6 +14,7 @@ import com.ibm.webrunner.j2mclb.util.HeapSorter;
 
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.list.AccountNameComparator;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ContestTime;
@@ -120,6 +121,10 @@ public class ContestTimesPane extends JPanePlugin {
     
     protected class AccountNameComparatorMCLB implements Comparator {
 
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 6940019340965217198L;
         private AccountNameComparator accountNameComparator = new AccountNameComparator();
 
         public int compare(Object arg0, Object arg1) {
@@ -162,7 +167,8 @@ public class ContestTimesPane extends JPanePlugin {
     public void updateContestTimeRow(final ContestTime contestTime) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                Object[] objects = buildContestTimeRow(contestTime);
+                String[] objects = buildContestTimeRow(contestTime);
+                info ("updateContestTimeRow - updated "+contestTime.getSiteNumber()+" " + contestTime.getElementId()+" "+objects[1]);
                 int rowNumber = contestTimeListBox.getIndexByKey(contestTime.getElementId());
                 if (rowNumber == -1) {
                     contestTimeListBox.addRow(objects, contestTime.getElementId());
@@ -175,12 +181,17 @@ public class ContestTimesPane extends JPanePlugin {
         });
     }
 
-    protected Object[] buildContestTimeRow(ContestTime contestTime) {
+    protected void info(String string) {
+        System.err.println(string);
+        getController().getLog().log(Log.WARNING, string);
+    }
+
+    protected String[] buildContestTimeRow(ContestTime contestTime) {
 
         // Object[] cols = { "Site", "State", "Remaining", "Elapsed", "Length" };
 
         int numberColumns = contestTimeListBox.getColumnCount();
-        Object[] c = new String[numberColumns];
+        String[] c = new String[numberColumns];
 
         c[0] = "Site " + contestTime.getSiteNumber();
         c[1] = "NO CONTACT";

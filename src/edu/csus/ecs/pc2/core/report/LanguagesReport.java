@@ -16,11 +16,16 @@ import edu.csus.ecs.pc2.core.model.Language;
  * Print all languages info.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
-// $Id$
 public class LanguagesReport implements IReport {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 3558660040036850297L;
 
     private IContest contest;
 

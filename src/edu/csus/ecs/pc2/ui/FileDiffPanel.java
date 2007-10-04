@@ -24,11 +24,17 @@ import edu.csus.ecs.pc2.core.model.IContest;
  * A file diff (comparison) panel.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // TODO recreate in VE.
 // $HeadURL$
 public class FileDiffPanel implements IDiffPanel {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 5826285702175183581L;
 
     public static final String SVN_ID = "$Id$";
 

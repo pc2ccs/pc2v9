@@ -23,12 +23,17 @@ import edu.csus.ecs.pc2.core.security.Permission;
  * Print all account info.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
-// $Id$
 
 public class AccountsReport implements IReport {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -8628612595677727400L;
 
     private IContest contest;
 
