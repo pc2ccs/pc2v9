@@ -16,7 +16,10 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.ContestTime;
+import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
 import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.core.util.XSLTransformer;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
@@ -24,6 +27,11 @@ import edu.csus.ecs.pc2.ui.LogWindow;
 import edu.csus.ecs.pc2.ui.OptionsPanel;
 import edu.csus.ecs.pc2.ui.StandingsPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
+import javax.swing.JPanel;
+import java.awt.BorderLayout;
+import javax.swing.JLabel;
+import javax.swing.SwingConstants;
+import javax.swing.JButton;
 
 /**
  * This class is the default scoreboard view (frame).
@@ -31,7 +39,7 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
- 
+
 // $HeadURL$
 public class ScoreboardView extends JFrame implements UIPlugin {
 
@@ -49,10 +57,22 @@ public class ScoreboardView extends JFrame implements UIPlugin {
     private JTabbedPane mainTabbedPane = null;
 
     private String xslDir;
-    
+
     private String outputDir = "html";
 
     private Log log;
+
+    private JPanel mainViewPane = null;
+
+    private JPanel northLabel = null;
+
+    private JLabel timeLabel = null;
+
+    private JLabel messageLabel = null;
+
+    private JPanel eastPane = null;
+
+    private JButton exitButton = null;
 
     /**
      * This method initializes
@@ -66,16 +86,16 @@ public class ScoreboardView extends JFrame implements UIPlugin {
     /**
      * 
      * @author pc2@ecs.csus.edu
-     *
+     * 
      */
     public class PropertyChangeListenerImplementation implements PropertyChangeListener {
 
         public void propertyChange(PropertyChangeEvent evt) {
-            if(evt.getPropertyName().equalsIgnoreCase("standings")) {
+            if (evt.getPropertyName().equalsIgnoreCase("standings")) {
                 if (evt.getNewValue() != null && !evt.getNewValue().equals(evt.getOldValue())) {
                     // standings have changed
                     // TODO take this off the awt thread
-                    generateOutput((String)evt.getNewValue());
+                    generateOutput((String) evt.getNewValue());
                 }
             }
         }
@@ -86,8 +106,8 @@ public class ScoreboardView extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(405, 296));
-        this.setContentPane(getMainTabbedPane());
+        this.setSize(new java.awt.Dimension(515, 319));
+        this.setContentPane(getMainViewPane());
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setTitle("Scoreboard");
 
@@ -118,23 +138,27 @@ public class ScoreboardView extends JFrame implements UIPlugin {
 
         log = controller.getLog();
         
+        contest.addContestTimeListener(new ContestTimeListenerImplementation());
+
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 setTitle("PC^2 " + contest.getTitle() + " Build " + new VersionInfo().getBuildNumber());
-        
+
                 if (logWindow == null) {
                     logWindow = new LogWindow();
                 }
                 logWindow.setContestAndController(contest, controller);
                 logWindow.setTitle("Log " + contest.getClientId().toString());
-        
+                
                 StandingsPane standingsPane = new StandingsPane();
                 addUIPlugin(getMainTabbedPane(), "Standings", standingsPane);
                 standingsPane.addPropertyChangeListener("standings", new PropertyChangeListenerImplementation());
                 OptionsPanel optionsPanel = new OptionsPanel();
                 addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
                 optionsPanel.setLogWindow(logWindow);
-        
+                
+                showMessage("");
+
                 setVisible(true);
             }
         });
@@ -235,4 +259,134 @@ public class ScoreboardView extends JFrame implements UIPlugin {
         return mainTabbedPane;
     }
 
+    /**
+     * This method initializes mainViewPane
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getMainViewPane() {
+        if (mainViewPane == null) {
+            mainViewPane = new JPanel();
+            mainViewPane.setLayout(new BorderLayout());
+            mainViewPane.add(getMainTabbedPane(), java.awt.BorderLayout.CENTER);
+            mainViewPane.add(getNorthLabel(), java.awt.BorderLayout.NORTH);
+        }
+        return mainViewPane;
+    }
+
+    /**
+     * This method initializes jPanel
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getNorthLabel() {
+        if (northLabel == null) {
+            messageLabel = new JLabel();
+            messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            messageLabel.setText("JLabel");
+            timeLabel = new JLabel();
+            timeLabel.setText("STOPPED ");
+            northLabel = new JPanel();
+            northLabel.setLayout(new BorderLayout());
+            northLabel.add(timeLabel, java.awt.BorderLayout.WEST);
+            northLabel.add(messageLabel, java.awt.BorderLayout.CENTER);
+            northLabel.add(getEastPane(), java.awt.BorderLayout.EAST);
+        }
+        return northLabel;
+    }
+
+    /**
+     * This method initializes jPanel1
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getEastPane() {
+        if (eastPane == null) {
+            eastPane = new JPanel();
+            eastPane.add(getExitButton(), null);
+        }
+        return eastPane;
+    }
+
+    /**
+     * This method initializes jButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getExitButton() {
+        if (exitButton == null) {
+            exitButton = new JButton();
+            exitButton.setText("Exit");
+            exitButton.setMnemonic(java.awt.event.KeyEvent.VK_X);
+            exitButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    promptAndExit();
+                }
+            });
+        }
+        return exitButton;
+    }
+
+    private void setFrameTitle(final boolean contestStarted) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                if (contestStarted) {
+                    setTitle("PC^2  " + contest.getTitle() + " [STARTED] Build " + new VersionInfo().getBuildNumber());
+                    timeLabel.setText("");
+                } else {
+                    setTitle("PC^2 " + contest.getTitle() + " [STOPPED] Build " + new VersionInfo().getBuildNumber());
+                    timeLabel.setText("STOPPED");
+                }
+            }
+        });
+        FrameUtilities.regularCursor(this);
+    }
+    
+    protected boolean isThisSite (int siteNumber){
+        return contest.getSiteNumber() == siteNumber;
+    }
+    
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    
+    class ContestTimeListenerImplementation implements IContestTimeListener {
+
+        public void contestTimeAdded(ContestTimeEvent event) {
+            contestTimeChanged(event);
+        }
+
+        public void contestTimeRemoved(ContestTimeEvent event) {
+            contestTimeChanged(event);
+        }
+
+        public void contestTimeChanged(ContestTimeEvent event) {
+            ContestTime contestTime = event.getContestTime();
+            if (isThisSite(contestTime.getSiteNumber())){
+                setFrameTitle (contestTime.isContestRunning());
+            }
+        }
+
+        public void contestStarted(ContestTimeEvent event) {
+            contestTimeChanged(event);
+        }
+
+        public void contestStopped(ContestTimeEvent event) {
+            contestTimeChanged(event);
+        }
+        
+    }
+    
+    private void showMessage(final String string) {
+
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                messageLabel.setText(string);
+                messageLabel.setToolTipText(string);
+            }
+        });
+
+    }
 } // @jve:decl-index=0:visual-constraint="10,10"

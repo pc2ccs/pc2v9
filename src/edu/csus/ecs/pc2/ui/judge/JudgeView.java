@@ -1,13 +1,21 @@
 package edu.csus.ecs.pc2.ui.judge;
 
+import java.awt.BorderLayout;
+
+import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.model.ContestTime;
+import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
 import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.ui.ClarificationsPane;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
@@ -16,10 +24,6 @@ import edu.csus.ecs.pc2.ui.OptionsPanel;
 import edu.csus.ecs.pc2.ui.RunsPanel;
 import edu.csus.ecs.pc2.ui.SubmitRunPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
-import javax.swing.JPanel;
-import java.awt.BorderLayout;
-import javax.swing.JLabel;
-import javax.swing.JButton;
 
 /**
  * Judge GUI.
@@ -131,6 +135,8 @@ public class JudgeView extends JFrame implements UIPlugin {
         }
         logWindow.setContestAndController(contest, controller);
         logWindow.setTitle("Log " + contest.getClientId().toString());
+        
+        contest.addContestTimeListener(new ContestTimeListenerImplementation());
 
         setFrameTitle(contest.getContestTime().isContestRunning());
         showMessage("");
@@ -256,5 +262,45 @@ public class JudgeView extends JFrame implements UIPlugin {
         });
 
     }
+    
+    protected boolean isThisSite (int siteNumber){
+        return contest.getSiteNumber() == siteNumber;
+    }
+    
+    
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    
+    class ContestTimeListenerImplementation implements IContestTimeListener {
+
+        public void contestTimeAdded(ContestTimeEvent event) {
+            contestTimeChanged(event);
+        }
+
+        public void contestTimeRemoved(ContestTimeEvent event) {
+            contestTimeChanged(event);
+        }
+
+        public void contestTimeChanged(ContestTimeEvent event) {
+            ContestTime contestTime = event.getContestTime();
+            if (isThisSite(contestTime.getSiteNumber())){
+                setFrameTitle (contestTime.isContestRunning());
+            }
+        }
+
+        public void contestStarted(ContestTimeEvent event) {
+            contestTimeChanged(event);
+        }
+
+        public void contestStopped(ContestTimeEvent event) {
+            contestTimeChanged(event);
+        }
+        
+    }
+    
+   
 
 } // @jve:decl-index=0:visual-constraint="10,10"
