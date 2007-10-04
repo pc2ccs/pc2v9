@@ -291,5 +291,7 @@ public interface IController {
     void initializeServer();
 
     void addNewClientSettings(ClientSettings newClientSettings);
+
+    void updateContestTime(ContestTime newContestTime);
     
 }

@@ -144,30 +144,6 @@ public class ContestTimePane extends JPanePlugin {
     }
 
     /**
-     * Add ContestTime to the fields.
-     * 
-     */
-    protected void addContestTime() {
-
-        ContestTime newContestTime = null;
-        try {
-            newContestTime = getContestTimeFromFields(null);
-        } catch (InvalidFieldValue e) {
-            showMessage(e.getMessage());
-            return;
-        }
-
-        // getController().addNewContestTime(newContestTime);
-
-        cancelButton.setText("Close");
-        updateButton.setEnabled(false);
-
-        if (getParentFrame() != null) {
-            getParentFrame().setVisible(false);
-        }
-    }
-
-    /**
      * Enable or disable Update button based on comparison of run to fields.
      * 
      */
@@ -285,8 +261,7 @@ public class ContestTimePane extends JPanePlugin {
             return;
         }
 
-        // TODO code
-        // getController().updateContestTime(newContestTime);
+        getController().updateContestTime(newContestTime);
 
         cancelButton.setText("Close");
         updateButton.setEnabled(false);

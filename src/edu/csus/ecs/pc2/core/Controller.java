@@ -1888,4 +1888,9 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     public int getSiteNumber() {
         return contest.getSiteNumber();
     }
+
+    public void updateContestTime(ContestTime newContestTime) {
+        Packet newContestTimePacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), newContestTime);
+        sendToLocalServer(newContestTimePacket);
+    }
 }
