@@ -112,7 +112,23 @@ public class LanguagePane extends JPanePlugin {
 
     public void setContestAndController(IContest inContest, IController inController) {
         super.setContestAndController(inContest, inController);
+        addWindowCloserListener();
     }
+    
+    private void addWindowCloserListener() {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                if (getParentFrame() != null) {
+                    getParentFrame().addWindowListener(new java.awt.event.WindowAdapter() {
+                        public void windowClosing(java.awt.event.WindowEvent e) {
+                            handleCancelButton();
+                        }
+                    });
+                } 
+            }
+        });
+    }
+
 
     public String getPluginTitle() {
         return "Edit Language Pane";

@@ -179,6 +179,23 @@ public class ProblemPane extends JPanePlugin {
         // getContest().addProblemListener(new Proble)
 
         log = getController().getLog();
+        
+        addWindowCloserListener();
+        
+    }
+    
+    private void addWindowCloserListener() {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                if (getParentFrame() != null) {
+                    getParentFrame().addWindowListener(new java.awt.event.WindowAdapter() {
+                        public void windowClosing(java.awt.event.WindowEvent e) {
+                            handleCancelButton();
+                        }
+                    });
+                } 
+            }
+        });
     }
 
     public String getPluginTitle() {
