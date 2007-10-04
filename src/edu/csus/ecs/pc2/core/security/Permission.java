@@ -191,6 +191,10 @@ public class Permission implements Serializable {
          * Stop contest clock
          */
         STOP_CONTEST_CLOCK,
+        /**
+         * 
+         */
+        EDIT_CONTEST_CLOCK,
     };
 
     private Hashtable<Type, String> hash = new Hashtable<Type, String>();
