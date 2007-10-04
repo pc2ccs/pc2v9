@@ -15,6 +15,7 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IContest;
+import javax.swing.JCheckBox;
 
 /**
  * Add/Edit ContestTime Pane.
@@ -57,7 +58,9 @@ public class ContestTimePane extends JPanePlugin {
 
     private JLabel contestLengthLabel = null;
 
-    private JTextField contestLenthTextBox = null;
+    private JTextField contestLengthTextBox = null;
+
+    private JCheckBox stopAtEndofContestCheckBox = null;
 
     /**
      * This method initializes
@@ -74,7 +77,7 @@ public class ContestTimePane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new java.awt.Dimension(396, 243));
+        this.setSize(new java.awt.Dimension(418, 243));
 
         this.add(getMessagePane(), java.awt.BorderLayout.NORTH);
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
@@ -84,6 +87,21 @@ public class ContestTimePane extends JPanePlugin {
     public void setContestAndController(IContest inContest, IController inController) {
         super.setContestAndController(inContest, inController);
 
+        addWindowCloserListener();
+    }
+
+    private void addWindowCloserListener() {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                if (getParentFrame() != null) {
+                    getParentFrame().addWindowListener(new java.awt.event.WindowAdapter() {
+                        public void windowClosing(java.awt.event.WindowEvent e) {
+                            handleCancelButton();
+                        }
+                    });
+                } 
+            }
+        });
     }
 
     public String getPluginTitle() {
@@ -116,7 +134,7 @@ public class ContestTimePane extends JPanePlugin {
     private JPanel getButtonPane() {
         if (buttonPane == null) {
             FlowLayout flowLayout = new FlowLayout();
-            flowLayout.setHgap(15);
+            flowLayout.setHgap(45);
             buttonPane = new JPanel();
             buttonPane.setLayout(flowLayout);
             buttonPane.add(getUpdateButton(), null);
@@ -139,9 +157,7 @@ public class ContestTimePane extends JPanePlugin {
             return;
         }
 
-        
-        
-// getController().addNewContestTime(newContestTime);
+        // getController().addNewContestTime(newContestTime);
 
         cancelButton.setText("Close");
         updateButton.setEnabled(false);
@@ -167,10 +183,11 @@ public class ContestTimePane extends JPanePlugin {
 
             try {
                 ContestTime changedContestTime = getContestTimeFromFields(null);
-                // TODO compare contest times
-// if (!contestTime.isSameAs(changedContestTime)) {
-// enableButton = true;
-// }
+
+                enableButton |= contestTime.isHaltContestAtTimeZero() == changedContestTime.isHaltContestAtTimeZero();
+                enableButton |= contestTime.getElapsedTimeStr().equals(changedContestTime.getElapsedTimeStr());
+                enableButton |= contestTime.getContestLengthStr().equals(changedContestTime.getContestLengthStr());
+                enableButton |= contestTime.getRemainingTimeStr().equals(changedContestTime.getRemainingTimeStr());
 
             } catch (InvalidFieldValue e) {
                 // invalid field, but that is ok as they are entering data
@@ -178,11 +195,9 @@ public class ContestTimePane extends JPanePlugin {
                 StaticLog.getLog().log(Log.DEBUG, "Input ContestTime (but not saving) ", e);
                 enableButton = true;
             }
-
         }
 
         enableUpdateButtons(enableButton);
-
     }
 
     /**
@@ -197,14 +212,41 @@ public class ContestTimePane extends JPanePlugin {
      */
     public ContestTime getContestTimeFromFields(ContestTime checkContestTime) throws InvalidFieldValue {
 
-        // TODO code
-        
-// if (checkContestTime == null) {
-// checkContestTime = new ContestTime(contestTimeNameTextField.getText());
-// }
+        long secs = stringToLongSecs(getElapsedTimeTextBox().getText());
+        if (secs == -1) {
+            throw new InvalidFieldValue("Invalid elapsed time");
+        }
+
+        long elapsedTime = secs;
+
+        secs = stringToLongSecs(getRemainingTimeTextBox().getText());
+        if (secs == -1) {
+            throw new InvalidFieldValue("Invalid remaining time");
+        }
+
+        long remainingTime = secs;
+
+        secs = stringToLongSecs(getContestLengthTextBox().getText());
+        if (secs == -1) {
+            throw new InvalidFieldValue("Invalid contest length");
+        }
+
+        long contestLength = secs;
+
+        long actualRemaining = contestLength - elapsedTime;
+
+        if (actualRemaining != remainingTime) {
+            throw new InvalidFieldValue("Invalid contest times, set remaining to " + ContestTime.formatTime(actualRemaining));
+        }
+
+        if (checkContestTime == null) {
+            checkContestTime = new ContestTime(0);
+        }
+        checkContestTime.setContestLengthSecs(contestLength);
+        checkContestTime.setRemainingSecs(remainingTime);
+        // elapsed is calculate in setRemainingSecs
 
         return checkContestTime;
-
     }
 
     /**
@@ -244,7 +286,7 @@ public class ContestTimePane extends JPanePlugin {
         }
 
         // TODO code
-// getController().updateContestTime(newContestTime);
+        // getController().updateContestTime(newContestTime);
 
         cancelButton.setText("Close");
         updateButton.setEnabled(false);
@@ -261,10 +303,26 @@ public class ContestTimePane extends JPanePlugin {
      */
     private boolean validateContestTimeFields() {
 
+        long secs = stringToLongSecs(getElapsedTimeTextBox().getText());
+        if (secs == -1) {
+            showMessage("Invalid elapsed time");
+            return false;
+        }
+
+        secs = stringToLongSecs(getRemainingTimeTextBox().getText());
+        if (secs == -1) {
+            showMessage("Invalid remaining time");
+            return false;
+        }
+
+        secs = stringToLongSecs(getContestLengthTextBox().getText());
+        if (secs == -1) {
+            showMessage("Invalid contest length");
+            return false;
+        }
+
         return true;
     }
-
- 
 
     /**
      * This method initializes cancelButton
@@ -288,14 +346,13 @@ public class ContestTimePane extends JPanePlugin {
     protected void handleCancelButton() {
 
         if (getUpdateButton().isEnabled()) {
-
             // Something changed, are they sure ?
 
             int result = FrameUtilities.yesNoCancelDialog("ContestTime modified, save changes?", "Confirm Choice");
 
             if (result == JOptionPane.YES_OPTION) {
                 updateContestTime();
-                
+
                 if (getParentFrame() != null) {
                     getParentFrame().setVisible(false);
                 }
@@ -304,8 +361,8 @@ public class ContestTimePane extends JPanePlugin {
                     getParentFrame().setVisible(false);
                 }
             }
-
         } else {
+            // Close
             if (getParentFrame() != null) {
                 getParentFrame().setVisible(false);
             }
@@ -333,24 +390,12 @@ public class ContestTimePane extends JPanePlugin {
 
         populatingGUI = true;
 
-        if (inContestTime != null) {
+        getRemainingTimeTextBox().setText(inContestTime.getRemainingTimeStr());
+        getElapsedTimeTextBox().setText(inContestTime.getElapsedTimeStr());
+        getContestLengthTextBox().setText(inContestTime.getContestLengthStr());
 
-            getUpdateButton().setVisible(true);
-
-            try {
-                @SuppressWarnings("unused")
-                ContestTime changedContestTime = getContestTimeFromFields(null);
-            } catch (InvalidFieldValue e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-
-        } else {
-
-            getUpdateButton().setVisible(false);
-            updateButton.setEnabled(false);
-
-        }
+        getUpdateButton().setVisible(true);
+        enableUpdateButtons(false);
 
         populatingGUI = false;
     }
@@ -380,15 +425,15 @@ public class ContestTimePane extends JPanePlugin {
     private JPanel getCenterPane() {
         if (centerPane == null) {
             contestLengthLabel = new JLabel();
-            contestLengthLabel.setBounds(new java.awt.Rectangle(79, 120, 110, 23));
+            contestLengthLabel.setBounds(new java.awt.Rectangle(60, 103, 110, 23));
             contestLengthLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
             contestLengthLabel.setText("Contest Length");
             elapsedTimeLabel = new JLabel();
-            elapsedTimeLabel.setBounds(new java.awt.Rectangle(79, 73, 110, 23));
+            elapsedTimeLabel.setBounds(new java.awt.Rectangle(60, 60, 110, 23));
             elapsedTimeLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
             elapsedTimeLabel.setText("Elapsed Time");
             remaingingTimeLabel = new JLabel();
-            remaingingTimeLabel.setBounds(new java.awt.Rectangle(79, 26, 110, 23));
+            remaingingTimeLabel.setBounds(new java.awt.Rectangle(60, 17, 110, 23));
             remaingingTimeLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
             remaingingTimeLabel.setText("Remaining Time");
             centerPane = new JPanel();
@@ -398,7 +443,8 @@ public class ContestTimePane extends JPanePlugin {
             centerPane.add(elapsedTimeLabel, null);
             centerPane.add(getElapsedTimeTextBox(), null);
             centerPane.add(contestLengthLabel, null);
-            centerPane.add(getContestLenthTextBox(), null);
+            centerPane.add(getContestLengthTextBox(), null);
+            centerPane.add(getStopAtEndofContestCheckBox(), null);
         }
         return centerPane;
     }
@@ -411,7 +457,12 @@ public class ContestTimePane extends JPanePlugin {
     private JTextField getRemainingTimeTextBox() {
         if (remainingTimeTextBox == null) {
             remainingTimeTextBox = new JTextField();
-            remainingTimeTextBox.setBounds(new java.awt.Rectangle(210, 22, 115, 29));
+            remainingTimeTextBox.setBounds(new java.awt.Rectangle(191, 14, 115, 29));
+            remainingTimeTextBox.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyTyped(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
         }
         return remainingTimeTextBox;
     }
@@ -424,7 +475,12 @@ public class ContestTimePane extends JPanePlugin {
     private JTextField getElapsedTimeTextBox() {
         if (elapsedTimeTextBox == null) {
             elapsedTimeTextBox = new JTextField();
-            elapsedTimeTextBox.setBounds(new java.awt.Rectangle(210, 68, 115, 29));
+            elapsedTimeTextBox.setBounds(new java.awt.Rectangle(191, 57, 115, 29));
+            elapsedTimeTextBox.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyTyped(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
         }
         return elapsedTimeTextBox;
     }
@@ -434,12 +490,94 @@ public class ContestTimePane extends JPanePlugin {
      * 
      * @return javax.swing.JTextField
      */
-    private JTextField getContestLenthTextBox() {
-        if (contestLenthTextBox == null) {
-            contestLenthTextBox = new JTextField();
-            contestLenthTextBox.setBounds(new java.awt.Rectangle(210, 117, 115, 29));
+    private JTextField getContestLengthTextBox() {
+        if (contestLengthTextBox == null) {
+            contestLengthTextBox = new JTextField();
+            contestLengthTextBox.setBounds(new java.awt.Rectangle(191, 100, 115, 29));
+            contestLengthTextBox.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyTyped(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
         }
-        return contestLenthTextBox;
+        return contestLengthTextBox;
     }
-    
+
+    /**
+     * This method initializes jCheckBox
+     * 
+     * @return javax.swing.JCheckBox
+     */
+    private JCheckBox getStopAtEndofContestCheckBox() {
+        if (stopAtEndofContestCheckBox == null) {
+            stopAtEndofContestCheckBox = new JCheckBox();
+            stopAtEndofContestCheckBox.setBounds(new java.awt.Rectangle(194, 143, 202, 21));
+            stopAtEndofContestCheckBox.setText("Stop Clock at end of contest");
+            stopAtEndofContestCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableUpdateButton();
+                }
+            });
+        }
+        return stopAtEndofContestCheckBox;
+    }
+
+    /**
+     * Convert String to second. Expects input in form: ss or mm:ss or hh:mm:ss
+     * 
+     * @param s
+     *            string to be converted to seconds
+     * @return -1 if invalid time string, 0 or >0 if valid
+     */
+    public long stringToLongSecs(String s) {
+
+        if (s == null || s.trim().length() == 0) {
+            return -1;
+        }
+
+        String[] fields = s.split(":");
+
+        long hh = stringToLong(fields[0]);
+        long mm = stringToLong(fields[1]);
+        long ss = stringToLong(fields[2]);
+
+        // System.out.println(" values "+hh+":"+mm+":"+ss);
+
+        long totsecs = 0;
+        if (hh != -1) {
+            totsecs = hh;
+        }
+        if (mm != -1) {
+            totsecs = (totsecs * 60) + mm;
+        }
+        if (ss != -1) {
+            totsecs = (totsecs * 60) + ss;
+        }
+
+        // System.out.println(" values "+hh+":"+mm+":"+ss+" secs="+totsecs);
+
+        if (hh == -1 || mm == -1 || ss == -1) {
+            return -1;
+        }
+
+        return totsecs;
+    }
+
+    /**
+     * Parse and return positive long.
+     * 
+     * @param s1
+     * @return -1 if non-long string, else long value
+     */
+    private long stringToLong(String s1) {
+        if (s1 == null) {
+            return -1;
+        }
+        try {
+            return Long.parseLong(s1);
+        } catch (Exception e) {
+            return -1;
+        }
+    }
+
 } // @jve:decl-index=0:visual-constraint="10,10"

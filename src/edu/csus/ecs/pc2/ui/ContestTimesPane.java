@@ -29,7 +29,7 @@ import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
 
 /**
- * Contest Times Pane.
+ * Contest Times Pane/Grid.
  * 
  * Shows contest times at all sites.
  * 
@@ -265,6 +265,8 @@ public class ContestTimesPane extends JPanePlugin {
         getContest().addSiteListener(new SiteListenerImplementation());
 
         getContest().addAccountListener(new AccountListenerImplementation());
+
+        editContestTimeFrame.setContestAndController(inContest, inController);
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
