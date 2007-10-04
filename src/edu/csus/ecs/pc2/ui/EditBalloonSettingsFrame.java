@@ -43,6 +43,7 @@ public class EditBalloonSettingsFrame extends JFrame implements UIPlugin {
      */
     private void initialize() {
         this.setSize(new java.awt.Dimension(618,339));
+        this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setContentPane(getBalloonSettingPane());
         this.setTitle("Edit Balloon Settings");
 

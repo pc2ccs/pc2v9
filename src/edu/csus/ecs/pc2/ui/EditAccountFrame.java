@@ -43,6 +43,7 @@ public class EditAccountFrame extends JFrame implements UIPlugin {
      */
     private void initialize() {
         this.setSize(new java.awt.Dimension(549,349));
+        this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setContentPane(getAccountPane());
         this.setTitle("New Account");
 

@@ -43,6 +43,7 @@ public class EditLanguageFrame extends JFrame implements UIPlugin {
      */
     private void initialize() {
         this.setSize(new java.awt.Dimension(549, 278));
+        this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setContentPane(getLanguagePane());
         this.setTitle("New Language");
 
