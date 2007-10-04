@@ -213,7 +213,7 @@ public class Contest implements IContest {
         }
 
         if (getAccounts(Type.ADMINISTRATOR) != null){
-            generateNewAccounts(ClientType.Type.ADMINISTRATOR.toString(), siteNum, true);
+            generateNewAccounts(ClientType.Type.ADMINISTRATOR.toString(), 1, true);
         }
     }
 
