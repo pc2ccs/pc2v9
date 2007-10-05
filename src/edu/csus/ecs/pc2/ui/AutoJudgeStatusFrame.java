@@ -1,9 +1,11 @@
 package edu.csus.ecs.pc2.ui;
 
-import javax.swing.JPanel;
 import java.awt.BorderLayout;
+
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 /**
  * Auto Judge Status Frame.
@@ -32,7 +34,7 @@ public class AutoJudgeStatusFrame extends javax.swing.JFrame {
 
     private JLabel messageLabel = null;
 
-    private JLabel stuf = null;
+    private JLabel bigAutoJudgeStatusLabel = null;
 
     /**
      * This method initializes
@@ -49,6 +51,7 @@ public class AutoJudgeStatusFrame extends javax.swing.JFrame {
      */
     private void initialize() {
         this.setSize(new java.awt.Dimension(519, 251));
+        this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setContentPane(getMainAJStausPane());
         this.setTitle("Auto Judge Status");
 
@@ -91,13 +94,13 @@ public class AutoJudgeStatusFrame extends javax.swing.JFrame {
      */
     private JPanel getCenterPane() {
         if (centerPane == null) {
-            stuf = new JLabel();
-            stuf.setText("Waiting for runs");
-            stuf.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-            stuf.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 36));
+            bigAutoJudgeStatusLabel = new JLabel();
+            bigAutoJudgeStatusLabel.setText("Waiting for runs");
+            bigAutoJudgeStatusLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+            bigAutoJudgeStatusLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 36));
             centerPane = new JPanel();
             centerPane.setLayout(new BorderLayout());
-            centerPane.add(stuf, java.awt.BorderLayout.CENTER);
+            centerPane.add(bigAutoJudgeStatusLabel, java.awt.BorderLayout.CENTER);
         }
         return centerPane;
     }
@@ -130,8 +133,37 @@ public class AutoJudgeStatusFrame extends javax.swing.JFrame {
         if (stopAutoJudgingButton == null) {
             stopAutoJudgingButton = new JButton();
             stopAutoJudgingButton.setText("Stop AutoJudging");
+            stopAutoJudgingButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    System.err.println("debug - You can't stop... Auto Judging.  Sorry :(");
+                }
+            });
         }
         return stopAutoJudgingButton;
+    }
+    
+    /**
+     * Show message at top of frame.
+     * @param message
+     */
+    public void updateMessage(final String message){
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                messageLabel.setText(message);
+            }
+        });
+    }
+    
+    /**
+     * Update big message in center of frame.
+     * @param bigMessage
+     */
+    public void updateStatusLabel (final String bigMessage) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                bigAutoJudgeStatusLabel.setText(bigMessage);
+            }
+        });
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
