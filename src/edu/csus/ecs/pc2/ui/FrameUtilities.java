@@ -7,8 +7,7 @@ import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
 /**
- * Methods to center frame, change cursor, etc.
- * <br>
+ * Methods to center frame, change cursor, etc. <br>
  * Contains method to change look and feel, set cursor state, center windows and a yes no dialog with cancel as default.
  * 
  * @author pc2@ecs.csus
@@ -20,10 +19,29 @@ public final class FrameUtilities {
 
     /**
      * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    public enum HorizontalPosition {
+        LEFT, RIGHT, CENTER, NO_CHANGE
+    };
+
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+
+    public enum VerticalPosition {
+        TOP, CENTER, BOTTOM, NO_CHANGE
+    }
+
+    /**
+     * 
      */
     private static final long serialVersionUID = -1342163314986200464L;
-    
-    private FrameUtilities () {
+
+    private FrameUtilities() {
         // Constructor required by CheckEclipse
     }
 
@@ -58,8 +76,7 @@ public final class FrameUtilities {
      */
     public static void centerFrame(Component component) {
         java.awt.Dimension screenDim = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        component.setLocation(screenDim.width / 2 - component.getSize().width / 2, screenDim.height / 2
-                - component.getSize().height / 2);
+        component.setLocation(screenDim.width / 2 - component.getSize().width / 2, screenDim.height / 2 - component.getSize().height / 2);
     }
 
     /**
@@ -99,7 +116,7 @@ public final class FrameUtilities {
     public static void regularCursor(Component component) {
         component.setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.DEFAULT_CURSOR));
     }
-    
+
     /**
      * Puts this frame/component to right of input frame.
      * 
@@ -130,11 +147,10 @@ public final class FrameUtilities {
 
         Object[] options = { "Yes", "No", "Cancel" };
 
-        int result = JOptionPane.showOptionDialog(null, message, title, JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
-                null, options, options[2]);
+        int result = JOptionPane.showOptionDialog(null, message, title, JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[2]);
         return result;
     }
-    
+
     /**
      * Create this lovely window with full height of screen
      */
@@ -149,6 +165,32 @@ public final class FrameUtilities {
 
         component.setLocation(screenDim.width / 2 - component.getSize().width / 2, screenDim.height / 2 - component.getSize().height / 2);
 
+    }
+
+    public static void setFramePosition(Component component, HorizontalPosition horizontalPosition, VerticalPosition verticalPosition) {
+
+        java.awt.Dimension screenDim = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+
+        int newX = component.getX();
+        int newY = component.getY();
+        
+        if (verticalPosition == VerticalPosition.TOP){
+            newY = 20;
+        } else if (verticalPosition == VerticalPosition.BOTTOM){
+            newY = screenDim.height - component.getSize().height - 20;
+        } else if (verticalPosition == VerticalPosition.CENTER){
+            newY = screenDim.height / 2 - component.getSize().height / 2;
+        }
+
+        if (horizontalPosition == HorizontalPosition.LEFT) {
+            newX = 20;
+        } else if (horizontalPosition == HorizontalPosition.RIGHT) {
+            newX = screenDim.width - component.getSize().width - 20;
+        } else if (horizontalPosition == HorizontalPosition.CENTER) {
+            newX = screenDim.width / 2 - component.getSize().width / 2;
+        } // else no change
+
+        component.setLocation(newX, newY);
     }
 
 }
