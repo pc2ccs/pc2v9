@@ -22,18 +22,21 @@ import edu.csus.ecs.pc2.ui.JPanePlugin;
 import edu.csus.ecs.pc2.ui.LogWindow;
 import edu.csus.ecs.pc2.ui.OptionsPanel;
 import edu.csus.ecs.pc2.ui.RunsPanel;
+import edu.csus.ecs.pc2.ui.SubmissionBiffFrame;
+import edu.csus.ecs.pc2.ui.SubmissionBiffPane;
 import edu.csus.ecs.pc2.ui.SubmitRunPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
+import edu.csus.ecs.pc2.ui.FrameUtilities.HorizontalPosition;
+import edu.csus.ecs.pc2.ui.FrameUtilities.VerticalPosition;
 
 /**
  * Judge GUI.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id$ 
+ * @version $Id$
  */
 
-//$HeadURL$
-
+// $HeadURL$
 public class JudgeView extends JFrame implements UIPlugin {
 
     /**
@@ -63,6 +66,10 @@ public class JudgeView extends JFrame implements UIPlugin {
     private JButton exitButton = null;
 
     private JLabel timeLabel = null;
+
+    private JPanel northPane = null;
+
+    private JPanel judgeBiffPane = null;
 
     public JudgeView() {
         super();
@@ -108,7 +115,6 @@ public class JudgeView extends JFrame implements UIPlugin {
 
         plugin.setContestAndController(contest, controller);
         tabbedPane.add(plugin, tabTitle);
-
     }
 
     private void setFrameTitle(final boolean contestStarted) {
@@ -135,7 +141,7 @@ public class JudgeView extends JFrame implements UIPlugin {
         }
         logWindow.setContestAndController(contest, controller);
         logWindow.setTitle("Log " + contest.getClientId().toString());
-        
+
         contest.addContestTimeListener(new ContestTimeListenerImplementation());
 
         setFrameTitle(contest.getContestTime().isContestRunning());
@@ -161,6 +167,17 @@ public class JudgeView extends JFrame implements UIPlugin {
         OptionsPanel optionsPanel = new OptionsPanel();
         addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
         optionsPanel.setLogWindow(logWindow);
+
+        SubmissionBiffFrame submissionBiffFrame = new SubmissionBiffFrame();
+        submissionBiffFrame.setContestAndController(contest, controller);
+        FrameUtilities.setFramePosition(submissionBiffFrame, HorizontalPosition.RIGHT, VerticalPosition.TOP);
+        submissionBiffFrame.setFontSize(56);
+        submissionBiffFrame.setVisible(true);
+        
+        SubmissionBiffPane submissionBiffPane = new SubmissionBiffPane();
+        getJudgeBiffPane().add(submissionBiffPane, java.awt.BorderLayout.CENTER);
+        submissionBiffPane.setContestAndController(contest, controller);
+
     }
 
     public String getPluginTitle() {
@@ -215,8 +232,8 @@ public class JudgeView extends JFrame implements UIPlugin {
         if (mainPane == null) {
             mainPane = new JPanel();
             mainPane.setLayout(new BorderLayout());
-            mainPane.add(getMessagePane(), java.awt.BorderLayout.NORTH);
             mainPane.add(getCenterPane(), java.awt.BorderLayout.CENTER);
+            mainPane.add(getNorthPane(), java.awt.BorderLayout.NORTH);
         }
         return mainPane;
     }
@@ -262,18 +279,17 @@ public class JudgeView extends JFrame implements UIPlugin {
         });
 
     }
-    
-    protected boolean isThisSite (int siteNumber){
+
+    protected boolean isThisSite(int siteNumber) {
         return contest.getSiteNumber() == siteNumber;
     }
-    
-    
+
     /**
      * 
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
-    
+
     class ContestTimeListenerImplementation implements IContestTimeListener {
 
         public void contestTimeAdded(ContestTimeEvent event) {
@@ -286,8 +302,8 @@ public class JudgeView extends JFrame implements UIPlugin {
 
         public void contestTimeChanged(ContestTimeEvent event) {
             ContestTime contestTime = event.getContestTime();
-            if (isThisSite(contestTime.getSiteNumber())){
-                setFrameTitle (contestTime.isContestRunning());
+            if (isThisSite(contestTime.getSiteNumber())) {
+                setFrameTitle(contestTime.isContestRunning());
             }
         }
 
@@ -298,9 +314,37 @@ public class JudgeView extends JFrame implements UIPlugin {
         public void contestStopped(ContestTimeEvent event) {
             contestTimeChanged(event);
         }
-        
+
     }
-    
-   
+
+    /**
+     * This method initializes northPane
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getNorthPane() {
+        if (northPane == null) {
+            northPane = new JPanel();
+            northPane.setLayout(new BorderLayout());
+            northPane.setPreferredSize(new java.awt.Dimension(65,65));
+            northPane.add(getMessagePane(), java.awt.BorderLayout.NORTH);
+            northPane.add(getJudgeBiffPane(), java.awt.BorderLayout.CENTER);
+        }
+        return northPane;
+    }
+
+    /**
+     * This method initializes judgeBiffPane
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getJudgeBiffPane() {
+        if (judgeBiffPane == null) {
+            judgeBiffPane = new JPanel();
+            judgeBiffPane.setLayout(new BorderLayout());
+            judgeBiffPane.setPreferredSize(new java.awt.Dimension(35, 35));
+        }
+        return judgeBiffPane;
+    }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
