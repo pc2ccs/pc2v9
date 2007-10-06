@@ -103,38 +103,35 @@ public final class Utilities {
     }
 
     /**
-     * Returns vector of lines/String from file.
-     *
+     * Returns lines from file.
+     * 
      * @param filename
      *            String file to load
-     * @return Vector<String> lines from file.
+     * @return lines from file
+     * @throws IOException
      */
-    public static String[] loadFile(String filename) {
-        Vector<String> lines = new Vector <String>();
+    public static String[] loadFile(String filename) throws IOException {
+        Vector<String> lines = new Vector<String>();
 
         if (filename == null) {
             throw new IllegalArgumentException("filename is null");
         }
 
-        try {
-            if (!new File(filename).exists()) {
-                return new String[0];
-            }
-
-            FileReader fileReader = new FileReader(filename);
-            BufferedReader in = new BufferedReader(fileReader);
-            String line = in.readLine();
-            while (line != null) {
-                lines.addElement(line);
-                line = in.readLine();
-            }
-            in.close();
-            fileReader.close();
-            in = null;
-            fileReader = null;
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (!new File(filename).exists()) {
+            return new String[0];
         }
+
+        FileReader fileReader = new FileReader(filename);
+        BufferedReader in = new BufferedReader(fileReader);
+        String line = in.readLine();
+        while (line != null) {
+            lines.addElement(line);
+            line = in.readLine();
+        }
+        in.close();
+        fileReader.close();
+        in = null;
+        fileReader = null;
 
         if (lines.size() == 0) {
             return new String[0];
@@ -164,7 +161,7 @@ public final class Utilities {
             return ".";
         }
     }
-    
+
     /**
      * Returns Yes if true, No if false.
      * @param b
@@ -177,4 +174,42 @@ public final class Utilities {
             return "No";
         }
     }
+
+    /**
+     * Load INI file.
+     * 
+     * This will read a text file and strip out blank/empty lines
+     * and lines that start with a hash mark.
+     * <P>
+     * This will also trim the input lines.
+     * 
+     * @param filename file to be read
+     * @return String [] null if can't read/find file, else lines infile
+     */
+    public static String[] loadINIFile(String filename) {
+
+        Vector<String> v = new Vector<String>();
+
+        try {
+            RandomAccessFile file = new RandomAccessFile(filename, "r");
+            String line;
+
+            while ((line = file.readLine()) != null) {
+                line = line.trim();
+                if (line.length() > 0) {
+                    if (line.charAt(0) != '#') {
+                        v.addElement(line);
+                    }
+                }
+            }
+
+            file.close();
+            file = null;
+        } catch (Exception e) {
+            return null;
+        }
+        
+        return (String[]) v.toArray(new String[v.size()]);
+    }
+
 }

@@ -27,6 +27,8 @@ import edu.csus.ecs.pc2.core.log.Log;
  * </pre>
  * 
  * @author pc2@ecs.csus.edu.
+ * @version $Id$
+ * 
  */
 // $HeadURL: http://pc2.ecs.csus.edu/repos/v9wip/trunk/src/edu/csus/ecs/pc2/VersionInfo.java$
 public class VersionInfo {
@@ -141,7 +143,7 @@ public class VersionInfo {
      * Print list of OS, Java and PC2 version information.
      * 
      * @param args
-     *            arguements to control what is printed.
+     *            arguments to control what is printed.
      */
     public static void main(java.lang.String[] args) {
         String javaVer = System.getProperty("java.version", "?");
@@ -242,31 +244,34 @@ public class VersionInfo {
      */
     protected void loadVersionInfoFromFile(String filename) {
 
-        String[] lines = Utilities.loadFile(filename);
+        try {
+            String[] lines = Utilities.loadFile(filename);
 
-        if (lines.length == 0) {
-            System.err.println("Unable to read " + filename + " version information unavailable");
-        } else if (lines.length < 2) {
-            System.err.println("Unable to find version information in " + filename + ", version information unavailable");
-        } else {
-            String[] fields = lines[1].split("\\s+");
-
-            if (fields.length == 10) {
-                setVersionNumber(fields[1] + " " + fields[2]);
-                String versionString = fields[4] + " " + fields[5] + " " + fields[6] + addNumberEnding(fields[6]) + " " + fields[7]
-                        + " " + fields[8] + " " + fields[9];
-                setVersionDate(versionString.substring(1, versionString.length() - 1));
-                setBuildNumber(fields[3]);
+            if (lines.length == 0) {
+                System.err.println("Unable to read " + filename + " version information unavailable");
+            } else if (lines.length < 2) {
+                System.err.println("Unable to find version information in " + filename + ", version information unavailable");
             } else {
-                System.err.println("Incorrect number of fields on line 2 in file: \"" + filename
-                        + "\", version information unavailable");
-                System.err.println("Expecting 10 fields, found " + fields.length + " fields.");
+                String[] fields = lines[1].split("\\s+");
+
+                if (fields.length == 10) {
+                    setVersionNumber(fields[1] + " " + fields[2]);
+                    String versionString = fields[4] + " " + fields[5] + " " + fields[6] + addNumberEnding(fields[6]) + " " + fields[7] + " " + fields[8] + " " + fields[9];
+                    setVersionDate(versionString.substring(1, versionString.length() - 1));
+                    setBuildNumber(fields[3]);
+                } else {
+                    System.err.println("Incorrect number of fields on line 2 in file: \"" + filename + "\", version information unavailable");
+                    System.err.println("Expecting 10 fields, found " + fields.length + " fields.");
+                }
             }
+        } catch (Exception e) {
+            System.err.println("Exception loading "+filename);
+            e.printStackTrace(System.err);
         }
     }
 
     /**
-     * Retreives version info from the manifest and checks against what has been set
+     * Retrieves version info from the manifest and checks against what has been set
      * from reading the VERSION file.
      * 
      * @return 1 if the version number do not match, 2 if the build numbers do not match, otherwise 0 
