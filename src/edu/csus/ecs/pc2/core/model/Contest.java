@@ -511,7 +511,9 @@ public class Contest implements IContest {
     public void updateClarification(Clarification clarification, ClientId whoChangedIt) {
         clarificationList.updateClarification(clarification);
         ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.CHANGED, clarification);
-        clarificationEvent.setWhoModifiedClarification(whoChangedIt);
+        if (whoChangedIt != null){
+            clarificationEvent.setWhoModifiedClarification(whoChangedIt);
+        }
         fireClarificationListener(clarificationEvent);
     }
 

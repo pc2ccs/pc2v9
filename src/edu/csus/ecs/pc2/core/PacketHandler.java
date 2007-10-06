@@ -1394,7 +1394,11 @@ public class PacketHandler {
                 for (Clarification clarification : clarifications) {
 
                     if ( (!isServer()) || (!isThisSite(clarification))) {
-                        contest.addClarification(clarification);
+                        if (contest.getClarification(clarification.getElementId()) != null){
+                            contest.updateClarification(clarification, null);
+                        } else {
+                            contest.addClarification(clarification);
+                        }
                     }
                 }
             }
@@ -1530,6 +1534,11 @@ public class PacketHandler {
 
    
 
+    /**
+     * Add logins from remote site.
+     * @param packet
+     * @param remoteSiteNumber
+     */
     private void addRemoteLoginsToModel(Packet packet, int remoteSiteNumber) {
 
         try {
@@ -1540,7 +1549,7 @@ public class PacketHandler {
                     if (remoteSiteNumber == clientId.getSiteNumber()) {
 
                         // TODO someday soon load logins with their connectionIds
-                        ConnectionHandlerID fakeId = new ConnectionHandlerID("Fake-Site" + clientId.getSiteNumber());
+                        ConnectionHandlerID fakeId = new ConnectionHandlerID("FauxSite" + clientId.getSiteNumber()+"-");
                         contest.addRemoteLogin(clientId, fakeId);
                     }
                 }
@@ -1654,7 +1663,7 @@ public class PacketHandler {
         }
     }
 
-    
+
     private void addRemoteContestTimes(Packet packet) {
         try {
             ContestTime[] contestTimes = (ContestTime[]) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME_LIST);
@@ -1732,30 +1741,24 @@ public class PacketHandler {
         controller.setSiteNumber(clientId.getSiteNumber());
 
         addSitesToModel(packet);
+        
 
         // Load local settings
         controller.initializeServer();
-        
-        try {
-            Language[] languages = (Language[]) PacketFactory.getObjectValue(packet, PacketFactory.LANGUAGE_LIST);
-            if (languages != null) {
-                for (Language language : languages) {
-                    contest.addLanguage(language);
-                }
-            }
-        } catch (Exception e) {
-            // TODO: log handle exception
-            controller.getLog().log(Log.WARNING,"Exception logged ", e);
-        }
+
+        addLanguagesToModel(packet);
         
         addProblemsToModel(packet);
 
-        
         try {
             Judgement[] judgements = (Judgement[]) PacketFactory.getObjectValue(packet, PacketFactory.JUDGEMENT_LIST);
             if (judgements != null) {
                 for (Judgement judgement : judgements) {
-                    contest.addJudgement(judgement);
+                    if (contest.getJudgement(judgement.getElementId()) != null){
+                        contest.updateJudgement(judgement);
+                    } else {
+                        contest.addJudgement(judgement);
+                    }
                 }
             }
         } catch (Exception e) {
@@ -1832,6 +1835,27 @@ public class PacketHandler {
         }
     }
 
+    private void addLanguagesToModel(Packet packet) {
+
+        try {
+            Language[] languages = (Language[]) PacketFactory.getObjectValue(packet, PacketFactory.LANGUAGE_LIST);
+            if (languages != null) {
+                for (Language language : languages) {
+                    if (contest.getLanguage(language.getElementId()) != null){
+                        contest.updateLanguage(language);
+                    } else {
+                        contest.addLanguage(language);
+                   }
+                }
+            }
+        } catch (Exception e) {
+            // TODO: log handle exception
+            controller.getLog().log(Log.WARNING,"Exception logged ", e);
+        }
+
+        
+    }
+
     /**
      * Initialize this sites contest time.
      *
@@ -1880,7 +1904,7 @@ public class PacketHandler {
                     
                     if (isServer()) {
                         if (!isThisSite(clientId)) {
-                            // only add settings if not this site.
+                            // only add settings if NOT this site.
                             contest.updateClientSettings(clientSettings2);
                         }
                     } else {
@@ -1926,7 +1950,13 @@ public class PacketHandler {
                     
                     // Now add both problem and potentially problem data files into contest.
                     
-                    contest.addProblem(problem, (ProblemDataFiles) problemDataFilesList.get(problem));
+                    if (contest.getProblem(problem.getElementId()) != null) {
+                        contest.updateProblem(problem, (ProblemDataFiles) problemDataFilesList.get(problem));
+                    } else {
+                        contest.addProblem(problem, (ProblemDataFiles) problemDataFilesList.get(problem));
+                        
+                    }
+                    
                 }
             }
         } catch (Exception e) {
