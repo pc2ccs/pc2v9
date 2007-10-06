@@ -2,13 +2,17 @@ package edu.csus.ecs.pc2.ui;
 
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.ui.FrameUtilities.HorizontalPosition;
+import edu.csus.ecs.pc2.ui.FrameUtilities.VerticalPosition;
+
 import javax.swing.JCheckBox;
+import javax.swing.JPanel;
+import java.awt.BorderLayout;
 
 /**
  * Options Pane, Show Log checkbox.
  * 
- * You must invoke {@link #setLogWindow(LogWindow)} for Show
- * Log checkbox to enable. 
+ * You must invoke {@link #setLogWindow(LogWindow)} for Show Log checkbox to enable.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -26,6 +30,10 @@ public class OptionsPanel extends JPanePlugin {
 
     private JCheckBox showLogWindowCheckbox = null;
 
+    private ReportFrame reportFrame;
+
+    private JPanel contentPane = null;
+
     /**
      * This method initializes
      * 
@@ -40,9 +48,19 @@ public class OptionsPanel extends JPanePlugin {
      * 
      */
     private void initialize() {
+        this.setLayout(new BorderLayout());
         this.setSize(new java.awt.Dimension(453, 259));
-        this.add(getShowLogWindowCheckbox(), null);
+        this.add(getContentPane(), java.awt.BorderLayout.CENTER);
 
+    }
+
+    protected void showReportFrame() {
+        if (reportFrame == null) {
+            reportFrame = new ReportFrame();
+            reportFrame.setContestAndController(getContest(), getController());
+        }
+        FrameUtilities.setFramePosition(reportFrame, HorizontalPosition.RIGHT, VerticalPosition.CENTER);
+        reportFrame.setVisible(true);
     }
 
     public void setContestAndController(IContest inContest, IController inController) {
@@ -66,7 +84,7 @@ public class OptionsPanel extends JPanePlugin {
      */
     public void setLogWindow(LogWindow logWindow) {
         this.logWindow = logWindow;
-        if (logWindow != null){
+        if (logWindow != null) {
             getShowLogWindowCheckbox().setEnabled(true);
         }
     }
@@ -93,6 +111,26 @@ public class OptionsPanel extends JPanePlugin {
 
     protected void showLog(boolean showLogWindow) {
         logWindow.setVisible(showLogWindow);
+    }
+
+    /**
+     * This method initializes contentPane
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getContentPane() {
+        if (contentPane == null) {
+            contentPane = new JPanel();
+            contentPane.add(getShowLogWindowCheckbox(), null);
+            contentPane.addMouseListener(new java.awt.event.MouseAdapter() {
+                public void mouseClicked(java.awt.event.MouseEvent e) {
+                    if (e.getClickCount() > 1 && e.isControlDown() && e.isShiftDown()) {
+                        showReportFrame();
+                    }
+                }
+            });
+        }
+        return contentPane;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
