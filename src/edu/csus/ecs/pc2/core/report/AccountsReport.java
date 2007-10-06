@@ -13,10 +13,12 @@ import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.Site;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.security.Permission;
 
 /**
@@ -120,8 +122,13 @@ public class AccountsReport implements IReport {
                     printWriter.println(" id=" + account.getElementId());
                     
                     printWriter.format("%22s"," ");
-                    printWriter.print("'"+account.getDisplayName()+"' password '"+account.getPassword()+"' ");
-
+                    printWriter.print("'"+account.getDisplayName()+"' ");
+                    ClientId clientId = contest.getClientId();
+                    
+                    if (clientId.getClientType().equals(Type.ADMINISTRATOR) || clientId.getClientType().equals(Type.SERVER)) {
+                        printWriter.print("password '" + account.getPassword() + "' ");
+                    }
+                    
                     Permission.Type type = Permission.Type.LOGIN;
                     if (account.isAllowed(type)){
                         printWriter.print(type+" ");
