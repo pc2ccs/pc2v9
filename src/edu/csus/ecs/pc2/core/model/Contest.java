@@ -39,7 +39,7 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
  */
 
 // $HeadURL$
-// $Id$
+
 public class Contest implements IContest {
 
     public static final String SVN_ID = "$Id$";
@@ -208,26 +208,11 @@ public class Contest implements IContest {
             generateNewAccounts(Type.SERVER.toString(), 1, true);
         }
         
-        if (getJudgements().length == 0){
-            loadJudgements();
-        }
-
         if (getAccounts(Type.ADMINISTRATOR) != null){
             generateNewAccounts(ClientType.Type.ADMINISTRATOR.toString(), 1, true);
         }
     }
 
-    private void loadJudgements() {
-        String[] judgementNames = { "Yes", "No - Compilation Error", "No - Run-time Error", "No - Time-limit Exceeded", "No - Wrong Answer", "No - Excessive Output", "No - Output Format Error",
-                "No - Other - Contact Staff" };
-
-        // TODO load judgements from reject.ini
-
-        for (String judgementName : judgementNames) {
-            Judgement judgement = new Judgement(judgementName);
-            addJudgement(judgement);
-        }
-    }
 
     public void addRunListener(IRunListener runListener) {
         runListenerList.addElement(runListener);
@@ -945,7 +930,7 @@ public class Contest implements IContest {
             // No one did this ?
 
             Exception ex = new Exception("addRunJudgement - not in checkedout list, whoCheckedOut is null ");
-            StaticLog.log("debug ", ex);
+            StaticLog.log("Odd that. ", ex);
             info("Exception in log" + ex.getMessage());
 
         } else if (!whoChangedItId.equals(whoCheckedOut)) {
@@ -959,16 +944,12 @@ public class Contest implements IContest {
                 info("Exception in log" + ex.getMessage());
             }
 
-        } else {
-            // Judge is ok.
-            info("debug all is well in addRunJudgement, continuing... ");
+        } // else - ok
 
-        }
         runList.updateRun(theRun, judgementRecord); // this sets run to JUDGED
-        info("debug  updated run to judged " + theRun);
 
         if (whoCheckedOut != null) {
-            info("debug found checked out by " + whoCheckedOut + " judgement updated by " + judgementRecord.getJudgerClientId());
+            info("Found checked out by " + whoCheckedOut + " judgement updated by " + judgementRecord.getJudgerClientId());
             runCheckOutList.remove(whoCheckedOut);
         }
         theRun = runList.get(run);
@@ -1355,7 +1336,4 @@ public class Contest implements IContest {
     public BalloonSettings getBalloonSettings(ElementId elementId) {
         return balloonSettingsList.get(elementId);
     }
-
-
-
 }

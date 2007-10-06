@@ -673,8 +673,6 @@ public class PacketHandler {
         Integer startCount = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.START_COUNT);
         Boolean active = (Boolean) PacketFactory.getObjectValue(packet, PacketFactory.CREATE_ACCOUNT_ACTIVE);
         
-        info("debug generateAccounts ");
-        
         if (isServer()){
             
             if (isThisSite(siteNumber)){
@@ -683,11 +681,7 @@ public class PacketHandler {
                 Vector<Account> accountVector = contest.generateNewAccounts(type.toString(), count.intValue(), startCount.intValue(), active);
                 Account[] accounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
                 
-                System.out.flush();
-                System.out.println("debug account generate ");
                 PacketFactory.dumpPacket(System.out, packet);
-                System.out.flush();
-                
                 controller.writeConfigToDisk();
                 
                 Packet newAccountsPacket = PacketFactory.createAddSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, accounts);
@@ -1742,8 +1736,7 @@ public class PacketHandler {
 
         addSitesToModel(packet);
         
-
-        // Load local settings
+        // Load local settings and initialize settings if necessary
         controller.initializeServer();
 
         addLanguagesToModel(packet);

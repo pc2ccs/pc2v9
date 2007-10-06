@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.MalformedURLException;
@@ -53,28 +54,23 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
  * <li> Team: {@link #submitRun(Problem, Language, String)}
  * <li> Server: {@link edu.csus.ecs.pc2.core.PacketHandler#handlePacket(Packet, ConnectionHandlerID)}
  * <li> Server: {@link edu.csus.ecs.pc2.core.model.Contest#acceptRun(Run, RunFiles)}
- * <li> Team: {@link edu.csus.ecs.pc2.core.model.IRunListener#runAdded(edu.csus.ecs.pc2.core.model.RunEvent)} RunEvent action is:
- * {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#ADDED}
- * <li> Client: {@link edu.csus.ecs.pc2.core.model.IRunListener#runAdded(edu.csus.ecs.pc2.core.model.RunEvent)} RunEvent action is:
- * {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#ADDED}
+ * <li> Team: {@link edu.csus.ecs.pc2.core.model.IRunListener#runAdded(edu.csus.ecs.pc2.core.model.RunEvent)} RunEvent action is: {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#ADDED}
+ * <li> Client: {@link edu.csus.ecs.pc2.core.model.IRunListener#runAdded(edu.csus.ecs.pc2.core.model.RunEvent)} RunEvent action is: {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#ADDED}
  * </ol>
  * Check out run
  * <ol>
  * <li> Judge: {@link #checkOutRun(Run)}
  * <li> Server: {@link edu.csus.ecs.pc2.core.PacketHandler#requestRun(Run, IContest, IController, ClientId)}
- * <li> Judge and clients: {@link edu.csus.ecs.pc2.core.model.IRunListener#runChanged(edu.csus.ecs.pc2.core.model.RunEvent)}, check
- * {@link edu.csus.ecs.pc2.core.model.RunEvent#getSentToClientId()} to learn if you are the judge/client to get the run. RunEvent
- * action is: {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#CHECKEDOUT_RUN}
+ * <li> Judge and clients: {@link edu.csus.ecs.pc2.core.model.IRunListener#runChanged(edu.csus.ecs.pc2.core.model.RunEvent)}, check {@link edu.csus.ecs.pc2.core.model.RunEvent#getSentToClientId()} to
+ * learn if you are the judge/client to get the run. RunEvent action is: {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#CHECKEDOUT_RUN}
  * </ol>
  * Submit Judgement
  * <ol>
  * <li> Judge: {@link #submitRunJudgement(Run, JudgementRecord, RunResultFiles)}
- * <li> Server:
- * {@link edu.csus.ecs.pc2.core.PacketHandler#judgeRun(Run, IContest, IController, JudgementRecord, RunResultFiles, ClientId)}
- * <li> Team: {@link edu.csus.ecs.pc2.core.model.IRunListener#runChanged(edu.csus.ecs.pc2.core.model.RunEvent)} if {@link Run#isSendToTeams()} set true.
- * RunEvent action is: {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#CHANGED}
- * <li> Clients: {@link edu.csus.ecs.pc2.core.model.IRunListener#runChanged(edu.csus.ecs.pc2.core.model.RunEvent)} RunEvent action is:
+ * <li> Server: {@link edu.csus.ecs.pc2.core.PacketHandler#judgeRun(Run, IContest, IController, JudgementRecord, RunResultFiles, ClientId)}
+ * <li> Team: {@link edu.csus.ecs.pc2.core.model.IRunListener#runChanged(edu.csus.ecs.pc2.core.model.RunEvent)} if {@link Run#isSendToTeams()} set true. RunEvent action is:
  * {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#CHANGED}
+ * <li> Clients: {@link edu.csus.ecs.pc2.core.model.IRunListener#runChanged(edu.csus.ecs.pc2.core.model.RunEvent)} RunEvent action is: {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#CHANGED}
  * </ol>
  * Cancel Run
  * <ol>
@@ -114,9 +110,14 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
     private Log log;
 
+    private String judgementINIFileName = "reject.ini";
+
     private static final String SITE_OPTION_STRING = "--site";
+
     private static final String LOGIN_OPTION_STRING = "--login";
+
     private static final String PASSWORD_OPTION_STRING = "--password";
+
     // TODO code implement --loginUI
     @SuppressWarnings("unused")
     private static final String LOGIN_UI_OPTION_STRING = "--loginUI";
@@ -124,23 +125,21 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     /**
      * The port that the server will listen on.
      * 
-     * This is the port where all clients will contact this server/site. 
+     * This is the port where all clients will contact this server/site.
      */
     private static int port;
 
     /**
      * The host/IP for a client or server to contact.
      * 
-     * Both client and server who are connecting a server use
-     * this host as the host to contact.
+     * Both client and server who are connecting a server use this host as the host to contact.
      */
     private static String remoteHostName = "127.0.0.1";
 
     /**
      * The port for a client or server to login to/contact.
      * 
-     * Both client and server who are connecting a server use
-     * this port  as the portt to contact.
+     * Both client and server who are connecting a server use this port as the portt to contact.
      */
     private static int remoteHostPort;
 
@@ -149,7 +148,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * 
      */
     private static final String SERVER_PORT_KEY = "server.port";
-    
+
     /**
      * Key in the .ini for the remote server host name.
      * <P>
@@ -178,35 +177,32 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
     @SuppressWarnings("unused")
     private ParseArguments parseArguments = new ParseArguments();
-    
+
     private boolean contactingRemoteServer = true;
-    
+
     private boolean usingMainUI = true;
-    
+
     private PacketArchiver packetArchiver = new PacketArchiver();
-    
+
     // TODO change this to UIPlugin
     /*
-     * Difficulty with changing LoginFrame to UIPlugin, there
-     * is no way to setVisible(false) a UIPlugin or make
-     * the GUI cursor change for a UIPlugin. dal.
+     * Difficulty with changing LoginFrame to UIPlugin, there is no way to setVisible(false) a UIPlugin or make the GUI cursor change for a UIPlugin. dal.
      * 
      */
     private LoginFrame loginUI;
-    
+
     /*
-     * Set to true when start() is called,
-     * checked by login().
+     * Set to true when start() is called, checked by login().
      */
     private boolean isStarted = false;
 
     private PacketHandler packetHandler = null;
-    
+
     /**
      * Is this a server module.
      */
     private boolean serverModule = false;
-    
+
     private ConfigurationIO configurationIO = new ConfigurationIO(1);
 
     /**
@@ -217,26 +213,27 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     public Controller(IContest contest) {
         super();
         this.contest = contest;
-        packetHandler  = new PacketHandler(this, contest);
+        packetHandler = new PacketHandler(this, contest);
     }
-    
+
     /**
      * Client send packet to server.
+     * 
      * @param packet
      */
     private void sendToLocalServer(Packet packet) {
         try {
-            log.info("Sending packet to server "+packet);
+            log.info("Sending packet to server " + packet);
             transportManager.send(packet);
         } catch (TransportException e) {
             info("Unable to send to Server  " + packet);
             e.printStackTrace();
         }
-        log.info("Sent    packet to server "+packet);
+        log.info("Sent    packet to server " + packet);
     }
 
     private void sendToClient(ConnectionHandlerID connectionHandlerID, Packet packet) {
-        info("sendToClient (send) "+packet.getDestinationId()+" " +packet+" "+connectionHandlerID);
+        info("sendToClient (send) " + packet.getDestinationId() + " " + packet + " " + connectionHandlerID);
         try {
             transportManager.send(packet, connectionHandlerID);
         } catch (TransportException e) {
@@ -250,39 +247,39 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * @param siteNumber
      * @param packet
      */
-    public void sendToRemoteServer (int siteNumber, Packet packet){
+    public void sendToRemoteServer(int siteNumber, Packet packet) {
 
         ClientId clientId = new ClientId(siteNumber, Type.SERVER, 0);
 
         ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(clientId);
-        info("sendToRemoteServer "+clientId+" " +packet+" "+connectionHandlerID);
-        
+        info("sendToRemoteServer " + clientId + " " + packet + " " + connectionHandlerID);
+
         Type type = packet.getSourceId().getClientType();
-        if ((!type.equals(Type.ADMINISTRATOR)) && (! type.equals(Type.SERVER))){
-            log.log(Log.WARNING, "Unexpected User sent packet to other ("+siteNumber+") site.  "+packet);
+        if ((!type.equals(Type.ADMINISTRATOR)) && (!type.equals(Type.SERVER))) {
+            log.log(Log.WARNING, "Unexpected User sent packet to other (" + siteNumber + ") site.  " + packet);
         }
 
         if (connectionHandlerID != null) {
-            
+
             try {
                 transportManager.send(packet, connectionHandlerID);
             } catch (TransportException e) {
-                log.log(Log.SEVERE,"Exception sending packet to site "+siteNumber+" "+packet, e);
+                log.log(Log.SEVERE, "Exception sending packet to site " + siteNumber + " " + packet, e);
             }
-            
+
         } else {
-            log.log(Log.SEVERE,"Unable to send packet to site "+siteNumber+" ("+clientId+")" +packet);
+            log.log(Log.SEVERE, "Unable to send packet to site " + siteNumber + " (" + clientId + ")" + packet);
         }
     }
 
     public void sendToClient(Packet packet) {
         info("sendToClient b4 to " + packet.getDestinationId() + " " + packet);
-        
-        ClientId toClientId = packet.getDestinationId();
-        
-        if (isThisSite(toClientId.getSiteNumber())){
 
-            if (contest.isLocalLoggedIn(toClientId)){
+        ClientId toClientId = packet.getDestinationId();
+
+        if (isThisSite(toClientId.getSiteNumber())) {
+
+            if (contest.isLocalLoggedIn(toClientId)) {
                 ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(toClientId);
                 info("sendToClient " + packet.getSourceId() + " " + connectionHandlerID);
                 sendToClient(connectionHandlerID, packet);
@@ -291,26 +288,26 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                     packetArchiver.writeNextPacket(packet);
                     info("Unable to send packet to " + toClientId + " not logged in.  Packet saved in: " + packetArchiver.getLastArchiveFilename());
                 } catch (Exception e) {
-                    info("Unable to send packet to " + toClientId + " could not save packet",e);
+                    info("Unable to send packet to " + toClientId + " could not save packet", e);
                 }
             }
-            
+
         } else {
-            
+
             sendToRemoteServer(toClientId.getSiteNumber(), packet);
         }
 
         // dal old code: (bad code?)
-//        if (connectionHandlerID == null) {
-//            int destinationSiteNumber = packet.getDestinationId().getSiteNumber();
-//            if (isThisSite(destinationSiteNumber)) {
-//                sendToLocalServer(packet);
-//            } else {
-//                sendToRemoteServer(destinationSiteNumber, packet);
-//            }
-//        } else {
-//            sendToClient(connectionHandlerID, packet);
-//        }
+        // if (connectionHandlerID == null) {
+        // int destinationSiteNumber = packet.getDestinationId().getSiteNumber();
+        // if (isThisSite(destinationSiteNumber)) {
+        // sendToLocalServer(packet);
+        // } else {
+        // sendToRemoteServer(destinationSiteNumber, packet);
+        // }
+        // } else {
+        // sendToClient(connectionHandlerID, packet);
+        // }
 
         info("sendToClient af to " + packet.getDestinationId() + " " + packet);
     }
@@ -358,6 +355,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
     /**
      * Get value from .ini file if it exists.
+     * 
      * @param key
      * @return
      */
@@ -377,7 +375,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         if (loginName.equals("s")) {
             loginName = "server1";
         }
-        
+
         if (loginName.equals("r") || loginName.equals("root")) {
             loginName = "administrator1";
         }
@@ -481,7 +479,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                 info("Contacted using connection id " + remoteServerConnectionHandlerID);
 
                 sendLoginRequestFromServerToServer(transportManager, remoteServerConnectionHandlerID, clientId, password);
-                
+
             } else {
 
                 if (!serverModule) {
@@ -508,52 +506,110 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         } else {
 
             // Client login
-            info("Contacting server at " + remoteHostName + ":" + remoteHostPort);
-            info("Sending login request to Server as " + clientId); // TODO debug remove this
+            info("Contacting server at " + remoteHostName + ":" + remoteHostPort+" as "+clientId);
             sendLoginRequest(transportManager, clientId, id, password);
         }
     }
-    
-    public void initializeServer() {
-        
-        if (contest.getSites().length == 0) { 
 
-            if (contest.getSiteNumber() == 0){
+    public void initializeServer() {
+
+        if (contest.getSites().length == 0) {
+
+            if (contest.getSiteNumber() == 0) {
                 contest.setSiteNumber(1);
                 info("initializeServer STARTED this site as Site 1");
             }
         }
-            
+
         boolean loadedConfiguration = readConfigFromDisk(contest.getSiteNumber());
-        
+
         if (!loadedConfiguration) {
             // No configuration on disk, initialize settings.
-            
+
             log.info("initializing controller with default settings");
-            
-            if (contest.getSite(1) == null){
+
+            if (contest.getSite(1) == null) {
                 Site site = createFirstSite(contest.getSiteNumber(), "localhost", port);
                 contest.addSite(site);
             }
-            
+
             contest.initializeStartupData(contest.getSiteNumber());
-            
+
             contest.initializeSubmissions(contest.getSiteNumber());
             
-            log.info("initialized controller Site "+contest.getSiteNumber());
-            writeConfigToDisk();
+            loadJudgements();
+
+            info("initialized controller Site " + contest.getSiteNumber());          writeConfigToDisk();
         } else {
-            if (saveCofigurationToDisk){
+            if (saveCofigurationToDisk) {
                 contest.initializeSubmissions(contest.getSiteNumber());
             }
-            log.info("Loaded configuration from disk");
+            info("Loaded configuration from disk");
+        }
+    }
+    
+    protected void loadJudgements(){
+        
+        if (!isContactingRemoteServer()) {
+
+            if (contest.getJudgements().length == 0) {
+
+                if (loadedJudgementsFromIni()) {
+                    info("Loaded judgements from " + judgementINIFileName);
+                } else {
+                    info(judgementINIFileName + " not found, ok.  Loading default judgements");
+                    loadDefaultJudgements();
+                }
+            }
+        } 
+    }
+
+    /**
+     * Loads reject.ini file contents into Judgements.
+     * 
+     * If finds reject.ini file, reads file. Addes Yes judgement, then prepends "No - " onto each entry from the reject.ini file and returns true.
+     * 
+     * Returns false if can not read reject.ini file or reject.ini file is empty (perhaps only containing comments).
+     * 
+     * @return true if loaded, false if could not read file.
+     */
+    protected boolean loadedJudgementsFromIni() {
+
+        if (new File(judgementINIFileName).exists()) {
+
+            String[] lines = Utilities.loadINIFile(judgementINIFileName);
+
+            if (lines == null || lines.length == 0) {
+                return false;
+            }
+
+            Judgement judgement = new Judgement("Yes");
+            contest.addJudgement(judgement);
+
+            for (String judgementName : lines) {
+                judgement = new Judgement("No - " + judgementName);
+                contest.addJudgement(judgement);
+            }
+            
+            return true;
+        }
+        return false;
+    }
+
+    private void loadDefaultJudgements() {
+        String[] judgementNames = { "Yes", "No - Compilation Error", "No - Run-time Error", "No - Time-limit Exceeded", "No - Wrong Answer", "No - Excessive Output", "No - Output Format Error",
+                "No - Other - Contact Staff" };
+
+        for (String judgementName : judgementNames) {
+            Judgement judgement = new Judgement(judgementName);
+            contest.addJudgement(judgement);
         }
     }
 
     private ClientId authenticateFirstServer(String password) {
-        
+
         initializeServer();
-    
+
         int newSiteNumber = getServerSiteNumber(password);
 
         ClientId newId = new ClientId(newSiteNumber, ClientType.Type.SERVER, 0);
@@ -562,7 +618,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         }
         return newId;
     }
-    
+
     private Site createFirstSite(int siteNumber, String hostName, int portNumber) {
         Site site = new Site("Site " + siteNumber, siteNumber);
         Properties props = new Properties();
@@ -577,14 +633,15 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * Reads .ini file and sets server and port.
      * 
      * Sets the server and port for client.
-     * @param portString 
-     *
+     * 
+     * @param portString
+     * 
      */
-    private void setClientServerAndPort (String portString){
-        
+    private void setClientServerAndPort(String portString) {
+
         remoteHostName = "localhost";
         remoteHostPort = Integer.parseInt(TransportManager.DEFAULT_PC2_PORT);
-        
+
         if (containsINIKey(CLIENT_SERVER_KEY)) {
             remoteHostName = getINIValue(CLIENT_SERVER_KEY);
             int idx = remoteHostName.indexOf(":");
@@ -593,38 +650,37 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                 remoteHostName = remoteHostName.substring(0, idx);
             }
         }
-        
+
         if (containsINIKey(CLIENT_PORT_KEY)) {
             remoteHostPort = Integer.parseInt(getINIValue(CLIENT_PORT_KEY));
         }
-        
-        if (portString != null){
-            getLog().log(Log.INFO, "Attempting to use port from --port '"+portString+"'");
+
+        if (portString != null) {
+            getLog().log(Log.INFO, "Attempting to use port from --port '" + portString + "'");
             remoteHostPort = Integer.parseInt(portString);
         }
-        
-        
+
     }
-    
-    private void setServerRemoteHostAndPort (String remoteServerValue) {
+
+    private void setServerRemoteHostAndPort(String remoteServerValue) {
 
         // Contacting another server. "join"
         String hostName = getINIValue(REMOTE_SERVER_KEY);
-        if (hostName != null && hostName.length() > 4){
+        if (hostName != null && hostName.length() > 4) {
             remoteHostName = hostName;
             contactingRemoteServer = true;
         }
-        
-        if (remoteServerValue != null){
+
+        if (remoteServerValue != null) {
             remoteHostName = remoteServerValue;
             contactingRemoteServer = true;
         }
-        
-        if (contactingRemoteServer){
-            
+
+        if (contactingRemoteServer) {
+
             // Set port to default
             remoteHostPort = Integer.parseInt(TransportManager.DEFAULT_PC2_PORT);
-            
+
             int idx = remoteHostName.indexOf(":");
             if (idx > 2) {
                 remoteHostPort = Integer.parseInt(remoteHostName.substring(idx + 1));
@@ -632,11 +688,11 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             }
         }
     }
-    
-    private void setServerPort(String portString){
-        
+
+    private void setServerPort(String portString) {
+
         port = Integer.parseInt(TransportManager.DEFAULT_PC2_PORT);
-        
+
         if (containsINIKey(SERVER_PORT_KEY)) {
             port = Integer.parseInt(getINIValue(SERVER_PORT_KEY));
         }
@@ -645,7 +701,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             getLog().log(Log.INFO, "Attempting to use port from --port '" + portString + "'");
             port = Integer.parseInt(portString);
         }
-        
+
     }
 
     /**
@@ -653,13 +709,16 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * 
      * Send login request directly to connectionHandlerId.
      * 
-     * @param manager transmission manager
-     * @param targetConnectionHandlerID target connectionId
-     * @param clientId from clientid
-     * @param password site password
+     * @param manager
+     *            transmission manager
+     * @param targetConnectionHandlerID
+     *            target connectionId
+     * @param clientId
+     *            from clientid
+     * @param password
+     *            site password
      */
-    private void sendLoginRequestFromServerToServer(ITransportManager manager, ConnectionHandlerID targetConnectionHandlerID, ClientId clientId,
-            String password) {
+    private void sendLoginRequestFromServerToServer(ITransportManager manager, ConnectionHandlerID targetConnectionHandlerID, ClientId clientId, String password) {
         try {
             info("sendLoginRequestFromServerToServer ConId start - sending from " + clientId);
             ClientId serverClientId = new ClientId(0, Type.SERVER, 0);
@@ -668,7 +727,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             manager.send(loginPacket, targetConnectionHandlerID);
             info("sendLoginRequestFromServerToServer ConId end - packet sent.");
         } catch (TransportException e) {
-            info("Exception sendLoginRequestFromServerToServer ",e);
+            info("Exception sendLoginRequestFromServerToServer ", e);
         }
     }
 
@@ -680,7 +739,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * @param password
      */
     private void sendLoginRequest(ITransportManager manager, ClientId clientId, String loginName, String password) {
-        info("sendLoginRequest start - sending from "+clientId);
+        info("sendLoginRequest start - sending from " + clientId);
         ClientId serverClientId = new ClientId(0, Type.SERVER, 0);
         Packet loginPacket = PacketFactory.createLoginRequest(clientId, loginName, password, serverClientId);
         sendToLocalServer(loginPacket);
@@ -690,13 +749,12 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     /**
      * Server receives Packet from client or server.
      * 
-     * @see edu.csus.ecs.pc2.core.transport.ITwoToOne#receiveObject(java.io.Serializable,
-     *      edu.csus.ecs.pc2.core.transport.ConnectionHandlerID)
+     * @see edu.csus.ecs.pc2.core.transport.ITwoToOne#receiveObject(java.io.Serializable, edu.csus.ecs.pc2.core.transport.ConnectionHandlerID)
      */
     public void receiveObject(Serializable object, ConnectionHandlerID connectionHandlerID) {
 
         // TODO code check the input connection to insure they are valid connection
-        info("receiveObject (S,C) debug start got " + object);
+        info("receiveObject start got " + object);
 
         try {
 
@@ -706,29 +764,28 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                 ClientId clientId = packet.getSourceId();
 
                 info("receiveObject " + packet);
-                
+
                 if (packet.getType().equals(PacketType.Type.LOGIN_REQUEST)) {
                     String password = PacketFactory.getStringValue(packet, PacketFactory.PASSWORD);
                     try {
 
                         /**
-                         * Login request from client or other server. When this block is done, they are logged in and a login
-                         * success is sent to them.
+                         * Login request from client or other server. When this block is done, they are logged in and a login success is sent to them.
                          */
-                        
+
                         packetArchiver.writeNextPacket(packet);
 
                         if (clientId.getSiteNumber() == ClientId.UNSET) {
                             clientId = new ClientId(contest.getSiteNumber(), clientId.getClientType(), clientId.getClientNumber());
                         }
                         attemptToLogin(clientId, password, connectionHandlerID);
-                        
+
                         removeConnection(connectionHandlerID);
                         sendLoginSuccess(clientId, connectionHandlerID);
-                        
+
                         // Send login notification to users.
-                        
-                        Packet loginConfirmedPacket  = PacketFactory.createLogin(contest.getClientId(), PacketFactory.ALL_SERVERS, connectionHandlerID, clientId);
+
+                        Packet loginConfirmedPacket = PacketFactory.createLogin(contest.getClientId(), PacketFactory.ALL_SERVERS, connectionHandlerID, clientId);
                         sendToAdministrators(loginConfirmedPacket);
                         sendToJudges(loginConfirmedPacket);
                         sendToServers(loginConfirmedPacket);
@@ -758,9 +815,8 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                         } else if (!contest.isLoggedIn() && packet.getType().equals(PacketType.Type.LOGIN_SUCCESS)) {
 
                             /**
-                             * Since this module is not logged in, this packet should only be a LOGIN_SUCCESS from a server we just
-                             * tried to login to. At this point we are not connected to the contest and need information from the
-                             * server we logged into.
+                             * Since this module is not logged in, this packet should only be a LOGIN_SUCCESS from a server we just tried to login to. At this point we are not connected to the contest
+                             * and need information from the server we logged into.
                              */
 
                             // TODO add a security check that this connection id matches the one we
@@ -771,45 +827,43 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                             processPacket(packet, connectionHandlerID);
 
                             // Add the other (server we logged into) into our logged in list.
-                            
-                            loginServer (clientId, connectionHandlerID);
+
+                            loginServer(clientId, connectionHandlerID);
 
                         } else {
-                            
+
                             log.log(Log.INFO, "Packet from non-logged in server, processed anyways " + packet);
 
-//                            // 
-//                            String message = "Security violation user " + clientId + " got a " + packet;
-//                            info(message + " on " + connectionHandlerID);
-//                            PacketFactory.dumpPacket(System.err, packet);
-                            
-//                            try {
-//                                
-//                                packetArchiver.writeNextPacket(packet);
-//                                log.info("Security violation possible spoof packet from "+clientId+" connection "+connectionHandlerID);
-//                                log.info("Security violation wrote packet to "+packetArchiver+" packet "+packet);
-//                            } catch (Exception e) {
-//                                log.log(Log.WARNING, "Exception logged writing packet ", e);
-//                            }
-                            
-                            
+                            // //
+                            // String message = "Security violation user " + clientId + " got a " + packet;
+                            // info(message + " on " + connectionHandlerID);
+                            // PacketFactory.dumpPacket(System.err, packet);
+
+                            // try {
+                            //                                
+                            // packetArchiver.writeNextPacket(packet);
+                            // log.info("Security violation possible spoof packet from "+clientId+" connection "+connectionHandlerID);
+                            // log.info("Security violation wrote packet to "+packetArchiver+" packet "+packet);
+                            // } catch (Exception e) {
+                            // log.log(Log.WARNING, "Exception logged writing packet ", e);
+                            // }
+
                             processPacket(packet, connectionHandlerID);
-                            
+
                         }
                         return;
-                    } else if ( clientId.getClientType().equals(Type.ADMINISTRATOR)) {
-                        
-                        // TODO code security kluge admin 
+                    } else if (clientId.getClientType().equals(Type.ADMINISTRATOR)) {
+
+                        // TODO code security kluge admin
                         // TODO KLUDGE HUGE KLUDGE - this block allows any admin to update stuff.
-                        
+
                         securityCheck(packet, connectionHandlerID);
-                        
+
                         processPacket(packet, connectionHandlerID);
-                        
+
                     } else {
 
                         // TODO warning got packet but client is not logged in
-                        
 
                         log.log(Log.WARNING, "Packet from non-logged in user, processed anyways " + packet);
 
@@ -818,11 +872,11 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                         // TODO remove processPacket when security is in place.
                         processPacket(packet, connectionHandlerID);
 
-                    } 
+                    }
                 }
             } else {
                 // TODO code archive packet, send security violation to notification system.
-                
+
                 info("receiveObject(S,C): Unsupported class received: " + object);
             }
 
@@ -830,10 +884,10 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
             // TODO code archive packet, send security violation to notification system.
 
-            info("Exception in receiveObject(S,C): " + e.getMessage(),e);
+            info("Exception in receiveObject(S,C): " + e.getMessage(), e);
             info("Exception in receiveObject ", e);
         }
-        info("receiveObject (S,C) debug end   got " + object.getClass().getName());
+        info("receiveObject end   got " + object.getClass().getName());
     }
 
     /**
@@ -844,55 +898,55 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      */
     private void loginServer(ClientId clientId, ConnectionHandlerID connectionHandlerID) {
 
-       if (contest.isLocalLoggedIn(clientId)) {
-           contest.removeLogin(clientId);
-       }
-       
-       if (contest.isRemoteLoggedIn(clientId)){
-           contest.removeRemoteLogin(clientId);
-       }
-       
-       contest.addLocalLogin(clientId, connectionHandlerID);
+        if (contest.isLocalLoggedIn(clientId)) {
+            contest.removeLogin(clientId);
+        }
+
+        if (contest.isRemoteLoggedIn(clientId)) {
+            contest.removeRemoteLogin(clientId);
+        }
+
+        contest.addLocalLogin(clientId, connectionHandlerID);
     }
 
     private void securityCheck(Packet packet, ConnectionHandlerID connectionHandlerID) {
-        // TODO code throw an exception if the security fails. 
-        
+        // TODO code throw an exception if the security fails.
+
         ConnectionHandlerID connectionHandlerIDAuthen = contest.getConnectionHandleID(packet.getSourceId());
-        if (! connectionHandlerID.equals(connectionHandlerIDAuthen)){
+        if (!connectionHandlerID.equals(connectionHandlerIDAuthen)) {
             /**
              * Security Violation - their login does not match the connectionID
              */
-            
+
             info("Note: security violation in packet: ConnectionHandlerID do not match, check log");
-            log.info("Security Violation for packet "+packet);
-            log.info("User "+packet.getSourceId()+" expected "+connectionHandlerIDAuthen);
-            log.info("User "+packet.getSourceId()+" found    "+connectionHandlerID);
+            log.info("Security Violation for packet " + packet);
+            log.info("User " + packet.getSourceId() + " expected " + connectionHandlerIDAuthen);
+            log.info("User " + packet.getSourceId() + " found    " + connectionHandlerID);
         }
-        
+
         ClientId fromId = packet.getSourceId();
-        
-        if (! isThisSite(fromId.getSiteNumber())) {
+
+        if (!isThisSite(fromId.getSiteNumber())) {
             // Not from this site, should only come from a server.
-            
-            if (! isServer(fromId)){
-                
-                info("Security Violation expecting only server from site "+fromId.getSiteNumber()+" for packet "+packet);
-                log.info("Security Violation expecting only server from site "+fromId.getSiteNumber()+" for packet "+packet);
+
+            if (!isServer(fromId)) {
+
+                info("Security Violation expecting only server from site " + fromId.getSiteNumber() + " for packet " + packet);
+                log.info("Security Violation expecting only server from site " + fromId.getSiteNumber() + " for packet " + packet);
             }
         }
     }
 
     private void handleServerLoginFailure(Packet packet) {
         // TODO rewrite handle this failure better
-        
+
         try {
             packetArchiver.writeNextPacket(packet);
             log.info("Login failure packet written to " + packetArchiver.getLastArchiveFilename() + " " + packet);
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception logged trying to write packet ", e);
         }
-        
+
         String message = PacketFactory.getStringValue(packet, PacketFactory.MESSAGE_STRING);
 
         // TODO Handle this better via new login code.
@@ -900,7 +954,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         info("Login Failure");
         PacketFactory.dumpPacket(System.err, packet);
 
-        if (loginUI != null ){
+        if (loginUI != null) {
             FrameUtilities.regularCursor(loginUI);
         }
         contest.loginDenied(packet.getDestinationId(), null, message);
@@ -919,8 +973,8 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                 return site.getSiteNumber();
             }
         }
-        
-        if (contest.getSites().length > 1 || contest.isLoggedIn()){
+
+        if (contest.getSites().length > 1 || contest.isLoggedIn()) {
             throw new SecurityException("No such site or invalid site password");
         } else {
             throw new SecurityException("Does not match first site password");
@@ -943,30 +997,30 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             // Server login
 
             int newSiteNumber = getServerSiteNumber(password);
-            
+
             if (newSiteNumber == clientId.getSiteNumber()) {
                 // matching password, ok.
-                
+
                 loginServer(clientId, connectionHandlerID);
-                
+
             } else {
-                
+
                 throw new SecurityException("Failed attempt to login");
-                
+
             }
-            
+
         } else if (contest.isValidLoginAndPassword(clientId, password)) {
             // Client login
-            
-            if (contest.isLocalLoggedIn(clientId)){
-                
+
+            if (contest.isLocalLoggedIn(clientId)) {
+
                 // Already logged in, log them off
                 ConnectionHandlerID connectionHandlerID2 = contest.getConnectionHandleID(clientId);
-                log.info("login - "+clientId+" already logged in, will logoff client at connection "+connectionHandlerID2);
+                log.info("login - " + clientId + " already logged in, will logoff client at connection " + connectionHandlerID2);
                 contest.removeLogin(clientId);
             }
             contest.addLocalLogin(clientId, connectionHandlerID);
-            info("LOGIN logged in " + clientId + " at "+connectionHandlerID);
+            info("LOGIN logged in " + clientId + " at " + connectionHandlerID);
 
         } else {
 
@@ -993,7 +1047,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             packetHandler.handlePacket(packet, connectionHandlerID);
 
         } catch (Exception e) {
-            info("Exception in processPacket, check logs ", e); 
+            info("Exception in processPacket, check logs ", e);
         }
 
     }
@@ -1009,22 +1063,20 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         Packet packet = PacketFactory.createLoginDenied(contest.getClientId(), destinationId, message);
         sendToClient(connectionHandlerID, packet);
     }
-    
 
- 
     /**
      * Send Login Success packet to client.
+     * 
      * @param clientId
      * @param connectionHandlerID
      */
     private void sendLoginSuccess(ClientId clientId, ConnectionHandlerID connectionHandlerID) {
-        
+
         sendToClient(packetHandler.createLoginSuccessPacket(clientId));
     }
 
-
     public void connectionEstablished(ConnectionHandlerID connectionHandlerID) {
-        info("connectionEstablished: "+ connectionHandlerID);
+        info("connectionEstablished: " + connectionHandlerID);
         contest.connectionEstablished(connectionHandlerID);
 
         Packet connectionPacket = PacketFactory.createEstablishedConnection(contest.getClientId(), PacketFactory.ALL_SERVERS, connectionHandlerID);
@@ -1038,28 +1090,28 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     public void connectionDropped(ConnectionHandlerID connectionHandlerID) {
 
         ClientId clientId = contest.getLoginClientId(connectionHandlerID);
-        if (clientId != null){
+        if (clientId != null) {
             // Logged in
             removeLogin(clientId);
         }
-        
+
         if (contest.isConnected(connectionHandlerID)) {
             removeConnection(connectionHandlerID);
         }
         // else nothing to do.
     }
-    
+
     public void logoffUser(ClientId clientId) {
 
-        if (contest.isLocalLoggedIn(clientId)){
-            
+        if (contest.isLocalLoggedIn(clientId)) {
+
             ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(clientId);
 
-            info ("LOGOFF "+clientId+" "+connectionHandlerID);
+            info("LOGOFF " + clientId + " " + connectionHandlerID);
             removeLogin(clientId);
-            
+
         } else {
-            info ("LOGOFF remote "+clientId);
+            info("LOGOFF remote " + clientId);
             contest.removeLogin(clientId); // remove from remote login list
         }
     }
@@ -1069,8 +1121,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         // TODO code create a packet and send it to servers and admins
 
         // TODO code connectionError
-        info("connectionError: " + contest.getTitle() + " " + connectionHandlerID + " " + causeDescription + " "
-                + object.getClass().getName());
+        info("connectionError: " + contest.getTitle() + " " + connectionHandlerID + " " + causeDescription + " " + object.getClass().getName());
 
     }
 
@@ -1081,7 +1132,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      */
     public void receiveObject(Serializable object) {
 
-        info(" receiveObject(S) debug start got "+ object);
+        info(" receiveObject(S) start got " + object);
 
         try {
             if (object instanceof Packet) {
@@ -1095,21 +1146,21 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             }
         } catch (Exception e) {
             String message = "Unable to start main UI, contact staff";
-            
-            if (loginUI != null ){
+
+            if (loginUI != null) {
                 FrameUtilities.regularCursor(loginUI);
             }
             contest.loginDenied(null, null, message);
-            info ("Exception ", e);
+            info("Exception ", e);
         }
-        info(" receiveObject(S) debug end   got "+ object);
+        info(" receiveObject(S) end   got " + object);
     }
 
     /**
      * This client lost connection.
      */
     public void connectionDropped() {
-        
+
         // Connection dropped, countdown and halt client
 
         CountDownMessage countDownMessage = new CountDownMessage("Shutting down PC^2 in ", 10);
@@ -1121,7 +1172,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             countDownMessage.setTitle("Shutting down PC^2 Client");
         }
         countDownMessage.setExitOnClose(true);
-        if (isUsingMainUI()){
+        if (isUsingMainUI()) {
             countDownMessage.setVisible(true);
         }
 
@@ -1135,7 +1186,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
 
     public void info(String s, Exception exception) {
-        log.log (Log.WARNING, s, exception);
+        log.log(Log.WARNING, s, exception);
         System.err.println(Thread.currentThread().getName() + " " + s);
         System.err.flush();
         exception.printStackTrace(System.err);
@@ -1147,16 +1198,16 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
 
     public void setContestTime(ContestTime contestTime) {
-        if (contest.getContestTime() != null){
+        if (contest.getContestTime() != null) {
             contest.updateContestTime(contestTime);
-        } else {        
+        } else {
             contest.addContestTime(contestTime);
         }
     }
 
     public void sendToServers(Packet packet) {
-        ClientId [] clientIds = contest.getLocalLoggedInClients(ClientType.Type.SERVER);
-        for (ClientId clientId : clientIds){
+        ClientId[] clientIds = contest.getLocalLoggedInClients(ClientType.Type.SERVER);
+        for (ClientId clientId : clientIds) {
             ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(clientId);
             boolean isThisServer = isThisSite(clientId.getSiteNumber());
             if (!isThisServer) {
@@ -1172,9 +1223,9 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * @param packet
      */
     private void sendPacketToClients(Packet packet, ClientType.Type type) {
-        
-        ClientId [] clientIds = contest.getLocalLoggedInClients(type);
-        for (ClientId clientId : clientIds){
+
+        ClientId[] clientIds = contest.getLocalLoggedInClients(type);
+        for (ClientId clientId : clientIds) {
             if (isThisSite(clientId.getSiteNumber())) {
                 ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(clientId);
                 sendToClient(connectionHandlerID, packet);
@@ -1201,11 +1252,11 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     public void sendToTeams(Packet packet) {
         sendPacketToClients(packet, ClientType.Type.TEAM);
     }
-    
+
     private int getPortForSite(int inSiteNumber) {
 
         try {
-            Site []  sites = contest.getSites();
+            Site[] sites = contest.getSites();
             for (Site site : sites) {
                 if (site.getSiteNumber() == inSiteNumber) {
                     String portStr = site.getConnectionInfo().getProperty(Site.PORT_KEY);
@@ -1217,8 +1268,8 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             info("Exception logged ", e);
             throw new SecurityException("Unable to determine port for site " + inSiteNumber);
         }
-        
-        throw new SecurityException("Could not find site "+inSiteNumber+" in site list, there are "+contest.getSites().length+" sites.");
+
+        throw new SecurityException("Could not find site " + inSiteNumber + " in site list, there are " + contest.getSites().length + " sites.");
     }
 
     /**
@@ -1232,20 +1283,20 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         try {
 
             contest.setClientId(clientId);
-            
+
             boolean isServer = clientId.getClientType().equals(ClientType.Type.SERVER);
 
             if (isServer && isContactingRemoteServer()) {
                 // secondary server logged in, start listening.
-        
+
                 port = getPortForSite(contest.getSiteNumber());
-                
-                if (parseArguments.getOptValue("--port") != null){
-                    String portString = parseArguments.getOptValue("--port") ;
-                    getLog().log(Log.INFO, "Attempting to use port from --port '"+portString+"'");
+
+                if (parseArguments.getOptValue("--port") != null) {
+                    String portString = parseArguments.getOptValue("--port");
+                    getLog().log(Log.INFO, "Attempting to use port from --port '" + portString + "'");
                     port = Integer.parseInt(portString);
                 }
-                
+
                 info("Started Server Transport listening on " + port);
                 transportManager.accecptConnections(port);
 
@@ -1256,7 +1307,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                 if (isUsingMainUI()) {
                     if (uiPlugin == null) {
                         // NO UI to display, so let's find one to display
-                        
+
                         String uiClassName = LoadUIClass.getUIClassName(clientId);
                         if (uiClassName == null) {
                             info("Unable to find UI class for " + clientId.getClientType().toString().toLowerCase());
@@ -1268,7 +1319,6 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                     }
 
                     uiPlugin.setContestAndController(contest, this);
-                    
 
                     if (loginUI != null) {
                         loginUI.dispose();
@@ -1284,221 +1334,203 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         } catch (Exception e) {
             // TODO separate the showing main Frame and listening to port exception messages
             info("Error showing frame or listening to port ", e);
-            if (loginUI != null ){
+            if (loginUI != null) {
                 FrameUtilities.regularCursor(loginUI);
             }
-            contest.loginDenied(clientId, null, e.getMessage()+" (port "+port+")");
+            contest.loginDenied(clientId, null, e.getMessage() + " (port " + port + ")");
         }
     }
 
-     /**
+    /**
      * Start the UI.
      */
     public void start(String[] stringArray) {
 
         log = new Log("pc2.startup");
-        StaticLog.setLog (log);
-        
+        StaticLog.setLog(log);
+
         /**
          * Saved exception.
          * 
-         * If TransportException thrown before UI has been created,
-         * save the exception and present it on the UI later.
+         * If TransportException thrown before UI has been created, save the exception and present it on the UI later.
          */
         TransportException savedTransportException = null;
-        
+
         String[] arguments = { "--login", "--id", "--password", "--loginUI", "--remoteServer", "--server", "--port", "--ini", "--nosave" };
         parseArguments = new ParseArguments(stringArray, arguments);
-        
-        if (parseArguments.isOptPresent("--help")){
+
+        if (parseArguments.isOptPresent("--help")) {
             System.out.println("Usage: Starter [--help] [--server] [--first] [--login <login>] [--password <pass>] [--site ##] [--ini filename] ");
             System.exit(0);
         }
-        
-        for (String arg : stringArray){
-            if (arg.equals("--first")){
+
+        for (String arg : stringArray) {
+            if (arg.equals("--first")) {
                 setContactingRemoteServer(false);
             }
         }
-        
-        // TODO parse arguments logic 
-        
+
+        // TODO parse arguments logic
+
         /**
-         * if (args DOES NOT contains login/pwd) {
-         *   String s;
-         *   if (args contains LoginUI )
-         *   {
-         *      s = args login UI
-         *    }
-         *    else
-         *    {
-         *        s = pc2 LoginFrame
-         *    }
-         *    UIPlugin l = classloader (s);
-         *    l.setModelAndListener (contest, this);
-         * }
-         * else {
-         *   this.login (login,password)
+         * if (args DOES NOT contains login/pwd) { String s; if (args contains LoginUI ) { s = args login UI } else { s = pc2 LoginFrame } UIPlugin l = classloader (s); l.setModelAndListener (contest,
+         * this); } else { this.login (login,password)
          * 
          */
-        
+
         log.info("Starting TransportManager...");
         transportManager = new TransportManager(log);
         log.info("Started TransportManager");
-        
-        
+
         // TODO code add INI_FILENAME_OPTION_STRING
-        if ( parseArguments.isOptPresent("--ini")) {
+        if (parseArguments.isOptPresent("--ini")) {
             // TODO handle URL too
             String iniName = parseArguments.getOptValue("--ini");
             try {
                 IniFile.setIniFile(iniName);
             } catch (MalformedURLException e) {
-                getLog().log (Log.WARNING, "Unable to read ini URL "+iniName, e);
-                savedTransportException = new TransportException("Unable to read ini file "+iniName);
+                getLog().log(Log.WARNING, "Unable to read ini URL " + iniName, e);
+                savedTransportException = new TransportException("Unable to read ini file " + iniName);
             }
-            
+
         }
-        
+
         contest.setSiteNumber(0);
-        
-        if ( parseArguments.isOptPresent(SITE_OPTION_STRING)) {
-            
+
+        if (parseArguments.isOptPresent(SITE_OPTION_STRING)) {
+
             String siteNumberParam = parseArguments.getOptValue(SITE_OPTION_STRING);
-            
-            if (siteNumberParam == null || siteNumberParam.trim().length() == 0){
-                savedTransportException = new TransportException("No site found after "+SITE_OPTION_STRING);
+
+            if (siteNumberParam == null || siteNumberParam.trim().length() == 0) {
+                savedTransportException = new TransportException("No site found after " + SITE_OPTION_STRING);
             }
-            
+
             try {
                 int siteNumber = Integer.parseInt(siteNumberParam);
                 contest.setSiteNumber(siteNumber);
-                
+
             } catch (Exception e) {
-                getLog().log (Log.WARNING, "Expecting a number after "+SITE_OPTION_STRING+" found "+siteNumberParam, e);
-                savedTransportException = new TransportException("Invalid site after "+SITE_OPTION_STRING);
+                getLog().log(Log.WARNING, "Expecting a number after " + SITE_OPTION_STRING + " found " + siteNumberParam, e);
+                savedTransportException = new TransportException("Invalid site after " + SITE_OPTION_STRING);
             }
         }
-        
-        log.log(Log.DEBUG, "Site Number is set as "+contest.getSiteNumber()+" (0 means unset)");
-        
-        
+
+        log.log(Log.DEBUG, "Site Number is set as " + contest.getSiteNumber() + " (0 means unset)");
+
         if (IniFile.isFilePresent()) {
             // Only read and load .ini file if it is present.
             new IniFile();
         }
-        
+
         // TODO code add NO_SAVE_OPTION_STRING
-        if (parseArguments.isOptPresent("--nosave")){
+        if (parseArguments.isOptPresent("--nosave")) {
             saveCofigurationToDisk = false;
         }
-        
 
-        if ( parseArguments.isOptPresent("--server")) {
+        if (parseArguments.isOptPresent("--server")) {
             info("Starting Server Transport...");
             transportManager.startServerTransport(this);
             serverModule = true;
-            
+
             contactingRemoteServer = false;
             setServerRemoteHostAndPort(parseArguments.getOptValue("--remoteServer"));
-          
+
             try {
                 setServerPort(parseArguments.getOptValue("--port"));
             } catch (NumberFormatException numException) {
-                savedTransportException = new TransportException("Unable to parse value after --port '"+parseArguments.getOptValue("--port")+"'");
+                savedTransportException = new TransportException("Unable to parse value after --port '" + parseArguments.getOptValue("--port") + "'");
                 log.log(Log.WARNING, "Exception logged ", numException);
             }
 
         } else {
-            // Client contact server 
-            
+            // Client contact server
+
             try {
-                
+
                 setClientServerAndPort(parseArguments.getOptValue("--port"));
-                
+
                 info("Contacting server at " + remoteHostName + ":" + remoteHostPort);
                 transportManager.startClientTransport(remoteHostName, remoteHostPort, this);
             } catch (NumberFormatException numException) {
-                savedTransportException = new TransportException("Unable to parse value after --port '"+parseArguments.getOptValue("--port")+"'");
+                savedTransportException = new TransportException("Unable to parse value after --port '" + parseArguments.getOptValue("--port") + "'");
                 log.log(Log.WARNING, "Exception logged ", numException);
             }
-       
+
             try {
                 transportManager.connectToMyServer();
             } catch (TransportException transportException) {
                 savedTransportException = transportException;
                 log.log(Log.INFO, "Exception logged ", transportException);
-                info("Unable to contact server at " + remoteHostName + ":" + port+" "+transportException.getMessage());
+                info("Unable to contact server at " + remoteHostName + ":" + port + " " + transportException.getMessage());
             }
         }
-        
+
         isStarted = true;
-        
-        if (  ! parseArguments.isOptPresent(LOGIN_OPTION_STRING)){
+
+        if (!parseArguments.isOptPresent(LOGIN_OPTION_STRING)) {
 
             // TODO: code handle alternate Login UI.
-            
-//            if ( parseArguments.isOptPresent(LOGIN_UI_OPTION_STRING)) {
-//                String loginUIName = parseArguments.getOptValue(LOGIN_UI_OPTION_STRING);
-//                // TODO: load Login UI
-////                loginUI = LoadUIClass.loadUIClass(loginUIName);
-//            } else {
-//              
-//            }
-            if (isUsingMainUI()){
+
+            // if ( parseArguments.isOptPresent(LOGIN_UI_OPTION_STRING)) {
+            // String loginUIName = parseArguments.getOptValue(LOGIN_UI_OPTION_STRING);
+            // // TODO: load Login UI
+            // // loginUI = LoadUIClass.loadUIClass(loginUIName);
+            // } else {
+            //              
+            // }
+            if (isUsingMainUI()) {
                 loginUI = new LoginFrame();
                 loginUI.setContestAndController(contest, this);
             }
-            
+
         } else {
             // has a login, go for it.
-            
-            
+
             // Get loginId
             String loginName = "";
-            if ( parseArguments.isOptPresent(LOGIN_OPTION_STRING)) {
+            if (parseArguments.isOptPresent(LOGIN_OPTION_STRING)) {
                 loginName = parseArguments.getOptValue(LOGIN_OPTION_STRING);
             }
-            
+
             // get password (optional if joe password)
             String password = "";
-            if ( parseArguments.isOptPresent(PASSWORD_OPTION_STRING)) {
+            if (parseArguments.isOptPresent(PASSWORD_OPTION_STRING)) {
                 password = parseArguments.getOptValue(PASSWORD_OPTION_STRING);
             }
-            
-            if (isUsingMainUI()){
+
+            if (isUsingMainUI()) {
                 loginUI = new LoginFrame();
                 loginUI.setContestAndController(contest, this); // this displays the login
-            } 
+            }
 
             try {
-                
-                if (savedTransportException == null){
-                    login (loginName, password);  // starts login attempt, will show failure to LoginFrame
+
+                if (savedTransportException == null) {
+                    login(loginName, password); // starts login attempt, will show failure to LoginFrame
                 }
-                
+
             } catch (Exception e) {
                 log.log(Log.INFO, "Exception logged ", e);
-                if (loginUI != null){
+                if (loginUI != null) {
                     loginUI.setStatusMessage(e.getMessage());
                 }
             }
         }
-        
-        if (savedTransportException != null && loginUI != null){
+
+        if (savedTransportException != null && loginUI != null) {
             loginUI.disableLoginButton();
             loginUI.setStatusMessage("Unable to contact server, contact staff");
         }
     }
 
-    private ClientId getServerClientId(){
-//      TODO s/new ClientId(contest.getSiteNumber(), Type.SERVER, 0);/getServerClientId()/
-        return new ClientId (contest.getSiteNumber(), Type.SERVER, 0);
+    private ClientId getServerClientId() {
+        // TODO s/new ClientId(contest.getSiteNumber(), Type.SERVER, 0);/getServerClientId()/
+        return new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
     }
 
     public void checkOutRun(Run run, boolean readOnly) {
         ClientId clientId = contest.getClientId();
-        Packet packet = PacketFactory.createRunRequest(clientId,getServerClientId(),run, clientId, readOnly);
+        Packet packet = PacketFactory.createRunRequest(clientId, getServerClientId(), run, clientId, readOnly);
         sendToLocalServer(packet);
     }
 
@@ -1507,7 +1539,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      */
     public void submitRunJudgement(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles) {
         ClientId clientId = contest.getClientId();
-        Packet packet = PacketFactory.createRunJudgement(clientId,getServerClientId(), run, judgementRecord, runResultFiles);
+        Packet packet = PacketFactory.createRunJudgement(clientId, getServerClientId(), run, judgementRecord, runResultFiles);
         sendToLocalServer(packet);
     }
 
@@ -1524,12 +1556,12 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * Add a new site into contest, send update to other servers.
      */
     public void addNewSite(Site site) {
-        if (isServer ()){
+        if (isServer()) {
             contest.addSite(site);
             writeConfigToDisk();
             Packet packet = PacketFactory.createAddSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, site);
             sendToServers(packet);
-            
+
             sendToJudges(packet);
             sendToAdministrators(packet);
             sendToScoreboards(packet);
@@ -1538,24 +1570,24 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             sendToLocalServer(packet);
         }
     }
-    
+
     /**
      * Modify an existing site, send update to other servers.
      */
-    public void modifySite (Site site) {
+    public void modifySite(Site site) {
         contest.changeSite(site);
         Packet packet = PacketFactory.createUpdateSetting(getServerClientId(), PacketFactory.ALL_SERVERS, site);
         sendToServers(packet);
     }
 
     public void sendServerLoginRequest(int inSiteNumber) {
-        
+
         if (isThisSite(inSiteNumber)) {
             /**
              * We should not send a LOGIN_REQUEST from this site... to this site.
              */
-            System.err.println(" Tried to send login request to ourselves, login to "+inSiteNumber+", ignored");
-            log.log(Log.DEBUG, " Tried to send login request to ourselves, login to "+inSiteNumber+", ignored");
+            System.err.println(" Tried to send login request to ourselves, login to " + inSiteNumber + ", ignored");
+            log.log(Log.DEBUG, " Tried to send login request to ourselves, login to " + inSiteNumber + ", ignored");
             return;
         }
 
@@ -1571,18 +1603,19 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             info("Send login request to Site " + remoteSite.getSiteNumber() + " " + hostName + ":" + portStr);
             ConnectionHandlerID connectionHandlerID = transportManager.connectToServer(hostName, portNumber);
 
-            info("Contacted Site "+remoteSite.getSiteNumber()+ " using connection id " + connectionHandlerID);
-            info("Sending login request to Site "+remoteSite.getSiteNumber()+" " + hostName + " as " + getServerClientId() + " " + localPassword); // TODO remove this
+            info("Contacted Site " + remoteSite.getSiteNumber() + " using connection id " + connectionHandlerID);
+            info("Sending login request to Site " + remoteSite.getSiteNumber() + " " + hostName + " as " + getServerClientId() + " " + localPassword); // TODO remove this
             sendLoginRequestFromServerToServer(transportManager, connectionHandlerID, getServerClientId(), localPassword);
-            
+
         } catch (Exception e) {
-            info("Unable to login to site "+inSiteNumber, e);
+            info("Unable to login to site " + inSiteNumber, e);
         }
 
     }
 
     /**
      * Contacting remote server (joining contest).
+     * 
      * @return true if joining contest, false if first server
      */
     public boolean isContactingRemoteServer() {
@@ -1618,11 +1651,11 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
     public void updateSite(Site site) {
 
-        if (isServer ()){
+        if (isServer()) {
             contest.changeSite(site);
             Packet packet = PacketFactory.createUpdateSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, site);
             sendToServers(packet);
-            
+
             sendToJudges(packet);
             sendToAdministrators(packet);
             sendToScoreboards(packet);
@@ -1634,13 +1667,14 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
     /**
      * Returns true if this client is a server.
+     * 
      * @return true if logged in client is a server.
      */
     private boolean isServer() {
         return contest.getClientId() != null && isServer(contest.getClientId());
     }
-    
-    private boolean isServer (ClientId clientId){
+
+    private boolean isServer(ClientId clientId) {
         return clientId.getClientType().equals(ClientType.Type.SERVER);
     }
 
@@ -1650,15 +1684,15 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
     public void generateNewAccounts(String clientTypeName, int siteNumber, int count, int startNumber, boolean active) {
         ClientType.Type type = ClientType.Type.valueOf(clientTypeName);
-        Packet packet = PacketFactory.createGenerateAccounts(contest.getClientId(), getServerClientId(), siteNumber, type, count, startNumber,  active);
+        Packet packet = PacketFactory.createGenerateAccounts(contest.getClientId(), getServerClientId(), siteNumber, type, count, startNumber, active);
         sendToLocalServer(packet);
     }
 
     public void generateNewAccounts(String clientTypeName, int count, int startNumber, boolean active) {
         generateNewAccounts(clientTypeName, contest.getSiteNumber(), count, startNumber, active);
-        
+
     }
-    
+
     public void submitClarification(Problem problem, String question) {
 
         ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
@@ -1668,7 +1702,6 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
         sendToLocalServer(packet);
     }
-    
 
     public void checkOutClarification(Clarification clarification, boolean readOnly) {
         ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
@@ -1688,7 +1721,6 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         sendToLocalServer(packet);
     }
 
-
     public void forceConnectionDrop(ConnectionHandlerID connectionHandlerID) {
         transportManager.unregisterConnection(connectionHandlerID);
         contest.connectionDropped(connectionHandlerID);
@@ -1698,7 +1730,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         Packet updateProblemPacket = PacketFactory.createAddSetting(contest.getClientId(), getServerClientId(), problem, problemDataFiles);
         sendToLocalServer(updateProblemPacket);
     }
-    
+
     public void updateRun(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles) {
         Packet updateRunPacket = PacketFactory.createRunUpdated(contest.getClientId(), getServerClientId(), run, judgementRecord, runResultFiles, contest.getClientId());
         sendToLocalServer(updateRunPacket);
@@ -1731,9 +1763,9 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * Removes connection from list and sends packet.
      */
     public void removeConnection(ConnectionHandlerID connectionHandlerID) {
-        
+
         contest.connectionDropped(connectionHandlerID);
-        
+
         Packet disconnectionPacket = PacketFactory.createDroppedConnection(contest.getClientId(), PacketFactory.ALL_SERVERS, connectionHandlerID);
         sendToAdministrators(disconnectionPacket);
         sendToServers(disconnectionPacket);
@@ -1744,13 +1776,13 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * Removed login from system and sends packet.
      */
     public void removeLogin(ClientId clientId) {
-        
+
         contest.removeLogin(clientId);
-        
+
         try {
             Packet logoffPacket = PacketFactory.createLogoff(contest.getClientId(), PacketFactory.ALL_SERVERS, clientId);
             sendToAdministrators(logoffPacket);
-            if (! isServer(clientId)){
+            if (!isServer(clientId)) {
                 // Each server tracks its own list of server logins.
                 sendToServers(logoffPacket);
             }
@@ -1770,31 +1802,31 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
 
     public void startAllContestTimes() {
-        Packet packet = PacketFactory.createStartAllClocks(contest.getClientId(), getServerClientId(),  contest.getClientId());
+        Packet packet = PacketFactory.createStartAllClocks(contest.getClientId(), getServerClientId(), contest.getClientId());
         sendToLocalServer(packet);
     }
 
     public void stopAllContestTimes() {
-        Packet packet = PacketFactory.createStopAllClocks(contest.getClientId(), getServerClientId(),  contest.getClientId());
+        Packet packet = PacketFactory.createStopAllClocks(contest.getClientId(), getServerClientId(), contest.getClientId());
         sendToLocalServer(packet);
     }
 
     public void addNewLanguage(Language language) {
         Packet addLanguagePacket = PacketFactory.createAddSetting(contest.getClientId(), getServerClientId(), language);
-        sendToLocalServer(addLanguagePacket); 
+        sendToLocalServer(addLanguagePacket);
     }
-    
+
     public void addNewJudgement(Judgement judgement) {
         Packet addJudgementPacket = PacketFactory.createAddSetting(contest.getClientId(), getServerClientId(), judgement);
-        sendToLocalServer(addJudgementPacket); 
+        sendToLocalServer(addJudgementPacket);
     }
 
     public void updateLanguage(Language language) {
         Packet updateLanguagePacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), language);
         sendToLocalServer(updateLanguagePacket);
     }
-    
-    public void updateJudgement (Judgement judgement) {
+
+    public void updateJudgement(Judgement judgement) {
         Packet updatePacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), judgement);
         sendToLocalServer(updatePacket);
     }
@@ -1811,36 +1843,36 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
     public void addNewAccount(Account account) {
         Packet addAccountPacket = PacketFactory.createAddSetting(contest.getClientId(), getServerClientId(), account);
-        sendToLocalServer(addAccountPacket); 
+        sendToLocalServer(addAccountPacket);
     }
 
     public void addNewAccounts(Account[] accounts) {
         Packet addAccountPacket = PacketFactory.createAddSetting(contest.getClientId(), getServerClientId(), accounts);
-        sendToLocalServer(addAccountPacket); 
+        sendToLocalServer(addAccountPacket);
     }
-    
-    public boolean readConfigFromDisk (int siteNum){
-        
+
+    public boolean readConfigFromDisk(int siteNum) {
+
         boolean loadedConfiguration = false;
-        
-        if (saveCofigurationToDisk){
+
+        if (saveCofigurationToDisk) {
             loadedConfiguration = configurationIO.loadFromDisk(siteNum, contest, getLog());
             contest.initializeSubmissions(siteNum);
             // Initialize contest time if necessary
             ContestTime contestTime = contest.getContestTime(siteNum);
-            if (contestTime == null){
+            if (contestTime == null) {
                 contestTime = new ContestTime(siteNum);
                 contest.addContestTime(contestTime);
             }
-            
+
         }
 
         return loadedConfiguration;
 
     }
-    
-    public void writeConfigToDisk (){
-        
+
+    public void writeConfigToDisk() {
+
         if (saveCofigurationToDisk) {
             try {
                 configurationIO.saveToDisk(contest, getLog());
@@ -1855,6 +1887,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         Packet addClientSettingsPacket = PacketFactory.createAddSetting(contest.getClientId(), getServerClientId(), clientSettings);
         sendToLocalServer(addClientSettingsPacket);
     }
+
     public void updateClientSettings(ClientSettings clientSettings) {
         Packet updateClientSettingsPacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), clientSettings);
         sendToLocalServer(updateClientSettingsPacket);
