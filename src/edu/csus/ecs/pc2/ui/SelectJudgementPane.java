@@ -779,9 +779,47 @@ public class SelectJudgementPane extends JPanePlugin {
     }
 
     protected void acceptValidatorJudgement() {
-        // TODO accept validator judgement
-        JOptionPane.showMessageDialog(null,"Can not accept validator judgement at this time");
+        
+        Run newRun = getRunFromFields();
 
+        enableUpdateButtons(false);
+
+        RunResultFiles runResultFiles = null;
+        
+        JudgementRecord judgementRecord = null;
+
+        String results = validatorJudgementLabel.getText();
+
+        boolean solved = false;
+
+        // Try to find result text in judgement list
+        ElementId elementId = getContest().getJudgements()[1].getElementId();
+        for (Judgement judgement : getContest().getJudgements()) {
+            if (judgement.getDisplayName().equals(results)) {
+                elementId = judgement.getElementId();
+            }
+        }
+
+        // Or perhaps it is a yes? yes?
+        Judgement yesJudgement = getContest().getJudgements()[0];
+        if (yesJudgement.getDisplayName().equalsIgnoreCase(results)) {
+            elementId = yesJudgement.getElementId();
+            solved = true;
+        }
+        
+        newRun.setStatus(RunStates.JUDGED);
+
+        judgementRecord = new JudgementRecord(elementId, getContest().getClientId(), solved, true);
+        judgementRecord.setValidatorResultString(results);
+
+        judgementRecord.setSendToTeam(getNotifyTeamCheckBox().isSelected());
+
+        getController().submitRunJudgement(newRun, judgementRecord, runResultFiles);
+
+        if (getParentFrame() != null) {
+            getParentFrame().setVisible(false);
+        }
+        
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
