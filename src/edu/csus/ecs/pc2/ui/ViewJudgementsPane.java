@@ -7,7 +7,6 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IController;
-import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.Judgement;
@@ -141,7 +140,7 @@ public class ViewJudgementsPane extends JPanePlugin implements UIPlugin {
         Object[] column = new Object[numberColumns];
 
         column[0] = new Integer(rowNumber).toString();
-        column[1] = getJudgementTitle(judgementRecord.getJudgementId());
+        column[1] = getJudgementName(judgementRecord);
         column[2] = judgementRecord.getJudgerClientId().getName();
         column[3] = yesNoString(judgementRecord.isActive());
         column[4] = "" + inRun.getElapsedMins();
@@ -163,12 +162,24 @@ public class ViewJudgementsPane extends JPanePlugin implements UIPlugin {
         return column;
     }
 
-    private String getJudgementTitle(ElementId judgementId) {
-        Judgement judgement = getContest().getJudgement(judgementId);
-        if (judgement == null) {
-            return "<missing>";
+    private String getJudgementName(JudgementRecord judgementRecord) {
+        
+        String name = "No";
+        
+        if (judgementRecord != null && judgementRecord.getJudgementId() != null) {
+            if (judgementRecord.isUsedValidator()){
+                name = judgementRecord.getValidatorResultString();
+            } else {
+                Judgement judgement = getContest().getJudgement(judgementRecord.getJudgementId());
+                if (judgement != null){
+                    name = judgement.toString();
+                }
+            }
+        } else {
+            name = "<missing>";
         }
-        return judgement.toString();
+
+        return name;
     }
 
     /**

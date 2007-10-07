@@ -154,13 +154,17 @@ public class RunsPanel extends JPanePlugin {
 
                 } else {
                     s[4] = run.getStatus().toString() + " No";
-                }
 
-                JudgementRecord judgementRecord = run.getJudgementRecord();
-                if (judgementRecord != null && judgementRecord.getJudgementId() != null) {
-                    Judgement judgement = getContest().getJudgement(judgementRecord.getJudgementId());
-                    if (judgement != null){
-                        s[4] = judgement.toString();
+                    JudgementRecord judgementRecord = run.getJudgementRecord();
+                    if (judgementRecord != null && judgementRecord.getJudgementId() != null) {
+                        if (judgementRecord.isUsedValidator()){
+                            s[4] = judgementRecord.getValidatorResultString();
+                        } else {
+                            Judgement judgement = getContest().getJudgement(judgementRecord.getJudgementId());
+                            if (judgement != null){
+                                s[4] = judgement.toString();
+                            }
+                        }
                     }
                 }
 
@@ -295,16 +299,26 @@ public class RunsPanel extends JPanePlugin {
                     //check if this is the scoreable judgement
                     boolean isActive = judgementRecord.isActive ();
                     if (isActive) {
-                        
+
+                        String response = getContest().getJudgement(judgementRecord.getJudgementId()).toString() ;
+
                         //it's a valid judging response (presumably to a team); 
                         //  get the info from the run and display it in a modal popup
                         if (judgementRecord.isSolved()) {
                             responseFormat += "<FONT COLOR=\"00FF00\" SIZE=+2>" ;  //green, larger
                         } else {
                             responseFormat += "<FONT COLOR=RED>";               //red, current size
+                            
+                            String validatorJudgementName = judgementRecord.getValidatorResultString();
+                            if (judgementRecord.isUsedValidator() && validatorJudgementName != null) {
+                                if (validatorJudgementName.trim().length() == 0) {
+                                    validatorJudgementName = "undetermined";
+                                }
+                                response = validatorJudgementName;
+                            }
                         }
-                        String response = getContest().getJudgement(judgementRecord.getJudgementId()).toString() ;
-                        String judgeComment = theRun.getCommentsForTeam();
+                        
+                       String judgeComment = theRun.getCommentsForTeam();
                        try {
                             String displayString =
                                 "<HTML><FONT SIZE=+1>Judge's Response<BR><BR>"

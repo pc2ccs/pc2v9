@@ -14,7 +14,6 @@ import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IContest;
-import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
@@ -108,10 +107,21 @@ public class RunsReport implements IReport {
         if (run.isJudged()) {
 
             for (JudgementRecord judgementRecord : run.getAllJudgementRecords()) {
-                Judgement judgement = contest.getJudgement(judgementRecord.getJudgementId());
+                String judgementText = contest.getJudgement(judgementRecord.getJudgementId()).toString();
+                String validatorJudgementName = judgementRecord.getValidatorResultString();
+                if (judgementRecord.isUsedValidator() && validatorJudgementName != null) {
+                    if (validatorJudgementName.trim().length() == 0) {
+                        validatorJudgementName = "undetermined";
+                    }
+                    judgementText = validatorJudgementName;
+                }
+
                 printWriter.print("     ");
-                printWriter.print(" '" + judgement + "'");
+                printWriter.print(" '" + judgementText + "'");
                 printWriter.print(" by " + judgementRecord.getJudgerClientId().getName());
+                if (judgementRecord.isUsedValidator()) {
+                    printWriter.print("/Validator");
+                }
                 printWriter.print(" at " + judgementRecord.getWhenJudgedTime());
                 printWriter.println();
             }
