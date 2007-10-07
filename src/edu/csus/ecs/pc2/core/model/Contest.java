@@ -965,13 +965,18 @@ public class Contest implements IContest {
 
     public void cancelRunCheckOut(Run run, ClientId fromId) {
 
+        // TODO Security check, code needed to insure that only
+        // certain accounts can cancel a checkout
+        
         ClientId whoCheckedOut = runCheckOutList.get(run.getElementId());
         // if (fromId.equals(whoCheckedOut)) {
-        // // TODO security code, handle this problem.
         // StaticLog.unclassified("Security Warning canceling "+run+", not checked out by "+whoCheckedOut);
         // }
 
-        runCheckOutList.remove(whoCheckedOut);
+        if (whoCheckedOut != null){
+            runCheckOutList.remove(whoCheckedOut);
+        }
+        
         run.setStatus(RunStates.NEW);
         runList.updateRun(run);
         Run theRun = runList.get(run);

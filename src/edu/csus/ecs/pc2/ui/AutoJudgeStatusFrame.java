@@ -35,6 +35,8 @@ public class AutoJudgeStatusFrame extends javax.swing.JFrame {
     private JLabel messageLabel = null;
 
     private JLabel bigAutoJudgeStatusLabel = null;
+    
+    private AutoJudgingMonitor autoJudgingMonitor = null;
 
     /**
      * This method initializes
@@ -135,35 +137,66 @@ public class AutoJudgeStatusFrame extends javax.swing.JFrame {
             stopAutoJudgingButton.setText("Stop AutoJudging");
             stopAutoJudgingButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.err.println("debug - You can't stop... Auto Judging.  Sorry :(");
+                    startStopAutoJudging();
                 }
             });
         }
         return stopAutoJudgingButton;
     }
-    
+
+    protected void startStopAutoJudging() {
+        
+        if (autoJudgingMonitor.isAutoJudgeDisabledLocally()){
+            // Locally turned off, turn it ON
+            getStopAutoJudgingButton().setText("Stop Auto Judging");
+            autoJudgingMonitor.setAutoJudgeDisabledLocally(false);
+            autoJudgingMonitor.startAutoJudging();
+              
+        } else {
+            // Local turned ON, turn it off
+            getStopAutoJudgingButton().setText("Start Auto Judging");
+            autoJudgingMonitor.setAutoJudgeDisabledLocally(true);
+            autoJudgingMonitor.stopAutoJudging();
+            
+        }
+    }
+
     /**
      * Show message at top of frame.
+     * 
      * @param message
      */
-    public void updateMessage(final String message){
+    public void updateMessage(final String message) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 messageLabel.setText(message);
             }
         });
     }
-    
+
     /**
      * Update big message in center of frame.
+     * 
      * @param bigMessage
      */
-    public void updateStatusLabel (final String bigMessage) {
+    public void updateStatusLabel(final String bigMessage) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 bigAutoJudgeStatusLabel.setText(bigMessage);
             }
         });
+    }
+
+    public void setAutoJudgeMonitor(AutoJudgingMonitor monitor) {
+        autoJudgingMonitor = monitor;
+    }
+
+    protected AutoJudgingMonitor getAutoJudgingMonitor() {
+        return autoJudgingMonitor;
+    }
+
+    public void setAutoJudgingMonitor(AutoJudgingMonitor autoJudgingMonitor) {
+        this.autoJudgingMonitor = autoJudgingMonitor;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

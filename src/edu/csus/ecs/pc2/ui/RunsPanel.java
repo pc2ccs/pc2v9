@@ -599,7 +599,10 @@ public class RunsPanel extends JPanePlugin {
             editRunButton.setVisible(isAllowed(Permission.Type.EDIT_RUN));
             extractButton.setVisible(isAllowed(Permission.Type.EXTRACT_RUNS));
             giveButton.setVisible(isAllowed(Permission.Type.GIVE_RUN));
-            takeButton.setVisible(isAllowed(Permission.Type.TAKE_RUN));
+            
+            takeButton.setVisible(false);
+//            takeButton.setVisible(isAllowed(Permission.Type.TAKE_RUN));
+            
             rejudgeRunButton.setVisible(isAllowed(Permission.Type.REJUDGE_RUN));
             viewJudgementsButton.setVisible(isAllowed(Permission.Type.VIEW_RUN_JUDGEMENT_HISTORIES));
             autoJudgeButton.setVisible(false);
@@ -868,11 +871,39 @@ public class RunsPanel extends JPanePlugin {
             giveButton.setMnemonic(java.awt.event.KeyEvent.VK_G);
             giveButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.out.println("actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+                    giveSelectedRun();
                 }
             });
         }
         return giveButton;
+    }
+
+    protected void giveSelectedRun() {
+
+        int[] selectedIndexes = runListBox.getSelectedIndexes();
+
+        if (selectedIndexes.length < 1) {
+            showMessage("Please select a run ");
+            return;
+        }
+
+        try {
+            ElementId elementId = (ElementId) runListBox.getKeys()[selectedIndexes[0]];
+            Run runToEdit = getContest().getRun(elementId);
+
+            if (runToEdit.getStatus().equals(RunStates.BEING_JUDGED) || runToEdit.getStatus().equals(RunStates.NEW) || runToEdit.getStatus().equals(RunStates.BEING_RE_JUDGED)) {
+                getController().cancelRun(runToEdit);
+                showMessage("Gave run " + runToEdit);
+
+            } else {
+                showMessage("Can not give run with state: " + runToEdit.getStatus());
+            }
+
+        } catch (Exception e) {
+            log.log(Log.WARNING, "Exception logged ", e);
+            showMessage("Unable to give run, check log");
+        }
+
     }
 
     /**
@@ -887,7 +918,8 @@ public class RunsPanel extends JPanePlugin {
             takeButton.setMnemonic(java.awt.event.KeyEvent.VK_T);
             takeButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.out.println("actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+                    System.out.println("actionPerformed()"); 
+                    // TODO Auto-generated Event stub actionPerformed()
                 }
             });
         }
@@ -1120,6 +1152,8 @@ public class RunsPanel extends JPanePlugin {
     protected void startAutoJudging() {
 
         if (isAutoJudgeOn()) {
+            // RE-enable local auto judge flag 
+            autoJudgingMonitor.setAutoJudgeDisabledLocally(false);
             autoJudgingMonitor.startAutoJudging();
         } else {
             showMessage("Administrator has turned off Auto Judging");
