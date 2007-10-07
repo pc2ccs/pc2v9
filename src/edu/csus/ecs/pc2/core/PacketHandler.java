@@ -1943,13 +1943,20 @@ public class PacketHandler {
                     
                     // Now add both problem and potentially problem data files into contest.
                     
+                    ProblemDataFiles problemDataFiles = (ProblemDataFiles) problemDataFilesList.get(problem);
                     if (contest.getProblem(problem.getElementId()) != null) {
-                        contest.updateProblem(problem, (ProblemDataFiles) problemDataFilesList.get(problem));
+                        if (problemDataFiles == null){
+                            contest.updateProblem(problem);
+                        } else {
+                            contest.updateProblem(problem, problemDataFiles);
+                        }
                     } else {
-                        contest.addProblem(problem, (ProblemDataFiles) problemDataFilesList.get(problem));
-                        
+                        if (problemDataFiles == null){
+                            contest.addProblem(problem);
+                        } else {
+                            contest.addProblem(problem, problemDataFiles);
+                        }
                     }
-                    
                 }
             }
         } catch (Exception e) {
