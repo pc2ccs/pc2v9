@@ -53,6 +53,8 @@ public class BalloonSettings implements IElementObject {
      */
     private boolean printBalloons = false;
 
+    private boolean balloonsEnabled = false;
+    
     /**
      * How many lines per page before a page break, defaults to 66.
      */
@@ -96,6 +98,7 @@ public class BalloonSettings implements IElementObject {
      */
     public void setEmailBalloons(boolean emailBalloons) {
         this.emailBalloons = emailBalloons;
+        setBalloonsEnabled(isEmailBalloons() | isPrintBalloons());
     }
 
     /**
@@ -171,7 +174,8 @@ public class BalloonSettings implements IElementObject {
      */
     public void setPrintBalloons(boolean printBalloons) {
         this.printBalloons = printBalloons;
-    }
+        setBalloonsEnabled(isEmailBalloons() | isPrintBalloons());
+   }
 
     /**
      * @return Returns the printDevice.
@@ -337,5 +341,19 @@ public class BalloonSettings implements IElementObject {
             e.printStackTrace();
             return false;
         }
+    }
+
+    /**
+     * @return Returns the balloonsEnabled.
+     */
+    public boolean isBalloonsEnabled() {
+        return balloonsEnabled;
+    }
+
+    /**
+     * @param balloonsEnabled The balloonsEnabled to set.
+     */
+    private void setBalloonsEnabled(boolean balloonsEnabled) {
+        this.balloonsEnabled = balloonsEnabled;
     }
 }
