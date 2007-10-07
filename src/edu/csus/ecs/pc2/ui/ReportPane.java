@@ -27,6 +27,7 @@ import edu.csus.ecs.pc2.core.report.InternalDumpReport;
 import edu.csus.ecs.pc2.core.report.JudgementReport;
 import edu.csus.ecs.pc2.core.report.LanguagesReport;
 import edu.csus.ecs.pc2.core.report.LoginReport;
+import edu.csus.ecs.pc2.core.report.OldRunsReport;
 import edu.csus.ecs.pc2.core.report.ProblemsReport;
 import edu.csus.ecs.pc2.core.report.RunsByTeamReport;
 import edu.csus.ecs.pc2.core.report.RunsReport;
@@ -107,20 +108,25 @@ public class ReportPane extends JPanePlugin {
         this.add(getMainPane(), java.awt.BorderLayout.CENTER);
 
         // populate list of reports
-        listOfReports = new IReport[13];
-        listOfReports[0] = new AccountsReport();
-        listOfReports[1] = new RunsReport();
-        listOfReports[2] = new LoginReport();
-        listOfReports[3] = new ClarificationsReport();
-        listOfReports[4] = new ProblemsReport();
-        listOfReports[5] = new LanguagesReport();
-        listOfReports[6] = new JudgementReport();
-        listOfReports[7] = new AccountPermissionReport();
-        listOfReports[8] = new StandingsReport();
-        listOfReports[9] = new RunsByTeamReport();
-        listOfReports[10] = new BalloonSettingsReport();
-        listOfReports[11] = new ClientSettingsReport();
-        listOfReports[12] = new InternalDumpReport();
+        listOfReports = new IReport[14];
+        int repNo = 0;
+        listOfReports[repNo++] = new AccountsReport();
+        listOfReports[repNo++] = new StandingsReport();
+        listOfReports[repNo++] = new LoginReport();
+        
+        listOfReports[repNo++] = new RunsReport();
+        listOfReports[repNo++] = new ClarificationsReport();
+        listOfReports[repNo++] = new ProblemsReport();
+        listOfReports[repNo++] = new LanguagesReport();
+        
+        listOfReports[repNo++] = new JudgementReport();
+        listOfReports[repNo++] = new RunsByTeamReport();
+        listOfReports[repNo++] = new BalloonSettingsReport();
+        listOfReports[repNo++] = new ClientSettingsReport();
+        
+        listOfReports[repNo++] = new OldRunsReport();
+        listOfReports[repNo++] = new AccountPermissionReport();
+        listOfReports[repNo++] = new InternalDumpReport();
         
     }
 
