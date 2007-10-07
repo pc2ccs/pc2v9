@@ -142,6 +142,9 @@ public class ViewJudgementsPane extends JPanePlugin implements UIPlugin {
         column[0] = new Integer(rowNumber).toString();
         column[1] = getJudgementName(judgementRecord);
         column[2] = judgementRecord.getJudgerClientId().getName();
+        if (judgementRecord.isUsedValidator()){
+            column[2] = judgementRecord.getJudgerClientId().getName() + "/AJ";
+        }
         column[3] = yesNoString(judgementRecord.isActive());
         column[4] = "" + inRun.getElapsedMins();
         column[5] = "" + judgementRecord.getWhenJudgedTime();
