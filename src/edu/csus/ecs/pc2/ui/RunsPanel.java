@@ -139,6 +139,7 @@ public class RunsPanel extends JPanePlugin {
 //        Object[] cols = { "Site", "Team", "Run Id", "Time", "Status", "Problem", "Judge", "Language", "OS" };
 
         try {
+            boolean autoJudgedRun = false;
             int cols = runListBox.getColumnCount();
             Object[] s = new String[cols];
 
@@ -158,6 +159,7 @@ public class RunsPanel extends JPanePlugin {
                     JudgementRecord judgementRecord = run.getJudgementRecord();
                     if (judgementRecord != null && judgementRecord.getJudgementId() != null) {
                         if (judgementRecord.isUsedValidator()){
+                            autoJudgedRun = true;
                             s[4] = judgementRecord.getValidatorResultString();
                         } else {
                             Judgement judgement = getContest().getJudgement(judgementRecord.getJudgementId());
@@ -190,6 +192,9 @@ public class RunsPanel extends JPanePlugin {
                         s[6] = "Me";
                     } else {
                         s[6] = judgeId.getName();
+                    }
+                    if (autoJudgedRun) {
+                        s[6] = s[6] + "/AJ";
                     }
                 } else {
                     s[6] = "";
