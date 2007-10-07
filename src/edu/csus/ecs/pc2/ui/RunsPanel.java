@@ -446,11 +446,21 @@ public class RunsPanel extends JPanePlugin {
                 int rowNumber = runListBox.getIndexByKey(run.getElementId());
                 if (rowNumber != -1) {
                     runListBox.removeRow(rowNumber);
+                    updateRowCount();
                 }
             }
         });
     }
 
+    /**
+     * This updates the rowCountlabel & toolTipText.
+     * It should be called only while on the swing thread.
+     */
+    private void updateRowCount() {
+        rowCountLabel.setText(""+runListBox.getRowCount());
+        rowCountLabel.setToolTipText("There are "+runListBox.getRowCount()+" runs");
+    }
+    
     public void updateRunRow(final Run run, final ClientId whoModifiedId) {
         
         if (filter != null){
@@ -481,8 +491,7 @@ public class RunsPanel extends JPanePlugin {
                 } else {
                     runListBox.replaceRow(objects, rowNumber);
                 }
-                rowCountLabel.setText(""+runListBox.getRowCount());
-                rowCountLabel.setToolTipText("There are "+runListBox.getRowCount()+" runs");
+                updateRowCount();
                 runListBox.autoSizeAllColumns();
                 runListBox.sort();
                 if (selectJudgementFrame != null) {
