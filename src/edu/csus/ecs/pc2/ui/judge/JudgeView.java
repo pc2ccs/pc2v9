@@ -22,12 +22,9 @@ import edu.csus.ecs.pc2.ui.JPanePlugin;
 import edu.csus.ecs.pc2.ui.LogWindow;
 import edu.csus.ecs.pc2.ui.OptionsPanel;
 import edu.csus.ecs.pc2.ui.RunsPanel;
-import edu.csus.ecs.pc2.ui.SubmissionBiffFrame;
 import edu.csus.ecs.pc2.ui.SubmissionBiffPane;
 import edu.csus.ecs.pc2.ui.SubmitRunPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
-import edu.csus.ecs.pc2.ui.FrameUtilities.HorizontalPosition;
-import edu.csus.ecs.pc2.ui.FrameUtilities.VerticalPosition;
 
 /**
  * Judge GUI.
@@ -167,12 +164,6 @@ public class JudgeView extends JFrame implements UIPlugin {
         OptionsPanel optionsPanel = new OptionsPanel();
         addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
         optionsPanel.setLogWindow(logWindow);
-
-        SubmissionBiffFrame submissionBiffFrame = new SubmissionBiffFrame();
-        submissionBiffFrame.setContestAndController(contest, controller);
-        FrameUtilities.setFramePosition(submissionBiffFrame, HorizontalPosition.RIGHT, VerticalPosition.TOP);
-        submissionBiffFrame.setFontSize(56);
-        submissionBiffFrame.setVisible(true);
         
         SubmissionBiffPane submissionBiffPane = new SubmissionBiffPane();
         getJudgeBiffPane().add(submissionBiffPane, java.awt.BorderLayout.CENTER);

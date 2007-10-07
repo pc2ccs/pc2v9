@@ -1,13 +1,19 @@
 package edu.csus.ecs.pc2.ui;
 
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+
+import javax.swing.JButton;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+
 import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.security.Permission;
+import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.ui.FrameUtilities.HorizontalPosition;
 import edu.csus.ecs.pc2.ui.FrameUtilities.VerticalPosition;
-
-import javax.swing.JCheckBox;
-import javax.swing.JPanel;
-import java.awt.BorderLayout;
 
 /**
  * Options Pane, Show Log checkbox.
@@ -28,11 +34,18 @@ public class OptionsPanel extends JPanePlugin {
 
     private LogWindow logWindow;
 
-    private JCheckBox showLogWindowCheckbox = null;
-
     private ReportFrame reportFrame;
 
     private JPanel contentPane = null;
+
+    private JButton showLogButton = null;
+
+    private JButton showBiffWindow = null;
+
+    private SubmissionBiffFrame submissionBiffFrame = new SubmissionBiffFrame();
+    
+    private PermissionList permissionList = new PermissionList();
+    
 
     /**
      * This method initializes
@@ -62,9 +75,43 @@ public class OptionsPanel extends JPanePlugin {
         FrameUtilities.setFramePosition(reportFrame, HorizontalPosition.RIGHT, VerticalPosition.CENTER);
         reportFrame.setVisible(true);
     }
+    
+ 
+    
+    private boolean isAllowed (Permission.Type type){
+        return permissionList.isAllowed(type);
+    }
+    
+    
+    private void initializePermissions() {
+        Account account = getContest().getAccount(getContest().getClientId());
+        if (account != null){
+            permissionList.clearAndLoadPermissions(account.getPermissionList());
+        }
+    }
+
+    
+    private void updateGUIperPermissions() {
+        
+        showBiffWindow.setVisible(isAllowed(Permission.Type.JUDGE_RUN));
+        
+    }
 
     public void setContestAndController(IContest inContest, IController inController) {
         super.setContestAndController(inContest, inController);
+        
+        initializePermissions();
+
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                submissionBiffFrame.setContestAndController(getContest(), getController());
+                FrameUtilities.setFramePosition(submissionBiffFrame, HorizontalPosition.RIGHT, VerticalPosition.TOP);
+                submissionBiffFrame.setFontSize(56);
+                
+                updateGUIperPermissions();
+                
+            }
+        });
 
     }
 
@@ -84,29 +131,6 @@ public class OptionsPanel extends JPanePlugin {
      */
     public void setLogWindow(LogWindow logWindow) {
         this.logWindow = logWindow;
-        if (logWindow != null) {
-            getShowLogWindowCheckbox().setEnabled(true);
-        }
-    }
-
-    /**
-     * This method initializes showLogWindowCheckbox
-     * 
-     * @return javax.swing.JCheckBox
-     */
-    private JCheckBox getShowLogWindowCheckbox() {
-        if (showLogWindowCheckbox == null) {
-            showLogWindowCheckbox = new JCheckBox();
-            showLogWindowCheckbox.setText("Show Log");
-            showLogWindowCheckbox.setEnabled(false);
-            showLogWindowCheckbox.setMnemonic(java.awt.event.KeyEvent.VK_L);
-            showLogWindowCheckbox.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    showLog(showLogWindowCheckbox.isSelected());
-                }
-            });
-        }
-        return showLogWindowCheckbox;
     }
 
     protected void showLog(boolean showLogWindow) {
@@ -120,8 +144,12 @@ public class OptionsPanel extends JPanePlugin {
      */
     private JPanel getContentPane() {
         if (contentPane == null) {
+            FlowLayout flowLayout = new FlowLayout();
+            flowLayout.setHgap(20);
             contentPane = new JPanel();
-            contentPane.add(getShowLogWindowCheckbox(), null);
+            contentPane.setLayout(flowLayout);
+            contentPane.add(getShowLogButton(), null);
+            contentPane.add(getShowBiffWindow(), null);
             contentPane.addMouseListener(new java.awt.event.MouseAdapter() {
                 public void mouseClicked(java.awt.event.MouseEvent e) {
                     if (e.getClickCount() > 1 && e.isControlDown() && e.isShiftDown()) {
@@ -131,6 +159,48 @@ public class OptionsPanel extends JPanePlugin {
             });
         }
         return contentPane;
+    }
+
+    /**
+     * This method initializes showLogButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getShowLogButton() {
+        if (showLogButton == null) {
+            showLogButton = new JButton();
+            showLogButton.setText("Show Log");
+            showLogButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    showLog(true);
+                }
+            });
+        }
+        return showLogButton;
+    }
+
+    /**
+     * This method initializes showBiffWindow
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getShowBiffWindow() {
+        if (showBiffWindow == null) {
+            showBiffWindow = new JButton();
+            showBiffWindow.setText("Show Unjudged Submissions Count");
+            showBiffWindow.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    showBiffWindow();
+                }
+            });
+        }
+        return showBiffWindow;
+    }
+
+    protected void showBiffWindow() {
+
+        submissionBiffFrame.setVisible(true);
+
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
