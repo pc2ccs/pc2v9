@@ -2,6 +2,8 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.text.SimpleDateFormat;
+import java.util.logging.Logger;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -17,14 +19,19 @@ import edu.csus.ecs.pc2.core.list.AccountNameComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
+import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
+import edu.csus.ecs.pc2.core.model.ILoginListener;
 import edu.csus.ecs.pc2.core.model.ISiteListener;
+import edu.csus.ecs.pc2.core.model.LoginEvent;
 import edu.csus.ecs.pc2.core.model.SiteEvent;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
 
@@ -69,6 +76,11 @@ public class ContestTimesPane extends JPanePlugin {
 
     private JButton editButton = null;
 
+    private SimpleDateFormat formatter = new SimpleDateFormat(" HH:mm:ss MM-dd");
+
+    private Logger log;
+
+    
     /**
      * This method initializes
      * 
@@ -149,7 +161,8 @@ public class ContestTimesPane extends JPanePlugin {
             contestTimeListBox = new MCLB();
 
             contestTimeListBox.setMultipleSelections(true);
-            Object[] cols = { "Site", "State", "Remaining", "Elapsed", "Length" };
+            Object[] cols = { "Site", "State", "Remaining", "Elapsed", "Length", "Attached", "Since" };
+
 
             contestTimeListBox.addColumns(cols);
 
@@ -192,12 +205,12 @@ public class ContestTimesPane extends JPanePlugin {
 
     protected void info(String string) {
         System.err.println(string);
-        getController().getLog().log(Log.WARNING, string);
+        log.log(Log.WARNING, string);
     }
 
     protected String[] buildContestTimeRow(ContestTime contestTime) {
 
-        // Object[] cols = { "Site", "State", "Remaining", "Elapsed", "Length" };
+        // Object[] cols = { "Site", "State", "Remaining", "Elapsed", "Length", "Attached", "Since" };
 
         int numberColumns = contestTimeListBox.getColumnCount();
         String[] c = new String[numberColumns];
@@ -215,9 +228,30 @@ public class ContestTimesPane extends JPanePlugin {
             c[2] = contestTime.getRemainingTimeStr();
             c[3] = contestTime.getElapsedTimeStr();
             c[4] = contestTime.getContestLengthStr();
+            
+            c[5] = "No";
+            if (isThisSite(contestTime.getSiteNumber())) {
+                c[5] = "N/A";
+            }
+            c[6] = "";
+            
+            try {
+                ClientId serverId = new ClientId(contestTime.getSiteNumber(), Type.SERVER, 0);
+                if (getContest().isLocalLoggedIn(serverId)) {
+                    c[5] = "Yes";
+                    c[6] = formatter.format(getContest().getLocalLoggedInDate(serverId));
+                }
+            } catch (Exception e) {
+                c[5] = "??";
+                log.log(Log.WARNING, "Exception updating Contest Time for site "+contestTime.getSiteNumber(), e);
+            }
         }
 
         return c;
+    }
+
+    private boolean isThisSite(int siteNumber) {
+        return getContest().getSiteNumber() == siteNumber;
     }
 
     private void reloadListBox() {
@@ -248,7 +282,6 @@ public class ContestTimesPane extends JPanePlugin {
 
     private void updateGUIperPermissions() {
 
-        // getContestTimeRefreshButton();
         getStartClockButton().setVisible(isAllowed(Permission.Type.START_CONTEST_CLOCK));
         getStopClockButton().setVisible(isAllowed(Permission.Type.STOP_CONTEST_CLOCK));
         getStartAllButton().setVisible(isAllowed(Permission.Type.START_CONTEST_CLOCK));
@@ -258,15 +291,21 @@ public class ContestTimesPane extends JPanePlugin {
 
     public void setContestAndController(IContest inContest, IController inController) {
         super.setContestAndController(inContest, inController);
+
+        log = getController().getLog();
+
         initializePermissions();
 
         getContest().addContestTimeListener(new ContestTimeListenerImplementation());
 
         getContest().addSiteListener(new SiteListenerImplementation());
+        
+        getContest().addLoginListener(new LoginListenerImplementation());
 
         getContest().addAccountListener(new AccountListenerImplementation());
 
         editContestTimeFrame.setContestAndController(inContest, inController);
+        
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -318,6 +357,30 @@ public class ContestTimesPane extends JPanePlugin {
         }
 
     }
+    
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    public class LoginListenerImplementation implements ILoginListener {
+
+        public void loginAdded(LoginEvent event) {
+            if (isServer(event.getClientId())){
+                reloadListBox();
+            }
+        }
+
+        public void loginRemoved(LoginEvent event) {
+            if (isServer(event.getClientId())){
+                reloadListBox();
+            }
+        }
+
+        public void loginDenied(LoginEvent event) {
+          
+        }
+    }
 
     /**
      * ContestTime Listener
@@ -368,6 +431,10 @@ public class ContestTimesPane extends JPanePlugin {
             });
         }
         return refreshButton;
+    }
+
+    protected boolean isServer(ClientId clientId) {
+        return clientId != null && clientId.getClientType().equals(ClientType.Type.SERVER);
     }
 
     /**
@@ -504,7 +571,6 @@ public class ContestTimesPane extends JPanePlugin {
                         updateGUIperPermissions();
                     }
                 });
-
             }
 
         }
@@ -603,5 +669,6 @@ public class ContestTimesPane extends JPanePlugin {
         editContestTimeFrame.setVisible(true);
 
     }
+    
 
 } // @jve:decl-index=0:visual-constraint="10,10"

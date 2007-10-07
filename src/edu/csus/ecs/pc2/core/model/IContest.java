@@ -297,6 +297,17 @@ public interface IContest {
      * @return true if logged in.
      */
     boolean isLocalLoggedIn(ClientId sourceId);
+    
+    /**
+     * Return date when client logged in or null if not logged in.
+     * 
+     * Should use {@link #isLocalLoggedIn(ClientId)} not this
+     * method to check whether client logged in.
+     * 
+     * @param clientId
+     * @return
+     */
+    Date getLocalLoggedInDate (ClientId clientId);
 
     /**
      * Is logged into remote server.

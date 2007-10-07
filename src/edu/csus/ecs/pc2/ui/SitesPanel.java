@@ -56,6 +56,8 @@ public class SitesPanel extends JPanePlugin {
 
     private JLabel messageLabel = null;
 
+    private JButton reconnectButton = null;
+
     /**
      * This method initializes
      * 
@@ -98,6 +100,7 @@ public class SitesPanel extends JPanePlugin {
             siteButtonPanel.setPreferredSize(new java.awt.Dimension(35, 35));
             siteButtonPanel.add(getAddSiteButton(), null);
             siteButtonPanel.add(getUpdateSiteButton(), null);
+            siteButtonPanel.add(getReconnectButton(), null);
             siteButtonPanel.add(getCancelSiteEditButton(), null);
         }
         return siteButtonPanel;
@@ -551,5 +554,51 @@ public class SitesPanel extends JPanePlugin {
                 messageLabel.setText(string);
             }
         });
+    }
+
+    /**
+     * This method initializes reconnectButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getReconnectButton() {
+        if (reconnectButton == null) {
+            reconnectButton = new JButton();
+            reconnectButton.setText("Reconnect");
+            reconnectButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    reconnectToSelectedSite();
+                }
+            });
+        }
+        return reconnectButton;
+    }
+
+    protected void reconnectToSelectedSite() {
+        
+        int selectedSite = getSiteListBox().getSelectedIndex();
+        
+        if (selectedSite == -1){
+            showMessage("Select a site to reconnect to");
+            return;
+        }
+        
+        try {
+            
+            Site site = createSiteFromRow(selectedSite);
+            
+            if (getContest().getSite(site.getSiteNumber()) == null){
+                showMessage("Can not connect to site "+site.getSiteNumber()+", Update Site first");
+                return;
+            }
+
+            getController().sendServerLoginRequest(site.getSiteNumber());
+            
+        } catch (Exception e) {
+            showMessage("Unable to reconnect site, check log");
+            getController().getLog().log(Log.WARNING, "Exception attempting to reconnect to site ", e);
+        }
+        
+        
     }
 } // @jve:decl-index=0:visual-constraint="10,10"

@@ -1580,7 +1580,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         sendToServers(packet);
     }
 
-    public void sendServerLoginRequest(int inSiteNumber) {
+    public void sendServerLoginRequest(int inSiteNumber) throws Exception {
 
         if (isThisSite(inSiteNumber)) {
             /**
@@ -1591,25 +1591,20 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             return;
         }
 
-        try {
-            Site remoteSite = contest.getSite(inSiteNumber);
-            Site localSite = contest.getSite(contest.getSiteNumber());
-            String localPassword = localSite.getPassword();
-
-            String hostName = remoteSite.getConnectionInfo().getProperty(Site.IP_KEY);
-            String portStr = remoteSite.getConnectionInfo().getProperty(Site.PORT_KEY);
-            int portNumber = Integer.parseInt(portStr);
-
-            info("Send login request to Site " + remoteSite.getSiteNumber() + " " + hostName + ":" + portStr);
-            ConnectionHandlerID connectionHandlerID = transportManager.connectToServer(hostName, portNumber);
-
-            info("Contacted Site " + remoteSite.getSiteNumber() + " using connection id " + connectionHandlerID);
-            info("Sending login request to Site " + remoteSite.getSiteNumber() + " " + hostName + " as " + getServerClientId() + " " + localPassword); // TODO remove this
-            sendLoginRequestFromServerToServer(transportManager, connectionHandlerID, getServerClientId(), localPassword);
-
-        } catch (Exception e) {
-            info("Unable to login to site " + inSiteNumber, e);
-        }
+        Site remoteSite = contest.getSite(inSiteNumber);
+        Site localSite = contest.getSite(contest.getSiteNumber());
+        String localPassword = localSite.getPassword();
+        
+        String hostName = remoteSite.getConnectionInfo().getProperty(Site.IP_KEY);
+        String portStr = remoteSite.getConnectionInfo().getProperty(Site.PORT_KEY);
+        int portNumber = Integer.parseInt(portStr);
+        
+        info("Send login request to Site " + remoteSite.getSiteNumber() + " " + hostName + ":" + portStr);
+        ConnectionHandlerID connectionHandlerID = transportManager.connectToServer(hostName, portNumber);
+        
+        info("Contacted Site " + remoteSite.getSiteNumber() + " using connection id " + connectionHandlerID);
+        info("Sending login request to Site " + remoteSite.getSiteNumber() + " " + hostName + " as " + getServerClientId() + " " + localPassword); // TODO remove this
+        sendLoginRequestFromServerToServer(transportManager, connectionHandlerID, getServerClientId(), localPassword);
 
     }
 

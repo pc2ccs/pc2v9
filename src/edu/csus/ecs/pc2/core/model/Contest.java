@@ -722,6 +722,10 @@ public class Contest implements IContest {
     public boolean isLocalLoggedIn(ClientId clientId) {
         return localLoginList.isLoggedIn(clientId);
     }
+    
+    public Date getLocalLoggedInDate (ClientId clientId){
+        return localLoginList.getLoggedInDate(clientId);
+    }
 
     public ConnectionHandlerID getConnectionHandleID(ClientId sourceId) {
         ConnectionHandlerID connectionHandlerID = localLoginList.getConnectionHandleID(sourceId);

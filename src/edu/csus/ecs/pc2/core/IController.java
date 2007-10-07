@@ -181,7 +181,7 @@ public interface IController {
 
     void updateRun(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles);
 
-    void sendServerLoginRequest(int siteNumber);
+    void sendServerLoginRequest(int inSiteNumber) throws Exception;
 
     void updateSite(Site newSite);
 
