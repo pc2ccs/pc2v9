@@ -17,6 +17,7 @@ import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
@@ -99,6 +100,10 @@ public class RunsPanel extends JPanePlugin {
     
     private Filter filter = null;
 
+    private JButton autoJudgeButton = null;
+    
+    private AutoJudgingMonitor autoJudgingMonitor = new AutoJudgingMonitor();
+
     /**
      * This method initializes
      * 
@@ -114,7 +119,7 @@ public class RunsPanel extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new java.awt.Dimension(625, 216));
+        this.setSize(new java.awt.Dimension(744,216));
         this.add(getButtonPanel(), java.awt.BorderLayout.SOUTH);
         this.add(getRunsListBox(), java.awt.BorderLayout.CENTER);
         this.add(getMessagePanel(), java.awt.BorderLayout.NORTH);
@@ -560,6 +565,8 @@ public class RunsPanel extends JPanePlugin {
         
         if (showNewRunsOnly){
 
+            // Show New Runs
+            
             requestRunButton.setVisible(true);
             requestRunButton.setEnabled(isAllowed(Permission.Type.JUDGE_RUN));
             editRunButton.setVisible(false);
@@ -568,9 +575,12 @@ public class RunsPanel extends JPanePlugin {
             takeButton.setVisible(false);
             rejudgeRunButton.setVisible(false);
             viewJudgementsButton.setVisible(false);
+            autoJudgeButton.setVisible(isAllowed(Permission.Type.ALLOWED_TO_AUTO_JUDGE));
 
         } else {
         
+            // Show ALL Runs
+            
             requestRunButton.setVisible(isAllowed(Permission.Type.JUDGE_RUN));
             editRunButton.setVisible(isAllowed(Permission.Type.EDIT_RUN));
             extractButton.setVisible(isAllowed(Permission.Type.EXTRACT_RUNS));
@@ -578,6 +588,7 @@ public class RunsPanel extends JPanePlugin {
             takeButton.setVisible(isAllowed(Permission.Type.TAKE_RUN));
             rejudgeRunButton.setVisible(isAllowed(Permission.Type.REJUDGE_RUN));
             viewJudgementsButton.setVisible(isAllowed(Permission.Type.VIEW_RUN_JUDGEMENT_HISTORIES));
+            autoJudgeButton.setVisible(false);
             
         }
     }
@@ -594,6 +605,8 @@ public class RunsPanel extends JPanePlugin {
         if (isAllowed(Permission.Type.JUDGE_RUN)) {
             selectJudgementFrame.setContestAndController(getContest(), getController());
         }
+        
+        autoJudgingMonitor.setContestAndController(getContest(), getController());
 
         getContest().addRunListener(new RunListenerImplementation());
         getContest().addAccountListener(new AccountListenerImplementation());
@@ -649,6 +662,7 @@ public class RunsPanel extends JPanePlugin {
             buttonPanel.add(getRequestRunButton(), null);
             buttonPanel.add(getRejudgeRunButton(), null);
             buttonPanel.add(getFilterButton(), null);
+            buttonPanel.add(getAutoJudgeButton(), null);
             buttonPanel.add(getExtractButton(), null);
         }
         return buttonPanel;
@@ -1055,6 +1069,47 @@ public class RunsPanel extends JPanePlugin {
     public void setShowJudgesInfo(boolean showJudgesInfo) {
         this.showJudgesInfo = showJudgesInfo;
         resetRunsListBoxColumns();
+    }
+
+    /**
+     * This method initializes autoJudgeButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getAutoJudgeButton() {
+        if (autoJudgeButton == null) {
+            autoJudgeButton = new JButton();
+            autoJudgeButton.setText("Auto Judge");
+            autoJudgeButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    startAutoJudging();
+                }
+            });
+        }
+        return autoJudgeButton;
+    }
+
+    /**
+     * Is Auto Judging turned On for this judge ?
+     * 
+     * @return
+     */
+    private boolean isAutoJudgeOn() {
+        ClientSettings clientSettings = getContest().getClientSettings();
+        if (clientSettings != null && clientSettings.isAutoJudging()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    protected void startAutoJudging() {
+
+        if (isAutoJudgeOn()) {
+            autoJudgingMonitor.startAutoJudging();
+        } else {
+            showMessage("Administrator has turned off Auto Judging");
+        }
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

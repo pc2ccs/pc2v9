@@ -1,21 +1,35 @@
 package edu.csus.ecs.pc2.ui;
 
+import javax.swing.SwingUtilities;
+
 import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.execute.Executable;
+import edu.csus.ecs.pc2.core.execute.ExecutionData;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
+import edu.csus.ecs.pc2.core.model.ClientSettingsEvent;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
+import edu.csus.ecs.pc2.core.model.IClientSettingsListener;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.IRunListener;
+import edu.csus.ecs.pc2.core.model.Judgement;
+import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.RunFiles;
+import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 
 /**
  * Auto Judge Monitor.
  * 
  * This class will auto judge runs. It will update the status frame as the state of judging runs changes.
+ * <P>
+ * The auto judging monitor starts when the {@link #startAutoJudging()}
+ * is invoked.  Auto judging will only occur if autojudging is turned on in ClientSettings.
+ * 
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -36,6 +50,8 @@ public class AutoJudgingMonitor implements UIPlugin {
 
     private Run runToCheckout = null;
 
+    private Executable executable;
+
     /**
      * 
      */
@@ -47,9 +63,6 @@ public class AutoJudgingMonitor implements UIPlugin {
 
         log = controller.getLog();
 
-        autoJudgeStatusFrame.updateStatusLabel("Waiting for runs");
-        autoJudgeStatusFrame.updateMessage("(Still waiting)");
-        attemptToFetchNextRun(); // START trying to auto judge now
     }
 
     public String getPluginTitle() {
@@ -114,8 +127,8 @@ public class AutoJudgingMonitor implements UIPlugin {
      * @return
      */
     private boolean isRunToBeAutoJudged(Run run) {
-        
-        if (run == null){
+
+        if (run == null) {
             return false;
         }
 
@@ -152,13 +165,21 @@ public class AutoJudgingMonitor implements UIPlugin {
         runToCheckout = run;
         autoJudgeStatusFrame.updateStatusLabel("Fetching Run " + run.getNumber() + " (Site " + run.getSiteNumber() + ")");
         autoJudgeStatusFrame.updateMessage(getRunDescription(run));
-        
-        // TODO send run request to server
+
+        try {
+            controller.checkOutRun(run, false);
+        } catch (Exception e) {
+            log.log(Log.WARNING, "Could not check out run " + run + " waiting again... ", e);
+            setAlreadyJudgingRun(false);
+            runToCheckout = null;
+            autoJudgeStatusFrame.updateStatusLabel("Waiting for runs");
+            autoJudgeStatusFrame.updateMessage("(Still waiting)");
+        }
     }
 
     private String getRunDescription(Run runToCheckOut) {
         // ## - Problem Title (Run NN, Site YY)
-        return contest.getProblem(runToCheckOut.getProblemId()).getDisplayName() + " (Run " + runToCheckOut.getNumber() + " Site " + runToCheckOut.getSiteNumber();
+        return " Run " + runToCheckOut.getNumber() + " Site " + runToCheckOut.getSiteNumber() + " - " + contest.getProblem(runToCheckOut.getProblemId()).getDisplayName(); 
     }
 
     protected boolean isAlreadyJudgingRun() {
@@ -232,6 +253,8 @@ public class AutoJudgingMonitor implements UIPlugin {
     private void executeAndAutoJudgeRun(Run run, RunFiles runFiles) {
 
         setAlreadyJudgingRun(true);
+        
+        autoJudgeStatusFrame.setVisible(true);
 
         autoJudgeStatusFrame.updateMessage(getRunDescription(run));
         autoJudgeStatusFrame.updateStatusLabel("Received run");
@@ -244,43 +267,127 @@ public class AutoJudgingMonitor implements UIPlugin {
             log.log(Log.WARNING, "Exception logged ", e);
         }
 
-        // TODO send judgement back to server.
+        System.gc();
 
-        // JudgementRecord judgementRecord = pendingJudgements.get(run.getElementId());
-        // if (judgementRecord != null) {
-        // getController().submitRunJudgement(run, judgementRecord, null);
-        // pendingJudgements.remove(run.getElementId());
-        // }
-        autoJudgeStatusFrame.updateStatusLabel("Sent judgement to server");
+        executable = new Executable(contest, controller, run, runFiles);
+
+        executable.execute();
+
+        ExecutionData executionData = executable.getExecutionData();
+
+        RunResultFiles runResultFiles = null;
+
+        JudgementRecord judgementRecord = null;
+
+        try {
+
+            if (!executionData.isCompileSuccess()) {
+                // Compile failed, darn!
+
+                autoJudgeStatusFrame.updateStatusLabel("Run failed to compile");
+
+                ElementId elementId = contest.getJudgements()[1].getElementId();
+                judgementRecord = new JudgementRecord(elementId, contest.getClientId(), false, true);
+                judgementRecord.setValidatorResultString("Source failed to compile (compilation error)");
+
+            } else if (executionData.isValidationSuccess()) {
+
+                // We got stuff from validator!!
+                String results = executable.getValidationResults();
+                if (results == null) {
+                    results = "Undetermined";
+                }
+                if (results.trim().length() == 0) {
+                    results = "Undetermined";
+                }
+
+                boolean solved = false;
+
+                // Try to find result text in judgement list
+                ElementId elementId = contest.getJudgements()[1].getElementId();
+                for (Judgement judgement : contest.getJudgements()) {
+                    if (judgement.getDisplayName().equals(results)) {
+                        elementId = judgement.getElementId();
+                    }
+                }
+
+                // Or perhaps it is a yes? yes?
+                Judgement yesJudgement = contest.getJudgements()[0];
+                if (yesJudgement.getDisplayName().equalsIgnoreCase(results)) {
+                    elementId = yesJudgement.getElementId();
+                    solved = true;
+                }
+
+                judgementRecord = new JudgementRecord(elementId, contest.getClientId(), solved, true);
+                judgementRecord.setValidatorResultString(results);
+
+            } else {
+                // Something went wrong either during validation or execution
+                // Unable to validate result: Undetermined
+
+                log.log(Log.WARNING, "Run compiled but failed to validate " + run);
+
+                ElementId elementId = contest.getJudgements()[1].getElementId();
+                judgementRecord = new JudgementRecord(elementId, contest.getClientId(), false, true);
+                judgementRecord.setValidatorResultString("Undetermined");
+
+            }
+
+        } catch (Exception e) {
+            log.log(Log.WARNING, "Exception logged ", e);
+        }
+
+        if (judgementRecord == null) {
+
+            autoJudgeStatusFrame.updateStatusLabel("Problem judging run");
+            // Cancel the run, hope for better luck.
+
+            controller.cancelRun(run);
+            sleepMS(2000);
+
+        } else {
+
+            controller.submitRunJudgement(run, judgementRecord, runResultFiles);
+            autoJudgeStatusFrame.updateStatusLabel("Sent judgement to server");
+
+        }
+
+        sleepMS(2000);
 
         setAlreadyJudgingRun(false);
+        runToCheckout = run;
 
         attemptToFetchNextRun();
 
     }
 
     /**
-     * Find next auto judge run and fetch it.
+     * Start auto judging by finding and fetching next run.
      */
     private void attemptToFetchNextRun() {
-        attemptToFetchNextRun (findNextAutoJudgeRun());
+        attemptToFetchNextRun(findNextAutoJudgeRun());
     }
-    
+
+    private void sleepMS(int milliseconds) {
+        try {
+            Thread.sleep(milliseconds);
+        } catch (Exception e) {
+            log.log(Log.WARNING, " sleep interrupted ", e);
+        }
+    }
+
     /**
      * Attempt to fetch next run to be judged.
+     * 
      * @param nextRun
      */
     private void attemptToFetchNextRun(Run nextRun) {
-            
+
         if (isRunToBeAutoJudged(nextRun)) {
             // There is ANOTHER run to judge!! Yes!
 
-            try {
-                // TODO get this setting from the contest property
-                Thread.sleep(2500);
-            } catch (Exception e) {
-                log.log(Log.WARNING, "Exception logged ", e);
-            }
+            // TODO get this setting from the contest property
+            sleepMS(1500);
 
             checkoutNextRun(nextRun);
 
@@ -288,5 +395,59 @@ public class AutoJudgingMonitor implements UIPlugin {
             autoJudgeStatusFrame.updateStatusLabel("Waiting for runs");
             autoJudgeStatusFrame.updateMessage("(Still waiting)");
         }
+    }
+
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    protected class ClientSettingsListenerImplementation implements IClientSettingsListener {
+
+        public void clientSettingsAdded(ClientSettingsEvent event) {
+            clientSettingsChanged(event);
+        }
+
+        public void clientSettingsChanged(ClientSettingsEvent event) {
+            updateClientSettings(event.getClientSettings());
+        }
+
+        public void clientSettingsRemoved(ClientSettingsEvent event) {
+            // TODO Auto-generated method stub
+        }
+
+    }
+
+    /**
+     * If settings are updated then attempt to start autojuding.
+     * @param clientSettings
+     */
+    public void updateClientSettings(ClientSettings clientSettings) {
+        if (clientSettings.getClientId().equals(contest.getClientId())) {
+            startAutoJudging();
+        }
+    }
+
+    /**
+     * Start Auto Judging (if configured to start).
+     *
+     */
+    public void startAutoJudging() {
+        
+        if (isAutoJudgeOn()){
+            autoJudgeStatusFrame.updateStatusLabel("Waiting for runs");
+            autoJudgeStatusFrame.updateMessage("(Still waiting)");
+            attemptToFetchNextRun();
+            
+        } else {
+
+            autoJudgeStatusFrame.updateStatusLabel("Auto-judging is OFF");
+            autoJudgeStatusFrame.updateMessage("");
+        }
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                autoJudgeStatusFrame.setVisible(true);        
+            }
+        });
     }
 }
