@@ -94,6 +94,8 @@ public class JudgementRecord implements Serializable {
      * Send this judgement to team ?.
      */
     private boolean sendToTeam = true;
+    
+    private String validatorResultString = null;
 
     public JudgementRecord(ElementId judgementId, ClientId judgerClientId, boolean solved, boolean usedValidator) {
         this.judgementId = judgementId;
@@ -299,8 +301,15 @@ public class JudgementRecord implements Serializable {
         return elementId.getVersionNumber();
     }
 
+    /**
+     * 
+     * @return null if no results, else a string result.
+     */
+    public String getValidatorResultString() {
+        return validatorResultString;
+    }
 
-    
-    
-
+    public void setValidatorResultString(String validatorResultString) {
+        this.validatorResultString = validatorResultString;
+    }
 }
