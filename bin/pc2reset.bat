@@ -9,8 +9,8 @@ rem
 set RMCMD=rmdir /s /q
 if %OS%. == . set RMCMD=deltree /y
 
-if not exist %0\..\..\logs goto wrongdir
-if not exist %0\..\..\packets goto wrongdir
+if not exist logs goto wrongdir
+if not exist packets goto wrongdir
 
 echo Backing up settings to archive 
 call %0\..\pc2zip.bat
