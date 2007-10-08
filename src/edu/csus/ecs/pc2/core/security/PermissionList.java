@@ -76,4 +76,23 @@ public class PermissionList implements Serializable {
             }
         }
     }
+    
+    public Permission.Type [] getList() {
+        return (Permission.Type[]) hash.keySet().toArray(new Permission.Type[hash.keySet().size()]);
+    }
+    
+    public boolean isSameAs(PermissionList permissionList) {
+        if (permissionList.hash.size() != hash.size()) {
+            return false;
+        }
+        
+        for (Permission.Type type : getList()) {
+            if (! isAllowed(type)){
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
 }

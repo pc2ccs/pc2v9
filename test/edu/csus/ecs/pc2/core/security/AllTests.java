@@ -19,9 +19,10 @@ public final class AllTests {
 
     public static Test suite() {
         TestSuite suite = new TestSuite("Test for edu.csus.ecs.pc2.core.security");
-        // $JUnit-BEGIN$
+        //$JUnit-BEGIN$
         suite.addTestSuite(PermissionTest.class);
-        // $JUnit-END$
+        suite.addTestSuite(PermissionListTest.class);
+        //$JUnit-END$
         return suite;
     }
 
