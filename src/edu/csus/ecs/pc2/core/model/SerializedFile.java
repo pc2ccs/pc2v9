@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.security.MessageDigest;
 
+import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 
 /**
@@ -35,7 +36,11 @@ public class SerializedFile implements Serializable {
 
     private String sha1sum;
 
-//    private PC2Constants.FileTypes fileType = PC2Constants.FileTypes.BINARY;
+    public int fileType = Constants.FILETYPE_BINARY;
+
+    public int newLineCount = 0;
+
+//    private Constants.FileTypes fileType = Constants.FileTypes.BINARY;
 
 //    private int newLineCount = 0;
 
@@ -43,7 +48,7 @@ public class SerializedFile implements Serializable {
         name = null;
         buffer = null;
         file = null;
-//        fileType = PC2Constants.FileTypes.BINARY;
+        fileType = Constants.FILETYPE_BINARY;
     }
 
     /**
@@ -62,7 +67,7 @@ public class SerializedFile implements Serializable {
                 buffer = file2buffer(fileName);
                 absolutePath = file.getAbsolutePath();
                 generateSHA1(buffer);
-//                generateFileType(buffer);
+                generateFileType(buffer);
 
             } catch (Exception e) {
                 StaticLog.log("Exception in SerializeFile for file "+fileName, e);
@@ -93,7 +98,7 @@ public class SerializedFile implements Serializable {
                 buffer = file2buffer(fileName, limit);
                 absolutePath = file.getAbsolutePath();
                 generateSHA1(buffer);
-//                generateFileType(buffer);
+                generateFileType(buffer);
 
             } catch (Exception e) {
                 StaticLog.log("Exception in SerializeFile for file "+fileName, e);
@@ -300,5 +305,203 @@ public class SerializedFile implements Serializable {
 
     private void setName(String name) {
         this.name = name;
+    }
+
+    /**
+     * Insert the method's description here.
+     * Creation date: (11/16/2003 9:14:19 PM)
+     */
+    public void generateFileType(byte buf[]) {
+    
+    	int dosFlag = 0;
+    	int unixFlag = 0;
+    	int macFlag = 0;
+    	byte lastChar = 0;
+    
+    	/*
+    		DOS FILE		0x0D 0x0A
+    		UNIX FILE		0xA
+    		MAC FILE		0xD
+    	*/
+    
+    	for ( int i = 0; i < buf.length; i++) {
+    
+    		if (buf[i] == 0x0A) {
+    			if (lastChar == 0x0D) {
+    				dosFlag ++;
+    				macFlag --;
+    			} 
+    			else {
+    				unixFlag ++;
+    			}
+    		}
+    		else if (buf[i] == 0x0D)  {
+    			macFlag ++;
+    		}
+    		
+    		if ( buf[i] > 127 ) {
+    			fileType = Constants.FILETYPE_BINARY;
+    			newLineCount = 0;
+    			return;
+    		}
+    
+    		lastChar = buf[i];
+    	}
+    
+     	if ((dosFlag != 0) && (unixFlag == 0) && (macFlag == 0)) {
+    		fileType = Constants.FILETYPE_DOS;
+    		newLineCount = dosFlag;
+    	}
+     	else if ((dosFlag == 0) && (unixFlag != 0) && (macFlag == 0)) {
+    		fileType = Constants.FILETYPE_UNIX;
+    		newLineCount = unixFlag;
+    	}
+     	else if ((dosFlag == 0) && (unixFlag == 0) && (macFlag != 0)) {
+    		fileType = Constants.FILETYPE_MAC;
+    		newLineCount = macFlag;
+    	}
+     	else if ((dosFlag == 0) && (unixFlag == 0) && (macFlag == 0)) {
+    		fileType = Constants.FILETYPE_ASCII_GENERIC;
+    		newLineCount = 0;
+     	}
+    	else {
+    		fileType = Constants.FILETYPE_ASCII_OTHER;
+    		newLineCount = 0;
+    
+    	}
+    		
+    	return;	
+    }
+
+    /**
+     *
+     */
+    public int getFileType()
+    {
+    	return fileType;
+    }
+
+    /**
+     * Insert the method's description here.
+     * Creation date: (11/16/2003 9:14:19 PM)
+     */
+    public boolean convertFile(int convertFileToType) {
+    	byte newbuffer[];
+    	int counter;
+    	
+    	if ((fileType == Constants.FILETYPE_BINARY) ||
+    			(fileType == Constants.FILETYPE_ASCII_GENERIC) || 
+    			(fileType == Constants.FILETYPE_ASCII_OTHER)) {
+    
+    				/* we are not converting these types for now*/
+    				return false;			
+    	}
+    
+    	if (fileType == convertFileToType) {
+    			/* duh easy conversion */
+    		return true;
+    	}
+    			
+    	if (convertFileToType == Constants.FILETYPE_DOS) {
+    		newbuffer = new byte[buffer.length + newLineCount];
+    	} else if (fileType == Constants.FILETYPE_DOS) {
+    		newbuffer = new byte[buffer.length - newLineCount];
+    	} else {
+    		newbuffer = new byte[buffer.length];
+    	}
+    	
+    	/*
+    		if we convert the file we are saving the old
+    			MD5 checksum to avoid refersing the file
+    			everytime the problem is edited. The class
+    			will contain the MD5 check of the original file
+    			loaded from disk
+    	*/
+    
+    	/*
+    		DOS FILE		0x0D 0x0A
+    		UNIX FILE		0xA
+    		MAC FILE		0xD
+    	*/
+    	counter = 0;
+    	for ( int i = 0; i < buffer.length; i++) {
+    /*		dos -> unix
+    		dos -> mac
+    
+    		unix -> mac
+    		unix -> dos
+    
+    		mac -> dos
+    		mac -> unix
+    */		
+    		if ((buffer[i] == 0x0D) || (buffer[i] == 0x0A)) {
+    			if (fileType == Constants.FILETYPE_DOS) {
+    				if (convertFileToType == Constants.FILETYPE_UNIX) {
+    					newbuffer[counter++] = 0x0A;
+    					i++;
+    				} else {
+    					newbuffer[counter++] = 0x0D;
+    					i++;
+    				}
+    			}
+    			else if (fileType == Constants.FILETYPE_UNIX) {
+    				if (convertFileToType == Constants.FILETYPE_MAC) {
+    					newbuffer[counter++] = 0x0D;
+    				} else {
+    					newbuffer[counter++] = 0x0D;
+    					newbuffer[counter++] = 0x0A;
+    				}
+    			}
+    			else if (fileType == Constants.FILETYPE_MAC) {
+    				if (convertFileToType == Constants.FILETYPE_UNIX) {
+    					newbuffer[counter++] = 0x0A;
+    				} else {
+    					newbuffer[counter++] = 0x0D;
+    					newbuffer[counter++] = 0x0A;
+    				}
+    			}
+    		}
+    		else {
+    			newbuffer[counter++] = buffer[i];
+    		}
+    	}
+    
+    	String s = "Converted file from " ;
+    	
+    		if (fileType == Constants.FILETYPE_BINARY) 
+    				s = s + Constants.FILETYPE_BINARY_TEXT;
+    		else if (fileType == Constants.FILETYPE_DOS)
+    				s = s + Constants.FILETYPE_DOS_TEXT;
+    		else if (fileType == Constants.FILETYPE_MAC)
+    				s = s + Constants.FILETYPE_MAC_TEXT;
+    		else if (fileType == Constants.FILETYPE_UNIX)
+    				s = s + Constants.FILETYPE_UNIX_TEXT;
+    		else if (fileType == Constants.FILETYPE_ASCII_GENERIC)
+    				s = s + Constants.FILETYPE_ASCII_GENERIC_TEXT;
+    		else if (fileType == Constants.FILETYPE_ASCII_OTHER)
+    				s = s + Constants.FILETYPE_ASCII_OTHER_TEXT;
+    
+    		s = s + " to " ;
+    				
+    		if (convertFileToType == Constants.FILETYPE_BINARY) 
+    				s = s + Constants.FILETYPE_BINARY_TEXT;
+    		else if (convertFileToType == Constants.FILETYPE_DOS)
+    				s = s + Constants.FILETYPE_DOS_TEXT;
+    		else if (convertFileToType == Constants.FILETYPE_MAC)
+    				s = s + Constants.FILETYPE_MAC_TEXT;
+    		else if (convertFileToType == Constants.FILETYPE_UNIX)
+    				s = s + Constants.FILETYPE_UNIX_TEXT;
+    		else if (convertFileToType == Constants.FILETYPE_ASCII_GENERIC)
+    				s = s + Constants.FILETYPE_ASCII_GENERIC_TEXT;
+    		else if (convertFileToType == Constants.FILETYPE_ASCII_OTHER)
+    				s = s + Constants.FILETYPE_ASCII_OTHER_TEXT;
+    
+    				
+        StaticLog.info(s);
+    	
+    	fileType = convertFileToType;
+    	buffer = newbuffer;
+    	
+    	return true;	
     }
 }
