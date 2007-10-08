@@ -10,6 +10,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.Vector;
 
 /**
@@ -161,6 +163,44 @@ public final class Utilities {
             // ignore exception
             return ".";
         }
+    }
+    
+    /**
+     * Returns a date-time String as defined by RFC 2822 section 3.3
+     * Useful for mail messages.
+     * 
+     * @return the date in rfc2822 format
+     */
+    public static String getRFC2822DateTime() {
+        Calendar calendar = new GregorianCalendar();
+        // per rfc 2822
+        // date-time = [ day-of-week "," ] date time CFWS
+        //date-time       =       [ day-of-week "," ] date FWS time [CFWS]
+        //day-of-week     =       ([FWS] day-name) / obs-day-of-week
+        //day-name        =       "Mon" / "Tue" / "Wed" / "Thu" /
+        //                        "Fri" / "Sat" / "Sun"
+        //date            =       day month year
+        //year            =       4*DIGIT / obs-year
+        //month           =       (FWS month-name FWS) / obs-month
+        //month-name      =       "Jan" / "Feb" / "Mar" / "Apr" /
+        //                        "May" / "Jun" / "Jul" / "Aug" /
+        //                        "Sep" / "Oct" / "Nov" / "Dec"
+        //day             =       ([FWS] 1*2DIGIT) / obs-day
+        //time            =       time-of-day FWS zone
+        //time-of-day     =       hour ":" minute [ ":" second ]
+        //hour            =       2DIGIT / obs-hour
+        //minute          =       2DIGIT / obs-minute
+        //second          =       2DIGIT / obs-second
+        //zone            =       (( "+" / "-" ) 4DIGIT) / obs-zone
+
+        // Formatter Date/Time Conversions
+        // 'a '   Locale-specific short name of the day of the week, e.g. "Sun", "Mon"
+        // 'e'    Day of month, formatted as two digits, i.e. 1 - 31.
+        // 'b'    Locale-specific abbreviated month name, e.g. "Jan", "Feb".
+        // 'Y'    Year, formatted as at least four digits with leading zeros as necessary, e.g. 0092 equals 92 CE for the Gregorian calendar.
+        // 'T'    Time formatted for the 24-hour clock as "%tH:%tM:%tS".
+        // 'z'    RFC 822  style numeric time zone offset from GMT, e.g. -0800.
+        return String.format("%1$ta, %1$te %1$tb %1$tY %1$tT %1$tz", calendar);
     }
 
     /**
