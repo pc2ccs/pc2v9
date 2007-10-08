@@ -261,8 +261,8 @@ public class BalloonSettingPane extends JPanePlugin {
     public BalloonSettings getBalloonSettingsFromFields(BalloonSettings checkBalloonSettings) throws InvalidFieldValue {
 
         if (checkBalloonSettings == null){
-            // TODO populate site and title from site combo box
-            checkBalloonSettings =  new BalloonSettings("New Site 1", 1);
+            Site site = (Site)getSiteComboBox().getSelectedItem();
+            checkBalloonSettings =  new BalloonSettings(site.getDisplayName(), site.getSiteNumber());
         }
 
         checkBalloonSettings.setPrintBalloons(getPrintNotificationsCheckBox().isSelected());
@@ -462,6 +462,7 @@ public class BalloonSettingPane extends JPanePlugin {
             getPrintNotificationsCheckBox().setSelected(false);
 
             getEmailContactTextBox().setText("");
+            getEmailServerTextBox().setText("");
             getPrintDeviceTextBox().setText("");
             getPostScriptEnabledCheckBox().setSelected(false);
 
@@ -477,6 +478,7 @@ public class BalloonSettingPane extends JPanePlugin {
             getPrintNotificationsCheckBox().setSelected(inBalloonSettings.isPrintBalloons());
 
             getEmailContactTextBox().setText(inBalloonSettings.getEmailContact());
+            getEmailServerTextBox().setText(inBalloonSettings.getMailServer());
             getPrintDeviceTextBox().setText(inBalloonSettings.getPrintDevice());
             getPostScriptEnabledCheckBox().setSelected(inBalloonSettings.isPostscriptCapable());
             getAddButton().setVisible(false);
@@ -504,13 +506,11 @@ public class BalloonSettingPane extends JPanePlugin {
         
         // TODO Get this to work.
 
-        int i = 0;
+        int i = 1; // 1 since we started with noneSelected
         Site[] sites = getContest().getSites();
         Arrays.sort(sites, new SiteComparatorBySiteNumber());
         for (Site site : sites) {
             getSiteComboBox().addItem(site);
-            System.out.println(" debug  added "+site); 
-            getSiteComboBox().addItem(noneSelected);
 
             if (siteNumber == site.getSiteNumber()) {
                 siteIndex = i;
@@ -518,11 +518,10 @@ public class BalloonSettingPane extends JPanePlugin {
             i++;
         }
         
-        for (i = 0; i < getSiteComboBox().getItemCount(); i++) {
-            System.out.println(i + " debug " + getSiteComboBox().getItemAt(i));
-        }
+//        for (i = 0; i < getSiteComboBox().getItemCount(); i++) {
+//            System.out.println(i + " debug " + getSiteComboBox().getItemAt(i));
+//        }
         getSiteComboBox().setSelectedIndex(siteIndex);
-
     }
 
     private void setBalloonColors(BalloonSettings inBalloonSettings) {
