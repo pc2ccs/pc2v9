@@ -21,6 +21,7 @@ import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.core.util.XSLTransformer;
+import edu.csus.ecs.pc2.ui.BalloonHandler;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
 import edu.csus.ecs.pc2.ui.LogWindow;
@@ -153,6 +154,9 @@ public class ScoreboardView extends JFrame implements UIPlugin {
                 StandingsPane standingsPane = new StandingsPane();
                 addUIPlugin(getMainTabbedPane(), "Standings", standingsPane);
                 standingsPane.addPropertyChangeListener("standings", new PropertyChangeListenerImplementation());
+                BalloonHandler balloonHandler = new BalloonHandler();
+                // TODO replace with addUIPlugin when/if it is graphical
+                balloonHandler.setContestAndController(contest, controller);
                 OptionsPanel optionsPanel = new OptionsPanel();
                 addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
                 optionsPanel.setLogWindow(logWindow);

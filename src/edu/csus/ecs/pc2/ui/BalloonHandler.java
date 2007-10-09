@@ -8,10 +8,12 @@ import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.TreeMap;
+import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.list.RunComparatorByTeam;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.Balloon;
 import edu.csus.ecs.pc2.core.model.BalloonSettings;
 import edu.csus.ecs.pc2.core.model.BalloonSettingsEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -19,10 +21,12 @@ import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IBalloonSettingsListener;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.IRunListener;
+import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.RunEvent.Action;
+import edu.csus.ecs.pc2.core.util.BalloonWriter;
 
 /**
  * @author pc2@ecs.csus.edu
@@ -97,7 +101,7 @@ public class BalloonHandler extends JPanePlugin {
                     recomputeBalloonStatus(who, what);
                 } else { // have not processed any balloons for this key
                     if (!run.isDeleted() && run.isJudged() && run.isSolved()) {
-                        if (sendBalloon(who, what)) {
+                        if (sendBalloon(buildBalloon("yes", who, what, run))) {
                             sentBalloonFor(key);
                         }
                     } // else we do not send balloons for deleted/new/no
@@ -127,6 +131,8 @@ public class BalloonHandler extends JPanePlugin {
      * Quick access to the BalloonSettings by SiteId.
      */
     private Hashtable<Integer, BalloonSettings> balloonSettingsHash = new Hashtable<Integer, BalloonSettings>();
+
+    private BalloonWriter balloonWriter;
     
     /**
      * 
@@ -186,7 +192,7 @@ public class BalloonHandler extends JPanePlugin {
         }
         if (!isSolved) {
             takeBalloonFrom(getBalloonKey(who, problemId));
-            takeBalloon(who, problemId);
+            takeBalloon(buildBalloon("take", who, problemId, null));
         }
     }
 
@@ -218,7 +224,7 @@ public class BalloonHandler extends JPanePlugin {
                 // there should be a yes for this run
                 String key = getBalloonKey(run.getSubmitter(), run.getProblemId()); 
                 if (!isBalloonSentFor(key)) { // no balloon has been sent
-                    if (sendBalloon(run.getSubmitter(), run.getProblemId())) {
+                    if (sendBalloon(buildBalloon("yes", run.getSubmitter(), run.getProblemId(), run))) {
                         sentBalloonFor(key);
                     } else {
                         // TODO error sending balloon
@@ -230,10 +236,26 @@ public class BalloonHandler extends JPanePlugin {
         }
 
     }
-    boolean sendBalloon(ClientId who, ElementId problemId) {
-        // TODO probably need to have the generic balloon here, eg missing arg
-        log.finest("TODO give a balloon to "+who.getTripletKey()+ " for "+problemId.toString());
-        // TODO fire some event to notify others
+    private Balloon buildBalloon(String answer, ClientId submitter, ElementId problemId, Run aRun) {
+        BalloonSettings bSettings = balloonSettingsHash.get(Integer.valueOf(submitter.getSiteNumber()));
+        Balloon balloon = new Balloon(bSettings, submitter, getContest().getAccount(submitter).getDisplayName(), problemId, getContest().getProblem(problemId).getDisplayName(), answer, aRun);
+        Run[] runs = getContest().getRuns(submitter);
+        Vector<Problem> v = new Vector<Problem>();
+        for (int i = 0; i < runs.length; i++) {
+            Run run = runs[i];
+            if (!run.isDeleted() && run.isJudged() && run.isSolved()) {
+                v.add(getContest().getProblem(run.getProblemId()));
+            }
+        }
+        // TODO fix the order of the Problems, they should be in ProblemDisplayOrder
+        balloon.setProblems(v.toArray(new Problem[v.size()]));
+        return balloon;
+    }
+
+    boolean sendBalloon(Balloon balloon) {
+        log.finest("TODO give a balloon to "+balloon.getClientId().getTripletKey()+ " for "+balloon.getProblemTitle());
+        // TODO fire some event to notify others, or just do it ourselves
+        balloonWriter.sendBalloon(balloon);
         return true;
     }
 
@@ -252,8 +274,11 @@ public class BalloonHandler extends JPanePlugin {
         log = getController().getLog();
         
         loadBalloonSettings();
+        balloonWriter = new BalloonWriter(log);
         // TODO return our clientSettings and populate balloons
+//        getContest().getClientSettings().
         Site[] sites = inContest.getSites();
+        // TODO put this on a separate thread?
         for (int i = 0; i < sites.length; i++) {
             recomputeBalloons(sites[i].getSiteNumber());
         }
@@ -263,10 +288,10 @@ public class BalloonHandler extends JPanePlugin {
 
     }
 
-    boolean takeBalloon(ClientId who, ElementId problemId) {
-        // TODO probably need to have the generic balloon here, eg missing arg
-        log.finest("TODO take a balloon away from "+who.getTripletKey()+ " for "+problemId.toString());
+    boolean takeBalloon(Balloon balloon) {
+        log.finest("TODO take a balloon away from "+balloon.getClientId().getTripletKey()+ " for "+balloon.getProblemTitle());
         // TODO fire some event to notify others
+        balloonWriter.sendBalloon(balloon);
         return true;
     }
 
