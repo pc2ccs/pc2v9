@@ -1764,11 +1764,20 @@ public class PacketHandler {
             if (contestTime != null) {
                 if (isServer()) {
                     if ( isThisSite(contestTime.getSiteNumber())) {
-                        // Add update contest time if this is from another server
-                        contest.addContestTime(contestTime);
-                    }                        
+                        controller.setContestTime (contestTime);
+                    } else {
+                        if (contest.getContestTime(contestTime.getSiteNumber()) == null) {
+                            contest.addContestTime(contestTime);
+                        } else {
+                            contest.updateContestTime(contestTime);
+                        }
+                    }
                 } else {
-                    contest.addContestTime(contestTime);
+                    if (contest.getContestTime(contestTime.getSiteNumber()) == null) {
+                        contest.addContestTime(contestTime);
+                    } else {
+                        contest.updateContestTime(contestTime);
+                    }
                 }
             }
 
