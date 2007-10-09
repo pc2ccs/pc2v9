@@ -12,7 +12,6 @@ import java.util.Date;
 import java.util.Hashtable;
 
 import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
@@ -572,7 +571,7 @@ public class Executable {
             } else {
                 // TODO LOG
                 log.config("validationCall - Did not produce output results file " + resultsFileName);
-                JOptionPane.showMessageDialog(null, "Did not produce output results file " + resultsFileName + " contact staff");
+//                JOptionPane.showMessageDialog(null, "Did not produce output results file " + resultsFileName + " contact staff");
             }
         } catch (Exception ex) {
             log.log(Log.INFO, "Exception in validation  ", ex);
