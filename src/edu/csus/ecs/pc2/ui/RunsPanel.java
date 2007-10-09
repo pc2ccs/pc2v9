@@ -1133,6 +1133,8 @@ public class RunsPanel extends JPanePlugin {
             autoJudgeButton.setText("Auto Judge");
             autoJudgeButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
+                    // Turn auto judging on
+                    autoJudgingMonitor.setAutoJudgeDisabledLocally(false);
                     startAutoJudging();
                 }
             });
@@ -1158,7 +1160,6 @@ public class RunsPanel extends JPanePlugin {
 
         if (isAutoJudgeOn()) {
             // RE-enable local auto judge flag 
-            autoJudgingMonitor.setAutoJudgeDisabledLocally(false);
             autoJudgingMonitor.startAutoJudging();
         } else {
             showMessage("Administrator has turned off Auto Judging");
