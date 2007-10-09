@@ -249,10 +249,8 @@ public class BalloonHandler extends JPanePlugin {
         }
         // now put them in the right order
         Problem[] result=new Problem[v.size()];
-        Problem[] sortOrder=getContest().getProblems();
         int j=0;
-        for (int i = 0; i < sortOrder.length; i++) {
-            Problem problem = sortOrder[i];
+        for (Problem problem : getContest().getProblems()) {
             if (v.contains(problem)) {
                 result[j]=problem;
                 j++;
@@ -289,6 +287,7 @@ public class BalloonHandler extends JPanePlugin {
 //        getContest().getClientSettings().get
         Site[] sites = inContest.getSites();
         // TODO put this on a separate thread?
+        // TODO #2 recompute after or before listeners, seems there is a timing window either way...
         for (int i = 0; i < sites.length; i++) {
             recomputeBalloons(sites[i].getSiteNumber());
         }
