@@ -396,7 +396,7 @@ public class ProblemPane extends JPanePlugin {
                 SerializedFile serializedFile = new SerializedFile(fileName);
     
                 if (serializedFile.getBuffer() == null) {
-                    throw new InvalidFieldValue("Unable to read file " + fileName + " choose data file again");
+                    throw new InvalidFieldValue("Unable to read file " + fileName + " choose data file again (adding)");
                 }
 
                 checkProblem.setDataFileName(serializedFile.getName());
@@ -411,39 +411,56 @@ public class ProblemPane extends JPanePlugin {
                 }
 
                 if (serializedFile.getBuffer() == null) {
-                    throw new InvalidFieldValue("Unable to read file " + fileName + " choose data file again");
+                    throw new InvalidFieldValue("Unable to read file " + fileName + " choose data file again (updating)");
                 }
                 
                 checkProblem.setDataFileName(serializedFile.getName());
                 newProblemDataFiles.setJudgesDataFile(freshenIfNeeded(serializedFile));
             }
-               
         } else {
             checkProblem.setDataFileName(null);
         }
 
         if (judgesHaveAnswerFiles.isSelected()) {
             String fileName = answerFileNameLabel.getText() + "";
-
             if (fileName.trim().length() == 0) {
-                // TODO more specific message about which file is required
-                throw new InvalidFieldValue("Judges Have Provided Answer File checked, select a file ");
+                throw new InvalidFieldValue("Judges Have Provided Answer File checked, select a file");
             }
-
-            SerializedFile serializedFile = new SerializedFile(fileName);
-
-            if (serializedFile.getBuffer() == null) {
-                throw new InvalidFieldValue("Unable to read file " + fileName + " choose answer file again");
+            
+            if (fileName.trim().length() != answerFileNameLabel.getToolTipText().length()) {
+                fileName = answerFileNameLabel.getToolTipText() + "";
             }
+            
+            if (isAdding) {
+                SerializedFile serializedFile = new SerializedFile(fileName);
+    
+                if (serializedFile.getBuffer() == null) {
+                    throw new InvalidFieldValue("Unable to read file " + fileName + " choose answer file again (adding)");
+                }
 
-            checkProblem.setAnswerFileName(serializedFile.getName());
-            newProblemDataFiles.setJudgesAnswerFile(freshenIfNeeded (serializedFile));
+                checkProblem.setAnswerFileName(serializedFile.getName());
+                newProblemDataFiles.setJudgesAnswerFile(serializedFile);
+            } else {
+                SerializedFile sFile = getController().getProblemDataFiles(checkProblem).getJudgesAnswerFile();
+                SerializedFile serializedFile = null;
+                if (sFile.getAbsolutePath().equals(fileName)) {
+                    serializedFile = sFile;
+                } else {
+                    serializedFile = new SerializedFile(fileName);
+                }
+
+                if (serializedFile.getBuffer() == null) {
+                    throw new InvalidFieldValue("Unable to read file " + fileName + " choose answer file again (updating)");
+                }
+                
+                checkProblem.setAnswerFileName(serializedFile.getName());
+                newProblemDataFiles.setJudgesAnswerFile(freshenIfNeeded(serializedFile));
+            }
         } else {
             checkProblem.setAnswerFileName(null);
         }
 
         if (stdinRadioButton.isSelected() && fileRadioButton.isSelected()) {
-            // TODO make radio button group to obviate this message
             throw new InvalidFieldValue("Pick just one radio button TODO fix all TODOs!");
         }
 
@@ -467,8 +484,8 @@ public class ProblemPane extends JPanePlugin {
         }
 
         checkProblem.setValidatorCommandLine(validatorCommandLineTextBox.getText());
-        checkProblem.setWhichPC2Validator(0);
-        checkProblem.setIgnoreSpacesOnValidation(false);
+//        checkProblem.setWhichPC2Validator(0);
+//        checkProblem.setIgnoreSpacesOnValidation(false);
 
         if (checkProblem.isUsingPC2Validator()) {
 
@@ -497,7 +514,7 @@ public class ProblemPane extends JPanePlugin {
             SerializedFile serializedFile = new SerializedFile(fileName);
 
             if (serializedFile.getBuffer() == null) {
-                throw new InvalidFieldValue("Unable to read file " + fileName + " choose validator file again");
+                throw new InvalidFieldValue("Unable to read file " + fileName + " choose validator file again(2)");
             }
 
             checkProblem.setValidatorProgramName(serializedFile.getName());
@@ -779,8 +796,8 @@ public class ProblemPane extends JPanePlugin {
                 stdinRadioButton.setSelected(false);
             }
 
-            pc2ValidatorOptionComboBox.setSelectedIndex(0);
-            ignoreCaseCheckBox.setSelected(false);
+            getPc2ValidatorComboBox().setSelectedIndex(0);
+            getIgnoreCaseCheckBox().setSelected(true);
 
             if (inProblem.isValidatedProblem()) {
 
@@ -796,9 +813,6 @@ public class ProblemPane extends JPanePlugin {
                 useNOValidatatorRadioButton.setSelected(true);
             }
 
-            getPc2ValidatorComboBox().setSelectedIndex(0);
-            getIgnoreCaseCheckBox().setSelected(true);
-
             getValidatorCommandLineTextBox().setText(problem.getValidatorCommandLine());
             getShowValidatorToJudges().setSelected(problem.isShowValidationToJudges());
             getDoNotShowOutputWindowCheckBox().setSelected(problem.isHideOutputWindow());
@@ -807,7 +821,6 @@ public class ProblemPane extends JPanePlugin {
             try {
                 @SuppressWarnings("unused") Problem changedProblem = getProblemFromFields(null);
             } catch (InvalidFieldValue e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
 
