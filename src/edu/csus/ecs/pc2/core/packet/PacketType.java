@@ -11,24 +11,15 @@ import java.io.Serializable;
  * <P>
  * 
  * @author PC<sup>2</sup> (pc2@ecs.csus.edu)
+ * @version $Id$
  */
 
-// TODO: Settings update 
-// TODO: Settings update 
-//
 // TODO: Settings update from admin 
-// TODO: Run update from admin 
 // TODO: Clar update from admin 
-// TODO: stop all sites 
-// TODO: start all sites 
-// TODO: Settings update 
 // TODO: import 
 // TODO: export 
 // TODO: force logoff 
 // TODO: force transport disconnection 
-// TODO: Settings update 
-// TODO: Settings update 
-
 
 // $HeadURL$
 public final class PacketType implements Serializable {
@@ -305,7 +296,7 @@ public final class PacketType implements Serializable {
          * Password change request to server.
          * <P>
          * From client to server <br>
-         * Contents: SessionId, previous password, new password TODO code
+         * Contents: previous password, new password
          */
         PASSWORD_CHANGE_REQUEST,
 
@@ -313,7 +304,7 @@ public final class PacketType implements Serializable {
          * Confirmation of password change (or not :).
          * <P>
          * Package indicates whether password change was successful or not. From server to client <br>
-         * Contents: SessionId, boolean (true - changed, false - not changed) TODO code
+         * Contents: boolean (true - changed, false - not changed)
          */
         PASSWORD_CHANGE_CONFIRM,
 

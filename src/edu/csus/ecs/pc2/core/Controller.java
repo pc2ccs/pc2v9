@@ -323,6 +323,14 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
         sendToLocalServer(packet);
     }
+    
+    public void requestChangPassword(String oldPassword, String newPassword){
+        
+        ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
+        Packet packet = PacketFactory.createPasswordChangeRequest(contest.getClientId(), serverClientId, oldPassword, newPassword);
+        sendToLocalServer(packet);
+        
+    }
 
     /**
      * Return int for input string

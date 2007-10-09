@@ -145,7 +145,18 @@ public final class PacketFactory {
     public static final String CLIENT_SETTINGS = "CLIENT_SETTINGS";
     
     public static final String BALLOON_SETTINGS_LIST = "BALLOON_SETTINGS_LIST";
+
     
+    
+    /**
+     * Change password, new password
+     */
+    public static final String NEW_PASSWORD = "NEW_PASSWORD";
+
+    /**
+     * Boolean value.
+     */
+    public static final String PASSWORD_CHANGED = "PASSWORD_CHANGED";
     
 
     /**
@@ -226,6 +237,21 @@ public final class PacketFactory {
         return createPacket(PacketType.Type.LOGIN_REQUEST, source, destination, prop);
     }
     
+    public static Packet createPasswordChangeRequest(ClientId source,  ClientId destination, String password, String newPassword) {
+        Properties prop = new Properties();
+        prop.put(CLIENT_ID, source);
+        prop.put(PASSWORD, password);
+        prop.put(NEW_PASSWORD, newPassword);
+        return createPacket(PacketType.Type.PASSWORD_CHANGE_REQUEST, source, destination, prop);
+    }
+    
+    public static Packet createPasswordChangeResult(ClientId source,  ClientId destination, boolean passwordChanged) {
+        Properties prop = new Properties();
+        prop.put(CLIENT_ID, source);
+        prop.put(PASSWORD_CHANGED, passwordChanged);
+        return createPacket(PacketType.Type.PASSWORD_CHANGE_CONFIRM, source, destination, prop);
+    }
+    
     /**
      * Create a packet.
      * 
@@ -240,7 +266,7 @@ public final class PacketFactory {
      *            contents of packet.
      * @return a Packet.
      */
-    private static Packet createPacket(Type type, ClientId source, ClientId destination, Serializable serializable) {
+    protected static Packet createPacket(Type type, ClientId source, ClientId destination, Serializable serializable) {
         Packet packet = new Packet(type, source, destination, serializable);
         return packet;
     }
