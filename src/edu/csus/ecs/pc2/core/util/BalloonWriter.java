@@ -12,6 +12,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -278,17 +279,18 @@ public class BalloonWriter {
 
                         String emailMessage = "";
                         String date = Utilities.getRFC2822DateTime();
+                        String messageId = String.format("Message-ID: <%1$tY%1$tm%1$td%1$tH%1$tM%1$tS.pc%1$tL@"+myHostName+">", new GregorianCalendar());
                         if (answer.equalsIgnoreCase("yes")) {
                             String subject = "Subject: YES " + balloon.getClientId().getName() + " (" + balloon.getClientTitle() + ") color " + balloonSettings.getColor(balloon.getProblemId()) + NL;
-                            emailMessage = subject + "Date: " + date + NL + NL
+                            emailMessage = subject + "Date: " + date + NL + messageId + NL + NL
                                     + message;
                         } else if (answer.equalsIgnoreCase("no")) {
                             // TODO need problemTitle here
                             String subject = "Subject: NO " + balloon.getClientId().getName() + " (" + balloon.getClientTitle() + ")" + " problem " + balloon.getProblemId() + NL;
-                            emailMessage = subject + "Date: " + date + NL + NL + message;
+                            emailMessage = subject + "Date: " + date + NL + messageId + NL + NL + message;
                         } else {
                             String subject = "Subject: Take away balloon from " + balloon.getClientId().getName() + " color " + balloonSettings.getColor(balloon.getProblemId()) + NL;
-                            emailMessage = subject + "Date: " + date + NL + NL + message;
+                            emailMessage = subject + "Date: " + date + NL + messageId + NL + NL + message;
                         }
     
                         if (mailServer != null) {
@@ -420,7 +422,7 @@ public class BalloonWriter {
                 // "mail from: pc2@ecs.csus.edu"+NL+
                 // "rcpt to: "+to+NL+
                 // "data"+NL+
-                mess = "From: pc2@ecs.csus.edu" + NL + "To: " + mailTo + NL;
+                mess = "From: Balloons <pc2@ecs.csus.edu>" + NL + "To: " + mailTo + NL;
                 os.write(mess.getBytes());
                 message = message + "." + NL;
                 os.write(message.getBytes());
