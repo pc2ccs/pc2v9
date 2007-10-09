@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.core.model;
 
 import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -35,6 +36,11 @@ public class ClientSettings implements IElementObject {
      */
     private Filter autoJudgeFilter = new Filter();
 
+    /**
+     * List of when clientId.getTripletKey() + problem.getElementId() got a balloon.
+     */
+    private Hashtable<String,Long> balloonList = new Hashtable<String,Long>();
+    
     public Filter getAutoJudgeFilter() {
         return autoJudgeFilter;
     }
@@ -102,5 +108,19 @@ public class ClientSettings implements IElementObject {
         }
         
         return (String[]) v.toArray(new String[v.size()]);
+    }
+
+    /**
+     * @return Returns the balloonList.
+     */
+    public Hashtable<String, Long> getBalloonList() {
+        return balloonList;
+    }
+
+    /**
+     * @param balloonList The balloonList to set.
+     */
+    public void setBalloonList(Hashtable<String, Long> balloonList) {
+        this.balloonList = balloonList;
     }
 }
