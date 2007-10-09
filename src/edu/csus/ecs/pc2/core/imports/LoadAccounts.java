@@ -76,9 +76,9 @@ public class LoadAccounts {
             account.setAliasName(values[aliasColumn]);
         }
         if (externalIdColumn != -1 && values.length > externalIdColumn) {
-            account.setAliasName(values[externalIdColumn]);
+            account.setExternalId(values[externalIdColumn]);
         }
-        if (groupColumn != -1 && values.length >= groupColumn && values.length > 0) {
+        if (groupColumn != -1 && values.length > groupColumn && values[groupColumn].length() > 0) {
             // TODO in the future, may need to convert this id to an elementId
             account.setGroupId(values[groupColumn]);
         }
@@ -196,8 +196,11 @@ public class LoadAccounts {
                 // already a properly formatted exception
                 throw e2;
             } catch (Exception e) {
+                e.printStackTrace();
                 String msg = "Error " + filename + ":" + lineCount + ": " + e.getMessage();
-                throw new Exception(msg);
+                Exception sendException = new Exception(msg);
+                sendException.setStackTrace(e.getStackTrace());
+                throw sendException;
             }
             line = in.readLine();
             lineCount++;
