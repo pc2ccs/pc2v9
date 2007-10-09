@@ -15,17 +15,15 @@ import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.execute.Executable;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
+import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.core.model.ILanguageListener;
-import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.IProblemListener;
-import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.LanguageEvent;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemEvent;
 import edu.csus.ecs.pc2.core.model.Run;
-import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 
@@ -167,29 +165,24 @@ public class SubmitRunPane extends JPanePlugin {
     private class ContestTimeListenerImplementation implements IContestTimeListener {
 
         public void contestTimeAdded(ContestTimeEvent event) {
-            log.info("debug ContestTime site " + event.getSiteNumber() + " ADDED " + event.getContestTime().getElapsedTimeStr());
             if (isThisSite(event.getSiteNumber())) {
                 setButtonsActive(event.getContestTime().isContestRunning());
             }
         }
 
         public void contestTimeRemoved(ContestTimeEvent event) {
-            log.info("debug ContestTime site " + event.getSiteNumber() + " REMOVED ");
         }
 
         public void contestTimeChanged(ContestTimeEvent event) {
-            log.info("debug ContestTime site " + event.getSiteNumber() + " CHANGED ");
         }
 
         public void contestStarted(ContestTimeEvent event) {
-            log.info("debug ContestTime site " + event.getSiteNumber() + " STARTED " + event.getContestTime().getElapsedTimeStr());
             if (isThisSite(event.getSiteNumber())) {
                 setButtonsActive(event.getContestTime().isContestRunning());
             }
         }
 
         public void contestStopped(ContestTimeEvent event) {
-            log.info("debug ContestTime site " + event.getSiteNumber() + " STOPPED " + event.getContestTime().getElapsedTimeStr());
             if (isThisSite(event.getSiteNumber())) {
                 setButtonsActive(event.getContestTime().isContestRunning());
             }
@@ -265,26 +258,6 @@ public class SubmitRunPane extends JPanePlugin {
                     reloadLanguages();
                 }
             });
-        }
-    }
-
-    /**
-     * 
-     * @author pc2@ecs.csus.edu
-     */
-    private class RunListenerImplementation implements IRunListener {
-
-        public void runAdded(RunEvent event) {
-            // updateListBox(event.getRun() + " ADDED ");
-            log.info("debug Added run " + event.getRun());
-        }
-
-        public void runChanged(RunEvent event) {
-            log.info("debug "+event.getRun() + " CHANGED ");
-        }
-
-        public void runRemoved(RunEvent event) {
-            log.info("debug "+event.getRun() + " REMOVED ");
         }
     }
 
@@ -598,7 +571,6 @@ public class SubmitRunPane extends JPanePlugin {
 
         this.log = getController().getLog();
         
-        getContest().addRunListener(new RunListenerImplementation());
         getContest().addContestTimeListener(new ContestTimeListenerImplementation());
         getContest().addLanguageListener(new LanguageListenerImplementation());
         getContest().addProblemListener(new ProblemListenerImplementation());

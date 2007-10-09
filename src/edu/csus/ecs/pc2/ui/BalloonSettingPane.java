@@ -518,9 +518,6 @@ public class BalloonSettingPane extends JPanePlugin {
             i++;
         }
         
-//        for (i = 0; i < getSiteComboBox().getItemCount(); i++) {
-//            System.out.println(i + " debug " + getSiteComboBox().getItemAt(i));
-//        }
         getSiteComboBox().setSelectedIndex(siteIndex);
     }
 

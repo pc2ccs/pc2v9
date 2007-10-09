@@ -106,7 +106,6 @@ public class Reconnector implements Runnable {
         
         try {
             int msec = r.nextInt(maxMSecs);
-            System.out.println("debug msecs = "+msec);
             Thread.sleep(msec);
         } catch (InterruptedException e) {
             // TODO Auto-generated catch block

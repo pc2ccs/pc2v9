@@ -43,7 +43,7 @@ public class AutoJudgingMonitor implements UIPlugin {
 
     private AutoJudgeStatusFrame autoJudgeStatusFrame = new AutoJudgeStatusFrame();
 
-    private boolean alreadyJudgingRun = false;
+    private boolean currentlyAutoJudging = false;
 
     private Log log;
 
@@ -118,13 +118,18 @@ public class AutoJudgingMonitor implements UIPlugin {
     }
 
     /**
-     * Is Auto Judging turned On for this judge ?
+     * Should monitor auto judge?
+     * 
+     * 
      * 
      * @return
      */
     private boolean isAutoJudgeOn() {
 
         if (autoJudgeDisabledLocally) {
+            return false;
+        }
+        if (isCurrentlyAutoJudging()) {
             return false;
         }
         ClientSettings clientSettings = contest.getClientSettings();
@@ -176,7 +181,7 @@ public class AutoJudgingMonitor implements UIPlugin {
      * @param run
      */
     private void checkoutNextRun(Run run) {
-        setAlreadyJudgingRun(true);
+        setCurrentlyAutoJudging(true);
         runBeingAutoJudged = run;
         autoJudgeStatusFrame.updateStatusLabel("Fetching Run " + run.getNumber() + " (Site " + run.getSiteNumber() + ")");
         autoJudgeStatusFrame.updateMessage(getRunDescription(run));
@@ -185,7 +190,7 @@ public class AutoJudgingMonitor implements UIPlugin {
             controller.checkOutRun(run, false);
         } catch (Exception e) {
             info("Could not check out run " + run + " waiting again... ", e);
-            setAlreadyJudgingRun(false);
+            setCurrentlyAutoJudging(false);
             runBeingAutoJudged = null;
             autoJudgeStatusFrame.updateStatusLabel("Waiting for runs");
             autoJudgeStatusFrame.updateMessage("(Still waiting)");
@@ -197,12 +202,12 @@ public class AutoJudgingMonitor implements UIPlugin {
         return " Run " + runToCheckOut.getNumber() + " Site " + runToCheckOut.getSiteNumber() + " - " + contest.getProblem(runToCheckOut.getProblemId()).getDisplayName();
     }
 
-    protected boolean isAlreadyJudgingRun() {
-        return alreadyJudgingRun;
+    protected boolean isCurrentlyAutoJudging() {
+        return currentlyAutoJudging;
     }
 
-    protected void setAlreadyJudgingRun(boolean alreadyJudgingRun) {
-        this.alreadyJudgingRun = alreadyJudgingRun;
+    protected void setCurrentlyAutoJudging(boolean alreadyJudgingRun) {
+        this.currentlyAutoJudging = alreadyJudgingRun;
     }
 
     /**
@@ -255,7 +260,7 @@ public class AutoJudgingMonitor implements UIPlugin {
         } else if (event.getAction().equals(RunEvent.Action.RUN_NOT_AVIALABLE)) {
             if (runBeingAutoJudged.getElementId().equals(event.getRun().getElementId())) {
                 // Darn we weren't fast enough
-                setAlreadyJudgingRun(false);
+                setCurrentlyAutoJudging(false);
                 runBeingAutoJudged = null;
 
                 info(event.getAction() + " for run " + event.getRun());
@@ -274,7 +279,7 @@ public class AutoJudgingMonitor implements UIPlugin {
      */
     private void executeAndAutoJudgeRun(Run run, RunFiles runFiles) {
 
-        setAlreadyJudgingRun(true);
+        setCurrentlyAutoJudging(true);
 
         autoJudgeStatusFrame.setVisible(true);
 
@@ -376,7 +381,7 @@ public class AutoJudgingMonitor implements UIPlugin {
 
         sleepMS(2000);
 
-        setAlreadyJudgingRun(false);
+        setCurrentlyAutoJudging(false);
         runBeingAutoJudged = run;
 
         attemptToFetchNextRun();
@@ -475,7 +480,7 @@ public class AutoJudgingMonitor implements UIPlugin {
     }
 
     public void stopAutoJudging() {
-        if (isAlreadyJudgingRun()) {
+        if (isCurrentlyAutoJudging()) {
             // Cancel the run
             if (runBeingAutoJudged != null){
                 controller.cancelRun(runBeingAutoJudged);

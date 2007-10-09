@@ -594,7 +594,6 @@ public class Executable {
      * @return true if should be validated.
      */
     private boolean isValidated() {
-        System.err.println("debug 22 isVal " + problem.isValidatedProblem() + " " + isTestRunOnly());
         return (problem.isValidatedProblem() && (!isTestRunOnly()));
     }
 

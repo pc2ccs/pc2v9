@@ -340,8 +340,6 @@ public class AccountPane extends JPanePlugin {
         
         account = account2;
         
-        System.out.println("debug -- here is daddy "+getParentFrame() != null);
-
         if (account2 == null) {
             
             getDisplayNameTextField().setText("");
@@ -689,7 +687,6 @@ public class AccountPane extends JPanePlugin {
         for (Object object : objects) {
             String name = (String) object;
             Type type = getTypeFromDescrption(name);
-            System.out.println("debug name = "+name+" type "+type);
             checkAccount.addPermission(type);
         }
 
@@ -715,23 +712,5 @@ public class AccountPane extends JPanePlugin {
         }
         return null;
     }
-    
-    @SuppressWarnings("unused")
-    private void printAccount(Account inAccount) {
-        System.out.print("   Site " + inAccount.getSiteNumber());
-        System.out.format(" %-15s", inAccount.getClientId().getName());
-        System.out.println(" id=" + inAccount.getElementId());
-
-        System.out.print("display '" + inAccount.getDisplayName() + "' ");
-        System.out.println("password '" + inAccount.getPassword() + "' ");
-        
-        Type [] types = inAccount.getPermissionList().getList();
-        System.out.print(types.length+" permissions ");
-        System.out.print("   ");
-        for (Type type: types){
-            System.out.print(type+" ");
-        }
-        System.out.println();
-    }
-
+   
 } // @jve:decl-index=0:visual-constraint="10,10"

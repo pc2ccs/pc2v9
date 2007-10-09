@@ -283,12 +283,10 @@ public class ClarificationsPane extends JPanePlugin {
             getQuestionTextArea().setText(clarification.getQuestion());
             
             if (clarification.getAnswer() != null){
-                showMessage("debug Do show answer");
                 getAnswerPane().setVisible(true);
                 getAnswerTextArea().setText(clarification.getAnswer());
             } else {
                 // Don't show answer pane if no answer
-                showMessage("debug Do not show answer");
                 getAnswerPane().setVisible(false);
             }
         }
