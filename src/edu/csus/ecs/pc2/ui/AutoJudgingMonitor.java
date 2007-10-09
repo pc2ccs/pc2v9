@@ -369,8 +369,10 @@ public class AutoJudgingMonitor implements UIPlugin {
             autoJudgeStatusFrame.updateStatusLabel("Problem judging run");
             // Cancel the run, hope for better luck.
 
-            controller.cancelRun(run);
             sleepMS(2000);
+            autoJudgeStatusFrame.updateStatusLabel("Returning run to server");
+            controller.cancelRun(run);
+            sleepMS(10000);
 
         } else {
 
@@ -486,6 +488,8 @@ public class AutoJudgingMonitor implements UIPlugin {
                 controller.cancelRun(runBeingAutoJudged);
             }
         }
+        
+        setAutoJudgeDisabledLocally(true);
 
         autoJudgeStatusFrame.updateStatusLabel("Auto-judging is OFF");
         autoJudgeStatusFrame.updateMessage("");
