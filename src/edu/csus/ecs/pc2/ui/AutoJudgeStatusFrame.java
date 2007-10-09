@@ -53,7 +53,7 @@ public class AutoJudgeStatusFrame extends javax.swing.JFrame {
      */
     private void initialize() {
         this.setSize(new java.awt.Dimension(519, 251));
-        this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
+        this.setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
         this.setContentPane(getMainAJStausPane());
         this.setTitle("Auto Judge Status");
 
