@@ -463,7 +463,7 @@ public class ProblemPane extends JPanePlugin {
         }
 
         if (stdinRadioButton.isSelected() && fileRadioButton.isSelected()) {
-            throw new InvalidFieldValue("Pick just one radio button TODO fix all TODOs!");
+            throw new InvalidFieldValue("Pick just one radio button");
         }
 
         if (fileRadioButton.isSelected()) {
@@ -486,8 +486,8 @@ public class ProblemPane extends JPanePlugin {
         }
 
         checkProblem.setValidatorCommandLine(validatorCommandLineTextBox.getText());
-        // checkProblem.setWhichPC2Validator(0);
-        // checkProblem.setIgnoreSpacesOnValidation(false);
+        checkProblem.setWhichPC2Validator(0);
+        checkProblem.setIgnoreSpacesOnValidation(false);
 
         if (checkProblem.isUsingPC2Validator()) {
 
@@ -521,8 +521,6 @@ public class ProblemPane extends JPanePlugin {
 
             checkProblem.setValidatorProgramName(serializedFile.getName());
             newProblemDataFiles.setValidatorFile(freshenIfNeeded(serializedFile));
-        } else {
-            checkProblem.setValidatorProgramName(null);
         }
 
         return checkProblem;
