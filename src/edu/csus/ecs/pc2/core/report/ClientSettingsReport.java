@@ -3,10 +3,12 @@ package edu.csus.ecs.pc2.core.report;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.Date;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.list.ClientSettingsComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
@@ -79,13 +81,13 @@ public class ClientSettingsReport implements IReport {
             return "is not enabled";
         }
     }
- 
+
     private void writeRow(PrintWriter printWriter, ClientSettings clientSettings) {
 
         printWriter.print(clientSettings.getClientId());
-        
+
         if (isJudge(clientSettings.getClientId())) {
-            printWriter.println(" auto judge" + enabledString(clientSettings.isAutoJudging()));
+            printWriter.println(" auto judge " + enabledString(clientSettings.isAutoJudging()));
             Filter filter = clientSettings.getAutoJudgeFilter();
             if (filter != null) {
                 ElementId[] elementIds = filter.getProblemIdList();
@@ -96,9 +98,12 @@ public class ClientSettingsReport implements IReport {
             printWriter.println();
         }
 
-        // TODO print key/value pairs.
-        // String [] keys = clientSettings.getKeys();
+        String[] keys = clientSettings.getKeys();
+        Arrays.sort(keys);
 
+        for (String key : keys) {
+            printWriter.println("   " + key + "='" + clientSettings.getProperty(key) + "'");
+        }
     }
 
     private boolean isJudge(ClientId id) {
@@ -110,7 +115,7 @@ public class ClientSettingsReport implements IReport {
         printWriter.println();
         ClientSettings[] clientSettings = contest.getClientSettingsList();
 
-        // Arrays.sort (clientSettings, new ClientSettingsComparator());
+        Arrays.sort(clientSettings, new ClientSettingsComparator());
 
         printWriter.println("-- " + clientSettings.length + " client settings --");
         for (ClientSettings clientSettings2 : clientSettings) {
