@@ -283,8 +283,8 @@ public class BalloonHandler extends JPanePlugin {
         
         loadBalloonSettings();
         balloonWriter = new BalloonWriter(log);
-        // TODO return our clientSettings and populate balloons
-//        getContest().getClientSettings().get
+        sentBalloons = getContest().getClientSettings().getBalloonList();
+        // TODO save the sentBalloons, at logout/timed/balloon action?
         Site[] sites = inContest.getSites();
         // TODO put this on a separate thread?
         // TODO #2 recompute after or before listeners, seems there is a timing window either way...
