@@ -17,6 +17,7 @@ import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.security.Permission;
@@ -50,7 +51,7 @@ public class AccountPane extends JPanePlugin {
     private JLabel messageLabel = null;
 
     private Account account = null;
-    
+
     private DefaultListModel defaultListModel = new DefaultListModel();
 
     // May be used sometime later.
@@ -87,6 +88,10 @@ public class AccountPane extends JPanePlugin {
 
     private JTextField groupTextField = null;
 
+    private boolean populatingGUI = false;
+
+    private Permission permission = new Permission();
+
     /**
      * This method initializes
      * 
@@ -102,7 +107,7 @@ public class AccountPane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new java.awt.Dimension(536,294));
+        this.setSize(new java.awt.Dimension(536, 294));
 
         this.add(getMessagePane(), java.awt.BorderLayout.NORTH);
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
@@ -114,7 +119,7 @@ public class AccountPane extends JPanePlugin {
         log = getController().getLog();
         addWindowCloserListener();
     }
-    
+
     private void addWindowCloserListener() {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -124,11 +129,10 @@ public class AccountPane extends JPanePlugin {
                             handleCancelButton();
                         }
                     });
-                } 
+                }
             }
         });
     }
-
 
     public String getPluginTitle() {
         return "Edit Account Pane";
@@ -232,18 +236,39 @@ public class AccountPane extends JPanePlugin {
 
     protected void updateAccount() {
 
-        // Account newAccount = getAccountFromFields();
+        if (!validatedFields()) {
+            return;
+        }
+        Account newAccount;
+        try {
+            newAccount = getAccountFromFields(account);
+        } catch (InvalidFieldValue e) {
+            showMessage(e.getMessage());
+            return;
+        }
 
         cancelButton.setText("Close");
         addButton.setEnabled(false);
         updateButton.setEnabled(false);
 
-        // TODO update account
-        // getController().updateAccount(newAccount);
+        getController().updateAccount(newAccount);
 
         if (getParentFrame() != null) {
             getParentFrame().setVisible(false);
         }
+    }
+
+    private boolean validatedFields() {
+
+        String oldPassword = getPasswordTextField().getText();
+        String newPassword = getPasswordConfirmField().getText();
+
+        if (!oldPassword.equals(newPassword)) {
+            showMessage("Password and Confirm password do not match");
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -272,13 +297,17 @@ public class AccountPane extends JPanePlugin {
             // Something changed, are they sure ?
 
             int result = FrameUtilities.yesNoCancelDialog("Account modified, save changes?", "Confirm Choice");
-
+            
             if (result == JOptionPane.YES_OPTION) {
                 if (getAddButton().isEnabled()) {
                     addAccount();
                 } else {
                     updateAccount();
                 }
+                if (getParentFrame() != null) {
+                    getParentFrame().setVisible(false);
+                }
+            } else if (result == JOptionPane.NO_OPTION) {
                 if (getParentFrame() != null) {
                     getParentFrame().setVisible(false);
                 }
@@ -307,65 +336,93 @@ public class AccountPane extends JPanePlugin {
     }
 
     private void populateGUI(Account account2) {
+        
+        account = account2;
+        
+        System.out.println("debug -- here is daddy "+getParentFrame() != null);
 
-        if (account2 != null) {
-
-            getAddButton().setVisible(false);
-            getUpdateButton().setVisible(true);
+        if (account2 == null) {
             
-            getDisplayNameTextField().setText(account2.getDisplayName());
-            getPasswordTextField().setText(account2.getPassword());
-            getPasswordConfirmField().setText(account2.getPassword());
-            getGroupTextField().setText(account2.getGroupId());
-        } else {
-
-            getAddButton().setVisible(true);
-            getUpdateButton().setVisible(false);
-
             getDisplayNameTextField().setText("");
             getPasswordTextField().setText("");
             getPasswordConfirmField().setText("");
             getGroupTextField().setText("");
+
+            getAddButton().setVisible(true);
+            getUpdateButton().setVisible(false);
+
+        } else {
+            
+            getDisplayNameTextField().setText(account2.getDisplayName());
+            getPasswordTextField().setText(account2.getPassword());
+            getPasswordConfirmField().setText(account2.getPassword());
+            
+            if (account2.getGroupId() == null){
+                getGroupTextField().setText("");
+            } else{
+                getGroupTextField().setText(account2.getGroupId());
+            }
+            
+            populatePermissions(account2);
+            
+            getAddButton().setVisible(false);
+            getUpdateButton().setVisible(true);
         }
-        
-        populatePermissions (account2);
+
+        populatePermissions(account2);
     }
-    
-    private String [] getPermissionDescriptions() {
-        Permission permission = new Permission();
-        
-        String [] permissionListNames =  new String[Permission.Type.values().length];
-        
+
+    private String[] getPermissionDescriptions() {
+        String[] permissionListNames = new String[Permission.Type.values().length];
+
         int i = 0;
-        for (Type type : Permission.Type.values()){
+        for (Type type : Permission.Type.values()) {
             permissionListNames[i] = permission.getDescription(type);
             i++;
         }
-        
+
         Arrays.sort(permissionListNames);
 
         return permissionListNames;
     }
 
     private void populatePermissions(Account inAccount) {
-        
-//        Vector <Integer> permissionIndexes = new Vector<Integer>();
-        
+
         defaultListModel.removeAllElements();
-        for (String name : getPermissionDescriptions()) {
-            defaultListModel.addElement(name);
-        }
         
-        int count = 0;
-        for (Type type : Permission.Type.values()){
-            if (account.isAllowed(type)){
-                count ++;
+        if (inAccount == null){
+            
+            for (String name : getPermissionDescriptions()) {
+                defaultListModel.addElement(name);
+            }
+            getPermissionsJList().setSelectedIndex(-1);
+            
+        } else {
+
+            int count = 0;
+            for (Type type : Permission.Type.values()) {
+                if (account.isAllowed(type)) {
+                    count++;
+                }
+            }
+            
+            if (count > 0){
+                int [] indexes = new int[count];
+                count = 0;
+                int idx = 0;
+                for (Type type : Permission.Type.values()) {
+                    defaultListModel.addElement(permission.getDescription(type));
+                    if (account.isAllowed(type)) {
+                        indexes[count] = idx;
+                        count++;
+                    }
+                    idx ++;
+                }
+                getPermissionsJList().setSelectedIndices(indexes);
             }
         }
-        
-        permissionCountLabel.setText(count+" permissions selected");
-        
-        
+
+        showPermissionCount(getPermissionsJList().getSelectedIndices().length + " permissions selected");
     }
 
     protected void enableUpdateButtons(boolean editedText) {
@@ -382,6 +439,14 @@ public class AccountPane extends JPanePlugin {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 messageLabel.setText(message);
+            }
+        });
+    }
+    
+    public void showPermissionCount(final String message) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                permissionCountLabel.setText(message);
             }
         });
     }
@@ -410,16 +475,16 @@ public class AccountPane extends JPanePlugin {
     private JPanel getPermissionPane() {
         if (accountDetailPane == null) {
             groupTitleLabel = new JLabel();
-            groupTitleLabel.setBounds(new java.awt.Rectangle(13,171,137,16));
+            groupTitleLabel.setBounds(new java.awt.Rectangle(13, 171, 137, 16));
             groupTitleLabel.setText("Group");
             jLabel = new JLabel();
-            jLabel.setBounds(new java.awt.Rectangle(13,116,191,21));
+            jLabel.setBounds(new java.awt.Rectangle(13, 116, 191, 21));
             jLabel.setText("Password Confirmation ");
             passwordLabel = new JLabel();
-            passwordLabel.setBounds(new java.awt.Rectangle(13,61,191,21));
+            passwordLabel.setBounds(new java.awt.Rectangle(13, 61, 191, 21));
             passwordLabel.setText("Password");
             displayNameLabel = new JLabel();
-            displayNameLabel.setBounds(new java.awt.Rectangle(13,6,191,21));
+            displayNameLabel.setBounds(new java.awt.Rectangle(13, 6, 191, 21));
             displayNameLabel.setText("Display Name");
             accountDetailPane = new JPanel();
             accountDetailPane.setLayout(null);
@@ -483,6 +548,11 @@ public class AccountPane extends JPanePlugin {
         if (permissionsJList == null) {
             permissionsJList = new JList();
             permissionsJList.setModel(defaultListModel);
+            permissionsJList.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
+                public void valueChanged(javax.swing.event.ListSelectionEvent e) {
+                    showPermissionCount(permissionsJList.getSelectedIndices().length+" selected");
+                }
+            });
         }
         return permissionsJList;
     }
@@ -495,7 +565,12 @@ public class AccountPane extends JPanePlugin {
     private JTextField getDisplayNameTextField() {
         if (displayNameTextField == null) {
             displayNameTextField = new JTextField();
-            displayNameTextField.setBounds(new java.awt.Rectangle(13,33,272,22));
+            displayNameTextField.setBounds(new java.awt.Rectangle(13, 33, 272, 22));
+            displayNameTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyTyped(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
         }
         return displayNameTextField;
     }
@@ -508,7 +583,12 @@ public class AccountPane extends JPanePlugin {
     private JTextField getPasswordTextField() {
         if (passwordTextField == null) {
             passwordTextField = new JTextField();
-            passwordTextField.setBounds(new java.awt.Rectangle(13,88,272,22));
+            passwordTextField.setBounds(new java.awt.Rectangle(13, 88, 272, 22));
+            passwordTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyTyped(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
         }
         return passwordTextField;
     }
@@ -521,7 +601,12 @@ public class AccountPane extends JPanePlugin {
     private JTextField getPasswordConfirmField() {
         if (passwordConfirmField == null) {
             passwordConfirmField = new JTextField();
-            passwordConfirmField.setBounds(new java.awt.Rectangle(13,143,272,22));
+            passwordConfirmField.setBounds(new java.awt.Rectangle(13, 143, 272, 22));
+            passwordConfirmField.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyTyped(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
         }
         return passwordConfirmField;
     }
@@ -534,9 +619,104 @@ public class AccountPane extends JPanePlugin {
     private JTextField getGroupTextField() {
         if (groupTextField == null) {
             groupTextField = new JTextField();
-            groupTextField.setBounds(new java.awt.Rectangle(13,193,272,22));
+            groupTextField.setBounds(new java.awt.Rectangle(13, 193, 272, 22));
+            groupTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyTyped(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
         }
         return groupTextField;
+    }
+
+    public void enableUpdateButton() {
+
+        if (populatingGUI) {
+            return;
+        }
+
+        boolean enableButton = false;
+
+        if (account != null) {
+
+            try {
+                Account changedAccount = getAccountFromFields(null);
+                
+//                printAccount(account);
+//                printAccount(changedAccount);
+                
+                if (!account.isSameAs(changedAccount)) {
+                    enableButton = true;
+                }
+
+            } catch (InvalidFieldValue e) {
+                // invalid field, but that is ok as they are entering data
+                // will be caught and reported when they hit update or add.
+                StaticLog.getLog().log(Log.DEBUG, "Input Problem (but not saving) ", e);
+                enableButton = true;
+            }
+
+        } else {
+            if (getAddButton().isVisible()) {
+                enableButton = true;
+            }
+        }
+
+        enableUpdateButtons(enableButton);
+
+    }
+
+    private Account getAccountFromFields(Account checkAccount) throws InvalidFieldValue {
+        if (checkAccount == null) {
+            checkAccount = new Account(account.getClientId(), null, account.getSiteNumber());
+        }
+
+        // get permissions
+        Object[] objects = getPermissionsJList().getSelectedValues();
+        for (Object object : objects) {
+            account.addPermission(getTypeFromDescrption((String) object));
+        }
+
+        // get display name and group
+        checkAccount.setDisplayName(getDisplayNameTextField().getText());
+        checkAccount.setGroupId(getGroupTextField().getText());
+        
+        checkAccount.setPassword(getPasswordConfirmField().getText());
+
+        return checkAccount;
+    }
+
+    /**
+     * Return Permission Type from description string.
+     * @param string
+     * @return
+     */
+    private Type getTypeFromDescrption(String string) {
+        for (Type type : Permission.Type.values()) {
+            if (string.equals(permission .getDescription(type))){
+                return type;
+            }
+        }
+        return null;
+    }
+    
+    @SuppressWarnings("unused")
+    private void printAccount(Account account2) {
+        System.out.print("   Site " + account.getSiteNumber());
+        System.out.format(" %-15s", account.getClientId().getName());
+        System.out.println(" id=" + account.getElementId());
+
+        System.out.print("display '" + account.getDisplayName() + "' ");
+        System.out.println("password '" + account.getPassword() + "' ");
+        
+        Type [] types = account.getPermissionList().getList();
+        System.out.print(types.length+" permissions ");
+        System.out.print("   ");
+        for (Type type: types){
+            System.out.print(type+" ");
+        }
+        System.out.println();
+
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
