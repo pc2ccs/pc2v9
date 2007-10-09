@@ -152,6 +152,8 @@ public class ProblemPane extends JPanePlugin {
 
     private ButtonGroup validatorChoiceButtonGroup = null; // @jve:decl-index=0:visual-constraint="595,128"
 
+    private static final String NL = System.getProperty("line.separator");
+
     /**
      * This method initializes
      * 
@@ -180,11 +182,11 @@ public class ProblemPane extends JPanePlugin {
         // getContest().addProblemListener(new Proble)
 
         log = getController().getLog();
-        
+
         addWindowCloserListener();
-        
+
     }
-    
+
     private void addWindowCloserListener() {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -194,7 +196,7 @@ public class ProblemPane extends JPanePlugin {
                             handleCancelButton();
                         }
                     });
-                } 
+                }
             }
         });
     }
@@ -337,11 +339,11 @@ public class ProblemPane extends JPanePlugin {
                 if (!problem.isSameAs(changedProblem)) {
                     enableButton = true;
                 }
-                
+
             } catch (InvalidFieldValue e) {
                 // invalid field, but that is ok as they are entering data
                 // will be caught and reported when they hit update or add.
-                StaticLog.getLog().log(Log.DEBUG, "Input Problem (but not saving) ",e);
+                StaticLog.getLog().log(Log.DEBUG, "Input Problem (but not saving) ", e);
                 enableButton = true;
             }
 
@@ -367,7 +369,7 @@ public class ProblemPane extends JPanePlugin {
      */
     public Problem getProblemFromFields(Problem checkProblem) throws InvalidFieldValue {
         boolean isAdding = true;
-        
+
         if (checkProblem == null) {
             checkProblem = new Problem(problemNameTextField.getText());
             isAdding = true;
@@ -387,14 +389,14 @@ public class ProblemPane extends JPanePlugin {
             if (fileName.trim().length() == 0) {
                 throw new InvalidFieldValue("Problem Requires Input Data checked, select a file ");
             }
-            
+
             if (fileName.trim().length() != inputDataFileLabel.getToolTipText().length()) {
                 fileName = inputDataFileLabel.getToolTipText() + "";
             }
-            
+
             if (isAdding) {
                 SerializedFile serializedFile = new SerializedFile(fileName);
-    
+
                 if (serializedFile.getBuffer() == null) {
                     throw new InvalidFieldValue("Unable to read file " + fileName + " choose data file again (adding)");
                 }
@@ -413,7 +415,7 @@ public class ProblemPane extends JPanePlugin {
                 if (serializedFile.getBuffer() == null) {
                     throw new InvalidFieldValue("Unable to read file " + fileName + " choose data file again (updating)");
                 }
-                
+
                 checkProblem.setDataFileName(serializedFile.getName());
                 newProblemDataFiles.setJudgesDataFile(freshenIfNeeded(serializedFile));
             }
@@ -426,14 +428,14 @@ public class ProblemPane extends JPanePlugin {
             if (fileName.trim().length() == 0) {
                 throw new InvalidFieldValue("Judges Have Provided Answer File checked, select a file");
             }
-            
+
             if (fileName.trim().length() != answerFileNameLabel.getToolTipText().length()) {
                 fileName = answerFileNameLabel.getToolTipText() + "";
             }
-            
+
             if (isAdding) {
                 SerializedFile serializedFile = new SerializedFile(fileName);
-    
+
                 if (serializedFile.getBuffer() == null) {
                     throw new InvalidFieldValue("Unable to read file " + fileName + " choose answer file again (adding)");
                 }
@@ -452,7 +454,7 @@ public class ProblemPane extends JPanePlugin {
                 if (serializedFile.getBuffer() == null) {
                     throw new InvalidFieldValue("Unable to read file " + fileName + " choose answer file again (updating)");
                 }
-                
+
                 checkProblem.setAnswerFileName(serializedFile.getName());
                 newProblemDataFiles.setJudgesAnswerFile(freshenIfNeeded(serializedFile));
             }
@@ -484,8 +486,8 @@ public class ProblemPane extends JPanePlugin {
         }
 
         checkProblem.setValidatorCommandLine(validatorCommandLineTextBox.getText());
-//        checkProblem.setWhichPC2Validator(0);
-//        checkProblem.setIgnoreSpacesOnValidation(false);
+        // checkProblem.setWhichPC2Validator(0);
+        // checkProblem.setIgnoreSpacesOnValidation(false);
 
         if (checkProblem.isUsingPC2Validator()) {
 
@@ -494,7 +496,7 @@ public class ProblemPane extends JPanePlugin {
 
             checkProblem.setValidatorCommandLine(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + checkProblem.getWhichPC2Validator() + " " + checkProblem.isIgnoreSpacesOnValidation());
             checkProblem.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);
-            
+
             checkProblem.setWhichPC2Validator(getPc2ValidatorComboBox().getSelectedIndex());
             checkProblem.setIgnoreSpacesOnValidation(getIgnoreCaseCheckBox().isSelected());
         }
@@ -518,11 +520,11 @@ public class ProblemPane extends JPanePlugin {
             }
 
             checkProblem.setValidatorProgramName(serializedFile.getName());
-            newProblemDataFiles.setValidatorFile(freshenIfNeeded (serializedFile));
+            newProblemDataFiles.setValidatorFile(freshenIfNeeded(serializedFile));
         } else {
             checkProblem.setValidatorProgramName(null);
         }
-        
+
         return checkProblem;
 
     }
@@ -593,11 +595,11 @@ public class ProblemPane extends JPanePlugin {
                 showMessage("Problem Requires Input Data checked, select a file ");
                 return false;
             }
-            
+
             if (fileName.trim().length() != inputDataFileLabel.getToolTipText().length()) {
                 fileName = inputDataFileLabel.getToolTipText() + "";
             }
-            
+
             if (!checkFile(fileName)) {
                 // note: if error, then checkFile will showMessage
                 return false;
@@ -776,7 +778,7 @@ public class ProblemPane extends JPanePlugin {
             } else {
                 inputDataFileLabel.setToolTipText("");
             }
-            
+
             answerFileNameLabel.setText(inProblem.getAnswerFileName());
             sFile = getController().getProblemDataFiles(inProblem).getJudgesAnswerFile();
             if (sFile != null) {
@@ -819,7 +821,8 @@ public class ProblemPane extends JPanePlugin {
             getShowCompareCheckBox().setSelected(problem.isShowCompareWindow());
 
             try {
-                @SuppressWarnings("unused") Problem changedProblem = getProblemFromFields(null);
+                @SuppressWarnings("unused")
+                Problem changedProblem = getProblemFromFields(null);
             } catch (InvalidFieldValue e) {
                 e.printStackTrace();
             }
@@ -1527,136 +1530,118 @@ public class ProblemPane extends JPanePlugin {
         return validatorChoiceButtonGroup;
     }
 
-
     /**
-     *  Checks whether needs to freshen, prompt user before freshening.
+     * Checks whether needs to freshen, prompt user before freshening.
      */
-     
-    private SerializedFile freshenIfNeeded (SerializedFile serFile)
-    {
-        if (serFile == null)
-           return serFile;
-           
-        SerializedFile sf = needsFreshening( serFile );
-        
-        if (sf != null )
-        {
-            int result = JOptionPane.showConfirmDialog
-                (this, "Datafile ("+serFile.getName()+") has changed; reload from disk?", "Freshen file "+serFile.getName()+"?",
-                 JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-                
-            if (result == JOptionPane.YES_OPTION) 
-            {
+
+    private SerializedFile freshenIfNeeded(SerializedFile serFile) {
+        if (serFile == null) {
+            return serFile;
+        }
+
+        SerializedFile sf = needsFreshening(serFile);
+
+        if (sf != null) {
+            int result = JOptionPane.showConfirmDialog(this, "Datafile (" + serFile.getName() + ") has changed; reload from disk?", "Freshen file " + serFile.getName() + "?",
+                    JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+
+            if (result == JOptionPane.YES_OPTION) {
                 checkFileFormat(sf);
                 return sf;
             }
-        }
-        else
-        {
-            // nothing to update
-       }
+        } // else nothing to update
 
         return serFile;
     }
-   
+
     /**
      * Has this file been updated on disk ?
      */
-    public SerializedFile needsFreshening (SerializedFile sFile)
-    {
+    public SerializedFile needsFreshening(SerializedFile sFile) {
 
-        if ( sFile == null)
+        if (sFile == null) {
             return null;
+        }
 
         try {
-            if (sFile.getAbsolutePath() == null)
-            {
+            if (sFile.getAbsolutePath() == null) {
                 StaticLog.getLog().log(Log.DEBUG, " needsFreshening path is null, ignoring ");
                 return null;
             }
-            File f = new File (sFile.getAbsolutePath());
-            
-            if (f.exists())
-            {
+            File f = new File(sFile.getAbsolutePath());
+
+            if (f.exists()) {
                 // Only can check whether to update if file is on disk
-                
+
                 // Now compare them
                 // Can't use SerializeFile.getFile() because it may return null... sigh.
 
                 SerializedFile sf = new SerializedFile(sFile.getAbsolutePath());
-                
-                if (sf.getSHA1sum().equals(sFile.getSHA1sum()))
-                    return null;
-                else
-                    return sf;
-            }
-            
-        } catch (Exception ex99) {
-            StaticLog.getLog().log(Log.DEBUG,"Exception ",ex99);
-        }
 
+                if (sf.getSHA1sum().equals(sFile.getSHA1sum())) {
+                    return null;
+                } else {
+                    return sf;
+                }
+            }
+
+        } catch (Exception ex99) {
+            StaticLog.getLog().log(Log.DEBUG, "Exception ", ex99);
+        }
 
         return null;
     }
 
     public void checkFileFormat(SerializedFile newFile) {
-        
+
         /*
-    DOS FILE        0x0D 0x0A
-    UNIX FILE       0xA
-    MAC FILE        0xD
-    */
-    int currentOS = 0;
-    // compare OS Versions.
-    String NL = System.getProperty("line.separator");
+         * DOS FILE 0x0D 0x0A UNIX FILE 0xA MAC FILE 0xD
+         */
+        int currentOS = 0;
+        // compare OS Versions.
 
-    if (NL.length() == 2) {
-        currentOS = Constants.FILETYPE_DOS;
-    }
-    else if (NL.charAt(0) == 0x0A) {
-        currentOS = Constants.FILETYPE_UNIX;
-    }
-    else if (NL.charAt(0) == 0x0D) {
-        currentOS = Constants.FILETYPE_MAC;
-    }
-
-    if ((currentOS != newFile.getFileType()) && 
-            (newFile.getFileType() != Constants.FILETYPE_BINARY) &&
-            (newFile.getFileType() != Constants.FILETYPE_ASCII_GENERIC) &&
-            (newFile.getFileType() != Constants.FILETYPE_ASCII_OTHER)) {
-        
-        String question = "The file you are loading appears to be of type '" ;
-    
-        if (newFile.getFileType() == Constants.FILETYPE_BINARY) 
-                question = question + Constants.FILETYPE_BINARY_TEXT;
-        else if (newFile.getFileType() == Constants.FILETYPE_DOS)
-                question = question + Constants.FILETYPE_DOS_TEXT;
-        else if (newFile.getFileType() == Constants.FILETYPE_MAC)
-                question = question + Constants.FILETYPE_MAC_TEXT;
-        else if (newFile.getFileType() == Constants.FILETYPE_UNIX)
-                question = question + Constants.FILETYPE_UNIX_TEXT;
-        else if (newFile.getFileType() == Constants.FILETYPE_ASCII_GENERIC)
-                question = question + Constants.FILETYPE_ASCII_GENERIC_TEXT;
-        else if (newFile.getFileType() == Constants.FILETYPE_ASCII_OTHER)
-                question = question + Constants.FILETYPE_ASCII_OTHER_TEXT;
-
-        question = question + "'." + NL +NL;
-
-        question = question + "The Current OS is '" + System.getProperty( "os.name", "?" );
-    
-        question = question + "'." + NL + NL;
-
-        
-        question = question + "Do you want the file converted to the current OS file format as it is loaded into PC^2?";
-        
-        int answer = JOptionPane.showConfirmDialog(this, question, "File Format Mismatch", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-
-        if (answer == JOptionPane.YES_OPTION) {
-            newFile.convertFile(currentOS);
+        if (NL.length() == 2) {
+            currentOS = Constants.FILETYPE_DOS;
+        } else if (NL.charAt(0) == 0x0A) {
+            currentOS = Constants.FILETYPE_UNIX;
+        } else if (NL.charAt(0) == 0x0D) {
+            currentOS = Constants.FILETYPE_MAC;
         }
 
-    }
-}
+        if ((currentOS != newFile.getFileType()) && (newFile.getFileType() != Constants.FILETYPE_BINARY) && (newFile.getFileType() != Constants.FILETYPE_ASCII_GENERIC)
+                && (newFile.getFileType() != Constants.FILETYPE_ASCII_OTHER)) {
 
-    
+            String question = "The file you are loading appears to be of type '";
+
+            if (newFile.getFileType() == Constants.FILETYPE_BINARY) {
+                question = question + Constants.FILETYPE_BINARY_TEXT;
+            } else if (newFile.getFileType() == Constants.FILETYPE_DOS) {
+                question = question + Constants.FILETYPE_DOS_TEXT;
+            } else if (newFile.getFileType() == Constants.FILETYPE_MAC) {
+                question = question + Constants.FILETYPE_MAC_TEXT;
+            } else if (newFile.getFileType() == Constants.FILETYPE_UNIX) {
+                question = question + Constants.FILETYPE_UNIX_TEXT;
+            } else if (newFile.getFileType() == Constants.FILETYPE_ASCII_GENERIC) {
+                question = question + Constants.FILETYPE_ASCII_GENERIC_TEXT;
+            } else if (newFile.getFileType() == Constants.FILETYPE_ASCII_OTHER) {
+                question = question + Constants.FILETYPE_ASCII_OTHER_TEXT;
+            }
+
+            question = question + "'." + NL + NL;
+
+            question = question + "The Current OS is '" + System.getProperty("os.name", "?");
+
+            question = question + "'." + NL + NL;
+
+            question = question + "Do you want the file converted to the current OS file format as it is loaded into PC^2?";
+
+            int answer = JOptionPane.showConfirmDialog(this, question, "File Format Mismatch", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+
+            if (answer == JOptionPane.YES_OPTION) {
+                newFile.convertFile(currentOS);
+            }
+
+        }
+    }
+
 } // @jve:decl-index=0:visual-constraint="10,10"
