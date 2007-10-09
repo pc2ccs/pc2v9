@@ -312,12 +312,20 @@ public class AccountPane extends JPanePlugin {
 
             getAddButton().setVisible(false);
             getUpdateButton().setVisible(true);
-
+            
+            getDisplayNameTextField().setText(account2.getDisplayName());
+            getPasswordTextField().setText(account2.getPassword());
+            getPasswordConfirmField().setText(account2.getPassword());
+            getGroupTextField().setText(account2.getGroupId());
         } else {
 
             getAddButton().setVisible(true);
             getUpdateButton().setVisible(false);
 
+            getDisplayNameTextField().setText("");
+            getPasswordTextField().setText("");
+            getPasswordConfirmField().setText("");
+            getGroupTextField().setText("");
         }
         
         populatePermissions (account2);
@@ -420,10 +428,10 @@ public class AccountPane extends JPanePlugin {
             accountDetailPane.add(getDisplayNameTextField(), null);
             accountDetailPane.add(passwordLabel, null);
             accountDetailPane.add(getPasswordTextField(), null);
-            accountDetailPane.add(getJTextField(), null);
+            accountDetailPane.add(getPasswordConfirmField(), null);
             accountDetailPane.add(jLabel, null);
             accountDetailPane.add(groupTitleLabel, null);
-            accountDetailPane.add(getJTextField2(), null);
+            accountDetailPane.add(getGroupTextField(), null);
         }
         return accountDetailPane;
     }
@@ -510,7 +518,7 @@ public class AccountPane extends JPanePlugin {
      * 
      * @return javax.swing.JTextField
      */
-    private JTextField getJTextField() {
+    private JTextField getPasswordConfirmField() {
         if (passwordConfirmField == null) {
             passwordConfirmField = new JTextField();
             passwordConfirmField.setBounds(new java.awt.Rectangle(13,143,272,22));
@@ -523,7 +531,7 @@ public class AccountPane extends JPanePlugin {
      * 
      * @return javax.swing.JTextField
      */
-    private JTextField getJTextField2() {
+    private JTextField getGroupTextField() {
         if (groupTextField == null) {
             groupTextField = new JTextField();
             groupTextField.setBounds(new java.awt.Rectangle(13,193,272,22));
