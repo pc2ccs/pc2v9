@@ -436,6 +436,19 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         }
 
     }
+    protected String stripChar (String s, char ch){
+        int idx = s.indexOf(ch);
+        while (idx > -1) {
+            StringBuffer sb = new StringBuffer(s);
+            idx = sb.indexOf(ch+"");
+            while (idx > -1){
+                sb.deleteCharAt(idx);
+                idx = sb.indexOf(ch+"");
+            }
+            return sb.toString();
+        }
+        return s;
+    }
 
     /**
      * Login to contest server.
@@ -455,7 +468,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         }
         ClientId clientId = loginShortcutExpansion(0, id);
 
-        log = new Log(clientId.toString());
+        log = new Log(stripChar(clientId.toString(),' '));
         StaticLog.setLog(log);
 
         info(new VersionInfo().getSystemVersionInfo());
