@@ -551,6 +551,7 @@ public class AccountPane extends JPanePlugin {
             permissionsJList.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
                 public void valueChanged(javax.swing.event.ListSelectionEvent e) {
                     showPermissionCount(permissionsJList.getSelectedIndices().length+" selected");
+                    enableUpdateButton();
                 }
             });
         }
@@ -634,7 +635,7 @@ public class AccountPane extends JPanePlugin {
         if (populatingGUI) {
             return;
         }
-
+        
         boolean enableButton = false;
 
         if (account != null) {
@@ -646,6 +647,14 @@ public class AccountPane extends JPanePlugin {
 //                printAccount(changedAccount);
                 
                 if (!account.isSameAs(changedAccount)) {
+                    enableButton = true;
+                }
+                
+                if (!account.getPermissionList().isSameAs(changedAccount.getPermissionList())) {
+                    enableButton = true;
+                }
+                
+                if (getPasswordTextField().getText().equals(getPasswordConfirmField().getText())){
                     enableButton = true;
                 }
 
