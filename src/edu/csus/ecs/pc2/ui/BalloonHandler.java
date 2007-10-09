@@ -247,13 +247,23 @@ public class BalloonHandler extends JPanePlugin {
                 v.add(getContest().getProblem(run.getProblemId()));
             }
         }
-        // TODO fix the order of the Problems, they should be in ProblemDisplayOrder
-        balloon.setProblems(v.toArray(new Problem[v.size()]));
+        // now put them in the right order
+        Problem[] result=new Problem[v.size()];
+        Problem[] sortOrder=getContest().getProblems();
+        int j=0;
+        for (int i = 0; i < sortOrder.length; i++) {
+            Problem problem = sortOrder[i];
+            if (v.contains(problem)) {
+                result[j]=problem;
+                j++;
+            }
+        }
+        balloon.setProblems(result);
         return balloon;
     }
 
     boolean sendBalloon(Balloon balloon) {
-        log.finest("TODO give a balloon to "+balloon.getClientId().getTripletKey()+ " for "+balloon.getProblemTitle());
+        log.finest("send a balloon to "+balloon.getClientId().getTripletKey()+ " for "+balloon.getProblemTitle());
         // TODO fire some event to notify others, or just do it ourselves
         balloonWriter.sendBalloon(balloon);
         return true;
@@ -276,7 +286,7 @@ public class BalloonHandler extends JPanePlugin {
         loadBalloonSettings();
         balloonWriter = new BalloonWriter(log);
         // TODO return our clientSettings and populate balloons
-//        getContest().getClientSettings().
+//        getContest().getClientSettings().get
         Site[] sites = inContest.getSites();
         // TODO put this on a separate thread?
         for (int i = 0; i < sites.length; i++) {
@@ -289,7 +299,7 @@ public class BalloonHandler extends JPanePlugin {
     }
 
     boolean takeBalloon(Balloon balloon) {
-        log.finest("TODO take a balloon away from "+balloon.getClientId().getTripletKey()+ " for "+balloon.getProblemTitle());
+        log.finest("take a balloon away from "+balloon.getClientId().getTripletKey()+ " for "+balloon.getProblemTitle());
         // TODO fire some event to notify others
         balloonWriter.sendBalloon(balloon);
         return true;
