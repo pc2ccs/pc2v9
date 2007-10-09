@@ -133,13 +133,13 @@ public class ScoreboardView extends JFrame implements UIPlugin {
         this.contest = inContest;
         this.controller = inController;
 
+        contest.addContestTimeListener(new ContestTimeListenerImplementation());
+
         VersionInfo versionInfo = new VersionInfo();
         // TODO xslDir should be configurable this is just one possible default
         xslDir = versionInfo.locateHome() + File.separator + "data" + File.separator + "xsl";
 
         log = controller.getLog();
-        
-        contest.addContestTimeListener(new ContestTimeListenerImplementation());
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -151,6 +151,8 @@ public class ScoreboardView extends JFrame implements UIPlugin {
                 logWindow.setContestAndController(contest, controller);
                 logWindow.setTitle("Log " + contest.getClientId().toString());
                 
+                setFrameTitle(contest.getContestTime().isContestRunning());
+
                 StandingsPane standingsPane = new StandingsPane();
                 addUIPlugin(getMainTabbedPane(), "Standings", standingsPane);
                 standingsPane.addPropertyChangeListener("standings", new PropertyChangeListenerImplementation());
