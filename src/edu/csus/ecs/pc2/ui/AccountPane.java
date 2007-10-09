@@ -17,7 +17,6 @@ import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.log.Log;
-import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.security.Permission;
@@ -337,6 +336,8 @@ public class AccountPane extends JPanePlugin {
 
     private void populateGUI(Account account2) {
         
+        populatingGUI = true;
+        
         account = account2;
         
         System.out.println("debug -- here is daddy "+getParentFrame() != null);
@@ -370,6 +371,10 @@ public class AccountPane extends JPanePlugin {
         }
 
         populatePermissions(account2);
+        
+        populatingGUI = false;
+        
+        enableUpdateButton();
     }
 
     private String[] getPermissionDescriptions() {
@@ -568,7 +573,7 @@ public class AccountPane extends JPanePlugin {
             displayNameTextField = new JTextField();
             displayNameTextField.setBounds(new java.awt.Rectangle(13, 33, 272, 22));
             displayNameTextField.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyTyped(java.awt.event.KeyEvent e) {
+                public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
                 }
             });
@@ -586,7 +591,7 @@ public class AccountPane extends JPanePlugin {
             passwordTextField = new JTextField();
             passwordTextField.setBounds(new java.awt.Rectangle(13, 88, 272, 22));
             passwordTextField.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyTyped(java.awt.event.KeyEvent e) {
+                public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
                 }
             });
@@ -604,7 +609,7 @@ public class AccountPane extends JPanePlugin {
             passwordConfirmField = new JTextField();
             passwordConfirmField.setBounds(new java.awt.Rectangle(13, 143, 272, 22));
             passwordConfirmField.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyTyped(java.awt.event.KeyEvent e) {
+                public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
                 }
             });
@@ -622,7 +627,7 @@ public class AccountPane extends JPanePlugin {
             groupTextField = new JTextField();
             groupTextField.setBounds(new java.awt.Rectangle(13, 193, 272, 22));
             groupTextField.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyTyped(java.awt.event.KeyEvent e) {
+                public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
                 }
             });
@@ -649,22 +654,21 @@ public class AccountPane extends JPanePlugin {
                 if (!account.isSameAs(changedAccount)) {
                     enableButton = true;
                 }
-                
+
                 if (!account.getPermissionList().isSameAs(changedAccount.getPermissionList())) {
                     enableButton = true;
                 }
-                
-                if (getPasswordTextField().getText().equals(getPasswordConfirmField().getText())){
+
+                if (!getPasswordTextField().getText().equals(getPasswordConfirmField().getText())) {
                     enableButton = true;
                 }
 
             } catch (InvalidFieldValue e) {
                 // invalid field, but that is ok as they are entering data
                 // will be caught and reported when they hit update or add.
-                StaticLog.getLog().log(Log.DEBUG, "Input Problem (but not saving) ", e);
+                getController().getLog().log(Log.DEBUG, "Input Problem (but not saving) ", e);
                 enableButton = true;
             }
-
         } else {
             if (getAddButton().isVisible()) {
                 enableButton = true;
@@ -683,7 +687,10 @@ public class AccountPane extends JPanePlugin {
         // get permissions
         Object[] objects = getPermissionsJList().getSelectedValues();
         for (Object object : objects) {
-            account.addPermission(getTypeFromDescrption((String) object));
+            String name = (String) object;
+            Type type = getTypeFromDescrption(name);
+            System.out.println("debug name = "+name+" type "+type);
+            checkAccount.addPermission(type);
         }
 
         // get display name and group
@@ -710,22 +717,21 @@ public class AccountPane extends JPanePlugin {
     }
     
     @SuppressWarnings("unused")
-    private void printAccount(Account account2) {
-        System.out.print("   Site " + account.getSiteNumber());
-        System.out.format(" %-15s", account.getClientId().getName());
-        System.out.println(" id=" + account.getElementId());
+    private void printAccount(Account inAccount) {
+        System.out.print("   Site " + inAccount.getSiteNumber());
+        System.out.format(" %-15s", inAccount.getClientId().getName());
+        System.out.println(" id=" + inAccount.getElementId());
 
-        System.out.print("display '" + account.getDisplayName() + "' ");
-        System.out.println("password '" + account.getPassword() + "' ");
+        System.out.print("display '" + inAccount.getDisplayName() + "' ");
+        System.out.println("password '" + inAccount.getPassword() + "' ");
         
-        Type [] types = account.getPermissionList().getList();
+        Type [] types = inAccount.getPermissionList().getList();
         System.out.print(types.length+" permissions ");
         System.out.print("   ");
         for (Type type: types){
             System.out.print(type+" ");
         }
         System.out.println();
-
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
