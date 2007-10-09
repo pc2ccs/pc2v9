@@ -30,6 +30,17 @@ public class AccountNameComparator implements Comparator<String>, Serializable {
 
     public int compare(String displayNameOne, String displayNameTwo) {
 
+        if (displayNameOne.length() == 0 || displayNameTwo.length() == 0) {
+            if (displayNameOne.length() == 0 && displayNameTwo.length() == 0) {
+                return 0;
+            } else {
+                if (displayNameOne.length() == 0) {
+                    return -1;
+                } else {
+                    return 1;
+                }
+            }
+        }
         if (displayNameOne.charAt(0) != displayNameTwo.charAt(0)) {
             // if first character different then just regular sort
             return displayNameOne.compareTo(displayNameTwo);
