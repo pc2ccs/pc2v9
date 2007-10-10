@@ -12,12 +12,17 @@ import com.ibm.webrunner.j2mclb.util.HeapSorter;
 import com.ibm.webrunner.j2mclb.util.NumericStringComparator;
 
 import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.ILoginListener;
 import edu.csus.ecs.pc2.core.model.LoginEvent;
+import edu.csus.ecs.pc2.core.security.Permission;
+import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
+import javax.swing.JButton;
+import javax.swing.JLabel;
 
 /**
  * View Logins.
@@ -27,7 +32,6 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
 // $HeadURL${date}
 // $Id$
-
 public class LoginsPane extends JPanePlugin {
 
     /**
@@ -38,6 +42,14 @@ public class LoginsPane extends JPanePlugin {
     private JPanel loginButtonPane = null;
 
     private MCLB loginListBox = null;
+
+    private JButton logoffButton = null;
+
+    private PermissionList permissionList = new PermissionList();
+
+    private JPanel messagePanel = null;
+
+    private JLabel messageLabel = null;
 
     /**
      * This method initializes
@@ -78,6 +90,7 @@ public class LoginsPane extends JPanePlugin {
             loginButtonPane = new JPanel();
             loginButtonPane.setLayout(flowLayout);
             loginButtonPane.setPreferredSize(new java.awt.Dimension(35, 35));
+            loginButtonPane.add(getLogoffButton(), null);
         }
         return loginButtonPane;
     }
@@ -91,6 +104,7 @@ public class LoginsPane extends JPanePlugin {
         if (loginListBox == null) {
             loginListBox = new MCLB();
 
+            loginListBox.add(getMessagePanel(), java.awt.BorderLayout.NORTH);
             Object[] cols = { "Site", "Type", "Number", "Connection Id", "Since" };
 
             loginListBox.addColumns(cols);
@@ -123,14 +137,14 @@ public class LoginsPane extends JPanePlugin {
 
     private Object[] buildLoginRow(ClientId clientId, ConnectionHandlerID connectionHandlerID) {
 
-//        Object[] cols = { "Site", "Type", "Number", "Connection Id", "Since" };
+        // Object[] cols = { "Site", "Type", "Number", "Connection Id", "Since" };
 
         Object[] obj = new Object[loginListBox.getColumnCount()];
 
         obj[0] = "Site " + clientId.getSiteNumber();
         obj[1] = clientId.getClientType().toString().toLowerCase();
         obj[2] = "" + clientId.getClientNumber();
-        if (connectionHandlerID != null){
+        if (connectionHandlerID != null) {
             obj[3] = connectionHandlerID.toString();
         } else {
             obj[3] = "Undefined";
@@ -139,36 +153,35 @@ public class LoginsPane extends JPanePlugin {
 
         return obj;
     }
-    
-    
+
     /**
      * Return array of all logged in users.
      */
-    private ClientId [] getAllLoggedInUsers() {
-        
+    private ClientId[] getAllLoggedInUsers() {
+
         Vector<ClientId> clientList = new Vector<ClientId>();
 
         for (ClientType.Type ctype : ClientType.Type.values()) {
 
-            ClientId [] users = getContest().getAllLoggedInClients(ctype);
-            for (ClientId clientId : users){
+            ClientId[] users = getContest().getAllLoggedInClients(ctype);
+            for (ClientId clientId : users) {
                 clientList.addElement(clientId);
             }
         }
         if (clientList.size() == 0) {
             return new ClientId[0];
         } else {
-            ClientId [] clients = (ClientId[]) clientList.toArray(new ClientId[clientList.size()]);
+            ClientId[] clients = (ClientId[]) clientList.toArray(new ClientId[clientList.size()]);
             return clients;
         }
     }
 
     private void reloadListBox() {
         loginListBox.removeAllRows();
-        
-        ClientId [] clientList = getAllLoggedInUsers();
 
-        for (ClientId clientId : clientList){
+        ClientId[] clientList = getAllLoggedInUsers();
+
+        for (ClientId clientId : clientList) {
             ConnectionHandlerID connectionHandlerID = getContest().getConnectionHandleID(clientId);
             updateLoginList(clientId, connectionHandlerID);
         }
@@ -176,23 +189,24 @@ public class LoginsPane extends JPanePlugin {
 
     /**
      * Add or update a login row
+     * 
      * @param login
      */
-    private void updateLoginRow (ClientId clientId, ConnectionHandlerID connectionHandlerID) {
+    private void updateLoginRow(ClientId clientId, ConnectionHandlerID connectionHandlerID) {
         int row = loginListBox.getIndexByKey(clientId);
-        if (row == -1){
-            Object [] objects = buildLoginRow(clientId, connectionHandlerID);
+        if (row == -1) {
+            Object[] objects = buildLoginRow(clientId, connectionHandlerID);
             loginListBox.addRow(objects, clientId);
-        }else {
-            Object [] objects = buildLoginRow(clientId, connectionHandlerID);
+        } else {
+            Object[] objects = buildLoginRow(clientId, connectionHandlerID);
             loginListBox.replaceRow(objects, row);
         }
         loginListBox.autoSizeAllColumns();
     }
-    
-    private void removeLoginRow (ClientId clientId, ConnectionHandlerID connectionHandlerID) {
+
+    private void removeLoginRow(ClientId clientId, ConnectionHandlerID connectionHandlerID) {
         int row = loginListBox.getIndexByKey(clientId);
-        if (row != -1){
+        if (row != -1) {
             loginListBox.removeRow(row);
         }
         loginListBox.autoSizeAllColumns();
@@ -200,16 +214,17 @@ public class LoginsPane extends JPanePlugin {
 
     public void setContestAndController(IContest inContest, IController inController) {
         super.setContestAndController(inContest, inController);
-        
+
         getContest().addLoginListener(new LoginListenerImplementation());
-        
+
+        initializePermissions();
+
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 reloadListBox();
             }
         });
     }
-    
 
     /**
      * Login Listener for use by ServerView.
@@ -220,7 +235,7 @@ public class LoginsPane extends JPanePlugin {
     public class LoginListenerImplementation implements ILoginListener {
 
         public void loginAdded(LoginEvent event) {
-          updateLoginList(event.getClientId(), event.getConnectionHandlerID());
+            updateLoginList(event.getClientId(), event.getConnectionHandlerID());
         }
 
         public void loginRemoved(final LoginEvent event) {
@@ -232,12 +247,13 @@ public class LoginsPane extends JPanePlugin {
         }
 
         public void loginDenied(LoginEvent event) {
-//            updateLoginList(event.getClientId(), event.getConnectionHandlerID());
-        }}
-    
+            // updateLoginList(event.getClientId(), event.getConnectionHandlerID());
+        }
+    }
+
     /**
      * Reset to model existing.
-     *
+     * 
      */
     protected void undoEdit() {
         reloadListBox();
@@ -248,6 +264,81 @@ public class LoginsPane extends JPanePlugin {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 updateLoginRow(clientId, connectionHandlerID);
+            }
+        });
+    }
+
+    private void initializePermissions() {
+        Account account = getContest().getAccount(getContest().getClientId());
+        if (account != null) {
+            permissionList.clearAndLoadPermissions(account.getPermissionList());
+        }
+    }
+
+    private boolean isAllowed(Permission.Type type) {
+        return permissionList.isAllowed(type);
+    }
+
+    private void updateGUIperPermissions() {
+
+        logoffButton.setEnabled(isAllowed(Permission.Type.FORCE_LOGOFF_CLIENT));
+    }
+
+    /**
+     * This method initializes logoffButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getLogoffButton() {
+        if (logoffButton == null) {
+            logoffButton = new JButton();
+            logoffButton.setText("Logoff");
+            logoffButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    logoffSelectedClient();
+                }
+            });
+        }
+        return logoffButton;
+    }
+
+    protected void logoffSelectedClient() {
+        
+        int selected = getLoginListBox().getSelectedIndex();
+        
+        if (selected == -1){
+            showMessage("Please Select Client to logoff");
+        }
+        
+        ClientId clientId = (ClientId) getLoginListBox().getKeys()[selected];
+        
+        // TODO log off user
+        showMessage("todo: Logging off "+clientId);
+
+    }
+
+    /**
+     * This method initializes messagePanel
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getMessagePanel() {
+        if (messagePanel == null) {
+            messageLabel = new JLabel();
+            messageLabel.setText("");
+            messageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+            messagePanel = new JPanel();
+            messagePanel.setLayout(new BorderLayout());
+            messagePanel.setPreferredSize(new java.awt.Dimension(25, 25));
+            messagePanel.add(messageLabel, java.awt.BorderLayout.CENTER);
+        }
+        return messagePanel;
+    }
+
+    public void showMessage(final String message) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                messageLabel.setText(message);
             }
         });
     }
