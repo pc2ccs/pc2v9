@@ -71,4 +71,16 @@ public class Group implements IElementObject {
         this.site = site;
     }
 
+    public String toString() {
+        return groupTitle;
+    }
+
+    /**
+     * @param groupTitle
+     */
+    public Group(String groupTitle) {
+        super();
+        // TODO Auto-generated constructor stub
+        this.groupTitle = groupTitle;
+    }
 }
