@@ -288,9 +288,9 @@ public class ServerView extends JFrame implements UIPlugin {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 if (turnButtonsOn) {
-                    setTitle("PC^2 Site " + model.getSiteNumber() + " [STARTED] Build " + new VersionInfo().getBuildNumber());
+                    setTitle("PC^2 Server (Site " + model.getSiteNumber() + ") [STARTED] Build " + new VersionInfo().getBuildNumber());
                 } else {
-                    setTitle("PC^2 Site " + model.getSiteNumber() + " [STOPPED] Build " + new VersionInfo().getBuildNumber());
+                    setTitle("PC^2 Server (Site " + model.getSiteNumber() + ") [STOPPED] Build " + new VersionInfo().getBuildNumber());
                 }
             }
         });

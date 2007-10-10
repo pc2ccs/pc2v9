@@ -34,6 +34,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemEvent;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunEvent;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
@@ -167,6 +168,12 @@ public class RunsPanel extends JPanePlugin {
                                 s[4] = judgement.toString();
                             }
                         }
+                        
+                        if (isTeam(run.getSubmitter())){
+                            if (! judgementRecord.isSendToTeam()){
+                                s[4] = RunStates.NEW.toString();
+                            }
+                        }
                     }
                 }
 
@@ -209,6 +216,10 @@ public class RunsPanel extends JPanePlugin {
             StaticLog.getLog().log(Log.INFO, "Exception in buildRunRow()", exception);
         }
         return null;
+    }
+
+    private boolean isTeam(ClientId submitter) {
+        return submitter == null || submitter.getClientType().equals(Type.TEAM);
     }
 
     private String getLanguageTitle(ElementId languageId) {
@@ -613,6 +624,9 @@ public class RunsPanel extends JPanePlugin {
             autoJudgeButton.setVisible(false);
             
         }
+        
+        // TODO when this is working make visible
+        filterButton.setVisible(false);
     }
 
     public void setContestAndController(IContest inContest, IController inController) {

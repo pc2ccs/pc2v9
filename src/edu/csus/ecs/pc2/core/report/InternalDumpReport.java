@@ -189,6 +189,14 @@ public class InternalDumpReport implements IReport {
             printWriter.println("Contest Time is undefined (null)");
 
         }
+        
+        printWriter.println();
+        Account account = contest.getAccount(contest.getClientId());
+        String name = contest.getClientId().getName();
+        if (account != null){
+            name = account.getDisplayName();
+        }
+        printWriter.println("* Client Id = "+contest.getClientId()+" "+name);
 
         // Sites
         printWriter.println();

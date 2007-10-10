@@ -308,6 +308,8 @@ public class AutoJudgingMonitor implements UIPlugin {
         // Suppress pop up messages on errors
         executable.setShowMessageToUser(false);
         
+        autoJudgeStatusFrame.updateMessage(getRunDescription(run));
+        
         executable.execute();
 
         ExecutionData executionData = executable.getExecutionData();
@@ -401,6 +403,11 @@ public class AutoJudgingMonitor implements UIPlugin {
 
         setCurrentlyAutoJudging(false);
         runBeingAutoJudged = run;
+        
+        if (! isAutoJudgeOn()){
+            autoJudgeStatusFrame.updateStatusLabel("Auto-judging is OFF");
+            autoJudgeStatusFrame.updateMessage("");
+        }
 
         attemptToFetchNextRun();
 
@@ -428,7 +435,7 @@ public class AutoJudgingMonitor implements UIPlugin {
      */
     private void attemptToFetchNextRun(Run nextRun) {
         
-        if (isCurrentlyAutoJudging()){
+        if (!isAutoJudgeOn()){
             return;
         }
 
