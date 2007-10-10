@@ -72,7 +72,7 @@ public class BalloonWriter {
             message.append("%!"+NL+NL);
             message.append("/Time-Roman findfont 18 scalefont setfont"+NL);
         }
-        if (answer.equalsIgnoreCase("revoke")) {
+        if (answer.equalsIgnoreCase("revoke") || answer.equalsIgnoreCase("take")) {
             message.append(print("There has been a change in judgement.",postscript,x,y));
             message.append(NL);
             y -= 20;
@@ -128,12 +128,15 @@ public class BalloonWriter {
             message.append(print("Problem: "+balloon.getProblemTitle(),postscript,x,y));
             message.append(NL);
             y -= 20;
-            message.append(print("Time: "+balloon.getRun().getElapsedMins(),postscript, x, y));
-            message.append(NL);
-            y -= 20;
-            message.append(print("RunID: "+balloon.getRun().getNumber(),postscript, x, y));
-            message.append(NL);
-            y -= 20;
+            if (balloon.getRun() != null) {
+                // is null on a take
+                message.append(print("Time: "+balloon.getRun().getElapsedMins(),postscript, x, y));
+                message.append(NL);
+                y -= 20;
+                message.append(print("RunID: "+balloon.getRun().getNumber(),postscript, x, y));
+                message.append(NL);
+                y -= 20;
+            }
             message.append(print("Current Date: "+new Date().toString(),postscript, x, y));
             message.append(NL);
             y -= 20*2;
@@ -258,7 +261,12 @@ public class BalloonWriter {
         }
     }
 
-    public void sendBalloon(Balloon balloon) {
+    /**
+     * @param balloon
+     * @return will return true if a balloon was output (either by print or email).
+     */
+    public boolean sendBalloon(Balloon balloon) {
+        boolean sentBalloon = false;
         BalloonSettings balloonSettings = balloon.getBalloonSettings();
         try {
             log.entering(getClass().getName(), "sendBalloon", balloon.getAnswer());
@@ -294,7 +302,9 @@ public class BalloonWriter {
                         }
     
                         if (mailServer != null) {
-                            sendBalloonByEmail(emailMessage, mailServer, to);
+                            if (sendBalloonByEmail(emailMessage, mailServer, to)) {
+                                sentBalloon = true;
+                            }
                         }
                         emailMessage = null;
                     } else {
@@ -336,7 +346,9 @@ public class BalloonWriter {
                         // or we could just rely on a formfeed
                         // message = message + '\f';
                     }
-                    sendBalloonToLocalFile(message, balloonSettings.getPrintDevice().trim());
+                    if (sendBalloonToLocalFile(message, balloonSettings.getPrintDevice().trim())) {
+                        sentBalloon = true;
+                    }
                 } else {
                     // TODO cleanup this message
                     log.info("printing enabled, but no printDevice set");
@@ -353,8 +365,9 @@ public class BalloonWriter {
             if (getClass() == null) {
                 System.err.println("getClass is null");
             }
-            log.exiting(getClass().getName(), "sendBalloon()");
+            log.exiting(getClass().getName(), "sendBalloon()", sentBalloon);
         }
+        return sentBalloon;
     }
 
     private boolean sendBalloonByEmail(String message, InetAddress host, String mailTo) {

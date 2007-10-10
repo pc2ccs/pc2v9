@@ -39,7 +39,7 @@ public class ClientSettings implements IElementObject {
     /**
      * List of when clientId.getTripletKey() + problem.getElementId() got a balloon.
      */
-    private Hashtable<String,Long> balloonList = new Hashtable<String,Long>();
+    private Hashtable<String,BalloonDeliveryInfo> balloonList = new Hashtable<String,BalloonDeliveryInfo>();
     
     public Filter getAutoJudgeFilter() {
         return autoJudgeFilter;
@@ -113,14 +113,14 @@ public class ClientSettings implements IElementObject {
     /**
      * @return Returns the balloonList.
      */
-    public Hashtable<String, Long> getBalloonList() {
+    public Hashtable<String, BalloonDeliveryInfo> getBalloonList() {
         return balloonList;
     }
 
     /**
      * @param balloonList The balloonList to set.
      */
-    public void setBalloonList(Hashtable<String, Long> balloonList) {
+    public void setBalloonList(Hashtable<String, BalloonDeliveryInfo> balloonList) {
         this.balloonList = balloonList;
     }
 }
