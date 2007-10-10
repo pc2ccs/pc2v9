@@ -6,6 +6,7 @@ import java.util.Arrays;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
@@ -18,6 +19,8 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.ElementId;
+import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.Permission.Type;
@@ -36,6 +39,8 @@ public class AccountPane extends JPanePlugin {
      * 
      */
     private static final long serialVersionUID = -1572390105202179281L;
+
+    private static final String NONE_SELECTED = "NONE SELECTED";
 
     private JPanel messagePane = null;
 
@@ -85,7 +90,7 @@ public class AccountPane extends JPanePlugin {
 
     private JLabel groupTitleLabel = null;
 
-    private JTextField groupTextField = null;
+    private JComboBox groupComboBox = null;
 
     private boolean populatingGUI = false;
 
@@ -345,7 +350,7 @@ public class AccountPane extends JPanePlugin {
             getDisplayNameTextField().setText("");
             getPasswordTextField().setText("");
             getPasswordConfirmField().setText("");
-            getGroupTextField().setText("");
+            populateGroupComboBox(null);
 
             getAddButton().setVisible(true);
             getUpdateButton().setVisible(false);
@@ -356,11 +361,7 @@ public class AccountPane extends JPanePlugin {
             getPasswordTextField().setText(account2.getPassword());
             getPasswordConfirmField().setText(account2.getPassword());
             
-            if (account2.getGroupId() == null){
-                getGroupTextField().setText("");
-            } else{
-                getGroupTextField().setText(account2.getGroupId());
-            }
+            populateGroupComboBox(account2.getGroupId());
             
             populatePermissions(account2);
             
@@ -373,6 +374,25 @@ public class AccountPane extends JPanePlugin {
         populatingGUI = false;
         
         enableUpdateButton();
+    }
+
+    private void populateGroupComboBox(ElementId elementId) {
+        int groupIndex = 0;
+        int selectedIndex = 0;
+        Group[] groups = getContest().getGroups();
+
+        getGroupComboBox().removeAllItems();
+        getGroupComboBox().addItem(NONE_SELECTED);
+        for (Group group : groups) {
+            groupIndex++;
+            getGroupComboBox().addItem(group);
+            if (elementId != null) {
+                if (group.getElementId().equals(elementId)) {
+                    selectedIndex = groupIndex;
+                }
+            }
+        }
+        getGroupComboBox().setSelectedIndex(selectedIndex);
     }
 
     private String[] getPermissionDescriptions() {
@@ -499,7 +519,7 @@ public class AccountPane extends JPanePlugin {
             accountDetailPane.add(getPasswordConfirmField(), null);
             accountDetailPane.add(jLabel, null);
             accountDetailPane.add(groupTitleLabel, null);
-            accountDetailPane.add(getGroupTextField(), null);
+            accountDetailPane.add(getGroupComboBox(), null);
         }
         return accountDetailPane;
     }
@@ -620,17 +640,17 @@ public class AccountPane extends JPanePlugin {
      * 
      * @return javax.swing.JTextField
      */
-    private JTextField getGroupTextField() {
-        if (groupTextField == null) {
-            groupTextField = new JTextField();
-            groupTextField.setBounds(new java.awt.Rectangle(13, 193, 272, 22));
-            groupTextField.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyReleased(java.awt.event.KeyEvent e) {
+    private JComboBox getGroupComboBox() {
+        if (groupComboBox == null) {
+            groupComboBox = new JComboBox();
+            groupComboBox.setBounds(new java.awt.Rectangle(13, 193, 272, 22));
+            groupComboBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableUpdateButton();
                 }
             });
         }
-        return groupTextField;
+        return groupComboBox;
     }
 
     public void enableUpdateButton() {
@@ -692,7 +712,12 @@ public class AccountPane extends JPanePlugin {
 
         // get display name and group
         checkAccount.setDisplayName(getDisplayNameTextField().getText());
-        checkAccount.setGroupId(getGroupTextField().getText());
+        if (getGroupComboBox().getSelectedIndex() > 0) {
+            Group group = (Group)getGroupComboBox().getSelectedItem();
+            checkAccount.setGroupId(group.getElementId());
+        } else {
+            checkAccount.setGroupId(null);
+        }
         
         checkAccount.setPassword(getPasswordConfirmField().getText());
 

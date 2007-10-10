@@ -21,6 +21,7 @@ import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ElementId;
+import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
@@ -243,6 +244,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         summaryMememento.putLong("problemCount", problems.length);
         Site[] sites = theContest.getSites();
         summaryMememento.putInteger("siteCount", sites.length);
+        Group[] groups = theContest.getGroups();
 
 
         Hashtable <ElementId, Integer> problemsIndexHash = new Hashtable<ElementId, Integer>();
@@ -301,7 +303,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 treeMap.put(record, record);
             }
             
-            createStandingXML(treeMap, mementoRoot, accountList, problems, problemsIndexHash, summaryMememento);
+            createStandingXML(treeMap, mementoRoot, accountList, problems, problemsIndexHash, groups, summaryMememento);
             
         } // mutex
  
@@ -330,8 +332,13 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      * @param summaryMememento
      */
     private void createStandingXML (TreeMap<StandingsRecord, StandingsRecord> treeMap, XMLMemento mementoRoot, 
-            AccountList accountList, Problem[] problems, Hashtable<ElementId, Integer> problemsIndexHash, IMemento summaryMememento) {
+            AccountList accountList, Problem[] problems, Hashtable<ElementId, Integer> problemsIndexHash, Group[] groups, IMemento summaryMememento) {
    
+        // easy access
+        Hashtable<ElementId, Group> groupHash = new Hashtable<ElementId, Group>();
+        for (Group group : groups) {
+            groupHash.put(group.getElementId(), group);
+        }
         StandingsRecord[] srArray = new StandingsRecord[treeMap.size()];
         Collection<StandingsRecord> coll = treeMap.values();
         Iterator iterator = coll.iterator();
@@ -382,8 +389,14 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             standingsRecordMemento.putInteger("teamSiteId", account.getClientId().getSiteNumber());
             standingsRecordMemento.putString("teamKey", account.getClientId().getTripletKey());
             standingsRecordMemento.putString("teamExternalId", account.getExternalId());
-            // TODO may want groupName here too, in future might to lookup this id in a sep table
-            standingsRecordMemento.putString("teamGroupId", account.getGroupId());
+            Group group = null;
+            if (account.getGroupId() != null) {
+                group = groupHash.get(account.getGroupId());
+            }
+            if (group != null ) {
+                standingsRecordMemento.putString("teamGroupName", group.getDisplayName());
+                standingsRecordMemento.putInteger("teamGroupId", group.getGroupId());
+            }
             SummaryRow summaryRow = standingsRecord.getSummaryRow();
             for (int i = 0; i < problems.length; i++) {
                 int id = i + 1;

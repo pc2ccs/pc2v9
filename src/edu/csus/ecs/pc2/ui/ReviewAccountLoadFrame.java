@@ -124,7 +124,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
         if (accountListBox == null) {
             accountListBox = new MCLB();
 
-            Object[] cols = { "Site", "Type", "Account Id", "Display Name", "Password", "Permissions" };
+            Object[] cols = { "Site", "Type", "Account Id", "Display Name", "Password", "Permissions", "Group" };
             accountListBox.addColumns(cols);
 
             /**
@@ -226,7 +226,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
         LoadAccounts loadAccounts = new LoadAccounts();
         getAcceptButton().setEnabled(false);
         try {
-            accounts = loadAccounts.fromTSVFile(filename, getAllAccounts());
+            accounts = loadAccounts.fromTSVFile(filename, getAllAccounts(), contest.getGroups());
             if (accounts != null) {
                 // TODO sort accounts
                 Arrays.sort(accounts, new AccountComparator());
@@ -268,7 +268,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
     }
 
     protected Object[] buildAccountRow(Account account) {
-        // Object[] cols = { "Site", "Type", "Account Id", "Display Name", "Password" };
+        // Object[] cols = { "Site", "Type", "Account Id", "Display Name", "Password", "Permissions", "Group" };
         try {
             int cols = accountListBox.getColumnCount();
             Object[] s = new String[cols];
@@ -288,12 +288,6 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
             } else {
                 s[4] = CHANGE_BEGIN + account.getPassword() + CHANGE_END;
             }
-            // if (accountOrig.getGroup().equalsIgnoreCase(account.getGroup())) {
-            // s[5] = account.getGroup();
-            // } else {
-            // s[5] = CHANGE_BEGIN + account.getGroup() + CHANGE_END;
-            // }
-            s[5] = "";
             String perms = "";
             if (account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD)) {
                 perms = perms + "DISPLAY_ON_SCOREBOARD ";
@@ -302,6 +296,24 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
                 perms = perms + "LOGIN ";
             }
             s[5] = perms.trim();
+            if (accountOrig.getGroupId() == null && account.getGroupId() == null) {
+                s[6] = "";
+            } else {
+                if (account.getGroupId() == null) {
+                    s[6] = CHANGE_BEGIN + "<removed>" + CHANGE_END;
+                } else {
+                    if (accountOrig.getGroupId() == null) {
+                        s[6] = CHANGE_BEGIN + contest.getGroup(account.getGroupId()).toString() + CHANGE_END;
+                    } else {
+                        // neither are null
+                        if (account.getGroupId().equals(accountOrig.getGroupId())) {
+                            s[6] = contest.getGroup(account.getGroupId()).toString();
+                        } else {
+                            s[6] = CHANGE_BEGIN + contest.getGroup(account.getGroupId()).toString() + CHANGE_END;
+                        }
+                    }
+                }
+            }
             return s;
         } catch (Exception exception) {
             StaticLog.getLog().log(Log.INFO, "Exception in buildAccountRow()", exception);

@@ -46,9 +46,8 @@ public class Account implements IElementObject {
     
     /**
      * Group id
-     * TODO consider replacing with ElementId
      */
-    private String groupId;
+    private ElementId groupId;
     
     private PermissionList permissionList = new PermissionList();
 
@@ -142,6 +141,16 @@ public class Account implements IElementObject {
             if (!getClientId().equals(account.getClientId())) {
                 return false;
             }
+            if (groupId == null || account.getGroupId() == null) {
+                // if only 1 is null then return false
+                if (!(groupId == null && account.getGroupId() == null)) {
+                    return false;
+                }
+            } else {
+                if (!groupId.equals(account.getGroupId())) {
+                    return false;
+                }
+            }
             return true;
         } catch (Exception e) {
             // TODO log to static exception log
@@ -185,11 +194,11 @@ public class Account implements IElementObject {
         this.externalId = externalId;
     }
 
-    public String getGroupId() {
+    public ElementId getGroupId() {
         return groupId;
     }
 
-    public void setGroupId(String groupId) {
+    public void setGroupId(ElementId groupId) {
         this.groupId = groupId;
     }
 

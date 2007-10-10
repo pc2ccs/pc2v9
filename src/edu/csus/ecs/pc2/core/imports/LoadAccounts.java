@@ -10,6 +10,7 @@ import java.util.HashMap;
 import edu.csus.ecs.pc2.core.exception.IllegalTSVFormatException;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.util.TabSeparatedValueParser;
@@ -20,6 +21,7 @@ import edu.csus.ecs.pc2.core.util.TabSeparatedValueParser;
  */
 public class LoadAccounts {
     private HashMap<ClientId, Account> accountMap = new HashMap<ClientId, Account>();
+    private HashMap<String,Group> groups = new HashMap<String,Group>();
 
     private int siteColumn = -1;
 
@@ -78,9 +80,12 @@ public class LoadAccounts {
         if (externalIdColumn != -1 && values.length > externalIdColumn) {
             account.setExternalId(values[externalIdColumn]);
         }
-        if (groupColumn != -1 && values.length > groupColumn && values[groupColumn].length() > 0) {
-            // TODO in the future, may need to convert this id to an elementId
-            account.setGroupId(values[groupColumn]);
+        if (groups.size() > 0) {
+            if (groupColumn != -1 && values.length > groupColumn && values[groupColumn].length() > 0) {
+                if (groups.containsKey(values[groupColumn])) {
+                    account.setGroupId(groups.get(values[groupColumn]).getElementId());
+                }
+            }
         }
         if (permDisplayColumn != -1 && values.length > permDisplayColumn && values[permDisplayColumn].length() > 0) {
             if (Boolean.parseBoolean(values[permDisplayColumn])) {
@@ -98,7 +103,7 @@ public class LoadAccounts {
         }
         return account;
     }
-
+   
     /**
      * Read a tab-separated values from a file.
      * 1st line should contain the column headers.
@@ -106,7 +111,7 @@ public class LoadAccounts {
      * account (required)
      * alias
      * displayname
-     * group
+     * group (name)
      * password
      * permdisplay
      * permlogin
@@ -114,14 +119,19 @@ public class LoadAccounts {
      * 
      * @param filename
      * @param existingAccounts
+     * @param groups
      * @return an array of accounts
      * @throws Exception
      */
-    public Account[] fromTSVFile(String filename, Account[] existingAccounts) throws Exception {
+    public Account[] fromTSVFile(String filename, Account[] existingAccounts, Group[] groupList) throws Exception {
         if (existingAccounts != null && existingAccounts.length > 0) {
             for (int i = 0; i < existingAccounts.length; i++) {
                 existingAccountsMap.put(existingAccounts[i].getClientId(), existingAccounts[i]);
             }
+        }
+        groups.clear();
+        for (Group group : groupList) {
+            groups.put(group.toString(),group);
         }
         int lineCount = 0;
         String[] columns;
