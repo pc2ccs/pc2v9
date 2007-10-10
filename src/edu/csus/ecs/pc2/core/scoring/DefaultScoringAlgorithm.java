@@ -474,7 +474,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      * @param standingsRecordHash
      * @param problemsIndexHash
      */
-    private void generateStandingsValues (final TreeMap<Run, Run> runTreeMap, Hashtable<String, StandingsRecord> standingsRecordHash, Hashtable<ElementId, Integer> problemsIndexHash) throws IllegalContestState {
+    private void generateStandingsValues (final TreeMap<Run, Run> runTreeMap, Hashtable<String, StandingsRecord> standingsHash, Hashtable<ElementId, Integer> problemsHash) throws IllegalContestState {
 
         long oldTime = 0;
         long youngTime = -1;
@@ -494,9 +494,9 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             if (!lastUser.equals(run.getSubmitter().toString()) || !lastProblem.equals(run.getProblemId().toString())) {
                 if (!problemTreeMap.isEmpty()) {
                     ProblemSummaryInfo problemSummaryInfo = calcProblemScoreData(problemTreeMap);
-                    StandingsRecord standingsRecord = (StandingsRecord) standingsRecordHash.get(lastUser);
+                    StandingsRecord standingsRecord = (StandingsRecord) standingsHash.get(lastUser);
                     SummaryRow summaryRow = standingsRecord.getSummaryRow();
-                    summaryRow.put(problemsIndexHash.get(problemSummaryInfo.getProblemId()), problemSummaryInfo);
+                    summaryRow.put(problemsHash.get(problemSummaryInfo.getProblemId()), problemSummaryInfo);
                     standingsRecord.setSummaryRow(summaryRow);
                     standingsRecord.setPenaltyPoints(standingsRecord.getPenaltyPoints() + problemSummaryInfo.getPenaltyPoints());
                     if (problemSummaryInfo.isSolved()) {
@@ -510,7 +510,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                             standingsRecord.setLastSolved(problemSummaryInfo.getSolutionTime());
                         }
                     }
-                    standingsRecordHash.put(lastUser, standingsRecord);
+                    standingsHash.put(lastUser, standingsRecord);
                     // now clear the TreeMap
                     problemTreeMap.clear();
                 }
@@ -523,9 +523,9 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         // handle last run
         if (!problemTreeMap.isEmpty()) {
             ProblemSummaryInfo problemSummaryInfo = calcProblemScoreData(problemTreeMap);
-            StandingsRecord standingsRecord = (StandingsRecord) standingsRecordHash.get(lastUser);
+            StandingsRecord standingsRecord = (StandingsRecord) standingsHash.get(lastUser);
             SummaryRow summaryRow = standingsRecord.getSummaryRow();
-            summaryRow.put(problemsIndexHash.get(problemSummaryInfo.getProblemId()), problemSummaryInfo);
+            summaryRow.put(problemsHash.get(problemSummaryInfo.getProblemId()), problemSummaryInfo);
             standingsRecord.setSummaryRow(summaryRow);
             standingsRecord.setPenaltyPoints(standingsRecord.getPenaltyPoints() + problemSummaryInfo.getPenaltyPoints());
             if (problemSummaryInfo.isSolved()) {
@@ -539,7 +539,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                     standingsRecord.setFirstSolved(problemSummaryInfo.getSolutionTime());
                 }
             }
-            standingsRecordHash.put(lastUser, standingsRecord);
+            standingsHash.put(lastUser, standingsRecord);
         }
 
         problemTreeMap.clear();
