@@ -27,6 +27,8 @@ public interface IContest {
 
     void addJudgement(Judgement judgement);
     
+    void addGroup(Group group);
+    
     /**
      * Replace judgement list.
      * 
@@ -36,6 +38,8 @@ public interface IContest {
     
     void removeJudgement(Judgement judgement);
 
+    void removeGroup(Group group);
+    
     void addSite(Site site);
 
     void connectionEstablished(ConnectionHandlerID connectionHandlerID);
@@ -74,6 +78,8 @@ public interface IContest {
 
     void updateJudgement(Judgement judgement);
 
+    void updateGroup(Group group);
+    
     void changeSite(Site site);
 
     void updateAccount(Account account);
@@ -168,6 +174,13 @@ public interface IContest {
     void removeAccountListener(IAccountListener accountListener);
 
     /**
+     * Fetch all defined groups.
+     * 
+     * @return array of Group
+     */
+    Group[] getGroups();
+    
+    /**
      * Fetch all defined problems.
      * 
      * @return array of Problem
@@ -237,6 +250,10 @@ public interface IContest {
 
     void removeConnectionListener(IConnectionListener connectionListener);
 
+    void addGroupListener(IGroupListener groupListener);
+    
+    void removeGroupListener(IGroupListener groupListener);
+    
     Run getRun(ElementId id);
 
     Vector<Account> getAccounts(Type type, int siteNumber);

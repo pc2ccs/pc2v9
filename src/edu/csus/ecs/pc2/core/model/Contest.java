@@ -12,6 +12,8 @@ import edu.csus.ecs.pc2.core.list.ClarificationList;
 import edu.csus.ecs.pc2.core.list.ClientSettingsList;
 import edu.csus.ecs.pc2.core.list.ConnectionHandlerList;
 import edu.csus.ecs.pc2.core.list.ContestTimeList;
+import edu.csus.ecs.pc2.core.list.GroupDisplayList;
+import edu.csus.ecs.pc2.core.list.GroupList;
 import edu.csus.ecs.pc2.core.list.JudgementDisplayList;
 import edu.csus.ecs.pc2.core.list.JudgementList;
 import edu.csus.ecs.pc2.core.list.LanguageDisplayList;
@@ -70,6 +72,8 @@ public class Contest implements IContest {
     
     private Vector<IBalloonSettingsListener> balloonSettingsListenerList = new Vector<IBalloonSettingsListener>();
 
+    private Vector<IGroupListener> groupListenerList = new Vector<IGroupListener>();
+
     /**
      * Contains name of client (judge or admin) who checks out the run.
      */
@@ -80,6 +84,8 @@ public class Contest implements IContest {
     private BalloonSettingsList balloonSettingsList = new BalloonSettingsList();
 
     private Vector<IAccountListener> accountListenerList = new Vector<IAccountListener>();
+    
+    private GroupList groupList = new GroupList();
 
     /**
      * Logins on this site.
@@ -153,6 +159,11 @@ public class Contest implements IContest {
      * List of all displayed judgements, in order. Does not contain deleted judgements.
      */
     private JudgementDisplayList judgementDisplayList = new JudgementDisplayList();
+
+    /**
+     * List of all groups displayed to users, in order. Does not contain deleted groups.
+     */
+    private GroupDisplayList groupDisplayList = new GroupDisplayList();
 
     /**
      * List of all judgements. Contains deleted judgements too.
@@ -1344,5 +1355,52 @@ public class Contest implements IContest {
 
     public BalloonSettings getBalloonSettings(ElementId elementId) {
         return balloonSettingsList.get(elementId);
+    }
+
+    public void addGroup(Group group) {
+        groupDisplayList.add(group);
+        groupList.add(group);
+        GroupEvent groupEvent = new GroupEvent(GroupEvent.Action.ADDED, group);
+        fireGroupListener(groupEvent);
+    }
+
+    private void fireGroupListener(GroupEvent groupEvent) {
+        for (int i = 0; i < groupListenerList.size(); i++) {
+
+            if (groupEvent.getAction() == GroupEvent.Action.ADDED) {
+                groupListenerList.elementAt(i).groupAdded(groupEvent);
+            } else if (groupEvent.getAction() == GroupEvent.Action.DELETED) {
+                groupListenerList.elementAt(i).groupRemoved(groupEvent);
+            } else {
+                groupListenerList.elementAt(i).groupChanged(groupEvent);
+            }
+        }
+    }
+
+    public void removeGroup(Group group) {
+        int idx = groupDisplayList.indexOf(group);
+        if (idx != -1) {
+            groupDisplayList.remove(idx);
+            GroupEvent groupEvent = new GroupEvent(GroupEvent.Action.DELETED, group);
+            fireGroupListener(groupEvent);
+        }
+    }
+
+    public void updateGroup(Group group) {
+        groupList.update(group);
+        GroupEvent groupEvent = new GroupEvent(GroupEvent.Action.CHANGED, group);
+        fireGroupListener(groupEvent);
+    }
+
+    public Group[] getGroups() {
+        return groupList.getList();
+    }
+
+    public void addGroupListener(IGroupListener groupListener) {
+        groupListenerList.addElement(groupListener);
+    }
+
+    public void removeGroupListener(IGroupListener groupListener) {
+        groupListenerList.remove(groupListener);
     }
 }
