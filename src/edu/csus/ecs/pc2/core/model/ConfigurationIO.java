@@ -79,7 +79,11 @@ public class ConfigurationIO {
         /**
          * Balloon Settings List
          */
-        BALLOON_SETTINGS_LIST
+        BALLOON_SETTINGS_LIST,
+        /**
+         * 
+         */
+        GROUPS
     }
 
     private String directoryName = "db";
@@ -279,6 +283,19 @@ public class ConfigurationIO {
                     log.log(Log.WARNING, "Exception while updating client settings ", e);
                 }   
 
+                try {
+                    key = ConfigKeys.GROUPS;
+                    if (configuration.containsKey(key)) {
+                        Group[] groups = (Group[]) configuration.get(key.toString());
+                        for (Group group : groups) {
+                            contest.addGroup(group);
+                        }
+                        log.info("Loaded " + groups.length + " " + key.toString().toLowerCase());
+                    }
+                } catch (Exception e) {
+                    log.log(Log.WARNING, "Exception while loading judgements ", e);
+                }
+
                 return true;
                 
             } else {
@@ -332,6 +349,7 @@ public class ConfigurationIO {
         
         configuration.add(ConfigKeys.CONTEST_INFORMATION, contest.getContestInformation());
         configuration.add(ConfigKeys.CLIENT_SETTINGS_LIST, contest.getClientSettingsList());
+        configuration.add(ConfigKeys.GROUPS, contest.getGroups());
 
         configuration.writeToDisk(getFileName());
 

@@ -22,6 +22,7 @@ import edu.csus.ecs.pc2.core.report.AccountsReport;
 import edu.csus.ecs.pc2.core.report.BalloonSettingsReport;
 import edu.csus.ecs.pc2.core.report.ClarificationsReport;
 import edu.csus.ecs.pc2.core.report.ClientSettingsReport;
+import edu.csus.ecs.pc2.core.report.GroupsReport;
 import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.core.report.InternalDumpReport;
 import edu.csus.ecs.pc2.core.report.JudgementReport;
@@ -108,7 +109,7 @@ public class ReportPane extends JPanePlugin {
         this.add(getMainPane(), java.awt.BorderLayout.CENTER);
 
         // populate list of reports
-        listOfReports = new IReport[14];
+        listOfReports = new IReport[15];
         int repNo = 0;
         listOfReports[repNo++] = new AccountsReport();
         listOfReports[repNo++] = new StandingsReport();
@@ -123,6 +124,7 @@ public class ReportPane extends JPanePlugin {
         listOfReports[repNo++] = new RunsByTeamReport();
         listOfReports[repNo++] = new BalloonSettingsReport();
         listOfReports[repNo++] = new ClientSettingsReport();
+        listOfReports[repNo++] = new GroupsReport();
         
         listOfReports[repNo++] = new OldRunsReport();
         listOfReports[repNo++] = new AccountPermissionReport();

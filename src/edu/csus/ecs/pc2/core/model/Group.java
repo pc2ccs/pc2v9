@@ -20,7 +20,7 @@ public class Group implements IElementObject {
     private ElementId elementId;
     
     private int groupId;
-    private String groupTitle;
+    private String displayName;
     private ElementId site;
     
     public ElementId getElementId() {
@@ -47,12 +47,12 @@ public class Group implements IElementObject {
         this.groupId = groupId;
     }
 
-    public String getGroupTitle() {
-        return groupTitle;
+    public String getDisplayName() {
+        return displayName;
     }
 
-    public void setGroupTitle(String groupTitle) {
-        this.groupTitle = groupTitle;
+    public void setDisplayName(String groupTitle) {
+        this.displayName = groupTitle;
     }
 
     /**
@@ -72,15 +72,23 @@ public class Group implements IElementObject {
     }
 
     public String toString() {
-        return groupTitle;
+        return displayName;
     }
 
     /**
-     * @param groupTitle
+     * @param displayName
      */
-    public Group(String groupTitle) {
+    public Group(String displayName) {
         super();
-        // TODO Auto-generated constructor stub
-        this.groupTitle = groupTitle;
+        this.displayName = displayName;
+        elementId = new ElementId(displayName);
+        setSiteNumber(0);
     }
+    
+    @Override
+    public int hashCode() {
+        // use elementId to be consistent with equals()
+        return elementId.hashCode();
+    }
+
 }

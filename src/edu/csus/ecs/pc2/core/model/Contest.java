@@ -1388,12 +1388,13 @@ public class Contest implements IContest {
 
     public void updateGroup(Group group) {
         groupList.update(group);
+        groupDisplayList.update(group);
         GroupEvent groupEvent = new GroupEvent(GroupEvent.Action.CHANGED, group);
         fireGroupListener(groupEvent);
     }
 
     public Group[] getGroups() {
-        return groupList.getList();
+        return groupDisplayList.getList();
     }
 
     public void addGroupListener(IGroupListener groupListener) {

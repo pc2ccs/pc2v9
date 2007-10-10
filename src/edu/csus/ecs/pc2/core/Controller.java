@@ -19,6 +19,7 @@ import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ConfigurationIO;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
+import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
@@ -1941,5 +1942,15 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     public void updateContestTime(ContestTime newContestTime) {
         Packet newContestTimePacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), newContestTime);
         sendToLocalServer(newContestTimePacket);
+    }
+
+    public void addNewGroup(Group group) {
+        Packet newGroupPacket = PacketFactory.createAddSetting(contest.getClientId(), getServerClientId(), group);
+        sendToLocalServer(newGroupPacket);
+    }
+
+    public void updateGroup(Group group) {
+        Packet groupPacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), group);
+        sendToLocalServer(groupPacket);
     }
 }

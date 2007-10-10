@@ -19,6 +19,7 @@ import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
+import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
@@ -65,6 +66,8 @@ public final class PacketFactory {
     public static final String LANGUAGE = "LANGUAGE";
 
     public static final String PROBLEM = "PROBLEM";
+
+    public static final String GROUP = "GROUP";
 
     public static final String CLARIFICATION_ANSWER = "CLARIFICATION_ANSWER";
 
@@ -167,6 +170,11 @@ public final class PacketFactory {
     public static final String SEND_SETTINGS = "SEND_SETTINGS";
 
     public static final String RUN_RESULTS_FILE = "RUN_RESULTS_FILE";
+
+    /**
+     * Array of {@link Group}.
+     */
+    public static final String GROUP_LIST = "GROUP_LIST";
 
     /**
      * Array of {@link Problem}.
@@ -627,7 +635,14 @@ public final class PacketFactory {
         return packet;
     }
 
-    /**
+     public static Packet createAddSetting(ClientId source, ClientId destination, Group group) {
+         Properties prop = new Properties();
+         prop.put(GROUP, group);
+         Packet packet = new Packet(Type.ADD_SETTING, source, destination, prop);
+         return packet;
+     }
+
+     /**
      * Create a packet of {@link PacketType.Type#ADD_SETTING}.
      * 
      * @param source
@@ -838,11 +853,12 @@ public final class PacketFactory {
      * @param connectionHandlerIDs
      * @param problemDataFiles 
      * @param clientSettings 
+     * @param groups
      * @param information 
      */
     public static Packet createLoginSuccess(ClientId source, ClientId destination, ContestTime contestTime, ContestTime[] contestTimes, int siteNumber, Language[] languages, Problem[] problems,
             Judgement[] judgements, Site[] sites, Run[] runs, Clarification[] clarifications, ClientId[] loggedInUsers, ConnectionHandlerID[] connectionHandlerIDs, 
-            Account [] accounts, ProblemDataFiles[] problemDataFiles, ContestInformation information, BalloonSettings [] balloonSettingsArray, ClientSettings[] clientSettings) {
+            Account [] accounts, ProblemDataFiles[] problemDataFiles, ContestInformation information, BalloonSettings [] balloonSettingsArray, ClientSettings[] clientSettings, Group[] groups) {
         try {
             Properties prop = new Properties();
             prop.put(SITE_NUMBER, new Integer(siteNumber));
@@ -862,6 +878,7 @@ public final class PacketFactory {
             prop.put(CONTEST_INFORMATION, information);
             prop.put(CLIENT_SETTINGS_LIST, clientSettings);
             prop.put(BALLOON_SETTINGS_LIST, balloonSettingsArray);
+            prop.put(GROUP_LIST, groups);
 
             Packet packet = new Packet(Type.LOGIN_SUCCESS, source, destination, prop);
             return packet;
@@ -1135,6 +1152,20 @@ public final class PacketFactory {
         return packet;
     }
 
+    /**
+     * Create packet for {@link PacketType.Type#UPDATE_SETTING}.
+     * 
+     * @param source
+     * @param destination
+     * @param group
+     */
+    public static Packet createUpdateSetting(ClientId source, ClientId destination, Group group) {
+        Properties prop = new Properties();
+        prop.put(GROUP, group);
+        Packet packet = new Packet(Type.UPDATE_SETTING, source, destination, prop);
+        return packet;
+    }
+    
     /**
      * Create packet for {@link PacketType.Type#RUN_REJUDGE_REQUEST}.
      * 

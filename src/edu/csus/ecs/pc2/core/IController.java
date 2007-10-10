@@ -8,6 +8,7 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
+import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
@@ -270,6 +271,10 @@ public interface IController {
     void addNewLanguage(Language language);
     
     void updateLanguage(Language language);
+
+    void addNewGroup(Group group);
+    
+    void updateGroup(Group group);
 
     void addNewAccount (Account account);
     

@@ -13,6 +13,7 @@ import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
+import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.ISubmission;
 import edu.csus.ecs.pc2.core.model.Judgement;
@@ -804,6 +805,12 @@ public class PacketHandler {
             sendToTeams = true;
         }
 
+        Group group = (Group) PacketFactory.getObjectValue(packet, PacketFactory.GROUP);
+        if (group != null) {
+            contest.addGroup(group);
+            sendToTeams = true;
+        }
+
         Problem problem = (Problem) PacketFactory.getObjectValue(packet, PacketFactory.PROBLEM);
         ProblemDataFiles problemDataFiles = (ProblemDataFiles) PacketFactory.getObjectValue(packet, PacketFactory.PROBLEM_DATA_FILES);
         if (problem != null) {
@@ -916,6 +923,12 @@ public class PacketHandler {
         Language language = (Language) PacketFactory.getObjectValue(packet, PacketFactory.LANGUAGE);
         if (language != null) {
             contest.updateLanguage(language);
+            sendToTeams = true;
+        }
+
+        Group group = (Group) PacketFactory.getObjectValue(packet, PacketFactory.GROUP);
+        if (group != null) {
+            contest.updateGroup(group);
             sendToTeams = true;
         }
 
@@ -1713,7 +1726,7 @@ public class PacketHandler {
      * <li> {@link PacketFactory#LANGUAGE_LIST}
      * <li> {@link PacketFactory#PROBLEM_LIST}
      * <li> {@link PacketFactory#JUDGEMENT_LIST}
-     * <li> {@link PacketFactory#CONTEST_TIME}
+     * <li> {@link PacketFactory#GROUP_LIST}
      * <ol>
      * 
      * @param packet
@@ -1744,6 +1757,8 @@ public class PacketHandler {
         addLanguagesToModel(packet);
         
         addProblemsToModel(packet);
+
+        addGroupsToModel(packet);
 
         try {
             Judgement[] judgements = (Judgement[]) PacketFactory.getObjectValue(packet, PacketFactory.JUDGEMENT_LIST);
@@ -1849,6 +1864,27 @@ public class PacketHandler {
                         contest.updateLanguage(language);
                     } else {
                         contest.addLanguage(language);
+                   }
+                }
+            }
+        } catch (Exception e) {
+            // TODO: log handle exception
+            controller.getLog().log(Log.WARNING,"Exception logged ", e);
+        }
+
+        
+    }
+
+    private void addGroupsToModel(Packet packet) {
+
+        try {
+            Group[] groups = (Group[]) PacketFactory.getObjectValue(packet, PacketFactory.GROUP_LIST);
+            if (groups != null) {
+                for (Group group : groups) {
+                    if (contest.getGroup(group.getElementId()) != null){
+                        contest.updateGroup(group);
+                    } else {
+                        contest.addGroup(group);
                    }
                 }
             }
@@ -2136,7 +2172,7 @@ public class PacketHandler {
         Packet loginSuccessPacket = PacketFactory.createLoginSuccess(contest.getClientId(), clientId, contest.getContestTime(), contest.getContestTimes(), contest.getSiteNumber(), 
                 contest.getLanguages(), contest.getProblems(), contest.getJudgements(), contest.getSites(), runs, clarifications, 
                 getAllLoggedInUsers(), contest.getConnectionHandleIDs(), getAllAccounts(), problemDataFiles,
-                contest.getContestInformation(), contest.getBalloonSettings(), clientSettings);
+                contest.getContestInformation(), contest.getBalloonSettings(), clientSettings, contest.getGroups());
      
         return loginSuccessPacket;
     }
