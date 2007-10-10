@@ -47,6 +47,8 @@ public class ExecutionData {
     private boolean validationSuccess;
 
     private String validationResults;
+    
+    private Exception executionException = null;
 
     /**
      * @return Returns the validationReturnCode.
@@ -271,6 +273,18 @@ public class ExecutionData {
      */
     public void setValidationSuccess(boolean validationSuccess) {
         this.validationSuccess = validationSuccess;
+    }
+
+    /**
+     * Get Exception that occurred during execution
+     * @return
+     */
+    public Exception getExecutionException() {
+        return executionException;
+    }
+
+    public void setExecutionException(Exception executionException) {
+        this.executionException = executionException;
     }
 
 }

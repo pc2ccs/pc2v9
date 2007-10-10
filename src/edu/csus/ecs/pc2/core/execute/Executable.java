@@ -127,6 +127,8 @@ public class Executable {
 
     private boolean testRunOnly = false;
 
+    private boolean showMessageToUser;
+
     public Executable(IContest inContest, IController inController, Run run, RunFiles runFiles) {
         super();
         this.contest = inContest;
@@ -213,10 +215,13 @@ public class Executable {
 
         try {
             boolean dirThere = insureDir(executeDirectoryName);
+            
+            executionData = new ExecutionData();
 
             if (!dirThere) {
                 log.config("Directory could not be created: " + executeDirectoryName);
-                fileViewer.showMessage("Unable to create directory " + executeDirectoryName);
+                showDialogToUser("Unable to create directory " + executeDirectoryName);
+                setException (executionData, "Unable to create directory " + executeDirectoryName);
                 return fileViewer;
             }
 
@@ -232,7 +237,8 @@ public class Executable {
                     // TODO LOG error Directory could not be cleared, other process running?
                     log.config("Directory could not be cleared, other process running? ");
 
-                    fileViewer.showMessage("Unable to remove all files from directory " + executeDirectoryName);
+                    showDialogToUser("Unable to remove all files from directory " + executeDirectoryName);
+                    setException (executionData, "Unable to remove all files from directory " + executeDirectoryName);
                     return fileViewer;
                 }
 
@@ -253,7 +259,7 @@ public class Executable {
                 }
             }
 
-            executionData = new ExecutionData();
+            
 
             if (isTestRunOnly()) {
                 // Team, just compile and execute it.
@@ -263,9 +269,12 @@ public class Executable {
                 } else {
                     int errnoIndex = errorString.indexOf('=') + 1;
                     if (errorString.substring(errnoIndex).equals("2")) {
-                        fileViewer.showMessage("Compiler not found, contact staff.");
+                        showDialogToUser("Compiler not found, contact staff.");
+                        setException (executionData, "Compiler not found, contact staff.");
+
                     } else {
-                        fileViewer.showMessage("Problem executing compiler, contact staff.");
+                        showDialogToUser("Problem executing compiler, contact staff.");
+                        setException (executionData, "Problem executing compiler, contact staff.");
                     }
                 }
             } else if (compileProgram()) {
@@ -297,9 +306,13 @@ public class Executable {
             } else {
                 int errnoIndex = errorString.indexOf('=') + 1;
                 if (errorString.substring(errnoIndex).equals("2")) {
-                    fileViewer.showMessage("Compiler not found, contact staff.");
+                    showDialogToUser("Compiler not found, contact staff.");
+                    setException (executionData, "Compiler not found, contact staff.");
+
                 } else {
-                    fileViewer.showMessage("Problem executing compiler, contact staff.");
+                    showDialogToUser("Problem executing compiler, contact staff.");
+                    setException (executionData, "Problem executing compiler, contact staff.");
+
                 }
             }
 
@@ -350,6 +363,17 @@ public class Executable {
     }
 
     /**
+     * Show pop up mesage to user.
+     * @param string
+     */
+    private void showDialogToUser(String string) {
+        
+        if (showMessageToUser){
+            fileViewer.showMessage(string);
+        }
+    }
+
+    /**
      * Insure directory exists, if does not exist create it.
      * 
      * @param dirName
@@ -361,7 +385,8 @@ public class Executable {
 
         dir = new File(dirName);
         if (!dir.exists() && !dir.mkdir()) {
-            log.log(Log.CONFIG, "Executable.execute(RunData): Directory " + dir.getName() + " could not be created.", 0);
+            log.log(Log.CONFIG, "Executable.execute(RunData): Directory " + dir.getName() + " could not be created.");
+            setException (executionData, "Executable.execute(RunData): Directory " + dir.getName() + " could not be created.");
         }
 
         return dir.isDirectory();
@@ -382,6 +407,8 @@ public class Executable {
             String validatorUnpackName = prefixExecuteDirname(validatorFileName);
             if (!createFile(problemDataFiles.getValidatorFile(), validatorUnpackName)) {
                 log.info("Unable to create validator program " + validatorUnpackName);
+                setException (executionData, "Unable to create validator program " + validatorUnpackName);
+
                 throw new SecurityException("Unable to create validator, check logs");
             }
 
@@ -465,6 +492,8 @@ public class Executable {
             }
 
         } catch (Exception e) {
+            setException (executionData, "Exception in validatorCall "+e.getMessage());
+
             log.log(Log.INFO, "Exception in validatorCall ", e);
             throw new SecurityException(e);
         }
@@ -550,6 +579,8 @@ public class Executable {
                         executionData.setValidationSuccess(true);
                     } else {
                         // TODO LOG info
+                        setException (executionData, "validationCall - results file did not contain security");
+
                         log.config("validationCall - results file did not contain security");
                         log.config(resultsFileName + " != " + results.get("security"));
                     }
@@ -557,10 +588,13 @@ public class Executable {
                     if (!done) {
                         // TODO LOG
                         // TODO show user message
+                        setException (executionData, "Error parsing/reading results file, check log");
+
                         log.config("Error parsing/reading results file, check log");
                     } else if (results != null && (!results.containsKey("outcome"))) {
                         // TODO LOG
                         // TODO show user message
+                        setException (executionData, "Error parsing/reading results file, check log");
                         log.config("Error could not find 'outcome' in results file, check log");
                     } else {
                         // TODO LOG
@@ -579,6 +613,16 @@ public class Executable {
         }
 
         return executionData.isValidationSuccess();
+    }
+
+    /**
+     * Sets the exception for this execute().
+     * 
+     * @param inExecutionData
+     * @param string
+     */
+    private void setException(ExecutionData inExecutionData, String string) {
+        inExecutionData.setExecutionException(new Exception(string));
     }
 
     private String findPC2JarPath() {
@@ -1301,5 +1345,21 @@ public class Executable {
 
     public boolean isValidationSuccess() {
         return executionData.isValidationSuccess();
+    }
+
+    /**
+     * 
+     * @return true if show message to users
+     */
+    public boolean isShowMessageToUser() {
+        return showMessageToUser;
+    }
+
+    /**
+     * Show gui message to user when errors occur?
+     * @param showMessageToUser
+     */
+    public void setShowMessageToUser(boolean showMessageToUser) {
+        this.showMessageToUser = showMessageToUser;
     }
 }

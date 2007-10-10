@@ -74,6 +74,13 @@ public class AutoJudgingMonitor implements UIPlugin {
 
         contest.addRunListener(new RunListenerImplementation());
         contest.addClientSettingsListener(new ClientSettingsListenerImplementation());
+
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                autoJudgeStatusFrame.setTitle("Auto Judge Status "+contest.getClientId().getName());
+            }
+        });
+
     }
 
     public String getPluginTitle() {
@@ -297,7 +304,10 @@ public class AutoJudgingMonitor implements UIPlugin {
         System.gc();
 
         executable = new Executable(contest, controller, run, runFiles);
-
+        
+        // Suppress pop up messages on errors
+        executable.setShowMessageToUser(false);
+        
         executable.execute();
 
         ExecutionData executionData = executable.getExecutionData();
@@ -305,12 +315,18 @@ public class AutoJudgingMonitor implements UIPlugin {
         RunResultFiles runResultFiles = null;
 
         JudgementRecord judgementRecord = null;
-
+        
         try {
 
-            if (!executionData.isCompileSuccess()) {
-                // Compile failed, darn!
+            if (executionData.getExecutionException() != null) {
+                autoJudgeStatusFrame.updateStatusLabel("ERROR - " + executionData.getExecutionException().getMessage());
+                log.log(Log.WARNING, "ERROR - " + executionData.getExecutionException().getMessage(), "ERROR - " + executionData.getExecutionException());
+                sleepMS(3000);
+                // judgementRecord stays null
 
+            } else if (!executionData.isCompileSuccess()) {
+                // Compile failed, darn!
+                
                 autoJudgeStatusFrame.updateStatusLabel("Run failed to compile");
 
                 ElementId elementId = contest.getJudgements()[1].getElementId();
@@ -411,6 +427,10 @@ public class AutoJudgingMonitor implements UIPlugin {
      * @param nextRun
      */
     private void attemptToFetchNextRun(Run nextRun) {
+        
+        if (isCurrentlyAutoJudging()){
+            return;
+        }
 
         if (isRunToBeAutoJudged(nextRun)) {
             // There is ANOTHER run to judge!! Yes!
