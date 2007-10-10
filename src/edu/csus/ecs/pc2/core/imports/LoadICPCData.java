@@ -22,7 +22,6 @@ import edu.csus.ecs.pc2.core.util.TabSeparatedValueParser;
  * 
  */
 public class LoadICPCData {
-    private HashMap<ClientId, Account> accountMap = new HashMap<ClientId, Account>();
 
     private static final int TEAM_TAB = 11;
     private static final int SITE_TAB = 22;
@@ -185,14 +184,15 @@ public class LoadICPCData {
             // we have the pc2 site info
         }
         // 0 is the pc2 site id
+        if (values.length == 9 && sites != null) {
+            int siteNum = Integer.parseInt(values[0]);
+            if (sites.length <= siteNum) {
+                group.setSite(sites[siteNum-1].getElementId());
+            }
+        }
         // 1 is the contest Id
         group.setGroupId(Integer.parseInt(values[2+offset]));
         group.setGroupTitle(values[3+offset]);
-        if (values.length == 9) {
-            int siteNum = Integer.parseInt(values[0]);
-            // TODO populate site if given sitelist
-//            group.setSite(sites[siteNum-1].getElementId());
-        }
         return group;
     }
 
