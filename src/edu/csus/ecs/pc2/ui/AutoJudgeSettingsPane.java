@@ -181,6 +181,8 @@ public class AutoJudgeSettingsPane extends JPanePlugin {
                 filter.addProblem(problem);
             }
         }
+        
+        checkSettings.setBalloonList(clientSettings.getBalloonList());
 
         checkSettings.setAutoJudgeFilter(filter);
         return checkSettings;
