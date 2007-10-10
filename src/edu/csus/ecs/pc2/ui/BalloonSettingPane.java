@@ -771,7 +771,6 @@ public class BalloonSettingPane extends JPanePlugin {
             siteComboBox.setBounds(new java.awt.Rectangle(96, 18, 254, 25));
             siteComboBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.out.println("getSiteComboBox actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
                     enableButtons();
                 }
             });
