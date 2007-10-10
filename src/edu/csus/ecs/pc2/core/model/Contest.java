@@ -1403,4 +1403,8 @@ public class Contest implements IContest {
     public void removeGroupListener(IGroupListener groupListener) {
         groupListenerList.remove(groupListener);
     }
+
+    public Group getGroup(ElementId elementId) {
+        return (Group) groupList.get(elementId);
+    }
 }

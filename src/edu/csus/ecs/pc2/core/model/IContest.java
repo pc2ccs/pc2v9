@@ -536,6 +536,8 @@ public interface IContest {
 
     Account getAccount(ClientId id);
 
+    Group getGroup(ElementId elementId);
+
     ContestTime[] getContestTimes();
 
     /**
