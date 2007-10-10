@@ -5,11 +5,14 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Hashtable;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.list.ClientSettingsComparator;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.BalloonDeliveryInfo;
+import edu.csus.ecs.pc2.core.model.BalloonSettings;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ClientType;
@@ -104,6 +107,26 @@ public class ClientSettingsReport implements IReport {
         for (String key : keys) {
             printWriter.println("   " + key + "='" + clientSettings.getProperty(key) + "'");
         }
+
+        Hashtable<String, BalloonDeliveryInfo> hashtable = clientSettings.getBalloonList();
+
+        keys = (String[]) hashtable.keySet().toArray(new String[hashtable.keySet().size()]);
+        Arrays.sort(keys);
+        for (String balloonKey : keys) {
+            BalloonDeliveryInfo balloonDeliveryInfo = hashtable.get(balloonKey);
+            ElementId problemElementId = balloonDeliveryInfo.getProblemId();
+            ClientId clientId = balloonDeliveryInfo.getClientId();
+            // long timeSent = balloonDeliveryInfo.getTimeSent();
+            Problem problem = contest.getProblem(problemElementId);
+            BalloonSettings balloonSettings = contest.getBalloonSettings(clientId.getSiteNumber());
+            String color = "";
+            if (balloonSettings != null) {
+                color = balloonSettings.getColor(problemElementId);
+            }
+            printWriter.println("    " + balloonKey + " " + color + " " + problem + " " + clientId);
+
+        }
+
     }
 
     private boolean isJudge(ClientId id) {
