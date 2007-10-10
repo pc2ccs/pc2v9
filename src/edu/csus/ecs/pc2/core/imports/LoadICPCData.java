@@ -173,7 +173,6 @@ public class LoadICPCData {
     }
 
     private Group processSite(String[] values) {
-        Group group = new Group();
         int offset;
         
         if (values.length == 8) {
@@ -183,6 +182,7 @@ public class LoadICPCData {
             offset = 0;
             // we have the pc2 site info
         }
+        Group group = new Group(values[3+offset]);
         // 0 is the pc2 site id
         if (values.length == 9 && sites != null) {
             int siteNum = Integer.parseInt(values[0]);
@@ -192,7 +192,6 @@ public class LoadICPCData {
         }
         // 1 is the contest Id
         group.setGroupId(Integer.parseInt(values[2+offset]));
-        group.setGroupTitle(values[3+offset]);
         return group;
     }
 
