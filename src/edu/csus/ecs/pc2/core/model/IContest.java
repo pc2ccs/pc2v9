@@ -15,6 +15,10 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
 // $HeadURL$
 //$Id$
+/**
+ * @author boudreat
+ *
+ */
 public interface IContest {
 
     void addLanguage(Language language);
@@ -173,6 +177,13 @@ public interface IContest {
      */
     void removeAccountListener(IAccountListener accountListener);
 
+    /**
+     * Remove a balloonSettings listener.
+     * 
+     * @param balloonSettingsListener
+     */
+    void removeBalloonSettingsListener(IBalloonSettingsListener balloonSettingsListener);
+    
     /**
      * Fetch all defined groups.
      * 
