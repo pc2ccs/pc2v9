@@ -1736,8 +1736,10 @@ public class PacketHandler {
 
         addSitesToModel(packet);
         
-        // Load local settings and initialize settings if necessary
-        controller.initializeServer();
+        if (isServer()){
+            // Load local settings and initialize settings if necessary
+            controller.initializeServer();
+        }
 
         addLanguagesToModel(packet);
         
