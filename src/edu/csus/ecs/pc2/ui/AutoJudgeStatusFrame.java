@@ -170,6 +170,7 @@ public class AutoJudgeStatusFrame extends javax.swing.JFrame {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 messageLabel.setText(message);
+                messageLabel.setToolTipText(message);
             }
         });
     }
@@ -183,6 +184,7 @@ public class AutoJudgeStatusFrame extends javax.swing.JFrame {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 bigAutoJudgeStatusLabel.setText(bigMessage);
+                bigAutoJudgeStatusLabel.setToolTipText(bigMessage);
             }
         });
     }
