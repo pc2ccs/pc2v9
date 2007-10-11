@@ -178,7 +178,7 @@ public class LoadAccounts {
                     groupColumn = i;
                 }
                 if (columns[i].equalsIgnoreCase("alias")) {
-                    groupColumn = i;
+                    aliasColumn = i;
                 }
             }
             if (accountColumn == -1 || siteColumn == -1 || passwordColumn == -1) {
