@@ -528,8 +528,11 @@ public class TransportManager implements ITransportManager {
                     //
                     // Application will have to handle the connectionError
                     // correctly
-
-                    getAppClientCallBack().connectionError(fMsgObj, fConnectionHandlerID, e.getMessage());
+                    if ( getAppClientCallBack() != null){
+                        getAppClientCallBack().connectionError(fMsgObj, fConnectionHandlerID, e.getMessage());
+                    } else {
+                        e.printStackTrace();
+                    }
                 }
                 try {
                     getConnectionHandlerThreadList().get(fConnectionHandlerID).send(sealedObject);
@@ -539,8 +542,13 @@ public class TransportManager implements ITransportManager {
                     //
                     // Application will have to handle the connectionError
                     // correctly
+                    
+                    if ( getAppClientCallBack() != null){
+                        getAppClientCallBack().connectionError(fMsgObj, fConnectionHandlerID, e.getMessage());
+                    } else {
+                        e.printStackTrace();
+                    }
 
-                    getAppClientCallBack().connectionError(fMsgObj, fConnectionHandlerID, e.getMessage());
                 }
             }
         }).start();
