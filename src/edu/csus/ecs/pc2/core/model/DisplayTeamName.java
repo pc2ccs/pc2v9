@@ -54,7 +54,7 @@ public class DisplayTeamName implements Serializable, UIPlugin {
 
                 case ALIAS:
                     account = contest.getAccount(clientId);
-                    if (account.getAliasName() != null) {
+                    if (account.getAliasName() != null && account.getAliasName().trim().length() > 0) {
                         return account.getAliasName();
                     } else {
                         if (controller != null){
