@@ -197,10 +197,7 @@ public class AutoJudgingMonitor implements UIPlugin {
             controller.checkOutRun(run, false);
         } catch (Exception e) {
             info("Could not check out run " + run + " waiting again... ", e);
-            setCurrentlyAutoJudging(false);
-            runBeingAutoJudged = null;
-            autoJudgeStatusFrame.updateStatusLabel("Waiting for runs");
-            autoJudgeStatusFrame.updateMessage("(Still waiting)");
+            cleanupLastAutoJudge();
         }
     }
 
@@ -267,15 +264,35 @@ public class AutoJudgingMonitor implements UIPlugin {
         } else if (event.getAction().equals(RunEvent.Action.RUN_NOT_AVIALABLE)) {
             if (runBeingAutoJudged.getElementId().equals(event.getRun().getElementId())) {
                 // Darn we weren't fast enough
-                setCurrentlyAutoJudging(false);
-                runBeingAutoJudged = null;
+                
+                cleanupLastAutoJudge();
 
                 info(event.getAction() + " for run " + event.getRun());
 
                 attemptToFetchNextRun();
             }
 
+        } else if (event.getAction().equals(RunEvent.Action.RUN_AVAILABLE)) {
+            if (runBeingAutoJudged != null){
+                if (runBeingAutoJudged.getElementId().equals(event.getRun().getElementId())) {
+                    cleanupLastAutoJudge ();
+                }
+            }
         }
+
+    }
+    /**
+     * Called when auto judging done, or run canceled.
+     *
+     */
+    private void cleanupLastAutoJudge() {
+        
+        setCurrentlyAutoJudging(false);
+        runBeingAutoJudged = null;
+        autoJudgeStatusFrame.updateStatusLabel("Waiting for runs");
+        autoJudgeStatusFrame.updateMessage("(Still waiting)");
+        
+        attemptToFetchNextRun();
     }
 
     /**
@@ -395,14 +412,13 @@ public class AutoJudgingMonitor implements UIPlugin {
         } else {
 
             controller.submitRunJudgement(run, judgementRecord, runResultFiles);
-            autoJudgeStatusFrame.updateStatusLabel("Sent judgement to server");
+            autoJudgeStatusFrame.updateStatusLabel("Sending judgement to server");
 
         }
 
         sleepMS(2000);
 
-        setCurrentlyAutoJudging(false);
-        runBeingAutoJudged = run;
+  
         
         if (! isAutoJudgeOn()){
             autoJudgeStatusFrame.updateStatusLabel("Auto-judging is OFF");

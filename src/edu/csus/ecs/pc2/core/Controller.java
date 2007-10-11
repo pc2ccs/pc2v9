@@ -79,7 +79,7 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
  * <li> Server: {@link edu.csus.ecs.pc2.core.PacketHandler#cancelRun(Run, IContest, IController, ClientId)}
  * <li> Team: n/a
  * <li> Judge/Clients: {@link edu.csus.ecs.pc2.core.model.IRunListener#runChanged(edu.csus.ecs.pc2.core.model.RunEvent)}. RunEvent action is:
- * {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#RUN_AVIALABLE}
+ * {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#RUN_AVAILABLE}
  * </ol>
  * <P>
  * 

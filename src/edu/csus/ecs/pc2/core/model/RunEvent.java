@@ -46,7 +46,7 @@ public class RunEvent {
          * 
          * Usually triggered by a cancel run.
          */
-        RUN_AVIALABLE,
+        RUN_AVAILABLE,
         /**
          * Held Run
          */

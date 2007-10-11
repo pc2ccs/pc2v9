@@ -534,7 +534,7 @@ public class Contest implements IContest {
 
     public void availableRun(Run run) {
         runList.add(run);
-        RunEvent runEvent = new RunEvent(RunEvent.Action.RUN_AVIALABLE, run, null);
+        RunEvent runEvent = new RunEvent(RunEvent.Action.RUN_AVAILABLE, run, null);
         fireRunListener(runEvent);
     }
 
@@ -994,7 +994,7 @@ public class Contest implements IContest {
         runList.updateRun(run);
         Run theRun = runList.get(run);
 
-        RunEvent runEvent = new RunEvent(RunEvent.Action.RUN_AVIALABLE, theRun, null);
+        RunEvent runEvent = new RunEvent(RunEvent.Action.RUN_AVAILABLE, theRun, null);
         fireRunListener(runEvent);
     }
 
