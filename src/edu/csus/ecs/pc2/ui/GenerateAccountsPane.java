@@ -125,8 +125,10 @@ public class GenerateAccountsPane extends JPanePlugin {
                 int thisSiteNumber = getContest().getSiteNumber();
                 int theSiteNumber = thisSiteNumber;
 
-                if (getSiteSelectionComboBox().getSelectedIndex() > 0) {
-                    theSiteNumber = getSiteSelectionComboBox().getSelectedIndex();
+                int index = getSiteSelectionComboBox().getSelectedIndex();
+                if (index > 0) {
+                    Site site = (Site) getSiteSelectionComboBox().getSelectedItem();
+                    theSiteNumber = site.getSiteNumber();
                 }
 
                 int number = getContest().getAccounts(ClientType.Type.SCOREBOARD, theSiteNumber).size();
@@ -303,9 +305,12 @@ public class GenerateAccountsPane extends JPanePlugin {
             int thisSiteNumber = getContest().getSiteNumber();
             int theSiteNumber = thisSiteNumber;
 
-            if (getSiteSelectionComboBox().getSelectedIndex() > 0) { // 0 is this site
-                theSiteNumber = getSiteSelectionComboBox().getSelectedIndex();
+            int index = getSiteSelectionComboBox().getSelectedIndex();
+            if (index > 0) {
+                Site site = (Site) getSiteSelectionComboBox().getSelectedItem();
+                theSiteNumber = site.getSiteNumber();
             }
+
             
             int count = getIntegerValue(adminCountTextField.getText());
             if (count > 0) {
@@ -332,7 +337,7 @@ public class GenerateAccountsPane extends JPanePlugin {
             }
 
         } catch (Exception e) {
-            // TODO: handle exception
+             // TODO: handle exception
             e.printStackTrace();
         }
     }
@@ -436,3 +441,4 @@ public class GenerateAccountsPane extends JPanePlugin {
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
+
