@@ -251,7 +251,7 @@ public class ContestInformationPane extends JPanePlugin {
                     getDisplayNameButtonGroup().setSelected(getDisplayNamesOnlyRadioButton().getModel(), true);
                     break;
                 case LOGIN_NAME_ONLY:
-                    getDisplayNameButtonGroup().setSelected(getDisplayNamesOnlyRadioButton().getModel(), true);
+                    getDisplayNameButtonGroup().setSelected(getDisplayNumbersOnlyRadioButton().getModel(), true);
                     break;
                 case NUMBERS_AND_NAME:
                     getDisplayNameButtonGroup().setSelected(getDisplayNameAndNumberRadioButton().getModel(), true);
