@@ -257,12 +257,22 @@ public class PacketHandler {
             ClientId clientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
             info("Clock for site "+contestTime.getSiteNumber()+" started by "+clientId+" elapsed "+contestTime.getElapsedTimeStr());
             
+            if (isServer()){
+                controller.sendToTeams(packet);
+                sendToJudgesAndOthers(packet, false);
+            }
+            
         } else if (packetType.equals(Type.CLOCK_STOPPED)) {
             Integer siteNumber = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
             contest.stopContest(siteNumber);
             ClientId clientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
             ContestTime contestTime = contest.getContestTime(siteNumber);
             info("Clock for site "+contestTime.getSiteNumber()+" stopped by "+clientId+" elapsed "+contestTime.getElapsedTimeStr());
+
+            if (isServer()){
+                controller.sendToTeams(packet);
+                sendToJudgesAndOthers(packet, false);
+            }
 
         } else if (packetType.equals(Type.ADD_SETTING)) {
             addNewSetting(packet);
