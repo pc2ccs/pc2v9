@@ -83,8 +83,8 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new java.awt.Dimension(600,800));
-        this.setPreferredSize(new java.awt.Dimension(600,1000));
+        this.setSize(new java.awt.Dimension(800,1000));
+        this.setPreferredSize(new java.awt.Dimension(800,1000));
         this.setTitle("Review Account Loading");
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setContentPane(getJPanel());
@@ -124,7 +124,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
         if (accountListBox == null) {
             accountListBox = new MCLB();
 
-            Object[] cols = { "Site", "Type", "Account Id", "Display Name", "Password", "Permissions", "Group" };
+            Object[] cols = { "Site", "Type", "Account Id", "Display Name", "Password", "Permissions", "Group", "Alias"};
             accountListBox.addColumns(cols);
 
             /**
@@ -268,7 +268,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
     }
 
     protected Object[] buildAccountRow(Account account) {
-        // Object[] cols = { "Site", "Type", "Account Id", "Display Name", "Password", "Permissions", "Group" };
+        // Object[] cols = { "Site", "Type", "Account Id", "Display Name", "Password", "Permissions", "Group", "Alias"};
         try {
             int cols = accountListBox.getColumnCount();
             Object[] s = new String[cols];
@@ -310,6 +310,25 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
                             s[6] = contest.getGroup(account.getGroupId()).toString();
                         } else {
                             s[6] = CHANGE_BEGIN + contest.getGroup(account.getGroupId()).toString() + CHANGE_END;
+                        }
+                    }
+                }
+            }
+            // TODO extra foo to handle null,  maybe it should initialize to "" ?
+            if (accountOrig.getAliasName() == null && account.getAliasName() == null) {
+                s[7] = "";
+            } else {
+                if (account.getAliasName() == null) {
+                    s[7] = CHANGE_BEGIN + "<removed>" + CHANGE_END;
+                } else {
+                    if (accountOrig.getAliasName() == null) {
+                        s[7] = CHANGE_BEGIN + account.getAliasName() + CHANGE_END;
+                    } else {
+                        // neither are null
+                        if (account.getAliasName().equals(accountOrig.getAliasName())) {
+                            s[7] = account.getAliasName();
+                        } else {
+                            s[7] = CHANGE_BEGIN + account.getAliasName() + CHANGE_END;
                         }
                     }
                 }
