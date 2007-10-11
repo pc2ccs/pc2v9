@@ -105,6 +105,10 @@ public class RunsPanel extends JPanePlugin {
     
     private AutoJudgingMonitor autoJudgingMonitor = new AutoJudgingMonitor();
 
+    private boolean usingTeamColumns = false;
+
+    private boolean usingFullColumns = false;
+
     /**
      * This method initializes
      * 
@@ -137,79 +141,48 @@ public class RunsPanel extends JPanePlugin {
     }
 
     protected Object[] buildRunRow(Run run, ClientId judgeId) {
-//        Object[] cols = { "Site", "Team", "Run Id", "Time", "Status", "Problem", "Judge", "Language", "OS" };
+        
 
         try {
-            boolean autoJudgedRun = false;
+            boolean autoJudgedRun = isAutoJudgedRun(run);
+            
             int cols = runListBox.getColumnCount();
             Object[] s = new String[cols];
-
-            s[0] = getSiteTitle("" + run.getSubmitter().getSiteNumber());
-            s[1] = getTeamDisplayName(run);
-            s[2] = new Long(run.getNumber()).toString();
-            s[3] = new Long(run.getElapsedMins()).toString();
-
-            if (run.isJudged()) {
-
-                if (run.isSolved()) {
-                    s[4] = run.getStatus().toString() + " Yes";
-
-                } else {
-                    s[4] = run.getStatus().toString() + " No";
-
-                    JudgementRecord judgementRecord = run.getJudgementRecord();
-                    if (judgementRecord != null && judgementRecord.getJudgementId() != null) {
-                        if (judgementRecord.isUsedValidator()){
-                            autoJudgedRun = true;
-                            s[4] = judgementRecord.getValidatorResultString();
-                        } else {
-                            Judgement judgement = getContest().getJudgement(judgementRecord.getJudgementId());
-                            if (judgement != null){
-                                s[4] = judgement.toString();
-                            }
-                        }
-                        
-                        if (isTeam(run.getSubmitter())){
-                            if (! judgementRecord.isSendToTeam()){
-                                s[4] = RunStates.NEW.toString();
-                            }
-                        }
-                    }
-                }
-
+            
+            int idx = 0;
+            
+            if (usingFullColumns){
+//              Object[] fullColumns = { "Site", "Team", "Run Id", "Time", "Status", "Problem", "Judge", "Language", "OS" };
+                
+                s[idx++] = getSiteTitle("" + run.getSubmitter().getSiteNumber());
+                s[idx++] = getTeamDisplayName(run);
+                s[idx++] = new Long(run.getNumber()).toString();
+                s[idx++] = new Long(run.getElapsedMins()).toString();
+                s[idx++] = getJudgementResultString(run);
+                s[idx++] = getProblemTitle(run.getProblemId());
+                s[idx++] = getJudgesTitle (run, judgeId, showJudgesInfo, autoJudgedRun);
+                s[idx++] = getLanguageTitle(run.getLanguageId());
+                s[idx++] = run.getSystemOS();
+            } else if (showJudgesInfo){
+//              Object[] fullColumnsNoJudge = { "Site", "Team", "Run Id", "Time", "Status", "Problem", "Language", "OS" };
+                s[idx++] = getSiteTitle("" + run.getSubmitter().getSiteNumber());
+                s[idx++] = getTeamDisplayName(run);
+                s[idx++] = new Long(run.getNumber()).toString();
+                s[idx++] = new Long(run.getElapsedMins()).toString();
+                s[idx++] = getJudgementResultString(run);
+                s[idx++] = getProblemTitle(run.getProblemId());
+                s[idx++] = getLanguageTitle(run.getLanguageId());
+                s[idx++] = run.getSystemOS();
+                
             } else {
-                if (showJudgesInfo){
-                    s[4] = run.getStatus().toString();
-                } else {
-                    s[4] = RunStates.NEW.toString();
-                }
+//              Object[] teamColumns = { "Site", "Run Id", "Problem", "Time", "Status",  "Language"};
+                s[idx++] = getSiteTitle("" + run.getSubmitter().getSiteNumber());
+                s[idx++] = new Long(run.getNumber()).toString();
+                s[idx++] = getProblemTitle(run.getProblemId());
+                s[idx++] = new Long(run.getElapsedMins()).toString();
+                s[idx++] = getJudgementResultString(run);
+                s[idx++] = getLanguageTitle(run.getLanguageId());
             }
-
-            if (run.isDeleted()) {
-                s[4] = "DEL " + s[4];
-            }
-
-            s[5] = getProblemTitle(run.getProblemId());
-            
-            int idx = 6;
-            
-            if (showJudgesInfo){
-                if (judgeId != null) {
-                    if (judgeId.equals(getContest().getClientId())) {
-                        s[6] = "Me";
-                    } else {
-                        s[6] = judgeId.getName();
-                    }
-                    if (autoJudgedRun) {
-                        s[6] = s[6] + "/AJ";
-                    }
-                } else {
-                    s[6] = "";
-                }
-                idx++;
-            }                
-            s[idx++] = getLanguageTitle(run.getLanguageId());
-            s[idx++] = run.getSystemOS();
 
             return s;
         } catch (Exception exception) {
@@ -217,9 +190,92 @@ public class RunsPanel extends JPanePlugin {
         }
         return null;
     }
+    
+    private String getJudgesTitle(Run run, ClientId judgeId, boolean showJudgesInfo2, boolean autoJudgedRun) {
+        
+        String result = "";
+        
+        if (showJudgesInfo){
+            if (judgeId != null) {
+                if (judgeId.equals(getContest().getClientId())) {
+                    result = "Me";
+                } else {
+                    result = judgeId.getName();
+                }
+                if (autoJudgedRun) {
+                    result = result + "/AJ";
+                }
+            } else {
+                result = "";
+            }
+        }
+        return result;
+    }
 
-    private boolean isTeam(ClientId submitter) {
-        return submitter == null || submitter.getClientType().equals(Type.TEAM);
+    private boolean isAutoJudgedRun(Run run) {
+        if (run.isJudged()) {
+            if (!run.isSolved()) {
+                JudgementRecord judgementRecord = run.getJudgementRecord();
+                if (judgementRecord != null && judgementRecord.getJudgementId() != null) {
+                    return judgementRecord.isUsedValidator();
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Return the judgement for the run.
+     * @param run
+     * @return
+     */
+    private String getJudgementResultString(Run run) {
+
+        String result = "";
+        
+        if (run.isJudged()) {
+
+            if (run.isSolved()) {
+                result = run.getStatus().toString() + " Yes";
+
+            } else {
+                result = run.getStatus().toString() + " No";
+
+                JudgementRecord judgementRecord = run.getJudgementRecord();
+                if (judgementRecord != null && judgementRecord.getJudgementId() != null) {
+                    if (judgementRecord.isUsedValidator()){
+                        result = judgementRecord.getValidatorResultString();
+                    } else {
+                        Judgement judgement = getContest().getJudgement(judgementRecord.getJudgementId());
+                        if (judgement != null){
+                            result = judgement.toString();
+                        }
+                    }
+                    
+                    if (isTeam(run.getSubmitter())){
+                        if (! judgementRecord.isSendToTeam()){
+                            result = RunStates.NEW.toString();
+                        }
+                    }
+                }
+            }
+
+        } else {
+            if (showJudgesInfo){
+                result = run.getStatus().toString();
+            } else {
+                result = RunStates.NEW.toString();
+            }
+        }
+
+        if (run.isDeleted()) {
+            result = "DEL " + result;
+        }
+        return result;
+    }
+
+    private boolean isTeam(ClientId clientId) {
+        return clientId == null || clientId.getClientType().equals(Type.TEAM);
     }
 
     private String getLanguageTitle(ElementId languageId) {
@@ -401,8 +457,6 @@ public class RunsPanel extends JPanePlugin {
                 public void rowDeselected(com.ibm.webrunner.j2mclb.event.ListboxEvent e) {
                 }
             });
-         
-            resetRunsListBoxColumns ();
         }
         return runListBox;
     }
@@ -412,58 +466,66 @@ public class RunsPanel extends JPanePlugin {
         runListBox.removeAllRows();
         runListBox.removeAllColumns();
         
-        runListBox.addColumn("Site");
-        runListBox.addColumn("Team");
-        runListBox.addColumn("Run Id");
-        runListBox.addColumn("Time");
-        runListBox.addColumn("Status");
-        runListBox.addColumn("Problem");
-        if (showJudgesInfo) {
-            runListBox.addColumn("Judge");
-        }
-        runListBox.addColumn("Language");
-        runListBox.addColumn("OS");
+        Object[] fullColumns = { "Site", "Team", "Run Id", "Time", "Status", "Problem", "Judge", "Language", "OS" };
+        Object[] fullColumnsNoJudge = { "Site", "Team", "Run Id", "Time", "Status", "Problem", "Language", "OS" };
+        Object[] teamColumns = { "Site", "Run Id", "Problem", "Time", "Status",  "Language"};
 
+        usingTeamColumns = false;
+        usingFullColumns = false;
+
+        if (isTeam(getContest().getClientId())){
+            usingTeamColumns = true;
+            runListBox.addColumns(teamColumns);    
+        } else if (! showJudgesInfo){
+            runListBox.addColumns(fullColumnsNoJudge);    
+        } else {
+            usingFullColumns = true;
+            runListBox.addColumns(fullColumns);    
+        }
+        
         // Sorters
         HeapSorter sorter = new HeapSorter();
         HeapSorter numericStringSorter = new HeapSorter();
         numericStringSorter.setComparator(new NumericStringComparator());
 
-        // Site
-        runListBox.setColumnSorter(0, sorter, 3);
-
-        // Team
-        runListBox.setColumnSorter(1, sorter, 2);
-
-        // Run Id
-        runListBox.setColumnSorter(2, numericStringSorter, 1);
-
-        // Time
-        runListBox.setColumnSorter(3, numericStringSorter, 4);
-
-        // Status
-        runListBox.setColumnSorter(4, sorter, 5);
-
-        // Problem
-        runListBox.setColumnSorter(5, sorter, 6);
-
-        if (showJudgesInfo) {
-            // Judge
-            runListBox.setColumnSorter(6, sorter, 7);
+        int idx = 0;
+        
+        if (isTeam(getContest().getClientId())){
             
-            // Language
-            runListBox.setColumnSorter(7, sorter, 8);
+//            Object[] teamColumns = { "Site", "Run Id", "Problem", "Time", "Status",  "Language"};
+
+            runListBox.setColumnSorter(idx++, sorter, 3);  // Site
+            runListBox.setColumnSorter(idx++, numericStringSorter, 2); // Run Id
+            runListBox.setColumnSorter(idx++, sorter, 4); // Problem 
+            runListBox.setColumnSorter(idx++, numericStringSorter, 1); // Time 
+            runListBox.setColumnSorter(idx++, sorter, 5); // Status 
+            runListBox.setColumnSorter(idx++, sorter, 6); // Language
             
-            // OS
-            runListBox.setColumnSorter(8, sorter, 9);
+        } else if (showJudgesInfo) {
+
+//          Object[] fullColumns = { "Site", "Team", "Run Id", "Time", "Status", "Problem", "Judge", "Language", "OS" };
+
+            runListBox.setColumnSorter(idx++, sorter, 3);  // Site
+            runListBox.setColumnSorter(idx++, sorter, 2); // Team
+            runListBox.setColumnSorter(idx++, numericStringSorter, 1); // Run Id
+            runListBox.setColumnSorter(idx++, numericStringSorter, 4); // Time 
+            runListBox.setColumnSorter(idx++, sorter, 5); // Status 
+            runListBox.setColumnSorter(idx++, sorter, 6); // Problem 
+            runListBox.setColumnSorter(idx++, sorter, 7); // Judge
+            runListBox.setColumnSorter(idx++, sorter, 8); // Language
+            runListBox.setColumnSorter(idx++, sorter, 9); // OS
             
         } else {
-            
-            // Language
-            runListBox.setColumnSorter(6, sorter, 7);
-            
-            // OS
-            runListBox.setColumnSorter(7, sorter, 8);
+
+//          Object[] fullColumnsNoJudge = { "Site", "Team", "Run Id", "Time", "Status", "Problem", "Language", "OS" };
+            runListBox.setColumnSorter(idx++, sorter, 2);  // Site
+            runListBox.setColumnSorter(idx++, sorter, 3); // Team
+            runListBox.setColumnSorter(idx++, numericStringSorter, 1); // Run Id
+            runListBox.setColumnSorter(idx++, numericStringSorter, 4); // Time 
+            runListBox.setColumnSorter(idx++, sorter, 5); // Status 
+            runListBox.setColumnSorter(idx++, sorter, 6); // Problem 
+            runListBox.setColumnSorter(idx++, sorter, 8); // Language
+            runListBox.setColumnSorter(idx++, sorter, 9); // OS
         }
 
         runListBox.autoSizeAllColumns();
@@ -652,6 +714,7 @@ public class RunsPanel extends JPanePlugin {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 updateGUIperPermissions();
+                resetRunsListBoxColumns();
                 reloadRunList();
             }
         });
@@ -1133,7 +1196,6 @@ public class RunsPanel extends JPanePlugin {
 
     public void setShowJudgesInfo(boolean showJudgesInfo) {
         this.showJudgesInfo = showJudgesInfo;
-        resetRunsListBoxColumns();
     }
 
     /**
