@@ -303,7 +303,7 @@ public class GenerateAccountsPane extends JPanePlugin {
             int thisSiteNumber = getContest().getSiteNumber();
             int theSiteNumber = thisSiteNumber;
 
-            if (getSiteSelectionComboBox().getSelectedIndex() > 1) {
+            if (getSiteSelectionComboBox().getSelectedIndex() > 0) { // 0 is this site
                 theSiteNumber = getSiteSelectionComboBox().getSelectedIndex();
             }
             
