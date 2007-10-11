@@ -190,7 +190,6 @@ public class ContestTimesPane extends JPanePlugin {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 String[] objects = buildContestTimeRow(contestTime);
-                info("updateContestTimeRow - updated " + contestTime.getSiteNumber() + " " + contestTime.getElementId() + " " + objects[1]);
                 int rowNumber = contestTimeListBox.getIndexByKey(contestTime.getElementId());
                 if (rowNumber == -1) {
                     contestTimeListBox.addRow(objects, contestTime.getElementId());
@@ -201,11 +200,6 @@ public class ContestTimesPane extends JPanePlugin {
                 contestTimeListBox.sort();
             }
         });
-    }
-
-    protected void info(String string) {
-        System.err.println(string);
-        log.log(Log.WARNING, string);
     }
 
     protected String[] buildContestTimeRow(ContestTime contestTime) {
