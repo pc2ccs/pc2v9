@@ -774,14 +774,16 @@ public class Contest implements IContest {
 
     
     public void removeRemoteLogin(ClientId sourceId) {
-        remoteLoginList.remove(sourceId);
+        if (isRemoteLoggedIn(sourceId)) {
+            remoteLoginList.remove(sourceId);
+        }
         ConnectionHandlerID connectionHandlerID = getConnectionHandleID(sourceId);
         LoginEvent loginEvent = new LoginEvent(LoginEvent.Action.LOGOFF, sourceId, connectionHandlerID, "Remote Logoff");
         fireLoginListener(loginEvent);
     }
 
     public void removeLogin(ClientId sourceId) {
-        if (sourceId.getSiteNumber() == siteNumber) {
+        if (isLocalLoggedIn(sourceId)){
             localLoginList.remove(sourceId);
         } else {
             remoteLoginList.remove(sourceId);
