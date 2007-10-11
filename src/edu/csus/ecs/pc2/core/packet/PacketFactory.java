@@ -17,6 +17,7 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
+import edu.csus.ecs.pc2.core.model.ContestLoginSuccessData;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Group;
@@ -856,29 +857,27 @@ public final class PacketFactory {
      * @param groups
      * @param information 
      */
-    public static Packet createLoginSuccess(ClientId source, ClientId destination, ContestTime contestTime, ContestTime[] contestTimes, int siteNumber, Language[] languages, Problem[] problems,
-            Judgement[] judgements, Site[] sites, Run[] runs, Clarification[] clarifications, ClientId[] loggedInUsers, ConnectionHandlerID[] connectionHandlerIDs, 
-            Account [] accounts, ProblemDataFiles[] problemDataFiles, ContestInformation information, BalloonSettings [] balloonSettingsArray, ClientSettings[] clientSettings, Group[] groups) {
+    public static Packet createLoginSuccess(ClientId source, ClientId destination, ContestTime contestTime, int siteNumber, ContestInformation information, ContestLoginSuccessData data) {
         try {
             Properties prop = new Properties();
             prop.put(SITE_NUMBER, new Integer(siteNumber));
             prop.put(CONTEST_TIME, contestTime);
-            prop.put(CONTEST_TIME_LIST, contestTimes);
+            prop.put(CONTEST_TIME_LIST, data.getContestTimes());
             prop.put(CLIENT_ID, destination);
-            prop.put(PROBLEM_LIST, problems);
-            prop.put(LANGUAGE_LIST, languages);
-            prop.put(JUDGEMENT_LIST, judgements);
-            prop.put(SITE_LIST, sites);
-            prop.put(RUN_LIST, runs);
-            prop.put(CLARIFICATION_LIST, clarifications);
-            prop.put(LOGGED_IN_USERS, loggedInUsers);
-            prop.put(CONNECTION_HANDLE_ID_LIST, connectionHandlerIDs);
-            prop.put(ACCOUNT_ARRAY, accounts);
-            prop.put(PROBLEM_DATA_FILES, problemDataFiles);
+            prop.put(PROBLEM_LIST, data.getProblems());
+            prop.put(LANGUAGE_LIST, data.getLanguages());
+            prop.put(JUDGEMENT_LIST, data.getJudgements());
+            prop.put(SITE_LIST, data.getSites());
+            prop.put(RUN_LIST, data.getRuns());
+            prop.put(CLARIFICATION_LIST, data.getClarifications());
+            prop.put(LOGGED_IN_USERS, data.getLoggedInUsers());
+            prop.put(CONNECTION_HANDLE_ID_LIST, data.getConnectionHandlerIDs());
+            prop.put(ACCOUNT_ARRAY, data.getAccounts());
+            prop.put(PROBLEM_DATA_FILES, data.getProblemDataFiles());
             prop.put(CONTEST_INFORMATION, information);
-            prop.put(CLIENT_SETTINGS_LIST, clientSettings);
-            prop.put(BALLOON_SETTINGS_LIST, balloonSettingsArray);
-            prop.put(GROUP_LIST, groups);
+            prop.put(CLIENT_SETTINGS_LIST, data.getClientSettings());
+            prop.put(BALLOON_SETTINGS_LIST, data.getBalloonSettingsArray());
+            prop.put(GROUP_LIST, data.getGroups());
 
             Packet packet = new Packet(Type.LOGIN_SUCCESS, source, destination, prop);
             return packet;

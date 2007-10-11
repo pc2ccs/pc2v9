@@ -11,6 +11,7 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
+import edu.csus.ecs.pc2.core.model.ContestLoginSuccessData;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Group;
@@ -2169,10 +2170,23 @@ public class PacketHandler {
             clientSettings = contest.getClientSettingsList();
         }
 
-        Packet loginSuccessPacket = PacketFactory.createLoginSuccess(contest.getClientId(), clientId, contest.getContestTime(), contest.getContestTimes(), contest.getSiteNumber(), 
-                contest.getLanguages(), contest.getProblems(), contest.getJudgements(), contest.getSites(), runs, clarifications, 
-                getAllLoggedInUsers(), contest.getConnectionHandleIDs(), getAllAccounts(), problemDataFiles,
-                contest.getContestInformation(), contest.getBalloonSettings(), clientSettings, contest.getGroups());
+        ContestLoginSuccessData data = new ContestLoginSuccessData();
+        data.setAccounts(getAllAccounts());
+        data.setBalloonSettingsArray(contest.getBalloonSettings());
+        data.setClarifications(clarifications);
+        data.setClientSettings(clientSettings);
+        data.setConnectionHandlerIDs(contest.getConnectionHandleIDs());
+        data.setContestTimes(contest.getContestTimes()); 
+        data.setGroups(contest.getGroups());
+        data.setJudgements(contest.getJudgements());
+        data.setLanguages(contest.getLanguages());
+        data.setLoggedInUsers(getAllLoggedInUsers());
+        data.setProblemDataFiles(problemDataFiles);
+        data.setProblems(contest.getProblems());
+        data.setRuns(runs);
+        data.setSites(contest.getSites());
+        Packet loginSuccessPacket = PacketFactory.createLoginSuccess(contest.getClientId(), clientId, contest.getContestTime(), 
+                contest.getSiteNumber(), contest.getContestInformation(), data);
      
         return loginSuccessPacket;
     }
