@@ -318,11 +318,7 @@ public class RunsPanel extends JPanePlugin {
 
     private String getTeamDisplayName(Run run) {
         
-        System.out.println("debug22 - display "+isJudge()+" "+isTeam(run.getSubmitter()));
-        
         if (isJudge() && isTeam(run.getSubmitter())){
-            
-            System.out.println("debug 22 name is "+displayTeamName.getDisplayName(run.getSubmitter()));
             
             return displayTeamName.getDisplayName(run.getSubmitter());
         }
@@ -631,8 +627,6 @@ public class RunsPanel extends JPanePlugin {
             displayTeamName.setTeamDisplayMask(contestInformation.getTeamDisplayMode());
         }
         
-        System.out.println("debug == "+displayTeamName.getTeamDisplayMask());
-
         // TODO bulk load these record
 
         for (Run run : runs) {
