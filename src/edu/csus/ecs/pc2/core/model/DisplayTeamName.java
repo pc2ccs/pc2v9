@@ -60,7 +60,7 @@ public class DisplayTeamName implements Serializable, UIPlugin {
                         if (controller != null){
                             controller.getLog().log(Log.WARNING, "Alias not created for " + clientId, new Exception("No alias for team " + clientId));
                         }
-                        return account + " (not aliased)";
+                        return account.getClientId().getName() + " (not aliased)";
                     }
                 case NUMBERS_AND_NAME:
                     account = contest.getAccount(clientId);
