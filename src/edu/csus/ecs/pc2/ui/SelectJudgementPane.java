@@ -12,7 +12,6 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
@@ -28,6 +27,8 @@ import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
+import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
@@ -65,8 +66,6 @@ public class SelectJudgementPane extends JPanePlugin {
 
     private RunFiles runFiles = null;
 
-    private JTabbedPane mainTabbedPane = null;
-
     private JPanel generalPane = null;
 
     private Log log = null;
@@ -97,6 +96,10 @@ public class SelectJudgementPane extends JPanePlugin {
 
     private IFileViewer sourceViewer;
 
+    private IFileViewer answerFileViewer;
+
+    private IFileViewer dataFileViewer;
+
     private boolean populatingGUI = true;
 
     private JLabel problemNameLabel = null;
@@ -115,6 +118,14 @@ public class SelectJudgementPane extends JPanePlugin {
 
     private JButton acceptValidatorJudgementButton = null;
 
+    private JPanel eastPane = null;
+
+    private JButton viewDataFileButton = null;
+
+    private JButton viewAnswerFileButton = null;
+
+    private JButton shellButton = null;
+
     /**
      * This method initializes
      * 
@@ -130,12 +141,12 @@ public class SelectJudgementPane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new java.awt.Dimension(536, 294));
+        this.setSize(new java.awt.Dimension(666,294));
 
         this.add(getMessagePane(), java.awt.BorderLayout.NORTH);
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
-        this.add(getMainTabbedPane(), java.awt.BorderLayout.EAST);
         this.add(getGeneralPane(), java.awt.BorderLayout.CENTER);
+        this.add(getEastPane(), java.awt.BorderLayout.EAST);
     }
 
     public void setContestAndController(IContest inContest, IController inController) {
@@ -176,11 +187,10 @@ public class SelectJudgementPane extends JPanePlugin {
     private JPanel getButtonPane() {
         if (buttonPane == null) {
             FlowLayout flowLayout = new FlowLayout();
-            flowLayout.setHgap(15);
+            flowLayout.setHgap(50);
             buttonPane = new JPanel();
             buttonPane.setLayout(flowLayout);
             buttonPane.add(getUpdateButton(), null);
-            buttonPane.add(getViewSourceButton(), null);
             buttonPane.add(getExecuteButton(), null);
             buttonPane.add(getExtractButton(), null);
             buttonPane.add(getCancelButton(), null);
@@ -394,9 +404,9 @@ public class SelectJudgementPane extends JPanePlugin {
         getExecuteButton().setEnabled(runFiles != null);
         getExecuteButton().setEnabled(runFiles != null);
         getViewSourceButton().setEnabled(runFiles != null);
-        
-        if (runFiles == null){
-            log.log(Log.WARNING, "No run files in requested run "+run);
+
+        if (runFiles == null) {
+            log.log(Log.WARNING, "No run files in requested run " + run);
             showMessage("No Run Files in requested run");
         }
 
@@ -438,18 +448,6 @@ public class SelectJudgementPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes mainTabbedPane
-     * 
-     * @return javax.swing.JTabbedPane
-     */
-    private JTabbedPane getMainTabbedPane() {
-        if (mainTabbedPane == null) {
-            mainTabbedPane = new JTabbedPane();
-        }
-        return mainTabbedPane;
-    }
-
-    /**
      * This method initializes generalPane
      * 
      * @return javax.swing.JPanel
@@ -457,53 +455,53 @@ public class SelectJudgementPane extends JPanePlugin {
     private JPanel getGeneralPane() {
         if (generalPane == null) {
             validatorJudgementLabel = new JLabel();
-            validatorJudgementLabel.setBounds(new java.awt.Rectangle(223, 172, 282, 19));
+            validatorJudgementLabel.setBounds(new java.awt.Rectangle(171, 171, 282, 19));
             validatorJudgementLabel.setText("Validator Judgement");
             validatorJudgementLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
             validatorJudgementLabel.setForeground(Color.BLUE);
             validatorRecommendsLabel = new JLabel();
-            validatorRecommendsLabel.setBounds(new java.awt.Rectangle(69, 172, 142, 19));
+            validatorRecommendsLabel.setBounds(new java.awt.Rectangle(17, 171, 142, 19));
             validatorRecommendsLabel.setText("Validator Recommends");
             validatorRecommendsLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             validatorRecommendsLabel.setForeground(Color.BLUE);
             elapsedTimeLabel = new JLabel();
-            elapsedTimeLabel.setBounds(new java.awt.Rectangle(223, 61, 254, 19));
+            elapsedTimeLabel.setBounds(new java.awt.Rectangle(171, 60, 254, 19));
             elapsedTimeLabel.setText("Elapsed");
             elapsedTimeLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
             languageNameLabel = new JLabel();
-            languageNameLabel.setBounds(new java.awt.Rectangle(223, 111, 254, 19));
+            languageNameLabel.setBounds(new java.awt.Rectangle(171, 110, 254, 19));
             languageNameLabel.setText("Language");
             languageNameLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
             problemNameLabel = new JLabel();
-            problemNameLabel.setBounds(new java.awt.Rectangle(223, 86, 254, 19));
+            problemNameLabel.setBounds(new java.awt.Rectangle(171, 85, 254, 19));
             problemNameLabel.setText("Problem");
             problemNameLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
             elapsedTitleLabel = new JLabel();
-            elapsedTitleLabel.setBounds(new java.awt.Rectangle(69, 61, 142, 19));
+            elapsedTitleLabel.setBounds(new java.awt.Rectangle(17, 60, 142, 19));
             elapsedTitleLabel.setText("Elapsed");
             elapsedTitleLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             languageTitleLabel = new JLabel();
-            languageTitleLabel.setBounds(new java.awt.Rectangle(69, 111, 142, 19));
+            languageTitleLabel.setBounds(new java.awt.Rectangle(17, 110, 142, 19));
             languageTitleLabel.setText("Language");
             languageTitleLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
             problemTitleLabel = new JLabel();
-            problemTitleLabel.setBounds(new java.awt.Rectangle(69, 86, 142, 19));
+            problemTitleLabel.setBounds(new java.awt.Rectangle(17, 85, 142, 19));
             problemTitleLabel.setText("Problem");
             problemTitleLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
             statusTitleLabel = new JLabel();
-            statusTitleLabel.setBounds(new java.awt.Rectangle(69, 33, 142, 19));
+            statusTitleLabel.setBounds(new java.awt.Rectangle(17, 32, 142, 19));
             statusTitleLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
             statusTitleLabel.setText("Status");
             statusLabel = new JLabel();
-            statusLabel.setBounds(new java.awt.Rectangle(223, 33, 254, 19));
+            statusLabel.setBounds(new java.awt.Rectangle(171, 32, 254, 19));
             statusLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
             statusLabel.setText("JLabel");
             judgementLabel = new JLabel();
-            judgementLabel.setBounds(new java.awt.Rectangle(69, 138, 142, 19));
+            judgementLabel.setBounds(new java.awt.Rectangle(17, 137, 142, 19));
             judgementLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
             judgementLabel.setText("Judgement");
             runInfoLabel = new JLabel();
-            runInfoLabel.setBounds(new java.awt.Rectangle(5, -1, 511, 25));
+            runInfoLabel.setBounds(new java.awt.Rectangle(5, -1, 424, 25));
             runInfoLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
             runInfoLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 14));
             runInfoLabel.setText("Run Info");
@@ -578,12 +576,6 @@ public class SelectJudgementPane extends JPanePlugin {
         return viewSourceButton;
     }
 
-    protected void viewSourceFile() {
-
-        createAndViewFile(runFiles.getMainFile(), "Team's source");
-
-    }
-
     /**
      * This method initializes extractButton
      * 
@@ -594,6 +586,7 @@ public class SelectJudgementPane extends JPanePlugin {
             extractButton = new JButton();
             extractButton.setText("Extract");
             extractButton.setMnemonic(java.awt.event.KeyEvent.VK_T);
+            extractButton.setVisible(false);
             extractButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     extractRun();
@@ -658,7 +651,7 @@ public class SelectJudgementPane extends JPanePlugin {
     private JComboBox getJudgementComboBox() {
         if (judgementComboBox == null) {
             judgementComboBox = new JComboBox();
-            judgementComboBox.setLocation(new java.awt.Point(223, 136));
+            judgementComboBox.setLocation(new java.awt.Point(171, 135));
             judgementComboBox.setSize(new java.awt.Dimension(263, 22));
             judgementComboBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -669,30 +662,29 @@ public class SelectJudgementPane extends JPanePlugin {
         return judgementComboBox;
     }
 
-    private void createAndViewFile(SerializedFile file, String title) {
-        // TODO the executeable dir name should be from the model, eh ?
+    private String getExecuteDirectoryName() {
         Executable tempEexecutable = new Executable(getContest(), getController(), run, runFiles);
-        String targetDirectory = tempEexecutable.getExecuteDirectoryName();
+        return tempEexecutable.getExecuteDirectoryName();
+    }
+
+    private void createAndViewFile(IFileViewer fileViewer, SerializedFile file, String title) {
+        // TODO the executable dir name should be from the model, eh ?
+        String targetDirectory = getExecuteDirectoryName();
         Utilities.insureDir(targetDirectory);
         String targetFileName = targetDirectory + File.separator + file.getName();
-        showMessage("Create: " + targetFileName);
         try {
             file.writeFile(targetFileName);
-            if (sourceViewer != null) {
-                sourceViewer.dispose();
-            }
-            sourceViewer = new MultipleFileViewer(getController().getLog());
 
             if (new File(targetFileName).isFile()) {
-                sourceViewer.addFilePane(title, targetFileName);
-                sourceViewer.setVisible(true);
+                fileViewer.addFilePane(title, targetFileName);
+                fileViewer.setVisible(true);
             } else {
-                sourceViewer.addTextPane(title, "Could not create file at " + targetFileName);
-                sourceViewer.setVisible(true);
+                fileViewer.addTextPane(title, "Could not create file at " + targetFileName);
+                fileViewer.setVisible(true);
             }
         } catch (IOException e) {
-            sourceViewer.addTextPane(title, "Could not create file at " + targetFileName + "Exception " + e.getMessage());
-            sourceViewer.setVisible(true);
+            fileViewer.addTextPane(title, "Could not create file at " + targetFileName + "Exception " + e.getMessage());
+            fileViewer.setVisible(true);
         }
     }
 
@@ -704,7 +696,7 @@ public class SelectJudgementPane extends JPanePlugin {
     private JCheckBox getNotifyTeamCheckBox() {
         if (notifyTeamCheckBox == null) {
             notifyTeamCheckBox = new JCheckBox();
-            notifyTeamCheckBox.setBounds(new java.awt.Rectangle(223, 200, 112, 21));
+            notifyTeamCheckBox.setBounds(new java.awt.Rectangle(171, 199, 112, 21));
             notifyTeamCheckBox.setSelected(true);
             notifyTeamCheckBox.setText("Notify Team");
         }
@@ -760,7 +752,7 @@ public class SelectJudgementPane extends JPanePlugin {
     private JButton getAcceptValidatorJudgementButton() {
         if (acceptValidatorJudgementButton == null) {
             acceptValidatorJudgementButton = new JButton();
-            acceptValidatorJudgementButton.setBounds(new java.awt.Rectangle(365, 200, 140, 23));
+            acceptValidatorJudgementButton.setBounds(new java.awt.Rectangle(313, 199, 140, 23));
             acceptValidatorJudgementButton.setText("Accept Validator");
             acceptValidatorJudgementButton.setForeground(Color.BLUE);
             acceptValidatorJudgementButton.addActionListener(new java.awt.event.ActionListener() {
@@ -779,13 +771,13 @@ public class SelectJudgementPane extends JPanePlugin {
     }
 
     protected void acceptValidatorJudgement() {
-        
+
         Run newRun = getRunFromFields();
 
         enableUpdateButtons(false);
 
         RunResultFiles runResultFiles = null;
-        
+
         JudgementRecord judgementRecord = null;
 
         String results = validatorJudgementLabel.getText();
@@ -806,7 +798,7 @@ public class SelectJudgementPane extends JPanePlugin {
             elementId = yesJudgement.getElementId();
             solved = true;
         }
-        
+
         newRun.setStatus(RunStates.JUDGED);
 
         judgementRecord = new JudgementRecord(elementId, getContest().getClientId(), solved, true);
@@ -819,7 +811,162 @@ public class SelectJudgementPane extends JPanePlugin {
         if (getParentFrame() != null) {
             getParentFrame().setVisible(false);
         }
-        
+
+    }
+
+    /**
+     * This method initializes eastPane
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getEastPane() {
+        if (eastPane == null) {
+            FlowLayout flowLayout1 = new FlowLayout();
+            flowLayout1.setVgap(25);
+            eastPane = new JPanel();
+            eastPane.setLayout(flowLayout1);
+            eastPane.setPreferredSize(new java.awt.Dimension(132, 132));
+            eastPane.add(getViewSourceButton(), null);
+            eastPane.add(getViewDataFileButton(), null);
+            eastPane.add(getViewAnswerFileButton(), null);
+            eastPane.add(getShellButton(), null);
+        }
+        return eastPane;
+    }
+
+    /**
+     * This method initializes viewDataFile
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getViewDataFileButton() {
+        if (viewDataFileButton == null) {
+            viewDataFileButton = new JButton();
+            viewDataFileButton.setText("View Data File");
+            viewDataFileButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    viewDataFile();
+                }
+            });
+        }
+        return viewDataFileButton;
+    }
+
+    /**
+     * This method initializes viewAnswerFile
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getViewAnswerFileButton() {
+        if (viewAnswerFileButton == null) {
+            viewAnswerFileButton = new JButton();
+            viewAnswerFileButton.setText("View Answer File");
+            viewAnswerFileButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    viewAnswerFile();
+                }
+            });
+        }
+        return viewAnswerFileButton;
+    }
+
+    private ProblemDataFiles getProblemDataFiles() {
+        Problem problem = getContest().getProblem(run.getProblemId());
+        return getContest().getProblemDataFile(problem);
+    }
+
+    protected void viewSourceFile() {
+        if (sourceViewer != null) {
+            sourceViewer.dispose();
+        }
+        sourceViewer = new MultipleFileViewer(getController().getLog());
+        createAndViewFile(sourceViewer, runFiles.getMainFile(), "Team's source");
+    }
+
+    protected void viewDataFile() {
+        if (getProblemDataFiles() != null) {
+            if (getProblemDataFiles().getJudgesDataFile() != null) {
+                if (answerFileViewer != null) {
+                    answerFileViewer.dispose();
+                }
+                answerFileViewer = new MultipleFileViewer(getController().getLog());
+                createAndViewFile(answerFileViewer, getProblemDataFiles().getJudgesDataFile(), "Judge's data file");
+            } else {
+                JOptionPane.showMessageDialog(this, "No data file defined");
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "No data file defined");
+        }
+    }
+
+    protected void viewAnswerFile() {
+        if (getProblemDataFiles() != null) {
+            if (getProblemDataFiles().getJudgesAnswerFile() != null) {
+                if (answerFileViewer != null) {
+                    answerFileViewer.dispose();
+                }
+                answerFileViewer = new MultipleFileViewer(getController().getLog());
+                createAndViewFile(answerFileViewer, getProblemDataFiles().getJudgesAnswerFile(), "Judge's answer file");
+            } else {
+                JOptionPane.showMessageDialog(this, "No Answer File defined");
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "No Answer File defined");
+        }
+    }
+
+    /**
+     * This method initializes shellButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getShellButton() {
+        if (shellButton == null) {
+            shellButton = new JButton();
+            shellButton.setText("Shell ");
+            shellButton.setVisible(false);
+            shellButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    shellToExecuteDirectory();
+                }
+            });
+        }
+        return shellButton;
+    }
+
+    protected void shellToExecuteDirectory() {
+        String executeDir = getExecuteDirectoryName();
+        File runDir = new File(executeDir);
+        Utilities.insureDir(executeDir);
+
+        String fs = File.separator;
+
+        String winShellCommand = fs + "windows" + fs + "system32" + fs + "cmd.exe";
+        String unixShellCommand = fs + "bin" + fs + "sh";
+
+        String[] env = null;
+
+        if (new File(winShellCommand).exists()) {
+
+            // System.out.println("debug "+winShellCommand+" to "+executeDir);
+
+            try {
+                Runtime.getRuntime().exec("cmd.exe", env, runDir);
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(null, "Unable to run command " + winShellCommand + " " + e.getMessage());
+                e.printStackTrace();
+            }
+        } else if (new File(unixShellCommand).exists()) {
+
+            // System.out.println("debug "+unixShellCommand+" to "+executeDir);
+
+            try {
+                Runtime.getRuntime().exec(unixShellCommand, env, runDir);
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(null, "Unable to run command " + unixShellCommand + " " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
