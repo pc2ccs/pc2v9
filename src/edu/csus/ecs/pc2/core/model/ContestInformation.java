@@ -25,6 +25,38 @@ public class ContestInformation implements Serializable{
 
     private String contestURL;
     
+    private TeamDisplayMask teamDisplayMode = TeamDisplayMask.LOGIN_NAME_ONLY;
+    
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    public enum TeamDisplayMask {
+        /**
+         * Show no information, just ***
+         */
+        NONE,
+        /**
+         * Show Login name, teamN.
+         */
+        LOGIN_NAME_ONLY,
+        /**
+         * Show display name, Johns Hopkins Team 1.
+         */
+        DISPLAY_NAME_ONLY,
+        /**
+         * name and number, teamN  Johns Hopkins Team 1. 
+         */
+        NUMBERS_AND_NAME,
+        /**
+         * Show alias,  shows teamM for team N.
+         * This method uses an alias in Account to display
+         * an alternate team name.
+         */
+        ALIAS,
+    }
+    
     public String getContestTitle() {
         return contestTitle;
     }
@@ -39,5 +71,13 @@ public class ContestInformation implements Serializable{
 
     public void setContestURL(String contestURL) {
         this.contestURL = contestURL;
+    }
+
+    public TeamDisplayMask getTeamDisplayMode() {
+        return teamDisplayMode;
+    }
+
+    public void setTeamDisplayMode(TeamDisplayMask teamDisplayMask) {
+        this.teamDisplayMode = teamDisplayMask;
     }
 }

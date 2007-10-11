@@ -1,5 +1,14 @@
 package edu.csus.ecs.pc2.ui;
 
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IController;
@@ -7,11 +16,7 @@ import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.IContestInformationListener;
-import javax.swing.JPanel;
-import java.awt.BorderLayout;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
+import edu.csus.ecs.pc2.core.model.ContestInformation.TeamDisplayMask;
 
 /**
  * Contest Information edit/update Pane.
@@ -24,7 +29,6 @@ import javax.swing.JTextField;
 
 // $HeadURL$
 // $Id$
-
 public class ContestInformationPane extends JPanePlugin {
 
     /**
@@ -41,6 +45,20 @@ public class ContestInformationPane extends JPanePlugin {
     private JLabel contestTitleLabel = null;
 
     private JTextField contestTitleTextField = null;
+
+    private JPanel teamDisplaySettingPane = null;
+
+    private JRadioButton displayNoneRadioButton = null;
+
+    private JRadioButton displayNumbersOnlyRadioButton = null;
+
+    private JRadioButton displayNameAndNumberRadioButton = null;
+
+    private JRadioButton displayAliasNameRadioButton = null;
+
+    private JRadioButton displayNamesOnlyRadioButton = null;
+
+    private ButtonGroup displayNameButtonGroup = null; // @jve:decl-index=0:visual-constraint="617,62"
 
     /**
      * This method initializes
@@ -91,6 +109,7 @@ public class ContestInformationPane extends JPanePlugin {
             centerPane.setLayout(null);
             centerPane.add(contestTitleLabel, null);
             centerPane.add(getContestTitleTextField(), null);
+            centerPane.add(getTeamDisplaySettingPane(), null);
         }
         return centerPane;
     }
@@ -127,7 +146,6 @@ public class ContestInformationPane extends JPanePlugin {
         return contestTitleTextField;
     }
 
-
     @Override
     public String getPluginTitle() {
         return "Contest Information Pane";
@@ -148,14 +166,30 @@ public class ContestInformationPane extends JPanePlugin {
             public void run() {
                 ContestInformation contestInformation = getContest().getContestInformation();
                 getContestTitleTextField().setText(contestInformation.getContestTitle());
+                selectDisplayRadioButton();
             }
         });
-        
+
     }
 
     private void updateContestInformation() {
         ContestInformation contestInformation = getContest().getContestInformation();
         contestInformation.setContestTitle(getContestTitleTextField().getText());
+        
+        contestInformation.setTeamDisplayMode(TeamDisplayMask.LOGIN_NAME_ONLY);
+        
+        if (getDisplayNoneRadioButton().isSelected()) {
+            contestInformation.setTeamDisplayMode(TeamDisplayMask.NONE);
+        } else if (getDisplayNameAndNumberRadioButton().isSelected()) {
+            contestInformation.setTeamDisplayMode(TeamDisplayMask.NUMBERS_AND_NAME);
+        } else if (getDisplayNumbersOnlyRadioButton().isSelected()) {
+            contestInformation.setTeamDisplayMode(TeamDisplayMask.LOGIN_NAME_ONLY);
+        } else if (getDisplayNamesOnlyRadioButton().isSelected()) {
+            contestInformation.setTeamDisplayMode(TeamDisplayMask.DISPLAY_NAME_ONLY);
+        } else if (getDisplayAliasNameRadioButton().isSelected()) {
+            contestInformation.setTeamDisplayMode(TeamDisplayMask.ALIAS);
+        }
+        
         getController().updateContestInformation(contestInformation);
     }
 
@@ -182,5 +216,152 @@ public class ContestInformationPane extends JPanePlugin {
         }
 
     }
+
+    /**
+     * This method initializes teamDisplaySettingPane
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getTeamDisplaySettingPane() {
+        if (teamDisplaySettingPane == null) {
+            teamDisplaySettingPane = new JPanel();
+            teamDisplaySettingPane.setLayout(new FlowLayout());
+            teamDisplaySettingPane.setBounds(new java.awt.Rectangle(111,59,381,101));
+            teamDisplaySettingPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Team Information Displayed to Judges", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+                    javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
+            teamDisplaySettingPane.add(getDisplayNoneRadioButton(), null);
+            teamDisplaySettingPane.add(getDisplayNumbersOnlyRadioButton(), null);
+            teamDisplaySettingPane.add(getDisplayNamesOnlyRadioButton(), null);
+            teamDisplaySettingPane.add(getDisplayNameAndNumberRadioButton(), null);
+            teamDisplaySettingPane.add(getDisplayAliasNameRadioButton(), null);
+            
+        }
+        return teamDisplaySettingPane;
+    }
+
+    private void selectDisplayRadioButton() {
+        
+        ContestInformation contestInformation = getContest().getContestInformation();
+        if (contestInformation == null || contestInformation.getTeamDisplayMode() == null){
+            getDisplayNameButtonGroup().setSelected(getDisplayNamesOnlyRadioButton().getModel(), true);
+            
+        } else {
+            switch (contestInformation.getTeamDisplayMode()) {
+                case DISPLAY_NAME_ONLY:
+                    getDisplayNameButtonGroup().setSelected(getDisplayNamesOnlyRadioButton().getModel(), true);
+                    break;
+                case LOGIN_NAME_ONLY:
+                    getDisplayNameButtonGroup().setSelected(getDisplayNamesOnlyRadioButton().getModel(), true);
+                    break;
+                case NUMBERS_AND_NAME:
+                    getDisplayNameButtonGroup().setSelected(getDisplayNameAndNumberRadioButton().getModel(), true);
+                    break;
+                case ALIAS:
+                    getDisplayNameButtonGroup().setSelected(getDisplayAliasNameRadioButton().getModel(), true);
+                    break;
+                case NONE:
+                    getDisplayNameButtonGroup().setSelected(getDisplayNoneRadioButton().getModel(), true);
+                    break;
+                default:
+                    break;
+            }
+        }
+        // TODO Auto-generated method stub
+        
+//        getDisplayNameButtonGroup().setSelected(getDisplayNoneButton(), false)
+
+    }
+
+    /**
+     * This method initializes displayNoneButton
+     * 
+     * @return javax.swing.JRadioButton
+     */
+    private JRadioButton getDisplayNoneRadioButton() {
+        if (displayNoneRadioButton == null) {
+            displayNoneRadioButton = new JRadioButton();
+            displayNoneRadioButton.setText("None");
+        }
+        return displayNoneRadioButton;
+    }
+
+    /**
+     * This method initializes displayNumbersOnlyRadioButton
+     * 
+     * @return javax.swing.JRadioButton
+     */
+    private JRadioButton getDisplayNumbersOnlyRadioButton() {
+        if (displayNumbersOnlyRadioButton == null) {
+            displayNumbersOnlyRadioButton = new JRadioButton();
+            displayNumbersOnlyRadioButton.setText("Show Numbers Only");
+        }
+        return displayNumbersOnlyRadioButton;
+    }
+
+    /**
+     * This method initializes displayNameAndNumberRadioButton
+     * 
+     * @return javax.swing.JRadioButton
+     */
+    private JRadioButton getDisplayNameAndNumberRadioButton() {
+        if (displayNameAndNumberRadioButton == null) {
+            displayNameAndNumberRadioButton = new JRadioButton();
+            displayNameAndNumberRadioButton.setText("Show Number and Name");
+        }
+        return displayNameAndNumberRadioButton;
+    }
+
+    /**
+     * This method initializes displayAliasNameRadioButton
+     * 
+     * @return javax.swing.JRadioButton
+     */
+    private JRadioButton getDisplayAliasNameRadioButton() {
+        if (displayAliasNameRadioButton == null) {
+            displayAliasNameRadioButton = new JRadioButton();
+            displayAliasNameRadioButton.setText("Show Alias");
+        }
+        return displayAliasNameRadioButton;
+    }
+
+    /**
+     * This method initializes showNamesOnlyRadioButton
+     * 
+     * @return javax.swing.JRadioButton
+     */
+    private JRadioButton getDisplayNamesOnlyRadioButton() {
+        if (displayNamesOnlyRadioButton == null) {
+            displayNamesOnlyRadioButton = new JRadioButton();
+            displayNamesOnlyRadioButton.setText("Show Names only");
+        }
+        return displayNamesOnlyRadioButton;
+    }
+
+    /**
+     * This method initializes displayNameButtonGroup
+     * 
+     * @return javax.swing.ButtonGroup
+     */
+    private ButtonGroup getDisplayNameButtonGroup() {
+        if (displayNameButtonGroup == null) {
+            displayNameButtonGroup = new ButtonGroup();
+            displayNameButtonGroup.add(getDisplayNoneRadioButton());
+            
+            displayNameButtonGroup.add(getDisplayNamesOnlyRadioButton());
+            displayNameButtonGroup.add(getDisplayNameAndNumberRadioButton());
+            displayNameButtonGroup.add(getDisplayNumbersOnlyRadioButton());
+            displayNameButtonGroup.add(getDisplayAliasNameRadioButton());
+        }
+        return displayNameButtonGroup;
+    }
+
+    // private ButtonGroup getTeamReadsFrombuttonGroup() {
+    // if (teamReadsFrombuttonGroup == null) {
+    // teamReadsFrombuttonGroup = new ButtonGroup();
+    // teamReadsFrombuttonGroup.add(getStdinRadioButton());
+    // teamReadsFrombuttonGroup.add(getFileRadioButton());
+    // }
+    // return teamReadsFrombuttonGroup;
+    // }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

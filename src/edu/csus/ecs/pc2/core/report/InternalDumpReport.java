@@ -30,6 +30,7 @@ import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.Site;
+import edu.csus.ecs.pc2.core.model.ContestInformation.TeamDisplayMask;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
 /**
@@ -117,6 +118,12 @@ public class InternalDumpReport implements IReport {
         printWriter.println("-- Contest Information --");
         printWriter.println("  Title : '" + contestInformation.getContestTitle()+"'");
         printWriter.println("  URL   : '" + contestInformation.getContestURL()+"'");
+        
+        if (contestInformation.getTeamDisplayMode() != null){
+            printWriter.println("  Judges see: "+contestInformation.getTeamDisplayMode());
+        } else {
+            printWriter.println("  Judges see: "+TeamDisplayMask.LOGIN_NAME_ONLY);
+        }
     }
 
     private void printAccounts(PrintWriter printWriter) {

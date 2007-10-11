@@ -19,10 +19,14 @@ import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
+import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
+import edu.csus.ecs.pc2.core.model.DisplayTeamName;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IContestInformationListener;
 import edu.csus.ecs.pc2.core.model.ILanguageListener;
 import edu.csus.ecs.pc2.core.model.IProblemListener;
 import edu.csus.ecs.pc2.core.model.IRunListener;
@@ -108,6 +112,8 @@ public class RunsPanel extends JPanePlugin {
     private boolean usingTeamColumns = false;
 
     private boolean usingFullColumns = false;
+    
+    private DisplayTeamName displayTeamName = null;
 
     /**
      * This method initializes
@@ -174,7 +180,7 @@ public class RunsPanel extends JPanePlugin {
                 s[idx++] = getLanguageTitle(run.getLanguageId());
                 s[idx++] = run.getSystemOS();
                 
-            } else {
+            } else if (usingTeamColumns){
 //              Object[] teamColumns = { "Site", "Run Id", "Problem", "Time", "Status",  "Language"};
                 s[idx++] = getSiteTitle("" + run.getSubmitter().getSiteNumber());
                 s[idx++] = new Long(run.getNumber()).toString();
@@ -182,6 +188,8 @@ public class RunsPanel extends JPanePlugin {
                 s[idx++] = new Long(run.getElapsedMins()).toString();
                 s[idx++] = getJudgementResultString(run);
                 s[idx++] = getLanguageTitle(run.getLanguageId());
+            } else {
+                log.log(Log.INFO,"In RunPanes no mclb columns set");
             }
 
             return s;
@@ -277,6 +285,13 @@ public class RunsPanel extends JPanePlugin {
     private boolean isTeam(ClientId clientId) {
         return clientId == null || clientId.getClientType().equals(Type.TEAM);
     }
+    private boolean isJudge(ClientId clientId) {
+        return clientId == null || clientId.getClientType().equals(Type.JUDGE);
+    }
+    
+    private boolean isJudge(){
+        return isJudge(getContest().getClientId());
+    }
 
     private String getLanguageTitle(ElementId languageId) {
         // TODO Auto-generated method stub
@@ -302,14 +317,15 @@ public class RunsPanel extends JPanePlugin {
     }
 
     private String getTeamDisplayName(Run run) {
-        // TODO when team display configuration is in a GUI somewhere
-        // modify this code to show the configured way of showing the team.
         
-//        Account account = getContest().getAccount(run.getSubmitter());
-//        if (account != null) {
-//            return account.getDisplayName();
-//        }
-
+        System.out.println("debug22 - display "+isJudge()+" "+isTeam(run.getSubmitter()));
+        
+        if (isJudge() && isTeam(run.getSubmitter())){
+            
+            System.out.println("debug 22 name is "+displayTeamName.getDisplayName(run.getSubmitter()));
+            
+            return displayTeamName.getDisplayName(run.getSubmitter());
+        }
         return run.getSubmitter().getName();
     }
 
@@ -609,6 +625,13 @@ public class RunsPanel extends JPanePlugin {
     public void reloadRunList() {
 
         Run[] runs = getContest().getRuns();
+        
+        if (isJudge()){
+            ContestInformation contestInformation = getContest().getContestInformation();
+            displayTeamName.setTeamDisplayMask(contestInformation.getTeamDisplayMode());
+        }
+        
+        System.out.println("debug == "+displayTeamName.getTeamDisplayMask());
 
         // TODO bulk load these record
 
@@ -690,11 +713,14 @@ public class RunsPanel extends JPanePlugin {
         // TODO when this is working make visible
         filterButton.setVisible(false);
     }
-
+    
     public void setContestAndController(IContest inContest, IController inController) {
         super.setContestAndController(inContest, inController);
         
         log = getController().getLog();
+        
+        displayTeamName = new DisplayTeamName();
+        displayTeamName.setContestAndController(inContest, inController);
 
         initializePermissions();
         
@@ -710,6 +736,7 @@ public class RunsPanel extends JPanePlugin {
         getContest().addAccountListener(new AccountListenerImplementation());
         getContest().addProblemListener(new ProblemListenerImplementation());
         getContest().addLanguageListener(new LanguageListenerImplementation());
+        getContest().addContestInformationListener(new ContestInformationListenerImplementation());
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -1161,6 +1188,37 @@ public class RunsPanel extends JPanePlugin {
             // ignore does not affect this pane
         }
     }
+    
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    
+    public class ContestInformationListenerImplementation implements IContestInformationListener {
+
+        public void contestInformationAdded(ContestInformationEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadRunList();
+                }
+            });
+        }
+
+        public void contestInformationChanged(ContestInformationEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadRunList();
+                }
+            });
+        }
+
+        public void contestInformationRemoved(ContestInformationEvent event) {
+            // TODO Auto-generated method stub
+            
+        }
+        
+    }
 
     private void showMessage(final String string) {
 
@@ -1241,5 +1299,6 @@ public class RunsPanel extends JPanePlugin {
             showMessage("Administrator has turned off Auto Judging");
         }
     }
-
+    
+    
 } // @jve:decl-index=0:visual-constraint="10,10"
