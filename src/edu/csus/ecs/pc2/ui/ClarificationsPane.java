@@ -26,17 +26,22 @@ import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClarificationEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
+import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
+import edu.csus.ecs.pc2.core.model.DisplayTeamName;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IClarificationListener;
 import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IContestInformationListener;
 import edu.csus.ecs.pc2.core.model.ILanguageListener;
 import edu.csus.ecs.pc2.core.model.IProblemListener;
 import edu.csus.ecs.pc2.core.model.LanguageEvent;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemEvent;
 import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
 
@@ -95,6 +100,8 @@ public class ClarificationsPane extends JPanePlugin {
     private boolean showNewClarificationsOnly = false;
     
     private Filter filter = null;
+
+    private DisplayTeamName displayTeamName = null;
 
     /**
      * This method initializes
@@ -408,6 +415,11 @@ public class ClarificationsPane extends JPanePlugin {
     }
 
     void reloadListBox() {
+        if (isJudge()){
+            ContestInformation contestInformation = getContest().getContestInformation();
+            displayTeamName.setTeamDisplayMask(contestInformation.getTeamDisplayMode());
+        }
+
         clarificationListBox.removeAllRows();
         Clarification[] clarifications = getContest().getClarifications();
 
@@ -428,6 +440,35 @@ public class ClarificationsPane extends JPanePlugin {
         clarificationListBox.addRow(objects, clarification.getElementId());
         clarificationListBox.autoSizeAllColumns();
         clarificationListBox.sort();
+    }
+
+    /**
+     * @author pc2@ecs.csus.edu
+     *
+     */
+    public class ContestInformationListenerImplementation implements IContestInformationListener {
+
+        public void contestInformationAdded(ContestInformationEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                }
+            });
+        }
+
+        public void contestInformationChanged(ContestInformationEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                }
+            });
+        }
+
+        public void contestInformationRemoved(ContestInformationEvent event) {
+            // TODO Auto-generated method stub
+            
+        }
+        
     }
 
     /**
@@ -468,13 +509,17 @@ public class ClarificationsPane extends JPanePlugin {
         super.setContestAndController(inContest, inController);
         answerClarificationFrame.setContestAndController(inContest, inController);
 
+        displayTeamName = new DisplayTeamName();
+        displayTeamName.setContestAndController(inContest, inController);
+
         initializePermissions();
 
         getContest().addClarificationListener(new ClarificationListenerImplementation());
         getContest().addAccountListener(new AccountListenerImplementation());
         getContest().addProblemListener(new ProblemListenerImplementation());
         getContest().addLanguageListener(new LanguageListenerImplementation());
-
+        getContest().addContestInformationListener(new ContestInformationListenerImplementation());
+        
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 updateGUIperPermissions();
@@ -497,15 +542,13 @@ public class ClarificationsPane extends JPanePlugin {
     }
 
     private String getTeamDisplayName(ClientId clientId) {
-        // TODO code change this depending on how to display team names
-        Account account = getContest().getAccount(clientId);
-        if (account != null) {
-            return account.getDisplayName();
+        if (isJudge() && isTeam(clientId)){
+            return displayTeamName.getDisplayName(clientId);
         }
 
         return clientId.getName();
     }
-
+    
     /**
      * This method initializes getButton
      * 
@@ -607,6 +650,18 @@ public class ClarificationsPane extends JPanePlugin {
 
     private boolean isAllowed(Permission.Type type) {
         return permissionList.isAllowed(type);
+    }
+
+    private boolean isTeam(ClientId clientId) {
+        return clientId == null || clientId.getClientType().equals(Type.TEAM);
+    }
+    
+    private boolean isJudge(ClientId clientId) {
+        return clientId == null || clientId.getClientType().equals(Type.JUDGE);
+    }
+    
+    private boolean isJudge(){
+        return isJudge(getContest().getClientId());
     }
 
     private void initializePermissions() {
