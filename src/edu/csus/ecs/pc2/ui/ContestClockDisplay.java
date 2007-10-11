@@ -286,13 +286,21 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
             public void run() {
                 Vector<JLabel> list = sitesElapsedTimeLabelList.get(siteNumber);
 
-                for (int i = 0; i < list.size(); i++) {
-                    list.elementAt(i).setForeground(Color.BLACK);
+                if (list == null) {
+                    log.fine("sitesElapsedTimeLabelList for "+ siteNumber+ " is null.");
+                } else {
+                    for (int i = 0; i < list.size(); i++) {
+                        list.elementAt(i).setForeground(Color.BLACK);
+                    }
                 }
 
                 list = sitesRemainingtimeLabelList.get(new Integer(siteNumber));
-                for (int i = 0; i < list.size(); i++) {
-                    list.elementAt(i).setForeground(Color.BLACK);
+                if (list == null) {
+                    log.fine("sitesRemainingtimeLabelList for "+ siteNumber+ " is null.");
+                } else {
+                    for (int i = 0; i < list.size(); i++) {
+                        list.elementAt(i).setForeground(Color.BLACK);
+                    }
                 }
             }
         });
@@ -306,12 +314,20 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
         timer.stop();
 
         Vector<JLabel> list = sitesElapsedTimeLabelList.get(new Integer(siteNumber));
-        for (int i = 0; i < list.size(); i++) {
-            list.elementAt(i).setForeground(Color.RED);
+        if (list == null) {
+            log.fine("sitesElapsedTimeLabelList for " + siteNumber + " is null");
+        } else {
+            for (int i = 0; i < list.size(); i++) {
+                list.elementAt(i).setForeground(Color.RED);
+            }
         }
         list = sitesRemainingtimeLabelList.get(new Integer(siteNumber));
-        for (int i = 0; i < list.size(); i++) {
-            list.elementAt(i).setForeground(Color.RED);
+        if (list == null) {
+            log.fine("sitesRemainingtimeLabelList for " + siteNumber + " is null");
+        } else {
+            for (int i = 0; i < list.size(); i++) {
+                list.elementAt(i).setForeground(Color.RED);
+            }
         }
     }
 
