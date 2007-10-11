@@ -12,6 +12,7 @@ import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.ui.AccountsPane;
 import edu.csus.ecs.pc2.ui.AutoJudgesPane;
@@ -271,8 +272,19 @@ public class AdministratorView extends JFrame implements UIPlugin {
 
     protected void addUIPlugin(JTabbedPane tabbedPane, String tabTitle, JPanePlugin plugin) {
 
-        plugin.setContestAndController(contest, controller);
-        tabbedPane.add(plugin, tabTitle);
+        // TODO this should throw an exception
+        if (plugin == null){
+            return;
+        }
+        
+        try {
+            plugin.setContestAndController(contest, controller);
+            tabbedPane.add(plugin, tabTitle);
+            
+        } catch (Exception e) {
+            controller.getLog().log(Log.WARNING, "Exception loading plugin ", e);
+            JOptionPane.showMessageDialog(this, "Error loading "+plugin.getPluginTitle());
+        }
 
     }
 
