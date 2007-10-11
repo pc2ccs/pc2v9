@@ -1162,16 +1162,16 @@ public class Contest implements IContest {
     }
 
     public Run[] getRuns(ClientId clientId) {
-        Vector<Run> clientClarifications = new Vector<Run>();
+        Vector<Run> clientRuns = new Vector<Run>();
         Enumeration<Run> enumeration = runList.getRunList();
         while (enumeration.hasMoreElements()) {
-            Run clarification = (Run) enumeration.nextElement();
+            Run run = (Run) enumeration.nextElement();
 
-            if (clientId.equals(clarification.getSubmitter())) {
-                clientClarifications.add(clarification);
+            if (clientId.equals(run.getSubmitter())) {
+                clientRuns.add(run);
             }
         }
-        return (Run[]) clientClarifications.toArray(new Run[clientClarifications.size()]);
+        return (Run[]) clientRuns.toArray(new Run[clientRuns.size()]);
     }
 
     public void addProblem(Problem problem, ProblemDataFiles problemDataFiles) {
