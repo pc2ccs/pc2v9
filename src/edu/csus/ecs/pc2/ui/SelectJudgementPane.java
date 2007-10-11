@@ -886,11 +886,11 @@ public class SelectJudgementPane extends JPanePlugin {
     protected void viewDataFile() {
         if (getProblemDataFiles() != null) {
             if (getProblemDataFiles().getJudgesDataFile() != null) {
-                if (answerFileViewer != null) {
-                    answerFileViewer.dispose();
+                if (dataFileViewer != null) {
+                    dataFileViewer.dispose();
                 }
-                answerFileViewer = new MultipleFileViewer(getController().getLog());
-                createAndViewFile(answerFileViewer, getProblemDataFiles().getJudgesDataFile(), "Judge's data file");
+                dataFileViewer = new MultipleFileViewer(getController().getLog());
+                createAndViewFile(dataFileViewer, getProblemDataFiles().getJudgesDataFile(), "Judge's data file");
             } else {
                 JOptionPane.showMessageDialog(this, "No data file defined");
             }
