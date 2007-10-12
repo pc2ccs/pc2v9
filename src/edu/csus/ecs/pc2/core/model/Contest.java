@@ -1442,6 +1442,6 @@ public class Contest implements IContest {
     }
 
     public void setGeneralProblem(Problem generalProblem) {
-        generalProblem = generalProblem;
+        this.generalProblem = generalProblem;
     }
 }
