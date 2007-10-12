@@ -219,51 +219,90 @@ public class ClarificationsPane extends JPanePlugin {
                     showSelectedClarification();
                 }
             });
-
-            Object[] cols = { "Site", "Team", "Clar Id", "Time", "Status", "Judge", "Sent to", "Problem", "Question", "Answer" };
-            clarificationListBox.addColumns(cols);
-
-            // Sorters
-            HeapSorter sorter = new HeapSorter();
-            HeapSorter numericStringSorter = new HeapSorter();
-            numericStringSorter.setComparator(new NumericStringComparator());
-
-            // Site
-            clarificationListBox.setColumnSorter(0, sorter, 1);
-
-            // Team
-            clarificationListBox.setColumnSorter(1, sorter, 2);
-
-            // Clar Id
-            clarificationListBox.setColumnSorter(2, numericStringSorter, 3);
-
-            // Time
-            clarificationListBox.setColumnSorter(3, numericStringSorter, 4);
-
-            // Status
-            clarificationListBox.setColumnSorter(4, sorter, 5);
-
-            // Judge
-            clarificationListBox.setColumnSorter(5, sorter, 6);
-
-            // Sent to
-            clarificationListBox.setColumnSorter(6, sorter, 7);
-
-            // Problem
-            clarificationListBox.setColumnSorter(7, sorter, 8);
-
-            // Question
-            clarificationListBox.setColumnSorter(8, sorter, 9);
-
-            // Answer
-            clarificationListBox.setColumnSorter(9, sorter, 10);
-
-            clarificationListBox.autoSizeAllColumns();
-
+            // do the reset of the columns after we have contest
         }
         return clarificationListBox;
     }
+
+    private void resetClarsListBoxColumns() {
+        
+        clarificationListBox.removeAllRows();
+        clarificationListBox.removeAllColumns();
+        Object[] fullColumns = { "Site", "Team", "Clar Id", "Time", "Status", "Judge", "Sent to", "Problem", "Question", "Answer" };
+        Object[] teamColumns = { "Site", "Team", "Clar Id", "Time", "Status", "Problem", "Question", "Answer" };
+        
+        if (isTeam(getContest().getClientId())){
+            clarificationListBox.addColumns(teamColumns);    
+        } else {
+            clarificationListBox.addColumns(fullColumns);
+        }
+
+        // Sorters
+        HeapSorter sorter = new HeapSorter();
+        HeapSorter numericStringSorter = new HeapSorter();
+        numericStringSorter.setComparator(new NumericStringComparator());
+
+        int idx = 0;
+        
+        if (!isTeam(getContest().getClientId())){
+            // Site
+            clarificationListBox.setColumnSorter(idx++, sorter, 1);
     
+            // Team
+            clarificationListBox.setColumnSorter(idx++, sorter, 2);
+    
+            // Clar Id
+            clarificationListBox.setColumnSorter(idx++, numericStringSorter, 3);
+    
+            // Time
+            clarificationListBox.setColumnSorter(idx++, numericStringSorter, 4);
+    
+            // Status
+            clarificationListBox.setColumnSorter(idx++, sorter, 5);
+    
+            // Judge
+            clarificationListBox.setColumnSorter(idx++, sorter, 6);
+    
+            // Sent to
+            clarificationListBox.setColumnSorter(idx++, sorter, 7);
+    
+            // Problem
+            clarificationListBox.setColumnSorter(idx++, sorter, 8);
+    
+            // Question
+            clarificationListBox.setColumnSorter(idx++, sorter, 9);
+    
+            // Answer
+            clarificationListBox.setColumnSorter(idx++, sorter, 10);
+        } else {
+            // teamColumns
+            // Site
+            clarificationListBox.setColumnSorter(idx++, sorter, 1);
+    
+            // Team
+            clarificationListBox.setColumnSorter(idx++, sorter, 2);
+    
+            // Clar Id
+            clarificationListBox.setColumnSorter(idx++, numericStringSorter, 3);
+    
+            // Time
+            clarificationListBox.setColumnSorter(idx++, numericStringSorter, 4);
+    
+            // Status
+            clarificationListBox.setColumnSorter(idx++, sorter, 5);
+    
+            // Problem
+            clarificationListBox.setColumnSorter(idx++, sorter, 8);
+    
+            // Question
+            clarificationListBox.setColumnSorter(idx++, sorter, 9);
+    
+            // Answer
+            clarificationListBox.setColumnSorter(idx++, sorter, 10);
+        }
+
+        clarificationListBox.autoSizeAllColumns();
+    }
 
     protected void showSelectedClarification() {
         
@@ -375,41 +414,51 @@ public class ClarificationsPane extends JPanePlugin {
         Object[] obj = new Object[cols];
 
         // Object[] cols = {"Site", "Team", "Clar Id", "Time", "Status", "Judge", "Sent to", "Problem", "Question", "Answer" };
-
-        obj[0] = getSiteTitle(clar.getSubmitter().getSiteNumber());
-        obj[1] = getTeamDisplayName(clar.getSubmitter());
-        obj[2] = clar.getNumber();
-        obj[3] = clar.getElapsedMins();
+        // or
+        // Object[] cols = {"Site", "Team", "Clar Id", "Time", "Status", "Problem", "Question", "Answer" };
+        
+        int idx = 0;
+        obj[idx++] = getSiteTitle(clar.getSubmitter().getSiteNumber());
+        obj[idx++] = getTeamDisplayName(clar.getSubmitter());
+        obj[idx++] = clar.getNumber();
+        obj[idx++] = clar.getElapsedMins();
 
         boolean isTeam = getContest().getClientId().getClientType().equals(ClientType.Type.TEAM);
 
         if (isTeam) {
-            obj[4] = "New";
             if (clar.isAnswered()) {
-                obj[4] = "Answered";
-            }
-        } else {
-            obj[4] = clar.getState();
-        }
-
-        obj[5] = "";
-        if (clar.isAnswered()) {
-
-            if (clar.getWhoJudgedItId() == null || isTeam) {
-                obj[5] = "";
+                if (clar.isSendToAll()) {
+                    obj[idx++] = "Broadcast";
+                } else {
+                    obj[idx++] = "Answered";
+                }
             } else {
-                obj[5] = clar.getWhoJudgedItId().getName();
+                obj[idx++] = "New";
             }
+        } else {
+            obj[idx++] = clar.getState();
         }
 
-        if (clar.isSendToAll()) {
-            obj[6] = "All Teams";
-        } else {
-            obj[6] = getTeamDisplayName(clar.getSubmitter());
+        if (!isTeam) {
+            if (clar.isAnswered()) {
+    
+                if (clar.getWhoJudgedItId() == null || isTeam) {
+                    obj[idx++] = "";
+                } else {
+                    obj[idx++] = clar.getWhoJudgedItId().getName();
+                }
+            } else {
+                obj[idx++] = "";
+            }
+            if (clar.isSendToAll()) {
+                obj[idx++] = "All Teams";
+            } else {
+                obj[idx++] = getTeamDisplayName(clar.getSubmitter());
+            }
         }
-        obj[7] = getProblemTitle(clar.getProblemId());
-        obj[8] = clar.getQuestion();
-        obj[9] = clar.getAnswer();
+        obj[idx++] = getProblemTitle(clar.getProblemId());
+        obj[idx++] = clar.getQuestion();
+        obj[idx++] = clar.getAnswer();
 
         return obj;
     }
@@ -523,6 +572,7 @@ public class ClarificationsPane extends JPanePlugin {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 updateGUIperPermissions();
+                resetClarsListBoxColumns();
                 reloadListBox();
             }
         });
