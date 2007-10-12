@@ -197,6 +197,17 @@ public class ConfigurationIO {
                 }
 
                 try {
+                    key = ConfigKeys.GENERAL_PROBLEM;
+                    if (configuration.containsKey(key)) {
+                        Problem genProblem = (Problem)  configuration.get(key.toString());
+                        contest.setGeneralProblem(genProblem);
+                        log.info("Loaded " + key.toString().toLowerCase());
+                    }
+                } catch (Exception e) {
+                    log.log(Log.WARNING, "Exception while loading general problem ", e);
+                }
+                
+                try {
                     key = ConfigKeys.ACCOUNTS;
                     if (configuration.containsKey(key)) {
                         Account[] accounts = (Account[]) configuration.get(key.toString());
@@ -221,7 +232,7 @@ public class ConfigurationIO {
                 } catch (Exception e) {
                     log.log(Log.WARNING, "Exception while loading judgements ", e);
                 }
-
+                
                 try {
                     key = ConfigKeys.PROBLEM_DATA_FILES;
                     if (configuration.containsKey(key)) {
@@ -340,7 +351,9 @@ public class ConfigurationIO {
         configuration.add(ConfigKeys.CONTEST_TIME, contest.getContestTime());
         configuration.add(ConfigKeys.CONTEST_TIME_LIST, contest.getContestTimes());
         configuration.add(ConfigKeys.BALLOON_SETTINGS_LIST, contest.getBalloonSettings());
-        // configuration.add(ConfigKeys.GENERAL_PROBLEM, contest.huh());
+        if (contest.getGeneralProblem() != null){
+            configuration.add(ConfigKeys.GENERAL_PROBLEM, contest.getGeneralProblem());
+        }
         configuration.add(ConfigKeys.PROBLEM_DATA_FILES, contest.getProblemDataFiles());
         configuration.add(ConfigKeys.JUDGEMENTS, contest.getJudgements());
         configuration.add(ConfigKeys.LANGUAGES, contest.getLanguages());

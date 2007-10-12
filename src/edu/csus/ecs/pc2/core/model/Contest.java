@@ -86,6 +86,8 @@ public class Contest implements IContest {
     private Vector<IAccountListener> accountListenerList = new Vector<IAccountListener>();
     
     private GroupList groupList = new GroupList();
+    
+    private Problem generalProblem = null;
 
     /**
      * Logins on this site.
@@ -207,6 +209,9 @@ public class Contest implements IContest {
             site.setActive(true);
             siteList.add(site);
             contestInformation.setContestTitle("Default Contest Title");
+            if (getGeneralProblem() == null){
+                setGeneralProblem(new Problem("General"));
+            }
         }
 
         if (getContestTime(siteNum) == null){
@@ -1430,5 +1435,13 @@ public class Contest implements IContest {
 
     public Group getGroup(ElementId elementId) {
         return (Group) groupList.get(elementId);
+    }
+
+    public Problem getGeneralProblem() {
+        return generalProblem;
+    }
+
+    public void setGeneralProblem(Problem generalProblem) {
+        generalProblem = generalProblem;
     }
 }

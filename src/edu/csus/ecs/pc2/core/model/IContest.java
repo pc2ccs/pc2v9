@@ -621,5 +621,9 @@ public interface IContest {
     BalloonSettings getBalloonSettings(ElementId elementId);
 
     void addBalloonSettingsListener(IBalloonSettingsListener implementation);
+    
+    void setGeneralProblem (Problem newGeneralProblem);
+    
+    Problem getGeneralProblem ();
 
 }
