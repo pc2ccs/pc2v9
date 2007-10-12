@@ -238,11 +238,17 @@ public class ServerView extends JFrame implements UIPlugin {
         }
 
         public void contestStarted(ContestTimeEvent event) {
-            updateFrameTitle(event.getContestTime().isContestRunning());
+            // only update our title if the event concerns us
+            if (model.getSiteNumber() == event.getSiteNumber()) {
+                updateFrameTitle(event.getContestTime().isContestRunning());
+            }
         }
 
         public void contestStopped(ContestTimeEvent event) {
-            updateFrameTitle(event.getContestTime().isContestRunning());
+            // only update our title if the event concerns us
+            if (model.getSiteNumber() == event.getSiteNumber()) {
+                updateFrameTitle(event.getContestTime().isContestRunning());
+            }
         }
         
     }
