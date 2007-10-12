@@ -138,6 +138,13 @@ public class ProblemsReport implements IReport {
             printWriter.println("  Problem Data File set for " + problem + " id=" + problemDataFile.getProblemId());
             writeProblemDataFiles(printWriter, problemDataFile);
         }
+        
+        if (contest.getGeneralProblem() == null){
+            printWriter.println(" General Problem: (not defined) ");
+        } else {
+            printWriter.println(" General Problem: "+contest.getGeneralProblem().getElementId());
+        }
+        
     }
 
     private void printHeader(PrintWriter printWriter) {

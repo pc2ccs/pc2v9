@@ -252,6 +252,12 @@ public class InternalDumpReport implements IReport {
             printWriter.println("  '" + problem + "' id=" + problem.getElementId());
 
         }
+        
+        if (contest.getGeneralProblem() == null){
+            printWriter.println(" General Problem: (not defined) ");
+        } else {
+            printWriter.println(" General Problem: "+contest.getGeneralProblem().getElementId());
+        }
 
         // Language
         printWriter.println();
