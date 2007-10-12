@@ -562,6 +562,10 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             contest.initializeSubmissions(contest.getSiteNumber());
             
             loadJudgements();
+            
+            if (contest.getGeneralProblem() == null){
+                contest.setGeneralProblem(new Problem("General"));
+            }
 
             info("initialized controller Site " + contest.getSiteNumber());          writeConfigToDisk();
         } else {
