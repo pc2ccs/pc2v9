@@ -131,6 +131,8 @@ public class SelectJudgementPane extends JPanePlugin {
 
     private DisplayTeamName displayTeamName = null;
 
+    private IFileViewer executableFileViewer;
+
     /**
      * This method initializes
      * 
@@ -244,7 +246,9 @@ public class SelectJudgementPane extends JPanePlugin {
         closeViewer(dataFileViewer);
         closeViewer(answerFileViewer);
         closeViewer(sourceViewer);
+        closeViewer(executableFileViewer);
     }
+    
     private void closeViewer(IFileViewer fileViewer) {
         if (fileViewer != null) {
             fileViewer.dispose();
@@ -629,7 +633,10 @@ public class SelectJudgementPane extends JPanePlugin {
 
         executable = new Executable(getContest(), getController(), run, runFiles);
 
-        IFileViewer fileViewer = executable.execute();
+        if (executableFileViewer != null) {
+            executableFileViewer.dispose();
+        }
+        executableFileViewer = executable.execute();
 
         // Show validator results, if there are any.
 
@@ -644,7 +651,7 @@ public class SelectJudgementPane extends JPanePlugin {
             }
         }
 
-        fileViewer.setVisible(true);
+        executableFileViewer.setVisible(true);
     }
 
     public void setRunAndFiles(Run theRun, RunFiles runFiles2) {
@@ -818,6 +825,7 @@ public class SelectJudgementPane extends JPanePlugin {
 
         enableUpdateButtons(false);
 
+        closeViewerWindows();
         RunResultFiles runResultFiles = null;
 
         JudgementRecord judgementRecord = null;
