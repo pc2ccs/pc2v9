@@ -1154,8 +1154,9 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         for (int i = 0; i < runIDs.length; i++) {
             System.out.println("Canceling runID " + (contest.getRun(runIDs[i])).getNumber());
             Run run = contest.getRun(runIDs[i]);
-            Packet packet = PacketFactory.createUnCheckoutRun(judgeId, getServerClientId(), run);
-            packetHandler.cancelRun(packet, run, getServerClientId());
+            ClientId destinationId = new ClientId(run.getSiteNumber(), Type.SERVER, 0);
+            Packet packet = PacketFactory.createUnCheckoutRun(judgeId, destinationId, run);
+            packetHandler.cancelRun(packet, run, destinationId);
         }
     }
 
