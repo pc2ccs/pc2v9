@@ -1077,7 +1077,7 @@ public class PacketHandler {
         return id.getClientType().equals(ClientType.Type.ADMINISTRATOR);
     }
     
-    private void cancelRun(Packet packet, Run run, ClientId whoCanceledRun) {
+    public void cancelRun(Packet packet, Run run, ClientId whoCanceledRun) {
 
         if (isServer()) {
 
