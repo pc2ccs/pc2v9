@@ -385,8 +385,8 @@ public class ProblemPane extends JPanePlugin {
 
         if (problemRequiresDataCheckBox.isSelected()) {
 
-            String fileName = inputDataFileLabel.getText() + "";
-            if (fileName.trim().length() == 0) {
+            String fileName = inputDataFileLabel.getText();
+            if (fileName == null || fileName.trim().length() == 0) {
                 throw new InvalidFieldValue("Problem Requires Input Data checked, select a file ");
             }
 
@@ -406,7 +406,7 @@ public class ProblemPane extends JPanePlugin {
             } else {
                 SerializedFile sFile = getController().getProblemDataFiles(checkProblem).getJudgesDataFile();
                 SerializedFile serializedFile = null;
-                if (sFile.getAbsolutePath().equals(fileName)) {
+                if (sFile != null && sFile.getAbsolutePath().equals(fileName)) {
                     serializedFile = sFile;
                 } else {
                     serializedFile = new SerializedFile(fileName);
@@ -424,8 +424,8 @@ public class ProblemPane extends JPanePlugin {
         }
 
         if (judgesHaveAnswerFiles.isSelected()) {
-            String fileName = answerFileNameLabel.getText() + "";
-            if (fileName.trim().length() == 0) {
+            String fileName = answerFileNameLabel.getText();
+            if (fileName == null || fileName.trim().length() == 0) {
                 throw new InvalidFieldValue("Judges Have Provided Answer File checked, select a file");
             }
 
@@ -445,7 +445,7 @@ public class ProblemPane extends JPanePlugin {
             } else {
                 SerializedFile sFile = getController().getProblemDataFiles(checkProblem).getJudgesAnswerFile();
                 SerializedFile serializedFile = null;
-                if (sFile.getAbsolutePath().equals(fileName)) {
+                if (sFile != null && sFile.getAbsolutePath().equals(fileName)) {
                     serializedFile = sFile;
                 } else {
                     serializedFile = new SerializedFile(fileName);
@@ -586,10 +586,10 @@ public class ProblemPane extends JPanePlugin {
             return false;
         }
 
-        String fileName = inputDataFileLabel.getText() + "";
+        String fileName = inputDataFileLabel.getText();
         if (getProblemRequiresDataCheckBox().isSelected()) {
             // this check is outside so we can provide a specific message
-            if (fileName.trim().length() == 0) {
+            if (fileName == null || fileName.trim().length() == 0) {
                 showMessage("Problem Requires Input Data checked, select a file ");
                 return false;
             }
@@ -604,6 +604,7 @@ public class ProblemPane extends JPanePlugin {
             }
         } else {
             if (fileName != null && fileName.trim().length() > 0) {
+                System.out.println("XXX filename='"+fileName+"'");
                 // file selected, but checkbox not clicked
                 int verifyInputDataFile = JOptionPane.showConfirmDialog(getParent(), "Use selected data file?");
                 switch (verifyInputDataFile) {
@@ -622,10 +623,10 @@ public class ProblemPane extends JPanePlugin {
             }
         }
 
-        fileName = answerFileNameLabel.getText() + "";
+        fileName = answerFileNameLabel.getText();
         if (getJudgesHaveAnswerFiles().isSelected()) {
             // this check is outside so we can provide a specific message
-            if (fileName.trim().length() == 0) {
+            if (fileName != null && fileName.trim().length() == 0) {
                 showMessage("Problem Requires Judges' Answer File checked, select a file ");
                 return false;
             }
@@ -633,6 +634,7 @@ public class ProblemPane extends JPanePlugin {
                 // note: if error, then checkFile will showMessage
                 return false;
             }
+        } else {
             if (fileName != null && fileName.trim().length() > 0) {
                 // file selected, but checkbox not clicked
                 int verifyAnswerFile = JOptionPane.showConfirmDialog(getParent(), "Use selected answer file?");
