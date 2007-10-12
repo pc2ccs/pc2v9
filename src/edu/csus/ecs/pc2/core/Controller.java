@@ -1135,8 +1135,6 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     private void cancelAllClarsByThisJudge(ClientId judgeId) {
         Clarification[] clars = contest.getClarifications();
         for (int i = 0; i < clars.length; i++) {
-            System.out.println("Clar state =" + clars[i].getState());
-            System.out.println("Clar judged id = " + clars[i].getWhoJudgedItId() );
             if ((clars[i].getState() == ClarificationStates.BEING_ANSWERED) && (clars[i].getWhoCheckedItOutId().equals(judgeId))) {
                 Packet packet = PacketFactory.createUnCheckoutClarification(contest.getClientId(), getServerClientId(), clars[i]);
                 packetHandler.cancelClarificationCheckOut(packet);
@@ -1152,10 +1150,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     private void cancelAllRunsByThisJudge(ClientId judgeId) {
         ElementId [] runIDs = contest.getRunIdsCheckedOutBy(judgeId);
         for (int i = 0; i < runIDs.length; i++) {
-            
-            System.out.println("Canceling runID " + (contest.getRun(runIDs[i])).getNumber());
             Run run = contest.getRun(runIDs[i]);
-            
             ClientId destinationId = new ClientId(run.getSiteNumber(), Type.SERVER, 0);
             Packet packet = PacketFactory.createUnCheckoutRun(judgeId, destinationId, run);
             packetHandler.cancelRun(packet, run, judgeId);
