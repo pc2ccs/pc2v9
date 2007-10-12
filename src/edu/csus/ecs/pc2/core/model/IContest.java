@@ -480,6 +480,15 @@ public interface IContest {
     ClientId getRunCheckedOutBy(Run run);
 
     /**
+     * Returns which user has checked out the input run.
+     * 
+     * @param clientid
+     * @return Element id of runs, or null if not checked out.
+     */
+    ElementId[] getRunIdsCheckedOutBy(ClientId judgeID);
+
+    
+    /**
      * Available run, a canceled run.
      * 
      * @param run

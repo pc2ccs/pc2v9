@@ -1002,6 +1002,31 @@ public class Contest implements IContest {
         return runCheckOutList.get(run.getElementId());
     }
 
+    public ElementId[] getRunIdsCheckedOutBy(ClientId judgeID) {
+        ElementId runId;
+        ClientId cID;
+        
+        if (runCheckOutList.size() == 0) {
+            return null;
+        }
+
+        Vector<ElementId> v = new Vector<ElementId>();
+        Enumeration runIDs = runCheckOutList.keys();
+        
+        while (runIDs.hasMoreElements()) {
+            
+           runId = (ElementId) runIDs.nextElement();
+            
+           cID = runCheckOutList.get(runId);
+           
+           if (cID.equals(judgeID)) {
+               v.addElement(runId);
+           }
+        }
+        
+        return (ElementId[]) v.toArray(new ElementId[v.size()]);
+    }
+    
     public Clarification[] getClarifications() {
         return clarificationList.getList();
     }

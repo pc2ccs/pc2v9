@@ -19,6 +19,7 @@ import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ConfigurationIO;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
@@ -1115,12 +1116,21 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         if (clientId != null) {
             // Logged in
             removeLogin(clientId);
+            cancelAllRunsByThisJudge(clientId);
         }
 
         if (contest.isConnected(connectionHandlerID)) {
             removeConnection(connectionHandlerID);
         }
         // else nothing to do.
+    }
+
+    private void cancelAllRunsByThisJudge(ClientId clientId) {
+
+        ElementId [] runIDs = contest.getRunIdsCheckedOutBy(clientId);
+        for (int i = 0; i < runIDs.length; i++) {
+            cancelRun(contest.getRun(runIDs[i]));
+        }
     }
 
     public void logoffUser(ClientId clientId) {
@@ -1131,6 +1141,10 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
             info("LOGOFF " + clientId + " " + connectionHandlerID);
             removeLogin(clientId);
+
+            if (clientId.getClientType().equals(ClientType.Type.JUDGE)) {
+                cancelAllRunsByThisJudge(clientId);
+            }
 
         } else {
             info("LOGOFF remote " + clientId);
