@@ -236,9 +236,21 @@ public class SelectJudgementPane extends JPanePlugin {
     private void cancelRun() {
 
         enableUpdateButtons(false);
+        closeViewerWindows();
         Run newRun = getRunFromFields();
         getController().cancelRun(newRun);
 
+    }
+
+    private void closeViewerWindows() {
+        closeViewer(dataFileViewer);
+        closeViewer(answerFileViewer);
+        closeViewer(sourceViewer);
+    }
+    private void closeViewer(IFileViewer fileViewer) {
+        if (fileViewer != null) {
+            fileViewer.dispose();
+        }
     }
 
     protected void updateRun() {
@@ -246,7 +258,8 @@ public class SelectJudgementPane extends JPanePlugin {
         Run newRun = getRunFromFields();
 
         enableUpdateButtons(false);
-
+        closeViewerWindows();
+        
         JudgementRecord judgementRecord = null;
         RunResultFiles runResultFiles = null;
 
