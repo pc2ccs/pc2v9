@@ -197,34 +197,38 @@ public class TeamView extends JFrame implements UIPlugin {
         this.model = inContest;
         this.teamController = inController;
 
-        if (logWindow == null) {
-            logWindow = new LogWindow();
-        }
-        logWindow.setContestAndController(model, teamController);
-        logWindow.setTitle("Log " + model.getClientId().toString());
-
-        model.addContestTimeListener(new ContestTimeListenerImplementation());
-
-        SubmitRunPane submitRunPane = new SubmitRunPane();
-        addUIPlugin(getMainTabbedPane(), "Submit Run", submitRunPane);
-
-        RunsPanel runsPanel = new RunsPanel();
-        runsPanel.setShowJudgesInfo(false);
-        addUIPlugin(getMainTabbedPane(), "View Runs", runsPanel);
-
-        SubmitClarificationPane submitClarificationPane = new SubmitClarificationPane();
-        addUIPlugin(getMainTabbedPane(), "Request Clarification", submitClarificationPane);
-
-        ClarificationsPane clarificationsPane = new ClarificationsPane();
-        addUIPlugin(getMainTabbedPane(), "View Clarifications", clarificationsPane);
-
-        OptionsPanel optionsPanel = new OptionsPanel();
-        addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
-        optionsPanel.setLogWindow(logWindow);
-
-        updateFrameTitle(model.getContestTime().isContestRunning());
-
-        setVisible(true);
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                if (logWindow == null) {
+                    logWindow = new LogWindow();
+                }
+                logWindow.setContestAndController(model, teamController);
+                logWindow.setTitle("Log " + model.getClientId().toString());
+        
+                model.addContestTimeListener(new ContestTimeListenerImplementation());
+        
+                SubmitRunPane submitRunPane = new SubmitRunPane();
+                addUIPlugin(getMainTabbedPane(), "Submit Run", submitRunPane);
+        
+                RunsPanel runsPanel = new RunsPanel();
+                runsPanel.setShowJudgesInfo(false);
+                addUIPlugin(getMainTabbedPane(), "View Runs", runsPanel);
+        
+                SubmitClarificationPane submitClarificationPane = new SubmitClarificationPane();
+                addUIPlugin(getMainTabbedPane(), "Request Clarification", submitClarificationPane);
+        
+                ClarificationsPane clarificationsPane = new ClarificationsPane();
+                addUIPlugin(getMainTabbedPane(), "View Clarifications", clarificationsPane);
+        
+                OptionsPanel optionsPanel = new OptionsPanel();
+                addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
+                optionsPanel.setLogWindow(logWindow);
+        
+                updateFrameTitle(model.getContestTime().isContestRunning());
+        
+                setVisible(true);
+            }
+        });
     }
 
     public String getPluginTitle() {

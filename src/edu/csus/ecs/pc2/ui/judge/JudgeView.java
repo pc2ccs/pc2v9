@@ -133,41 +133,45 @@ public class JudgeView extends JFrame implements UIPlugin {
         this.contest = inContest;
         this.controller = inController;
 
-        if (logWindow == null) {
-            logWindow = new LogWindow();
-        }
-        logWindow.setContestAndController(contest, controller);
-        logWindow.setTitle("Log " + contest.getClientId().toString());
-
-        contest.addContestTimeListener(new ContestTimeListenerImplementation());
-
-        setFrameTitle(contest.getContestTime().isContestRunning());
-        showMessage("");
-
-        RunsPanel newRunsPane = new RunsPanel();
-        newRunsPane.setShowNewRunsOnly(true);
-        addUIPlugin(getMainTabbedPane(), "New Runs", newRunsPane);
-
-        RunsPanel runsPanel = new RunsPanel();
-        addUIPlugin(getMainTabbedPane(), "All Runs", runsPanel);
-
-        ClarificationsPane newClarificationsPane = new ClarificationsPane();
-        newClarificationsPane.setShowNewClarificationsOnly(true);
-        addUIPlugin(getMainTabbedPane(), "New Clars", newClarificationsPane);
-
-        ClarificationsPane clarificationsPane = new ClarificationsPane();
-        addUIPlugin(getMainTabbedPane(), "All clarifications", clarificationsPane);
-
-        SubmitRunPane submitRunPane = new SubmitRunPane();
-        addUIPlugin(getMainTabbedPane(), "Test Run", submitRunPane);
-
-        OptionsPanel optionsPanel = new OptionsPanel();
-        addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
-        optionsPanel.setLogWindow(logWindow);
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                if (logWindow == null) {
+                    logWindow = new LogWindow();
+                }
+                logWindow.setContestAndController(contest, controller);
+                logWindow.setTitle("Log " + contest.getClientId().toString());
         
-        SubmissionBiffPane submissionBiffPane = new SubmissionBiffPane();
-        getJudgeBiffPane().add(submissionBiffPane, java.awt.BorderLayout.CENTER);
-        submissionBiffPane.setContestAndController(contest, controller);
+                contest.addContestTimeListener(new ContestTimeListenerImplementation());
+        
+                setFrameTitle(contest.getContestTime().isContestRunning());
+                showMessage("");
+        
+                RunsPanel newRunsPane = new RunsPanel();
+                newRunsPane.setShowNewRunsOnly(true);
+                addUIPlugin(getMainTabbedPane(), "New Runs", newRunsPane);
+        
+                RunsPanel runsPanel = new RunsPanel();
+                addUIPlugin(getMainTabbedPane(), "All Runs", runsPanel);
+        
+                ClarificationsPane newClarificationsPane = new ClarificationsPane();
+                newClarificationsPane.setShowNewClarificationsOnly(true);
+                addUIPlugin(getMainTabbedPane(), "New Clars", newClarificationsPane);
+        
+                ClarificationsPane clarificationsPane = new ClarificationsPane();
+                addUIPlugin(getMainTabbedPane(), "All clarifications", clarificationsPane);
+        
+                SubmitRunPane submitRunPane = new SubmitRunPane();
+                addUIPlugin(getMainTabbedPane(), "Test Run", submitRunPane);
+        
+                OptionsPanel optionsPanel = new OptionsPanel();
+                addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
+                optionsPanel.setLogWindow(logWindow);
+                
+                SubmissionBiffPane submissionBiffPane = new SubmissionBiffPane();
+                getJudgeBiffPane().add(submissionBiffPane, java.awt.BorderLayout.CENTER);
+                submissionBiffPane.setContestAndController(contest, controller);
+            }
+        });
 
     }
 
