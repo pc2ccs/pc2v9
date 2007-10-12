@@ -37,12 +37,12 @@ public class Account implements IElementObject {
      * An alias that may be displayed to judges to keep
      * the identity of a team consistent yet anonymous.
      */
-    private String aliasName;
+    private String aliasName = "";
     
     /**
      * An external identifier, ex: an ICPC id
      */
-    private String externalId;
+    private String externalId = "";
     
     /**
      * Group id
@@ -51,11 +51,11 @@ public class Account implements IElementObject {
     
     private PermissionList permissionList = new PermissionList();
 
-    private String shortSchoolName;
+    private String shortSchoolName = "";
 
-    private String longSchoolName;
+    private String longSchoolName = "";
 
-    private String externalName;
+    private String externalName = "";
 
     /**
      * Create an account
