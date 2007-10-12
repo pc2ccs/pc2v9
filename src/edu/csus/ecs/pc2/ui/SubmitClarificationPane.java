@@ -151,8 +151,10 @@ public class SubmitClarificationPane extends JPanePlugin {
     private void populateGUI() {
 
         getProblemComboBox().removeAllItems();
-        Problem problemN = new Problem("None Selected");
+        Problem problemN = new Problem("Select Problem");
         getProblemComboBox().addItem(problemN);
+
+        getProblemComboBox().addItem(getContest().getGeneralProblem());
         
         for (Problem problem : getContest().getProblems()) {
             getProblemComboBox().addItem(problem);
@@ -286,16 +288,16 @@ public class SubmitClarificationPane extends JPanePlugin {
 
         this.log = getController().getLog();
         
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                populateGUI();
-            }
-        });
-        
         getContest().addContestTimeListener(new ContestTimeListenerImplementation());
         getContest().addProblemListener(new ProblemListenerImplementation());
 
-        setVisible(true);
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                populateGUI();
+                setVisible(true);
+            }
+        });
+        
         
     }
 

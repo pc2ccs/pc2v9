@@ -44,8 +44,6 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
 public class Contest implements IContest {
 
-    public static final String SVN_ID = "$Id$";
-
     private ClientId localClientId = null;
 
     private Vector<IRunListener> runListenerList = new Vector<IRunListener>();
@@ -1094,7 +1092,11 @@ public class Contest implements IContest {
     }
 
     public Problem getProblem(ElementId elementId) {
-        return (Problem) problemList.get(elementId);
+        if (generalProblem != null && generalProblem.getElementId().equals(elementId)){
+            return generalProblem;
+        } else {
+            return (Problem) problemList.get(elementId);
+        }
     }
 
     public Judgement getJudgement(ElementId elementId) {

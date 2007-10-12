@@ -68,6 +68,8 @@ public final class PacketFactory {
 
     public static final String PROBLEM = "PROBLEM";
 
+    public static final String GENERAL_PROBLEM = "GENERAL_PROBLEM";
+    
     public static final String GROUP = "GROUP";
 
     public static final String CLARIFICATION_ANSWER = "CLARIFICATION_ANSWER";
@@ -878,6 +880,7 @@ public final class PacketFactory {
             prop.put(CLIENT_SETTINGS_LIST, data.getClientSettings());
             prop.put(BALLOON_SETTINGS_LIST, data.getBalloonSettingsArray());
             prop.put(GROUP_LIST, data.getGroups());
+            prop.put(GENERAL_PROBLEM, data.getGeneralProblem());
 
             Packet packet = new Packet(Type.LOGIN_SUCCESS, source, destination, prop);
             return packet;

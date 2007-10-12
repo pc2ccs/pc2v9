@@ -396,6 +396,7 @@ public class PacketHandler {
      * 
      * @param comment
      */
+    @SuppressWarnings("unused")
     private void dumpServerLoginLists(String comment) {
         
         System.out.println("dumpLoginLists ("+contest.getSiteNumber()+" "+comment);
@@ -1682,49 +1683,7 @@ public class PacketHandler {
             controller.getLog().log(Log.WARNING,"Exception logged ", e);
         }
     }
-
-
-    private void addRemoteContestTimes(Packet packet) {
-        try {
-            ContestTime[] contestTimes = (ContestTime[]) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME_LIST);
-            if (contestTimes != null) {
-                for (ContestTime contestTime : contestTimes) {
-                    if (contest.getSiteNumber() != contestTime.getSiteNumber()) {
-                        // Update other sites contestTime, do not touch ours.
-                        if (contest.getContestTime(contestTime.getSiteNumber()) != null) {
-                            contest.updateContestTime(contestTime);
-                        } else {
-                            contest.addContestTime(contestTime);
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            // TODO: log handle exception
-            e.printStackTrace();
-            controller.getLog().log(Log.WARNING,"Exception logged ", e);
-        }
-    }
-
-    private void updateSitesToModel(Packet packet) {
-
-        try {
-            Site[] sites = (Site[]) PacketFactory.getObjectValue(packet, PacketFactory.SITE_LIST);
-            if (sites != null) {
-                for (Site site : sites) {
-                    if (contest.getSite(site.getSiteNumber()) == null){
-                        // Only add site if site does not exist on this server.
-                        contest.addSite(site);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            // TODO: log handle exception
-            controller.getLog().log(Log.WARNING, "Exception logged ", e);
-        }
-
-    }
-
+    
     /**
      * Add contest data into the contest.
      * 
@@ -1844,6 +1803,18 @@ public class PacketHandler {
         addLoginsToModel(packet);
         
         addBalloonSettingsToModel (packet);
+        
+        
+        try {
+            Problem generalProblem = (Problem) PacketFactory.getObjectValue(packet, PacketFactory.GENERAL_PROBLEM);
+            if (generalProblem != null) {
+                contest.setGeneralProblem(generalProblem);
+            }
+
+        } catch (Exception e) {
+            // TODO: log handle exception
+            controller.getLog().log(Log.WARNING,"Exception logged in General Problem ", e);
+        }
 
         if (contest.isLoggedIn()) {
             
@@ -2182,23 +2153,24 @@ public class PacketHandler {
             clientSettings = contest.getClientSettingsList();
         }
 
-        ContestLoginSuccessData data = new ContestLoginSuccessData();
-        data.setAccounts(getAllAccounts());
-        data.setBalloonSettingsArray(contest.getBalloonSettings());
-        data.setClarifications(clarifications);
-        data.setClientSettings(clientSettings);
-        data.setConnectionHandlerIDs(contest.getConnectionHandleIDs());
-        data.setContestTimes(contest.getContestTimes()); 
-        data.setGroups(contest.getGroups());
-        data.setJudgements(contest.getJudgements());
-        data.setLanguages(contest.getLanguages());
-        data.setLoggedInUsers(getAllLoggedInUsers());
-        data.setProblemDataFiles(problemDataFiles);
-        data.setProblems(contest.getProblems());
-        data.setRuns(runs);
-        data.setSites(contest.getSites());
+        ContestLoginSuccessData contestLoginSuccessData = new ContestLoginSuccessData();
+        contestLoginSuccessData.setAccounts(getAllAccounts());
+        contestLoginSuccessData.setBalloonSettingsArray(contest.getBalloonSettings());
+        contestLoginSuccessData.setClarifications(clarifications);
+        contestLoginSuccessData.setClientSettings(clientSettings);
+        contestLoginSuccessData.setConnectionHandlerIDs(contest.getConnectionHandleIDs());
+        contestLoginSuccessData.setContestTimes(contest.getContestTimes()); 
+        contestLoginSuccessData.setGroups(contest.getGroups());
+        contestLoginSuccessData.setJudgements(contest.getJudgements());
+        contestLoginSuccessData.setLanguages(contest.getLanguages());
+        contestLoginSuccessData.setLoggedInUsers(getAllLoggedInUsers());
+        contestLoginSuccessData.setProblemDataFiles(problemDataFiles);
+        contestLoginSuccessData.setProblems(contest.getProblems());
+        contestLoginSuccessData.setRuns(runs);
+        contestLoginSuccessData.setSites(contest.getSites());
+        contestLoginSuccessData.setGeneralProblem(contest.getGeneralProblem());
         Packet loginSuccessPacket = PacketFactory.createLoginSuccess(contest.getClientId(), clientId, contest.getContestTime(), 
-                contest.getSiteNumber(), contest.getContestInformation(), data);
+                contest.getSiteNumber(), contest.getContestInformation(), contestLoginSuccessData);
      
         return loginSuccessPacket;
     }

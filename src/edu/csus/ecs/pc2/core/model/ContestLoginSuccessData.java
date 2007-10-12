@@ -34,6 +34,7 @@ public class ContestLoginSuccessData implements Serializable {
     private ProblemDataFiles[] problemDataFiles;
     private Run[] runs;
     private Site[] sites;
+    private Problem generalProblem;
     /**
      * @return Returns the accounts.
      */
@@ -201,5 +202,11 @@ public class ContestLoginSuccessData implements Serializable {
      */
     public void setSites(Site[] sites) {
         this.sites = sites;
+    }
+    public Problem getGeneralProblem() {
+        return generalProblem;
+    }
+    public void setGeneralProblem(Problem generalProblem) {
+        this.generalProblem = generalProblem;
     }
 }
