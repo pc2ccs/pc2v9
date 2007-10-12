@@ -1006,10 +1006,6 @@ public class Contest implements IContest {
         ElementId runId;
         ClientId cID;
         
-        if (runCheckOutList.size() == 0) {
-            return null;
-        }
-
         Vector<ElementId> v = new Vector<ElementId>();
         Enumeration runIDs = runCheckOutList.keys();
         

@@ -483,7 +483,7 @@ public interface IContest {
      * Returns which user has checked out the input run.
      * 
      * @param clientid
-     * @return Element id of runs, or null if not checked out.
+     * @return Element id of runs.
      */
     ElementId[] getRunIdsCheckedOutBy(ClientId judgeID);
 
