@@ -126,8 +126,6 @@ public class AnswerClarificationPane extends JPanePlugin {
 
         displayTeamName = new DisplayTeamName();
         displayTeamName.setContestAndController(inContest, inController);
-        ContestInformation contestInformation = getContest().getContestInformation();
-        displayTeamName.setTeamDisplayMask(contestInformation.getTeamDisplayMode());
 
         initializePermissions();
         updateGUIperPermissions();
@@ -277,6 +275,8 @@ public class AnswerClarificationPane extends JPanePlugin {
     }
 
     public void setClarification(final Clarification inClarification, boolean checkedOut) {
+        ContestInformation contestInformation = getContest().getContestInformation();
+        displayTeamName.setTeamDisplayMask(contestInformation.getTeamDisplayMode());
 
         this.clarification = inClarification;
         this.fetchedFromServer = checkedOut;

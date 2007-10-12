@@ -160,8 +160,6 @@ public class SelectJudgementPane extends JPanePlugin {
 
         displayTeamName = new DisplayTeamName();
         displayTeamName.setContestAndController(inContest, inController);
-        ContestInformation contestInformation = getContest().getContestInformation();
-        displayTeamName.setTeamDisplayMask(contestInformation.getTeamDisplayMode());
 
         initializePermissions();
 
@@ -334,6 +332,8 @@ public class SelectJudgementPane extends JPanePlugin {
     }
 
     public void setRun(final Run run) {
+        ContestInformation contestInformation = getContest().getContestInformation();
+        displayTeamName.setTeamDisplayMask(contestInformation.getTeamDisplayMode());
 
         this.run = run;
 
