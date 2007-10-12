@@ -135,11 +135,16 @@ public class ScoreboardView extends JFrame implements UIPlugin {
 
         contest.addContestTimeListener(new ContestTimeListenerImplementation());
 
-        VersionInfo versionInfo = new VersionInfo();
         // TODO xslDir should be configurable this is just one possible default
-        xslDir = versionInfo.locateHome() + File.separator + "data" + File.separator + "xsl";
+        xslDir = "data" + File.separator + "xsl";
+        File xslDirFile = new File(xslDir);
+        if (!(xslDirFile.canRead() && xslDirFile.isDirectory())) {
+            VersionInfo versionInfo = new VersionInfo();
+            xslDir = versionInfo.locateHome() + File.separator + xslDir;
+        }
 
         log = controller.getLog();
+        log.info("Using XSL from directory "+xslDir);
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
