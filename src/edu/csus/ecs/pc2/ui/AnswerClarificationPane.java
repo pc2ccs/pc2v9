@@ -21,7 +21,10 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
+import edu.csus.ecs.pc2.core.model.DisplayTeamName;
 import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
 
@@ -92,6 +95,8 @@ public class AnswerClarificationPane extends JPanePlugin {
 
     private boolean fetchedFromServer = false;
 
+    private DisplayTeamName displayTeamName = null;
+
     /**
      * This method initializes
      * 
@@ -118,6 +123,11 @@ public class AnswerClarificationPane extends JPanePlugin {
     public void setContestAndController(IContest inContest, IController inController) {
         super.setContestAndController(inContest, inController);
         log = getController().getLog();
+
+        displayTeamName = new DisplayTeamName();
+        displayTeamName.setContestAndController(inContest, inController);
+        ContestInformation contestInformation = getContest().getContestInformation();
+        displayTeamName.setTeamDisplayMask(contestInformation.getTeamDisplayMode());
 
         initializePermissions();
         updateGUIperPermissions();
@@ -294,8 +304,7 @@ public class AnswerClarificationPane extends JPanePlugin {
         if (theClarification != null) {
             getOkButton().setVisible(true);
 
-            ClientId id = theClarification.getSubmitter();
-            String teamName = id.getName();
+            String teamName = getTeamDisplayName(theClarification.getSubmitter());
 
             clarificationInfoLabel.setText("Clarification " + theClarification.getNumber() + " (Site " + theClarification.getSiteNumber() + ") from " + teamName);
 
@@ -389,6 +398,14 @@ public class AnswerClarificationPane extends JPanePlugin {
         });
     }
 
+    private String getTeamDisplayName(ClientId clientId) {
+        if (isJudge() && isTeam(clientId)){
+            return displayTeamName.getDisplayName(clientId);
+        }
+
+        return clientId.getName();
+    }
+
     protected void extractClarification() {
         showMessage("Would have extracted clarification");
         // TODO code extract clarification
@@ -396,6 +413,18 @@ public class AnswerClarificationPane extends JPanePlugin {
 
     private boolean isAllowed(Permission.Type type) {
         return permissionList.isAllowed(type);
+    }
+
+    private boolean isTeam(ClientId clientId) {
+        return clientId == null || clientId.getClientType().equals(Type.TEAM);
+    }
+    
+    private boolean isJudge(ClientId clientId) {
+        return clientId == null || clientId.getClientType().equals(Type.JUDGE);
+    }
+    
+    private boolean isJudge(){
+        return isJudge(getContest().getClientId());
     }
 
     private void initializePermissions() {

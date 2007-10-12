@@ -22,6 +22,8 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
+import edu.csus.ecs.pc2.core.model.DisplayTeamName;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IContest;
@@ -33,6 +35,7 @@ import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
@@ -126,6 +129,8 @@ public class SelectJudgementPane extends JPanePlugin {
 
     private JButton shellButton = null;
 
+    private DisplayTeamName displayTeamName = null;
+
     /**
      * This method initializes
      * 
@@ -152,6 +157,11 @@ public class SelectJudgementPane extends JPanePlugin {
     public void setContestAndController(IContest inContest, IController inController) {
         super.setContestAndController(inContest, inController);
         log = getController().getLog();
+
+        displayTeamName = new DisplayTeamName();
+        displayTeamName.setContestAndController(inContest, inController);
+        ContestInformation contestInformation = getContest().getContestInformation();
+        displayTeamName.setTeamDisplayMask(contestInformation.getTeamDisplayMode());
 
         initializePermissions();
 
@@ -334,8 +344,7 @@ public class SelectJudgementPane extends JPanePlugin {
         if (theRun != null) {
             getUpdateButton().setVisible(true);
 
-            ClientId id = theRun.getSubmitter();
-            String teamName = id.getName();
+            String teamName = getTeamDisplayName(theRun.getSubmitter());
 
             runInfoLabel.setText("Run " + theRun.getNumber() + " (Site " + theRun.getSiteNumber() + ") from " + teamName);
             statusLabel.setText(run.getStatus().toString());
@@ -703,8 +712,28 @@ public class SelectJudgementPane extends JPanePlugin {
         return notifyTeamCheckBox;
     }
 
+    private String getTeamDisplayName(ClientId clientId) {
+        if (isJudge() && isTeam(clientId)){
+            return displayTeamName.getDisplayName(clientId);
+        }
+
+        return clientId.getName();
+    }
+
     private boolean isAllowed(Permission.Type type) {
         return permissionList.isAllowed(type);
+    }
+
+    private boolean isTeam(ClientId clientId) {
+        return clientId == null || clientId.getClientType().equals(Type.TEAM);
+    }
+    
+    private boolean isJudge(ClientId clientId) {
+        return clientId == null || clientId.getClientType().equals(Type.JUDGE);
+    }
+    
+    private boolean isJudge(){
+        return isJudge(getContest().getClientId());
     }
 
     private void initializePermissions() {
