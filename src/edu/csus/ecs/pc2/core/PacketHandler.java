@@ -1113,7 +1113,7 @@ public class PacketHandler {
      * 
      * @param packet
      */
-    private void cancelClarificationCheckOut(Packet packet) {
+    public void cancelClarificationCheckOut(Packet packet) {
         Clarification clarification = (Clarification) PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION);
         ClientId whoCancelledIt = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
 

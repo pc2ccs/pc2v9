@@ -32,6 +32,7 @@ import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Site;
+import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.packet.PacketFactory;
@@ -1117,7 +1118,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             // Logged in
             removeLogin(clientId);
             if (clientId.getClientType().equals(ClientType.Type.JUDGE)) {
-                cancelAllRunsByThisJudge(clientId);
+                cancelAllByThisJudge(clientId);
             }
         }
 
@@ -1127,13 +1128,29 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         // else nothing to do.
     }
 
-    private void cancelAllRunsByThisJudge(ClientId clientId) {
+    private void cancelAllClarsByThisJudge(ClientId judgeId) {
+        Clarification[] clars = contest.getClarifications();
+        for (int i = 0; i < clars.length; i++) {
+            System.out.println("Clar state =" + clars[i].getState());
+            System.out.println("Clar judged id = " + clars[i].getWhoJudgedItId() );
+            if ((clars[i].getState() == ClarificationStates.BEING_ANSWERED) && (clars[i].getWhoCheckedItOutId().equals(judgeId))) {
+                Packet packet = PacketFactory.createUnCheckoutClarification(contest.getClientId(), getServerClientId(), clars[i]);
+                packetHandler.cancelClarificationCheckOut(packet);
+            }
+        }
+    }
 
-        ElementId [] runIDs = contest.getRunIdsCheckedOutBy(clientId);
+    private void cancelAllByThisJudge(ClientId judgeId) {
+        cancelAllRunsByThisJudge(judgeId);
+        cancelAllClarsByThisJudge(judgeId);
+    }
+    
+    private void cancelAllRunsByThisJudge(ClientId judgeId) {
+        ElementId [] runIDs = contest.getRunIdsCheckedOutBy(judgeId);
         for (int i = 0; i < runIDs.length; i++) {
             System.out.println("Canceling runID " + (contest.getRun(runIDs[i])).getNumber());
             Run run = contest.getRun(runIDs[i]);
-            Packet packet = PacketFactory.createUnCheckoutRun(clientId, getServerClientId(), run);
+            Packet packet = PacketFactory.createUnCheckoutRun(judgeId, getServerClientId(), run);
             packetHandler.cancelRun(packet, run, getServerClientId());
         }
     }
@@ -1148,7 +1165,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             removeLogin(clientId);
 
             if (clientId.getClientType().equals(ClientType.Type.JUDGE)) {
-                cancelAllRunsByThisJudge(clientId);
+                cancelAllByThisJudge(clientId);
             }
 
         } else {
