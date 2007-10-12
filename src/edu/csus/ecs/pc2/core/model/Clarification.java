@@ -44,6 +44,8 @@ public class Clarification extends ISubmission {
     }
 
     private ClientId whoJudgedItId = null;
+    
+    private ClientId whoCheckedItOutId = null;
 
     private String question = null;
 
@@ -166,5 +168,13 @@ public class Clarification extends ISubmission {
             // TODO log to static Exception log
             return false;
         }
+    }
+
+    public ClientId getWhoCheckedItOutId() {
+        return whoCheckedItOutId;
+    }
+
+    public void setWhoCheckedItOutId(ClientId whoCheckedItOut) {
+        this.whoCheckedItOutId = whoCheckedItOut;
     }
 }
