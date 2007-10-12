@@ -106,7 +106,7 @@ public class SubmitRunPane extends JPanePlugin {
      */
     private void reloadProblems() {
         getProblemComboBox().removeAllItems();
-        Problem problemN = new Problem("None Selected");
+        Problem problemN = new Problem("Select Problem");
         getProblemComboBox().addItem(problemN);
 
         for (Problem problem : getContest().getProblems()) {
@@ -121,7 +121,7 @@ public class SubmitRunPane extends JPanePlugin {
      */
     private void reloadLanguages() {
         getLanguageComboBox().removeAllItems();
-        Language languageN = new Language("None Selected");
+        Language languageN = new Language("Select Language");
         getLanguageComboBox().addItem(languageN);
 
         for (Language language : getContest().getLanguages()) {
@@ -338,6 +338,7 @@ public class SubmitRunPane extends JPanePlugin {
             submitRunButton.setLocation(new java.awt.Point(355,254));
             submitRunButton.setSize(new java.awt.Dimension(100,26));
             submitRunButton.setPreferredSize(new java.awt.Dimension(100,26));
+            submitRunButton.setMnemonic(java.awt.event.KeyEvent.VK_S);
             submitRunButton.setText("Submit");
             submitRunButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -525,6 +526,7 @@ public class SubmitRunPane extends JPanePlugin {
         if (pickFileButton == null) {
             pickFileButton = new JButton();
             pickFileButton.setEnabled(false);
+            pickFileButton.setMnemonic(java.awt.event.KeyEvent.VK_L);
             pickFileButton.setText("Select");
             pickFileButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -671,6 +673,7 @@ public class SubmitRunPane extends JPanePlugin {
             testButton.setLocation(new java.awt.Point(20,254));
             testButton.setSize(new java.awt.Dimension(100,26));
             testButton.setPreferredSize(new java.awt.Dimension(100,26));
+            testButton.setMnemonic(java.awt.event.KeyEvent.VK_T);
             testButton.setVisible(true);
             testButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
