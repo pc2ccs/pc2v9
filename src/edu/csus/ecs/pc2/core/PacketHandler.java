@@ -1275,6 +1275,8 @@ public class PacketHandler {
                 } else if (theClarification.getState() == ClarificationStates.NEW || isSuperUser(requestFromId)) {
 
                     theClarification.setState(ClarificationStates.BEING_ANSWERED);
+                    theClarification.setWhoCheckedItOutId(requestFromId);
+                    
                     contest.updateClarification(theClarification, requestFromId);
 
                     theClarification = contest.getClarification(clarification.getElementId());
