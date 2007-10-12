@@ -258,9 +258,12 @@ public class BalloonHandler extends JPanePlugin {
                     // pull apart key into ClientId & ElementId
                     BalloonDeliveryInfo bdi = sentBalloons.get(key);
                     ClientId clientId = bdi.getClientId();
-                    ElementId problemId = bdi.getProblemId();
-                    if (takeBalloon(buildBalloon("take", clientId, problemId, null))) {
-                        tookBalloonFrom(key);
+                    // sentBalloons includes all sites, filter for this site
+                    if (clientId.getSiteNumber() == siteNumber) {
+                        ElementId problemId = bdi.getProblemId();
+                        if (takeBalloon(buildBalloon("take", clientId, problemId, null))) {
+                            tookBalloonFrom(key);
+                        }
                     }
                 }
             }
