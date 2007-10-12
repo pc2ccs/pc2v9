@@ -18,7 +18,6 @@ import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.ILoginListener;
 import edu.csus.ecs.pc2.core.model.LoginEvent;
-import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 import javax.swing.JButton;
@@ -273,15 +272,6 @@ public class LoginsPane extends JPanePlugin {
         if (account != null) {
             permissionList.clearAndLoadPermissions(account.getPermissionList());
         }
-    }
-
-    private boolean isAllowed(Permission.Type type) {
-        return permissionList.isAllowed(type);
-    }
-
-    private void updateGUIperPermissions() {
-
-        logoffButton.setEnabled(isAllowed(Permission.Type.FORCE_LOGOFF_CLIENT));
     }
 
     /**
