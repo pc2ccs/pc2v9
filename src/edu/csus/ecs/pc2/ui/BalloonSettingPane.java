@@ -34,7 +34,7 @@ public class BalloonSettingPane extends JPanePlugin {
 
     private static final long serialVersionUID = -1060536964672397704L;
 
-    private Site noneSelected = new Site("None Selected", 0);
+    private Site noneSelected = new Site("Select Site", 0);
 
     private JPanel messagePane = null;
 
@@ -84,6 +84,8 @@ public class BalloonSettingPane extends JPanePlugin {
 
     private JComboBox siteComboBox = null;
 
+    private IContest contest;
+
     /**
      * This method initializes
      * 
@@ -109,6 +111,7 @@ public class BalloonSettingPane extends JPanePlugin {
     public void setContestAndController(IContest inContest, IController inController) {
         super.setContestAndController(inContest, inController);
 
+        contest = inContest;
         log = getController().getLog();
     }
 
@@ -202,44 +205,6 @@ public class BalloonSettingPane extends JPanePlugin {
         }
     }
 
-    /**
-     * Enable or disable Update button based on comparison of run to fields.
-     * 
-     */
-    public void enableUpdateButton() {
-
-        if (populatingGUI) {
-            return;
-        }
-
-        boolean enableButton = false;
-
-        if (balloonSettings != null) {
-
-            try {
-                BalloonSettings changedBalloonSettings = getBalloonSettingsFromFields(null);
-
-                if (!balloonSettings.isSameAs(changedBalloonSettings)) {
-                    enableButton = true;
-                }
-
-            } catch (InvalidFieldValue e) {
-                // invalid field, but that is ok as they are entering data
-                // will be caught and reported when they hit update or add.
-                StaticLog.getLog().log(Log.DEBUG, "Input BalloonSettings (but not saving) ", e);
-                enableButton = true;
-            }
-
-        } else {
-            if (getAddButton().isVisible()) {
-                enableButton = true;
-            }
-        }
-
-        enableUpdateButtons(enableButton);
-
-    }
-
     protected void enableUpdateButtons(boolean fieldsChanged) {
         if (fieldsChanged) {
             cancelButton.setText("Cancel");
@@ -260,6 +225,10 @@ public class BalloonSettingPane extends JPanePlugin {
     public BalloonSettings getBalloonSettingsFromFields(BalloonSettings checkBalloonSettings) throws InvalidFieldValue {
 
         if (checkBalloonSettings == null){
+            if (getSiteComboBox().getSelectedIndex() == 0) {
+                // select site
+                new InvalidFieldValue("Invalid site selected.");
+            }
             Site site = (Site)getSiteComboBox().getSelectedItem();
             checkBalloonSettings =  new BalloonSettings(site.getDisplayName(), site.getSiteNumber());
         }
@@ -275,10 +244,10 @@ public class BalloonSettingPane extends JPanePlugin {
             checkBalloonSettings.setEmailContact(getEmailContactTextBox().getText());
             checkBalloonSettings.setMailServer(getEmailServerTextBox().getText());
         }
-
-        for (int row = 0; row < colorListBox.getRowCount(); row ++)        {
+        
+        for (int row = 0; row < getColorListBox().getRowCount(); row ++)        {
             
-            Object [] colValues = colorListBox.getRow(row);
+            Object [] colValues = getColorListBox().getRow(row);
             try {
                 Problem problem = (Problem) colValues[0];
                 JTextField textField = (JTextField) colValues[1];
@@ -409,7 +378,7 @@ public class BalloonSettingPane extends JPanePlugin {
             int result = FrameUtilities.yesNoCancelDialog("BalloonSettings modified, save changes?", "Confirm Choice");
 
             if (result == JOptionPane.YES_OPTION) {
-                if (getAddButton().isEnabled()) {
+                if (getAddButton().isVisible()) {
                     addBalloonSettings();
                 } else {
                     updateBalloonSettings();
@@ -469,10 +438,11 @@ public class BalloonSettingPane extends JPanePlugin {
             getAddButton().setEnabled(true);
             getUpdateButton().setVisible(false);
             populateSiteJCombo(0);
+            getSiteComboBox().setEnabled(true);
 
         } else {
             populateSiteJCombo(balloonSettings.getSiteNumber());
-
+            getSiteComboBox().setEnabled(false);
             getSendEmailNotificationsCheckBox().setSelected(inBalloonSettings.isEmailBalloons());
             getPrintNotificationsCheckBox().setSelected(inBalloonSettings.isPrintBalloons());
 
@@ -501,14 +471,19 @@ public class BalloonSettingPane extends JPanePlugin {
 
         int siteIndex = 0;
 
+        getSiteComboBox().removeAllItems();
         getSiteComboBox().addItem(noneSelected);
         
-        // TODO Get this to work.
-
         int i = 1; // 1 since we started with noneSelected
         Site[] sites = getContest().getSites();
         Arrays.sort(sites, new SiteComparatorBySiteNumber());
         for (Site site : sites) {
+            if (siteNumber == 0) { // this is an add
+                // do not allow them to add balloonSettings for a site with settings already
+                if (contest.getBalloonSettings(site.getSiteNumber()) != null) {
+                    continue;
+                }
+            }
             getSiteComboBox().addItem(site);
 
             if (siteNumber == site.getSiteNumber()) {
@@ -522,7 +497,7 @@ public class BalloonSettingPane extends JPanePlugin {
 
     private void setBalloonColors(BalloonSettings inBalloonSettings) {
 
-        colorListBox.removeAllRows();
+        getColorListBox().removeAllRows();
 
         for (Problem problem : getContest().getProblems()) {
 
@@ -534,15 +509,15 @@ public class BalloonSettingPane extends JPanePlugin {
             }
             JTextField editField = new JTextField(color);
             editField.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyTyped(java.awt.event.KeyEvent e) {
+                public void keyReleased(java.awt.event.KeyEvent e) {
                     enableButtons();
                 }
             });
             row[1] = editField;
-            colorListBox.addRow(row);
+            getColorListBox().addRow(row);
 
         }
-        colorListBox.autoSizeAllColumns();
+        getColorListBox().autoSizeAllColumns();
     }
 
     public void showMessage(final String message) {
@@ -641,7 +616,7 @@ public class BalloonSettingPane extends JPanePlugin {
             }
 
         } else {
-            if (getAddButton().isVisible()) {
+            if (getSiteComboBox().getSelectedIndex() > 0 && getAddButton().isVisible()) {
                 enableButton = true;
             }
         }
@@ -677,8 +652,8 @@ public class BalloonSettingPane extends JPanePlugin {
         if (emailContactTextBox == null) {
             emailContactTextBox = new JTextField();
             emailContactTextBox.setBounds(new java.awt.Rectangle(183, 80, 179, 21));
-            emailContactTextBox.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
+            emailContactTextBox.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyReleased(java.awt.event.KeyEvent e) {
                     enableButtons();
                 }
             });
@@ -696,8 +671,8 @@ public class BalloonSettingPane extends JPanePlugin {
         if (emailServerTextBox == null) {
             emailServerTextBox = new JTextField();
             emailServerTextBox.setBounds(new java.awt.Rectangle(183, 115, 179, 21));
-            emailServerTextBox.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
+            emailServerTextBox.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyReleased(java.awt.event.KeyEvent e) {
                     enableButtons();
                 }
             });
@@ -733,8 +708,8 @@ public class BalloonSettingPane extends JPanePlugin {
         if (printDeviceTextBox == null) {
             printDeviceTextBox = new JTextField();
             printDeviceTextBox.setBounds(new java.awt.Rectangle(183, 177, 179, 21));
-            printDeviceTextBox.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
+            printDeviceTextBox.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyReleased(java.awt.event.KeyEvent e) {
                     enableButtons();
                 }
             });
