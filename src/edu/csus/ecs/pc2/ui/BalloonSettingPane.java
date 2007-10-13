@@ -2,7 +2,6 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.awt.Panel;
 import java.util.Arrays;
 
 import javax.swing.JButton;
@@ -59,7 +58,7 @@ public class BalloonSettingPane extends JPanePlugin {
 
     private boolean populatingGUI = true;
 
-    private Panel centerPane = null;
+    private JPanel centerPane = null;
 
     private JCheckBox sendEmailNotificationsCheckBox = null;
 
@@ -559,7 +558,7 @@ public class BalloonSettingPane extends JPanePlugin {
      * 
      * @return java.awt.Panel
      */
-    private Panel getCenterPane() {
+    private JPanel getCenterPane() {
         if (centerPane == null) {
             siteLabel = new JLabel();
             siteLabel.setBounds(new java.awt.Rectangle(25, 22, 48, 16));
@@ -573,7 +572,7 @@ public class BalloonSettingPane extends JPanePlugin {
             mailContactLabel = new JLabel();
             mailContactLabel.setBounds(new java.awt.Rectangle(52, 80, 112, 21));
             mailContactLabel.setText("EMail Contact");
-            centerPane = new Panel();
+            centerPane = new JPanel();
             centerPane.setLayout(null);
             centerPane.add(getSendEmailNotificationsCheckBox(), null);
             centerPane.add(getPrintNotificationsCheckBox(), null);
