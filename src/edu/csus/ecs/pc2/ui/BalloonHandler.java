@@ -251,19 +251,19 @@ public class BalloonHandler extends JPanePlugin {
                     }
                 }
             }
-            Enumeration balloonEnum = sentBalloons.keys();
-            while (balloonEnum.hasMoreElements()) {
-                String key = (String) balloonEnum.nextElement();
-                if (!goodBalloons.containsKey(key)) {
-                    // pull apart key into ClientId & ElementId
-                    BalloonDeliveryInfo bdi = sentBalloons.get(key);
-                    ClientId clientId = bdi.getClientId();
-                    // sentBalloons includes all sites, filter for this site
-                    if (clientId.getSiteNumber() == siteNumber) {
-                        ElementId problemId = bdi.getProblemId();
-                        if (takeBalloon(buildBalloon("take", clientId, problemId, null))) {
-                            tookBalloonFrom(key);
-                        }
+        }
+        Enumeration balloonEnum = sentBalloons.keys();
+        while (balloonEnum.hasMoreElements()) {
+            String key = (String) balloonEnum.nextElement();
+            if (!goodBalloons.containsKey(key)) {
+                // pull apart key into ClientId & ElementId
+                BalloonDeliveryInfo bdi = sentBalloons.get(key);
+                ClientId clientId = bdi.getClientId();
+                // sentBalloons includes all sites, filter for this site
+                if (clientId.getSiteNumber() == siteNumber) {
+                    ElementId problemId = bdi.getProblemId();
+                    if (takeBalloon(buildBalloon("take", clientId, problemId, null))) {
+                        tookBalloonFrom(key);
                     }
                 }
             }
