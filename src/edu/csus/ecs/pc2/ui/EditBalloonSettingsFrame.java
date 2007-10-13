@@ -76,6 +76,11 @@ public class EditBalloonSettingsFrame extends JFrame implements UIPlugin {
 
     public void setBalloonSettings(BalloonSettings balloonSettings) {
         getBalloonSettingPane().setBalloonSettings(balloonSettings);
+        if (balloonSettings != null) {
+            this.setTitle("Edit Balloon Settings for Site " + balloonSettings.getSiteNumber());
+        } else {
+            this.setTitle("Edit Balloon Settings");
+        }
 
     }
 
