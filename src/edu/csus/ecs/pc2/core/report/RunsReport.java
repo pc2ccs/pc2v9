@@ -118,7 +118,7 @@ public class RunsReport implements IReport {
 
                 printWriter.print("     ");
                 printWriter.print(" '" + judgementText + "'");
-                printWriter.print(" by " + judgementRecord.getJudgerClientId().getName());
+                printWriter.print(" by " + judgementRecord.getJudgerClientId().getName()+"/s"+judgementRecord.getJudgerClientId().getSiteNumber());
                 if (judgementRecord.isUsedValidator()) {
                     printWriter.print("/Validator");
                 }
