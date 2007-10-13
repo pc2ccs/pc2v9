@@ -48,7 +48,7 @@ Last updated
             <xsl:for-each select="/contestStandings/standingsHeader/problem">
 <!-- <problemsummary attempts="246" bestSolutionTime="25" id="1" lastsolutionTime="283" numberSolved="81" title="A+ Consanguine Calculations"/> -->
 <td>
-<xsl:value-of select="@attempts"/>/<xsl:if test="@solved &lt; 1">--</xsl:if>
+<xsl:value-of select="@attempts"/>/<xsl:if test="@numberSolved &lt; '1'">--</xsl:if>
 <xsl:if test="@bestSolutionTime"><xsl:value-of select="@bestSolutionTime"/></xsl:if>/<xsl:value-of select="@numberSolved"/>
 </td>
             </xsl:for-each>
