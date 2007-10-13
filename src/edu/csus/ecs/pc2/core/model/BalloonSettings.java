@@ -308,6 +308,9 @@ public class BalloonSettings implements IElementObject {
             if (! stringSame(getPrintDevice(),balloonSettings.getPrintDevice())) {
                 return false;
             }
+            if (isPostscriptCapable() != balloonSettings.isPostscriptCapable()) {
+                return false;
+            }
             if (! stringSame(getEmailContact(),balloonSettings.getEmailContact())) {
                 return false;
             }
