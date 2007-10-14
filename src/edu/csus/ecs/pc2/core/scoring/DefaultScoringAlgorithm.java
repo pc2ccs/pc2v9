@@ -139,7 +139,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 problemId = run.getProblemId();
                 if (run.isSolved()) {
                     if(!run.isJudged()) {
-                        throw new IllegalRunState("");
+                        throw new IllegalRunState("Run isSolved but ! isJudged "+run);
                     }
                     // TODO: we might want some differing logic here if all
                     // yes's are counted
