@@ -6,6 +6,8 @@ package edu.csus.ecs.pc2.core.util;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.StringReader;
+import java.io.StringWriter;
 
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
@@ -15,8 +17,7 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
 /**
- * 
- * Transforms  xml and xsl input to generate the output.
+ * Transforms xml and xsl input to generate the output.
  */
 // $HeadURL$
 public class XSLTransformer {
@@ -28,13 +29,15 @@ public class XSLTransformer {
         super();
     }
 
+    // TODO move main to another class to test.
+    
     public static void main(String[] args) {
         if (args.length == 3) {
             XSLTransformer me = new XSLTransformer();
             try {
                 me.transform(args[0], args[1], new FileOutputStream(args[2]));
             } catch (Exception e) {
-                System.err.println("Error doing tranform: " + e.getMessage());
+                System.err.println("Error doing transform: " + e.getMessage());
                 e.printStackTrace();
             }
         } else {
@@ -88,10 +91,38 @@ public class XSLTransformer {
         // Setup a factory for transforms
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
 
-        // Get a transofrmer for this XSL
+        // Get a transformer for this XSL
         Transformer transformer = transformerFactory.newTransformer(inputXSL);
 
         // Perform the transformation
         transformer.transform(inputXML, output);
     }
+
+    /**
+     * Transform and return XML String.
+     * @param xslFile
+     * @param xmlString
+     * @return String result of XSLT transformation
+     * @throws Exception
+     */
+    public String transformToString (File xslFile, String xmlString) throws Exception {
+    
+        Source inputXML = new StreamSource(new StringReader(xmlString));
+        Source inputXSL = new StreamSource(xslFile);
+        
+        StringWriter stringWriter = new StringWriter();
+        Result result = new StreamResult(stringWriter);
+
+        // Setup a factory for transforms
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+
+        // Get a transformer for this XSL
+        Transformer transformer = transformerFactory.newTransformer(inputXSL);
+
+        // Perform the transformation
+        transformer.transform(inputXML, result);
+        
+        return stringWriter.toString();
+    }
+
 }
