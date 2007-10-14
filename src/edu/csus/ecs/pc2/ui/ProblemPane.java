@@ -856,6 +856,8 @@ public class ProblemPane extends JPanePlugin {
 
         }
 
+        // select the general tab
+        getMainTabbedPane().setSelectedIndex(0);
         populatingGUI = false;
     }
 
