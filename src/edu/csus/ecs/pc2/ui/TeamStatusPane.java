@@ -2,10 +2,13 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.util.Arrays;
 import java.util.Vector;
 
+import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -13,7 +16,9 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.AccountList;
+import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClarificationEvent;
@@ -23,24 +28,21 @@ import edu.csus.ecs.pc2.core.model.IClarificationListener;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.ILoginListener;
 import edu.csus.ecs.pc2.core.model.IRunListener;
+import edu.csus.ecs.pc2.core.model.ISiteListener;
 import edu.csus.ecs.pc2.core.model.LoginEvent;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunEvent;
-import javax.swing.JButton;
-import java.awt.FlowLayout;
+import edu.csus.ecs.pc2.core.model.Site;
+import edu.csus.ecs.pc2.core.model.SiteEvent;
 
 /**
  * Team Status Pane.
  * 
- * This presents the user with a grid of all local teams
- * and whether the team has logged in, submitted a clarification,
- * submitted a run or submitted a run and clarification by color.
+ * This presents the user with a grid of all local teams and whether the team has logged in, submitted a clarification, submitted a run or submitted a run and clarification by color.
  * <P>
- * There is a legend at the top which shows the color of each
- * state of submission or login.
+ * There is a legend at the top which shows the color of each state of submission or login.
  * <P>
- * If one hovers over a team name will display the number
- * of clarifications and runs that the team has submitted.
+ * If one hovers over a team name will display the number of clarifications and runs that the team has submitted.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -91,6 +93,22 @@ public class TeamStatusPane extends JPanePlugin {
     private JLabel submittedClarsLabel = null;
 
     private JLabel readyLabel = null;
+
+    private JButton reloadButton = null;
+
+    private JComboBox siteComboBox = null;
+
+    private Site allSitesSite = new Site("All Sites", 0);
+    
+    // TODO fix when switching from all to one site, residue on screen.
+
+    /**
+     * Is the GUI being populated?.
+     * 
+     * This avoids a loop that happens on the combo box item changed
+     * invocation of populateGUI.
+     */
+    private boolean populatingGUI = false;
 
     /**
      * This method initializes
@@ -161,16 +179,59 @@ public class TeamStatusPane extends JPanePlugin {
         return centerPane;
     }
 
-    private void repopulateGrid() {
+    private void populateGUI() {
+        
+        if (populatingGUI){
+            return;
+        }
+        populatingGUI = true;
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                repopulateGrid(getContest().getSiteNumber(), true);
+                try {
+                    repopulateSitePulldown();
+                    repopulateGrid(true);
+                } catch (Exception e) {
+                    getController().getLog().log(Log.WARNING, "Exception logged ", e);
+                }
+                populatingGUI = false;
             }
         });
     }
 
-    private void repopulateGrid(int siteNumber, boolean populate) {
+    protected void repopulateSitePulldown() {
+
+        int selectedIndex = getSiteComboBox().getSelectedIndex();
+
+        getSiteComboBox().removeAllItems();
+
+        Site[] sites = getContest().getSites();
+        Arrays.sort(sites, new SiteComparatorBySiteNumber());
+
+        getSiteComboBox().addItem(allSitesSite);
+
+        for (Site site : sites) {
+            getSiteComboBox().addItem(site);
+        }
+
+        if (selectedIndex > -1) {
+            getSiteComboBox().setSelectedIndex(selectedIndex);
+        } else {
+            getSiteComboBox().setSelectedIndex(0);
+        }
+    }
+
+    private void repopulateGrid(boolean populate) {
+
+        boolean allSites = false;
+
+        Site site = null;
+
+        if (getSiteComboBox().getSelectedIndex() < 1) {
+            allSites = true;
+        } else {
+            site = (Site) getSiteComboBox().getSelectedItem();
+        }
 
         getCenterPane().removeAll();
         GridLayout gridLayout = new GridLayout();
@@ -183,37 +244,56 @@ public class TeamStatusPane extends JPanePlugin {
         AccountList accountList = new AccountList();
         accountList.generateNewAccounts(ClientType.Type.TEAM, 25, 1, PasswordType.JOE, 1, true);
 
-        Vector<Account> vectorAccounts = getContest().getAccounts(ClientType.Type.TEAM, siteNumber);
+        Vector<Account> vectorAccounts;
+        if (allSites) {
+            vectorAccounts = getContest().getAccounts(ClientType.Type.TEAM);
+
+        } else {
+            vectorAccounts = getContest().getAccounts(ClientType.Type.TEAM, site.getSiteNumber());
+
+        }
         Account[] accounts = (Account[]) vectorAccounts.toArray(new Account[vectorAccounts.size()]);
         Arrays.sort(accounts, new AccountComparator());
 
+        System.out.println("---------------------------------------------------");
+        new Exception("Here").printStackTrace();
+        int counter = 0;
         for (Account account : accounts) {
+            counter++;
+            
+            System.out.println("debug 22 loading account "+account+" "+accounts.length+" accounts "+counter);
+            
             JLabel teamLabel = new JLabel();
             ClientId clientId = account.getClientId();
             String teamName = clientId.getName();
-            String teamSubmittions = "No submissions";
+            if (allSites){
+                teamName = "S"+clientId.getSiteNumber()+" "+teamName;
+            }
+            String toolTipText = "No submissions";
 
             Color teamStatusColor = NO_CONTACT_COLOR;
 
             if (populate) {
-                
-                teamSubmittions = teamName;
-                
+
+                toolTipText = teamName;
+
                 Run[] runs = getContest().getRuns(clientId);
                 if (runs.length > 0) {
-                    teamSubmittions = teamSubmittions + " " + runs.length + " runs";
+                    toolTipText = toolTipText + " " + runs.length + " runs";
                 }
                 Clarification[] clarifications = getContest().getClarifications(clientId);
                 if (clarifications.length > 0) {
-                    teamSubmittions = teamSubmittions + " " + clarifications.length + " clarifications ";
+                    toolTipText = toolTipText + " " + clarifications.length + " clarifications ";
                 }
 
                 teamStatusColor = getStatusColor(clientId, runs, clarifications);
             }
 
+            toolTipText = toolTipText + " (" + account.getDisplayName() + ")";
+            
             teamLabel.setText(teamName);
             teamLabel.setForeground(teamStatusColor);
-            teamLabel.setToolTipText(teamSubmittions);
+            teamLabel.setToolTipText(toolTipText);
             centerPane.add(teamName, teamLabel);
         }
     }
@@ -237,7 +317,8 @@ public class TeamStatusPane extends JPanePlugin {
     public void setContestAndController(IContest inContest, IController inController) {
         super.setContestAndController(inContest, inController);
 
-        repopulateGrid();
+        System.out.println("debug22 before populateGUI");
+        populateGUI();
 
         getContest().addLoginListener(new LoginListenerImplementation());
         getContest().addRunListener(new RunListenerImplementation());
@@ -247,19 +328,50 @@ public class TeamStatusPane extends JPanePlugin {
     /**
      * 
      * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    public class SiteListenerImplementation implements ISiteListener{
+
+        public void siteAdded(SiteEvent event) {
+            populateGUI();
+        }
+
+        public void siteRemoved(SiteEvent event) {
+            populateGUI();
+        }
+
+        public void siteChanged(SiteEvent event) {
+            populateGUI();
+        }
+
+        public void siteLoggedOn(SiteEvent event) {
+            // nada
+            
+        }
+
+        public void siteLoggedOff(SiteEvent event) {
+            // nada
+            
+        }
+        
+    }
+
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
      */
     public class RunListenerImplementation implements IRunListener {
 
         public void runAdded(RunEvent event) {
-            repopulateGrid();
+            populateGUI();
         }
 
         public void runChanged(RunEvent event) {
-            repopulateGrid();
+            populateGUI();
         }
 
         public void runRemoved(RunEvent event) {
-            repopulateGrid();
+            populateGUI();
         }
 
     }
@@ -271,15 +383,15 @@ public class TeamStatusPane extends JPanePlugin {
     private class ClarificationListenerImplementation implements IClarificationListener {
 
         public void clarificationAdded(ClarificationEvent event) {
-            repopulateGrid();
+            populateGUI();
         }
 
         public void clarificationChanged(ClarificationEvent event) {
-            repopulateGrid();
+            populateGUI();
         }
 
         public void clarificationRemoved(ClarificationEvent event) {
-            repopulateGrid();
+            populateGUI();
         }
 
     }
@@ -291,15 +403,15 @@ public class TeamStatusPane extends JPanePlugin {
     public class LoginListenerImplementation implements ILoginListener {
 
         public void loginAdded(LoginEvent event) {
-            repopulateGrid();
+            populateGUI();
         }
 
         public void loginRemoved(final LoginEvent event) {
-            repopulateGrid();
+            populateGUI();
         }
 
         public void loginDenied(LoginEvent event) {
-            repopulateGrid();
+            populateGUI();
         }
     }
 
@@ -325,8 +437,13 @@ public class TeamStatusPane extends JPanePlugin {
      */
     private JPanel getButtonPane() {
         if (buttonPane == null) {
+            FlowLayout flowLayout1 = new FlowLayout();
+            flowLayout1.setHgap(25);
             buttonPane = new JPanel();
+            buttonPane.setLayout(flowLayout1);
             buttonPane.add(getClearButton(), null);
+            buttonPane.add(getReloadButton(), null);
+            buttonPane.add(getSiteComboBox(), null);
         }
         return buttonPane;
     }
@@ -354,7 +471,7 @@ public class TeamStatusPane extends JPanePlugin {
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                repopulateGrid(getContest().getSiteNumber(), false);
+                repopulateGrid(false);
             }
         });
 
@@ -414,5 +531,40 @@ public class TeamStatusPane extends JPanePlugin {
             stateDescriptonPane.add(readyLabel, null);
         }
         return stateDescriptonPane;
+    }
+
+    /**
+     * This method initializes reloadButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getReloadButton() {
+        if (reloadButton == null) {
+            reloadButton = new JButton();
+            reloadButton.setText("Reload");
+            reloadButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    populateGUI();
+                }
+            });
+        }
+        return reloadButton;
+    }
+
+    /**
+     * This method initializes siteComboBox
+     * 
+     * @return javax.swing.JComboBox
+     */
+    private JComboBox getSiteComboBox() {
+        if (siteComboBox == null) {
+            siteComboBox = new JComboBox();
+            siteComboBox.addItemListener(new java.awt.event.ItemListener() {
+                public void itemStateChanged(java.awt.event.ItemEvent e) {
+                    populateGUI();
+                }
+            });
+        }
+        return siteComboBox;
     }
 } // @jve:decl-index=0:visual-constraint="10,10"
