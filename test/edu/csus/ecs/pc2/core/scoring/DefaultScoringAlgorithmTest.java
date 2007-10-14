@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.core.scoring;
 
 import java.io.StringReader;
 import java.util.Properties;
+import java.util.Vector;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -51,8 +52,6 @@ public class DefaultScoringAlgorithmTest extends TestCase {
         log = new Log("DefaultScoringAlgorithmTest");
         StaticLog.setLog(log);
         
-        
-        
     }
 
     /**
@@ -61,6 +60,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
     public void testNoData() {
 
         Contest contest = new Contest();
+
         checkOutputXML(contest);
 
     }
@@ -96,19 +96,27 @@ public class DefaultScoringAlgorithmTest extends TestCase {
             contest.addJudgement(judgement);
         }
         
-        ClientId firstTeam = contest.getAccounts(ClientType.Type.TEAM).firstElement().getClientId();
-        assertTrue("No teams defined in contest", firstTeam == null);
-
-        ClientId firstJudge = contest.getAccounts(ClientType.Type.JUDGE).firstElement().getClientId();
-        assertTrue("No judges defined in contest", firstJudge == null);
-
+        checkForJudgeAndTeam(contest);
     }
     
+    private void checkForJudgeAndTeam(IContest contest) {
+        Account account = contest.getAccounts(ClientType.Type.TEAM).firstElement();
+        assertFalse("Team account not generated", account == null);
+        assertFalse("Team account not generated", account.getClientId().equals(Type.TEAM));
+        
+        account = contest.getAccounts(ClientType.Type.JUDGE).firstElement();
+        assertFalse("Judge account not generated", account == null);
+        assertFalse("Team account not generated", account.getClientId().equals(Type.TEAM));
+
+    }
+
     private void initData(IContest contest, int numTeams, int numProblems) {
 
         // Add accounts
         contest.generateNewAccounts(ClientType.Type.TEAM.toString(), numTeams, true);
         contest.generateNewAccounts(ClientType.Type.JUDGE.toString(), 6, true);
+        
+        checkForJudgeAndTeam(contest);
         
         // Add Problem
         for (int i = 0; i < numProblems; i ++){
@@ -173,6 +181,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
     public void testOneRunUnjudged() {
 
         Contest contest = new Contest();
+        
         initContestData(contest);
         Run run = getARun(contest);
         RunFiles runFiles = new RunFiles(run, "samps/Sumit.java");
@@ -188,8 +197,8 @@ public class DefaultScoringAlgorithmTest extends TestCase {
     public void testMixedjudged() {
 
         Contest contest = new Contest();
-        initContestData(contest);
         
+        initContestData(contest);
         Run run = getARun(contest, 5);
         RunFiles runFiles = new RunFiles(run, "samps/Sumit.java");
         
@@ -219,10 +228,8 @@ public class DefaultScoringAlgorithmTest extends TestCase {
         contest.addRun(run, runFiles, null);
         
         ClientId who = contest.getAccounts(ClientType.Type.JUDGE).firstElement().getClientId();
-        assertTrue ("No judges defined in contest", who == null);
         
-        run.setStatus(RunStates.BEING_JUDGED);
-        contest.updateRun(run, who);
+        checkOutRun (contest, run, who);
         
         Judgement judgement = contest.getJudgements()[judgementIndex]; // Judge as No
         
@@ -245,8 +252,9 @@ public class DefaultScoringAlgorithmTest extends TestCase {
         contest.addRun(run, runFiles, null);
         
         ClientId who = contest.getAccounts(ClientType.Type.JUDGE).firstElement().getClientId();
-        run.setStatus(RunStates.BEING_JUDGED);
-        contest.updateRun(run, who);
+        assertFalse ("Could not retrieve first judge ", who == null);
+        
+        checkOutRun (contest,run,who);
         
         Judgement judgement = contest.getJudgements()[judgementIndex]; // Judge as No
         
@@ -284,6 +292,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
     public void testOneRunJudged() {
 
         Contest contest = new Contest();
+        
         initContestData(contest);
         
         createJudgedRun(contest, 2, false);
@@ -297,6 +306,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
     public void testFiveRunsJudged() {
 
         Contest contest = new Contest();
+        
         initContestData(contest);
         
         createJudgedRun(contest, 2, false);
@@ -314,7 +324,13 @@ public class DefaultScoringAlgorithmTest extends TestCase {
             return 0;
         }
     }
-
+    
+    private void checkOutRun (IContest contest, Run run, ClientId judgeId){
+        // TODO this should be a method in IContest.
+        
+        run.setStatus(RunStates.BEING_JUDGED);
+        contest.updateRun(run, judgeId);
+    }
     
     /**
      * Test based on data from boardtest.html.
@@ -347,6 +363,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
         };
 
         Contest contest = new Contest();
+
         initData(contest, 2, 2);
 
         Problem[] problemList = contest.getProblems();
@@ -381,6 +398,9 @@ public class DefaultScoringAlgorithmTest extends TestCase {
             }
             JudgementRecord judgementRecord = new JudgementRecord(judgementId, judgeId, solved, false);
             contest.addRun(run);
+            
+            checkOutRun(contest, run, judgeId);
+
             contest.addRunJudgement(run, judgementRecord, null, judgeId);
         }
 
