@@ -36,6 +36,7 @@ import edu.csus.ecs.pc2.ui.ProblemsPane;
 import edu.csus.ecs.pc2.ui.ReportPane;
 import edu.csus.ecs.pc2.ui.RunsPanel;
 import edu.csus.ecs.pc2.ui.SitesPanel;
+import edu.csus.ecs.pc2.ui.StandingsHTMLPane;
 import edu.csus.ecs.pc2.ui.StandingsPane;
 import edu.csus.ecs.pc2.ui.TeamStatusPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
@@ -174,6 +175,15 @@ public class AdministratorView extends JFrame implements UIPlugin {
               
                 AutoJudgesPane autoJudgesPane = new AutoJudgesPane();
                 addUIPlugin(getMainTabbedPanel(), "Auto Judge", autoJudgesPane);
+                
+//                full.xsl
+//                fullnums.xsl
+//                sumatt.xsl
+//                summary.xsl
+//                sumtime.xsl
+                
+                StandingsHTMLPane standingsHTMLPane = new StandingsHTMLPane("full.xsl");
+                addUIPlugin(getMainTabbedPanel(), "Standings HTML", standingsHTMLPane);
                 
                 setTitle("PC^2 " + contest.getTitle() + " Build " + new VersionInfo().getBuildNumber());
                 setVisible(true);
