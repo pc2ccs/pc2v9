@@ -865,8 +865,12 @@ public class ProblemPane extends JPanePlugin {
         } else {
             cancelButton.setText("Close");
         }
-        updateButton.setEnabled(fieldsChanged);
-        addButton.setEnabled(fieldsChanged);
+        // only enable the visible one, we are either editting or adding not both
+        if (getUpdateButton().isVisible()) {
+            getUpdateButton().setEnabled(fieldsChanged);
+        } else {
+            getAddButton().setEnabled(fieldsChanged);
+        }
     }
 
     /**
