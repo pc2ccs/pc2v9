@@ -369,6 +369,20 @@ public class SelectJudgementPane extends JPanePlugin {
 
             problemNameLabel.setText(getContest().getProblem(run.getProblemId()).toString());
             languageNameLabel.setText(getContest().getLanguage(run.getLanguageId()).toString());
+            boolean showFile ;
+            if (getProblemDataFiles() != null && getProblemDataFiles().getJudgesDataFile() != null) {
+                showFile = true;
+            } else {
+                showFile = false;
+            }
+            getViewAnswerFileButton().setVisible(showFile);
+            if (getProblemDataFiles() != null && getProblemDataFiles().getJudgesDataFile() != null) {
+                showFile = true;
+            } else {
+                showFile = false;
+            }
+            getViewDataFileButton().setVisible(showFile);
+            getViewSourceButton().setVisible(true);
 
         } else {
             getUpdateButton().setVisible(false);
@@ -379,6 +393,9 @@ public class SelectJudgementPane extends JPanePlugin {
 
             problemNameLabel.setText("");
             languageNameLabel.setText("");
+            getViewAnswerFileButton().setVisible(false);
+            getViewDataFileButton().setVisible(false);
+            getViewSourceButton().setVisible(false);
 
         }
         populateComboBoxes();
