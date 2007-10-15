@@ -2,7 +2,6 @@ package edu.csus.ecs.pc2.core.scoring;
 
 import java.io.StringReader;
 import java.util.Properties;
-import java.util.Vector;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
