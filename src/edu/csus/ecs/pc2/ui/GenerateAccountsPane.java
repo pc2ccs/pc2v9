@@ -335,6 +335,8 @@ public class GenerateAccountsPane extends JPanePlugin {
                 getController().generateNewAccounts(ClientType.Type.SCOREBOARD.toString(), theSiteNumber, count, startNumber, true);
                 boardCountTextField.setText("");
             }
+            
+            getStartNumberTextField().setText("");
 
         } catch (Exception e) {
              // TODO: handle exception
