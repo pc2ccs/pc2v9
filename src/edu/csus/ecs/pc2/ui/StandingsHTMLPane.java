@@ -1,15 +1,20 @@
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.net.URL;
 import java.util.Date;
 import java.util.Properties;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
+import javax.swing.text.html.HTMLEditorKit;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
@@ -28,7 +33,6 @@ import edu.csus.ecs.pc2.core.model.RunEvent.Action;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 import edu.csus.ecs.pc2.core.scoring.IScoringAlgorithm;
 import edu.csus.ecs.pc2.core.util.XSLTransformer;
-import javax.swing.JScrollPane;
 
 /**
  * Standings HTML view pane.
@@ -147,7 +151,7 @@ public class StandingsHTMLPane extends JPanePlugin {
         String xmlString;
         try {
             xmlString = scoringAlgorithm.getStandings(getContest(), new Properties(), log);
-            System.out.println("debug -- " + xmlString);
+//            System.out.println("debug -- " + xmlString);
 
             transformAndDisplay(xmlString, styleSheetFileName);
             showMessage("Last update " + new Date());
@@ -177,17 +181,40 @@ public class StandingsHTMLPane extends JPanePlugin {
             final String htmlString = xslTransformer.transformToString(xslFile, xmlString);
             System.out.println("debug there are " + htmlString.length() + " characters ");
 
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-
-                    // TODO display this string as interpreted HTML
-                    getTextArea().setText(htmlString);
-                }
-            });
-
+            viewHTML (htmlString);
+    
         } catch (Exception e) {
             log.log(Log.WARNING, "Error generating web/html display ", e);
             showMessage("Error generating web/html display, check logs");
+        }
+    }
+
+    private void viewHTML(String htmlString) {
+
+        try {
+            File tmpFile = File.createTempFile("__t",".htm");
+            tmpFile.deleteOnExit();
+            
+            BufferedWriter out = new BufferedWriter(new FileWriter(tmpFile));
+            out.write(htmlString);
+            out.close();
+            out = null;
+            
+            final URL tmpURL = tmpFile.toURL();
+            
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    try {
+                        getTextArea().setPage(tmpURL);
+                    } catch (Exception e) {
+                        log.log(Log.WARNING,"Could not display HTML", e);
+                    }
+                    
+                }
+            });
+            
+        } catch (Exception e) {
+            log.log(Log.WARNING, "In View HTML ", e);
         }
     }
 
@@ -303,8 +330,7 @@ public class StandingsHTMLPane extends JPanePlugin {
     private JTextPane getTextArea() {
         if (textArea == null) {
             textArea = new JTextPane();
-            // textArea.setContentType("text/html");
-            textArea.setDoubleBuffered(true);
+            textArea.setEditorKit(new HTMLEditorKit());
             textArea.setEditable(false);
         }
         return textArea;
