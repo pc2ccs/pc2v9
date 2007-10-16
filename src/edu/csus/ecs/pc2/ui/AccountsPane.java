@@ -167,6 +167,10 @@ public class AccountsPane extends JPanePlugin {
     }
 
     public void updateAccountRow(final Account account) {
+        // default to autosizing and sorting
+        updateAccountRow(account, true);
+    }
+    public void updateAccountRow(final Account account, final boolean autoSizeAndSort) {
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -177,8 +181,10 @@ public class AccountsPane extends JPanePlugin {
                 } else {
                     accountListBox.replaceRow(objects, rowNumber);
                 }
-                accountListBox.autoSizeAllColumns();
-                accountListBox.sort();
+                if (autoSizeAndSort) {
+                    accountListBox.autoSizeAllColumns();
+                    accountListBox.sort();
+                }
             }
         });
     }
@@ -210,8 +216,10 @@ public class AccountsPane extends JPanePlugin {
         // TODO bulk load these record
 
         for (Account account : accounts) {
-            updateAccountRow(account);
+            updateAccountRow(account, false);
         }
+        getRunsListBox().autoSizeAllColumns();
+        getRunsListBox().sort();
     }
 
     private boolean isAllowed (Permission.Type type){
