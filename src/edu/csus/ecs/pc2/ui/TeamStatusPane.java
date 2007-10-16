@@ -255,14 +255,9 @@ public class TeamStatusPane extends JPanePlugin {
         Account[] accounts = (Account[]) vectorAccounts.toArray(new Account[vectorAccounts.size()]);
         Arrays.sort(accounts, new AccountComparator());
 
-        System.out.println("---------------------------------------------------");
-        new Exception("Here").printStackTrace();
         int counter = 0;
         for (Account account : accounts) {
             counter++;
-            
-            System.out.println("debug 22 loading account "+account+" "+accounts.length+" accounts "+counter);
-            
             JLabel teamLabel = new JLabel();
             ClientId clientId = account.getClientId();
             String teamName = clientId.getName();
@@ -317,7 +312,6 @@ public class TeamStatusPane extends JPanePlugin {
     public void setContestAndController(IContest inContest, IController inController) {
         super.setContestAndController(inContest, inController);
 
-        System.out.println("debug22 before populateGUI");
         populateGUI();
 
         getContest().addLoginListener(new LoginListenerImplementation());
