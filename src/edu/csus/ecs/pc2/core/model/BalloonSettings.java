@@ -21,12 +21,12 @@ public class BalloonSettings implements IElementObject {
     /**
      * Who to email balloons to.
      */
-    private String emailContact;
+    private String emailContact = "";
 
     /**
      * Where to write balloons to (ex: lpt1: or a fifo)
      */
-    private String printDevice;
+    private String printDevice = "";
 
     /**
      * Whether the printDevice is capable.
@@ -36,7 +36,7 @@ public class BalloonSettings implements IElementObject {
     /**
      * Our mail server (be mindful of relay filters)
      */
-    private String mailServer;
+    private String mailServer = "";
 
     /**
      * Send a balloon for each no?
