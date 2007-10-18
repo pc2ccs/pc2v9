@@ -358,8 +358,8 @@ public class Problem implements IElementObject {
     }
 
     /**
-     * @param validatedProblem
-     *            The validatedProblem to set.
+     * @param validated
+     *            Set to true if the problem uses a validator.
      */
     public void setValidatedProblem(boolean validated) {
         this.validatedProblem = validated;

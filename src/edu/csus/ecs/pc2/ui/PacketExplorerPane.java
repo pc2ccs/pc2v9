@@ -318,7 +318,7 @@ public class PacketExplorerPane extends JPanePlugin {
      * Name for client, especially servers.
      * 
      * @param clientId
-     * @return
+     * @return name
      */
     protected Object getClientName(ClientId clientId) {
         if (clientId == null) {

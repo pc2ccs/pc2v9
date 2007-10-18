@@ -88,10 +88,10 @@ public class Filter implements Serializable {
     }
 
     /**
-     * Match criteria against a run.
+     * Match criteria against a clar.
      * 
      * @param clarification
-     * @return
+     * @return true if the clarifcations matches the filter
      */
     public boolean matches(Clarification clarification) {
         return isThisSite(clarification) && matchesClarificationState(clarification.getState()) && matchesProblem(clarification.getProblemId());
@@ -101,7 +101,7 @@ public class Filter implements Serializable {
      * Match criteria against a clientId.
      * 
      * @param clientId
-     * @return
+     * @return true if the sites match
      */
     public boolean matches(ClientId clientId) {
         return isThisSite(clientId);

@@ -62,15 +62,15 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
  * </ol>
  * Check out run
  * <ol>
- * <li> Judge: {@link #checkOutRun(Run)}
- * <li> Server: {@link edu.csus.ecs.pc2.core.PacketHandler#requestRun(Run, IContest, IController, ClientId)}
+ * <li> Judge: {@link #checkOutRun(Run, boolean)}
+ * <li> Server: {@link edu.csus.ecs.pc2.core.PacketHandler#requestRun(Packet, Run, ClientId)}
  * <li> Judge and clients: {@link edu.csus.ecs.pc2.core.model.IRunListener#runChanged(edu.csus.ecs.pc2.core.model.RunEvent)}, check {@link edu.csus.ecs.pc2.core.model.RunEvent#getSentToClientId()} to
  * learn if you are the judge/client to get the run. RunEvent action is: {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#CHECKEDOUT_RUN}
  * </ol>
  * Submit Judgement
  * <ol>
  * <li> Judge: {@link #submitRunJudgement(Run, JudgementRecord, RunResultFiles)}
- * <li> Server: {@link edu.csus.ecs.pc2.core.PacketHandler#judgeRun(Run, IContest, IController, JudgementRecord, RunResultFiles, ClientId)}
+ * <li> Server: {@link edu.csus.ecs.pc2.core.PacketHandler#judgeRun(Run, JudgementRecord, RunResultFiles, ClientId)}
  * <li> Team: {@link edu.csus.ecs.pc2.core.model.IRunListener#runChanged(edu.csus.ecs.pc2.core.model.RunEvent)} if {@link Run#isSendToTeams()} set true. RunEvent action is:
  * {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#CHANGED}
  * <li> Clients: {@link edu.csus.ecs.pc2.core.model.IRunListener#runChanged(edu.csus.ecs.pc2.core.model.RunEvent)} RunEvent action is: {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#CHANGED}
@@ -78,7 +78,7 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
  * Cancel Run
  * <ol>
  * <li> Judge: {@link #cancelRun(Run)}
- * <li> Server: {@link edu.csus.ecs.pc2.core.PacketHandler#cancelRun(Run, IContest, IController, ClientId)}
+ * <li> Server: {@link edu.csus.ecs.pc2.core.PacketHandler#cancelRun(Packet, Run, ClientId)}
  * <li> Team: n/a
  * <li> Judge/Clients: {@link edu.csus.ecs.pc2.core.model.IRunListener#runChanged(edu.csus.ecs.pc2.core.model.RunEvent)}. RunEvent action is:
  * {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#RUN_AVAILABLE}

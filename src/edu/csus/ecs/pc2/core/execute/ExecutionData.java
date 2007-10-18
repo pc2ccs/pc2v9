@@ -277,7 +277,7 @@ public class ExecutionData {
 
     /**
      * Get Exception that occurred during execution
-     * @return
+     * @return the Exception
      */
     public Exception getExecutionException() {
         return executionException;

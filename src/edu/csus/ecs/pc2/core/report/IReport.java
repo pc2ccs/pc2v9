@@ -34,7 +34,7 @@ public interface IReport extends UIPlugin {
     /**
      * Create XML output for report
      * @param filter
-     * @return
+     * @return report in XML as a string
      */
     String createReportXML (Filter filter); 
 

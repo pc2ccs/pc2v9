@@ -509,7 +509,7 @@ public final class PacketType implements Serializable {
          * Remove setting.
          * 
          * This packet contains a setting or list of settings to
-         * remove from the settings ({@link Contest}
+         * remove from the settings ({@link edu.csus.ecs.pc2.core.model.Contest}
          * <P>
          * from Admin to server<br>
          * from server to server<br>

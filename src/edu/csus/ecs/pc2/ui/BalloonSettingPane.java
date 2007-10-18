@@ -219,7 +219,7 @@ public class BalloonSettingPane extends JPanePlugin {
      * Create a BalloonSettings from the fields.
      * 
      * @param checkBalloonSettings
-     * @return
+     * @return BalloonSettings as retrieved from UI
      * @throws InvalidFieldValue
      */
     public BalloonSettings getBalloonSettingsFromFields(BalloonSettings checkBalloonSettings) throws InvalidFieldValue {

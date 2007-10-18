@@ -65,7 +65,7 @@ public final class TimeFormat {
      * <P>
      * 
      * @param seconds
-     * @return
+     * @return formatted time
      */
     public static String formatTimeLong(long seconds) {
         boolean negative = seconds < 0;

@@ -119,7 +119,7 @@ public class LoadAccounts {
      * 
      * @param filename
      * @param existingAccounts
-     * @param groups
+     * @param groupList
      * @return an array of accounts
      * @throws Exception
      */

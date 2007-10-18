@@ -134,7 +134,7 @@ public class EventLogger {
     /**
      * The name of the opened log file that is being read.
      * 
-     * @return
+     * @return file name
      */
     public String getInputLogFilename() {
         return inputLogFilename;
@@ -143,7 +143,7 @@ public class EventLogger {
     /**
      * The name of the file which is opened and being written to.
      * 
-     * @return
+     * @return file name
      */
     public String getOutputLogFilename() {
         return outputLogFilename;
@@ -154,7 +154,7 @@ public class EventLogger {
      * 
      * @param minNumberToRead -
      *            mininum number of records to read.
-     * @return
+     * @return array of LogEvent
      * @throws Exception
      */
     public LogEvent[] readLogEvents(long minNumberToRead) throws Exception {

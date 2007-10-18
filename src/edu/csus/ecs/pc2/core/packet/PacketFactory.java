@@ -235,7 +235,6 @@ public final class PacketFactory {
      *            who is logging in.
      * @param password -
      *            password for login authentication.
-     * @param password2 
      * @param destination -
      *            server to authenticate.
      * @return a {@link PacketType.Type#LOGIN_REQUEST} packet.
@@ -733,7 +732,7 @@ public final class PacketFactory {
 
 
     /**
-     * Create a packet of {@link PacketType.Type#UPDATE_CLOCK}.
+     * Create a packet of {@link PacketType.Type#UPDATE_CONTEST_CLOCK}.
      * 
      * @param source
      * @param destination
@@ -844,20 +843,9 @@ public final class PacketFactory {
      * @param source
      * @param destination
      * @param contestTime
-     * @param contestTimes
      * @param siteNumber
-     * @param languages
-     * @param problems
-     * @param judgements
-     * @param sites
-     * @param runs
-     * @param clarifications
-     * @param loggedInUsers
-     * @param connectionHandlerIDs
-     * @param problemDataFiles 
-     * @param clientSettings 
-     * @param groups
      * @param information 
+     * @param data 
      */
     public static Packet createLoginSuccess(ClientId source, ClientId destination, ContestTime contestTime, int siteNumber, ContestInformation information, ContestLoginSuccessData data) {
         try {
@@ -898,7 +886,7 @@ public final class PacketFactory {
      * @param source
      * @param destination
      * @param loginSuccessPacket
-     * @return
+     * @return a contest settings packet
      */
     public static Packet createContestSettingsPacket(ClientId source, ClientId destination, Packet loginSuccessPacket) {
 
@@ -1111,7 +1099,7 @@ public final class PacketFactory {
      * @param startNumber - a requested start client number
      * @param count - number of accounts to add
      * @param isActive
-     * @return
+     * @return a packet
      */
     public static Packet createGenerateAccounts(ClientId source, ClientId destination, int siteNumber, ClientType.Type type, int count, int startNumber, boolean isActive) {
         Properties prop = new Properties();
@@ -1585,7 +1573,7 @@ public final class PacketFactory {
      * @param source
      * @param destination
      * @param packet
-     * @return
+     * @return copy of the input packet
      */
     public static Packet clonePacket(ClientId source, ClientId destination, Packet packet) {
         return createPacket(packet.getType(), source, destination, (Properties) packet.getContent());

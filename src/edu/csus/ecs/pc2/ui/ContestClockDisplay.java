@@ -79,7 +79,6 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
     /**
      * Ways to display contest time.
      * 
-     * @author pc2@ecs.csus.edu
      */
 
     private IController controller;

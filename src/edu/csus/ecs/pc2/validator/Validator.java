@@ -586,7 +586,7 @@ public class Validator {
     /**
      * return validator command with input command
      * @param whichCommand command line option for validator
-     * @return
+     * @return internal validator command line
      */
     public String getInternalValidatorCommandLine(int whichCommand, boolean ignoreCase) {
 

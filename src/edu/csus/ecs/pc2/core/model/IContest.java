@@ -132,7 +132,7 @@ public interface IContest {
     /**
      * Add new accounts.
      * 
-     * @see edu.csus.ecs.pc2.core.list.AccountList#generateNewAccounts(Type, int, int, edu.csus.ecs.pc2.core.list.AccountList.PasswordType, int, boolean)
+     * @see edu.csus.ecs.pc2.core.list.AccountList#generateNewAccounts(edu.csus.ecs.pc2.core.model.ClientType.Type, int, int, edu.csus.ecs.pc2.core.list.AccountList.PasswordType, int, boolean)
      * @param clientTypeName
      *            name of client type, "team", "judge", etc.
      * @param count
@@ -146,6 +146,7 @@ public interface IContest {
     /**
      * Add new accounts, client number starting at startNumber.
      * 
+     * @see edu.csus.ecs.pc2.core.list.AccountList#generateNewAccounts(edu.csus.ecs.pc2.core.model.ClientType.Type, int, int, edu.csus.ecs.pc2.core.list.AccountList.PasswordType, int, boolean)
      * @param clientTypeName
      * @param count
      * @param startNumber
@@ -157,7 +158,6 @@ public interface IContest {
     /**
      * Add new sites.
      * 
-     * @see edu.csus.ecs.pc2.core.list.AccountList#generateNewAccounts(Type, int, int, edu.csus.ecs.pc2.core.list.AccountList.PasswordType, int, boolean)
      * @param count
      * @param active
      */
@@ -333,7 +333,7 @@ public interface IContest {
      * method to check whether client logged in.
      * 
      * @param clientId
-     * @return
+     * @return date client logged in
      */
     Date getLocalLoggedInDate (ClientId clientId);
 
@@ -341,7 +341,7 @@ public interface IContest {
      * Is logged into remote server.
      * 
      * @param clientId
-     * @return
+     * @return true if client is logged into remote server
      */
     boolean isRemoteLoggedIn(ClientId clientId);
 
@@ -371,7 +371,7 @@ public interface IContest {
 
     /**
      * Remove client from remote login list
-     * @param fromId
+     * @param clientId
      */
     void removeRemoteLogin(ClientId clientId);
 
@@ -395,21 +395,21 @@ public interface IContest {
     /**
      * Get all logins in contest.
      * @param type
-     * @return
+     * @return array of all logged in clients
      */
     ClientId [] getAllLoggedInClients(Type type);
 
     /**
      * Get all locally logged in clients.
      * @param type
-     * @return
+     * @return array of all local logged in clients
      */
     ClientId [] getLocalLoggedInClients(Type type);
     
     /**
      * Get clients logged into other servers.
      * @param type
-     * @return
+     * @return array of all remote logged in clients
      */
     ClientId [] getRemoteLoggedInClients(Type type);
 
@@ -482,7 +482,7 @@ public interface IContest {
     /**
      * Returns which user has checked out the input run.
      * 
-     * @param clientid
+     * @param judgeID
      * @return Element id of runs.
      */
     ElementId[] getRunIdsCheckedOutBy(ClientId judgeID);
@@ -581,13 +581,13 @@ public interface IContest {
     /**
      * Get contest info, like title.
      * 
-     * @return
+     * @return the contest info
      */
     ContestInformation getContestInformation();
 
     /**
      * Get individual client settings
-     * @return
+     * @return client settings
      */
     ClientSettings getClientSettings();
 
@@ -600,7 +600,7 @@ public interface IContest {
      * 
      * Used to calculate a "random" connection retry, when
      * client disconnected.
-     * @return
+     * @return milliseconds
      */
     int getMaxRetryMSecs();
 
@@ -608,13 +608,13 @@ public interface IContest {
      * Maximum number of connection retries before taking action.
      * 
      * Action might be putting a GUI in front of the user.
-     * @return
+     * @return maximum unattended retry attempts
      */
     int getMaxConnectionRetries();
 
     /**
      * Get all Balloon Settings.
-     * @return
+     * @return array of the Balloon Settings
      */
     BalloonSettings[] getBalloonSettings();
 

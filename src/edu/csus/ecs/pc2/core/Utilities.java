@@ -206,7 +206,7 @@ public final class Utilities {
     /**
      * Returns Yes if true, No if false.
      * @param b
-     * @return
+     * @return Yes or No
      */
     public static String yesNoString(boolean b) {
         if (b) {

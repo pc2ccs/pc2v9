@@ -554,7 +554,7 @@ public class AutoJudgingMonitor implements UIPlugin {
     /**
      * Has the user turned auto judging off locally?.
      * 
-     * @return
+     * @return true if the auto judge has been turned off lcoally, else false
      */
     public boolean isAutoJudgeDisabledLocally() {
         return autoJudgeDisabledLocally;

@@ -204,11 +204,11 @@ public class Executable {
      * </ol>
      * 
      * <br>
-     * Will only run the validation on a run if not a {@link edu.csus.ecs.pc2.core.execute.contest.ClientType.Type#TEAM} client.
+     * Will only run the validation on a run if not a {@link edu.csus.ecs.pc2.core.model.ClientType.Type#TEAM} client.
      * 
      * @param clearDirFirst -
      *            clear the directory before unpacking and executing
-     * @return
+     * @return FileViewer with 1 or more tabs
      */
     public IFileViewer execute(boolean clearDirFirst) {
         fileViewer = new MultipleFileViewer(log);
@@ -1336,7 +1336,6 @@ public class Executable {
      * 
      * If the module is a team, then execute will not extract judge's data files nor will execute run a validation.
      * 
-     * @return true if executor is a TEAM
      */
 
     public void setTestRunOnly(boolean testRunOnly) {

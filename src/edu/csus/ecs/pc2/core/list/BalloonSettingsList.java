@@ -43,7 +43,7 @@ public class BalloonSettingsList extends ElementList {
     /**
      * get BalloonSettings by number.
      * @param siteNumber
-     * @return
+     * @return BalloonSettings for the given site, else null
      */
     public BalloonSettings get(int siteNumber) {
         for (BalloonSettings balloonSettings : getList()) {

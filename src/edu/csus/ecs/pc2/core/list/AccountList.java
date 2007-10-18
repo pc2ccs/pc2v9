@@ -58,7 +58,7 @@ public class AccountList extends BaseElementList {
     /**
      * Generate accounts, start a client number 1.
      * 
-     * @see #generateNewAccounts(Type, int, int, PasswordType, int, boolean)
+     * @see #generateNewAccounts(edu.csus.ecs.pc2.core.model.ClientType.Type, int, int, PasswordType, int, boolean)
      * @param type
      * @param count
      * @param passwordType

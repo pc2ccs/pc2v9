@@ -480,10 +480,10 @@ public class Contest implements IContest {
     }
 
     /**
-     * Accept Clarification, add run into this server.
+     * Accept Clarification, add clar into this server.
      * 
      * @param clarification
-     * @return
+     * @return the accepted Clarifcation
      */
     public Clarification acceptClarification(Clarification clarification) {
         clarification.setElapsedMins(getContestTime().getElapsedMins());
