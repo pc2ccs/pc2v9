@@ -267,15 +267,26 @@ public class Executable {
                 if (compileProgram()) {
                     executeProgram(0); // execute with first data set.
                 } else {
-                    int errnoIndex = errorString.indexOf('=') + 1;
-                    if (errorString.substring(errnoIndex).equals("2")) {
-                        showDialogToUser("Compiler not found, contact staff.");
-                        setException (executionData, "Compiler not found, contact staff.");
-
-                    } else {
-                        showDialogToUser("Problem executing compiler, contact staff.");
-                        setException (executionData, "Problem executing compiler, contact staff.");
-                    }
+                    /**
+                     * compileProgram returns false if
+                     * 1) runProgram failed (errorString set)
+                     * 2) compiler fails to create expecte output file (errorString empty)
+                     * If there is compiler stderr or stdout we should not add the
+                     * textPane saying there was an error.
+                     */ 
+                    if (executionData.getCompileStderr() == null && executionData.getCompileStdout() == null) {
+                        int errnoIndex = errorString.indexOf('=') + 1;
+                        String errorMessage;
+                        if (errorString.substring(errnoIndex).equals("2")) {
+                            errorMessage = "Compiler not found, contact staff.";
+    
+                        } else {
+                            errorMessage = "Problem executing compiler, contact staff.";
+                        }
+                        showDialogToUser(errorMessage);
+                        setException (executionData, errorMessage);
+                        fileViewer.addTextPane("Error during compile", errorMessage);
+                    } // else they will get a tab hopefully showing something wrong
                 }
             } else if (compileProgram()) {
                 SerializedFile[] dataFiles = null;
@@ -304,16 +315,26 @@ public class Executable {
                     }
                 }
             } else {
-                int errnoIndex = errorString.indexOf('=') + 1;
-                if (errorString.substring(errnoIndex).equals("2")) {
-                    showDialogToUser("Compiler not found, contact staff.");
-                    setException (executionData, "Compiler not found, contact staff.");
-
-                } else {
-                    showDialogToUser("Problem executing compiler, contact staff.");
-                    setException (executionData, "Problem executing compiler, contact staff.");
-
-                }
+                /**
+                 * compileProgram returns false if
+                 * 1) runProgram failed (errorString set)
+                 * 2) compiler fails to create expecte output file (errorString empty)
+                 * If there is compiler stderr or stdout we should not add the
+                 * textPane saying there was an error.
+                 */ 
+                if (executionData.getCompileStderr() == null && executionData.getCompileStdout() == null) {
+                    int errnoIndex = errorString.indexOf('=') + 1;
+                    String errorMessage;
+                    if (errorString.substring(errnoIndex).equals("2")) {
+                        errorMessage = "Compiler not found, contact staff.";
+    
+                    } else {
+                        errorMessage = "Problem executing compiler, contact staff.";
+                    }
+                    showDialogToUser(errorMessage);
+                    setException (executionData, errorMessage);
+                    fileViewer.addTextPane("Error during compile", errorMessage);
+                } // else they will get a tab hopefully showing something wrong
             }
 
             File file;
@@ -877,6 +898,10 @@ public class Executable {
                 executionTimer.stopTimer();
                 stderrlog.close();
                 stdoutlog.close();
+                // errorString will be set by runProgram
+                executionData.setCompileExeFileName("");
+                executionData.setCompileSuccess(false);
+                executionData.setCompileResultCode(1);
                 return false;
             }
             // This reads from the stdout of the child process
@@ -1184,7 +1209,8 @@ public class Executable {
             log.config("Note: exec failed in RunProgram " + errorString);
             return null;
         } catch (Exception e) {
-            log.log(Log.CONFIG, "Note: exec failed in RunProgram " + e.getMessage(), e);
+            errorString = e.getMessage();
+            log.log(Log.CONFIG, "Note: exec failed in RunProgram " + errorString, e);
             return null;
         }
 
