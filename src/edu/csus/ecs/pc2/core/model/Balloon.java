@@ -7,7 +7,7 @@ package edu.csus.ecs.pc2.core.model;
  * This object represents a generic balloon.
  * 
  * @author pc2@ecs.csus.edu
- * @verion $Id$
+ * @version $Id$
  * 
  */
 

@@ -7,7 +7,7 @@ import java.io.Serializable;
 
 /**
  * @author pc2@ecs.csus.edu
- * @verion $Id$
+ * @version $Id$
  */
 
 // $HeadURL$
