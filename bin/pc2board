@@ -1,0 +1,12 @@
+#!/bin/sh
+#
+# Purpose: start pc2
+# Author : pc2@ecs.csus.edu
+# $HeadURL$
+#
+
+. `dirname $0`/pc2env
+
+java -cp $libdir/pc2.jar:$mclbdir/mclb.jar edu.csus.ecs.pc2.Starter $*
+
+# eof pc2board $Id$ 
