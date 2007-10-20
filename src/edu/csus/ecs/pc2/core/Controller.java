@@ -980,7 +980,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         // TODO Handle this better via new login code.
         info("Login Failed: " + message);
         info("Login Failure");
-        PacketFactory.dumpPacket(System.err, packet);
+        PacketFactory.dumpPacket(System.err, packet,"Login Failed");
 
         if (loginUI != null) {
             FrameUtilities.regularCursor(loginUI);
@@ -1197,7 +1197,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         try {
             if (object instanceof Packet) {
                 Packet packet = (Packet) object;
-                PacketFactory.dumpPacket(System.err, packet);
+                PacketFactory.dumpPacket(System.err, packet, "recieveObject");
 
                 // TODO code put the server's connection handler id as 4th parameter
                 packetHandler.handlePacket(packet, null);
