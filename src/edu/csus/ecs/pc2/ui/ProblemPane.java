@@ -313,27 +313,6 @@ public class ProblemPane extends JPanePlugin {
 
         if (problem != null) {
 
-            // enableButton |= (!problem.getDisplayName().equals(getProblemNameTextField().getText()));
-            //
-            // int timeOutSeconds = getIntegerValue(timeOutSecondTextField.getText());
-            // enableButton |= (timeOutSeconds != problem.getTimeOutInSeconds());
-            //
-            // boolean hasDataFile = problem.getDataFileName() != null;
-            // enableButton |= (hasDataFile != problemRequiresDataCheckBox.isSelected());
-            // if (hasDataFile) {
-            // enableButton |= (!inputDataFileLabel.getText().equals(problem.getDataFileName()));
-            // }
-            //
-            // boolean hasAnswerFile = problem.getAnswerFileName() != null;
-            // enableButton |= (hasAnswerFile != judgesHaveAnswerFiles.isSelected());
-            // if (hasAnswerFile) {
-            // enableButton |= (!answerFileNameLabel.getText().equals(problem.getAnswerFileName()));
-            // }
-            //
-            // enableButton |= (stdinRadioButton.isSelected() != problem.isReadInputDataFromSTDIN());
-            //
-            // enableButton |= (fileRadioButton.isSelected() && problem.isReadInputDataFromSTDIN());
-
             try {
                 Problem changedProblem = getProblemFromFields(null);
                 if (!problem.isSameAs(changedProblem)) {
@@ -856,10 +835,10 @@ public class ProblemPane extends JPanePlugin {
 
         }
         
+        enableValidatorComponents();
+        
         enableRequiresInputDataComponents (problemRequiresDataCheckBox.isSelected());
-        
-        enablePC2ValidatorComponents(usePC2ValidatorRadioButton.isSelected());
-        
+
         enableProvideAnswerFileComponents(judgesHaveAnswerFiles.isSelected());
 
         // select the general tab
@@ -873,7 +852,7 @@ public class ProblemPane extends JPanePlugin {
         } else {
             cancelButton.setText("Close");
         }
-        // only enable the visible one, we are either editting or adding not both
+        // only enable the visible one, we are either editing or adding not both
         if (getUpdateButton().isVisible()) {
             getUpdateButton().setEnabled(fieldsChanged);
         } else {
@@ -1304,13 +1283,17 @@ public class ProblemPane extends JPanePlugin {
     protected void enableValidatorComponents() {
         if (usePC2ValidatorRadioButton.isSelected()){
             enablePC2ValidatorComponents(true);
-            
+            enableExternalValidatorComponents(false);
+            getShowValidatorToJudges().setEnabled(true);
         } else if (useExternalValidatorRadioButton.isSelected()){
             enablePC2ValidatorComponents(false);
-//            enable)
+            enableExternalValidatorComponents(true);
+            getShowValidatorToJudges().setEnabled(true);
         } else {
             // None used
             enablePC2ValidatorComponents(false);
+            enableExternalValidatorComponents(false);
+            getShowValidatorToJudges().setEnabled(false);
         }
     }
 
@@ -1326,7 +1309,7 @@ public class ProblemPane extends JPanePlugin {
             usePC2ValidatorRadioButton.setText("Use PC^2 Validator");
             usePC2ValidatorRadioButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    enablePC2ValidatorComponents(usePC2ValidatorRadioButton.isSelected());
+                    enableValidatorComponents();
                     enableUpdateButton();
                 }
             });
@@ -1334,6 +1317,15 @@ public class ProblemPane extends JPanePlugin {
         return usePC2ValidatorRadioButton;
     }
 
+    protected void enableExternalValidatorComponents(boolean enableComponents) {
+        
+        getExternalValidatorFrame().setEnabled(enableComponents);
+        getValidatorProgramJButton().setEnabled(enableComponents);
+        getValidatorCommandLineTextBox().setEditable(enableComponents);
+
+        // huh
+        
+    }
     protected void enablePC2ValidatorComponents(boolean enableComponents) {
         ignoreCaseCheckBox.setEnabled(enableComponents);
         pc2ValidatorOptionComboBox.setEnabled(enableComponents);
@@ -1351,6 +1343,7 @@ public class ProblemPane extends JPanePlugin {
             useExternalValidatorRadioButton.setText("Use External Validator");
             useExternalValidatorRadioButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableValidatorComponents();
                     enableUpdateButton();
                 }
             });
