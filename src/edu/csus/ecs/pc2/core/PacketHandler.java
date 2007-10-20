@@ -1,8 +1,10 @@
 package edu.csus.ecs.pc2.core;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Vector;
 
+import edu.csus.ecs.pc2.core.list.ClientIdComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.BalloonSettings;
@@ -37,7 +39,7 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 /**
  * Process all incoming packets.
  * 
- * Process packets. In {@link #handlePacket(Packet, ConnectionHandlerID) handlePacket} a packet is unpacked, contest is updated, and controller used to send packets as needed.
+ * Process packets. In {@link #handlePacket(IController, IContest, Packet, ConnectionHandlerID) handlePacket} a packet is unpacked, contest is updated, and controller used to send packets as needed.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -66,12 +68,12 @@ public class PacketHandler {
         Type packetType = packet.getType();
 
         info("handlePacket start " + packet);
-        PacketFactory.dumpPacket(System.err, packet); System.err.flush();
 
         ClientId fromId = packet.getSourceId();
 
         if (packetType.equals(Type.MESSAGE)) {
-            PacketFactory.dumpPacket(System.err, packet);
+            
+            PacketFactory.dumpPacket(System.err, packet, null);
 
             if (isThisSite(packet.getDestinationId().getSiteNumber())) {
                 if (!packet.getDestinationId().getClientType().equals(ClientType.Type.SERVER)) {
@@ -399,21 +401,21 @@ public class PacketHandler {
     @SuppressWarnings("unused")
     private void dumpServerLoginLists(String comment) {
         
-        System.out.println("dumpLoginLists ("+contest.getSiteNumber()+" "+comment);
+        info("dumpLoginLists ("+contest.getSiteNumber()+" "+comment);
         
         ClientId [] clientIds =  contest.getRemoteLoggedInClients(edu.csus.ecs.pc2.core.model.ClientType.Type.SERVER);
-        System.out.print("   "+clientIds.length+" remote logins: ");
+        info("   "+clientIds.length+" remote logins: ");
         for (ClientId clientId :clientIds){
-            System.out.print("Site " + clientId.getSiteNumber()+" - ");
+            info("Site " + clientId.getSiteNumber()+" - ");
         }
-        System.out.println();
+        info("");
         
         clientIds =  contest.getLocalLoggedInClients(edu.csus.ecs.pc2.core.model.ClientType.Type.SERVER);
-        System.out.print("   "+clientIds.length+"  local logins: ");
+        info("   "+clientIds.length+"  local logins: ");
         for (ClientId clientId :clientIds){
-            System.out.print("Site " + clientId.getSiteNumber()+" - ");
+            info("Site " + clientId.getSiteNumber()+" - ");
         }
-        System.out.println();
+        info("");
     }
 
     private void updateContestClock(Packet packet) {
@@ -694,7 +696,7 @@ public class PacketHandler {
                 Vector<Account> accountVector = contest.generateNewAccounts(type.toString(), count.intValue(), startCount.intValue(), active);
                 Account[] accounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
                 
-                PacketFactory.dumpPacket(System.out, packet);
+                PacketFactory.dumpPacket(System.err, packet, "Gen Accounts");
                 controller.writeConfigToDisk();
                 
                 Packet newAccountsPacket = PacketFactory.createAddSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, accounts);
@@ -1489,7 +1491,6 @@ public class PacketHandler {
     private void addLoginsToModel(Packet packet) {
         
         try {
-            
             ClientId [] clientIds = (ClientId[]) PacketFactory.getObjectValue(packet, PacketFactory.LOGGED_IN_USERS);
             if (clientIds != null){
                 for (ClientId clientId : clientIds){
@@ -1499,9 +1500,9 @@ public class PacketHandler {
                         if (! contest.isLocalLoggedIn(clientId) && !isThisSite(clientId.getSiteNumber())) {
                             // Only add into remote list on server, if they are not already logged in
                             // TODO someday soon load logins with their connectionIds
-                            ConnectionHandlerID fakeId = new ConnectionHandlerID("Fake-Site"+clientId.getSiteNumber());
+                            ConnectionHandlerID fakeId = new ConnectionHandlerID("FauxSite"+clientId.getSiteNumber()+clientId);
                             
-                            System.out.println("DEBUG adding remote login "+clientId);
+                            info("addLoginsToModel: Adding remote login "+clientId);
                             contest.addRemoteLogin(clientId, fakeId);
                         }
                         
@@ -1509,7 +1510,7 @@ public class PacketHandler {
                         // Not a server Controller - add everything
                         
                         // TODO someday soon load logins with their connectionIds
-                        ConnectionHandlerID fakeId = new ConnectionHandlerID("Fake-Site" + clientId.getSiteNumber());
+                        ConnectionHandlerID fakeId = new ConnectionHandlerID("FauxSite" + clientId.getSiteNumber()+clientId);
                         contest.addRemoteLogin(clientId, fakeId);
                     }
                 }
@@ -1518,6 +1519,20 @@ public class PacketHandler {
             // TODO: log handle exception
             e.printStackTrace();
             controller.getLog().log(Log.WARNING, "Exception logged ", e);
+        }
+
+    }
+    
+
+    @SuppressWarnings("unused")
+    private void dumpClientList(ClientId[] clientIds, String comment) {
+        if (clientIds == null || clientIds.length == 0) {
+            info(comment + " no clients in list ");
+        } else {
+            Arrays.sort(clientIds, new ClientIdComparator());
+            for (ClientId clientId : clientIds) {
+                info(comment + " " + clientId);
+            }
         }
     }
 
@@ -1551,6 +1566,10 @@ public class PacketHandler {
         addRemoteAllClientSettingsToModel (packet, remoteSiteNumber);
         
         addRemoteLoginsToModel (packet, remoteSiteNumber);
+        
+        if (isServer()){
+            loginToOtherSites(packet);
+        }
     }
 
    
@@ -1567,10 +1586,22 @@ public class PacketHandler {
             ClientId[] clientIds = (ClientId[]) PacketFactory.getObjectValue(packet, PacketFactory.LOGGED_IN_USERS);
             if (clientIds != null) {
                 for (ClientId clientId : clientIds) {
-                    if (remoteSiteNumber == clientId.getSiteNumber()) {
+                    if (isServer(clientId)) {
+
+                        if (! contest.isLocalLoggedIn(clientId) && !isThisSite(clientId.getSiteNumber())) {
+                            // Only add into remote list on server, if they are not already logged in
+                            
+                            // TODO someday soon load logins with their connectionIds
+                            ConnectionHandlerID fakeId = new ConnectionHandlerID("FauxSite"+clientId.getSiteNumber()+clientId);
+                            
+                            info("Adding remote login "+clientId);
+                            contest.addRemoteLogin(clientId, fakeId);
+                        }
+                        
+                    } else if (remoteSiteNumber == clientId.getSiteNumber()) {
 
                         // TODO someday soon load logins with their connectionIds
-                        ConnectionHandlerID fakeId = new ConnectionHandlerID("FauxSite" + clientId.getSiteNumber()+"-");
+                        ConnectionHandlerID fakeId = new ConnectionHandlerID("FauxSite" + clientId.getSiteNumber()+"-"+clientId);
                         contest.addRemoteLogin(clientId, fakeId);
                     }
                 }
@@ -1706,7 +1737,7 @@ public class PacketHandler {
     private void loadDataIntoModel(Packet packet, ConnectionHandlerID connectionHandlerID) {
 
         ClientId clientId = null;
-
+        
         try {
             clientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
             if (clientId != null) {
@@ -2047,6 +2078,9 @@ public class PacketHandler {
      *            contains list of other servers
      */
     private void loginToOtherSites(Packet packet) {
+        
+        dumpServerLoginLists("loginToOtherSites");
+        
         for (Site site : contest.getSites()) {
             if (!isThisSite(site.getSiteNumber())) {
                 try {
@@ -2055,7 +2089,7 @@ public class PacketHandler {
                     if (contest.isRemoteLoggedIn(serverClientId)) {
                         controller.sendServerLoginRequest(site.getSiteNumber());
                     } else {
-                        info("Not logging into site " + site.getSiteNumber() + ", site not connected to contest");
+                        info("Not logging into site " + site.getSiteNumber() + ", site is not connected to contest.");
                     }
                 } catch (Exception e) {
                     controller.getLog().log(Log.WARNING, "Exception logging into other site ", e);
@@ -2092,6 +2126,8 @@ public class PacketHandler {
     private ClientId [] getAllLoggedInUsers() {
         
         Vector<ClientId> clientList = new Vector<ClientId>();
+        
+        dumpServerLoginLists("getAllLoggedInUsers");
 
         for (ClientType.Type ctype : ClientType.Type.values()) {
 
@@ -2199,12 +2235,14 @@ public class PacketHandler {
     }
     
     public void info(String s) {
+        System.err.flush();
         controller.getLog().warning(s);
         System.err.println(Thread.currentThread().getName() + " " + s);
         System.err.flush();
     }
 
     public void info(String s, Exception exception) {
+        System.err.flush();
         controller.getLog().log (Log.WARNING, s, exception);
         System.err.println(Thread.currentThread().getName() + " " + s);
         System.err.flush();
