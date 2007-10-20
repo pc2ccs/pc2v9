@@ -151,8 +151,6 @@ public class StandingsHTMLPane extends JPanePlugin {
         String xmlString;
         try {
             xmlString = scoringAlgorithm.getStandings(getContest(), new Properties(), log);
-//            System.out.println("debug -- " + xmlString);
-
             transformAndDisplay(xmlString, styleSheetFileName);
             showMessage("Last update " + new Date());
         } catch (IllegalContestState e) {
@@ -176,11 +174,8 @@ public class StandingsHTMLPane extends JPanePlugin {
 
             String fullPathFileName = xslDir + File.separator + xsltFileName;
 
-            System.out.println("Creating HTML string from " + fullPathFileName);
             File xslFile = new File(fullPathFileName);
             final String htmlString = xslTransformer.transformToString(xslFile, xmlString);
-            System.out.println("debug there are " + htmlString.length() + " characters ");
-
             viewHTML (htmlString);
     
         } catch (Exception e) {
