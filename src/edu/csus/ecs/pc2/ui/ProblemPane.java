@@ -21,7 +21,6 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.core.Constants;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.log.Log;
-import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
@@ -271,6 +270,11 @@ public class ProblemPane extends JPanePlugin {
             showMessage("Enter a problem name");
             return;
         }
+        
+        if (!validateProblemFields()) {
+            // new problem is invalid, just return, message issued by validateProblemFields
+            return;
+        }
 
         Problem newProblem = null;
         try {
@@ -279,7 +283,7 @@ public class ProblemPane extends JPanePlugin {
             showMessage(e.getMessage());
             return;
         }
-
+        
         getController().addNewProblem(newProblem, newProblemDataFiles);
 
         cancelButton.setText("Close");
@@ -310,6 +314,8 @@ public class ProblemPane extends JPanePlugin {
         }
 
         boolean enableButton = false;
+        
+        showMessage("");
 
         if (problem != null) {
 
@@ -322,7 +328,7 @@ public class ProblemPane extends JPanePlugin {
             } catch (InvalidFieldValue e) {
                 // invalid field, but that is ok as they are entering data
                 // will be caught and reported when they hit update or add.
-                StaticLog.getLog().log(Log.DEBUG, "Input Problem (but not saving) ", e);
+                getController().getLog().log(Log.DEBUG, "Input Problem (but not saving) ", e);
                 enableButton = true;
             }
 
@@ -383,20 +389,20 @@ public class ProblemPane extends JPanePlugin {
                 checkProblem.setDataFileName(serializedFile.getName());
                 newProblemDataFiles.setJudgesDataFile(serializedFile);
             } else {
-                SerializedFile sFile = getController().getProblemDataFiles(checkProblem).getJudgesDataFile();
-                SerializedFile serializedFile = null;
-                if (sFile != null && sFile.getAbsolutePath().equals(fileName)) {
-                    serializedFile = sFile;
-                } else {
+                
+                SerializedFile serializedFile = getController().getProblemDataFiles(checkProblem).getJudgesDataFile();
+                if (serializedFile == null){
+                    // they've added a new file
                     serializedFile = new SerializedFile(fileName);
+                    if (serializedFile == null){
+                        throw new InvalidFieldValue("Unable to find/load "+fileName);
+                    }
+                } else {
+                    serializedFile = freshenIfNeeded(serializedFile, fileName);
                 }
-
-                if (serializedFile.getBuffer() == null) {
-                    throw new InvalidFieldValue("Unable to read file " + fileName + " choose data file again (updating)");
-                }
-
+                
+                newProblemDataFiles.setJudgesDataFile(serializedFile);
                 checkProblem.setDataFileName(serializedFile.getName());
-                newProblemDataFiles.setJudgesDataFile(freshenIfNeeded(serializedFile));
             }
         } else {
             checkProblem.setDataFileName(null);
@@ -422,20 +428,19 @@ public class ProblemPane extends JPanePlugin {
                 checkProblem.setAnswerFileName(serializedFile.getName());
                 newProblemDataFiles.setJudgesAnswerFile(serializedFile);
             } else {
-                SerializedFile sFile = getController().getProblemDataFiles(checkProblem).getJudgesAnswerFile();
-                SerializedFile serializedFile = null;
-                if (sFile != null && sFile.getAbsolutePath().equals(fileName)) {
-                    serializedFile = sFile;
-                } else {
+                SerializedFile serializedFile = getController().getProblemDataFiles(checkProblem).getJudgesAnswerFile();
+                if (serializedFile == null){
+                    // they've added a new file
                     serializedFile = new SerializedFile(fileName);
+                    if (serializedFile == null){
+                        throw new InvalidFieldValue("Unable to find/load "+fileName);
+                    }
+                } else {
+                    serializedFile = freshenIfNeeded(serializedFile, fileName);
                 }
-
-                if (serializedFile.getBuffer() == null) {
-                    throw new InvalidFieldValue("Unable to read file " + fileName + " choose answer file again (updating)");
-                }
-
+                
+                newProblemDataFiles.setJudgesAnswerFile(freshenIfNeeded(serializedFile, fileName));
                 checkProblem.setAnswerFileName(serializedFile.getName());
-                newProblemDataFiles.setJudgesAnswerFile(freshenIfNeeded(serializedFile));
             }
         } else {
             checkProblem.setAnswerFileName(null);
@@ -499,7 +504,7 @@ public class ProblemPane extends JPanePlugin {
             }
 
             checkProblem.setValidatorProgramName(serializedFile.getName());
-            newProblemDataFiles.setValidatorFile(freshenIfNeeded(serializedFile));
+            newProblemDataFiles.setValidatorFile(freshenIfNeeded(serializedFile, fileName));
         }
 
         return checkProblem;
@@ -532,13 +537,14 @@ public class ProblemPane extends JPanePlugin {
             // new problem is invalid, just return, message issued by validateProblemFields
             return;
         }
-
+        
         Problem newProblem = null;
 
         try {
             newProblem = getProblemFromFields(problem);
         } catch (InvalidFieldValue e) {
-            showMessage(e.getMessage());
+            JOptionPane.showMessageDialog(this, e.getMessage());
+//            showMessage(e.getMessage());
             return;
         }
 
@@ -552,7 +558,7 @@ public class ProblemPane extends JPanePlugin {
             getParentFrame().setVisible(false);
         }
     }
-
+    
     /**
      * Validate that all problem fields are ok.
      * 
@@ -564,9 +570,17 @@ public class ProblemPane extends JPanePlugin {
             showMessage("Enter a problem name");
             return false;
         }
+        
+        if (getUsePC2ValidatorRadioButton().isSelected()) {
+            if (pc2ValidatorOptionComboBox.getSelectedIndex() < 1) {
+                showMessage("Select a Validator option");
+                return false;
+            }
+        }
 
-        String fileName = inputDataFileLabel.getText();
         if (getProblemRequiresDataCheckBox().isSelected()) {
+            
+            String fileName = inputDataFileLabel.getText();
             // this check is outside so we can provide a specific message
             if (fileName == null || fileName.trim().length() == 0) {
                 showMessage("Problem Requires Input Data checked, select a file ");
@@ -581,64 +595,28 @@ public class ProblemPane extends JPanePlugin {
                 // note: if error, then checkFile will showMessage
                 return false;
             }
-        } else {
-            if (fileName != null && fileName.trim().length() > 0) {
-                System.out.println("XXX filename='"+fileName+"'");
-                // file selected, but checkbox not clicked
-                int verifyInputDataFile = JOptionPane.showConfirmDialog(getParent(), "Use selected data file?");
-                switch (verifyInputDataFile) {
-                    case JOptionPane.CANCEL_OPTION:
-                        showMessage("Update canceled");
-                        return false;
-                    case JOptionPane.YES_OPTION:
-                        getProblemRequiresDataCheckBox().setSelected(true);
-                        break;
-                    case JOptionPane.NO_OPTION:
-                        inputDataFileLabel.setText("");
-                        break;
-                    default:
-                        return false;
-                }
-            }
         }
 
-        fileName = answerFileNameLabel.getText();
         if (getJudgesHaveAnswerFiles().isSelected()) {
+            
+            String answerFileName = answerFileNameLabel.getText();
+
             // this check is outside so we can provide a specific message
-            if (fileName != null && fileName.trim().length() == 0) {
+            if (answerFileName == null || answerFileName.trim().length() == 0) {
                 showMessage("Problem Requires Judges' Answer File checked, select a file ");
                 return false;
             }
-            if (!checkFile(fileName)) {
+            
+            if (answerFileName.trim().length() != answerFileNameLabel.getToolTipText().length()) {
+                answerFileName = answerFileNameLabel.getToolTipText() + "";
+            }
+            
+            if (!checkFile(answerFileName)) {
                 // note: if error, then checkFile will showMessage
                 return false;
             }
-        } else {
-            if (fileName != null && fileName.trim().length() > 0) {
-                // file selected, but checkbox not clicked
-                int verifyAnswerFile = JOptionPane.showConfirmDialog(getParent(), "Use selected answer file?");
-                switch (verifyAnswerFile) {
-                    case JOptionPane.CANCEL_OPTION:
-                        showMessage("Update canceled");
-                        return false;
-                    case JOptionPane.YES_OPTION:
-                        getJudgesHaveAnswerFiles().setSelected(true);
-                        break;
-                    case JOptionPane.NO_OPTION:
-                        answerFileNameLabel.setText("");
-                        break;
-                    default:
-                        return false;
-                }
-            }
         }
 
-        if (getUsePC2ValidatorRadioButton().isSelected()) {
-            if (pc2ValidatorOptionComboBox.getSelectedIndex() < 1) {
-                showMessage("Select a Validator option");
-                return false;
-            }
-        }
 
         return true;
     }
@@ -817,8 +795,12 @@ public class ProblemPane extends JPanePlugin {
             timeOutSecondTextField.setText("120");
             judgesHaveAnswerFiles.setSelected(false);
             problemRequiresDataCheckBox.setSelected(false);
+            
             inputDataFileLabel.setText("");
+            inputDataFileLabel.setToolTipText("");
             answerFileNameLabel.setText("");
+            answerFileNameLabel.setToolTipText("");
+            
             fileRadioButton.setSelected(false);
             stdinRadioButton.setSelected(false);
             useNOValidatatorRadioButton.setSelected(true);
@@ -1201,6 +1183,7 @@ public class ProblemPane extends JPanePlugin {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 messageLabel.setText(message);
+                messageLabel.setToolTipText(message);
             }
         });
     }
@@ -1577,43 +1560,53 @@ public class ProblemPane extends JPanePlugin {
 
     /**
      * Checks whether needs to freshen, prompt user before freshening.
+     * @param serializedFile
+     * @param fileName
+     * @return
+     * @throws InvalidFieldValue
      */
+    private SerializedFile freshenIfNeeded(SerializedFile serializedFile, String fileName) throws InvalidFieldValue {
 
-    private SerializedFile freshenIfNeeded(SerializedFile serFile) {
-        if (serFile == null) {
-            return serFile;
+        if (serializedFile == null){
+            return null;
+            
+        }
+        if (serializedFile.getBuffer() == null) {
+            throw new InvalidFieldValue("Unable to read file " + fileName + " choose data file again (updating)");
         }
 
-        SerializedFile sf = needsFreshening(serFile);
-
-        if (sf != null) {
-            int result = JOptionPane.showConfirmDialog(this, "Datafile (" + serFile.getName() + ") has changed; reload from disk?", "Freshen file " + serFile.getName() + "?",
+        if (needsFreshening(serializedFile, fileName)) {
+            
+            int result = JOptionPane.showConfirmDialog(this, "Datafile (" + fileName + ") has changed; reload from disk?", "Freshen file " + fileName + "?",
                     JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 
             if (result == JOptionPane.YES_OPTION) {
-                checkFileFormat(sf);
-                return sf;
+                checkFileFormat(serializedFile);
+                return serializedFile;
+            } else if (result == JOptionPane.CANCEL_OPTION) {
+                throw new InvalidFieldValue("Update canceled");
             }
         } // else nothing to update
 
-        return serFile;
+        checkFileFormat(serializedFile);
+        return serializedFile;
     }
 
     /**
      * Has this file been updated on disk ?
+     * 
+     * @param serializedFile existing saved file
+     * @param fileName name for file that might need freshening.
+     * @return true if file on disk different than saved file.
      */
-    public SerializedFile needsFreshening(SerializedFile sFile) {
+    public boolean needsFreshening(SerializedFile serializedFile, String fileName) {
 
-        if (sFile == null) {
-            return null;
+        if (serializedFile == null) {
+            return false;
         }
 
         try {
-            if (sFile.getAbsolutePath() == null) {
-                StaticLog.getLog().log(Log.DEBUG, " needsFreshening path is null, ignoring ");
-                return null;
-            }
-            File f = new File(sFile.getAbsolutePath());
+            File f = new File(serializedFile.getAbsolutePath());
 
             if (f.exists()) {
                 // Only can check whether to update if file is on disk
@@ -1621,20 +1614,20 @@ public class ProblemPane extends JPanePlugin {
                 // Now compare them
                 // Can't use SerializeFile.getFile() because it may return null... sigh.
 
-                SerializedFile sf = new SerializedFile(sFile.getAbsolutePath());
+                SerializedFile newSerializedFile = new SerializedFile(fileName);
 
-                if (sf.getSHA1sum().equals(sFile.getSHA1sum())) {
-                    return null;
+                if (serializedFile.getSHA1sum().equals(newSerializedFile.getSHA1sum())) {
+                    return false;
                 } else {
-                    return sf;
+                    return true;
                 }
-            }
+            } // else no need to refresh, no file found.
 
         } catch (Exception ex99) {
-            StaticLog.getLog().log(Log.DEBUG, "Exception ", ex99);
+            getController().getLog().log(Log.DEBUG, "Exception ", ex99);
         }
 
-        return null;
+        return false;
     }
 
     public void checkFileFormat(SerializedFile newFile) {
