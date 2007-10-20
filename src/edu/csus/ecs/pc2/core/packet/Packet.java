@@ -99,7 +99,7 @@ public class Packet implements Serializable {
     }
 
     public String toString() {
-        return "Packet[" + type + "] " + sourceId + " -> " + destinationId;
+        return "Packet[" + type + "] #"+packetNumber +" " + sourceId + " -> " + destinationId;
     }
 
     public Date getCreateDate() {
