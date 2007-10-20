@@ -503,4 +503,8 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
             savedFrameTitle = clientFrame.getTitle();
         }
     }
+
+    public JFrame getClientFrame() {
+        return clientFrame;
+    }
 }  //  @jve:decl-index=0:visual-constraint="96,54"

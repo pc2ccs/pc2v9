@@ -2,7 +2,9 @@ package edu.csus.ecs.pc2.ui.team;
 
 import java.awt.BorderLayout;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
@@ -10,10 +12,13 @@ import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.ui.ClarificationsPane;
+import edu.csus.ecs.pc2.ui.ContestClockDisplay;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
 import edu.csus.ecs.pc2.ui.LogWindow;
@@ -22,8 +27,7 @@ import edu.csus.ecs.pc2.ui.RunsPanel;
 import edu.csus.ecs.pc2.ui.SubmitClarificationPane;
 import edu.csus.ecs.pc2.ui.SubmitRunPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
-import javax.swing.JLabel;
-import javax.swing.JButton;
+import edu.csus.ecs.pc2.ui.ContestClockDisplay.DisplayTimes;
 
 /**
  * Team Client View/GUI.
@@ -37,7 +41,7 @@ public class TeamView extends JFrame implements UIPlugin {
 
     public static final String SVN_ID = "$Id$";
 
-    private IContest model = null;
+    private IContest contest = null;
 
     private IController teamController = null;
 
@@ -65,6 +69,8 @@ public class TeamView extends JFrame implements UIPlugin {
     private JLabel messageLabel = null;
 
     private JButton exitButton = null;
+    
+    private ContestClockDisplay contestClockDisplay = null;
 
     /**
      * Nevermind this constructor, needed for VE and other reasons.
@@ -105,18 +111,26 @@ public class TeamView extends JFrame implements UIPlugin {
     }
 
     private boolean isThisSite(int siteNumber) {
-        return siteNumber == model.getSiteNumber();
+        return siteNumber == contest.getSiteNumber();
     }
 
     private void updateFrameTitle(final boolean turnButtonsOn) {
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
+                
                 if (turnButtonsOn) {
-                    setTitle("PC^2 Team " + model.getTitle() + " [STARTED] Build " + new VersionInfo().getBuildNumber());
+                    setTitle("PC^2 Team " + contest.getTitle() + " [STARTED] Build " + new VersionInfo().getBuildNumber());
                 } else {
-                    setTitle("PC^2 Team " + model.getTitle() + " [STOPPED] Build " + new VersionInfo().getBuildNumber());
+                    setTitle("PC^2 Team " + contest.getTitle() + " [STOPPED] Build " + new VersionInfo().getBuildNumber());
                 }
+
+                if (contestClockDisplay.getClientFrame() == null){
+                    contestClockDisplay.setClientFrame(getThisFrame());
+                }
+
+                contestClockDisplay.fireClockStateChange(contest.getContestTime());
+
             }
         });
 
@@ -127,7 +141,6 @@ public class TeamView extends JFrame implements UIPlugin {
         }
         
         FrameUtilities.regularCursor(this);
-
     }
 
     /**
@@ -192,9 +205,13 @@ public class TeamView extends JFrame implements UIPlugin {
         }
         return mainTabbedPane;
     }
+    
+    protected TeamView getThisFrame(){
+        return this;
+    }
 
     public void setContestAndController(IContest inContest, IController inController) {
-        this.model = inContest;
+        this.contest = inContest;
         this.teamController = inController;
 
         SwingUtilities.invokeLater(new Runnable() {
@@ -202,10 +219,10 @@ public class TeamView extends JFrame implements UIPlugin {
                 if (logWindow == null) {
                     logWindow = new LogWindow();
                 }
-                logWindow.setContestAndController(model, teamController);
-                logWindow.setTitle("Log " + model.getClientId().toString());
+                logWindow.setContestAndController(contest, teamController);
+                logWindow.setTitle("Log " + contest.getClientId().toString());
         
-                model.addContestTimeListener(new ContestTimeListenerImplementation());
+                contest.addContestTimeListener(new ContestTimeListenerImplementation());
         
                 SubmitRunPane submitRunPane = new SubmitRunPane();
                 addUIPlugin(getMainTabbedPane(), "Submit Run", submitRunPane);
@@ -223,12 +240,22 @@ public class TeamView extends JFrame implements UIPlugin {
                 OptionsPanel optionsPanel = new OptionsPanel();
                 addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
                 optionsPanel.setLogWindow(logWindow);
-        
-                updateFrameTitle(model.getContestTime().isContestRunning());
-        
+                
+                updateFrameTitle(contest.getContestTime().isContestRunning());
+                
+                contestClockDisplay = new ContestClockDisplay(teamController.getLog(), contest.getContestTime(), contest.getSiteNumber(), isTeam(), null);
+                contestClockDisplay.addLabeltoUpdateList(clockLabel, DisplayTimes.REMAINING_TIME, contest.getSiteNumber());
+                
                 setVisible(true);
             }
         });
+    }
+
+    private boolean isTeam(ClientId id) {
+        return id != null && id.getClientType().equals(ClientType.Type.TEAM);
+    }
+    private boolean isTeam() {
+        return isTeam(contest.getClientId());
     }
 
     public String getPluginTitle() {
@@ -236,7 +263,7 @@ public class TeamView extends JFrame implements UIPlugin {
     }
 
     protected void addUIPlugin(JTabbedPane tabbedPane, String tabTitle, JPanePlugin plugin) {
-        plugin.setContestAndController(model, teamController);
+        plugin.setContestAndController(contest, teamController);
         tabbedPane.add(plugin, tabTitle);
     }
 
