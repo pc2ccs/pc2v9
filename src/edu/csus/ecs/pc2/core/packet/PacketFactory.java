@@ -345,9 +345,10 @@ public final class PacketFactory {
      * 
      * @param pw
      * @param packet
+     * @param message 
      */
-    public static void dumpPacket(PrintStream pw, Packet packet) {
-        pw.println("Packet " + packet.getType());
+    public static void dumpPacket(PrintStream pw, Packet packet, String message) {
+        pw.println("Packet "  + packet.getType()+" (Seq #"+packet.getPacketNumber()+" ) "+message);
         pw.println("  From: " + packet.getSourceId());
         pw.println("    To: " + packet.getDestinationId());
         Object obj = packet.getContent();
