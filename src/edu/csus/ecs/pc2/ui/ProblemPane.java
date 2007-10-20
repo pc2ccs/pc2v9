@@ -855,6 +855,12 @@ public class ProblemPane extends JPanePlugin {
             getShowCompareCheckBox().setSelected(true);
 
         }
+        
+        enableRequiresInputDataComponents (problemRequiresDataCheckBox.isSelected());
+        
+        enablePC2ValidatorComponents(usePC2ValidatorRadioButton.isSelected());
+        
+        enableProvideAnswerFileComponents(judgesHaveAnswerFiles.isSelected());
 
         // select the general tab
         getMainTabbedPane().setSelectedIndex(0);
@@ -971,11 +977,24 @@ public class ProblemPane extends JPanePlugin {
             problemRequiresDataCheckBox.setText("Problem Requires Input Data");
             problemRequiresDataCheckBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableRequiresInputDataComponents (problemRequiresDataCheckBox.isSelected());
                     enableUpdateButton();
                 }
             });
         }
         return problemRequiresDataCheckBox;
+    }
+
+    protected void enableRequiresInputDataComponents(boolean enableButtons) {
+        getInputDataFilePane().setEnabled(enableButtons);
+        getFileRadioButton().setEnabled(enableButtons);
+        getStdinRadioButton().setEnabled(enableButtons);
+        getReadsFromPane().setEnabled(enableButtons);
+        getSelectFileButton().setEnabled(enableButtons);
+        getInputDataFilePane().setEnabled(enableButtons);
+        getFileNamePane().setEnabled(enableButtons);
+        getInputDataFilePane().setEnabled(enableButtons);
+        getFileNamePane().setEnabled(enableButtons);
     }
 
     /**
@@ -1127,11 +1146,18 @@ public class ProblemPane extends JPanePlugin {
             judgesHaveAnswerFiles.setText("Judges Have Provided Answer File");
             judgesHaveAnswerFiles.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableProvideAnswerFileComponents(judgesHaveAnswerFiles.isSelected());
                     enableUpdateButton();
                 }
             });
         }
         return judgesHaveAnswerFiles;
+    }
+
+    protected void enableProvideAnswerFileComponents(boolean enableComponents) {
+        getAnswerFilenamePane().setEnabled(enableComponents);
+        getAnswerBrowseButton().setEnabled(enableComponents);
+        answerFileNameLabel.setEnabled(enableComponents);
     }
 
     /**
@@ -1267,11 +1293,25 @@ public class ProblemPane extends JPanePlugin {
             useNOValidatatorRadioButton.setText("Do not use Validator");
             useNOValidatatorRadioButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableValidatorComponents();
                     enableUpdateButton();
                 }
             });
         }
         return useNOValidatatorRadioButton;
+    }
+
+    protected void enableValidatorComponents() {
+        if (usePC2ValidatorRadioButton.isSelected()){
+            enablePC2ValidatorComponents(true);
+            
+        } else if (useExternalValidatorRadioButton.isSelected()){
+            enablePC2ValidatorComponents(false);
+//            enable)
+        } else {
+            // None used
+            enablePC2ValidatorComponents(false);
+        }
     }
 
     /**
@@ -1286,11 +1326,17 @@ public class ProblemPane extends JPanePlugin {
             usePC2ValidatorRadioButton.setText("Use PC^2 Validator");
             usePC2ValidatorRadioButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enablePC2ValidatorComponents(usePC2ValidatorRadioButton.isSelected());
                     enableUpdateButton();
                 }
             });
         }
         return usePC2ValidatorRadioButton;
+    }
+
+    protected void enablePC2ValidatorComponents(boolean enableComponents) {
+        ignoreCaseCheckBox.setEnabled(enableComponents);
+        pc2ValidatorOptionComboBox.setEnabled(enableComponents);
     }
 
     /**
