@@ -749,6 +749,10 @@ public class Contest implements IContest {
         return connectionHandlerID;
     }
 
+    public ClientId getClientId(ConnectionHandlerID connectionHandlerID){
+        return localLoginList.getClientId(connectionHandlerID);
+    }
+    
     public boolean isConnected(ConnectionHandlerID connectionHandlerID) {
         return localConnectionHandlerList.get(connectionHandlerID) != null;
     }

@@ -358,6 +358,8 @@ public interface IContest {
      */
     ConnectionHandlerID getConnectionHandleID(ClientId clientId);
 
+    ClientId getClientId(ConnectionHandlerID connectionHandlerID);
+
     boolean isConnected(ConnectionHandlerID connectionHandlerID);
 
     boolean isConnectedToRemoteSite(ConnectionHandlerID connectionHandlerID);
