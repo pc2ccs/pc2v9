@@ -56,6 +56,8 @@ public class Group implements IElementObject {
     }
 
     /**
+     * Returns what PC2 site is responsible for this group.
+     * 
      * @return Returns the site.
      */
     public ElementId getSite() {
