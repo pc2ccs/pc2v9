@@ -62,6 +62,7 @@ public class ConnectionHandlerClientThread extends ConnectionHandlerThread {
                     sealedObject = receive();
                     getTmCallBack().receive(sealedObject, getMyConnectionID());
                 } catch (TransportException e) {
+                    e.printStackTrace();
                     if (e.getMessage().equalsIgnoreCase(TransportException.CONNECTION_RESET)) {
                         setStillListening(false);
                     }

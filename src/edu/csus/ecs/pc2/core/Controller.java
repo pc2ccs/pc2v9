@@ -37,6 +37,7 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.packet.PacketFactory;
 import edu.csus.ecs.pc2.core.packet.PacketType;
+import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 import edu.csus.ecs.pc2.core.transport.IBtoA;
 import edu.csus.ecs.pc2.core.transport.ITransportManager;
@@ -1639,34 +1640,55 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         Packet packet = PacketFactory.createUpdateSetting(getServerClientId(), PacketFactory.ALL_SERVERS, site);
         sendToServers(packet);
     }
+    
+    public void sendPriorityMessage(String event, String message, Exception exception) {
+        Packet priorityMessagePacket = PacketFactory.createPriorityMessagePacket(contest.getClientId(), getServerClientId(), event, message, exception);
+        sendToLocalServer(priorityMessagePacket);
+    }
 
     public void sendServerLoginRequest(int inSiteNumber) throws Exception {
+        
+        if (isServer()){
+        
 
-        if (isThisSite(inSiteNumber)) {
-            /**
-             * We should not send a LOGIN_REQUEST from this site... to this site.
-             */
-            System.err.println(" Tried to send login request to ourselves, login to " + inSiteNumber + ", ignored");
-            log.log(Log.DEBUG, " Tried to send login request to ourselves, login to " + inSiteNumber + ", ignored");
+            if (isThisSite(inSiteNumber)) {
+                /**
+                 * We should not send a LOGIN_REQUEST from this site... to this site.
+                 */
+                System.err.println(" Tried to send login request to ourselves, login to " + inSiteNumber + ", ignored");
+                log.log(Log.DEBUG, " Tried to send login request to ourselves, login to " + inSiteNumber + ", ignored");
+                return;
+            }
+
+            Site remoteSite = contest.getSite(inSiteNumber);
+            Site localSite = contest.getSite(contest.getSiteNumber());
+            String localPassword = localSite.getPassword();
+            
+            String hostName = remoteSite.getConnectionInfo().getProperty(Site.IP_KEY);
+            String portStr = remoteSite.getConnectionInfo().getProperty(Site.PORT_KEY);
+            int portNumber = Integer.parseInt(portStr);
+            
+            info("Send login request to Site " + remoteSite.getSiteNumber() + " " + hostName + ":" + portStr);
+            ConnectionHandlerID connectionHandlerID = transportManager.connectToServer(hostName, portNumber);
+            
+            info("Contacted Site " + remoteSite.getSiteNumber() + " using connection id " + connectionHandlerID);
+            info("Sending login request to Site " + remoteSite.getSiteNumber() + " " + hostName + " as " + getServerClientId() + " " + localPassword); // TODO remove this
+            sendLoginRequestFromServerToServer(transportManager, connectionHandlerID, getServerClientId(), localPassword);
+        } else if (contest.isAllowed (Permission.Type.ALLOWED_TO_RECONNECT_SERVER)){
+            // Send the reconnection request to our server
+            
+            Packet reconnectPacket = PacketFactory.createReconnectPacket (contest.getClientId(), getServerClientId(), inSiteNumber);
+            sendToLocalServer(reconnectPacket);
+        } else {
+            // TODO security problem
+            System.err.println(" Non-admin Tried to send reconnection request " + inSiteNumber + ", ignored");
+            log.log(Log.DEBUG, " Non-admin Tried to send reconnection request " + inSiteNumber + ", ignored");
             return;
+            
         }
 
-        Site remoteSite = contest.getSite(inSiteNumber);
-        Site localSite = contest.getSite(contest.getSiteNumber());
-        String localPassword = localSite.getPassword();
-        
-        String hostName = remoteSite.getConnectionInfo().getProperty(Site.IP_KEY);
-        String portStr = remoteSite.getConnectionInfo().getProperty(Site.PORT_KEY);
-        int portNumber = Integer.parseInt(portStr);
-        
-        info("Send login request to Site " + remoteSite.getSiteNumber() + " " + hostName + ":" + portStr);
-        ConnectionHandlerID connectionHandlerID = transportManager.connectToServer(hostName, portNumber);
-        
-        info("Contacted Site " + remoteSite.getSiteNumber() + " using connection id " + connectionHandlerID);
-        info("Sending login request to Site " + remoteSite.getSiteNumber() + " " + hostName + " as " + getServerClientId() + " " + localPassword); // TODO remove this
-        sendLoginRequestFromServerToServer(transportManager, connectionHandlerID, getServerClientId(), localPassword);
-
     }
+
 
     /**
      * Contacting remote server (joining contest).

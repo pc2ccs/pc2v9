@@ -193,6 +193,15 @@ public interface IController {
     ProblemDataFiles getProblemDataFiles (Problem problem);
 
     Log getLog();
+    
+    /**
+     * Send message to server that needs attention/resolution.
+     * 
+     * @param event optional event
+     * @param message message about the event/circumstances.
+     * @param exception optional exception
+     */
+    void sendPriorityMessage(String event, String message, Exception exception);
 
     /**
      * Generate new accounts on a server.

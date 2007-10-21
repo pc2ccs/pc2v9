@@ -220,6 +220,12 @@ public final class PacketFactory {
     public static final String READ_ONLY = "READ_ONLY";
 
     public static final String  BALLOON_SETTINGS = "BALLOON_SETTINGS";
+    
+    public static final String  EVENT_NAME = "EVENT_NAME";
+    
+    public static final String  MESSAGE = "MESSAGE";
+    
+    public static final String  EXCEPTION = "EXCEPTION";
 
     /**
      * Constructor is private as this is a utility class which should not be extended or invoked.
@@ -1645,5 +1651,27 @@ public final class PacketFactory {
         return packet;
     }
 
-    
+    public static Packet createReconnectPacket(ClientId source, ClientId destination, int inSiteNumber) {
+        Properties prop = new Properties();
+        prop.put(SITE_NUMBER, new Integer(inSiteNumber));
+        prop.put(CLIENT_ID, source);
+        Packet packet = new Packet(Type.RECONNECT_SITE_REQUEST, source, destination, prop);
+        return packet;
+    }
+
+    public static Packet createPriorityMessagePacket(ClientId source, ClientId destination, String event, String message, Exception exception) {
+        Properties prop = new Properties();
+        prop.put(CLIENT_ID, source);
+        if (event != null) {
+            prop.put(EVENT_NAME, event);
+        }
+        prop.put(MESSAGE, message);
+        if (exception != null) {
+            prop.put(EXCEPTION, exception);
+        }
+
+        Packet packet = new Packet(Type.RECONNECT_SITE_REQUEST, source, destination, prop);
+        return packet;
+    }
+
 }

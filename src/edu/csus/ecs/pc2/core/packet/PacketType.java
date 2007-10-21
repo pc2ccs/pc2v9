@@ -607,7 +607,12 @@ public final class PacketType implements Serializable {
         /**
          * Server settings.
          */
-        SERVER_SETTINGS, 
+        SERVER_SETTINGS,
+        /**
+         * Reconnect Site Request.
+         * 
+         */
+        RECONNECT_SITE_REQUEST, 
     }
 
     /**
