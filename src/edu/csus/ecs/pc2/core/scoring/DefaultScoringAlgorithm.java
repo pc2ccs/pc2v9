@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.core.scoring;
 
 import java.io.IOException;
 import java.security.InvalidParameterException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
@@ -15,9 +16,11 @@ import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.exception.IllegalRunState;
 import edu.csus.ecs.pc2.core.list.AccountList;
+import edu.csus.ecs.pc2.core.list.BalloonSettingsComparatorbySite;
 import edu.csus.ecs.pc2.core.list.RunComparatorByTeam;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.BalloonSettings;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ElementId;
@@ -241,11 +244,25 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         
         AccountList accountList = getAccountList(theContest);
         Problem[] problems = theContest.getProblems();
+        // TODO are these counts off by 1?  
         summaryMememento.putLong("problemCount", problems.length);
         Site[] sites = theContest.getSites();
         summaryMememento.putInteger("siteCount", sites.length);
         Group[] groups = theContest.getGroups();
-
+        if (groups != null) {
+            dumpGroupList(groups, summaryMememento);
+        }
+        BalloonSettings[] balloonSettings = theContest.getBalloonSettings();
+        if (balloonSettings != null) {
+            Arrays.sort(balloonSettings, new BalloonSettingsComparatorbySite());
+            IMemento listMemento = summaryMememento.createChild("colorList");
+            for (int i = 0; i < balloonSettings.length; i++) {
+                int id = i + 1;
+                IMemento balloonSettingsMemento = listMemento.createChild("colors");
+                balloonSettingsMemento.putInteger("id", id);
+                dumpBalloonSettings(balloonSettings[i], problems, balloonSettingsMemento);
+            }
+        }
 
         Hashtable <ElementId, Integer> problemsIndexHash = new Hashtable<ElementId, Integer>();
         for (int p=1; p <= problems.length ; p++) {
@@ -318,6 +335,31 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         return xmlString;
     }
 
+    private void dumpBalloonSettings(BalloonSettings balloonSettings, Problem[] problems, IMemento memento) {
+        memento.putInteger("siteNum", balloonSettings.getSiteNumber());
+        if (problems != null) {
+            for (int i = 0; i < problems.length; i++) {
+                int id = i + 1;
+                IMemento problemMemento = memento.createChild("problem");
+                problemMemento.putInteger("id", id);
+                problemMemento.putString("color", balloonSettings.getColor(problems[i]));
+            }
+        }
+    }
+
+    private void dumpGroupList(Group[] groups, IMemento memento) {
+        memento.putInteger("groupCount", groups.length+1);
+        IMemento groupsMemento = memento.createChild("groupList");
+        for (int i = 0; i < groups.length; i++) {
+            int id = i + 1;
+            IMemento groupMemento = groupsMemento.createChild("group");
+            groupMemento.putInteger("id", id);
+            groupMemento.putString("title", groups[i].getDisplayName());
+            groupMemento.putInteger("externalId", groups[i].getGroupId());
+            groupMemento.putInteger("pc2Site", groups[i].getSite().getSiteNumber());
+        }
+    }
+
     /**
      * Ranks standings records and add standings XML to mementoRoot.
      * 
@@ -340,6 +382,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             groupHash.put(group.getElementId(), group);
         }
         StandingsRecord[] srArray = new StandingsRecord[treeMap.size()];
+        
         Collection<StandingsRecord> coll = treeMap.values();
         Iterator iterator = coll.iterator();
         
@@ -438,10 +481,40 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             srArray[index++] = standingsRecord;
         }
      
+        summaryMememento.putInteger("medianProblemsSolved", getMedian(srArray));
         generateSummaryTotalsForProblem (problems, problemsIndexHash, summaryMememento);
         
     }
     
+    /**
+     * Input is a sorted ranking list.  What is the median number of problems solved.
+     * 
+     * @param srArray
+     * @return median number of problems solved
+     */
+    private int getMedian(StandingsRecord[] srArray) {
+        int median;
+        if (srArray == null || srArray.length == 0) {
+            median = 0;
+        } else {
+            if (srArray.length == 1) {
+                median = srArray[0].getNumberSolved();
+            } else {
+                if (srArray.length % 2 == 0) {
+                    // even number of entries
+                    int high, low;
+                    low = srArray[srArray.length/2-1].getNumberSolved();
+                    high = srArray[(srArray.length+1)/2].getNumberSolved();
+                    median = (low + high) /2;
+                } else {
+                    // odd number
+                    median = srArray[(srArray.length+1)/2-1].getNumberSolved();
+                }
+            }
+        }
+        return median;
+    }
+
     /**
      * Add Problem Summary totals/info for each problem.
      * 
