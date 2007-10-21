@@ -593,7 +593,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                             standingsRecord.setLastSolved(problemSummaryInfo.getSolutionTime());
                         }
                         if (youngTime < 0 || problemSummaryInfo.getSolutionTime() < youngTime) {
-                            standingsRecord.setLastSolved(problemSummaryInfo.getSolutionTime());
+                            standingsRecord.setFirstSolved(problemSummaryInfo.getSolutionTime());
                         }
                     }
                     standingsHash.put(lastUser, standingsRecord);
