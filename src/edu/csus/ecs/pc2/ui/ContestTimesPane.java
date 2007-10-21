@@ -161,7 +161,7 @@ public class ContestTimesPane extends JPanePlugin {
             contestTimeListBox = new MCLB();
 
             contestTimeListBox.setMultipleSelections(true);
-            Object[] cols = { "Site", "State", "Remaining", "Elapsed", "Length", "Attached", "Since" };
+            Object[] cols = { "Site", "State", "Remaining", "Elapsed", "Length", "Logged In", "Since" };
 
 
             contestTimeListBox.addColumns(cols);
@@ -204,7 +204,8 @@ public class ContestTimesPane extends JPanePlugin {
 
     protected String[] buildContestTimeRow(ContestTime contestTime) {
 
-        // Object[] cols = { "Site", "State", "Remaining", "Elapsed", "Length", "Attached", "Since" };
+//        Object[] cols = { "Site", "State", "Remaining", "Elapsed", "Length", "Logged In", "Since" };
+
 
         int numberColumns = contestTimeListBox.getColumnCount();
         String[] c = new String[numberColumns];
@@ -232,8 +233,14 @@ public class ContestTimesPane extends JPanePlugin {
             try {
                 ClientId serverId = new ClientId(contestTime.getSiteNumber(), Type.SERVER, 0);
                 if (getContest().isLocalLoggedIn(serverId)) {
-                    c[5] = "Yes";
+                    c[5] = "YES";
                     c[6] = formatter.format(getContest().getLocalLoggedInDate(serverId));
+                } else if (! isServer(getContest().getClientId())){
+                    if (getContest().isRemoteLoggedIn(serverId)){
+                        c[5] = "YES";
+                        // TODO some day send when server was logged in
+                        c[6] = "";
+                    }
                 }
             } catch (Exception e) {
                 c[5] = "??";
