@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
 /**
@@ -393,6 +394,21 @@ public interface IContest {
     void setClientId(ClientId clientId);
 
     void setSiteNumber(int number);
+    
+    /**
+     * Is current module allowed to perform action based on their permissions?.
+     * @param type
+     * @return true if allowed, false if not.
+     */
+    boolean isAllowed(Permission.Type type);
+    
+    /**
+     * Is client/module allowed to perform action based on their permissions?.
+     * @param clientId
+     * @param type
+     * @return true if allowed, false if not.
+     */
+    boolean isAllowed(ClientId clientId, Permission.Type type);
 
     /**
      * Get all logins in contest.

@@ -28,6 +28,7 @@ import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
+import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
 /**
@@ -807,11 +808,20 @@ public class Contest implements IContest {
     public void setSiteNumber(int number) {
         this.siteNumber = number;
     }
+    
+ 
+    public boolean isAllowed(Permission.Type type) {
+        // TODO wander throughout UI code and use this method.
+        return isAllowed(getClientId(), type);
+    }
 
-    @SuppressWarnings("unused")
-    // TODO remove isServer method ?
-    private boolean isServer() {
-        return getClientId().getClientType().equals(ClientType.Type.SERVER);
+    public boolean isAllowed(ClientId clientId, Permission.Type type) {
+        Account account = getAccount(clientId);
+        if (account == null) {
+            return false;
+        } else {
+            return account.isAllowed(type);
+        }
     }
 
     /**
