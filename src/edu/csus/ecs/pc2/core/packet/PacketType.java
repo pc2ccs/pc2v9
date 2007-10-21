@@ -613,6 +613,10 @@ public final class PacketType implements Serializable {
          * 
          */
         RECONNECT_SITE_REQUEST, 
+        /**
+         * 
+         */
+        PRIORITY_MESSAGE,
     }
 
     /**

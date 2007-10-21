@@ -1670,7 +1670,7 @@ public final class PacketFactory {
             prop.put(EXCEPTION, exception);
         }
 
-        Packet packet = new Packet(Type.RECONNECT_SITE_REQUEST, source, destination, prop);
+        Packet packet = new Packet(Type.PRIORITY_MESSAGE, source, destination, prop);
         return packet;
     }
 
