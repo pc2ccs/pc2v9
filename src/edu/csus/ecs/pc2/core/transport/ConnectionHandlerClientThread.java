@@ -63,9 +63,13 @@ public class ConnectionHandlerClientThread extends ConnectionHandlerThread {
                     getTmCallBack().receive(sealedObject, getMyConnectionID());
                 } catch (TransportException e) {
                     e.printStackTrace();
-                    if (e.getMessage().equalsIgnoreCase(TransportException.CONNECTION_RESET)) {
+                    if (e.getMessage() != null && e.getMessage().equalsIgnoreCase(TransportException.CONNECTION_RESET)) {
                         setStillListening(false);
                     }
+                    if (e.getMessage() == null) {
+                        getLog().info("Trouble? e.getMessage() is null");
+                    }
+                    getLog().throwing(getClass().getName(), "run", e);
                 }
             }
 
