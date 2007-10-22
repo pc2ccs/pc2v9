@@ -52,9 +52,12 @@ public class PacketHandler {
 
     private IController controller;
     
+    private PriorityMessageHandler priorityMessageHandler;
+    
     public PacketHandler(IController controller, IContest contest) {
         this.controller = controller;
         this.contest = contest;
+        priorityMessageHandler.setContestAndController(contest, controller);
     }
 
     /**
@@ -74,17 +77,8 @@ public class PacketHandler {
         if (packetType.equals(Type.MESSAGE)) {
             
             PacketFactory.dumpPacket(System.err, packet, null);
-
-            if (isThisSite(packet.getDestinationId().getSiteNumber())) {
-                if (!packet.getDestinationId().getClientType().equals(ClientType.Type.SERVER)) {
-                    controller.sendToClient(packet);
-                }
-            } else {
-                String message = (String) PacketFactory.getObjectValue(packet, PacketFactory.MESSAGE_STRING);
-                Packet messagePacket = PacketFactory.createMessage(contest.getClientId(), packet.getDestinationId(), message);
-                int siteNumber = packet.getDestinationId().getSiteNumber();
-                controller.sendToRemoteServer(siteNumber, messagePacket);
-            }
+            
+            handleMessagePacket (packet);
         } else if (packetType.equals(Type.RUN_SUBMISSION_CONFIRM)) {
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
             contest.addRun(run);
@@ -138,7 +132,7 @@ public class PacketHandler {
             }
             
         } else if (packetType.equals(Type.CLARIFICATION_UNCHECKOUT)) {
-            // Clarification cancel or uncheckout, client to server
+            // Clarification cancel or un-checkout, client to server
             cancelClarificationCheckOut(packet);
 
         } else if (packetType.equals(Type.CLARIFICATION_CHECKOUT)) {
@@ -324,7 +318,7 @@ public class PacketHandler {
             
         } else if (packetType.equals(Type.LOGIN_SUCCESS)) {
             // from server to client/server on a successful login
-            
+
             loginSuccess(packet, connectionHandlerID, fromId);
             
         } else if (packetType.equals(Type.SERVER_SETTINGS)) {
@@ -338,6 +332,14 @@ public class PacketHandler {
                 sendToJudgesAndOthers(packet, false);
             }
 
+        } else if (packetType.equals(Type.RECONNECT_SITE_REQUEST)) {
+
+            reconnectSite (packet);
+            
+        } else if (packetType.equals(Type.PRIORITY_MESSAGE)) {
+            
+            priorityMessage (packet);
+            
         } else {
 
             Exception exception = new Exception("PacketHandler.handlePacket Unhandled packet " + packet);
@@ -347,6 +349,63 @@ public class PacketHandler {
         info("handlePacket end " + packet);
     }
     
+    private void priorityMessage(Packet packet) {
+        
+        String message = (String) PacketFactory.getObjectValue(packet, PacketFactory.MESSAGE);
+        String eventName = (String) PacketFactory.getObjectValue(packet, PacketFactory.EVENT_NAME);
+        ClientId clientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+        Exception exception = (Exception) PacketFactory.getObjectValue(packet, PacketFactory.EXCEPTION);
+        
+        String elapsed = "";
+        try {
+            elapsed = contest.getContestTime().getElapsedTimeStr();
+        } catch (Exception e) {
+            controller.getLog().log(Log.WARNING, "Exception logged ", e);
+        }
+        
+        controller.getLog().log(Log.SEVERE, "At "+elapsed+" From: "+ clientId +":"+message);
+        
+        priorityMessageHandler.newMessage(clientId, message, eventName, exception);
+        
+        if (isServer()){
+            boolean sendToOtherServers = isThisSite(packet.getSourceId());
+            
+            controller.sendToAdministrators(packet);
+            
+            if (sendToOtherServers) {
+                controller.sendToServers(packet);
+            }
+        }
+    }
+
+    private void reconnectSite(Packet packet) {
+        
+       Integer siteNumber = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
+       if (siteNumber != null){
+           try {
+            controller.getLog().log(Log.INFO, "Client "+packet.getSourceId()+" requests reconnection to site "+siteNumber);
+            controller.sendServerLoginRequest(siteNumber.intValue());
+        } catch (Exception e) {
+            controller.getLog().log(Log.WARNING, "Unable to send reconnection request to ", e);
+        }
+       }
+    }
+
+    private void handleMessagePacket(Packet packet) {
+
+        if (isThisSite(packet.getDestinationId().getSiteNumber())) {
+            if (!packet.getDestinationId().getClientType().equals(ClientType.Type.SERVER)) {
+                controller.sendToClient(packet);
+            }
+        } else {
+            String message = (String) PacketFactory.getObjectValue(packet, PacketFactory.MESSAGE_STRING);
+            Packet messagePacket = PacketFactory.createMessage(contest.getClientId(), packet.getDestinationId(), message);
+            int siteNumber = packet.getDestinationId().getSiteNumber();
+            controller.sendToRemoteServer(siteNumber, messagePacket);
+        }
+
+    }
+
     private void loginSuccess(Packet packet, ConnectionHandlerID connectionHandlerID, ClientId fromId) {
 
         if (!contest.isLoggedIn()) {
