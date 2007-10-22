@@ -356,7 +356,9 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             groupMemento.putInteger("id", id);
             groupMemento.putString("title", groups[i].getDisplayName());
             groupMemento.putInteger("externalId", groups[i].getGroupId());
-            groupMemento.putInteger("pc2Site", groups[i].getSite().getSiteNumber());
+            if (groups[i].getSite() != null) {
+                groupMemento.putInteger("pc2Site", groups[i].getSite().getSiteNumber());
+            }
         }
     }
 
