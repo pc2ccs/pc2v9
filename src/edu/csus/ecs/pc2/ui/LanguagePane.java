@@ -594,8 +594,12 @@ public class LanguagePane extends JPanePlugin {
         }else{
             cancelButton.setText("Close");
         }
-        addButton.setEnabled(editedText);
-        updateButton.setEnabled(editedText);
+        // only enable the visible one, we are either editting or adding not both
+        if (getUpdateButton().isVisible()) {
+            getUpdateButton().setEnabled(editedText);
+        } else {
+            getAddButton().setEnabled(editedText);
+        }
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
