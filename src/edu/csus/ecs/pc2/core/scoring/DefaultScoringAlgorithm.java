@@ -350,8 +350,12 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
     private void dumpGroupList(Group[] groups, IMemento memento) {
         memento.putInteger("groupCount", groups.length+1);
         IMemento groupsMemento = memento.createChild("groupList");
+        int id = 0;
         for (int i = 0; i < groups.length; i++) {
-            int id = i + 1;
+            if (!groups[i].isDisplayOnScoreboard()) {
+                continue;
+            }
+            id = id + 1;
             IMemento groupMemento = groupsMemento.createChild("group");
             groupMemento.putInteger("id", id);
             groupMemento.putString("title", groups[i].getDisplayName());
@@ -381,6 +385,10 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         // easy access
         Hashtable<ElementId, Group> groupHash = new Hashtable<ElementId, Group>();
         for (Group group : groups) {
+            // no refence to groups that should not be displayed on scoreboard
+            if (!group.isDisplayOnScoreboard()) {
+                continue;
+            }
             groupHash.put(group.getElementId(), group);
         }
         StandingsRecord[] srArray = new StandingsRecord[treeMap.size()];

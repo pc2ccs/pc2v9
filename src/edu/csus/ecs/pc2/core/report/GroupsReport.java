@@ -47,8 +47,9 @@ public class GroupsReport implements IReport {
             if (group.getSite() != null) {
                 site = contest.getSite(group.getSite().getSiteNumber()).toString();
             }
-            printWriter.println("    Site                : " + site);
-            printWriter.println("    External Id         : " + group.getGroupId());
+            printWriter.println("    Site                  : " + site);
+            printWriter.println("    External Id           : " + group.getGroupId());
+            printWriter.println("    Display On Scoreboard : " + group.isDisplayOnScoreboard());
         }
     }
 

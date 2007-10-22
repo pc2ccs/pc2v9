@@ -104,7 +104,7 @@ public class GroupsPane extends JPanePlugin {
         if (groupListBox == null) {
             groupListBox = new MCLB();
 
-            Object[] cols = { "Display Name", "PC^2 Site", "Id" };
+            Object[] cols = { "Display Name", "PC^2 Site", "Id" , "On Scoreboard"};
             groupListBox.addColumns(cols);
             
             groupListBox.autoSizeAllColumns();
@@ -130,7 +130,7 @@ public class GroupsPane extends JPanePlugin {
 
     protected Object[] buildGroupRow(Group group) {
 
-        // Object[] cols = { "Display Name", "PC^2 Site", "Id" };
+        // Object[] cols = { "Display Name", "PC^2 Site", "Id", "On Scoreboard" };
 
         int numberColumns = groupListBox.getColumnCount();
         Object[] c = new String[numberColumns];
@@ -142,6 +142,7 @@ public class GroupsPane extends JPanePlugin {
             c[1] = getContest().getSite(group.getSite().getSiteNumber()).toString();
         }
         c[2] = Integer.valueOf(group.getGroupId()).toString();
+        c[3] = Boolean.toString(group.isDisplayOnScoreboard());
         return c;
     }
 

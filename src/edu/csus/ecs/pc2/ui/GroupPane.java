@@ -17,9 +17,11 @@ import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.Site;
+import javax.swing.JCheckBox;
 
 /**
  * Add/Edit Group Pane
@@ -67,6 +69,8 @@ public class GroupPane extends JPanePlugin {
     private boolean populatingGUI = true;
 
     private JComboBox siteComboBox = null;
+
+    private JCheckBox displayOnScoreboardCheckbox = null;
 
     /**
      * This method initializes
@@ -172,7 +176,18 @@ public class GroupPane extends JPanePlugin {
 
     protected void addGroup() {
         
-        Group newGroup = getGroupFromFields();
+        if (!validateGroupFields()) {
+            // new problem is invalid, just return, message issued by validateProblemFields
+            return;
+        }
+        
+        Group newGroup = null;
+        try {
+            newGroup = getGroupFromFields(null);
+        } catch (InvalidFieldValue e) {
+            showMessage(e.getMessage());
+            return;
+        }
         
         getController().addNewGroup(newGroup);
         
@@ -185,22 +200,31 @@ public class GroupPane extends JPanePlugin {
         }
     }
 
-    private Group getGroupFromFields() {
-        if (group == null) {
-            group = new Group(displayNameTextField.getText());
+    private Group getGroupFromFields(Group checkGroup) throws InvalidFieldValue {
+        if (checkGroup == null) {
+            checkGroup = new Group(getDisplayNameTextField().getText());
         } else {
-            group.setDisplayName(displayNameTextField.getText());
+            checkGroup.setDisplayName(getDisplayNameTextField().getText());
+        }
+
+        if (checkGroup == null) {
+            checkGroup = new Group(displayNameTextField.getText());
+        } else {
+            checkGroup.setDisplayName(displayNameTextField.getText());
         }
         
         if (getSiteComboBox().getSelectedIndex() > 0) {
             Site site = (Site)getSiteComboBox().getSelectedItem();
-            group.setSite(site.getElementId());
+            checkGroup.setSite(site.getElementId());
+        } else {
+            // alow them to clear this field
+            checkGroup.setSite(null);
         }
         if (getExternalidTextField().getText().length() >0) {
-            group.setGroupId(Integer.parseInt(externalIdTextField.getText()));
+            checkGroup.setGroupId(Integer.parseInt(externalIdTextField.getText()));
         }
-        
-        return group;
+        checkGroup.setDisplayOnScoreboard(getDisplayOnScoreboardCheckbox().isSelected());
+        return checkGroup;
     }
 
     /**
@@ -225,7 +249,20 @@ public class GroupPane extends JPanePlugin {
 
     protected void updateGroup() {
         
-        Group newGroup = getGroupFromFields();
+        if (!validateGroupFields()) {
+            // new group is invalid, just return, message issued by validateGroupFields
+            return;
+        }
+
+        Group newGroup = null;
+
+        try {
+            newGroup = getGroupFromFields(group);
+        } catch (InvalidFieldValue e) {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+//            showMessage(e.getMessage());
+            return;
+        }
         
         getController().updateGroup(newGroup);
         
@@ -236,6 +273,20 @@ public class GroupPane extends JPanePlugin {
         if ( getParentFrame() != null){
             getParentFrame().setVisible(false);
         }
+    }
+
+    /**
+     * Validate that all group fields are ok.
+     * 
+     * @return
+     */
+    private boolean validateGroupFields() {
+
+        if (getDisplayNameTextField().getText().trim().length() < 1) {
+            showMessage("Enter a group display name");
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -323,6 +374,7 @@ public class GroupPane extends JPanePlugin {
             jPanel.add(jLabel4, jLabel4.getName());
             jPanel.add(getExternalidTextField(), getExternalidTextField().getName());
             jPanel.add(getSiteComboBox(), null);
+            jPanel.add(getDisplayOnScoreboardCheckbox(), null);
         }
         return jPanel;
     }
@@ -383,25 +435,19 @@ public class GroupPane extends JPanePlugin {
         boolean enableButton = false;
 
         if (group != null) {
+            try {
+                Group changedGroup = getGroupFromFields(null);
+                if (!group.isSameAs(changedGroup)) {
+                    enableButton = true;
+                }
 
-            enableButton |= (!displayNameTextField.getText().equals(group.getDisplayName()));
-            Site site = null;
-            if (getSiteComboBox().getSelectedIndex() > 0) {
-                site = (Site)getSiteComboBox().getSelectedItem();
+            } catch (InvalidFieldValue e) {
+                // invalid field, but that is ok as they are entering data
+                // will be caught and reported when they hit update or add.
+                getController().getLog().log(Log.DEBUG, "Input Group (but not saving) ", e);
+                enableButton = true;
             }
             
-            if (site != null && group.getSite() != null) {
-                enableButton |= (!group.getSite().equals(site.getElementId()));
-            } else {
-                // 1 or both are null
-                enableButton |= (!(group.getSite() == null && site == null));
-            }
-            int newId = 0;
-            if (externalIdTextField.getText().trim().length() > 0) {
-                newId = Integer.parseInt(externalIdTextField.getText());
-            }
-            enableButton |= (newId != group.getGroupId());
-
         } else {
             if (getAddButton().isVisible()){
                 enableButton = true;
@@ -462,7 +508,8 @@ public class GroupPane extends JPanePlugin {
         if (group2 != null) {
             getDisplayNameTextField().setText(group2.getDisplayName());
             getExternalidTextField().setText(String.valueOf(group2.getGroupId()));
-
+            getDisplayOnScoreboardCheckbox().setSelected(group2.isDisplayOnScoreboard());
+            
             int siteNumber=0;
             if (group2.getSite() != null ) {
                 siteNumber = group2.getSite().getSiteNumber();
@@ -474,6 +521,7 @@ public class GroupPane extends JPanePlugin {
         } else {
             getDisplayNameTextField().setText("");
             getExternalidTextField().setText("");
+            getDisplayOnScoreboardCheckbox().setSelected(true);
 
             populateSiteCombo(0);
             getAddButton().setVisible(true);
@@ -511,6 +559,35 @@ public class GroupPane extends JPanePlugin {
             });
         }
         return siteComboBox;
+    }
+
+    /**
+     * This method initializes displayOnScoreboardCheckbox
+     * 
+     * @return javax.swing.JCheckBox
+     */
+    private JCheckBox getDisplayOnScoreboardCheckbox() {
+        if (displayOnScoreboardCheckbox == null) {
+            displayOnScoreboardCheckbox = new JCheckBox();
+            displayOnScoreboardCheckbox.setBounds(new java.awt.Rectangle(22, 110, 197, 21));
+            displayOnScoreboardCheckbox.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
+            displayOnScoreboardCheckbox.setText("Display on Scoreboard?");
+            displayOnScoreboardCheckbox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableUpdateButton();
+                }
+            });
+        }
+        return displayOnScoreboardCheckbox;
+    }
+
+    public void showMessage(final String message) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                messageLabel.setText(message);
+                messageLabel.setToolTipText(message);
+            }
+        });
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

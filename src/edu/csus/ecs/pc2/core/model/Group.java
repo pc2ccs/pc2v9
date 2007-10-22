@@ -22,6 +22,7 @@ public class Group implements IElementObject {
     private int groupId;
     private String displayName;
     private ElementId site;
+    private boolean displayOnScoreboard = true;
     
     public ElementId getElementId() {
         return elementId;
@@ -93,4 +94,75 @@ public class Group implements IElementObject {
         return elementId.hashCode();
     }
 
+    /**
+     * @return Returns the displayOnScoreboard.
+     */
+    public boolean isDisplayOnScoreboard() {
+        return displayOnScoreboard;
+    }
+
+    /**
+     * @param displayOnScoreboard The displayOnScoreboard to set.
+     */
+    public void setDisplayOnScoreboard(boolean displayOnScoreboard) {
+        this.displayOnScoreboard = displayOnScoreboard;
+    }
+
+    /**
+     * Compares string, handles if either string is null.
+     * 
+     * @param s1
+     * @param s2
+     * @return true if both null or equal, false otherwise
+     */
+    // TODO move this into a string utility class.
+    private boolean stringSame (String s1, String s2){
+        if (s1 == null && s2 == null) {
+            return true;
+        }
+        
+        if (s1 == null && s2 != null){
+            return false;
+        }
+        
+        return s1.equals(s2);
+            
+    }
+
+    public boolean isSameAs(Group newGroup) {
+        try {
+            if (newGroup == null){
+                return false;
+            }
+            if (! stringSame(displayName, newGroup.getDisplayName())){
+                return false;
+            }
+            if (getSiteNumber() != newGroup.getSiteNumber()){
+                return false;
+            }
+            if (groupId != newGroup.getGroupId()) {
+                return false;
+            }
+            if (isDisplayOnScoreboard() != newGroup.isDisplayOnScoreboard()) {
+                return false;
+            }
+            if (site != null && newGroup.getSite() != null) {
+                if (!newGroup.getSite().equals(site)) {
+                    return false;
+                }
+            } else {
+                // 1 or both are null
+                if (!(newGroup.getSite() == null && site == null)) {
+                    return false;
+                }
+            }
+
+            return true;
+        } catch (Exception e) {
+            // TODO Log to static exception Log
+            e.printStackTrace();
+            return false;
+        }
+
+    }
 }
