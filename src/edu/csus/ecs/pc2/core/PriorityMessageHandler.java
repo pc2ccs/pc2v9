@@ -16,6 +16,7 @@ public class PriorityMessageHandler implements UIPlugin {
 
     private IContest contest;
 
+    @SuppressWarnings("unused")
     private IController controller;
 
     private Log log;
