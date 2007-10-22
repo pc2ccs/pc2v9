@@ -73,8 +73,10 @@ public class ConnectionHandlerClientThread extends ConnectionHandlerThread {
             getLog().info("Lost connection to this client!");
         } catch (TransportException e) {
             e.printStackTrace();
+            getLog().throwing(getClass().getName(), "run", e);
         } catch (IOException e) {
             e.printStackTrace();
+            getLog().throwing(getClass().getName(), "run", e);
         }
         getTmCallBack().connectionDropped(getMyConnectionID());
     }
