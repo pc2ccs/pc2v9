@@ -57,7 +57,6 @@ public class PacketHandler {
     public PacketHandler(IController controller, IContest contest) {
         this.controller = controller;
         this.contest = contest;
-        priorityMessageHandler.setContestAndController(contest, controller);
     }
 
     /**
@@ -1807,6 +1806,11 @@ public class PacketHandler {
             controller.getLog().log(Log.WARNING,"Exception logged ", e);
         }
 
+        if (priorityMessageHandler == null){
+            priorityMessageHandler = new PriorityMessageHandler();
+            priorityMessageHandler.setContestAndController(contest, controller);
+        }
+        
         controller.setSiteNumber(clientId.getSiteNumber());
 
         addSitesToModel(packet);
