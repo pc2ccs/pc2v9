@@ -45,7 +45,7 @@ public class PriorityMessageHandler implements UIPlugin {
      * 
      * @param s
      * @param characterToRemove
-     * @return
+     * @return the input string minus any occurrences of characterToRemove
      */
     protected String stripChar(String s, char characterToRemove) {
         int idx = s.indexOf(characterToRemove);
