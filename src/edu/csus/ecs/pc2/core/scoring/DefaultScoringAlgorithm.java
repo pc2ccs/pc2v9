@@ -384,12 +384,16 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
    
         // easy access
         Hashtable<ElementId, Group> groupHash = new Hashtable<ElementId, Group>();
+        Hashtable<Group, Integer> groupIndexHash = new Hashtable<Group, Integer>();
+        int groupCount = 0;
         for (Group group : groups) {
             // no refence to groups that should not be displayed on scoreboard
             if (!group.isDisplayOnScoreboard()) {
                 continue;
             }
             groupHash.put(group.getElementId(), group);
+            groupIndexHash.put(group, Integer.valueOf(groupCount));
+            groupCount++;
         }
         StandingsRecord[] srArray = new StandingsRecord[treeMap.size()];
         
@@ -412,11 +416,26 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         long numSolved = -1, score = 0, lastSolved = 0;
         int rank = 0, indexRank = 0;
         int index = 0;
+        // these are indexed by groupIndex
+        long[] groupNumSolved = new long[groupCount];
+        for (int i = 0; i < groupNumSolved.length; i++) {
+            groupNumSolved[i] = -1;
+        }
+        long[] groupScore = new long[groupCount];
+        long[] groupLastSolved = new long[groupCount];
+        int[] groupRank = new int[groupCount];
+        int[] groupIndexRank = new int[groupCount];
+        for (int i = 0; i < groupIndexRank.length; i++) {
+            groupScore[i] = 0;
+            groupLastSolved[i] = 0;
+            groupRank[i] = 0;
+            groupIndexRank[i] = 0;
+        }
         while (iterator.hasNext()) {
             Object o = iterator.next();
             StandingsRecord standingsRecord = (StandingsRecord) o;
             indexRank++;
-            if (numSolved != standingsRecord.getNumberSolved() || score != standingsRecord.getPenaltyPoints() || lastSolved != standingsRecord.getLastSolved()) {
+            if (!isTeamTied(standingsRecord, numSolved, score, lastSolved)) {
                 numSolved = standingsRecord.getNumberSolved();
                 score = standingsRecord.getPenaltyPoints();
                 lastSolved = standingsRecord.getLastSolved();
@@ -447,8 +466,21 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 group = groupHash.get(account.getGroupId());
             }
             if (group != null ) {
+                // the group was in groupHash, so must be in groupIndexHash
+                int groupIndex = groupIndexHash.get(group).intValue();
+                // do the same thing as above, now for the group
+                groupIndexRank[groupIndex]++;
+                if (!isTeamTied(standingsRecord,groupNumSolved[groupIndex], groupScore[groupIndex],groupLastSolved[groupIndex])) {
+                    groupRank[groupIndex] = groupIndexRank[groupIndex];
+                    standingsRecord.setGroupRankNumber(groupRank[groupIndex]);
+                } else {
+                    // current user tied with last user, so same rank
+                    standingsRecord.setGroupRankNumber(groupRank[groupIndex]);
+                }
+                standingsRecordMemento.putInteger("groupRank", standingsRecord.getGroupRankNumber());
                 standingsRecordMemento.putString("teamGroupName", group.getDisplayName());
-                standingsRecordMemento.putInteger("teamGroupId", group.getGroupId());
+                standingsRecordMemento.putInteger("teamGroupId", groupIndex+1);
+                standingsRecordMemento.putInteger("teamGroupExternalId", group.getGroupId());
             }
             SummaryRow summaryRow = standingsRecord.getSummaryRow();
             for (int i = 0; i < problems.length; i++) {
@@ -523,6 +555,28 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             }
         }
         return median;
+    }
+
+    /**
+     * Do these long parameters match the values in the StandingsRecord?
+     * 
+     * @param standingsRecord
+     * @param numSolved
+     * @param score
+     * @param lastSolved
+     * @return True if the long parameters match the corresponding numbers in the StandingsRecord
+     */
+    boolean isTeamTied(StandingsRecord standingsRecord, long numSolved, long score, long lastSolved) {
+        if (numSolved != standingsRecord.getNumberSolved()) {
+            return false;
+        }
+        if (score != standingsRecord.getPenaltyPoints()) {
+            return false;
+        }
+        if (lastSolved != standingsRecord.getLastSolved()) {
+            return false;
+        }
+        return true;
     }
 
     /**

@@ -19,6 +19,11 @@ public class StandingsRecord {
     private int rankNumber;
 
     /**
+     * Rank within the Group.
+     */
+    private int groupRankNumber = 0;
+    
+    /**
      * Penalty Points.
      *
      */
@@ -154,6 +159,20 @@ public class StandingsRecord {
      */
     public void setSummaryRow(SummaryRow summaryRow) {
         this.summaryRow = summaryRow;
+    }
+
+    /**
+     * @return Returns the groupRankNumber.
+     */
+    public int getGroupRankNumber() {
+        return groupRankNumber;
+    }
+
+    /**
+     * @param groupRankNumber The groupRankNumber to set.
+     */
+    public void setGroupRankNumber(int groupRankNumber) {
+        this.groupRankNumber = groupRankNumber;
     }
 
 }
