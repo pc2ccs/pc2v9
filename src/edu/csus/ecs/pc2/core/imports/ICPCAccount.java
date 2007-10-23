@@ -3,29 +3,35 @@
  */
 package edu.csus.ecs.pc2.core.imports;
 
+import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ElementId;
+
 /**
  * @author PC2
  *
  */
 public class ICPCAccount {
 
-    private int accountNumber;
+    private int accountNumber = 0;
     /**
      * An external identifier, ex: an ICPC id
      */
-    private String externalId;
+    private String externalId = "";
     
     /**
      * Group id
-     * TODO consider replacing with ElementId
      */
-    private String groupId;
+    private ElementId groupId;
     
-    private String shortSchoolName;
+    private ClientId clientId;
+    
+    private String groupExternalId = "";
+    
+    private String shortSchoolName = "";
 
-    private String longSchoolName;
+    private String longSchoolName = "";
 
-    private String externalName;
+    private String externalName = "";
     /**
      * 
      */
@@ -35,8 +41,8 @@ public class ICPCAccount {
     public void setExternalId(String id) {
         externalId = id;
     }
-    public void setGroupId(String groupId) {
-        this.groupId = groupId;
+    public void setGroupExternalId(String groupExternalId) {
+        this.groupExternalId = groupExternalId;
     }
     public void setExternalName(String name) {
         externalName = name;
@@ -74,8 +80,8 @@ public class ICPCAccount {
     /**
      * @return Returns the groupId.
      */
-    public String getGroupId() {
-        return groupId;
+    public String getGroupExternalId() {
+        return groupExternalId;
     }
     /**
      * @return Returns the longSchoolName.
@@ -88,6 +94,30 @@ public class ICPCAccount {
      */
     public String getShortSchoolName() {
         return shortSchoolName;
+    }
+    /**
+     * @return Returns the clientId.
+     */
+    public ClientId getClientId() {
+        return clientId;
+    }
+    /**
+     * @param clientId The clientId to set.
+     */
+    public void setClientId(ClientId clientId) {
+        this.clientId = clientId;
+    }
+    /**
+     * @return Returns the groupId.
+     */
+    public ElementId getGroupId() {
+        return groupId;
+    }
+    /**
+     * @param groupId The groupId to set.
+     */
+    public void setGroupId(ElementId groupId) {
+        this.groupId = groupId;
     }
 
 }
