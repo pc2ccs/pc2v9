@@ -1616,11 +1616,7 @@ public class ProblemPane extends JPanePlugin {
 
                 SerializedFile newSerializedFile = new SerializedFile(fileName);
 
-                if (serializedFile.getSHA1sum().equals(newSerializedFile.getSHA1sum())) {
-                    return false;
-                } else {
-                    return true;
-                }
+                return !serializedFile.getSHA1sum().equals(newSerializedFile.getSHA1sum());
             } // else no need to refresh, no file found.
 
         } catch (Exception ex99) {
