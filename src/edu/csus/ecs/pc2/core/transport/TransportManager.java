@@ -320,7 +320,7 @@ public class TransportManager implements ITransportManager {
             incomingMsg = getEncrytionKeys().decrypt(transportPacket, connectionHandlerID.getSecretKey());
         } catch (CryptoException e) {
             e.printStackTrace();
-            getLog().info("Could not decrypt Packet!");
+            getLog().info("Could not decypt Packet!");
         }
         if (incomingMsg != null) {
             if (getTmType() == tmTypes.SERVER) {
@@ -443,7 +443,7 @@ public class TransportManager implements ITransportManager {
 
     /**
      * Public Interface method for Client to send Object to their Server. This method is invoked by the application which passes in
-     * a Serializable Object to be sent to the Server.
+     * a Serilizable Object to be sent to the Server.
      * 
      */
     public void send(Serializable msgObj) throws TransportException {
@@ -461,40 +461,34 @@ public class TransportManager implements ITransportManager {
                     busyWait++;
                 }
 
-                SecretKey secretKey = null;
+                SecretKey secretKey = getMyConnection().getConnectionHandlerClientThread().getMyConnectionID().getSecretKey();
                 SealedObject sealedObject = null;
+
                 try {
-                    secretKey = getMyConnection().getConnectionHandlerClientThread().getMyConnectionID().getSecretKey();
-                } catch (Exception e) {
-                    getLog().log(Log.WARNING,"Exception on getSecretKey() ",e);
+                    sealedObject = getEncrytionKeys().encrypt(fMsgObj, secretKey);
+                } catch (CryptoException e) {
+
+                    // could not do this because we are not on a thread.
+                    // throw new TransportException(e.getMessage());
+                    //
+                    // Application will have to handle the connectionError
+                    // correctly
+
+                    getAppClientCallBack().connectionError(fMsgObj, null, e.getMessage());
                 }
-                
-                    try {
-                        sealedObject = getEncrytionKeys().encrypt(fMsgObj, secretKey);
-                    } catch (CryptoException e) {
 
-                        // could not do this because we are not on a thread.
-                        // throw new TransportException(e.getMessage());
-                        //
-                        // Application will have to handle the connectionError
-                        // correctly
+                try {
+                    getMyConnection().send(sealedObject);
+                } catch (Exception e) {
+                    // could not do this because we are not on a thread.
+                    // throw new TransportException(e.getMessage());
+                    //
+                    // Application will have to handle the connectionError
+                    // correctly
 
-                        getAppClientCallBack().connectionError(fMsgObj, null, e.getMessage());
-                    } catch (Exception e) {
-                        getLog().log(Log.WARNING,"Exception in getEncryptionKeys ",e);
-                        getAppClientCallBack().connectionError(fMsgObj, null, e.getMessage());
-                    }
-                    try {
-                        getMyConnection().send(sealedObject);
-                    } catch (Exception e) {
-                        // could not do this because we are not on a thread.
-                        // throw new TransportException(e.getMessage());
-                        //
-                        // Application will have to handle the connectionError
-                        // correctly
+                    getAppClientCallBack().connectionError(fMsgObj, null, e.getMessage());
+                }
 
-                        getAppClientCallBack().connectionError(fMsgObj, null, e.getMessage());
-                    }
             }
         }).start();
     }
