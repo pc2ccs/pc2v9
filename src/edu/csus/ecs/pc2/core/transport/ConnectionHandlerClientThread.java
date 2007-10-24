@@ -67,7 +67,8 @@ public class ConnectionHandlerClientThread extends ConnectionHandlerThread {
                         setStillListening(false);
                     }
                     if (e.getMessage() == null) {
-                        getLog().info("Trouble? e.getMessage() is null");
+                        setStillListening(false);
+                        getLog().info("Unknown transport exception");
                     }
                     getLog().throwing(getClass().getName(), "run", e);
                 }
