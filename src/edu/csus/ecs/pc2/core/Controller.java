@@ -1116,8 +1116,10 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      */
     public void connectionDropped(ConnectionHandlerID connectionHandlerID) {
 
+        getLog().log(Log.WARNING, "connection Dropped for "+connectionHandlerID);
         ClientId clientId = contest.getLoginClientId(connectionHandlerID);
         if (clientId != null) {
+            getLog().log(Log.WARNING, "connection Dropped for "+connectionHandlerID+ " which is "+clientId);
             // Logged in
             removeLogin(clientId);
             if (clientId.getClientType().equals(ClientType.Type.JUDGE)) {
@@ -1162,7 +1164,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
             ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(clientId);
 
-            info("LOGOFF " + clientId + " " + connectionHandlerID);
+            info("LOGOFF (logoffUser) " + clientId + " " + connectionHandlerID);
             removeLogin(clientId);
 
             if (clientId.getClientType().equals(ClientType.Type.JUDGE)) {
@@ -1170,7 +1172,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             }
 
         } else {
-            info("LOGOFF remote " + clientId);
+            info("LOGOFF remote (logoffUser) " + clientId);
             contest.removeLogin(clientId); // remove from remote login list
         }
     }
@@ -1839,9 +1841,9 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      */
     public void removeConnection(ConnectionHandlerID connectionHandlerID) {
 
-
         contest.connectionDropped(connectionHandlerID);
         Packet disconnectionPacket = PacketFactory.createDroppedConnection(contest.getClientId(), PacketFactory.ALL_SERVERS, connectionHandlerID);
+        PacketFactory.dumpPacket(log, disconnectionPacket, "removeConnection");
         sendToAdministrators(disconnectionPacket);
         sendToServers(disconnectionPacket);
 
@@ -1856,6 +1858,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
         try {
             Packet logoffPacket = PacketFactory.createLogoff(contest.getClientId(), PacketFactory.ALL_SERVERS, clientId);
+            PacketFactory.dumpPacket(log, logoffPacket, "removeLogin");
             sendToAdministrators(logoffPacket);
             if (!isServer(clientId)) {
                 // Each server tracks its own list of server logins.

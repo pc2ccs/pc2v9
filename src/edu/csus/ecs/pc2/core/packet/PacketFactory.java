@@ -9,6 +9,7 @@ import java.util.Properties;
 import edu.csus.ecs.pc2.core.list.ClarificationList;
 import edu.csus.ecs.pc2.core.list.LanguageDisplayList;
 import edu.csus.ecs.pc2.core.list.ProblemDisplayList;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.BalloonSettings;
@@ -344,6 +345,32 @@ public final class PacketFactory {
         }
         pw.println();
 
+    }
+    
+    /**
+     * Dump packet info to PrintWriter and System.err.
+     * 
+     * @param pw
+     * @param packet
+     */
+    public static void dumpPacket(Log log, Packet packet, String message) {
+
+        log.info("Packet "  + packet.getType()+" (Seq #"+packet.getPacketNumber()+" ) "+message);
+        log.info("  From: " + packet.getSourceId());
+        log.info("    To: " + packet.getDestinationId());
+        Object obj = packet.getContent();
+        if (obj instanceof Properties) {
+            Properties prop = (Properties) obj;
+            Enumeration enumeration = prop.keys();
+
+            while (enumeration.hasMoreElements()) {
+                String element = (String) enumeration.nextElement();
+                log.info("   key: " + element + " is: " + prop.get(element).getClass().getName() + " " + prop.get(element));
+            }
+        } else {
+
+            log.info("  Contains: " + obj.toString() + " " + obj);
+        }
     }
 
     /**

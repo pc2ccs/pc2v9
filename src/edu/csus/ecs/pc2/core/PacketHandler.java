@@ -70,9 +70,7 @@ public class PacketHandler {
         Type packetType = packet.getType();
 
         info("handlePacket start " + packet);
-        System.out.flush();
-        PacketFactory.dumpPacket(System.out,packet, "handlePacket");
-        System.out.flush();
+        PacketFactory.dumpPacket(controller.getLog(),packet, "handlePacket");
 
         ClientId fromId = packet.getSourceId();
 
@@ -630,16 +628,16 @@ public class PacketHandler {
                 info("LOGIN from other site " + whoLoggedIn);
 
                 if (!contest.isLocalLoggedIn(whoLoggedIn)) {
-                    // if client not already logged in 
-                    
-                    boolean isThisServer = isServer(whoLoggedIn) && isThisSite(whoLoggedIn);
+                    // if client not already logged in
 
-                    if (!isThisServer) {
-                        // if client is not this server, add to remote list
-                        contest.addRemoteLogin(whoLoggedIn, connectionHandlerID);
-                        sendToJudgesAndOthers(packet, false);
-                    } else {
-                        controller.getLog().log(Log.DEBUG, "LOGIN packet, ignored LOGIN of this server (" + whoLoggedIn.getSiteNumber() + " from other server " + packet.getSourceId());
+                    if (!isThisSite(whoLoggedIn)) {
+                        if (isServer(whoLoggedIn)) {
+                            if (!contest.isRemoteLoggedIn(whoLoggedIn)) {
+                                // Add to remote login list if not in list
+                                contest.addRemoteLogin(whoLoggedIn, connectionHandlerID);
+                                sendToJudgesAndOthers(packet, false);
+                            }
+                        }
                     }
                 } else {
                     controller.getLog().log(Log.DEBUG, "LOGIN packet, server site " + whoLoggedIn + " logged onto " + packet.getSourceId() + ", already logged in on this site");
