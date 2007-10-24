@@ -82,7 +82,7 @@ public class LoadICPCDataTest extends TestCase {
             assertNotNull("icpc account2 clientid not null", account.getClientId());
             for (int i = 0; i < accounts.length; i++) {
                 ClientId clientId = accounts[i].getClientId();
-                if (clientId.getClientNumber() == 2 && clientId.getSiteNumber() == 2) {
+                if (clientId.getClientNumber() == 2 && clientId.getSiteNumber() == 1) {
                     assertEquals(clientId, account.getClientId());
                     break;
                 }
