@@ -808,15 +808,6 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                             clientId = new ClientId(contest.getSiteNumber(), clientId.getClientType(), clientId.getClientNumber());
                         }
                         attemptToLogin(clientId, password, connectionHandlerID);
-
-                        try {
-                            Packet disconnectionPacket = PacketFactory.createDroppedConnection(contest.getClientId(), PacketFactory.ALL_SERVERS, connectionHandlerID);
-                            sendToAdministrators(disconnectionPacket);
-                            sendToServers(disconnectionPacket);
-                        } catch (Exception e) {
-                            log.log(Log.WARNING, "Exception logged ", e);
-                        }
-                 
                         sendLoginSuccess(clientId, connectionHandlerID);
 
                         // Send login notification to users.
