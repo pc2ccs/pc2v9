@@ -7,10 +7,12 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.exception.IllegalTSVFormatException;
+import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
@@ -36,6 +38,7 @@ public final class LoadICPCData {
      * @throws Exception
      */
     public static ICPCImportData loadSites(String directory, Site[] sites) throws Exception {
+        Arrays.sort(sites, new SiteComparatorBySiteNumber());
         ICPCImportData siteData = new ICPCImportData();
 
         String fs = File.separator;
