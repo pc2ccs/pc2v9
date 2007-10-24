@@ -38,7 +38,9 @@ public final class LoadICPCData {
      * @throws Exception
      */
     public static ICPCImportData loadSites(String directory, Site[] sites) throws Exception {
-        Arrays.sort(sites, new SiteComparatorBySiteNumber());
+        if (sites != null) {
+            Arrays.sort(sites, new SiteComparatorBySiteNumber());
+        }
         ICPCImportData siteData = new ICPCImportData();
 
         String fs = File.separator;
