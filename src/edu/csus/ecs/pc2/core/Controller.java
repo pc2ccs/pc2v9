@@ -809,7 +809,14 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                         }
                         attemptToLogin(clientId, password, connectionHandlerID);
 
-                        removeConnection(connectionHandlerID);
+                        try {
+                            Packet disconnectionPacket = PacketFactory.createDroppedConnection(contest.getClientId(), PacketFactory.ALL_SERVERS, connectionHandlerID);
+                            sendToAdministrators(disconnectionPacket);
+                            sendToServers(disconnectionPacket);
+                        } catch (Exception e) {
+                            log.log(Log.WARNING, "Exception logged ", e);
+                        }
+                 
                         sendLoginSuccess(clientId, connectionHandlerID);
 
                         // Send login notification to users.
@@ -1841,8 +1848,8 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      */
     public void removeConnection(ConnectionHandlerID connectionHandlerID) {
 
-        contest.connectionDropped(connectionHandlerID);
 
+        contest.connectionDropped(connectionHandlerID);
         Packet disconnectionPacket = PacketFactory.createDroppedConnection(contest.getClientId(), PacketFactory.ALL_SERVERS, connectionHandlerID);
         sendToAdministrators(disconnectionPacket);
         sendToServers(disconnectionPacket);
