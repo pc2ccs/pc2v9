@@ -1,80 +1,78 @@
-1	31530	1266	A	sleep(0);	British Columbia Institute of Technology	BCIT	http://www.bcit.ca	CAN	Y
-2	31549	1266	A	DigiPen Blue	DigiPen Institute of Technology	DigiPen	http://www.digipen.edu	USA	Y
-3	32024	1266	A	Eagle Black	Eastern Washington University	EWU	http://www.ewu.edu	USA	Y
-4	31537	1266	A	George Fox Blue	George Fox University	George Fox	http://www.georgefox.edu	USA	N
-5	31574	1266	A	Gonzaga Bulldogs	Gonzaga University	Gonzaga U.	http://www.gonzaga.edu	USA	N
-6	31079	1266	A	hsujacks	Humboldt State University	HSU	http://www.humboldt.edu/	USA	N
-7	31953	1266	A	Busy Beavers	Oregon State University	OSU	http://www.oregonstate.edu	USA	Y
-8	32018	1266	A	Lute-1	Pacific Lutheran University	PLU	http://www.plu.edu	USA	N
-9	32574	1266	A	Pacific Boxers	Pacific University	Pacific U.	http://www.pacificu.edu	USA	N
-10	31551	1266	A	PSU Viking1	Portland State University	PSU	http://www.pdx.edu	USA	Y
-11	29469	1266	A	SFU Red	Simon Fraser University	SFU	http://www.sfu.ca	CAN	Y
-12	33205	1266	A	Deep Thought	Simon Fraser University - Surrey	SFU	http://www.surrey.sfu.ca	CAN	Y
-13	31186	1266	A	TWU Blue	Trinity Western University	Trinity Western	http://www.twu.ca	CAN	N
-14	31312	1266	A	UBC 0	University of British Columbia	U British Columbia	http://www.ubc.ca	CAN	Y
-15	32357	1266	A	Gadwalls	University of Oregon	U of Oregon	http://www.uoregon.edu	USA	Y
-16	31380	1266	A	Null Pointers	University of Portland	UofP	http://www.up.edu	USA	N
-17	33408	1266	A	Udub Gold	University of Washington	U. Washington	http://www.washington.edu/	USA	Y
-18	33578	1266	A	Binary Bandits	Western Oregon University	WOU	http://www.wou.edu	USA	N
-19	31865	1266	A	S. S. Botany Bay	Western Washington University	WWU	http://www.wwu.edu/	USA	Y
-20	31563	1266	A	Whitworth O( lg(n) )	Whitworth College	Whitworth	http://www.whitworth.edu	USA	N
-21	31531	1266	A	while(1);	British Columbia Institute of Technology	BCIT	http://www.bcit.ca	CAN	Y
-22	31548	1266	A	DigiPen Grey	DigiPen Institute of Technology	DigiPen	http://www.digipen.edu	USA	Y
-23	32021	1266	A	Eagle Red	Eastern Washington University	EWU	http://www.ewu.edu	USA	Y
-24	31536	1266	A	George Fox Gold	George Fox University	George Fox	http://www.georgefox.edu	USA	N
-25	31080	1266	A	Les Joueurs	Humboldt State University	HSU	http://www.humboldt.edu/	USA	N
-26	31954	1266	A	Eager Beavers	Oregon State University	OSU	http://www.oregonstate.edu	USA	Y
-27	32019	1266	A	Lute-2	Pacific Lutheran University	PLU	http://www.plu.edu	USA	N
-28	29471	1266	A	SFU White	Simon Fraser University	SFU	http://www.sfu.ca	CAN	Y
-29	33207	1266	A	Infinite Possibilities	Simon Fraser University - Surrey	SFU	http://www.surrey.sfu.ca	CAN	Y
-30	31185	1266	A	TWU Gold	Trinity Western University	Trinity Western	http://www.twu.ca	CAN	N
-31	31314	1266	A	UBC 1	University of British Columbia	U British Columbia	http://www.ubc.ca	CAN	Y
-32	32017	1266	A	Goldeneyes	University of Oregon	U of Oregon	http://www.uoregon.edu	USA	Y
-33	31379	1266	A	Pilot Purple	University of Portland	UofP	http://www.up.edu	USA	N
-34	33409	1266	A	Udub Purple	University of Washington	U. Washington	http://www.washington.edu/	USA	Y
-35	31534	1266	A	Wolf Pack	Western Oregon University	WOU	http://www.wou.edu	USA	N
-36	31864	1266	A	Sed Zeppelin	Western Washington University	WWU	http://www.wwu.edu/	USA	Y
-37	31562	1266	A	Whitworth O( n! )	Whitworth College	Whitworth	http://www.whitworth.edu	USA	N
-38	31547	1266	A	DigiPen Red	DigiPen Institute of Technology	DigiPen	http://www.digipen.edu	USA	Y
-39	32023	1266	A	Eagle White	Eastern Washington University	EWU	http://www.ewu.edu	USA	Y
-40	31539	1266	A	George Fox White	George Fox University	George Fox	http://www.georgefox.edu	USA	N
-41	31952	1266	A	Easy Beavers	Oregon State University	OSU	http://www.oregonstate.edu	USA	Y
-42	31315	1266	A	UBC X	University of British Columbia	U British Columbia	http://www.ubc.ca	CAN	Y
-43	31624	1266	A	Widgeons	University of Oregon	U of Oregon	http://www.uoregon.edu	USA	Y
-44	31378	1266	A	UP Chobits	University of Portland	UofP	http://www.up.edu	USA	N
-45	31564	1266	A	Whitworth O(n)	Whitworth College	Whitworth	http://www.whitworth.edu	USA	N
-	31613	1267	A	Hornet 1	California State University - Sacramento	"CSU, Sacramento"	http://www.csus.edu	USA	Y
-	31614	1267	A	Hornet 2	California State University - Sacramento	"CSU, Sacramento"	http://www.csus.edu	USA	Y
-	31615	1267	A	Hornet 3	California State University - Sacramento	"CSU, Sacramento"	http://www.csus.edu	USA	Y
-	32658	1267	A	Fresno 1	California State University Fresno	CSUFresno	http://www.csufresno.edu/	USA	Y
-	31540	1267	A	Chico team 01	"California State University, Chico"	CSU Chico	http://www.csuchico.edu	USA	Y
-	31542	1267	A	Team 0	"California State University, Chico"	CSU Chico	http://www.csuchico.edu	USA	Y
-	31541	1267	A	Team 2	"California State University, Chico"	CSU Chico	http://www.csuchico.edu	USA	Y
-	29611	1267	A	DVC Blue Vikings	Diablo Valley College	DVC	http://www.dvc.edu	USA	N
-	29610	1267	A	DVC Red Vikings	Diablo Valley College	DVC	http://www.dvc.edu	USA	N
-	32371	1267	A	SFSU Gators	San Francisco State University	SFSU	http://www.sfsu.edu	USA	Y
-	32213	1267	A	SSU C-Woves	Sonoma State University	SSU	http://www.sonoma.edu	USA	Y
-	32586	1267	A	Stanford Red	Stanford University	Stanford	http://www.stanford.edu	USA	Y
-	32655	1267	A	Stanford White	Stanford University	Stanford	http://www.stanford.edu	USA	Y
-	31560	1267	A	Berkeley Blue	University of California at Berkeley	UC Berkeley	http://www.berkeley.edu	USA	Y
-	31567	1267	A	Berkeley Gold	University of California at Berkeley	UC Berkeley	http://www.berkeley.edu	USA	Y
-	31568	1267	A	Berkeley Radicals	University of California at Berkeley	UC Berkeley	http://www.berkeley.edu	USA	Y
-	31825	1267	A	 CWC	University of California at Davis	UC Davis	http://www.ucdavis.edu/	USA	Y
-	31824	1267	A	Davis A	University of California at Davis	UC Davis	http://www.ucdavis.edu/	USA	Y
-	32361	1267	A	Davis B	University of California at Davis	UC Davis	http://www.ucdavis.edu/	USA	Y
-	30241	1267	A	CyberSlugs 1	University of California Santa Cruz	UCSC	http://www.cse.ucsc.edu	USA	Y
-	30242	1267	A	CyberSlugs 2	University of California Santa Cruz	UCSC	http://www.cse.ucsc.edu	USA	Y
-	33303	1267	A	Programming Crew	University of Nevada	UNR	http://www.cs.unr.edu	USA	Y
-	33687	1267	A	UNR Blue	University of Nevada	UNR	http://www.cs.unr.edu	USA	Y
-	32595	1267	A	USF Green	University of San Francisco	USF	www.cs.usfca.edu	USA	Y
-	31702	1267	A	Pacific ALT	University of the Pacific	Pacific	http://www.pacific.edu	USA	N
-	31569	1267	A	Pacific CTRL	University of the Pacific	Pacific	http://www.pacific.edu	USA	N
-	31710	1267	A	Pacific DEL	University of the Pacific	Pacific	http://www.pacific.edu	USA	N
-	32049	1330	A	BYUHK	Brigham Young University-Hawaii	BYU Hawaii	http://byuh.edu	USA	N
-	32226	1330	A	Masters	Brigham Young University-Hawaii	BYU Hawaii	http://byuh.edu	USA	N
-	32227	1330	A	Pascal	Brigham Young University-Hawaii	BYU Hawaii	http://byuh.edu	USA	N
-	32827	1330	A	Lava	Hawaii Pacific University	HPU	http://www.hpu.edu	USA	Y
-	32829	1330	A	Surf	Hawaii Pacific University	HPU	http://www.hpu.edu	USA	Y
-	32828	1330	A	Wave	Hawaii Pacific University	HPU	http://www.hpu.edu	USA	Y
-	30723	1330	A	TeamA	"University of Hawaii, Hilo"	UHH	http://www.uhh.hawaii.edu	USA	N
-	32239	1330	A	TeamB	"University of Hawaii, Hilo"	UHH	http://www.uhh.hawaii.edu	USA	N
+1	22804	972	A	WWU 1	Western Washington University	WWU	http://www.wwu.edu/	USA	Y
+2	22863	972	A	Wigeons	University of Oregon	UO	http://www.uoregon.edu	USA	Y
+3	21904	972	A	Eagle 2	Eastern Washington University	EWU	http://www.ewu.edu	USA	Y
+4	22292	972	A	Washington Purple	University of Washington	U of Wash	http://www.cs.washington.edu/	USA	Y
+5	23130	972	A	Blue	George Fox University	George Fox	http://www.georgefox.edu	USA	N
+6	21905	972	A	Eagle 3	Eastern Washington University	EWU	http://www.ewu.edu	USA	Y
+7	22897	972	A	Pumping Lemma	Oregon State University	OSU	www.orst.edu	USA	Y
+8	21253	972	A	XeNo's Paradox	British Columbia Institute of Technology	BCIT	http://www.bcit.ca	CAN	Y
+9	23132	972	A	White	George Fox University	George Fox	http://www.georgefox.edu	USA	N
+10	23142	972	A	Twisted Group	DigiPen Institute of Technology	DigiPen	http://www.digipen.edu	USA	N
+11	23441	972	A	The Wolf Pack	Western Oregon University	Western Oregon	http://www.wou.edu	USA	N
+12	21061	972	A	UP Yours	University of Portland	UP	http://www.up.edu	USA	N
+13	20447	972	A	SFU Blue	Simon Fraser University	SFU	http://www.sfu.ca	CAN	Y
+14	21992	972	A	TWU B	Trinity Western University	Trinity Western	http://www.twu.ca	CAN	N
+15	22294	972	A	Washington Emerald	University of Washington	U of Wash	http://www.cs.washington.edu/	USA	Y
+16	21577	972	A	UBC 1	University of British Columbia	UBC	http://www.cs.ubc.ca/	CAN	Y
+17	22789	972	A	Mergansers	University of Oregon	UO	http://www.uoregon.edu	USA	Y
+18	22961	972	A	WWU 2	Western Washington University	WWU	http://www.wwu.edu/	USA	Y
+19	23141	972	A	Monster Group	DigiPen Institute of Technology	DigiPen	http://www.digipen.edu	USA	N
+20	21503	972	A	Pioneers	Lewis & Clark College	Lewis & Clark	http://www.lclark.edu/~sciences	USA	N
+21	21903	972	A	Eagle 1	Eastern Washington University	EWU	http://www.ewu.edu	USA	Y
+22	22565	972	A	UBC 10	University of British Columbia	UBC	http://www.cs.ubc.ca/	CAN	Y
+23	21252	972	A	Synchronize(this)	British Columbia Institute of Technology	BCIT	http://www.bcit.ca	CAN	Y
+24	21059	972	A	UP White	University of Portland	UP	http://www.up.edu	USA	N
+25	22790	972	A	Buffleheads	University of Oregon	UO	http://www.uoregon.edu	USA	Y
+26	22803	972	A	WWU 3	Western Washington University	WWU	http://www.wwu.edu/	USA	Y
+27	21991	972	A	TWU A	Trinity Western University	Trinity Western	http://www.twu.ca	CAN	N
+28	23131	972	A	Gold	George Fox University	George Fox	http://www.georgefox.edu	USA	N
+29	21060	972	A	UP Purple	University of Portland	UP	http://www.up.edu	USA	N
+30	21576	972	A	UBC 0	University of British Columbia	UBC	http://www.cs.ubc.ca/	CAN	Y
+31	22104	972	A	LUTE0	Pacific Lutheran University	PLU	www.plu.edu	USA	N
+32	22982	972	A	Whitwork Pirates	Whitworth College	Whitworth	http://www.whitworth.edu	USA	N
+33	22983	972	A	Pios	Lewis & Clark College	Lewis & Clark	http://www.lclark.edu/~sciences	USA	N
+34	21251	972	A	The Null Terminators	British Columbia Institute of Technology	BCIT	http://www.bcit.ca	CAN	Y
+35	22898	972	A	Busy Beavers	Oregon State University	OSU	www.orst.edu	USA	Y
+36	22293	972	A	Washington Gold	University of Washington	U of Wash	http://www.cs.washington.edu/	USA	Y
+37	23446	972	A	The Grey Wolves	Western Oregon University	Western Oregon	http://www.wou.edu	USA	N
+38	20448	972	A	SFU Red	Simon Fraser University	SFU	http://www.sfu.ca	CAN	Y
+39	22105	972	A	LUTE1	Pacific Lutheran University	PLU	www.plu.edu	USA	N
+40	23200	972	A	Gonzaga: Go-Zags!	Gonzaga University	Gonzaga U.	http://www.gonzaga.edu	USA	N
+41	23822	972	A	UAF Team 1	"University of Alaska, Fairbanks"	UAF	http://www.uaf.edu	USA	Y
+42	23198	972	A	Gonzaga Bulldogs	Gonzaga University	Gonzaga U.	http://www.gonzaga.edu	USA	N
+43	22890	972	A	Tail Recursion	Oregon State University	OSU	www.orst.edu	USA	Y
+	23185	973	A	Wildcats 3	"California State University, Chico"	"CSU, Chico"	http://www.csuchico.edu	USA	Y
+	23287	973	A	CyberSlugs II	"University of California, Santa Cruz"	UCSC	http://www.ucsc.edu	USA	Y
+	22868	973	A	CCSF	City College of San Francisco	CCSF	http://www.ccsf.edu	USA	N
+	23181	973	A	Wildcats 2	"California State University, Chico"	"CSU, Chico"	http://www.csuchico.edu	USA	Y
+	21618	973	A	USF Green	University of San Francisco	USF	http:/www.cs.usfca.edu	USA	Y
+	20834	973	A	DVC Blue Vikings	Diablo Valley College	DVC	http://www.dvc.edu	USA	N
+	22504	973	A	Pacific Release 1.3.1	University of the Pacific	UOP	http://www.uop.edu	USA	N
+	23768	973	A	SFSU Gators	San Francisco State University	SFSU	http://www.sfsu.edu	USA	Y
+	21745	973	A	HSU 2.0	Humboldt State University	HSU	http://www.humboldt.edu/	USA	N
+	23105	973	A	Berkeley Radicals	University of California at Berkeley	UC Berkeley	http://www.berkeley.edu	USA	Y
+	21527	973	P	Clear Solutions	Diablo Valley College	DVC	http//www.dvc.edu	USA	Y
+	21742	973	A	HSU 1	Humboldt State University	HSU	http://www.humboldt.edu/	USA	N
+	23184	973	A	CSUS #3	"California State University, Sacramento"	Sac State	http://www.csus.edu	USA	Y
+	21573	973	A	UNR Silver	"University of Nevada, Reno"	UNR	http://www.cs.unr.edu	USA	Y
+	21579	973	A	Berkeley Gold	University of California at Berkeley	UC Berkeley	http://www.berkeley.edu	USA	Y
+	24057	973	A	SSU 1	Sonoma State University	Sonoma State	http://www.sonoma.edu	USA	Y
+	23136	973	A	Stanford Cardinal	Stanford University	Stanford	http://www.stanford.edu	USA	Y
+	21575	973	A	UNR White	"University of Nevada, Reno"	UNR	http://www.cs.unr.edu	USA	Y
+	22485	973	A	USF3	University of San Francisco	USF	http:/www.cs.usfca.edu	USA	Y
+	23183	973	A	CSUS #2	"California State University, Sacramento"	Sac State	http://www.csus.edu	USA	Y
+	22896	973	A	Pacific $HOME/team_name	University of the Pacific	UOP	http://www.uop.edu	USA	N
+	21578	973	A	Berkeley Blue	University of California at Berkeley	UC Berkeley	http://www.berkeley.edu	USA	Y
+	20833	973	A	DVC Green Vikings	Diablo Valley College	DVC	http://www.dvc.edu	USA	N
+	23182	973	A	CSUS #1	"California State University, Sacramento"	Sac State	http://www.csus.edu	USA	Y
+	23201	973	A	Davis Leftover	University of CA at Davis	UC Davis	http://www.ucdavis.edu/	USA	Y
+	21574	973	A	UNR Blue	"University of Nevada, Reno"	UNR	http://www.cs.unr.edu	USA	Y
+	21619	973	A	USF Gold	University of San Francisco	USF	http:/www.cs.usfca.edu	USA	Y
+	23180	973	A	Wildcats 1	"California State University, Chico"	"CSU, Chico"	http://www.csuchico.edu	USA	Y
+	21149	973	A	Stanford White	Stanford University	Stanford	http://www.stanford.edu	USA	Y
+	20832	973	A	DVC Red Vikings	Diablo Valley College	DVC	http://www.dvc.edu	USA	N
+	21148	973	A	Stanford Red	Stanford University	Stanford	http://www.stanford.edu	USA	Y
+	22895	973	A	Pacific Vim	University of the Pacific	UOP	http://www.uop.edu	USA	N
+	22627	973	A	Davis Beta	University of CA at Davis	UC Davis	http://www.ucdavis.edu/	USA	Y
+	23284	973	A	CyberSlugs I	"University of California, Santa Cruz"	UCSC	http://www.ucsc.edu	USA	Y
+	21746	973	A	HSU 3	Humboldt State University	HSU	http://www.humboldt.edu/	USA	N
