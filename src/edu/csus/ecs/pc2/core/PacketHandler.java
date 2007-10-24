@@ -70,6 +70,9 @@ public class PacketHandler {
         Type packetType = packet.getType();
 
         info("handlePacket start " + packet);
+        System.out.flush();
+        PacketFactory.dumpPacket(System.out,packet, "handlePacket");
+        System.out.flush();
 
         ClientId fromId = packet.getSourceId();
 
@@ -172,6 +175,7 @@ public class PacketHandler {
                 if (isThisSite(packet.getSourceId())){
                     controller.sendToServers(packet);
                 }
+                contest.connectionEstablished(inConnectionHandlerID);
             } else {
                 contest.connectionEstablished(inConnectionHandlerID);
             }
@@ -183,6 +187,7 @@ public class PacketHandler {
                     controller.sendToServers(packet);
                 }
                 sendToJudgesAndOthers (packet, false);
+                contest.connectionDropped(inConnectionHandlerID);
             } else {
                 contest.connectionDropped(inConnectionHandlerID);
             }
