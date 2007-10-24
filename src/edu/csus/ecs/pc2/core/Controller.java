@@ -473,6 +473,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         ClientId clientId = loginShortcutExpansion(0, id);
 
         log = new Log(stripChar(clientId.toString(),' '));
+        transportManager.setLog(log);
         StaticLog.setLog(log);
 
         info(new VersionInfo().getSystemVersionInfo());
