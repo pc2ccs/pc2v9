@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 
 import javax.crypto.SealedObject;
@@ -184,6 +185,12 @@ public class ConnectionHandler implements Runnable {
 
     private void setMySocket(Socket mySocket) {
         this.mySocket = mySocket;
+        try {
+            this.mySocket.setKeepAlive(true);
+        } catch (SocketException e) {
+            getLog().info("Could not set KeepAlive on socket");
+            getLog().throwing(getClass().getName(), "setMySocket", e);
+        }
     }
 
     protected ConnectionHandlerClientThread getConnectionHandlerClientThread() {
@@ -232,7 +239,7 @@ public class ConnectionHandler implements Runnable {
                 try {
                     new ConnectionHandlerServerThread(getServerSocket().accept(), getTmCallBack(), this, getLog()).start();
                 } catch (Exception e) {
-                    getLog().info("Could Spawn new thread:");
+                    getLog().info("Could not spawn new thread:");
                     // throw new TransportException (e.getMessage());
                     // TODO: This should pass the exception back up to the
                     // TransportManager
