@@ -119,5 +119,12 @@ public class ICPCAccount {
     public void setGroupId(ElementId groupId) {
         this.groupId = groupId;
     }
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return accountNumber+" "+groupId+" "+externalName+ " " +shortSchoolName;
+    }
 
 }
