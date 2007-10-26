@@ -2154,6 +2154,8 @@ public class PacketHandler {
                     ClientId serverClientId = new ClientId(site.getSiteNumber(), ClientType.Type.SERVER, 0);
                     if (contest.isRemoteLoggedIn(serverClientId)) {
                         controller.sendServerLoginRequest(site.getSiteNumber());
+                    } else if (contest.isLocalLoggedIn(serverClientId)){
+                        info("Not logging into site " + site.getSiteNumber() + ", site already logged in");
                     } else {
                         info("Not logging into site " + site.getSiteNumber() + ", site is not connected to contest.");
                     }
