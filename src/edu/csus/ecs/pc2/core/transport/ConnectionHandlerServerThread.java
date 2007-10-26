@@ -39,7 +39,8 @@ public class ConnectionHandlerServerThread extends ConnectionHandlerThread {
             setFromOtherModule(new ObjectInputStream(iss));
 
             getTmCallBack().registerIncomingConnectionRequest(getMyConnectionID(), this);
-            getLog().info(getMySocket().toString());
+            getLog().info("Socket: "+getMySocket().toString());
+            getLog().info("ConnectionHandlerId: "+getMyConnectionID());
             // Code should ensure that the send worked!
             sendUnencrypted(getTmCallBack().getPublicKeyPacket());
 
@@ -47,7 +48,7 @@ public class ConnectionHandlerServerThread extends ConnectionHandlerThread {
             try {
                 getTmCallBack().receiveUnencrypted(receiveUnencrypted(), getMyConnectionID());
             } catch (Exception e) {
-                getLog().log(Log.INFO, "Exception - Could not receive unencrypted packet", e);
+                getLog().log(Log.INFO, "Exception - Could not receive unencrypted packet for: "+getMyConnectionID(), e);
                 if (getMyConnectionID().getSecretKey() == null) {
                     getLog().info("Could not generate SecretKey -- Aborting connection");
                     // TODO Throw the expection to upper level
