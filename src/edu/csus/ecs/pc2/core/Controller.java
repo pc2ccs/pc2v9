@@ -1117,10 +1117,10 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      */
     public void connectionDropped(ConnectionHandlerID connectionHandlerID) {
 
-        getLog().log(Log.WARNING, "connection Dropped for "+connectionHandlerID);
+        getLog().log(Log.INFO, "connection Dropped for "+connectionHandlerID, new Exception("connection Dropped for "+connectionHandlerID));
         ClientId clientId = contest.getLoginClientId(connectionHandlerID);
         if (clientId != null) {
-            getLog().log(Log.WARNING, "connection Dropped for "+connectionHandlerID+ " which is "+clientId);
+            getLog().log(Log.INFO, "connection Dropped for "+connectionHandlerID+ " which is "+clientId);
             // Logged in
             removeLogin(clientId);
             if (clientId.getClientType().equals(ClientType.Type.JUDGE)) {
@@ -1800,6 +1800,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
 
     public void forceConnectionDrop(ConnectionHandlerID connectionHandlerID) {
+        log.log(Log.INFO,"forceConnectionDrop: "+connectionHandlerID);
         transportManager.unregisterConnection(connectionHandlerID);
         contest.connectionDropped(connectionHandlerID);
     }
