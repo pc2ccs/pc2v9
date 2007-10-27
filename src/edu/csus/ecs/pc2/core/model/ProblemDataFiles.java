@@ -177,4 +177,63 @@ public class ProblemDataFiles implements IElementObject {
         this.validatorFile = validatorFile;
     }
 
+    private boolean compareSerializedFiles(SerializedFile oldFile, SerializedFile newFile) {
+        if (oldFile == null) {
+            return(newFile == null);
+        }
+        if (newFile == null) {
+            return false;
+        }
+        if (!oldFile.getSHA1sum().equals(newFile.getSHA1sum())) {
+            return false;
+        }
+        // the sha1sum lies if a conversion has occurred
+        if (!oldFile.getBuffer().equals(newFile.getBuffer())) {
+            return false;
+        }
+        return true;
+    }
+    
+    private boolean compareSerializedFileArrays(SerializedFile[] oldList, SerializedFile[] newList) {
+        if (oldList == null) {
+            return(newList == null);
+        }
+        // newList is null, but oldList is not
+        if (newList == null) {
+            return false;
+        }
+        // different length, obviously different
+        if (oldList.length != newList.length) {
+           return false;
+        }
+        for (int i = 0; i < oldList.length; i++) {
+            if (!compareSerializedFiles(oldList[i], newList[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    public boolean isSameAs(ProblemDataFiles newProblemDataFiles) {
+        try {
+            if (newProblemDataFiles == null) {
+                return false;
+            }
+            if (!compareSerializedFileArrays(judgesAnswerFiles, newProblemDataFiles.getJudgesAnswerFiles())) {
+                return false;
+            }
+            if (!compareSerializedFileArrays(judgesDataFiles, newProblemDataFiles.getJudgesDataFiles())) {
+                return false;
+            }
+            if (!compareSerializedFiles(validatorFile, newProblemDataFiles.getValidatorFile())) {
+                return false;
+            }
+                
+            return true;
+        } catch (Exception e) {
+            // TODO Log to static exception Log
+            e.printStackTrace();
+            return false;
+        }
+    }
 }
