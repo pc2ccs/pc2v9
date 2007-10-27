@@ -9,6 +9,7 @@ import java.net.SocketException;
 import javax.crypto.SealedObject;
 
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.transport.TransportException.Type;
 
 /**
  * Connection Handler Thread.
@@ -137,12 +138,13 @@ public abstract class ConnectionHandlerThread extends Thread {
         try {
             msgObj = (SealedObject) getFromOtherModule().readObject();
         } catch (SocketException e) {
-            getLog().info("Connection died -- Resetting Connection");
-            throw new TransportException(e.getMessage());
+            getLog().log(Log.INFO, "Connection died -- Resetting Connection", e);
+            throw new TransportException(e.getMessage(), Type.RECEIVE);
         } catch (EOFException e) {
-            throw new TransportException(TransportException.CONNECTION_RESET);
+            throw new TransportException(e.getMessage(), Type.CONNECTION_RESET);
         } catch (Exception e) {
-            throw new TransportException(e.getMessage());
+            log.log(Log.INFO, "Exception in receive for "+getMyConnectionID(), e);
+            throw new TransportException(e.getMessage(), Type.RECEIVE);
         }
         return msgObj;
     }
