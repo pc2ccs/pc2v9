@@ -358,12 +358,12 @@ public class ProblemPane extends JPanePlugin {
         if (checkProblem == null) {
             checkProblem = new Problem(problemNameTextField.getText());
             isAdding = true;
+            // now that we have a title(hopefully)
+            newProblemDataFiles = new ProblemDataFiles(checkProblem);
         } else {
             checkProblem.setDisplayName(problemNameTextField.getText());
             isAdding = false;
         }
-
-        newProblemDataFiles = new ProblemDataFiles(checkProblem);
 
         int secs = getIntegerValue(timeOutSecondTextField.getText());
         checkProblem.setTimeOutInSeconds(secs);
@@ -391,7 +391,7 @@ public class ProblemPane extends JPanePlugin {
             } else {
                 
                 SerializedFile serializedFile = getController().getProblemDataFiles(checkProblem).getJudgesDataFile();
-                if (serializedFile == null){
+                if (serializedFile == null || !serializedFile.getAbsolutePath().equals(fileName)){
                     // they've added a new file
                     serializedFile = new SerializedFile(fileName);
                     if (serializedFile == null){
@@ -429,7 +429,7 @@ public class ProblemPane extends JPanePlugin {
                 newProblemDataFiles.setJudgesAnswerFile(serializedFile);
             } else {
                 SerializedFile serializedFile = getController().getProblemDataFiles(checkProblem).getJudgesAnswerFile();
-                if (serializedFile == null){
+                if (serializedFile == null || !serializedFile.getAbsolutePath().equals(fileName)){
                     // they've added a new file
                     serializedFile = new SerializedFile(fileName);
                     if (serializedFile == null){
@@ -439,7 +439,7 @@ public class ProblemPane extends JPanePlugin {
                     serializedFile = freshenIfNeeded(serializedFile, fileName);
                 }
                 
-                newProblemDataFiles.setJudgesAnswerFile(freshenIfNeeded(serializedFile, fileName));
+                newProblemDataFiles.setJudgesAnswerFile(serializedFile);
                 checkProblem.setAnswerFileName(serializedFile.getName());
             }
         } else {
@@ -721,6 +721,9 @@ public class ProblemPane extends JPanePlugin {
         populatingGUI = true;
 
         if (inProblem != null) {
+
+            // initialize the new ProblemDataFiles, before we start editting (uses elementId)
+            newProblemDataFiles = new ProblemDataFiles(inProblem);
 
             getAddButton().setVisible(false);
             getUpdateButton().setVisible(true);
@@ -1192,22 +1195,33 @@ public class ProblemPane extends JPanePlugin {
      * select file, if file picked updates label.
      * 
      * @param label
-     * @return
+     * @return True is a file was select and label updated
      * @throws Exception
      */
     private boolean selectFile(JLabel label) {
-        JFileChooser chooser = new JFileChooser(lastDirectory);
+        boolean result= false;
+        // toolTip should always have the full path
+        String oldFile = label.getToolTipText();
+        String startDir;
+        if (oldFile.equalsIgnoreCase("")) {
+            startDir = lastDirectory;
+        } else {
+            startDir = oldFile;
+        }
+        JFileChooser chooser = new JFileChooser(startDir);
         try {
             int returnVal = chooser.showOpenDialog(this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 lastDirectory = chooser.getCurrentDirectory().toString();
                 label.setText(chooser.getSelectedFile().getCanonicalFile().toString());
+                result = true;
             }
         } catch (Exception e) {
             log.log(Log.INFO, "Error getting selected file, try again.", e);
+            result=false;
         }
         chooser = null;
-        return true;
+        return result;
     }
 
     /**
