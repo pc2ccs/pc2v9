@@ -6,6 +6,7 @@ package edu.csus.ecs.pc2.ui;
 import java.awt.BorderLayout;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.Hashtable;
 import java.util.Vector;
 
 
@@ -15,6 +16,7 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IContest;
 
@@ -22,6 +24,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JButton;
 import javax.swing.SwingUtilities;
+
+import com.ibm.webrunner.j2mclb.util.HeapSorter;
+import com.ibm.webrunner.j2mclb.util.NumericStringComparator;
+
 import java.awt.FlowLayout;
 
 /**
@@ -131,65 +137,68 @@ public class ICPCAccountPane extends JPanePlugin {
             updatedAccountVector.clear();
             getAccountListBox().removeAllRows();
             String newDisplayName;
-            // TODO must be a cleaner way of doing this
-            if (string.equalsIgnoreCase(DisplayNameFormatterPane.DisplayNameChoice.TEAMNAME.toString())) {
-                for (ICPCAccount account : icpcAccounts) {
-                    if (account.getClientId() != null) {
-                        Account account2 = getContest().getAccount(account.getClientId());
-                        if (account2 != null) {
-                            newDisplayName=account.getExternalName();
-                            updateDisplayName(account2, account, newDisplayName);
-                        }
-                    }
-                }
-            } else {
-                if (string.equalsIgnoreCase(DisplayNameFormatterPane.DisplayNameChoice.SCHOOLNAME.toString())) {
-                    for (ICPCAccount account : icpcAccounts) {
-                        if (account.getClientId() != null) {
-                            Account account2 = getContest().getAccount(account.getClientId());
-                            if (account2 != null) {
-                                newDisplayName=account.getLongSchoolName();
-                                updateDisplayName(account2, account, newDisplayName);
-                            }
-                        }
-                    }
-                } else {
-                    if (string.equalsIgnoreCase(DisplayNameFormatterPane.DisplayNameChoice.SHORTSCHOOLNAME.toString())) {
-                        for (ICPCAccount account : icpcAccounts) {
-                            if (account.getClientId() != null) {
-                                Account account2 = getContest().getAccount(account.getClientId());
-                                if (account2 != null) {
-                                    newDisplayName=account.getShortSchoolName();
-                                    updateDisplayName(account2, account, newDisplayName);
-                                }
-                            }
-                        }
-                    } else {
-                        if (string.equalsIgnoreCase(DisplayNameFormatterPane.DisplayNameChoice.TEAMANDSHORTSCHOOLNAME.toString())) {
-                            for (ICPCAccount account : icpcAccounts) {
-                                if (account.getClientId() != null) {
-                                    Account account2 = getContest().getAccount(account.getClientId());
-                                    if (account2 != null) {
-                                        newDisplayName=account.getExternalName()+" ("+account.getShortSchoolName()+")";
-                                        updateDisplayName(account2, account, newDisplayName);
-                                    }
-                                }
-                            }
-                        } else {
-                            getController().getLog().info("Unknown display name choice " + string);
-                        }
-                        
-                    }
-                    
+            
+            Hashtable<ClientId,ICPCAccount> icpcAccountsHash = new Hashtable<ClientId,ICPCAccount>();
+            for (ICPCAccount account : icpcAccounts) {
+                if (account.getClientId() != null) {
+                    icpcAccountsHash.put(account.getClientId(), account);
                 }
             }
+            
+            // update all the accounts, if they have the icpc data
+            // note, the icpcAccount (if available) will be merged in updateDisplayName
+            for(Account account : getContest().getAccounts(ClientType.Type.TEAM)) {
+                newDisplayName = "";
+                ICPCAccount icpcAccount = icpcAccountsHash.get(account.getClientId());
+                if (string.equalsIgnoreCase(DisplayNameFormatterPane.DisplayNameChoice.TEAMNAME.toString())) {
+                    if (icpcAccount == null) {
+                        newDisplayName=account.getExternalName();
+                    } else {
+                        newDisplayName=icpcAccount.getExternalName();
+                    }
+                } else if (string.equalsIgnoreCase(DisplayNameFormatterPane.DisplayNameChoice.SCHOOLNAME.toString())) {
+                    if (icpcAccount == null) {
+                        newDisplayName=account.getLongSchoolName();
+                    } else {
+                        newDisplayName=icpcAccount.getLongSchoolName();
+                    }
+                } else if (string.equalsIgnoreCase(DisplayNameFormatterPane.DisplayNameChoice.SHORTSCHOOLNAME.toString())) {
+                    if (icpcAccount == null) {
+                        newDisplayName=account.getShortSchoolName();
+                    } else {
+                        newDisplayName=icpcAccount.getShortSchoolName();
+                    }
+                } else if (string.equalsIgnoreCase(DisplayNameFormatterPane.DisplayNameChoice.TEAMANDSHORTSCHOOLNAME.toString())) {
+                    String externalName = "";
+                    String shortSchoolName = "";
+                    if (icpcAccount == null) {
+                        externalName = account.getExternalName();
+                        shortSchoolName = account.getShortSchoolName();
+                    } else {
+                        externalName = icpcAccount.getExternalName();
+                        shortSchoolName = icpcAccount.getShortSchoolName();
+                    }
+                    if (externalName.equals("") && shortSchoolName.equals("")) {
+                        // skip this account, no icpc data
+                        continue;
+                    } else {
+                        newDisplayName=externalName+" ("+shortSchoolName+")";
+                    }
+                } else {
+                    getController().getLog().info("Unknown display name choice " + string);
+                    break;
+                }
+                if (!newDisplayName.equals("")) {
+                    updateDisplayName(account, icpcAccount, newDisplayName);
+                } // else skip this account, no icpc data
+            }
+            
             if (updatedAccountVector.size() > 0) {
                 cancelButton.setText("Cancel");
             } else {
                 cancelButton.setText("Close");
             }
             getUpdateButton().setEnabled(updatedAccountVector.size() > 0);
-
             getAccountListBox().autoSizeAllColumns();
         }
     }
@@ -213,10 +222,16 @@ public class ICPCAccountPane extends JPanePlugin {
             account.setDisplayName(new String(account2.getDisplayName()));
             account.setExternalId(new String(account2.getExternalId()));
             account.setExternalName(new String(account2.getExternalName()));
-            account.setLongSchoolName(icpcAccount.getLongSchoolName());
-            account.setShortSchoolName(icpcAccount.getShortSchoolName());
+            account.setLongSchoolName(new String(account2.getLongSchoolName()));
+            account.setShortSchoolName(new String(account2.getShortSchoolName()));
             if (account.isSameAs(account2)) {
                 account.setDisplayName(newDisplayName);
+                if (icpcAccount != null) {
+                    account.setExternalId(icpcAccount.getExternalId());
+                    account.setExternalName(icpcAccount.getExternalName());
+                    account.setLongSchoolName(icpcAccount.getLongSchoolName());
+                    account.setShortSchoolName(icpcAccount.getShortSchoolName());
+                }
                 updatedAccountVector.add(account);
                 getAccountListBox().addRow(buildAccountRow(account2, newDisplayName));
             } else {
@@ -266,8 +281,32 @@ public class ICPCAccountPane extends JPanePlugin {
         if (accountListBox == null) {
             accountListBox = new MCLB();
             accountListBox.add(getButtonPanel(), java.awt.BorderLayout.SOUTH);
-            Object[] cols = {"Site", "Type", "Account Id", "Current Display Name", "New Display Name"};
+            Object[] cols = {"Site", "Type", "Account Id", "Old Display Name", "New Display Name"};
             accountListBox.addColumns(cols);
+            // Sorters
+            HeapSorter sorter = new HeapSorter();
+            HeapSorter numericStringSorter = new HeapSorter();
+            numericStringSorter.setComparator(new NumericStringComparator());
+
+            // Site
+            accountListBox.setColumnSorter(0, sorter, 3);
+
+            // Type
+            accountListBox.setColumnSorter(1, sorter, 2);
+
+            // Account Id
+            accountListBox.setColumnSorter(2, numericStringSorter, 1);
+
+            // Display Name
+            accountListBox.setColumnSorter(3, sorter, 4);
+            
+            // new Display Name
+            accountListBox.setColumnSorter(4, sorter, 5);
+
+            cols = null;
+
+            accountListBox.autoSizeAllColumns();
+
         }
         return accountListBox;
     }
@@ -345,7 +384,6 @@ public class ICPCAccountPane extends JPanePlugin {
                 if (getParentFrame() != null) {
                     getParentFrame().addWindowListener(new java.awt.event.WindowAdapter() {
                         public void windowClosing(java.awt.event.WindowEvent e) {
-                            System.out.println("call handleCancel");
                             handleCancelButton();
                         }
                     });
