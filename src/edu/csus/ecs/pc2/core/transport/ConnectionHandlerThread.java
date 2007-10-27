@@ -141,6 +141,7 @@ public abstract class ConnectionHandlerThread extends Thread {
             getLog().log(Log.INFO, "Connection died -- Resetting Connection", e);
             throw new TransportException(e.getMessage(), Type.RECEIVE);
         } catch (EOFException e) {
+            log.log(Log.INFO, "Exception in receive for "+getMyConnectionID(), e);
             throw new TransportException(e.getMessage(), Type.CONNECTION_RESET);
         } catch (Exception e) {
             log.log(Log.INFO, "Exception in receive for "+getMyConnectionID(), e);
