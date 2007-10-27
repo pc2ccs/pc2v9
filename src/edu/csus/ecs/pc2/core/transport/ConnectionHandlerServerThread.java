@@ -39,8 +39,8 @@ public class ConnectionHandlerServerThread extends ConnectionHandlerThread {
             setFromOtherModule(new ObjectInputStream(iss));
 
             getTmCallBack().registerIncomingConnectionRequest(getMyConnectionID(), this);
-            getLog().info("Socket: "+getMySocket().toString());
-            getLog().info("ConnectionHandlerId: "+getMyConnectionID());
+            getLog().info("debug Socket: "+getMySocket().toString());
+            getLog().info("debug ConnectionHandlerId: "+getMyConnectionID());
             // Code should ensure that the send worked!
             sendUnencrypted(getTmCallBack().getPublicKeyPacket());
 
@@ -73,9 +73,9 @@ public class ConnectionHandlerServerThread extends ConnectionHandlerThread {
                 }
             }
         } catch (SocketException e) {
-            getLog().info("Lost connection to this client!");
+            getLog().info("Lost connection to "+getMyConnectionID());
         } catch (Exception e) {
-            e.printStackTrace();
+            getLog().log(Log.DEBUG, "Exception "+e.getMessage(), e);
         }
 
         getTmCallBack().connectionDropped(getMyConnectionID());
