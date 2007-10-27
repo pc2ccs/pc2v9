@@ -361,6 +361,9 @@ public class ProblemPane extends JPanePlugin {
             // now that we have a title(hopefully)
             newProblemDataFiles = new ProblemDataFiles(checkProblem);
         } else {
+            // initialize the new ProblemDataFiles, before we start editting (uses elementId)
+            // TODO should this be a deep clone?
+            newProblemDataFiles = new ProblemDataFiles(checkProblem);
             checkProblem.setDisplayName(problemNameTextField.getText());
             isAdding = false;
         }
@@ -400,7 +403,6 @@ public class ProblemPane extends JPanePlugin {
                 } else {
                     serializedFile = freshenIfNeeded(serializedFile, fileName);
                 }
-                
                 newProblemDataFiles.setJudgesDataFile(serializedFile);
                 checkProblem.setDataFileName(serializedFile.getName());
             }
@@ -721,9 +723,6 @@ public class ProblemPane extends JPanePlugin {
         populatingGUI = true;
 
         if (inProblem != null) {
-
-            // initialize the new ProblemDataFiles, before we start editting (uses elementId)
-            newProblemDataFiles = new ProblemDataFiles(inProblem);
 
             getAddButton().setVisible(false);
             getUpdateButton().setVisible(true);
@@ -1595,6 +1594,10 @@ public class ProblemPane extends JPanePlugin {
                     JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 
             if (result == JOptionPane.YES_OPTION) {
+                serializedFile = new SerializedFile(fileName);
+                if (serializedFile == null){
+                    throw new InvalidFieldValue("Unable to find/load "+fileName);
+                }
                 checkFileFormat(serializedFile);
                 return serializedFile;
             } else if (result == JOptionPane.CANCEL_OPTION) {
