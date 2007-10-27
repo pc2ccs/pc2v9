@@ -151,6 +151,22 @@ public class Account implements IElementObject {
                     return false;
                 }
             }
+            // TODO consider implementing a Class.getDeclaredFields to cover the strings
+            if (!aliasName.equals(account.getAliasName())) {
+                return false;
+            }
+            if (!externalId.equals(account.getExternalId())) {
+                return false;
+            }
+            if (!externalName.equals(account.getExternalName())) {
+                return false;
+            }
+            if (!longSchoolName.equals(account.getLongSchoolName())) {
+                return false;
+            }
+            if (!shortSchoolName.equals(account.getShortSchoolName())) {
+                return false;
+            }
             return true;
         } catch (Exception e) {
             // TODO log to static exception log
