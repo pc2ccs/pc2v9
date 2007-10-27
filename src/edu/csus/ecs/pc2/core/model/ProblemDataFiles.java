@@ -187,9 +187,29 @@ public class ProblemDataFiles implements IElementObject {
         if (!oldFile.getSHA1sum().equals(newFile.getSHA1sum())) {
             return false;
         }
-        // the sha1sum lies if a conversion has occurred
-        if (!oldFile.getBuffer().equals(newFile.getBuffer())) {
+        // checks same file, different location
+        if (!oldFile.getAbsolutePath().equals(newFile.getAbsolutePath())) {
             return false;
+        }
+        // the sha1sum lies if a conversion has occurred
+        byte[] oldBuffer = oldFile.getBuffer();
+        byte[] newBuffer = newFile.getBuffer();
+        if (oldBuffer == null) {
+            if (newBuffer != null) {
+                return false;
+            }
+        } else if (newBuffer == null) {
+            // oldBuffer not null, but new buffer is
+            return false;
+        }
+        // sizes no not match
+        if (oldBuffer.length != newBuffer.length) {
+            return false;
+        }
+        for (int i = 0; i < newBuffer.length; i++) {
+            if (newBuffer[i] != oldBuffer[i]) {
+                return false;
+            }
         }
         return true;
     }
