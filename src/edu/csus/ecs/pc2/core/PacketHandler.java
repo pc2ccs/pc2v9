@@ -459,24 +459,25 @@ public class PacketHandler {
      * 
      * @param comment
      */
-    @SuppressWarnings("unused")
     private void dumpServerLoginLists(String comment) {
-        
-        info("dumpLoginLists ("+contest.getSiteNumber()+" "+comment);
-        
-        ClientId [] clientIds =  contest.getRemoteLoggedInClients(edu.csus.ecs.pc2.core.model.ClientType.Type.SERVER);
-        info("   "+clientIds.length+" remote logins: ");
-        for (ClientId clientId :clientIds){
-            info("Site " + clientId.getSiteNumber()+" - ");
+
+        info("dumpLoginLists (Site " + contest.getSiteNumber() + ") " + comment);
+
+        ClientId[] clientIds = contest.getLocalLoggedInClients(edu.csus.ecs.pc2.core.model.ClientType.Type.SERVER);
+        String message = "   " + clientIds.length + "  local logins:";
+        for (ClientId clientId : clientIds) {
+            message += " Site " + clientId.getSiteNumber();
         }
-        info("");
-        
-        clientIds =  contest.getLocalLoggedInClients(edu.csus.ecs.pc2.core.model.ClientType.Type.SERVER);
-        info("   "+clientIds.length+"  local logins: ");
-        for (ClientId clientId :clientIds){
-            info("Site " + clientId.getSiteNumber()+" - ");
+        info(message + ".");
+
+        clientIds = contest.getRemoteLoggedInClients(edu.csus.ecs.pc2.core.model.ClientType.Type.SERVER);
+
+        message = "   " + clientIds.length + " remote logins:";
+        for (ClientId clientId : clientIds) {
+            message += " Site " + clientId.getSiteNumber();
         }
-        info("");
+
+        info(message + ".");
     }
 
     private void updateContestClock(Packet packet) {
@@ -1567,7 +1568,7 @@ public class PacketHandler {
                             contest.addRemoteLogin(clientId, fakeId);
                         }
                         
-                    } else if (!isThisSite(clientId.getSiteNumber())) {
+                    } else {
                         // Not a server Controller - add everything
                         
                         // TODO someday soon load logins with their connectionIds
@@ -1649,20 +1650,22 @@ public class PacketHandler {
                 for (ClientId clientId : clientIds) {
                     if (isServer(clientId)) {
 
-                        if (! contest.isLocalLoggedIn(clientId) && !isThisSite(clientId.getSiteNumber())) {
-                            // Only add into remote list on server, if they are not already logged in
-                            
-                            // TODO someday soon load logins with their connectionIds
-                            ConnectionHandlerID fakeId = new ConnectionHandlerID("FauxSite"+clientId.getSiteNumber()+clientId);
-                            
-                            info("Adding remote login "+clientId);
-                            contest.addRemoteLogin(clientId, fakeId);
-                        }
-                        
-                    } else if (remoteSiteNumber == clientId.getSiteNumber()) {
+                        if (!contest.isLocalLoggedIn(clientId)) {
 
+                            if (!isThisSite(clientId.getSiteNumber())) {
+
+                                // Only add into remote list on server, if they are not already logged in
+
+                                // TODO someday soon load logins with their connectionIds
+                                ConnectionHandlerID fakeId = new ConnectionHandlerID("FauxSite" + clientId.getSiteNumber() + clientId);
+
+                                info("Adding remote login " + clientId);
+                                contest.addRemoteLogin(clientId, fakeId);
+                            }
+                        }
+                    } else if (remoteSiteNumber == clientId.getSiteNumber()) {
                         // TODO someday soon load logins with their connectionIds
-                        ConnectionHandlerID fakeId = new ConnectionHandlerID("FauxSite" + clientId.getSiteNumber()+"-"+clientId);
+                        ConnectionHandlerID fakeId = new ConnectionHandlerID("FauxSite" + clientId.getSiteNumber() + "-" + clientId);
                         contest.addRemoteLogin(clientId, fakeId);
                     }
                 }
