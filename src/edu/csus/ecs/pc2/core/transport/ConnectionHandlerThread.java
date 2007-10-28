@@ -120,7 +120,7 @@ public abstract class ConnectionHandlerThread extends Thread {
 
         try {
             msgObj = (TransportWrapper) getFromOtherModule().readObject();
-
+            log.log(Log.INFO, "debug 22 CHT receiveUnencrypted "+getMyConnectionID()+" got "+msgObj);
         } catch (Exception e) {
             throw new TransportException(e.getMessage());
         }
@@ -137,6 +137,7 @@ public abstract class ConnectionHandlerThread extends Thread {
 
         try {
             msgObj = (SealedObject) getFromOtherModule().readObject();
+            log.log(Log.DEBUG, "debug 22 CHT receive for "+getMyConnectionID()+" got "+msgObj);
         } catch (SocketException e) {
             getLog().log(Log.INFO, "Connection died -- Resetting Connection", e);
             throw new TransportException(e.getMessage(), Type.RECEIVE);
