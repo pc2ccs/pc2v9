@@ -279,6 +279,20 @@ public class ProblemPane extends JPanePlugin {
         Problem newProblem = null;
         try {
             newProblem = getProblemFromFields(null);
+            SerializedFile sFile;
+            sFile = newProblemDataFiles.getJudgesDataFile();
+            if (sFile != null) {
+                checkFileFormat(sFile);
+                if (checkFileFormat(sFile)) {
+                    newProblemDataFiles.setJudgesDataFile(sFile);
+                }
+            }
+            sFile = newProblemDataFiles.getJudgesAnswerFile();
+            if (sFile != null) {
+                if (checkFileFormat(sFile)) {
+                    newProblemDataFiles.setJudgesAnswerFile(sFile);
+                }
+            }
         } catch (InvalidFieldValue e) {
             showMessage(e.getMessage());
             return;
@@ -400,6 +414,7 @@ public class ProblemPane extends JPanePlugin {
                     if (serializedFile == null){
                         throw new InvalidFieldValue("Unable to find/load "+fileName);
                     }
+                    checkFileFormat(serializedFile);
                 } else {
                     serializedFile = freshenIfNeeded(serializedFile, fileName);
                 }
@@ -437,6 +452,7 @@ public class ProblemPane extends JPanePlugin {
                     if (serializedFile == null){
                         throw new InvalidFieldValue("Unable to find/load "+fileName);
                     }
+                    checkFileFormat(serializedFile);
                 } else {
                     serializedFile = freshenIfNeeded(serializedFile, fileName);
                 }
@@ -1643,7 +1659,11 @@ public class ProblemPane extends JPanePlugin {
         return false;
     }
 
-    public void checkFileFormat(SerializedFile newFile) {
+    /**
+     * @param newFile
+     * @return true if the file was converted
+     */
+    public boolean checkFileFormat(SerializedFile newFile) {
 
         /*
          * DOS FILE 0x0D 0x0A UNIX FILE 0xA MAC FILE 0xD
@@ -1662,7 +1682,8 @@ public class ProblemPane extends JPanePlugin {
         if ((currentOS != newFile.getFileType()) && (newFile.getFileType() != Constants.FILETYPE_BINARY) && (newFile.getFileType() != Constants.FILETYPE_ASCII_GENERIC)
                 && (newFile.getFileType() != Constants.FILETYPE_ASCII_OTHER)) {
 
-            String question = "The file you are loading appears to be of type '";
+            String fileName = newFile.getName();
+            String question = "The file (" + fileName + ") you are loading appears to be of type '";
 
             if (newFile.getFileType() == Constants.FILETYPE_BINARY) {
                 question = question + Constants.FILETYPE_BINARY_TEXT;
@@ -1690,9 +1711,11 @@ public class ProblemPane extends JPanePlugin {
 
             if (answer == JOptionPane.YES_OPTION) {
                 newFile.convertFile(currentOS);
+                return true;
             }
 
         }
+        return false;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
