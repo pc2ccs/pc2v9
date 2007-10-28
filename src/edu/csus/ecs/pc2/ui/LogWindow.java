@@ -28,7 +28,7 @@ public class LogWindow extends JFrame implements UIPlugin {
      */
     private static final long serialVersionUID = -3451023761556886609L;
 
-    private int maxLines = 400;
+    private int maxLines = 4000;
 
     private static MCLB logMessageListbox = null;
 
