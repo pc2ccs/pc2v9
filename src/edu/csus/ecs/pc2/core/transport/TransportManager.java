@@ -561,18 +561,19 @@ public class TransportManager implements ITransportManager {
      * @param myConnectionID
      */
     protected void receiveUnencrypted(TransportWrapper wrapper, ConnectionHandlerID myConnectionID) {
-        getLog().info("receiveUnencrypted(TransportWrapper, ConnectionHandlerID)");
-        getLog().info(myConnectionID.toString());
-        getLog().info("");
+        getLog().info("receiveUnencrypted(TransportWrapper, ConnectionHandlerID="+myConnectionID+")");
 
         PublicKey pk = (PublicKey) wrapper.get(PUBLIC_KEY);
+        
+        log.log(Log.DEBUG, "debug 22 CHT receiveUnencrypted just before generateSecretKey ");
         SecretKey tmpKey = getEncrytionKeys().generateSecretKey(pk, getEncrytionKeys().getPrivateKey());
+        log.log(Log.DEBUG, "debug 22 CHT receiveUnencrypted just after  generateSecretKey ");
         getEncrytionKeys().setSecretKey(tmpKey);
 
         myConnectionID.setSecretKey(tmpKey);
         myConnectionID.setReadyToCommunicate(true);
 
-        getLog().info("in receiveUnencrypted Made a secret key " + tmpKey.toString());
+        getLog().info("receiveUnencrypted Made a secret key " + tmpKey.toString());
     }
 
     /**
