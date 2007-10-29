@@ -110,9 +110,9 @@ public abstract class ConnectionHandlerThread extends Thread {
 
     protected void sendUnencrypted(TransportWrapper msgObj) throws TransportException {
         try {
-            log.log(Log.INFO, "debug 22 CHT sendUnencrypted "+getMyConnectionID()+" just before writeObject ");
+            log.log(Log.INFO, "debug 22 CHT sendUnencrypted "+getMyConnectionID()+" just before writeObject "+msgObj);
             getToOtherModule().writeObject(msgObj);
-            log.log(Log.INFO, "debug 22 CHT sendUnencrypted "+getMyConnectionID()+" just after  writeObject ");
+            log.log(Log.INFO, "debug 22 CHT sendUnencrypted "+getMyConnectionID()+" just after  writeObject "+msgObj);
         } catch (Exception e) {
             throw new TransportException(e.getMessage());
         }
@@ -144,7 +144,7 @@ public abstract class ConnectionHandlerThread extends Thread {
             msgObj = (SealedObject) getFromOtherModule().readObject();
             log.log(Log.DEBUG, "debug 22 CHT receive for "+getMyConnectionID()+" got "+msgObj);
         } catch (SocketException e) {
-            getLog().log(Log.INFO, "Connection died -- Resetting Connection", e);
+            getLog().log(Log.INFO, "Connection died -- Resetting Connection "+getMyConnectionID(), e);
             throw new TransportException(e.getMessage(), Type.RECEIVE);
         } catch (EOFException e) {
             log.log(Log.INFO, "Exception in receive for "+getMyConnectionID(), e);
