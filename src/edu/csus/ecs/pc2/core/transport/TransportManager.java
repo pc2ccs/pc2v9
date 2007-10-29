@@ -313,7 +313,8 @@ public class TransportManager implements ITransportManager {
      * @param connectionHandlerID
      */
     public void receive(SealedObject transportPacket, ConnectionHandlerID connectionHandlerID) {
-        getLog().fine("public void receive(SealedObject TransportPacket, ConnectionHandlerID connectionHandlerID)");
+        // TODO change to fine
+        getLog().info("public void receive(SealedObject TransportPacket, ConnectionHandlerID connectionHandlerID)");
         Serializable incomingMsg = null;
 
         try {
