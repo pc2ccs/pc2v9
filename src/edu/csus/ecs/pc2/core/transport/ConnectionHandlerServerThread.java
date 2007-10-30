@@ -39,8 +39,6 @@ public class ConnectionHandlerServerThread extends ConnectionHandlerThread {
             setFromOtherModule(new ObjectInputStream(iss));
 
             getTmCallBack().registerIncomingConnectionRequest(getMyConnectionID(), this);
-            getLog().info("debug 22 Socket: "+getMySocket().toString());
-            getLog().info("debug 22 ConnectionHandlerId: "+getMyConnectionID());
             // Code should ensure that the send worked!
             sendUnencrypted(getTmCallBack().getPublicKeyPacket());
 
@@ -61,13 +59,10 @@ public class ConnectionHandlerServerThread extends ConnectionHandlerThread {
 
             setStillListening(true);
 
-            getLog().info("debug 22 Now listening for SealedObjects - ConnectionHandlerId: "+getMyConnectionID());
-
             while (isStillListening()) {
                 SealedObject sealedObject = null;
                 try {
                     sealedObject = receive();
-                    getLog().info("debug 22 CHST For ConnectionHandlerId: "+getMyConnectionID()+" got a "+sealedObject);
                     getTmCallBack().receive(sealedObject, getMyConnectionID());
                 } catch (TransportException e) {
                     if (e.getMessage().equalsIgnoreCase(TransportException.CONNECTION_RESET)) {

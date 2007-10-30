@@ -60,7 +60,6 @@ public class ConnectionHandlerClientThread extends ConnectionHandlerThread {
                 SealedObject sealedObject = null;
                 try {
                     sealedObject = receive();
-                    getLog().log(Log.DEBUG, "debug 22 CHT receive for "+getMyConnectionID()+" got "+sealedObject);
 
                     getTmCallBack().receive(sealedObject, getMyConnectionID());
                 } catch (TransportException e) {
@@ -74,10 +73,8 @@ public class ConnectionHandlerClientThread extends ConnectionHandlerThread {
         } catch (SocketException e) {
             getLog().info("Lost connection to this client!");
         } catch (TransportException e) {
-            e.printStackTrace();
             getLog().throwing(getClass().getName(), "run", e);
         } catch (IOException e) {
-            e.printStackTrace();
             getLog().throwing(getClass().getName(), "run", e);
         }
         getTmCallBack().connectionDropped(getMyConnectionID());

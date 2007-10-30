@@ -320,8 +320,7 @@ public class TransportManager implements ITransportManager {
         try {
             incomingMsg = getEncrytionKeys().decrypt(transportPacket, connectionHandlerID.getSecretKey());
         } catch (CryptoException e) {
-            e.printStackTrace();
-            getLog().info("Could not decypt Packet!");
+            getLog().log(Log.INFO,"Could not decrypt Packet!", e);
         }
         if (incomingMsg != null) {
             if (getTmType() == tmTypes.SERVER) {
@@ -532,7 +531,7 @@ public class TransportManager implements ITransportManager {
                     if ( getAppClientCallBack() != null){
                         getAppClientCallBack().connectionError(fMsgObj, fConnectionHandlerID, e.getMessage());
                     } else {
-                        e.printStackTrace();
+                        log.log(Log.INFO, "Exception in send "+fConnectionHandlerID, e);
                     }
                 }
                 try {
@@ -547,7 +546,7 @@ public class TransportManager implements ITransportManager {
                     if ( getAppClientCallBack() != null){
                         getAppClientCallBack().connectionError(fMsgObj, fConnectionHandlerID, e.getMessage());
                     } else {
-                        e.printStackTrace();
+                        log.log(Log.INFO, "Exception in send "+fConnectionHandlerID, e);
                     }
 
                 }
@@ -566,15 +565,13 @@ public class TransportManager implements ITransportManager {
 
         PublicKey pk = (PublicKey) wrapper.get(PUBLIC_KEY);
         
-        log.log(Log.DEBUG, "debug 22 CHT receiveUnencrypted just before generateSecretKey ");
         SecretKey tmpKey = getEncrytionKeys().generateSecretKey(pk, getEncrytionKeys().getPrivateKey());
-        log.log(Log.DEBUG, "debug 22 CHT receiveUnencrypted just after  generateSecretKey ");
         getEncrytionKeys().setSecretKey(tmpKey);
 
         myConnectionID.setSecretKey(tmpKey);
         myConnectionID.setReadyToCommunicate(true);
 
-        getLog().info("receiveUnencrypted Made a secret key " + tmpKey.toString());
+        getLog().info("receiveUnencrypted Made a secret key for " + myConnectionID + " key is " + tmpKey.toString());
     }
 
     /**
