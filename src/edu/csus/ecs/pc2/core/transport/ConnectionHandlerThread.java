@@ -102,6 +102,7 @@ public abstract class ConnectionHandlerThread extends Thread {
         try {
             getToOtherModule().writeObject(msgToSend);
         } catch (Exception e) {
+            getLog().throwing(getClass().getName(),"send",e);
             throw new TransportException(e.getMessage());
         }
     }
@@ -110,6 +111,7 @@ public abstract class ConnectionHandlerThread extends Thread {
         try {
             getToOtherModule().writeObject(msgObj);
         } catch (Exception e) {
+            getLog().throwing(getClass().getName(),"sendUnencrypted",e);
             throw new TransportException(e.getMessage());
         }
     }
@@ -120,6 +122,7 @@ public abstract class ConnectionHandlerThread extends Thread {
         try {
             msgObj = (TransportWrapper) getFromOtherModule().readObject();
         } catch (Exception e) {
+            getLog().throwing(getClass().getName(),"receiveUnencrypted",e);
             throw new TransportException(e.getMessage());
         }
         return msgObj;
