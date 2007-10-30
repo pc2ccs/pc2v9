@@ -300,7 +300,10 @@ public class TransportManager implements ITransportManager {
      */
     public TransportWrapper getPublicKeyPacket() {
         getLog().info("Generating Unencrypted Public Key Packet");
+        getLog().info("checking key:= " + getEncrytionKeys().getPublicKey());
         TransportWrapper packet = new TransportWrapper(PUBLIC_KEY, getEncrytionKeys().getPublicKey());
+        getLog().info("packet:= " + packet);
+        
         return packet;
     }
 
