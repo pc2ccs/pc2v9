@@ -143,7 +143,7 @@ public abstract class ConnectionHandlerThread extends Thread {
             throw new TransportException(e.getMessage(), Type.CONNECTION_RESET);
         } catch (EOFException e) {
             log.log(Log.INFO, "Exception in receive for "+getMyConnectionID(), e);
-            throw new TransportException(e.getMessage(), Type.RECEIVE);
+//            throw new TransportException(e.getMessage(), Type.RECEIVE);
         } catch (Exception e) {
             log.log(Log.INFO, "Exception in receive for "+getMyConnectionID(), e);
             throw new TransportException(e.getMessage(), Type.RECEIVE);
