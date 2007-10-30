@@ -368,13 +368,21 @@ public class ContestTimesPane extends JPanePlugin {
 
         public void loginAdded(LoginEvent event) {
             if (isServer(event.getClientId())){
-                reloadListBox();
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        reloadListBox();
+                    }
+                });
             }
         }
 
         public void loginRemoved(LoginEvent event) {
             if (isServer(event.getClientId())){
-                reloadListBox();
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        reloadListBox();
+                    }
+                });
             }
         }
 
