@@ -57,6 +57,8 @@ public class ConnectionHandlerServerThread extends ConnectionHandlerThread {
                 }
             }
 
+            getMyConnectionID().setReadyToCommunicate(true);
+
             setStillListening(true);
 
             while (isStillListening()) {

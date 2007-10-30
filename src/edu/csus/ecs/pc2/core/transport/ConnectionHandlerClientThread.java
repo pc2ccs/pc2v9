@@ -53,7 +53,9 @@ public class ConnectionHandlerClientThread extends ConnectionHandlerThread {
 
             // Code should insure that the send worked!
             sendUnencrypted(getTmCallBack().getPublicKeyPacket());
-            
+
+            getMyConnectionID().setReadyToCommunicate(true);
+
             setStillListening(true);
 
             while (isStillListening()) {

@@ -572,7 +572,6 @@ public class TransportManager implements ITransportManager {
         getEncrytionKeys().setSecretKey(tmpKey);
 
         myConnectionID.setSecretKey(tmpKey);
-        myConnectionID.setReadyToCommunicate(true);
 
         getLog().info("receiveUnencrypted Made a secret key for " + myConnectionID + " key is " + tmpKey.toString());
     }
