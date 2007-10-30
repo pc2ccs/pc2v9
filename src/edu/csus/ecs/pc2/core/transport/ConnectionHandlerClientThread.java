@@ -66,6 +66,7 @@ public class ConnectionHandlerClientThread extends ConnectionHandlerThread {
                     getLog().throwing(getClass().getName(), "run", e);
                     if (e.getMessage() == null ) {
                         getLog().throwing(getClass().getName(), "run - e.getmessage is null()", e);
+                        setStillListening(false);
                     } else if (e.getMessage().equalsIgnoreCase(TransportException.CONNECTION_RESET)) {
                         setStillListening(false);
                     }
