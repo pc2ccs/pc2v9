@@ -54,6 +54,12 @@ public class ConnectionHandlerClientThread extends ConnectionHandlerThread {
             // Code should insure that the send worked!
             sendUnencrypted(getTmCallBack().getPublicKeyPacket());
 
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e1) {
+                getLog().throwing(getClass().getName(), "run - Could not sleep", e1);
+            }
+            
             setStillListening(true);
 
             while (isStillListening()) {
