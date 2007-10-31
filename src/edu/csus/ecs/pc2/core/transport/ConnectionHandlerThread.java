@@ -91,7 +91,9 @@ public abstract class ConnectionHandlerThread extends Thread {
         }
 
         try {
-            getToOtherModule().writeObject(msgObj);
+            synchronized (getMyConnectionID()) {
+                getToOtherModule().writeObject(msgObj);
+            }
         } catch (Exception e) {
             getLog().log(Log.INFO, "Exception near writeObject", e);
             throw new TransportException(e.getMessage());
