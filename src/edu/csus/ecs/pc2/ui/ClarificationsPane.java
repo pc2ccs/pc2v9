@@ -19,6 +19,7 @@ import com.ibm.webrunner.j2mclb.util.HeapSorter;
 import com.ibm.webrunner.j2mclb.util.NumericStringComparator;
 
 import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
@@ -355,10 +356,10 @@ public class ClarificationsPane extends JPanePlugin {
         String problemName = getProblemTitle(clarification.getProblemId());
         String displayString =
             "<HTML><FONT SIZE=+1>Judge's Response<BR><BR>"
-            + "Problem: <FONT COLOR=BLUE>" +  problemName + "</FONT><BR><BR>" 
+            + "Problem: <FONT COLOR=BLUE>" +  Utilities.forHTML( problemName) + "</FONT><BR><BR>" 
             + "Clar Id: <FONT COLOR=BLUE>" + clarification.getNumber() + "</FONT><BR><BR><BR>" 
-            + "Question: <FONT COLOR=BLUE> "  + clarification.getQuestion() + "</FONT><BR><BR><BR>"
-            + "Answer: <FONT COLOR=BLUE>" + clarification.getAnswer() + "</FONT><BR><BR><BR>" ;
+            + "Question: <FONT COLOR=BLUE> "  + Utilities.forHTML(clarification.getQuestion()) + "</FONT><BR><BR><BR>"
+            + "Answer: <FONT COLOR=BLUE>" + Utilities.forHTML(clarification.getAnswer()) + "</FONT><BR><BR><BR>" ;
 
         if (clarification.isSendToAll()) {
             displayString = displayString + "* For All Teams *" + "\n";

@@ -12,6 +12,7 @@ import com.ibm.webrunner.j2mclb.util.HeapSorter;
 import com.ibm.webrunner.j2mclb.util.NumericStringComparator;
 
 import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -406,14 +407,14 @@ public class RunsPanel extends JPanePlugin {
                        try {
                             String displayString =
                                 "<HTML><FONT SIZE=+1>Judge's Response<BR><BR>"
-                                + "Problem: <FONT COLOR=BLUE>" +  problemName + "</FONT><BR><BR>" 
-                                + "Language: <FONT COLOR=BLUE>" + languageName   + "</FONT><BR><BR>" 
+                                + "Problem: <FONT COLOR=BLUE>" +  Utilities.forHTML(problemName) + "</FONT><BR><BR>" 
+                                + "Language: <FONT COLOR=BLUE>" + Utilities.forHTML(languageName)   + "</FONT><BR><BR>" 
                                 + "Run Id: <FONT COLOR=BLUE>" + runId + "</FONT><BR><BR><BR>" 
-                                + "Judge's Response: " + responseFormat + response + "</FONT><BR><BR><BR>" ;
+                                + "Judge's Response: " + responseFormat + Utilities.forHTML( response )+ "</FONT><BR><BR><BR>" ;
     
                             if (judgeComment!=null) {
                                 if (judgeComment.length() > 0) {
-                                    displayString += "Judge's Comment: " + judgeComment + "<BR><BR><BR>";
+                                    displayString += "Judge's Comment: " + Utilities.forHTML(judgeComment) + "<BR><BR><BR>";
                                 }
                             }
                                 
@@ -434,8 +435,8 @@ public class RunsPanel extends JPanePlugin {
                 try {
                     String displayString =
                         "<HTML><FONT SIZE=+1>Confirmation of Run Receipt<BR><BR>"
-                        + "Problem: <FONT COLOR=BLUE>" +  problemName + "</FONT><BR><BR>" 
-                        + "Language: <FONT COLOR=BLUE>" + languageName   + "</FONT><BR><BR>" 
+                        + "Problem: <FONT COLOR=BLUE>" +  Utilities.forHTML(problemName) + "</FONT><BR><BR>" 
+                        + "Language: <FONT COLOR=BLUE>" + Utilities.forHTML(languageName)   + "</FONT><BR><BR>" 
                         + "Run Id: <FONT COLOR=BLUE>" + runId + "</FONT><BR><BR><BR>";
                         
                     displayString += "</FONT></HTML>" ;

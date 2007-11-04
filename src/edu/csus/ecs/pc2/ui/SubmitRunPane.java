@@ -12,6 +12,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.Executable;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
@@ -397,13 +398,13 @@ public class SubmitRunPane extends JPanePlugin {
             try {
                 String confirmQuestion = "<HTML><FONT SIZE=+1>Do you wish to submit run for<BR><BR>"
                     + "Problem:  <FONT COLOR=BLUE>"
-                    + problem
+                    + Utilities.forHTML(problem.toString())
                     + "</FONT><BR><BR>"
                     + "Language:  <FONT COLOR=BLUE>"
-                    + language
+                    + Utilities.forHTML(language.toString())
                     + "</FONT><BR><BR>"
                     + "File: <FONT COLOR=BLUE>"
-                    + filename + "</FONT><BR><BR></FONT>";
+                    + Utilities.forHTML(filename) + "</FONT><BR><BR></FONT>";
 
                 int result = FrameUtilities.yesNoCancelDialog(confirmQuestion, "Confirm Submisson");
     
