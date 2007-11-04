@@ -10,6 +10,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
+import java.text.CharacterIterator;
+import java.text.StringCharacterIterator;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Vector;
@@ -18,12 +20,10 @@ import java.util.Vector;
  * Various common routines.
  *
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
-// $HeadURL$
 public final class Utilities {
-
-    public static final String SVN_ID = "$Id$";
 
     /**
      * Constructor is private as this is a utility class which
@@ -253,4 +253,43 @@ public final class Utilities {
         return (String[]) v.toArray(new String[v.size()]);
     }
 
+    
+    public static String forHTML(String aText) {
+        final StringBuilder result = new StringBuilder();
+        final StringCharacterIterator iterator = new StringCharacterIterator(aText);
+        char character = iterator.current();
+        while (character != CharacterIterator.DONE) {
+            if (character == '<') {
+                result.append("&lt;");
+            } else if (character == '>') {
+                result.append("&gt;");
+            } else if (character == '&') {
+                result.append("&amp;");
+            } else if (character == '\"') {
+                result.append("&quot;");
+            } else if (character == '\'') {
+                result.append("&#039;");
+            } else if (character == '(') {
+                result.append("&#040;");
+            } else if (character == ')') {
+                result.append("&#041;");
+            } else if (character == '#') {
+                result.append("&#035;");
+            } else if (character == '%') {
+                result.append("&#037;");
+            } else if (character == ';') {
+                result.append("&#059;");
+            } else if (character == '+') {
+                result.append("&#043;");
+            } else if (character == '-') {
+                result.append("&#045;");
+            } else {
+                // the char is not a special one
+                // add it to the result as is
+                result.append(character);
+            }
+            character = iterator.next();
+        }
+        return result.toString();
+    }
 }
