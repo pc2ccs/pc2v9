@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.FlowLayout;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -187,11 +188,24 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
             public void run() {
                 messageLabel.setText(string);
                 messageLabel.setToolTipText(string);
+                messageLabel.setForeground(Color.BLACK);
             }
         });
 
     }
 
+    private void showMessage(final String string, final Color color) {
+
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                messageLabel.setText(string);
+                messageLabel.setForeground(color);
+            }
+        });
+    }
+    
+    
+    
     public String getPluginTitle() {
         return "Review Account Load Frame";
     }
@@ -247,7 +261,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
     }
     
     private void showErrorMessage(String msg){
-        showMessage("<HTML><FONT COLOR='red'>" + msg + "</FONT></HTML>");
+        showMessage(msg, Color.RED);
     }
 
 
