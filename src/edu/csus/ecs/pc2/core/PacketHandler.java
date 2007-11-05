@@ -922,14 +922,22 @@ public class PacketHandler {
 
         Account[] accounts = (Account[]) PacketFactory.getObjectValue(packet, PacketFactory.ACCOUNT_ARRAY);
         if (accounts != null) {
+            // TODO change these from Vector to something lightweight
+            Vector<Account> addAccountsVector = new Vector<Account>();
             for (Account account : accounts) {
+                // split the incoming list between add and no-op updates
                 if (contest.getAccount(account.getClientId()) == null) {
-                    contest.addAccount(account);
+                    addAccountsVector.add(account);
                 }
-                if (isServer()) {
+            }
+            if (addAccountsVector.size() > 0) {
+                contest.addAccounts(addAccountsVector.toArray(new Account[addAccountsVector.size()]));
+            }
+            if (isServer()) {
+                for (Account account : accounts) {
                     if (contest.isLocalLoggedIn(account.getClientId())) {
-                        Packet addPacket = PacketFactory.clonePacket(contest.getClientId(), oneAccount.getClientId(), packet);
-                        controller.sendToClient(addPacket);
+                        Packet updatePacket = PacketFactory.clonePacket(contest.getClientId(), account.getClientId(), packet);
+                        controller.sendToClient(updatePacket);
                     }
                 }
             }
@@ -1043,14 +1051,26 @@ public class PacketHandler {
         }
         Account[] accounts = (Account[]) PacketFactory.getObjectValue(packet, PacketFactory.ACCOUNT_ARRAY);
         if (accounts != null) {
+            // TODO change these from Vector to something lightweight
+            Vector<Account> addAccountsVector = new Vector<Account>();
+            Vector<Account> updateAccountsVector = new Vector<Account>();
             for (Account account : accounts) {
+                // split this into 2 lists,  then call the bulk version
                 if (contest.getAccount(account.getClientId()) == null) {
-                    contest.addAccount(account);
+                    addAccountsVector.add(account);
                 } else {
                     // existing account
-                    contest.updateAccount(account);
+                    updateAccountsVector.add(account);
                 }
-                if (isServer()) {
+            }
+            if (addAccountsVector.size() > 0) {
+                contest.addAccounts(addAccountsVector.toArray(new Account[addAccountsVector.size()]));
+            }
+            if (updateAccountsVector.size() > 0) {
+                contest.updateAccounts(updateAccountsVector.toArray(new Account[updateAccountsVector.size()]));
+            }
+            if (isServer()) {
+                for (Account account : accounts) {
                     if (contest.isLocalLoggedIn(account.getClientId())) {
                         Packet updatePacket = PacketFactory.clonePacket(contest.getClientId(), account.getClientId(), packet);
                         controller.sendToClient(updatePacket);
