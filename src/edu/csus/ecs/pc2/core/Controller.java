@@ -1199,7 +1199,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         try {
             if (object instanceof Packet) {
                 Packet packet = (Packet) object;
-                PacketFactory.dumpPacket(System.err, packet, "recieveObject");
+                PacketFactory.dumpPacket(log, packet, "recieveObject");
 
                 // TODO code put the server's connection handler id as 4th parameter
                 packetHandler.handlePacket(packet, null);
@@ -1241,17 +1241,17 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
 
     public void info(String s) {
-        log.warning(s);
-        System.err.println(Thread.currentThread().getName() + " " + s);
-        System.err.flush();
+//        log.warning(s);
+//        System.err.println(Thread.currentThread().getName() + " " + s);
+//        System.err.flush();
         log.log(Log.INFO, s);
     }
 
     public void info(String s, Exception exception) {
-        log.log(Log.WARNING, s, exception);
-        System.err.println(Thread.currentThread().getName() + " " + s);
-        System.err.flush();
-        exception.printStackTrace(System.err);
+//        log.log(Log.WARNING, s, exception);
+//        System.err.println(Thread.currentThread().getName() + " " + s);
+//        System.err.flush();
+//        exception.printStackTrace(System.err);
         log.log(Log.INFO, s, exception);
     }
 

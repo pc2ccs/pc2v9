@@ -2326,18 +2326,18 @@ public class PacketHandler {
     }
     
     public void info(String s) {
-        System.err.flush();
+//        System.err.flush();
         controller.getLog().warning(s);
-        System.err.println(Thread.currentThread().getName() + " " + s);
-        System.err.flush();
+//        System.err.println(Thread.currentThread().getName() + " " + s);
+//        System.err.flush();
     }
 
     public void info(String s, Exception exception) {
-        System.err.flush();
+//        System.err.flush();
         controller.getLog().log (Log.WARNING, s, exception);
-        System.err.println(Thread.currentThread().getName() + " " + s);
-        System.err.flush();
-        exception.printStackTrace(System.err);
+//        System.err.println(Thread.currentThread().getName() + " " + s);
+//        System.err.flush();
+//        exception.printStackTrace(System.err);
     }
 
 }
