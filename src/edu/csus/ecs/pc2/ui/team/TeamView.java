@@ -233,20 +233,24 @@ public class TeamView extends JFrame implements UIPlugin {
         
                 SubmitClarificationPane submitClarificationPane = new SubmitClarificationPane();
                 addUIPlugin(getMainTabbedPane(), "Request Clarification", submitClarificationPane);
-        
+
                 ClarificationsPane clarificationsPane = new ClarificationsPane();
                 addUIPlugin(getMainTabbedPane(), "View Clarifications", clarificationsPane);
         
                 OptionsPanel optionsPanel = new OptionsPanel();
                 addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
                 optionsPanel.setLogWindow(logWindow);
-                
+
                 updateFrameTitle(contest.getContestTime().isContestRunning());
                 
                 contestClockDisplay = new ContestClockDisplay(teamController.getLog(), contest.getContestTime(), contest.getSiteNumber(), isTeam(), null);
                 contestClockDisplay.addLabeltoUpdateList(clockLabel, DisplayTimes.REMAINING_TIME, contest.getSiteNumber());
-                
+
                 setVisible(true);
+                //TODO This needs to be resolved. The submitClarifcaitonPane is bleeding through the other tabs
+                getMainTabbedPane().setSelectedComponent(submitClarificationPane);
+                getMainTabbedPane().doLayout();
+                getMainTabbedPane().setSelectedComponent(submitRunPane);
             }
         });
     }
