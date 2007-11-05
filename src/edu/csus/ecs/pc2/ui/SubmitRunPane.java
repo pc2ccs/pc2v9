@@ -380,6 +380,11 @@ public class SubmitRunPane extends JPanePlugin {
 
         String filename = fileNameLabel.getText();
 
+        if (fileNameLabel.getText().equals("")) {
+            JOptionPane.showMessageDialog(this, "Please select a Main file");
+            return;
+        }
+        
         if (!fileExists(filename)) {
             File curdir = new File(".");
 

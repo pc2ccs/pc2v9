@@ -45,6 +45,7 @@ import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
+import javax.swing.JScrollPane;
 
 /**
  * Shows clarifications in a list box.
@@ -54,7 +55,6 @@ import edu.csus.ecs.pc2.core.security.PermissionList;
 
 // $HeadURL$
 // $Id$
-
 public class ClarificationsPane extends JPanePlugin {
 
     /**
@@ -97,12 +97,16 @@ public class ClarificationsPane extends JPanePlugin {
     private JPanel answerPane = null;
 
     private JTextArea answerTextArea = null;
-    
+
     private boolean showNewClarificationsOnly = false;
-    
+
     private Filter filter = null;
 
     private DisplayTeamName displayTeamName = null;
+
+    private JScrollPane jQuestionScrollPane = null;
+
+    private JScrollPane jAnswerScrollPane = null;
 
     /**
      * This method initializes
@@ -167,7 +171,7 @@ public class ClarificationsPane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new java.awt.Dimension(622, 229));
+        this.setSize(new java.awt.Dimension(622, 327));
         this.add(getCenterPane(), java.awt.BorderLayout.CENTER);
         this.add(getMessagePane(), java.awt.BorderLayout.NORTH);
         this.add(getClarificationButtonPane(), java.awt.BorderLayout.SOUTH);
@@ -216,6 +220,7 @@ public class ClarificationsPane extends JPanePlugin {
                 public void rowSelected(com.ibm.webrunner.j2mclb.event.ListboxEvent e) {
                     showSelectedClarification();
                 }
+
                 public void rowDeselected(com.ibm.webrunner.j2mclb.event.ListboxEvent e) {
                     showSelectedClarification();
                 }
@@ -226,14 +231,14 @@ public class ClarificationsPane extends JPanePlugin {
     }
 
     private void resetClarsListBoxColumns() {
-        
+
         clarificationListBox.removeAllRows();
         clarificationListBox.removeAllColumns();
         Object[] fullColumns = { "Site", "Team", "Clar Id", "Time", "Status", "Judge", "Sent to", "Problem", "Question", "Answer" };
         Object[] teamColumns = { "Site", "Team", "Clar Id", "Time", "Status", "Problem", "Question", "Answer" };
-        
-        if (isTeam(getContest().getClientId())){
-            clarificationListBox.addColumns(teamColumns);    
+
+        if (isTeam(getContest().getClientId())) {
+            clarificationListBox.addColumns(teamColumns);
         } else {
             clarificationListBox.addColumns(fullColumns);
         }
@@ -244,60 +249,60 @@ public class ClarificationsPane extends JPanePlugin {
         numericStringSorter.setComparator(new NumericStringComparator());
 
         int idx = 0;
-        
-        if (!isTeam(getContest().getClientId())){
+
+        if (!isTeam(getContest().getClientId())) {
             // Site
             clarificationListBox.setColumnSorter(idx++, sorter, 1);
-    
+
             // Team
             clarificationListBox.setColumnSorter(idx++, sorter, 2);
-    
+
             // Clar Id
             clarificationListBox.setColumnSorter(idx++, numericStringSorter, 3);
-    
+
             // Time
             clarificationListBox.setColumnSorter(idx++, numericStringSorter, 4);
-    
+
             // Status
             clarificationListBox.setColumnSorter(idx++, sorter, 5);
-    
+
             // Judge
             clarificationListBox.setColumnSorter(idx++, sorter, 6);
-    
+
             // Sent to
             clarificationListBox.setColumnSorter(idx++, sorter, 7);
-    
+
             // Problem
             clarificationListBox.setColumnSorter(idx++, sorter, 8);
-    
+
             // Question
             clarificationListBox.setColumnSorter(idx++, sorter, 9);
-    
+
             // Answer
             clarificationListBox.setColumnSorter(idx++, sorter, 10);
         } else {
             // teamColumns
             // Site
             clarificationListBox.setColumnSorter(idx++, sorter, 1);
-    
+
             // Team
             clarificationListBox.setColumnSorter(idx++, sorter, 2);
-    
+
             // Clar Id
             clarificationListBox.setColumnSorter(idx++, numericStringSorter, 3);
-    
+
             // Time
             clarificationListBox.setColumnSorter(idx++, numericStringSorter, 4);
-    
+
             // Status
             clarificationListBox.setColumnSorter(idx++, sorter, 5);
-    
+
             // Problem
             clarificationListBox.setColumnSorter(idx++, sorter, 8);
-    
+
             // Question
             clarificationListBox.setColumnSorter(idx++, sorter, 9);
-    
+
             // Answer
             clarificationListBox.setColumnSorter(idx++, sorter, 10);
         }
@@ -306,10 +311,10 @@ public class ClarificationsPane extends JPanePlugin {
     }
 
     protected void showSelectedClarification() {
-        
+
         int selectedClarificationIndex = getClarificationListBox().getSelectedIndex();
-        
-        if (selectedClarificationIndex == -1){
+
+        if (selectedClarificationIndex == -1) {
             getAnswerPane().setVisible(false);
             getAnswerTextArea().setText("");
             getQuestionTextArea().setText("");
@@ -319,23 +324,26 @@ public class ClarificationsPane extends JPanePlugin {
         }
 
         ElementId clarificationId = (ElementId) getClarificationListBox().getKeys()[selectedClarificationIndex];
-        
+
         Clarification clarification = getContest().getClarification(clarificationId);
-        
-        if (clarification != null){
-            
-            String clarificationTitle = "Clarification "+clarification.getNumber()+"  from "+getTeamDisplayName(clarification.getSubmitter())+" (Site "+clarification.getSiteNumber()+")";
+
+        if (clarification != null) {
+
+            String clarificationTitle = "Clarification " + clarification.getNumber() + "  from " + getTeamDisplayName(clarification.getSubmitter()) + " (Site " + clarification.getSiteNumber() + ")";
             clarificationPane.setBorder(BorderFactory.createTitledBorder(null, clarificationTitle, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
-            
+
             getQuestionTextArea().setText(clarification.getQuestion());
-            
-            if (clarification.getAnswer() != null){
+            getQuestionTextArea().setCaretPosition(0);
+
+            if (clarification.getAnswer() != null) {
                 getAnswerPane().setVisible(true);
                 getAnswerTextArea().setText(clarification.getAnswer());
             } else {
                 // Don't show answer pane if no answer
-                getAnswerPane().setVisible(false);
+                getAnswerTextArea().setText("Not answered, yet.\nNot answered, yet.\nNot answered, yet.\nNot answered, yet.\n");
+                getAnswerPane().setVisible(true);
             }
+            getAnswerTextArea().setCaretPosition(0);
         }
 
         // Show preview pane
@@ -344,7 +352,8 @@ public class ClarificationsPane extends JPanePlugin {
 
     /**
      * 
-     * @param clarification the clarification to show
+     * @param clarification
+     *            the clarification to show
      */
     private void showClarificationAnswer(Clarification clarification) {
         // do not show deleted clars
@@ -354,12 +363,9 @@ public class ClarificationsPane extends JPanePlugin {
         }
 
         String problemName = getProblemTitle(clarification.getProblemId());
-        String displayString =
-            "<HTML><FONT SIZE=+1>Judge's Response<BR><BR>"
-            + "Problem: <FONT COLOR=BLUE>" +  Utilities.forHTML( problemName) + "</FONT><BR><BR>" 
-            + "Clar Id: <FONT COLOR=BLUE>" + clarification.getNumber() + "</FONT><BR><BR><BR>" 
-            + "Question: <FONT COLOR=BLUE> "  + Utilities.forHTML(clarification.getQuestion()) + "</FONT><BR><BR><BR>"
-            + "Answer: <FONT COLOR=BLUE>" + Utilities.forHTML(clarification.getAnswer()) + "</FONT><BR><BR><BR>" ;
+        String displayString = "<HTML><FONT SIZE=+1>Judge's Response<BR><BR>" + "Problem: <FONT COLOR=BLUE>" + Utilities.forHTML(problemName) + "</FONT><BR><BR>" + "Clar Id: <FONT COLOR=BLUE>"
+                + clarification.getNumber() + "</FONT><BR><BR><BR>" + "Question: <FONT COLOR=BLUE> " + Utilities.forHTML(clarification.getQuestion()) + "</FONT><BR><BR><BR>"
+                + "Answer: <FONT COLOR=BLUE>" + Utilities.forHTML(clarification.getAnswer()) + "</FONT><BR><BR><BR>";
 
         if (clarification.isSendToAll()) {
             displayString = displayString + "* For All Teams *" + "\n";
@@ -367,8 +373,7 @@ public class ClarificationsPane extends JPanePlugin {
 
         JOptionPane.showMessageDialog(this, displayString, "Clarification " + clarification.getNumber(), JOptionPane.INFORMATION_MESSAGE);
     }
- 
-    
+
     private void removeClarificationRow(final Clarification clarification) {
 
         SwingUtilities.invokeLater(new Runnable() {
@@ -383,17 +388,17 @@ public class ClarificationsPane extends JPanePlugin {
     }
 
     public void updateClarificationRow(final Clarification clarification, final ClientId whoChangedId) {
-        
-        if (filter != null){
-            
-            if (! filter.matches(clarification)){
+
+        if (filter != null) {
+
+            if (!filter.matches(clarification)) {
                 // if run does not match filter, be sure to remove it from grid
                 // This applies when a run is New then BEING_ANSWERED and other conditions.
                 removeClarificationRow(clarification);
                 return;
             }
         }
-        
+
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 Object[] objects = buildClarificationRow(clarification, whoChangedId);
@@ -417,7 +422,7 @@ public class ClarificationsPane extends JPanePlugin {
         // Object[] cols = {"Site", "Team", "Clar Id", "Time", "Status", "Judge", "Sent to", "Problem", "Question", "Answer" };
         // or
         // Object[] cols = {"Site", "Team", "Clar Id", "Time", "Status", "Problem", "Question", "Answer" };
-        
+
         int idx = 0;
         obj[idx++] = getSiteTitle(clar.getSubmitter().getSiteNumber());
         obj[idx++] = getTeamDisplayName(clar.getSubmitter());
@@ -442,7 +447,7 @@ public class ClarificationsPane extends JPanePlugin {
 
         if (!isTeam) {
             if (clar.isAnswered()) {
-    
+
                 if (clar.getWhoJudgedItId() == null || isTeam) {
                     obj[idx++] = "";
                 } else {
@@ -465,7 +470,7 @@ public class ClarificationsPane extends JPanePlugin {
     }
 
     void reloadListBox() {
-        if (isJudge()){
+        if (isJudge()) {
             ContestInformation contestInformation = getContest().getContestInformation();
             displayTeamName.setTeamDisplayMask(contestInformation.getTeamDisplayMode());
         }
@@ -474,13 +479,13 @@ public class ClarificationsPane extends JPanePlugin {
         Clarification[] clarifications = getContest().getClarifications();
 
         for (Clarification clarification : clarifications) {
-            
-            if (filter != null){
-                if (! filter.matches(clarification)){
+
+            if (filter != null) {
+                if (!filter.matches(clarification)) {
                     continue;
                 }
             }
-            
+
             addClarificationRow(clarification);
         }
     }
@@ -494,7 +499,7 @@ public class ClarificationsPane extends JPanePlugin {
 
     /**
      * @author pc2@ecs.csus.edu
-     *
+     * 
      */
     public class ContestInformationListenerImplementation implements IContestInformationListener {
 
@@ -516,9 +521,9 @@ public class ClarificationsPane extends JPanePlugin {
 
         public void contestInformationRemoved(ContestInformationEvent event) {
             // TODO Auto-generated method stub
-            
+
         }
-        
+
     }
 
     /**
@@ -533,17 +538,17 @@ public class ClarificationsPane extends JPanePlugin {
         public void clarificationAdded(ClarificationEvent event) {
             updateClarificationRow(event.getClarification(), event.getWhoModifiedClarification());
             if (event.getClarification().isAnswered()) {
-                if (getContest().getClientId().getClientType()==ClientType.Type.TEAM) {
+                if (getContest().getClientId().getClientType() == ClientType.Type.TEAM) {
                     showClarificationAnswer(event.getClarification());
                 }
             }
-        
+
         }
 
         public void clarificationChanged(ClarificationEvent event) {
             updateClarificationRow(event.getClarification(), event.getWhoModifiedClarification());
             if (event.getClarification().isAnswered()) {
-                if (getContest().getClientId().getClientType()==ClientType.Type.TEAM) {
+                if (getContest().getClientId().getClientType() == ClientType.Type.TEAM) {
                     showClarificationAnswer(event.getClarification());
                 }
             }
@@ -569,7 +574,7 @@ public class ClarificationsPane extends JPanePlugin {
         getContest().addProblemListener(new ProblemListenerImplementation());
         getContest().addLanguageListener(new LanguageListenerImplementation());
         getContest().addContestInformationListener(new ContestInformationListenerImplementation());
-        
+
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 updateGUIperPermissions();
@@ -593,13 +598,13 @@ public class ClarificationsPane extends JPanePlugin {
     }
 
     private String getTeamDisplayName(ClientId clientId) {
-        if (isJudge() && isTeam(clientId)){
+        if (isJudge() && isTeam(clientId)) {
             return displayTeamName.getDisplayName(clientId);
         }
 
         return clientId.getName();
     }
-    
+
     /**
      * This method initializes getButton
      * 
@@ -689,6 +694,7 @@ public class ClarificationsPane extends JPanePlugin {
         if (filterButton == null) {
             filterButton = new JButton();
             filterButton.setText("Filter");
+            filterButton.setVisible(false);
             filterButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     reloadListBox();
@@ -706,12 +712,12 @@ public class ClarificationsPane extends JPanePlugin {
     private boolean isTeam(ClientId clientId) {
         return clientId == null || clientId.getClientType().equals(Type.TEAM);
     }
-    
+
     private boolean isJudge(ClientId clientId) {
         return clientId == null || clientId.getClientType().equals(Type.JUDGE);
     }
-    
-    private boolean isJudge(){
+
+    private boolean isJudge() {
         return isJudge(getContest().getClientId());
     }
 
@@ -721,14 +727,14 @@ public class ClarificationsPane extends JPanePlugin {
     }
 
     private void updateGUIperPermissions() {
-        
-        if (showNewClarificationsOnly){
+
+        if (showNewClarificationsOnly) {
             requestButton.setVisible(isAllowed(Permission.Type.ANSWER_CLARIFICATION));
             editButton.setVisible(false);
             giveButton.setVisible(false);
             takeButton.setVisible(false);
             generateClarificationButton.setVisible(isAllowed(Permission.Type.GENERATE_NEW_CLARIFICATION));
-            
+
         } else {
             requestButton.setVisible(isAllowed(Permission.Type.ANSWER_CLARIFICATION));
             editButton.setVisible(isAllowed(Permission.Type.EDIT_CLARIFICATION));
@@ -885,6 +891,7 @@ public class ClarificationsPane extends JPanePlugin {
             GridLayout gridLayout = new GridLayout();
             gridLayout.setRows(2);
             centerPane = new JPanel();
+            centerPane.setPreferredSize(new java.awt.Dimension(200,400));
             centerPane.setLayout(gridLayout);
             centerPane.add(getClarificationListBox(), null);
             centerPane.add(getClarificationSplitPane(), null);
@@ -900,10 +907,16 @@ public class ClarificationsPane extends JPanePlugin {
     private JSplitPane getClarificationSplitPane() {
         if (clarificationSplitPane == null) {
             clarificationSplitPane = new JSplitPane();
-            clarificationSplitPane.setPreferredSize(new Dimension(120, 120));
+            clarificationSplitPane.setPreferredSize(new java.awt.Dimension(200, 200));
+            clarificationSplitPane.setDividerLocation(70);
             clarificationSplitPane.setTopComponent(getClarificationPane());
             clarificationSplitPane.setBottomComponent(getAnswerPane());
-            clarificationSplitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
+            clarificationSplitPane.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
+            clarificationSplitPane.addComponentListener(new java.awt.event.ComponentAdapter() {
+                public void componentResized(java.awt.event.ComponentEvent e) {
+                    clarificationSplitPane.setDividerLocation(clarificationSplitPane.getHeight()/2);
+                }
+            });
         }
         return clarificationSplitPane;
     }
@@ -919,7 +932,7 @@ public class ClarificationsPane extends JPanePlugin {
             clarificationPane.setLayout(new BorderLayout());
             clarificationPane.setPreferredSize(new Dimension(10, 40));
             clarificationPane.setBorder(BorderFactory.createTitledBorder(null, "Clarification", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
-            clarificationPane.add(getQuestionTextArea(), java.awt.BorderLayout.CENTER);
+            clarificationPane.add(getJQuestionScrollPane(), java.awt.BorderLayout.CENTER);
         }
         return clarificationPane;
     }
@@ -932,6 +945,11 @@ public class ClarificationsPane extends JPanePlugin {
     private JTextArea getQuestionTextArea() {
         if (questionTextArea == null) {
             questionTextArea = new JTextArea();
+            questionTextArea.setLayout(new BorderLayout());
+//            questionTextArea.setBorder(BorderFactory.createTitledBorder(null, "Question", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
+            questionTextArea.setBorder(BorderFactory.createTitledBorder(null, "", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
+            questionTextArea.add(getAnswerTextArea(), java.awt.BorderLayout.CENTER);
+
         }
         return questionTextArea;
     }
@@ -946,7 +964,7 @@ public class ClarificationsPane extends JPanePlugin {
             answerPane = new JPanel();
             answerPane.setLayout(new BorderLayout());
             answerPane.setBorder(BorderFactory.createTitledBorder(null, "Answer", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
-            answerPane.add(getAnswerTextArea(), java.awt.BorderLayout.CENTER);
+            answerPane.add(getJAnswerScrollPane(), java.awt.BorderLayout.CENTER);
         }
         return answerPane;
     }
@@ -969,13 +987,39 @@ public class ClarificationsPane extends JPanePlugin {
 
     public void setShowNewClarificationsOnly(boolean showNewClarificationsOnly) {
         this.showNewClarificationsOnly = showNewClarificationsOnly;
-        
-        if (showNewClarificationsOnly){
-            if (filter == null){
+
+        if (showNewClarificationsOnly) {
+            if (filter == null) {
                 filter = new Filter();
             }
             filter.addClarificationState(ClarificationStates.NEW);
         }
+    }
+
+    /**
+     * This method initializes jQuestionScrollPane
+     * 
+     * @return javax.swing.JScrollPane
+     */
+    private JScrollPane getJQuestionScrollPane() {
+        if (jQuestionScrollPane == null) {
+            jQuestionScrollPane = new JScrollPane();
+            jQuestionScrollPane.setViewportView(getQuestionTextArea());
+        }
+        return jQuestionScrollPane;
+    }
+
+    /**
+     * This method initializes jcAnswerScrollPane
+     * 
+     * @return javax.swing.JScrollPane
+     */
+    private JScrollPane getJAnswerScrollPane() {
+        if (jAnswerScrollPane == null) {
+            jAnswerScrollPane = new JScrollPane();
+            jAnswerScrollPane.setViewportView(getAnswerTextArea());
+        }
+        return jAnswerScrollPane;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

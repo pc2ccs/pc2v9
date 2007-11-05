@@ -204,6 +204,7 @@ public class SubmitClarificationPane extends JPanePlugin {
         try {
             log.info("submit clarification for " + problem + " " + question);
             getController().submitClarification(problem, question);
+            questionTextArea.setText("");
 
         } catch (Exception e) {
             // TODO need to make this cleaner
