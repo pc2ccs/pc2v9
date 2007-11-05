@@ -340,7 +340,7 @@ public class ClarificationsPane extends JPanePlugin {
                 getAnswerTextArea().setText(clarification.getAnswer());
             } else {
                 // Don't show answer pane if no answer
-                getAnswerTextArea().setText("Not answered, yet.\nNot answered, yet.\nNot answered, yet.\nNot answered, yet.\n");
+                getAnswerTextArea().setText("Not answered, yet.");
                 getAnswerPane().setVisible(true);
             }
             getAnswerTextArea().setCaretPosition(0);
