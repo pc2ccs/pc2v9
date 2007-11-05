@@ -37,10 +37,10 @@ import edu.csus.ecs.pc2.core.security.PermissionList;
  * Account Pane list.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$$
-// $Id$ 
 
 public class AccountsPane extends JPanePlugin {
 
@@ -125,7 +125,6 @@ public class AccountsPane extends JPanePlugin {
     }
 
     private String getSiteTitle(String string) {
-        // TODO Auto-generated method stub
         return "Site " + string;
     }
 
@@ -242,6 +241,9 @@ public class AccountsPane extends JPanePlugin {
     private void updateGUIperPermissions() {
         addButton.setVisible(isAllowed(Permission.Type.EDIT_ACCOUNT));
         editButton.setVisible(isAllowed(Permission.Type.EDIT_ACCOUNT));
+        
+        // TODO once filter is working make this visible.
+        getFilterButton().setVisible(false);
     }
     
     public void setContestAndController(IContest inContest, IController inController) {
@@ -599,12 +601,8 @@ public class AccountsPane extends JPanePlugin {
             }
             
         } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.log(Log.WARNING, "Exception ", e);
         }
-        // TODO Auto-generated method stub
-        
-        
     }
 
     /**
