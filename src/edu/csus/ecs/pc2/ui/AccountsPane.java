@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.io.File;
@@ -479,22 +480,22 @@ public class AccountsPane extends JPanePlugin {
                         } else {
                             msg = "File is not readable (" + selectedFile.toString() + ")";
                             log.log(Log.WARNING, msg);
-                            showMessage("<HTML><FONT color='red'>" + msg + "</FONT></HTML>");
+                            showMessage(msg, Color.RED);
                         }
                     } else {
                         msg = "Selected file is not a file (" + selectedFile.toString() + ")";
                         log.log(Log.WARNING, msg);
-                        showMessage("<HTML><FONT color='red'>" + msg + "</FONT></HTML>");
+                        showMessage(msg, Color.RED);
                     }
                 } else {
                     msg = "File does not exist (" + selectedFile.toString() + ")";
                     log.log(Log.WARNING, msg);
-                    showMessage("<HTML><FONT color='red'>" + msg + "</FONT></HTML>");
+                    showMessage(msg, Color.RED);
                 }
             } catch (IOException e) {
                 msg = "Trouble retrieving selected file (" + chooser.getSelectedFile().toString() + ") " + e.toString();
                 log.log(Log.WARNING, msg, e);
-                showMessage("<HTML><FONT color='red'>" + msg + "</FONT></HTML>");
+                showMessage(msg, Color.RED);
             }
         }
     }
@@ -530,6 +531,17 @@ public class AccountsPane extends JPanePlugin {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 messageLabel.setText(string);
+            }
+        });
+    }
+
+    private void showMessage(final String string, final Color color) {
+
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                messageLabel.setText(string);
+                messageLabel.setForeground(color);
+                
             }
         });
     }
