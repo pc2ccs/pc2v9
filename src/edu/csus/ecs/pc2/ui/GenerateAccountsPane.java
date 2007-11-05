@@ -410,6 +410,22 @@ public class GenerateAccountsPane extends JPanePlugin {
             });
             
         }
+
+        public void accountsAdded(AccountEvent accountEvent) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    updateGenerateTitles();
+                }
+            });
+        }
+
+        public void accountsModified(AccountEvent accountEvent) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    updateGenerateTitles();
+                }
+            });
+        }
         
     }
 

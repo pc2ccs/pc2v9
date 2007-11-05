@@ -185,6 +185,14 @@ public class ServerView extends JFrame implements UIPlugin {
             logDebugMessage("Account Event Event " + accountEvent.getAction() + " " + accountText(accountEvent.getAccount()));
 
         }
+
+        public void accountsAdded(AccountEvent accountEvent) {
+            logDebugMessage("Account Event Event " + accountEvent.getAction() + " " + accountEvent.getAccounts().length + " accounts");
+        }
+
+        public void accountsModified(AccountEvent accountEvent) {
+            logDebugMessage("Account Event Event " + accountEvent.getAction() + " " + accountEvent.getAccounts().length + " accounts");
+        }
     }
 
     /**

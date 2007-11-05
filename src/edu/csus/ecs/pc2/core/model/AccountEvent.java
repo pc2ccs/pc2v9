@@ -34,6 +34,14 @@ public class AccountEvent {
          * Account added
          */
         ADDED,
+        /**
+         * More then 1 account was added
+         */
+        ADDED_ACCOUNTS,
+        /**
+         * Move then 1 account was updated
+         */
+        CHANGED_ACCOUNTS,
 
     };
 
@@ -47,11 +55,19 @@ public class AccountEvent {
      */
     private Account account;
 
+    private Account[] accounts;
+    
     public AccountEvent(Action action, Account account) {
         super();
         // TODO Auto-generated constructor stub
         this.action = action;
         this.account = account;
+    }
+    
+    public AccountEvent(Action action, Account[] accounts) {
+        super();
+        this.action = action;
+        this.accounts = accounts;
     }
 
     public Account getAccount() {
@@ -68,6 +84,20 @@ public class AccountEvent {
 
     public void setAction(Action action) {
         this.action = action;
+    }
+
+    /**
+     * @return Returns the accounts.
+     */
+    public Account[] getAccounts() {
+        return accounts;
+    }
+
+    /**
+     * @param accounts The accounts to set.
+     */
+    public void setAccounts(Account[] accounts) {
+        this.accounts = accounts;
     }
     
     

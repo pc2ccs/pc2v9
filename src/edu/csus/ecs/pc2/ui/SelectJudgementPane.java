@@ -808,6 +808,20 @@ public class SelectJudgementPane extends JPanePlugin {
                 }
             });
         }
+
+        public void accountsAdded(AccountEvent accountEvent) {
+            // ignore this does not affect me
+            
+        }
+
+        public void accountsModified(AccountEvent accountEvent) {
+            // TODO is this not dependant on us being modified???
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    updateGUIperPermissions();
+                }
+            });
+        }
     }
 
     /**

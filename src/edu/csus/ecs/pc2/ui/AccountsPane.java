@@ -294,6 +294,40 @@ public class AccountsPane extends JPanePlugin {
                 
             }
         }
+
+        public void accountsAdded(AccountEvent accountEvent) {
+            Account[] accounts = accountEvent.getAccounts();
+            for ( Account account : accounts) {
+                updateAccountRow(account, false);
+            }
+            getRunsListBox().autoSizeAllColumns();
+            getRunsListBox().sort();
+        }
+
+        public void accountsModified(AccountEvent accountEvent) {
+            Account[] accounts = accountEvent.getAccounts();
+            for ( Account account : accounts) {
+                updateAccountRow(account, false);
+                
+                /**
+                 * If this is the account then update the GUI display per
+                 * the potential change in Permissions.
+                 */
+                if (getContest().getClientId().equals(account.getClientId())) {
+                    // They modified us!!
+                    initializePermissions();
+                    SwingUtilities.invokeLater(new Runnable() {
+                        public void run() {
+                            updateGUIperPermissions();
+                        }
+                    });
+                    
+                }
+                
+            }
+            getRunsListBox().autoSizeAllColumns();
+            getRunsListBox().sort();
+        }
     }
 
     /**

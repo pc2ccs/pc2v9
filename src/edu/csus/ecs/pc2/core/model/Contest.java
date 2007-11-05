@@ -462,6 +462,14 @@ public class Contest implements IContest {
         fireAccountListener(accountEvent);
     }
 
+    public void addAccounts(Account[] accounts) {
+        for (Account account : accounts) {
+            accountList.add(account);
+        }
+        AccountEvent accountEvent = new AccountEvent(AccountEvent.Action.ADDED_ACCOUNTS, accounts);
+        fireAccountListener(accountEvent);
+    }
+
     public Judgement[] getJudgements() {
         return judgementDisplayList.getList();
     }
@@ -603,6 +611,10 @@ public class Contest implements IContest {
 
             if (accountEvent.getAction() == AccountEvent.Action.ADDED) {
                 accountListenerList.elementAt(i).accountAdded(accountEvent);
+            } else if(accountEvent.getAction() == AccountEvent.Action.ADDED_ACCOUNTS) {
+                accountListenerList.elementAt(i).accountsAdded(accountEvent);
+            } else if(accountEvent.getAction() == AccountEvent.Action.CHANGED_ACCOUNTS) {
+                accountListenerList.elementAt(i).accountsModified(accountEvent);
             } else {
                 accountListenerList.elementAt(i).accountModified(accountEvent);
             }
@@ -1094,6 +1106,14 @@ public class Contest implements IContest {
     public void updateAccount(Account account) {
         accountList.update(account);
         AccountEvent accountEvent = new AccountEvent(AccountEvent.Action.CHANGED, account);
+        fireAccountListener(accountEvent);
+    }
+    
+    public void updateAccounts(Account[] accounts) {
+        for (Account account : accounts) {
+            accountList.update(account);
+        }
+        AccountEvent accountEvent = new AccountEvent(AccountEvent.Action.CHANGED_ACCOUNTS, accounts);
         fireAccountListener(accountEvent);
     }
 

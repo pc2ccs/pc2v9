@@ -414,6 +414,32 @@ public class AutoJudgesPane extends JPanePlugin {
                 }
             });
         }
+
+        public void accountsAdded(final AccountEvent accountEvent) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    for(Account account : accountEvent.getAccounts()) {
+                        ClientId clientId = account.getClientId();
+                        if (isJudge(clientId)) {
+                            updateAutoJudgeRow(clientId);
+                        }
+                    }
+                }
+            });
+        }
+
+        public void accountsModified(final AccountEvent accountEvent) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    for(Account account : accountEvent.getAccounts()) {
+                        ClientId clientId = account.getClientId();
+                        if (isJudge(clientId)) {
+                            updateAutoJudgeRow(clientId);
+                        }
+                    }
+                }
+            });
+        }
         
     }
 

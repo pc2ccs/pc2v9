@@ -254,6 +254,14 @@ public class StandingsHTMLPane extends JPanePlugin {
             refreshStandings();
         }
 
+        public void accountsAdded(AccountEvent accountEvent) {
+            refreshStandings();
+        }
+
+        public void accountsModified(AccountEvent accountEvent) {
+            refreshStandings();
+        }
+
     }
 
     /**

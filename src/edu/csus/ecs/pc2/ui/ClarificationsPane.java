@@ -773,6 +773,33 @@ public class ClarificationsPane extends JPanePlugin {
 
             }
         }
+
+        public void accountsAdded(AccountEvent accountEvent) {
+            // ignore, does not affect this pane
+        }
+
+        public void accountsModified(AccountEvent accountEvent) {
+            // check if it included this account
+            boolean theyModifiedUs = false;
+            for (Account account : accountEvent.getAccounts()) {
+                /**
+                 * If this is the account then update the GUI display per the potential change in Permissions.
+                 */
+                if (getContest().getClientId().equals(account.getClientId())) {
+                    theyModifiedUs = true;
+                    initializePermissions();
+                }
+            }
+            final boolean finalTheyModifiedUs = theyModifiedUs;
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    if (finalTheyModifiedUs) {
+                        updateGUIperPermissions();
+                    }
+                    reloadListBox();
+                }
+            });
+        }
     }
 
     /**

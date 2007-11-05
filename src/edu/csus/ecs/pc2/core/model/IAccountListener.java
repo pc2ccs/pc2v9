@@ -22,4 +22,17 @@ public interface IAccountListener {
      * @param accountEvent
      */
     void accountModified(AccountEvent accountEvent);
+    /**
+     * Accounts were added.
+     * 
+     * @param accountEvent
+     */
+    void accountsAdded(AccountEvent accountEvent);
+
+    /**
+     * Accounts were modified.
+     * 
+     * @param accountEvent
+     */
+    void accountsModified(AccountEvent accountEvent);
 }

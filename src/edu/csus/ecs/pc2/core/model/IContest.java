@@ -644,4 +644,8 @@ public interface IContest {
     
     Problem getGeneralProblem ();
 
+    void addAccounts(Account[] accounts);
+
+    void updateAccounts(Account[] accounts);
+
 }
