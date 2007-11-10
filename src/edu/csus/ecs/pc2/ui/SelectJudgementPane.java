@@ -39,6 +39,7 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
+import edu.csus.ecs.pc2.ui.judge.JudgeView;
 
 /**
  * Add/Edit Run Pane
@@ -238,8 +239,8 @@ public class SelectJudgementPane extends JPanePlugin {
         enableUpdateButtons(false);
         closeViewerWindows();
         Run newRun = getRunFromFields();
+        JudgeView.setAlreadyJudgingRun(false);
         getController().cancelRun(newRun);
-
     }
 
     private void closeViewerWindows() {
@@ -275,7 +276,8 @@ public class SelectJudgementPane extends JPanePlugin {
             judgementRecord.setSendToTeam(getNotifyTeamCheckBox().isSelected());
 
         }
-
+        
+        JudgeView.setAlreadyJudgingRun(false);
         getController().submitRunJudgement(newRun, judgementRecord, runResultFiles);
 
         if (getParentFrame() != null) {
@@ -887,6 +889,7 @@ public class SelectJudgementPane extends JPanePlugin {
 
         judgementRecord.setSendToTeam(getNotifyTeamCheckBox().isSelected());
 
+        JudgeView.setAlreadyJudgingRun(false);
         getController().submitRunJudgement(newRun, judgementRecord, runResultFiles);
 
         if (getParentFrame() != null) {

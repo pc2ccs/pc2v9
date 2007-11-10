@@ -67,6 +67,8 @@ public class JudgeView extends JFrame implements UIPlugin {
     private JPanel northPane = null;
 
     private JPanel judgeBiffPane = null;
+    
+    private static boolean alreadyJudgingRun = false;
 
     public JudgeView() {
         super();
@@ -340,6 +342,14 @@ public class JudgeView extends JFrame implements UIPlugin {
             judgeBiffPane.setPreferredSize(new java.awt.Dimension(35, 35));
         }
         return judgeBiffPane;
+    }
+
+    public static boolean isAlreadyJudgingRun() {
+        return alreadyJudgingRun;
+    }
+
+    public static void setAlreadyJudgingRun(boolean alreadyJudgingRun) {
+        JudgeView.alreadyJudgingRun = alreadyJudgingRun;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

@@ -43,6 +43,8 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
+import edu.csus.ecs.pc2.ui.judge.JudgeView;
+
 import javax.swing.JLabel;
 
 /**
@@ -820,6 +822,13 @@ public class RunsPanel extends JPanePlugin {
             showMessage("Please select a run ");
             return;
         }
+        
+        if (JudgeView.isAlreadyJudgingRun()){
+            JOptionPane.showMessageDialog(this, "Already judging run");
+            return;
+        }
+        
+        JudgeView.setAlreadyJudgingRun(true);
         
         try {
             ElementId elementId = (ElementId) runListBox.getKeys()[selectedIndexes[0]];
