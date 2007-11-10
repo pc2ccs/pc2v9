@@ -508,22 +508,23 @@ public class ProblemPane extends JPanePlugin {
         checkProblem.setHideOutputWindow(getDoNotShowOutputWindowCheckBox().isSelected());
         checkProblem.setShowCompareWindow(getShowCompareCheckBox().isSelected());
 
-        if (useExternalValidatorRadioButton.isSelected()) {
-
-            String fileName = externalValidatorLabel.getText() + "";
-            if (fileName.trim().length() == 0) {
-                throw new InvalidFieldValue("Problem Requires External Validator is checked, select a file ");
-            }
-
-            SerializedFile serializedFile = new SerializedFile(fileName);
-
-            if (serializedFile.getBuffer() == null) {
-                throw new InvalidFieldValue("Unable to read file " + fileName + " choose validator file again(2)");
-            }
-
-            checkProblem.setValidatorProgramName(serializedFile.getName());
-            newProblemDataFiles.setValidatorFile(freshenIfNeeded(serializedFile, fileName));
-        }
+        // TODO validator program is no longer loaded, maybe someday
+//        if (useExternalValidatorRadioButton.isSelected()) {
+//            
+//            String fileName = externalValidatorLabel.getText() + "";
+//            if (fileName.trim().length() == 0) {
+//                throw new InvalidFieldValue("Problem Requires External Validator is checked, select a file ");
+//            }
+//
+//            SerializedFile serializedFile = new SerializedFile(fileName);
+//
+//            if (serializedFile.getBuffer() == null) {
+//                throw new InvalidFieldValue("Unable to read file " + fileName + " choose validator file again(2)");
+//            }
+//
+//            checkProblem.setValidatorProgramName(serializedFile.getName());
+//            newProblemDataFiles.setValidatorFile(freshenIfNeeded(serializedFile, fileName));
+//        }
 
         return checkProblem;
 
@@ -775,7 +776,9 @@ public class ProblemPane extends JPanePlugin {
 
             getPc2ValidatorComboBox().setSelectedIndex(0);
             getIgnoreCaseCheckBox().setSelected(true);
-
+            externalValidatorLabel.setText("");
+            externalValidatorLabel.setToolTipText("");
+            
             if (inProblem.isValidatedProblem()) {
 
                 if (inProblem.isUsingPC2Validator()) {
@@ -784,6 +787,8 @@ public class ProblemPane extends JPanePlugin {
                     ignoreCaseCheckBox.setSelected(inProblem.isIgnoreSpacesOnValidation());
                 } else {
                     useExternalValidatorRadioButton.setSelected(true);
+                    externalValidatorLabel.setText(inProblem.getValidatorProgramName());
+                    externalValidatorLabel.setToolTipText(inProblem.getValidatorProgramName());
                 }
 
             } else {
@@ -824,9 +829,9 @@ public class ProblemPane extends JPanePlugin {
             useNOValidatatorRadioButton.setSelected(true);
             pc2ValidatorOptionComboBox.setSelectedIndex(0);
             ignoreCaseCheckBox.setSelected(false);
-            validatorCommandLineTextBox.setEnabled(useExternalValidatorRadioButton.isSelected());
-
+            
             externalValidatorLabel.setText("");
+            externalValidatorLabel.setToolTipText("");
 
             getValidatorCommandLineTextBox().setText(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
             getShowValidatorToJudges().setSelected(true);
@@ -1333,10 +1338,7 @@ public class ProblemPane extends JPanePlugin {
         
         getExternalValidatorFrame().setEnabled(enableComponents);
         getValidatorProgramJButton().setEnabled(enableComponents);
-        getValidatorCommandLineTextBox().setEditable(enableComponents);
-
-        // huh
-        
+        getValidatorCommandLineTextBox().setEnabled(enableComponents);
     }
     protected void enablePC2ValidatorComponents(boolean enableComponents) {
         ignoreCaseCheckBox.setEnabled(enableComponents);
@@ -1423,7 +1425,7 @@ public class ProblemPane extends JPanePlugin {
             externalValidatorFrame.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "External Validator", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
                     javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
             externalValidatorFrame.add(validatorProgramLabel, null);
-            externalValidatorFrame.add(getExternalValidatorLabel(), null);
+            externalValidatorFrame.add(getExternalValidatorPane(), null);
             externalValidatorFrame.add(getValidatorProgramJButton(), null);
             externalValidatorFrame.add(jLabel, null);
             externalValidatorFrame.add(getValidatorCommandLineTextBox(), null);
@@ -1482,10 +1484,11 @@ public class ProblemPane extends JPanePlugin {
      * 
      * @return javax.swing.JPanel
      */
-    private JPanel getExternalValidatorLabel() {
+    private JPanel getExternalValidatorPane() {
         if (externalValidatorLabel == null) {
             externalValidatorLabel = new JLabel();
             externalValidatorLabel.setText("");
+            externalValidatorLabel.setToolTipText("");
             externalValidatorPane = new JPanel();
             externalValidatorPane.setLayout(new BorderLayout());
             externalValidatorPane.setBounds(new java.awt.Rectangle(140, 21, 267, 22));
