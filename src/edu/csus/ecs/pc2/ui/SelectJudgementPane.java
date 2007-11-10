@@ -305,6 +305,13 @@ public class SelectJudgementPane extends JPanePlugin {
     }
 
     public void handleCancelButton() {
+        
+        if (runFiles == null){
+            if (getParentFrame() != null) {
+                getParentFrame().setVisible(false);
+            }
+            return;
+        }
 
         if (getUpdateButton().isEnabled()) {
 
@@ -438,7 +445,7 @@ public class SelectJudgementPane extends JPanePlugin {
 
     }
 
-    protected void enableUpdateButtons(boolean editedText) {
+    public void enableUpdateButtons(boolean editedText) {
         if (editedText) {
             cancelButton.setText("Cancel");
         } else {
@@ -446,7 +453,6 @@ public class SelectJudgementPane extends JPanePlugin {
         }
 
         // Can only run or extract if there are run files...
-        getExecuteButton().setEnabled(runFiles != null);
         getExecuteButton().setEnabled(runFiles != null);
         getViewSourceButton().setEnabled(runFiles != null);
 
@@ -584,7 +590,7 @@ public class SelectJudgementPane extends JPanePlugin {
      * 
      * @return javax.swing.JButton
      */
-    private JButton getExecuteButton() {
+    public JButton getExecuteButton() {
         if (executeButton == null) {
             executeButton = new JButton();
             executeButton.setText("Execute");

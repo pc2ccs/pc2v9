@@ -109,7 +109,8 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
                 if (event.getRun().getElementId().equals(run.getElementId())) {
 
                     if (event.getAction().equals(Action.RUN_NOT_AVIALABLE)) {
-                        getSelectJudgementPane().showMessage("Run " + run.getNumber() + " not available ");
+                        getSelectJudgementPane().showMessage("Run " + run.getNumber() + " is not available ");
+                        getSelectJudgementPane().enableUpdateButtons(false);
                         JudgeView.setAlreadyJudgingRun(false);
                     } else {
                         getSelectJudgementPane().setRunAndFiles(event.getRun(), event.getRunFiles());
