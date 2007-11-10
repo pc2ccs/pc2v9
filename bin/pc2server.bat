@@ -6,6 +6,6 @@ rem $HeadURL$
 
 call %0\..\pc2env.bat
 
-java -cp %libdir%\pc2.jar;%mclbdir%\mclb.jar edu.csus.ecs.pc2.Starter --server %1 %2 %3 %4 %5 %6 %7 %8 %9
+java -Xms64M -Xmx768M -cp %libdir%\pc2.jar;%mclbdir%\mclb.jar edu.csus.ecs.pc2.Starter --server %1 %2 %3 %4 %5 %6 %7 %8 %9
 
 rem eof pc2server.bat $Id$
