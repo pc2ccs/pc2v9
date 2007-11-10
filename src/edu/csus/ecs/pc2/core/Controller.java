@@ -34,6 +34,7 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.packet.PacketFactory;
 import edu.csus.ecs.pc2.core.packet.PacketType;
@@ -1153,9 +1154,11 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         ElementId [] runIDs = contest.getRunIdsCheckedOutBy(judgeId);
         for (int i = 0; i < runIDs.length; i++) {
             Run run = contest.getRun(runIDs[i]);
-            ClientId destinationId = new ClientId(run.getSiteNumber(), Type.SERVER, 0);
-            Packet packet = PacketFactory.createUnCheckoutRun(judgeId, destinationId, run);
-            packetHandler.cancelRun(packet, run, judgeId);
+            if (run.getStatus().equals(RunStates.BEING_JUDGED)){
+                ClientId destinationId = new ClientId(run.getSiteNumber(), Type.SERVER, 0);
+                Packet packet = PacketFactory.createUnCheckoutRun(judgeId, destinationId, run);
+                packetHandler.cancelRun(packet, run, judgeId);
+            }
         }
     }
 
