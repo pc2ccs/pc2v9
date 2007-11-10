@@ -9,6 +9,7 @@ import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.RunEvent.Action;
 import edu.csus.ecs.pc2.core.security.Permission;
+import edu.csus.ecs.pc2.ui.judge.JudgeView;
 
 /**
  * Judge can chose judgement and execute run.
@@ -109,6 +110,7 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
 
                     if (event.getAction().equals(Action.RUN_NOT_AVIALABLE)) {
                         getSelectJudgementPane().showMessage("Run " + run.getNumber() + " not available ");
+                        JudgeView.setAlreadyJudgingRun(false);
                     } else {
                         getSelectJudgementPane().setRunAndFiles(event.getRun(), event.getRunFiles());
                     }

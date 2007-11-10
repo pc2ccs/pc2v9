@@ -1435,24 +1435,29 @@ public class PacketHandler {
                     Packet checkOutPacket = PacketFactory.createCheckedOutRun(contest.getClientId(), whoRequestsRunId, theRun, runFiles, whoRequestsRunId);
                     controller.sendToClient(checkOutPacket);
 
-                } else if (run.getStatus() == RunStates.NEW || isSuperUser(whoRequestsRunId)) {
-
-                    theRun.setStatus(RunStates.BEING_JUDGED);
-                    contest.updateRun(theRun, whoRequestsRunId);
-
-                    theRun = contest.getRun(run.getElementId());
-                    RunFiles runFiles = contest.getRunFiles(run);
-
-                    // send to Judge
-                    Packet checkOutPacket = PacketFactory.createCheckedOutRun(contest.getClientId(), whoRequestsRunId, theRun, runFiles, whoRequestsRunId);
-                    controller.sendToClient(checkOutPacket);
-
-                    sendToJudgesAndOthers(checkOutPacket, true);
-                    
                 } else {
-                    // Unavailable
-                    Packet notAvailableRunPacket = PacketFactory.createRunNotAvailable(contest.getClientId(), whoRequestsRunId, run);
-                    controller.sendToClient(notAvailableRunPacket);
+                    
+                    synchronized (theRun){
+                        if (theRun.getStatus() == RunStates.NEW || isSuperUser(whoRequestsRunId)) {
+                            
+                            theRun.setStatus(RunStates.BEING_JUDGED);
+                            contest.updateRun(theRun, whoRequestsRunId);
+                            
+                            theRun = contest.getRun(run.getElementId());
+                            RunFiles runFiles = contest.getRunFiles(run);
+                            
+                            // send to Judge
+                            Packet checkOutPacket = PacketFactory.createCheckedOutRun(contest.getClientId(), whoRequestsRunId, theRun, runFiles, whoRequestsRunId);
+                            controller.sendToClient(checkOutPacket);
+                            
+                            sendToJudgesAndOthers(checkOutPacket, true);
+                            
+                        } else {
+                            // Unavailable
+                            Packet notAvailableRunPacket = PacketFactory.createRunNotAvailable(contest.getClientId(), whoRequestsRunId, run);
+                            controller.sendToClient(notAvailableRunPacket);
+                        }
+                    }
                 }
             }
         } else {
