@@ -79,6 +79,7 @@ public class ProblemsReport implements IReport {
         if (problemDataFiles != null) {
             SerializedFile[] judgesDataFiles = problemDataFiles.getJudgesDataFiles();
             SerializedFile[] judgesAnswerFiles = problemDataFiles.getJudgesAnswerFiles();
+            SerializedFile validatorFile = problemDataFiles.getValidatorFile();
 
             if (judgesDataFiles != null) {
 
@@ -111,6 +112,17 @@ public class ProblemsReport implements IReport {
                 }
             } else {
                 printWriter.println("                  * No judge's answer files *");
+            }
+            
+            if (validatorFile != null) {
+                printWriter.println("                  " + 1 + " validator file");
+                int bytes = 0;
+                if (validatorFile.getBuffer() != null) {
+                    bytes = validatorFile.getBuffer().length;
+                }
+                printWriter.println("                    validator file '" + validatorFile.getName() + "' " + bytes + " bytes");
+            } else {
+                printWriter.println("                  * No validator files *");
             }
         } else {
             printWriter.println("                  * No judge's files *");
