@@ -30,7 +30,8 @@ public final class LoadICPCData {
     private static final int CONTEST_TAB = 33;
     
     /**
-     * Caller is responsible for merging groups from ICPCImportData with the model grouplist.
+     * Caller is responsible for merging groups from ICPCImportData with the model grouplist
+     * and updating the ContestTitle.
      * 
      * @param directory
      * @param sites
@@ -109,11 +110,13 @@ public final class LoadICPCData {
                     if (groupMap.containsKey(account.getGroupExternalId())) {
                         Group group = groupMap.get(account.getGroupExternalId());
                         account.setGroupId(group.getElementId());
-                        int siteNum = group.getSite().getSiteNumber();
-                        int accountNum = account.getAccountNumber();
-                        ClientId clientId = new ClientId(siteNum, ClientType.Type.TEAM, accountNum);
-                        if (existingAccountsMap.containsKey(clientId)) {
-                            account.setClientId(clientId);
+                        if (group.getSite() != null) {
+                            int siteNum = group.getSite().getSiteNumber();
+                            int accountNum = account.getAccountNumber();
+                            ClientId clientId = new ClientId(siteNum, ClientType.Type.TEAM, accountNum);
+                            if (existingAccountsMap.containsKey(clientId)) {
+                                account.setClientId(clientId);
+                            }
                         }
                     }
                 }
