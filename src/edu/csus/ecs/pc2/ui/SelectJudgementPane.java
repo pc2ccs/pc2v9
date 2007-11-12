@@ -307,6 +307,7 @@ public class SelectJudgementPane extends JPanePlugin {
     public void handleCancelButton() {
         
         if (runFiles == null){
+            JudgeView.setAlreadyJudgingRun(false);
             if (getParentFrame() != null) {
                 getParentFrame().setVisible(false);
             }
