@@ -67,9 +67,17 @@ public class LoadAccounts {
             return null;
         }
         // TODO would be nice if Account had a deep clone
-        Account account = new Account(clientId, password, clientId.getSiteNumber());
+        Account account = new Account(accountClean.getClientId(), accountClean.getPassword(), accountClean.getClientId().getSiteNumber());
         account.clearListAndLoadPermissions(accountClean.getPermissionList());
         account.setGroupId(accountClean.getGroupId());
+        account.setDisplayName(new String(accountClean.getDisplayName()));
+        account.setAliasName(new String(accountClean.getAliasName()));
+        account.setExternalId(new String(accountClean.getExternalId()));
+        account.setExternalName(new String(accountClean.getExternalName()));
+        account.setGroupId(accountClean.getGroupId());
+        account.setLongSchoolName(new String(accountClean.getLongSchoolName()));
+        account.setShortSchoolName(new String(accountClean.getShortSchoolName()));
+        // now start changing
         account.setPassword(password);
         if (displayNameColumn != -1 && values.length > displayNameColumn) {
             account.setDisplayName(values[displayNameColumn]);
