@@ -239,6 +239,7 @@ public class ICPCAccountPane extends JPanePlugin {
                     account.setExternalName(icpcAccount.getExternalName());
                     account.setLongSchoolName(icpcAccount.getLongSchoolName());
                     account.setShortSchoolName(icpcAccount.getShortSchoolName());
+                    account.setGroupId(icpcAccount.getGroupId());
                 }
                 updatedAccountVector.add(account);
                 getAccountListBox().addRow(buildAccountRow(account2, newDisplayName));
