@@ -16,6 +16,7 @@ import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.imports.ICPCImportData;
 import edu.csus.ecs.pc2.core.imports.LoadICPCData;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.IGroupListener;
@@ -340,6 +341,13 @@ public class GroupsPane extends JPanePlugin {
                             newFileProblem = false;
                             Group[] importedGroups = importData.getGroups();
                             Group[] modelGroups = getContest().getGroups();
+                            // XXX this is a funky location, but we do not want to add a 3rd icpc load for it
+                            String contestTitle = importData.getContestTitle();
+                            if (contestTitle != null && contestTitle.trim().length() > 0) {
+                                ContestInformation ci = getContest().getContestInformation();
+                                ci.setContestTitle(contestTitle);
+                                getController().updateContestInformation(ci);
+                            }
                             if (importedGroups != null && importedGroups.length > 0) {
                                 if (modelGroups == null || modelGroups.length == 0) {
                                     for (Group group : importedGroups) {
