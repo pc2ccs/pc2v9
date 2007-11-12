@@ -293,6 +293,12 @@ public class ProblemPane extends JPanePlugin {
                     newProblemDataFiles.setJudgesAnswerFile(sFile);
                 }
             }
+            sFile = newProblemDataFiles.getValidatorFile();
+            if (sFile != null) {
+                if (checkFileFormat(sFile)) {
+                    newProblemDataFiles.setValidatorFile(sFile);
+                }
+            }
         } catch (InvalidFieldValue e) {
             showMessage(e.getMessage());
             return;
@@ -508,23 +514,49 @@ public class ProblemPane extends JPanePlugin {
         checkProblem.setHideOutputWindow(getDoNotShowOutputWindowCheckBox().isSelected());
         checkProblem.setShowCompareWindow(getShowCompareCheckBox().isSelected());
 
-        // TODO validator program is no longer loaded, maybe someday
-//        if (useExternalValidatorRadioButton.isSelected()) {
-//            
-//            String fileName = externalValidatorLabel.getText() + "";
-//            if (fileName.trim().length() == 0) {
-//                throw new InvalidFieldValue("Problem Requires External Validator is checked, select a file ");
-//            }
-//
-//            SerializedFile serializedFile = new SerializedFile(fileName);
-//
-//            if (serializedFile.getBuffer() == null) {
-//                throw new InvalidFieldValue("Unable to read file " + fileName + " choose validator file again(2)");
-//            }
-//
-//            checkProblem.setValidatorProgramName(serializedFile.getName());
-//            newProblemDataFiles.setValidatorFile(freshenIfNeeded(serializedFile, fileName));
-//        }
+        // selecting a file is optional
+        String fileNameVal = externalValidatorLabel.getText();
+        if (fileNameVal != null) {
+            fileNameVal = fileNameVal.trim();
+        } else {
+            fileNameVal = "";
+        }
+        if (useExternalValidatorRadioButton.isSelected() && fileNameVal.length() > 0) {
+            String fileName = fileNameVal;
+            if (fileName.length() != externalValidatorLabel.getToolTipText().length()) {
+                fileName = externalValidatorLabel.getToolTipText() + "";
+            }
+
+            if (isAdding) {
+                SerializedFile serializedFile = new SerializedFile(fileName);
+
+                if (serializedFile.getBuffer() == null) {
+                    throw new InvalidFieldValue("Unable to read file " + fileName + " choose validator file again (adding)");
+                }
+
+                checkProblem.setValidatorProgramName(serializedFile.getName());
+                // for some reason on validator this is borked
+//                newProblemDataFiles.setValidatorFile(freshenIfNeeded(serializedFile, fileName));
+                newProblemDataFiles.setValidatorFile(serializedFile);
+            } else {
+                SerializedFile serializedFile = getController().getProblemDataFiles(checkProblem).getValidatorFile();
+                if (serializedFile == null || !serializedFile.getAbsolutePath().equals(fileName)){
+                    // they've added a new file
+                    serializedFile = new SerializedFile(fileName);
+                    if (serializedFile == null){
+                        throw new InvalidFieldValue("Unable to find/load "+fileName);
+                    }
+                    checkFileFormat(serializedFile);
+                } else {
+                    serializedFile = freshenIfNeeded(serializedFile, fileName);
+                }
+                
+                newProblemDataFiles.setValidatorFile(serializedFile);
+                checkProblem.setValidatorProgramName(serializedFile.getName());
+            }
+        } else {
+            checkProblem.setValidatorProgramName(null);
+        }
 
         return checkProblem;
 
@@ -789,6 +821,12 @@ public class ProblemPane extends JPanePlugin {
                     useExternalValidatorRadioButton.setSelected(true);
                     externalValidatorLabel.setText(inProblem.getValidatorProgramName());
                     externalValidatorLabel.setToolTipText(inProblem.getValidatorProgramName());
+                    sFile = getController().getProblemDataFiles(inProblem).getValidatorFile();
+                    if (sFile != null) {
+                        externalValidatorLabel.setToolTipText(sFile.getAbsolutePath());
+                    } else {
+                        externalValidatorLabel.setToolTipText("");
+                    }
                 }
 
             } else {
@@ -1529,7 +1567,7 @@ public class ProblemPane extends JPanePlugin {
             validatorCommandLineTextBox = new JTextField();
             validatorCommandLineTextBox.setBounds(new java.awt.Rectangle(17, 78, 432, 29));
             validatorCommandLineTextBox.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyTyped(java.awt.event.KeyEvent e) {
+                public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
                 }
             });
