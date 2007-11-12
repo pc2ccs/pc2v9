@@ -123,78 +123,73 @@ public class AdministratorView extends JFrame implements UIPlugin {
                 logWindow.setContestAndController(contest, controller);
                 logWindow.setTitle("Log " + contest.getClientId().toString());
 
-                RunsPanel runsPane = new RunsPanel();
-                addUIPlugin(getMainTabbedPanel(), "Runs", runsPane);
+                // NOTE: this tab list is in alphabetical order
+                AccountsPane accountsPane = new AccountsPane();
+                addUIPlugin(getMainTabbedPanel(), "Accounts", accountsPane);
+
+                AutoJudgesPane autoJudgesPane = new AutoJudgesPane();
+                addUIPlugin(getMainTabbedPanel(), "Auto Judge", autoJudgesPane);
 
                 ClarificationsPane clarificationsPane = new ClarificationsPane();
                 addUIPlugin(getMainTabbedPanel(), "Clarifications", clarificationsPane);
 
-                StandingsPane standingsPane = new StandingsPane();
-                addUIPlugin(getMainTabbedPanel(), "Standings", standingsPane);
-
-                ReportPane reportPane = new ReportPane();
-                addUIPlugin(getMainTabbedPanel(), "Reports", reportPane);
-
-                GenerateAccountsPane generateAccountsPane = new GenerateAccountsPane();
-                addUIPlugin(getMainTabbedPanel(), "Generate", generateAccountsPane);
-
-                AccountsPane accountsPane = new AccountsPane();
-                addUIPlugin(getMainTabbedPanel(), "Accounts", accountsPane);
-
-                LanguagesPane languagesPane = new LanguagesPane();
-                addUIPlugin(getMainTabbedPanel(), "Languages", languagesPane);
-
-                ProblemsPane problemsPane = new ProblemsPane();
-                addUIPlugin(getMainTabbedPanel(), "Problems", problemsPane);
-
-                ContestTimesPane contestTimesPane = new ContestTimesPane();
-                addUIPlugin(getMainTabbedPanel(), "Times", contestTimesPane);
-
-                SitesPanel sitesPanel = new SitesPanel();
-                addUIPlugin(getMainTabbedPanel(), "Sites", sitesPanel);
-
-                LoginsPane loginsPane = new LoginsPane();
-                addUIPlugin(getMainTabbedPanel(), "Logins", loginsPane);
+                ContestClockPane contestClockPane = new ContestClockPane();
+                addUIPlugin(getMainTabbedPanel(), "Clock", contestClockPane);
 
                 ConnectionsPane connectionsPane = new ConnectionsPane();
                 addUIPlugin(getMainTabbedPanel(), "Connections", connectionsPane);
 
+                InfoPane infoPane = new InfoPane();
+                addUIPlugin(getMainTabbedPanel(), "Dev", infoPane);
+
+                GenerateAccountsPane generateAccountsPane = new GenerateAccountsPane();
+                addUIPlugin(getMainTabbedPanel(), "Generate", generateAccountsPane);
+
                 GroupsPane groupsPane = new GroupsPane();
                 addUIPlugin(getMainTabbedPanel(), "Groups", groupsPane);
+
+                JudgementsPanel judgementsPanel = new JudgementsPanel();
+                addUIPlugin(getMainTabbedPanel(), "Judgements", judgementsPanel);
+
+                LanguagesPane languagesPane = new LanguagesPane();
+                addUIPlugin(getMainTabbedPanel(), "Languages", languagesPane);
+
+                LoginsPane loginsPane = new LoginsPane();
+                addUIPlugin(getMainTabbedPanel(), "Logins", loginsPane);
+
+                BalloonSettingsPane balloonSettingsPane = new BalloonSettingsPane();
+                addUIPlugin(getMainTabbedPanel(), "Notifications", balloonSettingsPane);
 
                 OptionsPanel optionsPanel = new OptionsPanel();
                 addUIPlugin(getMainTabbedPanel(), "Options", optionsPanel);
                 optionsPanel.setLogWindow(logWindow);
 
-                InfoPane infoPane = new InfoPane();
-                addUIPlugin(getMainTabbedPanel(), "Dev", infoPane);
+                ProblemsPane problemsPane = new ProblemsPane();
+                addUIPlugin(getMainTabbedPanel(), "Problems", problemsPane);
+
+                ReportPane reportPane = new ReportPane();
+                addUIPlugin(getMainTabbedPanel(), "Reports", reportPane);
+
+                RunsPanel runsPane = new RunsPanel();
+                addUIPlugin(getMainTabbedPanel(), "Runs", runsPane);
+
+                ContestInformationPane contestInformationPane = new ContestInformationPane();
+                addUIPlugin(getMainTabbedPanel(), "Settings", contestInformationPane);
+
+                SitesPanel sitesPanel = new SitesPanel();
+                addUIPlugin(getMainTabbedPanel(), "Sites", sitesPanel);
+
+                StandingsHTMLPane standingsHTMLPane = new StandingsHTMLPane("full.xsl");
+                addUIPlugin(getMainTabbedPanel(), "Standings HTML", standingsHTMLPane);
+
+                StandingsPane standingsPane = new StandingsPane();
+                addUIPlugin(getMainTabbedPanel(), "Standings", standingsPane);
 
                 TeamStatusPane teamStatusPane = new TeamStatusPane();
                 addUIPlugin(getMainTabbedPanel(), "Team Status", teamStatusPane);
 
-                ContestInformationPane contestInformationPane = new ContestInformationPane();
-                addUIPlugin(getMainTabbedPanel(), "Title", contestInformationPane);
-
-                JudgementsPanel judgementsPanel = new JudgementsPanel();
-                addUIPlugin(getMainTabbedPanel(), "Judgements", judgementsPanel);
-
-                ContestClockPane contestClockPane = new ContestClockPane();
-                addUIPlugin(getMainTabbedPanel(), "Clock", contestClockPane);
-
-                BalloonSettingsPane balloonSettingsPane = new BalloonSettingsPane();
-                addUIPlugin(getMainTabbedPanel(), "Notifications", balloonSettingsPane);
-
-                AutoJudgesPane autoJudgesPane = new AutoJudgesPane();
-                addUIPlugin(getMainTabbedPanel(), "Auto Judge", autoJudgesPane);
-
-                // full.xsl
-                // fullnums.xsl
-                // sumatt.xsl
-                // summary.xsl
-                // sumtime.xsl
-
-                StandingsHTMLPane standingsHTMLPane = new StandingsHTMLPane("full.xsl");
-                addUIPlugin(getMainTabbedPanel(), "Standings HTML", standingsHTMLPane);
+                ContestTimesPane contestTimesPane = new ContestTimesPane();
+                addUIPlugin(getMainTabbedPanel(), "Times", contestTimesPane);
 
                 contestClockDisplay = new ContestClockDisplay(controller.getLog(), contest.getContestTime(), contest.getSiteNumber(), false, null);
                 contestClockDisplay.setContestAndController(contest, controller);
