@@ -149,7 +149,7 @@ public class SelectJudgementPane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new java.awt.Dimension(666,294));
+        this.setSize(new java.awt.Dimension(720,294));
 
         this.add(getMessagePane(), java.awt.BorderLayout.NORTH);
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
@@ -507,50 +507,61 @@ public class SelectJudgementPane extends JPanePlugin {
     private JPanel getGeneralPane() {
         if (generalPane == null) {
             validatorJudgementLabel = new JLabel();
-            validatorJudgementLabel.setBounds(new java.awt.Rectangle(171, 171, 282, 19));
             validatorJudgementLabel.setText("Validator Judgement");
             validatorJudgementLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+            validatorJudgementLabel.setSize(new java.awt.Dimension(346,19));
+            validatorJudgementLabel.setLocation(new java.awt.Point(180,171));
             validatorJudgementLabel.setForeground(Color.BLUE);
             validatorRecommendsLabel = new JLabel();
-            validatorRecommendsLabel.setBounds(new java.awt.Rectangle(17, 171, 142, 19));
             validatorRecommendsLabel.setText("Validator Recommends");
             validatorRecommendsLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+            validatorRecommendsLabel.setLocation(new java.awt.Point(17,171));
+            validatorRecommendsLabel.setSize(new java.awt.Dimension(150,19));
             validatorRecommendsLabel.setForeground(Color.BLUE);
             elapsedTimeLabel = new JLabel();
-            elapsedTimeLabel.setBounds(new java.awt.Rectangle(171, 60, 254, 19));
             elapsedTimeLabel.setText("Elapsed");
+            elapsedTimeLabel.setSize(new java.awt.Dimension(254,19));
+            elapsedTimeLabel.setLocation(new java.awt.Point(180,60));
             elapsedTimeLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
             languageNameLabel = new JLabel();
-            languageNameLabel.setBounds(new java.awt.Rectangle(171, 110, 254, 19));
             languageNameLabel.setText("Language");
+            languageNameLabel.setSize(new java.awt.Dimension(254,19));
+            languageNameLabel.setLocation(new java.awt.Point(180,110));
             languageNameLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
             problemNameLabel = new JLabel();
-            problemNameLabel.setBounds(new java.awt.Rectangle(171, 85, 254, 19));
             problemNameLabel.setText("Problem");
+            problemNameLabel.setSize(new java.awt.Dimension(254,19));
+            problemNameLabel.setLocation(new java.awt.Point(180,85));
             problemNameLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
             elapsedTitleLabel = new JLabel();
-            elapsedTitleLabel.setBounds(new java.awt.Rectangle(17, 60, 142, 19));
             elapsedTitleLabel.setText("Elapsed");
+            elapsedTitleLabel.setLocation(new java.awt.Point(17,60));
+            elapsedTitleLabel.setSize(new java.awt.Dimension(150,19));
             elapsedTitleLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             languageTitleLabel = new JLabel();
-            languageTitleLabel.setBounds(new java.awt.Rectangle(17, 110, 142, 19));
             languageTitleLabel.setText("Language");
+            languageTitleLabel.setLocation(new java.awt.Point(17,110));
+            languageTitleLabel.setSize(new java.awt.Dimension(150,19));
             languageTitleLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
             problemTitleLabel = new JLabel();
-            problemTitleLabel.setBounds(new java.awt.Rectangle(17, 85, 142, 19));
             problemTitleLabel.setText("Problem");
+            problemTitleLabel.setLocation(new java.awt.Point(17,85));
+            problemTitleLabel.setSize(new java.awt.Dimension(150,19));
             problemTitleLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
             statusTitleLabel = new JLabel();
-            statusTitleLabel.setBounds(new java.awt.Rectangle(17, 32, 142, 19));
             statusTitleLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+            statusTitleLabel.setLocation(new java.awt.Point(17,32));
+            statusTitleLabel.setSize(new java.awt.Dimension(150,19));
             statusTitleLabel.setText("Status");
             statusLabel = new JLabel();
-            statusLabel.setBounds(new java.awt.Rectangle(171, 32, 254, 19));
             statusLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+            statusLabel.setSize(new java.awt.Dimension(254,19));
+            statusLabel.setLocation(new java.awt.Point(180,32));
             statusLabel.setText("JLabel");
             judgementLabel = new JLabel();
-            judgementLabel.setBounds(new java.awt.Rectangle(17, 137, 142, 19));
             judgementLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+            judgementLabel.setLocation(new java.awt.Point(17,137));
+            judgementLabel.setSize(new java.awt.Dimension(150,19));
             judgementLabel.setText("Judgement");
             runInfoLabel = new JLabel();
             runInfoLabel.setBounds(new java.awt.Rectangle(5, -1, 424, 25));
@@ -706,7 +717,7 @@ public class SelectJudgementPane extends JPanePlugin {
     private JComboBox getJudgementComboBox() {
         if (judgementComboBox == null) {
             judgementComboBox = new JComboBox();
-            judgementComboBox.setLocation(new java.awt.Point(171, 135));
+            judgementComboBox.setLocation(new java.awt.Point(180,135));
             judgementComboBox.setSize(new java.awt.Dimension(263, 22));
             judgementComboBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -843,6 +854,7 @@ public class SelectJudgementPane extends JPanePlugin {
             acceptValidatorJudgementButton = new JButton();
             acceptValidatorJudgementButton.setBounds(new java.awt.Rectangle(313, 199, 140, 23));
             acceptValidatorJudgementButton.setText("Accept Validator");
+            acceptValidatorJudgementButton.setPreferredSize(new java.awt.Dimension(150,26));
             acceptValidatorJudgementButton.setForeground(Color.BLUE);
             acceptValidatorJudgementButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -916,7 +928,7 @@ public class SelectJudgementPane extends JPanePlugin {
             flowLayout1.setVgap(25);
             eastPane = new JPanel();
             eastPane.setLayout(flowLayout1);
-            eastPane.setPreferredSize(new java.awt.Dimension(132, 132));
+            eastPane.setPreferredSize(new java.awt.Dimension(150,132));
             eastPane.add(getViewSourceButton(), null);
             eastPane.add(getViewDataFileButton(), null);
             eastPane.add(getViewAnswerFileButton(), null);
