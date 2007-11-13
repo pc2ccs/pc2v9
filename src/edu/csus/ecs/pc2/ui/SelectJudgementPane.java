@@ -380,7 +380,7 @@ public class SelectJudgementPane extends JPanePlugin {
             problemNameLabel.setText(getContest().getProblem(run.getProblemId()).toString());
             languageNameLabel.setText(getContest().getLanguage(run.getLanguageId()).toString());
             boolean showFile ;
-            if (getProblemDataFiles() != null && getProblemDataFiles().getJudgesDataFile() != null) {
+            if (getProblemDataFiles() != null && getProblemDataFiles().getJudgesAnswerFile() != null) {
                 showFile = true;
             } else {
                 showFile = false;
