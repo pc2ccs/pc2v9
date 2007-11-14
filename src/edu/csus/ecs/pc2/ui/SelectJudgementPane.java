@@ -227,7 +227,9 @@ public class SelectJudgementPane extends JPanePlugin {
             updateButton.setMnemonic(java.awt.event.KeyEvent.VK_U);
             updateButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    updateRun();
+                    if (confirmInconsistentJudgements()) {
+                        updateRun();
+                    }
                 }
             });
         }
@@ -241,6 +243,27 @@ public class SelectJudgementPane extends JPanePlugin {
         Run newRun = getRunFromFields();
         JudgeView.setAlreadyJudgingRun(false);
         getController().cancelRun(newRun);
+    }
+
+    /**
+     * Compares the validatorJudgemnt (if available) and the manualJudgement.
+     * 
+     * @return True to continue the Update, else false
+     */
+    private boolean confirmInconsistentJudgements() {
+        if (getAcceptValidatorJudgementButton().isVisible()) {
+            ElementId elementId = getValidatorResult(validatorJudgementLabel.getText());
+            Judgement manualJudgement = (Judgement) getJudgementComboBox().getSelectedItem();
+            Judgement autoJudgement = getContest().getJudgement(elementId);
+            if (!manualJudgement.equals(autoJudgement)) {
+                String message = "You selected Update but the validator returned " + autoJudgement + ".  Did you intend to accept " + manualJudgement+"?";
+                int result = JOptionPane.showConfirmDialog(this, message);
+                if (result != JOptionPane.YES_OPTION) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     private void closeViewerWindows() {
@@ -321,9 +344,11 @@ public class SelectJudgementPane extends JPanePlugin {
             int result = FrameUtilities.yesNoCancelDialog("Run modified, save changes?", "Confirm Choice");
 
             if (result == JOptionPane.YES_OPTION) {
-                updateRun();
-                if (getParentFrame() != null) {
-                    getParentFrame().setVisible(false);
+                if (confirmInconsistentJudgements()) {
+                    updateRun();
+                    if (getParentFrame() != null) {
+                        getParentFrame().setVisible(false);
+                    }
                 }
             }
             if (result == JOptionPane.NO_OPTION) {
@@ -875,6 +900,27 @@ public class SelectJudgementPane extends JPanePlugin {
         validatorRecommendsLabel.setVisible(showControls);
     }
 
+    /*
+     * Get the ElementId corresponding to the Validator Judgement.
+     * @returns 1st No if not found
+     */
+    private ElementId getValidatorResult(String results) {
+        // Try to find result text in judgement list
+        ElementId elementId = getContest().getJudgements()[1].getElementId();
+        for (Judgement judgement : getContest().getJudgements()) {
+            if (judgement.getDisplayName().equals(results)) {
+                elementId = judgement.getElementId();
+            }
+        }
+
+        // Or perhaps it is a yes? yes?
+        Judgement yesJudgement = getContest().getJudgements()[0];
+        if (yesJudgement.getDisplayName().equalsIgnoreCase(results)) {
+            elementId = yesJudgement.getElementId();
+        }
+        return elementId;
+    }
+
     protected void acceptValidatorJudgement() {
 
         Run newRun = getRunFromFields();
@@ -890,21 +936,23 @@ public class SelectJudgementPane extends JPanePlugin {
 
         boolean solved = false;
 
-        // Try to find result text in judgement list
-        ElementId elementId = getContest().getJudgements()[1].getElementId();
-        for (Judgement judgement : getContest().getJudgements()) {
-            if (judgement.getDisplayName().equals(results)) {
-                elementId = judgement.getElementId();
-            }
-        }
-
-        // Or perhaps it is a yes? yes?
+        ElementId elementId = getValidatorResult(results);
         Judgement yesJudgement = getContest().getJudgements()[0];
-        if (yesJudgement.getDisplayName().equalsIgnoreCase(results)) {
-            elementId = yesJudgement.getElementId();
+        if (yesJudgement.getElementId().equals(elementId)) {
             solved = true;
         }
-
+        if (getJudgementComboBox().getSelectedIndex() > -1) {
+            Judgement manualJudgement = (Judgement) getJudgementComboBox().getSelectedItem();
+            Judgement autoJudgement = getContest().getJudgement(elementId);
+            if (!manualJudgement.equals(autoJudgement)) {
+                String message = "You selected Accept Validator but have manually selected " + manualJudgement + ".  Did you intend to accept " + autoJudgement+"?";
+                int result = JOptionPane.showConfirmDialog(this, message);
+                if (result != JOptionPane.YES_OPTION) {
+                    enableUpdateButtons(true);
+                    return;
+                }
+            }
+        }
         newRun.setStatus(RunStates.JUDGED);
 
         judgementRecord = new JudgementRecord(elementId, getContest().getClientId(), solved, true);
