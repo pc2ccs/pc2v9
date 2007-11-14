@@ -262,7 +262,7 @@ public class AutoJudgingMonitor implements UIPlugin {
                 info("Ignoring run " + event.getRun() + " was for judge " + event.getRun());
             }
         } else if (event.getAction().equals(RunEvent.Action.RUN_NOT_AVIALABLE)) {
-            if (runBeingAutoJudged.getElementId().equals(event.getRun().getElementId())) {
+            if (runBeingAutoJudged != null && runBeingAutoJudged.getElementId().equals(event.getRun().getElementId())) {
                 // Darn we weren't fast enough
                 
                 cleanupLastAutoJudge();
