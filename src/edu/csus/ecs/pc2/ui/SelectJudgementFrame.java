@@ -111,9 +111,10 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
                     if (event.getAction().equals(Action.RUN_NOT_AVIALABLE)) {
                         getSelectJudgementPane().showMessage("Run " + run.getNumber() + " is not available ");
                         getSelectJudgementPane().enableUpdateButtons(false);
+                        getSelectJudgementPane().regularCursor();
                         JudgeView.setAlreadyJudgingRun(false);
                     } else {
-                        if (event.getSentToClientId().equals(contest.getClientId())) {
+                        if (event.getSentToClientId() != null && event.getSentToClientId().equals(contest.getClientId())) {
                             getSelectJudgementPane().setRunAndFiles(event.getRun(), event.getRunFiles());
                             // stop processing once we get it 
                             // stops both the duplicate checkedout_run and the run_not_available going to other judges

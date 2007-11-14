@@ -414,6 +414,10 @@ public class SelectJudgementPane extends JPanePlugin {
 
     }
 
+    protected void regularCursor() {
+        FrameUtilities.regularCursor(this);
+    }
+
     private void populateComboBoxes() {
 
         int selectedIndex = -1;
