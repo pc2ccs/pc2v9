@@ -5,7 +5,7 @@ import javax.swing.filechooser.FileFilter;
 /**
  * Filters JFileChooser to just .tab files (for ICPC Import)
  * 
- * @author: pc2@ecs.csus.edu
+ * @author pc2@ecs.csus.edu
  * @version $Id$
  */
 
@@ -43,7 +43,7 @@ public class TabFileFilter extends FileFilter {
     /**
      * The description of this filter.
      * 
-     * @see FileView#getName
+     * @see javax.swing.filechooser.FileView#getName(java.io.File)
      */
     public String getDescription() {
         return "ICPC import files";

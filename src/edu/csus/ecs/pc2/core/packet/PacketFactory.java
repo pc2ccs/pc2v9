@@ -350,8 +350,9 @@ public final class PacketFactory {
     /**
      * Dump packet info to PrintWriter and System.err.
      * 
-     * @param pw
+     * @param log
      * @param packet
+     * @param message
      */
     public static void dumpPacket(Log log, Packet packet, String message) {
 
