@@ -50,7 +50,9 @@ public class LoadICPCDataTest extends TestCase {
         try {
             ICPCImportData importData = LoadICPCData.loadSites(loadDir+"icpcimport1", null);
             assertEquals("contestTitle", "The 2004 ACM Pacific Northwest Programming Contest", importData.getContestTitle());
-            importData = LoadICPCData.loadAccounts(loadDir+"icpcimport1", null, null);
+            // this threw an exception on 1051 due to the unassociated groups
+            Group[] groups = importData.getGroups();
+            importData = LoadICPCData.loadAccounts(loadDir+"icpcimport1", groups, null);
             ICPCAccount account = importData.getAccounts()[1];
             assertEquals("2nd account short school", "SFU", account.getShortSchoolName());
         } catch (Exception e) {
