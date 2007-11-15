@@ -24,7 +24,7 @@ Summary - <xsl:value-of select="/contestStandings/standingsHeader/@title"/>
                 <xsl:call-template name="summary"/>
             </TABLE>
 <p>
-Created by <A HREF="http://www.ecs.csus.edu/pc2">CSUS PC^2 <xsl:value-of select="/contestStandings/standingsHeader/@pc2version"/></A><br/>
+Created by <A HREF="http://www.ecs.csus.edu/pc2">CSUS PC^2 <xsl:value-of select="/contestStandings/standingsHeader/@systemVersion"/></A><br/>
 <A HREF="http://www.ecs.csus.edu/pc2/">http://www.ecs.csus.edu/pc2/</A><br/>
 Last updated
 <xsl:value-of select="/contestStandings/standingsHeader/@currentDate"/>
