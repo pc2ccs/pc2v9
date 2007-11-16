@@ -11,10 +11,7 @@
 
     <property name="build.unpack.dir" value="${build.dir}/unpack"/>
 
-    <property name="zip.name" value="${release}.zip"/>
-    <property name="zip.path" value="${dist.dir}/${zip.name}"/>
-    <property name="gzip.name" value="${release}.tar.gz"/>
-    <property name="gzip.path" value="${dist.dir}/${gzip.name}"/>
+    <!-- zip/gzip moved to archives so we have repo.version available -->
     <property name="version.path" value="${build.dir}/VERSION"/>
     <property name="pc2jzip.name" value="pc2j-${version}.zip"/>
     <property name="pc2jzip.path" value="${build.dir}/${pc2jzip.name}"/>
@@ -117,8 +114,17 @@
         <checksum file="${gzip.path}" algorithm="SHA" fileext=".sha1.txt"/>
     </target>
     <target name="archives" description="public in dist, private in build">
-        <!-- start with api, only relies on the javadoc target -->
-        <antcall target="apizip"/> 
+        <!-- TODO replace this with svnkit -->
+        <exec executable="svnversion" outputproperty="repo.version">
+            <arg line="-n ."/>
+        </exec> 
+
+        <property name="zip.name" value="${release}-${repo.version}.zip"/>
+        <property name="zip.path" value="${dist.dir}/${zip.name}"/>
+        <property name="gzip.name" value="${release}-${repo.version}.tar.gz"/>
+        <property name="gzip.path" value="${dist.dir}/${gzip.name}"/>
+
+        <antcall target="apizip"/>
         <antcall target="zip"/> 
         <antcall target="gzip"/> 
     </target>
