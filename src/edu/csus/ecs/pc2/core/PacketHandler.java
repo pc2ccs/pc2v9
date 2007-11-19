@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Vector;
 
+import edu.csus.ecs.pc2.core.exception.RunUnavailableException;
 import edu.csus.ecs.pc2.core.list.ClientIdComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -1437,26 +1438,20 @@ public class PacketHandler {
 
                 } else {
                     
-                    synchronized (theRun){
-                        if (theRun.getStatus() == RunStates.NEW || isSuperUser(whoRequestsRunId)) {
-                            
-                            theRun.setStatus(RunStates.BEING_JUDGED);
-                            contest.updateRun(theRun, whoRequestsRunId);
-                            
-                            theRun = contest.getRun(run.getElementId());
-                            RunFiles runFiles = contest.getRunFiles(run);
-                            
-                            // send to Judge
-                            Packet checkOutPacket = PacketFactory.createCheckedOutRun(contest.getClientId(), whoRequestsRunId, theRun, runFiles, whoRequestsRunId);
-                            controller.sendToClient(checkOutPacket);
-                            
-                            sendToJudgesAndOthers(checkOutPacket, true);
-                            
-                        } else {
-                            // Unavailable
-                            Packet notAvailableRunPacket = PacketFactory.createRunNotAvailable(contest.getClientId(), whoRequestsRunId, run);
-                            controller.sendToClient(notAvailableRunPacket);
-                        }
+                    try {
+                        theRun = contest.checkoutRun(run, whoRequestsRunId);
+                        RunFiles runFiles = contest.getRunFiles(run);
+
+                        // send to Judge
+                        Packet checkOutPacket = PacketFactory.createCheckedOutRun(contest.getClientId(), whoRequestsRunId, theRun, runFiles, whoRequestsRunId);
+                        controller.sendToClient(checkOutPacket);
+
+                        // TODO change this packet type so it is not confused with the actual checked out run.
+                        
+                        sendToJudgesAndOthers(checkOutPacket, true);
+                    } catch (RunUnavailableException runUnavailableException) {
+                        Packet notAvailableRunPacket = PacketFactory.createRunNotAvailable(contest.getClientId(), whoRequestsRunId, run);
+                        controller.sendToClient(notAvailableRunPacket);
                     }
                 }
             }
