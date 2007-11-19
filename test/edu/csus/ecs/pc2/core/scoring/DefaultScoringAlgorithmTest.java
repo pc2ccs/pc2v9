@@ -29,7 +29,6 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
-import edu.csus.ecs.pc2.core.model.Run.RunStates;
 
 /**
  * Test Scoring Algorithm.
@@ -325,10 +324,11 @@ public class DefaultScoringAlgorithmTest extends TestCase {
     }
     
     private void checkOutRun (IContest contest, Run run, ClientId judgeId){
-        // TODO this should be a method in IContest.
-        
-        run.setStatus(RunStates.BEING_JUDGED);
-        contest.updateRun(run, judgeId);
+        try {
+            contest.checkoutRun(run, judgeId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
     
     /**

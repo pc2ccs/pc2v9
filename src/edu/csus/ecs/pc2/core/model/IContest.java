@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.core.model;
 import java.util.Date;
 import java.util.Vector;
 
+import edu.csus.ecs.pc2.core.exception.RunUnavailableException;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
@@ -457,9 +458,18 @@ public interface IContest {
      * @param run
      */
     void runNotAvailable(Run run);
+    
+    
+    /**
+     * Attempt to checkout run.
+     * @param run
+     * @param whoChangedRun
+     * @throws RunUnavailableException - if run already checked out or not NEW.
+     */
+    Run checkoutRun (Run run, ClientId whoChangedRun) throws RunUnavailableException;
 
     /**
-     * Update the run.
+     * Unconditionally update the run.
      * 
      */
     void updateRun(Run run, ClientId whoChangedRun);

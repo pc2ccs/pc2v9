@@ -22,6 +22,7 @@ public final class AllTests {
         //$JUnit-BEGIN$
         suite.addTestSuite(BalloonSettingsTest.class);
         suite.addTestSuite(FilterTest.class);
+        suite.addTestSuite(ContestTest.class);
         suite.addTestSuite(TimeFormatTest.class);
         suite.addTestSuite(SiteTest.class);
         suite.addTestSuite(DisplayTeamNameTest.class);

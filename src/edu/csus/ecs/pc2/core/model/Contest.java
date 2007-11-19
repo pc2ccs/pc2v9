@@ -6,6 +6,7 @@ import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
 
+import edu.csus.ecs.pc2.core.exception.RunUnavailableException;
 import edu.csus.ecs.pc2.core.list.AccountList;
 import edu.csus.ecs.pc2.core.list.BalloonSettingsList;
 import edu.csus.ecs.pc2.core.list.ClarificationList;
@@ -948,15 +949,41 @@ public class Contest implements IContest {
         RunEvent runEvent = new RunEvent(RunEvent.Action.RUN_NOT_AVIALABLE, run, null);
         fireRunListener(runEvent);
     }
+    
+    public Run checkoutRun(Run run, ClientId whoChangedRun) throws RunUnavailableException {
+        
+        synchronized (runCheckOutList) {
+            ClientId clientId = runCheckOutList.get(run.getElementId());
 
-    // Check out run
-    public void updateRun(Run run, ClientId whoChangedRun) {
-        runList.updateRun(run);
-        Run newRun = runList.get(run.getElementId());
-        if (newRun.getStatus().equals(RunStates.BEING_JUDGED)) {
-            runCheckOutList.put(run.getElementId(), whoChangedRun);
+            if (clientId != null) {
+                // Run checked out
+                throw new RunUnavailableException("Client " + clientId + " already checked out run " + run.getNumber() + " (site " + run.getSiteNumber() + ")");
+            }
+            
+            Run newRun = runList.get(run.getElementId());
+            
+            if (newRun == null){
+                throw new RunUnavailableException("Run "+ run.getNumber() + " (site " + run.getSiteNumber() + ") not found");
+            }
+            
+            if (newRun.getStatus().equals(RunStates.NEW)){
+                runCheckOutList.put(newRun.getElementId(), whoChangedRun);
+                newRun.setStatus(RunStates.BEING_JUDGED);
+                runList.updateRun(newRun);
+                return runList.get(run.getElementId());
+            } else {
+                throw new RunUnavailableException("Client " + clientId + " can not checked out run " + run.getNumber() + " (site " + run.getSiteNumber() + ")");
+            }
+        
         }
 
+    }
+    
+    public void updateRun(Run run, ClientId whoChangedRun) {
+
+        Run newRun = runList.get(run.getElementId());
+        runList.updateRun(run);
+        
         RunEvent runEvent = new RunEvent(RunEvent.Action.CHANGED, newRun, null);
         runEvent.setWhoModifiedRun(whoChangedRun);
         fireRunListener(runEvent);
@@ -1016,7 +1043,7 @@ public class Contest implements IContest {
         // }
 
         if (whoCheckedOut != null){
-            runCheckOutList.remove(whoCheckedOut);
+            runCheckOutList.remove(run.getElementId());
         }
         
         run.setStatus(RunStates.NEW);
