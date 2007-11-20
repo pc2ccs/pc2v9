@@ -42,13 +42,13 @@ import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.ui.judge.JudgeView;
 
 /**
- * Add/Edit Run Pane
+ * Select a Judgement Pane.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
-// $Id$
 public class SelectJudgementPane extends JPanePlugin {
 
     /**
@@ -68,6 +68,12 @@ public class SelectJudgementPane extends JPanePlugin {
 
     private Run run = null;
 
+    /**
+     * Submitted run files from user.
+     * 
+     * This is used as an indicator as to whether this client/judge
+     * has a checked out run.
+     */
     private RunFiles runFiles = null;
 
     private JPanel generalPane = null;
@@ -242,7 +248,11 @@ public class SelectJudgementPane extends JPanePlugin {
         closeViewerWindows();
         Run newRun = getRunFromFields();
         JudgeView.setAlreadyJudgingRun(false);
-        getController().cancelRun(newRun);
+        
+        if (runFiles != null){
+            // Cancel/return run only if the run has actually been checked out.
+            getController().cancelRun(newRun);
+        }
     }
 
     /**
