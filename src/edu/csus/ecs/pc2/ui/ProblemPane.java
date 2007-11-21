@@ -503,11 +503,10 @@ public class ProblemPane extends JPanePlugin {
             // java -cp ..\..\lib\pc2.jar edu.csus.ecs.pc2.validator.Validator sumit.dat estdout.pc2 sumit.ans 212XRSAM.txt -pc2 1 false
             // "{:validator} {:infle} {:outfile} {:ansfile} {:resfile} ";
 
-            checkProblem.setValidatorCommandLine(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + checkProblem.getWhichPC2Validator() + " " + checkProblem.isIgnoreSpacesOnValidation());
-            checkProblem.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);
-
             checkProblem.setWhichPC2Validator(getPc2ValidatorComboBox().getSelectedIndex());
             checkProblem.setIgnoreSpacesOnValidation(getIgnoreCaseCheckBox().isSelected());
+            checkProblem.setValidatorCommandLine(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND + " -pc2 " + checkProblem.getWhichPC2Validator() + " " + checkProblem.isIgnoreSpacesOnValidation());
+            checkProblem.setValidatorProgramName(Problem.INTERNAL_VALIDATOR_NAME);
         }
 
         checkProblem.setShowValidationToJudges(showValidatorToJudges.isSelected());
