@@ -836,6 +836,7 @@ public class RunsPanel extends JPanePlugin {
             
             if ((! runToEdit.getStatus().equals(RunStates.NEW)) || runToEdit.isDeleted()){
                 showMessage("Not allowed to request run, already judged");
+                JudgeView.setAlreadyJudgingRun(false);
                 return;
             }
 
