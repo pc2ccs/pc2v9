@@ -385,6 +385,7 @@ public class SelectJudgementPane extends JPanePlugin {
         displayTeamName.setTeamDisplayMask(contestInformation.getTeamDisplayMode());
 
         this.run = run;
+        runFiles = null;
 
         showMessage("Waiting for run...");
         FrameUtilities.waitCursor(this);
