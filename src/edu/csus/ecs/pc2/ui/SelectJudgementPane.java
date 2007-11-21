@@ -252,7 +252,6 @@ public class SelectJudgementPane extends JPanePlugin {
         if (runFiles != null){
             // Cancel/return run only if the run has actually been checked out.
             getController().cancelRun(newRun);
-            runFiles = null;
         }
     }
 
@@ -313,8 +312,6 @@ public class SelectJudgementPane extends JPanePlugin {
         
         JudgeView.setAlreadyJudgingRun(false);
         getController().submitRunJudgement(newRun, judgementRecord, runResultFiles);
-
-        runFiles = null;
 
         if (getParentFrame() != null) {
             getParentFrame().setVisible(false);
@@ -388,7 +385,6 @@ public class SelectJudgementPane extends JPanePlugin {
         displayTeamName.setTeamDisplayMask(contestInformation.getTeamDisplayMode());
 
         this.run = run;
-        runFiles = null;
 
         showMessage("Waiting for run...");
         FrameUtilities.waitCursor(this);
