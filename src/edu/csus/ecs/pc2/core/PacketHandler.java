@@ -937,7 +937,12 @@ public class PacketHandler {
             if (isServer()) {
                 for (Account account : accounts) {
                     if (contest.isLocalLoggedIn(account.getClientId())) {
-                        Packet updatePacket = PacketFactory.clonePacket(contest.getClientId(), account.getClientId(), packet);
+                        Packet updatePacket;
+                        if (account.getClientId().getClientType().equals(ClientType.Type.TEAM)) {
+                            updatePacket = PacketFactory.createUpdateSetting(contest.getClientId(), account.getClientId(), contest.getAccount(account.getClientId()));
+                        } else {
+                            updatePacket = PacketFactory.clonePacket(contest.getClientId(), account.getClientId(), packet);
+                        }
                         controller.sendToClient(updatePacket);
                     }
                 }
@@ -1073,7 +1078,12 @@ public class PacketHandler {
             if (isServer()) {
                 for (Account account : accounts) {
                     if (contest.isLocalLoggedIn(account.getClientId())) {
-                        Packet updatePacket = PacketFactory.clonePacket(contest.getClientId(), account.getClientId(), packet);
+                        Packet updatePacket;
+                        if (account.getClientId().getClientType().equals(ClientType.Type.TEAM)) {
+                            updatePacket = PacketFactory.createUpdateSetting(contest.getClientId(), account.getClientId(), contest.getAccount(account.getClientId()));
+                        } else {
+                            updatePacket = PacketFactory.clonePacket(contest.getClientId(), account.getClientId(), packet);
+                        }
                         controller.sendToClient(updatePacket);
                     }
                 }
