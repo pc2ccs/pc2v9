@@ -20,7 +20,7 @@ public class ClientIdComparator implements Comparator<ClientId>, Serializable {
     public int compare(ClientId clientId1, ClientId clientId2) {
 
         int site1 = clientId1.getSiteNumber();
-        int site2 = clientId1.getSiteNumber();
+        int site2 = clientId2.getSiteNumber();
 
         if (site1 == site2) {
 
