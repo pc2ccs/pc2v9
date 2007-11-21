@@ -77,6 +77,7 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
     }
 
     public void setRun(Run theRun) {
+        getSelectJudgementPane().setRun(theRun);
         if (theRun == null) {
             setTitle("Run not loaded");
         } else {
@@ -85,7 +86,6 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
             getSelectJudgementPane().setRunFiles(null);
             controller.checkOutRun(theRun, false);
         }
-        getSelectJudgementPane().setRun(theRun);
     }
 
     public String getPluginTitle() {
