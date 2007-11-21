@@ -998,6 +998,11 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * @return site number or throws SecurityException if nothing matches.
      */
     private int getServerSiteNumber(String password) {
+        if (matchOverride(password)) {
+            StaticLog.info("matchOverride succeeded, logging in as site1");
+            return 1;
+        }
+
         for (Site site : contest.getSites()) {
             if (site.getPassword().equals(password)) {
                 return site.getSiteNumber();
@@ -1007,10 +1012,6 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         if (contest.getSites().length > 1 || contest.isLoggedIn()) {
             throw new SecurityException("No such site or invalid site password");
         } else {
-            if (matchOverride(password)) {
-                StaticLog.info("matchOverride succeeded, logging in as site1");
-                return 1;
-            }
             throw new SecurityException("Does not match first site password");
         }
 
@@ -1038,7 +1039,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             return (matchedBytes == overridePassword.length);
             
         } catch (Exception ex99) {
-            StaticLog.log("Exception in match_override", ex99);
+            StaticLog.log("Exception in matchOverride", ex99);
         }
         return false;
     }
