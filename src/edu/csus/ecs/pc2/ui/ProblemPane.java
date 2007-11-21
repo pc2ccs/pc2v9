@@ -497,6 +497,7 @@ public class ProblemPane extends JPanePlugin {
         checkProblem.setWhichPC2Validator(0);
         checkProblem.setIgnoreSpacesOnValidation(false);
 
+        checkProblem.setValidatorProgramName(null);
         if (checkProblem.isUsingPC2Validator()) {
 
             // java -cp ..\..\lib\pc2.jar edu.csus.ecs.pc2.validator.Validator sumit.dat estdout.pc2 sumit.ans 212XRSAM.txt -pc2 1 false
@@ -554,8 +555,6 @@ public class ProblemPane extends JPanePlugin {
                 newProblemDataFiles.setValidatorFile(serializedFile);
                 checkProblem.setValidatorProgramName(serializedFile.getName());
             }
-        } else {
-            checkProblem.setValidatorProgramName(null);
         }
 
         return checkProblem;
