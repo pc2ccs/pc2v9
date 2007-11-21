@@ -1347,6 +1347,15 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
 
     public void sendToTeams(Packet packet) {
+        Properties properties = (Properties)packet.getContent();
+        // does the packet includes problemDataFiles
+        if (properties.containsKey(PacketFactory.PROBLEM_DATA_FILES)) {
+            // null the files out
+            properties.put(PacketFactory.PROBLEM_DATA_FILES, null);
+            // stick it back into the packet
+            packet.setContent(properties);
+        }
+        // TODO clear out/cleanup ACCOUNTS
         sendPacketToClients(packet, ClientType.Type.TEAM);
     }
 
