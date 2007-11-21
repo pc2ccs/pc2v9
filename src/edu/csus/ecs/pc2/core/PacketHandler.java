@@ -1460,7 +1460,8 @@ public class PacketHandler {
                         
                         sendToJudgesAndOthers(checkOutPacket, true);
                     } catch (RunUnavailableException runUnavailableException) {
-                        Packet notAvailableRunPacket = PacketFactory.createRunNotAvailable(contest.getClientId(), whoRequestsRunId, run);
+                        theRun = contest.getRun(run.getElementId());
+                        Packet notAvailableRunPacket = PacketFactory.createRunNotAvailable(contest.getClientId(), whoRequestsRunId, theRun);
                         controller.sendToClient(notAvailableRunPacket);
                     }
                 }
