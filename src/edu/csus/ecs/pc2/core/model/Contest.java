@@ -981,10 +981,9 @@ public class Contest implements IContest {
     
     public void updateRun(Run run, ClientId whoChangedRun) {
 
-        Run newRun = runList.get(run.getElementId());
         runList.updateRun(run);
         
-        RunEvent runEvent = new RunEvent(RunEvent.Action.CHANGED, newRun, null);
+        RunEvent runEvent = new RunEvent(RunEvent.Action.CHANGED, runList.get(run), null);
         runEvent.setWhoModifiedRun(whoChangedRun);
         fireRunListener(runEvent);
     }
