@@ -2256,6 +2256,7 @@ public class PacketHandler {
         Clarification[] clarifications = null;
         ProblemDataFiles [] problemDataFiles = new ProblemDataFiles[0];
         ClientSettings [] clientSettings = null;
+        Account[] accounts = null;
         
         if (contest.getClientSettings(clientId) == null){
             ClientSettings clientSettings2 = new ClientSettings(clientId);
@@ -2273,15 +2274,18 @@ public class PacketHandler {
             clarifications = contest.getClarifications(clientId);
             clientSettings = new ClientSettings[1];
             clientSettings[0] = contest.getClientSettings(clientId);
+            accounts = new Account[1];
+            accounts[0] = contest.getAccount(clientId);
         } else {
             runs = contest.getRuns();
             clarifications = contest.getClarifications();
             problemDataFiles = contest.getProblemDataFiles();
             clientSettings = contest.getClientSettingsList();
+            accounts = getAllAccounts();
         }
 
         ContestLoginSuccessData contestLoginSuccessData = new ContestLoginSuccessData();
-        contestLoginSuccessData.setAccounts(getAllAccounts());
+        contestLoginSuccessData.setAccounts(accounts);
         contestLoginSuccessData.setBalloonSettingsArray(contest.getBalloonSettings());
         contestLoginSuccessData.setClarifications(clarifications);
         contestLoginSuccessData.setClientSettings(clientSettings);
