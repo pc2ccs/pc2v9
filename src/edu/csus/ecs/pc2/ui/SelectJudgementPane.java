@@ -498,11 +498,6 @@ public class SelectJudgementPane extends JPanePlugin {
         getJudgementComboBox().setEnabled(runFiles != null);
         getNotifyTeamCheckBox().setEnabled(runFiles != null);
         
-        if (runFiles == null) {
-            log.log(Log.WARNING, "No run files in requested run " + run);
-            showMessage("No Run Files in requested run");
-        }
-
         updateButton.setEnabled(editedText);
     }
 
