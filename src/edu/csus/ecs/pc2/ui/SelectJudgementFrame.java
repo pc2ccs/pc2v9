@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.ui;
 
 import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.model.IContest;
@@ -110,8 +111,13 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
                 if (event.getRun().getElementId().equals(run.getElementId())) {
                     // RUN_NOT_AVIALABLE is undirected (sentToClient is null)
                     if (event.getAction().equals(Action.RUN_NOT_AVIALABLE)) {
+                        getSelectJudgementPane().setRun(run);
                         getSelectJudgementPane().showMessage("Run " + run.getNumber() + " is not available ");
-                        getSelectJudgementPane().enableUpdateButtons(false);
+                        SwingUtilities.invokeLater(new Runnable() {
+                            public void run() {
+                                getSelectJudgementPane().enableUpdateButtons(false);
+                            }
+                        });
                         getSelectJudgementPane().regularCursor();
                         JudgeView.setAlreadyJudgingRun(false);
                     } else {
