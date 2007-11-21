@@ -82,6 +82,7 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
         } else {
             setTitle("Select Judgement for run " + theRun.getNumber() + " (Site " + theRun.getSiteNumber() + ")");
             run = theRun;
+            getSelectJudgementPane().setRunFiles(null);
             controller.checkOutRun(theRun, false);
         }
         getSelectJudgementPane().setRun(theRun);

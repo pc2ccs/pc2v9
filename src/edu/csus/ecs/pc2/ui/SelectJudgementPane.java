@@ -1139,4 +1139,8 @@ public class SelectJudgementPane extends JPanePlugin {
         }
     }
 
+    protected void setRunFiles(RunFiles inRunFiles) {
+        runFiles = inRunFiles;
+    }
+
 } // @jve:decl-index=0:visual-constraint="10,10"
