@@ -1766,6 +1766,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
         if (isServer()) {
             contest.changeSite(site);
+            writeConfigToDisk();
             Packet packet = PacketFactory.createUpdateSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, site);
             sendToServers(packet);
 
