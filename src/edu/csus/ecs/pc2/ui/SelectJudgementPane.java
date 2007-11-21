@@ -495,7 +495,8 @@ public class SelectJudgementPane extends JPanePlugin {
         // Can only run or extract if there are run files...
         getExecuteButton().setEnabled(runFiles != null);
         getViewSourceButton().setEnabled(runFiles != null);
-
+        getJudgementComboBox().setEnabled(runFiles != null);
+        
         if (runFiles == null) {
             log.log(Log.WARNING, "No run files in requested run " + run);
             showMessage("No Run Files in requested run");
