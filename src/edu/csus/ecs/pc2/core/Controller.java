@@ -23,9 +23,11 @@ import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.ILoginListener;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
+import edu.csus.ecs.pc2.core.model.LoginEvent;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Run;
@@ -536,6 +538,116 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             // Client login
             info("Contacting server at " + remoteHostName + ":" + remoteHostPort+" as "+clientId);
             sendLoginRequest(transportManager, clientId, id, password);
+        }
+    }
+    
+    /**
+     * This is a very temporary kludge class.
+     * 
+     * This is used with clientLogin, as a 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    
+    // $HeadURL$
+    protected class TemporaryClientUI implements UIPlugin, ILoginListener {
+
+        private IContest contest = null;
+        private IController controller = null;
+        
+        private SecurityException securityException = null;
+
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 8735788359720905862L;
+
+        public void setContestAndController(IContest inContest, IController inController) {
+            contest = inContest;
+            controller = inController;
+            
+        }
+
+        public String getPluginTitle() {
+            return "TemporaryClientUI";
+        }
+
+        public IContest getContest() {
+            if (securityException != null){
+                throw securityException;
+            }
+            return contest;
+        }
+
+        public void setContest(IContest contest) {
+            this.contest = contest;
+        }
+
+        public IController getController() {
+            return controller;
+        }
+
+        public void setController(IController controller) {
+            this.controller = controller;
+        }
+
+        public void loginAdded(LoginEvent event) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public void loginRemoved(LoginEvent event) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public void loginDenied(LoginEvent event) {
+            securityException = new SecurityException("Login denied "+event.getMessage());
+        }
+    }
+    
+    public IContest clientLogin(String loginName, String password) throws Exception {
+
+        if (!isStarted) {
+            // TODO review this message
+            throw new SecurityException("Invalid sequence, must call start(String[]) method before login(String, String).");
+        }
+        ClientId clientId = loginShortcutExpansion(0, loginName);
+
+        log = new Log(stripChar(clientId.toString(),' '));
+        transportManager.setLog(log);
+        StaticLog.setLog(log);
+
+        info(new VersionInfo().getSystemVersionInfo());
+        info("Login: " + loginName + " (aka " + clientId.getName() + ")");
+
+        if (password.length() < 1) {
+            password = clientId.getName(); // Joe password.
+            if (clientId.getClientType().equals(Type.SERVER)) {
+                password = "site" + clientId.getSiteNumber();
+            }
+        }
+
+        if (clientId.getClientType().equals(Type.SERVER)) {
+            throw new SecurityException("Can not use clientLogin to login a Server "+loginName);
+        } else {
+
+            
+            TemporaryClientUI temporaryClientUI = new TemporaryClientUI();
+            setUsingMainUI(true);
+            setUiPlugin(temporaryClientUI);
+
+            // Client login
+            info("Contacting server at " + remoteHostName + ":" + remoteHostPort+" as "+clientId);
+            sendLoginRequest(transportManager, clientId, loginName, password);
+            
+            // Busy loop
+            
+            while ( temporaryClientUI.getContest() == null){
+                Thread.sleep(500);
+            }
+
+            return temporaryClientUI.getContest();
         }
     }
 
@@ -2062,4 +2174,6 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         Packet groupPacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), group);
         sendToLocalServer(groupPacket);
     }
+
+ 
 }

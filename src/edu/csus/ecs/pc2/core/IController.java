@@ -9,6 +9,7 @@ import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.Group;
+import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
@@ -120,11 +121,21 @@ public interface IController {
     void start(String[] stringArray);
 
     /**
-     * Login to server.
+     * Login to server, start MainUI.
      * @param loginName
      * @param password
      */
     void login(String loginName, String password);
+    
+    /**
+     * Login to server, wait for login 
+     * 
+     * @param loginName
+     * @param password
+     * @return
+     * @throws Exception
+     */
+    IContest clientLogin(String loginName, String password) throws Exception;
     
     /**
      * Logoff a client.

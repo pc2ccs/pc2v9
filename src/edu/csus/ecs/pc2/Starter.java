@@ -1,9 +1,8 @@
 package edu.csus.ecs.pc2;
 
 import edu.csus.ecs.pc2.core.Controller;
-import edu.csus.ecs.pc2.core.IController;
-import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.Contest;
+import edu.csus.ecs.pc2.core.model.IContest;
 
 /**
  * Starter class.
@@ -35,7 +34,19 @@ public final class Starter  {
     public static void main(String[] args) {
         
         IContest model = new Contest();
-        IController controller = new Controller (model);
-        controller.start(args);
+        Controller controller = new Controller (model);
+        
+        if (args.length > 0 && args[0].equals("--team1")){
+            try {
+                controller.setUsingMainUI(false);
+                controller.start(args);
+                IContest contest = controller.clientLogin("t1", "");
+                System.out.println("Logged in as "+contest.getClientId()+" length = "+contest.getSites().length);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            controller.start(args);
+        }
     }
 }
