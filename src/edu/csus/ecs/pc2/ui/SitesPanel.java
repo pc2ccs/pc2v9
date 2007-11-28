@@ -205,11 +205,12 @@ public class SitesPanel extends JPanePlugin {
             for (int i = 0; i < siteListBox.getRowCount(); i++) {
 
                 Site newSite = createSiteFromRow(i);
-
                 if (i >= sites.length) {
                     getController().addNewSite(newSite);
                 } else {
-                    getController().updateSite(newSite);
+                    if (!newSite.isSameAs(getContest().getSite(newSite.getSiteNumber()))) {
+                        getController().updateSite(newSite);
+                    }
                 }
             }
             enableUpdateButtons(false);
@@ -383,7 +384,7 @@ public class SitesPanel extends JPanePlugin {
         String port = site.getConnectionInfo().getProperty(Site.PORT_KEY);
         JTextField textField = createJTextField(port, false);
         textField.setDocument(new IntegerDocument());
-        textField.setText(port); // had to re-add port becuase IntegerDocument cleared it out.
+        textField.setText(port); // had to re-add port because IntegerDocument cleared it out.
         obj[4] = textField;
 
         return obj;
@@ -397,12 +398,31 @@ public class SitesPanel extends JPanePlugin {
         Arrays.sort(sites, new SiteComparatorBySiteNumber());
 
         for (Site site : sites) {
-            addSiteRow(site);
+            Site siteClone = site.clone();
+            addSiteRow(siteClone);
         }
 
         enableUpdateButtons(false);
     }
 
+    protected void enableButtons() {
+        boolean enableButtons = false;
+        Site[] sites = getContest().getSites();
+        if (getSiteListBox().getRowCount() > sites.length) {
+            enableButtons = true;
+        } else {
+            // compare the sites
+            for (int i = 0; i < siteListBox.getRowCount(); i++) {
+                Site newSite = createSiteFromRow(i);
+                if (!newSite.isSameAs(getContest().getSite(newSite.getSiteNumber()))) {
+                    enableButtons = true;
+                    break;
+                }
+            }
+        }
+        enableUpdateButtons(enableButtons);
+    }
+    
     private void enableUpdateButtons(boolean enableButtons) {
 
         updateSiteButton.setEnabled(enableButtons);
@@ -416,9 +436,9 @@ public class SitesPanel extends JPanePlugin {
         // textField.setEditable(editFieldsEnabled);
 
         textField.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyPressed(java.awt.event.KeyEvent e) {
+            public void keyReleased(java.awt.event.KeyEvent e) {
                 siteListBox.autoSizeAllColumns();
-                enableUpdateButtons(true);
+                enableButtons();
             }
         });
         return textField;
@@ -520,11 +540,12 @@ public class SitesPanel extends JPanePlugin {
      * 
      * @param site
      */
-    public void updateSiteList(final Site site) {
+    public void updateSiteList(Site site) {
 
+        final Site siteClone = site.clone();
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                updateSiteRow(site);
+                updateSiteRow(siteClone);
             }
         });
     }
