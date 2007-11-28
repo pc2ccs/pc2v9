@@ -788,8 +788,16 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
         if (containsINIKey(CLIENT_SERVER_KEY)) {
             remoteHostName = getINIValue(CLIENT_SERVER_KEY);
-            int idx = remoteHostName.indexOf(":");
-            if (idx > 2) {
+            /*
+             * Examples:
+             * server=[2001:DB8::1] (default port)
+             * server=[2001:DB8::1]:50000
+             * server=10.86.76.240:50002
+             * server=10.86.76.240 (default port)
+             */
+            int idx = remoteHostName.lastIndexOf(":");
+            int literalClose = remoteHostName.indexOf("]");
+            if (idx > literalClose && idx > 2) {
                 remoteHostPort = Integer.parseInt(remoteHostName.substring(idx + 1));
                 remoteHostName = remoteHostName.substring(0, idx);
             }
@@ -825,8 +833,16 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             // Set port to default
             remoteHostPort = Integer.parseInt(TransportManager.DEFAULT_PC2_PORT);
 
-            int idx = remoteHostName.indexOf(":");
-            if (idx > 2) {
+            /*
+             * Examples:
+             * server=[2001:DB8::1] (default port)
+             * server=[2001:DB8::1]:50000
+             * server=10.86.76.240:50002
+             * server=10.86.76.240 (default port)
+             */
+            int idx = remoteHostName.lastIndexOf(":");
+            int literalClose = remoteHostName.indexOf("]");
+            if (idx > literalClose && idx > 2) {
                 remoteHostPort = Integer.parseInt(remoteHostName.substring(idx + 1));
                 remoteHostName = remoteHostName.substring(0, idx);
             }
