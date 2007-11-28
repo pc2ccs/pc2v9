@@ -1022,7 +1022,7 @@ public class Contest implements IContest {
 
         if (whoCheckedOut != null) {
             info("Found checked out by " + whoCheckedOut + " judgement updated by " + judgementRecord.getJudgerClientId());
-            runCheckOutList.remove(whoCheckedOut);
+            runCheckOutList.remove(run.getElementId());
         }
         theRun = runList.get(run);
 
