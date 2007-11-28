@@ -557,7 +557,7 @@ public class AccountsPane extends JPanePlugin {
         if (loadICPCButton == null) {
             loadICPCButton = new JButton();
             loadICPCButton.setText("Load ICPC");
-            loadICPCButton.setToolTipText("Load ICPC PC2_Site.tab");
+            loadICPCButton.setToolTipText("Load ICPC PC2_Team.tab");
             loadICPCButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     loadICPCAccounts();
