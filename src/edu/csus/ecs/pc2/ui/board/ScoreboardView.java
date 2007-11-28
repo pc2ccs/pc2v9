@@ -75,6 +75,10 @@ public class ScoreboardView extends JFrame implements UIPlugin {
 
     private JButton exitButton = null;
 
+    private String currentXMLString = "";
+
+    private JButton refreshButton = null;
+    
     /**
      * This method initializes
      * 
@@ -185,6 +189,8 @@ public class ScoreboardView extends JFrame implements UIPlugin {
     }
 
     private void generateOutput(String xmlString) {
+        // save it so we can refresh the html after updating the xsl
+        currentXMLString = xmlString;
         File inputDir = new File(xslDir);
         if (!inputDir.isDirectory()) {
             log.warning("xslDir is not a directory");
@@ -314,6 +320,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
     private JPanel getEastPane() {
         if (eastPane == null) {
             eastPane = new JPanel();
+            eastPane.add(getRefreshButton(), null);
             eastPane.add(getExitButton(), null);
         }
         return eastPane;
@@ -399,5 +406,34 @@ public class ScoreboardView extends JFrame implements UIPlugin {
             }
         });
 
+    }
+
+    /**
+     * This method initializes refreshButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getRefreshButton() {
+        if (refreshButton == null) {
+            refreshButton = new JButton();
+            refreshButton.setPreferredSize(new java.awt.Dimension(100, 26));
+            refreshButton.setToolTipText("Re-generate the HTML");
+            refreshButton.setMnemonic(java.awt.event.KeyEvent.VK_R);
+            refreshButton.setText("Refresh");
+            refreshButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    if (currentXMLString.length() > 0) {
+                        new Thread(new Runnable() {
+                            public void run() {
+                                generateOutput(currentXMLString);
+                            }
+                        }).start();
+                    } else{
+                        JOptionPane.showMessageDialog(getParent(), "XML currently unavailable", "Please wait", JOptionPane.WARNING_MESSAGE);
+                    }
+                }
+            });
+        }
+        return refreshButton;
     }
 } // @jve:decl-index=0:visual-constraint="10,10"
