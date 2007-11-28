@@ -209,9 +209,26 @@ public class ScoreboardView extends JFrame implements UIPlugin {
             log.fine("Sending output to " + outputDirFile.getAbsolutePath());
         }
         try {
-            FileOutputStream outputXML = new FileOutputStream("results.xml");
+            File output = File.createTempFile("__t", ".tmp", new File("."));
+            FileOutputStream outputXML = new FileOutputStream(output);
             outputXML.write(xmlString.getBytes());
             outputXML.close();
+            if (output.length() > 0) {
+                File outputFile = new File("results.xml");
+                // behaviour of renameTo is platform specific, try the possibly atomic 1st
+                if (!output.renameTo(outputFile)) {
+                    // otherwise fallback to the delete then rename
+                    outputFile.delete();
+                    if (!output.renameTo(outputFile)) {
+                        log.warning("Could not create " + outputFile.getCanonicalPath());
+                    }
+                }
+            } else {
+                // 0 length file
+                log.warning("New results.xml is empty, not updating");
+                output.delete();
+            }
+            output = null;
         } catch (FileNotFoundException e1) {
             log.log(Log.WARNING, "Could not write to " + "results.xml", e1);
             e1.printStackTrace();
