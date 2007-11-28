@@ -263,7 +263,7 @@ public class RunsPanel extends JPanePlugin {
                         }
                     }
                     
-                    if (isTeam(run.getSubmitter())){
+                    if (isTeam(getContest().getClientId())){
                         if (! judgementRecord.isSendToTeam()){
                             result = RunStates.NEW.toString();
                         }
