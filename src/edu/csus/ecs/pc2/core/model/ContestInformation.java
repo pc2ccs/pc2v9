@@ -80,4 +80,25 @@ public class ContestInformation implements Serializable{
     public void setTeamDisplayMode(TeamDisplayMask teamDisplayMask) {
         this.teamDisplayMode = teamDisplayMask;
     }
+    
+    public boolean isSameAs(ContestInformation contestInformation) {
+        try {
+            if (contestTitle == null) {
+                if (contestInformation.getContestTitle() != null) {
+                    return false;
+                }
+            } else {
+                if (!contestTitle.equals(contestInformation.getContestTitle())) {
+                    return false;
+                }
+            }
+            if (!teamDisplayMode.equals(contestInformation.getTeamDisplayMode())) {
+                return false;
+            }
+            return true;
+        } catch (Exception e) {
+            // TODO log to static exception log
+            return false;
+        }
+    }
 }

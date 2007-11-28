@@ -60,6 +60,8 @@ public class ContestInformationPane extends JPanePlugin {
 
     private ButtonGroup displayNameButtonGroup = null; // @jve:decl-index=0:visual-constraint="617,62"
 
+    private JButton cancelButton = null;
+
     /**
      * This method initializes
      * 
@@ -78,7 +80,6 @@ public class ContestInformationPane extends JPanePlugin {
         this.setSize(new java.awt.Dimension(533, 238));
         this.add(getCenterPane(), java.awt.BorderLayout.CENTER);
         this.add(getButtonPanel(), java.awt.BorderLayout.SOUTH);
-
     }
 
     /**
@@ -88,8 +89,12 @@ public class ContestInformationPane extends JPanePlugin {
      */
     private JPanel getButtonPanel() {
         if (buttonPanel == null) {
+            FlowLayout flowLayout = new FlowLayout();
+            flowLayout.setHgap(35);
             buttonPanel = new JPanel();
+            buttonPanel.setLayout(flowLayout);
             buttonPanel.add(getUpdateButton(), null);
+            buttonPanel.add(getCancelButton(), null);
         }
         return buttonPanel;
     }
@@ -142,6 +147,11 @@ public class ContestInformationPane extends JPanePlugin {
         if (contestTitleTextField == null) {
             contestTitleTextField = new JTextField();
             contestTitleTextField.setBounds(new java.awt.Rectangle(204, 21, 287, 27));
+            contestTitleTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
         }
         return contestTitleTextField;
     }
@@ -160,24 +170,13 @@ public class ContestInformationPane extends JPanePlugin {
 
     }
 
-    private void populateGUI() {
-
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                ContestInformation contestInformation = getContest().getContestInformation();
-                getContestTitleTextField().setText(contestInformation.getContestTitle());
-                selectDisplayRadioButton();
-            }
-        });
-
-    }
-
-    private void updateContestInformation() {
-        ContestInformation contestInformation = getContest().getContestInformation();
+    protected ContestInformation getFromFields() {
+        ContestInformation contestInformation = new ContestInformation();
+        ContestInformation currentContestInformation = getContest().getContestInformation();
+        if (currentContestInformation.getContestURL() != null) {
+            contestInformation.setContestURL(new String(currentContestInformation.getContestURL()));
+        }
         contestInformation.setContestTitle(getContestTitleTextField().getText());
-        
-        contestInformation.setTeamDisplayMode(TeamDisplayMask.LOGIN_NAME_ONLY);
-        
         if (getDisplayNoneRadioButton().isSelected()) {
             contestInformation.setTeamDisplayMode(TeamDisplayMask.NONE);
         } else if (getDisplayNameAndNumberRadioButton().isSelected()) {
@@ -188,8 +187,43 @@ public class ContestInformationPane extends JPanePlugin {
             contestInformation.setTeamDisplayMode(TeamDisplayMask.DISPLAY_NAME_ONLY);
         } else if (getDisplayAliasNameRadioButton().isSelected()) {
             contestInformation.setTeamDisplayMode(TeamDisplayMask.ALIAS);
+        } else {
+            // DEFAULT
+            contestInformation.setTeamDisplayMode(TeamDisplayMask.LOGIN_NAME_ONLY);
         }
-        
+        return(contestInformation);
+    }
+    
+    protected void enableUpdateButton() {
+        ContestInformation newChoice = getFromFields();
+        if (getContest().getContestInformation().isSameAs(newChoice)) {
+            setEnableButtons(false);
+        } else {
+            setEnableButtons(true);
+        }
+    }
+
+    void setEnableButtons(boolean isEnabled) {
+        getUpdateButton().setEnabled(isEnabled);
+        getCancelButton().setEnabled(isEnabled);
+    }
+
+
+    private void populateGUI() {
+
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                ContestInformation contestInformation = getContest().getContestInformation();
+                getContestTitleTextField().setText(contestInformation.getContestTitle());
+                selectDisplayRadioButton();
+                setEnableButtons(false);
+            }
+        });
+
+    }
+
+    private void updateContestInformation() {
+        ContestInformation contestInformation = getFromFields();
         getController().updateContestInformation(contestInformation);
     }
 
@@ -281,6 +315,13 @@ public class ContestInformationPane extends JPanePlugin {
         if (displayNoneRadioButton == null) {
             displayNoneRadioButton = new JRadioButton();
             displayNoneRadioButton.setText("None");
+            displayNoneRadioButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    // getActionCommand called with text from button
+                    // getSource returns the JRadioButton
+                    enableUpdateButton();
+                }
+            });
         }
         return displayNoneRadioButton;
     }
@@ -294,6 +335,13 @@ public class ContestInformationPane extends JPanePlugin {
         if (displayNumbersOnlyRadioButton == null) {
             displayNumbersOnlyRadioButton = new JRadioButton();
             displayNumbersOnlyRadioButton.setText("Show Numbers Only");
+            displayNumbersOnlyRadioButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    // getActionCommand called with text from button
+                    // getSource returns the JRadioButton
+                    enableUpdateButton();
+                }
+            });
         }
         return displayNumbersOnlyRadioButton;
     }
@@ -307,6 +355,13 @@ public class ContestInformationPane extends JPanePlugin {
         if (displayNameAndNumberRadioButton == null) {
             displayNameAndNumberRadioButton = new JRadioButton();
             displayNameAndNumberRadioButton.setText("Show Number and Name");
+            displayNameAndNumberRadioButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    // getActionCommand called with text from button
+                    // getSource returns the JRadioButton
+                    enableUpdateButton();
+                }
+            });
         }
         return displayNameAndNumberRadioButton;
     }
@@ -320,6 +375,13 @@ public class ContestInformationPane extends JPanePlugin {
         if (displayAliasNameRadioButton == null) {
             displayAliasNameRadioButton = new JRadioButton();
             displayAliasNameRadioButton.setText("Show Alias");
+            displayAliasNameRadioButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    // getActionCommand called with text from button
+                    // getSource returns the JRadioButton
+                    enableUpdateButton();
+                }
+            });
         }
         return displayAliasNameRadioButton;
     }
@@ -333,6 +395,13 @@ public class ContestInformationPane extends JPanePlugin {
         if (displayNamesOnlyRadioButton == null) {
             displayNamesOnlyRadioButton = new JRadioButton();
             displayNamesOnlyRadioButton.setText("Show Names only");
+            displayNamesOnlyRadioButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    // getActionCommand called with text from button
+                    // getSource returns the JRadioButton
+                    enableUpdateButton();
+                }
+            });
         }
         return displayNamesOnlyRadioButton;
     }
@@ -353,6 +422,25 @@ public class ContestInformationPane extends JPanePlugin {
             displayNameButtonGroup.add(getDisplayAliasNameRadioButton());
         }
         return displayNameButtonGroup;
+    }
+
+    /**
+     * This method initializes cancelButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getCancelButton() {
+        if (cancelButton == null) {
+            cancelButton = new JButton();
+            cancelButton.setText("Cancel");
+            cancelButton.setPreferredSize(new java.awt.Dimension(74, 26));
+            cancelButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    populateGUI();
+                }
+            });
+        }
+        return cancelButton;
     }
 
     // private ButtonGroup getTeamReadsFrombuttonGroup() {
