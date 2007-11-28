@@ -1,10 +1,8 @@
 
 //
-// File:    sum1.cpp
+// File:    sumit.cpp
 // Purpose: to sum the integers in the file sumit.dat
 // Author:  pc2@ecs.csus.edu or http://www.ecs.csus.edu/pc2
-//
-// Sat Oct 30 12:43:18 PDT 1999
 //
 // caveat - this is not nice code, copy at own risk ;)
 //
@@ -12,8 +10,9 @@
 //
 //
 
-#include <iostream.h>
-#include <fstream.h>
+#include <fstream>
+#include <iostream>
+using namespace std;
 
 main ()
 {

@@ -4,14 +4,13 @@
 // Purpose: to sum the integers from stdin
 // Author:  pc2@ecs.csus.edu or http://www.ecs.csus.edu/pc2
 //
-// Thu Oct  2 20:28:19 PDT 2003
-//
 // $Id$
 //
 //
 
-#include <iostream.h>
-#include <fstream.h>
+#include <fstream>
+#include <iostream>
+using namespace std;
 
 main ()
 {
