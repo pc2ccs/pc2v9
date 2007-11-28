@@ -8,6 +8,9 @@
 <TITLE>
 Summary/Attempt - <xsl:value-of select="/contestStandings/standingsHeader/@title"/>
 </TITLE>
+<META HTTP-EQUIV="EXPIRES" CONTENT="0"/>
+<META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE"/>
+<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE"/>
         </HEAD>
         <BODY>
             <TABLE border="1">
