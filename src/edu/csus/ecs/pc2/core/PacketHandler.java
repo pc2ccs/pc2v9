@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Vector;
 
+import edu.csus.ecs.pc2.core.exception.ClarificationUnavailableException;
 import edu.csus.ecs.pc2.core.exception.RunUnavailableException;
 import edu.csus.ecs.pc2.core.list.ClientIdComparator;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -30,7 +31,6 @@ import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.Site;
-import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.packet.PacketFactory;
@@ -141,7 +141,7 @@ public class PacketHandler {
             Clarification clarification = (Clarification)  PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION);
             ClientId whoCheckedOut = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
             
-            contest.updateClarification(clarification, whoCheckedOut);
+            contest.addClarification(clarification, whoCheckedOut);
             if (isServer()){
                 sendToJudgesAndOthers( packet, false);
             }
@@ -154,6 +154,14 @@ public class PacketHandler {
             String message = PacketFactory.getStringValue(packet, PacketFactory.MESSAGE_STRING);
             contest.loginDenied(packet.getDestinationId(), connectionHandlerID, message);
 
+        } else if (packetType.equals(Type.CLARIFICATION_NOT_AVAILABLE)) {
+            // Run not available from server
+            Clarification clar = (Clarification) PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION);
+            contest.clarificationNotAvailable(clar);
+
+            if (isServer()) {
+                sendToJudgesAndOthers( packet, isThisSite(clar));
+            }
         } else if (packetType.equals(Type.RUN_NOTAVAILABLE)) {
             // Run not available from server
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
@@ -1359,34 +1367,28 @@ public class PacketHandler {
                 }
 
             } else {
-                // This Site's run, if we can check it out and send to client
-
                 Clarification theClarification = contest.getClarification(clarification.getElementId());
-                
+                // This Site's clar, if we can check it out and send to client
+
                 if (readOnly) {
                     // just get run and sent it to them.
-                    
-                    info ("// TODO  send read only clar to them ");
 
-                } else if (theClarification.getState() == ClarificationStates.NEW || isSuperUser(requestFromId)) {
-
-                    theClarification.setState(ClarificationStates.BEING_ANSWERED);
-                    theClarification.setWhoCheckedItOutId(requestFromId);
-                    
-                    contest.updateClarification(theClarification, requestFromId);
-
-                    theClarification = contest.getClarification(clarification.getElementId());
-
-                    // send to Judge
-                    Packet checkOutPacket = PacketFactory.createCheckedOutClarification(contest.getClientId(), requestFromId, theClarification, requestFromId);
-                    controller.sendToClient(checkOutPacket);
-                    
-                    sendToJudgesAndOthers(checkOutPacket, true);
-                    
+                    info("// TODO  send read only clar to them ");
                 } else {
-                    // Unavailable
-                    Packet notAvailableRunPacket = PacketFactory.createClarificationNotAvailable(contest.getClientId(), requestFromId, theClarification, requestFromId);
-                    controller.sendToClient(notAvailableRunPacket);
+                    try {
+                        theClarification = contest.checkoutClarification(clarification, requestFromId);
+    
+                        // send to Judge
+                        Packet checkOutPacket = PacketFactory.createCheckedOutClarification(contest.getClientId(), requestFromId, theClarification, requestFromId);
+                        controller.sendToClient(checkOutPacket);
+    
+                        // TODO change this packet type so it is not confused with the actual checked out run.
+    
+                        sendToJudgesAndOthers(checkOutPacket, true);
+                    } catch (ClarificationUnavailableException clarUnavailableException) {
+                        Packet notAvailableRunPacket = PacketFactory.createClarificationNotAvailable(contest.getClientId(), requestFromId, clarification, requestFromId);
+                        controller.sendToClient(notAvailableRunPacket);
+                    }
                 }
             }
         } else {

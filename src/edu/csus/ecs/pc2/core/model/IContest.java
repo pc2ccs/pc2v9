@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.core.model;
 import java.util.Date;
 import java.util.Vector;
 
+import edu.csus.ecs.pc2.core.exception.ClarificationUnavailableException;
 import edu.csus.ecs.pc2.core.exception.RunUnavailableException;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.security.Permission;
@@ -565,6 +566,22 @@ public interface IContest {
      */
     void changeClarification(Clarification clarification);
 
+
+    /**
+     * Attempt to checkout clarification.
+     * @param clarification
+     * @param whoChangedClar
+     * @throws ClarificationUnavailableException - if clar already checked out or not NEW.
+     */
+    Clarification checkoutClarification (Clarification clar, ClientId whoChangedClar) throws ClarificationUnavailableException;
+
+    /**
+     * Add a clarification not available, notify listeners.
+     * 
+     * @param run
+     */
+    void clarificationNotAvailable(Clarification clar);
+    
     Language getLanguage(ElementId elementId);
 
     Problem getProblem(ElementId elementId);

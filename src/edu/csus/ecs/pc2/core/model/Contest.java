@@ -6,6 +6,7 @@ import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
 
+import edu.csus.ecs.pc2.core.exception.ClarificationUnavailableException;
 import edu.csus.ecs.pc2.core.exception.RunUnavailableException;
 import edu.csus.ecs.pc2.core.list.AccountList;
 import edu.csus.ecs.pc2.core.list.BalloonSettingsList;
@@ -78,6 +79,11 @@ public class Contest implements IContest {
      * Contains name of client (judge or admin) who checks out the run.
      */
     private Hashtable<ElementId, ClientId> runCheckOutList = new Hashtable<ElementId, ClientId>(200);
+
+    /**
+     * Contains name of client (judge or admin) who checks out the clarification.
+     */
+    private Hashtable<ElementId, ClientId> clarCheckOutList = new Hashtable<ElementId, ClientId>(200);
 
     private AccountList accountList = new AccountList();
 
@@ -519,11 +525,16 @@ public class Contest implements IContest {
 
     public void updateClarification(Clarification clarification, ClientId whoChangedIt) {
         clarificationList.updateClarification(clarification);
-        ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.CHANGED, clarification);
+        ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.CHANGED, clarificationList.get(clarification));
         if (whoChangedIt != null){
             clarificationEvent.setWhoModifiedClarification(whoChangedIt);
         }
         fireClarificationListener(clarificationEvent);
+    }
+
+    public void clarificationNotAvailable(Clarification clar) {
+        ClarificationEvent clarEvent = new ClarificationEvent(ClarificationEvent.Action.CLARIFICATION_NOT_AVAILABLE, clar);
+        fireClarificationListener(clarEvent);
     }
 
     /**
@@ -1198,8 +1209,8 @@ public class Contest implements IContest {
 
     public void addClarification(Clarification clarification, ClientId whoCheckedOutId) {
         clarificationList.add(clarification);
-        ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.CHANGED, clarification);
-        clarificationEvent.setWhoModifiedClarification(whoCheckedOutId);
+        ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.CHECKEDOUT_CLARIFICATION, clarification);
+        clarificationEvent.setSentToClientId(whoCheckedOutId);
         fireClarificationListener(clarificationEvent);
     }
 
@@ -1505,5 +1516,35 @@ public class Contest implements IContest {
 
     public void setGeneralProblem(Problem generalProblem) {
         this.generalProblem = generalProblem;
+    }
+
+    /* (non-Javadoc)
+     * @see edu.csus.ecs.pc2.core.model.IContest#checkoutClarification(edu.csus.ecs.pc2.core.model.Clarification, edu.csus.ecs.pc2.core.model.ClientId)
+     */
+    public Clarification checkoutClarification(Clarification clar, ClientId whoChangedClar) throws ClarificationUnavailableException {
+        synchronized (clarCheckOutList) {
+            ClientId clientId = runCheckOutList.get(clar.getElementId());
+
+            if (clientId != null) {
+                // Run checked out
+                throw new ClarificationUnavailableException("Client " + clientId + " already checked out clar " + clar.getNumber() + " (site " + clar.getSiteNumber() + ")");
+            }
+            
+            Clarification newClar = clarificationList.get(clar.getElementId());
+            
+            if (newClar == null){
+                throw new ClarificationUnavailableException("Run "+ clar.getNumber() + " (site " + clar.getSiteNumber() + ") not found");
+            }
+            
+            if (newClar.getState().equals(ClarificationStates.NEW)){
+                clarCheckOutList.put(newClar.getElementId(), whoChangedClar);
+                newClar.setState(ClarificationStates.BEING_ANSWERED);
+                clarificationList.updateClarification(newClar);
+                return clarificationList.get(clar.getElementId());
+            } else {
+                throw new ClarificationUnavailableException("Client " + clientId + " can not checked out clar " + clar.getNumber() + " (site " + clar.getSiteNumber() + ")");
+            }
+        
+        }
     }
 }

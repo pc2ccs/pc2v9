@@ -73,11 +73,11 @@ public class AnswerClarificationFrame extends JFrame implements UIPlugin {
         if (theClarification == null) {
             setTitle("Clarification not loaded");
         } else {
+            getAnswerClarificationPane().setClarification(theClarification, false);
             setTitle("Select Answer for clarification " + theClarification.getNumber() + " (Site " + theClarification.getSiteNumber() + ")");
             clarification = theClarification;
             controller.checkOutClarification(clarification, false);
         }
-        getAnswerClarificationPane().setClarification(theClarification, false);
     }
 
     public String getPluginTitle() {
@@ -103,8 +103,13 @@ public class AnswerClarificationFrame extends JFrame implements UIPlugin {
 
                     if (event.getAction().equals(Action.CLARIFICATION_NOT_AVAILABLE)) {
                         getAnswerClarificationPane().showMessage("Clarification " + clarification.getNumber() + " not available ");
+                        getAnswerClarificationPane().enableUpdateButtons(false);
+                        getAnswerClarificationPane().regularCursor();
                     } else {
-                        getAnswerClarificationPane().setClarification(event.getClarification(), true);
+                        if (event.getSentToClientId() != null && event.getSentToClientId().equals(contest.getClientId())) {
+                            getAnswerClarificationPane().setClarification(event.getClarification(), true);
+                            clarification = null;
+                        }
                     }
                 }
             }

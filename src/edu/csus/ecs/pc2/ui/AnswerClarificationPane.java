@@ -263,7 +263,9 @@ public class AnswerClarificationPane extends JPanePlugin {
             }
 
         } else {
-            cancelClarification();
+            if (fetchedFromServer) {
+                cancelClarification();
+            }
             if (getParentFrame() != null) {
                 getParentFrame().setVisible(false);
             }
@@ -326,6 +328,10 @@ public class AnswerClarificationPane extends JPanePlugin {
 
     }
 
+    protected void regularCursor() {
+        FrameUtilities.regularCursor(this);
+    }
+
     protected void enableUpdateButtons(boolean editedText) {
         
         if (fetchedFromServer){
@@ -336,11 +342,12 @@ public class AnswerClarificationPane extends JPanePlugin {
             }
 
             okButton.setEnabled(editedText);
-            defaultAnswerButton.setEnabled(false);
+            defaultAnswerButton.setEnabled(true);
+            getAnswerTextArea().setEnabled(true);
         } else  {
             okButton.setEnabled(editedText);
-            defaultAnswerButton.setEnabled(true);
-
+            defaultAnswerButton.setEnabled(false);
+            getAnswerTextArea().setEnabled(false);
         }
     }
 
