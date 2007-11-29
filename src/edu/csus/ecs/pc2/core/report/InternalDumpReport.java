@@ -56,6 +56,8 @@ public class InternalDumpReport implements IReport {
 
     private Filter accountFilter = new Filter();
 
+    private Filter filter;
+
     /**
      * Comparor for ClientSettings, by site, client type then client id.
      * @author pc2@ecs.csus.edu
@@ -176,7 +178,7 @@ public class InternalDumpReport implements IReport {
     }
     
 
-    private void writeReport(PrintWriter printWriter) {
+    public void writeReport(PrintWriter printWriter) {
 
         ContestTime localContestTime = contest.getContestTime();
 
@@ -336,7 +338,7 @@ public class InternalDumpReport implements IReport {
         printWriter.println("end report");
     }
 
-    public void createReportFile(String filename, Filter filter) throws IOException {
+    public void createReportFile(String filename, Filter inFilter) throws IOException {
 
         accountFilter = filter;
 
@@ -363,11 +365,11 @@ public class InternalDumpReport implements IReport {
         printWriter = null;
     }
 
-    public String[] createReport(Filter filter) {
+    public String[] createReport(Filter inFilter) {
         throw new SecurityException("Not implemented");
     }
 
-    public String createReportXML(Filter filter) {
+    public String createReportXML(Filter inFilter) {
         throw new SecurityException("Not implemented");
     }
 
@@ -434,6 +436,14 @@ public class InternalDumpReport implements IReport {
                 printWriter.println("  " + clarification);
             }
         }
+    }
+
+    public Filter getFilter() {
+        return filter;
+    }
+
+    public void setFilter(Filter filter) {
+        this.filter = filter;
     }
 
 }

@@ -47,6 +47,8 @@ public class AccountsReport implements IReport {
     
     private Filter accountFilter = new Filter();
 
+    private Filter filter;
+
     private void writeSummaryRow(PrintWriter printWriter, int site) {
 
         int total = 0;
@@ -87,7 +89,7 @@ public class AccountsReport implements IReport {
         }
     }
 
-    private void writeReport(PrintWriter printWriter) {
+    public void writeReport(PrintWriter printWriter) {
         printAccountSummaryBySite (printWriter);
         printAccountsByGroup (printWriter);
     }
@@ -171,7 +173,7 @@ public class AccountsReport implements IReport {
         printWriter.println("end report");
     }
 
-    public void createReportFile(String filename, Filter filter) throws IOException {
+    public void createReportFile(String filename, Filter inFilter) throws IOException {
 
         PrintWriter printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
 
@@ -196,11 +198,11 @@ public class AccountsReport implements IReport {
         }
     }
 
-    public String[] createReport(Filter filter) {
+    public String[] createReport(Filter inFilter) {
         throw new SecurityException("Not implemented");
     }
 
-    public String createReportXML(Filter filter) {
+    public String createReportXML(Filter inFilter) {
         throw new SecurityException("Not implemented");
     }
 
@@ -216,6 +218,14 @@ public class AccountsReport implements IReport {
 
     public String getPluginTitle() {
         return "Accounts Report";
+    }
+
+    public Filter getFilter() {
+        return filter;
+    }
+
+    public void setFilter(Filter filter) {
+        this.filter = filter;
     }
 
 }

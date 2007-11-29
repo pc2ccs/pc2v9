@@ -46,7 +46,9 @@ public class RunsByTeamReport implements IReport {
 
     private Filter reportFilter = new Filter();
 
-    private void writeReport(PrintWriter printWriter) {
+    private Filter filter;
+
+    public void writeReport(PrintWriter printWriter) {
 
         // Runs
         Run[] runs = contest.getRuns();
@@ -164,6 +166,10 @@ public class RunsByTeamReport implements IReport {
         
         Problem [] problems = contest.getProblems();
         
+        if (problems.length == 0){
+            printWriter.println("-- No problems defined -- ");
+        }
+        
         for (Problem problem : problems){
             
             Run [] runs = getRunsForProblem(teamsRuns, problem.getElementId());
@@ -242,7 +248,7 @@ public class RunsByTeamReport implements IReport {
         printWriter.println("end report");
     }
 
-    public void createReportFile(String filename, Filter filter) throws IOException {
+    public void createReportFile(String filename, Filter inFilter) throws IOException {
 
         PrintWriter printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
 
@@ -267,16 +273,16 @@ public class RunsByTeamReport implements IReport {
         }
     }
 
-    public String[] createReport(Filter filter) {
+    public String[] createReport(Filter inFilter) {
         throw new SecurityException("Not implemented");
     }
 
-    public String createReportXML(Filter filter) {
+    public String createReportXML(Filter inFilter) {
         throw new SecurityException("Not implemented");
     }
 
     public String getReportTitle() {
-        return "Runs grouped by team Report";
+        return "Runs grouped by team";
     }
 
     public void setContestAndController(IContest inContest, IController inController) {
@@ -288,4 +294,13 @@ public class RunsByTeamReport implements IReport {
     public String getPluginTitle() {
         return "Runs grouped by team Report";
     }
+    
+    public Filter getFilter() {
+        return filter;
+    }
+
+    public void setFilter(Filter filter) {
+        this.filter = filter;
+    }
+
 }

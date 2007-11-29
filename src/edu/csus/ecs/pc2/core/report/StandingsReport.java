@@ -47,6 +47,8 @@ public class StandingsReport implements IReport {
 
     private Log log;
 
+    private Filter filter;
+
     void formatXML(PrintWriter printWriter, String xmlString) throws ParserConfigurationException, SAXException, IOException {
         
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
@@ -58,7 +60,7 @@ public class StandingsReport implements IReport {
         
     }
 
-    private void writeReport(PrintWriter printWriter) throws ParserConfigurationException, SAXException, IOException, IllegalContestState  {
+    public void writeReport(PrintWriter printWriter) throws ParserConfigurationException, SAXException, IOException, IllegalContestState  {
 
         printWriter.println();
         DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
@@ -80,7 +82,7 @@ public class StandingsReport implements IReport {
         printWriter.println("end report");
     }
 
-    public void createReportFile(String filename, Filter filter) throws IOException {
+    public void createReportFile(String filename, Filter inFilter) throws IOException {
 
         PrintWriter printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
 
@@ -105,11 +107,11 @@ public class StandingsReport implements IReport {
         }
     }
 
-    public String[] createReport(Filter filter) {
+    public String[] createReport(Filter inFilter) {
         throw new SecurityException("Not implemented");
     }
 
-    public String createReportXML(Filter filter) {
+    public String createReportXML(Filter inFilter) {
         DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
         try {
             return defaultScoringAlgorithm.getStandings(contest, new Properties(), controller.getLog());
@@ -182,6 +184,14 @@ public class StandingsReport implements IReport {
         for (int i = 0; i < list.getLength(); i++){
             formatLoop(printWriter, list.item(i), indent + "   ");
         }
+    }
+
+    public Filter getFilter() {
+        return filter;
+    }
+
+    public void setFilter(Filter filter) {
+        this.filter = filter;
     }
 
 }

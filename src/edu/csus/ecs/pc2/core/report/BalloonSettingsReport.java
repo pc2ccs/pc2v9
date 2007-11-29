@@ -36,7 +36,9 @@ public class BalloonSettingsReport implements IReport {
 
     private Log log;
 
-    private void writeReport(PrintWriter printWriter) {
+    private Filter filter;
+
+    public void writeReport(PrintWriter printWriter) {
 
         // BalloonSettingss
         printWriter.println();
@@ -78,7 +80,7 @@ public class BalloonSettingsReport implements IReport {
         printWriter.println("end report");
     }
 
-    public void createReportFile(String filename, Filter filter) throws IOException {
+    public void createReportFile(String filename, Filter inFilter) throws IOException {
 
         PrintWriter printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
 
@@ -103,11 +105,11 @@ public class BalloonSettingsReport implements IReport {
         }
     }
 
-    public String[] createReport(Filter filter) {
+    public String[] createReport(Filter inFilter) {
         throw new SecurityException("Not implemented");
     }
 
-    public String createReportXML(Filter filter) {
+    public String createReportXML(Filter inFilter) {
         throw new SecurityException("Not implemented");
     }
 
@@ -124,4 +126,13 @@ public class BalloonSettingsReport implements IReport {
     public String getPluginTitle() {
         return "BalloonSettingsReport";
     }
+    
+    public Filter getFilter() {
+        return filter;
+    }
+
+    public void setFilter(Filter filter) {
+        this.filter = filter;
+    }
+
 }

@@ -42,6 +42,8 @@ public class ClientSettingsReport implements IReport {
 
     private Log log;
 
+    private Filter filter;
+
     /**
      * Return a list of comma delimited problem names.
      * 
@@ -52,7 +54,7 @@ public class ClientSettingsReport implements IReport {
      * @param filter
      * @return
      */
-    private String getProblemlist(Filter filter) {
+    private String getProblemlist(Filter inFilter) {
         ElementId[] elementIds = filter.getProblemIdList();
 
         if (elementIds.length == 0) {
@@ -91,10 +93,10 @@ public class ClientSettingsReport implements IReport {
 
         if (isJudge(clientSettings.getClientId())) {
             printWriter.println(" auto judge " + enabledString(clientSettings.isAutoJudging()));
-            Filter filter = clientSettings.getAutoJudgeFilter();
-            if (filter != null) {
-                ElementId[] elementIds = filter.getProblemIdList();
-                printWriter.println("     Auto judging " + elementIds.length + " problems : " + getProblemlist(filter));
+            Filter clientFilter = clientSettings.getAutoJudgeFilter();
+            if (clientFilter != null) {
+                ElementId[] elementIds = clientFilter.getProblemIdList();
+                printWriter.println("     Auto judging " + elementIds.length + " problems : " + getProblemlist(clientFilter));
             }
 
         } else {
@@ -133,7 +135,7 @@ public class ClientSettingsReport implements IReport {
         return id != null && id.getClientType().equals(ClientType.Type.JUDGE);
     }
 
-    private void writeReport(PrintWriter printWriter) {
+    public void writeReport(PrintWriter printWriter) {
         // ClientSettings
         printWriter.println();
         ClientSettings[] clientSettings = contest.getClientSettingsList();
@@ -157,7 +159,7 @@ public class ClientSettingsReport implements IReport {
         printWriter.println("end report");
     }
 
-    public void createReportFile(String filename, Filter filter) throws IOException {
+    public void createReportFile(String filename, Filter inFilter) throws IOException {
 
         PrintWriter printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
 
@@ -182,11 +184,11 @@ public class ClientSettingsReport implements IReport {
         }
     }
 
-    public String[] createReport(Filter filter) {
+    public String[] createReport(Filter inFilter) {
         throw new SecurityException("Not implemented");
     }
 
-    public String createReportXML(Filter filter) {
+    public String createReportXML(Filter inFilter) {
         throw new SecurityException("Not implemented");
     }
 
@@ -202,6 +204,14 @@ public class ClientSettingsReport implements IReport {
 
     public String getPluginTitle() {
         return "Client Settings Report";
+    }
+
+    public Filter getFilter() {
+        return filter;
+    }
+
+    public void setFilter(Filter filter) {
+        this.filter = filter;
     }
 
 }

@@ -35,6 +35,8 @@ public class ProblemsReport implements IReport {
 
     private Log log;
 
+    private Filter filter;
+
     private void writeRow(PrintWriter printWriter, Problem problem, ProblemDataFiles problemDataFiles) {
         printWriter.println("  Problem '" + problem + "' ver="+ problem.getElementId().getVersionNumber()+" id=" + problem.getElementId());
         printWriter.println("       Data file name   : " + problem.getDataFileName());
@@ -130,7 +132,7 @@ public class ProblemsReport implements IReport {
 
     }
 
-    private void writeReport(PrintWriter printWriter) {
+    public void writeReport(PrintWriter printWriter) {
 
         // Problem
         printWriter.println();
@@ -170,7 +172,7 @@ public class ProblemsReport implements IReport {
         printWriter.println("end report");
     }
 
-    public void createReportFile(String filename, Filter filter) throws IOException {
+    public void createReportFile(String filename, Filter inFilter) throws IOException {
 
         PrintWriter printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
 
@@ -195,11 +197,11 @@ public class ProblemsReport implements IReport {
         }
     }
 
-    public String[] createReport(Filter filter) {
+    public String[] createReport(Filter inFilter) {
         throw new SecurityException("Not implemented");
     }
 
-    public String createReportXML(Filter filter) {
+    public String createReportXML(Filter inFilter) {
         throw new SecurityException("Not implemented");
     }
 
@@ -216,5 +218,14 @@ public class ProblemsReport implements IReport {
     public String getPluginTitle() {
         return "Problems Report";
     }
+    
+    public Filter getFilter() {
+        return filter;
+    }
+
+    public void setFilter(Filter filter) {
+        this.filter = filter;
+    }
+
 
 }

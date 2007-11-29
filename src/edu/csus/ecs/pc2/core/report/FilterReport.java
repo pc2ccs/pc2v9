@@ -35,23 +35,27 @@ public class FilterReport implements IReport {
 
     private Log log;
 
-    private void writeReport(PrintWriter printWriter) {
+    private Filter filter;
+
+    public void writeReport(PrintWriter printWriter) {
         
         // find any filters in contes and dump them here.
         
         throw new UnsupportedOperationException(); // TODO code
     }
 
-    public void writeReportDetailed(PrintWriter printWriter, Filter filter) {
+    public void writeReportDetailed(PrintWriter printWriter, Filter inFilter) {
 
-        printWriter.println("  '" + filter + " " + filter);
+        filter = null;
+        
+        printWriter.println("  '" + inFilter + " " + inFilter);
 
-        printWriter.println("     Filter problems: " + filter.isFilteringProblems());
-        printWriter.println("   Filter run states: " + filter.isFilteringRunStates());
+        printWriter.println("     Filter problems: " + inFilter.isFilteringProblems());
+        printWriter.println("   Filter run states: " + inFilter.isFilteringRunStates());
         printWriter.println();
 
         try {
-            ElementId[] elementIds = filter.getProblemIdList();
+            ElementId[] elementIds = inFilter.getProblemIdList();
             printWriter.println("-- " + elementIds.length + " Problems filtered --");
             for (ElementId elementId : elementIds) {
                 Problem problem = contest.getProblem(elementId);
@@ -69,7 +73,7 @@ public class FilterReport implements IReport {
         printWriter.println();
         
         try {
-            RunStates[] runStatesList = filter.getRunStates();
+            RunStates[] runStatesList = inFilter.getRunStates();
             printWriter.println("-- " + runStatesList.length + " Run states filtered --");
             for (RunStates runStates : runStatesList) {
                 printWriter.println("   " + runStates);
@@ -80,12 +84,12 @@ public class FilterReport implements IReport {
 
     }
 
-    public void writeReport(PrintWriter printWriter, Filter filter) {
+    public void writeReport(PrintWriter printWriter, Filter inFilter) {
 
         // Filters
         printWriter.println();
 
-        printWriter.println("  '" + filter + " " + filter);
+        printWriter.println("  '" + inFilter + " " + inFilter);
     }
 
     private void printHeader(PrintWriter printWriter) {
@@ -99,7 +103,7 @@ public class FilterReport implements IReport {
         printWriter.println("end report");
     }
 
-    public void createReportFile(String filename, Filter filter) throws IOException {
+    public void createReportFile(String filename, Filter inFilter) throws IOException {
 
         PrintWriter printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
 
@@ -124,11 +128,11 @@ public class FilterReport implements IReport {
         }
     }
 
-    public String[] createReport(Filter filter) {
+    public String[] createReport(Filter inFilter) {
         throw new SecurityException("Not implemented");
     }
 
-    public String createReportXML(Filter filter) {
+    public String createReportXML(Filter inFilter) {
         throw new SecurityException("Not implemented");
     }
 
@@ -144,6 +148,14 @@ public class FilterReport implements IReport {
 
     public String getPluginTitle() {
         return "Filters Report";
+    }
+
+    public Filter getFilter() {
+        return filter;
+    }
+
+    public void setFilter(Filter filter) {
+        this.filter = filter;
     }
 
 }
