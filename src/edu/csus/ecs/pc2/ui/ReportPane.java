@@ -24,17 +24,21 @@ import edu.csus.ecs.pc2.core.report.BalloonSettingsReport;
 import edu.csus.ecs.pc2.core.report.BalloonSummaryReport;
 import edu.csus.ecs.pc2.core.report.ClarificationsReport;
 import edu.csus.ecs.pc2.core.report.ClientSettingsReport;
+import edu.csus.ecs.pc2.core.report.ContestAnalysisReport;
 import edu.csus.ecs.pc2.core.report.ContestReport;
+import edu.csus.ecs.pc2.core.report.FastestSolvedReport;
 import edu.csus.ecs.pc2.core.report.GroupsReport;
 import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.core.report.InternalDumpReport;
 import edu.csus.ecs.pc2.core.report.JudgementReport;
 import edu.csus.ecs.pc2.core.report.LanguagesReport;
+import edu.csus.ecs.pc2.core.report.ListRunLanguages;
 import edu.csus.ecs.pc2.core.report.LoginReport;
 import edu.csus.ecs.pc2.core.report.OldRunsReport;
 import edu.csus.ecs.pc2.core.report.ProblemsReport;
 import edu.csus.ecs.pc2.core.report.RunsByTeamReport;
 import edu.csus.ecs.pc2.core.report.RunsReport;
+import edu.csus.ecs.pc2.core.report.SolutionsByProblemReport;
 import edu.csus.ecs.pc2.core.report.StandingsReport;
 
 /**
@@ -112,13 +116,18 @@ public class ReportPane extends JPanePlugin {
         this.add(getMainPane(), java.awt.BorderLayout.CENTER);
 
         // populate list of reports
-        listOfReports = new IReport[18];
+        listOfReports = new IReport[22];
         int repNo = 0;
         listOfReports[repNo++] = new AccountsReport();
         listOfReports[repNo++] = new BalloonSummaryReport();
         
         listOfReports[repNo++] = new AllReports();
         listOfReports[repNo++] = new ContestReport();
+        
+        listOfReports[repNo++] = new ContestAnalysisReport();
+        listOfReports[repNo++] = new SolutionsByProblemReport();
+        listOfReports[repNo++] = new ListRunLanguages();
+        listOfReports[repNo++] = new FastestSolvedReport();
         
         listOfReports[repNo++] = new StandingsReport();
         listOfReports[repNo++] = new LoginReport();
