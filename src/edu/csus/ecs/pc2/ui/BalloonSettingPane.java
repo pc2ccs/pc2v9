@@ -334,7 +334,7 @@ public class BalloonSettingPane extends JPanePlugin {
         }
         if (getSendEmailNotificationsCheckBox().isSelected()) {
             if (getEmailContactTextBox().getText().length() < 1) {
-                showMessage("You must specify a email address/contact");
+                showMessage("You must specify an email address/contact");
                 return false;
             }
             if (getEmailServerTextBox().getText().length() < 1) {
