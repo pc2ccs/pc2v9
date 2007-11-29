@@ -6,6 +6,6 @@ rem $HeadURL$
 
 call %0\..\pc2env.bat
 
-java -cp %libdir%\pc2.jar edu.csus.ecs.pc2.core.archive.ZipPC2
+java -Xms64M -Xmx768M -cp %libdir%\pc2.jar edu.csus.ecs.pc2.core.archive.ZipPC2
 
 rem eof pc2ver.bat $Id$
