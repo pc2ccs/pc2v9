@@ -120,6 +120,7 @@ public class InternalDumpReport implements IReport {
         printWriter.println("-- Contest Information --");
         printWriter.println("  Title : '" + contestInformation.getContestTitle()+"'");
         printWriter.println("  URL   : '" + contestInformation.getContestURL()+"'");
+        printWriter.println("  Judges' Default Answer: '" + contestInformation.getJudgesDefaultAnswer()+"'");
         
         if (contestInformation.getTeamDisplayMode() != null){
             printWriter.println("  Judges see: "+contestInformation.getTeamDisplayMode());

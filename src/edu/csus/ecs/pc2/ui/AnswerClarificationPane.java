@@ -97,6 +97,8 @@ public class AnswerClarificationPane extends JPanePlugin {
 
     private DisplayTeamName displayTeamName = null;
 
+    private String defaultAnswer;
+
     /**
      * This method initializes
      * 
@@ -474,15 +476,20 @@ public class AnswerClarificationPane extends JPanePlugin {
         if (defaultAnswerButton == null) {
             defaultAnswerButton = new JButton();
             defaultAnswerButton.setText("Default Answer");
-            defaultAnswerButton.setToolTipText("No response, read problem statement");
+            defaultAnswerButton.setToolTipText(getDefaultAnswerText());
             defaultAnswerButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    answerTextArea.setText("No response, read problem statement");
+                    answerTextArea.setText(defaultAnswerButton.getToolTipText());
                     updateClarification();
                 }
             });
         }
         return defaultAnswerButton;
+    }
+
+    private String getDefaultAnswerText() {
+        
+        return defaultAnswer;
     }
 
     /**
@@ -634,7 +641,23 @@ public class AnswerClarificationPane extends JPanePlugin {
         }
         return questionTextArea;
     }
+
+    public void setDefaultAnswerText(String judgesDefaultAnswer) {
+        defaultAnswer = judgesDefaultAnswer;
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                updateDefaultAnswerButton();
+            }
+
+        });
+    }
     
+    /**
+     * This method must be invokved from the AWT thread.  Caller beware!
+     */
+    private void updateDefaultAnswerButton() {
+        getDefaultAnswerButton().setToolTipText(defaultAnswer);
+    }
     
 
 } // @jve:decl-index=0:visual-constraint="10,10"

@@ -26,6 +26,8 @@ public class ContestInformation implements Serializable{
     private String contestURL;
     
     private TeamDisplayMask teamDisplayMode = TeamDisplayMask.LOGIN_NAME_ONLY;
+
+    private String judgesDefaultAnswer = "No response, read problem statement";
     
     /**
      * 
@@ -80,6 +82,21 @@ public class ContestInformation implements Serializable{
     public void setTeamDisplayMode(TeamDisplayMask teamDisplayMask) {
         this.teamDisplayMode = teamDisplayMask;
     }
+
+    public String getJudgesDefaultAnswer() {
+        return judgesDefaultAnswer ;
+    }
+
+    /**
+     * judgesDefaultAnswer must be a non-zero length trimmed string.
+     * 
+     * @param judgesDefaultAnswer The judgesDefaultAnswer to set.
+     */
+    public void setJudgesDefaultAnswer(String judgesDefaultAnswer) {
+        if (judgesDefaultAnswer != null && judgesDefaultAnswer.trim().length() > 0) {
+            this.judgesDefaultAnswer = judgesDefaultAnswer.trim();
+        }
+    }
     
     public boolean isSameAs(ContestInformation contestInformation) {
         try {
@@ -91,6 +108,9 @@ public class ContestInformation implements Serializable{
                 if (!contestTitle.equals(contestInformation.getContestTitle())) {
                     return false;
                 }
+            }
+            if (!judgesDefaultAnswer.equals(contestInformation.getJudgesDefaultAnswer())) {
+                return false;
             }
             if (!teamDisplayMode.equals(contestInformation.getTeamDisplayMode())) {
                 return false;

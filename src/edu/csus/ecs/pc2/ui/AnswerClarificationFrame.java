@@ -5,8 +5,10 @@ import javax.swing.JFrame;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClarificationEvent;
+import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
 import edu.csus.ecs.pc2.core.model.IClarificationListener;
 import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IContestInformationListener;
 import edu.csus.ecs.pc2.core.model.ClarificationEvent.Action;
 
 /**
@@ -65,7 +67,9 @@ public class AnswerClarificationFrame extends JFrame implements UIPlugin {
 
         getAnswerClarificationPane().setContestAndController(contest, controller);
         getAnswerClarificationPane().setParentFrame(this);
+        getAnswerClarificationPane().setDefaultAnswerText(contest.getContestInformation().getJudgesDefaultAnswer());
 
+        contest.addContestInformationListener(new ContestInformationListenerImplementation());
         contest.addClarificationListener(new ClarificationListenerImplementation());
     }
 
@@ -120,6 +124,34 @@ public class AnswerClarificationFrame extends JFrame implements UIPlugin {
         }
     }
 
+    /**
+     * Is responsible for updating the default answer field on the AnswerClarificationPane.
+     * Note the Pane is responsible for updating it UI.
+     * 
+     * @author pc2@ecs.csus.edu
+     *
+     */
+    public class ContestInformationListenerImplementation implements IContestInformationListener {
+
+        public void contestInformationAdded(ContestInformationEvent event) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        public void contestInformationChanged(ContestInformationEvent event) {
+            // TODO Auto-generated method stub
+            if (event.getContestInformation() != null) {
+                String answer = event.getContestInformation().getJudgesDefaultAnswer();
+                getAnswerClarificationPane().setDefaultAnswerText(answer);
+            }
+        }
+
+        public void contestInformationRemoved(ContestInformationEvent event) {
+            // TODO Auto-generated method stub
+            
+        }
+        
+    }
     /**
      * This method initializes answerClarificationPane
      * 

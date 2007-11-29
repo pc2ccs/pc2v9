@@ -62,6 +62,10 @@ public class ContestInformationPane extends JPanePlugin {
 
     private JButton cancelButton = null;
 
+    private JTextField judgesDefaultAnswerTextField = null;
+
+    private JLabel judgesDefaultAnswerLabel = null;
+
     /**
      * This method initializes
      * 
@@ -115,6 +119,8 @@ public class ContestInformationPane extends JPanePlugin {
             centerPane.add(contestTitleLabel, null);
             centerPane.add(getContestTitleTextField(), null);
             centerPane.add(getTeamDisplaySettingPane(), null);
+            centerPane.add(getJudgesDefaultAnswerLabel(), null);
+            centerPane.add(getJudgesDefaultAnswerTextField(), null);
         }
         return centerPane;
     }
@@ -191,6 +197,7 @@ public class ContestInformationPane extends JPanePlugin {
             // DEFAULT
             contestInformation.setTeamDisplayMode(TeamDisplayMask.LOGIN_NAME_ONLY);
         }
+        contestInformation.setJudgesDefaultAnswer(getJudgesDefaultAnswerTextField().getText());
         return(contestInformation);
     }
     
@@ -216,6 +223,7 @@ public class ContestInformationPane extends JPanePlugin {
                 ContestInformation contestInformation = getContest().getContestInformation();
                 getContestTitleTextField().setText(contestInformation.getContestTitle());
                 selectDisplayRadioButton();
+                getJudgesDefaultAnswerTextField().setText(contestInformation.getJudgesDefaultAnswer());
                 setEnableButtons(false);
             }
         });
@@ -441,6 +449,43 @@ public class ContestInformationPane extends JPanePlugin {
             });
         }
         return cancelButton;
+    }
+
+    /**
+     * This method initializes JudgesDefaultAnswerTextField
+     * 
+     * @return javax.swing.JTextField
+     */
+    private JTextField getJudgesDefaultAnswerTextField() {
+        if (judgesDefaultAnswerTextField == null) {
+            judgesDefaultAnswerTextField = new JTextField();
+            judgesDefaultAnswerTextField.setText("");
+            judgesDefaultAnswerTextField.setSize(new java.awt.Dimension(280, 27));
+            judgesDefaultAnswerTextField.setLocation(new java.awt.Point(209, 169));
+            judgesDefaultAnswerTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
+        }
+        return judgesDefaultAnswerTextField;
+    }
+
+    /**
+     * This method initializes judgesDefaultAnswerLabel
+     * 
+     * @return javax.swing.JLabel
+     */
+    private JLabel getJudgesDefaultAnswerLabel() {
+        if (judgesDefaultAnswerLabel == null) {
+            judgesDefaultAnswerLabel = new JLabel();
+            judgesDefaultAnswerLabel.setText("Judges' Default Answer");
+            judgesDefaultAnswerLabel.setHorizontalTextPosition(javax.swing.SwingConstants.TRAILING);
+            judgesDefaultAnswerLabel.setLocation(new java.awt.Point(25, 165));
+            judgesDefaultAnswerLabel.setSize(new java.awt.Dimension(175, 27));
+            judgesDefaultAnswerLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        }
+        return judgesDefaultAnswerLabel;
     }
 
     // private ButtonGroup getTeamReadsFrombuttonGroup() {
