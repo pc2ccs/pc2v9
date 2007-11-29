@@ -3,23 +3,32 @@ package edu.csus.ecs.pc2.core.report;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.Date;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.Site;
 
 /**
- * All Reports, very long contains most reports.
+ * Create sitelist.txt file.
+ * 
+ * The format for the site list file is:
+ * 
+ * <pre>
+ *   &lt;site #&gt;|&lt;site title&gt;|&lt;site password&gt;|&lt;site IP&gt;|&lt;site Port&gt;|&lt;site element Id&gt;
+ * </pre>
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
 
 // $HeadURL$
-public class AllReports implements IReport {
+public class SiteListReport implements IReport {
 
     /**
      * 
@@ -31,67 +40,45 @@ public class AllReports implements IReport {
     private IController controller;
 
     private Log log;
-    
+
     private Filter filter;
-    
+
     public void writeReport(PrintWriter printWriter) {
-        
-        IReport[] listOfReports;
-        
-        listOfReports = new IReport[13];
-        int repNo = 0;
-        
-        listOfReports[repNo++] = new ContestAnalysisReport();
-        listOfReports[repNo++] = new SolutionsByProblemReport();
-        listOfReports[repNo++] = new ListRunLanguages();
-        listOfReports[repNo++] = new FastestSolvedReport();
-        
-        listOfReports[repNo++] = new RunsByTeamReport();
-        
-        listOfReports[repNo++] = new RunsReport();
-        
-        listOfReports[repNo++] = new ProblemsReport();
-        listOfReports[repNo++] = new LanguagesReport();
-        listOfReports[repNo++] = new AccountsReport();
-        
-        listOfReports[repNo++] = new ClarificationsReport();
-        listOfReports[repNo++] = new OldRunsReport();
-        
-        listOfReports[repNo++] = new BalloonSummaryReport();
 
-        listOfReports[repNo++] = new JudgementReport();
+        // Judgements
+        printWriter.println();
 
-        for (IReport report : listOfReports) {
-            try {
+        Site[] sites = contest.getSites();
 
-                if (report != null){
-                    report.setContestAndController(contest, controller);
-                    printWriter.println("**** " + report.getReportTitle()+" Report");
-                    report.writeReport(printWriter);
-                    printWriter.println();
-                }
-                
-            } catch (Exception e) {
-                printWriter.println("Exception in report: " + e.getMessage());
-                e.printStackTrace(printWriter);
-            }
+        Arrays.sort(sites, new SiteComparatorBySiteNumber());
+
+        printWriter.println("# -- " + sites.length + " sites --");
+
+        for (Site site : sites) {
+            printWriter.print(site.getSiteNumber());
+            printWriter.print("|");
+            printWriter.print(site.getDisplayName());
+            printWriter.print("|");
+            printWriter.print(site.getPassword());
+            printWriter.print("|");
+            printWriter.print(site.getConnectionInfo().getProperty(Site.IP_KEY));
+            printWriter.print("|");
+            printWriter.print(site.getConnectionInfo().getProperty(Site.PORT_KEY));
+            printWriter.print("|");
+            printWriter.print(site.getElementId());
+            printWriter.print("|");
         }
     }
 
     private void printHeader(PrintWriter printWriter) {
-        printWriter.println();
-        printWriter.println(new VersionInfo().getSystemName());
-        printWriter.println("Date: " + new Date());
-        printWriter.println(new VersionInfo().getSystemVersionInfo());
-        printWriter.println();
-        printWriter.println("On: "+new Date());
-        printWriter.println();
-        
+        printWriter.println("# " + new VersionInfo().getSystemName());
+        printWriter.println("# Date: " + new Date());
+        printWriter.println("# " + new VersionInfo().getSystemVersionInfo());
     }
 
     private void printFooter(PrintWriter printWriter) {
         printWriter.println();
-        printWriter.println("end "+getReportTitle()+" report");
+        printWriter.println("# end report");
     }
 
     public void createReportFile(String filename, Filter inFilter) throws IOException {
@@ -128,7 +115,7 @@ public class AllReports implements IReport {
     }
 
     public String getReportTitle() {
-        return "All Reports";
+        return "Site List";
     }
 
     public void setContestAndController(IContest inContest, IController inController) {
@@ -138,7 +125,7 @@ public class AllReports implements IReport {
     }
 
     public String getPluginTitle() {
-        return "All Reports Report";
+        return "Site List Report";
     }
 
     public Filter getFilter() {
