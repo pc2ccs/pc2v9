@@ -401,7 +401,7 @@ public class AccountsPane extends JPanePlugin {
         
         int selectedIndex = accountListBox.getSelectedIndex();
         if(selectedIndex == -1){
-            showMessage("Select a account to edit");
+            showMessage("Select an account to edit");
             return;
         }
         
