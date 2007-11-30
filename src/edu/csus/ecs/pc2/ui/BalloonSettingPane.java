@@ -122,6 +122,7 @@ public class BalloonSettingPane extends JPanePlugin {
 
         contest = inContest;
         log = getController().getLog();
+        addWindowCloserListener();
     }
 
     public String getPluginTitle() {
@@ -212,6 +213,20 @@ public class BalloonSettingPane extends JPanePlugin {
         if (getParentFrame() != null) {
             getParentFrame().setVisible(false);
         }
+    }
+
+    private void addWindowCloserListener() {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                if (getParentFrame() != null) {
+                    getParentFrame().addWindowListener(new java.awt.event.WindowAdapter() {
+                        public void windowClosing(java.awt.event.WindowEvent e) {
+                            handleCancelButton();
+                        }
+                    });
+                }
+            }
+        });
     }
 
     protected void enableUpdateButtons(boolean fieldsChanged) {
