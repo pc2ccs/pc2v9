@@ -1479,8 +1479,9 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         Properties properties = (Properties)packet.getContent();
         // does the packet includes problemDataFiles
         if (properties.containsKey(PacketFactory.PROBLEM_DATA_FILES)) {
-            // null the files out
-            properties.put(PacketFactory.PROBLEM_DATA_FILES, null);
+            ProblemDataFiles pdf = (ProblemDataFiles)properties.get(PacketFactory.PROBLEM_DATA_FILES);
+            // null the files out (place an empty ProblemDataFiles)
+            properties.put(PacketFactory.PROBLEM_DATA_FILES, new ProblemDataFiles(contest.getProblem(pdf.getProblemId())));
             // stick it back into the packet
             packet.setContent(properties);
         }
