@@ -2296,21 +2296,10 @@ public class PacketHandler {
             clientSettings = contest.getClientSettingsList();
             accounts = getAllAccounts();
         }
-        // only send balloon to me
-        BalloonSettings[] allBalloonSettings = contest.getBalloonSettings();
-        Vector<BalloonSettings> balloonSettingsVector= new Vector<BalloonSettings>();
-        if (allBalloonSettings != null) {
-            for (BalloonSettings settings : allBalloonSettings) {
-                if (settings.isMatchesBalloonClient(clientId)) {
-                    balloonSettingsVector.add(settings);
-                }
-            }
-        }
-        BalloonSettings[] myBalloonSettings = (BalloonSettings[]) balloonSettingsVector.toArray(new BalloonSettings[balloonSettingsVector.size()]);
 
         ContestLoginSuccessData contestLoginSuccessData = new ContestLoginSuccessData();
         contestLoginSuccessData.setAccounts(accounts);
-        contestLoginSuccessData.setBalloonSettingsArray(myBalloonSettings);
+        contestLoginSuccessData.setBalloonSettingsArray(contest.getBalloonSettings());
         contestLoginSuccessData.setClarifications(clarifications);
         contestLoginSuccessData.setClientSettings(clientSettings);
         contestLoginSuccessData.setConnectionHandlerIDs(contest.getConnectionHandleIDs());
