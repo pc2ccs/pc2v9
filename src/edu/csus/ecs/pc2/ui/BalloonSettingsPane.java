@@ -106,7 +106,7 @@ public class BalloonSettingsPane extends JPanePlugin {
         if (balloonSettingsListBox == null) {
             balloonSettingsListBox = new MCLB();
 
-            Object[] cols = { "Site", "Print", "E-mail", "Printer", "Send To", "Mail Server" };
+            Object[] cols = { "Site", "Print", "E-mail", "Printer", "Send To", "Mail Server" , "Balloon Client"};
 
             balloonSettingsListBox.addColumns(cols);
 
@@ -131,6 +131,8 @@ public class BalloonSettingsPane extends JPanePlugin {
             balloonSettingsListBox.setColumnSorter(4, sorter, 4);
             // Mail Server
             balloonSettingsListBox.setColumnSorter(5, sorter, 6);
+            // Balloon Client
+            balloonSettingsListBox.setColumnSorter(6, sorter, 7);
 
             balloonSettingsListBox.autoSizeAllColumns();
 
@@ -164,7 +166,7 @@ public class BalloonSettingsPane extends JPanePlugin {
     }
 
     protected Object[] buildBalloonSettingsRow(BalloonSettings balloonSettings) {
-//        Object[] cols = { "Site", "Print", "E-mail", "Printer", "Sent To", "Mail Server" };
+//        Object[] cols = { "Site", "Print", "E-mail", "Printer", "Sent To", "Mail Server" , "Balloon Client"};
         int numberColumns = balloonSettingsListBox.getColumnCount();
         Object[] c = new String[numberColumns];
 
@@ -174,6 +176,8 @@ public class BalloonSettingsPane extends JPanePlugin {
         c[3] = balloonSettings.getPrintDevice();
         c[4] = balloonSettings.getEmailContact();
         c[5] = balloonSettings.getMailServer();
+        // it is an error if we get here and balloonClient is not set
+        c[6] = balloonSettings.getBalloonClient().toString();
 
         return c;
     }

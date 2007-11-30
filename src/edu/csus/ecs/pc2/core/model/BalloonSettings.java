@@ -60,6 +60,11 @@ public class BalloonSettings implements IElementObject {
      */
     private int linesPerPage = 66;
 
+    /**
+     * Which client is responsible for this BalloonSettings.
+     */
+    private ClientId balloonClient = null;
+    
     public BalloonSettings(String displayName, int siteNumber) {
         super();
         elementId = new ElementId(displayName);
@@ -320,7 +325,19 @@ public class BalloonSettings implements IElementObject {
             if (! stringSame(getMailServer(),balloonSettings.getMailServer())) {
                 return false;
             }
-
+            if (balloonClient == null) {
+                if (balloonSettings.getBalloonClient() != null) {
+                    return false;
+                }
+            } else {
+                if (balloonSettings.getBalloonClient() == null) {
+                    return false;
+                } else {
+                    if (!balloonClient.equals(balloonSettings.getBalloonClient())) {
+                        return false;
+                    }
+                }
+            }
             // If balloon color lists are different sizes, then false.
             if (balloonSettings.getProblemIDList().length != getProblemIDList().length){
                 return false;
@@ -358,5 +375,29 @@ public class BalloonSettings implements IElementObject {
      */
     private void setBalloonsEnabled(boolean balloonsEnabled) {
         this.balloonsEnabled = balloonsEnabled;
+    }
+
+    /**
+     * @return Returns the balloonClient.
+     */
+    public ClientId getBalloonClient() {
+        return balloonClient;
+    }
+
+    /**
+     * @param balloonClient The balloonClient to set.
+     */
+    public void setBalloonClient(ClientId balloonClient) {
+        this.balloonClient = balloonClient;
+    }
+    
+    public boolean isMatchesBalloonClient(ClientId clientId) {
+        if (balloonClient == null) {
+            return clientId == null;
+        }
+        if (clientId == null) {
+            return false;
+        }
+        return balloonClient.equals(clientId);
     }
 }

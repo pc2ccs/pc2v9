@@ -50,6 +50,7 @@ public class BalloonSettingsReport implements IReport {
         printWriter.println("-- " + balloonSettings.length + " BalloonSettings--");
         for (BalloonSettings balloonSetting : balloonSettings) {
             printWriter.println("Site '" + balloonSetting.getSiteNumber() + "' id=" + balloonSetting.getElementId());
+            printWriter.println("      Balloon Client     : " + balloonSetting.getBalloonClient());
             printWriter.println("      Print balloons     : " + balloonSetting.isPrintBalloons());
             printWriter.println("      Print device       : " + balloonSetting.getPrintDevice());
             printWriter.println("      Postscript capable : " + balloonSetting.isPostscriptCapable());

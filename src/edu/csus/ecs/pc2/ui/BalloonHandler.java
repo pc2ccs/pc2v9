@@ -52,7 +52,7 @@ public class BalloonHandler extends JPanePlugin {
         public void balloonSettingsAdded(BalloonSettingsEvent event) {
             loadBalloonSettings();
             BalloonSettings balloonSettings = event.getBalloonSettings();
-            if (balloonSettings != null && balloonSettings.isBalloonsEnabled()) {
+            if (balloonSettings != null && balloonSettings.isBalloonsEnabled() && balloonSettings.isMatchesBalloonClient(getContest().getClientId())) {
                 recomputeBalloons(balloonSettings.getSiteNumber());
             }
             
@@ -63,7 +63,7 @@ public class BalloonHandler extends JPanePlugin {
             // are uptodate
             loadBalloonSettings();
             BalloonSettings balloonSettings = event.getBalloonSettings();
-            if (balloonSettings != null && balloonSettings.isBalloonsEnabled()) {
+            if (balloonSettings != null && balloonSettings.isBalloonsEnabled() && balloonSettings.isMatchesBalloonClient(getContest().getClientId())) {
                 recomputeBalloons(balloonSettings.getSiteNumber());
             }
         }
@@ -170,8 +170,10 @@ public class BalloonHandler extends JPanePlugin {
             balloonSettingsHash.clear();
             for (int i = 0; i < balloonSettings.length; i++) {
                 BalloonSettings settings = balloonSettings[i];
-                Integer siteNum = settings.getSiteNumber();
-                balloonSettingsHash.put(siteNum, settings);
+                if (settings.isMatchesBalloonClient(getContest().getClientId())) {
+                    Integer siteNum = settings.getSiteNumber();
+                    balloonSettingsHash.put(siteNum, settings);
+                }
             }
         }
     }

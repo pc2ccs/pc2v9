@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.ui;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.util.Arrays;
+import java.util.Vector;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -14,10 +15,14 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
+import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.BalloonSettings;
+import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Site;
@@ -86,6 +91,10 @@ public class BalloonSettingPane extends JPanePlugin {
 
     private IContest contest;
 
+    private JLabel balloonClientLabel = null;
+
+    private JComboBox balloonClientComboBox = null;
+
     /**
      * This method initializes
      * 
@@ -101,7 +110,7 @@ public class BalloonSettingPane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new java.awt.Dimension(610, 306));
+        this.setSize(new java.awt.Dimension(610, 400));
 
         this.add(getMessagePane(), java.awt.BorderLayout.NORTH);
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
@@ -237,6 +246,13 @@ public class BalloonSettingPane extends JPanePlugin {
             checkBalloonSettings =  new BalloonSettings(site.getDisplayName(), site.getSiteNumber());
         }
 
+        // XXX should this Exception  be in the above null check?
+        if (getBalloonClientComboBox().getSelectedIndex() == 0) {
+            // select user
+            new InvalidFieldValue("Invalid balloon user selected.");
+        } else {
+            checkBalloonSettings.setBalloonClient((ClientId)getBalloonClientComboBox().getSelectedItem());
+        }
         checkBalloonSettings.setPrintBalloons(getPrintNotificationsCheckBox().isSelected());
         checkBalloonSettings.setEmailBalloons(getSendEmailNotificationsCheckBox().isSelected());
 
@@ -343,6 +359,10 @@ public class BalloonSettingPane extends JPanePlugin {
             }
         }
 
+        if (getBalloonClientComboBox().getSelectedIndex() == 0) {
+            showMessage("You must specify a Balloon Client");
+            return false;
+        }
         // TODO validate site combo working
 //        if (getSiteComboBox().getSelectedIndex() < 1) {
 //            showMessage("You must specify a site number");
@@ -442,10 +462,12 @@ public class BalloonSettingPane extends JPanePlugin {
             getAddButton().setEnabled(true);
             getUpdateButton().setVisible(false);
             populateSiteJCombo(0);
+            populateBalloonClientCombo(null);
             getSiteComboBox().setEnabled(true);
 
         } else {
             populateSiteJCombo(balloonSettings.getSiteNumber());
+            populateBalloonClientCombo(balloonSettings.getBalloonClient());
             getSiteComboBox().setEnabled(false);
             getSendEmailNotificationsCheckBox().setSelected(inBalloonSettings.isEmailBalloons());
             getPrintNotificationsCheckBox().setSelected(inBalloonSettings.isPrintBalloons());
@@ -464,6 +486,35 @@ public class BalloonSettingPane extends JPanePlugin {
 
         enableButtons();
 
+    }
+
+    private void populateBalloonClientCombo(ClientId balloonClient) {
+        
+        // combo should be populate with all admin and board clients for all sites
+        Vector<Account> accounts = getContest().getAccounts(ClientType.Type.SCOREBOARD);
+        accounts.addAll(getContest().getAccounts(ClientType.Type.ADMINISTRATOR));
+        Account[] accountArray;
+        getBalloonClientComboBox().removeAllItems();
+        getBalloonClientComboBox().addItem("Select User");
+        if (accounts.size() > 0) {
+            accountArray = accounts.toArray(new Account[accounts.size()]);
+            // TODO ideally this would be boards 1st, then admins
+            Arrays.sort(accountArray, new AccountComparator());
+            int found = 0;
+            int count = 0;
+            for (Account account : accountArray) {
+                getBalloonClientComboBox().addItem(account.getClientId());
+                count++;
+                if (balloonClient != null && account.getClientId().equals(balloonClient)) {
+                    found = count;
+                }
+            }
+            if (balloonClient == null ) {
+                getBalloonClientComboBox().setSelectedIndex(0);
+            } else {
+                getBalloonClientComboBox().setSelectedIndex(found);
+            }
+        }
     }
 
     /**
@@ -539,6 +590,10 @@ public class BalloonSettingPane extends JPanePlugin {
      */
     private JPanel getCenterPane() {
         if (centerPane == null) {
+            balloonClientLabel = new JLabel();
+            balloonClientLabel.setText("Balloon Client");
+            balloonClientLabel.setSize(new java.awt.Dimension(100,16));
+            balloonClientLabel.setLocation(new java.awt.Point(29,246));
             siteLabel = new JLabel();
             siteLabel.setBounds(new java.awt.Rectangle(25, 22, 48, 16));
             siteLabel.setText("Site");
@@ -565,6 +620,8 @@ public class BalloonSettingPane extends JPanePlugin {
             centerPane.add(siteLabel, null);
             centerPane.add(getColorListBox(), null);
             centerPane.add(getSiteComboBox(), null);
+            centerPane.add(balloonClientLabel, null);
+            centerPane.add(getBalloonClientComboBox(), null);
         }
         return centerPane;
     }
@@ -618,9 +675,8 @@ public class BalloonSettingPane extends JPanePlugin {
                 StaticLog.getLog().log(Log.DEBUG, "Input Balloon Setting (but not saving) ", e);
                 enableButton = true;
             }
-
         } else {
-            if (getSiteComboBox().getSelectedIndex() > 0 && getAddButton().isVisible()) {
+            if (getSiteComboBox().getSelectedIndex() > 0 && getBalloonClientComboBox().getSelectedIndex() > 0 && getAddButton().isVisible()) {
                 enableButton = true;
             }
         }
@@ -754,6 +810,26 @@ public class BalloonSettingPane extends JPanePlugin {
             });
         }
         return siteComboBox;
+    }
+
+    /**
+     * This method initializes balloonClientComboBox
+     * 
+     * @return javax.swing.JComboBox
+     */
+    private JComboBox getBalloonClientComboBox() {
+        if (balloonClientComboBox == null) {
+            balloonClientComboBox = new JComboBox();
+            balloonClientComboBox.setBounds(new java.awt.Rectangle(143, 240, 204, 25));
+            balloonClientComboBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    // message is usually only updated on Update/Add, clear it till then
+                    showMessage("");
+                    enableButtons();
+                }
+            });
+        }
+        return balloonClientComboBox;
     }
 
 } // @jve:decl-index=0:visual-constraint="28,22"
