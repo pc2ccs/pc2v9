@@ -250,6 +250,10 @@ public class ScoreboardView extends JFrame implements UIPlugin {
                     outputStream.close();
                     if (output.length() > 0) {
                         File outputFile = new File(outputDir + File.separator + outputFilename);
+                        if (xslFilename.equals("pc2export.xsl")) {
+                            // change that, we want the pc2export written as a .dat in the cwd
+                            outputFile = new File("pc2export.dat");
+                        }
                         // behaviour of renameTo is platform specific, try the possibly atomic 1st
                         if (!output.renameTo(outputFile)) {
                             // otherwise fallback to the delete then rename
