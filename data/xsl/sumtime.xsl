@@ -79,8 +79,8 @@ Last updated
             </xsl:for-each>
         </xsl:template>
         <xsl:template name="problemColor">
-            <xsl:for-each select="/contestStandings/standingsHeader/problem">
-<td><center><xsl:choose><xsl:when test="@color"> <xsl:value-of select="@color"/></xsl:when><xsl:otherwise>Color<xsl:value-of select="@id"/> </xsl:otherwise></xsl:choose></center></td>
+            <xsl:for-each select="/contestStandings/standingsHeader/colorList/colors[@siteNum = 1]/problem">
+                <td><center><xsl:choose><xsl:when test="@color"> <xsl:value-of select="@color"/></xsl:when><xsl:otherwise>Color<xsl:value-of select="@id"/></xsl:otherwise></xsl:choose></center></td>
             </xsl:for-each>
         </xsl:template>
 </xsl:stylesheet>
