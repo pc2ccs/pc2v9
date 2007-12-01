@@ -23,6 +23,7 @@ import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.security.Permission;
+import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.core.security.Permission.Type;
 
 /**
@@ -702,6 +703,8 @@ public class AccountPane extends JPanePlugin {
             checkAccount = new Account(account.getClientId(), null, account.getSiteNumber());
         }
 
+        // clear out the permissions
+        checkAccount.clearListAndLoadPermissions(new PermissionList());
         // get permissions
         Object[] objects = getPermissionsJList().getSelectedValues();
         for (Object object : objects) {
