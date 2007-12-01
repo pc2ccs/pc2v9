@@ -60,7 +60,7 @@ public class SelectJudgementPane extends JPanePlugin {
 
     private JPanel buttonPane = null;
 
-    private JButton updateButton = null;
+    private JButton okButton = null;
 
     private JButton cancelButton = null;
 
@@ -207,7 +207,7 @@ public class SelectJudgementPane extends JPanePlugin {
             flowLayout.setHgap(50);
             buttonPane = new JPanel();
             buttonPane.setLayout(flowLayout);
-            buttonPane.add(getUpdateButton(), null);
+            buttonPane.add(getOkButton(), null);
             buttonPane.add(getExecuteButton(), null);
             buttonPane.add(getExtractButton(), null);
             buttonPane.add(getCancelButton(), null);
@@ -225,13 +225,14 @@ public class SelectJudgementPane extends JPanePlugin {
      * 
      * @return javax.swing.JButton
      */
-    private JButton getUpdateButton() {
-        if (updateButton == null) {
-            updateButton = new JButton();
-            updateButton.setText("Update");
-            updateButton.setEnabled(false);
-            updateButton.setMnemonic(java.awt.event.KeyEvent.VK_U);
-            updateButton.addActionListener(new java.awt.event.ActionListener() {
+    private JButton getOkButton() {
+        if (okButton == null) {
+            okButton = new JButton();
+            okButton.setText("Ok");
+            okButton.setEnabled(false);
+            okButton.setActionCommand("Ok");
+            okButton.setMnemonic(java.awt.event.KeyEvent.VK_O);
+            okButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     if (confirmInconsistentJudgements()) {
                         updateRun();
@@ -239,7 +240,7 @@ public class SelectJudgementPane extends JPanePlugin {
                 }
             });
         }
-        return updateButton;
+        return okButton;
     }
 
     private void cancelRun() {
@@ -347,7 +348,7 @@ public class SelectJudgementPane extends JPanePlugin {
             return;
         }
 
-        if (getUpdateButton().isEnabled()) {
+        if (getOkButton().isEnabled()) {
 
             // Something changed, are they sure ?
 
@@ -404,7 +405,7 @@ public class SelectJudgementPane extends JPanePlugin {
         showValidatorControls(false);
 
         if (theRun != null) {
-            getUpdateButton().setVisible(true);
+            getOkButton().setVisible(true);
 
             String teamName = getTeamDisplayName(theRun.getSubmitter());
 
@@ -430,7 +431,7 @@ public class SelectJudgementPane extends JPanePlugin {
             getViewSourceButton().setVisible(true);
 
         } else {
-            getUpdateButton().setVisible(false);
+            getOkButton().setVisible(false);
 
             runInfoLabel.setText("Could not get run " + +theRun.getNumber() + " (Site " + theRun.getSiteNumber() + ")");
             statusLabel.setText("");
@@ -498,7 +499,7 @@ public class SelectJudgementPane extends JPanePlugin {
         getJudgementComboBox().setEnabled(runFiles != null);
         getNotifyTeamCheckBox().setEnabled(runFiles != null);
         
-        updateButton.setEnabled(editedText);
+        okButton.setEnabled(editedText);
     }
 
     /**
