@@ -35,12 +35,4 @@ pause
 :end
 rem continue what you were doing...
 
-rem XXX seems all this should go away
-if not exist "%JAVA_HOME%\bin\java.exe" set JAVA_HOME=c:\jdk1.5.0_05
-
-rem might need to set systemroot on win95/98/ME
-rem set SYSTEMROOT=c:\windows
-
-set PATH=%JAVA_HOME%\bin;%SYSTEMROOT%;%SYSTEMROOT%\system32;%PATH%
-
 rem eof pc2env.bat $Id$
