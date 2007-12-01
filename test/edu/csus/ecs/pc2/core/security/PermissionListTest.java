@@ -39,5 +39,12 @@ public class PermissionListTest extends TestCase {
         
         permissionList2.removePermission(Type.ALLOWED_TO_AUTO_JUDGE);
         assertTrue ("Full minus ALLOWED_TO_AUTO_JUDGE same as ", permissionList.isSameAs(permissionList2));
+
+        permissionList.clearAndLoadPermissions(new PermissionList());
+        permissionList2.clearAndLoadPermissions(new PermissionList());
+        
+        permissionList.addPermission(Type.ALLOWED_TO_RECONNECT_SERVER);
+        permissionList2.addPermission(Type.ALLOWED_TO_AUTO_JUDGE);
+        assertFalse ("One but different same as", permissionList.isSameAs(permissionList2));
     }
 }
