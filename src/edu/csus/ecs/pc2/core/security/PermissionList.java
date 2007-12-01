@@ -86,8 +86,10 @@ public class PermissionList implements Serializable {
             return false;
         }
         
-        for (Permission.Type type : getList()) {
-            if (! isAllowed(type)){
+        for (Permission.Type type  : Permission.Type.values()){
+            // compare this PermissionList with the passed in List
+            // they should either both be false, or both be true
+            if (isAllowed(type) != permissionList.isAllowed(type)) {
                 return false;
             }
         }
