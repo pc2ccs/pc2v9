@@ -33,6 +33,7 @@ import java.awt.BorderLayout;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import javax.swing.JButton;
+import javax.xml.transform.TransformerConfigurationException;
 
 /**
  * This class is the default scoreboard view (frame).
@@ -231,10 +232,8 @@ public class ScoreboardView extends JFrame implements UIPlugin {
             output = null;
         } catch (FileNotFoundException e1) {
             log.log(Log.WARNING, "Could not write to " + "results.xml", e1);
-            e1.printStackTrace();
         } catch (IOException e) {
             log.log(Log.WARNING, "Problem writing to " + "results.xml", e);
-            e.printStackTrace();
         }
         // TODO consider changing this to use a filenameFilter
         String[] inputFiles = inputDir.list();
@@ -274,12 +273,12 @@ public class ScoreboardView extends JFrame implements UIPlugin {
                     output = null;
                 } catch (IOException e) {
                     // TODO re-visit this log message
-                    log.log(Log.WARNING, "Trouble generating output", e);
-                    e.printStackTrace();
+                    log.log(Log.WARNING, "Trouble transforming "+xslFilename, e);
+                } catch (TransformerConfigurationException e) {
+                    // unfortunately this prints the details to stdout (or maybe stderr)
+                    log.log(Log.WARNING, "Trouble transforming "+xslFilename, e);
                 } catch (Exception e) {
-                    // TODO re-visit this log message
-                    log.log(Log.WARNING, "Trouble generating output", e);
-                    e.printStackTrace();
+                    log.log(Log.WARNING, "Trouble transforming "+xslFilename, e);
                 }
             }
         }
