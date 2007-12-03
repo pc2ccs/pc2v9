@@ -374,6 +374,25 @@ public class Executable {
             } else {
                 fileViewer.setInformationLabelText("");
             }
+            
+            if (!isTestRunOnly()) {
+                if (problem.isShowCompareWindow()) {
+                    String teamsOutputFileName = prefixExecuteDirname(EXECUTE_STDOUT_FILENAME);
+
+                    if (problem.getAnswerFileName() != null && problem.getAnswerFileName().length() > 0) {
+                        String answerFileName = prefixExecuteDirname(problem.getAnswerFileName());
+                        if (! new File(answerFileName).isFile()){
+                            int dataSetNumber = 0;
+                            
+                            // Create the correct output file, aka answer file
+                            createFile(problemDataFiles.getJudgesAnswerFiles(), dataSetNumber, answerFileName);
+                        }
+                        fileViewer.setCompareFileNames(answerFileName, teamsOutputFileName);
+                        fileViewer.enableCompareButton(true);
+                    }
+                }
+            }
+
 
         } catch (Exception e) {
             log.log(Log.INFO, "Exception during execute() ", e);

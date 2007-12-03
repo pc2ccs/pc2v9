@@ -51,5 +51,9 @@ public interface IFileViewer extends UIPlugin {
      * @param b
      */
     void setVisible(boolean b);
+    
+    void setCompareFileNames(String incomingJudgeOutputFileName, String incomingTeamOutputFileName);
+
+    void enableCompareButton(boolean value);
 
 }
