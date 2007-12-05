@@ -239,7 +239,12 @@ public class AccountsPane extends JPanePlugin {
     }
 
     private void updateGUIperPermissions() {
-        addButton.setVisible(isAllowed(Permission.Type.EDIT_ACCOUNT));
+        
+        if (isAllowed(Permission.Type.EDIT_ACCOUNT)){
+            addButton.setVisible(isAllowed(Permission.Type.EDIT_ACCOUNT));
+            addButton.setEnabled(false);      
+        }
+
         editButton.setVisible(isAllowed(Permission.Type.EDIT_ACCOUNT));
         
         // TODO once filter is working make this visible.
@@ -366,7 +371,9 @@ public class AccountsPane extends JPanePlugin {
             addButton.setToolTipText("Add new account");
             addButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    addAccount();
+                    showMessage("Add not implement, yet");
+                    // TODO addAccount when implemented
+//                    addAccount();
                 }
             });
         }
