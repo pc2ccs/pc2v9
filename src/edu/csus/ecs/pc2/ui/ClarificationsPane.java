@@ -486,15 +486,20 @@ public class ClarificationsPane extends JPanePlugin {
                 }
             }
 
-            addClarificationRow(clarification);
+            addClarificationRow(clarification, false);
         }
-    }
-
-    private void addClarificationRow(Clarification clarification) {
-        Object[] objects = buildClarificationRow(clarification, null);
-        clarificationListBox.addRow(objects, clarification.getElementId());
         clarificationListBox.autoSizeAllColumns();
         clarificationListBox.sort();
+
+    }
+
+    private void addClarificationRow(Clarification clarification, boolean autoSizeAndSort) {
+        Object[] objects = buildClarificationRow(clarification, null);
+        clarificationListBox.addRow(objects, clarification.getElementId());
+        if (autoSizeAndSort) {
+            clarificationListBox.autoSizeAllColumns();
+            clarificationListBox.sort();
+        }
     }
 
     /**

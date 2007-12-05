@@ -338,7 +338,7 @@ public class RunsPanel extends JPanePlugin {
     public class RunListenerImplementation implements IRunListener {
 
         public void runAdded(RunEvent event) {
-            updateRunRow(event.getRun(), event.getWhoModifiedRun());
+            updateRunRow(event.getRun(), event.getWhoModifiedRun(), true);
             //check if this is a team; if so, pop up a confirmation dialog
             if (getContest().getClientId().getClientType()==ClientType.Type.TEAM) {
                 showResponseToTeam(event);
@@ -346,7 +346,7 @@ public class RunsPanel extends JPanePlugin {
         }
 
         public void runChanged(RunEvent event) {
-            updateRunRow(event.getRun(), event.getWhoModifiedRun());
+            updateRunRow(event.getRun(), event.getWhoModifiedRun(), true);
             
             //check if this is a team; if so, pop up a response dialog
             if (getContest().getClientId().getClientType()==ClientType.Type.TEAM) {
@@ -573,7 +573,7 @@ public class RunsPanel extends JPanePlugin {
         rowCountLabel.setToolTipText("There are "+runListBox.getRowCount()+" runs");
     }
     
-    public void updateRunRow(final Run run, final ClientId whoModifiedId) {
+    public void updateRunRow(final Run run, final ClientId whoModifiedId, final boolean autoSizeAndSort) {
         
         if (filter != null){
             
@@ -603,9 +603,11 @@ public class RunsPanel extends JPanePlugin {
                 } else {
                     runListBox.replaceRow(objects, rowNumber);
                 }
-                updateRowCount();
-                runListBox.autoSizeAllColumns();
-                runListBox.sort();
+                if (autoSizeAndSort) {
+                    updateRowCount();
+                    runListBox.autoSizeAllColumns();
+                    runListBox.sort();
+                }
                 if (selectJudgementFrame != null) {
                     // return focus to the other frame if it is around
                     /*
@@ -630,7 +632,7 @@ public class RunsPanel extends JPanePlugin {
             displayTeamName.setTeamDisplayMask(contestInformation.getTeamDisplayMode());
         }
         
-        // TODO bulk load these record
+        // TODO bulk load these records, this is closer only do the count,size,sort at end
 
         for (Run run : runs) {
             
@@ -649,16 +651,15 @@ public class RunsPanel extends JPanePlugin {
                     clientId = judgementRecord.getJudgerClientId();
                 }
             }
-            updateRunRow(run, clientId);
+            updateRunRow(run, clientId, false);
         }
-        if (runs.length < 1) {
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    rowCountLabel.setText(""+runListBox.getRowCount());
-                    rowCountLabel.setToolTipText("There are "+runListBox.getRowCount()+" runs");
-                }
-            });
-        }
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                updateRowCount();
+                runListBox.autoSizeAllColumns();
+                runListBox.sort();
+            }
+        });
     }
     
     private boolean isAllowed (Permission.Type type){
