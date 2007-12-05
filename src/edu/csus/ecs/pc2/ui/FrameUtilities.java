@@ -2,7 +2,11 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
+import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
@@ -193,4 +197,29 @@ public final class FrameUtilities {
         component.setLocation(newX, newY);
     }
 
+    public static void showMessage(JFrame parentFrame, String strTitle, String displayString) {
+        final JDialog dialog = new JDialog(parentFrame, strTitle, true);
+        final JOptionPane optionPane = new JOptionPane(displayString, JOptionPane.INFORMATION_MESSAGE);
+        dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+        optionPane.addPropertyChangeListener(
+                new PropertyChangeListener() {
+                    public void propertyChange(PropertyChangeEvent e) {
+                        String prop = e.getPropertyName();
+
+                        if (dialog.isVisible() 
+                         && (e.getSource() == optionPane)
+                         && (prop.equals(JOptionPane.VALUE_PROPERTY))) {
+                            //If you were going to check something
+                            //before closing the window, you'd do
+                            //it here.
+                            dialog.setVisible(false);
+                        }
+                    }
+                });
+        dialog.setContentPane(optionPane);
+        dialog.pack();
+        dialog.setVisible(true);
+    }
+
+    
 }
