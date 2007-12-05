@@ -25,7 +25,7 @@ public class Balloon {
     private Run run;
 
     // TODO consider changing this to use an enum
-    private String answer = ""; // yes | no | take
+    private String answer = ""; // yes | no | take | test
 
     // The Problems should be in ProblemDisplayList order
     private Problem[] problems;

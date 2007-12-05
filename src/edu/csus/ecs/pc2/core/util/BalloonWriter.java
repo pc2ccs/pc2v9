@@ -83,7 +83,9 @@ public class BalloonWriter {
             message.append(NL+NL+NL);
             y -= 20*3;
         }
-        y = buildBalloonMessageRunInfo(message, balloon, postscript, y);
+        if (!answer.equalsIgnoreCase("test")) {
+            y = buildBalloonMessageRunInfo(message, balloon, postscript, y);
+        }
         y = buildBalloonMessageSummary(message, balloon, postscript, y-20);
         if (postscript) {
             message.append(NL+"showpage"+NL);
@@ -296,6 +298,10 @@ public class BalloonWriter {
                             // TODO need problemTitle here
                             String subject = "Subject: NO " + balloon.getClientId().getName() + " (" + balloon.getClientTitle() + ")" + " problem " + balloon.getProblemId() + NL;
                             emailMessage = subject + "Date: " + date + NL + messageId + NL + NL + message;
+                        } else if (answer.equalsIgnoreCase("test")) {
+                            String subject = "Subject: List of Balloon Colors" + NL;
+                            emailMessage = subject + "Date: " + date + NL + messageId + NL + NL
+                                    + message;
                         } else {
                             String subject = "Subject: Take away balloon from " + balloon.getClientId().getName() + " color " + balloonSettings.getColor(balloon.getProblemId()) + NL;
                             emailMessage = subject + "Date: " + date + NL + messageId + NL + NL + message;

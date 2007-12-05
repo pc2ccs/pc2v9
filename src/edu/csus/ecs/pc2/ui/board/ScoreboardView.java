@@ -168,7 +168,8 @@ public class ScoreboardView extends JFrame implements UIPlugin {
                 standingsPane.addPropertyChangeListener("standings", new PropertyChangeListenerImplementation());
                 BalloonHandler balloonHandler = new BalloonHandler();
                 // TODO replace with addUIPlugin when/if it is graphical
-                balloonHandler.setContestAndController(contest, controller);
+//                balloonHandler.setContestAndController(contest, controller);
+                addUIPlugin(getMainTabbedPane(), "Balloon Test", balloonHandler);
                 OptionsPanel optionsPanel = new OptionsPanel();
                 addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
                 optionsPanel.setLogWindow(logWindow);

@@ -400,4 +400,24 @@ public class BalloonSettings implements IElementObject {
         }
         return balloonClient.equals(clientId);
     }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#clone()
+     */
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        BalloonSettings clone = new BalloonSettings("foo", getSiteNumber());
+        clone.elementId = elementId;
+        clone.colorList = colorList;
+        clone.setBalloonClient(getBalloonClient());
+        clone.setEmailBalloons(isEmailBalloons());
+        clone.setEmailContact(new String(emailContact));
+        clone.setIncludeNos(isIncludeNos());
+        clone.setLinesPerPage(getLinesPerPage());
+        clone.setMailServer(new String(mailServer));
+        clone.setPostscriptCapable(isPostscriptCapable());
+        clone.setPrintBalloons(isPrintBalloons());
+        clone.setPrintDevice(new String(printDevice));
+        return clone;
+    }
 }
