@@ -481,8 +481,14 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         transportManager.setLog(log);
         StaticLog.setLog(log);
 
+        info("");
         info(new VersionInfo().getSystemVersionInfo());
         info("Login: " + id + " (aka " + clientId.getName() + ")");
+        try {
+            log.info("Working directory is " + new File(".").getCanonicalPath());
+        } catch (IOException e1) {
+            log.info("Could not determine working directory "+e1.getMessage());
+        }
 
         if (password.length() < 1) {
             password = clientId.getName(); // Joe password.
@@ -619,8 +625,14 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         transportManager.setLog(log);
         StaticLog.setLog(log);
 
+        info("");
         info(new VersionInfo().getSystemVersionInfo());
         info("Login: " + loginName + " (aka " + clientId.getName() + ")");
+        try {
+            log.info("Working directory is " + new File(".").getCanonicalPath());
+        } catch (IOException e1) {
+            log.info("Could not determine working directory "+e1.getMessage());
+        }
 
         if (password.length() < 1) {
             password = clientId.getName(); // Joe password.
@@ -1597,6 +1609,13 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
         log = new Log("pc2.startup");
         StaticLog.setLog(log);
+        info("");
+        info(new VersionInfo().getSystemVersionInfo());
+        try {
+            log.info("Working directory is " + new File(".").getCanonicalPath());
+        } catch (IOException e1) {
+            log.info("Could not determine working directory "+e1.getMessage());
+        }
 
         /**
          * Saved exception.

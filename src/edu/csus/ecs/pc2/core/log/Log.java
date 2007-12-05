@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.core.log;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -255,7 +256,13 @@ public class Log extends Logger {
         // System.out.println("setFileHandlers after handlers =
         // "+getHandlers().length);
 
-        config("Now logging to " + logDirBase + " directory.");
+        String location = logDirBase;
+        try {
+            location = new File(logDirBase).getCanonicalPath();
+        } catch (IOException e) {
+            info("Unable to getCanonicalPath of "+logDirBase+":"+e.getMessage());
+        }
+        config("Now logging to " + location + " directory.");
     }
 
     /*
