@@ -767,7 +767,6 @@ public class PacketHandler {
                 Vector<Account> accountVector = contest.generateNewAccounts(type.toString(), count.intValue(), startCount.intValue(), active);
                 Account[] accounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
                 
-                PacketFactory.dumpPacket(System.err, packet, "Gen Accounts");
                 controller.writeConfigToDisk();
                 
                 Packet newAccountsPacket = PacketFactory.createAddSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, accounts);
