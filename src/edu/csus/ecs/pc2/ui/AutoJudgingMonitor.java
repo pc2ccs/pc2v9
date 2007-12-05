@@ -540,8 +540,8 @@ public class AutoJudgingMonitor implements UIPlugin {
 
     public void info(String s) {
         controller.getLog().warning(s);
-        System.err.println(Thread.currentThread().getName() + " " + s);
-        System.err.flush();
+//        System.err.println(Thread.currentThread().getName() + " " + s);
+//        System.err.flush();
     }
 
     public void info(String s, Exception exception) {
