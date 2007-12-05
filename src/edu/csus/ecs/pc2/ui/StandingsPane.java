@@ -22,8 +22,10 @@ import com.ibm.webrunner.j2mclb.MultiColumnListbox;
 import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
+import edu.csus.ecs.pc2.core.model.BalloonSettingsEvent;
 import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
+import edu.csus.ecs.pc2.core.model.IBalloonSettingsListener;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.IContestInformationListener;
 import edu.csus.ecs.pc2.core.model.IProblemListener;
@@ -92,7 +94,8 @@ public class StandingsPane extends JPanePlugin {
         getContest().addProblemListener(new ProblemListenerImplementation());
         getContest().addRunListener(new RunListenerImplementation());
         getContest().addContestInformationListener(new ContestInformationListenerImplementation());
-
+        getContest().addBalloonSettingsListener(new BalloonSettingsListenerImplementation());
+        
         refreshStandings();
     }
     
@@ -325,6 +328,26 @@ public class StandingsPane extends JPanePlugin {
         
     }
     
+    /**
+     * @author pc2@ecs.csus.edu
+     *
+     */
+    public class BalloonSettingsListenerImplementation implements IBalloonSettingsListener {
+
+        public void balloonSettingsAdded(BalloonSettingsEvent event) {
+            refreshStandings();
+        }
+
+        public void balloonSettingsChanged(BalloonSettingsEvent event) {
+            refreshStandings();
+        }
+
+        public void balloonSettingsRemoved(BalloonSettingsEvent event) {
+            refreshStandings();
+        }
+        
+    }
+
     /**
      * 
      * @author pc2@ecs.csus.edu
