@@ -687,7 +687,9 @@ public class RunsPanel extends JPanePlugin {
             takeButton.setVisible(false);
             rejudgeRunButton.setVisible(false);
             viewJudgementsButton.setVisible(false);
-            autoJudgeButton.setVisible(isAllowed(Permission.Type.ALLOWED_TO_AUTO_JUDGE));
+            // TODO enable when auto judging works
+//            autoJudgeButton.setVisible(isAllowed(Permission.Type.ALLOWED_TO_AUTO_JUDGE));
+            autoJudgeButton.setVisible(false);
 
         } else {
         
