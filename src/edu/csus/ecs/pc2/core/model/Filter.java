@@ -6,6 +6,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 
 import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 
 /**
@@ -15,6 +16,9 @@ import edu.csus.ecs.pc2.core.model.Run.RunStates;
  * Use the add methods to add items (Problems, RunStates, etc) to match against. <br>
  * Use the match and matches methods to determine if the Run, Clarification, etc matches the filter. <br>
  * Use the setUsing methods to turn on and off filtering of Problems, RunStates, etc.
+ * <P>
+ * The set methods for various filtering criterias will cause that filter criteria to be used. If filter.setEndElapsedTime() is used then filter.isFilteringElapsedTime() will return true and any
+ * subsequent use of filter will filter on the elapsed time.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -23,10 +27,8 @@ import edu.csus.ecs.pc2.core.model.Run.RunStates;
 // $HeadURL$
 public class Filter implements Serializable {
 
-    // TODO filter for elapsed time
     // TODO filter for site
     // TODO filter for permissions, etc.
-    // TODO filter on account types
 
     /**
      * 
@@ -42,6 +44,12 @@ public class Filter implements Serializable {
      * filtering on run states.
      */
     private boolean filteringRunStates = false;
+
+    private boolean filteringElapsedTime = false;
+
+    private long startElapsedTime = -1;
+
+    private long endElapsedTime = -1;
 
     /**
      * collection of chosen clarification states
@@ -62,6 +70,15 @@ public class Filter implements Serializable {
      * filtering on problem (problem id)
      */
     private boolean filteringProblems = false;
+
+    /**
+     * Collection of Account
+     */
+    private Hashtable<ElementId, Date> accountIdHash = new Hashtable<ElementId, Date>();
+
+    private Hashtable<Type, Date> clientTypeHash = new Hashtable<Type, Date>();
+
+    private boolean filteringAccounts = false;
 
     /**
      * filtering for this site only
@@ -183,6 +200,35 @@ public class Filter implements Serializable {
         }
     }
 
+    public boolean matchesAccount(Account account) {
+        if (filteringAccounts) {
+            if (matchesAccount(account.getElementId())) {
+                return true;
+            } else if (matchesClientType(account.getClientId().getClientType())) {
+                return true;
+            }
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    private boolean matchesClientType(Type type) {
+        if (filteringAccounts) {
+            return clientTypeHash.containsKey(type);
+        } else {
+            return false;
+        }
+    }
+
+    public boolean matchesAccount(ElementId elementId) {
+        if (filteringAccounts) {
+            return accountIdHash.containsKey(elementId);
+        } else {
+            return true;
+        }
+    }
+
     public void clearAccountList() {
         throw new UnsupportedOperationException();
     }
@@ -231,19 +277,34 @@ public class Filter implements Serializable {
     }
 
     public void addAccount(Account account) {
-        throw new UnsupportedOperationException(); // TODO code
+        addAccount(account.getElementId());
     }
 
-    public void addAccounts(Account[] account) {
-        throw new UnsupportedOperationException(); // TODO code
+    protected void addAccount(ElementId elementId) {
+        accountIdHash.put(elementId, new Date());
+    }
+
+    public void addAccounts(Account[] accounts) {
+        for (Account account : accounts) {
+            addAccount(account);
+        }
     }
 
     public void removeAccount(Account account) {
-        throw new UnsupportedOperationException(); // TODO code
+        if (accountIdHash.get(account.getElementId()) != null) {
+            accountIdHash.remove(account.getElementId());
+        }
     }
 
-    public void removeAccounts(Account[] account) {
-        throw new UnsupportedOperationException(); // TODO code
+    public void removeAccounts(Account[] accounts) {
+        for (Account account : accounts) {
+            removeAccount(account);
+        }
+    }
+
+    public void addClientType(Type type) {
+        filteringAccounts = true;
+        clientTypeHash.put(type, new Date());
     }
 
     public void addRunState(RunStates runStates) {
@@ -254,6 +315,37 @@ public class Filter implements Serializable {
     public boolean matchesRunState(RunStates runStates) {
         if (filteringRunStates) {
             return runStateHash.containsKey(runStates);
+        } else {
+            return true;
+        }
+    }
+
+    public boolean matchesElapsedTime(Run run) {
+        return matchesElapsedTimeSubmission(run);
+    }
+
+    public boolean matchesElapsedTime(Clarification clarification) {
+        return matchesElapsedTimeSubmission(clarification);
+    }
+
+    protected boolean matchesElapsedTimeSubmission(ISubmission submission) {
+        if (filteringElapsedTime) {
+
+            long elapsedTime = submission.getElapsedMins();
+
+            if (startElapsedTime != -1) {
+                if (elapsedTime < startElapsedTime) {
+                    return false;
+                }
+            }
+
+            if (endElapsedTime != -1) {
+                if (elapsedTime > endElapsedTime) {
+                    return false;
+                }
+            }
+            return true;
+
         } else {
             return true;
         }
@@ -322,5 +414,39 @@ public class Filter implements Serializable {
         } else {
             return "";
         }
+    }
+
+    public long getStartElapsedTime() {
+        return startElapsedTime;
+    }
+
+    public void setStartElapsedTime(long startElapsedTime) {
+        filteringElapsedTime = true;
+        this.startElapsedTime = startElapsedTime;
+    }
+
+    public long getEndElapsedTime() {
+        return endElapsedTime;
+    }
+
+    public void setEndElapsedTime(long endElapsedTime) {
+        filteringElapsedTime = true;
+        this.endElapsedTime = endElapsedTime;
+    }
+
+    public boolean isFilteringElapsedTime() {
+        return filteringElapsedTime;
+    }
+
+    public void setFilteringElapsedTime(boolean filteringElapsedTime) {
+        this.filteringElapsedTime = filteringElapsedTime;
+    }
+
+    public boolean isFilteringAccounts() {
+        return filteringAccounts;
+    }
+
+    public void setFilteringAccounts(boolean filteringAccounts) {
+        this.filteringAccounts = filteringAccounts;
     }
 }

@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core.model;
 
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import junit.framework.TestCase;
 
 /**
@@ -89,5 +90,51 @@ public class FilterTest extends TestCase {
 
         assertTrue ("Should be "+problems.length+" in list found "+elementIds.length, elementIds.length == problems.length);
         
+    }
+    
+    public void testElapsedTime(){
+        
+        Problem problem = new Problem("First Problem");
+        Language language = new Language("LangName");
+        
+        ClientId clientId = new ClientId(1,ClientType.Type.TEAM, 4);
+        
+        Run run = new Run(clientId, language, problem);
+        
+        run.setElapsedMins(220);
+        
+        Filter filter = new Filter();
+        
+        filter.setStartElapsedTime(200);
+        
+        assertTrue("Should filter ", filter.matchesElapsedTime(run));
+        
+        filter.setEndElapsedTime(220);
+        assertTrue("Should filter ", filter.matchesElapsedTime(run));
+        
+        run.setElapsedMins(22);
+        assertFalse("Should filter ", filter.matchesElapsedTime(run));
+        
+    }
+    
+    public void testClientType(){
+        
+        Filter filter = new Filter();
+        filter.addClientType(Type.TEAM);
+        
+        ClientId clientId = new ClientId(1,ClientType.Type.TEAM, 4);
+        Account account = new Account(clientId, "pass", 1);
+        
+        assertTrue("Match on ClientType Team ", filter.matchesAccount(account));
+        
+        ClientId judgeId = new ClientId(1,ClientType.Type.JUDGE, 4);
+        account = new Account(judgeId, "pass", 1);
+
+        assertFalse("Match on ClientType Team for "+account, filter.matchesAccount(account));
+        
+        filter = new Filter();
+        filter.addAccount(account);
+        
+        assertTrue("Match on Account "+account, filter.matchesAccount(account));
     }
 }
