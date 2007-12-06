@@ -69,4 +69,28 @@ public class LoadAccountsTest extends TestCase {
             assertTrue("exception", false);
         }
     }
+    public void testTwo() {
+        try {
+            LoadAccounts loadAccounts = new LoadAccounts();
+            Account account = accountList.getAccount(new ClientId(1,ClientType.Type.TEAM, 1));
+            Group group = new Group("Group 1");
+            account.setGroupId(group.getElementId());
+            // these were broken in 1052
+            account.setLongSchoolName("California State University, Sacramento");
+            account.setShortSchoolName("CSUS");
+            account.setExternalId("1234");
+            account.setAliasName("orange");
+            account.setExternalName("Hornet 1");
+            accountList.update(account);
+            // min only has site & account
+            Account[] accounts = loadAccounts.fromTSVFile(loadDir+"loadaccount"+File.separator+"accounts.min.txt", accountList.getList(), new Group[0]);
+            for (Account account2 : accounts) {
+                assertTrue("account clone "+account2.getClientId(), accountList.getAccount(account2.getClientId()).isSameAs(account2));
+                
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            assertTrue("exception", false);
+        }
+    }
 }

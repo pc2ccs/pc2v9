@@ -58,7 +58,6 @@ public class LoadAccounts {
         Type type = Type.valueOf(accountName.toUpperCase());
         int clientNumber = Integer.parseInt(accountString.substring(accountSplit[0].length()));
         String siteString = values[siteColumn];
-        String password = values[passwordColumn];
         ClientId clientId = new ClientId(Integer.parseInt(siteString), type, clientNumber);
         Account accountClean = existingAccountsMap.get(clientId);
         if (accountClean == null) {
@@ -78,7 +77,9 @@ public class LoadAccounts {
         account.setLongSchoolName(new String(accountClean.getLongSchoolName()));
         account.setShortSchoolName(new String(accountClean.getShortSchoolName()));
         // now start changing
-        account.setPassword(password);
+        if (passwordColumn != -1 && values.length > passwordColumn) {
+            account.setPassword(values[passwordColumn]);
+        }
         if (displayNameColumn != -1 && values.length > displayNameColumn) {
             account.setDisplayName(values[displayNameColumn]);
         }
@@ -123,7 +124,7 @@ public class LoadAccounts {
      * password
      * permdisplay
      * permlogin
-     * site
+     * site (required)
      * 
      * @param filename
      * @param existingAccounts
@@ -189,8 +190,8 @@ public class LoadAccounts {
                     aliasColumn = i;
                 }
             }
-            if (accountColumn == -1 || siteColumn == -1 || passwordColumn == -1) {
-                String msg = "1st line should be the row headers (account, password, and site are required)";
+            if (accountColumn == -1 || siteColumn == -1) {
+                String msg = "1st line should be the row headers (account and site are required)";
                 throw new IllegalTSVFormatException(msg);
             }
         }
