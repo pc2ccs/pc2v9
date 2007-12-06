@@ -2,10 +2,13 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.Arrays;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -73,7 +76,7 @@ public class AccountPane extends JPanePlugin {
 
     private JScrollPane permissionScrollPane = null;
 
-    private JList permissionsJList = null;
+    private JCheckBoxJList permissionsJList = null;
 
     private JLabel permissionCountLabel = null;
 
@@ -417,7 +420,8 @@ public class AccountPane extends JPanePlugin {
         if (inAccount == null){
             
             for (String name : getPermissionDescriptions()) {
-                defaultListModel.addElement(name);
+                JCheckBox checkBox = new JCheckBox(name);
+                defaultListModel.addElement(checkBox);
             }
             getPermissionsJList().setSelectedIndex(-1);
             
@@ -435,7 +439,8 @@ public class AccountPane extends JPanePlugin {
                 count = 0;
                 int idx = 0;
                 for (Type type : Permission.Type.values()) {
-                    defaultListModel.addElement(permission.getDescription(type));
+                    JCheckBox checkBox = new JCheckBox(permission.getDescription(type));
+                    defaultListModel.addElement(checkBox);
                     if (account.isAllowed(type)) {
                         indexes[count] = idx;
                         count++;
@@ -443,6 +448,7 @@ public class AccountPane extends JPanePlugin {
                     idx ++;
                 }
                 getPermissionsJList().setSelectedIndices(indexes);
+                getPermissionsJList().ensureIndexIsVisible(0);
             }
         }
 
@@ -570,11 +576,12 @@ public class AccountPane extends JPanePlugin {
      */
     private JList getPermissionsJList() {
         if (permissionsJList == null) {
-            permissionsJList = new JList();
+            permissionsJList = new JCheckBoxJList();
             permissionsJList.setModel(defaultListModel);
-            permissionsJList.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
-                public void valueChanged(javax.swing.event.ListSelectionEvent e) {
-                    showPermissionCount(permissionsJList.getSelectedIndices().length+" selected");
+            // ListSelectionListeners are called before JCheckBoxes get updated
+            permissionsJList.addPropertyChangeListener("change", new PropertyChangeListener() {
+                public void propertyChange(PropertyChangeEvent evt) {
+                    showPermissionCount(permissionsJList.getSelectedIndices().length+" permissions selected");
                     enableUpdateButton();
                 }
             });
@@ -708,7 +715,8 @@ public class AccountPane extends JPanePlugin {
         // get permissions
         Object[] objects = getPermissionsJList().getSelectedValues();
         for (Object object : objects) {
-            String name = (String) object;
+            JCheckBox checkBox = (JCheckBox) object;
+            String name = checkBox.getText();
             Type type = getTypeFromDescrption(name);
             checkAccount.addPermission(type);
         }
