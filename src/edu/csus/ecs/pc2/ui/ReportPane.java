@@ -26,6 +26,7 @@ import edu.csus.ecs.pc2.core.report.ClarificationsReport;
 import edu.csus.ecs.pc2.core.report.ClientSettingsReport;
 import edu.csus.ecs.pc2.core.report.ContestAnalysisReport;
 import edu.csus.ecs.pc2.core.report.ContestReport;
+import edu.csus.ecs.pc2.core.report.EvaluationReport;
 import edu.csus.ecs.pc2.core.report.FastestSolvedReport;
 import edu.csus.ecs.pc2.core.report.GroupsReport;
 import edu.csus.ecs.pc2.core.report.IReport;
@@ -116,7 +117,7 @@ public class ReportPane extends JPanePlugin {
         this.add(getMainPane(), java.awt.BorderLayout.CENTER);
 
         // populate list of reports
-        listOfReports = new IReport[22];
+        listOfReports = new IReport[23];
         int repNo = 0;
         listOfReports[repNo++] = new AccountsReport();
         listOfReports[repNo++] = new BalloonSummaryReport();
@@ -142,6 +143,8 @@ public class ReportPane extends JPanePlugin {
         listOfReports[repNo++] = new BalloonSettingsReport();
         listOfReports[repNo++] = new ClientSettingsReport();
         listOfReports[repNo++] = new GroupsReport();
+        
+        listOfReports[repNo++] = new EvaluationReport();
         
         listOfReports[repNo++] = new OldRunsReport();
         listOfReports[repNo++] = new AccountPermissionReport();
@@ -238,6 +241,7 @@ public class ReportPane extends JPanePlugin {
         if (viewReportButton == null) {
             viewReportButton = new JButton();
             viewReportButton.setText("View Report");
+            viewReportButton.setMnemonic(java.awt.event.KeyEvent.VK_V);
             viewReportButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     generateSelectedReport();
@@ -325,6 +329,7 @@ public class ReportPane extends JPanePlugin {
         if (thisSiteCheckBox == null) {
             thisSiteCheckBox = new JCheckBox();
             thisSiteCheckBox.setBounds(new java.awt.Rectangle(30, 87, 165, 21));
+            thisSiteCheckBox.setMnemonic(java.awt.event.KeyEvent.VK_F);
             thisSiteCheckBox.setText("Filter for this site only");
         }
         return thisSiteCheckBox;
