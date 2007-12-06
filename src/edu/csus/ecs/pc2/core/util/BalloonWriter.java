@@ -13,6 +13,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.StringTokenizer;
 
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -380,6 +381,7 @@ public class BalloonWriter {
         boolean success = false;
         try {
             log.entering(getClass().getName(), "sendBalloonByEmail()", host.toString());
+            String[] rcpts = spliRecipients(mailTo);
             Socket socket = new Socket(host, 25);
             OutputStream os = socket.getOutputStream();
             InputStream is = socket.getInputStream();
@@ -407,24 +409,19 @@ public class BalloonWriter {
                     error = true;
                     break;
                 }
-                mess = "rcpt to: " + mailTo + NL;
-                os.write(mess.getBytes());
-                b = new byte[arraySize];
-                is.read(b);
-                if (b[0] == '4' || b[0] == '5') {
-                    // todo: handle error
-                    log.info("ERROR: sendBalloon I said=\"" + mess + "\" server said=\"" + new String(b).trim() + "\"");
-                    error = true;
-                    break;
+                for (int i = 0; i < rcpts.length; i++) {
+                    mess = "rcpt to: " + rcpts[i] + NL;
+                    os.write(mess.getBytes());
+                    b = new byte[arraySize];
+                    is.read(b);
+                    if (b[0] == '4' || b[0] == '5') {
+                        // todo: handle error
+                        log.info("ERROR: sendBalloon I said=\"" + mess + "\" server said=\"" + new String(b).trim() + "\"");
+                        error = true;
+                        break;
+                    }
                 }
-                mess = "rcpt to: " + mailTo + NL;
-                os.write(mess.getBytes());
-                b = new byte[arraySize];
-                is.read(b);
-                if (b[0] == '4' || b[0] == '5') {
-                    // todo: handle error
-                    log.info("ERROR: sendBalloon I said=\"" + mess + "\" server said=\"" + new String(b).trim() + "\"");
-                    error = true;
+                if (error) {
                     break;
                 }
                 mess = "data" + NL;
@@ -473,6 +470,31 @@ public class BalloonWriter {
             log.exiting(getClass().getName(), "sendBalloonByEmail()", success);
         }
         return success;
+    }
+
+    /**
+     * This functions returns an array of recipients suitable for use by rcpt to.
+     * 
+     * @param mailTo
+     * @return array of recipients for the mail message
+     */
+    String[] spliRecipients(String mailTo) {
+        String[] results = null;
+        if (mailTo != null) {
+            int comma = mailTo.indexOf(',');
+            if (comma == -1) {
+                results = new String[1];
+                results[0] = mailTo.trim();
+            } else {
+                // we have at least one comma, but how many receipients?
+                StringTokenizer st = new StringTokenizer(mailTo, ",");
+                results = new String[st.countTokens()];
+                for (int i = 0; i < results.length; i++) {
+                    results[i] = st.nextToken().trim();
+                }
+            }
+        }
+        return results;
     }
 
     private boolean sendBalloonToLocalFile(String message, String fileName) {
