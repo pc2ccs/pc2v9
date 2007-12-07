@@ -127,8 +127,8 @@ public class RunsReport implements IReport {
                 printWriter.print(" at " + judgementRecord.getWhenJudgedTime());
                 printWriter.println();
             }
-            printWriter.println();
         }
+        printWriter.println();
 
     }
     
