@@ -11,9 +11,12 @@ import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
 import java.text.CharacterIterator;
+import java.text.DateFormat;
 import java.text.StringCharacterIterator;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Locale;
 import java.util.Vector;
 
 /**
@@ -163,6 +166,30 @@ public final class Utilities {
             // ignore exception
             return ".";
         }
+    }
+    
+    /**
+     * @return the current dateTime in a local-sensitive manner in the full date/long time style
+     */
+    public static String getL10nDateTime() {
+        Locale currentLocale = Locale.getDefault();
+        Date today = new Date();
+        DateFormat dateFormatter;
+        dateFormatter = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.LONG, currentLocale);
+        return(dateFormatter.format(today));
+    }
+    
+    /**
+     * @param dateStyle
+     * @param timeStyle
+     * @param currentLocale
+     * @return current date in localization format
+     */
+    public static String getL10nDateTime(int dateStyle, int timeStyle, Locale currentLocale) {
+        Date today = new Date();
+        DateFormat dateFormatter;
+        dateFormatter = DateFormat.getDateTimeInstance(dateStyle, timeStyle, currentLocale);
+        return(dateFormatter.format(today));
     }
     
     /**

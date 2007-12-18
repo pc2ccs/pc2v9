@@ -5,11 +5,11 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.ClarificationComparator;
 import edu.csus.ecs.pc2.core.list.ContestTimeComparator;
@@ -328,7 +328,7 @@ public class InternalDumpReport implements IReport {
     private void printHeader(PrintWriter printWriter) {
         VersionInfo versionInfo = new VersionInfo();
         printWriter.println(versionInfo.getSystemName());
-        printWriter.println("Date: " + new Date());
+        printWriter.println("Date: " + Utilities.getL10nDateTime());
         printWriter.println(versionInfo.getSystemVersionInfo());
         printWriter.println("Build " + versionInfo.getBuildNumber());
 

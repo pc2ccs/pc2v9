@@ -4,11 +4,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.RunComparatorByTeamProblem;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -150,7 +150,7 @@ public class BalloonSummaryReport implements IReport {
 
     private void printHeader(PrintWriter printWriter) {
         printWriter.println(new VersionInfo().getSystemName());
-        printWriter.println("Date: " + new Date());
+        printWriter.println("Date: " + Utilities.getL10nDateTime());
         printWriter.println(new VersionInfo().getSystemVersionInfo());
     }
 
