@@ -541,6 +541,11 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             }
 
         } else {
+            if (serverModule) {
+                SecurityException securityException = new SecurityException("Can not login as client, check logs");
+                getLog().log(Log.WARNING, "Can not login as client, must start this module without --server command line option");
+                throw securityException;
+            }
 
             // Client login
             info("Contacting server at " + remoteHostName + ":" + remoteHostPort+" as "+clientId);
@@ -641,6 +646,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             }
         }
 
+        // XXX this if does not make sense,  should it be if serverModule?
         if (clientId.getClientType().equals(Type.SERVER)) {
             throw new SecurityException("Can not use clientLogin to login a Server "+loginName);
         } else {
