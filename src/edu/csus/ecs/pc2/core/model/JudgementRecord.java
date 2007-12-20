@@ -44,6 +44,8 @@ public class JudgementRecord implements Serializable {
      * Is this judgement from a validator.
      */
     private boolean usedValidator = false;
+    
+    private boolean acceptButtonHit = false;
 
     /**
      * Is this "the" judgement for a run.
@@ -311,5 +313,13 @@ public class JudgementRecord implements Serializable {
 
     public void setValidatorResultString(String validatorResultString) {
         this.validatorResultString = validatorResultString;
+    }
+
+    public boolean isAcceptButtonHit() {
+        return acceptButtonHit;
+    }
+
+    public void setAcceptButtonHit(boolean acceptButtonHit) {
+        this.acceptButtonHit = acceptButtonHit;
     }
 }
