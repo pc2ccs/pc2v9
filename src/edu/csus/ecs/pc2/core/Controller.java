@@ -5,11 +5,13 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.security.MessageDigest;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Properties;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.archive.PacketArchiver;
+import edu.csus.ecs.pc2.core.log.EvaluationLog;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -218,6 +220,8 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * Load and Save configuration to disk
      */
     private boolean saveCofigurationToDisk = true;
+    
+    private EvaluationLog evaluationLog;
 
     public Controller(IContest contest) {
         super();
@@ -701,13 +705,25 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             if (contest.getGeneralProblem() == null){
                 contest.setGeneralProblem(new Problem("General"));
             }
-
+            
             info("initialized controller Site " + contest.getSiteNumber());          writeConfigToDisk();
         } else {
             if (saveCofigurationToDisk) {
                 contest.initializeSubmissions(contest.getSiteNumber());
             }
             info("Loaded configuration from disk");
+        }
+        
+        try {
+            if (evaluationLog == null) {
+                Utilities.insureDir(Log.LOG_DIRECTORY_NAME);
+                // this not only opens the log but registers this class to handle all run events.
+                evaluationLog = new EvaluationLog(Log.LOG_DIRECTORY_NAME + File.separator + "evals.log", contest, this);
+                evaluationLog.getEvalLog().println("# Log opened " + new Date());
+                info("evals.log is opened");
+            }
+        } catch (Exception e) {
+            getLog().log(Log.WARNING, "Exception logged ", e);
         }
     }
     

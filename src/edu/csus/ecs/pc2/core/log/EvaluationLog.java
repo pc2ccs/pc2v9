@@ -15,7 +15,7 @@ import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
- * Creates and adds to evals.log.
+ * Creates and adds evaluation/judgement info line to a log file (evals.log).
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -46,6 +46,7 @@ public class EvaluationLog implements UIPlugin {
             logOpened = false;
             evalLog = new PrintWriter(new FileOutputStream(logFileName, true), true);
             logOpened = true;
+            setContestAndController(contest, controller);
         } catch (FileNotFoundException e) {
             StaticLog.log("Unable to open file" + logFileName, e);
             evalLog = null;
@@ -61,24 +62,23 @@ public class EvaluationLog implements UIPlugin {
      */
     public static void printEvaluationLine(PrintWriter printWriter, Run run, IContest inContest) {
 
-        printWriter.print(run.getStatus()+" debug]" );
         // 1 date and time
         // 2 site #
         // 3 Run #
         // 4 Team #
         printWriter.print(new Date() + "|");
-        printWriter.print(run.getSiteNumber() + "|");
-        printWriter.print(run.getNumber() + "|");
-        printWriter.print(run.getSubmitter().getClientNumber() + "|");
+        printWriter.print("Site " + run.getSiteNumber() + "|");
+        printWriter.print("Run " + run.getNumber() + "|");
+        printWriter.print("Team " + run.getSubmitter().getClientNumber() + "|");
 
         // 5 Problem #
         // 6 Was solved
         // 7 Proxy
         // 8 Run deleted
         printWriter.print(run.getProblemId() + "|");
-        printWriter.print(run.isSolved() + "|");
-        printWriter.print("|");
-        printWriter.print(run.isDeleted() + "|");
+        printWriter.print("Solved " + run.isSolved() + "|");
+        printWriter.print("Proxy 0|");
+        printWriter.print("Deleted " + run.isDeleted() + "|");
 
         // 9# Judgement
         // 10 (unknown)
@@ -90,14 +90,15 @@ public class EvaluationLog implements UIPlugin {
         if (run.isJudged() && judgementRecord != null) {
 
             ElementId elementId = judgementRecord.getJudgementId();
-            printWriter.print(inContest.getJudgement(elementId) + "|");
-            printWriter.print("|");
-            printWriter.print(judgementRecord.isUsedValidator() + "|");
-            printWriter.print(judgementRecord.getJudgerClientId() + "|");
+            printWriter.print("Judgement " + inContest.getJudgement(elementId) + "|");
+            printWriter.print("ValJud " + judgementRecord.isUsedValidator() + "|");
+            printWriter.print("AccHit " + judgementRecord.isAcceptButtonHit() + "|");
+            printWriter.print("Judge " + judgementRecord.getJudgerClientId() + "|");
         } else {
             printWriter.print("||||");
         }
         printWriter.println();
+        printWriter.flush();
     }
 
     public void setContestAndController(IContest inContest, IController inController) {
@@ -120,7 +121,9 @@ public class EvaluationLog implements UIPlugin {
     }
 
     /**
+     * Run Listenter for Evaluations Log.
      * 
+     * This listener will write out when runs are judged and deleted.
      * 
      * @author pc2@ecs.csus.edu
      */
@@ -130,25 +133,31 @@ public class EvaluationLog implements UIPlugin {
 
         public void runAdded(RunEvent event) {
             runChanged(event);
-            System.out.println("debug22 "+event.getAction()+" "+event.getRun());
         }
 
         public void runChanged(RunEvent event) {
             Run run = event.getRun();
             if (run.isJudged()) {
                 writeRunLine(run);
-                System.out.println("debug22 "+event.getAction()+" "+event.getRun());
             }
         }
 
         public void runRemoved(RunEvent event) {
             Run run = event.getRun();
             writeRunLine(run);
-            System.out.println("debug22 "+event.getAction()+" "+event.getRun());
         }
     }
 
     public boolean isLogOpened() {
         return logOpened;
+    }
+
+    /**
+     * A handle the the evaluation log.
+     * 
+     * @return
+     */
+    public PrintWriter getEvalLog() {
+        return evalLog;
     }
 }

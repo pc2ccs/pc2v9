@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Vector;
@@ -7,6 +8,7 @@ import java.util.Vector;
 import edu.csus.ecs.pc2.core.exception.ClarificationUnavailableException;
 import edu.csus.ecs.pc2.core.exception.RunUnavailableException;
 import edu.csus.ecs.pc2.core.list.ClientIdComparator;
+import edu.csus.ecs.pc2.core.log.EvaluationLog;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.BalloonSettings;
@@ -54,6 +56,8 @@ public class PacketHandler {
     private IController controller;
     
     private PriorityMessageHandler priorityMessageHandler;
+    
+    private EvaluationLog evaluationLog = null;
     
     public PacketHandler(IController controller, IContest contest) {
         this.controller = controller;
@@ -597,6 +601,7 @@ public class PacketHandler {
                     } else {
                         contest.updateRun(run, whoChangedRun);
                     }
+                    
                 } else {
                     throw new SecurityException("Non-admin user "+packet.getSourceId()+" attempted to update run "+run);
                 }
@@ -1849,6 +1854,7 @@ public class PacketHandler {
             priorityMessageHandler.setContestAndController(contest, controller);
         }
         
+        
         controller.setSiteNumber(clientId.getSiteNumber());
 
         addSitesToModel(packet);
@@ -1968,6 +1974,18 @@ public class PacketHandler {
             String message = "Trouble logging in, check logs";
             contest.loginDenied(packet.getDestinationId(), connectionHandlerID, message);
         }
+        
+        try {
+            if (evaluationLog == null && isServer()) {
+                Utilities.insureDir(Log.LOG_DIRECTORY_NAME);
+                // this not only opens the log but registers this class to handle all run events.
+                evaluationLog = new EvaluationLog(Log.LOG_DIRECTORY_NAME + File.separator + "evals.log", contest, controller);
+                evaluationLog.getEvalLog().println("# Log opened " + new Date());
+            }
+        } catch (Exception e) {
+            controller.getLog().log(Log.WARNING, "Exception logged ", e);
+        }
+
     }
 
     private void addLanguagesToModel(Packet packet) {

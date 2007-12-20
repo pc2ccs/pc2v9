@@ -107,6 +107,8 @@ public class Log extends Logger {
      */
     public static final Level FINEST = Level.FINEST;
 
+    public static final String LOG_DIRECTORY_NAME = "logs";
+
     private LogStreamHandler streamHandler = null;
     
     /**
@@ -128,7 +130,7 @@ public class Log extends Logger {
      * @param logFileName name to log messages to.
      */
     public Log (String logFileName){
-        this ("edu.ecs.csus.pc2", null, "logs", logFileName);
+        this ("edu.ecs.csus.pc2", null, LOG_DIRECTORY_NAME, logFileName);
     }
 
     /**
