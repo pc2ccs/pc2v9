@@ -106,7 +106,7 @@ public class RunsReport implements IReport {
             printWriter.print(" DELETED ");
         }
         printWriter.println();
-        if (run.isJudged()) {
+        if (run.isJudged() || run.getStatus().equals(RunStates.BEING_RE_JUDGED)) {
 
             for (JudgementRecord judgementRecord : run.getAllJudgementRecords()) {
                 String judgementText = contest.getJudgement(judgementRecord.getJudgementId()).toString();
