@@ -117,6 +117,8 @@ public class RunsPanel extends JPanePlugin {
     private boolean usingFullColumns = false;
     
     private DisplayTeamName displayTeamName = null;
+    
+    private boolean makeSoundOnOneRun = false;
 
     /**
      * This method initializes
@@ -607,6 +609,13 @@ public class RunsPanel extends JPanePlugin {
                 } else {
                     runListBox.replaceRow(objects, rowNumber);
                 }
+                
+                if (isAllowed(Permission.Type.JUDGE_RUN)) {
+                    if (runListBox.getRowCount() == 1) {
+                        emitSound();
+                    }
+                }
+                
                 if (autoSizeAndSort) {
                     updateRowCount();
                     runListBox.autoSizeAllColumns();
@@ -662,8 +671,15 @@ public class RunsPanel extends JPanePlugin {
                 updateRowCount();
                 runListBox.autoSizeAllColumns();
                 runListBox.sort();
+
             }
         });
+    }
+    
+    private void emitSound() {
+        if (isMakeSoundOnOneRun()) {
+            java.awt.Toolkit.getDefaultToolkit().beep();
+        }
     }
     
     private boolean isAllowed (Permission.Type type){
@@ -1346,6 +1362,14 @@ public class RunsPanel extends JPanePlugin {
         } else {
             showMessage("Administrator has turned off Auto Judging");
         }
+    }
+
+    public boolean isMakeSoundOnOneRun() {
+        return makeSoundOnOneRun;
+    }
+
+    public void setMakeSoundOnOneRun(boolean makeSoundOnOneRun) {
+        this.makeSoundOnOneRun = makeSoundOnOneRun;
     }
     
     

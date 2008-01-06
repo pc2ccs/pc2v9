@@ -150,6 +150,7 @@ public class JudgeView extends JFrame implements UIPlugin {
         
                 RunsPanel newRunsPane = new RunsPanel();
                 newRunsPane.setShowNewRunsOnly(true);
+                newRunsPane.setMakeSoundOnOneRun(true);
                 addUIPlugin(getMainTabbedPane(), "New Runs", newRunsPane);
         
                 RunsPanel runsPanel = new RunsPanel();
