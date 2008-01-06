@@ -8,6 +8,7 @@ import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.exception.ClarificationUnavailableException;
 import edu.csus.ecs.pc2.core.exception.RunUnavailableException;
+import edu.csus.ecs.pc2.core.exception.UnableToUncheckoutRunException;
 import edu.csus.ecs.pc2.core.list.AccountList;
 import edu.csus.ecs.pc2.core.list.BalloonSettingsList;
 import edu.csus.ecs.pc2.core.list.ClarificationList;
@@ -961,7 +962,7 @@ public class Contest implements IContest {
         fireRunListener(runEvent);
     }
     
-    public Run checkoutRun(Run run, ClientId whoChangedRun) throws RunUnavailableException {
+    public Run checkoutRun(Run run, ClientId whoChangedRun, boolean reCheckoutRun) throws RunUnavailableException {
         
         synchronized (runCheckOutList) {
             ClientId clientId = runCheckOutList.get(run.getElementId());
@@ -977,9 +978,19 @@ public class Contest implements IContest {
                 throw new RunUnavailableException("Run "+ run.getNumber() + " (site " + run.getSiteNumber() + ") not found");
             }
             
-            if (newRun.getStatus().equals(RunStates.NEW)){
+            boolean canBeCheckedOut = newRun.getStatus().equals(RunStates.NEW);
+            
+            if (reCheckoutRun && run.isJudged()){
+                canBeCheckedOut = true;
+            }
+            
+            if (canBeCheckedOut){
                 runCheckOutList.put(newRun.getElementId(), whoChangedRun);
                 newRun.setStatus(RunStates.BEING_JUDGED);
+                
+                if (reCheckoutRun){
+                    newRun.setStatus(RunStates.BEING_RE_JUDGED);
+                }
                 runList.updateRun(newRun);
                 return runList.get(run.getElementId());
             } else {
@@ -991,14 +1002,58 @@ public class Contest implements IContest {
     }
     
     public void updateRun(Run run, ClientId whoChangedRun) {
-
-        runList.updateRun(run);
-        
-        RunEvent runEvent = new RunEvent(RunEvent.Action.CHANGED, runList.get(run), null);
-        runEvent.setWhoModifiedRun(whoChangedRun);
-        fireRunListener(runEvent);
+        updateRun (run, null, whoChangedRun);
     }
 
+    public void updateRun(Run run, RunFiles runFiles, ClientId whoChangedRun) {
+
+        /**
+         * Should this run be un-checked out (removed from the checked out list) ? 
+         */
+        boolean unCheckoutRun = false;
+        
+        /**
+         * Should this run be added to the checkout list ?
+         */
+        boolean checkOutRun = false;
+        
+        switch (run.getStatus()) {
+            case CHECKED_OUT:
+            case BEING_JUDGED:
+            case BEING_RE_JUDGED:
+            case HOLD:
+                checkOutRun = true;
+                break;
+            case JUDGED:
+            case NEW:
+            case REJUDGE:
+                unCheckoutRun = true;
+        }
+
+        if (checkOutRun) {
+            synchronized (runCheckOutList) {
+                runCheckOutList.put(run.getElementId(), whoChangedRun);
+            }
+        } else if (unCheckoutRun) {
+            synchronized (runCheckOutList) {
+                ClientId clientId = runCheckOutList.get(run.getElementId());
+                if (clientId != null){
+                    runCheckOutList.remove(run.getElementId());
+                }
+            }
+        }
+        
+        runList.updateRun(run);
+        
+        RunEvent runEvent = new RunEvent(RunEvent.Action.CHANGED, runList.get(run), runFiles);
+        runEvent.setWhoModifiedRun(whoChangedRun);
+        
+        if (checkOutRun) {
+            runEvent.setSentToClientId(whoChangedRun);
+        }
+        fireRunListener(runEvent);
+    }
+    
     public RunFiles getRunFiles(Run run) {
         return runFilesList.getRunFiles(run);
     }
@@ -1042,26 +1097,52 @@ public class Contest implements IContest {
 
     }
 
-    public void cancelRunCheckOut(Run run, ClientId fromId) {
-
+    public void cancelRunCheckOut(Run run, ClientId fromId) throws UnableToUncheckoutRunException {
+        
         // TODO Security check, code needed to insure that only
         // certain accounts can cancel a checkout
-        
-        ClientId whoCheckedOut = runCheckOutList.get(run.getElementId());
-        // if (fromId.equals(whoCheckedOut)) {
-        // StaticLog.unclassified("Security Warning canceling "+run+", not checked out by "+whoCheckedOut);
-        // }
 
-        if (whoCheckedOut != null){
+        ClientId whoCheckedOut = runCheckOutList.get(run.getElementId());
+
+        if (whoCheckedOut == null) {
+            throw new UnableToUncheckoutRunException(fromId + " can not checkout " + run + " not checked out");
+        }
+
+        /**
+         * This is the user who checked out the run.
+         */
+        boolean userCheckedOutRun = fromId.equals(whoCheckedOut);
+
+        if (isAdministrator(fromId) && isAllowed(fromId, Permission.Type.EDIT_RUN)) {
+            // Allow admin to override if they have permission to edit a run
+            userCheckedOutRun = true;
+        }
+
+        if (!userCheckedOutRun) {
+            throw new UnableToUncheckoutRunException(fromId + " can not checkout " + run + " checked out to " + whoCheckedOut);
+        }
+
+        Run theRun = getRun(run.getElementId());
+
+        if (theRun.getStatus().equals(RunStates.BEING_JUDGED)) {
+            run.setStatus(RunStates.NEW);
+        } else if (theRun.getStatus().equals(RunStates.BEING_RE_JUDGED)) {
+            run.setStatus(RunStates.JUDGED);
+        }
+        
+        synchronized (runCheckOutList) {
             runCheckOutList.remove(run.getElementId());
         }
         
-        run.setStatus(RunStates.NEW);
         runList.updateRun(run);
-        Run theRun = runList.get(run);
+        theRun = runList.get(run);
 
         RunEvent runEvent = new RunEvent(RunEvent.Action.RUN_AVAILABLE, theRun, null);
         fireRunListener(runEvent);
+    }
+
+    protected boolean isAdministrator(ClientId clientId) {
+        return clientId.getClientType().equals(ClientType.Type.ADMINISTRATOR);
     }
 
     public ClientId getRunCheckedOutBy(Run run) {
@@ -1523,7 +1604,7 @@ public class Contest implements IContest {
      */
     public Clarification checkoutClarification(Clarification clar, ClientId whoChangedClar) throws ClarificationUnavailableException {
         synchronized (clarCheckOutList) {
-            ClientId clientId = runCheckOutList.get(clar.getElementId());
+            ClientId clientId = clarCheckOutList.get(clar.getElementId());
 
             if (clientId != null) {
                 // Run checked out

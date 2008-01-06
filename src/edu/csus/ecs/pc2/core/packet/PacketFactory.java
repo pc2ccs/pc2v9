@@ -153,8 +153,8 @@ public final class PacketFactory {
     
     public static final String BALLOON_SETTINGS_LIST = "BALLOON_SETTINGS_LIST";
 
-    
-    
+    public static final String PACKET = "PACKET";
+
     /**
      * Change password, new password
      */
@@ -522,10 +522,12 @@ public final class PacketFactory {
      * @param source
      * @param destination
      * @param beingJudgingRun
+     * @param whoUncheckedOutRun - who checked out run.
      */
-    public static Packet createUnCheckoutRun(ClientId source, ClientId destination, Run beingJudgingRun) {
+    public static Packet createUnCheckoutRun(ClientId source, ClientId destination, Run beingJudgingRun, ClientId whoUncheckedOutRun) {
         Properties prop = new Properties();
         prop.put(RUN, beingJudgingRun);
+        prop.put(CLIENT_ID, whoUncheckedOutRun);
         Packet packet = new Packet(Type.RUN_UNCHECKOUT, source, destination, prop);
         return packet;
     }
@@ -1196,12 +1198,12 @@ public final class PacketFactory {
      * 
      * @param source
      * @param destination
-     * @param elementId
+     * @param run2
      * @param requesterId
      */
-    public static Packet createRunRejudgeRequest(ClientId source, ClientId destination, ElementId elementId, ClientId requesterId) {
+    public static Packet createRunRejudgeRequest(ClientId source, ClientId destination, Run run, ClientId requesterId) {
         Properties props = new Properties();
-        props.put(PacketFactory.REQUESTED_RUN_ELEMENT_ID, elementId);
+        props.put(PacketFactory.RUN, run);
         props.put(PacketFactory.CLIENT_ID, requesterId);
         Packet packet = new Packet(Type.RUN_REJUDGE_REQUEST, source, destination, props);
         return packet;
@@ -1702,4 +1704,16 @@ public final class PacketFactory {
         return packet;
     }
 
+    public static Packet createViolationPacket(ClientId source, ClientId destination, String message, ClientId whoCanceledRun, ConnectionHandlerID connectionHandlerID, Packet inPacket) {
+        Properties prop = new Properties();
+        prop.put(CLIENT_ID, whoCanceledRun);
+        prop.put(MESSAGE, message);
+        if (connectionHandlerID != null){
+            prop.put(CONNECTION_HANDLE_ID, connectionHandlerID);
+        }
+        prop.put(PACKET, inPacket);
+        
+        Packet packet = new Packet(Type.VIOLATION, source, destination, prop);
+        return packet;
+    }
 }

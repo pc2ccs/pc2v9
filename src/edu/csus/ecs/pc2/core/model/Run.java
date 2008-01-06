@@ -118,10 +118,11 @@ public class Run extends ISubmission {
     }
 
     /**
+     * Returns true if judged (or is being re-judged).
      * @return true if judged.
      */
     public boolean isJudged() {
-        return status == Run.RunStates.JUDGED;
+        return status == RunStates.JUDGED || status == RunStates.BEING_RE_JUDGED;
     }
 
     /**

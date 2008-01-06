@@ -617,6 +617,10 @@ public final class PacketType implements Serializable {
          * 
          */
         PRIORITY_MESSAGE,
+        /**
+         * Security Violation.
+         */
+        VIOLATION,
     }
 
     /**

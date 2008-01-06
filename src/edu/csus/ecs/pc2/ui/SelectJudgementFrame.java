@@ -77,7 +77,7 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
         contest.addRunListener(new RunListenerImplementation());
     }
 
-    public void setRun(Run theRun) {
+    public void setRun(Run theRun, boolean rejudgeRun) {
         getSelectJudgementPane().setRun(theRun);
         if (theRun == null) {
             setTitle("Run not loaded");
@@ -85,7 +85,11 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
             setTitle("Select Judgement for run " + theRun.getNumber() + " (Site " + theRun.getSiteNumber() + ")");
             run = theRun;
             getSelectJudgementPane().setRunFiles(null);
-            controller.checkOutRun(theRun, false);
+            if (rejudgeRun){
+                controller.checkOutRejudgeRun(theRun);
+            } else {
+                controller.checkOutRun(theRun, false);
+            }
         }
     }
 
@@ -103,10 +107,14 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
     public class RunListenerImplementation implements IRunListener {
 
         public void runAdded(RunEvent event) {
+            System.out.println("sjf: : "+event.getAction()+" "+event.getSentToClientId()+" "+event.getRun());
             // ignore
         }
 
         public void runChanged(RunEvent event) {
+            
+            System.out.println("sjf: : "+event.getAction()+" "+event.getSentToClientId()+" "+event.getWhoModifiedRun()+" "+event.getRun());
+            
             if (run != null) {
                 if (event.getRun().getElementId().equals(run.getElementId())) {
                     // RUN_NOT_AVIALABLE is undirected (sentToClient is null)
@@ -122,6 +130,7 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
                         JudgeView.setAlreadyJudgingRun(false);
                     } else {
                         if (event.getSentToClientId() != null && event.getSentToClientId().equals(contest.getClientId())) {
+                            
                             getSelectJudgementPane().setRunAndFiles(event.getRun(), event.getRunFiles());
                             // stop processing once we get it 
                             // stops both the duplicate checkedout_run and the run_not_available going to other judges

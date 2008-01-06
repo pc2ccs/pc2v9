@@ -1352,8 +1352,8 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             Run run = contest.getRun(runIDs[i]);
             if (run.getStatus().equals(RunStates.BEING_JUDGED)){
                 ClientId destinationId = new ClientId(run.getSiteNumber(), Type.SERVER, 0);
-                Packet packet = PacketFactory.createUnCheckoutRun(judgeId, destinationId, run);
-                packetHandler.cancelRun(packet, run, judgeId);
+                Packet packet = PacketFactory.createUnCheckoutRun(judgeId, destinationId, run, judgeId);
+                packetHandler.cancelRun(packet, run, judgeId, null);
             }
         }
     }
@@ -1824,6 +1824,13 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         sendToLocalServer(packet);
     }
 
+    public void checkOutRejudgeRun(Run run) {
+        ClientId clientId = contest.getClientId();
+        Packet packet = PacketFactory.createRunRejudgeRequest(clientId, getServerClientId(), run, clientId);
+        sendToLocalServer(packet);
+    }
+
+
     /**
      * Send run judgement to server.
      */
@@ -1838,7 +1845,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      */
     public void cancelRun(Run run) {
         ClientId clientId = contest.getClientId();
-        Packet packet = PacketFactory.createUnCheckoutRun(clientId, getServerClientId(), run);
+        Packet packet = PacketFactory.createUnCheckoutRun(clientId, getServerClientId(), run, clientId);
         sendToLocalServer(packet);
     }
 
@@ -2246,5 +2253,4 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         sendToLocalServer(groupPacket);
     }
 
- 
 }

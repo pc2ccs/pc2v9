@@ -5,6 +5,7 @@ import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.exception.ClarificationUnavailableException;
 import edu.csus.ecs.pc2.core.exception.RunUnavailableException;
+import edu.csus.ecs.pc2.core.exception.UnableToUncheckoutRunException;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
@@ -467,14 +468,15 @@ public interface IContest {
      * @param whoChangedRun
      * @throws RunUnavailableException - if run already checked out or not NEW.
      */
-    Run checkoutRun (Run run, ClientId whoChangedRun) throws RunUnavailableException;
+    Run checkoutRun (Run run, ClientId whoChangedRun,  boolean reCheckoutRun) throws RunUnavailableException;
 
     /**
      * Unconditionally update the run.
      * 
      */
     void updateRun(Run run, ClientId whoChangedRun);
-
+    
+    void updateRun(Run run, RunFiles runFiles, ClientId whoChangedRun);
     /**
      * Get submitted files for input run.
      * 
@@ -498,7 +500,7 @@ public interface IContest {
      * @param run
      * @param fromId
      */
-    void cancelRunCheckOut(Run run, ClientId fromId);
+    void cancelRunCheckOut(Run run, ClientId fromId) throws UnableToUncheckoutRunException;
 
     /**
      * Returns which user has checked out the input run.

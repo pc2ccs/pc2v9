@@ -158,6 +158,13 @@ public interface IController {
      */
     void checkOutRun (Run run, boolean readOnly);
     
+    
+    /**
+     * Request to checkout a judged run, to rejudge the run.
+     * @param theRun
+     */
+    void checkOutRejudgeRun(Run theRun);
+    
     /**
      * Submit judgement from run to judge.
      * @param run
@@ -318,5 +325,7 @@ public interface IController {
     void addNewClientSettings(ClientSettings newClientSettings);
 
     void updateContestTime(ContestTime newContestTime);
+
+    
     
 }

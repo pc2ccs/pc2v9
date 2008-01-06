@@ -236,9 +236,9 @@ public class RunsPanel extends JPanePlugin {
     }
 
     /**
-     * Return the judgement for the run.
+     * Return the judgement/status for the run.
      * @param run
-     * @return
+     * @return a string that represents the state of the run
      */
     private String getJudgementResultString(Run run) {
 
@@ -254,18 +254,22 @@ public class RunsPanel extends JPanePlugin {
 
                 JudgementRecord judgementRecord = run.getJudgementRecord();
                 if (judgementRecord != null && judgementRecord.getJudgementId() != null) {
-                    if (judgementRecord.isUsedValidator()){
+                    if (judgementRecord.isUsedValidator()) {
                         result = judgementRecord.getValidatorResultString();
                     } else {
                         Judgement judgement = getContest().getJudgement(judgementRecord.getJudgementId());
-                        if (judgement != null){
+                        if (judgement != null) {
                             result = judgement.toString();
                         }
                     }
-                    
-                    if (isTeam(getContest().getClientId())){
-                        if (! judgementRecord.isSendToTeam()){
+
+                    if (isTeam(getContest().getClientId())) {
+                        if (!judgementRecord.isSendToTeam()) {
                             result = RunStates.NEW.toString();
+                        }
+                    } else {
+                        if (run.getStatus().equals(RunStates.BEING_RE_JUDGED)) {
+                            result = RunStates.BEING_RE_JUDGED.toString();
                         }
                     }
                 }
@@ -838,12 +842,12 @@ public class RunsPanel extends JPanePlugin {
             Run runToEdit = getContest().getRun(elementId);
             
             if ((! runToEdit.getStatus().equals(RunStates.NEW)) || runToEdit.isDeleted()){
-                showMessage("Not allowed to request run, already judged");
+                showMessage("Not allowed to request run (run not status NEW) ");
                 JudgeView.setAlreadyJudgingRun(false);
                 return;
             }
 
-            selectJudgementFrame.setRun(runToEdit);
+            selectJudgementFrame.setRun(runToEdit, false);
             selectJudgementFrame.setVisible(true);
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception logged ", e);
@@ -851,37 +855,45 @@ public class RunsPanel extends JPanePlugin {
         }   
     }
     
-    protected void rejudgeSelectedRun () {
-        
-        int [] selectedIndexes = runListBox.getSelectedIndexes();
-        
-        if (selectedIndexes.length < 1){
+    protected void rejudgeSelectedRun() {
+
+        int[] selectedIndexes = runListBox.getSelectedIndexes();
+
+        if (selectedIndexes.length < 1) {
             showMessage("Please select a run ");
             return;
         }
-        
+
         try {
             ElementId elementId = (ElementId) runListBox.getKeys()[selectedIndexes[0]];
             Run runToEdit = getContest().getRun(elementId);
-            
-            if (! runToEdit.isJudged()){
+
+            if (!runToEdit.isJudged()) {
                 showMessage("Judge run before attempting to re-judge run");
                 return;
             }
-            
-            if (runToEdit.isDeleted()){
+
+            if (runToEdit.isDeleted()) {
                 showMessage("Not allowed to rejudge deleted run ");
                 return;
             }
 
-            showMessage("Would have rejudged run "+runToEdit.getNumber());
-//            selectJudgementFrame.setRun(runToEdit);
-//            selectJudgementFrame.setVisible(true);
-            
+            if (JudgeView.isAlreadyJudgingRun()) {
+                JOptionPane.showMessageDialog(this, "Already judging run");
+                return;
+            }
+
+            // huh
+
+            JudgeView.setAlreadyJudgingRun(true);
+
+            selectJudgementFrame.setRun(runToEdit, true);
+            selectJudgementFrame.setVisible(true);
+
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception logged ", e);
             showMessage("Unable to rejudge run, check log");
-        }   
+        }
     }
 
     /**

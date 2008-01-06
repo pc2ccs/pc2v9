@@ -7,6 +7,7 @@ import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.exception.ClarificationUnavailableException;
 import edu.csus.ecs.pc2.core.exception.RunUnavailableException;
+import edu.csus.ecs.pc2.core.exception.UnableToUncheckoutRunException;
 import edu.csus.ecs.pc2.core.list.ClientIdComparator;
 import edu.csus.ecs.pc2.core.log.EvaluationLog;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -33,7 +34,6 @@ import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.Site;
-import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.packet.PacketFactory;
 import edu.csus.ecs.pc2.core.packet.PacketType.Type;
@@ -76,13 +76,12 @@ public class PacketHandler {
 
         info("handlePacket start " + packet);
         PacketFactory.dumpPacket(controller.getLog(),packet, "handlePacket");
+        PacketFactory.dumpPacket(System.err,packet, "handlePacket");
 
         ClientId fromId = packet.getSourceId();
 
         if (packetType.equals(Type.MESSAGE)) {
-            
             PacketFactory.dumpPacket(System.err, packet, null);
-            
             handleMessagePacket (packet);
         } else if (packetType.equals(Type.RUN_SUBMISSION_CONFIRM)) {
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
@@ -233,7 +232,7 @@ public class PacketHandler {
             // Cancel run from requestor to server
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
             ClientId whoCanceledId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-            cancelRun(packet, run,  whoCanceledId);
+            cancelRun(packet, run,  whoCanceledId, connectionHandlerID);
             
         } else if (packetType.equals(Type.START_ALL_CLOCKS)) {
             startContest(packet);
@@ -299,15 +298,12 @@ public class PacketHandler {
 
         } else if (packetType.equals(Type.RUN_CHECKOUT)) {
             // Run from server to clients
-            Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
-            RunFiles runFiles = (RunFiles) PacketFactory.getObjectValue(packet, PacketFactory.RUN_FILES);
-            ClientId whoCheckedOut = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-            contest.addRun(run, runFiles, whoCheckedOut);
-            
-            if (isServer()){
-                sendToJudgesAndOthers( packet, false);
-            }
+            runCheckout (packet);
 
+        } else if (packetType.equals(Type.RUN_REJUDGE_CHECKOUT)) {
+            // Run from server to clients
+            runCheckout (packet); // this works for rejudge as well.
+            
         } else if (packetType.equals(Type.CLARIFICATION_REQUEST)) {
             requestClarification(packet);
 
@@ -323,6 +319,10 @@ public class PacketHandler {
                 requestRun(packet, run, requestFromId);
             }
 
+        } else if (packetType.equals(Type.RUN_REJUDGE_REQUEST)) {
+            // REJUDGE Request Run from requestor to server
+            requestRejudgeRun (packet);
+            
         } else if (packetType.equals(Type.LOGOUT)) {
             // client logged out
             logoutClient(packet);
@@ -360,10 +360,87 @@ public class PacketHandler {
             Exception exception = new Exception("PacketHandler.handlePacket Unhandled packet " + packet);
             controller.getLog().log(Log.WARNING,"Unhandled Packet ", exception);
         }
-
+        
         info("handlePacket end " + packet);
     }
-    
+
+
+    /**
+     * 
+     * @param packet
+     */
+    private void runCheckout(Packet packet) {
+
+        // Run checkout OR run re-judge checkout
+        
+        Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
+        RunFiles runFiles = (RunFiles) PacketFactory.getObjectValue(packet, PacketFactory.RUN_FILES);
+        ClientId whoCheckedOut = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+        contest.updateRun(run, runFiles, whoCheckedOut);
+        
+        if (isServer()){
+            sendToJudgesAndOthers( packet, false);
+        }
+        
+    }
+
+    /**
+     * Re-judge run request, parse packet, attempt to checkout run. 
+     * @param packet
+     */
+    private void requestRejudgeRun(Packet packet) {
+        
+        Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
+        ClientId whoRequestsRunId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+        
+        if (isServer()) {
+
+            if (!isThisSite(run)) {
+
+                ClientId serverClientId = new ClientId(run.getSiteNumber(), ClientType.Type.SERVER, 0);
+                if (contest.isLocalLoggedIn(serverClientId)) {
+
+                    // send request to remote server
+                    Packet requestPacket = PacketFactory.createRunRejudgeRequest(contest.getClientId(), serverClientId, run, whoRequestsRunId);
+                    controller.sendToRemoteServer(run.getSiteNumber(), requestPacket);
+
+                } else {
+
+                    // send NOT_AVAILABLE back to client
+                    Packet notAvailableRunPacket = PacketFactory.createRunNotAvailable(contest.getClientId(), whoRequestsRunId, run);
+                    controller.sendToClient(notAvailableRunPacket);
+                }
+
+            } else {
+                // This Site's run, if we can check it out and send to client
+
+                Run theRun = contest.getRun(run.getElementId());
+
+                try {
+                    theRun = contest.checkoutRun(run, whoRequestsRunId, true);
+                    RunFiles runFiles = contest.getRunFiles(run);
+
+                    // send to Judge
+                    Packet checkOutPacket = PacketFactory.createRejudgeCheckedOut(contest.getClientId(), whoRequestsRunId, theRun, runFiles, whoRequestsRunId);
+                    controller.sendToClient(checkOutPacket);
+
+                    // TODO change this packet type so it is not confused with the actual checked out run.
+
+                    sendToJudgesAndOthers(checkOutPacket, true);
+                } catch (RunUnavailableException runUnavailableException) {
+                    theRun = contest.getRun(run.getElementId());
+                    Packet notAvailableRunPacket = PacketFactory.createRunNotAvailable(contest.getClientId(), whoRequestsRunId, theRun);
+                    controller.sendToClient(notAvailableRunPacket);
+                }
+            }
+        } else {
+
+            throw new SecurityException("requestRun - sent to client " + contest.getClientId());
+
+        }
+
+    }
+
     private void priorityMessage(Packet packet) {
         
         String message = (String) PacketFactory.getObjectValue(packet, PacketFactory.MESSAGE);
@@ -1185,7 +1262,7 @@ public class PacketHandler {
         return id.getClientType().equals(ClientType.Type.ADMINISTRATOR);
     }
     
-    public void cancelRun(Packet packet, Run run, ClientId whoCanceledRun) {
+    public void cancelRun(Packet packet, Run run, ClientId whoCanceledRun, ConnectionHandlerID connectionHandlerID) {
 
         if (isServer()) {
 
@@ -1195,22 +1272,27 @@ public class PacketHandler {
 
             } else {
 
-                // TODO: insure that this client checked out the run or send back a "oh no you didn't!"
-
-                contest.cancelRunCheckOut(run, whoCanceledRun);
-
-                Run availableRun = contest.getRun(run.getElementId());
-                Packet availableRunPacket = PacketFactory.createRunAvailable(contest.getClientId(), whoCanceledRun, availableRun);
-
-                if (isServer()) {
+                try {
+                    contest.cancelRunCheckOut(run, whoCanceledRun);
+                    Run availableRun = contest.getRun(run.getElementId());
+                    Packet availableRunPacket = PacketFactory.createRunAvailable(contest.getClientId(), whoCanceledRun, availableRun);
                     sendToJudgesAndOthers(availableRunPacket, true);
+                } catch (UnableToUncheckoutRunException e) {
+                    
+                    // TODO handle Security violation 
+                    
+                    controller.getLog().log(Log.WARNING, "Security Warning " + e.getMessage(), e);
+
+                    // Send Security warning to all admins and servers
+
+                    Packet violationPacket = PacketFactory.createViolationPacket(contest.getClientId(), PacketFactory.ALL_SERVERS, e.getMessage(), whoCanceledRun, connectionHandlerID, packet);
+
+                    controller.sendToAdministrators(violationPacket);
+                    controller.sendToServers(violationPacket);
                 }
             }
 
         } else {
-            // Client, update status and done.
-
-            run.setStatus(RunStates.NEW);
             contest.updateRun(run, whoCanceledRun);
         }
     }
@@ -1455,7 +1537,7 @@ public class PacketHandler {
                 } else {
                     
                     try {
-                        theRun = contest.checkoutRun(run, whoRequestsRunId);
+                        theRun = contest.checkoutRun(run, whoRequestsRunId, false);
                         RunFiles runFiles = contest.getRunFiles(run);
 
                         // send to Judge
