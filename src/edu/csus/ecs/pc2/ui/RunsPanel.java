@@ -211,7 +211,7 @@ public class RunsPanel extends JPanePlugin {
                 if (judgeId.equals(getContest().getClientId())) {
                     result = "Me";
                 } else {
-                    result = judgeId.getName();
+                    result = judgeId.getName() + " S"+judgeId.getSiteNumber();
                 }
                 if (autoJudgedRun) {
                     result = result + "/AJ";
