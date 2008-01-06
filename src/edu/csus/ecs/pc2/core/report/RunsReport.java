@@ -106,6 +106,11 @@ public class RunsReport implements IReport {
             printWriter.print(" DELETED ");
         }
         printWriter.println();
+        ClientId whoCheckedOutId = contest.getRunCheckedOutBy(run);
+        if (whoCheckedOutId != null){
+            printWriter.print("    Checked out by: "+whoCheckedOutId);
+        }
+        
         if (run.isJudged() || run.getStatus().equals(RunStates.BEING_RE_JUDGED)) {
 
             for (JudgementRecord judgementRecord : run.getAllJudgementRecords()) {
