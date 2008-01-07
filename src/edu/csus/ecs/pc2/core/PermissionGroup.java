@@ -64,7 +64,6 @@ public class PermissionGroup {
         judgePermissionList.addPermission(Type.VIEW_RUNS);
         judgePermissionList.addPermission(Type.ANSWER_CLARIFICATION);
         judgePermissionList.addPermission(Type.SUBMIT_CLARIFICATION);
-        judgePermissionList.addPermission(Type.SUBMIT_RUN);
         judgePermissionList.addPermission(Type.VIEW_ALL_JUDGEMENTS);
         judgePermissionList.addPermission(Type.VIEW_STANDINGS);
         judgePermissionList.addPermission(Type.VIEW_SUMMARY_ATTEMPTS_GRID);

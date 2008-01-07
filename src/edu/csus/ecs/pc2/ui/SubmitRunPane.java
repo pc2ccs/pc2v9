@@ -15,7 +15,12 @@ import edu.csus.ecs.pc2.core.IController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.Executable;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.AccountEvent;
+import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
+import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.core.model.ILanguageListener;
@@ -27,6 +32,8 @@ import edu.csus.ecs.pc2.core.model.ProblemEvent;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
+import edu.csus.ecs.pc2.core.security.Permission;
+import edu.csus.ecs.pc2.core.security.PermissionList;
 
 /**
  * A submit run pane.
@@ -71,7 +78,8 @@ public class SubmitRunPane extends JPanePlugin {
     
     private Executable executable = null;
 
-
+    private PermissionList permissionList = new PermissionList();
+    
     /**
      * Nevermind this constructor, needed for VE and other reasons.
      * 
@@ -134,12 +142,24 @@ public class SubmitRunPane extends JPanePlugin {
         reloadLanguages();
         
         setButtonsActive(getContest().getContestTime().isContestRunning());
+        if (! isTeam()){
+            setButtonsActive(true);
+        }
     }
 
     private boolean isThisSite(int siteNumber) {
         return siteNumber == getContest().getSiteNumber();
     }
 
+    
+    protected boolean isTeam(ClientId id) {
+        return id != null && id.getClientType().equals(ClientType.Type.TEAM);
+    }
+    
+    protected boolean isTeam() {
+        return isTeam(getContest().getClientId());
+    }
+    
     /**
      * Enable or disable submission buttons.
      * 
@@ -149,10 +169,12 @@ public class SubmitRunPane extends JPanePlugin {
     private void setButtonsActive(final boolean turnButtonsOn) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                getSubmitRunButton().setEnabled(turnButtonsOn);
-                getPickFileButton().setEnabled(turnButtonsOn);
-                getTestButton().setEnabled(turnButtonsOn);
-
+                if (isTeam()){
+                    // Only turn buttons on and off if a Team
+                    getSubmitRunButton().setEnabled(turnButtonsOn);
+                    getPickFileButton().setEnabled(turnButtonsOn);
+                    getTestButton().setEnabled(turnButtonsOn);
+                }
             }
         });
         FrameUtilities.regularCursor(this);
@@ -335,7 +357,7 @@ public class SubmitRunPane extends JPanePlugin {
     private JButton getSubmitRunButton() {
         if (submitRunButton == null) {
             submitRunButton = new JButton();
-            submitRunButton.setEnabled(false);
+            submitRunButton.setEnabled(true);
             submitRunButton.setLocation(new java.awt.Point(355,254));
             submitRunButton.setSize(new java.awt.Dimension(100,26));
             submitRunButton.setPreferredSize(new java.awt.Dimension(100,26));
@@ -531,7 +553,7 @@ public class SubmitRunPane extends JPanePlugin {
     private JButton getPickFileButton() {
         if (pickFileButton == null) {
             pickFileButton = new JButton();
-            pickFileButton.setEnabled(false);
+            pickFileButton.setEnabled(true);
             pickFileButton.setMnemonic(java.awt.event.KeyEvent.VK_L);
             pickFileButton.setText("Select");
             pickFileButton.addActionListener(new java.awt.event.ActionListener() {
@@ -573,6 +595,25 @@ public class SubmitRunPane extends JPanePlugin {
         chooser = null;
 
     }
+    
+    
+    private boolean isAllowed (Permission.Type type){
+        return permissionList.isAllowed(type);
+    }
+    
+    private void updateGUIperPermissions() {
+
+//        testButton.setVisible(isAllowed(Permission.Type.JUDGE_RUN));
+        submitRunButton.setVisible(isAllowed(Permission.Type.SUBMIT_RUN));
+    }
+    
+    private void initializePermissions() {
+        Account account = getContest().getAccount(getContest().getClientId());
+        if (account != null){
+            permissionList.clearAndLoadPermissions(account.getPermissionList());
+        }
+    }
+
 
     public void setContestAndController(IContest inContest, IController inController) {
         super.setContestAndController(inContest, inController);
@@ -585,13 +626,16 @@ public class SubmitRunPane extends JPanePlugin {
 
         // TODO add listeners for accounts, login and site.
 
-        // getModel().addAccountListener(new AccountListenerImplementation());
-        // getModel().addLoginListener(new LoginListenerImplementation());
-        // getModel().addSiteListener(new SiteListenerImplementation());
+         getContest().addAccountListener(new AccountListenerImplementation());
+        // getContest().addLoginListener(new LoginListenerImplementation());
+        // getContest().addSiteListener(new SiteListenerImplementation());
+        
+        initializePermissions();
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 populateGUI();
+                updateGUIperPermissions();
             }
         });
 
@@ -675,7 +719,7 @@ public class SubmitRunPane extends JPanePlugin {
         if (testButton == null) {
             testButton = new JButton();
             testButton.setText("Test");
-            testButton.setEnabled(false);
+            testButton.setEnabled(true);
             testButton.setLocation(new java.awt.Point(20,254));
             testButton.setSize(new java.awt.Dimension(100,26));
             testButton.setPreferredSize(new java.awt.Dimension(100,26));
@@ -693,5 +737,55 @@ public class SubmitRunPane extends JPanePlugin {
         }
         return testButton;
     }
+    
+ 
+    /**
+     * Account Listener for SubmitRunPane. 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    protected class AccountListenerImplementation implements IAccountListener {
 
+        public void accountAdded(AccountEvent accountEvent) {
+            // ignore doesn't affect this pane
+        }
+
+        public void accountModified(AccountEvent event) {
+            // check if is this account
+            Account account = event.getAccount();
+            /**
+             * If this is the account then update the GUI display per
+             * the potential change in Permissions.
+             */
+            if (getContest().getClientId().equals(account.getClientId())) {
+                // They modified us!!
+                initializePermissions();
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        updateGUIperPermissions();
+                    }
+                });
+                
+            } // else  nothing
+            
+        }
+
+        public void accountsAdded(AccountEvent accountEvent) {
+            // Will not apply to this pane, account already added for this user
+        }
+
+        public void accountsModified(AccountEvent accountEvent) {
+            Account [] accounts = accountEvent.getAccounts();
+            for (Account account : accounts){
+                if (getContest().getClientId().equals(account.getClientId())) {
+                    initializePermissions();
+                    SwingUtilities.invokeLater(new Runnable() {
+                        public void run() {
+                            updateGUIperPermissions();
+                        }
+                    });
+                }
+            }
+        }
+    }
 } // @jve:decl-index=0:visual-constraint="10,10"
