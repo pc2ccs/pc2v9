@@ -399,7 +399,7 @@ public class BalloonWriter {
                     error = true;
                     break;
                 }
-                mess = "mail from: pc2@ecs.csus.edu" + NL;
+                mess = "mail from: <pc2@ecs.csus.edu>" + NL;
                 os.write(mess.getBytes());
                 b = new byte[arraySize];
                 is.read(b);
@@ -410,7 +410,7 @@ public class BalloonWriter {
                     break;
                 }
                 for (int i = 0; i < rcpts.length; i++) {
-                    mess = "rcpt to: " + rcpts[i] + NL;
+                    mess = "rcpt to: <" + rcpts[i] + ">" + NL;
                     os.write(mess.getBytes());
                     b = new byte[arraySize];
                     is.read(b);
