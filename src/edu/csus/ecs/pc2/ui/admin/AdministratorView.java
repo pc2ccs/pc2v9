@@ -33,6 +33,7 @@ import edu.csus.ecs.pc2.ui.LogWindow;
 import edu.csus.ecs.pc2.ui.LoginsPane;
 import edu.csus.ecs.pc2.ui.OptionsPanel;
 import edu.csus.ecs.pc2.ui.ProblemsPane;
+import edu.csus.ecs.pc2.ui.ProfilesPane;
 import edu.csus.ecs.pc2.ui.ReportPane;
 import edu.csus.ecs.pc2.ui.RunsPanel;
 import edu.csus.ecs.pc2.ui.SitesPanel;
@@ -163,6 +164,9 @@ public class AdministratorView extends JFrame implements UIPlugin {
                 ProblemsPane problemsPane = new ProblemsPane();
                 addUIPlugin(getMainTabbedPanel(), "Problems", problemsPane);
 
+                ProfilesPane profilesPane = new ProfilesPane();
+                addUIPlugin(getMainTabbedPanel(), "Profiles", profilesPane);
+                
                 ReportPane reportPane = new ReportPane();
                 addUIPlugin(getMainTabbedPanel(), "Reports", reportPane);
 
