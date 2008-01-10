@@ -1028,6 +1028,8 @@ public class Contest implements IContest {
             case NEW:
             case REJUDGE:
                 unCheckoutRun = true;
+            default:
+                break; // put here to avoid Checkclipse warning
         }
 
         if (checkOutRun) {
