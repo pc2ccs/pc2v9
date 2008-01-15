@@ -3,7 +3,13 @@ package edu.csus.ecs.pc2.core.transport.connection;
 import java.io.Serializable;
 import java.util.Vector;
 
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
+import edu.csus.ecs.pc2.core.transport.IBtoA;
+import edu.csus.ecs.pc2.core.transport.ITransportManager;
+import edu.csus.ecs.pc2.core.transport.ITwoToOne;
+import edu.csus.ecs.pc2.core.transport.TransportException;
+import edu.csus.ecs.pc2.core.transport.TransportManager;
 
 /**
  * Manages Connections.
@@ -15,7 +21,18 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
  */
 
 // $HeadURL$
-public class ConnectionManager {
+public class ConnectionManager implements ITransportManager {
+
+    public static final String DEFAULT_PC2_PORT = TransportManager.DEFAULT_PC2_PORT;
+
+    private TransportManager transportManager = null;
+    
+    private Log cmLog = null;
+
+    public ConnectionManager(Log log) {
+        cmLog = log;
+        transportManager = new TransportManager(cmLog);
+    }
 
     private Vector<IConnectionManagerListener> connectionListenerList = new Vector<IConnectionManagerListener>();
 
@@ -78,4 +95,44 @@ public class ConnectionManager {
         fireConnectionListener(connectionManagerEvent);
     }
 
+    public void connectToMyServer() throws TransportException {
+        transportManager.connectToMyServer();
+    }
+
+    public void send(Serializable msgObj) throws TransportException {
+        transportManager.send(msgObj);
+    }
+
+    public ConnectionHandlerID connectToServer(String serverIP, int port) throws TransportException {
+        return transportManager.connectToServer(serverIP, port);
+    }
+
+    public void startClientTransport(String serverIP, int port, IBtoA appCallBack) {
+        transportManager.startClientTransport(serverIP, port, appCallBack);
+    }
+
+    public void shutdownTransport() {
+        transportManager.shutdownTransport();
+    }
+
+    public void setLog(Log log) {
+        cmLog = log;
+        transportManager.setLog(log);
+    }
+
+    public void accecptConnections(int listeningPort) throws TransportException {
+        transportManager.accecptConnections(listeningPort);
+    }
+
+    public void send(Serializable msgObj, ConnectionHandlerID connectionHandlerID) throws TransportException {
+        transportManager.send(msgObj,connectionHandlerID);
+    }
+
+    public void unregisterConnection(ConnectionHandlerID myConnectionID) {
+        transportManager.unregisterConnection(myConnectionID);
+    }
+
+    public void startServerTransport(ITwoToOne appCallBack) {
+        transportManager.startServerTransport(appCallBack);
+    }
 }

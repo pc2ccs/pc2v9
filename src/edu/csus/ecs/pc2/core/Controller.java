@@ -50,7 +50,7 @@ import edu.csus.ecs.pc2.core.transport.IBtoA;
 import edu.csus.ecs.pc2.core.transport.ITransportManager;
 import edu.csus.ecs.pc2.core.transport.ITwoToOne;
 import edu.csus.ecs.pc2.core.transport.TransportException;
-import edu.csus.ecs.pc2.core.transport.TransportManager;
+import edu.csus.ecs.pc2.core.transport.connection.ConnectionManager;
 import edu.csus.ecs.pc2.ui.CountDownMessage;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.LoadUIClass;
@@ -108,7 +108,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     /**
      * Transport.
      */
-    private ITransportManager transportManager;
+    private ITransportManager connectionManager;
 
     /**
      * Controller.
@@ -237,7 +237,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     private void sendToLocalServer(Packet packet) {
         try {
             log.info("Sending packet to server " + packet);
-            transportManager.send(packet);
+            connectionManager.send(packet);
         } catch (TransportException e) {
             info("Unable to send to Server  " + packet);
             e.printStackTrace();
@@ -248,7 +248,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     private void sendToClient(ConnectionHandlerID connectionHandlerID, Packet packet) {
         info("sendToClient (send) " + packet.getDestinationId() + " " + packet + " " + connectionHandlerID);
         try {
-            transportManager.send(packet, connectionHandlerID);
+            connectionManager.send(packet, connectionHandlerID);
         } catch (TransportException e) {
             info("Unable to send to " + connectionHandlerID + " packet " + packet);
             e.printStackTrace();
@@ -275,7 +275,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         if (connectionHandlerID != null) {
 
             try {
-                transportManager.send(packet, connectionHandlerID);
+                connectionManager.send(packet, connectionHandlerID);
             } catch (TransportException e) {
                 log.log(Log.SEVERE, "Exception sending packet to site " + siteNumber + " " + packet, e);
             }
@@ -482,7 +482,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         ClientId clientId = loginShortcutExpansion(0, id);
 
         log = new Log(stripChar(clientId.toString(),' '));
-        transportManager.setLog(log);
+        connectionManager.setLog(log);
         StaticLog.setLog(log);
 
         info("");
@@ -509,7 +509,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
                 info("Contacting " + remoteHostName + ":" + remoteHostPort);
                 try {
-                    remoteServerConnectionHandlerID = transportManager.connectToServer(remoteHostName, remoteHostPort);
+                    remoteServerConnectionHandlerID = connectionManager.connectToServer(remoteHostName, remoteHostPort);
                 } catch (TransportException e) {
                     info("** ERROR ** Unable to contact server at " + remoteHostName + ":" + remoteHostPort);
                     info("Server at " + remoteHostName + ":" + remoteHostPort + " not started or contacting wrong host or port ?");
@@ -519,7 +519,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
                 info("Contacted using connection id " + remoteServerConnectionHandlerID);
 
-                sendLoginRequestFromServerToServer(transportManager, remoteServerConnectionHandlerID, clientId, password);
+                sendLoginRequestFromServerToServer(connectionManager, remoteServerConnectionHandlerID, clientId, password);
 
             } else {
 
@@ -532,7 +532,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
                 clientId = authenticateFirstServer(password);
                 try {
-                    transportManager.accecptConnections(port);
+                    connectionManager.accecptConnections(port);
                     info("Started Server Transport listening on " + port);
                 } catch (Exception e) {
                     info("Exception logged ", e);
@@ -553,7 +553,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
             // Client login
             info("Contacting server at " + remoteHostName + ":" + remoteHostPort+" as "+clientId);
-            sendLoginRequest(transportManager, clientId, id, password);
+            sendLoginRequest(connectionManager, clientId, id, password);
         }
     }
     
@@ -631,7 +631,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         ClientId clientId = loginShortcutExpansion(0, loginName);
 
         log = new Log(stripChar(clientId.toString(),' '));
-        transportManager.setLog(log);
+        connectionManager.setLog(log);
         StaticLog.setLog(log);
 
         info("");
@@ -662,7 +662,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
             // Client login
             info("Contacting server at " + remoteHostName + ":" + remoteHostPort+" as "+clientId);
-            sendLoginRequest(transportManager, clientId, loginName, password);
+            sendLoginRequest(connectionManager, clientId, loginName, password);
             
             // Busy loop
             
@@ -819,7 +819,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     private void setClientServerAndPort(String portString) {
 
         remoteHostName = "localhost";
-        remoteHostPort = Integer.parseInt(TransportManager.DEFAULT_PC2_PORT);
+        remoteHostPort = Integer.parseInt(ConnectionManager.DEFAULT_PC2_PORT);
 
         if (containsINIKey(CLIENT_SERVER_KEY)) {
             remoteHostName = getINIValue(CLIENT_SERVER_KEY);
@@ -866,7 +866,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         if (contactingRemoteServer) {
 
             // Set port to default
-            remoteHostPort = Integer.parseInt(TransportManager.DEFAULT_PC2_PORT);
+            remoteHostPort = Integer.parseInt(ConnectionManager.DEFAULT_PC2_PORT);
 
             /*
              * Examples:
@@ -886,7 +886,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
     private void setServerPort(String portString) {
 
-        port = Integer.parseInt(TransportManager.DEFAULT_PC2_PORT);
+        port = Integer.parseInt(ConnectionManager.DEFAULT_PC2_PORT);
 
         if (containsINIKey(SERVER_PORT_KEY)) {
             port = Integer.parseInt(getINIValue(SERVER_PORT_KEY));
@@ -1581,7 +1581,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                 }
 
                 info("Started Server Transport listening on " + port);
-                transportManager.accecptConnections(port);
+                connectionManager.accecptConnections(port);
 
                 info("Secondary Server has started " + contest.getTitle());
             }
@@ -1668,9 +1668,9 @@ public class Controller implements IController, ITwoToOne, IBtoA {
          * 
          */
 
-        log.info("Starting TransportManager...");
-        transportManager = new TransportManager(log);
-        log.info("Started TransportManager");
+        log.info("Starting ConnectionManager...");
+        connectionManager = new ConnectionManager(log);
+        log.info("Started ConnectionManager");
 
         // TODO code add INI_FILENAME_OPTION_STRING
         if (parseArguments.isOptPresent("--ini")) {
@@ -1719,7 +1719,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
         if (parseArguments.isOptPresent("--server")) {
             info("Starting Server Transport...");
-            transportManager.startServerTransport(this);
+            connectionManager.startServerTransport(this);
             serverModule = true;
 
             contactingRemoteServer = false;
@@ -1740,14 +1740,14 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                 setClientServerAndPort(parseArguments.getOptValue("--port"));
 
                 info("Contacting server at " + remoteHostName + ":" + remoteHostPort);
-                transportManager.startClientTransport(remoteHostName, remoteHostPort, this);
+                connectionManager.startClientTransport(remoteHostName, remoteHostPort, this);
             } catch (NumberFormatException numException) {
                 savedTransportException = new TransportException("Unable to parse value after --port '" + parseArguments.getOptValue("--port") + "'");
                 log.log(Log.WARNING, "Exception logged ", numException);
             }
 
             try {
-                transportManager.connectToMyServer();
+                connectionManager.connectToMyServer();
             } catch (TransportException transportException) {
                 savedTransportException = transportException;
                 log.log(Log.INFO, "Exception logged ", transportException);
@@ -1905,11 +1905,11 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             int portNumber = Integer.parseInt(portStr);
             
             info("Send login request to Site " + remoteSite.getSiteNumber() + " " + hostName + ":" + portStr);
-            ConnectionHandlerID connectionHandlerID = transportManager.connectToServer(hostName, portNumber);
+            ConnectionHandlerID connectionHandlerID = connectionManager.connectToServer(hostName, portNumber);
             
             info("Contacted Site " + remoteSite.getSiteNumber() + " using connection id " + connectionHandlerID);
             info("Sending login request to Site " + remoteSite.getSiteNumber() + " " + hostName + " as " + getServerClientId() + " " + localPassword); // TODO remove this
-            sendLoginRequestFromServerToServer(transportManager, connectionHandlerID, getServerClientId(), localPassword);
+            sendLoginRequestFromServerToServer(connectionManager, connectionHandlerID, getServerClientId(), localPassword);
         } else if (contest.isAllowed (Permission.Type.ALLOWED_TO_RECONNECT_SERVER)){
             // Send the reconnection request to our server
             
@@ -2037,7 +2037,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
 
     public void forceConnectionDrop(ConnectionHandlerID connectionHandlerID) {
         log.log(Log.INFO,"forceConnectionDrop: "+connectionHandlerID);
-        transportManager.unregisterConnection(connectionHandlerID);
+        connectionManager.unregisterConnection(connectionHandlerID);
         contest.connectionDropped(connectionHandlerID);
     }
 
@@ -2071,7 +2071,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     }
 
     public void shutdownTransport() {
-        transportManager.shutdownTransport();
+        connectionManager.shutdownTransport();
     }
 
     /**
