@@ -328,11 +328,12 @@ public class TeamView extends JFrame implements UIPlugin {
             clockLabel = new JLabel();
             clockLabel.setText("STOPPED");
             clockLabel.setForeground(java.awt.Color.red);
-            clockLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 14));
+            clockLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 16));
+            clockLabel.setPreferredSize(new java.awt.Dimension(82,21));
             clockLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
             clockPane = new JPanel();
             clockPane.setLayout(new BorderLayout());
-            clockPane.setPreferredSize(new java.awt.Dimension(80, 34));
+            clockPane.setPreferredSize(new java.awt.Dimension(85,34));
             clockPane.add(clockLabel, java.awt.BorderLayout.CENTER);
         }
         return clockPane;
