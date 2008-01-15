@@ -325,12 +325,12 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         info("sendToClient af to " + packet.getDestinationId() + " " + packet);
     }
 
-    public void submitRun(Problem problem, Language language, String filename) throws Exception {
+    public void submitRun(Problem problem, Language language, String filename, SerializedFile[] otherFiles) throws Exception {
         SerializedFile serializedFile = new SerializedFile(filename);
 
         ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
         Run run = new Run(contest.getClientId(), language, problem);
-        RunFiles runFiles = new RunFiles(run, serializedFile, null);
+        RunFiles runFiles = new RunFiles(run, serializedFile, otherFiles);
 
         Packet packet = PacketFactory.createSubmittedRun(contest.getClientId(), serverClientId, run, runFiles);
 

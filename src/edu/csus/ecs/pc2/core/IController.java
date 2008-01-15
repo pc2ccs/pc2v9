@@ -17,6 +17,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
+import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
@@ -65,7 +66,7 @@ public interface IController {
      * @param filename
      * @throws Exception
      */
-    void submitRun(Problem problem, Language language, String filename) throws Exception;
+    void submitRun(Problem problem, Language language, String filename, SerializedFile[] otherFiles) throws Exception;
 
     void setSiteNumber(int i);
 

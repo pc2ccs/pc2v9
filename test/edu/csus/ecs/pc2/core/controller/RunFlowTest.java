@@ -279,7 +279,7 @@ public class RunFlowTest extends TestCase {
         Language firstLanguage = contestOne.getLanguages()[0];
 
         try {
-            teamController.submitRun(firstProblem, firstLanguage, "pc2v9.ini");
+            teamController.submitRun(firstProblem, firstLanguage, "pc2v9.ini", null);
             System.err.println(new Date() + " submitted run to server ");
         } catch (Exception e) {
             // TODO Auto-generated catch block
