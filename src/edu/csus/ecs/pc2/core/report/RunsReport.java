@@ -16,6 +16,8 @@ import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.RunFiles;
+import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 
 /**
@@ -111,6 +113,34 @@ public class RunsReport implements IReport {
             printWriter.print("    Checked out by: "+whoCheckedOutId);
         }
         
+        RunFiles runFiles = contest.getRunFiles(run);
+        if (runFiles == null){
+            printWriter.print("    No submitted files found.");
+        } else {
+            SerializedFile mainFile =  runFiles.getMainFile();
+            int bytes = 0;
+            if (mainFile.getBuffer() != null) {
+                bytes = mainFile.getBuffer().length;
+            }
+            printWriter.println("      main file '" + mainFile.getName() + "' " + bytes + " bytes");
+            if ( runFiles.getOtherFiles() == null){
+                printWriter.println("                no additional submitted files");
+            } else {
+                printWriter.println("                " + runFiles.getOtherFiles().length + " additional submitted files");
+                
+                if (runFiles.getOtherFiles().length > 0) {
+                    for (SerializedFile serializedFile : runFiles.getOtherFiles()) {
+                        bytes = 0;
+                        if (serializedFile.getBuffer() != null) {
+                            bytes = serializedFile.getBuffer().length;
+                        }
+                        printWriter.println("                '" + serializedFile.getName() + "' " + bytes + " bytes");
+                    }
+                }
+            }
+        }
+        
+        
         if (run.isJudged() || run.getStatus().equals(RunStates.BEING_RE_JUDGED)) {
 
             for (JudgementRecord judgementRecord : run.getAllJudgementRecords()) {
@@ -133,6 +163,8 @@ public class RunsReport implements IReport {
                 printWriter.println();
             }
         }
+        
+   
         printWriter.println();
 
     }
