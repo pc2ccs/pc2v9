@@ -140,6 +140,9 @@ public abstract class ConnectionHandlerThread extends Thread {
 
         try {
             msgObj = (SealedObject) getFromOtherModule().readObject();
+
+            System.out.println ("msgObj = " + msgObj);
+            
         } catch (SocketException e) {
             getLog().log(Log.INFO, "SocketException in receive for "+getMyConnectionID(), e);
             throw new TransportException(e.getMessage(), Type.CONNECTION_RESET);
