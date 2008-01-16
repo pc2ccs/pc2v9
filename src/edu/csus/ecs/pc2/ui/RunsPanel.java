@@ -428,8 +428,7 @@ public class RunsPanel extends JPanePlugin {
                                 
                             displayString += "</FONT></HTML>" ;
 
-                            JOptionPane.showMessageDialog(null, displayString, 
-                                        "Run Judgement Received", JOptionPane.INFORMATION_MESSAGE );
+                            FrameUtilities.showMessage(getParentFrame(), "Run Judgement Received", displayString);
     
                         } catch (Exception e) {
                             // TODO need to make this cleaner
@@ -449,8 +448,7 @@ public class RunsPanel extends JPanePlugin {
                         
                     displayString += "</FONT></HTML>" ;
 
-                    JOptionPane.showMessageDialog(null, displayString, 
-                                "Run Received", JOptionPane.INFORMATION_MESSAGE );
+                    FrameUtilities.showMessage(getParentFrame(), "Run Received", displayString);
 
                 } catch (Exception e) {
                     JOptionPane.showMessageDialog(null, "Exception handling Run Confirmation: " + e.getMessage());
