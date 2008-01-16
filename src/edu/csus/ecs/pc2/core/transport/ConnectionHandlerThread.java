@@ -145,14 +145,12 @@ public abstract class ConnectionHandlerThread extends Thread {
             getLog().log(Log.INFO, "SocketException in receive for "+getMyConnectionID(), e);
             throw new TransportException(e.getMessage(), Type.CONNECTION_RESET);
         } catch (EOFException e) {
-            log.log(Log.INFO, "Exception in receive for "+getMyConnectionID(), e);
-//            throw new TransportException(e.getMessage(), Type.RECEIVE);
+            log.log(Log.INFO, "EOFException in receive for "+getMyConnectionID(), e);
+            throw new TransportException(e.getMessage(), Type.CONNECTION_RESET);
         } catch (Exception e) {
             log.log(Log.INFO, "Exception in receive for "+getMyConnectionID(), e);
             throw new TransportException(e.getMessage(), Type.RECEIVE);
         }
-
-        System.out.println ("msgObj = " + msgObj);
 
         return msgObj;
     }
