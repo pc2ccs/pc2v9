@@ -1706,7 +1706,9 @@ public final class PacketFactory {
 
     public static Packet createViolationPacket(ClientId source, ClientId destination, String message, ClientId whoCanceledRun, ConnectionHandlerID connectionHandlerID, Packet inPacket) {
         Properties prop = new Properties();
-        prop.put(CLIENT_ID, whoCanceledRun);
+        if (whoCanceledRun != null){
+            prop.put(CLIENT_ID, whoCanceledRun);
+        }
         prop.put(MESSAGE, message);
         if (connectionHandlerID != null){
             prop.put(CONNECTION_HANDLE_ID, connectionHandlerID);

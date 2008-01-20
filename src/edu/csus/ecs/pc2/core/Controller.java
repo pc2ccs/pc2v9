@@ -11,6 +11,7 @@ import java.util.Properties;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.archive.PacketArchiver;
+import edu.csus.ecs.pc2.core.exception.ContestSecurityException;
 import edu.csus.ecs.pc2.core.log.EvaluationLog;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
@@ -1270,6 +1271,20 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         try {
 
             packetHandler.handlePacket(packet, connectionHandlerID);
+            
+        } catch (ContestSecurityException contestSecurityException){
+            
+            // Security Violation, someone tried to do something they weren't allowed to
+            
+            log.log(Log.SEVERE, "Violation  " + contestSecurityException.getSecurityMessage() + packet, contestSecurityException);
+
+            packetHandler.getPriorityMessageHandler().newMessage(packet.getSourceId(), "Security violation", packet.getType().toString(), contestSecurityException);
+            
+            Packet violationPacket = PacketFactory.createViolationPacket(contest.getClientId(), PacketFactory.ALL_SERVERS, contestSecurityException.getSecurityMessage(), null, connectionHandlerID,
+                    packet);
+
+            sendToAdministrators(violationPacket);
+            sendToServers(violationPacket);
 
         } catch (Exception e) {
             info("Exception in processPacket, check logs ", e);
@@ -1321,7 +1336,11 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             // Logged in
             removeLogin(clientId);
             if (clientId.getClientType().equals(ClientType.Type.JUDGE)) {
-                cancelAllByThisJudge(clientId);
+                try {
+                    cancelAllByThisJudge(clientId);
+                } catch (ContestSecurityException e) {
+                    log.log(Log.WARNING, "Warning on canceling runs for "+clientId, e);
+                }
             }
         }
 
@@ -1331,17 +1350,17 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         // else nothing to do.
     }
 
-    private void cancelAllClarsByThisJudge(ClientId judgeId) {
+    private void cancelAllClarsByThisJudge(ClientId judgeId) throws ContestSecurityException {
         Clarification[] clars = contest.getClarifications();
         for (int i = 0; i < clars.length; i++) {
             if ((clars[i].getState() == ClarificationStates.BEING_ANSWERED) && (clars[i].getWhoCheckedItOutId().equals(judgeId))) {
                 Packet packet = PacketFactory.createUnCheckoutClarification(contest.getClientId(), getServerClientId(), clars[i]);
-                packetHandler.cancelClarificationCheckOut(packet);
+                packetHandler.cancelClarificationCheckOut(packet, null);
             }
         }
     }
 
-    private void cancelAllByThisJudge(ClientId judgeId) {
+    private void cancelAllByThisJudge(ClientId judgeId) throws ContestSecurityException {
         cancelAllRunsByThisJudge(judgeId);
         cancelAllClarsByThisJudge(judgeId);
     }
@@ -1368,7 +1387,11 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             removeLogin(clientId);
 
             if (clientId.getClientType().equals(ClientType.Type.JUDGE)) {
-                cancelAllByThisJudge(clientId);
+                try {
+                    cancelAllByThisJudge(clientId);
+                } catch (ContestSecurityException e) {
+                    log.log(Log.WARNING, "Warning on canceling runs for "+clientId, e);
+                }
             }
 
         } else {

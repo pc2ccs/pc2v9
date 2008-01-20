@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.exception.ClarificationUnavailableException;
+import edu.csus.ecs.pc2.core.exception.ContestSecurityException;
 import edu.csus.ecs.pc2.core.exception.RunUnavailableException;
 import edu.csus.ecs.pc2.core.exception.UnableToUncheckoutRunException;
 import edu.csus.ecs.pc2.core.list.ClientIdComparator;
@@ -37,6 +38,7 @@ import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.packet.PacketFactory;
 import edu.csus.ecs.pc2.core.packet.PacketType.Type;
+import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
 /**
@@ -55,9 +57,28 @@ public class PacketHandler {
 
     private IController controller;
     
+    /**
+     * Message handler for conditions where attention may be needed.
+     */
     private PriorityMessageHandler priorityMessageHandler;
     
     private EvaluationLog evaluationLog = null;
+
+    /**
+     * Highest Security Level
+     */
+    private static final int SECURITY_HIGH_LEVEL = 10;
+    
+    /**
+     * Security Level, security turned off.
+     */
+    private static final int SECURITY_NONE_LEVEL = 0;
+    
+    /**
+     * Security Level for Server.
+     */
+    private int securityLevel = SECURITY_NONE_LEVEL;
+    
     
     public PacketHandler(IController controller, IContest contest) {
         this.controller = controller;
@@ -70,7 +91,7 @@ public class PacketHandler {
      * @param packet
      * @param connectionHandlerID
      */
-    public void handlePacket(Packet packet, ConnectionHandlerID connectionHandlerID) {
+    public void handlePacket(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
 
         Type packetType = packet.getType();
 
@@ -122,7 +143,7 @@ public class PacketHandler {
 
         } else if (packetType.equals(Type.CLARIFICATION_ANSWER)) {
             // Answer from client to server
-            answerClarification (packet);
+            answerClarification (packet, connectionHandlerID);
             
         } else if (packetType.equals(Type.CLARIFICATION_ANSWER_UPDATE)) {
             // Answer from server to client
@@ -137,18 +158,11 @@ public class PacketHandler {
             
         } else if (packetType.equals(Type.CLARIFICATION_UNCHECKOUT)) {
             // Clarification cancel or un-checkout, client to server
-            cancelClarificationCheckOut(packet);
+            cancelClarificationCheckOut(packet, connectionHandlerID);
 
         } else if (packetType.equals(Type.CLARIFICATION_CHECKOUT)) {
             // The clarification that was checked out, sent from server to clients
-            Clarification clarification = (Clarification)  PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION);
-            ClientId whoCheckedOut = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-            
-            contest.addClarification(clarification, whoCheckedOut);
-            if (isServer()){
-                sendToJudgesAndOthers( packet, false);
-            }
-            
+            checkoutClarification(packet, connectionHandlerID);
         } else if (packetType.equals(Type.CLARIFICATION_AVAILABLE)) {
             // Server to client, run was canceled, now available
             sendClarificationAvailable(packet);
@@ -178,30 +192,10 @@ public class PacketHandler {
             sendForceDisconnection (packet);
 
         } else if (packetType.equals(Type.ESTABLISHED_CONNECTION)) {
-            ConnectionHandlerID inConnectionHandlerID = (ConnectionHandlerID) PacketFactory.getObjectValue(packet, PacketFactory.CONNECTION_HANDLE_ID);
-
-            if (isServer()) {
-                controller.sendToAdministrators(packet);
-                if (isThisSite(packet.getSourceId())){
-                    controller.sendToServers(packet);
-                }
-                contest.connectionEstablished(inConnectionHandlerID);
-            } else {
-                contest.connectionEstablished(inConnectionHandlerID);
-            }
-
+            establishConnection (packet, connectionHandlerID);
         } else if (packetType.equals(Type.DROPPED_CONNECTION)) {
-            ConnectionHandlerID inConnectionHandlerID = (ConnectionHandlerID) PacketFactory.getObjectValue(packet, PacketFactory.CONNECTION_HANDLE_ID);
-            if (isServer()) {
-                if (isThisSite(packet.getSourceId())){
-                    controller.sendToServers(packet);
-                }
-                sendToJudgesAndOthers (packet, false);
-                contest.connectionDropped(inConnectionHandlerID);
-            } else {
-                contest.connectionDropped(inConnectionHandlerID);
-            }
-
+            droppedConnection (packet, connectionHandlerID);
+            
         } else if (packetType.equals(Type.RUN_AVAILABLE)) {
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
             contest.availableRun(run);
@@ -212,18 +206,13 @@ public class PacketHandler {
 
         } else if (packetType.equals(Type.RUN_JUDGEMENT)) {
             // Judgement from judge to server
-            // TODO security code insure that this judge/admin can make this change
-            Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
-            JudgementRecord judgementRecord = (JudgementRecord) PacketFactory.getObjectValue(packet, PacketFactory.JUDGEMENT_RECORD);
-            RunResultFiles runResultFiles = (RunResultFiles) PacketFactory.getObjectValue(packet, PacketFactory.RUN_RESULTS_FILE);
-            ClientId whoJudgedRunId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-            judgeRun(run,  judgementRecord, runResultFiles, whoJudgedRunId);
+            acceptRunJudgement(packet, connectionHandlerID);
 
         } else if (packetType.equals(Type.RUN_JUDGEMENT_UPDATE)) {
             sendJudgementUpdate(packet);
             
         } else if (packetType.equals(Type.RUN_UPDATE)) {
-            updateRun (packet);
+            updateRun (packet, connectionHandlerID);
 
         } else if (packetType.equals(Type.RUN_UPDATE_NOTIFICATION)) {
             sendRunUpdateNotification(packet);
@@ -235,14 +224,14 @@ public class PacketHandler {
             cancelRun(packet, run,  whoCanceledId, connectionHandlerID);
             
         } else if (packetType.equals(Type.START_ALL_CLOCKS)) {
-            startContest(packet);
+            startContest(packet, connectionHandlerID);
             
             if (isThisSite(packet.getSourceId())){
                 controller.sendToServers(packet);
             }
             
         } else if (packetType.equals(Type.STOP_ALL_CLOCKS)) {
-            stopContest(packet);
+            stopContest(packet, connectionHandlerID);
             
             if (isThisSite(packet.getSourceId())){
                 controller.sendToServers(packet);
@@ -250,17 +239,18 @@ public class PacketHandler {
             
         } else if (packetType.equals(Type.START_CONTEST_CLOCK)) {
             // Admin to server, start the clock
-            startContest(packet);
+            startContest(packet, connectionHandlerID);
             
         } else if (packetType.equals(Type.STOP_CONTEST_CLOCK)) {
             // Admin to server, stop the clock
-            stopContest(packet);
+            stopContest(packet, connectionHandlerID);
 
         } else if (packetType.equals(Type.UPDATE_CONTEST_CLOCK)) {
             // Admin to server, stop the clock
             updateContestClock(packet);
             
         } else if (packetType.equals(Type.CLOCK_STARTED)) {
+            // Contest Clock started sent from server to clients
             Integer siteNumber = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
             contest.startContest(siteNumber);
             ContestTime contestTime = contest.getContestTime(siteNumber);
@@ -273,6 +263,7 @@ public class PacketHandler {
             }
             
         } else if (packetType.equals(Type.CLOCK_STOPPED)) {
+            // Contest Clock stopped sent from server to clients
             Integer siteNumber = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
             contest.stopContest(siteNumber);
             ClientId clientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
@@ -313,10 +304,10 @@ public class PacketHandler {
             ClientId requestFromId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
             Boolean readOnly = (Boolean) PacketFactory.getObjectValue(packet, PacketFactory.READ_ONLY);
             if (readOnly != null) {
-                fetchRun(packet, run, requestFromId, readOnly.booleanValue());
+                fetchRun(packet, run, requestFromId, readOnly.booleanValue(), connectionHandlerID);
 
             } else {
-                requestRun(packet, run, requestFromId);
+                requestRun(packet, run, requestFromId, connectionHandlerID);
             }
 
         } else if (packetType.equals(Type.RUN_REJUDGE_REQUEST)) {
@@ -339,7 +330,6 @@ public class PacketHandler {
         } else if (packetType.equals(Type.SERVER_SETTINGS)) {
 
             // This is settings from a recently logged in server
-            
             loadSettingsFromRemoteServer(packet, connectionHandlerID);
             info(" handlePacket SERVER_SETTINGS - from another site -- all settings loaded " + packet);
             
@@ -354,6 +344,8 @@ public class PacketHandler {
         } else if (packetType.equals(Type.PRIORITY_MESSAGE)) {
             
             priorityMessage (packet);
+        } else if (packetType.equals(Type.VIOLATION)) {
+            violationHandler (packet);
             
         } else {
 
@@ -364,6 +356,114 @@ public class PacketHandler {
         info("handlePacket end " + packet);
     }
 
+    protected void droppedConnection(Packet packet, ConnectionHandlerID connectionHandlerID) {
+        ConnectionHandlerID inConnectionHandlerID = (ConnectionHandlerID) PacketFactory.getObjectValue(packet, PacketFactory.CONNECTION_HANDLE_ID);
+        if (isServer()) {
+            if (isThisSite(packet.getSourceId())){
+                controller.sendToServers(packet);
+            }
+            sendToJudgesAndOthers (packet, false);
+            contest.connectionDropped(inConnectionHandlerID);
+        } else {
+            contest.connectionDropped(inConnectionHandlerID);
+        }
+    }
+
+    private void violationHandler(Packet inPacket) {
+
+        ClientId clientId = (ClientId) PacketFactory.getObjectValue(inPacket, PacketFactory.CLIENT_ID);
+//        ConnectionHandlerID connectionHandlerID = (ConnectionHandlerID) PacketFactory.getObjectValue(inPacket, PacketFactory.CONNECTION_HANDLE_ID);
+        String message = (String) PacketFactory.getObjectValue(inPacket, PacketFactory.MESSAGE);
+//        Packet packet = (Packet)PacketFactory.getObjectValue(inPacket, PacketFactory.PACKET);
+        
+        controller.getLog().log(Log.WARNING, "Security violation "+clientId+" "+message);
+        
+        // TODO send/display the violation to user
+        
+    }
+
+    private void establishConnection(Packet packet, ConnectionHandlerID connectionHandlerID) {
+        
+        ConnectionHandlerID inConnectionHandlerID = (ConnectionHandlerID) PacketFactory.getObjectValue(packet, PacketFactory.CONNECTION_HANDLE_ID);
+
+        if (isServer()) {
+            controller.sendToAdministrators(packet);
+            if (isThisSite(packet.getSourceId())){
+                controller.sendToServers(packet);
+            }
+            contest.connectionEstablished(inConnectionHandlerID);
+        } else {
+            contest.connectionEstablished(inConnectionHandlerID);
+        }
+
+
+    }
+
+    protected void checkoutClarification(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
+        
+        Clarification clarification = (Clarification)  PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION);
+        ClientId whoCheckedOut = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+        
+        if (isServer()){
+            securityCheck (Permission.Type.ANSWER_CLARIFICATION, whoCheckedOut, connectionHandlerID);
+        }
+        
+        contest.addClarification(clarification, whoCheckedOut);
+        if (isServer()){
+            sendToJudgesAndOthers( packet, false);
+        }
+    }
+
+    /**
+     * Is Client allowed to use Permission.
+     * 
+     * @param clientId
+     * @param type
+     * @return
+     */
+    protected boolean isAllowed(ClientId clientId, Permission.Type type) {
+        try {
+            Account account = contest.getAccount(clientId);
+            if (account != null) {
+                return account.getPermissionList().isAllowed(type);
+            }
+        } catch (Exception e) {
+            controller.getLog().log(Log.WARNING, "Exception logged ", e);
+        }
+        return false;
+    }
+    
+    /**
+     * Checks whether client is allowed to do particular activity +(Permission).
+     * 
+     * This checks the client permissions settings and if the client does not
+     * have permission to do the permission (type) throws a security exception.
+     * 
+     * @param type
+     * @param clientId
+     * @param connectionHandlerID
+     */
+    protected void securityCheck(Permission.Type type, ClientId clientId, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
+        
+        if (securityLevel < SECURITY_HIGH_LEVEL){
+            return;
+        }
+        
+        if (!isAllowed(clientId, type)) {
+            throw new ContestSecurityException(clientId, connectionHandlerID, clientId + " not allowed to " + type);
+        }
+    }
+
+
+    private void acceptRunJudgement(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
+        
+        Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
+        JudgementRecord judgementRecord = (JudgementRecord) PacketFactory.getObjectValue(packet, PacketFactory.JUDGEMENT_RECORD);
+        RunResultFiles runResultFiles = (RunResultFiles) PacketFactory.getObjectValue(packet, PacketFactory.RUN_RESULTS_FILE);
+        ClientId whoJudgedRunId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+        judgeRun(run,  judgementRecord, runResultFiles, whoJudgedRunId, connectionHandlerID);
+
+    }
 
     /**
      * 
@@ -417,6 +517,9 @@ public class PacketHandler {
                 Run theRun = contest.getRun(run.getElementId());
 
                 try {
+                    
+                    // TODO security check
+                    
                     theRun = contest.checkoutRun(run, whoRequestsRunId, true);
                     RunFiles runFiles = contest.getRunFiles(run);
 
@@ -578,6 +681,9 @@ public class PacketHandler {
 
         if (isServer()) {
             if (isThisSite(contestTime.getSiteNumber())) {
+                
+                // TODO securityCheck permission
+                
                 contest.updateContestTime(contestTime);
                 ContestTime updatedContestTime = contest.getContestTime(siteNumber);
                 controller.getLog().info(
@@ -646,8 +752,9 @@ public class PacketHandler {
      * Update from admin to server.
      * 
      * @param packet
+     * @throws ContestSecurityException 
      */
-    private void updateRun(Packet packet){
+    private void updateRun(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException{
         
         Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
         JudgementRecord judgementRecord = (JudgementRecord) PacketFactory.getObjectValue(packet, PacketFactory.JUDGEMENT_RECORD);
@@ -666,6 +773,8 @@ public class PacketHandler {
 //                if (account.isAllowed(Permission.Type.EDIT_RUN)){
 //                    // ok to update run
 //                }
+                
+                securityCheck (Permission.Type.EDIT_RUN, packet.getSourceId(), connectionHandlerID);
                 
                 if (isSuperUser(packet.getSourceId())) {
                     info("updateRun by " + packet.getSourceId() + " " + run);
@@ -866,10 +975,12 @@ public class PacketHandler {
 
     /**
      * This starts the contest and sends notification to other servers/clients.
+     * @param connectionHandlerID 
      * @param contestTime
      * @param sourceServerId
+     * @throws ContestSecurityException 
      */
-    private void startContest(Packet packet) {
+    private void startContest(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
 
         ClientId who = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
         Integer siteNumber = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
@@ -878,6 +989,9 @@ public class PacketHandler {
         }
 
         if (isThisSite(siteNumber)) {
+            
+            securityCheck (Permission.Type.START_CONTEST_CLOCK, packet.getSourceId(), connectionHandlerID);
+            
             contest.startContest(siteNumber);
             ContestTime updatedContestTime = contest.getContestTime(siteNumber);
             controller.getLog().info("Clock STARTED by " + who + " elapsed = " + updatedContestTime.getElapsedTimeStr());
@@ -904,8 +1018,10 @@ public class PacketHandler {
 
     /**
      * This stops the contest and sends notification to other servers/clients.
+     * @param connectionHandlerID 
+     * @throws ContestSecurityException 
      */
-    private void stopContest(Packet packet) {
+    private void stopContest(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
         ClientId who = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
         Integer siteNumber = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
         if (packet.getType().equals(Type.STOP_ALL_CLOCKS)) {
@@ -913,6 +1029,9 @@ public class PacketHandler {
         }
         
         if (isThisSite(siteNumber)){
+            
+            securityCheck (Permission.Type.STOP_CONTEST_CLOCK, who, connectionHandlerID);
+            
             contest.stopContest(siteNumber);
             ContestTime updatedContestTime = contest.getContestTime(siteNumber);
             controller.getLog().info("Clock STOPPED by "+who+" elapsed = "+updatedContestTime.getElapsedTimeStr());
@@ -1302,8 +1421,10 @@ public class PacketHandler {
      * UN checkout or cancel clarification checkout.
      * 
      * @param packet
+     * @param connectionHandlerID 
+     * @throws ContestSecurityException 
      */
-    public void cancelClarificationCheckOut(Packet packet) {
+    public void cancelClarificationCheckOut(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
         Clarification clarification = (Clarification) PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION);
         ClientId whoCancelledIt = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
 
@@ -1317,6 +1438,9 @@ public class PacketHandler {
 
             } else {
                 // This site's clarification
+                
+                // TODO securityCheck
+//                securityCheck(Permission.Type.ANSWER_CLARIFICATION, whoCancelledIt, connectionHandlerID);
 
                 contest.cancelClarificationCheckOut(clarification, whoCancelledIt);
 
@@ -1347,7 +1471,7 @@ public class PacketHandler {
 
     }
     
-    private void answerClarification(Packet packet) {
+    private void answerClarification(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
 
         Clarification clarification = (Clarification) PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION);
         ClientId whoAnsweredIt = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
@@ -1362,6 +1486,8 @@ public class PacketHandler {
 
             } else {
                 // This site's clarification
+                
+                securityCheck(Permission.Type.ANSWER_CLARIFICATION, whoAnsweredIt, connectionHandlerID);
 
                 contest.answerClarification(clarification, clarification.getAnswer(), whoAnsweredIt, clarification.isSendToAll());
                 Clarification theClarification = contest.getClarification(clarification.getElementId());
@@ -1382,7 +1508,16 @@ public class PacketHandler {
     }
 
 
-    private void judgeRun(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles, ClientId whoJudgedId) {
+    /**
+     * Judge a run
+     * @param run
+     * @param judgementRecord
+     * @param runResultFiles
+     * @param whoJudgedId
+     * @param connectionHandlerID 
+     * @throws ContestSecurityException 
+     */
+    protected void judgeRun(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles, ClientId whoJudgedId, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
 
         if (isServer()) {
 
@@ -1393,6 +1528,8 @@ public class PacketHandler {
 
             } else {
                 // This site's run
+                
+                securityCheck (Permission.Type.JUDGE_RUN, whoJudgedId, connectionHandlerID);
 
                 judgementRecord.setWhenJudgedTime(contest.getContestTime().getElapsedMins());
 
@@ -1422,9 +1559,10 @@ public class PacketHandler {
      * @param packet
      * @param run
      * @param whoRequestsRunId
+     * @throws ContestSecurityException 
      */
-    private void requestRun(Packet packet, Run run, ClientId whoRequestsRunId) {
-        fetchRun(packet,run,whoRequestsRunId, false);
+    private void requestRun(Packet packet, Run run, ClientId whoRequestsRunId, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
+        fetchRun(packet,run,whoRequestsRunId, false, connectionHandlerID);
     }
     
     private void requestClarification(Packet packet) {
@@ -1498,8 +1636,10 @@ public class PacketHandler {
      * @param run
      * @param whoRequestsRunId
      * @param readOnly - get a read only copy (aka do not checkout/select run).
+     * @param connectionHandlerID 
+     * @throws ContestSecurityException 
      */
-    private void fetchRun(Packet packet, Run run, ClientId whoRequestsRunId, boolean readOnly) {
+    private void fetchRun(Packet packet, Run run, ClientId whoRequestsRunId, boolean readOnly, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
 
         if (isServer()) {
 
@@ -1537,6 +1677,8 @@ public class PacketHandler {
                 } else {
                     
                     try {
+                        securityCheck (Permission.Type.JUDGE_RUN, whoRequestsRunId, connectionHandlerID);
+                        
                         theRun = contest.checkoutRun(run, whoRequestsRunId, false);
                         RunFiles runFiles = contest.getRunFiles(run);
 
@@ -2454,6 +2596,14 @@ public class PacketHandler {
 //        System.err.println(Thread.currentThread().getName() + " " + s);
 //        System.err.flush();
 //        exception.printStackTrace(System.err);
+    }
+
+    public PriorityMessageHandler getPriorityMessageHandler() {
+        return priorityMessageHandler;
+    }
+
+    public void setPriorityMessageHandler(PriorityMessageHandler priorityMessageHandler) {
+        this.priorityMessageHandler = priorityMessageHandler;
     }
 
 }

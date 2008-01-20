@@ -1,12 +1,17 @@
 package edu.csus.ecs.pc2.core;
 
+import edu.csus.ecs.pc2.core.exception.ContestSecurityException;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.IContest;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
- * Handler for priority messages. 
+ * Handler for priority messages.
+ * 
+ * Priority Mesaages are messages that are warnings that 
+ * might require contest administrator attention.
+ * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -63,6 +68,14 @@ public class PriorityMessageHandler implements UIPlugin {
 
 
 
+    /**
+     * Print new message to log.
+     * 
+     * @param clientId who triggered this message
+     * @param message message included
+     * @param eventName name for event
+     * @param exception optional exception
+     */
     public void newMessage(ClientId clientId, String message, String eventName, Exception exception) {
         
         if (eventName == null){
@@ -75,5 +88,20 @@ public class PriorityMessageHandler implements UIPlugin {
             log.log(Log.SEVERE, "From: " + clientId + " " + eventName + " " + message);
         }
     }
+    
+    public void newMessage(ClientId clientId, String message, String eventName, ContestSecurityException exception) {
+        
+        if (eventName == null){
+            eventName = "";
+        }
+        
+        if (exception != null) {
+            log.log(Log.SEVERE, "SecurityException From:  " + clientId + " " + eventName + " " + message, exception);
+            log.log(Log.SEVERE, "SecurityException Sec. Message: "+exception.getSecurityMessage()+" ConnHandId "+exception.getConnectionHandlerID());
+        } else {
+            log.log(Log.SEVERE, "From: " + clientId + " " + eventName + " " + message);
+        }
+    }
+    
 
 }
