@@ -21,6 +21,7 @@ public final class AllTests {
         //$JUnit-BEGIN$
         suite.addTestSuite(BalloonSettingsTest.class);
         suite.addTestSuite(TestAccountNameComparator.class);
+        suite.addTestSuite(PacketHandlerTest.class);
         suite.addTestSuite(ElementIdTest.class);
         suite.addTestSuite(ClientIdTest.class);
         //$JUnit-END$

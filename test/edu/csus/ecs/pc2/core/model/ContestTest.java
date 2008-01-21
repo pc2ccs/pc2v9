@@ -42,7 +42,7 @@ public class ContestTest extends TestCase {
         
         SampleContest sampleContest = new SampleContest();
         
-        IContest contest = sampleContest.createContest(1, 1, 12, 4);
+        IContest contest = sampleContest.createContest(1, 1, 12, 4, true);
         
         ContestTime contestTime = contest.getContestTime();
         contestTime.setElapsedMins(52);

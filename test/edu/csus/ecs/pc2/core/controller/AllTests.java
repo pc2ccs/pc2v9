@@ -21,7 +21,8 @@ public final class AllTests {
         TestSuite suite = new TestSuite("Test for edu.csus.ecs.pc2.core.controller");
         //$JUnit-BEGIN$
         suite.addTestSuite(RunFlowTest.class);
-//        suite.addTestSuite(MultiSiteTest.class);
+        suite.addTestSuite(MultiSiteTest.class);
+        suite.addTestSuite(ControllerTest.class);
         suite.addTestSuite(InvalidStartSequence.class);
         //$JUnit-END$
         return suite;
