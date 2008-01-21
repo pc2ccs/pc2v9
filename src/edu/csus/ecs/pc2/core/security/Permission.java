@@ -30,6 +30,9 @@ public class Permission implements Serializable {
      * 
      */
     public enum Type {
+        /**
+         * 
+         */
         BALLOON_EMAIL,
         /**
          * 
@@ -44,11 +47,11 @@ public class Permission implements Serializable {
          */
         CHANGE_PASSWORD,
         /**
-         * 
+         * Add, delete, modify accounts.
          */
         EDIT_ACCOUNT,
         /**
-         * 
+         * Can user request and judge runs ?
          */
         JUDGE_RUN,
         /**
@@ -60,7 +63,7 @@ public class Permission implements Serializable {
          */
         DISPLAY_ON_SCOREBOARD,
         /**
-         * 
+         * Can user request and judge a already judged run ?.
          */
         REJUDGE_RUN,
         /**
@@ -112,7 +115,7 @@ public class Permission implements Serializable {
          */
         EDIT_SITE,
         /**
-         * 
+         * Able to edit settings in general.
          */
         EDIT_SETTINGS,
         /**
