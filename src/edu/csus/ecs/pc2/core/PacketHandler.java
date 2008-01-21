@@ -64,20 +64,6 @@ public class PacketHandler {
     
     private EvaluationLog evaluationLog = null;
 
-    /**
-     * Highest Security Level
-     */
-    private static final int SECURITY_HIGH_LEVEL = 10;
-    
-    /**
-     * Security Level, security turned off.
-     */
-    private static final int SECURITY_NONE_LEVEL = 0;
-    
-    /**
-     * Security Level for Server.
-     */
-    private int securityLevel = SECURITY_NONE_LEVEL;
     
     
     public PacketHandler(IController controller, IContest contest) {
@@ -224,6 +210,7 @@ public class PacketHandler {
             cancelRun(packet, run,  whoCanceledId, connectionHandlerID);
             
         } else if (packetType.equals(Type.START_ALL_CLOCKS)) {
+            // Start All Clocks from admin to server
             startContest(packet, connectionHandlerID);
             
             if (isThisSite(packet.getSourceId())){
@@ -231,6 +218,7 @@ public class PacketHandler {
             }
             
         } else if (packetType.equals(Type.STOP_ALL_CLOCKS)) {
+            // Start All Clocks from admin to server
             stopContest(packet, connectionHandlerID);
             
             if (isThisSite(packet.getSourceId())){
@@ -296,7 +284,7 @@ public class PacketHandler {
             runCheckout (packet); // this works for rejudge as well.
             
         } else if (packetType.equals(Type.CLARIFICATION_REQUEST)) {
-            requestClarification(packet);
+            requestClarification(packet, connectionHandlerID);
 
         } else if (packetType.equals(Type.RUN_REQUEST)) {
             // Request Run from requestor to server
@@ -312,7 +300,7 @@ public class PacketHandler {
 
         } else if (packetType.equals(Type.RUN_REJUDGE_REQUEST)) {
             // REJUDGE Request Run from requestor to server
-            requestRejudgeRun (packet);
+            requestRejudgeRun (packet, connectionHandlerID);
             
         } else if (packetType.equals(Type.LOGOUT)) {
             // client logged out
@@ -378,7 +366,7 @@ public class PacketHandler {
         
         controller.getLog().log(Log.WARNING, "Security violation "+clientId+" "+message);
         
-        // TODO send/display the violation to user
+        // TODO send/display the violation to user ??
         
     }
 
@@ -445,7 +433,7 @@ public class PacketHandler {
      */
     protected void securityCheck(Permission.Type type, ClientId clientId, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
         
-        if (securityLevel < SECURITY_HIGH_LEVEL){
+        if (controller.getSecurityLevel() < Controller.SECURITY_HIGH_LEVEL){
             return;
         }
         
@@ -487,8 +475,10 @@ public class PacketHandler {
     /**
      * Re-judge run request, parse packet, attempt to checkout run. 
      * @param packet
+     * @param connectionHandlerID 
+     * @throws ContestSecurityException 
      */
-    private void requestRejudgeRun(Packet packet) {
+    private void requestRejudgeRun(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
         
         Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
         ClientId whoRequestsRunId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
@@ -518,7 +508,7 @@ public class PacketHandler {
 
                 try {
                     
-                    // TODO security check
+                    securityCheck (Permission.Type.REJUDGE_RUN, whoRequestsRunId, connectionHandlerID);
                     
                     theRun = contest.checkoutRun(run, whoRequestsRunId, true);
                     RunFiles runFiles = contest.getRunFiles(run);
@@ -682,7 +672,7 @@ public class PacketHandler {
         if (isServer()) {
             if (isThisSite(contestTime.getSiteNumber())) {
                 
-                // TODO securityCheck permission
+                // TODO securityCheck updateContestClock
                 
                 contest.updateContestTime(contestTime);
                 ContestTime updatedContestTime = contest.getContestTime(siteNumber);
@@ -766,8 +756,7 @@ public class PacketHandler {
         if (isServer()) {
             if (isThisSite(run)) {
 
-                // TODO security check
-                // check permission, check user type
+                // TODO security check updateRun
                 
 //                Account account = contest.getAccount(packet.getSourceId());
 //                if (account.isAllowed(Permission.Type.EDIT_RUN)){
@@ -1391,14 +1380,22 @@ public class PacketHandler {
 
             } else {
 
+                // TODO handle Security violation
+                
+                /**
+                 * If there is a problem then there is no requirement (due to lack of analysis)
+                 * to notify the client canceling the run.
+                 */
+                
+                // TODO do we send something back to client if unable to cancel run ? Or just be silent?
+
                 try {
                     contest.cancelRunCheckOut(run, whoCanceledRun);
                     Run availableRun = contest.getRun(run.getElementId());
                     Packet availableRunPacket = PacketFactory.createRunAvailable(contest.getClientId(), whoCanceledRun, availableRun);
                     sendToJudgesAndOthers(availableRunPacket, true);
-                } catch (UnableToUncheckoutRunException e) {
                     
-                    // TODO handle Security violation 
+                } catch (UnableToUncheckoutRunException e) {
                     
                     controller.getLog().log(Log.WARNING, "Security Warning " + e.getMessage(), e);
 
@@ -1439,7 +1436,7 @@ public class PacketHandler {
             } else {
                 // This site's clarification
                 
-                // TODO securityCheck
+                // TODO securityCheck cancelClarificationCheckOut
 //                securityCheck(Permission.Type.ANSWER_CLARIFICATION, whoCancelledIt, connectionHandlerID);
 
                 contest.cancelClarificationCheckOut(clarification, whoCancelledIt);
@@ -1565,7 +1562,7 @@ public class PacketHandler {
         fetchRun(packet,run,whoRequestsRunId, false, connectionHandlerID);
     }
     
-    private void requestClarification(Packet packet) {
+    private void requestClarification(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
         ElementId clarificationId = (ElementId) PacketFactory.getObjectValue(packet, PacketFactory.REQUESTED_CLARIFICATION_ELEMENT_ID);
         ClientId requestFromId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
 //        Boolean readOnly = (Boolean) PacketFactory.getObjectValue(packet, PacketFactory.READ_ONLY);
@@ -1597,9 +1594,12 @@ public class PacketHandler {
                 if (readOnly) {
                     // just get run and sent it to them.
 
-                    info("// TODO  send read only clar to them ");
+                    // TODO  send read only clar to them
+                    info("requestClarification read-only not implemented, yet");
                 } else {
                     try {
+                        securityCheck (Permission.Type.ANSWER_CLARIFICATION, requestFromId, connectionHandlerID);
+                        
                         theClarification = contest.checkoutClarification(clarification, requestFromId);
     
                         // send to Judge
@@ -2077,7 +2077,6 @@ public class PacketHandler {
             priorityMessageHandler = new PriorityMessageHandler();
             priorityMessageHandler.setContestAndController(contest, controller);
         }
-        
         
         controller.setSiteNumber(clientId.getSiteNumber());
 
@@ -2598,6 +2597,7 @@ public class PacketHandler {
 //        exception.printStackTrace(System.err);
     }
 
+
     public PriorityMessageHandler getPriorityMessageHandler() {
         return priorityMessageHandler;
     }
@@ -2605,5 +2605,4 @@ public class PacketHandler {
     public void setPriorityMessageHandler(PriorityMessageHandler priorityMessageHandler) {
         this.priorityMessageHandler = priorityMessageHandler;
     }
-
 }

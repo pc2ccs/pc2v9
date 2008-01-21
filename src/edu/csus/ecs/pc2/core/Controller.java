@@ -221,9 +221,28 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * Load and Save configuration to disk
      */
     private boolean saveCofigurationToDisk = true;
-    
+
+    /**
+     * Evaluations log (evals.log).
+     */
     private EvaluationLog evaluationLog;
 
+    /**
+     * Highest Security Level
+     */
+    public static final int SECURITY_HIGH_LEVEL = 10;
+    
+    /**
+     * Security Level, security turned off.
+     */
+    public static final int SECURITY_NONE_LEVEL = 0;
+    
+    /**
+     * Security Level for Server.
+     */
+    private int securityLevel = SECURITY_NONE_LEVEL;
+
+    
     public Controller(IContest contest) {
         super();
         this.contest = contest;
@@ -1350,7 +1369,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         // else nothing to do.
     }
 
-    private void cancelAllClarsByThisJudge(ClientId judgeId) throws ContestSecurityException {
+    protected void cancelAllClarsByThisJudge(ClientId judgeId) throws ContestSecurityException {
         Clarification[] clars = contest.getClarifications();
         for (int i = 0; i < clars.length; i++) {
             if ((clars[i].getState() == ClarificationStates.BEING_ANSWERED) && (clars[i].getWhoCheckedItOutId().equals(judgeId))) {
@@ -1360,12 +1379,12 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         }
     }
 
-    private void cancelAllByThisJudge(ClientId judgeId) throws ContestSecurityException {
+    protected void cancelAllByThisJudge(ClientId judgeId) throws ContestSecurityException {
         cancelAllRunsByThisJudge(judgeId);
         cancelAllClarsByThisJudge(judgeId);
     }
     
-    private void cancelAllRunsByThisJudge(ClientId judgeId) {
+    protected void cancelAllRunsByThisJudge(ClientId judgeId) {
         ElementId [] runIDs = contest.getRunIdsCheckedOutBy(judgeId);
         for (int i = 0; i < runIDs.length; i++) {
             Run run = contest.getRun(runIDs[i]);
@@ -2274,6 +2293,14 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     public void updateGroup(Group group) {
         Packet groupPacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), group);
         sendToLocalServer(groupPacket);
+    }
+
+    public int getSecurityLevel() {
+        return securityLevel;
+    }
+
+    public void setSecurityLevel(int securityLevel) {
+        this.securityLevel = securityLevel;
     }
 
 }

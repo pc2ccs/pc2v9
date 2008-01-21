@@ -327,6 +327,13 @@ public interface IController {
 
     void updateContestTime(ContestTime newContestTime);
 
+    /**
+     * Get Security Level.
+     * 
+     * @return curent security level
+     */
+    int getSecurityLevel();
     
+    void setSecurityLevel(int securityLevel);
     
 }
