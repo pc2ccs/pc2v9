@@ -1,12 +1,13 @@
 package edu.csus.ecs.pc2.ui.admin;
 
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.Font; 
 import java.awt.Color;
+import java.awt.FlowLayout;
+import java.awt.Font;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
@@ -24,11 +25,9 @@ import edu.csus.ecs.pc2.ui.BalloonSettingsPane;
 import edu.csus.ecs.pc2.ui.ClarificationsPane;
 import edu.csus.ecs.pc2.ui.ConnectionsPane;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay;
-import edu.csus.ecs.pc2.ui.ContestClockPane;
 import edu.csus.ecs.pc2.ui.ContestInformationPane;
 import edu.csus.ecs.pc2.ui.ContestTimesPane;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
-import edu.csus.ecs.pc2.ui.GenerateAccountsPane;
 import edu.csus.ecs.pc2.ui.GroupsPane;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
 import edu.csus.ecs.pc2.ui.JudgementsPanel;
@@ -46,8 +45,6 @@ import edu.csus.ecs.pc2.ui.StandingsPane;
 import edu.csus.ecs.pc2.ui.TeamStatusPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay.DisplayTimes;
-
-import javax.swing.JLabel;
 
 /**
  * Administrator GUI.
@@ -91,6 +88,9 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
     private JTabbedPane runContestTabbedPane = null;
 
+    private static final Color ACTIVE_TAB_COLOR = Color.BLUE;
+    private static final Color INACTIVE_TAB_COLOR = Color.GRAY ;
+    
     /**
      * This method initializes
      * 
@@ -137,8 +137,9 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 int fontSize = getMainTabbedPanel().getFont().getSize();
                 getMainTabbedPanel().setFont( getMainTabbedPanel().getFont().deriveFont(Font.BOLD, fontSize+6));
                 getMainTabbedPanel().setTitleAt(0, "Configure Contest");
-                getMainTabbedPanel().setForegroundAt(0, Color.blue);
+                getMainTabbedPanel().setForegroundAt(0, ACTIVE_TAB_COLOR );
                 getMainTabbedPanel().setTitleAt(1, "Run Contest");
+                getMainTabbedPanel().setForegroundAt(1, INACTIVE_TAB_COLOR );
 
                 // add UI components involved with Configuration to the Configure Contest tabbed pane
                 AccountsPane accountsPane = new AccountsPane();
@@ -147,8 +148,8 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 AutoJudgesPane autoJudgesPane = new AutoJudgesPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Auto Judge", autoJudgesPane);
 
-                GenerateAccountsPane generateAccountsPane = new GenerateAccountsPane();
-                addUIPlugin(getConfigureContestTabbedPane(), "Generate", generateAccountsPane);
+                //GenerateAccountsPane generateAccountsPane = new GenerateAccountsPane();
+                //addUIPlugin(getConfigureContestTabbedPane(), "Generate", generateAccountsPane);
 
                 GroupsPane groupsPane = new GroupsPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Groups", groupsPane);
@@ -172,18 +173,14 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 addUIPlugin(getConfigureContestTabbedPane(), "Times", contestTimesPane);
 
                 ContestInformationPane contestInformationPane = new ContestInformationPane();
-                addUIPlugin(getConfigureContestTabbedPane(), "Misc1", contestInformationPane);
-
-                OptionsPanel optionsPanel = new OptionsPanel();
-                addUIPlugin(getConfigureContestTabbedPane(), "Misc2", optionsPanel);
-                optionsPanel.setLogWindow(logWindow);
+                addUIPlugin(getConfigureContestTabbedPane(), "Settings", contestInformationPane);
 
 
                 // add UI components involved with Running the contest to the Run Contest tabbed pane
                 RunsPanel runsPane = new RunsPanel();
                 addUIPlugin(getRunContestTabbedPane(), "Runs", runsPane);
 
-               ClarificationsPane clarificationsPane = new ClarificationsPane();
+                ClarificationsPane clarificationsPane = new ClarificationsPane();
                 addUIPlugin(getRunContestTabbedPane(), "Clarifications", clarificationsPane);
 
                 ConnectionsPane connectionsPane = new ConnectionsPane();
@@ -207,8 +204,12 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 TeamStatusPane teamStatusPane = new TeamStatusPane();
                 addUIPlugin(getRunContestTabbedPane(), "Team Status", teamStatusPane);
 
-                ContestClockPane contestClockPane = new ContestClockPane();
-                addUIPlugin(getConfigureContestTabbedPane(), "Big Clock", contestClockPane);
+                OptionsPanel optionsPanel = new OptionsPanel();
+                addUIPlugin(getRunContestTabbedPane(), "Options", optionsPanel);
+                optionsPanel.setLogWindow(logWindow);
+
+                //ContestClockPane contestClockPane = new ContestClockPane();
+                //addUIPlugin(getConfigureContestTabbedPane(), "Big Clock", contestClockPane);
 
                 contestClockDisplay = new ContestClockDisplay(controller.getLog(), contest.getContestTime(), contest.getSiteNumber(), false, null);
                 contestClockDisplay.setContestAndController(contest, controller);
@@ -411,11 +412,11 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
             //change all mainpanel tab text to black
             int tabCount = getMainTabbedPanel().getTabCount();
             for (int i=0; i<tabCount; i++) {
-                getMainTabbedPanel().setForegroundAt(i,Color.black);
+                getMainTabbedPanel().setForegroundAt(i,INACTIVE_TAB_COLOR);
             }
             //change the currently selected mainpanel tab to red 
             int selectedTab = getMainTabbedPanel().getSelectedIndex();
-            getMainTabbedPanel().setForegroundAt( selectedTab, Color.blue);
+            getMainTabbedPanel().setForegroundAt( selectedTab, ACTIVE_TAB_COLOR);
         } else {
             throw new RuntimeException ("Unexpected ChangeEvent: " + e);
         }

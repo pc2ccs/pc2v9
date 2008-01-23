@@ -116,6 +116,11 @@ public class ProfilesPane extends JPanePlugin {
             setButton = new JButton();
             setButton.setBounds(new java.awt.Rectangle(497,38,73,26));
             setButton.setText("Set");
+            setButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    System.out.println("actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+                }
+            });
         }
         return setButton;
     }

@@ -41,7 +41,6 @@ import edu.csus.ecs.pc2.core.security.PermissionList;
  */
 
 // $HeadURL$$
-
 public class AccountsPane extends JPanePlugin {
 
     /**
@@ -64,11 +63,13 @@ public class AccountsPane extends JPanePlugin {
     private JPanel messagePanel = null;
 
     private JLabel messageLabel = null;
-    
+
     private PermissionList permissionList = new PermissionList();
-    
+
     private EditAccountFrame editAccountFrame = new EditAccountFrame();
-    
+
+    private GenerateAccountsFrame generateAccountsFrame = new GenerateAccountsFrame();
+
     private Log log;
 
     private String lastDir = ".";
@@ -77,7 +78,9 @@ public class AccountsPane extends JPanePlugin {
 
     private JButton loadICPCButton = null;
 
-    private ICPCAccountFrame icpcAccountFrame = null;  //  @jve:decl-index=0:visual-constraint="701,102"
+    private ICPCAccountFrame icpcAccountFrame = null; // @jve:decl-index=0:visual-constraint="701,102"
+
+    private JButton generateAccountsButton = null;
 
     /**
      * This method initializes
@@ -102,7 +105,7 @@ public class AccountsPane extends JPanePlugin {
 
     @Override
     public String getPluginTitle() {
-        return "Accounts Panel";
+        return "Accounts Pane";
     }
 
     protected Object[] buildAccountRow(Account account) {
@@ -177,6 +180,7 @@ public class AccountsPane extends JPanePlugin {
         // default to autosizing and sorting
         updateAccountRow(account, true);
     }
+
     public void updateAccountRow(final Account account, final boolean autoSizeAndSort) {
 
         SwingUtilities.invokeLater(new Runnable() {
@@ -229,37 +233,38 @@ public class AccountsPane extends JPanePlugin {
         getRunsListBox().sort();
     }
 
-    private boolean isAllowed (Permission.Type type){
+    private boolean isAllowed(Permission.Type type) {
         return permissionList.isAllowed(type);
     }
-    
+
     private void initializePermissions() {
         Account account = getContest().getAccount(getContest().getClientId());
         permissionList.clearAndLoadPermissions(account.getPermissionList());
     }
 
     private void updateGUIperPermissions() {
-        
-        if (isAllowed(Permission.Type.EDIT_ACCOUNT)){
+
+        if (isAllowed(Permission.Type.EDIT_ACCOUNT)) {
             addButton.setVisible(isAllowed(Permission.Type.EDIT_ACCOUNT));
-            addButton.setEnabled(false);      
+            addButton.setEnabled(false);
         }
 
         editButton.setVisible(isAllowed(Permission.Type.EDIT_ACCOUNT));
-        
+
         // TODO once filter is working make this visible.
         getFilterButton().setVisible(false);
     }
-    
+
     public void setContestAndController(IContest inContest, IController inController) {
         super.setContestAndController(inContest, inController);
 
         log = getController().getLog();
         getContest().addAccountListener(new AccountListenerImplementation());
-        
+
         initializePermissions();
-        
+
         editAccountFrame.setContestAndController(inContest, inController);
+        generateAccountsFrame.setContestAndController(inContest, inController);
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -284,12 +289,11 @@ public class AccountsPane extends JPanePlugin {
 
         public void accountModified(AccountEvent accountEvent) {
             updateAccountRow(accountEvent.getAccount());
-            
+
             // check if is this account
             Account account = accountEvent.getAccount();
             /**
-             * If this is the account then update the GUI display per
-             * the potential change in Permissions.
+             * If this is the account then update the GUI display per the potential change in Permissions.
              */
             if (getContest().getClientId().equals(account.getClientId())) {
                 // They modified us!!
@@ -299,13 +303,13 @@ public class AccountsPane extends JPanePlugin {
                         updateGUIperPermissions();
                     }
                 });
-                
+
             }
         }
 
         public void accountsAdded(AccountEvent accountEvent) {
             Account[] accounts = accountEvent.getAccounts();
-            for ( Account account : accounts) {
+            for (Account account : accounts) {
                 updateAccountRow(account, false);
             }
             getRunsListBox().autoSizeAllColumns();
@@ -314,12 +318,11 @@ public class AccountsPane extends JPanePlugin {
 
         public void accountsModified(AccountEvent accountEvent) {
             Account[] accounts = accountEvent.getAccounts();
-            for ( Account account : accounts) {
+            for (Account account : accounts) {
                 updateAccountRow(account, false);
-                
+
                 /**
-                 * If this is the account then update the GUI display per
-                 * the potential change in Permissions.
+                 * If this is the account then update the GUI display per the potential change in Permissions.
                  */
                 if (getContest().getClientId().equals(account.getClientId())) {
                     // They modified us!!
@@ -329,9 +332,9 @@ public class AccountsPane extends JPanePlugin {
                             updateGUIperPermissions();
                         }
                     });
-                    
+
                 }
-                
+
             }
             getRunsListBox().autoSizeAllColumns();
             getRunsListBox().sort();
@@ -350,6 +353,7 @@ public class AccountsPane extends JPanePlugin {
             buttonPane = new JPanel();
             buttonPane.setPreferredSize(new Dimension(35, 35));
             buttonPane.setLayout(flowLayout);
+            buttonPane.add(getGenerateAccountsButton(), null);
             buttonPane.add(getAddButton(), null);
             buttonPane.add(getEditButton(), null);
             buttonPane.add(getFilterButton(), null);
@@ -373,7 +377,7 @@ public class AccountsPane extends JPanePlugin {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     showMessage("Add not implement, yet");
                     // TODO addAccount when implemented
-//                    addAccount();
+                    // addAccount();
                 }
             });
         }
@@ -405,13 +409,13 @@ public class AccountsPane extends JPanePlugin {
     }
 
     protected void editSelectedAccount() {
-        
+
         int selectedIndex = accountListBox.getSelectedIndex();
-        if(selectedIndex == -1){
+        if (selectedIndex == -1) {
             showMessage("Select an account to edit");
             return;
         }
-        
+
         try {
             ClientId clientId = (ClientId) accountListBox.getKeys()[selectedIndex];
             Account accountToEdit = getContest().getAccount(clientId);
@@ -443,7 +447,7 @@ public class AccountsPane extends JPanePlugin {
 
     protected void filterAccounts() {
         // TODO Auto-generated method stub
-        
+
         showMessage("Would have filtered ");
     }
 
@@ -468,12 +472,12 @@ public class AccountsPane extends JPanePlugin {
 
     protected void loadAccountsFromDisk() {
         JFileChooser chooser = new JFileChooser(lastDir);
-//        ExtensionFileFilter filter = new ExtensionFileFilter();
-//        filter.addExtension("txt");
-//        filter.addDescription("Text Files");
-//        chooser.addChoosableFileFilter(filter);
-//        or??
-//        chooser.setFileFilter(filter);
+        // ExtensionFileFilter filter = new ExtensionFileFilter();
+        // filter.addExtension("txt");
+        // filter.addDescription("Text Files");
+        // chooser.addChoosableFileFilter(filter);
+        // or??
+        // chooser.setFileFilter(filter);
         showMessage("");
         int returnVal = chooser.showOpenDialog(this);
         String msg = "";
@@ -550,7 +554,7 @@ public class AccountsPane extends JPanePlugin {
             public void run() {
                 messageLabel.setText(string);
                 messageLabel.setForeground(color);
-                
+
             }
         });
     }
@@ -606,7 +610,7 @@ public class AccountsPane extends JPanePlugin {
                     JOptionPane.showMessageDialog(null, "Could not open file " + newFile, "Warning", JOptionPane.WARNING_MESSAGE);
                 }
             }
-            
+
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception ", e);
         }
@@ -622,6 +626,25 @@ public class AccountsPane extends JPanePlugin {
             icpcAccountFrame = new ICPCAccountFrame();
         }
         return icpcAccountFrame;
+    }
+
+    /**
+     * This method initializes generateAccountsButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getGenerateAccountsButton() {
+        if (generateAccountsButton == null) {
+            generateAccountsButton = new JButton();
+            generateAccountsButton.setText("Generate");
+            generateAccountsButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    System.out.println("actionPerformed()" + e); // TODO Auto-generated Event stub actionPerformed()
+                    generateAccountsFrame.setVisible(true);
+                }
+            });
+        }
+        return generateAccountsButton;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
