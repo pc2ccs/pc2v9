@@ -620,7 +620,15 @@ public final class PacketType implements Serializable {
         /**
          * Security Violation.
          */
-        VIOLATION,
+        VIOLATION, 
+        /**
+         * Run taken from judge
+         */
+        RUN_REVOKED,
+        /**
+         * Clarification taken from judge.
+         */
+        CLARIFICATION_REVOKED,
     }
 
     /**

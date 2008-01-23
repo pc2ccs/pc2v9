@@ -58,6 +58,10 @@ public class ClarificationEvent {
          * Send to a judge in response to a {@link #CHECKEDOUT_REANSWER_CLARIFICATION} or {@link #CHECKEDOUT_CLARIFICATION}
          */
         CLARIFICATION_NOT_AVAILABLE,
+        /**
+         * Clarification revoked
+         */
+        CLARIFICATION_REVOKED,
     }
 
     private Action action;

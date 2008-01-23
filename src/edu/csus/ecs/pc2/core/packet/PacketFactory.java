@@ -489,6 +489,21 @@ public final class PacketFactory {
         Packet packet = new Packet(Type.RUN_NOTAVAILABLE, source, destination, prop);
         return packet;
     }
+    
+    /**
+     * Create a packet of {@link PacketType.Type#RUN_NOTAVAILABLE}.
+     * 
+     * @param source
+     * @param destination
+     * @param run
+     */
+    public static Packet createRunRevoked (ClientId source, ClientId destination, Run run, ClientId revokedFrom) {
+        Properties prop = new Properties();
+        prop.put(RUN, run);
+        prop.put(CLIENT_ID, revokedFrom);
+        Packet packet = new Packet(Type.RUN_REVOKED, source, destination, prop);
+        return packet;
+    }
 
     /**
      * Create a packet of {@link PacketType.Type#RUN_LIST}.
@@ -1056,6 +1071,15 @@ public final class PacketFactory {
         Packet packet = new Packet(Type.CLARIFICATION_AVAILABLE, source, destination, prop);
         return packet;
     }
+    
+    public static Packet createClarificationRevoked(ClientId source, ClientId destination, Clarification clarification, ClientId revokedFrom) {
+        Properties prop = new Properties();
+        prop.put(CLARIFICATION, clarification);
+        prop.put(CLIENT_ID,revokedFrom);
+        Packet packet = new Packet(Type.CLARIFICATION_REVOKED, source, destination, prop);
+        return packet;
+    }
+
 
     /**
      * Create packet for {@link PacketType.Type#CLARIFICATION_UPDATE}.

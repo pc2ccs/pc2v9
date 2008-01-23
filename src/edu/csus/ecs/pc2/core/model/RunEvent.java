@@ -57,6 +57,10 @@ public class RunEvent {
          * Send to a judge in response to a {@link #CHECKEDOUT_REJUDGE_RUN} or {@link #CHECKEDOUT_RUN}
          */
         RUN_NOT_AVIALABLE,
+        /**
+         * Run revoked.
+         */
+        RUN_REVOKED,
     }
 
     private Action action;
