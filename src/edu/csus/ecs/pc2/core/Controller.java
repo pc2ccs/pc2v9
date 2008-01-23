@@ -550,7 +550,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
                     throw securityException;
                 }
 
-                clientId = authenticateFirstServer(password);
+                clientId = authenticateFirstServer(clientId.getSiteNumber(), password);
                 try {
                     connectionManager.accecptConnections(port);
                     info("Started Server Transport listening on " + port);
@@ -805,11 +805,11 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         }
     }
 
-    private ClientId authenticateFirstServer(String password) {
+    private ClientId authenticateFirstServer(int siteNum, String password) {
 
         initializeServer();
 
-        int newSiteNumber = getServerSiteNumber(password);
+        int newSiteNumber = getServerSiteNumber(siteNum, password);
 
         ClientId newId = new ClientId(newSiteNumber, ClientType.Type.SERVER, 0);
         if (contest.isLocalLoggedIn(newId)) {
@@ -1180,13 +1180,14 @@ public class Controller implements IController, ITwoToOne, IBtoA {
      * @param password
      * @return site number or throws SecurityException if nothing matches.
      */
-    private int getServerSiteNumber(String password) {
+    private int getServerSiteNumber(int siteNum, String password) {
         if (matchOverride(password)) {
-            StaticLog.info("matchOverride succeeded, logging in as site1");
-            return 1;
+            StaticLog.info("matchOverride succeeded, logging in as site"+siteNum);
+            return siteNum;
         }
 
-        for (Site site : contest.getSites()) {
+        Site site = contest.getSite(siteNum);
+        if (site != null) {
             if (site.getPassword().equals(password)) {
                 return site.getSiteNumber();
             }
@@ -1241,7 +1242,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         if (clientId.getClientType().equals(Type.SERVER)) {
             // Server login
 
-            int newSiteNumber = getServerSiteNumber(password);
+            int newSiteNumber = getServerSiteNumber(clientId.getSiteNumber(), password);
 
             if (newSiteNumber == clientId.getSiteNumber()) {
                 // matching password, ok.
