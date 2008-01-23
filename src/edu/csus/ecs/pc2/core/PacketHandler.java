@@ -2510,6 +2510,7 @@ public class PacketHandler {
         ProblemDataFiles [] problemDataFiles = new ProblemDataFiles[0];
         ClientSettings [] clientSettings = null;
         Account[] accounts = null;
+        Site[] sites = null;
         
         if (contest.getClientSettings(clientId) == null){
             ClientSettings clientSettings2 = new ClientSettings(clientId);
@@ -2529,12 +2530,19 @@ public class PacketHandler {
             clientSettings[0] = contest.getClientSettings(clientId);
             accounts = new Account[1];
             accounts[0] = contest.getAccount(clientId);
+            // re-build the site list without passwords, all they really need is the number & name
+            Site[] realSites = contest.getSites();
+            sites = new Site[realSites.length];
+            for (int i = 0; i < realSites.length; i++) {
+                sites[i] = new Site(realSites[i].getDisplayName(), realSites[i].getSiteNumber());
+            }
         } else {
             runs = contest.getRuns();
             clarifications = contest.getClarifications();
             problemDataFiles = contest.getProblemDataFiles();
             clientSettings = contest.getClientSettingsList();
             accounts = getAllAccounts();
+            sites = contest.getSites();
         }
 
         ContestLoginSuccessData contestLoginSuccessData = new ContestLoginSuccessData();
@@ -2551,7 +2559,7 @@ public class PacketHandler {
         contestLoginSuccessData.setProblemDataFiles(problemDataFiles);
         contestLoginSuccessData.setProblems(contest.getProblems());
         contestLoginSuccessData.setRuns(runs);
-        contestLoginSuccessData.setSites(contest.getSites());
+        contestLoginSuccessData.setSites(sites);
         contestLoginSuccessData.setGeneralProblem(contest.getGeneralProblem());
         Packet loginSuccessPacket = PacketFactory.createLoginSuccess(contest.getClientId(), clientId, contest.getContestTime(), 
                 contest.getSiteNumber(), contest.getContestInformation(), contestLoginSuccessData);
