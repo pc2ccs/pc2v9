@@ -137,7 +137,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 int fontSize = getMainTabbedPanel().getFont().getSize();
                 getMainTabbedPanel().setFont( getMainTabbedPanel().getFont().deriveFont(Font.BOLD, fontSize+6));
                 getMainTabbedPanel().setTitleAt(0, "Configure Contest");
-                getMainTabbedPanel().setForegroundAt(0, Color.red);
+                getMainTabbedPanel().setForegroundAt(0, Color.blue);
                 getMainTabbedPanel().setTitleAt(1, "Run Contest");
 
                 // add UI components involved with Configuration to the Configure Contest tabbed pane
@@ -415,7 +415,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
             }
             //change the currently selected mainpanel tab to red 
             int selectedTab = getMainTabbedPanel().getSelectedIndex();
-            getMainTabbedPanel().setForegroundAt(selectedTab, Color.red);
+            getMainTabbedPanel().setForegroundAt( selectedTab, Color.blue);
         } else {
             throw new RuntimeException ("Unexpected ChangeEvent: " + e);
         }
