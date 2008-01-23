@@ -1,5 +1,7 @@
 package edu.csus.ecs.pc2.core;
 
+import java.io.File;
+
 import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.exception.ContestSecurityException;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -33,9 +35,21 @@ public class PacketHandlerTest extends TestCase {
         contest = sampleContest.createContest(2, 4, 12, 6, true);
         controller = sampleContest.createController(contest, true, false);
 
+        String loadFile = "pc2v9.ini";
+        File dir = new File(loadFile);
+        if (!dir.exists()) {
+            // TODO, try to find this path in the environment
+            dir = new File("projects" + File.separator +"pc2v9" + File.separator + loadFile);
+            if (!dir.exists()) {
+                System.err.println("could not find " + loadFile);
+            } else {
+                loadFile = dir.getAbsolutePath();
+            }
+        }
+
         // Add 22 random runs
         Run[] runs = sampleContest.createRandomRuns(contest, 22, true, true, true);
-        sampleContest.addRuns(contest, runs, "pc2v9.ini");
+        sampleContest.addRuns(contest, runs, loadFile);
 
         packetHandler = new PacketHandler(controller, contest);
 
