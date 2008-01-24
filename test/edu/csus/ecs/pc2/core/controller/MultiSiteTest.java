@@ -3,8 +3,8 @@ package edu.csus.ecs.pc2.core.controller;
 import java.util.Properties;
 
 import junit.framework.TestCase;
-import edu.csus.ecs.pc2.core.model.Contest;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.InternalContest;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Site;
@@ -20,11 +20,11 @@ import edu.csus.ecs.pc2.core.model.Site;
 public class MultiSiteTest extends TestCase {
 
     // Models for site 1, 2, 3
-    private IContest modelOne;
+    private IInternalContest modelOne;
 
 
     // Controllers for site 1,2,3
-//    private Controller controllerOne;
+//    private InternalController controllerOne;
 
     /**
      * Create a new Site class instance.
@@ -67,7 +67,7 @@ public class MultiSiteTest extends TestCase {
         String[] languages = { "Java", "C", "APL" };
         String[] problems = { "Sumit", "Quadrangles", "Routing" };
 
-        modelOne = new Contest();
+        modelOne = new InternalContest();
         Site siteOne = createSite(1, "Site ONE", null, 0);
         modelOne.addSite(siteOne);
 
@@ -82,7 +82,7 @@ public class MultiSiteTest extends TestCase {
         }
 
         // Start site 1
-//        controllerOne = new Controller(modelOne);
+//        controllerOne = new InternalController(modelOne);
 //        controllerOne.setContactingRemoteServer(false);
 //        controllerOne.setUsingMainUI(false);
 //        String [] argsSiteOne = {"--server"};

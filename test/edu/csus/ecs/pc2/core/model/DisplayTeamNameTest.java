@@ -34,7 +34,7 @@ public class DisplayTeamNameTest extends TestCase {
 
     public void testOne() {
 
-        Contest contest = new Contest();
+        InternalContest contest = new InternalContest();
 
         contest.setSiteNumber(22);
         Vector<Account> accounts = contest.generateNewAccounts(ClientType.Type.TEAM.toString(), 4, true);

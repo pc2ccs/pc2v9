@@ -4,15 +4,15 @@ import java.util.Arrays;
 import java.util.Date;
 
 import junit.framework.TestCase;
-import edu.csus.ecs.pc2.core.Controller;
+import edu.csus.ecs.pc2.core.InternalController;
 import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
-import edu.csus.ecs.pc2.core.model.Contest;
+import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.ContestTime;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IJudgementListener;
 import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.Judgement;
@@ -45,16 +45,16 @@ public class RunFlowTest extends TestCase {
 
     private static final String [] CLIENT_COMMAND_LINE_OPTIONS = {"--port", "42000"};
 
-    private IContest contestOne;
+    private IInternalContest contestOne;
 
     @SuppressWarnings("unused")
-    private Controller controllerOne;
+    private InternalController controllerOne;
 
-    private IContest teamContest;
+    private IInternalContest teamContest;
 
     private TeamController teamController;
 
-    private IContest judgeContest;
+    private IInternalContest judgeContest;
 
     private JudgeController judgeController;
 
@@ -63,12 +63,12 @@ public class RunFlowTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
-        contestOne = new Contest();
+        contestOne = new InternalContest();
         Site siteTwelve = SiteTest.createSite(siteNumber, "Site 1", null, 42000);
         contestOne.addSite(siteTwelve);
 
         // Start site 1
-//        controllerOne = new Controller(contestOne);
+//        controllerOne = new InternalController(contestOne);
 //        controllerOne.setContactingRemoteServer(false);
 //        controllerOne.setUsingMainUI(false);
 //        controllerOne.start(SERVER_COMMAND_LINE_OPTIONS);
@@ -83,13 +83,13 @@ public class RunFlowTest extends TestCase {
      * 
      * @author pc2@ecs.csus.edu
      */
-    public class JudgeController extends Controller {
+    public class JudgeController extends InternalController {
 
         private Judgement yesJudgement;
 
-        private IContest theContest;
+        private IInternalContest theContest;
 
-        JudgeController(IContest contest) {
+        JudgeController(IInternalContest contest) {
             super(contest);
             contest.addRunListener(new RunListenerImpl());
             contest.addJudgementListener(new JudgementListenerImpl());
@@ -158,8 +158,8 @@ public class RunFlowTest extends TestCase {
      * 
      * @author pc2@ecs.csus.edu
      */
-    public class TeamController extends Controller {
-        TeamController(IContest contest) {
+    public class TeamController extends InternalController {
+        TeamController(IInternalContest contest) {
             super(contest);
             contest.addRunListener(new RunListenerImpl());
         }
@@ -189,7 +189,7 @@ public class RunFlowTest extends TestCase {
         }
     }
 
-    public void initializeModel(IContest contest) {
+    public void initializeModel(IInternalContest contest) {
 
         String[] languages = { "Java", "C", "APL" };
         String[] problems = { "Sumit", "Quadrangles", "Routing" };
@@ -259,7 +259,7 @@ public class RunFlowTest extends TestCase {
         ClientId judgeId = account.getClientId();
 
         // Login a judge
-        judgeContest = new Contest();
+        judgeContest = new InternalContest();
         judgeController = new JudgeController(judgeContest);
         judgeController.setUsingMainUI(false);
         judgeController.start(CLIENT_COMMAND_LINE_OPTIONS);
@@ -268,7 +268,7 @@ public class RunFlowTest extends TestCase {
 
         // Login a team
 
-        teamContest = new Contest();
+        teamContest = new InternalContest();
         teamController = new TeamController(teamContest);
         teamController.setUsingMainUI(false);
         teamController.start(CLIENT_COMMAND_LINE_OPTIONS);

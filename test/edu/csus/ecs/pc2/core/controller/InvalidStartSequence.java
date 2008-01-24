@@ -1,10 +1,10 @@
 package edu.csus.ecs.pc2.core.controller;
 
 import junit.framework.TestCase;
-import edu.csus.ecs.pc2.core.Controller;
+import edu.csus.ecs.pc2.core.InternalController;
 import edu.csus.ecs.pc2.core.model.ClientType;
-import edu.csus.ecs.pc2.core.model.Contest;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.InternalContest;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
@@ -13,14 +13,14 @@ import edu.csus.ecs.pc2.core.model.SiteTest;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 
 /**
- * Tests to insure Controller.start must be called before Controller.login
+ * Tests to insure InternalController.start must be called before InternalController.login
  *
  */
 public class InvalidStartSequence extends TestCase {
 
-    private IContest modelOne;
+    private IInternalContest modelOne;
 
-    private Controller controllerOne;
+    private InternalController controllerOne;
 
     public InvalidStartSequence() {
         super();
@@ -35,14 +35,14 @@ public class InvalidStartSequence extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
-        modelOne = new Contest();
+        modelOne = new InternalContest();
         initializeModel(modelOne);
 
         Site siteOne = SiteTest.createSite(1, "Site ONE", null, 0);
         modelOne.addSite(siteOne);
 
         // Start site 1
-        controllerOne = new Controller(modelOne);
+        controllerOne = new InternalController(modelOne);
         controllerOne.setContactingRemoteServer(false);
         controllerOne.setUsingMainUI(false);
     }
@@ -59,7 +59,7 @@ public class InvalidStartSequence extends TestCase {
         assertTrue("loginRequireStart", caughtException);
     }
     
-    public void initializeModel(IContest contest) {
+    public void initializeModel(IInternalContest contest) {
 
         String[] languages = { "Java", "C", "APL" };
         String[] problems = { "Sumit", "Quadrangles", "Routing" };

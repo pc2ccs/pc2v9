@@ -19,9 +19,9 @@ import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
-import edu.csus.ecs.pc2.core.model.Contest;
+import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.ElementId;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
@@ -57,7 +57,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
      */
     public void testNoData() {
 
-        Contest contest = new Contest();
+        InternalContest contest = new InternalContest();
 
         checkOutputXML(contest);
 
@@ -70,7 +70,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
      * 
      * @param contest
      */
-    private void initContestData(IContest contest) {
+    private void initContestData(IInternalContest contest) {
 
         // Add accounts
         contest.generateNewAccounts(ClientType.Type.TEAM.toString(), 1, true);
@@ -97,7 +97,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
         checkForJudgeAndTeam(contest);
     }
     
-    private void checkForJudgeAndTeam(IContest contest) {
+    private void checkForJudgeAndTeam(IInternalContest contest) {
         Account account = contest.getAccounts(ClientType.Type.TEAM).firstElement();
         assertFalse("Team account not generated", account == null);
         assertFalse("Team account not generated", account.getClientId().equals(Type.TEAM));
@@ -108,7 +108,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
 
     }
 
-    private void initData(IContest contest, int numTeams, int numProblems) {
+    private void initData(IInternalContest contest, int numTeams, int numProblems) {
 
         // Add accounts
         contest.generateNewAccounts(ClientType.Type.TEAM.toString(), numTeams, true);
@@ -142,7 +142,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
      * @param contest
      * @return created run.
      */
-    private Run getARun(IContest contest) {
+    private Run getARun(IInternalContest contest) {
         Problem problem = contest.getProblems()[0];
         Language language = contest.getLanguages()[0];
         
@@ -161,7 +161,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
      * @param elapsedMinutes
      * @return created run.
      */
-    private Run getARun(IContest contest, int elapsedMinutes) {
+    private Run getARun(IInternalContest contest, int elapsedMinutes) {
         Problem problem = contest.getProblems()[0];
         Language language = contest.getLanguages()[0];
         
@@ -178,7 +178,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
      */
     public void testOneRunUnjudged() {
 
-        Contest contest = new Contest();
+        InternalContest contest = new InternalContest();
         
         initContestData(contest);
         Run run = getARun(contest);
@@ -194,7 +194,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
      */
     public void testMixedjudged() {
 
-        Contest contest = new Contest();
+        InternalContest contest = new InternalContest();
         
         initContestData(contest);
         Run run = getARun(contest, 5);
@@ -219,7 +219,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
      * @param judgementIndex
      * @param solved
      */
-    public void createJudgedRun (IContest contest, int judgementIndex, boolean solved) {
+    public void createJudgedRun (IInternalContest contest, int judgementIndex, boolean solved) {
         Run run = getARun(contest);
         RunFiles runFiles = new RunFiles(run, "samps/Sumit.java");
         
@@ -243,7 +243,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
      * @param judgementIndex
      * @param solved
      */
-    public void createJudgedRun (IContest contest, int judgementIndex, boolean solved, int elapsedMinutes){
+    public void createJudgedRun (IInternalContest contest, int judgementIndex, boolean solved, int elapsedMinutes){
         Run run = getARun(contest, elapsedMinutes);
         RunFiles runFiles = new RunFiles(run, "samps/Sumit.java");
         
@@ -264,7 +264,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
      * Get XML from ScoringAlgorithm and test whether it can be parsed.
      * @param contest
      */
-    public void checkOutputXML (IContest contest) {
+    public void checkOutputXML (IInternalContest contest) {
        
         try {
             DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
@@ -289,7 +289,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
      */
     public void testOneRunJudged() {
 
-        Contest contest = new Contest();
+        InternalContest contest = new InternalContest();
         
         initContestData(contest);
         
@@ -303,7 +303,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
      */
     public void testFiveRunsJudged() {
 
-        Contest contest = new Contest();
+        InternalContest contest = new InternalContest();
         
         initContestData(contest);
         
@@ -323,7 +323,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
         }
     }
     
-    private void checkOutRun (IContest contest, Run run, ClientId judgeId){
+    private void checkOutRun (IInternalContest contest, Run run, ClientId judgeId){
         try {
             contest.checkoutRun(run, judgeId, false);
         } catch (Exception e) {
@@ -361,7 +361,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
                 "2,team2,1,30"
         };
 
-        Contest contest = new Contest();
+        InternalContest contest = new InternalContest();
 
         initData(contest, 2, 2);
 
@@ -451,7 +451,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
      * @param contest
      * @param rankData
      */
-    private void confirmRanks(Contest contest, String[] rankData) {
+    private void confirmRanks(InternalContest contest, String[] rankData) {
         
         Document document = null;
         

@@ -7,8 +7,8 @@ import javax.swing.JOptionPane;
 
 import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.model.BalloonSettings;
-import edu.csus.ecs.pc2.core.model.Contest;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.InternalContest;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Site;
@@ -24,7 +24,7 @@ import edu.csus.ecs.pc2.core.report.BalloonSettingsReport;
 // $HeadURL$
 public class BalloonSettingsTest extends TestCase {
 
-    private IContest contest;
+    private IInternalContest contest;
 
     private String[] colors = { "Orange", "TweedColor", "TreeColor", "Forest", "FBlack", "SeaFoam" };
 
@@ -68,7 +68,7 @@ public class BalloonSettingsTest extends TestCase {
         String[] languages = { "Java", "C", "APL" };
         String[] problems = { "Sumit", "Quadrangles", "Routing" };
 
-        contest = new Contest();
+        contest = new InternalContest();
         Site siteOne = createSite(1, "Site ONE", null, 0);
         contest.addSite(siteOne);
 
@@ -120,14 +120,14 @@ public class BalloonSettingsTest extends TestCase {
         BalloonSettingsReport balloonSettingsReport = new BalloonSettingsReport();
 
         String filename = "/tmp/stuf324";
-        Controller controller = new Controller(contest);
+        InternalController controller = new InternalController(contest);
         balloonSettingsReport.setContestAndController(contest, controller);
         balloonSettingsReport.createReportFile(filename, null);
         viewFile(filename);
     }
 
     /**
-     * Test settings for Balloon Settings in Contest.
+     * Test settings for Balloon Settings in InternalContest.
      *
      */
     public void testOne() {

@@ -5,7 +5,7 @@ import java.io.File;
 import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.exception.ContestSecurityException;
 import edu.csus.ecs.pc2.core.model.ClientId;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
@@ -23,9 +23,9 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 // $HeadURL$
 public class PacketHandlerTest extends TestCase {
 
-    private IContest contest;
+    private IInternalContest contest;
 
-    private IController controller;
+    private IInternalController controller;
 
     private PacketHandler packetHandler;
 
@@ -66,7 +66,7 @@ public class PacketHandlerTest extends TestCase {
     public void testSecuritySet() {
 
         // Security Leve HIGH
-        controller.setSecurityLevel(Controller.SECURITY_HIGH_LEVEL);
+        controller.setSecurityLevel(InternalController.SECURITY_HIGH_LEVEL);
 
         ClientId teamId = contest.getAccounts(Type.TEAM).firstElement().getClientId();
         ClientId serverId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
@@ -92,7 +92,7 @@ public class PacketHandlerTest extends TestCase {
         }
 
         // Security Leve OFF
-        controller.setSecurityLevel(Controller.SECURITY_NONE_LEVEL);
+        controller.setSecurityLevel(InternalController.SECURITY_NONE_LEVEL);
 
         packet = PacketFactory.createRunRequest(teamId, serverId, run, teamId, false);
         try {

@@ -3,14 +3,14 @@ package edu.csus.ecs.pc2.core.controller;
 import java.io.File;
 
 import junit.framework.TestCase;
-import edu.csus.ecs.pc2.core.Controller;
-import edu.csus.ecs.pc2.core.IController;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.InternalController;
+import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 
 /**
- * Test for Controller.
+ * Test for InternalController.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -19,9 +19,9 @@ import edu.csus.ecs.pc2.core.model.SampleContest;
 // $HeadURL$
 public class ControllerTest extends TestCase {
 
-    private IContest contest;
+    private IInternalContest contest;
 
-    private IController controller;
+    private IInternalController controller;
 
     protected void setUp() throws Exception {
         super.setUp();
@@ -56,11 +56,11 @@ public class ControllerTest extends TestCase {
         controller.setSecurityLevel(level);
         assertEquals("Expected " + level + " got " + controller.getSecurityLevel(), controller.getSecurityLevel(), level);
 
-        level = Controller.SECURITY_HIGH_LEVEL;
+        level = InternalController.SECURITY_HIGH_LEVEL;
         controller.setSecurityLevel(level);
         assertEquals("Expected " + level + " got " + controller.getSecurityLevel(), controller.getSecurityLevel(), level);
 
-        level = Controller.SECURITY_NONE_LEVEL;
+        level = InternalController.SECURITY_NONE_LEVEL;
         controller.setSecurityLevel(level);
         assertEquals("Expected " + level + " got " + controller.getSecurityLevel(), controller.getSecurityLevel(), level);
     }

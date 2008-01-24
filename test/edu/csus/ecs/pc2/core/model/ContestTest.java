@@ -5,7 +5,7 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import junit.framework.TestCase;
 
 /**
- * Test Contest class. 
+ * Test InternalContest class. 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -31,7 +31,7 @@ public class ContestTest extends TestCase {
      * @param contest
      * @return created run.
      */
-    private Run createRun (IContest contest, ClientId clientId) {
+    private Run createRun (IInternalContest contest, ClientId clientId) {
         Problem problem = contest.getProblems()[0];
         Language language = contest.getLanguages()[0];
         Run run = new Run(clientId, language, problem);
@@ -42,7 +42,7 @@ public class ContestTest extends TestCase {
         
         SampleContest sampleContest = new SampleContest();
         
-        IContest contest = sampleContest.createContest(1, 1, 12, 4, true);
+        IInternalContest contest = sampleContest.createContest(1, 1, 12, 4, true);
         
         ContestTime contestTime = contest.getContestTime();
         contestTime.setElapsedMins(52);

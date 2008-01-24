@@ -5,7 +5,7 @@ import java.util.Vector;
 import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientType;
-import edu.csus.ecs.pc2.core.model.Contest;
+import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.security.Permission.Type;
 
 /**
@@ -49,7 +49,7 @@ public class PermissionTest extends TestCase {
     }
 
     public void testTeamDefaultPermissions() {
-        Contest model = new Contest();
+        InternalContest model = new InternalContest();
         model.generateNewAccounts(ClientType.Type.TEAM.toString(), 1, true);
         Vector<Account> accountVect = model.getAccounts(ClientType.Type.TEAM);
         Account account = accountVect.get(0);

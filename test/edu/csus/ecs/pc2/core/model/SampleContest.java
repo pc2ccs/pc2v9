@@ -6,18 +6,18 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.Vector;
 
-import edu.csus.ecs.pc2.core.Controller;
-import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.InternalController;
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 
 /**
- * Create Sample Contest and Controller.
+ * Create Sample InternalContest and InternalController.
  * 
  * Also has a method to create a Site.
  * 
  * @see #createContest(int, int, int, int)
- * @see #createController(IContest, boolean, boolean)
+ * @see #createController(IInternalContest, boolean, boolean)
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -72,12 +72,12 @@ public class SampleContest {
      * @param setAsServer 
      * @return
      */
-    public IContest createContest(int siteNumber, int numSites, int numTeams, int numJudges, boolean initAsServer) {
+    public IInternalContest createContest(int siteNumber, int numSites, int numTeams, int numJudges, boolean initAsServer) {
 
         String[] languages = { "Java", "C++", "C", "APL" };
         String[] problems = { "Sumit", "Quadrangles", "Routing", "Faulty Towers", "London Bridge", "Finnigans Bluff" };
 
-        Contest contest = new Contest();
+        InternalContest contest = new InternalContest();
         
         contest.setSiteNumber(siteNumber);
         
@@ -116,7 +116,7 @@ public class SampleContest {
     }
 
     /**
-     * Create a Controller.
+     * Create a InternalController.
      * 
      * @param contest
      *            model for controller
@@ -126,10 +126,10 @@ public class SampleContest {
      *            is this a remote site ?
      * @return
      */
-    public IController createController(IContest contest, boolean isServer, boolean isRemote) {
+    public IInternalController createController(IInternalContest contest, boolean isServer, boolean isRemote) {
 
         // Start site 1
-        Controller controller = new Controller(contest);
+        InternalController controller = new InternalController(contest);
         controller.setUsingMainUI(false);
 
         if (isServer) {
@@ -140,7 +140,7 @@ public class SampleContest {
             // As of 2008-01-20 start sets site number to zero.
             controller.start(argsSiteOne);
             
-            // set Contest back to original site number
+            // set InternalContest back to original site number
             contest.setSiteNumber(siteNumber);
         } else {
             controller.start(null);
@@ -156,7 +156,7 @@ public class SampleContest {
      * 
      * @param contest
      */
-    public void populateContest(IContest contest) {
+    public void populateContest(IInternalContest contest) {
 
         String[] languages = { "Java", "C", "APL" };
         String[] problems = { "Sumit", "Quadrangles", "Routing" };
@@ -185,7 +185,7 @@ public class SampleContest {
 
     }
 
-    protected Account[] getTeamAccounts(IContest contest) {
+    protected Account[] getTeamAccounts(IInternalContest contest) {
         // this sites team accounts
         Vector<Account> accountVector = contest.getAccounts(ClientType.Type.TEAM);
 
@@ -205,7 +205,7 @@ public class SampleContest {
      * @param randomLanguage
      * @return
      */
-    public Run[] createRandomRuns(IContest contest, int numberRuns, boolean randomTeam, boolean randomProblem, boolean randomLanguage) {
+    public Run[] createRandomRuns(IInternalContest contest, int numberRuns, boolean randomTeam, boolean randomProblem, boolean randomLanguage) {
 
         Run[] runs = new Run[numberRuns];
 
@@ -245,7 +245,7 @@ public class SampleContest {
      * @param runs
      * @param filename name of file to submit
      */
-    public void addRuns (IContest contest, Run [] runs, String filename){
+    public void addRuns (IInternalContest contest, Run [] runs, String filename){
         
         if (! new File(filename).exists()){
             throw new IllegalArgumentException("filename is null");
