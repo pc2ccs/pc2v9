@@ -240,7 +240,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     /**
      * Security Level for Server.
      */
-    private int securityLevel = SECURITY_NONE_LEVEL;
+    private int securityLevel = SECURITY_HIGH_LEVEL;
 
     
     public InternalController(IInternalContest contest) {
