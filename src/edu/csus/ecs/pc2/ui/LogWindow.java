@@ -5,16 +5,16 @@ import javax.swing.SwingUtilities;
 
 import com.ibm.webrunner.j2mclb.util.TableModel;
 
-import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.IStreamListener;
 import edu.csus.ecs.pc2.core.log.Log;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
  * This class is intended to register as a listener to the Log/LogWindowHandler and display the logs in a grid.
  * <br>
  * If {@link #setLog(Log)} is not used, will be a window for
- * the {@link edu.csus.ecs.pc2.core.Controller#getLog()}.
+ * the {@link edu.csus.ecs.pc2.core.InternalController#getLog()}.
  * 
  * @version $Id$
  */
@@ -32,10 +32,10 @@ public class LogWindow extends JFrame implements UIPlugin {
 
     private static MCLB logMessageListbox = null;
 
-    private IController controller;
+    private IInternalController controller;
 
     @SuppressWarnings("unused")
-    private IContest contest;
+    private IInternalContest contest;
     
     private Log log = null;
 
@@ -181,7 +181,7 @@ public class LogWindow extends JFrame implements UIPlugin {
         this.maxLines = maxLines;
     }
 
-    public void setContestAndController(IContest inContest, IController inController) {
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
        contest = inContest;
        controller = inController;
        if (controller == null) {

@@ -2,7 +2,7 @@ package edu.csus.ecs.pc2.core.model;
 
 import java.io.Serializable;
 
-import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestInformation.TeamDisplayMask;
@@ -22,13 +22,13 @@ public class DisplayTeamName implements Serializable, UIPlugin {
      */
     private static final long serialVersionUID = 1483822798361043778L;
 
-    private IContest contest;
+    private IInternalContest contest;
 
-    private IController controller;
+    private IInternalController controller;
     
     private TeamDisplayMask teamDisplayMask = TeamDisplayMask.LOGIN_NAME_ONLY;
 
-    public void setContestAndController(IContest inContest, IController inController) {
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         contest = inContest;
         controller = inController;
     }

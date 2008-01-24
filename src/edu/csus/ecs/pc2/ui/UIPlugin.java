@@ -2,8 +2,8 @@ package edu.csus.ecs.pc2.ui;
 
 import java.io.Serializable;
 
-import edu.csus.ecs.pc2.core.IController;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
  * Interface for plugin UI or GUI.
@@ -27,7 +27,7 @@ public interface UIPlugin extends Serializable {
      * @param inController
      *            contest controller
      */
-    void setContestAndController(IContest inContest, IController inController);
+    void setContestAndController(IInternalContest inContest, IInternalController inController);
 
     /**
      * @return name of this plugin, used in choosing plugin.

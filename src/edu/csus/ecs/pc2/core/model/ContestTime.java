@@ -5,7 +5,7 @@ import java.util.StringTokenizer;
 import java.util.TimeZone;
 
 /**
- * Contest Time Information.
+ * InternalContest Time Information.
  * 
  * Methods used to access contest time as well as start and stop contest time. <br>
  * Start clock: {@link #startContestClock()}. <br>
@@ -65,7 +65,7 @@ public class ContestTime implements IElementObject {
     private ElementId elementId;
 
     public ContestTime() {
-        this("Contest Time");
+        this("InternalContest Time");
     }
 
     /**
@@ -74,7 +74,7 @@ public class ContestTime implements IElementObject {
      * @param siteNumber
      */
     public ContestTime(int siteNumber) {
-        this("Contest Time Site " + siteNumber);
+        this("InternalContest Time Site " + siteNumber);
         this.siteNumber = siteNumber;
     }
 

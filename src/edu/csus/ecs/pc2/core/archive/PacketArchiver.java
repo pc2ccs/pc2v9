@@ -4,9 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 
-import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
@@ -37,10 +37,10 @@ public class PacketArchiver implements UIPlugin {
     private String outputDirectoryName = "packets";
 
     @SuppressWarnings("unused")
-    private IContest contest;
+    private IInternalContest contest;
 
     @SuppressWarnings("unused")
-    private IController controller;
+    private IInternalController controller;
     
     private String lastArchiveFilename;
 
@@ -133,7 +133,7 @@ public class PacketArchiver implements UIPlugin {
 
  
 
-    public void setContestAndController(IContest inContest, IController inController) {
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.contest = inContest;
         this.controller = inController;
     }

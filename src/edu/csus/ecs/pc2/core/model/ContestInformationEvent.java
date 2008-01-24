@@ -12,7 +12,7 @@ public class ContestInformationEvent {
     public static final String SVN_ID = "$Id$";
 
     /**
-     * Contest Information Event States(s).
+     * InternalContest Information Event States(s).
      * 
      * @author pc2@ecs.csus.edu
      */

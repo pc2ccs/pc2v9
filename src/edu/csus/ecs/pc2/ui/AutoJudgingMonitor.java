@@ -2,7 +2,7 @@ package edu.csus.ecs.pc2.ui;
 
 import javax.swing.SwingUtilities;
 
-import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.execute.Executable;
 import edu.csus.ecs.pc2.core.execute.ExecutionData;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -11,7 +11,7 @@ import edu.csus.ecs.pc2.core.model.ClientSettingsEvent;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IClientSettingsListener;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
@@ -37,9 +37,9 @@ import edu.csus.ecs.pc2.core.model.Run.RunStates;
 // $HeadURL$
 public class AutoJudgingMonitor implements UIPlugin {
 
-    private IContest contest;
+    private IInternalContest contest;
 
-    private IController controller;
+    private IInternalController controller;
 
     private AutoJudgeStatusFrame autoJudgeStatusFrame = new AutoJudgeStatusFrame();
 
@@ -64,7 +64,7 @@ public class AutoJudgingMonitor implements UIPlugin {
      */
     private static final long serialVersionUID = 2774495762012789107L;
 
-    public void setContestAndController(IContest inContest, IController inController) {
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         contest = inContest;
         controller = inController;
 

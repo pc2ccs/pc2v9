@@ -23,7 +23,7 @@ import edu.csus.ecs.pc2.core.model.ContestLoginSuccessData;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Group;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.ISubmission;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
@@ -53,9 +53,9 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 // $HeadURL$
 public class PacketHandler {
 
-    private IContest contest;
+    private IInternalContest contest;
 
-    private IController controller;
+    private IInternalController controller;
     
     /**
      * Message handler for conditions where attention may be needed.
@@ -66,7 +66,7 @@ public class PacketHandler {
 
     
     
-    public PacketHandler(IController controller, IContest contest) {
+    public PacketHandler(IInternalController controller, IInternalContest contest) {
         this.controller = controller;
         this.contest = contest;
     }
@@ -238,7 +238,7 @@ public class PacketHandler {
             updateContestClock(packet);
             
         } else if (packetType.equals(Type.CLOCK_STARTED)) {
-            // Contest Clock started sent from server to clients
+            // InternalContest Clock started sent from server to clients
             Integer siteNumber = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
             contest.startContest(siteNumber);
             ContestTime contestTime = contest.getContestTime(siteNumber);
@@ -251,7 +251,7 @@ public class PacketHandler {
             }
             
         } else if (packetType.equals(Type.CLOCK_STOPPED)) {
-            // Contest Clock stopped sent from server to clients
+            // InternalContest Clock stopped sent from server to clients
             Integer siteNumber = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
             contest.stopContest(siteNumber);
             ClientId clientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
@@ -433,7 +433,7 @@ public class PacketHandler {
      */
     protected void securityCheck(Permission.Type type, ClientId clientId, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
         
-        if (controller.getSecurityLevel() < Controller.SECURITY_HIGH_LEVEL){
+        if (controller.getSecurityLevel() < InternalController.SECURITY_HIGH_LEVEL){
             return;
         }
         
@@ -677,7 +677,7 @@ public class PacketHandler {
                 contest.updateContestTime(contestTime);
                 ContestTime updatedContestTime = contest.getContestTime(siteNumber);
                 controller.getLog().info(
-                        "Contest Settings updated by " + who + " running=" + updatedContestTime.isContestRunning() + " elapsed = " + updatedContestTime.getElapsedTimeStr() + " remaining= "
+                        "InternalContest Settings updated by " + who + " running=" + updatedContestTime.isContestRunning() + " elapsed = " + updatedContestTime.getElapsedTimeStr() + " remaining= "
                                 + updatedContestTime.getRemainingTimeStr() + " length=" + updatedContestTime.getContestLengthStr());
                 Packet updatePacket = PacketFactory.clonePacket(contest.getClientId(), PacketFactory.ALL_SERVERS, packet);
                 controller.sendToTeams(updatePacket);
@@ -1830,7 +1830,7 @@ public class PacketHandler {
                         }
                         
                     } else {
-                        // Not a server Controller - add everything
+                        // Not a server InternalController - add everything
                         
                         // TODO someday soon load logins with their connectionIds
                         ConnectionHandlerID fakeId = new ConnectionHandlerID("FauxSite" + clientId.getSiteNumber()+clientId);

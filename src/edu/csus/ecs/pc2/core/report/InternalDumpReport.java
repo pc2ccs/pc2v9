@@ -8,7 +8,7 @@ import java.util.Comparator;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.VersionInfo;
-import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.ClarificationComparator;
@@ -24,7 +24,7 @@ import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.Filter;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
@@ -48,9 +48,9 @@ public class InternalDumpReport implements IReport {
      */
     private static final long serialVersionUID = -82937493006891083L;
 
-    private IContest contest;
+    private IInternalContest contest;
 
-    private IController controller;
+    private IInternalController controller;
 
     private Log log;
 
@@ -117,7 +117,7 @@ public class InternalDumpReport implements IReport {
         ContestInformation contestInformation = contest.getContestInformation();
         
         printWriter.println();
-        printWriter.println("-- Contest Information --");
+        printWriter.println("-- InternalContest Information --");
         printWriter.println("  Title : '" + contestInformation.getContestTitle()+"'");
         printWriter.println("  URL   : '" + contestInformation.getContestURL()+"'");
         printWriter.println("  Judges' Default Answer: '" + contestInformation.getJudgesDefaultAnswer()+"'");
@@ -186,9 +186,9 @@ public class InternalDumpReport implements IReport {
         printWriter.println();
         if (localContestTime != null) {
             if (localContestTime.isContestRunning()) {
-                printWriter.print("Contest is RUNNING");
+                printWriter.print("InternalContest is RUNNING");
             } else {
-                printWriter.print("Contest is STOPPED");
+                printWriter.print("InternalContest is STOPPED");
             }
 
             printWriter.print(" elapsed = " + localContestTime.getElapsedTimeStr());
@@ -196,7 +196,7 @@ public class InternalDumpReport implements IReport {
             printWriter.print(" length = " + localContestTime.getContestLengthStr());
             printWriter.println();
         } else {
-            printWriter.println("Contest Time is undefined (null)");
+            printWriter.println("InternalContest Time is undefined (null)");
 
         }
         
@@ -221,11 +221,11 @@ public class InternalDumpReport implements IReport {
                     + " password='" + site1.getPassword() + "' id=" + site1.getElementId());
         }
         
-        // Contest Times
+        // InternalContest Times
         printWriter.println();
         ContestTime[] contestTimes = contest.getContestTimes();
         Arrays.sort(contestTimes, new ContestTimeComparator());
-        printWriter.println("-- " + contestTimes.length + " Contest Times --");
+        printWriter.println("-- " + contestTimes.length + " InternalContest Times --");
         for (ContestTime contestTime : contestTimes) {
 
             if (contest.getSiteNumber() == contestTime.getSiteNumber()) {
@@ -245,7 +245,7 @@ public class InternalDumpReport implements IReport {
                     + ", id=" + contestTime.getElementId() + " site " + contestTime.getElementId().getSiteNumber());
         }
         
-        // Contest Information 
+        // InternalContest Information 
         printContestInformation(printWriter);
         
         // Problem
@@ -378,7 +378,7 @@ public class InternalDumpReport implements IReport {
         return "Internal Dump";
     }
 
-    public void setContestAndController(IContest inContest, IController inController) {
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.contest = inContest;
         this.controller = inController;
         log = controller.getLog();

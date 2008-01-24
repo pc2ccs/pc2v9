@@ -2,8 +2,8 @@ package edu.csus.ecs.pc2.ui;
 
 import javax.swing.JFrame;
 
-import edu.csus.ecs.pc2.core.IController;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 
 /**
@@ -22,9 +22,9 @@ public class EditLanguageFrame extends JFrame implements UIPlugin {
      */
     private static final long serialVersionUID = -6248957592340866836L;
 
-    private IContest contest;
+    private IInternalContest contest;
 
-    private IController controller;
+    private IInternalController controller;
 
     private LanguagePane languagePane = null;
 
@@ -51,7 +51,7 @@ public class EditLanguageFrame extends JFrame implements UIPlugin {
 
     }
 
-    public void setContestAndController(IContest inContest, IController inController) {
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.contest = inContest;
         this.controller = inController;
 

@@ -11,10 +11,10 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.VersionInfo;
-import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.ui.ClarificationsPane;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
@@ -41,10 +41,10 @@ public class JudgeView extends JFrame implements UIPlugin {
      */
     private static final long serialVersionUID = 5365837218548110171L;
 
-    private IContest contest;
+    private IInternalContest contest;
 
     @SuppressWarnings("unused")
-    private IController controller;
+    private IInternalController controller;
 
     private JTabbedPane mainTabbedPane = null;
 
@@ -131,7 +131,7 @@ public class JudgeView extends JFrame implements UIPlugin {
         FrameUtilities.regularCursor(this);
     }
 
-    public void setContestAndController(IContest inContest, IController inController) {
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.contest = inContest;
         this.controller = inController;
 

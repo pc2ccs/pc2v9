@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.Hashtable;
 
 import edu.csus.ecs.pc2.VersionInfo;
-import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.list.ClientSettingsComparator;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -18,7 +18,7 @@ import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 
 /**
@@ -36,9 +36,9 @@ public class ClientSettingsReport implements IReport {
      */
     private static final long serialVersionUID = -8850091501021448900L;
 
-    private IContest contest;
+    private IInternalContest contest;
 
-    private IController controller;
+    private IInternalController controller;
 
     private Log log;
 
@@ -196,7 +196,7 @@ public class ClientSettingsReport implements IReport {
         return "Client Settings";
     }
 
-    public void setContestAndController(IContest inContest, IController inController) {
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.contest = inContest;
         this.controller = inController;
         log = controller.getLog();

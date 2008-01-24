@@ -91,9 +91,9 @@ public final class PacketType implements Serializable {
         UNKNOWN,
 
         /**
-         * Contest Settings or partial settings.
+         * InternalContest Settings or partial settings.
          * 
-         * Contest Settings from server<br>
+         * InternalContest Settings from server<br>
          * From server to clients <br>
          * From server to remote server <br>
          * From Admin to server, to update the settings <br>
@@ -415,7 +415,7 @@ public final class PacketType implements Serializable {
          * From server to server <br>
          * Note: server login as well.
          * <P>
-         * Contents: Contest Settings.
+         * Contents: InternalContest Settings.
          */
         LOGIN_SUCCESS,
         
@@ -509,7 +509,7 @@ public final class PacketType implements Serializable {
          * Remove setting.
          * 
          * This packet contains a setting or list of settings to
-         * remove from the settings ({@link edu.csus.ecs.pc2.core.model.Contest}
+         * remove from the settings ({@link edu.csus.ecs.pc2.core.model.InternalContest}
          * <P>
          * from Admin to server<br>
          * from server to server<br>
@@ -525,7 +525,7 @@ public final class PacketType implements Serializable {
          */
         START_CONTEST_CLOCK,
         /**
-         * Stop Contest Clock. Admin to Server. Contains: SITE_NUMBER, CLIENT_ID
+         * Stop InternalContest Clock. Admin to Server. Contains: SITE_NUMBER, CLIENT_ID
          */
         STOP_CONTEST_CLOCK,
         
@@ -540,7 +540,7 @@ public final class PacketType implements Serializable {
         CLOCK_STARTED,
 
         /**
-         * Update Contest Clock.
+         * Update InternalContest Clock.
          * 
          * Update elapsed, remaining, contest length, running or not. <br>
          * Contains: Properties (ContestTime)

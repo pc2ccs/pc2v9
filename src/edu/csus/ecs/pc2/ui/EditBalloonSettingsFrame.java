@@ -2,9 +2,9 @@ package edu.csus.ecs.pc2.ui;
 
 import javax.swing.JFrame;
 
-import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.BalloonSettings;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
  * 
@@ -21,10 +21,10 @@ public class EditBalloonSettingsFrame extends JFrame implements UIPlugin {
     private static final long serialVersionUID = -5032031472446676474L;
 
     @SuppressWarnings("unused")
-    private IContest contest = null;
+    private IInternalContest contest = null;
 
     @SuppressWarnings("unused")
-    private IController controller = null;
+    private IInternalController controller = null;
 
     private BalloonSettingPane balloonSettingPane = null;
 
@@ -50,7 +50,7 @@ public class EditBalloonSettingsFrame extends JFrame implements UIPlugin {
         FrameUtilities.centerFrame(this);
     }
 
-    public void setContestAndController(IContest inContest, IController inController) {
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.contest = inContest;
         this.controller = inController;
 

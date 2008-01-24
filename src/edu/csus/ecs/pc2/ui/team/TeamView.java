@@ -11,11 +11,11 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.VersionInfo;
-import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.ui.ClarificationsPane;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay;
@@ -41,9 +41,9 @@ public class TeamView extends JFrame implements UIPlugin {
 
     public static final String SVN_ID = "$Id$";
 
-    private IContest contest = null;
+    private IInternalContest contest = null;
 
-    private IController teamController = null;
+    private IInternalController teamController = null;
 
     /**
      * 
@@ -210,7 +210,7 @@ public class TeamView extends JFrame implements UIPlugin {
         return this;
     }
 
-    public void setContestAndController(IContest inContest, IController inController) {
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.contest = inContest;
         this.teamController = inController;
 

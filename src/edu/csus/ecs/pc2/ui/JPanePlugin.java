@@ -3,8 +3,8 @@ package edu.csus.ecs.pc2.ui;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import edu.csus.ecs.pc2.core.IController;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
  * Base class for most UIPlugin panes.
@@ -16,13 +16,13 @@ import edu.csus.ecs.pc2.core.model.IContest;
 
 public abstract class JPanePlugin extends JPanel implements UIPlugin {
 
-    private IController controller;
+    private IInternalController controller;
 
-    private IContest contest;
+    private IInternalContest contest;
     
     private JFrame parentFrame = null;
 
-    public void setContestAndController(IContest inContest, IController inController) {
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.controller = inController;
         this.contest = inContest;
     }
@@ -30,19 +30,19 @@ public abstract class JPanePlugin extends JPanel implements UIPlugin {
 
     public abstract String getPluginTitle();
 
-    public IController getController() {
+    public IInternalController getController() {
         return controller;
     }
 
-    public void setController(IController controller) {
+    public void setController(IInternalController controller) {
         this.controller = controller;
     }
 
-    public IContest getContest() {
+    public IInternalContest getContest() {
         return contest;
     }
 
-    public void setContest(IContest contest) {
+    public void setContest(IInternalContest contest) {
         this.contest = contest;
     }
 

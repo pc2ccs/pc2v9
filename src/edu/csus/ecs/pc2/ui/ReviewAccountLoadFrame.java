@@ -12,14 +12,14 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.imports.LoadAccounts;
 import edu.csus.ecs.pc2.core.security.Permission;
 import javax.swing.JButton;
@@ -52,9 +52,9 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
 
     private Log log;
 
-    private IController controller;
+    private IInternalController controller;
 
-    private IContest contest;
+    private IInternalContest contest;
 
     private Account[] accounts;
     private static final String CHANGE_BEGIN = "";
@@ -151,7 +151,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
         return accountListBox;
     }
 
-    public void setContestAndController(IContest inContest, IController inController) {
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         contest = inContest;
         controller = inController;
         log = controller.getLog();

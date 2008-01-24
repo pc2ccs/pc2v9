@@ -2,12 +2,12 @@ package edu.csus.ecs.pc2.ui;
 
 import javax.swing.JFrame;
 
-import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.ContestTime;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
- * Edit Contest Time Frame.
+ * Edit InternalContest Time Frame.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -23,9 +23,9 @@ public class EditContestTimeFrame extends JFrame implements UIPlugin {
      */
     private static final long serialVersionUID = 3570106747020180994L;
 
-    private IContest contest;
+    private IInternalContest contest;
 
-    private IController controller;
+    private IInternalController controller;
 
     private ContestTimePane contestTimePane = null;
 
@@ -46,14 +46,14 @@ public class EditContestTimeFrame extends JFrame implements UIPlugin {
         this.setSize(new java.awt.Dimension(549, 278));
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setContentPane(getContestTimePane());
-        this.setTitle("New Contest Time");
+        this.setTitle("New InternalContest Time");
 
         FrameUtilities.centerFrame(this);
 
     }
 
 
-    public void setContestAndController(IContest inContest, IController inController) {
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.contest = inContest;
         this.controller = inController;
 
@@ -63,9 +63,9 @@ public class EditContestTimeFrame extends JFrame implements UIPlugin {
 
     public void setContestTime(ContestTime contestTime) {
         if (contestTime == null) {
-            setTitle("Add New Contest Time");
+            setTitle("Add New InternalContest Time");
         } else {
-            setTitle("Edit Contest Time for Site " + contestTime.getSiteNumber());
+            setTitle("Edit InternalContest Time for Site " + contestTime.getSiteNumber());
         }
         getContestTimePane().setContestTime(contestTime);
         

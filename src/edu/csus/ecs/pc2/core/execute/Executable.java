@@ -14,11 +14,11 @@ import java.util.Hashtable;
 import javax.swing.JFileChooser;
 
 import edu.csus.ecs.pc2.VersionInfo;
-import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
@@ -109,9 +109,9 @@ public class Executable {
 
     private String errorString;
 
-    private IContest contest;
+    private IInternalContest contest;
 
-    private IController controller;
+    private IInternalController controller;
 
     private Log log;
 
@@ -129,7 +129,7 @@ public class Executable {
 
     private boolean showMessageToUser;
 
-    public Executable(IContest inContest, IController inController, Run run, RunFiles runFiles) {
+    public Executable(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles) {
         super();
         this.contest = inContest;
         this.controller = inController;

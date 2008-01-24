@@ -11,7 +11,7 @@ import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 
 /**
- * Routines to safe and load configuration/Contest.
+ * Routines to safe and load configuration/InternalContest.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -69,11 +69,11 @@ public class ConfigurationIO {
          */
         CONTEST_TIME_LIST,
         /**
-         * Contest Information
+         * InternalContest Information
          */
         CONTEST_INFORMATION,
         /**
-         * Contest Client Settings
+         * InternalContest Client Settings
          */
         CLIENT_SETTINGS_LIST,
         /**
@@ -105,7 +105,7 @@ public class ConfigurationIO {
         this("db." + siteNumber);
     }
 
-    public boolean loadFromDisk(int siteNumber, IContest contest, Log log) {
+    public boolean loadFromDisk(int siteNumber, IInternalContest contest, Log log) {
 
         Configuration configuration = new Configuration();
         
@@ -273,7 +273,7 @@ public class ConfigurationIO {
                     if (configuration.containsKey(key)) {
                         ContestInformation contestInformation = (ContestInformation) configuration.get(key.toString());
                         contest.addContestInformation(contestInformation);
-                        log.info("Loaded Contest Information " + contestInformation.getContestTitle());
+                        log.info("Loaded InternalContest Information " + contestInformation.getContestTitle());
                     } 
                 } catch (Exception e) {
                     log.log(Log.WARNING, "Exception while loading contest information/title ", e);
@@ -327,7 +327,7 @@ public class ConfigurationIO {
      * 
      * @return Array of all accounts in contest.
      */
-    private Account[] getAllAccounts(IContest contest) {
+    private Account[] getAllAccounts(IInternalContest contest) {
 
         Vector<Account> allAccounts = new Vector<Account>();
 
@@ -342,7 +342,7 @@ public class ConfigurationIO {
         return accounts;
     }
 
-    public void saveToDisk(IContest contest, Log log) throws IOException {
+    public void saveToDisk(IInternalContest contest, Log log) throws IOException {
 
         Configuration configuration = new Configuration();
         

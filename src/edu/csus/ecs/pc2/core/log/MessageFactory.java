@@ -3,7 +3,7 @@ package edu.csus.ecs.pc2.core.log;
 import java.util.Properties;
 
 import edu.csus.ecs.pc2.core.model.Clarification;
-import edu.csus.ecs.pc2.core.model.Contest;
+import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.packet.Packet;
@@ -24,7 +24,7 @@ public final class MessageFactory {
 
     }
 
-    public static String createMessage(Contest contest, Packet packet) {
+    public static String createMessage(InternalContest contest, Packet packet) {
 
         Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
         if (run != null) {

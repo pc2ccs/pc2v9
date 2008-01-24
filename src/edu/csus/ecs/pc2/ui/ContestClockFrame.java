@@ -2,8 +2,8 @@ package edu.csus.ecs.pc2.ui;
 
 import javax.swing.JFrame;
 
-import edu.csus.ecs.pc2.core.IController;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import javax.swing.JPanel;
 import java.awt.BorderLayout;
 import javax.swing.JButton;
@@ -46,7 +46,7 @@ public class ContestClockFrame extends JFrame implements UIPlugin {
      */
     private void initialize() {
         this.setSize(new java.awt.Dimension(474, 287));
-        this.setTitle("Contest Clock");
+        this.setTitle("InternalContest Clock");
         this.setContentPane(getMainPanel1());
         this.addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent e) {
@@ -56,7 +56,7 @@ public class ContestClockFrame extends JFrame implements UIPlugin {
 
     }
 
-    public void setContestAndController(IContest model, IController controller) {
+    public void setContestAndController(IInternalContest model, IInternalController controller) {
 
         contestClockPane.setContestAndController(model, controller);
 
@@ -65,7 +65,7 @@ public class ContestClockFrame extends JFrame implements UIPlugin {
     }
 
     public String getPluginTitle() {
-        return "Contest Clock";
+        return "InternalContest Clock";
     }
 
     /**

@@ -16,9 +16,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.WindowConstants;
 
-import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
  * A file diff (comparison) panel.
@@ -447,10 +447,10 @@ public class FileDiffPanel implements IDiffPanel {
     private JLabel ivjJLabel3 = null;
 
     @SuppressWarnings("unused")
-    private IContest contest;
+    private IInternalContest contest;
 
     @SuppressWarnings("unused")
-    private IController controller;
+    private IInternalController controller;
 
     /**
      * connEtoC3: (JList1.mouse.mousePressed(java.awt.event.MouseEvent) -->
@@ -753,7 +753,7 @@ public class FileDiffPanel implements IDiffPanel {
 
     }
 
-    public void setContestAndController(IContest inContest, IController inController) {
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.contest = inContest;
         this.controller = inController;
         

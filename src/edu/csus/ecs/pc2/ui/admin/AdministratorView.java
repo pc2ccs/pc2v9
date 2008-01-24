@@ -16,9 +16,9 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import edu.csus.ecs.pc2.VersionInfo;
-import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.ui.AccountsPane;
 import edu.csus.ecs.pc2.ui.AutoJudgesPane;
 import edu.csus.ecs.pc2.ui.BalloonSettingsPane;
@@ -58,9 +58,9 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
     private static final long serialVersionUID = 1L;
 
-    private IContest contest;
+    private IInternalContest contest;
 
-    private IController controller;
+    private IInternalController controller;
 
     private JPanel jPanel = null;
 
@@ -121,7 +121,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
     }
 
-    public void setContestAndController(IContest inContest, IController inController) {
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.contest = inContest;
         this.controller = inController;
 
@@ -136,12 +136,12 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 // set the tab names and other characteristics for the main tabs
                 int fontSize = getMainTabbedPanel().getFont().getSize();
                 getMainTabbedPanel().setFont( getMainTabbedPanel().getFont().deriveFont(Font.BOLD, fontSize+6));
-                getMainTabbedPanel().setTitleAt(0, "Configure Contest");
+                getMainTabbedPanel().setTitleAt(0, "Configure InternalContest");
                 getMainTabbedPanel().setForegroundAt(0, ACTIVE_TAB_COLOR );
-                getMainTabbedPanel().setTitleAt(1, "Run Contest");
+                getMainTabbedPanel().setTitleAt(1, "Run InternalContest");
                 getMainTabbedPanel().setForegroundAt(1, INACTIVE_TAB_COLOR );
 
-                // add UI components involved with Configuration to the Configure Contest tabbed pane
+                // add UI components involved with Configuration to the Configure InternalContest tabbed pane
                 AccountsPane accountsPane = new AccountsPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Accounts", accountsPane);
 
@@ -176,7 +176,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 addUIPlugin(getConfigureContestTabbedPane(), "Settings", contestInformationPane);
 
 
-                // add UI components involved with Running the contest to the Run Contest tabbed pane
+                // add UI components involved with Running the contest to the Run InternalContest tabbed pane
                 RunsPanel runsPane = new RunsPanel();
                 addUIPlugin(getRunContestTabbedPane(), "Runs", runsPane);
 
@@ -390,7 +390,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
         if (configureContestTabbedPane == null) {
             configureContestTabbedPane = new JTabbedPane();
             configureContestTabbedPane.setToolTipText("");
-            configureContestTabbedPane.setName("Configure Contest");
+            configureContestTabbedPane.setName("Configure InternalContest");
         }
         return configureContestTabbedPane;
     }

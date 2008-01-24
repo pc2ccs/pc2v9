@@ -35,10 +35,10 @@ import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
 /**
- * Implementation of IContest.
+ * Implementation of IInternalContest.
  * 
  * This model is not responsible for logic, just storage. So, for example, {@link #cancelRunCheckOut(Run, ClientId)} will simply update the Run but will not check whether the run should be cancelled.
- * The Controller should be used to check whether a Run should be cancelled. Other logic of this sort is in the Controller, not the Contest.
+ * The InternalController should be used to check whether a Run should be cancelled. Other logic of this sort is in the InternalController, not the InternalContest.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -46,7 +46,7 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
 // $HeadURL$
 
-public class Contest implements IContest {
+public class InternalContest implements IInternalContest {
 
     private ClientId localClientId = null;
 
@@ -136,7 +136,7 @@ public class Contest implements IContest {
     private ClientSettingsList clientSettingsList = new ClientSettingsList();
 
     /**
-     * Contest Information (like title).
+     * InternalContest Information (like title).
      */
     private ContestInformation contestInformation = new ContestInformation();
 
@@ -215,7 +215,7 @@ public class Contest implements IContest {
             Site site = createFakeSite(1);
             site.setActive(true);
             siteList.add(site);
-            contestInformation.setContestTitle("Default Contest Title");
+            contestInformation.setContestTitle("Default InternalContest Title");
             if (getGeneralProblem() == null){
                 setGeneralProblem(new Problem("General"));
             }
@@ -566,7 +566,7 @@ public class Contest implements IContest {
     /**
      * Generate accounts.
      * 
-     * @see edu.csus.ecs.pc2.core.model.IContest#generateNewAccounts(java.lang.String, int, int, boolean)
+     * @see edu.csus.ecs.pc2.core.model.IInternalContest#generateNewAccounts(java.lang.String, int, int, boolean)
      * @param clientTypeName
      * @param count
      * @param active
@@ -576,7 +576,7 @@ public class Contest implements IContest {
     }
 
     /**
-     * @see edu.csus.ecs.pc2.core.model.IContest#generateNewAccounts(java.lang.String, int, int, boolean)
+     * @see edu.csus.ecs.pc2.core.model.IInternalContest#generateNewAccounts(java.lang.String, int, int, boolean)
      */
     public Vector<Account> generateNewAccounts(String clientTypeName, int count, int startNumber, boolean active) {
         ClientType.Type type = ClientType.Type.valueOf(clientTypeName.toUpperCase());
@@ -1602,7 +1602,7 @@ public class Contest implements IContest {
     }
 
     /* (non-Javadoc)
-     * @see edu.csus.ecs.pc2.core.model.IContest#checkoutClarification(edu.csus.ecs.pc2.core.model.Clarification, edu.csus.ecs.pc2.core.model.ClientId)
+     * @see edu.csus.ecs.pc2.core.model.IInternalContest#checkoutClarification(edu.csus.ecs.pc2.core.model.Clarification, edu.csus.ecs.pc2.core.model.ClientId)
      */
     public Clarification checkoutClarification(Clarification clar, ClientId whoChangedClar) throws ClarificationUnavailableException {
         synchronized (clarCheckOutList) {

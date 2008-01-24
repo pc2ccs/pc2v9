@@ -9,7 +9,7 @@ import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.Group;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
@@ -32,8 +32,8 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
  * public static void main(String[] args) {<br>
  * <br>
  * <blockquote>
- * IContest contest = new Contest();<br>
- * IController controller = new Controller (contest);<br>
+ * IInternalContest contest = new InternalContest();<br>
+ * IInternalController controller = new InternalController (contest);<br>
  * String serverArgs = "--server";
  * controller.start(serverArgs);<br>
  * </blockquote>
@@ -45,8 +45,8 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
  * public static void main(String[] args) {<br>
  * <blockquote>
  *      <br>
- *      IContest contest = new Contest();<br>
- *      IController controller = new Controller (contest);<br>
+ *      IInternalContest contest = new InternalContest();<br>
+ *      IInternalController controller = new InternalController (contest);<br>
  *      controller.start(args);<br>
  * } <br>
  * </blockquote>
@@ -57,7 +57,7 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
  */
 
 // $HeadURL$
-public interface IController {
+public interface IInternalController {
 
     /**
      * Submit a run to the server.
@@ -116,7 +116,7 @@ public interface IController {
     void sendToTeams(Packet packet);
 
     /**
-     * Start Controller with command line arguments.
+     * Start InternalController with command line arguments.
      * @param stringArray
      */
     void start(String[] stringArray);
@@ -136,7 +136,7 @@ public interface IController {
      * @return
      * @throws Exception
      */
-    IContest clientLogin(String loginName, String password) throws Exception;
+    IInternalContest clientLogin(String loginName, String password) throws Exception;
     
     /**
      * Logoff a client.
@@ -319,7 +319,7 @@ public interface IController {
     void updateBalloonSettings(BalloonSettings newBalloonSettings);
 
     /**
-     * Load contest settings from disk and initialize Contest. 
+     * Load contest settings from disk and initialize InternalContest. 
      */
     void initializeServer();
 

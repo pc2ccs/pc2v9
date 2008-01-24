@@ -2,7 +2,7 @@ package edu.csus.ecs.pc2.core;
 
 import java.util.Random;
 
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.packet.Packet;
 
 /**
@@ -23,7 +23,7 @@ public class Reconnector implements Runnable {
 
     private RetryDialog retryDialog = null;
     
-    private IContest contest = null;
+    private IInternalContest contest = null;
 
     private int maxConnectionRetries = 3;
     
@@ -50,7 +50,7 @@ public class Reconnector implements Runnable {
     }
 
     // required to access contest settings, like retry times and duration
-    void setContestAndController(IContest inContest, IController inController) {
+    void setContestAndController(IInternalContest inContest, IInternalController inController) {
 
     }
 

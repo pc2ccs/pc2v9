@@ -11,15 +11,15 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IContestInformationListener;
 import edu.csus.ecs.pc2.core.model.ContestInformation.TeamDisplayMask;
 
 /**
- * Contest Information edit/update Pane.
+ * InternalContest Information edit/update Pane.
  * 
  * Update contest title.
  * 
@@ -113,7 +113,7 @@ public class ContestInformationPane extends JPanePlugin {
             contestTitleLabel = new JLabel();
             contestTitleLabel.setBounds(new java.awt.Rectangle(55, 21, 134, 27));
             contestTitleLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-            contestTitleLabel.setText("Contest Title");
+            contestTitleLabel.setText("InternalContest Title");
             centerPane = new JPanel();
             centerPane.setLayout(null);
             centerPane.add(contestTitleLabel, null);
@@ -164,10 +164,10 @@ public class ContestInformationPane extends JPanePlugin {
 
     @Override
     public String getPluginTitle() {
-        return "Contest Information Pane";
+        return "InternalContest Information Pane";
     }
 
-    public void setContestAndController(IContest inContest, IController inController) {
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
 
         populateGUI();

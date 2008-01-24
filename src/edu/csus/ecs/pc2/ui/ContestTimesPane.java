@@ -14,7 +14,7 @@ import javax.swing.SwingUtilities;
 import com.ibm.webrunner.j2mclb.util.Comparator;
 import com.ibm.webrunner.j2mclb.util.HeapSorter;
 
-import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.list.AccountNameComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -25,7 +25,7 @@ import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.core.model.ILoginListener;
 import edu.csus.ecs.pc2.core.model.ISiteListener;
@@ -36,7 +36,7 @@ import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
 
 /**
- * Contest Times Pane/Grid.
+ * InternalContest Times Pane/Grid.
  * 
  * Shows contest times at all sites.
  * 
@@ -105,7 +105,7 @@ public class ContestTimesPane extends JPanePlugin {
 
     @Override
     public String getPluginTitle() {
-        return "Contest Times";
+        return "InternalContest Times";
     }
 
     /**
@@ -244,7 +244,7 @@ public class ContestTimesPane extends JPanePlugin {
                 }
             } catch (Exception e) {
                 c[5] = "??";
-                log.log(Log.WARNING, "Exception updating Contest Time for site "+contestTime.getSiteNumber(), e);
+                log.log(Log.WARNING, "Exception updating InternalContest Time for site "+contestTime.getSiteNumber(), e);
             }
         }
 
@@ -290,7 +290,7 @@ public class ContestTimesPane extends JPanePlugin {
         getEditButton().setVisible(isAllowed(Permission.Type.EDIT_CONTEST_CLOCK));
     }
 
-    public void setContestAndController(IContest inContest, IController inController) {
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
 
         log = getController().getLog();

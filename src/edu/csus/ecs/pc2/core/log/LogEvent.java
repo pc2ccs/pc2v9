@@ -3,7 +3,7 @@ package edu.csus.ecs.pc2.core.log;
 import java.io.Serializable;
 import java.util.Date;
 
-import edu.csus.ecs.pc2.core.model.Contest;
+import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.packet.Packet;
 
 /**
@@ -63,7 +63,7 @@ public class LogEvent implements Serializable {
      * @param packet
      * @param severity
      */
-    public LogEvent(Severity severity, Contest contest, Packet packet) {
+    public LogEvent(Severity severity, InternalContest contest, Packet packet) {
         this.severity = severity;
         eventType = packet.getType().toString();
         message = MessageFactory.createMessage(contest, packet);

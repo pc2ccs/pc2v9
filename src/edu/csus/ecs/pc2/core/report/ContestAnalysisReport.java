@@ -6,7 +6,7 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 
 import edu.csus.ecs.pc2.VersionInfo;
-import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.list.RunCompartorByTeamProblemElapsed;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -14,14 +14,14 @@ import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.security.Permission.Type;
 
 /**
- * Contest Analsysis Report.
+ * InternalContest Analsysis Report.
  * 
  * Prints summaries of each site submissions.
  * <P>
@@ -40,9 +40,9 @@ public class ContestAnalysisReport implements IReport {
      */
     private static final long serialVersionUID = 8827529273455158045L;
 
-    private IContest contest;
+    private IInternalContest contest;
 
-    private IController controller;
+    private IInternalController controller;
 
     private Log log;
 
@@ -51,7 +51,7 @@ public class ContestAnalysisReport implements IReport {
     public void writeReport(PrintWriter printWriter) throws IOException {
 
         printWriter.println();
-        printWriter.println("Contest Title: " + contest.getContestInformation().getContestTitle());
+        printWriter.println("InternalContest Title: " + contest.getContestInformation().getContestTitle());
         printWriter.println();
 
         printWriter.println(contest.getSites().length + " sites.");
@@ -317,17 +317,17 @@ public class ContestAnalysisReport implements IReport {
     }
 
     public String getReportTitle() {
-        return "Contest Analysis";
+        return "InternalContest Analysis";
     }
 
-    public void setContestAndController(IContest inContest, IController inController) {
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.contest = inContest;
         this.controller = inController;
         log = controller.getLog();
     }
 
     public String getPluginTitle() {
-        return "Contest Analysis Report";
+        return "InternalContest Analysis Report";
     }
 
     public Filter getFilter() {

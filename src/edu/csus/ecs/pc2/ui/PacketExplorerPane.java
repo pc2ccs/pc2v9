@@ -16,12 +16,12 @@ import javax.swing.SwingUtilities;
 import com.ibm.webrunner.j2mclb.util.HeapSorter;
 import com.ibm.webrunner.j2mclb.util.NumericStringComparator;
 
-import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.packet.PacketFactory;
@@ -59,10 +59,10 @@ public class PacketExplorerPane extends JPanePlugin {
     private JLabel messageLabel = null;
 
     @SuppressWarnings("unused")
-    private IContest contest;
+    private IInternalContest contest;
 
     @SuppressWarnings("unused")
-    private IController controller;
+    private IInternalController controller;
 
     public PacketExplorerPane() {
         super();
@@ -371,7 +371,7 @@ public class PacketExplorerPane extends JPanePlugin {
         listBox.getColumnInfo(columnNumber).getSorter().setSortOrder(sortRank);
     }
 
-    public void setContestAndController(IContest inContest, IController inController) {
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.contest = inContest;
         this.controller = inController;
         setVisible (true);

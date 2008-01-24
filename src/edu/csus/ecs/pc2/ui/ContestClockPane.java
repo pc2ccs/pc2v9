@@ -10,12 +10,12 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestTime;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay.DisplayTimes;
 
@@ -81,7 +81,7 @@ public class ContestClockPane extends JPanePlugin {
 
     @Override
     public String getPluginTitle() {
-        return "Contest Clock Pane";
+        return "InternalContest Clock Pane";
     }
 
     /**
@@ -172,7 +172,7 @@ public class ContestClockPane extends JPanePlugin {
         }
     }
 
-    public void setContestAndController(IContest inContest, IController inController) {
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
 
         log = getController().getLog();

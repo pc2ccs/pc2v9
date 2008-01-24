@@ -262,7 +262,7 @@ public final class LoadICPCData {
      * This will process the PC2_Contest.tab line to pull out the title.
      * 
      * @param values
-     * @return Contest Title
+     * @return InternalContest Title
      */
     private static String processContest(String[] values) {
         String title = "";

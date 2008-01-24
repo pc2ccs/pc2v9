@@ -5,9 +5,9 @@ import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.Date;
 
-import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.ElementId;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Run;
@@ -29,10 +29,10 @@ public class EvaluationLog implements UIPlugin {
      */
     private static final long serialVersionUID = -3187268249635199184L;
 
-    private IContest contest;
+    private IInternalContest contest;
 
     @SuppressWarnings("unused")
-    private IController controller;
+    private IInternalController controller;
 
     /**
      * 
@@ -41,7 +41,7 @@ public class EvaluationLog implements UIPlugin {
 
     private boolean logOpened = false;
 
-    public EvaluationLog(String logFileName, IContest contest, IController controller) {
+    public EvaluationLog(String logFileName, IInternalContest contest, IInternalController controller) {
         try {
             logOpened = false;
             evalLog = new PrintWriter(new FileOutputStream(logFileName, true), true);
@@ -60,7 +60,7 @@ public class EvaluationLog implements UIPlugin {
      * @param run
      * @param inContest
      */
-    public static void printEvaluationLine(PrintWriter printWriter, Run run, IContest inContest) {
+    public static void printEvaluationLine(PrintWriter printWriter, Run run, IInternalContest inContest) {
 
         // 1 date and time
         // 2 site #
@@ -101,7 +101,7 @@ public class EvaluationLog implements UIPlugin {
         printWriter.flush();
     }
 
-    public void setContestAndController(IContest inContest, IController inController) {
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.contest = inContest;
         this.controller = inController;
         

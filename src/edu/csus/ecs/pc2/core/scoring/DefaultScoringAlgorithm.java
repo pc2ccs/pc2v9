@@ -25,7 +25,7 @@ import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Group;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.Site;
@@ -99,7 +99,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         // TODO populate default properties
     }
 
-    AccountList getAccountList(IContest theContest) {
+    AccountList getAccountList(IInternalContest theContest) {
         Vector<Account> accountVect = theContest.getAccounts(ClientType.Type.ALL);
         AccountList accountList = new AccountList();
         Enumeration accountEnum = accountVect.elements();
@@ -221,7 +221,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      * 
      * @see edu.csus.ecs.pc2.core.scoring.ScoringAlgorithm#getStandings(edu.csus.ecs.pc2.core.Run[], edu.csus.ecs.pc2.core.AccountList, edu.csus.ecs.pc2.core.ProblemDisplayList, java.util.Properties)
      */
-    public String getStandings(IContest theContest, Properties properties, Log inputLog) throws IllegalContestState {
+    public String getStandings(IInternalContest theContest, Properties properties, Log inputLog) throws IllegalContestState {
         if (theContest == null) {
             throw new InvalidParameterException("Invalid model (null)");
         }
@@ -741,7 +741,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         IMemento memento = mementoRoot.createChild("standingsHeader");
         String title = contestInformation.getContestTitle();
         if (title == null || title.length() == 0) {
-            title = "Contest";
+            title = "InternalContest";
         }
         memento.putString("title", title);
         VersionInfo versionInfo = new VersionInfo();

@@ -12,11 +12,11 @@ import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
-import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 
 /**
@@ -81,10 +81,10 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
      * 
      */
 
-    private IController controller;
+    private IInternalController controller;
 
     @SuppressWarnings("unused")
-    private IContest contest;
+    private IInternalContest contest;
     
     /**
      * 
@@ -440,7 +440,7 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
         this.titleTimeToDisplay = titleTimeToDisplay;
     }
 
-    public void setContestAndController(IContest inContest, IController inController) {
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.contest = inContest;
         this.controller = inController;
         log = controller.getLog();
@@ -450,7 +450,7 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
     }
 
     public String getPluginTitle() {
-        return "Contest Clock Display";
+        return "InternalContest Clock Display";
     }
     
     /**

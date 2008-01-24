@@ -18,9 +18,9 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.VersionInfo;
-import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.StaticLog;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.ILoginListener;
 import edu.csus.ecs.pc2.core.model.LoginEvent;
 
@@ -39,9 +39,9 @@ public class LoginFrame extends JFrame implements UIPlugin {
     private static final long serialVersionUID = -6389607881992853161L;
     
     @SuppressWarnings("unused")
-    private IContest contest;
+    private IInternalContest contest;
     
-    private IController controller;
+    private IInternalController controller;
 
     private JPanel centerPane = null;
 
@@ -175,7 +175,7 @@ public class LoginFrame extends JFrame implements UIPlugin {
             mainTitleBottomLabel = new JLabel();
             mainTitleBottomLabel.setHorizontalAlignment(SwingConstants.CENTER);
             mainTitleBottomLabel.setHorizontalTextPosition(SwingConstants.CENTER);
-            mainTitleBottomLabel.setText("Contest Control System");
+            mainTitleBottomLabel.setText("InternalContest Control System");
             mainTitleBottomLabel.setFont(new Font("Dialog", Font.BOLD, 18));
             messageLabel = new JLabel();
             messageLabel.setForeground(Color.red);
@@ -191,7 +191,7 @@ public class LoginFrame extends JFrame implements UIPlugin {
             gridBagConstraints6.gridwidth = 2;
             mainTitleTopLabel = new JLabel();
             mainTitleTopLabel.setFont(new Font("Dialog", Font.BOLD, 18));
-            mainTitleTopLabel.setText("Contest Control System");
+            mainTitleTopLabel.setText("InternalContest Control System");
             mainTitleTopLabel.setHorizontalAlignment(SwingConstants.CENTER);
             passwordTitleLabel = new JLabel();
             passwordTitleLabel.setText("Password");
@@ -411,7 +411,7 @@ public class LoginFrame extends JFrame implements UIPlugin {
         }
     }
 
-    public void setContestAndController(IContest inContest, IController inController) {
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.contest = inContest;
         this.controller = inController;
         // initialize logWindow so it can add itself as a listener and

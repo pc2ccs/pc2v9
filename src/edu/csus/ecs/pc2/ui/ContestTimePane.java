@@ -10,11 +10,11 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ContestTime;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import javax.swing.JCheckBox;
 
 /**
@@ -84,7 +84,7 @@ public class ContestTimePane extends JPanePlugin {
         this.add(getCenterPane(), java.awt.BorderLayout.CENTER);
     }
 
-    public void setContestAndController(IContest inContest, IController inController) {
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
 
         addWindowCloserListener();
@@ -402,7 +402,7 @@ public class ContestTimePane extends JPanePlugin {
             contestLengthLabel = new JLabel();
             contestLengthLabel.setBounds(new java.awt.Rectangle(60, 103, 110, 23));
             contestLengthLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-            contestLengthLabel.setText("Contest Length");
+            contestLengthLabel.setText("InternalContest Length");
             elapsedTimeLabel = new JLabel();
             elapsedTimeLabel.setBounds(new java.awt.Rectangle(60, 60, 110, 23));
             elapsedTimeLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);

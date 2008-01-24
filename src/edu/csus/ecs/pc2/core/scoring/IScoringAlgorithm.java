@@ -4,7 +4,7 @@ import java.util.Properties;
 
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.log.Log;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
  * Interface that every Scoring Algorithm must implement.
@@ -27,5 +27,5 @@ public interface IScoringAlgorithm {
      *            a logger, used to add info to the log file and window.
      * @return An XML descriptor giving standings properties for each team
      */
-    String getStandings(IContest theContest, Properties properties, Log log) throws IllegalContestState;
+    String getStandings(IInternalContest theContest, Properties properties, Log log) throws IllegalContestState;
 }

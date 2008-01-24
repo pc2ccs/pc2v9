@@ -34,9 +34,9 @@ public class InternalDump {
 
     private String editorNameFullPath =   "/windows/vi.bat";
 
-    private IContest contest;
+    private IInternalContest contest;
 
-    public InternalDump(IContest contest){
+    public InternalDump(IInternalContest contest){
         this.contest = contest;
     }
 
@@ -171,11 +171,11 @@ public class InternalDump {
                 log.println("  " + clarification);
             }
 
-            // Contest Times
+            // InternalContest Times
             log.println();
             ContestTime[] contestTimes = contest.getContestTimes();
             Arrays.sort(contestTimes, new ContestTimeComparator());
-            log.println("-- " + contestTimes.length + " Contest Times --");
+            log.println("-- " + contestTimes.length + " InternalContest Times --");
             for (ContestTime contestTime : contestTimes) {
 
                 if (contest.getSiteNumber() == contestTime.getSiteNumber()) {

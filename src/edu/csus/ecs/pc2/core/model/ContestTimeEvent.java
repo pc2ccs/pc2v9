@@ -2,9 +2,9 @@ package edu.csus.ecs.pc2.core.model;
 
 
 /**
- * Contest Time event.
+ * InternalContest Time event.
  * 
- * The Contest has started, stopped or changed.
+ * The InternalContest has started, stopped or changed.
  * 
  * @author pc2@ecs.csus.edu
  * 
@@ -23,7 +23,7 @@ public class ContestTimeEvent {
     public enum Action {
 
         /**
-         * Contest Time added.
+         * InternalContest Time added.
          */
         DELETED,
         /**

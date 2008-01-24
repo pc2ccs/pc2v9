@@ -26,7 +26,7 @@ import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Group;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.ILoginListener;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
@@ -59,13 +59,13 @@ import edu.csus.ecs.pc2.ui.LoginFrame;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
- * Implementation of Contest Controller.
+ * Implementation of InternalContest InternalController.
  * 
  * Run Flow, submit run.
  * <ol>
  * <li> Team: {@link #submitRun(Problem, Language, String)}
  * <li> Server: {@link edu.csus.ecs.pc2.core.PacketHandler#handlePacket(Packet, ConnectionHandlerID)}
- * <li> Server: {@link edu.csus.ecs.pc2.core.model.Contest#acceptRun(Run, RunFiles)}
+ * <li> Server: {@link edu.csus.ecs.pc2.core.model.InternalContest#acceptRun(Run, RunFiles)}
  * <li> Team: {@link edu.csus.ecs.pc2.core.model.IRunListener#runAdded(edu.csus.ecs.pc2.core.model.RunEvent)} RunEvent action is: {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#ADDED}
  * <li> Client: {@link edu.csus.ecs.pc2.core.model.IRunListener#runAdded(edu.csus.ecs.pc2.core.model.RunEvent)} RunEvent action is: {@link edu.csus.ecs.pc2.core.model.RunEvent.Action#ADDED}
  * </ol>
@@ -99,12 +99,12 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
  * @version $Id$
  */
 // $HeadURL$
-public class Controller implements IController, ITwoToOne, IBtoA {
+public class InternalController implements IInternalController, ITwoToOne, IBtoA {
 
     /**
-     * Contest data.
+     * InternalContest data.
      */
-    private IContest contest;
+    private IInternalContest contest;
 
     /**
      * Transport.
@@ -112,7 +112,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     private ITransportManager connectionManager;
 
     /**
-     * Controller.
+     * InternalController.
      */
 
     /**
@@ -243,7 +243,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     private int securityLevel = SECURITY_NONE_LEVEL;
 
     
-    public Controller(IContest contest) {
+    public InternalController(IInternalContest contest) {
         super();
         this.contest = contest;
         packetHandler = new PacketHandler(this, contest);
@@ -588,8 +588,8 @@ public class Controller implements IController, ITwoToOne, IBtoA {
     // $HeadURL$
     protected class TemporaryClientUI implements UIPlugin, ILoginListener {
 
-        private IContest contest = null;
-        private IController controller = null;
+        private IInternalContest contest = null;
+        private IInternalController controller = null;
         
         private SecurityException securityException = null;
 
@@ -598,7 +598,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
          */
         private static final long serialVersionUID = 8735788359720905862L;
 
-        public void setContestAndController(IContest inContest, IController inController) {
+        public void setContestAndController(IInternalContest inContest, IInternalController inController) {
             contest = inContest;
             controller = inController;
             
@@ -608,22 +608,22 @@ public class Controller implements IController, ITwoToOne, IBtoA {
             return "TemporaryClientUI";
         }
 
-        public IContest getContest() {
+        public IInternalContest getContest() {
             if (securityException != null){
                 throw securityException;
             }
             return contest;
         }
 
-        public void setContest(IContest contest) {
+        public void setContest(IInternalContest contest) {
             this.contest = contest;
         }
 
-        public IController getController() {
+        public IInternalController getController() {
             return controller;
         }
 
-        public void setController(IController controller) {
+        public void setController(IInternalController controller) {
             this.controller = controller;
         }
 
@@ -642,7 +642,7 @@ public class Controller implements IController, ITwoToOne, IBtoA {
         }
     }
     
-    public IContest clientLogin(String loginName, String password) throws Exception {
+    public IInternalContest clientLogin(String loginName, String password) throws Exception {
 
         if (!isStarted) {
             // TODO review this message

@@ -10,7 +10,7 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 
-import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.imports.ICPCAccount;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -18,7 +18,7 @@ import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -401,7 +401,7 @@ public class ICPCAccountPane extends JPanePlugin {
         });
     }
 
-    public void setContestAndController(IContest inContest, IController inController) {
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
         addWindowCloserListener();
         getContest().addAccountListener(new AccountListenerImplementation());

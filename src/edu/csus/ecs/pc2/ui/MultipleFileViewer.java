@@ -15,9 +15,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 
-import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 
 /**
@@ -564,10 +564,10 @@ public class MultipleFileViewer extends JFrame implements IFileViewer {
     private JLabel informationLabel = null;
 
     @SuppressWarnings("unused")
-    private IController controller;
+    private IInternalController controller;
 
     @SuppressWarnings("unused")
-    private IContest contest;
+    private IInternalContest contest;
 
     /**
      * Center Frame
@@ -712,7 +712,7 @@ public class MultipleFileViewer extends JFrame implements IFileViewer {
         informationLabel.setText(text);
     }
 
-    public void setContestAndController(IContest inContest, IController inController) {
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.contest = inContest;
         this.controller = inController;
     }

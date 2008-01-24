@@ -3,8 +3,8 @@ package edu.csus.ecs.pc2.ui;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
-import edu.csus.ecs.pc2.core.IController;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
  * Submission Biff Frame.
@@ -20,9 +20,9 @@ public class SubmissionBiffFrame extends JFrame implements UIPlugin {
      */
     private static final long serialVersionUID = 1330276750746647066L;
 
-    private IContest contest;
+    private IInternalContest contest;
 
-    private IController controller;
+    private IInternalController controller;
 
     private SubmissionBiffPane submissionBiffPane = null;
 
@@ -46,7 +46,7 @@ public class SubmissionBiffFrame extends JFrame implements UIPlugin {
 
     }
 
-    public void setContestAndController(IContest inContest, IController inController) {
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.contest = inContest;
         this.controller = inController;
 

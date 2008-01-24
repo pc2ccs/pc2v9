@@ -2,8 +2,8 @@ package edu.csus.ecs.pc2.ui;
 
 import javax.swing.JFrame;
 
-import edu.csus.ecs.pc2.core.IController;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
  * Report Frame.s
@@ -38,12 +38,12 @@ public class ReportFrame extends JFrame implements UIPlugin {
     private void initialize() {
         this.setSize(new java.awt.Dimension(496, 230));
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        this.setTitle("Contest Reports");
+        this.setTitle("InternalContest Reports");
         this.setContentPane(getReportPane());
 
     }
 
-    public void setContestAndController(IContest inContest, IController inController) {
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         reportPane.setContestAndController(inContest, inController);
     }
 

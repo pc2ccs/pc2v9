@@ -13,11 +13,11 @@ import javax.swing.SwingUtilities;
 
 import com.ibm.webrunner.j2mclb.util.HeapSorter;
 
-import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ConnectionEvent;
 import edu.csus.ecs.pc2.core.model.IConnectionListener;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
 /**
@@ -173,7 +173,7 @@ public class ConnectionsPane extends JPanePlugin {
         });
     }
 
-    public void setContestAndController(IContest inContest, IController inController) {
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
 
         getContest().addConnectionListener(new ConnectionListenerImplementation());

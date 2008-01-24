@@ -3,7 +3,7 @@ package edu.csus.ecs.pc2.core;
 import edu.csus.ecs.pc2.core.exception.ContestSecurityException;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientId;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
@@ -19,10 +19,10 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
 // $HeadURL$
 public class PriorityMessageHandler implements UIPlugin {
 
-    private IContest contest;
+    private IInternalContest contest;
 
     @SuppressWarnings("unused")
-    private IController controller;
+    private IInternalController controller;
 
     private Log log;
 
@@ -31,7 +31,7 @@ public class PriorityMessageHandler implements UIPlugin {
      */
     private static final long serialVersionUID = -1913676615562732681L;
 
-    public void setContestAndController(IContest inContest, IController inController) {
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.controller = inController;
         this.contest = inContest;
 

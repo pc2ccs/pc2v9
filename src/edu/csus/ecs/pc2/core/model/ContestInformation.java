@@ -3,7 +3,7 @@ package edu.csus.ecs.pc2.core.model;
 import java.io.Serializable;
 
 /**
- * Contest Wide Information.
+ * InternalContest Wide Information.
  * 
  * 
  * 

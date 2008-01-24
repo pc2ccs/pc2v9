@@ -5,10 +5,10 @@ package edu.csus.ecs.pc2.ui;
 
 import javax.swing.JFrame;
 
-import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
  * Edit AutoJudge settings JFrame, holds AutoJudgeSettingsPane.
@@ -23,9 +23,9 @@ public class EditAutoJudgeSettingFrame extends JFrame implements UIPlugin {
      */
     private static final long serialVersionUID = 7466524895460714723L;
 
-    private IContest contest;
+    private IInternalContest contest;
 
-    private IController controller;
+    private IInternalController controller;
 
     private AutoJudgeSettingsPane autoJudgeSettingsPane = null;
 
@@ -48,7 +48,7 @@ public class EditAutoJudgeSettingFrame extends JFrame implements UIPlugin {
         FrameUtilities.centerFrame(this);
     }
 
-    public void setContestAndController(IContest inContest, IController inController) {
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.contest = inContest;
         this.controller = inController;
 

@@ -12,13 +12,13 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.VersionInfo;
-import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.core.model.ILoginListener;
 import edu.csus.ecs.pc2.core.model.IRunListener;
@@ -48,11 +48,11 @@ public class ServerView extends JFrame implements UIPlugin {
 
     public static final String SVN_ID = "$Id$";
 
-    private IContest model = null;
+    private IInternalContest model = null;
 
     // TODO remove @SuppressWarnings for controller
     @SuppressWarnings("unused")
-    private IController controller = null;
+    private IInternalController controller = null;
 
     /**
      * 
@@ -225,7 +225,7 @@ public class ServerView extends JFrame implements UIPlugin {
     }
 
     /**
-     * Contest Time for use by ServerView.
+     * InternalContest Time for use by ServerView.
      * 
      * @author pc2@ecs.csus.edu
      *
@@ -310,7 +310,7 @@ public class ServerView extends JFrame implements UIPlugin {
         });
     }
 
-    public void setContestAndController(IContest inContest, IController inController) {
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.model = inContest;
         this.controller = inController;
         this.log = controller.getLog();

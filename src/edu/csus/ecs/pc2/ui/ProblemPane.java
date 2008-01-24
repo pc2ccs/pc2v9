@@ -19,9 +19,9 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.Constants;
-import edu.csus.ecs.pc2.core.IController;
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
-import edu.csus.ecs.pc2.core.model.IContest;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
@@ -175,7 +175,7 @@ public class ProblemPane extends JPanePlugin {
         this.add(getMainTabbedPane(), java.awt.BorderLayout.CENTER);
     }
 
-    public void setContestAndController(IContest inContest, IController inController) {
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
 
         // getContest().addProblemListener(new Proble)

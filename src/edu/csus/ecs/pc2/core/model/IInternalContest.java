@@ -23,7 +23,7 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
  * @author boudreat
  *
  */
-public interface IContest {
+public interface IInternalContest {
 
     void addLanguage(Language language);
 
@@ -93,14 +93,14 @@ public interface IContest {
     void updateAccount(Account account);
 
     /**
-     * Start Contest Clock at site.
+     * Start InternalContest Clock at site.
      * 
      * @param siteNumber
      */
     void startContest(int siteNumber);
 
     /**
-     * Stop Contest Clock at site.
+     * Stop InternalContest Clock at site.
      * 
      * @param siteNumber
      */
