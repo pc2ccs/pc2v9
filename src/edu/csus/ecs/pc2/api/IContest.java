@@ -18,11 +18,11 @@ public interface IContest {
     /**
      * Has this client logged in ?.
      * 
-     * If the client has used the {@link IController#login(String, String)} successfully then this method will return true.
+     * If the client has used the {@link Controller#login(String, String)} successfully then this method will return true.
      * <P>
      * If the client has logged off ({@link IController#logoff()}) or never logged in then returns false.
      * 
-     * @see IController#login(String, String)
+     * @see Controller#login(String, String)
      * @return true if logged in, false if not.
      */
     boolean isLoggedIn();

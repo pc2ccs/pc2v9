@@ -11,7 +11,7 @@ import edu.csus.ecs.pc2.core.model.ElementId;
  * 
  * 
  * 
- * @eee Controller
+ * @see Controller
  * @see edu.csus.ecs.pc2.api.ConfigurationUpdateEvent
  * @see edu.csus.ecs.pc2.api.RunUpdateEvent
  * @author pc2@ecs.csus.edu
