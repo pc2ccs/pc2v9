@@ -13,7 +13,7 @@ import edu.csus.ecs.pc2.core.model.ElementId;
  */
  // $HeadURL$
  
-public interface IConfirgurationUpdateListener {
+public interface IConfigurationUpdateListener {
 
     /**
      * All contest data has been reset or changed.

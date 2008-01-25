@@ -1,6 +1,6 @@
 package edu.csus.ecs.pc2;
 
-import edu.csus.ecs.pc2.api.IConfirgurationUpdateListener;
+import edu.csus.ecs.pc2.api.IConfigurationUpdateListener;
 import edu.csus.ecs.pc2.api.IRunEventListener;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ElementId;
@@ -93,12 +93,12 @@ public class Contest implements IContest {
 
     }
 
-    public void addContestUpdateConfigurationListener(IConfirgurationUpdateListener contestUpdateConfigurationListener) {
+    public void addContestUpdateConfigurationListener(IConfigurationUpdateListener contestUpdateConfigurationListener) {
         // TODO Auto-generated method stub
 
     }
 
-    public void removeContestUpdateConfigurationListener(IConfirgurationUpdateListener contestUpdateConfigurationListener) {
+    public void removeContestUpdateConfigurationListener(IConfigurationUpdateListener contestUpdateConfigurationListener) {
         // TODO Auto-generated method stub
 
     }

@@ -1,6 +1,6 @@
 package edu.csus.ecs.pc2;
 
-import edu.csus.ecs.pc2.api.IConfirgurationUpdateListener;
+import edu.csus.ecs.pc2.api.IConfigurationUpdateListener;
 import edu.csus.ecs.pc2.api.IRunEventListener;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ElementId;
@@ -179,7 +179,7 @@ public interface IContest {
      * @param contestUpdateConfigurationListener
      *            listener for Configuration Update events
      */
-    void addContestUpdateConfigurationListener(IConfirgurationUpdateListener contestUpdateConfigurationListener);
+    void addContestUpdateConfigurationListener(IConfigurationUpdateListener contestUpdateConfigurationListener);
 
     /**
      * Remove Contest Update listener.
@@ -188,6 +188,6 @@ public interface IContest {
      * @param contestUpdateConfigurationListener
      *            listener for Configuration Update events
      */
-    void removeContestUpdateConfigurationListener(IConfirgurationUpdateListener contestUpdateConfigurationListener);
+    void removeContestUpdateConfigurationListener(IConfigurationUpdateListener contestUpdateConfigurationListener);
 
 }
