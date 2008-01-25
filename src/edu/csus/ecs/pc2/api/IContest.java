@@ -151,6 +151,42 @@ public interface IContest {
      * 
      */
     ElementId[] getJudgementIds();
+    
+    /**
+     * Get a list of runs (ElementIds).
+     * 
+     * <P>
+     * Code snippet to print all run infos.
+     * <pre>
+     * for (ElementId elementId : contest.getRunIds()) {
+     *     Run run = contest.getRun(elementId);
+     * 
+     *     System.out.println("Run " + run.getNumber() + " from site " + run.getSiteNumber());
+     *     System.out.println("    submitted at " + run.getElapsedMins() + " by " + run.getSubmitterId());
+     *     System.out.println("    For problem " + contest.getProblemTitle(run.getProblemId()));
+     *     System.out.println("    Written in " + contest.getLanguageTitle(run.getLanguageId()));
+     *   
+     *     if (run.isJudged()) {
+     *       System.out.println("    Judgement: "+run.getJudgementTitle(contest));
+     *     } else {
+     *       System.out.println("    Judgement: not judged yet ");
+     *     }
+     *     
+     *     System.out.println();
+     * }
+     * </pre>
+     * 
+     * @return list of Runs, unordered.
+     */
+    ElementId[] getRunIds();
+    
+    /**
+     * Get Run information.
+     * 
+     * @param elementId a id that identifies a run.
+     * @return null if elementId not in list of runs, else the Run.
+     */
+    Run getRun (ElementId elementId);
 
     /**
      * Add run event listener.

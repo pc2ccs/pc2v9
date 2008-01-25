@@ -101,4 +101,14 @@ public class Contest implements IContest {
 
     }
 
+    public ElementId[] getRunIds() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public Run getRun(ElementId elementId) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

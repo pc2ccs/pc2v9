@@ -104,4 +104,54 @@ public class Run {
         }
     }
 
+    /**
+     * Get problem elementId.
+     * 
+     * @return elementId for the problem that was selected.
+     */
+    public ElementId getProblemId(){
+        return run.getProblemId();
+    }
+    
+    /**
+     * Get language elementId.
+     * 
+     * @return elementId for the language which was selected.
+     */
+    public ElementId getLanguageId(){
+        return run.getLanguageId();
+    }
+
+    /**
+     * Get run number.
+     * 
+     * Run number is assigned on the server.  Each
+     * run number is unique to its site.  A run number
+     * with site number is unique in the contest.
+     * 
+     * @return the number for this run.
+     */
+    public int getNumber() {
+        return run.getNumber();
+    }
+    
+    /**
+     * Get site number.
+     * 
+     * @return the site number for the run.
+     */
+    public int getSiteNumber() {
+        return run.getSiteNumber();
+    }
+
+    /**
+     * Get elapsed minutes when this run was submitted.
+     * 
+     * @return the number of minutes elapsed when this run was submitted.
+     */
+    public long getElapsedMins() {
+        return run.getElapsedMins();
+    }
+
+
 }
