@@ -46,12 +46,11 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
  * from the Properties in a Packet.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
 public final class PacketFactory {
-
-    public static final String SVN_ID = "$Id$";
 
     public static final String LOGIN = "LOGIN";
 

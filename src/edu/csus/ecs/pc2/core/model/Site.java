@@ -7,11 +7,10 @@ import java.util.Properties;
  * Single Site Definition.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 // $HeadURL$
 public class Site implements IElementObject {
-
-    public static final String SVN_ID = "$Id$";
 
     /**
      * 

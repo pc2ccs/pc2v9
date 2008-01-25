@@ -5,11 +5,10 @@ package edu.csus.ecs.pc2.core.model;
  * Single Language Definition.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 // $HeadURL$
 public class Language implements IElementObject {
-    public static final String SVN_ID = "$Id$";
-
     /**
      * 
      */

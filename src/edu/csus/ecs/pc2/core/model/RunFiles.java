@@ -7,6 +7,7 @@ import java.io.Serializable;
  * 
  * @see Run
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
@@ -16,8 +17,6 @@ public class RunFiles implements Serializable {
      * 
      */
     private static final long serialVersionUID = -7676377417419464772L;
-
-    public static final String SVN_ID = "$Id$";
 
     /**
      * Unique id for this instance.

@@ -4,11 +4,10 @@ package edu.csus.ecs.pc2.core.model;
  * PC<sup>2</sup> client types.
  *
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 // $HeadURL$
 public class ClientType {
-
-    public static final String SVN_ID = "$Id$";
 
     /**
      * Client Types.

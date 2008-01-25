@@ -23,9 +23,6 @@ import java.io.Serializable;
 
 // $HeadURL$
 public final class PacketType implements Serializable {
-
-    public static final String SVN_ID = "$Id$";
-
     /**
      * 
      */

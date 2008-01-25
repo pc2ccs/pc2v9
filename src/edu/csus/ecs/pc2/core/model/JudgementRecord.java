@@ -10,6 +10,7 @@ import java.io.Serializable;
  * and whether the judgement {@link #isActive() is Active}
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
@@ -19,8 +20,6 @@ public class JudgementRecord implements Serializable {
      * 
      */
     private static final long serialVersionUID = -2043715842465711645L;
-
-    public static final String SVN_ID = "$Id$";
 
     /**
      * A Unique contest-wide identifier the judgement.

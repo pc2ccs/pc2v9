@@ -9,12 +9,12 @@ package edu.csus.ecs.pc2.core.model;
 // $HeadURL$
 public class ClarificationEvent {
 
-    public static final String SVN_ID = "$Id$";
 
     /**
      * Clarification Event States(s).
      * 
      * @author pc2@ecs.csus.edu
+     * @version $Id$
      */
     public enum Action {
 

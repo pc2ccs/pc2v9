@@ -9,6 +9,7 @@ import java.util.Vector;
  * Contains the submitter, problem, language, files and other data for a run.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
@@ -19,8 +20,6 @@ public class Run extends ISubmission {
      * 
      */
     private static final long serialVersionUID = 4643865629642121895L;
-
-    public static final String SVN_ID = "$Id$";
 
     /**
      * The states a Run can be in.

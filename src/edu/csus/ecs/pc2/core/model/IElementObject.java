@@ -8,13 +8,11 @@ import java.io.Serializable;
  * This allows classes like {@link edu.csus.ecs.pc2.core.list.ElementList} to maintain lists. <br>
  *
  * @author pc2@ecs.csus.edu
- *
+ * @version $Id$
  */
 
 // $HeadURL$
 public interface IElementObject extends Serializable {
-
-    String SVN_ID = "$Id$";
 
     /**
      * Get the {@link ElementId}.

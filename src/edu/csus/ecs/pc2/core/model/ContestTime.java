@@ -15,7 +15,7 @@ import java.util.TimeZone;
  * <br>
  * 
  * @author pc2@ecs.csus.edu
- * 
+ * @version $Id$
  */
 
 // $HeadURL$
@@ -25,8 +25,6 @@ public class ContestTime implements IElementObject {
      * 
      */
     private static final long serialVersionUID = 6967329985187819728L;
-
-    public static final String SVN_ID = "$Id$";
 
     /**
      * Default contest length.

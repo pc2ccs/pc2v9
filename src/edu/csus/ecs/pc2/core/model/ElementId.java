@@ -5,21 +5,21 @@ import java.util.Random;
 
 /**
  * A contest-wide Unique Id.
- *
- * This is a internal id for various classes.
- *
+ * 
+ * This identifier is used as a unique key for most
+ * of the data classes in PC&sup2;.
+ *  
  * @author pc2@ecs.csus.edu
- *
+ * @version $Id$
  */
 // $HeadURL$
+
 public class ElementId implements Serializable {
 
     /**
      *
      */
     private static final long serialVersionUID = -4019714577379393756L;
-
-    public static final String SVN_ID = "$Id$";
 
     private int siteNumber = 0;
 

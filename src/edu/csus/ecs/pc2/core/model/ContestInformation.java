@@ -5,10 +5,8 @@ import java.io.Serializable;
 /**
  * InternalContest Wide Information.
  * 
- * 
- * 
  * @author pc2@ecs.csus.edu
- * 
+ * @version $Id$
  */
 
 // $HeadURL$
@@ -18,8 +16,6 @@ public class ContestInformation implements Serializable{
      * 
      */
     private static final long serialVersionUID = -7333255582657988200L;
-
-    public static final String SVN_ID = "$Id$";
 
     private String contestTitle;
 

@@ -41,12 +41,11 @@ import java.util.Vector;
  * </pre>
  *
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
 public class ParseArguments {
-
-    public static final String SVN_ID = "$Id$";
 
     private Hashtable<String, String> argHash = new Hashtable<String, String>();
 

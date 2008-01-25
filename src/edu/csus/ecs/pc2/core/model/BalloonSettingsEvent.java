@@ -10,12 +10,12 @@ package edu.csus.ecs.pc2.core.model;
 //$HeadURL$
 public class BalloonSettingsEvent {
 
-    public static final String SVN_ID = "$Id$";
 
     /**
      * Run Event States(s).
      * 
      * @author pc2@ecs.csus.edu
+     * @version $Id$
      */
     public enum Action {
 

@@ -4,14 +4,13 @@ package edu.csus.ecs.pc2.core.model;
  * A single record with standings information for a team.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // TODO Add StandingsRecord array, or redesign this.
 
 // $HeadURL$
 public class StandingsRecord {
-
-    public static final String SVN_ID = "$Id$";
 
     /**
      * Rank Number.

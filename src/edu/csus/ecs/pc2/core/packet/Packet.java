@@ -18,6 +18,7 @@ import edu.csus.ecs.pc2.core.model.ClientId;
  * @see PacketFactory
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
@@ -27,8 +28,6 @@ public class Packet implements Serializable {
      * 
      */
     private static final long serialVersionUID = 1201529987796311669L;
-
-    public static final String SVN_ID = "$Id$";
 
     private ClientId sourceId = null;
 

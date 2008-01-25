@@ -8,6 +8,7 @@ import java.io.Serializable;
  * This contains the judgements, like Yes, No, Contact Staff.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 // $HeadURL$
 public class Judgement implements IElementObject, Serializable {
@@ -16,8 +17,6 @@ public class Judgement implements IElementObject, Serializable {
      * 
      */
     private static final long serialVersionUID = -8252588018410124478L;
-
-    public static final String SVN_ID = "$Id$";
 
     private ElementId elementId = null;
 

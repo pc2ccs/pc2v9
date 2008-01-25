@@ -6,11 +6,11 @@ package edu.csus.ecs.pc2.core.model;
  * A request for clarification from the judges.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
 public class Clarification extends ISubmission {
-    public static final String SVN_ID = "$Id$";
 
     /**
      * 

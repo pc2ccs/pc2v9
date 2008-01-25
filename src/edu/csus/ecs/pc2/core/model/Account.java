@@ -8,13 +8,11 @@ import edu.csus.ecs.pc2.core.security.PermissionList;
  * Login Account.
  * 
  * @author pc2@ecs.csus.edu
- * 
- * 
+ * @version $Id$
  */
 
 // $HeadURL$
 public class Account implements IElementObject {
-    public static final String SVN_ID = "$Id$";
 
     /**
      * 
