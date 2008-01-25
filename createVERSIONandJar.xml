@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
-<project name="v9VersionAndJarBuild" default="jar" basedir=".">	
-<!-- $Id$ -->
-<!-- $HeadURL$ -->
-<!-- 
+<project name="v9VersionAndJarBuild" default="jar" basedir=".">
+	<!-- $Id$ -->
+	<!-- $HeadURL$ -->
+	<!-- 
 
 Purpose: Create of dist/pc2.jar and VERSION file, no testing, no code style, 
 just a .jar file that can be used for unit testing using
@@ -128,6 +128,21 @@ dal
 		<delete dir="${build.dir}" />
 		<delete dir="${dist.dir}" />
 	</target>
+
+	<property name="pc2srcpath" value="${src.dir}/edu/csus/ecs/pc2"/>
+	<property name="extraApiSource" value="${pc2srcpath}/core/model/ClientId.java,${pc2srcpath}/core/model/ElementId.java"/>
+
+	<target name="javadocs_api" description="Creates API javadocs">
+		<mkdir dir="${docs.dir}/api" />
+		<javadoc sourcepath="${src.dir}" destdir="${docs.dir}/api" 
+				sourcefiles="${extraApiSource}"
+				defaultexcludes="yes" packagenames="edu.csus.ecs.pc2.api.*" 
+				doctitle="PC^2 Version 9 API Documentation" Use="yes" 
+				SplitIndex="yes" 
+			overview="yes"
+			packagelist="yes"
+				linkoffline="http://java.sun.com/j2se/1.5.0/docs/api/ ${api.url}" />
+		</target>
 
 
 </project>
