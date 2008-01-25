@@ -135,13 +135,19 @@ dal
 	<target name="javadocs_api" description="Creates API javadocs">
 		<mkdir dir="${docs.dir}/api" />
 		<javadoc sourcepath="${src.dir}" destdir="${docs.dir}/api" 
-				sourcefiles="${extraApiSource}"
-				defaultexcludes="yes" packagenames="edu.csus.ecs.pc2.api.*" 
-				doctitle="PC^2 Version 9 API Documentation" Use="yes" 
-				SplitIndex="yes" 
-			overview="yes"
-			packagelist="yes"
-				linkoffline="http://java.sun.com/j2se/1.5.0/docs/api/ ${api.url}" />
+			sourcefiles="${extraApiSource}"
+			defaultexcludes="yes" 
+			packagenames="edu.csus.ecs.pc2.api.*" 
+			nodeprecated="false" 
+			nodeprecatedlist="false" 
+			noindex="false" 
+			nonavbar="false" 
+			notree="false" 
+			doctitle="PC^2 Version 9 API Documentation" 
+			Use="yes" 
+			SplitIndex="yes" 
+			overview="api_overview.html"
+			linkoffline="http://java.sun.com/j2se/1.5.0/docs/api/ ${api.url}" />
 		</target>
 
 
