@@ -52,7 +52,7 @@ public interface IConfigurationUpdateListener {
     /**
      * The contest title has been updated.
      * 
-     * @see edu.csus.ecs.pc2.IContest#getContestTitle()
+     * @see edu.csus.ecs.pc2.api.IContest#getContestTitle()
      * @param title
      *            new title for contest.
      */
@@ -63,7 +63,7 @@ public interface IConfigurationUpdateListener {
      * 
      * The title, compile command line, etc has been changed.
      * 
-     * @see edu.csus.ecs.pc2.IContest#getLanguageTitle(ElementId)
+     * @see edu.csus.ecs.pc2.api.IContest#getLanguageTitle(ElementId)
      * @param elementId
      *            the ElementId for the added language.
      */
@@ -72,7 +72,7 @@ public interface IConfigurationUpdateListener {
     /**
      * A language was removed.
      * 
-     * @see edu.csus.ecs.pc2.IContest#getLanguageTitle(ElementId)
+     * @see edu.csus.ecs.pc2.api.IContest#getLanguageTitle(ElementId)
      * @param elementId
      *            the ElementId for the removed language.
      */

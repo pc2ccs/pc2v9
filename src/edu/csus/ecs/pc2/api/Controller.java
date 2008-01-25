@@ -1,4 +1,4 @@
-package edu.csus.ecs.pc2;
+package edu.csus.ecs.pc2.api;
 
 import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
 

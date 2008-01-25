@@ -96,7 +96,7 @@ public class ConfigurationUpdateEvent {
      * @param action
      * @param string
      */
-    public ConfigurationUpdateEvent(edu.csus.ecs.pc2.api.ConfigurationUpdateEvent.Action action, String string) {
+    public ConfigurationUpdateEvent(Action action, String string) {
         super();
         this.action = action;
         this.string = string;
@@ -106,7 +106,7 @@ public class ConfigurationUpdateEvent {
      * @param action
      * @param elementId
      */
-    public ConfigurationUpdateEvent(edu.csus.ecs.pc2.api.ConfigurationUpdateEvent.Action action, ElementId elementId) {
+    public ConfigurationUpdateEvent(Action action, ElementId elementId) {
         super();
         this.action = action;
         this.elementId = elementId;
@@ -116,7 +116,7 @@ public class ConfigurationUpdateEvent {
      * @param action
      * @param clientId
      */
-    public ConfigurationUpdateEvent(edu.csus.ecs.pc2.api.ConfigurationUpdateEvent.Action action, ClientId clientId) {
+    public ConfigurationUpdateEvent(Action action, ClientId clientId) {
         super();
         this.action = action;
         this.clientId = clientId;
