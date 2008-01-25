@@ -2,18 +2,17 @@ package edu.csus.ecs.pc2.api;
 
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ElementId;
-import edu.csus.ecs.pc2.core.model.ISubmission;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 
 /**
  * Run information.
- *  
+ * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
 
 // $HeadURL$
-public class Run extends ISubmission {
+public class Run {
 
     /**
      * Run from internal PC&sup2; data.
@@ -25,7 +24,16 @@ public class Run extends ISubmission {
     }
 
     /**
+     * Get the ElementId for this run.
+     * @return the ElementId for this run.
+     */
+    public ElementId getElementId() {
+        return run.getElementId();
+    }
+
+    /**
      * Has run been judged?
+     * 
      * @return true if judged, false if not judged.
      */
     public boolean isJudged() {
@@ -34,6 +42,7 @@ public class Run extends ISubmission {
 
     /**
      * Has the run been given a Yes/Correct judgement?.
+     * 
      * @return true if run solves problem, false if does not solve problem.
      */
     public boolean isSolved() {
@@ -42,6 +51,7 @@ public class Run extends ISubmission {
 
     /**
      * Has run been marked as deleted?.
+     * 
      * @return true if run deleted, else false.
      */
     public boolean isDeleted() {
@@ -50,6 +60,7 @@ public class Run extends ISubmission {
 
     /**
      * Which team (client) submitted this run ? .
+     * 
      * @return the clientid (site, team number)
      */
     public ClientId getSubmitterId() {
@@ -74,11 +85,10 @@ public class Run extends ISubmission {
     /**
      * Get the judgement title/text for the run.
      * 
-     * If the run has been judged using an automated judger (also know
-     * as a validator) this method may return text from the validator
-     * which may not match any defined judgement title/text. 
+     * If the run has been judged using an automated judger (also know as a validator) this method may return text from the validator which may not match any defined judgement title/text.
      * 
-     * @param contest contest is used to get the judgement title.
+     * @param contest
+     *            contest is used to get the judgement title.
      * @return null if not judged, else the title for the judgement.
      */
     public String getJudgementTitle(IContest contest) {

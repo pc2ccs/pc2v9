@@ -1,7 +1,5 @@
 package edu.csus.ecs.pc2.api;
 
-import edu.csus.ecs.pc2.core.model.Run;
-
 /**
  * Run Event.
  * 

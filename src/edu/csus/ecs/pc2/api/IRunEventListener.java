@@ -1,15 +1,12 @@
 package edu.csus.ecs.pc2.api;
 
-import edu.csus.ecs.pc2.core.model.Run;
-
 /**
  * Run update (add, update or delete) event.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
- // $HeadURL$
- 
+// $HeadURL$
 public interface IRunEventListener {
 
     /**
