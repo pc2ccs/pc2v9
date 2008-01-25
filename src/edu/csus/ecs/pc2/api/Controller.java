@@ -28,8 +28,23 @@ public class Controller implements IController {
      * Login/Authenticate into the contest (server).
      * 
      * The exception message will indicate the nature of the login failure.
+     * <P>
+     * Code snippet for login and logoff.
+     * <pre>
+     * String login = "team4";
+     * String password = "team4";
+     * try {
+     *     Contest contest = Controller.login(login, password);
+     *     Controller controller = new Controller(contest);
+     *     System.out.println("Logged in as " + contest.getClientId() + " " + contest.getTitle());
+     *     System.out.println("Number of runs " + contest.getRunIds().length);
+     *     controller.logoff();
      * 
-     * @see IContest#isLoggedIn()
+     * } catch (LoginFailureException e) {
+     *     System.out.println("Could not login because " + e.getMessage());
+     *     e.printStackTrace();
+     * }
+     * </pre>
      * 
      * @param login
      *            client login name (ex. team5, judge3)
