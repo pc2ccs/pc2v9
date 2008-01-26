@@ -33,8 +33,18 @@ public interface IContest {
      * For each login there is a display name, like a school name.
      * <P>
      * Use {@link #getContestTitle()} to get the contest title.
+     * 
+     * @return the display name for the logged in client.
      */
     String getTitle();
+
+    /**
+     * Returns the display name for a DlientId.
+     * 
+     * @param clientId
+     * @return the display name for the ClientId.
+     */
+    String getTitle(ClientId clientId);
 
     /**
      * Gets the ClientId for the logged in client.
@@ -42,6 +52,25 @@ public interface IContest {
      * @return ClientId (site, client type and client number) @
      */
     ClientId getClientId();
+
+    /**
+     * Gets all the team ClientIds in the contest.
+     * 
+     * <P>
+     * Code snippet to print all team names.
+     * 
+     * <pre>
+     * ClientId[] clientIds = contest.getTeamIds();
+     * Arrays.sort(clientIds, new ClientIdComparator());
+     * 
+     * for (ClientId clientId : clientIds) {
+     *     System.out.println(clientId.getTripletKey() + &quot; &quot; + contest.getTitle(clientId));
+     * }
+     * </pre>
+     * 
+     * @return array of ClientId not sorted.
+     */
+    ClientId[] getTeamIds();
 
     /**
      * Get the title for the specified site.
@@ -151,27 +180,28 @@ public interface IContest {
      * 
      */
     ElementId[] getJudgementIds();
-    
+
     /**
      * Get a list of runs (ElementIds).
      * 
      * <P>
      * Code snippet to print all run infos.
+     * 
      * <pre>
      * for (ElementId elementId : contest.getRunIds()) {
      *     Run run = contest.getRun(elementId);
      * 
-     *     System.out.println("Run " + run.getNumber() + " from site " + run.getSiteNumber());
-     *     System.out.println("    submitted at " + run.getElapsedMins() + " by " + run.getSubmitterId());
-     *     System.out.println("    For problem " + contest.getProblemTitle(run.getProblemId()));
-     *     System.out.println("    Written in " + contest.getLanguageTitle(run.getLanguageId()));
-     *   
+     *     System.out.println(&quot;Run &quot; + run.getNumber() + &quot; from site &quot; + run.getSiteNumber());
+     *     System.out.println(&quot;    submitted at &quot; + run.getElapsedMins() + &quot; by &quot; + run.getSubmitterId());
+     *     System.out.println(&quot;    For problem &quot; + contest.getProblemTitle(run.getProblemId()));
+     *     System.out.println(&quot;    Written in &quot; + contest.getLanguageTitle(run.getLanguageId()));
+     * 
      *     if (run.isJudged()) {
-     *       System.out.println("    Judgement: "+run.getJudgementTitle(contest));
+     *         System.out.println(&quot;    Judgement: &quot; + run.getJudgementTitle(contest));
      *     } else {
-     *       System.out.println("    Judgement: not judged yet ");
+     *         System.out.println(&quot;    Judgement: not judged yet &quot;);
      *     }
-     *     
+     * 
      *     System.out.println();
      * }
      * </pre>
@@ -179,14 +209,15 @@ public interface IContest {
      * @return list of Runs, unordered.
      */
     ElementId[] getRunIds();
-    
+
     /**
      * Get Run information.
      * 
-     * @param elementId a id that identifies a run.
+     * @param elementId
+     *            a id that identifies a run.
      * @return null if elementId not in list of runs, else the Run.
      */
-    Run getRun (ElementId elementId);
+    Run getRun(ElementId elementId);
 
     /**
      * Add run event listener.

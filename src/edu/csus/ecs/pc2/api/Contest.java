@@ -8,8 +8,67 @@ import edu.csus.ecs.pc2.core.model.ElementId;
  * 
  * Contains access to contest data and suppport for events that listen for changes in contest data.
  * <P>
+ * Code Sample - this sample will login to the contest, print all runs (info) in the system, then wait for runs to arrive and print those runs (info).
  * 
+ * <pre>
+ * import edu.csus.ecs.pc2.api.Contest;
+ * import edu.csus.ecs.pc2.api.Controller;
+ * import edu.csus.ecs.pc2.api.IRunEventListener;
+ * import edu.csus.ecs.pc2.api.Run;
+ * import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
+ * import edu.csus.ecs.pc2.core.model.ElementId;
  * 
+ * public class APIExample {
+ * 
+ *     protected class RunListener implements IRunEventListener {
+ * 
+ *         public void runAdded(Run run) {
+ *             System.out.println(&quot;Site &quot; + run.getSiteNumber() + &quot; Run &quot; + run.getNumber() + &quot; added &quot;);
+ *         }
+ * 
+ *         public void runRemoved(Run run) {
+ *             System.out.println(&quot;Site &quot; + run.getSiteNumber() + &quot; Run &quot; + run.getNumber() + &quot; removed &quot;);
+ *         }
+ * 
+ *         public void runJudged(Run run) {
+ *             System.out.println(&quot;Site &quot; + run.getSiteNumber() + &quot; Run &quot; + run.getNumber() + &quot; judged &quot;);
+ *         }
+ * 
+ *         public void runUpdated(Run run) {
+ *             System.out.println(&quot;Site &quot; + run.getSiteNumber() + &quot; Run &quot; + run.getNumber() + &quot; updated &quot;);
+ *         }
+ *     }
+ * 
+ * public void loginAndShowRuns(String loginName, String password) {
+ *  
+ *          try {
+ *              Contest contest = Controller.login(loginName, password);
+ *  
+ *              contest.addRunListener(new RunListener()); // Add listener for new runs and changed runs
+ *  
+ *              System.out.println(&quot;Logged in as &quot; + contest.getClientId());
+ *  
+ *              // Note: These runs are not sorted
+ *              for (ElementId runElementId : contest.getRunIds()) {
+ *                  Run run = contest.getRun(runElementId);
+ *                  System.out.println(&quot;Site &quot; + run.getSiteNumber() + &quot; Run &quot; + run.getNumber());
+ *              }
+ *  
+ *              // this program will not stop because the listener above will keep it alive.
+ *  
+ *          } catch (LoginFailureException e) {
+ *              System.err.println(&quot;Could not login &quot; + loginName + &quot; reason: &quot; + e.getMessage());
+ *          }
+ *      }    public static void main(String[] args) {
+ *         if (args.length != 2) {
+ *             System.out.println(&quot;API Sample, usage: APIExample loginName password&quot;);
+ *         } else {
+ *             System.out.println(&quot;login: &quot; + args[0] + &quot; password: &quot; + args[1]);
+ *             new APIExample().loginAndShowRuns(args[0], args[1]);
+ *         }
+ *     }
+ * }
+ * </pre>
  * 
  * @see Controller
  * @see edu.csus.ecs.pc2.api.ConfigurationUpdateEvent
@@ -107,6 +166,16 @@ public class Contest implements IContest {
     }
 
     public Run getRun(ElementId elementId) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public String getTitle(ClientId clientId) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public ClientId[] getTeamIds() {
         // TODO Auto-generated method stub
         return null;
     }
