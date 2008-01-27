@@ -2,12 +2,14 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.util.logging.Logger;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.security.Permission;
@@ -33,6 +35,8 @@ public class OptionsPanel extends JPanePlugin {
     private static final long serialVersionUID = -7331492559860531233L;
 
     private LogWindow logWindow;
+    
+    private LogWindow securityLogWindow = null;
 
     private ReportFrame reportFrame;
 
@@ -45,6 +49,8 @@ public class OptionsPanel extends JPanePlugin {
     private SubmissionBiffFrame submissionBiffFrame = new SubmissionBiffFrame();
     
     private PermissionList permissionList = new PermissionList();
+
+    private JButton showSecurityAlertWindowButton = null;
     
 
     /**
@@ -93,7 +99,8 @@ public class OptionsPanel extends JPanePlugin {
     
     private void updateGUIperPermissions() {
         
-        showBiffWindow.setVisible(isAllowed(Permission.Type.JUDGE_RUN));
+        getShowBiffWindow().setVisible(isAllowed(Permission.Type.JUDGE_RUN));
+        getShowSecurityAlertWindowButton().setVisible(isAllowed(Permission.Type.VIEW_SECURITY_ALERTS));
         
     }
 
@@ -112,7 +119,6 @@ public class OptionsPanel extends JPanePlugin {
                 
             }
         });
-
     }
 
     @Override
@@ -125,20 +131,53 @@ public class OptionsPanel extends JPanePlugin {
     }
 
     /**
-     * Sets log window, enables Show Log checkbox.
-     * 
+     * Sets log window.
+     *
+     * @see #showLog(boolean)
      * @param logWindow
      */
     public void setLogWindow(LogWindow logWindow) {
         this.logWindow = logWindow;
     }
 
+    /**
+     * Displays or hides log window.
+     * 
+     * @param showLogWindow
+     */
     protected void showLog(boolean showLogWindow) {
-        logWindow.setVisible(showLogWindow);
+        try {
+            logWindow.setVisible(showLogWindow);
+        } catch (Exception e) {
+            getLog().log(Log.WARNING, "Exception showing security log window", e);
+        }
+    }
+
+    private Logger getLog() {
+        return getController().getLog();
     }
 
     /**
-     * This method initializes contentPane
+     * Sets security log window.
+     * 
+     * @see #showSecurityLog(boolean)
+     * @param securityLogWindow
+     */
+    public void setSecurityLogWindow(LogWindow securityLogWindow) {
+        this.securityLogWindow = securityLogWindow;
+    }
+
+    /**
+     * Displays or hides security log window.
+     * @param showLogWindow
+     */
+    protected void showSecurityLog(boolean showLogWindow) {
+        securityLogWindow.setVisible(showLogWindow);
+    }
+    
+
+    /**
+     * Initialize contentPane
      * 
      * @return javax.swing.JPanel
      */
@@ -149,6 +188,7 @@ public class OptionsPanel extends JPanePlugin {
             contentPane = new JPanel();
             contentPane.setLayout(flowLayout);
             contentPane.add(getShowLogButton(), null);
+            contentPane.add(getShowSecurityAlertWindowButton(), null);
             contentPane.add(getShowBiffWindow(), null);
             contentPane.addMouseListener(new java.awt.event.MouseAdapter() {
                 public void mouseClicked(java.awt.event.MouseEvent e) {
@@ -170,6 +210,7 @@ public class OptionsPanel extends JPanePlugin {
         if (showLogButton == null) {
             showLogButton = new JButton();
             showLogButton.setText("Show Log");
+            showLogButton.setMnemonic(java.awt.event.KeyEvent.VK_L);
             showLogButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     showLog(true);
@@ -188,6 +229,7 @@ public class OptionsPanel extends JPanePlugin {
         if (showBiffWindow == null) {
             showBiffWindow = new JButton();
             showBiffWindow.setText("Show Unjudged Submissions Count");
+            showBiffWindow.setMnemonic(java.awt.event.KeyEvent.VK_U);
             showBiffWindow.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     showBiffWindow();
@@ -202,5 +244,25 @@ public class OptionsPanel extends JPanePlugin {
         submissionBiffFrame.setVisible(true);
 
     }
+
+    /**
+     * This method initializes showSecurityAlertWindowButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getShowSecurityAlertWindowButton() {
+        if (showSecurityAlertWindowButton == null) {
+            showSecurityAlertWindowButton = new JButton();
+            showSecurityAlertWindowButton.setText("Show Security Alert Log");
+            showSecurityAlertWindowButton.setMnemonic(java.awt.event.KeyEvent.VK_S);
+            showSecurityAlertWindowButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    showSecurityLog(true);
+                }
+            });
+        }
+        return showSecurityAlertWindowButton;
+    }
+
 
 } // @jve:decl-index=0:visual-constraint="10,10"

@@ -15,6 +15,7 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.report.AccountPermissionReport;
@@ -81,6 +82,8 @@ public class ReportPane extends JPanePlugin {
     private Log log;
 
     private String reportDirectory = "reports";
+
+    private JCheckBox thisClientFilterButton = null;
     
     public String getReportDirectory() {
         return reportDirectory;
@@ -228,6 +231,7 @@ public class ReportPane extends JPanePlugin {
             mainPane.setLayout(null);
             mainPane.add(getThisSiteCheckBox(), null);
             mainPane.add(getReportChoicePane(), null);
+            mainPane.add(getThisClientFilterButton(), null);
         }
         return mainPane;
     }
@@ -270,8 +274,18 @@ public class ReportPane extends JPanePlugin {
 
         // TODO code populate filter.
         Filter filter = new Filter();
-        filter.setSiteNumber(getContest().getSiteNumber());
-        filter.setThisSiteOnly(getThisSiteCheckBox().isSelected());
+        
+        // Site filter
+        if (getThisSiteCheckBox().isSelected()){
+            filter.setSiteNumber(getContest().getSiteNumber());
+            filter.setThisSiteOnly(true);
+        }
+        
+        // Client filter
+        if (getThisClientFilterButton().isSelected()){
+            Account account = getContest().getAccount(getContest().getClientId());
+            filter.addAccount(account);
+        }
 
         try {
             
@@ -362,6 +376,21 @@ public class ReportPane extends JPanePlugin {
             reportsComboBox = new JComboBox();
         }
         return reportsComboBox;
+    }
+
+    /**
+     * This method initializes thisClientFilterButton
+     * 
+     * @return javax.swing.JCheckBox
+     */
+    private JCheckBox getThisClientFilterButton() {
+        if (thisClientFilterButton == null) {
+            thisClientFilterButton = new JCheckBox();
+            thisClientFilterButton.setBounds(new java.awt.Rectangle(30,121,165,21));
+            thisClientFilterButton.setMnemonic(java.awt.event.KeyEvent.VK_C);
+            thisClientFilterButton.setText("Filter for this client only");
+        }
+        return thisClientFilterButton;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

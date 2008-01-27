@@ -73,6 +73,8 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
     private JButton exitButton = null;
 
     private LogWindow logWindow = null;
+    
+    private LogWindow securityAltertLogWindow = null;
 
     private JPanel clockPane = null;
 
@@ -133,6 +135,13 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 logWindow.setContestAndController(contest, controller);
                 logWindow.setTitle("Log " + contest.getClientId().toString());
 
+                if (securityAltertLogWindow == null){
+                    securityAltertLogWindow = new LogWindow();
+                    securityAltertLogWindow.setLog(controller.getSecurityAlertLog());
+                }
+                securityAltertLogWindow.setContestAndController(contest, controller);
+                securityAltertLogWindow.setTitle("Contest Security Alerts " + contest.getClientId().toString());
+                
                 // set the tab names and other characteristics for the main tabs
                 int fontSize = getMainTabbedPanel().getFont().getSize();
                 getMainTabbedPanel().setFont( getMainTabbedPanel().getFont().deriveFont(Font.BOLD, fontSize+6));

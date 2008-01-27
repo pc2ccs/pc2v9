@@ -42,7 +42,7 @@ public class RunsReport implements IReport {
 
     private Log log;
 
-    private Filter filter;
+    private Filter filter = new Filter();
     
     @SuppressWarnings("unused")
     private void writeRowOld (PrintWriter printWriter, Run run){
@@ -113,30 +113,44 @@ public class RunsReport implements IReport {
             printWriter.print("    Checked out by: "+whoCheckedOutId);
         }
         
-        RunFiles runFiles = contest.getRunFiles(run);
-        if (runFiles == null){
-            printWriter.print("    No submitted files found.");
-        } else {
-            SerializedFile mainFile =  runFiles.getMainFile();
-            int bytes = 0;
-            if (mainFile.getBuffer() != null) {
-                bytes = mainFile.getBuffer().length;
-            }
-            printWriter.println("      main file '" + mainFile.getName() + "' " + bytes + " bytes");
-            if ( runFiles.getOtherFiles() == null){
-                printWriter.println("                no additional submitted files");
+        try {
+            RunFiles runFiles = contest.getRunFiles(run);
+            if (runFiles == null) {
+                printWriter.print("    No submitted files found.");
             } else {
-                printWriter.println("                " + runFiles.getOtherFiles().length + " additional submitted files");
-                
-                if (runFiles.getOtherFiles().length > 0) {
-                    for (SerializedFile serializedFile : runFiles.getOtherFiles()) {
-                        bytes = 0;
-                        if (serializedFile.getBuffer() != null) {
-                            bytes = serializedFile.getBuffer().length;
+                SerializedFile mainFile = runFiles.getMainFile();
+                int bytes = 0;
+                if (mainFile.getBuffer() != null) {
+                    bytes = mainFile.getBuffer().length;
+                }
+                printWriter.println("      main file '" + mainFile.getName() + "' " + bytes + " bytes");
+                if (runFiles.getOtherFiles() == null) {
+                    printWriter.println("                no additional submitted files");
+                } else {
+                    printWriter.println("                " + runFiles.getOtherFiles().length + " additional submitted files");
+
+                    if (runFiles.getOtherFiles().length > 0) {
+                        for (SerializedFile serializedFile : runFiles.getOtherFiles()) {
+                            bytes = 0;
+                            if (serializedFile.getBuffer() != null) {
+                                bytes = serializedFile.getBuffer().length;
+                            }
+                            printWriter.println("                '" + serializedFile.getName() + "' " + bytes + " bytes");
                         }
-                        printWriter.println("                '" + serializedFile.getName() + "' " + bytes + " bytes");
                     }
                 }
+            }
+        } catch (Exception ex) {
+            if (ex instanceof java.io.FileNotFoundException) {
+                if (run.getSiteNumber() == contest.getSiteNumber()) {
+                    // If this site then there is a error
+                    printWriter.print("    Error - no submitted files found for this run.");
+                } else {
+                    // If not this site this is ok.
+                    printWriter.print("    No submitted files found (Run from site " + run.getSiteNumber() + ")");
+                }
+            } else {
+                ex.printStackTrace(printWriter);
             }
         }
         
@@ -164,9 +178,7 @@ public class RunsReport implements IReport {
             }
         }
         
-   
         printWriter.println();
-
     }
     
     public void writeReport(PrintWriter printWriter) {
@@ -175,10 +187,32 @@ public class RunsReport implements IReport {
         printWriter.println();
         Run[] runs = contest.getRuns();
         Arrays.sort(runs, new RunComparator());
-        printWriter.println("-- " + runs.length + " runs --");
-        for (Run run : runs) {
-            writeRow(printWriter, run);
+
+        if (filter.isFilterOn()){
+            printWriter.println("Filter: "+filter.toString());
+
+            int count = 0;
+            for (Run run : runs) {
+                if (filter.matches(run)) {
+                    count++;
+                }
+            }
+            
+            printWriter.println("-- " + runs.length + " runs (filtered) --");
+            for (Run run : runs) {
+                if (filter.matches(run)) {
+                    writeRow(printWriter, run);
+                }
+            }
+            
+        } else {
+            printWriter.println("-- " + runs.length + " runs --");
+            for (Run run : runs) {
+                writeRow(printWriter, run);
+            }
+            
         }
+        
     }
 
     private String getClientName(ClientId clientId) {

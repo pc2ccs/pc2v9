@@ -206,6 +206,10 @@ public class Permission implements Serializable {
          * 
          */
         ALLOWED_TO_AUTO_JUDGE,
+        /**
+         * 
+         */
+        VIEW_SECURITY_ALERTS,
     };
 
     private Hashtable<Type, String> hash = new Hashtable<Type, String>();
@@ -271,7 +275,8 @@ public class Permission implements Serializable {
         hash.put(Type.ALLOWED_TO_RECONNECT_SERVER, "Allowed to reconnect to server");
         
         hash.put(Type.ALLOWED_TO_AUTO_JUDGE, "Allowed to auto judge");
-        
+
+        hash.put(Type.VIEW_SECURITY_ALERTS, "View Security Alerts Log/View");
     }
 
     /**

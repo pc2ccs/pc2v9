@@ -38,8 +38,8 @@ public class AccountPermissionReport implements IReport {
     @SuppressWarnings("unused")
     private IInternalController controller;
 
-    private Filter filter;
-
+    private Filter filter = new Filter();
+    
     public void createReportFile(String filename, Filter inFilter) throws IOException {
 
         PrintWriter printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
@@ -62,31 +62,42 @@ public class AccountPermissionReport implements IReport {
 
         Account[] accounts = getAllAccounts();
         Arrays.sort(accounts, new AccountComparator());
-
-        Permission.Type[] types = Permission.Type.values();
-        Permission permission = new Permission();
         
         // Used for control break
         Type previousClientType = Type.UNKNOWN;
 
         for (Account account : accounts) {
 
-            Type clientType = account.getClientId().getClientType();
-            if (!previousClientType.equals(clientType)) {
-                printWriter.println();
-                printWriter.println("Type: " + clientType.toString());
-            }
-            
-            printWriter.println("  " + account.getClientId().getName() + " (site " + account.getSiteNumber() + ") ");
-            int count = 1;
-            for (Permission.Type type : types) {
-                if (account.isAllowed(type)) {
-                    printWriter.println("    " +count +" " + type + " " + permission.getDescription(type));
-                    count++;
+            if (filter.matchesAccount(account)) {
+
+                Type clientType = account.getClientId().getClientType();
+                if (!previousClientType.equals(clientType)) {
+                    printWriter.println();
+                    printWriter.println("Type: " + clientType.toString());
                 }
+                printPermissions(printWriter, account);
             }
         }
 
+    }
+    
+    /**
+     * Print permission for input account.
+     * @param printWriter write to this writer
+     * @param account account permissions to be listed
+     */
+    public static final void printPermissions(PrintWriter printWriter, Account account) {
+        Permission.Type[] types = Permission.Type.values();
+        Permission permission = new Permission();
+        
+        printWriter.println("  " + account.getClientId().getName() + " (site " + account.getSiteNumber() + ") ");
+        int count = 1;
+        for (Permission.Type type : types) {
+            if (account.isAllowed(type)) {
+                printWriter.println("    " +count +" " + type + " " + permission.getDescription(type));
+                count++;
+            }
+        }
     }
 
     private void printHeader(PrintWriter printWriter) {

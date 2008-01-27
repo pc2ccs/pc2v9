@@ -396,7 +396,7 @@ public class Filter implements Serializable {
 
     public String toString() {
 
-        if (thisSiteOnly || filteringClarificationStates || filteringProblems || filteringRunStates) {
+        if (isFilterOn() ) {
             String filterInfo = "Filter ON";
             if (thisSiteOnly) {
                 filterInfo += " Site " + siteNumber;
@@ -410,6 +410,10 @@ public class Filter implements Serializable {
             if (filteringClarificationStates) {
                 filterInfo += " clar state(s)";
             }
+            if (filteringClarificationStates) {
+                filterInfo += " account(s))";
+            }
+
             return filterInfo;
         } else {
             return "";
@@ -448,5 +452,13 @@ public class Filter implements Serializable {
 
     public void setFilteringAccounts(boolean filteringAccounts) {
         this.filteringAccounts = filteringAccounts;
+    }
+
+    /**
+     * Is one of the filters active?.
+     * @return true if filter is on, false if not filtering.
+     */
+    public boolean isFilterOn() {
+        return filteringAccounts || filteringClarificationStates || filteringElapsedTime || filteringRunStates || thisSiteOnly;
     }
 }

@@ -23,6 +23,8 @@ public class PermissionGroup {
 
     private PermissionList administratorPermissionList = new PermissionList();
 
+    private PermissionList serverPermissionList = new PermissionList();
+    
     public PermissionGroup() {
         initialize();
     }
@@ -37,6 +39,7 @@ public class PermissionGroup {
         
         administratorPermissionList.removePermission(Type.DISPLAY_ON_SCOREBOARD);
 
+        serverPermissionList.addPermission(Type.VIEW_SECURITY_ALERTS);
 
         /**
          * Team permissions
@@ -98,6 +101,8 @@ public class PermissionGroup {
             return teamPermissionList;
         } else if (type.equals(ClientType.Type.ADMINISTRATOR)) {
             return administratorPermissionList;
+        } else if (type.equals(ClientType.Type.SERVER)) {
+            return serverPermissionList;
         } else if (type.equals(ClientType.Type.JUDGE)) {
             return judgePermissionList;
         } else if (type.equals(ClientType.Type.SCOREBOARD)) {

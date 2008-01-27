@@ -211,7 +211,17 @@ public interface IInternalController {
     
     ProblemDataFiles getProblemDataFiles (Problem problem);
 
+    /**
+     * Get contest log.
+     * @return
+     */
     Log getLog();
+    
+    /**
+     * Get security log (reference)
+     * @return security log instance.
+     */
+    Log getSecurityAlertLog();
     
     /**
      * Send message to server that needs attention/resolution.
@@ -335,5 +345,6 @@ public interface IInternalController {
     int getSecurityLevel();
     
     void setSecurityLevel(int securityLevel);
+
     
 }

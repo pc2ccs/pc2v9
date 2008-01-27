@@ -12,6 +12,7 @@ import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
 // $HeadURL$
 public class Controller implements IController {
 
+    @SuppressWarnings("unused")
     private Contest contest = null;
 
     /**

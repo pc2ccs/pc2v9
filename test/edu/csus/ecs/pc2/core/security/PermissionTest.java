@@ -42,7 +42,7 @@ public class PermissionTest extends TestCase {
         }
 
         if (invalidCount > 0) {
-            System.out.println("Invalid description for type " + failedType);
+            System.out.println("Missing or invalid description for Permisison.Type. " + failedType);
             assertFalse("There are " + invalidCount + " missing proper descriptions ", invalidCount > 0);
         }
 

@@ -121,6 +121,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     private UIPlugin uiPlugin = null;
 
     private Log log;
+    
+    private Log securityAlertLog;
 
     private String judgementINIFileName = "reject.ini";
 
@@ -2304,4 +2306,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         this.securityLevel = securityLevel;
     }
 
+    public Log getSecurityAlertLog() {
+        return securityAlertLog;
+    }
 }
