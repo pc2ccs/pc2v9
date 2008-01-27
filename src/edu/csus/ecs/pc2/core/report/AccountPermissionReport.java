@@ -14,10 +14,11 @@ import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.security.Permission;
 
 /**
- * Report listing all permissions for clients.
+ * List all permissions for clients and servers.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -64,8 +65,18 @@ public class AccountPermissionReport implements IReport {
 
         Permission.Type[] types = Permission.Type.values();
         Permission permission = new Permission();
+        
+        // Used for control break
+        Type previousClientType = Type.UNKNOWN;
 
         for (Account account : accounts) {
+
+            Type clientType = account.getClientId().getClientType();
+            if (!previousClientType.equals(clientType)) {
+                printWriter.println();
+                printWriter.println("Type: " + clientType.toString());
+            }
+            
             printWriter.println("  " + account.getClientId().getName() + " (site " + account.getSiteNumber() + ") ");
             int count = 1;
             for (Permission.Type type : types) {
@@ -114,16 +125,22 @@ public class AccountPermissionReport implements IReport {
     /**
      * Return all accounts for all sites.
      * 
-     * @return Array of all accounts incontest.
+     * @return Array of all accounts in contest.
      */
     private Account[] getAllAccounts() {
 
         Vector<Account> allAccounts = new Vector<Account>();
 
         for (ClientType.Type ctype : ClientType.Type.values()) {
-            if (contest.getAccounts(ctype).size() > 0) {
-                Vector<Account> accounts = contest.getAccounts(ctype);
-                allAccounts.addAll(accounts);
+
+            // only add account if it is not ALL which would
+            // cause dups in the report.
+
+            if (!ClientType.Type.ALL.equals(ctype)) {
+                if (contest.getAccounts(ctype).size() > 0) {
+                    Vector<Account> accounts = contest.getAccounts(ctype);
+                    allAccounts.addAll(accounts);
+                }
             }
         }
 
