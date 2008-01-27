@@ -7,6 +7,7 @@ import java.util.Properties;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.exception.ClarificationUnavailableException;
+import edu.csus.ecs.pc2.core.exception.ContestSecurityException;
 import edu.csus.ecs.pc2.core.exception.RunUnavailableException;
 import edu.csus.ecs.pc2.core.exception.UnableToUncheckoutRunException;
 import edu.csus.ecs.pc2.core.list.AccountList;
@@ -27,11 +28,14 @@ import edu.csus.ecs.pc2.core.list.ProblemList;
 import edu.csus.ecs.pc2.core.list.RunFilesList;
 import edu.csus.ecs.pc2.core.list.RunList;
 import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
+import edu.csus.ecs.pc2.core.security.ISecurityMessageListener;
 import edu.csus.ecs.pc2.core.security.Permission;
+import edu.csus.ecs.pc2.core.security.SecurityMessageHandler;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
 /**
@@ -178,6 +182,8 @@ public class InternalContest implements IInternalContest {
      * List of all judgements. Contains deleted judgements too.
      */
     private JudgementList judgementList = new JudgementList();
+    
+    private SecurityMessageHandler securityMessageHandler;
 
     private Site createFakeSite(int nextSiteNumber) {
         Site site = new Site("Site " + nextSiteNumber, nextSiteNumber);
@@ -658,6 +664,18 @@ public class InternalContest implements IInternalContest {
         // runFilesList = new RunFilesList(clientId.getSiteNumber());
         // clarificationList = new ClarificationList(clientId.getSiteNumber(), true);
         // }
+        
+        try {
+            securityMessageHandler = new SecurityMessageHandler(clientId);
+        } catch (Exception e) {
+            // TODO handle this better sometime 
+            e.printStackTrace(System.err);
+        }
+        
+    }
+    
+    public Log getSecurityAlertLog() {
+        return securityMessageHandler.getLog();
     }
 
     public Site[] getSites() {
@@ -1630,4 +1648,33 @@ public class InternalContest implements IInternalContest {
         
         }
     }
+
+    /**
+     * Issue a security message, fire listeners.
+     * 
+     */
+    public void newSecurityMessage(ClientId clientId, String message, String eventName, ContestSecurityException contestSecurityException) {
+        securityMessageHandler.newMessage(clientId, getTitle(), getTitle(), contestSecurityException);
+    }
+    
+    /**
+     * Add security message Listener.
+     * 
+     * This listener will be given an {@link edu.csus.ecs.pc2.core.security.SecurityMessageEvent}
+     * when a security message is added/logged. 
+     * 
+     * @param securityMessageListener
+     */
+    public void addSecurityMessageListener(ISecurityMessageListener securityMessageListener) {
+        securityMessageHandler.addSecurityMessageListener(securityMessageListener);
+    }
+
+    /**
+     * Remove security message listener.
+     * @param securityMessageListener
+     */
+    public void removeSecurityMessageListener(ISecurityMessageListener securityMessageListener) {
+        securityMessageHandler.addSecurityMessageListener(securityMessageListener);
+    }
+
 }

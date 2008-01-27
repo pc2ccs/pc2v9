@@ -12,8 +12,11 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.security.ISecurityMessageListener;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
+import edu.csus.ecs.pc2.core.security.SecurityMessageEvent;
 import edu.csus.ecs.pc2.ui.FrameUtilities.HorizontalPosition;
 import edu.csus.ecs.pc2.ui.FrameUtilities.VerticalPosition;
 
@@ -95,25 +98,25 @@ public class OptionsPanel extends JPanePlugin {
             permissionList.clearAndLoadPermissions(account.getPermissionList());
         }
     }
-
     
     private void updateGUIperPermissions() {
-        
         getShowBiffWindow().setVisible(isAllowed(Permission.Type.JUDGE_RUN));
-        getShowSecurityAlertWindowButton().setVisible(isAllowed(Permission.Type.VIEW_SECURITY_ALERTS));
-        
+        getShowSecurityAlertWindowButton().setVisible(isAllowedToViewSecurityWindow());
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
         
         initializePermissions();
-
+        
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
+                
                 submissionBiffFrame.setContestAndController(getContest(), getController());
                 FrameUtilities.setFramePosition(submissionBiffFrame, HorizontalPosition.RIGHT, VerticalPosition.TOP);
                 submissionBiffFrame.setFontSize(56);
+                
+                getContest().addSecurityMessageListener(new SecurityMessageListenerImplementation());
                 
                 updateGUIperPermissions();
                 
@@ -149,7 +152,7 @@ public class OptionsPanel extends JPanePlugin {
         try {
             logWindow.setVisible(showLogWindow);
         } catch (Exception e) {
-            getLog().log(Log.WARNING, "Exception showing security log window", e);
+            getLog().log(Log.WARNING, "Exception showing log window", e);
         }
     }
 
@@ -172,7 +175,11 @@ public class OptionsPanel extends JPanePlugin {
      * @param showLogWindow
      */
     protected void showSecurityLog(boolean showLogWindow) {
-        securityLogWindow.setVisible(showLogWindow);
+        try {
+            securityLogWindow.setVisible(showLogWindow);
+        } catch (Exception e) {
+            getLog().log(Log.WARNING, "Exception showing security log window", e);
+        }
     }
     
 
@@ -240,9 +247,7 @@ public class OptionsPanel extends JPanePlugin {
     }
 
     protected void showBiffWindow() {
-
         submissionBiffFrame.setVisible(true);
-
     }
 
     /**
@@ -263,6 +268,31 @@ public class OptionsPanel extends JPanePlugin {
         }
         return showSecurityAlertWindowButton;
     }
+    
+    protected boolean isAllowedToViewSecurityWindow(){
+        
+        return isAllowed(Permission.Type.VIEW_SECURITY_ALERTS) || isServer();
+    }
 
+    private boolean isServer() {
+        return getContest().getClientId().getClientType().equals(Type.SERVER); 
+    }
 
+    /**
+     * Listen for security alerts. 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    
+    // $HeadURL$
+    protected class SecurityMessageListenerImplementation implements ISecurityMessageListener{
+        /**
+         * Show message window if alert appears.
+         */
+        public void newMessage(SecurityMessageEvent event) {
+            if (isAllowedToViewSecurityWindow()){
+                showSecurityLog(true);
+            }
+        }
+    }
 } // @jve:decl-index=0:visual-constraint="10,10"

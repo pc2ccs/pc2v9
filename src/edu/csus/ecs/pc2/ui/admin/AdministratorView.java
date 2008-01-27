@@ -74,7 +74,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
     private LogWindow logWindow = null;
     
-    private LogWindow securityAltertLogWindow = null;
+    private LogWindow securityAlertLogWindow = null;
 
     private JPanel clockPane = null;
 
@@ -134,14 +134,9 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 }
                 logWindow.setContestAndController(contest, controller);
                 logWindow.setTitle("Log " + contest.getClientId().toString());
-
-                if (securityAltertLogWindow == null){
-                    securityAltertLogWindow = new LogWindow();
-                    securityAltertLogWindow.setLog(controller.getSecurityAlertLog());
-                }
-                securityAltertLogWindow.setContestAndController(contest, controller);
-                securityAltertLogWindow.setTitle("Contest Security Alerts " + contest.getClientId().toString());
                 
+                initializeSecurityAlertWindow(contest);
+             
                 // set the tab names and other characteristics for the main tabs
                 int fontSize = getMainTabbedPanel().getFont().getSize();
                 getMainTabbedPanel().setFont( getMainTabbedPanel().getFont().deriveFont(Font.BOLD, fontSize+6));
@@ -216,6 +211,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 OptionsPanel optionsPanel = new OptionsPanel();
                 addUIPlugin(getRunContestTabbedPane(), "Options", optionsPanel);
                 optionsPanel.setLogWindow(logWindow);
+                optionsPanel.setSecurityLogWindow(securityAlertLogWindow);
 
                 //ContestClockPane contestClockPane = new ContestClockPane();
                 //addUIPlugin(getConfigureContestTabbedPane(), "Big Clock", contestClockPane);
@@ -227,7 +223,18 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 setTitle("PC^2 " + contest.getTitle() + " Build " + new VersionInfo().getBuildNumber());
                 setVisible(true);
             }
-        });
+
+     });
+    }
+    
+    protected void initializeSecurityAlertWindow(IInternalContest inContest) {
+        if (securityAlertLogWindow == null){
+            securityAlertLogWindow = new LogWindow(inContest.getSecurityAlertLog());
+        }
+        securityAlertLogWindow.setContestAndController(inContest, controller);
+        securityAlertLogWindow.setTitle("Contest Security Alerts " + inContest.getClientId().toString());
+        VersionInfo versionInfo = new VersionInfo();
+        securityAlertLogWindow.getLog().info("Security Log Started "+versionInfo.getSystemVersionInfo());
     }
 
     public String getPluginTitle() {

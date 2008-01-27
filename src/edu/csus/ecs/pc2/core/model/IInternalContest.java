@@ -4,9 +4,12 @@ import java.util.Date;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.exception.ClarificationUnavailableException;
+import edu.csus.ecs.pc2.core.exception.ContestSecurityException;
 import edu.csus.ecs.pc2.core.exception.RunUnavailableException;
 import edu.csus.ecs.pc2.core.exception.UnableToUncheckoutRunException;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.security.ISecurityMessageListener;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
@@ -676,5 +679,13 @@ public interface IInternalContest {
     void addAccounts(Account[] accounts);
 
     void updateAccounts(Account[] accounts);
+
+    Log getSecurityAlertLog();
+
+    void newSecurityMessage(ClientId sourceId, String string, String string2, ContestSecurityException contestSecurityException);
+
+    void addSecurityMessageListener(ISecurityMessageListener securityMessageListener);
+
+    void removeSecurityMessageListener(ISecurityMessageListener securityMessageListener);
 
 }

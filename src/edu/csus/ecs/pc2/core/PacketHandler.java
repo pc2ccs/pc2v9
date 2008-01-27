@@ -60,11 +60,7 @@ public class PacketHandler {
     /**
      * Message handler for conditions where attention may be needed.
      */
-    private PriorityMessageHandler priorityMessageHandler;
-    
     private EvaluationLog evaluationLog = null;
-
-    
     
     public PacketHandler(IInternalController controller, IInternalContest contest) {
         this.controller = controller;
@@ -550,7 +546,7 @@ public class PacketHandler {
         
         controller.getLog().log(Log.SEVERE, "At "+elapsed+" From: "+ clientId +":"+message);
         
-        priorityMessageHandler.newMessage(clientId, message, eventName, exception);
+        logSecurityMessage(clientId, message, eventName, exception);
         
         if (isServer()){
             boolean sendToOtherServers = isThisSite(packet.getSourceId());
@@ -561,6 +557,12 @@ public class PacketHandler {
                 controller.sendToServers(packet);
             }
         }
+    }
+
+    private void logSecurityMessage(ClientId clientId, String message, String eventName, Exception exception) {
+        
+        // TODO code now
+        
     }
 
     private void reconnectSite(Packet packet) {
@@ -2073,10 +2075,7 @@ public class PacketHandler {
             controller.getLog().log(Log.WARNING,"Exception logged ", e);
         }
 
-        if (priorityMessageHandler == null){
-            priorityMessageHandler = new PriorityMessageHandler();
-            priorityMessageHandler.setContestAndController(contest, controller);
-        }
+ 
         
         controller.setSiteNumber(clientId.getSiteNumber());
 
@@ -2604,13 +2603,5 @@ public class PacketHandler {
 //        System.err.flush();
 //        exception.printStackTrace(System.err);
     }
-
-
-    public PriorityMessageHandler getPriorityMessageHandler() {
-        return priorityMessageHandler;
-    }
-
-    public void setPriorityMessageHandler(PriorityMessageHandler priorityMessageHandler) {
-        this.priorityMessageHandler = priorityMessageHandler;
-    }
+ 
 }

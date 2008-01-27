@@ -122,8 +122,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     private Log log;
     
-    private Log securityAlertLog;
-
     private String judgementINIFileName = "reject.ini";
 
     private static final String SITE_OPTION_STRING = "--site";
@@ -506,6 +504,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         log = new Log(stripChar(clientId.toString(),' '));
         connectionManager.setLog(log);
         StaticLog.setLog(log);
+        
 
         info("");
         info(new VersionInfo().getSystemVersionInfo());
@@ -1298,9 +1297,11 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             
             // Security Violation, someone tried to do something they weren't allowed to
             
-            log.log(Log.SEVERE, "Violation  " + contestSecurityException.getSecurityMessage() + packet, contestSecurityException);
+            log.log(Log.SEVERE, "SECURITY Violation  " + contestSecurityException.getSecurityMessage() + packet);
 
-            packetHandler.getPriorityMessageHandler().newMessage(packet.getSourceId(), "Security violation", packet.getType().toString(), contestSecurityException);
+            // TODO code fire trigger in Contest
+            
+            contest.newSecurityMessage(packet.getSourceId(), "Security violation", packet.getType().toString(), contestSecurityException);
             
             Packet violationPacket = PacketFactory.createViolationPacket(contest.getClientId(), PacketFactory.ALL_SERVERS, contestSecurityException.getSecurityMessage(), null, connectionHandlerID,
                     packet);
@@ -2306,7 +2307,5 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         this.securityLevel = securityLevel;
     }
 
-    public Log getSecurityAlertLog() {
-        return securityAlertLog;
-    }
+
 }

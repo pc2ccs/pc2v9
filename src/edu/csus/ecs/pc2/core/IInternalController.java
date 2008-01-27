@@ -218,12 +218,6 @@ public interface IInternalController {
     Log getLog();
     
     /**
-     * Get security log (reference)
-     * @return security log instance.
-     */
-    Log getSecurityAlertLog();
-    
-    /**
      * Send message to server that needs attention/resolution.
      * 
      * @param event optional event

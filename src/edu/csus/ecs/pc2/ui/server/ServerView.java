@@ -75,6 +75,8 @@ public class ServerView extends JFrame implements UIPlugin {
 
     private JButton exitButton = null;
 
+    private LogWindow securityAlertLogWindow = null;
+
     /**
      * This method initializes
      * 
@@ -322,6 +324,8 @@ public class ServerView extends JFrame implements UIPlugin {
         }
         logWindow.setContestAndController(model, controller);
         logWindow.setTitle("Log " + model.getClientId().toString());
+        
+        initializeSecurityAlertWindow(inContest);
 
         model.addRunListener(new RunListenerImplementation());
         model.addAccountListener(new AccountListenerImplementation());
@@ -347,8 +351,20 @@ public class ServerView extends JFrame implements UIPlugin {
         OptionsPanel optionsPanel = new OptionsPanel();
         addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
         optionsPanel.setLogWindow(logWindow);
+        optionsPanel.setSecurityLogWindow(securityAlertLogWindow);
 
     }
+    
+    protected void initializeSecurityAlertWindow(IInternalContest inContest) {
+        if (securityAlertLogWindow == null){
+            securityAlertLogWindow = new LogWindow(inContest.getSecurityAlertLog());
+        }
+        securityAlertLogWindow.setContestAndController(inContest, controller);
+        securityAlertLogWindow.setTitle("Contest Security Alerts " + inContest.getClientId().toString());
+        VersionInfo versionInfo = new VersionInfo();
+        securityAlertLogWindow.getLog().info("Security Log Started "+versionInfo.getSystemVersionInfo());
+    }
+
 
     public String getPluginTitle() {
         return "Server Main GUI";
