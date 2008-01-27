@@ -28,11 +28,11 @@ public class ContestSecurityException extends Exception {
      */
     private static final long serialVersionUID = -4262229757068255182L;
 
-    public ContestSecurityException(ClientId clientId, ConnectionHandlerID connectionHandlerID, String string) {
-        super();
+    public ContestSecurityException(ClientId clientId, ConnectionHandlerID connectionHandlerID, String message) {
+        super(message);
         this.clientId = clientId;
         this.connectionHandlerID = connectionHandlerID;
-        this.securityMessage = string;
+        this.securityMessage = message;
     }
 
     public ClientId getClientId() {

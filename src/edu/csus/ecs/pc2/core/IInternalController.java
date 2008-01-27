@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core;
 
+import edu.csus.ecs.pc2.core.exception.ContestSecurityException;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.BalloonSettings;
@@ -222,9 +223,9 @@ public interface IInternalController {
      * 
      * @param event optional event
      * @param message message about the event/circumstances.
-     * @param exception optional exception
+     * @param contestSecurityException optional exception
      */
-    void sendPriorityMessage(String event, String message, Exception exception);
+    void sendSecurityMessage(String event, String message, ContestSecurityException contestSecurityException);
 
     /**
      * Generate new accounts on a server.

@@ -609,15 +609,11 @@ public final class PacketType implements Serializable {
          * Reconnect Site Request.
          * 
          */
-        RECONNECT_SITE_REQUEST, 
+        RECONNECT_SITE_REQUEST,
         /**
          * 
          */
-        PRIORITY_MESSAGE,
-        /**
-         * Security Violation.
-         */
-        VIOLATION, 
+        SECURITY_MESSAGE,
         /**
          * Run taken from judge
          */

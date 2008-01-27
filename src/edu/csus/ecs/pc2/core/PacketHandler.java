@@ -325,11 +325,9 @@ public class PacketHandler {
 
             reconnectSite (packet);
             
-        } else if (packetType.equals(Type.PRIORITY_MESSAGE)) {
-            
-            priorityMessage (packet);
-        } else if (packetType.equals(Type.VIOLATION)) {
-            violationHandler (packet);
+        } else if (packetType.equals(Type.SECURITY_MESSAGE)) {
+            // From server to admins
+            handleSecurityMessage(packet);
             
         } else {
 
@@ -338,6 +336,7 @@ public class PacketHandler {
         }
         
         info("handlePacket end " + packet);
+        
     }
 
     protected void droppedConnection(Packet packet, ConnectionHandlerID connectionHandlerID) {
@@ -353,17 +352,21 @@ public class PacketHandler {
         }
     }
 
-    private void violationHandler(Packet inPacket) {
+    private void handleSecurityMessage (Packet inPacket) {
 
         ClientId clientId = (ClientId) PacketFactory.getObjectValue(inPacket, PacketFactory.CLIENT_ID);
-//        ConnectionHandlerID connectionHandlerID = (ConnectionHandlerID) PacketFactory.getObjectValue(inPacket, PacketFactory.CONNECTION_HANDLE_ID);
         String message = (String) PacketFactory.getObjectValue(inPacket, PacketFactory.MESSAGE);
+        ContestSecurityException contestSecurityException = (ContestSecurityException) PacketFactory.getObjectValue(inPacket, PacketFactory.EXCEPTION);
 //        Packet packet = (Packet)PacketFactory.getObjectValue(inPacket, PacketFactory.PACKET);
         
         controller.getLog().log(Log.WARNING, "Security violation "+clientId+" "+message);
+
+        contest.newSecurityMessage(clientId, message, message, contestSecurityException);
         
-        // TODO send/display the violation to user ??
-        
+        if (isServer()){
+            Packet forwardPacket = PacketFactory.clonePacket(contest.getClientId(), PacketFactory.ALL_SERVERS, inPacket);
+            controller.sendToAdministrators(forwardPacket);
+        }
     }
 
     private void establishConnection(Packet packet, ConnectionHandlerID connectionHandlerID) {
@@ -528,41 +531,6 @@ public class PacketHandler {
 
         }
 
-    }
-
-    private void priorityMessage(Packet packet) {
-        
-        String message = (String) PacketFactory.getObjectValue(packet, PacketFactory.MESSAGE);
-        String eventName = (String) PacketFactory.getObjectValue(packet, PacketFactory.EVENT_NAME);
-        ClientId clientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-        Exception exception = (Exception) PacketFactory.getObjectValue(packet, PacketFactory.EXCEPTION);
-        
-        String elapsed = "";
-        try {
-            elapsed = contest.getContestTime().getElapsedTimeStr();
-        } catch (Exception e) {
-            controller.getLog().log(Log.WARNING, "Exception logged ", e);
-        }
-        
-        controller.getLog().log(Log.SEVERE, "At "+elapsed+" From: "+ clientId +":"+message);
-        
-        logSecurityMessage(clientId, message, eventName, exception);
-        
-        if (isServer()){
-            boolean sendToOtherServers = isThisSite(packet.getSourceId());
-            
-            controller.sendToAdministrators(packet);
-            
-            if (sendToOtherServers) {
-                controller.sendToServers(packet);
-            }
-        }
-    }
-
-    private void logSecurityMessage(ClientId clientId, String message, String eventName, Exception exception) {
-        
-        // TODO code now
-        
     }
 
     private void reconnectSite(Packet packet) {
@@ -1403,7 +1371,8 @@ public class PacketHandler {
 
                     // Send Security warning to all admins and servers
 
-                    Packet violationPacket = PacketFactory.createViolationPacket(contest.getClientId(), PacketFactory.ALL_SERVERS, e.getMessage(), whoCanceledRun, connectionHandlerID, packet);
+                    Packet violationPacket = PacketFactory.createSecurityMessagePacket(contest.getClientId(), PacketFactory.ALL_SERVERS, e.getMessage(), 
+                            whoCanceledRun, connectionHandlerID, null, packet);
 
                     controller.sendToAdministrators(violationPacket);
                     controller.sendToServers(violationPacket);

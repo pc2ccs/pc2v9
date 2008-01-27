@@ -1303,8 +1303,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             
             contest.newSecurityMessage(packet.getSourceId(), "Security violation", packet.getType().toString(), contestSecurityException);
             
-            Packet violationPacket = PacketFactory.createViolationPacket(contest.getClientId(), PacketFactory.ALL_SERVERS, contestSecurityException.getSecurityMessage(), null, connectionHandlerID,
-                    packet);
+            Packet violationPacket = PacketFactory.createSecurityMessagePacket(contest.getClientId(), PacketFactory.ALL_SERVERS,
+                    contestSecurityException.getSecurityMessage(), null, connectionHandlerID, contestSecurityException, packet);
 
             sendToAdministrators(violationPacket);
             sendToServers(violationPacket);
@@ -1923,11 +1923,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         sendToServers(packet);
     }
     
-    public void sendPriorityMessage(String event, String message, Exception exception) {
-        Packet priorityMessagePacket = PacketFactory.createPriorityMessagePacket(contest.getClientId(), getServerClientId(), event, message, exception);
-        sendToLocalServer(priorityMessagePacket);
-    }
-
     public void sendServerLoginRequest(int inSiteNumber) throws Exception {
         
         if (isServer()){
@@ -2307,5 +2302,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         this.securityLevel = securityLevel;
     }
 
+    public void sendSecurityMessage(String event, String message, ContestSecurityException contestSecurityException) {
+        Packet securityMessagePacket = PacketFactory.createSecurityMessagePacket(contest.getClientId(), getServerClientId(), event, 
+                    contestSecurityException.getClientId(), contestSecurityException.getConnectionHandlerID(), contestSecurityException, null);
+        sendToLocalServer(securityMessagePacket);
+    }
 
 }

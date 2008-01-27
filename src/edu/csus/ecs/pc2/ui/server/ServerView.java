@@ -382,6 +382,20 @@ public class ServerView extends JFrame implements UIPlugin {
     }
 
     /**
+     * Add a UI Plugin to the tabbed pane.
+     * 
+     * @param tabTitle
+     * @param plugin
+     */
+    public void addUIPlugin(String tabTitle, JPanePlugin plugin) {
+
+        plugin.setContestAndController(model, controller);
+        getMainTabbedPane().add(plugin, tabTitle);
+
+    }
+
+    
+    /**
      * This method initializes messagePanel
      * 
      * @return javax.swing.JPanel

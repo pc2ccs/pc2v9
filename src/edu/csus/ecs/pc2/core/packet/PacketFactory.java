@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Properties;
 
+import edu.csus.ecs.pc2.core.exception.ContestSecurityException;
 import edu.csus.ecs.pc2.core.list.ClarificationList;
 import edu.csus.ecs.pc2.core.list.LanguageDisplayList;
 import edu.csus.ecs.pc2.core.list.ProblemDisplayList;
@@ -1712,22 +1713,8 @@ public final class PacketFactory {
         return packet;
     }
 
-    public static Packet createPriorityMessagePacket(ClientId source, ClientId destination, String event, String message, Exception exception) {
-        Properties prop = new Properties();
-        prop.put(CLIENT_ID, source);
-        if (event != null) {
-            prop.put(EVENT_NAME, event);
-        }
-        prop.put(MESSAGE, message);
-        if (exception != null) {
-            prop.put(EXCEPTION, exception);
-        }
-
-        Packet packet = new Packet(Type.PRIORITY_MESSAGE, source, destination, prop);
-        return packet;
-    }
-
-    public static Packet createViolationPacket(ClientId source, ClientId destination, String message, ClientId whoCanceledRun, ConnectionHandlerID connectionHandlerID, Packet inPacket) {
+    public static Packet createSecurityMessagePacket(ClientId source, ClientId destination, String message, ClientId whoCanceledRun, 
+            ConnectionHandlerID connectionHandlerID, ContestSecurityException contestSecurityException, Packet inPacket) {
         Properties prop = new Properties();
         if (whoCanceledRun != null){
             prop.put(CLIENT_ID, whoCanceledRun);
@@ -1737,8 +1724,11 @@ public final class PacketFactory {
             prop.put(CONNECTION_HANDLE_ID, connectionHandlerID);
         }
         prop.put(PACKET, inPacket);
+        if (contestSecurityException != null){
+            prop.put(EXCEPTION, contestSecurityException);
+        }
         
-        Packet packet = new Packet(Type.VIOLATION, source, destination, prop);
+        Packet packet = new Packet(Type.SECURITY_MESSAGE, source, destination, prop);
         return packet;
     }
 }
