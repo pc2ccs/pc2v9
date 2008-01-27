@@ -271,7 +271,7 @@ public class Permission implements Serializable {
         hash.put(Type.START_CONTEST_CLOCK, "Start contest clock");
         hash.put(Type.STOP_CONTEST_CLOCK, "Stop contest clock");
         
-        hash.put(Type.EDIT_CONTEST_CLOCK, "Edit InternalContest Clock/Times");
+        hash.put(Type.EDIT_CONTEST_CLOCK, "Edit Contest Clock/Times");
         hash.put(Type.ALLOWED_TO_RECONNECT_SERVER, "Allowed to reconnect to server");
         
         hash.put(Type.ALLOWED_TO_AUTO_JUDGE, "Allowed to auto judge");

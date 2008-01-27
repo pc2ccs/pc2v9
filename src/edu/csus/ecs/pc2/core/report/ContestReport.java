@@ -156,7 +156,7 @@ public class ContestReport implements IReport {
     }
 
     public String getReportTitle() {
-        return "InternalContest";
+        return "Contest";
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {

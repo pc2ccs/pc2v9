@@ -284,7 +284,9 @@ public class ReportPane extends JPanePlugin {
         // Client filter
         if (getThisClientFilterButton().isSelected()){
             Account account = getContest().getAccount(getContest().getClientId());
-            filter.addAccount(account);
+            if (account != null){
+                filter.addAccount(account);
+            }
         }
 
         try {

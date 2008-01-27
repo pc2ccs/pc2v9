@@ -110,48 +110,56 @@ public class RunsReport implements IReport {
         printWriter.println();
         ClientId whoCheckedOutId = contest.getRunCheckedOutBy(run);
         if (whoCheckedOutId != null){
-            printWriter.print("    Checked out by: "+whoCheckedOutId);
+            printWriter.println("    Checked out by: "+whoCheckedOutId);
         }
         
-        try {
-            RunFiles runFiles = contest.getRunFiles(run);
-            if (runFiles == null) {
-                printWriter.print("    No submitted files found.");
-            } else {
-                SerializedFile mainFile = runFiles.getMainFile();
-                int bytes = 0;
-                if (mainFile.getBuffer() != null) {
-                    bytes = mainFile.getBuffer().length;
-                }
-                printWriter.println("      main file '" + mainFile.getName() + "' " + bytes + " bytes");
-                if (runFiles.getOtherFiles() == null) {
-                    printWriter.println("                no additional submitted files");
-                } else {
-                    printWriter.println("                " + runFiles.getOtherFiles().length + " additional submitted files");
+        if (isThisSite(run.getSiteNumber())) {
 
-                    if (runFiles.getOtherFiles().length > 0) {
-                        for (SerializedFile serializedFile : runFiles.getOtherFiles()) {
-                            bytes = 0;
-                            if (serializedFile.getBuffer() != null) {
-                                bytes = serializedFile.getBuffer().length;
+            try {
+
+                // TODO getRunFiles should throw an exception which is handled by this and other methods.
+                RunFiles runFiles = contest.getRunFiles(run);
+                if (runFiles == null) {
+                    printWriter.println("    No submitted files found.");
+                } else {
+                    SerializedFile mainFile = runFiles.getMainFile();
+                    int bytes = 0;
+                    if (mainFile.getBuffer() != null) {
+                        bytes = mainFile.getBuffer().length;
+                    }
+                    printWriter.println("      main file '" + mainFile.getName() + "' " + bytes + " bytes");
+                    if (runFiles.getOtherFiles() == null) {
+                        printWriter.println("                no additional submitted files");
+                    } else {
+                        printWriter.println("                " + runFiles.getOtherFiles().length + " additional submitted files");
+
+                        if (runFiles.getOtherFiles().length > 0) {
+                            for (SerializedFile serializedFile : runFiles.getOtherFiles()) {
+                                bytes = 0;
+                                if (serializedFile.getBuffer() != null) {
+                                    bytes = serializedFile.getBuffer().length;
+                                }
+                                printWriter.println("                '" + serializedFile.getName() + "' " + bytes + " bytes");
                             }
-                            printWriter.println("                '" + serializedFile.getName() + "' " + bytes + " bytes");
                         }
                     }
                 }
-            }
-        } catch (Exception ex) {
-            if (ex instanceof java.io.FileNotFoundException) {
-                if (run.getSiteNumber() == contest.getSiteNumber()) {
-                    // If this site then there is a error
-                    printWriter.print("    Error - no submitted files found for this run.");
+            } catch (Exception ex) {
+
+                if (ex.getMessage().startsWith("Unable to read object from file")) {
+                    if (run.getSiteNumber() == contest.getSiteNumber()) {
+                        // If this site then there is a error
+                        printWriter.println("    Error - no submitted files found for this run.");
+                    } else {
+                        // If not this site this is ok.
+                        printWriter.println("    No submitted files found (Run from site " + run.getSiteNumber() + ")");
+                    }
                 } else {
-                    // If not this site this is ok.
-                    printWriter.print("    No submitted files found (Run from site " + run.getSiteNumber() + ")");
+                    ex.printStackTrace(printWriter);
                 }
-            } else {
-                ex.printStackTrace(printWriter);
             }
+        } else {
+            printWriter.println("    No submitted files found (Run from site " + run.getSiteNumber() + ")");
         }
         
         
@@ -181,6 +189,10 @@ public class RunsReport implements IReport {
         printWriter.println();
     }
     
+    private boolean isThisSite(int siteNumber) {
+        return contest.getSiteNumber() == siteNumber;
+    }
+
     public void writeReport(PrintWriter printWriter) {
         
         // Runs
@@ -198,10 +210,15 @@ public class RunsReport implements IReport {
                 }
             }
             
-            printWriter.println("-- " + runs.length + " runs (filtered) --");
-            for (Run run : runs) {
-                if (filter.matches(run)) {
-                    writeRow(printWriter, run);
+            if (count == 0) {
+                printWriter.println("-- No runs match of " + runs.length + " runs (filtered) --");
+
+            } else {
+                printWriter.println("-- " + count + " of " + runs.length + " runs (filtered) --");
+                for (Run run : runs) {
+                    if (filter.matches(run)) {
+                        writeRow(printWriter, run);
+                    }
                 }
             }
             
@@ -238,6 +255,7 @@ public class RunsReport implements IReport {
     public void createReportFile(String filename, Filter inFilter) throws IOException {
 
         PrintWriter printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
+        filter = inFilter;
 
         try {
             printHeader(printWriter);

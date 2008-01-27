@@ -85,6 +85,7 @@ public class StandingsReport implements IReport {
     public void createReportFile(String filename, Filter inFilter) throws IOException {
 
         PrintWriter printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
+        filter = inFilter;
 
         try {
             printHeader(printWriter);
