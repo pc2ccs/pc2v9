@@ -741,7 +741,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         IMemento memento = mementoRoot.createChild("standingsHeader");
         String title = contestInformation.getContestTitle();
         if (title == null || title.length() == 0) {
-            title = "InternalContest";
+            title = "Contest";
         }
         memento.putString("title", title);
         VersionInfo versionInfo = new VersionInfo();

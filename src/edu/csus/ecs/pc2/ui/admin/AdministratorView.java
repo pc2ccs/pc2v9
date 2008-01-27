@@ -140,12 +140,12 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 // set the tab names and other characteristics for the main tabs
                 int fontSize = getMainTabbedPanel().getFont().getSize();
                 getMainTabbedPanel().setFont( getMainTabbedPanel().getFont().deriveFont(Font.BOLD, fontSize+6));
-                getMainTabbedPanel().setTitleAt(0, "Configure InternalContest");
+                getMainTabbedPanel().setTitleAt(0, "Configure Contest");
                 getMainTabbedPanel().setForegroundAt(0, ACTIVE_TAB_COLOR );
-                getMainTabbedPanel().setTitleAt(1, "Run InternalContest");
+                getMainTabbedPanel().setTitleAt(1, "Run Contest");
                 getMainTabbedPanel().setForegroundAt(1, INACTIVE_TAB_COLOR );
 
-                // add UI components involved with Configuration to the Configure InternalContest tabbed pane
+                // add UI components involved with Configuration to the ConfigureContest tabbed pane
                 AccountsPane accountsPane = new AccountsPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Accounts", accountsPane);
 
@@ -180,7 +180,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 addUIPlugin(getConfigureContestTabbedPane(), "Settings", contestInformationPane);
 
 
-                // add UI components involved with Running the contest to the Run InternalContest tabbed pane
+                // add UI components involved with Running the contest to the RunContest tabbed pane
                 RunsPanel runsPane = new RunsPanel();
                 addUIPlugin(getRunContestTabbedPane(), "Runs", runsPane);
 
@@ -406,7 +406,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
         if (configureContestTabbedPane == null) {
             configureContestTabbedPane = new JTabbedPane();
             configureContestTabbedPane.setToolTipText("");
-            configureContestTabbedPane.setName("Configure InternalContest");
+            configureContestTabbedPane.setName("Configure Contest");
         }
         return configureContestTabbedPane;
     }
