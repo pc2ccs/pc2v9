@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project default="javadocApi">
+	<!-- $Id$ -->
+	<!-- $HeadURL$ -->
+	<!-- 
+Purpose: Create the API Java documentation
+
+To Use this:
+  To run/use this file:
+  insure that javadoc.exe is in the PATH
+  insure JAVA_HOME is defined (in eclipse)
+  then Run As... Ant Build (in eclipse)
+  
+dal
+-->
+	<target name="javadocApi">
+		<javadoc access="protected" additionalparam=" -linkoffline  http://java.sun.com/j2se/1.5.0/docs/api/ file:///C:/javadoc/5.0/docs/api/" author="true" classpath="vendor\lib\junit-4.1.jar;vendor\lib\mclb.jar" destdir="doc" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" overview="api_overview.html" packagenames="edu.csus.ecs.pc2.api"
+			source="1.5" 
+			sourcefiles="src\edu\csus\ecs\pc2\core\model\ClientId.java,src\edu\csus\ecs\pc2\core\model\ElementId.java,src\edu\csus\ecs\pc2\core\model\ClientType.java"
+			sourcepath="src;test" splitindex="true" use="true" version="true" />
+	</target>
+</project>
