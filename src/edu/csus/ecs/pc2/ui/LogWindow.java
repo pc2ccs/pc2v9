@@ -13,7 +13,8 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 /**
  * This class is intended to register as a listener to the Log/LogWindowHandler and display the logs in a grid.
  * <br>
- * If {@link #setLog(Log)} is not used, will be a window for
+ * If {@link #setLog(Log)} is not used nor the constructor with log,
+ * the log will be a window for
  * the {@link edu.csus.ecs.pc2.core.InternalController#getLog()}.
  * 
  * @version $Id$
@@ -30,7 +31,7 @@ public class LogWindow extends JFrame implements UIPlugin {
 
     private int maxLines = 4000;
 
-    private static MCLB logMessageListbox = null;
+    private MCLB logMessageListbox = null;
 
     private IInternalController controller;
 
@@ -40,6 +41,11 @@ public class LogWindow extends JFrame implements UIPlugin {
     private Log log = null;
 
     private StreamListener streamListener = null;
+    
+    public LogWindow (Log log){
+        this();
+        this.log = log;
+    }
     
     public LogWindow() {
         super();
@@ -56,7 +62,7 @@ public class LogWindow extends JFrame implements UIPlugin {
             final String[] logMessageFields = inString.split("[|]");
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
-                    logMessageListbox.setUpdate(false);
+                    getLogMessageListbox().setUpdate(false);
                     if (logMessageFields.length > 5) {
                         // fill in reverse order because inserts rows at top
                         for (int i = logMessageFields.length - 1; i > 4; i--) {
@@ -66,20 +72,20 @@ public class LogWindow extends JFrame implements UIPlugin {
                             newRow[2] = "";
                             newRow[3] = "";
                             newRow[4] = logMessageFields[i];
-                            logMessageListbox.insertRow(newRow, 0);
+                            getLogMessageListbox().insertRow(newRow, 0);
                         }
 
                         // then print actual log message
                         Object[] row = { logMessageFields[0],
                                 logMessageFields[1], logMessageFields[2],
                                 logMessageFields[3], logMessageFields[4] };
-                        logMessageListbox.insertRow(row, 0);
+                        getLogMessageListbox().insertRow(row, 0);
                     } else {
-                        logMessageListbox.insertRow(logMessageFields, 0);
+                        getLogMessageListbox().insertRow(logMessageFields, 0);
                     }
                     truncateTo(maxLines);
-                    logMessageListbox.autoSizeAllColumns();
-                    logMessageListbox.setUpdate(true);
+                    getLogMessageListbox().autoSizeAllColumns();
+                    getLogMessageListbox().setUpdate(true);
                 }
             });
         }
@@ -93,7 +99,7 @@ public class LogWindow extends JFrame implements UIPlugin {
         this.setSize(new java.awt.Dimension(700, 300));
         this.setTitle("Log Viewer");
         this.setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
-        this.add(getMCLB());
+        this.add(getLogMessageListbox());
         centerFrameTopFullWidth(this);
    }
 
@@ -112,7 +118,7 @@ public class LogWindow extends JFrame implements UIPlugin {
     /**
      * @return MCLB
      */
-    private MCLB getMCLB() {
+    private MCLB getLogMessageListbox() {
         if (logMessageListbox == null) {
             logMessageListbox = new MCLB();
             Object[] cols = { "Date/Time", "Level", "Thread", "Method", "Message" };
@@ -157,7 +163,7 @@ public class LogWindow extends JFrame implements UIPlugin {
      *            Number of lines to remove from the listbox
      */
     private void truncateTo(int numLines) {
-        TableModel tableModel = getMCLB().getModel();
+        TableModel tableModel = getLogMessageListbox().getModel();
         if (tableModel.getRowCount() > numLines) {
             int lastRow = tableModel.getRowCount();
             for (int i = lastRow; i >= numLines; i--) {
