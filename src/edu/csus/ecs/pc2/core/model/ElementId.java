@@ -4,10 +4,14 @@ import java.io.Serializable;
 import java.util.Random;
 
 /**
- * A contest-wide Unique Id.
+ * A contest-wide unique identifier/key.
  * 
  * This identifier is used as a unique key for most
  * of the data classes in PC&sup2;.
+ * <P>
+ * 
+ * @see Contest#getRunIds()
+ * @see Contest#getProblemIds()
  *  
  * @author pc2@ecs.csus.edu
  * @version $Id$

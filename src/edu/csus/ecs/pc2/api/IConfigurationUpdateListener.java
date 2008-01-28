@@ -4,9 +4,11 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ElementId;
 
 /**
- * Contest Data Update, both configuration and run-time.
- * 
- * This event is triggered when any configuration data is changed (added, removed, updated).
+ * Set of methods that any Configuration Update Listener must implement.
+ *
+ * These are the events/methods invoked when contest data has changed.<br>
+ * For Account changes the ClientId for the client is supplied, for other
+ * contest data the ElementId is supplied.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -78,17 +80,48 @@ public interface IConfigurationUpdateListener {
      */
     void languageRemoved(ElementId elementId);
 
+    /**
+     * Language updated.
+     * 
+     * @param elementId         the ElementId for the changed language.
+     */
     void languageUpdated(ElementId elementId);
 
+    /**
+     * Problem added.
+     * 
+     * @param elementId the ElementId for the added problem.
+     */
     void problemAdded(ElementId elementId);
 
+    /**
+     * Problem removed.
+     * 
+     * @param elementId the ElementId for the removed problem.
+     */
     void problemRemoved(ElementId elementId);
 
+    /**
+     * Problem updated
+     * @param elementId the ElementId for the updated problem.
+     */
     void problemUpdated(ElementId elementId);
 
+    /**
+     * Judgement added.
+     * @param elementId the ElementId for the added judgement.
+     */
     void judgementAdded(ElementId elementId);
 
+    /**
+     * Judgement removed.
+     * @param elementId the ElementId for the added judgement.
+     */
     void judgementRemoved(ElementId elementId);
 
+    /**
+     * Judgement Updated.
+     * @param elementId the ElementId for the added judgement.
+     */
     void judgementUpdated(ElementId elementId);
 }

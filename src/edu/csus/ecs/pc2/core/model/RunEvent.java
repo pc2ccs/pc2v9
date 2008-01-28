@@ -1,10 +1,13 @@
 package edu.csus.ecs.pc2.core.model;
 
+import edu.csus.ecs.pc2.api.Contest;
+
 /**
  * A run and a event state {@link edu.csus.ecs.pc2.core.model.RunEvent.Action}.
  * 
- * 
+ * See {@link Contest#getRunIds()} for an example of use.
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // TODO should the get methods return clones or the references to the fields ??

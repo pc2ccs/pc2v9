@@ -185,7 +185,7 @@ public interface IContest {
      * Get a list of runs (ElementIds).
      * 
      * <P>
-     * Code snippet to print all run infos.
+     * Code snippet to print all run infos using ElementId as key.
      * 
      * <pre>
      * for (ElementId elementId : contest.getRunIds()) {

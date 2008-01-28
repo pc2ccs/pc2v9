@@ -1,8 +1,13 @@
 package edu.csus.ecs.pc2.api;
 
 /**
- * Run update (add, update or delete) event.
- * 
+ * Set of methods that any Run Listener must implement.
+ *
+ * These are the events/methods invoked when a run has been added, removed
+ * or updated.
+ * <P>
+ * See {@link Contest#getRunIds()} for an example of use.
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -43,7 +48,8 @@ public interface IRunEventListener {
 
     /**
      * Run updated or rejudged.
-     * 
+     * <P>
+     * Triggered when a judge re-judges a run.
      * Triggered when the admin changes a run (like changes the elapsed time) or changes a judgement.
      * 
      * @param run

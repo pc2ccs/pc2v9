@@ -6,6 +6,8 @@ import edu.csus.ecs.pc2.core.model.JudgementRecord;
 
 /**
  * Run information.
+ * <P>
+ * Contains information about a run.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -59,9 +61,9 @@ public class Run {
     }
 
     /**
-     * Which team (client) submitted this run ? .
+     * Which team (client) submitted this run.
      * 
-     * @return the clientid (site, team number)
+     * @return the ClientId (site, team number) for the team who submitted this run.
      */
     public ClientId getSubmitterId() {
         return run.getSubmitter();
@@ -69,8 +71,8 @@ public class Run {
 
     /**
      * Get the ElementId for the judgement.
-     * 
-     * 
+     *
+     * @see #getJudgementTitle(IContest)
      * @return null if run not judged, else the ElementId for the judgement.
      */
     public ElementId getJudgementId() {
