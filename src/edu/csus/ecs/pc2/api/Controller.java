@@ -26,34 +26,34 @@ public class Controller implements IController {
     }
 
     /**
-     * Login/Authenticate into the contest (server).
-     * 
-     * The exception message will indicate the nature of the login failure.
-     * <P>
-     * Code snippet for login and logoff.
-     * <pre>
-     * String login = "team4";
-     * String password = "team4";
-     * try {
-     *     Contest contest = Controller.login(login, password);
-     *     Controller controller = new Controller(contest);
-     *     System.out.println("Logged in as " + contest.getClientId() + " " + contest.getTitle());
-     *     System.out.println("Number of runs " + contest.getRunIds().length);
-     *     controller.logoff();
-     * 
-     * } catch (LoginFailureException e) {
-     *     System.out.println("Could not login because " + e.getMessage());
-     *     e.printStackTrace();
-     * }
-     * </pre>
-     * 
-     * @param login
-     *            client login name (ex. team5, judge3)
-     * @param password
-     *            password for the login name
-     * @throws LoginFailureException
-     *             if login failure, message indicating why it failed.
-     */
+	 * Login/Authenticate into the contest (server).
+	 * 
+	 * The exception message will indicate the nature of the login failure.
+	 * <P>
+	 * Code snippet for login and logoff.
+	 * 
+	 * <pre>
+	 * 
+	 * String login = &quot;team4&quot;;
+	 * String password = &quot;team4&quot;;
+	 * try {
+	 * 	Contest contest = Controller.login(login, password);
+	 * 	Controller controller = new Controller(contest);
+	 * 	System.out.println(&quot;Logged in as &quot; + contest.getClient().getTitle());
+	 * 	System.out.println(&quot;Number of runs &quot; + contest.getRuns().length);
+	 * 	controller.logoff();
+	 * 
+	 * } catch (LoginFailureException e) {
+	 * 	System.out.println(&quot;Could not login because &quot; + e.getMessage());
+	 * 	e.printStackTrace();
+	 * }
+	 * 
+	 * </pre>
+	 * 
+	 * @param login client login name (ex. team5, judge3)
+	 * @param password password for the login name
+	 * @throws LoginFailureException if login failure, message indicating why it failed.
+	 */
     public static Contest login(String login, String password) throws LoginFailureException {
         // TODO code
         return null;

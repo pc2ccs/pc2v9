@@ -24,7 +24,7 @@ public interface IRunEventListener {
      * @param run
      *            the run that has changed
      */
-    void runAdded(Run run);
+    void runAdded(IRun run);
 
     /**
      * Run has been removed (marked as deleted).
@@ -34,7 +34,7 @@ public interface IRunEventListener {
      * @param run
      *            deleted run
      */
-    void runRemoved(Run run);
+    void runRemoved(IRun run);
 
     /**
      * Run judged.
@@ -44,7 +44,7 @@ public interface IRunEventListener {
      * @param run
      *            the judged run
      */
-    void runJudged(Run run);
+    void runJudged(IRun run);
 
     /**
      * Run updated or rejudged.
@@ -55,6 +55,6 @@ public interface IRunEventListener {
      * @param run
      *            the changed run
      */
-    void runUpdated(Run run);
+    void runUpdated(IRun run);
 
 }

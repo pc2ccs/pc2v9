@@ -40,7 +40,7 @@ public class RunUpdateEvent {
 
     private Action action;
 
-    private Run run;
+    private IRun run;
 
     // TODO doc params
     /**
@@ -49,7 +49,7 @@ public class RunUpdateEvent {
      * @param action
      * @param run
      */
-    public RunUpdateEvent(Action action, Run run) {
+    public RunUpdateEvent(Action action, IRun run) {
         super();
         // TODO Auto-generated constructor stub
         this.action = action;
@@ -70,7 +70,7 @@ public class RunUpdateEvent {
      * 
      * @return the run affected by the action.
      */
-    public Run getRun() {
+    public IRun getRun() {
         return run;
     }
 

@@ -1,7 +1,5 @@
 package edu.csus.ecs.pc2.api;
 
-import edu.csus.ecs.pc2.core.model.ClientId;
-import edu.csus.ecs.pc2.core.model.ElementId;
 
 /**
  * Contest Data Update, both configuration and run-time.
@@ -29,125 +27,137 @@ public class ConfigurationUpdateEvent {
          */
         RESET,
         /**
-         * Account added (ClientId populated).
+         * Account added.
          */
         ACCOUNT_ADDED,
         /**
-         * Account removed (ClientId populated).
+         * Account removed.
          */
         ACCOUNT_REMOVED,
         /**
-         * Account updated (ClientId populated).
+         * Account updated.
          */
         ACCOUNT_UPDATED,
         /**
-         * Title updated (String populated)
+         * Title updated
          */
         TITLE_UPDATED,
         /**
-         * Language added (ElementId populated).
+         * Language added.
          */
         LANGUAGE_ADDED,
         /**
-         * Language removed (ElementId populated).
+         * Language removed.
          */
         LANGUAGE_REMOVED,
         /**
-         * Language updated (ElementId populated).
+         * Language updated.
          */
         LANGUAGE_UPDATED,
         /**
-         * Problem added (ElementId populated).
+         * Problem added.
          */
         PROBLEM_ADDED,
         /**
-         * Problem removed (ElementId populated).
+         * Problem removed.
          */
         PROBLEM_REMOVED,
         /**
-         * Problem updated (ElementId populated).
+         * Problem updated.
          */
         PROBLEM_UPDATED,
         /**
-         * Judgement added (ElementId populated).
+         * Judgement added.
          */
         JUDGEMENT_ADDED,
         /**
-         * Judgement removed (ElementId populated).
+         * Judgement removed.
          */
         JUDGEMENT_REMOVED,
         /**
-         * Judgement updated (ElementId populated).
+         * Judgement updated.
          */
         JUDGEMENT_UPDATED,
     }
 
     private Action action;
-
-    private ClientId clientId;
-
-    private ElementId elementId;
-
-    private String string;
+    
+    private IProblem problem;
+    
+    private ITeam team;
+    
+    private ILanguage language;
+    
+    private IJudgement judgement;
 
     // TODO DOC PARAMS
-
+ 
     /**
-     * @param action
-     * @param string
-     */
-    public ConfigurationUpdateEvent(Action action, String string) {
-        super();
-        this.action = action;
-        this.string = string;
-    }
+	 * @param action
+	 * @param team
+	 */
+	public ConfigurationUpdateEvent(Action action, ITeam team) {
+		super();
+		this.action = action;
+		this.team = team;
+	}
 
-    /**
-     * @param action
-     * @param elementId
-     */
-    public ConfigurationUpdateEvent(Action action, ElementId elementId) {
-        super();
-        this.action = action;
-        this.elementId = elementId;
-    }
+	/**
+	 * @param action
+	 * @param problem
+	 */
+	public ConfigurationUpdateEvent(Action action, IProblem problem) {
+		super();
+		this.action = action;
+		this.problem = problem;
+	}
+	
+	/**
+	 * @param action
+	 * @param language
+	 */
+	public ConfigurationUpdateEvent(Action action, ILanguage language) {
+		super();
+		this.action = action;
+		this.language = language;
+	}
 
-    /**
-     * @param action
-     * @param clientId
-     */
-    public ConfigurationUpdateEvent(Action action, ClientId clientId) {
-        super();
-        this.action = action;
-        this.clientId = clientId;
-    }
+	/**
+	 * @param action
+	 * @param judgement
+	 */
+	public ConfigurationUpdateEvent(Action action, IJudgement judgement) {
+		super();
+		this.action = action;
+		this.judgement = judgement;
+	}
 
-    /**
-     * get ClientId for account.
-     * 
-     * @return ClientId for account.
-     */
-    public ClientId getClientId() {
-        return clientId;
-    }
 
-    /**
-     * Get ElementId for changed problem, language or judgement.
-     * 
-     * @return ElementId for changed problem, language or judgement.
-     */
-    public ElementId getElementId() {
-        return elementId;
-    }
+	/**
+	 * Judgement that was changed.
+	 * @return judgement info.
+	 */
+	public IJudgement getJudgement() {
+		return judgement;
+	}
 
-    /**
-     * @return string value.
-     */
-    public String getString() {
-        return string;
-    }
+	/**
+	 * Language that was changed.
+	 * @return language info.
+	 */
+	public ILanguage getLanguage() {
+		return language;
+	}
 
-    /**
+	/**
+	 * Team that was changed
+	 * @return Team information
+	 */
+	public ITeam getTeam() {
+		return team;
+	}
+
+	/**
      * Get the action triggered.
      * 
      * @return the action triggered.
@@ -156,4 +166,11 @@ public class ConfigurationUpdateEvent {
         return action;
     }
 
+    /**
+     * Get problem which was changed.
+     * @return
+     */
+	public IProblem getProblem() {
+		return problem;
+	}
 }
