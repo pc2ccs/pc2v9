@@ -1,4 +1,9 @@
-package edu.csus.ecs.pc2.api;
+package edu.csus.ecs.pc2.api.listener;
+
+import edu.csus.ecs.pc2.api.IClient;
+import edu.csus.ecs.pc2.api.IJudgement;
+import edu.csus.ecs.pc2.api.ILanguage;
+import edu.csus.ecs.pc2.api.IProblem;
 
 /**
  * Set of methods that any Configuration Update Listener must implement.

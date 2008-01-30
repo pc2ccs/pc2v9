@@ -1,4 +1,6 @@
-package edu.csus.ecs.pc2.api;
+package edu.csus.ecs.pc2.api.listener;
+
+import edu.csus.ecs.pc2.api.IRun;
 
 /**
  * Set of methods that any Run Listener must implement.

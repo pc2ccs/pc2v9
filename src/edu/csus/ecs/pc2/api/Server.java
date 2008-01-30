@@ -10,20 +10,12 @@ import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
  */
 
 // $HeadURL$
-public class Controller implements IController {
+public class Server {
 
     @SuppressWarnings("unused")
-    private Contest contest = null;
+    private IContest contest = null;
 
-    /**
-     * Create a controller based on the contest.
-     * 
-     * @param contest
-     */
-    public Controller(Contest contest) {
-        super();
-        this.contest = contest;
-    }
+
 
     /**
      * Login/Authenticate into the contest (server).
@@ -37,8 +29,8 @@ public class Controller implements IController {
      * String login = &quot;team4&quot;;
      * String password = &quot;team4&quot;;
      * try {
-     *     Contest contest = Controller.login(login, password);
-     *     Controller controller = new Controller(contest);
+     *     Contest contest = Server.login(login, password);
+     *     Server controller = new Server(contest);
      *     System.out.println(&quot;Logged in as &quot; + contest.getClient().getTitle());
      *     System.out.println(&quot;Number of runs &quot; + contest.getRuns().length);
      *     controller.logoff();
@@ -57,7 +49,7 @@ public class Controller implements IController {
      * @throws LoginFailureException
      *             if login failure, message indicating why it failed.
      */
-    public static Contest login(String login, String password) throws LoginFailureException {
+    public IContest login(String login, String password) throws LoginFailureException {
         // TODO code
         return null;
     }

@@ -49,7 +49,7 @@ public interface IRun {
      *            contest is used to get the judgement title.
      * @return null if not judged, else the title for the judgement.
      */
-    String getJudgementTitle(IContest contest);
+    String getJudgementTitle();
 
     /**
      * Get problem for this run.
