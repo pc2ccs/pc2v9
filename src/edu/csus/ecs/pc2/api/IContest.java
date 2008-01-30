@@ -6,6 +6,65 @@ import edu.csus.ecs.pc2.api.listener.IRunEventListener;
 /**
  * Contest data/information.
  * 
+ * <pre>
+ * import edu.csus.ecs.pc2.api.IContest;
+ * import edu.csus.ecs.pc2.api.IRun;
+ * import edu.csus.ecs.pc2.api.Server;
+ * import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
+ * import edu.csus.ecs.pc2.api.listener.IRunEventListener;
+ * 
+ * public class APIExample {
+ * 
+ *     protected class RunListener implements IRunEventListener {
+ * 
+ *         public void runAdded(IRun run) {
+ *             System.out.println(&quot;Site &quot; + run.getSiteNumber() + &quot; Run &quot; + run.getNumber() + &quot; added &quot;);
+ *         }
+ * 
+ *         public void runRemoved(IRun run) {
+ *             System.out.println(&quot;Site &quot; + run.getSiteNumber() + &quot; Run &quot; + run.getNumber() + &quot; removed &quot;);
+ *         }
+ * 
+ *         public void runJudged(IRun run) {
+ *             System.out.println(&quot;Site &quot; + run.getSiteNumber() + &quot; Run &quot; + run.getNumber() + &quot; judged &quot;);
+ *         }
+ * 
+ *         public void runUpdated(IRun run) {
+ *             System.out.println(&quot;Site &quot; + run.getSiteNumber() + &quot; Run &quot; + run.getNumber() + &quot; updated &quot;);
+ *         }
+ *     }
+ * 
+ * public void loginAndShowRuns(String loginName, String password) {
+ *  
+ *          try {
+ *              Server server = new Server();
+ *              IContest contest = server.login(loginName, password);
+ *  
+ *              contest.addRunListener(new RunListener()); // Add listener for new runs and changed runs
+ *  
+ *              System.out.println(&quot;Logged in as &quot; + contest.getClient().getTitle());
+ *  
+ *              // Note: These runs are not sorted
+ *              for (IRun run : contest.getRuns()) {
+ *                  System.out.println(&quot;Site &quot; + run.getSiteNumber() + &quot; Run &quot; + run.getNumber());
+ *              }
+ *  
+ *              // this program will not stop because the listener above will keep it alive.
+ *  
+ *          } catch (LoginFailureException e) {
+ *              System.err.println(&quot;Could not login &quot; + loginName + &quot; reason: &quot; + e.getMessage());
+ *          }
+ *      }    public static void main(String[] args) {
+ *         if (args.length != 2) {
+ *             System.out.println(&quot;API Sample, usage: APIExample loginName password&quot;);
+ *         } else {
+ *             System.out.println(&quot;login: &quot; + args[0] + &quot; password: &quot; + args[1]);
+ *             new APIExample().loginAndShowRuns(args[0], args[1]);
+ *         }
+ *     }
+ * }
+ * </pre>
+ * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -163,8 +222,7 @@ public interface IContest {
      * Add run event listener.
      * 
      * @see edu.csus.ecs.pc2.api.RunUpdateEvent
-     * @param runEventListener
-     *            listener for Run events
+     * @param runEventListener listener for Run events
      */
     void addRunListener(IRunEventListener runEventListener);
 
@@ -172,8 +230,7 @@ public interface IContest {
      * Remove run event listener.
      * 
      * @see edu.csus.ecs.pc2.api.RunUpdateEvent
-     * @param runEventListener
-     *            listener for Run events
+     * @param runEventListener listener for Run events
      */
     void removeRunListener(IRunEventListener runEventListener);
 
@@ -181,8 +238,7 @@ public interface IContest {
      * Add Contest Update listener.
      * 
      * @see edu.csus.ecs.pc2.api.ConfigurationUpdateEvent
-     * @param contestUpdateConfigurationListener
-     *            listener for Configuration Update events
+     * @param contestUpdateConfigurationListener listener for Configuration Update events
      */
     void addContestUpdateConfigurationListener(IConfigurationUpdateListener contestUpdateConfigurationListener);
 
@@ -190,8 +246,7 @@ public interface IContest {
      * Remove Contest Update listener.
      * 
      * @see edu.csus.ecs.pc2.api.ConfigurationUpdateEvent
-     * @param contestUpdateConfigurationListener
-     *            listener for Configuration Update events
+     * @param contestUpdateConfigurationListener listener for Configuration Update events
      */
     void removeContestUpdateConfigurationListener(IConfigurationUpdateListener contestUpdateConfigurationListener);
 
@@ -207,12 +262,17 @@ public interface IContest {
      * 
      * @return list of groups.
      */
-    IGroup getGroups();
+    IGroup[] getGroups();
+
+    /**
+     * Get the current logged in client.
+     */
+    IClient getClient();
 
     /**
      * Is Contest Clock started/running ?.
      * 
-     * @return
+     * @return return true if clock started, false if stopped.
      */
     boolean isContestClockRunning();
 }
