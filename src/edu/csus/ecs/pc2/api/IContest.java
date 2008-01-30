@@ -205,13 +205,14 @@ public interface IContest {
      *     System.out.println(&quot;    Written in &quot; + run.getLanguage().getTitle());
      * 
      *     if (run.isJudged()) {
-     *         System.out.println(&quot;    Judgement: &quot; + run.getJudgementTitle(contest));
+     *         System.out.println(&quot;    Judgement: &quot; + run.getJudgementTitle());
      *     } else {
      *         System.out.println(&quot;    Judgement: not judged yet &quot;);
      *     }
      * 
      *     System.out.println();
      * }
+     * 
      * </pre>
      * 
      * @return list of Runs, unordered.
