@@ -46,6 +46,8 @@ public class ProfilesPane extends JPanePlugin {
 
     private JButton jButton2 = null;
 
+    private JLabel notificationOfNonImplementationLabel = null;
+
     /**
      * This method initializes
      * 
@@ -69,7 +71,7 @@ public class ProfilesPane extends JPanePlugin {
         profileNameLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         profileNameLabel.setText("Profile Name");
         this.setLayout(new BorderLayout());
-        this.setSize(new java.awt.Dimension(613,319));
+        this.setSize(new java.awt.Dimension(729,319));
         this.add(getCenterPane(), java.awt.BorderLayout.CENTER);
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
 
@@ -87,7 +89,7 @@ public class ProfilesPane extends JPanePlugin {
     private JComboBox getProfileComboBox() {
         if (profileComboBox == null) {
             profileComboBox = new JComboBox();
-            profileComboBox.setBounds(new java.awt.Rectangle(134,85,339,28));
+            profileComboBox.setBounds(new java.awt.Rectangle(134, 85, 339, 28));
         }
         return profileComboBox;
     }
@@ -100,7 +102,8 @@ public class ProfilesPane extends JPanePlugin {
     private JButton getSwitchButton() {
         if (switchButton == null) {
             switchButton = new JButton();
-            switchButton.setBounds(new java.awt.Rectangle(497,85,73,28));
+            switchButton.setBounds(new java.awt.Rectangle(497, 85, 73, 28));
+            switchButton.setEnabled(false);
             switchButton.setText("Switch");
         }
         return switchButton;
@@ -114,7 +117,8 @@ public class ProfilesPane extends JPanePlugin {
     private JButton getSetButton() {
         if (setButton == null) {
             setButton = new JButton();
-            setButton.setBounds(new java.awt.Rectangle(497,38,73,26));
+            setButton.setBounds(new java.awt.Rectangle(497, 38, 73, 26));
+            setButton.setEnabled(false);
             setButton.setText("Set");
             setButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -133,7 +137,7 @@ public class ProfilesPane extends JPanePlugin {
     private JTextField getProfileTextField() {
         if (profileTextField == null) {
             profileTextField = new JTextField();
-            profileTextField.setBounds(new java.awt.Rectangle(134,36,339,30));
+            profileTextField.setBounds(new java.awt.Rectangle(134, 36, 339, 30));
         }
         return profileTextField;
     }
@@ -145,6 +149,12 @@ public class ProfilesPane extends JPanePlugin {
      */
     private JPanel getCenterPane() {
         if (centerPane == null) {
+            notificationOfNonImplementationLabel = new JLabel();
+            notificationOfNonImplementationLabel.setBounds(new java.awt.Rectangle(0,132,733,113));
+            notificationOfNonImplementationLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+            notificationOfNonImplementationLabel.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
+            notificationOfNonImplementationLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 14));
+            notificationOfNonImplementationLabel.setText("<html><center>This pane will allow switching automatically between<br>Practice and Real contest configurations (work-in-progress)</html>");
             centerPane = new JPanel();
             centerPane.setLayout(null);
             centerPane.add(profileNameLabel, null);
@@ -154,6 +164,7 @@ public class ProfilesPane extends JPanePlugin {
             centerPane.add(getSetButton(), null);
             centerPane.add(getProfileTextField(), null);
 
+            centerPane.add(notificationOfNonImplementationLabel, null);
         }
         return centerPane;
     }
@@ -187,6 +198,7 @@ public class ProfilesPane extends JPanePlugin {
         if (newButton == null) {
             newButton = new JButton();
             newButton.setText("New");
+            newButton.setEnabled(false);
         }
         return newButton;
     }
@@ -200,6 +212,7 @@ public class ProfilesPane extends JPanePlugin {
         if (jButton == null) {
             jButton = new JButton();
             jButton.setText("Save As...");
+            jButton.setEnabled(false);
         }
         return jButton;
     }
@@ -213,6 +226,7 @@ public class ProfilesPane extends JPanePlugin {
         if (jButton1 == null) {
             jButton1 = new JButton();
             jButton1.setText("Delete");
+            jButton1.setEnabled(false);
         }
         return jButton1;
     }
@@ -226,6 +240,7 @@ public class ProfilesPane extends JPanePlugin {
         if (jButton2 == null) {
             jButton2 = new JButton();
             jButton2.setText("Export");
+            jButton2.setEnabled(false);
         }
         return jButton2;
     }
