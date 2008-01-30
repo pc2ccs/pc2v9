@@ -1,6 +1,5 @@
 package edu.csus.ecs.pc2.api;
 
-
 /**
  * Contest Data Update, both configuration and run-time.
  * 
@@ -9,8 +8,7 @@ package edu.csus.ecs.pc2.api;
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
- // $HeadURL$
- 
+// $HeadURL$
 public class ConfigurationUpdateEvent {
 
     /**
@@ -81,83 +79,85 @@ public class ConfigurationUpdateEvent {
     }
 
     private Action action;
-    
+
     private IProblem problem;
-    
+
     private ITeam team;
-    
+
     private ILanguage language;
-    
+
     private IJudgement judgement;
 
     // TODO DOC PARAMS
- 
+
     /**
-	 * @param action
-	 * @param team
-	 */
-	public ConfigurationUpdateEvent(Action action, ITeam team) {
-		super();
-		this.action = action;
-		this.team = team;
-	}
+     * @param action
+     * @param team
+     */
+    public ConfigurationUpdateEvent(Action action, ITeam team) {
+        super();
+        this.action = action;
+        this.team = team;
+    }
 
-	/**
-	 * @param action
-	 * @param problem
-	 */
-	public ConfigurationUpdateEvent(Action action, IProblem problem) {
-		super();
-		this.action = action;
-		this.problem = problem;
-	}
-	
-	/**
-	 * @param action
-	 * @param language
-	 */
-	public ConfigurationUpdateEvent(Action action, ILanguage language) {
-		super();
-		this.action = action;
-		this.language = language;
-	}
+    /**
+     * @param action
+     * @param problem
+     */
+    public ConfigurationUpdateEvent(Action action, IProblem problem) {
+        super();
+        this.action = action;
+        this.problem = problem;
+    }
 
-	/**
-	 * @param action
-	 * @param judgement
-	 */
-	public ConfigurationUpdateEvent(Action action, IJudgement judgement) {
-		super();
-		this.action = action;
-		this.judgement = judgement;
-	}
+    /**
+     * @param action
+     * @param language
+     */
+    public ConfigurationUpdateEvent(Action action, ILanguage language) {
+        super();
+        this.action = action;
+        this.language = language;
+    }
 
+    /**
+     * @param action
+     * @param judgement
+     */
+    public ConfigurationUpdateEvent(Action action, IJudgement judgement) {
+        super();
+        this.action = action;
+        this.judgement = judgement;
+    }
 
-	/**
-	 * Judgement that was changed.
-	 * @return judgement info.
-	 */
-	public IJudgement getJudgement() {
-		return judgement;
-	}
+    /**
+     * Judgement that was changed.
+     * 
+     * @return judgement info.
+     */
+    public IJudgement getJudgement() {
+        return judgement;
+    }
 
-	/**
-	 * Language that was changed.
-	 * @return language info.
-	 */
-	public ILanguage getLanguage() {
-		return language;
-	}
+    /**
+     * Language that was changed.
+     * 
+     * @return language info.
+     */
+    public ILanguage getLanguage() {
+        return language;
+    }
 
-	/**
-	 * Team that was changed
-	 * @return Team information
-	 */
-	public ITeam getTeam() {
-		return team;
-	}
+    /**
+     * Team that was changed
+     * 
+     * @return Team information
+     */
+    public ITeam getTeam() {
+        return team;
+    }
 
-	/**
+    /**
      * Get the action triggered.
      * 
      * @return the action triggered.
@@ -168,9 +168,10 @@ public class ConfigurationUpdateEvent {
 
     /**
      * Get problem which was changed.
+     * 
      * @return
      */
-	public IProblem getProblem() {
-		return problem;
-	}
+    public IProblem getProblem() {
+        return problem;
+    }
 }

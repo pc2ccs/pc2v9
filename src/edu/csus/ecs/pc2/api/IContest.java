@@ -10,202 +10,206 @@ package edu.csus.ecs.pc2.api;
 // $HeadURL$
 public interface IContest {
 
-	/**
-	 * Has this client logged in ?.
-	 * 
-	 * If the client has used the {@link Controller#login(String, String)} successfully then this method will return
-	 * true.
-	 * <P>
-	 * If the client has logged off ({@link IController#logoff()}) or never logged in then returns false.
-	 * 
-	 * @see Controller#login(String, String)
-	 * @return true if logged in, false if not.
-	 */
-	boolean isLoggedIn();
+    /**
+     * Has this client logged in ?.
+     * 
+     * If the client has used the {@link Controller#login(String, String)} successfully then this method will return true.
+     * <P>
+     * If the client has logged off ({@link IController#logoff()}) or never logged in then returns false.
+     * 
+     * @see Controller#login(String, String)
+     * @return true if logged in, false if not.
+     */
+    boolean isLoggedIn();
 
-	/**
-	 * Returns the display name for the logged in client.
-	 * 
-	 * For each login there is a display name, like a school name.
-	 * <P>
-	 * Use {@link #getContestTitle()} to get the contest title.
-	 * 
-	 * @return the display name for the logged in client.
-	 */
-	String getTitle();
+    /**
+     * Returns the display name for the logged in client.
+     * 
+     * For each login there is a display name, like a school name.
+     * <P>
+     * Use {@link #getContestTitle()} to get the contest title.
+     * 
+     * @return the display name for the logged in client.
+     */
+    String getTitle();
 
-	/**
-	 * Gets all the team ClientIds in the contest.
-	 * 
-	 * <P>
-	 * Code snippet to print all team names.
-	 * 
-	 * <pre>
-	 * for (ITeam team : contest.getTeams()) {
-	 * 	System.out.println(team.getTitle());
-	 * }
-	 * </pre>
-	 * 
-	 * @return array of ClientId not sorted.
-	 */
-	ITeam[] getTeams();
+    /**
+     * Gets all the team ClientIds in the contest.
+     * 
+     * <P>
+     * Code snippet to print all team names.
+     * 
+     * <pre>
+     * for (ITeam team : contest.getTeams()) {
+     *     System.out.println(team.getTitle());
+     * }
+     * </pre>
+     * 
+     * @return array of ClientId not sorted.
+     */
+    ITeam[] getTeams();
 
-	/**
-	 * Get the title for the specified site.
-	 * 
-	 * @param siteNumber
-	 * @return title for this site. @
-	 */
-	String getSiteTitle(int siteNumber);
+    /**
+     * Get the title for the specified site.
+     * 
+     * @param siteNumber
+     * @return title for this site. @
+     */
+    String getSiteTitle(int siteNumber);
 
-	/**
-	 * Get the contest title.
-	 * 
-	 * @return the title of the contest.
-	 * 
-	 */
-	String getContestTitle();
+    /**
+     * Get the contest title.
+     * 
+     * @return the title of the contest.
+     * 
+     */
+    String getContestTitle();
 
-	/**
-	 * Get the current server's site title.
-	 * 
-	 * Gets the title for the server this client is logged into.
-	 * 
-	 * @return the current server's site title.
-	 * 
-	 */
-	String getSiteTitle();
+    /**
+     * Get the current server's site title.
+     * 
+     * Gets the title for the server this client is logged into.
+     * 
+     * @return the current server's site title.
+     * 
+     */
+    String getSiteTitle();
 
-	/**
-	 * Get a list of languages.
-	 * 
-	 * Returns a list of languages.
-	 * <P>
-	 * Code snippet to print all language names.
-	 * 
-	 * <pre>
-	 * for (ILanguage language : contest.getLanguages()) {
-	 * 	System.out.println(language.getTitle());
-	 * }
-	 * </pre>
-	 * 
-	 * @return list of language ids in proper order
-	 * 
-	 */
-	ILanguage[] getLanguages();
+    /**
+     * Get a list of languages.
+     * 
+     * Returns a list of languages.
+     * <P>
+     * Code snippet to print all language names.
+     * 
+     * <pre>
+     * for (ILanguage language : contest.getLanguages()) {
+     *     System.out.println(language.getTitle());
+     * }
+     * </pre>
+     * 
+     * @return list of language ids in proper order
+     * 
+     */
+    ILanguage[] getLanguages();
 
-	/**
-	 * Get a list of problems.
-	 * 
-	 * Returns a list of problems.
-	 * <P>
-	 * Code snippet to print all language titles/names.
-	 * 
-	 * <pre>
-	 * for (IProblem problem : contest.getProblems()) {
-	 * 	System.out.println(problem.getTitle());
-	 * }
-	 * </pre>
-	 * 
-	 * @return list of problem ids in proper order
-	 * 
-	 */
-	IProblem[] getProblems();
+    /**
+     * Get a list of problems.
+     * 
+     * Returns a list of problems.
+     * <P>
+     * Code snippet to print all language titles/names.
+     * 
+     * <pre>
+     * for (IProblem problem : contest.getProblems()) {
+     *     System.out.println(problem.getTitle());
+     * }
+     * </pre>
+     * 
+     * @return list of problem ids in proper order
+     * 
+     */
+    IProblem[] getProblems();
 
-	/**
-	 * Get a list of judgements.
-	 * 
-	 * Code snippet to print all judgement titles/names.
-	 * 
-	 * <pre>
-	 * for (IJudgement judgement : contest.getJudgements()) {
-	 * 	System.out.println(judgement.getTitle());
-	 * }
-	 * 
-	 * </pre>
-	 * 
-	 * @return list of judgements in proper order.
-	 * 
-	 */
-	IJudgement[] getJudgements();
+    /**
+     * Get a list of judgements.
+     * 
+     * Code snippet to print all judgement titles/names.
+     * 
+     * <pre>
+     * for (IJudgement judgement : contest.getJudgements()) {
+     *     System.out.println(judgement.getTitle());
+     * }
+     * 
+     * </pre>
+     * 
+     * @return list of judgements in proper order.
+     * 
+     */
+    IJudgement[] getJudgements();
 
-	/**
-	 * Get a list of runs.
-	 * 
-	 * <P>
-	 * Code snippet to print all run info in contest.
-	 * 
-	 * <pre>
-	 * for (IRun run : contest.getRuns()) {
-	 * 
-	 * 	System.out.println(&quot;Run &quot; + run.getNumber() + &quot; from site &quot; + run.getSiteNumber());
-	 * 	System.out.println(&quot;    submitted at &quot; + run.getSubmissionTime() + &quot; by &quot; + run.getSubmitterTeam().getTitle());
-	 * 	System.out.println(&quot;    For problem &quot; + run.getProblem().getTitle());
-	 * 	System.out.println(&quot;    Written in &quot; + run.getLanguage().getTitle());
-	 * 
-	 * 	if (run.isJudged()) {
-	 * 		System.out.println(&quot;    Judgement: &quot; + run.getJudgementTitle(contest));
-	 * 	} else {
-	 * 		System.out.println(&quot;    Judgement: not judged yet &quot;);
-	 * 	}
-	 * 
-	 * 	System.out.println();
-	 * }
-	 * </pre>
-	 * 
-	 * @return list of Runs, unordered.
-	 */
-	IRun[] getRuns();
+    /**
+     * Get a list of runs.
+     * 
+     * <P>
+     * Code snippet to print all run info in contest.
+     * 
+     * <pre>
+     * for (IRun run : contest.getRuns()) {
+     * 
+     *     System.out.println(&quot;Run &quot; + run.getNumber() + &quot; from site &quot; + run.getSiteNumber());
+     *     System.out.println(&quot;    submitted at &quot; + run.getSubmissionTime() + &quot; by &quot; + run.getSubmitterTeam().getTitle());
+     *     System.out.println(&quot;    For problem &quot; + run.getProblem().getTitle());
+     *     System.out.println(&quot;    Written in &quot; + run.getLanguage().getTitle());
+     * 
+     *     if (run.isJudged()) {
+     *         System.out.println(&quot;    Judgement: &quot; + run.getJudgementTitle(contest));
+     *     } else {
+     *         System.out.println(&quot;    Judgement: not judged yet &quot;);
+     *     }
+     * 
+     *     System.out.println();
+     * }
+     * </pre>
+     * 
+     * @return list of Runs, unordered.
+     */
+    IRun[] getRuns();
 
-	/**
-	 * Add run event listener.
-	 * 
-	 * @see edu.csus.ecs.pc2.api.RunUpdateEvent
-	 * @param runEventListener listener for Run events
-	 */
-	void addRunListener(IRunEventListener runEventListener);
+    /**
+     * Add run event listener.
+     * 
+     * @see edu.csus.ecs.pc2.api.RunUpdateEvent
+     * @param runEventListener
+     *            listener for Run events
+     */
+    void addRunListener(IRunEventListener runEventListener);
 
-	/**
-	 * Remove run event listener.
-	 * 
-	 * @see edu.csus.ecs.pc2.api.RunUpdateEvent
-	 * @param runEventListener listener for Run events
-	 */
-	void removeRunListener(IRunEventListener runEventListener);
+    /**
+     * Remove run event listener.
+     * 
+     * @see edu.csus.ecs.pc2.api.RunUpdateEvent
+     * @param runEventListener
+     *            listener for Run events
+     */
+    void removeRunListener(IRunEventListener runEventListener);
 
-	/**
-	 * Add Contest Update listener.
-	 * 
-	 * @see edu.csus.ecs.pc2.api.ConfigurationUpdateEvent
-	 * @param contestUpdateConfigurationListener listener for Configuration Update events
-	 */
-	void addContestUpdateConfigurationListener(IConfigurationUpdateListener contestUpdateConfigurationListener);
+    /**
+     * Add Contest Update listener.
+     * 
+     * @see edu.csus.ecs.pc2.api.ConfigurationUpdateEvent
+     * @param contestUpdateConfigurationListener
+     *            listener for Configuration Update events
+     */
+    void addContestUpdateConfigurationListener(IConfigurationUpdateListener contestUpdateConfigurationListener);
 
-	/**
-	 * Remove Contest Update listener.
-	 * 
-	 * @see edu.csus.ecs.pc2.api.ConfigurationUpdateEvent
-	 * @param contestUpdateConfigurationListener listener for Configuration Update events
-	 */
-	void removeContestUpdateConfigurationListener(IConfigurationUpdateListener contestUpdateConfigurationListener);
+    /**
+     * Remove Contest Update listener.
+     * 
+     * @see edu.csus.ecs.pc2.api.ConfigurationUpdateEvent
+     * @param contestUpdateConfigurationListener
+     *            listener for Configuration Update events
+     */
+    void removeContestUpdateConfigurationListener(IConfigurationUpdateListener contestUpdateConfigurationListener);
 
-	/**
-	 * Get the current site's contest time.
-	 * 
-	 * @return contest time information
-	 */
-	IContestTime getContestTime();
+    /**
+     * Get the current site's contest time.
+     * 
+     * @return contest time information
+     */
+    IContestTime getContestTime();
 
-	/**
-	 * Get list of defined groups/regions.
-	 * 
-	 * @return list of groups.
-	 */
-	IGroup getGroups();
+    /**
+     * Get list of defined groups/regions.
+     * 
+     * @return list of groups.
+     */
+    IGroup getGroups();
 
-	/**
-	 * Is Contest Clock started/running ?.
-	 * @return
-	 */
-	boolean isContestClockRunning();
+    /**
+     * Is Contest Clock started/running ?.
+     * 
+     * @return
+     */
+    boolean isContestClockRunning();
 }

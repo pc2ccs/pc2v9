@@ -10,10 +10,10 @@ package edu.csus.ecs.pc2.api;
 // $HeadURL$
 public interface IProblem {
 
-	/**
-	 * Get description for this problem.
-	 * 
-	 * @return
-	 */
-	String getTitle();
+    /**
+     * Get description for this problem.
+     * 
+     * @return
+     */
+    String getTitle();
 }

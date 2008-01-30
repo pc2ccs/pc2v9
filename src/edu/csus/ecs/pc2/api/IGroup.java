@@ -9,11 +9,12 @@ package edu.csus.ecs.pc2.api;
 
 // $HeadURL$
 public interface IGroup {
-	
-	/**
-	 * Get name of group.
-	 * @return title/name for group.
-	 */
-	String getTitle();
+
+    /**
+     * Get name of group.
+     * 
+     * @return title/name for group.
+     */
+    String getTitle();
 
 }

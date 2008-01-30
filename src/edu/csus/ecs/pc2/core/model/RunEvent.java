@@ -1,17 +1,15 @@
 package edu.csus.ecs.pc2.core.model;
 
-import edu.csus.ecs.pc2.api.Contest;
-
 /**
  * A run and a event state {@link edu.csus.ecs.pc2.core.model.RunEvent.Action}.
  * 
  * See {@link Contest#getRunIds()} for an example of use.
+ * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
 
 // TODO should the get methods return clones or the references to the fields ??
-
 // $HeadURL$
 public class RunEvent {
 
@@ -53,7 +51,7 @@ public class RunEvent {
         /**
          * Held Run
          */
-        RUN_HELD, 
+        RUN_HELD,
         /**
          * Run not available.
          * 
@@ -71,17 +69,17 @@ public class RunEvent {
     private Run run;
 
     private RunFiles runFiles;
-    
+
     /**
      * Who this run is sent to.
      */
     private ClientId sentToClientId;
-    
+
     /**
      * 
      */
     private ClientId whoModifiedRun;
-    
+
     private String message;
 
     public RunEvent(Action action, Run run, RunFiles runFiles) {
@@ -91,7 +89,6 @@ public class RunEvent {
         this.runFiles = runFiles;
     }
 
-    
     public Action getAction() {
         return action;
     }
@@ -132,11 +129,9 @@ public class RunEvent {
         this.message = message;
     }
 
-
     public ClientId getWhoModifiedRun() {
         return whoModifiedRun;
     }
-
 
     public void setWhoModifiedRun(ClientId whoModifiedRun) {
         this.whoModifiedRun = whoModifiedRun;

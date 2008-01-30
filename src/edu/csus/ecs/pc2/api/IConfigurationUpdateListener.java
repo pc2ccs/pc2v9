@@ -9,108 +9,120 @@ package edu.csus.ecs.pc2.api;
 // $HeadURL$
 public interface IConfigurationUpdateListener {
 
-	/**
-	 * All contest data has been reset or changed.
-	 * 
-	 * This event happens when a reset is done on the server, any or all of the configuration information may have
-	 * changed.
-	 * <P>
-	 */
-	void reset();
+    /**
+     * All contest data has been reset or changed.
+     * 
+     * This event happens when a reset is done on the server, any or all of the configuration information may have changed.
+     * <P>
+     */
+    void reset();
 
-	/**
-	 * client has been added.
-	 * 
-	 * @param client client info.
-	 */
-	void clientAdded(IClient client);
+    /**
+     * client has been added.
+     * 
+     * @param client
+     *            client info.
+     */
+    void clientAdded(IClient client);
 
-	/**
-	 * client has been removed.
-	 * 
-	 * @param client client info.
-	 */
-	void clientRemoved(IClient client);
+    /**
+     * client has been removed.
+     * 
+     * @param client
+     *            client info.
+     */
+    void clientRemoved(IClient client);
 
-	/**
-	 * client has been updated.
-	 * 
-	 * Could be triggered by a change in the client's title.
-	 * 
-	 * @param client client info.
-	 */
-	void clientUpdated(IClient client);
+    /**
+     * client has been updated.
+     * 
+     * Could be triggered by a change in the client's title.
+     * 
+     * @param client
+     *            client info.
+     */
+    void clientUpdated(IClient client);
 
-	/**
-	 * The contest title has been updated.
-	 * 
-	 * @see edu.csus.ecs.pc2.api.IContest#getContestTitle()
-	 * @param title new title for contest.
-	 */
-	void titleUpdated(String title);
+    /**
+     * The contest title has been updated.
+     * 
+     * @see edu.csus.ecs.pc2.api.IContest#getContestTitle()
+     * @param title
+     *            new title for contest.
+     */
+    void titleUpdated(String title);
 
-	/**
-	 * Language has been added.
-	 * 
-	 * The title, compile command line, etc has been changed.
-	 * 
-	 * @param language language info.
-	 */
-	void languageAdded(ILanguage language);
+    /**
+     * Language has been added.
+     * 
+     * The title, compile command line, etc has been changed.
+     * 
+     * @param language
+     *            language info.
+     */
+    void languageAdded(ILanguage language);
 
-	/**
-	 * A language was removed.
-	 * 
-	 * @param language language info.
-	 */
-	void languageRemoved(ILanguage language);
+    /**
+     * A language was removed.
+     * 
+     * @param language
+     *            language info.
+     */
+    void languageRemoved(ILanguage language);
 
-	/**
-	 * Language updated.
-	 * 
-	 * @param language language info.
-	 */
-	void languageUpdated(ILanguage language);
+    /**
+     * Language updated.
+     * 
+     * @param language
+     *            language info.
+     */
+    void languageUpdated(ILanguage language);
 
-	/**
-	 * Problem added.
-	 * 
-	 * @param problem problem info.
-	 */
-	void problemAdded(IProblem problem);
+    /**
+     * Problem added.
+     * 
+     * @param problem
+     *            problem info.
+     */
+    void problemAdded(IProblem problem);
 
-	/**
-	 * Problem removed.
-	 * 
-	 * @param problem problem info.
-	 */
-	void problemRemoved(IProblem problem);
+    /**
+     * Problem removed.
+     * 
+     * @param problem
+     *            problem info.
+     */
+    void problemRemoved(IProblem problem);
 
-	/**
-	 * Problem updated
-	 * 
-	 * @param problem problem info.
-	 */
-	void problemUpdated(IProblem problem);
+    /**
+     * Problem updated
+     * 
+     * @param problem
+     *            problem info.
+     */
+    void problemUpdated(IProblem problem);
 
-	/**
-	 * Judgement added.
-	 * 
-	 * @param judgement judgement info.
-	 */
-	void judgementAdded(IJudgement judgement);
+    /**
+     * Judgement added.
+     * 
+     * @param judgement
+     *            judgement info.
+     */
+    void judgementAdded(IJudgement judgement);
 
-	/**
-	 * Judgement removed.
-	 * 
-	 * @param judgement judgement info.
-	 */
-	void judgementRemoved(IJudgement judgement);
+    /**
+     * Judgement removed.
+     * 
+     * @param judgement
+     *            judgement info.
+     */
+    void judgementRemoved(IJudgement judgement);
 
-	/**
-	 * Judgement Updated.
-	 * 
-	 * @param judgement judgement info.
-	 */
-	void judgementUpdated(IJudgement judgement);
+    /**
+     * Judgement Updated.
+     * 
+     * @param judgement
+     *            judgement info.
+     */
+    void judgementUpdated(IJudgement judgement);
 }

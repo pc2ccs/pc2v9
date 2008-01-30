@@ -9,12 +9,12 @@ package edu.csus.ecs.pc2.api;
 
 // $HeadURL$
 public interface IJudgement {
-	
-	/**
-	 * Get description for this judgement.
-	 * 
-	 * @return display name for judgement.
-	 */
-	String getTitle();
+
+    /**
+     * Get description for this judgement.
+     * 
+     * @return display name for judgement.
+     */
+    String getTitle();
 
 }
