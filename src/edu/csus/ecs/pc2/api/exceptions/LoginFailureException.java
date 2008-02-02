@@ -17,4 +17,17 @@ public class LoginFailureException extends Exception {
      */
     private static final long serialVersionUID = -6675979618354284924L;
 
+    public LoginFailureException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public LoginFailureException(Throwable cause) {
+        super(cause);
+    }
+
+    public LoginFailureException(String message) {
+        super(message);
+    }
+    
+
 }
