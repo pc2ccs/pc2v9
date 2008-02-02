@@ -10,12 +10,10 @@ import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
  */
 
 // $HeadURL$
-public class Server {
+public class ServerConnection {
 
     @SuppressWarnings("unused")
     private IContest contest = null;
-
-
 
     /**
      * Login/Authenticate into the contest (server).

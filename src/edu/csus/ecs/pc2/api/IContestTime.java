@@ -12,23 +12,43 @@ public interface IContestTime {
 
     /**
      * Get the remaining seconds in the contest.
+     * <P>
+     * Because of network lag and other factors there will likely
+     * be an error in accuracy.   For this reason typically the
+     * granularity of minutes is used, though seconds is given.
+     * 
      * 
      * @return number of seconds left in contest.
      */
     long getRemainingSecs();
 
     /**
-     * Get the elapsed minutes in contest.
+     * Get the elapsed seconds in contest.
+     * <P>
+     * Because of network lag and other factors there will likely
+     * be an error in accuracy.   For this reason typically the
+     * granularity of minutes is used, though seconds is given.
      * 
-     * @return elapsed time in contest.
+     * @return elapsed seconds in contest.
      */
-    long getElapsedMins();
+    long getElapsedSecs();
 
     /**
-     * Get the cotnest length.
+     * Get the contest length.
+     * <P>
+     * Because of network lag and other factors there will likely
+     * be an error in accuracy.   For this reason typically the
+     * granularity of minutes is used, though seconds is given.
      * 
      * @return the number of seconds in the contest.
      */
     long getContestLengthSecs();
+    
+    /**
+     * Is Contest Clock running?.
+     * 
+     * @return true if clock running, else false.
+     */
+    boolean isContestClockRunning ();
 
 }

@@ -75,11 +75,11 @@ public interface IContest {
     /**
      * Has this client logged in ?.
      * 
-     * If the client has used the {@link Server#login(String, String)} successfully then this method will return true.
+     * If the client has used the {@link ServerConnection#login(String, String)} successfully then this method will return true.
      * <P>
      * If the client has logged off ({@link IServer#logoff()}) or never logged in then returns false.
      * 
-     * @see Server#login(String, String)
+     * @see ServerConnection#login(String, String)
      * @return true if logged in, false if not.
      */
     boolean isLoggedIn();
