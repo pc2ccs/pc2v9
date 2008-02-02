@@ -145,7 +145,7 @@ public interface IContest {
      * for (IRun run : contest.getRuns()) {
      * 
      *     System.out.println(&quot;Run &quot; + run.getNumber() + &quot; from site &quot; + run.getSiteNumber());
-     *     System.out.println(&quot;    submitted at &quot; + run.getSubmissionTime() + &quot; by &quot; + run.getSubmitterTeam().getTitle());
+     *     System.out.println(&quot;    submitted at &quot; + run.getSubmissionTime() + &quot; minutes by &quot; + run.getSubmitterTeam().getTitle());
      *     System.out.println(&quot;    For problem &quot; + run.getProblem().getTitle());
      *     System.out.println(&quot;    Written in &quot; + run.getLanguage().getTitle());
      * 

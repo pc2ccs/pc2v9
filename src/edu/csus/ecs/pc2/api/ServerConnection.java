@@ -12,9 +12,6 @@ import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
 // $HeadURL$
 public class ServerConnection {
 
-    @SuppressWarnings("unused")
-    private IContest contest = null;
-
     /**
      * Login/Authenticate into the contest (server).
      * 
@@ -27,17 +24,19 @@ public class ServerConnection {
      * String login = &quot;team4&quot;;
      * String password = &quot;team4&quot;;
      * try {
-     *     Contest contest = Server.login(login, password);
-     *     Server controller = new Server(contest);
+     * 
+     *     ServerConnection serverConnection = new ServerConnection();
+     *     IContest contest = serverConnection.login(login, password);
+     * 
      *     System.out.println(&quot;Logged in as &quot; + contest.getClient().getTitle());
      *     System.out.println(&quot;Number of runs &quot; + contest.getRuns().length);
-     *     controller.logoff();
+     *     System.out.println(&quot;Contest running &quot; + contest.isContestClockRunning());
+     *     serverConnection.logoff();
      * 
      * } catch (LoginFailureException e) {
      *     System.out.println(&quot;Could not login because &quot; + e.getMessage());
      *     e.printStackTrace();
      * }
-     * 
      * </pre>
      * 
      * @param login

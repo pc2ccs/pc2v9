@@ -107,13 +107,13 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
     public class RunListenerImplementation implements IRunListener {
 
         public void runAdded(RunEvent event) {
-            System.out.println("sjf: : "+event.getAction()+" "+event.getSentToClientId()+" "+event.getRun());
+//            System.out.println("sjf: : "+event.getAction()+" "+event.getSentToClientId()+" "+event.getRun());
             // ignore
         }
 
         public void runChanged(RunEvent event) {
             
-            System.out.println("sjf: : "+event.getAction()+" "+event.getSentToClientId()+" "+event.getWhoModifiedRun()+" "+event.getRun());
+//            System.out.println("sjf: : "+event.getAction()+" "+event.getSentToClientId()+" "+event.getWhoModifiedRun()+" "+event.getRun());
             
             if (run != null) {
                 if (event.getRun().getElementId().equals(run.getElementId())) {

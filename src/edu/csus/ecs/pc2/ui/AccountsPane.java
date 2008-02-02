@@ -639,7 +639,6 @@ public class AccountsPane extends JPanePlugin {
             generateAccountsButton.setText("Generate");
             generateAccountsButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.out.println("actionPerformed()" + e); // TODO Auto-generated Event stub actionPerformed()
                     generateAccountsFrame.setVisible(true);
                 }
             });

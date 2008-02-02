@@ -296,8 +296,11 @@ public class SubmitRunPane extends JPanePlugin {
         }
     }
 
+    /**
+     * Auto populate problem, language and submitted file.
+     *
+     */
     protected void autoPopulate() {
-        // TODO: auto populate
 
         String matchProblemString = "umit";
         for (int i = 0; i < problemComboBox.getItemCount(); i++) {
@@ -317,10 +320,18 @@ public class SubmitRunPane extends JPanePlugin {
             }
         }
 
-        // problemComboBox.
-        // getProblemCombo().setSelectedIndex(getProblemCombo().getItemCount() - 1);
-        // getLanguageCombo().setSelectedIndex(getLanguageCombo().getItemCount() - 1);
-
+        // Current Dir
+        try {
+            String filename = "Sumit.java";
+            File file = new File(filename);
+            if (file.exists()) {
+                fileNameLabel.setText(filename);
+            }
+        } catch (Exception e) {
+            log.log(Log.WARNING, "Exception logged ", e);
+        }
+        
+        // Samps dir
         try {
             String filename = "samps/Sumit.java";
             File file = new File(filename);
@@ -333,6 +344,16 @@ public class SubmitRunPane extends JPanePlugin {
 
         try {
             String filename = "/pc2/samps/sumit.java";
+            File file = new File(filename);
+            if (file.exists()) {
+                fileNameLabel.setText(filename);
+            }
+        } catch (Exception e) {
+            log.log(Log.WARNING, "Exception logged ", e);
+        }
+        
+        try {
+            String filename = "/usr/pc2/samps/sumit.java";
             File file = new File(filename);
             if (file.exists()) {
                 fileNameLabel.setText(filename);
@@ -406,19 +427,19 @@ public class SubmitRunPane extends JPanePlugin {
         SerializedFile [] otherFiles = null;
 
         if (getProblemComboBox().getSelectedIndex() < 1) {
-            JOptionPane.showMessageDialog(this, "Please select problem");
+            showMessage( "Please select problem");
             return;
         }
 
         if (getLanguageComboBox().getSelectedIndex() < 1) {
-            JOptionPane.showMessageDialog(this, "Please select language");
+            showMessage( "Please select language");
             return;
         }
 
         String filename = fileNameLabel.getText();
 
         if (fileNameLabel.getText().equals("")) {
-            JOptionPane.showMessageDialog(this, "Please select a Main file");
+            showMessage( "Please select a Main file");
             return;
         }
 
@@ -432,7 +453,7 @@ public class SubmitRunPane extends JPanePlugin {
                 // ignore exception
                 message = message + ""; // What a waste of time and code.
             }
-            JOptionPane.showMessageDialog(this, message);
+            showMessage( message);
             return;
         }
         
@@ -440,7 +461,7 @@ public class SubmitRunPane extends JPanePlugin {
             try {
                 otherFiles = getAdditionalSerializedFiles();
             } catch (Exception e) {
-                JOptionPane.showMessageDialog(this, e.getMessage());
+                showMessage( e.getMessage());
                 log.log(Log.WARNING, "Exception logged ", e);
             }
         }
@@ -461,7 +482,7 @@ public class SubmitRunPane extends JPanePlugin {
 
             } catch (Exception e) {
                 // TODO need to make this cleaner
-                JOptionPane.showMessageDialog(this, "Exception " + e.getMessage());
+                showMessage( "Exception " + e.getMessage());
             }
         } else {
             // Test run
@@ -949,9 +970,13 @@ public class SubmitRunPane extends JPanePlugin {
         additionalFilesMCLB.removeRow(selectedIndex);
     }
 
-    private void showMessage(String string) {
-        System.out.println("Message: "+string);
+    private void showMessage(final String string) {
         
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                JOptionPane.showMessageDialog(null, string);
+            }
+        });
     }
 
     /**

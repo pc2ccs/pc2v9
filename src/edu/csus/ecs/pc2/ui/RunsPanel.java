@@ -995,7 +995,7 @@ public class RunsPanel extends JPanePlugin {
             extractButton.setMnemonic(java.awt.event.KeyEvent.VK_X);
             extractButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.out.println("actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+                    System.out.println("Extract actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
                 }
             });
         }
@@ -1061,7 +1061,7 @@ public class RunsPanel extends JPanePlugin {
             takeButton.setMnemonic(java.awt.event.KeyEvent.VK_T);
             takeButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.out.println("actionPerformed()"); 
+                    System.out.println("Take actionPerformed()"); 
                     // TODO Auto-generated Event stub actionPerformed()
                 }
             });

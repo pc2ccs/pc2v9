@@ -41,7 +41,7 @@ public final class Starter  {
                 controller.setUsingMainUI(false);
                 controller.start(args);
                 IInternalContest contest = controller.clientLogin("t1", "");
-                System.out.println("Logged in as "+contest.getClientId()+" length = "+contest.getSites().length);
+//                System.out.println("Logged in as "+contest.getClientId()+" length = "+contest.getSites().length);
             } catch (Exception e) {
                 e.printStackTrace();
             }

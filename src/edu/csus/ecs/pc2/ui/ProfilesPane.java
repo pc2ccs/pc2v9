@@ -122,7 +122,7 @@ public class ProfilesPane extends JPanePlugin {
             setButton.setText("Set");
             setButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.out.println("actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+                    System.out.println("SET actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
                 }
             });
         }
