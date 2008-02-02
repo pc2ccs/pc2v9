@@ -18,9 +18,8 @@ public interface IRunListener {
 
     /**
      * Run state has changed.
-     * 
-     * The chage info is in the {@link edu.csus.ecs.pc2.core.model.RunEvent.Action} of
-     * {@link RunEvent}.
+     *
+     * Run info is in the RunEvent.
      * 
      * @see RunEvent
      * @see edu.csus.ecs.pc2.core.model.RunEvent.Action

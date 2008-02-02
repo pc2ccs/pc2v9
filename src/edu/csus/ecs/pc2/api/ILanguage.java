@@ -12,7 +12,7 @@ public interface ILanguage {
     /**
      * Get description for this language.
      * 
-     * @return
+     * @return title/description for language.
      */
     String getTitle();
 }

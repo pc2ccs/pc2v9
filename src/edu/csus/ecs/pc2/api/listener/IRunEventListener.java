@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.api.listener;
 
+import edu.csus.ecs.pc2.api.IContest;
 import edu.csus.ecs.pc2.api.IRun;
 
 /**
@@ -8,7 +9,7 @@ import edu.csus.ecs.pc2.api.IRun;
  * These are the events/methods invoked when a run has been added, removed
  * or updated.
  * <P>
- * See {@link Contest#getRunIds()} for an example of use.
+ * See {@link IContest#getRuns()} for an example of use.
  *
  * @author pc2@ecs.csus.edu
  * @version $Id$

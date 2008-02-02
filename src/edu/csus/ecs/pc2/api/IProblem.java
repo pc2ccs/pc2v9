@@ -13,7 +13,7 @@ public interface IProblem {
     /**
      * Get description for this problem.
      * 
-     * @return
+     * @return title/name for problem.
      */
     String getTitle();
 }

@@ -45,8 +45,6 @@ public interface IRun {
      * 
      * If the run has been judged using an automated judger (also know as a validator) this method may return text from the validator which may not match any defined judgement title/text.
      * 
-     * @param contest
-     *            contest is used to get the judgement title.
      * @return null if not judged, else the title for the judgement.
      */
     String getJudgementTitle();
