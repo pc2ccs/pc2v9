@@ -427,13 +427,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         } else if (loginName.startsWith("server") && loginName.length() > 6) {
             int number = getIntegerValue(loginName.substring(6));
             return new ClientId(number, Type.SERVER, 0);
-        } else if (loginName.startsWith("s") && loginName.length() > 1) {
-            if (Character.isDigit(loginName.charAt(1))) {
-                int number = getIntegerValue(loginName.substring(1));
-                return new ClientId(number, Type.SERVER, 0);
-            } else {
-                throw new SecurityException("No such account " + loginName);
-            }
         } else if (loginName.startsWith("judge") && loginName.length() > 5) {
             int number = getIntegerValue(loginName.substring(5));
             return new ClientId(defaultSiteNumber, Type.JUDGE, number);
@@ -446,6 +439,13 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         } else if (loginName.startsWith("board") && loginName.length() > 5) {
             int number = getIntegerValue(loginName.substring(5));
             return new ClientId(defaultSiteNumber, Type.SCOREBOARD, number);
+        } else if (loginName.startsWith("s") && loginName.length() > 1) {
+            if (Character.isDigit(loginName.charAt(1))) {
+                int number = getIntegerValue(loginName.substring(1));
+                return new ClientId(number, Type.SERVER, 0);
+            } else {
+                throw new SecurityException("No such account " + loginName);
+            }
         } else if (loginName.startsWith("b") && loginName.length() > 1) {
             int number = getIntegerValue(loginName.substring(1));
             return new ClientId(defaultSiteNumber, Type.SCOREBOARD, number);
