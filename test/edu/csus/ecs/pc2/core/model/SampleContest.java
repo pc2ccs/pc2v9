@@ -14,7 +14,7 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 /**
  * Create Sample InternalContest and InternalController.
  * 
- * Also has a method to create a Site.
+ * Also has a method to create a Site class instance.
  * 
  * @see #createContest(int, int, int, int)
  * @see #createController(IInternalContest, boolean, boolean)
@@ -76,6 +76,15 @@ public class SampleContest {
 
         String[] languages = { "Java", "C++", "C", "APL" };
         String[] problems = { "Sumit", "Quadrangles", "Routing", "Faulty Towers", "London Bridge", "Finnigans Bluff" };
+        String[] judgements = { "Stupid programming error",
+                "Misread problem statement",
+                "Almost there",
+                "You have no clue",
+                "Give up and go home",
+                "Consider switching to another major",
+                "How did you get into this place ?",
+                "Contact Staff - you have no hope" };
+
 
         InternalContest contest = new InternalContest();
         
@@ -95,6 +104,11 @@ public class SampleContest {
             Problem problem = new Problem(probName);
             contest.addProblem(problem);
         }
+        
+        for (String judgementName : judgements){
+            Judgement judgement = new Judgement(judgementName);
+            contest.addJudgement(judgement);
+        }
 
         if (numTeams > 0) {
             contest.generateNewAccounts(Type.TEAM.toString(), numTeams, true);
@@ -111,6 +125,8 @@ public class SampleContest {
             ClientId serverId = new ClientId(siteNumber, Type.SERVER, 0);
             contest.setClientId(serverId);
         }
+        
+        
 
         return contest;
     }
