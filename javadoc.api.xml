@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project default="javadocApi">
+<project default="javadoc">
 	<!-- $Id$ -->
 	<!-- $HeadURL$ -->
 	<!-- 
@@ -13,10 +13,8 @@ To Use this:
   
 dal
 -->
-	<target name="javadocApi">
-		<javadoc access="protected" additionalparam=" -linkoffline  http://java.sun.com/j2se/1.5.0/docs/api/ file:///C:/javadoc/5.0/docs/api/" author="true" classpath="vendor\lib\junit-4.1.jar;vendor\lib\mclb.jar" destdir="doc" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" overview="api_overview.html" packagenames="edu.csus.ecs.pc2.api"
-			source="1.5" 
-			sourcefiles="src\edu\csus\ecs\pc2\core\model\ClientId.java,src\edu\csus\ecs\pc2\core\model\ElementId.java,src\edu\csus\ecs\pc2\core\model\ClientType.java"
-			sourcepath="src" splitindex="true" use="true" version="true" />
-	</target>
+<target name="javadoc">
+<javadoc access="protected" additionalparam=" -linkoffline  http://java.sun.com/j2se/1.5.0/docs/api/ file:///C:/javadoc/5.0/docs/api/" author="true" classpath="vendor/lib/junit-4.1.jar;vendor/lib/mclb.jar" 
+destdir="doc.api" doctitle="PC&amp;sup2; Version 9 API" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" overview="C:\workspace\pc2v9\api_overview.html" packagenames="edu.csus.ecs.pc2.api,edu.csus.ecs.pc2.api.exceptions,edu.csus.ecs.pc2.api.listener" source="1.5" sourcepath="src;test" splitindex="true" use="true" version="true"/>
+</target>
 </project>
