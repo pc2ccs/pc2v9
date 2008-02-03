@@ -79,7 +79,10 @@ public class PacketHandler {
 
         info("handlePacket start " + packet);
         PacketFactory.dumpPacket(controller.getLog(),packet, "handlePacket");
-        PacketFactory.dumpPacket(System.err,packet, "handlePacket");
+        
+        if (isServer() || isAdministrator()){
+          PacketFactory.dumpPacket(System.err,packet, "handlePacket");
+        }
 
         ClientId fromId = packet.getSourceId();
 
@@ -2546,6 +2549,11 @@ public class PacketHandler {
         return id != null && id.getClientType().equals(ClientType.Type.SERVER);
     }
     
+    private boolean isAdministrator() {
+        ClientId id = contest.getClientId();
+        return id != null && id.getClientType().equals(ClientType.Type.ADMINISTRATOR);
+    }
+    
     private boolean isJudge(ClientId id) {
         return id != null && id.getClientType().equals(ClientType.Type.JUDGE);
     }
@@ -2560,14 +2568,14 @@ public class PacketHandler {
     
     public void info(String s) {
 //        System.err.flush();
-        controller.getLog().warning(s);
+        controller.getLog().info(s);
 //        System.err.println(Thread.currentThread().getName() + " " + s);
 //        System.err.flush();
     }
 
     public void info(String s, Exception exception) {
 //        System.err.flush();
-        controller.getLog().log (Log.WARNING, s, exception);
+        controller.getLog().log (Log.INFO, s, exception);
 //        System.err.println(Thread.currentThread().getName() + " " + s);
 //        System.err.flush();
 //        exception.printStackTrace(System.err);
