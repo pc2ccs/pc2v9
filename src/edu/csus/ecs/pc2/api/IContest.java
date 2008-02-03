@@ -7,7 +7,7 @@ import edu.csus.ecs.pc2.api.listener.IRunEventListener;
  * Contest data/information.
  * 
  * <pre>
-
+ * System.out.println(&quot;hello&quot;);
  * </pre>
  * 
  * @author pc2@ecs.csus.edu
@@ -47,8 +47,9 @@ public interface IContest {
      * Code snippet to print all team names.
      * 
      * <pre>
+     * 
      * for (ITeam team : contest.getTeams()) {
-     *     System.out.println(team.getTitle());
+     *     System.out.println(team.getShortName() + &quot; Site &quot; + team.getSiteNumber() + &quot; title: &quot; + team.getTitle() + &quot; group: &quot; + team.getGroup());
      * }
      * </pre>
      * 
@@ -167,33 +168,42 @@ public interface IContest {
     /**
      * Add run event listener.
      * 
-     * @param runEventListener listener for Run events
+     * @param runEventListener
+     *            listener for Run events
      */
     void addRunListener(IRunEventListener runEventListener);
 
     /**
      * Remove run event listener.
      * 
-     * @param runEventListener listener for Run events
+     * @param runEventListener
+     *            listener for Run events
      */
     void removeRunListener(IRunEventListener runEventListener);
 
     /**
      * Add Contest Update listener.
      * 
-     * @param contestUpdateConfigurationListener listener for Configuration Update events
+     * @param contestUpdateConfigurationListener
+     *            listener for Configuration Update events
      */
     void addContestUpdateConfigurationListener(IConfigurationUpdateListener contestUpdateConfigurationListener);
 
     /**
      * Remove Contest Update listener.
      * 
-     * @param contestUpdateConfigurationListener listener for Configuration Update events
+     * @param contestUpdateConfigurationListener
+     *            listener for Configuration Update events
      */
     void removeContestUpdateConfigurationListener(IConfigurationUpdateListener contestUpdateConfigurationListener);
 
     /**
-     * Get the current site's contest time.
+     * Get the contest clock info.
+     * 
+     * <pre>
+     * System.out.println(&quot;Contest Time Updated, running &quot; 
+     *    + contestTime.isContestClockRunning() + &quot;, remaining &quot; + contestTime.getRemainingSecs());
+     * </pre>
      * 
      * @return contest time information
      */

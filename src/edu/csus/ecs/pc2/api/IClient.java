@@ -27,4 +27,20 @@ public interface IClient {
      * @return display name.
      */
     String getTitle();
+    
+    /**
+     * Get the site number for this client.
+     * 
+     * @return site number for this client.
+     */
+    int getSiteNumber();
+    
+    /**
+     * Get the client number for the client.
+     * 
+     * Will return 4 for team4.
+     * 
+     * @return the client number, ex 4 for team4
+     */
+    int getClientNumber();
 }
