@@ -66,6 +66,21 @@ public class ContestEvent {
     private ILanguage language;
 
     private IProblem problem;
+    
+    private String contestTitle;
+
+
+    /**
+     * Set event for change in contest title.
+     * @param eventType
+     * @param contestTitle contest title 
+     */
+    public ContestEvent(EventType eventType, String contestTitle) {
+        super();
+        // TODO Auto-generated constructor stub
+        this.eventType = eventType;
+        this.contestTitle = contestTitle;
+    }
 
     public ContestEvent(EventType eventType, IGroup group) {
         super();
@@ -164,4 +179,13 @@ public class ContestEvent {
     public IProblem getProblem() {
         return problem;
     }
+    
+    /**
+     * Get Contest Title for event type {@link EventType#CONTEST_TITLE}.
+     * @return contest title.
+     */
+    public String getContestTitle() {
+        return contestTitle;
+    }
+    
 }
