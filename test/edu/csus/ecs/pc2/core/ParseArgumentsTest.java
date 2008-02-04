@@ -15,7 +15,7 @@ public class ParseArgumentsTest extends TestCase {
     public void testNull() {
 
         try {
-            ParseArguments parseArguments = new ParseArguments(null);
+            @SuppressWarnings("unused") ParseArguments parseArguments = new ParseArguments(null);
         } catch (IllegalArgumentException e) {
             nullFakeRoutine("Passed test threw IllegalArgumentException");
         }
@@ -23,7 +23,7 @@ public class ParseArgumentsTest extends TestCase {
     }
 
     public void testEmpty() {
-        ParseArguments parseArguments = new ParseArguments(new String[0]);
+        @SuppressWarnings("unused") ParseArguments parseArguments = new ParseArguments(new String[0]);
     }
 
     /**

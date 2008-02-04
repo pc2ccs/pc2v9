@@ -40,6 +40,7 @@ public final class Starter  {
             try {
                 controller.setUsingMainUI(false);
                 controller.start(args);
+                @SuppressWarnings("unused") 
                 IInternalContest contest = controller.clientLogin("t1", "");
 //                System.out.println("Logged in as "+contest.getClientId()+" length = "+contest.getSites().length);
             } catch (Exception e) {
