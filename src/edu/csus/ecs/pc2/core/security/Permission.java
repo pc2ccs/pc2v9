@@ -47,7 +47,11 @@ public class Permission implements Serializable {
          */
         CHANGE_PASSWORD,
         /**
-         * Add, delete, modify accounts.
+         * Add accounts.
+         */
+        ADD_ACCOUNT,
+        /**
+         * Modify and delete accounts.
          */
         EDIT_ACCOUNT,
         /**
@@ -228,6 +232,7 @@ public class Permission implements Serializable {
         hash.put(Type.BALLOON_OUTPUT_SHUTOFF, "Allowed to shutoff output");
         hash.put(Type.BALLOON_PRINT, "Allowed to do balloon print");
         hash.put(Type.CHANGE_PASSWORD, "Change password");
+        hash.put(Type.ADD_ACCOUNT, "Add Accounts");
         hash.put(Type.EDIT_ACCOUNT, "Edit Accounts");
         hash.put(Type.EDIT_PERMISSIONS, "Edit Permissions");
         hash.put(Type.EDIT_PERMISSIONS, "Edit Runs");
