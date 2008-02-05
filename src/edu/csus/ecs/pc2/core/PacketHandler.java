@@ -1084,10 +1084,25 @@ public class PacketHandler {
         Account oneAccount = (Account) PacketFactory.getObjectValue(packet, PacketFactory.ACCOUNT);
         if (oneAccount != null) {
             if (isServer()) {
-                if (contest.isLocalLoggedIn(oneAccount.getClientId())) {
-                    Packet addPacket = PacketFactory.clonePacket(contest.getClientId(), oneAccount.getClientId(), packet);
-                    controller.sendToClient(addPacket);
+                if (isThisSite(oneAccount)){
+                    ClientId clientId = oneAccount.getClientId();
+                    
+                    // Add account, this assigns the new account a client number.
+                    Vector<Account> accountVector = contest.generateNewAccounts(clientId.getClientType().toString(), 1, true);
+                    Account addedAccount = accountVector.firstElement();
+                    
+                    // Update/clone new account
+                    addedAccount.setDisplayName(oneAccount.getDisplayName());
+                    addedAccount.setPassword(oneAccount.getPassword());
+                    addedAccount.clearListAndLoadPermissions(oneAccount.getPermissionList());
+                    contest.updateAccount(oneAccount);
+
+                    // Send new account to all servers, admins and judges
+                    Packet updatePacket = PacketFactory.createUpdateSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, contest.getAccount(oneAccount.getClientId()));
+                    sendToJudgesAndOthers(updatePacket, true);
                 }
+            } else {
+                contest.updateAccount(oneAccount);
             }
         }
 

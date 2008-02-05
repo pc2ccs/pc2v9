@@ -42,7 +42,7 @@ public class EditAccountFrame extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(549,349));
+        this.setSize(new java.awt.Dimension(549,409));
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setContentPane(getAccountPane());
         this.setTitle("New Account");
@@ -84,4 +84,4 @@ public class EditAccountFrame extends JFrame implements UIPlugin {
         return accountPane;
     }
 
-} // @jve:decl-index=0:visual-constraint="10,10"
+}  //  @jve:decl-index=0:visual-constraint="12,18"

@@ -22,6 +22,8 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -100,6 +102,10 @@ public class AccountPane extends JPanePlugin {
 
     private Permission permission = new Permission();
 
+    private JLabel jLabel1 = null;
+
+    private JComboBox accountTypeComboBox = null;
+
     /**
      * This method initializes
      * 
@@ -115,7 +121,7 @@ public class AccountPane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new java.awt.Dimension(536, 294));
+        this.setSize(new java.awt.Dimension(536,367));
 
         this.add(getMessagePane(), java.awt.BorderLayout.NORTH);
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
@@ -202,11 +208,20 @@ public class AccountPane extends JPanePlugin {
     }
 
     protected void addAccount() {
+        
+        if (!validatedFields()) {
+            return;
+        }
+        Account newAccount;
+        
+        try {
+            newAccount = getAccountFromFields(null);
+        } catch (InvalidFieldValue e) {
+            showMessage(e.getMessage());
+            return;
+        }
 
-        // Account newAccount = getAccountFromFields();
-
-        // TODO update account
-        // getController().addNewAccount(newAccount);
+        getController().addNewAccount(newAccount);
 
         cancelButton.setText("Close");
         addButton.setEnabled(false);
@@ -216,11 +231,6 @@ public class AccountPane extends JPanePlugin {
             getParentFrame().setVisible(false);
         }
     }
-
-    // TODO uncomment getAccountFromFields
-    // private Account getAccountFromFields() {
-    // return account;
-    // }
 
     /**
      * This method initializes updateButton
@@ -358,6 +368,9 @@ public class AccountPane extends JPanePlugin {
 
             getAddButton().setVisible(true);
             getUpdateButton().setVisible(false);
+            
+            getAccountTypeComboBox().setSelectedIndex(0);
+            getAccountTypeComboBox().setEnabled(true);
 
         } else {
             
@@ -371,6 +384,20 @@ public class AccountPane extends JPanePlugin {
             
             getAddButton().setVisible(false);
             getUpdateButton().setVisible(true);
+            
+            getAccountTypeComboBox().setEnabled(false);
+            
+            edu.csus.ecs.pc2.core.model.ClientType.Type accountType = account2.getClientId().getClientType();
+            
+            for (int i = 0; i < getAccountTypeComboBox().getItemCount(); i++) {
+                ClientType.Type type = (ClientType.Type) getAccountTypeComboBox().getItemAt(i);
+                if (accountType.equals(type)){
+                    getAccountTypeComboBox().setSelectedIndex(i);
+                }
+            }
+            
+            getAccountTypeComboBox().setEnabled(false);
+            
         }
 
         populatePermissions(account2);
@@ -504,17 +531,20 @@ public class AccountPane extends JPanePlugin {
      */
     private JPanel getPermissionPane() {
         if (accountDetailPane == null) {
+            jLabel1 = new JLabel();
+            jLabel1.setBounds(new java.awt.Rectangle(13,185,191,16));
+            jLabel1.setText("Account Type");
             groupTitleLabel = new JLabel();
-            groupTitleLabel.setBounds(new java.awt.Rectangle(13, 171, 137, 16));
+            groupTitleLabel.setBounds(new java.awt.Rectangle(13,242,191,16));
             groupTitleLabel.setText("Group");
             jLabel = new JLabel();
-            jLabel.setBounds(new java.awt.Rectangle(13, 116, 191, 21));
+            jLabel.setBounds(new java.awt.Rectangle(13,126,191,21));
             jLabel.setText("Password Confirmation ");
             passwordLabel = new JLabel();
-            passwordLabel.setBounds(new java.awt.Rectangle(13, 61, 191, 21));
+            passwordLabel.setBounds(new java.awt.Rectangle(13,67,191,21));
             passwordLabel.setText("Password");
             displayNameLabel = new JLabel();
-            displayNameLabel.setBounds(new java.awt.Rectangle(13, 6, 191, 21));
+            displayNameLabel.setBounds(new java.awt.Rectangle(13,8,191,21));
             displayNameLabel.setText("Display Name");
             accountDetailPane = new JPanel();
             accountDetailPane.setLayout(null);
@@ -527,6 +557,8 @@ public class AccountPane extends JPanePlugin {
             accountDetailPane.add(jLabel, null);
             accountDetailPane.add(groupTitleLabel, null);
             accountDetailPane.add(getGroupComboBox(), null);
+            accountDetailPane.add(jLabel1, null);
+            accountDetailPane.add(getAccountTypeComboBox(), null);
         }
         return accountDetailPane;
     }
@@ -597,7 +629,7 @@ public class AccountPane extends JPanePlugin {
     private JTextField getDisplayNameTextField() {
         if (displayNameTextField == null) {
             displayNameTextField = new JTextField();
-            displayNameTextField.setBounds(new java.awt.Rectangle(13, 33, 272, 22));
+            displayNameTextField.setBounds(new java.awt.Rectangle(13,37,272,22));
             displayNameTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
@@ -615,7 +647,7 @@ public class AccountPane extends JPanePlugin {
     private JTextField getPasswordTextField() {
         if (passwordTextField == null) {
             passwordTextField = new JTextField();
-            passwordTextField.setBounds(new java.awt.Rectangle(13, 88, 272, 22));
+            passwordTextField.setBounds(new java.awt.Rectangle(13,96,272,22));
             passwordTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
@@ -633,7 +665,7 @@ public class AccountPane extends JPanePlugin {
     private JTextField getPasswordConfirmField() {
         if (passwordConfirmField == null) {
             passwordConfirmField = new JTextField();
-            passwordConfirmField.setBounds(new java.awt.Rectangle(13, 143, 272, 22));
+            passwordConfirmField.setBounds(new java.awt.Rectangle(13,155,272,22));
             passwordConfirmField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
@@ -651,7 +683,7 @@ public class AccountPane extends JPanePlugin {
     private JComboBox getGroupComboBox() {
         if (groupComboBox == null) {
             groupComboBox = new JComboBox();
-            groupComboBox.setBounds(new java.awt.Rectangle(13, 193, 272, 22));
+            groupComboBox.setBounds(new java.awt.Rectangle(13,266,272,22));
             groupComboBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableUpdateButton();
@@ -707,7 +739,13 @@ public class AccountPane extends JPanePlugin {
 
     private Account getAccountFromFields(Account checkAccount) throws InvalidFieldValue {
         if (checkAccount == null) {
-            checkAccount = new Account(account.getClientId(), null, account.getSiteNumber());
+            if (account == null) {
+                ClientType.Type type = (ClientType.Type)  getAccountTypeComboBox().getSelectedItem();
+                ClientId clientId = new ClientId(getContest().getSiteNumber(), type, 0); 
+                checkAccount = new Account(clientId, null, account.getSiteNumber());
+            } else {
+                checkAccount = new Account(account.getClientId(), null, account.getSiteNumber());
+            }
         }
 
         // clear out the permissions
@@ -747,6 +785,25 @@ public class AccountPane extends JPanePlugin {
             }
         }
         return null;
+    }
+
+    /**
+     * Intialize Account Type combo box
+     * 
+     * @return javax.swing.JComboBox
+     */
+    private JComboBox getAccountTypeComboBox() {
+        if (accountTypeComboBox == null) {
+            accountTypeComboBox = new JComboBox();
+            accountTypeComboBox.setBounds(new java.awt.Rectangle(13,209,272,25));
+            
+            accountTypeComboBox.addItem(ClientType.Type.TEAM);
+            accountTypeComboBox.addItem(ClientType.Type.JUDGE);
+            accountTypeComboBox.addItem(ClientType.Type.SCOREBOARD);
+            accountTypeComboBox.addItem(ClientType.Type.ADMINISTRATOR);
+            
+        }
+        return accountTypeComboBox;
     }
    
 } // @jve:decl-index=0:visual-constraint="10,10"
