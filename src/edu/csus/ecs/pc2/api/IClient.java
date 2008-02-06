@@ -13,8 +13,6 @@ public interface IClient {
 
     /**
      * Client types defined in the system.
-     * 
-     * @return clientType
      */
     public enum ClientType {
         /**
