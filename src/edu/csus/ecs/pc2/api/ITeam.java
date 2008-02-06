@@ -12,14 +12,7 @@ package edu.csus.ecs.pc2.api;
 // $HeadURL$
 public interface ITeam extends IClient {
 
-    /**
-     * Get the display name/title for this team.
-     * 
-     * @return display name for team.
-     */
-    String getDisplayName();
-
-    /**
+   /**
      * Get the group for this team.
      * 
      * @return group information.

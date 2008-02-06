@@ -87,11 +87,11 @@ public class RunImplementation implements IRun {
         return deleted;
     }
 
-    public ITeam getSubmitterTeam() {
+    public ITeam getTeam() {
         return submitterTeam;
     }
 
-    public String getJudgementTitle() {
+    public String getJudgementName() {
         return judgementTitle;
     }
 

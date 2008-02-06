@@ -10,9 +10,9 @@ package edu.csus.ecs.pc2.api;
 // $HeadURL$
 public interface ILanguage {
     /**
-     * Get description for this language.
+     * Get name for this language.
      * 
      * @return title/description for language.
      */
-    String getTitle();
+    String getName();
 }

@@ -11,10 +11,10 @@ package edu.csus.ecs.pc2.api;
 public interface IJudgement {
 
     /**
-     * Get description for this judgement.
+     * Get name for this judgement.
      * 
      * @return display name for judgement.
      */
-    String getTitle();
+    String getName();
 
 }

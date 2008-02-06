@@ -58,29 +58,6 @@ import edu.csus.ecs.pc2.api.listener.IRunEventListener;
 public interface IContest {
 
     /**
-     * Has this client logged in ?.
-     * 
-     * If the client has used the {@link ServerConnection#login(String, String)} successfully then this method will return true.
-     * <P>
-     * If the client has logged off ({@link ServerConnection#logoff()}) or never logged in then returns false.
-     * 
-     * @see ServerConnection#login(String, String)
-     * @return true if logged in, false if not.
-     */
-    boolean isLoggedIn();
-
-    /**
-     * Returns the display name for the logged in client.
-     * 
-     * For each login there is a display name, like a school name.
-     * <P>
-     * Use {@link #getContestTitle()} to get the contest title.
-     * 
-     * @return the display name for the logged in client.
-     */
-    String getTitle();
-
-    /**
      * Gets all the team ClientIds in the contest.
      * 
      * <P>
@@ -98,12 +75,12 @@ public interface IContest {
     ITeam[] getTeams();
 
     /**
-     * Get the title for the specified site.
+     * Get the name for the specified site.
      * 
      * @param siteNumber
      * @return title for this site. @
      */
-    String getSiteTitle(int siteNumber);
+    String getSiteName(int siteNumber);
 
     /**
      * Get the contest title.
@@ -114,14 +91,14 @@ public interface IContest {
     String getContestTitle();
 
     /**
-     * Get the current server's site title.
+     * Get the current server's site name.
      * 
-     * Gets the title for the server this client is logged into.
+     * Gets the name for the server this client is logged into.
      * 
-     * @return the current server's site title.
+     * @return the current server's site name.
      * 
      */
-    String getSiteTitle();
+    String getSiteName();
 
     /**
      * Get a list of languages.
@@ -247,7 +224,7 @@ public interface IContest {
      * 
      * @return contest time information
      */
-    IContestTime getContestTime();
+    IContestClock getContestTime();
 
     /**
      * Get list of defined groups/regions.
@@ -259,7 +236,7 @@ public interface IContest {
     /**
      * Get the current logged in client.
      */
-    IClient getClient();
+    IClient getMyClient();
 
     /**
      * Is Contest Clock started/running ?.

@@ -12,13 +12,56 @@ package edu.csus.ecs.pc2.api;
 public interface IClient {
 
     /**
+     * Client types defined in the system.
+     * 
+     * @return clientType
+     */
+    public enum ClientType {
+        /**
+         * Team client.
+         */
+        TEAM_CLIENT,
+        /**
+         * Judge client.
+         */
+        JDUGE_CLIENT,
+        /**
+         * Scoreboard client.
+         */
+        SCOREBOARD_CLIENT,
+        /**
+         * Admin client.
+         */
+        ADMIN_CLIENT,
+        /**
+         * Custom client.
+         */
+        CUSTOM_CLIENT,
+        /**
+         * Other client.
+         */
+        OTHER_CLIENT,
+        /**
+         * Unknown client.
+         */
+        UNKNOWN_CLIENT 
+    };
+
+    /**
      * Get client short (login) name.
      * 
      * Example for team 4 site 5, would return "team4"
      * 
      * @return login name
      */
-    String getShortName();
+    String getLoginName();
+
+    /**
+     * Get the client Type.
+     * 
+     * @return enum type
+     */
+    ClientType getType();
 
     /**
      * Get the display name or title for this client.
@@ -26,7 +69,7 @@ public interface IClient {
      * 
      * @return display name.
      */
-    String getTitle();
+    String getDisplayName();
     
     /**
      * Get the site number for this client.
@@ -42,5 +85,5 @@ public interface IClient {
      * 
      * @return the client number, ex 4 for team4
      */
-    int getClientNumber();
+    int getNumber();
 }

@@ -16,7 +16,7 @@ public interface IConfigurationUpdateListener {
      * 
      * @param contestEvent
      */
-    void elementAdded(ContestEvent contestEvent);
+    void configurationElementAdded(ContestEvent contestEvent);
 
     /**
      * Contest element updated.
@@ -25,12 +25,12 @@ public interface IConfigurationUpdateListener {
      * 
      * @param contestEvent
      */
-    void elementUpdated(ContestEvent contestEvent);
+    void configurationElementUpdated(ContestEvent contestEvent);
 
     /**
      * Removed element.
      * 
      * @param contestEvent
      */
-    void elementRemoved(ContestEvent contestEvent);
+    void configurationElementRemoved(ContestEvent contestEvent);
 }

@@ -15,6 +15,6 @@ public interface IGroup {
      * 
      * @return title/name for group.
      */
-    String getTitle();
+    String getName();
 
 }

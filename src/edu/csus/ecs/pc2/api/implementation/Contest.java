@@ -4,7 +4,7 @@ import java.util.Vector;
 
 import edu.csus.ecs.pc2.api.IClient;
 import edu.csus.ecs.pc2.api.IContest;
-import edu.csus.ecs.pc2.api.IContestTime;
+import edu.csus.ecs.pc2.api.IContestClock;
 import edu.csus.ecs.pc2.api.IGroup;
 import edu.csus.ecs.pc2.api.IJudgement;
 import edu.csus.ecs.pc2.api.ILanguage;
@@ -67,7 +67,7 @@ public class Contest implements IContest {
         return teamImplementations;
     }
 
-    public String getSiteTitle(int siteNumber) {
+    public String getSiteName(int siteNumber) {
         Site site = contest.getSite(siteNumber);
         return site.getDisplayName();
     }
@@ -77,8 +77,8 @@ public class Contest implements IContest {
         return site.getDisplayName();
     }
 
-    public String getSiteTitle() {
-        return getSiteTitle(contest.getSiteNumber());
+    public String getSiteName() {
+        return getSiteName(contest.getSiteNumber());
     }
 
     public ILanguage[] getLanguages() {
@@ -137,7 +137,7 @@ public class Contest implements IContest {
         configurationListenerList.removeContestUpdateConfigurationListener(contestUpdateConfigurationListener);
     }
 
-    public IContestTime getContestTime() {
+    public IContestClock getContestTime() {
         return new ContestTimeImplementation(contest.getContestTime());
     }
 
@@ -150,7 +150,7 @@ public class Contest implements IContest {
         return groupImplementations;
     }
 
-    public IClient getClient() {
+    public IClient getMyClient() {
         return new ClientImplementation(contest.getClientId(), contest);
     }
 

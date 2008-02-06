@@ -18,25 +18,28 @@ public class ClientImplementation implements IClient {
 
     private String title;
 
-    private int clientNumber;
+    private int number;
 
     private int siteNumber;
 
+    private ClientType clientType;
+    
     public ClientImplementation(ClientId clientId, IInternalContest contest) {
         Account account = contest.getAccount(clientId);
         if (account != null) {
             shortName = clientId.getName();
             title = account.getDisplayName();
         }
-        clientNumber = clientId.getClientNumber();
+        number = clientId.getClientNumber();
         siteNumber = clientId.getSiteNumber();
+        //TODO: set the clientType;
     }
 
-    public String getShortName() {
+    public String getLoginName() {
         return shortName;
     }
 
-    public String getTitle() {
+    public String getDisplayName() {
         return title;
     }
 
@@ -44,8 +47,11 @@ public class ClientImplementation implements IClient {
         return siteNumber;
     }
 
-    public int getClientNumber() {
-        return clientNumber;
+    public int getNumber() {
+        return number;
     }
 
+    public ClientType getType() {
+        return clientType;
+    }
 }

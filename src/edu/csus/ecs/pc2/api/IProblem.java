@@ -11,9 +11,9 @@ package edu.csus.ecs.pc2.api;
 public interface IProblem {
 
     /**
-     * Get description for this problem.
+     * Get name for this problem.
      * 
      * @return title/name for problem.
      */
-    String getTitle();
+    String getName();
 }

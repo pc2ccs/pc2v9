@@ -14,17 +14,17 @@ import edu.csus.ecs.pc2.core.model.Language;
 // $HeadURL$
 public class LanguageImplementation implements ILanguage {
 
-    private String title;
+    private String name;
 
     public LanguageImplementation(ElementId languageId, IInternalContest internalContest) {
         this(internalContest.getLanguage(languageId));
     }
 
     public LanguageImplementation(Language language) {
-        title = language.getDisplayName();
+        name = language.getDisplayName();
     }
 
-    public String getTitle() {
-        return title;
+    public String getName() {
+        return name;
     }
 }

@@ -3,7 +3,7 @@ package edu.csus.ecs.pc2.api.implementation;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.api.IClient;
-import edu.csus.ecs.pc2.api.IContestTime;
+import edu.csus.ecs.pc2.api.IContestClock;
 import edu.csus.ecs.pc2.api.IGroup;
 import edu.csus.ecs.pc2.api.IJudgement;
 import edu.csus.ecs.pc2.api.ILanguage;
@@ -82,14 +82,14 @@ public class ConfigurationListenerList {
 
             switch (problemEvent.getAction()) {
                 case ADDED:
-                    listenerList.elementAt(i).elementAdded(contestEvent);
+                    listenerList.elementAt(i).configurationElementAdded(contestEvent);
                     break;
                 case DELETED:
-                    listenerList.elementAt(i).elementRemoved(contestEvent);
+                    listenerList.elementAt(i).configurationElementRemoved(contestEvent);
                     break;
                 case CHANGED:
                 default:
-                    listenerList.elementAt(i).elementUpdated(contestEvent);
+                    listenerList.elementAt(i).configurationElementUpdated(contestEvent);
                     break;
             }
         }
@@ -123,14 +123,14 @@ public class ConfigurationListenerList {
 
             switch (languageEvent.getAction()) {
                 case ADDED:
-                    listenerList.elementAt(i).elementAdded(contestEvent);
+                    listenerList.elementAt(i).configurationElementAdded(contestEvent);
                     break;
                 case DELETED:
-                    listenerList.elementAt(i).elementRemoved(contestEvent);
+                    listenerList.elementAt(i).configurationElementRemoved(contestEvent);
                     break;
                 case CHANGED:
                 default:
-                    listenerList.elementAt(i).elementUpdated(contestEvent);
+                    listenerList.elementAt(i).configurationElementUpdated(contestEvent);
                     break;
             }
         }
@@ -164,14 +164,14 @@ public class ConfigurationListenerList {
 
             switch (groupEvent.getAction()) {
                 case ADDED:
-                    listenerList.elementAt(i).elementAdded(contestEvent);
+                    listenerList.elementAt(i).configurationElementAdded(contestEvent);
                     break;
                 case DELETED:
-                    listenerList.elementAt(i).elementRemoved(contestEvent);
+                    listenerList.elementAt(i).configurationElementRemoved(contestEvent);
                     break;
                 case CHANGED:
                 default:
-                    listenerList.elementAt(i).elementUpdated(contestEvent);
+                    listenerList.elementAt(i).configurationElementUpdated(contestEvent);
                     break;
             }
         }
@@ -209,19 +209,19 @@ public class ConfigurationListenerList {
     private void fireContestTimeListener(ContestTimeEvent contestTimeEvent) {
         for (int i = 0; i < listenerList.size(); i++) {
 
-            IContestTime contestTime = new ContestTimeImplementation(contestTimeEvent.getContestTime());
+            IContestClock contestTime = new ContestTimeImplementation(contestTimeEvent.getContestTime());
             ContestEvent contestEvent = new ContestEvent(EventType.CONTEST_CLOCK, contestTime);
 
             switch (contestTimeEvent.getAction()) {
                 case ADDED:
-                    listenerList.elementAt(i).elementAdded(contestEvent);
+                    listenerList.elementAt(i).configurationElementAdded(contestEvent);
                     break;
                 case DELETED:
-                    listenerList.elementAt(i).elementRemoved(contestEvent);
+                    listenerList.elementAt(i).configurationElementRemoved(contestEvent);
                     break;
                 case CHANGED:
                 default:
-                    listenerList.elementAt(i).elementUpdated(contestEvent);
+                    listenerList.elementAt(i).configurationElementUpdated(contestEvent);
                     break;
             }
         }
@@ -255,14 +255,14 @@ public class ConfigurationListenerList {
 
             switch (judgementEvent.getAction()) {
                 case ADDED:
-                    listenerList.elementAt(i).elementAdded(contestEvent);
+                    listenerList.elementAt(i).configurationElementAdded(contestEvent);
                     break;
                 case DELETED:
-                    listenerList.elementAt(i).elementRemoved(contestEvent);
+                    listenerList.elementAt(i).configurationElementRemoved(contestEvent);
                     break;
                 case CHANGED:
                 default:
-                    listenerList.elementAt(i).elementUpdated(contestEvent);
+                    listenerList.elementAt(i).configurationElementUpdated(contestEvent);
                     break;
             }
         }
@@ -303,20 +303,20 @@ public class ConfigurationListenerList {
                 case ADDED:
                     client = new ClientImplementation(accountEvent.getAccount().getClientId(), contest);
                     contestEvent = new ContestEvent(EventType.LOGIN_ACCOUNT, client);
-                    listenerList.elementAt(i).elementAdded(contestEvent);
+                    listenerList.elementAt(i).configurationElementAdded(contestEvent);
                     break;
 
                 case DELETED:
                     client = new ClientImplementation(accountEvent.getAccount().getClientId(), contest);
                     contestEvent = new ContestEvent(EventType.LOGIN_ACCOUNT, client);
-                    listenerList.elementAt(i).elementRemoved(contestEvent);
+                    listenerList.elementAt(i).configurationElementRemoved(contestEvent);
                     break;
 
                 case ADDED_ACCOUNTS:
                     for (Account account : accountEvent.getAccounts()) {
                         client = new ClientImplementation(account.getClientId(), contest);
                         contestEvent = new ContestEvent(EventType.LOGIN_ACCOUNT, client);
-                        listenerList.elementAt(i).elementAdded(contestEvent);
+                        listenerList.elementAt(i).configurationElementAdded(contestEvent);
                     }
                     break;
 
@@ -324,7 +324,7 @@ public class ConfigurationListenerList {
                     for (Account account : accountEvent.getAccounts()) {
                         client = new ClientImplementation(account.getClientId(), contest);
                         contestEvent = new ContestEvent(EventType.LOGIN_ACCOUNT, client);
-                        listenerList.elementAt(i).elementUpdated(contestEvent);
+                        listenerList.elementAt(i).configurationElementUpdated(contestEvent);
                     }
                     break;
 
@@ -332,7 +332,7 @@ public class ConfigurationListenerList {
                 default:
                     client = new ClientImplementation(accountEvent.getAccount().getClientId(), contest);
                     contestEvent = new ContestEvent(EventType.LOGIN_ACCOUNT, client);
-                    listenerList.elementAt(i).elementUpdated(contestEvent);
+                    listenerList.elementAt(i).configurationElementUpdated(contestEvent);
                     break;
             }
         }
@@ -373,14 +373,14 @@ public class ConfigurationListenerList {
 
               switch (contestInformationEvent.getAction()) {
                   case ADDED:
-                      listenerList.elementAt(i).elementAdded(contestEvent);
+                      listenerList.elementAt(i).configurationElementAdded(contestEvent);
                       break;
                   case DELETED:
-                      listenerList.elementAt(i).elementRemoved(contestEvent);
+                      listenerList.elementAt(i).configurationElementRemoved(contestEvent);
                       break;
                   case CHANGED:
                   default:
-                      listenerList.elementAt(i).elementUpdated(contestEvent);
+                      listenerList.elementAt(i).configurationElementUpdated(contestEvent);
                       break;
               }
           }

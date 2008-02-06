@@ -12,14 +12,14 @@ import edu.csus.ecs.pc2.core.model.Judgement;
 // $HeadURL$
 public class JudgementImplementation implements IJudgement {
 
-    private String title;
+    private String name;
 
     public JudgementImplementation(Judgement judgement) {
-        title = judgement.getDisplayName();
+        name = judgement.getDisplayName();
     }
 
-    public String getTitle() {
-        return title;
+    public String getName() {
+        return name;
     }
 
 }

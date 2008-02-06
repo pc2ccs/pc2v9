@@ -13,11 +13,11 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 // $HeadURL$
 public class GroupImplementation implements IGroup {
 
-    private String title;
+    private String name;
 
-    public GroupImplementation(String title) {
+    public GroupImplementation(String name) {
         super();
-        this.title = title;
+        this.name = name;
     }
 
     public GroupImplementation(ElementId groupId, IInternalContest internalContest) {
@@ -25,11 +25,11 @@ public class GroupImplementation implements IGroup {
     }
 
     public GroupImplementation(Group group, IInternalContest contest) {
-        title = group.getDisplayName();
+        name = group.getDisplayName();
     }
 
-    public String getTitle() {
-        return title;
+    public String getName() {
+        return name;
     }
 
 }

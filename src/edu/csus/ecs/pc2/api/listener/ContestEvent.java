@@ -1,7 +1,7 @@
 package edu.csus.ecs.pc2.api.listener;
 
 import edu.csus.ecs.pc2.api.IClient;
-import edu.csus.ecs.pc2.api.IContestTime;
+import edu.csus.ecs.pc2.api.IContestClock;
 import edu.csus.ecs.pc2.api.IGroup;
 import edu.csus.ecs.pc2.api.IJudgement;
 import edu.csus.ecs.pc2.api.ILanguage;
@@ -57,7 +57,7 @@ public class ContestEvent {
 
     private IClient client;
 
-    private IContestTime contestTime;
+    private IContestClock contestTime;
 
     private IGroup group;
 
@@ -94,7 +94,7 @@ public class ContestEvent {
         this.client = client;
     }
 
-    public ContestEvent(EventType eventType, IContestTime contestTime) {
+    public ContestEvent(EventType eventType, IContestClock contestTime) {
         super();
         this.eventType = eventType;
         this.contestTime = contestTime;
@@ -132,7 +132,7 @@ public class ContestEvent {
      * 
      * @see #getEventType()
      */
-    public IContestTime getContestTime() {
+    public IContestClock getContestTime() {
         return contestTime;
     }
 

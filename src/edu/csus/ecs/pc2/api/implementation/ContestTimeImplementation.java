@@ -1,16 +1,16 @@
 package edu.csus.ecs.pc2.api.implementation;
 
-import edu.csus.ecs.pc2.api.IContestTime;
+import edu.csus.ecs.pc2.api.IContestClock;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 
 /**
- * API IContestTime implementation.  
+ * API IContestClock implementation.  
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
 
 // $HeadURL$
-public class ContestTimeImplementation implements IContestTime {
+public class ContestTimeImplementation implements IContestClock {
 
     private ContestTime contestTime;
     

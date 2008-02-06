@@ -38,16 +38,16 @@ public interface IRun {
      * 
      * @return the ClientId (site, team number) for the team who submitted this run.
      */
-    ITeam getSubmitterTeam();
+    ITeam getTeam();
 
     /**
-     * Get the judgement title/text for the run.
+     * Get the judgement name for the run.
      * 
      * If the run has been judged using an automated judger (also know as a validator) this method may return text from the validator which may not match any defined judgement title/text.
      * 
      * @return null if not judged, else the title for the judgement.
      */
-    String getJudgementTitle();
+    String getJudgementName();
 
     /**
      * Get problem for this run.

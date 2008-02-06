@@ -15,17 +15,17 @@ import edu.csus.ecs.pc2.core.model.Problem;
 // $HeadURL$
 public class ProblemImplementation implements IProblem {
 
-    private String title;
+    private String name;
 
     public ProblemImplementation(ElementId problemId, IInternalContest internalContest) {
         this(internalContest.getProblem(problemId));
     }
 
     public ProblemImplementation(Problem problem) {
-        title = problem.getDisplayName();
+        name = problem.getDisplayName();
     }
 
-    public String getTitle() {
-        return title;
+    public String getName() {
+        return name;
     }
 }

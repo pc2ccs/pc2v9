@@ -8,7 +8,7 @@ package edu.csus.ecs.pc2.api;
  */
 
 // $HeadURL$
-public interface IContestTime {
+public interface IContestClock {
 
     /**
      * Get the remaining seconds in the contest.

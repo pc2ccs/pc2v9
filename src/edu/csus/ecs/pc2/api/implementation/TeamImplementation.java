@@ -46,11 +46,8 @@ public class TeamImplementation extends ClientImplementation implements ITeam {
         return group;
     }
 
-    public String getShortName() {
+    public String getLoginName() {
         return shortName;
     }
 
-    public String getTitle() {
-        return displayName;
-    }
 }
