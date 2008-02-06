@@ -17,7 +17,7 @@ public interface ITeam extends IClient {
      * 
      * @return display name for team.
      */
-    String getLongName();
+    String getDisplayName();
 
     /**
      * Get the group for this team.

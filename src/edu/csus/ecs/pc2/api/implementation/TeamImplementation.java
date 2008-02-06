@@ -16,7 +16,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 // $HeadURL$
 public class TeamImplementation extends ClientImplementation implements ITeam {
 
-    private String longName;
+    private String displayName;
 
     private String shortName;
 
@@ -29,7 +29,7 @@ public class TeamImplementation extends ClientImplementation implements ITeam {
     public TeamImplementation(Account account, IInternalContest internalContest) {
         super(account.getClientId(), internalContest);
         
-        longName = account.getDisplayName();
+        displayName = account.getDisplayName();
         shortName = account.getClientId().getName();
         if (account.getGroupId() == null) {
             group = new GroupImplementation("");
@@ -38,8 +38,8 @@ public class TeamImplementation extends ClientImplementation implements ITeam {
         }
     }
 
-    public String getLongName() {
-        return longName;
+    public String getDisplayName() {
+        return displayName;
     }
 
     public IGroup getGroup() {
@@ -51,6 +51,6 @@ public class TeamImplementation extends ClientImplementation implements ITeam {
     }
 
     public String getTitle() {
-        return longName;
+        return displayName;
     }
 }
