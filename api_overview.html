@@ -1,5 +1,6 @@
 <body>
 <! -- $HeadURL: http://pc2.ecs.csus.edu/repos/pc2v9/trunk/edu/csus/ecs/pc2/package.html $ -- >
+This documentation describes the current <I>draft</i> of the PC<sup>2</sup> API, which is subject to change.
 <p>
 The <B>API</b> package provides the facilities necessary for user-written Client applications to directly access 
 a <A HREf="http://www.ecs.csus.edu/pc2"> PC<sup>2</sup></a> Server.  The API would typically be used
@@ -21,40 +22,25 @@ with these concepts; see the separate PC<sup>2</sup> Contest Administrator's Gui
 <P>
 Writing a custom Client using the PC<sup>2</sup> API involves three basic steps:
 <ol>
-	<li> Establishing a <i>server connection</i>
+	<li> Creating a <i>server connection</i>
 	<li> Logging in to the server via the server connection by providing valid authentication credentials.  Successfully 
 			logging in to a server provides access to an object of type <code>IContest</code>, a representation of the
 			contest being controlled by the server.
 	<li> Invoking the various <code>IContest</code> methods to access server operations and obtain contest data.
 </ol>
-The following paragraphs provide examples of how each of these basic steps is performed.
-<P>
-//TODO: add server connection, login, and contest data access example code here...
-
-<P>
-If you are familiar with how to start and configure a server and want to 
-try out the samples scroll down to the Quick Start section on this page.
+The following links provide access to examples of how each of these basic steps is performed.  
+Further examples can be found in the documentation for each of the API packages, classes, interfaces, and methods.
 <P>
 
-<h3>Quick Start</h3>
-<ol>
-<li>Obtain the pc2.jar from (todo: insert URL here)
-</li>
-<li> // TODO the rest of  the install instructions
-<li> Code Sample
-<a href="edu/csus/ecs/pc2/api/IContest.html"> Full login and print run sample</a>
-<li> Code Snippets 
-<br>
-<a href="edu/csus/ecs/pc2/api/ServerConnection.html#login(java.lang.String,%20java.lang.String)"> Login snippet </a> <br>
-<a href="edu/csus/ecs/pc2/api/IContest.html#getTeams()"> Print all teams (names) snippet </a> <br>
-<a href="edu/csus/ecs/pc2/api/IContest.html#getRuns()"> Print runs (info) snippet </a> <br>
-<a href="edu/csus/ecs/pc2/api/IContest.html#getLanguages()"> Print Language names snippet </a> <br>
-<a href="edu/csus/ecs/pc2/api/IContest.html#getProblems()"> Print Problem names snippet </a> <br>
-<a href="edu/csus/ecs/pc2/api/IContest.html#getJudgements()"> Print Judgement names snippet </a> <br>
-
-<pre>
-// TODO print output of SA ??
-</pre>
-</ol>
+<h3>Quick Samples</h3>
+<ul>
+	<li> <a href="edu/csus/ecs/pc2/api/ServerConnection.html#loginsample"> Connect and login to a PC<sup>2</sup> server</a> <br>
+	<li> <a href="edu/csus/ecs/pc2/api/IContest.html#loginsample"> Connect and login to a PC<sup>2</sup> server</a>
+	<li> <a href="edu/csus/ecs/pc2/api/IContest.html#getTeams()"> Print all teams (names) snippet </a> <br>
+	<li> <a href="edu/csus/ecs/pc2/api/IContest.html#getRuns()"> Print runs (info) snippet </a> <br>
+	<li> <a href="edu/csus/ecs/pc2/api/IContest.html#getLanguages()"> Print Language names snippet </a> <br>
+	<li> <a href="edu/csus/ecs/pc2/api/IContest.html#getProblems()"> Print Problem names snippet </a> <br>
+	<li> <a href="edu/csus/ecs/pc2/api/IContest.html#getJudgements()"> Print Judgement names snippet </a> <br>
+</ul>
 
 </body>
