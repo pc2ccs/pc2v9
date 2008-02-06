@@ -7,7 +7,47 @@ import edu.csus.ecs.pc2.api.listener.IRunEventListener;
  * Contest data/information.
  * 
  * <pre>
- * System.out.println(&quot;hello&quot;);
+ * import edu.csus.ecs.pc2.api.IContest;
+ * import edu.csus.ecs.pc2.api.IRun;
+ * import edu.csus.ecs.pc2.api.ServerConnection;
+ * import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
+ * 
+ * public class RunsSample {
+ * 
+ * private void loginAndShowRuns(String login, String password) throws LoginFailureException {
+ *  
+ *          ServerConnection serverConnection = new ServerConnection();
+ *          IContest contest = serverConnection.login(login, password);
+ *  
+ *          for (IRun run : contest.getRuns()) {
+ *  
+ *              System.out.println(&quot;Run &quot; + run.getNumber() + &quot; from site &quot; + run.getSiteNumber());
+ *              System.out.println(&quot;    submitted at &quot; + run.getSubmissionTime() + &quot; by &quot; + run.getSubmitterTeam().getTitle());
+ *              System.out.println(&quot;    For problem &quot; + run.getProblem().getTitle());
+ *              System.out.println(&quot;    Written in &quot; + run.getLanguage().getTitle());
+ *  
+ *              if (run.isJudged()) {
+ *                  System.out.println(&quot;    Judgement: &quot; + run.getJudgementTitle());
+ *              } else {
+ *                  System.out.println(&quot;    Judgement: not judged yet &quot;);
+ *              }
+ *  
+ *              System.out.println();
+ *          }
+ *  
+ *      }    public static void main(String[] args) {
+ *         if (args.length != 2) {
+ *             System.out.println(&quot;API Sample, usage: APIExample loginName password&quot;);
+ *         } else {
+ *             System.out.println(&quot;login: &quot; + args[0] + &quot; password: &quot; + args[1]);
+ *             try {
+ *                 new RunsSample().loginAndShowRuns(args[0], args[1]);
+ *             } catch (LoginFailureException e) {
+ *                 e.printStackTrace();
+ *             }
+ *         }
+ *     }
+ * }
  * </pre>
  * 
  * @author pc2@ecs.csus.edu
