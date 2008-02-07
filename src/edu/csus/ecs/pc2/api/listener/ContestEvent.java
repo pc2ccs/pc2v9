@@ -132,7 +132,7 @@ public class ContestEvent {
      * 
      * @see #getEventType()
      */
-    public IContestClock getContestTime() {
+    public IContestClock getContestClock() {
         return contestTime;
     }
 
