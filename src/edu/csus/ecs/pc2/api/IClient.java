@@ -16,6 +16,10 @@ public interface IClient {
      */
     public enum ClientType {
         /**
+         * Unknown client type.
+         */
+        UNKNOWN_CLIENT,
+        /**
          * Team client.
          */
         TEAM_CLIENT,
@@ -31,18 +35,6 @@ public interface IClient {
          * Admin client.
          */
         ADMIN_CLIENT,
-        /**
-         * Custom client.
-         */
-        CUSTOM_CLIENT,
-        /**
-         * Other client.
-         */
-        OTHER_CLIENT,
-        /**
-         * Unknown client.
-         */
-        UNKNOWN_CLIENT 
     };
 
     /**
