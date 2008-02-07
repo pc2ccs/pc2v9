@@ -1,7 +1,7 @@
 package edu.csus.ecs.pc2.api;
 
 /**
- * This class defines the data associated with a PC<sup>2</sup> &quot;Client&quot; which is visible through the PC<sup>2</sup> API .
+ * This interface defines the view which is visible through the PC<sup>2</sup> API of a PC<sup>2</sup> &quot;Client&quot;.
  * &quot;Client&quot; in this context refers to a piece of code logged in to a PC<sup>2</sup> server via an account
  * which has been created by the Contest Administrator; for example, an instance of a PC<sup>2</sup> Team, Judge, Administrator, or
  * Scoreboard, or a separate user-written client which logs in using a contest account.

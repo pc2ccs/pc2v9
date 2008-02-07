@@ -1,8 +1,11 @@
 package edu.csus.ecs.pc2.api;
 
 /**
- * Language information.
+ * This interface describes the PC<sup>2</sup> API view of a contest <I>Language</i>.
  * 
+ * <p>
+ * This documentation describes the current <I>draft</i> of the PC<sup>2</sup> API, which is subject to change.
+ *  
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -10,9 +13,9 @@ package edu.csus.ecs.pc2.api;
 // $HeadURL$
 public interface ILanguage {
     /**
-     * Get name for this language.
+     * Get the name for this language as configured by the Contest Administrator.
      * 
-     * @return title/description for language.
+     * @return A String containing the name of the language.
      */
     String getName();
 }

@@ -1,8 +1,11 @@
 package edu.csus.ecs.pc2.api;
 
 /**
- * Problem Information.
+ * This interface describes the PC<sup>2</sup> API view of a contest <I>Problem</i>.
  * 
+ * <p>
+ * This documentation describes the current <I>draft</i> of the PC<sup>2</sup> API, which is subject to change.
+ *  
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -11,9 +14,9 @@ package edu.csus.ecs.pc2.api;
 public interface IProblem {
 
     /**
-     * Get name for this problem.
+     * Get the name for this problem as configured by the Contest Administrator.
      * 
-     * @return title/name for problem.
+     * @return A String containing the name of the problem.
      */
     String getName();
 }
