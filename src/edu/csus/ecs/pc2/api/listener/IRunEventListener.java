@@ -4,9 +4,11 @@ import edu.csus.ecs.pc2.api.IRun;
 
 /**
  * This interface describes the set of methods that any Run Listener must implement.
- *
+ * <p>
  * These methods are invoked when a run has been added, removed (marked as deleted), judged,
- * or updated in the contest.
+ * or updated in the contest.  A client utilizing the PC<sup>2</sup> API can implement this
+ * interface and add itself to the contest as a Listener, and therefore arrange to be notified when 
+ * any runs are added to, modified, or removed from the contest.
  *
  * <p>
  * This documentation describes the current <I>draft</i> of the PC<sup>2</sup> API, which is subject to change.
