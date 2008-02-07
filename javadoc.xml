@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project default="javadoc">
+	<!-- $Id$ -->
+	<!-- $HeadURL$ -->
+	<!-- 
+Purpose: Create the API Java documentation
+
+To Use this:
+  To run/use this file:
+  insure that javadoc.exe is in the PATH
+  insure JAVA_HOME is defined (in eclipse)
+  then Run As... Ant Build (in eclipse)
+  
+dal
+-->
+	<target name="javadoc">
+		<javadoc 
+			access="protected"
+			additionalparam=" -link  http://java.sun.com/j2se/1.5.0/docs/api/" 
+			author="true" 
+			classpath="vendor\lib\junit-4.1.jar;vendor\lib\mclb.jar" 
+			destdir="doc" 
+			doctitle="PC&amp;sup2; Development Classes" 
+			nodeprecated="false" 
+			nodeprecatedlist="false" 
+			noindex="false" 
+			nonavbar="false" 
+			notree="false" 
+			overview="overview.html" 
+			packagenames="edu.csus.ecs.pc2.core.scoring,edu.csus.ecs.pc2.core.transport,edu.csus.ecs.pc2.core.transport.crypto,edu.csus.ecs.pc2.core.model,edu.csus.ecs.pc2.api.exceptions,edu.csus.ecs.pc2.core.log,edu.csus.ecs.pc2.api,edu.csus.ecs.pc2.core.imports,edu.csus.ecs.pc2.core.util,edu.csus.ecs.pc2.core.controller,edu.csus.ecs.pc2.ui.judge,edu.csus.ecs.pc2.core.exception,edu.csus.ecs.pc2.core.security,edu.csus.ecs.pc2.api.implementation,edu.csus.ecs.pc2.core.transport.connection,edu.csus.ecs.pc2.ui.team,edu.csus.ecs.pc2.api.listener,edu.csus.ecs.pc2.core.list,edu.csus.ecs.pc2.ui.admin,edu.csus.ecs.pc2.core.report,edu.csus.ecs.pc2.validator,edu.csus.ecs.pc2.ui,edu.csus.ecs.pc2.core,edu.csus.ecs.pc2.ui.board,edu.csus.ecs.pc2.core.packet,edu.csus.ecs.pc2.core.archive,edu.csus.ecs.pc2.core.execute,edu.csus.ecs.pc2.ui.server" 
+			source="1.5" 
+			sourcefiles="src\edu\csus\ecs\pc2\VersionInfo.java,src\edu\csus\ecs\pc2\Starter.java" 
+			sourcepath="src;test" 
+			splitindex="true" 
+			use="true" 
+			version="true" />
+	</target>
+</project>
