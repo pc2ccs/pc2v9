@@ -1,10 +1,14 @@
 package edu.csus.ecs.pc2.api;
 
 /**
- * Contest Client (Account).
+ * This class defines the data associated with a PC<sup>2</sup> &quot;Client&quot; which is visible through the PC<sup>2</sup> API .
+ * &quot;Client&quot; in this context refers to a piece of code logged in to a PC<sup>2</sup> server via an account
+ * which has been created by the Contest Administrator; for example, an instance of a PC<sup>2</sup> Team, Judge, Administrator, or
+ * Scoreboard, or a separate user-written client which logs in using a contest account.
  * 
- * Contains information about a contest account.
- * 
+ * <p>
+ * This documentation describes the current <I>draft</i> of the PC<sup>2</sup> API, which is subject to change.
+ *  
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -12,21 +16,28 @@ package edu.csus.ecs.pc2.api;
 public interface IClient {
 
     /**
-     * Client types defined in the system.
+     * This enumerates the Client types defined in the system (that is, the types of Clients visible through the PC<sup>2</sup> API).
      */
     public enum ClientType {
         /**
+<<<<<<< .mine
+         * Unknown client.
+         */
+        UNKNOWN_CLIENT, 
+        /**
+=======
          * Unknown client type.
          */
         UNKNOWN_CLIENT,
         /**
+>>>>>>> .r1260
          * Team client.
          */
         TEAM_CLIENT,
         /**
          * Judge client.
          */
-        JDUGE_CLIENT,
+        JUDGE_CLIENT,
         /**
          * Scoreboard client.
          */
@@ -34,28 +45,37 @@ public interface IClient {
         /**
          * Admin client.
          */
+<<<<<<< .mine
+        ADMIN_CLIENT
+=======
         ADMIN_CLIENT,
+>>>>>>> .r1260
     };
 
     /**
-     * Get client login name.
+     * Get the client's login name.
      * 
-     * Example for team 4 site 5, would return "team4"
+     * Returns a String giving the login name (account name) currently used by this client to connect to the PC<sup>2</sup> server.
+     * For example, for a team at site 5 logging in using the account &quot;team4&quot; the method would return &quot;team4&quot;".
      * 
-     * @return login name
+     * @return client's login name
      */
     String getLoginName();
 
     /**
      * Get the client Type.
+     * Returns an enum element identifying the type of this client.
      * 
-     * @return enum type
+     * @return {@link ClientType} enum element
      */
     ClientType getType();
 
     /**
-     * Get the &quot;display name&quot; for this client.
-     * 
+     * Get the client's &quot;display name&quot;.
+     * &quot;Display name&quot; refers to the printable description of the client as
+     * configured by the Contest Administrator.  For example, a Team's &quot;display name&quot;
+     * might be configured to consist of a combination of the <I>team name</i> and the Team's
+     * <I>school name</i>.
      * 
      * @return Client's display name.
      */
@@ -63,17 +83,18 @@ public interface IClient {
     
     /**
      * Get the site number for this client.
+     * Returns the number of the site which this client is logged into.
      * 
      * @return site number for this client.
      */
     int getSiteNumber();
     
     /**
-     * Get the client number for the client.
-     * 
-     * For example, for a client whose login name is &quot;team4&quot; the method will return the integer 4.
-     * 
-     * @return the client number, ex 4 for team4
+     * Get the client account number for this client.
+     * Returns a numerical identifier for this client's login name (account).
+     * The combination of account number, client type, and site number uniquely identifies
+     * any client in the contest.
+     * @return a numerical identifier for this client's login name (account)
      */
-    int getNumber();
+    int getAccountNumber();
 }
