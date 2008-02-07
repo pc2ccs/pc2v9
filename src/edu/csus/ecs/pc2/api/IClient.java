@@ -20,17 +20,10 @@ public interface IClient {
      */
     public enum ClientType {
         /**
-<<<<<<< .mine
-         * Unknown client.
+         * Unknown client type.
          */
         UNKNOWN_CLIENT, 
         /**
-=======
-         * Unknown client type.
-         */
-        UNKNOWN_CLIENT,
-        /**
->>>>>>> .r1260
          * Team client.
          */
         TEAM_CLIENT,
@@ -45,11 +38,7 @@ public interface IClient {
         /**
          * Admin client.
          */
-<<<<<<< .mine
         ADMIN_CLIENT
-=======
-        ADMIN_CLIENT,
->>>>>>> .r1260
     };
 
     /**
