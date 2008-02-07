@@ -57,7 +57,7 @@ public interface IRunEventListener {
      * Typically a <code>runUpdated()</code> invocation occurs when either
      * <ul>
      *      <li>A judge re-judges a run; or </li>
-     *      <li>The Contest Administrator changes a setting (such as the elapsed time or the assigned {@link IJudgement}) in the run.</li>
+     *      <li>The Contest Administrator changes a setting (such as the elapsed time or the assigned {@link edu.csus.ecs.pc2.api.IJudgement}) in the run.</li>
      * </ul>
      * 
      * @param run
