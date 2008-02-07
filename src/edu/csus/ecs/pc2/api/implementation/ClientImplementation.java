@@ -47,7 +47,7 @@ public class ClientImplementation implements IClient {
         return siteNumber;
     }
 
-    public int getNumber() {
+    public int getAccountNumber() {
         return number;
     }
 
