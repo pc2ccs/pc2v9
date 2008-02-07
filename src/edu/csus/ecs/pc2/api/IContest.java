@@ -4,52 +4,12 @@ import edu.csus.ecs.pc2.api.listener.IConfigurationUpdateListener;
 import edu.csus.ecs.pc2.api.listener.IRunEventListener;
 
 /**
- * Contest data/information.
+ * This interface represents the PC<sup>2</sup> API view of the contest information available
+ * to a client connected to a PC<sup>2</sup> server through the API.
  * 
- * <pre>
- * import edu.csus.ecs.pc2.api.IContest;
- * import edu.csus.ecs.pc2.api.IRun;
- * import edu.csus.ecs.pc2.api.ServerConnection;
- * import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
- * 
- * public class RunsSample {
- * 
- * private void loginAndShowRuns(String login, String password) throws LoginFailureException {
+ * <p>
+ * This documentation describes the current <I>draft</i> of the PC<sup>2</sup> API, which is subject to change.
  *  
- *          ServerConnection serverConnection = new ServerConnection();
- *          IContest contest = serverConnection.login(login, password);
- *  
- *          for (IRun run : contest.getRuns()) {
- *  
- *              System.out.println(&quot;Run &quot; + run.getNumber() + &quot; from site &quot; + run.getSiteNumber());
- *              System.out.println(&quot;    submitted at &quot; + run.getSubmissionTime() + &quot; by &quot; + run.getSubmitterTeam().getTitle());
- *              System.out.println(&quot;    For problem &quot; + run.getProblem().getTitle());
- *              System.out.println(&quot;    Written in &quot; + run.getLanguage().getTitle());
- *  
- *              if (run.isJudged()) {
- *                  System.out.println(&quot;    Judgement: &quot; + run.getJudgementTitle());
- *              } else {
- *                  System.out.println(&quot;    Judgement: not judged yet &quot;);
- *              }
- *  
- *              System.out.println();
- *          }
- *  
- *      }    public static void main(String[] args) {
- *         if (args.length != 2) {
- *             System.out.println(&quot;API Sample, usage: APIExample loginName password&quot;);
- *         } else {
- *             System.out.println(&quot;login: &quot; + args[0] + &quot; password: &quot; + args[1]);
- *             try {
- *                 new RunsSample().loginAndShowRuns(args[0], args[1]);
- *             } catch (LoginFailureException e) {
- *                 e.printStackTrace();
- *             }
- *         }
- *     }
- * }
- * </pre>
- * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -58,42 +18,49 @@ import edu.csus.ecs.pc2.api.listener.IRunEventListener;
 public interface IContest {
 
     /**
-     * Gets all the team ClientIds in the contest.
-     * 
+     * Gets all the teams in the contest. Returns an array of {@link ITeam} objects,
+     * where each {@link ITeam} element describes one Team account in the contest.
+     * Note that the returned array contains one entry for every Team account which is
+     * currently defined, whether or not that team is currently logged in to the contest
+     * via PC<sup>2</sup>.  Note also that in a multi-site contest the returned array contains an entry for every
+     * account <I>at every site</i>, not just for the site for the server to which the client is currently connected.
      * <P>
-     * Code snippet to print all team names.
-     * 
+     * <A NAME="printTeamsSample"></A>  
+     * The following code snippet shows typical usage for obtaining and printing a list of all teams currently 
+     * in the contest. It assumes variable <code>contest</code> represents a valid
+     * {@link IContest} obtained from a server to which this client is connected.
      * <pre>
-     * 
      * for (ITeam team : contest.getTeams()) {
-     *     System.out.println(team.getShortName() + &quot; Site &quot; + team.getSiteNumber() + &quot; title: &quot; + team.getTitle() + &quot; group: &quot; + team.getGroup());
+     *      String teamName = team.getDisplayName();
+     *      int siteNumber = team.getSiteNumber();
+     *      String groupName = team.getGroup().getName();
+     *      System.out.println(teamName + &quot; Site: &quot; + siteNumber + &quot; Group: &quot; + groupName));
      * }
      * </pre>
      * 
-     * @return array of ClientId not sorted.
+     * @return an unordered array of {@link ITeam}s, one for each team account defined in the contest.
      */
     ITeam[] getTeams();
 
     /**
-     * Get the name for the specified site.
+     * Get the name for the specified contest site.
      * 
-     * @param siteNumber
-     * @return title for this site. @
+     * @param siteNumber The number of a site in the contest.
+     * @return A String containing the name of the specified contest site.
      */
     String getSiteName(int siteNumber);
 
     /**
-     * Get the contest title.
+     * Get the contest title.  The contest title is configured by the Contest Administrator
+     * using the PC<sup>2</sup> &quot;Admin&quot; module.
      * 
-     * @return the title of the contest.
+     * @return A String containing the title of the contest.
      * 
      */
     String getContestTitle();
 
     /**
-     * Get the current server's site name.
-     * 
-     * Gets the name for the server this client is logged into.
+     * Get the name of the contest site for the PC<sup>2</sup> server to which this client is currently connected.
      * 
      * @return the current server's site name.
      * 
@@ -101,147 +68,178 @@ public interface IContest {
     String getSiteName();
 
     /**
-     * Get a list of languages.
-     * 
-     * Returns a list of languages.
+     * Get a list of all currently defined contest languages.
+     * Returns an array containing one {@link ILanguage} for each currently defined contest language.
      * <P>
-     * Code snippet to print all language names.
-     * 
+     * <A NAME="printLanguagesSample"></A>  
+     * The following code snippet shows typical usage for obtaining and printing the names of all languages
+     * currently defined in the contest. It assumes variable <code>contest</code> represents a valid
+     * {@link IContest} obtained from a server to which this client is connected.
      * <pre>
      * for (ILanguage language : contest.getLanguages()) {
-     *     System.out.println(language.getTitle());
+     *     System.out.println(language.getName());
      * }
      * </pre>
      * 
-     * @return list of language ids in proper order
+     * @return An array of {@link ILanguage}s, one for each language defined in the contest.
      * 
      */
     ILanguage[] getLanguages();
 
     /**
-     * Get a list of problems.
-     * 
-     * Returns a list of problems.
+     * Get a list of all currently defined contest problems.
+     * Returns an array containing one {@link IProblem} for each currently defined contest problem.
      * <P>
-     * Code snippet to print all language titles/names.
-     * 
+     * <A NAME="printProblemsSample"></A>  
+     * The following code snippet shows typical usage for obtaining and printing the names of all problems
+     * currently defined in the contest. It assumes variable <code>contest</code> represents a valid
+     * {@link IContest} obtained from a server to which this client is connected.
      * <pre>
      * for (IProblem problem : contest.getProblems()) {
-     *     System.out.println(problem.getTitle());
+     *     System.out.println(problem.getName());
      * }
      * </pre>
      * 
-     * @return list of problem ids in proper order
+     * @return An array containing one {@link IProblem} for each currently defined contest problem.
      * 
      */
     IProblem[] getProblems();
 
     /**
-     * Get a list of judgements.
-     * 
-     * Code snippet to print all judgement titles/names.
-     * 
+     * Get a list of all currently-defined (i.e., possible) judgements.  Note that this refers to the Judgement values which
+     * the Contest Administrator has configured into the contest settings (i.e., the list of judgement results
+     * from which a Judge may choose when assigning a result to any particular submitted run); 
+     * it is not related to the specific judgements which may have been assigned to any particular run.
+     * Returns an array containing one {@link IJudgement} for each currently defined allowable Judge's response
+     * to a submitted run.
+     * <P>
+     * <A NAME="printJudgementsSample"></A>  
+     * The following code snippet shows typical usage for obtaining and printing the names of all Judgements
+     * currently defined in the contest. It assumes variable <code>contest</code> represents a valid
+     * {@link IContest} obtained from a server to which this client is connected.
      * <pre>
      * for (IJudgement judgement : contest.getJudgements()) {
-     *     System.out.println(judgement.getTitle());
+     *     System.out.println(judgement.getName());
      * }
-     * 
      * </pre>
      * 
-     * @return list of judgements in proper order.
+     * @return An array containing one {@link IJudgement} for each currently defined allowable Judge's response
+     * to a submitted run.
      * 
      */
     IJudgement[] getJudgements();
 
     /**
-     * Get a list of runs.
+     * Get a list of all the runs in the contest.  Returns an array of {@link IRun}s, where 
+     * each element of the array holds a single contest {@link IRun}.  In a multi-site contest
+     * the returned array will contain the runs from all connected sites, not just the site for the
+     * server to which this client is connected.   
      * 
      * <P>
-     * Code snippet to print all run info in contest.
-     * 
+     * <A NAME="getRunsSample"></A>  
+     * The following code snippet shows typical usage for obtaining and printing a list of all runs currently 
+     * in the contest. It assumes variable <code>contest</code> represents a valid
+     * {@link IContest} obtained from a server to which this client is connected.
      * <pre>
      * for (IRun run : contest.getRuns()) {
      * 
      *     System.out.println(&quot;Run &quot; + run.getNumber() + &quot; from site &quot; + run.getSiteNumber());
-     *     System.out.println(&quot;    submitted at &quot; + run.getSubmissionTime() + &quot; minutes by &quot; + run.getSubmitterTeam().getTitle());
-     *     System.out.println(&quot;    For problem &quot; + run.getProblem().getTitle());
-     *     System.out.println(&quot;    Written in &quot; + run.getLanguage().getTitle());
+     *     System.out.println(&quot;    submitted at &quot; + run.getSubmissionTime() + &quot; minutes by &quot; + run.getTeam().getDisplayName());
+     *     System.out.println(&quot;    For problem &quot; + run.getProblem().getName());
+     *     System.out.println(&quot;    Written in &quot; + run.getLanguage().getName());
      * 
      *     if (run.isJudged()) {
-     *         System.out.println(&quot;    Judgement: &quot; + run.getJudgementTitle());
+     *         System.out.println(&quot;    Judgement: &quot; + run.getJudgementName());
      *     } else {
      *         System.out.println(&quot;    Judgement: not judged yet &quot;);
      *     }
-     * 
-     *     System.out.println();
      * }
-     * 
      * </pre>
      * 
-     * @return list of Runs, unordered.
+     * @return An unordered list of Runs for all sites currently connected to the contest.
      */
     IRun[] getRuns();
 
     /**
-     * Add run event listener.
+     * Add a Run Event listener to the contest.  A run event listener (object of type {@link IRunEventListener}) will be
+     * invoked every time a run is added to the contest, modified (e.g. Judged), or marked as deleted from the contest.
+     * Custom clients using the PC<sup>2</sup> API can therefore arrange to be notified when any of these conditions occurs.
      * 
-     * @param runEventListener
-     *            listener for Run events
+     * @see IRunEventListener
+     * @see IRun
+     * @param runEventListener an {@link IRunEventListener} listener for Run events
      */
     void addRunListener(IRunEventListener runEventListener);
 
     /**
-     * Remove run event listener.
+     * Remove the specified run event listener from the contest.
      * 
      * @param runEventListener
-     *            listener for Run events
+     *            The {@link IRunEventListener} listener to be removed.
      */
     void removeRunListener(IRunEventListener runEventListener);
 
     /**
-     * Add Contest Update listener.
+     * Add a Contest Configuration Update listener to the contest.
+     * A configuration update listener (object of type {@link IConfigurationUpdateListener}) will be
+     * invoked every time a contest configuration item is added, modified, or removed from the contest.
+     * Custom clients using the PC<sup>2</sup> API can therefore arrange to be notified when any of these conditions occurs.
      * 
-     * @param contestUpdateConfigurationListener
-     *            listener for Configuration Update events
+     * @see IConfigurationUpdateListener
+     * @see edu.csus.ecs.pc2.api.listener.ContestEvent
+     * 
+     * @param contestConfigurationUpdateListener
+     *            an {@link IConfigurationUpdateListener} listener for configuration update events
      */
-    void addContestUpdateConfigurationListener(IConfigurationUpdateListener contestUpdateConfigurationListener);
+    void addContestConfigurationUpdateListener(IConfigurationUpdateListener contestConfigurationUpdateListener);
 
     /**
-     * Remove Contest Update listener.
+     * Remove the specified Contest Configuration Update listener from the contest.
      * 
-     * @param contestUpdateConfigurationListener
-     *            listener for Configuration Update events
+     * @param contestConfigurationUpdateListener
+     *            The {@link IConfigurationUpdateListener} listener to be removed.
      */
-    void removeContestUpdateConfigurationListener(IConfigurationUpdateListener contestUpdateConfigurationListener);
+    void removeContestConfigurationUpdateListener(IConfigurationUpdateListener contestConfigurationUpdateListener);
 
     /**
-     * Get the contest clock info.
+     * Get an {@link IContestClock} object containing contest time-related information.
+     * The {@link IContestClock} object can be queried for values such as the amount of 
+     * time elasped so far in the contest, the amount of time remaining in the contest, and
+     * whether the contest clock is currently &quot;paused&quot; or not. 
      * 
-     * <pre>
-     * System.out.println(&quot;Contest Time Updated, running &quot; 
-     *    + contestTime.isContestClockRunning() + &quot;, remaining &quot; + contestTime.getRemainingSecs());
-     * </pre>
-     * 
-     * @return contest time information
+     * @see IContestClock
+     * @return A {@link IContestClock} object containing contest time information
      */
-    IContestClock getContestTime();
+    IContestClock getContestClock();
 
     /**
-     * Get list of defined groups/regions.
+     * Get a list of the <b>groups</b> currently defined in the contest. 
+     * Groups can be used by the Contest Administrator to associate Teams together.
+     * For example, all teams from a certain geographical region, or with an equivalent background
+     * (say, Undergraduate vs. Graduate) can be put together in the same group.  
+     * The PC<sup>2</sup> scoring algorithm implementation can then be used to compute
+     * standings on a per-group basis.
      * 
+     * @see IGroup
      * @return list of groups.
      */
     IGroup[] getGroups();
 
     /**
      * Get the current logged in client.
+     * This method can be used by a custom client making use of the PC<sup>2</sup> API to
+     * obtain at runtime a PC<sup>2</sup> {@link IClient} description of its own client
+     * login data.
      */
     IClient getMyClient();
 
     /**
-     * Is Contest Clock started/running ?.
+     * Returns a boolean value indicating whether the contest clock is currently running.
+     * If the method returns false, either the contest has not been started, or it has
+     * been started and then paused by the Contest Administrator.  Method {@link IContest#getContestClock()} 
+     * can be used to obtain clock information to determine which case exists (not yet started vs. paused.)
      * 
-     * @return return true if clock started, false if stopped.
+     * @return true if the contest clock is currently running; false otherwise.
      */
     boolean isContestClockRunning();
 }

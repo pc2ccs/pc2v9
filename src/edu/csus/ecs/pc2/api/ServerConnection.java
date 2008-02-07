@@ -7,15 +7,17 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.InternalContest;
 
 /**
- * This documentation describes the current <I>draft</i> of the PC<sup>2</sup> API, which is subject to change.
- * <p>
  * This class represents a connection to a PC<sup>2</sup> server. Instantiating the class creates a local {@link ServerConnection} object which can then be used to connect to the PC<sup>2</sup>
  * server via the {@link ServerConnection#login(String, String)} method. The PC<sup>2</sup> server must already be running, and the local client must have a <code>pc2v9.ini</code> file specifying
  * valid server connection information, prior to invoking {@link ServerConnection#login(String, String)} method.
  * 
+ * <p>
+ * This documentation describes the current <I>draft</i> of the PC<sup>2</sup> API, which is subject to change. 
+ * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
- */
+
+*/
 
 // $HeadURL$
 public class ServerConnection {
@@ -44,7 +46,8 @@ public class ServerConnection {
      * the <code>pc2v9.ini</code> must specify legitmate server connection information; otherwise, {@link edu.csus.ecs.pc2.api.exceptions.LoginFailureException} is thrown. See the PC<sup>2</sup>
      * Contest Administrator's Guide for information regarding specifying server connection information in <code>pc2v9.ini</code> files.
      * <P>
-     * The following code snippet shows typical usage for connecting to and logging in to a server. <A NAME="loginsample"></A>
+     * The following code snippet shows typical usage for connecting to and logging in to a PC<sup>2</sup> server. 
+     * <A NAME="loginsample"></A>
      * 
      * <pre>
      * String login = &quot;team4&quot;;

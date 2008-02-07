@@ -82,14 +82,14 @@ public class ConfigurationListenerList {
 
             switch (problemEvent.getAction()) {
                 case ADDED:
-                    listenerList.elementAt(i).configurationElementAdded(contestEvent);
+                    listenerList.elementAt(i).configurationItemAdded(contestEvent);
                     break;
                 case DELETED:
-                    listenerList.elementAt(i).configurationElementRemoved(contestEvent);
+                    listenerList.elementAt(i).configurationItemRemoved(contestEvent);
                     break;
                 case CHANGED:
                 default:
-                    listenerList.elementAt(i).configurationElementUpdated(contestEvent);
+                    listenerList.elementAt(i).configurationItemUpdated(contestEvent);
                     break;
             }
         }
@@ -123,14 +123,14 @@ public class ConfigurationListenerList {
 
             switch (languageEvent.getAction()) {
                 case ADDED:
-                    listenerList.elementAt(i).configurationElementAdded(contestEvent);
+                    listenerList.elementAt(i).configurationItemAdded(contestEvent);
                     break;
                 case DELETED:
-                    listenerList.elementAt(i).configurationElementRemoved(contestEvent);
+                    listenerList.elementAt(i).configurationItemRemoved(contestEvent);
                     break;
                 case CHANGED:
                 default:
-                    listenerList.elementAt(i).configurationElementUpdated(contestEvent);
+                    listenerList.elementAt(i).configurationItemUpdated(contestEvent);
                     break;
             }
         }
@@ -164,14 +164,14 @@ public class ConfigurationListenerList {
 
             switch (groupEvent.getAction()) {
                 case ADDED:
-                    listenerList.elementAt(i).configurationElementAdded(contestEvent);
+                    listenerList.elementAt(i).configurationItemAdded(contestEvent);
                     break;
                 case DELETED:
-                    listenerList.elementAt(i).configurationElementRemoved(contestEvent);
+                    listenerList.elementAt(i).configurationItemRemoved(contestEvent);
                     break;
                 case CHANGED:
                 default:
-                    listenerList.elementAt(i).configurationElementUpdated(contestEvent);
+                    listenerList.elementAt(i).configurationItemUpdated(contestEvent);
                     break;
             }
         }
@@ -214,14 +214,14 @@ public class ConfigurationListenerList {
 
             switch (contestTimeEvent.getAction()) {
                 case ADDED:
-                    listenerList.elementAt(i).configurationElementAdded(contestEvent);
+                    listenerList.elementAt(i).configurationItemAdded(contestEvent);
                     break;
                 case DELETED:
-                    listenerList.elementAt(i).configurationElementRemoved(contestEvent);
+                    listenerList.elementAt(i).configurationItemRemoved(contestEvent);
                     break;
                 case CHANGED:
                 default:
-                    listenerList.elementAt(i).configurationElementUpdated(contestEvent);
+                    listenerList.elementAt(i).configurationItemUpdated(contestEvent);
                     break;
             }
         }
@@ -255,14 +255,14 @@ public class ConfigurationListenerList {
 
             switch (judgementEvent.getAction()) {
                 case ADDED:
-                    listenerList.elementAt(i).configurationElementAdded(contestEvent);
+                    listenerList.elementAt(i).configurationItemAdded(contestEvent);
                     break;
                 case DELETED:
-                    listenerList.elementAt(i).configurationElementRemoved(contestEvent);
+                    listenerList.elementAt(i).configurationItemRemoved(contestEvent);
                     break;
                 case CHANGED:
                 default:
-                    listenerList.elementAt(i).configurationElementUpdated(contestEvent);
+                    listenerList.elementAt(i).configurationItemUpdated(contestEvent);
                     break;
             }
         }
@@ -303,20 +303,20 @@ public class ConfigurationListenerList {
                 case ADDED:
                     client = new ClientImplementation(accountEvent.getAccount().getClientId(), contest);
                     contestEvent = new ContestEvent(EventType.LOGIN_ACCOUNT, client);
-                    listenerList.elementAt(i).configurationElementAdded(contestEvent);
+                    listenerList.elementAt(i).configurationItemAdded(contestEvent);
                     break;
 
                 case DELETED:
                     client = new ClientImplementation(accountEvent.getAccount().getClientId(), contest);
                     contestEvent = new ContestEvent(EventType.LOGIN_ACCOUNT, client);
-                    listenerList.elementAt(i).configurationElementRemoved(contestEvent);
+                    listenerList.elementAt(i).configurationItemRemoved(contestEvent);
                     break;
 
                 case ADDED_ACCOUNTS:
                     for (Account account : accountEvent.getAccounts()) {
                         client = new ClientImplementation(account.getClientId(), contest);
                         contestEvent = new ContestEvent(EventType.LOGIN_ACCOUNT, client);
-                        listenerList.elementAt(i).configurationElementAdded(contestEvent);
+                        listenerList.elementAt(i).configurationItemAdded(contestEvent);
                     }
                     break;
 
@@ -324,7 +324,7 @@ public class ConfigurationListenerList {
                     for (Account account : accountEvent.getAccounts()) {
                         client = new ClientImplementation(account.getClientId(), contest);
                         contestEvent = new ContestEvent(EventType.LOGIN_ACCOUNT, client);
-                        listenerList.elementAt(i).configurationElementUpdated(contestEvent);
+                        listenerList.elementAt(i).configurationItemUpdated(contestEvent);
                     }
                     break;
 
@@ -332,7 +332,7 @@ public class ConfigurationListenerList {
                 default:
                     client = new ClientImplementation(accountEvent.getAccount().getClientId(), contest);
                     contestEvent = new ContestEvent(EventType.LOGIN_ACCOUNT, client);
-                    listenerList.elementAt(i).configurationElementUpdated(contestEvent);
+                    listenerList.elementAt(i).configurationItemUpdated(contestEvent);
                     break;
             }
         }
@@ -373,14 +373,14 @@ public class ConfigurationListenerList {
 
               switch (contestInformationEvent.getAction()) {
                   case ADDED:
-                      listenerList.elementAt(i).configurationElementAdded(contestEvent);
+                      listenerList.elementAt(i).configurationItemAdded(contestEvent);
                       break;
                   case DELETED:
-                      listenerList.elementAt(i).configurationElementRemoved(contestEvent);
+                      listenerList.elementAt(i).configurationItemRemoved(contestEvent);
                       break;
                   case CHANGED:
                   default:
-                      listenerList.elementAt(i).configurationElementUpdated(contestEvent);
+                      listenerList.elementAt(i).configurationItemUpdated(contestEvent);
                       break;
               }
           }

@@ -129,15 +129,15 @@ public class Contest implements IContest {
         runListenerList.removeRunListener(runEventListener);
     }
 
-    public void addContestUpdateConfigurationListener(IConfigurationUpdateListener contestUpdateConfigurationListener) {
+    public void addContestConfigurationUpdateListener(IConfigurationUpdateListener contestUpdateConfigurationListener) {
         configurationListenerList.addContestUpdateConfigurationListener(contestUpdateConfigurationListener);
     }
 
-    public void removeContestUpdateConfigurationListener(IConfigurationUpdateListener contestUpdateConfigurationListener) {
+    public void removeContestConfigurationUpdateListener(IConfigurationUpdateListener contestUpdateConfigurationListener) {
         configurationListenerList.removeContestUpdateConfigurationListener(contestUpdateConfigurationListener);
     }
 
-    public IContestClock getContestTime() {
+    public IContestClock getContestClock() {
         return new ContestTimeImplementation(contest.getContestTime());
     }
 

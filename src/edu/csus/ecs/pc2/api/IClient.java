@@ -46,7 +46,7 @@ public interface IClient {
     };
 
     /**
-     * Get client short (login) name.
+     * Get client login name.
      * 
      * Example for team 4 site 5, would return "team4"
      * 
@@ -62,10 +62,10 @@ public interface IClient {
     ClientType getType();
 
     /**
-     * Get the display name or title for this client.
+     * Get the &quot;display name&quot; for this client.
      * 
      * 
-     * @return display name.
+     * @return Client's display name.
      */
     String getDisplayName();
     
@@ -79,7 +79,7 @@ public interface IClient {
     /**
      * Get the client number for the client.
      * 
-     * Will return 4 for team4.
+     * For example, for a client whose login name is &quot;team4&quot; the method will return the integer 4.
      * 
      * @return the client number, ex 4 for team4
      */
