@@ -10,6 +10,7 @@ import edu.csus.ecs.pc2.api.IJudgement;
 import edu.csus.ecs.pc2.api.ILanguage;
 import edu.csus.ecs.pc2.api.IProblem;
 import edu.csus.ecs.pc2.api.IRun;
+import edu.csus.ecs.pc2.api.IStanding;
 import edu.csus.ecs.pc2.api.ITeam;
 import edu.csus.ecs.pc2.api.listener.IConfigurationUpdateListener;
 import edu.csus.ecs.pc2.api.listener.IRunEventListener;
@@ -160,5 +161,25 @@ public class Contest implements IContest {
 
     public void setLoggedIn(boolean loggedIn) {
         this.loggedIn = loggedIn;
+    }
+
+    public IStanding getStanding(ITeam team) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public IStanding getStanding(ITeam team, int elapsedMinutes) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public IStanding[] getStandings() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public IStanding[] getStandings(int elapsedMinutes) {
+        // TODO Auto-generated method stub
+        return null;
     }
 }
