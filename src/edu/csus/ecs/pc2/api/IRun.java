@@ -72,8 +72,11 @@ public interface IRun {
     /**
      * Get the run number.
      * 
-     * Every submitted run is assigned a site-unique Run number by the PC<sup>2</sup> server which first receives
+     * Every submitted run is assigned a site-unique 
+     * Run number by the PC<sup>2</sup> server which first receives
      * the submission (that is, by the server to which the submitting team client is connected). 
+     * Run numbers are always positive and always increasing at any given site (that is, every new
+     * run at a given site will acquire a run number higher than any previous run at that same site).
      * Every submitted run is also populated with the unique site number of the site where the run is first received.
      * The combination of the site number and the run number therefore provides a contest-wide unique identifier for
      * every run in the contest.

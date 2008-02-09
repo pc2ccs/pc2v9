@@ -87,8 +87,10 @@ public interface IContest {
     ILanguage[] getLanguages();
 
     /**
-     * Get a list of all currently defined contest problems.
+     * Get an ordered list of all currently defined contest problems.
      * Returns an array containing one {@link IProblem} for each currently defined contest problem.
+     * The problems in the returned array are always ordered in the order in which the Contest Administrator
+     * entered them into the contest:  element [0] is the first problem, etc.
      * <P>
      * <A NAME="printProblemsSample"></A>  
      * The following code snippet shows typical usage for obtaining and printing the names of all problems
