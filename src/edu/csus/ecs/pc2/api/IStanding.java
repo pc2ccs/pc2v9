@@ -29,25 +29,12 @@ public interface IStanding {
      */
     IClient getClient();
     
-
     /**
      * Get the number of contest problems which the team represented by this {@link IStanding} object
      * has solved.
      * @return the number of problems solved by the team to which this {@link IStanding} applies.
      */
     int getNumProblemsSolved();
-    
-    /**
-     * Get the number of contest teams that are currently tied with the team represented by this {@link IStanding}
-     * object.  The returned count  //TODO {does, does not} 
-     * include the team associated with this {@link IStanding}.
-     * <P>
-     * The determination of &quot;tied&quot; is made according to the implementation of the currently active
-     * PC<sup>2</sup> <I>Scoring Algorithm</i>.
-     * 
-     * @return the number of teams currently tied with this team in the contest standings.
-     */
-    int getNumTiedTeams();
     
     /**
      * Get the total number of <I>penalty points</i> assigned by the currently active PC<sup>2</sup> scoring
