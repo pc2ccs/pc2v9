@@ -106,6 +106,13 @@ public interface IContest {
      * 
      */
     IProblem[] getProblems();
+    
+    /**
+     * 
+     * @return
+     */
+    // TODO document
+    ISite [] getSites();
 
     /**
      * Get a list of all currently-defined (i.e., possible) judgements.  Note that this refers to the Judgement values which

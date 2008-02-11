@@ -10,6 +10,7 @@ import edu.csus.ecs.pc2.api.IJudgement;
 import edu.csus.ecs.pc2.api.ILanguage;
 import edu.csus.ecs.pc2.api.IProblem;
 import edu.csus.ecs.pc2.api.IRun;
+import edu.csus.ecs.pc2.api.ISite;
 import edu.csus.ecs.pc2.api.IStanding;
 import edu.csus.ecs.pc2.api.ITeam;
 import edu.csus.ecs.pc2.api.listener.IConfigurationUpdateListener;
@@ -169,6 +170,11 @@ public class Contest implements IContest {
     }
 
     public IStanding[] getStandings() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public ISite[] getSites() {
         // TODO Auto-generated method stub
         return null;
     }

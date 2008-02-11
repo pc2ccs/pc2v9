@@ -6,6 +6,7 @@ import edu.csus.ecs.pc2.api.IGroup;
 import edu.csus.ecs.pc2.api.IJudgement;
 import edu.csus.ecs.pc2.api.ILanguage;
 import edu.csus.ecs.pc2.api.IProblem;
+import edu.csus.ecs.pc2.api.ISite;
 
 /**
  * This class describes an Event representing the situation that some piece of contest configuration information has changed.
@@ -68,6 +69,10 @@ public class ContestEvent {
          * Account (Team) Group.
          */
         GROUP,
+        /**
+         * Site.
+         */
+        SITE,
     };
 
     private EventType eventType;
@@ -85,7 +90,19 @@ public class ContestEvent {
     private IProblem problem;
     
     private String contestTitle;
+    
+    private ISite site;
 
+    public ContestEvent(EventType eventType, ISite site) {
+        super();
+        this.eventType = eventType;
+        this.site = site;
+    }
+
+    // TODO document
+    public ISite getSite() {
+        return site;
+    }
 
     /**
      * Construct an event representing a change in the contest title.
