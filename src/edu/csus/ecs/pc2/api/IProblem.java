@@ -19,4 +19,15 @@ public interface IProblem {
      * @return A String containing the name of the problem.
      */
     String getName();
+    
+    String getJudgesDataFileName();
+    
+    byte [] getJudgesDataFileContents();
+
+    String getJudgesAnswerFileName();
+    
+    byte [] getJudgesAnswerFileContents();
+    
+    // TODO validator methods.
+
 }

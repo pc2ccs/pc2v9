@@ -97,7 +97,7 @@ public class Contest implements IContest {
         ProblemImplementation[] implementations = new ProblemImplementation[problems.length];
 
         for (int i = 0; i < problems.length; i++) {
-            implementations[i] = new ProblemImplementation(problems[i]);
+            implementations[i] = new ProblemImplementation(problems[i], contest);
         }
         return implementations;
     }
