@@ -109,7 +109,7 @@ public interface IContest {
     
     /**
      * 
-     * @return
+     * @return An array containing one {@link ISite} for each currently defined contest site.
      */
     // TODO document
     ISite [] getSites();
