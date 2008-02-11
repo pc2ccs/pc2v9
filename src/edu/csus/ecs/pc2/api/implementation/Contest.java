@@ -168,17 +168,7 @@ public class Contest implements IContest {
         return null;
     }
 
-    public IStanding getStanding(ITeam team, int elapsedMinutes) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
     public IStanding[] getStandings() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    public IStanding[] getStandings(int elapsedMinutes) {
         // TODO Auto-generated method stub
         return null;
     }

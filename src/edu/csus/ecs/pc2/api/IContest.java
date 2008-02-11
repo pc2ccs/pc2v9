@@ -261,23 +261,6 @@ public interface IContest {
     
     
     /**
-     * Returns an {@link IStanding} describing the standing of the specified team in the contest as of the
-     * specified elapsed time into the contest, as
-     * determined by the currently active implementation of the PC<sup>2</sup> scoring algorithm.  If the specified
-     * elapsedTime is greater than the current total elapsed time in the contest, returns the team's standing at
-     * the current time.
-     * <P>
-     * Note that the determination of the data in an {@link IStanding} is up to the scoring algorithm, which 
-     * can be dynamically changed by the Contest Administrator during a contest.  Note also that scoring
-     * details such as how to rank teams that are tied is also a function of the scoring algorithm.
-     * 
-     * @param team The {@link ITeam} for which an {@link IStanding} is being requested.
-     * @return An {@link IStanding} for the specified team.
-     */
-    IStanding getStanding(ITeam team, int elapsedMinutes);
-    
-   
-    /**
      * Returns an array of {@link IStanding}s describing the current standing of every team in the contest as
      * determined by the currently active implementation of the PC<sup>2</sup> scoring algorithm.
      * <P>
@@ -289,22 +272,4 @@ public interface IContest {
      */
     IStanding [] getStandings();
     
-    
-    /**
-     * Returns an array of {@link IStandings describing the standing of each team in the contest as of the
-     * specified elapsed time into the contest, as
-     * determined by the currently active implementation of the PC<sup>2</sup> scoring algorithm.  If the specified
-     * elapsedTime is greater than the current total elapsed time in the contest, returns the teams' standings at
-     * the current time.
-     * <P>
-     * Note that the determination of the data in an {@link IStanding} is up to the scoring algorithm, which 
-     * can be dynamically changed by the Contest Administrator during a contest.  Note also that scoring
-     * details such as how to rank teams that are tied is also a function of the scoring algorithm.
-     * 
-     * @param team The {@link ITeam} for which an {@link IStanding} is being requested.
-     * @return An {@link IStanding} for the specified team.
-     */
-    IStanding [] getStandings(int elapsedMinutes);
-    
-     
 }
