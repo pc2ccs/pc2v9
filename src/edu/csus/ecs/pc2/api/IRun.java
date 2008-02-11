@@ -100,5 +100,11 @@ public interface IRun {
      * @return the number of minutes elapsed when this run was submitted to a PC<sup>2</sup> server.
      */
     long getSubmissionTime();
+    
+    // TODO document
+    String [] getSourceCodeFileNames();
+    
+    // TODO document
+    byte [][] getSourceCodeContents();
 
 }

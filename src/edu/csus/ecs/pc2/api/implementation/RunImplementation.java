@@ -115,4 +115,14 @@ public class RunImplementation implements IRun {
         return elapsedMins;
     }
 
+    public String[] getSourceCodeFileNames() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public byte[][] getSourceCodeContents() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }
