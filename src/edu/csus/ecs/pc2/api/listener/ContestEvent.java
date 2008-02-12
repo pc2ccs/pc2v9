@@ -93,15 +93,16 @@ public class ContestEvent {
     
     private ISite site;
 
+    /**
+     * Construct an event representing a change in a contest site.
+     * @param eventType
+     * @param site the contest site which has changed 
+     */
+
     public ContestEvent(EventType eventType, ISite site) {
         super();
         this.eventType = eventType;
         this.site = site;
-    }
-
-    // TODO document
-    public ISite getSite() {
-        return site;
     }
 
     /**
@@ -111,7 +112,6 @@ public class ContestEvent {
      */
     public ContestEvent(EventType eventType, String contestTitle) {
         super();
-        // TODO Auto-generated constructor stub
         this.eventType = eventType;
         this.contestTitle = contestTitle;
     }
@@ -253,4 +253,13 @@ public class ContestEvent {
         return contestTitle;
     }
     
+    /**
+     * Get the {@link ISite} associated with events of type {@link EventType#SITE}.
+     * @return The site associated with this event.
+     */
+    public ISite getSite() {
+        return site;
+    }
+
+   
 }

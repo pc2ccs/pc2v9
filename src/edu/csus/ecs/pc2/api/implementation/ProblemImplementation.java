@@ -72,4 +72,44 @@ public class ProblemImplementation implements IProblem {
     public byte[] getJudgesAnswerFileContents() {
         return judgesAnswerFileContents;
     }
+
+    public String getValidatorFileName() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public String getValidatorCommandLine() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public byte[] getValidatorFileContents() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public boolean hasExternalValidator() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public boolean readsInputFromFile() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public boolean readsInputFromStdIn() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public boolean hasDataFile() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public boolean hasAnswerFile() {
+        // TODO Auto-generated method stub
+        return false;
+    }
 }

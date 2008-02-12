@@ -120,7 +120,7 @@ public class RunImplementation implements IRun {
         return null;
     }
 
-    public byte[][] getSourceCodeContents() {
+    public byte[][] getSourceCodeFileContents() {
         // TODO Auto-generated method stub
         return null;
     }

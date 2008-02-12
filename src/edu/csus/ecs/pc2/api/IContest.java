@@ -70,6 +70,8 @@ public interface IContest {
     /**
      * Get a list of all currently defined contest languages.
      * Returns an array containing one {@link ILanguage} for each currently defined contest language.
+     * The languages in the returned array are always ordered in the order in which the Contest Administrator
+     * entered them into the contest:  element [0] is the first language, etc.
      * <P>
      * <A NAME="printLanguagesSample"></A>  
      * The following code snippet shows typical usage for obtaining and printing the names of all languages
@@ -108,10 +110,13 @@ public interface IContest {
     IProblem[] getProblems();
     
     /**
+     * Get an ordered list of all currently defined contest sites.
+     * Returns an array containing one {@link ISite} for each currently defined contest site.
+     * The sites in the returned array are always ordered in the order in which the Contest Administrator
+     * defined them in the contest:  element [0] is the first site, etc.
      * 
      * @return An array containing one {@link ISite} for each currently defined contest site.
      */
-    // TODO document
     ISite [] getSites();
 
     /**
@@ -119,8 +124,10 @@ public interface IContest {
      * the Contest Administrator has configured into the contest settings (i.e., the list of judgement results
      * from which a Judge may choose when assigning a result to any particular submitted run); 
      * it is not related to the specific judgements which may have been assigned to any particular run.
+     * <P>
      * Returns an array containing one {@link IJudgement} for each currently defined allowable Judge's response
-     * to a submitted run.
+     * to a submitted run. The returned {@link IJudgement}s are given in the array in the order in which they
+     * were defined by the Contest Administrator.
      * <P>
      * <A NAME="printJudgementsSample"></A>  
      * The following code snippet shows typical usage for obtaining and printing the names of all Judgements
@@ -132,7 +139,7 @@ public interface IContest {
      * }
      * </pre>
      * 
-     * @return An array containing one {@link IJudgement} for each currently defined allowable Judge's response
+     * @return An ordered array containing one {@link IJudgement} for each currently defined allowable Judge's response
      * to a submitted run.
      * 
      */
@@ -215,6 +222,11 @@ public interface IContest {
      * The {@link IContestClock} object can be queried for values such as the amount of 
      * time elasped so far in the contest, the amount of time remaining in the contest, and
      * whether the contest clock is currently &quot;paused&quot; or not. 
+     * <P>
+     * Note that the {@link IContestClock} object returned by the current implementation of 
+     * this method is static; it does not dynamically update.  In other words, obtaining the
+     * current contest time requires obtaining a new {@link IContestClock} object each 
+     * time the current time information is needed.
      * 
      * @see IContestClock
      * @return A {@link IContestClock} object containing contest time information
@@ -269,11 +281,16 @@ public interface IContest {
     
     /**
      * Returns an array of {@link IStanding}s describing the current standing of every team in the contest as
-     * determined by the currently active implementation of the PC<sup>2</sup> scoring algorithm.
+     * determined by the currently active plugin implementation of the PC<sup>2</sup> scoring algorithm.
      * <P>
      * Note that the determination of the data in an {@link IStanding} is up to the scoring algorithm, which 
      * can be dynamically changed by the Contest Administrator during a contest.  Note also that scoring
      * details such as how to rank teams that are tied is also a function of the scoring algorithm.
+     * <P>
+     * In addition, note also that the order in which the {@link IStanding}s are contained in the returned array
+     * is a function of the scoring algorithm.  In particular, while the default PC<sup>2</sup> scoring 
+     * algorithm provides {@link IStanding}s in ranked order, scoring algorithm implementations are not
+     * required to do so.
      * 
      * @return An array of {@link IStanding}s, one element for each contest team.
      */

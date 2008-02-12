@@ -101,10 +101,26 @@ public interface IRun {
      */
     long getSubmissionTime();
     
-    // TODO document
+    /**
+     * Get the names of each of the source code files submitted
+     * as part of this {@link IRun} by the submitting team.  The number of elements in the returned array corresponds to 
+     * the number of different source code files submitted by the Team; the first element of the array (element [0])
+     * gives the name of the file which the Team submitted as the &quot;main&quot; program file.
+     * 
+     * @return An array of Strings where each array element contains the name of one source code file submitted by
+     * the Team which created this {@link IRun}.  
+     */
     String [] getSourceCodeFileNames();
     
-    // TODO document
-    byte [][] getSourceCodeContents();
+    /**
+     * Get the source code contained in the files submitted by the Team which created this {@link IRun}.
+     * Returns an array of arrays of bytes containing the contents of the submitted source code files.  
+     * The first element of the array contains the
+     * bytes from the first source code file submitted, which is always the &quot;main program&quot; file; subsequent
+     * elements of the array contain the bytes from each additional source code file submitted by the Team.  
+     * 
+     * @return The contents of each submitted source code file for this {@link IRun}.
+     */
+    byte [][] getSourceCodeFileContents();
 
 }
