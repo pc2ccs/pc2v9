@@ -32,7 +32,7 @@ public class ClientImplementation implements IClient {
         }
         number = clientId.getClientNumber();
         siteNumber = clientId.getSiteNumber();
-        //TODO: set the clientType;
+        clientType = ClientType.valueOf(clientId.getClientType().toString());
     }
 
     public String getLoginName() {
