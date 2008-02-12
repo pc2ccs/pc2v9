@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.api;
 import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
 import edu.csus.ecs.pc2.api.implementation.Contest;
 import edu.csus.ecs.pc2.core.InternalController;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.InternalContest;
 
@@ -101,7 +102,7 @@ public class ServerConnection {
                 return true;
             }
         } catch (Exception e) {
-            // TODO print exception ??
+            controller.getLog().log(Log.WARNING, "Logoff exception",e);
             return false;
         }
         return false;
