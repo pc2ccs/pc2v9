@@ -74,7 +74,7 @@ public interface IProblem {
      * Get the command line which has been specified by the Contest Administrator as
      * being the command required to execute the validator program associated with this problem.
      * <P>
-     * Note that when a Contest Administrator enters a &quot&;validator command line&quot&; into
+     * Note that when a Contest Administrator enters a &quot;validator command line&quot; into
      * PC<sup>2</sup>, the entry may contain &quot;substitution parameters&quot; to be filled in
      * at run time.  The validator command line obtained by calling this method will have already 
      * had any such command line parameter substitutions performed prior to returning the command line.
