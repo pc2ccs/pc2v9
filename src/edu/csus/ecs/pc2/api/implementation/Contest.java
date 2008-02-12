@@ -15,6 +15,7 @@ import edu.csus.ecs.pc2.api.IStanding;
 import edu.csus.ecs.pc2.api.ITeam;
 import edu.csus.ecs.pc2.api.listener.IConfigurationUpdateListener;
 import edu.csus.ecs.pc2.api.listener.IRunEventListener;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.Group;
@@ -42,9 +43,14 @@ public class Contest implements IContest {
     private RunListenerList runListenerList = new RunListenerList();
     
     private ConfigurationListenerList configurationListenerList = new ConfigurationListenerList();
+    
+    private GenerateStandings generateStandings = new GenerateStandings();
+    
+    private Log log = null;
 
-    public Contest(IInternalContest contest) {
+    public Contest(IInternalContest contest, Log log) {
         this.contest = contest;
+        this.log = log;
         runListenerList.setContest(contest);
         configurationListenerList.setContest(contest);
     }
@@ -165,17 +171,29 @@ public class Contest implements IContest {
     }
 
     public IStanding getStanding(ITeam team) {
-        // TODO Auto-generated method stub
+        IStanding[] standings = generateStandings.getStandings(contest, log);
+        if (standings == null) {
+            return null;
+        }
+        for (IStanding standing : standings) {
+            if (team.getAccountNumber() == standing.getClient().getAccountNumber() && team.getSiteNumber() == standing.getClient().getSiteNumber()) {
+                return standing;
+            }
+        }
         return null;
     }
 
     public IStanding[] getStandings() {
-        // TODO Auto-generated method stub
-        return null;
+        return generateStandings.getStandings(contest, log);
     }
 
     public ISite[] getSites() {
-        // TODO Auto-generated method stub
-        return null;
+
+        Site[] sites = contest.getSites();
+        SiteImplementation[] siteImplementations = new SiteImplementation[sites.length];
+        for (int i = 0; i < sites.length; i++) {
+            siteImplementations[i] = new SiteImplementation(sites[i]);
+        }
+        return siteImplementations;
     }
 }

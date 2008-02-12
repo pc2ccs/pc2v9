@@ -79,7 +79,7 @@ public class ServerConnection {
             controller.start(new String[0]);
             internalContest = controller.clientLogin(login, password);
 
-            contest = new Contest(internalContest);
+            contest = new Contest(internalContest, controller.getLog());
 
             return contest;
 
