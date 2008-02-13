@@ -86,4 +86,9 @@ public interface IClient {
      * @return a numerical identifier for this client's login name (account)
      */
     int getAccountNumber();
+    
+    // TODO document
+    boolean equals(Object obj);
+
+    int hashCode();
 }

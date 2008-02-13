@@ -27,14 +27,23 @@ public class ProblemImplementation implements IProblem {
 
     private byte[] judgesAnswerFileContents;
 
+    private String validatorCommandLine;
+
+    private String validatorFileName;
+    
+    private ElementId elementId;
+
     public ProblemImplementation(ElementId problemId, IInternalContest internalContest) {
         this(internalContest.getProblem(problemId), internalContest);
     }
 
     public ProblemImplementation(Problem problem, IInternalContest internalContest) {
+        elementId = problem.getElementId();
         name = problem.getDisplayName();
         judgesDataFileName = problem.getDataFileName();
         judgesAnswerFileName = problem.getAnswerFileName();
+        validatorFileName = problem.getValidatorProgramName();
+        
         
         ProblemDataFiles problemDataFiles = internalContest.getProblemDataFile(problem);
         if (problemDataFiles != null) {
@@ -74,13 +83,11 @@ public class ProblemImplementation implements IProblem {
     }
 
     public String getValidatorFileName() {
-        // TODO Auto-generated method stub
-        return null;
+        return validatorFileName;
     }
 
     public String getValidatorCommandLine() {
-        // TODO Auto-generated method stub
-        return null;
+        return validatorCommandLine;
     }
 
     public byte[] getValidatorFileContents() {
@@ -112,4 +119,13 @@ public class ProblemImplementation implements IProblem {
         // TODO Auto-generated method stub
         return false;
     }
+    
+    public boolean equals(Object obj) {
+        if (obj instanceof IProblem){
+            
+        } else {
+            false;
+        }
+    }
+    
 }

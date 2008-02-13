@@ -62,4 +62,8 @@ public interface IContestClock {
      */
     boolean isContestClockRunning ();
 
+    // TODO document
+    boolean equals(Object obj);
+
+    int hashCode();
 }

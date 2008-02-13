@@ -30,4 +30,8 @@ public interface ISite {
      */
     int getNumber();
     
+    // TODO document
+    boolean equals(Object obj);
+
+    int hashCode();
 }
