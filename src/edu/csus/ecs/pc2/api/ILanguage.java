@@ -5,7 +5,7 @@ package edu.csus.ecs.pc2.api;
  * 
  * <p>
  * This documentation describes the current <I>draft</i> of the PC<sup>2</sup> API, which is subject to change.
- *  
+ * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -18,4 +18,9 @@ public interface ILanguage {
      * @return A String containing the name of the language.
      */
     String getName();
+
+    // TODO document
+    boolean equals(Object obj);
+
+    int hashCode();
 }

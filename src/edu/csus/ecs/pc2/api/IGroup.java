@@ -24,4 +24,9 @@ public interface IGroup {
      * @return A String containing the name of the group.
      */
     String getName();
+    
+    // TODO document
+    boolean equals(Object obj);
+
+    int hashCode();
 }

@@ -149,4 +149,9 @@ public interface IProblem {
      * @return True if the Contest Administrator has defined a Judge's Answer File for this problem; false otherwise.
      */
     boolean hasAnswerFile();
+    
+    // TODO document
+    boolean equals(Object obj);
+    
+    int hashCode();
 }
