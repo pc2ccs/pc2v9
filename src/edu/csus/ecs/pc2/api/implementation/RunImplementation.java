@@ -4,6 +4,7 @@ import edu.csus.ecs.pc2.api.ILanguage;
 import edu.csus.ecs.pc2.api.IProblem;
 import edu.csus.ecs.pc2.api.IRun;
 import edu.csus.ecs.pc2.api.ITeam;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 
@@ -36,6 +37,8 @@ public class RunImplementation implements IRun {
     private int siteNumber;
 
     private long elapsedMins;
+
+    private ElementId elementId;
 
     /**
      * 
@@ -72,6 +75,8 @@ public class RunImplementation implements IRun {
         siteNumber = run.getSiteNumber();
         
         elapsedMins = run.getElapsedMins();
+        
+        elementId = run.getElementId();
 
     }
 
@@ -124,5 +129,26 @@ public class RunImplementation implements IRun {
         // TODO Auto-generated method stub
         return null;
     }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+
+        if (obj instanceof RunImplementation) {
+            RunImplementation runImplementation = (RunImplementation) obj;
+            return (runImplementation.elementId.equals(elementId));
+        } else {
+            return false;
+        }
+    }
+    
+    @Override
+    public int hashCode() {
+        return elementId.toString().hashCode();
+    }
+    
+    
 
 }

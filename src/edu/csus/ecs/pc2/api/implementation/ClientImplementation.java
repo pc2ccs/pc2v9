@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.api.implementation;
 import edu.csus.ecs.pc2.api.IClient;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
@@ -23,6 +24,8 @@ public class ClientImplementation implements IClient {
     private int siteNumber;
 
     private ClientType clientType;
+
+    private ElementId elementId;
     
     public ClientImplementation(ClientId clientId, IInternalContest contest) {
         Account account = contest.getAccount(clientId);
@@ -33,6 +36,7 @@ public class ClientImplementation implements IClient {
         number = clientId.getClientNumber();
         siteNumber = clientId.getSiteNumber();
         clientType = ClientType.valueOf(clientId.getClientType().toString());
+        elementId = account.getElementId();
     }
 
     public String getLoginName() {
@@ -53,5 +57,25 @@ public class ClientImplementation implements IClient {
 
     public ClientType getType() {
         return clientType;
+    }
+    
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+
+        if (obj instanceof ClientImplementation) {
+            ClientImplementation clientImplementation = (ClientImplementation) obj;
+            return (clientImplementation.elementId.equals(elementId));
+        } else {
+            return false;
+        }
+    }
+    
+    @Override
+    public int hashCode() {
+        return elementId.toString().hashCode();
     }
 }

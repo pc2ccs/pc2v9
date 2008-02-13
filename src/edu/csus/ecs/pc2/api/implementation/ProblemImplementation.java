@@ -120,12 +120,23 @@ public class ProblemImplementation implements IProblem {
         return false;
     }
     
+    @Override
     public boolean equals(Object obj) {
-        if (obj instanceof IProblem){
-            
-        } else {
-            false;
+        if (obj == null) {
+            return false;
         }
+
+        if (obj instanceof ProblemImplementation) {
+            ProblemImplementation problemImplementation = (ProblemImplementation) obj;
+            return (problemImplementation.elementId.equals(elementId));
+        } else {
+            return false;
+        }
+    }
+    
+    @Override
+    public int hashCode() {
+        return elementId.toString().hashCode();
     }
     
 }

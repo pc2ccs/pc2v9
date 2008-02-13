@@ -14,6 +14,8 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 public class GroupImplementation implements IGroup {
 
     private String name;
+    
+    private ElementId elementId;
 
     public GroupImplementation(String name) {
         super();
@@ -26,10 +28,32 @@ public class GroupImplementation implements IGroup {
 
     public GroupImplementation(Group group, IInternalContest contest) {
         name = group.getDisplayName();
+        elementId = group.getElementId();
     }
 
     public String getName() {
         return name;
     }
+    
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+
+        if (obj instanceof GroupImplementation) {
+            GroupImplementation groupImplementation = (GroupImplementation) obj;
+            return (groupImplementation.elementId.equals(elementId));
+        } else {
+            return false;
+        }
+    }
+    
+    @Override
+    public int hashCode() {
+        return elementId.toString().hashCode();
+    }
+  
 
 }
