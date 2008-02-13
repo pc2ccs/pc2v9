@@ -122,5 +122,9 @@ public interface IRun {
      * @return The contents of each submitted source code file for this {@link IRun}.
      */
     byte [][] getSourceCodeFileContents();
+    
+    boolean equals(Object obj);
+
+    int hashCode();
 
 }
