@@ -33,6 +33,12 @@ public class ProblemImplementation implements IProblem {
     
     private ElementId elementId;
 
+    private byte[] validatorFileContents;
+
+    private boolean externalValidator = false;
+
+    private boolean readsInputFromSTDIN = false;
+
     public ProblemImplementation(ElementId problemId, IInternalContest internalContest) {
         this(internalContest.getProblem(problemId), internalContest);
     }
@@ -44,6 +50,13 @@ public class ProblemImplementation implements IProblem {
         judgesAnswerFileName = problem.getAnswerFileName();
         validatorFileName = problem.getValidatorProgramName();
         
+        if (problem.isValidatedProblem()){
+            if (! problem.isUsingPC2Validator()){
+                externalValidator = true;
+            }
+        }
+        
+        readsInputFromSTDIN = problem.isReadInputDataFromSTDIN();
         
         ProblemDataFiles problemDataFiles = internalContest.getProblemDataFile(problem);
         if (problemDataFiles != null) {
@@ -57,9 +70,12 @@ public class ProblemImplementation implements IProblem {
             if (serializedFile != null){
                 judgesAnswerFileContents = serializedFile.getBuffer();
             }
-            
-        }
 
+            serializedFile = problemDataFiles.getValidatorFile();
+            if (serializedFile != null){
+                validatorFileContents = serializedFile.getBuffer();
+            }
+        }
     }
 
     public String getName() {
@@ -91,33 +107,33 @@ public class ProblemImplementation implements IProblem {
     }
 
     public byte[] getValidatorFileContents() {
-        // TODO Auto-generated method stub
-        return null;
+        return validatorFileContents;
     }
 
     public boolean hasExternalValidator() {
-        // TODO Auto-generated method stub
-        return false;
+        return externalValidator;
     }
 
     public boolean readsInputFromFile() {
-        // TODO Auto-generated method stub
+        if (hasDataFile()) {
+            return !readsInputFromStdIn();
+        }
         return false;
     }
 
     public boolean readsInputFromStdIn() {
-        // TODO Auto-generated method stub
+        if (hasDataFile()) {
+            return readsInputFromSTDIN;
+        }
         return false;
     }
 
     public boolean hasDataFile() {
-        // TODO Auto-generated method stub
-        return false;
+        return (judgesDataFileContents != null);
     }
 
     public boolean hasAnswerFile() {
-        // TODO Auto-generated method stub
-        return false;
+        return (judgesAnswerFileContents != null);
     }
     
     @Override
