@@ -18,6 +18,7 @@ import edu.csus.ecs.pc2.ui.FrameUtilities;
 
 /**
  * API Contest Test Frame
+ * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -66,6 +67,16 @@ public class ContestTestFrame extends JFrame {
 
     private RunListener runListener = null;
 
+    private ScrollyFrame scrollyFrame = new ScrollyFrame();
+
+    private String line = "";
+
+    private JButton jButton = null;
+
+    private JButton jButton1 = null;
+
+    private JButton jButton2 = null;
+
     /**
      * This method initializes
      * 
@@ -99,23 +110,19 @@ public class ContestTestFrame extends JFrame {
     protected class RunListener implements IRunEventListener {
 
         public void runAdded(IRun run) {
-            System.out.println("Run added Site " + run.getSiteNumber() + " Run " + run.getNumber() + " from "
-                    + run.getTeam().getLoginName() + " at " + run.getSubmissionTime());
+            println("Run added Site " + run.getSiteNumber() + " Run " + run.getNumber() + " from " + run.getTeam().getLoginName() + " at " + run.getSubmissionTime());
         }
 
         public void runRemoved(IRun run) {
-            System.out.println("Run removed Site " + run.getSiteNumber() + " Run " + run.getNumber() + " from "
-                    + run.getTeam().getLoginName() + " at " + run.getSubmissionTime());
+            println("Run removed Site " + run.getSiteNumber() + " Run " + run.getNumber() + " from " + run.getTeam().getLoginName() + " at " + run.getSubmissionTime());
         }
 
         public void runJudged(IRun run) {
-            System.out.println("Run judged Site " + run.getSiteNumber() + " Run " + run.getNumber() + " from "
-                    + run.getTeam().getLoginName() + " at " + run.getSubmissionTime());
+            println("Run judged Site " + run.getSiteNumber() + " Run " + run.getNumber() + " from " + run.getTeam().getLoginName() + " at " + run.getSubmissionTime());
         }
 
         public void runUpdated(IRun run) {
-            System.out.println("Run updated Site " + run.getSiteNumber() + " Run " + run.getNumber() + " from "
-                    + run.getTeam().getLoginName() + " at " + run.getSubmissionTime());
+            println("Run updated Site " + run.getSiteNumber() + " Run " + run.getNumber() + " from " + run.getTeam().getLoginName() + " at " + run.getSubmissionTime());
         }
     }
 
@@ -161,6 +168,9 @@ public class ContestTestFrame extends JFrame {
             centerPane.add(getLogoffButton(), null);
             centerPane.add(getRunListenerCheckBox(), null);
             centerPane.add(getConfigListenerCheckBox(), null);
+            centerPane.add(getJButton(), null);
+            centerPane.add(getJButton1(), null);
+            centerPane.add(getJButton2(), null);
         }
         return centerPane;
     }
@@ -175,6 +185,7 @@ public class ContestTestFrame extends JFrame {
             FlowLayout flowLayout = new FlowLayout();
             flowLayout.setHgap(55);
             buttonPane = new JPanel();
+            buttonPane.setPreferredSize(new java.awt.Dimension(269, 42));
             buttonPane.setLayout(flowLayout);
             buttonPane.add(getGoButton(), null);
             buttonPane.add(getExitButton(), null);
@@ -193,7 +204,7 @@ public class ContestTestFrame extends JFrame {
             goButton.setText("Go");
             goButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.out.println("actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+                    println("actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
                 }
             });
         }
@@ -209,6 +220,7 @@ public class ContestTestFrame extends JFrame {
         if (exitButton == null) {
             exitButton = new JButton();
             exitButton.setText("Exit");
+            exitButton.setMnemonic(java.awt.event.KeyEvent.VK_X);
             exitButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     System.exit(0);
@@ -226,48 +238,48 @@ public class ContestTestFrame extends JFrame {
     private JButton getTestRunButton() {
         if (testRunButton == null) {
             testRunButton = new JButton();
-            testRunButton.setBounds(new java.awt.Rectangle(16, 82, 117, 32));
-            testRunButton.setText("getRuns API");
+            testRunButton.setBounds(new java.awt.Rectangle(248,121,94,32));
+            testRunButton.setText("Runs");
             testRunButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    getRunsTest();
+                    printRunsTest();
                 }
             });
         }
         return testRunButton;
     }
 
-    protected void getRunsTest() {
+    protected void printRunsTest() {
 
         if (contest == null) {
             showMessage("Not logged in");
             return;
         }
 
-        // System.out.println("There are "+contest.getLanguages()+" languages");
+        // println("There are "+contest.getLanguages()+" languages");
         // for (ILanguage language : contest.getLanguages()){
-        // System.out.println(language.getTitle());
+        // println(language.getTitle());
         // }
 
-        System.out.println();
+        println();
 
         for (IRun run : contest.getRuns()) {
 
-            System.out.print("Run " + run.getNumber() + " Site " + run.getSiteNumber());
+            print("Run " + run.getNumber() + " Site " + run.getSiteNumber());
 
-            System.out.print(" @ " + run.getSubmissionTime() + " by " + run.getTeam().getLoginName());
-            System.out.print(" problem: " + run.getProblem().getName());
-            System.out.print(" in " + run.getLanguage().getName());
+            print(" @ " + run.getSubmissionTime() + " by " + run.getTeam().getLoginName());
+            print(" problem: " + run.getProblem().getName());
+            print(" in " + run.getLanguage().getName());
 
             if (run.isJudged()) {
-                System.out.println("  Judgement: " + run.getJudgementName());
+                println("  Judgement: " + run.getJudgementName());
             } else {
-                System.out.println("  Judgement: not judged yet ");
+                println("  Judgement: not judged yet ");
             }
 
-            System.out.println();
+            println();
         }
-        System.out.println();
+        println();
 
     }
 
@@ -308,7 +320,12 @@ public class ContestTestFrame extends JFrame {
             info("Logged in at " + login + " took " + totalMs + "ms (" + (totalMs / 1000) + " seconds)");
             setTitle("Contest " + contest.getMyClient().getLoginName() + " " + contest.getSiteName());
             getLoginButton().setEnabled(false);
+            scrollyFrame.setVisible(true);
+
         } catch (LoginFailureException e) {
+            contest = null;
+            showMessage("Unable to login " + e.getMessage());
+        } catch (Exception e) {
             contest = null;
             showMessage("Unable to login " + e.getMessage());
         }
@@ -318,8 +335,6 @@ public class ContestTestFrame extends JFrame {
 
     private void info(String string) {
         System.out.println(new Date() + " " + Thread.currentThread().getName() + " " + string);
-        // TODO Auto-generated method stub
-
     }
 
     private void showMessage(String string) {
@@ -361,30 +376,78 @@ public class ContestTestFrame extends JFrame {
     private JButton getListTeamsButton() {
         if (listTeamsButton == null) {
             listTeamsButton = new JButton();
-            listTeamsButton.setBounds(new java.awt.Rectangle(161, 82, 128, 32));
-            listTeamsButton.setText("getTeams API");
+            listTeamsButton.setBounds(new java.awt.Rectangle(248,172,94,32));
+            listTeamsButton.setText("Teams");
             listTeamsButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    getTeamsTest();
+                    printTeamsTest();
                 }
             });
         }
         return listTeamsButton;
     }
 
-    protected void getTeamsTest() {
+    protected void printTeamsTest() {
 
         if (contest == null) {
             showMessage("Not logged in");
             return;
         }
 
-        System.out.println("There are " + contest.getTeams().length + " team ");
+        println("There are " + contest.getTeams().length + " team ");
         for (ITeam team : contest.getTeams()) {
-            System.out.println(team.getLoginName() + " title: " + team.getLoginName() + " group: " + team.getGroup().getName());
+            println(team.getLoginName() + " title: " + team.getLoginName() + " group: " + team.getGroup().getName());
         }
+        println("");
 
     }
+    
+
+    protected void printProblemsTest() {
+
+        if (contest == null) {
+            showMessage("Not logged in");
+            return;
+        }
+
+        println("There are " + contest.getProblems().length + " team ");
+        for (IProblem problem : contest.getProblems()) {
+            print("Problem name = "+problem.getName());
+            
+            print(" data file = ");
+            if (problem.hasDataFile()){
+               print(problem.getJudgesDataFileName()); 
+            } else {
+                print ("<none>");
+            }
+            
+            print (" answer file = ");
+            if (problem.hasAnswerFile()){
+                print(problem.getJudgesAnswerFileName()); 
+            } else {
+                print ("<none>");
+            }
+            
+            print(" validator = ");
+            if (problem.hasExternalValidator()){
+                print(problem.getValidatorFileName());
+            } else {
+                print ("<none>");
+            }
+            
+            if (problem.readsInputFromFile()){
+                print (" reads from FILE");
+            }
+            if (problem.readsInputFromStdIn()){
+                print (" reads from stdin");
+            }
+            println();
+        }
+        println();
+
+    }
+    
+        
 
     /**
      * This method initializes logoffButton
@@ -394,7 +457,7 @@ public class ContestTestFrame extends JFrame {
     private JButton getLogoffButton() {
         if (logoffButton == null) {
             logoffButton = new JButton();
-            logoffButton.setBounds(new java.awt.Rectangle(418, 77, 93, 32));
+            logoffButton.setBounds(new java.awt.Rectangle(421,77,93,32));
             logoffButton.setText("Logoff");
             logoffButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -411,6 +474,8 @@ public class ContestTestFrame extends JFrame {
             showMessage("Not logged in");
             return;
         }
+
+        scrollyFrame.setVisible(false);
 
         serverConnection.logoff();
         contest = null;
@@ -441,7 +506,8 @@ public class ContestTestFrame extends JFrame {
     /**
      * Turn run listener on and off
      * 
-     * @param listenerON true add listener, false no listener.
+     * @param listenerON
+     *            true add listener, false no listener.
      */
     protected void runListenerChanged(boolean listenerON) {
 
@@ -456,11 +522,11 @@ public class ContestTestFrame extends JFrame {
                 runListener = new RunListener();
             }
             contest.addRunListener(runListener);
-            System.out.println("Run Listener added");
+            println("Run Listener added");
         } else {
             if (runListener != null) {
                 contest.removeRunListener(runListener);
-                System.out.println("Run Listener removed");
+                println("Run Listener removed");
             }
         }
     }
@@ -491,11 +557,118 @@ public class ContestTestFrame extends JFrame {
             return;
         }
 
-        System.out.println("configListenerChanged todo " + listenerON); // todo CODE
+        println("configListenerChanged todo " + listenerON); // todo CODE
+    }
+
+    /**
+     * This method initializes jButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getJButton() {
+        if (jButton == null) {
+            jButton = new JButton();
+            jButton.setBounds(new java.awt.Rectangle(248,219,94,32));
+            jButton.setText("Standings");
+            jButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    printStandingsTest();
+                }
+            });
+        }
+        return jButton;
+    }
+
+    protected void printStandingsTest() {
+
+        if (contest == null) {
+            showMessage("Not logged in");
+            return;
+        }
+
+        println("Standings");
+        for (IStanding standing : contest.getStandings()) {
+            println("Rank " + standing.getRank() + " solved= " + standing.getNumProblemsSolved() + " pts= " + standing.getPenaltyPoints() + " " + standing.getClient().getLoginName());
+        }
+
+    }
+
+    /**
+     * This method initializes jButton1
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getJButton1() {
+        if (jButton1 == null) {
+            jButton1 = new JButton();
+            jButton1.setBounds(new java.awt.Rectangle(421,172,94,32));
+            jButton1.setText("Print ALL");
+            jButton1.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    printAll();
+                }
+            });
+        }
+        return jButton1;
+    }
+
+    protected void printAll() {
+
+        if (contest == null) {
+            showMessage("Not logged in");
+            return;
+        }
+        
+        printRunsTest();
+        printStandingsTest();
+        printTeamsTest();
+        printProblemsTest();
+
+    }
+
+    /**
+     * This method initializes jButton2
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getJButton2() {
+        if (jButton2 == null) {
+            jButton2 = new JButton();
+            jButton2.setBounds(new java.awt.Rectangle(421,219,94,32));
+            jButton2.setText("Clear");
+            jButton2.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    scrollyFrame.removeAll();
+                }
+            });
+        }
+        return jButton2;
     }
 
     public static void main(String[] args) {
         new ContestTestFrame().setVisible(true);
+    }
+
+    private void println() {
+        String s = "";
+        if (line.length() > 0) {
+            s = line + s;
+            line = "";
+        }
+        scrollyFrame.addLine(s);
+    }
+
+    private void print(String s) {
+        line = line + s;
+
+    }
+
+    private void println(String s) {
+        if (line.length() > 0) {
+            s = line + s;
+            line = "";
+        }
+        scrollyFrame.addLine(s);
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
