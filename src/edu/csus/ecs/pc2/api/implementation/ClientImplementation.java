@@ -35,7 +35,18 @@ public class ClientImplementation implements IClient {
         }
         number = clientId.getClientNumber();
         siteNumber = clientId.getSiteNumber();
-        clientType = ClientType.valueOf(clientId.getClientType().toString());
+        switch (clientId.getClientType()) {
+            case JUDGE:
+                clientType = ClientType.JUDGE_CLIENT;
+                break;
+            case SCOREBOARD:
+                clientType = ClientType.SCOREBOARD_CLIENT;
+                break;
+            case TEAM:
+            default:
+                clientType = ClientType.TEAM_CLIENT;
+                break;
+        }
         elementId = account.getElementId();
     }
 

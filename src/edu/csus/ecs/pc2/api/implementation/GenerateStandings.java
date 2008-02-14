@@ -51,11 +51,13 @@ public class GenerateStandings {
                 outArray[0] = value;
             } else if (name.equals("teamName")) {
                 outArray[1] = value;
+            } else if (name.equals("solved")) {
+                outArray[2] = value;
             } else if (name.equals("points")) {
                 outArray[3] = value;
             } else if (name.equals("teamId")) {
                 outArray[4] = value;
-            } else if (name.equals("siteId")) {
+            } else if (name.equals("teamSiteId")) {
                 outArray[5] = value;
             } else if (name.equals("teamKey")) {
                 outArray[6] = value;
