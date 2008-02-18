@@ -1,5 +1,7 @@
 package edu.csus.ecs.pc2.core.model;
 
+import java.util.Vector;
+
 import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.list.AccountList;
 import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
@@ -28,7 +30,10 @@ public class AccountListTest extends TestCase {
     public void testGenOneTeam() {
 
         numAccounts = 1;
-        accountList.generateNewAccounts(ClientType.Type.TEAM, numAccounts, PasswordType.JOE, 1, true);
+        Vector<Account> accounts = accountList.generateNewAccounts(ClientType.Type.TEAM, numAccounts, PasswordType.JOE, 1, true);
+        
+        String password = accounts.firstElement().getClientId().getName();
+        assertEquals(password,accounts.firstElement().getPassword());
 
         totAccounts += numAccounts;
         assertTrue("Did not create " + numAccounts + " team accounts", accountList.getAccounts(ClientType.Type.TEAM).size() == numAccounts);
@@ -38,7 +43,10 @@ public class AccountListTest extends TestCase {
     public void testAddJudgeAccounts() {
 
         numAccounts = 4;
-        accountList.generateNewAccounts(ClientType.Type.JUDGE, numAccounts, PasswordType.JOE, 1, true);
+        Vector<Account> accounts =accountList.generateNewAccounts(ClientType.Type.JUDGE, numAccounts, PasswordType.JOE, 1, true);
+
+        String password = accounts.firstElement().getClientId().getName();
+        assertEquals(password,accounts.firstElement().getPassword());
 
         totAccounts += numAccounts;
         assertTrue("Did not create " + numAccounts + " judge accounts", accountList.getAccounts(ClientType.Type.JUDGE).size() == numAccounts);
@@ -54,8 +62,12 @@ public class AccountListTest extends TestCase {
 
     public void testFiveScoreboards() {
         numAccounts = 4;
-        accountList.generateNewAccounts(ClientType.Type.SCOREBOARD, numAccounts, PasswordType.JOE, 1, true);
+        Vector<Account> accounts =accountList.generateNewAccounts(ClientType.Type.SCOREBOARD, numAccounts, PasswordType.JOE, 1, true);
 
+        String password = accounts.firstElement().getClientId().getName();
+        assertEquals(password,accounts.firstElement().getPassword());
+
+        
         totAccounts += numAccounts;
         assertTrue("Did not create " + numAccounts + " judge accounts", accountList.getAccounts(ClientType.Type.SCOREBOARD).size() == numAccounts);
         assertTrue("Did not create " + totAccounts + " accounts", accountList.getAccounts(ClientType.Type.ALL).size() == totAccounts);

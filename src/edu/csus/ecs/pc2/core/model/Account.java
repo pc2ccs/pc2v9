@@ -69,7 +69,7 @@ public class Account implements IElementObject {
         super();
         elementId = new ElementId(clientId.toString());
         this.clientId = clientId;
-        this.password = password;
+        setPassword(password);
         elementId.setSiteNumber(siteNumber);
         displayName = clientId.getClientType().toString().toLowerCase()
                 + clientId.getClientNumber();
@@ -142,7 +142,7 @@ public class Account implements IElementObject {
             if (!displayName.equals(account.getDisplayName())) {
                 return false;
             }
-            if (!password.equals(account.getPassword())) {
+            if (!getPassword().equals(account.getPassword())) {
                 return false;
             }
             if (getClientId().getClientNumber() != account.getClientId()
