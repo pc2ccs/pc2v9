@@ -40,13 +40,11 @@ public class ProfilesPane extends JPanePlugin {
 
     private JButton newButton = null;
 
-    private JButton jButton = null;
-
-    private JButton jButton1 = null;
-
-    private JButton jButton2 = null;
+    private JButton exportButton = null;
 
     private JLabel notificationOfNonImplementationLabel = null;
+
+    private JButton cloneButton = null;
 
     /**
      * This method initializes
@@ -104,6 +102,7 @@ public class ProfilesPane extends JPanePlugin {
             switchButton = new JButton();
             switchButton.setBounds(new java.awt.Rectangle(497, 85, 73, 28));
             switchButton.setEnabled(false);
+            switchButton.setMnemonic(java.awt.event.KeyEvent.VK_W);
             switchButton.setText("Switch");
         }
         return switchButton;
@@ -119,6 +118,7 @@ public class ProfilesPane extends JPanePlugin {
             setButton = new JButton();
             setButton.setBounds(new java.awt.Rectangle(497, 38, 73, 26));
             setButton.setEnabled(false);
+            setButton.setMnemonic(java.awt.event.KeyEvent.VK_S);
             setButton.setText("Set");
             setButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -182,9 +182,8 @@ public class ProfilesPane extends JPanePlugin {
             buttonPane.setLayout(flowLayout);
             buttonPane.setPreferredSize(new java.awt.Dimension(35, 35));
             buttonPane.add(getNewButton(), null);
-            buttonPane.add(getJButton(), null);
-            buttonPane.add(getJButton1(), null);
-            buttonPane.add(getJButton2(), null);
+            buttonPane.add(getCloneButton(), null);
+            buttonPane.add(getExportButton(), null);
         }
         return buttonPane;
     }
@@ -198,37 +197,10 @@ public class ProfilesPane extends JPanePlugin {
         if (newButton == null) {
             newButton = new JButton();
             newButton.setText("New");
+            newButton.setMnemonic(java.awt.event.KeyEvent.VK_N);
             newButton.setEnabled(false);
         }
         return newButton;
-    }
-
-    /**
-     * This method initializes jButton
-     * 
-     * @return javax.swing.JButton
-     */
-    private JButton getJButton() {
-        if (jButton == null) {
-            jButton = new JButton();
-            jButton.setText("Save As...");
-            jButton.setEnabled(false);
-        }
-        return jButton;
-    }
-
-    /**
-     * This method initializes jButton1
-     * 
-     * @return javax.swing.JButton
-     */
-    private JButton getJButton1() {
-        if (jButton1 == null) {
-            jButton1 = new JButton();
-            jButton1.setText("Delete");
-            jButton1.setEnabled(false);
-        }
-        return jButton1;
     }
 
     /**
@@ -236,12 +208,33 @@ public class ProfilesPane extends JPanePlugin {
      * 
      * @return javax.swing.JButton
      */
-    private JButton getJButton2() {
-        if (jButton2 == null) {
-            jButton2 = new JButton();
-            jButton2.setText("Export");
-            jButton2.setEnabled(false);
+    private JButton getExportButton() {
+        if (exportButton == null) {
+            exportButton = new JButton();
+            exportButton.setText("Export");
+            exportButton.setMnemonic(java.awt.event.KeyEvent.VK_X);
+            exportButton.setEnabled(false);
         }
-        return jButton2;
+        return exportButton;
+    }
+
+    /**
+     * This method initializes cloneButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getCloneButton() {
+        if (cloneButton == null) {
+            cloneButton = new JButton();
+            cloneButton.setText("Clone");
+            cloneButton.setMnemonic(java.awt.event.KeyEvent.VK_C);
+            cloneButton.setEnabled(false);
+            cloneButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    System.out.println("actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+                }
+            });
+        }
+        return cloneButton;
     }
 } // @jve:decl-index=0:visual-constraint="25,9"
