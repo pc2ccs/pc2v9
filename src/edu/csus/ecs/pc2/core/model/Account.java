@@ -105,11 +105,28 @@ public class Account implements IElementObject {
     }
 
     public String getPassword() {
-        return password;
+        StringBuffer sb = new StringBuffer(password);
+
+        String p = new String("");
+        
+        for (int i = 0; i < sb.length(); i++) {
+            p = p + (char)(sb.charAt(i) ^ 0xfafa);
+        }
+
+        return p;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setPassword(String inPassword) {
+        StringBuffer sb = new StringBuffer(inPassword);
+        StringBuffer newStringBuffer = new StringBuffer();
+
+        password = "";
+        
+        for (int i = 0; i < inPassword.length(); i++) {
+            newStringBuffer.append((char)(sb.charAt(i) ^ 0xfafa));
+        }
+
+        password = new String(newStringBuffer);
     }
 
     public ClientId getClientId() {

@@ -25,6 +25,7 @@ public final class AllTests {
         suite.addTestSuite(ContestTest.class);
         suite.addTestSuite(TimeFormatTest.class);
         suite.addTestSuite(SiteTest.class);
+        suite.addTestSuite(AccountTest.class);
         suite.addTestSuite(DisplayTeamNameTest.class);
         suite.addTestSuite(AccountListTest.class);
         suite.addTestSuite(ProblemTest.class);
