@@ -19,13 +19,12 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.ISiteListener;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.SiteEvent;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 
 /**
  * Generate accounts pane.
  * 
- * Can generate panes on any site, for any client type.
- * Can use a client start number to start the numbering of
- * the accounts.  
+ * Can generate panes on any site, for any client type. Can use a client start number to start the numbering of the accounts.
  * 
  * @author pc2@ecs.csus.edu
  * 
@@ -69,6 +68,10 @@ public class GenerateAccountsPane extends JPanePlugin {
 
     private JLabel siteLabel = null;
 
+    private JComboBox otherClientsComboBox = null;
+
+    private JTextField otherClientCountTextBox = null;
+
     /**
      * This method initializes
      * 
@@ -84,19 +87,19 @@ public class GenerateAccountsPane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new java.awt.Dimension(441,234));
+        this.setSize(new java.awt.Dimension(441, 277));
         this.add(getCenterPanel(), java.awt.BorderLayout.CENTER);
         this.add(getGenerateButtonPanel(), java.awt.BorderLayout.SOUTH);
 
     }
-    
+
     private void updateSiteComboBox() {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 int selectedIndex = getSiteSelectionComboBox().getSelectedIndex();
 
                 getSiteSelectionComboBox().removeAllItems();
-                
+
                 Site[] sites = getContest().getSites();
                 Arrays.sort(sites, new SiteComparatorBySiteNumber());
                 for (int i = 0; i < sites.length; i++) {
@@ -149,11 +152,10 @@ public class GenerateAccountsPane extends JPanePlugin {
                 genAdminLabel.setText("Administrators (" + number + ")");
 
                 generateButton.setText("Generate Accounts for Site " + theSiteNumber);
-                
+
             }
         });
     }
-
 
     @Override
     public String getPluginTitle() {
@@ -168,22 +170,22 @@ public class GenerateAccountsPane extends JPanePlugin {
     private JPanel getCenterPanel() {
         if (centerPanel == null) {
             siteLabel = new JLabel();
-            siteLabel.setBounds(new java.awt.Rectangle(79,8,48,20));
+            siteLabel.setBounds(new java.awt.Rectangle(79, 8, 48, 20));
             siteLabel.setText("Site");
             genStartNumberLabel = new JLabel();
-            genStartNumberLabel.setBounds(new java.awt.Rectangle(81,159,166,19));
+            genStartNumberLabel.setBounds(new java.awt.Rectangle(81, 198, 166, 19));
             genStartNumberLabel.setText("Start Account Number at");
             genScoreboardLabel = new JLabel();
-            genScoreboardLabel.setBounds(new java.awt.Rectangle(81,129,166,19));
+            genScoreboardLabel.setBounds(new java.awt.Rectangle(81, 129, 166, 19));
             genScoreboardLabel.setText("Scoreboards");
             genTeamLabels = new JLabel();
-            genTeamLabels.setBounds(new java.awt.Rectangle(81,99,166,19));
+            genTeamLabels.setBounds(new java.awt.Rectangle(81, 99, 166, 19));
             genTeamLabels.setText("Teams");
             genJudgeLabel = new JLabel();
-            genJudgeLabel.setBounds(new java.awt.Rectangle(81,69,166,19));
+            genJudgeLabel.setBounds(new java.awt.Rectangle(81, 69, 166, 19));
             genJudgeLabel.setText("Judges");
             genAdminLabel = new JLabel();
-            genAdminLabel.setBounds(new java.awt.Rectangle(81,39,166,19));
+            genAdminLabel.setBounds(new java.awt.Rectangle(81, 39, 166, 19));
             genAdminLabel.setText("Administrators");
             centerPanel = new JPanel();
             centerPanel.setLayout(null);
@@ -199,6 +201,8 @@ public class GenerateAccountsPane extends JPanePlugin {
             centerPanel.add(genStartNumberLabel, null);
             centerPanel.add(getStartNumberTextField(), null);
             centerPanel.add(siteLabel, null);
+            centerPanel.add(getOtherClientsComboBox(), null);
+            centerPanel.add(getOtherClientCountTextBox(), null);
         }
         return centerPanel;
     }
@@ -211,7 +215,7 @@ public class GenerateAccountsPane extends JPanePlugin {
     private JTextField getAdminCountTextField() {
         if (adminCountTextField == null) {
             adminCountTextField = new JTextField();
-            adminCountTextField.setBounds(new java.awt.Rectangle(343,35,39,22));
+            adminCountTextField.setBounds(new java.awt.Rectangle(343, 35, 39, 22));
             adminCountTextField.setDocument(new IntegerDocument());
         }
         return adminCountTextField;
@@ -225,7 +229,7 @@ public class GenerateAccountsPane extends JPanePlugin {
     private JTextField getBoardCountTextField() {
         if (boardCountTextField == null) {
             boardCountTextField = new JTextField();
-            boardCountTextField.setBounds(new java.awt.Rectangle(343,127,39,22));
+            boardCountTextField.setBounds(new java.awt.Rectangle(343, 127, 39, 22));
             boardCountTextField.setDocument(new IntegerDocument());
         }
         return boardCountTextField;
@@ -239,7 +243,7 @@ public class GenerateAccountsPane extends JPanePlugin {
     private JTextField getTeamCountTextField() {
         if (teamCountTextField == null) {
             teamCountTextField = new JTextField();
-            teamCountTextField.setBounds(new java.awt.Rectangle(343,97,39,22));
+            teamCountTextField.setBounds(new java.awt.Rectangle(343, 97, 39, 22));
             teamCountTextField.setDocument(new IntegerDocument());
         }
         return teamCountTextField;
@@ -253,7 +257,7 @@ public class GenerateAccountsPane extends JPanePlugin {
     private JTextField getJudgeCountTextField() {
         if (judgeCountTextField == null) {
             judgeCountTextField = new JTextField();
-            judgeCountTextField.setBounds(new java.awt.Rectangle(343,67,39,22));
+            judgeCountTextField.setBounds(new java.awt.Rectangle(343, 67, 39, 22));
             judgeCountTextField.setDocument(new IntegerDocument());
         }
         return judgeCountTextField;
@@ -290,7 +294,7 @@ public class GenerateAccountsPane extends JPanePlugin {
         }
         return generateButton;
     }
-    
+
     private int getIntegerValue(String s) {
         try {
             return Integer.parseInt(s);
@@ -303,10 +307,10 @@ public class GenerateAccountsPane extends JPanePlugin {
 
         try {
             int startNumber = getIntegerValue(startNumberTextField.getText());
-            if (startNumber < 1){
+            if (startNumber < 1) {
                 startNumber = 1;
             }
-            
+
             int thisSiteNumber = getContest().getSiteNumber();
             int theSiteNumber = thisSiteNumber;
 
@@ -316,7 +320,6 @@ public class GenerateAccountsPane extends JPanePlugin {
                 theSiteNumber = site.getSiteNumber();
             }
 
-            
             int count = getIntegerValue(adminCountTextField.getText());
             if (count > 0) {
                 getController().generateNewAccounts(ClientType.Type.ADMINISTRATOR.toString(), theSiteNumber, count, startNumber, true);
@@ -331,7 +334,7 @@ public class GenerateAccountsPane extends JPanePlugin {
 
             count = getIntegerValue(teamCountTextField.getText());
             if (count > 0) {
-                getController().generateNewAccounts(ClientType.Type.TEAM.toString(), theSiteNumber, count, startNumber,true);
+                getController().generateNewAccounts(ClientType.Type.TEAM.toString(), theSiteNumber, count, startNumber, true);
                 teamCountTextField.setText("");
             }
 
@@ -341,10 +344,17 @@ public class GenerateAccountsPane extends JPanePlugin {
                 boardCountTextField.setText("");
             }
             
+            count = getIntegerValue(otherClientCountTextBox.getText());
+            if (count > 0) {
+                Type type = (Type) otherClientsComboBox.getSelectedItem();
+                getController().generateNewAccounts(type.toString(), theSiteNumber, count, startNumber, true);
+                otherClientCountTextBox.setText("");
+            }
+
             getStartNumberTextField().setText("");
 
         } catch (Exception e) {
-             // TODO: handle exception
+            // TODO: handle exception
             e.printStackTrace();
         }
     }
@@ -357,7 +367,7 @@ public class GenerateAccountsPane extends JPanePlugin {
     private JComboBox getSiteSelectionComboBox() {
         if (siteSelectionComboBox == null) {
             siteSelectionComboBox = new JComboBox();
-            siteSelectionComboBox.setBounds(new java.awt.Rectangle(151,9,229,19));
+            siteSelectionComboBox.setBounds(new java.awt.Rectangle(151, 9, 229, 19));
             siteSelectionComboBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     updateGenerateTitles();
@@ -375,25 +385,25 @@ public class GenerateAccountsPane extends JPanePlugin {
     private JTextField getStartNumberTextField() {
         if (startNumberTextField == null) {
             startNumberTextField = new JTextField();
-            startNumberTextField.setBounds(new java.awt.Rectangle(343,157,39,22));
+            startNumberTextField.setBounds(new java.awt.Rectangle(343, 193, 39, 22));
             startNumberTextField.setDocument(new IntegerDocument());
         }
         return startNumberTextField;
     }
-    
+
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
 
         updateGenerateTitles();
         updateSiteComboBox();
-        
+
         getContest().addAccountListener(new AccountListenerImplementation());
         getContest().addSiteListener(new SiteListenerImplementation());
     }
-    
+
     /**
      * Account Listener for GenerateAccountsPanel.
-     *  
+     * 
      * @author pc2@ecs.csus.edu
      */
     public class AccountListenerImplementation implements IAccountListener {
@@ -404,7 +414,7 @@ public class GenerateAccountsPane extends JPanePlugin {
                     updateGenerateTitles();
                 }
             });
-            
+
         }
 
         public void accountModified(AccountEvent accountEvent) {
@@ -413,7 +423,7 @@ public class GenerateAccountsPane extends JPanePlugin {
                     updateGenerateTitles();
                 }
             });
-            
+
         }
 
         public void accountsAdded(AccountEvent accountEvent) {
@@ -431,13 +441,14 @@ public class GenerateAccountsPane extends JPanePlugin {
                 }
             });
         }
-        
+
     }
 
     /**
-     * Site Listener. 
+     * Site Listener.
+     * 
      * @author pc2@ecs.csus.edu
-     *
+     * 
      */
     public class SiteListenerImplementation implements ISiteListener {
 
@@ -460,7 +471,36 @@ public class GenerateAccountsPane extends JPanePlugin {
         public void siteLoggedOff(SiteEvent event) {
             updateSiteComboBox();
         }
-        
+
+    }
+
+    /**
+     * This method initializes otherClientsComboBox
+     * 
+     * @return javax.swing.JComboBox
+     */
+    private JComboBox getOtherClientsComboBox() {
+        if (otherClientsComboBox == null) {
+            otherClientsComboBox = new JComboBox();
+            otherClientsComboBox.setBounds(new java.awt.Rectangle(81, 162, 167, 20));
+            otherClientsComboBox.addItem(Type.EXECUTOR);
+            otherClientsComboBox.addItem(Type.SPECTATOR);
+        }
+        return otherClientsComboBox;
+    }
+
+    /**
+     * This method initializes jTextField
+     * 
+     * @return javax.swing.JTextField
+     */
+    private JTextField getOtherClientCountTextBox() {
+        if (otherClientCountTextBox == null) {
+            otherClientCountTextBox = new JTextField();
+            otherClientCountTextBox.setBounds(new java.awt.Rectangle(343, 160, 39, 22));
+            otherClientCountTextBox.setDocument(new IntegerDocument());
+        }
+        return otherClientCountTextBox;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
