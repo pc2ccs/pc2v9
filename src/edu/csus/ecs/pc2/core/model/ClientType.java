@@ -14,6 +14,7 @@ public class ClientType {
      * 
      * These are the kinds of accounts/clients in PC<sup>2</sup>.
      * @author pc2@ecs.csus.edu
+     * @version $Id$
      */
     
     public enum Type {
@@ -45,6 +46,14 @@ public class ClientType {
          * Scoreboard.
          */
         SCOREBOARD,
+        /**
+         * Spectator.
+         */
+        SPECTATOR,
+        /**
+         * Auto Judger.
+         */
+        EXECUTOR,
         /**
          * Other or Custom.
          */

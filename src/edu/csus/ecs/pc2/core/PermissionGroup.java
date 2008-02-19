@@ -9,7 +9,7 @@ import edu.csus.ecs.pc2.core.security.Permission.Type;
  * Holds Default Permissions for users.
  * 
  * @author pc2@ecs.csus.edu
- * 
+ * @version $Id$
  */
 
 // $HeadURL$
@@ -24,7 +24,9 @@ public class PermissionGroup {
     private PermissionList administratorPermissionList = new PermissionList();
 
     private PermissionList serverPermissionList = new PermissionList();
-    
+
+    private PermissionList spectatorPermissionList = new PermissionList();
+
     public PermissionGroup() {
         initialize();
     }
@@ -75,6 +77,28 @@ public class PermissionGroup {
         judgePermissionList.addPermission(Type.ALLOWED_TO_AUTO_JUDGE);
         
         /**
+         * Spectator Permissions
+         */
+
+        spectatorPermissionList.addPermission(Type.BALLOON_EMAIL);
+        spectatorPermissionList.addPermission(Type.CHANGE_PASSWORD);
+        spectatorPermissionList.addPermission(Type.JUDGE_RUN);
+        spectatorPermissionList.addPermission(Type.LOGIN);
+//        spectatorPermissionList.addPermission(Type.REJUDGE_RUN);
+        spectatorPermissionList.addPermission(Type.TEST_RUN);
+        spectatorPermissionList.addPermission(Type.VIEW_CLARIFICATIONS);
+        spectatorPermissionList.addPermission(Type.VIEW_RUNS);
+//        spectatorPermissionList.addPermission(Type.ANSWER_CLARIFICATION);
+        spectatorPermissionList.addPermission(Type.SUBMIT_CLARIFICATION);
+        spectatorPermissionList.addPermission(Type.VIEW_ALL_JUDGEMENTS);
+        spectatorPermissionList.addPermission(Type.VIEW_STANDINGS);
+        spectatorPermissionList.addPermission(Type.VIEW_SUMMARY_ATTEMPTS_GRID);
+        spectatorPermissionList.addPermission(Type.VIEW_RUN_JUDGEMENT_HISTORIES);
+//        spectatorPermissionList.addPermission(Type.GENERATE_NEW_CLARIFICATION);
+        spectatorPermissionList.addPermission(Type.ALLOWED_TO_AUTO_JUDGE);
+
+        
+        /**
          * Board Permissions
          */
 
@@ -97,19 +121,21 @@ public class PermissionGroup {
      */
     public PermissionList getPermissionList(ClientType.Type type) {
 
-        if (type.equals(ClientType.Type.TEAM)) {
-            return teamPermissionList;
-        } else if (type.equals(ClientType.Type.ADMINISTRATOR)) {
-            return administratorPermissionList;
-        } else if (type.equals(ClientType.Type.SERVER)) {
-            return serverPermissionList;
-        } else if (type.equals(ClientType.Type.JUDGE)) {
-            return judgePermissionList;
-        } else if (type.equals(ClientType.Type.SCOREBOARD)) {
-            return scoreboardPermissionList;
-        } else {
-            // default scoreboard permissions.
-            return scoreboardPermissionList;
+        switch (type) {
+            case ADMINISTRATOR:
+                return administratorPermissionList;
+            case SERVER:
+                return serverPermissionList;
+            case JUDGE:
+            case EXECUTOR:
+                return judgePermissionList;
+            case SPECTATOR:
+                return spectatorPermissionList;
+            case SCOREBOARD:
+                return scoreboardPermissionList;
+            // case TEAM:
+            default:
+                return teamPermissionList;
         }
     }
 
