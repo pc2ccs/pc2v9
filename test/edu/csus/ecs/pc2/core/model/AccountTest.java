@@ -14,11 +14,12 @@ import junit.framework.TestCase;
 public class AccountTest extends TestCase {
 
     private Account account = null;
-    
+
     private int siteNumber = 22;
 
-    public static void main(String[] args) {
-    }
+    private Type clientType = Type.JUDGE;
+
+    private String testPassword = "passwordFiftyFive";
 
     public AccountTest(String arg0) {
         super(arg0);
@@ -26,8 +27,8 @@ public class AccountTest extends TestCase {
 
     protected void setUp() throws Exception {
         super.setUp();
-        ClientId clientId = new ClientId(siteNumber, Type.JUDGE, 3);
-        account = new Account(clientId, "", clientId.getSiteNumber());
+        ClientId clientId = new ClientId(siteNumber, clientType, 3);
+        account = new Account(clientId, testPassword, clientId.getSiteNumber());
     }
 
     protected void tearDown() throws Exception {
@@ -41,9 +42,43 @@ public class AccountTest extends TestCase {
 
         String password = "foo";
         account.setPassword(password);
-        
+
         assertEquals(password, account.getPassword());
         assertNotSame(password + "A", account.getPassword());
+    }
+
+    public void testPassword() {
+
+        String password = "admin904";
+
+        ClientId clientId = new ClientId(siteNumber, Type.ADMINISTRATOR, 3);
+        Account account2 = new Account(clientId, password, clientId.getSiteNumber());
+
+        String newPasswprd = password;
+
+        assertEquals(newPasswprd, account2.getPassword());
+        assertNotSame(newPasswprd + "A", account2.getPassword());
+
+    }
+
+    public void testSiteNumber() {
+
+        assertEquals(siteNumber, account.getSiteNumber());
+        assertEquals(siteNumber, account.getClientId().getSiteNumber());
+    }
+
+    public void testClientType() {
+
+        Type clientTypeTest = Type.JUDGE;
+        assertEquals(clientTypeTest, account.getClientId().getClientType());
+    }
+
+    public void testIsSameAs() {
+        ClientId clientId = new ClientId(siteNumber, clientType, 3);
+        Account account2 = new Account(clientId, testPassword, clientId.getSiteNumber());
+
+        assertTrue("Account isSameAs ", account.isSameAs(account2));
+
     }
 
 }
