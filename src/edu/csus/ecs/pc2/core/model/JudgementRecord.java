@@ -97,6 +97,8 @@ public class JudgementRecord implements Serializable {
     private boolean sendToTeam = true;
     
     private String validatorResultString = null;
+    
+    private ElementId runResultsElementId = null;
 
     public JudgementRecord(ElementId judgementId, ClientId judgerClientId, boolean solved, boolean usedValidator) {
         this.judgementId = judgementId;
@@ -320,5 +322,13 @@ public class JudgementRecord implements Serializable {
 
     public void setAcceptButtonHit(boolean acceptButtonHit) {
         this.acceptButtonHit = acceptButtonHit;
+    }
+
+    public ElementId getRunResultsElementId() {
+        return runResultsElementId;
+    }
+
+    public void setRunResultsElementId(ElementId runResultsElementId) {
+        this.runResultsElementId = runResultsElementId;
     }
 }

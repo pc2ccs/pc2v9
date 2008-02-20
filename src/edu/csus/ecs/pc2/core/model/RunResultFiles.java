@@ -25,7 +25,13 @@ public class RunResultFiles implements Serializable {
     private ElementId runId = null;
 
     private ElementId problemId = null;
-
+    
+    private long compileTimeMS = 0;
+    
+    private long executeTimeMS = 0;
+    
+    private long validateTimeMS = 0;
+    
     private SerializedFile compilerStdoutFile = null;
 
     private SerializedFile compilerStderrFile = null;
@@ -37,6 +43,12 @@ public class RunResultFiles implements Serializable {
     private SerializedFile validatorStdoutFile = null;
 
     private SerializedFile validatorStderrFile = null;
+
+    private boolean failedCompile = true;
+
+    private boolean failedExecute = true;
+
+    private boolean failedValidating = true;
 
     public RunResultFiles(ElementId runId, ElementId problemId) {
         super();
@@ -107,6 +119,54 @@ public class RunResultFiles implements Serializable {
 
     public void setValidatorStdoutFile(SerializedFile validatorStdoutFile) {
         this.validatorStdoutFile = validatorStdoutFile;
+    }
+    
+    public boolean failedInComile(){
+        return failedCompile;
+    }
+    
+    public void setFailedInCompile(boolean failed){
+        failedCompile = failed;
+    }
+
+    public boolean failedInExecute(){
+        return failedExecute;
+    }
+    
+    public void setFailedInExecute(boolean failed){
+        failedExecute = failed;
+    }
+
+    public boolean failedInValidating(){
+        return failedValidating;
+    }
+    
+    public void setFailedInValidating(boolean failed){
+        failedValidating = failed;
+    }
+
+    public long getCompileTimeMS() {
+        return compileTimeMS;
+    }
+
+    public void setCompileTimeMS(long compileTimeMS) {
+        this.compileTimeMS = compileTimeMS;
+    }
+
+    public long getExecuteTimeMS() {
+        return executeTimeMS;
+    }
+
+    public void setExecuteTimeMS(long executeTimeMS) {
+        this.executeTimeMS = executeTimeMS;
+    }
+
+    public long getValidateTimeMS() {
+        return validateTimeMS;
+    }
+
+    public void setValidateTimeMS(long validateTimeMS) {
+        this.validateTimeMS = validateTimeMS;
     }
 
 }
