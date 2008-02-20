@@ -408,7 +408,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
     }
 
-    protected static ClientId loginShortcutExpansion(int defaultSiteNumber, String loginName) {
+    public static ClientId loginShortcutExpansion(int defaultSiteNumber, String loginName) {
         if (loginName.equals("t")) {
             loginName = "team1";
         }
@@ -443,8 +443,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             if (Character.isDigit(loginName.charAt(1))) {
                 int number = getIntegerValue(loginName.substring(1));
                 return new ClientId(number, Type.SERVER, 0);
-            } else {
-                throw new SecurityException("No such account " + loginName);
             }
         } else if (loginName.startsWith("b") && loginName.length() > 1) {
             int number = getIntegerValue(loginName.substring(1));
@@ -464,9 +462,21 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         } else if (Character.isDigit(loginName.charAt(0))) {
             int number = getIntegerValue(loginName);
             return new ClientId(defaultSiteNumber, Type.TEAM, number);
-        } else {
-            throw new SecurityException("No such account " + loginName);
         }
+            
+        loginName = loginName.toUpperCase();
+        for (Type type: Type.values()){
+            String typeName = type.toString();
+            if (loginName.startsWith(typeName)){
+                if (loginName.length() > typeName.length()){
+                    int number = getIntegerValue(loginName.substring(typeName.length()));
+                    return new ClientId(defaultSiteNumber, type, number);
+                }
+            }
+        }
+        
+        throw new SecurityException("No such account " + loginName);
+        
 
     }
     protected String stripChar (String s, char ch){
