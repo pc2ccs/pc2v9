@@ -7,12 +7,14 @@ import java.io.IOException;
 import java.util.Properties;
 
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 
 /**
  * Contains methods to find/instantiate UI classes.
  * 
  * @see #loadUIClass(String)
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
@@ -62,16 +64,18 @@ public final class LoadUIClass {
 
 
     /**
-     * return default classnames per client type.
+     * return default class names per client type.
      */
     public static Properties getDefaultUIProperties() {
 
         Properties properties = new Properties();
-        properties.put("administrator", PROJECT_PACKAGE_PATH + ".ui.admin.AdministratorView");
-        properties.put("scoreboard", PROJECT_PACKAGE_PATH + ".ui.board.ScoreboardView");
-        properties.put("judge", PROJECT_PACKAGE_PATH + ".ui.judge.JudgeView");
-        properties.put("server", PROJECT_PACKAGE_PATH + ".ui.server.ServerView");
-        properties.put("team", PROJECT_PACKAGE_PATH + ".ui.team.TeamView");
+        properties.put(Type.ADMINISTRATOR.toString().toLowerCase(), PROJECT_PACKAGE_PATH + ".ui.admin.AdministratorView");
+        properties.put(Type.SCOREBOARD.toString().toLowerCase(), PROJECT_PACKAGE_PATH + ".ui.board.ScoreboardView");
+        properties.put(Type.JUDGE.toString().toLowerCase(), PROJECT_PACKAGE_PATH + ".ui.judge.JudgeView");
+        properties.put(Type.SPECTATOR.toString().toLowerCase(), PROJECT_PACKAGE_PATH + ".ui.judge.JudgeView");
+        properties.put(Type.EXECUTOR.toString().toLowerCase(), PROJECT_PACKAGE_PATH + ".ui.judge.JudgeView");
+        properties.put(Type.SERVER.toString().toLowerCase(), PROJECT_PACKAGE_PATH + ".ui.server.ServerView");
+        properties.put(Type.TEAM.toString().toLowerCase(), PROJECT_PACKAGE_PATH + ".ui.team.TeamView");
         return properties;
 
     }
