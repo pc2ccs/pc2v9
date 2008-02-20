@@ -62,8 +62,21 @@ public interface IContestClock {
      */
     boolean isContestClockRunning ();
 
-    // TODO document
+    /**
+     * Check whether this ContestClock object is the same as some other ContestClock.
+     * <P>
+     * Determination of whether two ContestClocks are equal is based on whether they refer to the
+     * same ContestClock as obtained from {@link IContest#getContestClock()}. 
+     * 
+     * @param obj the ContestClock which is to be compared with this ContestClock for equality.
+     * @return True if the specified object refers to the same ContestClock as this ContestClock
+     *          (regardless of the actual content of the two ContestClocks).
+     */
     boolean equals(Object obj);
 
+    /**
+     * Get the hashcode associated with this ContestClock.
+     * @return An integer hashcode for this object.
+     */
     int hashCode();
 }

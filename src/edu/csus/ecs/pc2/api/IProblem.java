@@ -1,7 +1,24 @@
 package edu.csus.ecs.pc2.api;
 
 /**
- * This interface describes the PC<sup>2</sup> API view of a contest <I>Problem</i>.
+ * This interface describes the PC<sup>2</sup> API view of a contest <I>Problem</i>. 
+ * Each contest problem consists of a variety of attributes configured by the Contest Administrator, 
+ * including
+ * <ul>
+ *    <li>The problem <I>name</i>;</li>
+ *    <li>A flag indicating whether the problem includes a requirement for reading input data;</li>
+ *    <li>The input data for the problem (referred to as the &quot;Judge's data file&quot;) if required;</li>
+ *    <li>A flag indicating whether solutions to the problem should expect any input
+ *          data to come from a file or from <I>stdin</i>;</li>
+ *    <li>A flag indicating whether the problem includes a specification of the expected output for
+ *          a correct solution to the problem (referred to as a &quot;Judge's answer file&quot;);</li>
+ *    <li>A flag indicating whether the problem includes a <I>validator</i> (a program designed to
+ *          accept as input (1) the output of a program submitted by a Team, and (2) a Judge's answer file, 
+ *          and makes an automated determination as to whether the Team's program is a correct solution
+ *          to the problem);</li>
+ *    <li>The executable code for the validator;</li>
+ *    <li>The command line necessary to invoke the validator.</li>
+ * </ul>
  * 
  * <p>
  * This documentation describes the current <I>draft</i> of the PC<sup>2</sup> API, which is subject to change.
@@ -36,6 +53,7 @@ public interface IProblem {
      * @return An array of bytes containing the Judge's data file contents.
      */
     byte [] getJudgesDataFileContents();
+    
 
     /**
      * Get the name of the <I>answer file</i> for this problem.
@@ -150,8 +168,26 @@ public interface IProblem {
      */
     boolean hasAnswerFile();
     
-    // TODO document
+    /**
+     * Check whether this problem is the same as some other contest problem.
+     * <P>
+     * Determination of whether two problems are equal is based on whether they refer to the
+     * same contest problem as originally entered into PC<sup>2</sup> by the Contest Administrator.  
+     * Note in particular that subsequent changes to a problem made by the Contest Administrator (for example,
+     * changes to the problem name, the Judge's data file, etc.) do <I>not</i> affect the result of the
+     * <code>equals()</code> method; if this problem refers to the same contest problem as the one indicated by the 
+     * specified parameter, this method will return true regardless of whether the internal contents of the two
+     * problem objects is identical or not.
+     * 
+     * @param obj the Problem which is to be compared with this problem for equality.
+     * @return True if the specified object refers to the same contest problem as this problem
+     *          (regardless of the actual content of the two problems).
+     */
     boolean equals(Object obj);
     
+    /**
+     * Get the hashcode associated with this contest problem.
+     * @return An integer hashcode for this object.
+     */
     int hashCode();
 }

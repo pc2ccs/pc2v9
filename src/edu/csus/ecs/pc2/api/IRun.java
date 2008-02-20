@@ -123,8 +123,29 @@ public interface IRun {
      */
     byte [][] getSourceCodeFileContents();
     
+    /**
+     * Check whether this Run is the same as some other Run.
+     * <P>
+     * Determination of whether two Runs are equal is based on whether they refer to the
+     * same run as submitted by a Team.  
+     * Note in particular that subsequent changes to a Run
+     * made by the Contest Administrator (for example,
+     * changes to the time the run was received, the language or problem specified in the run,
+     * or whether the run solved the problem or not) do <I>not</i> affect the result of the
+     * <code>equals()</code> method; if this Run refers to the same Run as the one indicated by the 
+     * specified parameter, this method will return true regardless of whether the internal contents of the two
+     * Run objects is identical or not.
+     * 
+     * @param obj the Run which is to be compared with this Run for equality.
+     * @return True if the specified object refers to the same Run as this Run
+     *          (regardless of the actual content of the two Runs).
+     */
     boolean equals(Object obj);
 
+    /**
+     * Get the hashcode associated with this client.
+     * @return An integer hashcode for this object.
+     */
     int hashCode();
 
 }

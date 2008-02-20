@@ -30,8 +30,27 @@ public interface ISite {
      */
     int getNumber();
     
-    // TODO document
+    /**
+     * Check whether this Site is the same as some other Site.
+     * <P>
+     * Determination of whether two Sites are equal is based on whether they refer to the
+     * same Site as originally created in PC<sup>2</sup> by the Contest Administrator.  
+     * Note in particular that subsequent changes to a Site
+     * made by the Contest Administrator (for example,
+     * changes to the Site name) do <I>not</i> affect the result of the
+     * <code>equals()</code> method; if this Site refers to the same Site as the one indicated by the 
+     * specified parameter, this method will return true regardless of whether the internal contents of the two
+     * Site objects is identical or not.
+     * 
+     * @param obj the Site which is to be compared with this Site for equality.
+     * @return True if the specified object refers to the same Site as this Site
+     *          (regardless of the actual content of the two Sites).
+     */
     boolean equals(Object obj);
 
+    /**
+     * Get the hashcode associated with this client.
+     * @return An integer hashcode for this object.
+     */
     int hashCode();
 }
