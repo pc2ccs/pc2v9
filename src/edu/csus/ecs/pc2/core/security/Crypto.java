@@ -1,4 +1,4 @@
-package edu.csus.ecs.pc2.core.transport.crypto;
+package edu.csus.ecs.pc2.core.security;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;

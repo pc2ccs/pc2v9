@@ -7,8 +7,8 @@ import javax.crypto.SealedObject;
 import javax.crypto.SecretKey;
 
 import edu.csus.ecs.pc2.core.log.Log;
-import edu.csus.ecs.pc2.core.transport.crypto.Crypto;
-import edu.csus.ecs.pc2.core.transport.crypto.CryptoException;
+import edu.csus.ecs.pc2.core.security.Crypto;
+import edu.csus.ecs.pc2.core.security.CryptoException;
 
 /**
  * Transport Manager Class used to control all communication between modules.

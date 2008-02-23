@@ -42,6 +42,8 @@ public class FileSecurity {
     private static final String CONTEST_KEY_FILENAME = "contest.key";
 
     private static final String PC2_KEY_FILENAME = "pc2.key";
+    
+    private boolean readyToWrite = false;
 
     /**
      * Initialize salt, algorithm and log.
@@ -53,7 +55,8 @@ public class FileSecurity {
         log = inLog;
         int iteration = 128;
         byte[] salt = { (byte) 0xc7, (byte) 0x73, (byte) 0x21, (byte) 0x8c, (byte) 0x7e, (byte) 0xc8, (byte) 0xee, (byte) 0x99 };
-
+        
+        readyToWrite = false;
         algorithm = new PBEParameterSpec(salt, iteration);
     }
 
@@ -123,7 +126,9 @@ public class FileSecurity {
             log.log(Log.INFO, "verify password - failed to decrypt object", e);
             throw new FileSecurityException("FAILED_TO_DECRYPT");
         }
-
+        
+        readyToWrite = true;
+        
         return true;
     }
 
@@ -306,6 +311,10 @@ public class FileSecurity {
      */
     public void writeFile(String fileName, Serializable objectToWrite) throws FileSecurityException {
 
+        if (!readyToWrite) {
+            throw new FileSecurityException("NOT_READY_TO_WRITE");
+        }
+        
         SealedObject sealedObjectToWrite;
         
         try {
