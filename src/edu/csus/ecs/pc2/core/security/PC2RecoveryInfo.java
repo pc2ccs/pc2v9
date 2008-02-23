@@ -21,6 +21,15 @@ class PC2RecoveryInfo implements Serializable {
     private SecretKey secretKey;
     private char[] password;
     private KeyPair keyPair;
+    private String contestDirectory;
+    
+    public String getContestDirectory() {
+        return contestDirectory;
+    }
+    
+    public void setContestDirectory(String inContestDirectory) {
+        contestDirectory = inContestDirectory;
+    }
     
     public KeyPair getKeyPair() {
         return keyPair;

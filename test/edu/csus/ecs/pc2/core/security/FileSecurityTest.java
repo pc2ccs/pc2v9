@@ -27,13 +27,13 @@ public class FileSecurityTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
-        fileSecurity = new FileSecurity(pc2log);
+        fileSecurity = new FileSecurity(pc2log, testDir);
     }
 
     public void testSaveWriteRead() {
 
         try {
-            fileSecurity.saveSecretKey(testDir, passwordString.toCharArray());
+            fileSecurity.saveSecretKey(passwordString.toCharArray());
         } catch (FileSecurityException e) {
             // 
             e.printStackTrace();
