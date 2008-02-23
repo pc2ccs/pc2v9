@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.core.security;
 import java.io.IOException;
 import java.io.Serializable;
 import java.security.InvalidKeyException;
+import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 
@@ -37,6 +38,8 @@ public class FileSecurity {
 
     private SecretKey contestSecretKey;
 
+    private KeyPair contestKeyPair;
+    
     private Log log;
     
     private static final String CONTEST_KEY_FILENAME = "contest.key";
@@ -45,6 +48,7 @@ public class FileSecurity {
     
     private boolean readyToWrite = false;
 
+    private Crypto fileCrypt = new Crypto();
     /**
      * Initialize salt, algorithm and log.
      * 
@@ -58,6 +62,7 @@ public class FileSecurity {
         
         readyToWrite = false;
         algorithm = new PBEParameterSpec(salt, iteration);
+        
     }
 
     /**
@@ -86,6 +91,7 @@ public class FileSecurity {
 
         SealedObject objectFromDisk;
         SecretKey secretKey = null;
+        KeyPair tmpKeyPair = null;
         
         Utilities.insureDir(folderName);
         if (!folderName.endsWith(java.io.File.separator)) {
@@ -121,11 +127,13 @@ public class FileSecurity {
         }
         
         try {
-            decryptObject(objectFromDisk, secretKey);
+            tmpKeyPair = (KeyPair)decryptObject(objectFromDisk, secretKey);
         } catch (Exception e) {
             log.log(Log.INFO, "verify password - failed to decrypt object", e);
             throw new FileSecurityException("FAILED_TO_DECRYPT");
         }
+        
+        fileCrypt.setMyKeyPair(tmpKeyPair);
         
         readyToWrite = true;
         
@@ -167,12 +175,14 @@ public class FileSecurity {
             throw new FileSecurityException("FAILED_TO_INIT_CIPHERS");
         }
         
+        contestKeyPair = fileCrypt.getKeyPair();
+
         writePC2RecoveryInfo(folderName, password);
         
         SealedObject sealedSecretKey = null;
         
         try { 
-            sealedSecretKey = encryptObject(contestSecretKey, contestSecretKey);
+            sealedSecretKey = encryptObject(contestKeyPair, contestSecretKey);
         } catch (Exception e) {
             log.log(Log.INFO, "saveSecretKey - failed to encrypt contestSecretKey", e);
             throw new FileSecurityException("FAILED TO ENCRYPT", e);
@@ -216,7 +226,7 @@ public class FileSecurity {
      * 
      * this method will be used by the first server to create its first profile.
      * @param folderName
-     * @param passworda
+     * @param password
      * @throws FileSecurityException
      */
     public void saveSecretKey(String folderName, char[] password) throws FileSecurityException {
@@ -243,8 +253,10 @@ public class FileSecurity {
             throw new FileSecurityException("FAILED_TO_INIT_CIPHERS");
         }
 
+        contestKeyPair = fileCrypt.getKeyPair();
+        
         try {
-            sealedSecretKey = encryptObject(contestSecretKey, secretKey);
+            sealedSecretKey = encryptObject(contestKeyPair, secretKey);
         } catch (Exception e) {
             log.log(Log.INFO, "saveSecretKey - failed to encrypt contestSecretKey", e);
             throw new FileSecurityException("FAILED TO ENCRYPT", e);
@@ -280,6 +292,7 @@ public class FileSecurity {
         
         pc2RecoveryInfo.setSecretKey(contestSecretKey);
         pc2RecoveryInfo.setPassword(contestPassword);
+        pc2RecoveryInfo.setKeyPair(contestKeyPair);
         
         // TODO: encryptObject(pc2RecoveryInfo, pc2pgpkey);
         
@@ -309,7 +322,7 @@ public class FileSecurity {
      * @param objectToWrite
      * @throws FileSecurityException
      */
-    public void writeFile(String fileName, Serializable objectToWrite) throws FileSecurityException {
+    private void writeFile(String fileName, Serializable objectToWrite) throws FileSecurityException {
 
         if (!readyToWrite) {
             throw new FileSecurityException("NOT_READY_TO_WRITE");
@@ -334,13 +347,75 @@ public class FileSecurity {
     }
 
     /**
+     * 
+     * @param fileName
+     * @param objectToWrite
+     * @throws FileSecurityException
+     */
+    public void writeSealedFile(String fileName, Serializable objectToWrite) throws FileSecurityException {
+
+        if (!readyToWrite) {
+            throw new FileSecurityException("NOT_READY_TO_WRITE");
+        }
+        
+        SealedObject sealedObjectToWrite;
+        
+        try {
+            sealedObjectToWrite = fileCrypt.encrypt(objectToWrite);
+        } catch (Exception e) {
+            log.log(Log.INFO, "writeFile - failed to encrypt object", e);
+            throw new FileSecurityException("FAILED TO ENCRYPT", e);
+        }
+        
+        try {
+            Utilities.writeObjectToFile(fileName, sealedObjectToWrite);
+        } catch (Exception e) {
+            log.log(Log.INFO, "writeFile - failed to write file to disk", e);
+            throw new FileSecurityException("FAILED TO WRITE", e);
+        }
+
+
+    
+    }
+
+    /**
+     * 
+     * @param fileName
+     * @return
+     * @throws FileSecurityException
+     */
+    public Serializable readSealedFile(String fileName) throws FileSecurityException {
+
+        SealedObject sealedObjectFromDisk;
+        Serializable objectToReturn = null;
+        
+        try {
+            sealedObjectFromDisk = (SealedObject)Utilities.readObjectFromFile(fileName);
+        } catch (Exception e) {
+            log.log(Log.INFO, "readFile - failed to read file from disk", e);
+            throw new FileSecurityException("FAILED TO READ", e);
+        }
+
+        
+        try {
+            objectToReturn = fileCrypt.decrypt(sealedObjectFromDisk);
+        } catch (Exception e) {
+            log.log(Log.INFO, "readFile - failed to decrypt object", e);
+            throw new FileSecurityException("FAILED TO DECRYPT", e);
+        }
+        
+        return objectToReturn;
+    }
+
+    
+    /**
      * will attempt to read a file from disk and return a decrypted object.
      * 
      * @param fileName
      * @return
      * @throws FileSecurityException
      */
-    public Serializable readFile(String fileName) throws FileSecurityException {
+    private Serializable readFile(String fileName) throws FileSecurityException {
 
         SealedObject sealedObjectFromDisk;
         Serializable objectToReturn = null;

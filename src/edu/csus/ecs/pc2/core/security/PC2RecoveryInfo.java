@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.core.security;
 
 import java.io.Serializable;
+import java.security.KeyPair;
 
 import javax.crypto.SecretKey;
 
@@ -19,6 +20,11 @@ class PC2RecoveryInfo implements Serializable {
     private static final long serialVersionUID = 1664370850668297030L;
     private SecretKey secretKey;
     private char[] password;
+    private KeyPair keyPair;
+    
+    public KeyPair getKeyPair() {
+        return keyPair;
+    }
     
     public SecretKey getSecretKey() {
         return secretKey;
@@ -35,4 +41,9 @@ class PC2RecoveryInfo implements Serializable {
     public void setSecretKey(SecretKey inSecretKey) {
         secretKey = inSecretKey;
     }
+
+    public void setKeyPair(KeyPair inKeyPair) {
+        keyPair = inKeyPair;
+    }
+
 }

@@ -42,13 +42,13 @@ public class FileSecurityTest extends TestCase {
         String cryptedFileName = testDir + File.separator + "secure.sld";
 
         try {
-            fileSecurity.writeFile(cryptedFileName, "SECRETINFORMATION");
+            fileSecurity.writeSealedFile(cryptedFileName, "SECRETINFORMATION");
         } catch (FileSecurityException e) {
             e.printStackTrace();
         }
 
         try {
-            String st = (String) fileSecurity.readFile(cryptedFileName);
+            String st = (String) fileSecurity.readSealedFile(cryptedFileName);
             assertEquals("SECRETINFORMATION", st);
         } catch (FileSecurityException e) {
             e.printStackTrace();
