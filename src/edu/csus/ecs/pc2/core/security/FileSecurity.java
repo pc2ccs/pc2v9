@@ -39,16 +39,17 @@ public class FileSecurity {
     private SecretKey contestSecretKey;
 
     private KeyPair contestKeyPair;
-    
+
     private Log log;
-    
+
     private static final String CONTEST_KEY_FILENAME = "contest.key";
 
     private static final String PC2_KEY_FILENAME = "pc2.key";
-    
+
     private boolean readyToWrite = false;
 
-    private Crypto fileCrypt = new Crypto();
+    private Crypto fileCrypt = null;
+
     /**
      * Initialize salt, algorithm and log.
      * 
@@ -59,10 +60,14 @@ public class FileSecurity {
         log = inLog;
         int iteration = 128;
         byte[] salt = { (byte) 0xc7, (byte) 0x73, (byte) 0x21, (byte) 0x8c, (byte) 0x7e, (byte) 0xc8, (byte) 0xee, (byte) 0x99 };
-        
+
         readyToWrite = false;
         algorithm = new PBEParameterSpec(salt, iteration);
-        
+
+        fileCrypt = new Crypto();
+        SecretKey sk = fileCrypt.generateSecretKey(fileCrypt.getPublicKey(), fileCrypt.getPrivateKey());
+        fileCrypt.setSecretKey(sk);
+
     }
 
     /**
@@ -85,58 +90,60 @@ public class FileSecurity {
      * @param folderName
      * @param password
      * @return
-     * @throws FileSecurityException 
+     * @throws FileSecurityException
      */
     public boolean verifyPassword(String folderName, char[] password) throws FileSecurityException {
 
         SealedObject objectFromDisk;
         SecretKey secretKey = null;
         KeyPair tmpKeyPair = null;
-        
+
         Utilities.insureDir(folderName);
         if (!folderName.endsWith(java.io.File.separator)) {
             folderName += java.io.File.separator;
         }
-        
+
         if (!Utilities.isFileThere(folderName + CONTEST_KEY_FILENAME)) {
             throw new FileSecurityException("KEY_FILE_NOT_FOUND");
         }
-        
+
         try {
             objectFromDisk = (SealedObject) Utilities.readObjectFromFile(folderName + CONTEST_KEY_FILENAME);
         } catch (Exception e) {
             log.log(Log.INFO, "verify password - failed to read file from disk", e);
             throw new FileSecurityException("FAILED_TO_READ_FILE");
         }
-        
+
         try {
             secretKey = makeSecretKey(password);
         } catch (Exception e) {
             log.log(Log.INFO, "verify password - failed to create key from password", e);
             throw new FileSecurityException("FAILED_TO_CREATE_KEY");
         }
-        
+
         contestPassword = password;
         contestSecretKey = secretKey;
-        
+
         try {
             cipherInit();
         } catch (Exception e) {
             log.log(Log.INFO, "verify password - initialize ciphers", e);
             throw new FileSecurityException("FAILED_TO_INIT_CIPHERS");
         }
-        
+
         try {
-            tmpKeyPair = (KeyPair)decryptObject(objectFromDisk, secretKey);
+            tmpKeyPair = (KeyPair) decryptObject(objectFromDisk, secretKey);
         } catch (Exception e) {
             log.log(Log.INFO, "verify password - failed to decrypt object", e);
             throw new FileSecurityException("FAILED_TO_DECRYPT");
         }
-        
+
         fileCrypt.setMyKeyPair(tmpKeyPair);
-        
+        SecretKey sk = fileCrypt.generateSecretKey(fileCrypt.getPublicKey(), fileCrypt.getPrivateKey());
+        fileCrypt.setSecretKey(sk);
+
         readyToWrite = true;
-        
+
         return true;
     }
 
@@ -164,37 +171,38 @@ public class FileSecurity {
         if (!folderName.endsWith(java.io.File.separator)) {
             folderName += java.io.File.separator;
         }
-        
+
         contestSecretKey = theKey;
         contestPassword = password;
-        
+
         try {
             cipherInit();
         } catch (Exception e) {
             log.log(Log.INFO, "saveSecretKey - initialize ciphers", e);
             throw new FileSecurityException("FAILED_TO_INIT_CIPHERS");
         }
-        
+
         contestKeyPair = fileCrypt.getKeyPair();
 
         writePC2RecoveryInfo(folderName, password);
         
         SealedObject sealedSecretKey = null;
-        
-        try { 
+
+        try {
             sealedSecretKey = encryptObject(contestKeyPair, contestSecretKey);
         } catch (Exception e) {
             log.log(Log.INFO, "saveSecretKey - failed to encrypt contestSecretKey", e);
             throw new FileSecurityException("FAILED TO ENCRYPT", e);
         }
-        
+
         try {
-            Utilities.writeObjectToFile(folderName + CONTEST_KEY_FILENAME, sealedSecretKey );
+            Utilities.writeObjectToFile(folderName + CONTEST_KEY_FILENAME, sealedSecretKey);
         } catch (Exception e) {
             log.log(Log.INFO, "saveSecretKey - failed to write file to disk", e);
             throw new FileSecurityException("FAILED TO WRITE", e);
         }
-        
+
+        readyToWrite = true;
     }
 
     /**
@@ -208,15 +216,17 @@ public class FileSecurity {
         if (!folderName.endsWith(java.io.File.separator)) {
             folderName += java.io.File.separator;
         }
-        
+
         // TODO: encryptObject(contestPassword, pc2pgpkey);
-        
+
         try {
             Utilities.writeObjectToFile(folderName + PC2_KEY_FILENAME, contestPassword);
         } catch (Exception e) {
             log.log(Log.INFO, "writePC2RecoveryFile - failed to write file to disk", e);
             throw new FileSecurityException("FAILED TO WRITE", e);
         }
+
+        readyToWrite = true;
     }
 
     /**
@@ -230,12 +240,12 @@ public class FileSecurity {
      * @throws FileSecurityException
      */
     public void saveSecretKey(String folderName, char[] password) throws FileSecurityException {
-        
+
         Utilities.insureDir(folderName);
         if (!folderName.endsWith(java.io.File.separator)) {
             folderName += java.io.File.separator;
         }
-        
+
         SealedObject sealedSecretKey = null;
         SecretKey secretKey = null;
 
@@ -254,48 +264,49 @@ public class FileSecurity {
         }
 
         contestKeyPair = fileCrypt.getKeyPair();
-        
+
         try {
             sealedSecretKey = encryptObject(contestKeyPair, secretKey);
         } catch (Exception e) {
             log.log(Log.INFO, "saveSecretKey - failed to encrypt contestSecretKey", e);
             throw new FileSecurityException("FAILED TO ENCRYPT", e);
         }
-        
+
         try {
-            Utilities.writeObjectToFile(folderName + CONTEST_KEY_FILENAME, sealedSecretKey );
+            Utilities.writeObjectToFile(folderName + CONTEST_KEY_FILENAME, sealedSecretKey);
         } catch (Exception e) {
             log.log(Log.INFO, "saveSecretKey - failed to write file to disk", e);
             throw new FileSecurityException("FAILED TO WRITE", e);
         }
-        
+
         writePC2RecoveryInfo(folderName, password);
+
+        readyToWrite = true;
     }
 
     /**
-     * Used to write out PC2_KEY file containing recovery information. Encrypted using the
-     * PC2 PGP key.
+     * Used to write out PC2_KEY file containing recovery information. Encrypted using the PC2 PGP key.
      * 
      * @param folderName
      * @param password
-     * @throws FileSecurityException 
+     * @throws FileSecurityException
      */
-    
+
     private void writePC2RecoveryInfo(String folderName, char[] password) throws FileSecurityException {
-        
+
         Utilities.insureDir(folderName);
         if (!folderName.endsWith(java.io.File.separator)) {
             folderName += java.io.File.separator;
         }
-        
+
         PC2RecoveryInfo pc2RecoveryInfo = new PC2RecoveryInfo();
-        
+
         pc2RecoveryInfo.setSecretKey(contestSecretKey);
         pc2RecoveryInfo.setPassword(contestPassword);
         pc2RecoveryInfo.setKeyPair(contestKeyPair);
-        
+
         // TODO: encryptObject(pc2RecoveryInfo, pc2pgpkey);
-        
+
         try {
             Utilities.writeObjectToFile(folderName + PC2_KEY_FILENAME, pc2RecoveryInfo);
         } catch (Exception e) {
@@ -303,6 +314,31 @@ public class FileSecurity {
             throw new FileSecurityException("FAILED TO WRITE", e);
         }
     }
+
+    private void readPC2RecoveryInfo(String folderName, char[] password) throws FileSecurityException {
+
+        Utilities.insureDir(folderName);
+        if (!folderName.endsWith(java.io.File.separator)) {
+            folderName += java.io.File.separator;
+        }
+
+        PC2RecoveryInfo pc2RecoveryInfo = null;
+        
+        try {
+            pc2RecoveryInfo = (PC2RecoveryInfo) Utilities.readObjectFromFile(folderName + PC2_KEY_FILENAME);
+        } catch (Exception e) {
+            log.log(Log.INFO, "writePC2RecoveryFile - failed to write file to disk", e);
+            throw new FileSecurityException("FAILED TO WRITE", e);
+        }
+
+        // TODO: encryptObject(pc2RecoveryInfo, pc2pgpkey);
+
+        System.out.println("The password: " + new String(pc2RecoveryInfo.getPassword()) );
+        System.out.println("The contestSecretKey: " + pc2RecoveryInfo.getSecretKey());
+        System.out.println("The contestKeyPair: " + pc2RecoveryInfo.getKeyPair());
+        
+    }
+
     
     /**
      * will return the current contestPassword
@@ -327,16 +363,16 @@ public class FileSecurity {
         if (!readyToWrite) {
             throw new FileSecurityException("NOT_READY_TO_WRITE");
         }
-        
+
         SealedObject sealedObjectToWrite;
-        
+
         try {
             sealedObjectToWrite = encryptObject(objectToWrite, contestSecretKey);
         } catch (Exception e) {
             log.log(Log.INFO, "writeFile - failed to encrypt object", e);
             throw new FileSecurityException("FAILED TO ENCRYPT", e);
         }
-        
+
         try {
             Utilities.writeObjectToFile(fileName, sealedObjectToWrite);
         } catch (Exception e) {
@@ -357,16 +393,16 @@ public class FileSecurity {
         if (!readyToWrite) {
             throw new FileSecurityException("NOT_READY_TO_WRITE");
         }
-        
+
         SealedObject sealedObjectToWrite;
-        
+
         try {
             sealedObjectToWrite = fileCrypt.encrypt(objectToWrite);
         } catch (Exception e) {
             log.log(Log.INFO, "writeFile - failed to encrypt object", e);
             throw new FileSecurityException("FAILED TO ENCRYPT", e);
         }
-        
+
         try {
             Utilities.writeObjectToFile(fileName, sealedObjectToWrite);
         } catch (Exception e) {
@@ -374,8 +410,6 @@ public class FileSecurity {
             throw new FileSecurityException("FAILED TO WRITE", e);
         }
 
-
-    
     }
 
     /**
@@ -388,26 +422,24 @@ public class FileSecurity {
 
         SealedObject sealedObjectFromDisk;
         Serializable objectToReturn = null;
-        
+
         try {
-            sealedObjectFromDisk = (SealedObject)Utilities.readObjectFromFile(fileName);
+            sealedObjectFromDisk = (SealedObject) Utilities.readObjectFromFile(fileName);
         } catch (Exception e) {
             log.log(Log.INFO, "readFile - failed to read file from disk", e);
             throw new FileSecurityException("FAILED TO READ", e);
         }
 
-        
         try {
             objectToReturn = fileCrypt.decrypt(sealedObjectFromDisk);
         } catch (Exception e) {
             log.log(Log.INFO, "readFile - failed to decrypt object", e);
             throw new FileSecurityException("FAILED TO DECRYPT", e);
         }
-        
+
         return objectToReturn;
     }
 
-    
     /**
      * will attempt to read a file from disk and return a decrypted object.
      * 
@@ -419,22 +451,21 @@ public class FileSecurity {
 
         SealedObject sealedObjectFromDisk;
         Serializable objectToReturn = null;
-        
+
         try {
-            sealedObjectFromDisk = (SealedObject)Utilities.readObjectFromFile(fileName);
+            sealedObjectFromDisk = (SealedObject) Utilities.readObjectFromFile(fileName);
         } catch (Exception e) {
             log.log(Log.INFO, "readFile - failed to read file from disk", e);
             throw new FileSecurityException("FAILED TO READ", e);
         }
 
-        
         try {
             objectToReturn = decryptObject(sealedObjectFromDisk, contestSecretKey);
         } catch (Exception e) {
             log.log(Log.INFO, "readFile - failed to decrypt object", e);
             throw new FileSecurityException("FAILED TO DECRYPT", e);
         }
-        
+
         return objectToReturn;
 
     }
@@ -473,7 +504,7 @@ public class FileSecurity {
      * @throws Exception
      */
     private void cipherInit() throws Exception {
-        
+
         try {
             // Prepare the encrypter
             ecipher = Cipher.getInstance("PBEWithMD5AndDES");
