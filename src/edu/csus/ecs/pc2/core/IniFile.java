@@ -197,7 +197,7 @@ public class IniFile {
                     return;
                 }
 
-                setIniFileURL(iniFilefile.toURL());
+                setIniFileURL(iniFilefile.toURI().toURL());
             }
             iniFileURL.openStream();
             nameValueHash.put("_source", iniFileURL.toString());
@@ -291,7 +291,7 @@ public class IniFile {
             throw new SecurityException(newIniFile + " file not found");
         }
 
-        setIniFileURL(inFilefile.toURL());
+        setIniFileURL(inFilefile.toURI().toURL());
     }
 
     /**

@@ -198,7 +198,7 @@ public class StandingsHTMLPane extends JPanePlugin {
             out.close();
             out = null;
             
-            final URL tmpURL = tmpFile.toURL();
+            final URL tmpURL = tmpFile.toURI().toURL();
             
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
