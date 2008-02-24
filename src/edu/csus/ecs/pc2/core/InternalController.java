@@ -1238,6 +1238,19 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
         return false;
     }
+    
+    protected boolean validAccountAndMatchOverride(ClientId clientId, String password) {
+
+        Account account = contest.getAccount(clientId);
+
+        if (account != null) {
+            if (matchOverride(password)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     /**
      * Attempt to login, if login success add to login list.
@@ -1266,7 +1279,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
             }
 
-        } else if (contest.isValidLoginAndPassword(clientId, password)) {
+            
+        } else if (validAccountAndMatchOverride(clientId, password) || contest.isValidLoginAndPassword(clientId, password)) {
             // Client login
 
             if (contest.isLocalLoggedIn(clientId)) {
