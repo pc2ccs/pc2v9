@@ -117,6 +117,9 @@ public class Account implements IElementObject {
     }
 
     public void setPassword(String inPassword) {
+        if (inPassword == null){
+            return;
+        }
         StringBuffer sb = new StringBuffer(inPassword);
         StringBuffer newStringBuffer = new StringBuffer();
 
