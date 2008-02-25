@@ -4,8 +4,8 @@ import java.io.File;
 
 import javax.crypto.SecretKey;
 
-import edu.csus.ecs.pc2.core.log.Log;
 import junit.framework.TestCase;
+import edu.csus.ecs.pc2.core.log.Log;
 
 /**
  * JUnit test for FileSecurity.
@@ -24,14 +24,73 @@ public class FileSecurityTest extends TestCase {
     private String passwordString = "ThisPassword";
 
     private String testDir = ".";
+    
+    static {
+        insureDirectoriesRemoved();
+    }
+    
+    public FileSecurityTest(){
+        super();
+    }
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-
         fileSecurity = new FileSecurity(pc2log, testDir);
     }
+    
+    private static void insureDirectoriesRemoved() {
+        
+        boolean ableToRemoveDirectories = true;
+        
+        String[] dirNames = { "fileSecVPDir", "fileSecVPDirGCD", "getSecretK" };
+        for (String name : dirNames){
+            ableToRemoveDirectories = ableToRemoveDirectories && insureDirRemoved (name);
+//            System.err.println("debug removing directory "+ableToRemoveDirectories+" "+name);
+        }
+        
+        if (! ableToRemoveDirectories){
+            System.err.println("Warning could not clear all directories created by previous test");
+            for (String name : dirNames){
+                if (new File(name).exists()){
+                    System.err.println("Dir "+name+" still exists");
+                }
+            }
+        }
+        
+    }
 
+
+    /**
+     * Removes all files and subdirectories.
+     * 
+     * @param dirName
+     *            directory to start removing files from.
+     * @return true if all files removed, else false
+     */
+    protected static boolean insureDirRemoved(String dirName) {
+        File dir = null;
+        boolean result = true;
+
+        dir = new File(dirName);
+        if (!dir.exists()) {
+            return true; // nothing there, all done!!
+        }
+
+        String[] filesToRemove = dir.list();
+        for (String dirEntryName : filesToRemove) {
+
+            File file = new File(dirName + File.separator + dirEntryName);
+
+            if (file.isDirectory()) {
+                // recurse through any directories
+                result &= insureDirRemoved(dirName + File.separator + dirEntryName);
+            }
+            result &= file.delete();
+        }
+        return (result);
+    }
+    
     public void testSaveWriteRead() {
 
         try {
@@ -60,7 +119,7 @@ public class FileSecurityTest extends TestCase {
 
     public void testWriteSealedFileNegative() {
 
-        String badDirName = "/baddirname";  // save to bad directory
+        String badDirName = "/baddirname"; // save to bad directory
 
         FileSecurity security = new FileSecurity(null, badDirName);
 
@@ -69,7 +128,7 @@ public class FileSecurityTest extends TestCase {
         try {
             security.writeSealedFile(cryptedFileName, "SECRETINFORMATION");
         } catch (FileSecurityException exception) {
-            assert(true); // bad dir does exist - this is what should happen
+            assert (true); // bad dir does exist - this is what should happen
         } catch (Exception e) {
             e.printStackTrace();
             failTest("Exception writeSealedFileNegative " + cryptedFileName, e);
@@ -134,8 +193,6 @@ public class FileSecurityTest extends TestCase {
         assertEquals("getContestDirectory", dirname, security.getContestDirectory());
 
     }
-
-
 
     /*
      * Test method for 'edu.csus.ecs.pc2.core.security.FileSecurity.getSecretKey()'
@@ -218,7 +275,7 @@ public class FileSecurityTest extends TestCase {
     public void testReadSealedFile() {
 
     }
-    
+
     @SuppressWarnings("unused")
     private void failTest(String string) {
         System.err.println("Failed TEST " + string);
