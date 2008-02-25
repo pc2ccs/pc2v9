@@ -187,7 +187,7 @@ public class FileSecurityTest extends TestCase {
      * Test method for 'edu.csus.ecs.pc2.core.security.FileSecurity.getContestDirectory()'
      */
     public void testGetContestDirectory() {
-        String dirname = "fileSecVPDirGCD";
+        String dirname = "fileSecVPDirGCD\\";
 
         FileSecurity security = new FileSecurity(null, dirname);
         assertEquals("getContestDirectory", dirname, security.getContestDirectory());
@@ -202,18 +202,29 @@ public class FileSecurityTest extends TestCase {
         // this also is testSaveSecretKeySecretKeyCharArray() {
 
         String dirname = "getSecretK";
+        String dirnameTwo = "getSecretKTwo";
 
         String password = "foobar";
 
         FileSecurity security = new FileSecurity(pc2log, dirname);
-        SecretKey inKey = createSecretKey();
+        FileSecurity securityTwo = new FileSecurity(pc2log, dirnameTwo);
+        
+        try {
+            securityTwo.saveSecretKey(password.toCharArray());   
+        } catch (Exception e) {
+            failTest("getSecretKey ", e);
+        }
+        
+        SecretKey inKey = securityTwo.getSecretKey();
 
         try {
             security.saveSecretKey(inKey, password.toCharArray());
             security = null;
 
             security = new FileSecurity(pc2log, dirname);
-
+               
+            security.verifyPassword(password.toCharArray());
+            
             SecretKey key = security.getSecretKey();
 
             assertNotNull(key);
@@ -289,9 +300,4 @@ public class FileSecurityTest extends TestCase {
         assertTrue(false);
     }
 
-    private SecretKey createSecretKey() {
-        Crypto crypto = new Crypto();
-        return crypto.generateSecretKey(crypto.getPublicKey(), crypto.getPrivateKey());
-
-    }
 }
