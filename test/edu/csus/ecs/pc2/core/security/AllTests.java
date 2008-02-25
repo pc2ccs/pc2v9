@@ -21,6 +21,7 @@ public final class AllTests {
         TestSuite suite = new TestSuite("Test for edu.csus.ecs.pc2.core.security");
         //$JUnit-BEGIN$
         suite.addTestSuite(PermissionTest.class);
+        suite.addTestSuite(FileSecurityTest.class);
         suite.addTestSuite(PermissionListTest.class);
         //$JUnit-END$
         return suite;
