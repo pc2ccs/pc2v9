@@ -3,11 +3,17 @@ package edu.csus.ecs.pc2.core.model;
 import java.io.Serializable;
 
 /**
- * Run results files.
+ * Run results files/statistics.
  * 
- * This is a collection of files produced as output for a run.
+ * This is a collection of files and statistics produced as output for a run,
+ * judgement and validation.
+ * <P>
+ * Each RunResultsFile is associated with a Run and RunJudgement, because
+ * each time a submitted run is executed a new judgement/set of statistics
+ * can be produced.  
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 // $HeadURL$
 public class RunResultFiles implements Serializable {
@@ -17,14 +23,11 @@ public class RunResultFiles implements Serializable {
      */
     private static final long serialVersionUID = -4739592801158369138L;
 
-    /**
-     * 
-     */
-    public static final String SVN_ID = "$Id$";
-
     private ElementId runId = null;
 
     private ElementId problemId = null;
+    
+    private ElementId judgementId = null;
     
     private long compileTimeMS = 0;
     
@@ -50,11 +53,11 @@ public class RunResultFiles implements Serializable {
 
     private boolean failedValidating = true;
 
-    public RunResultFiles(ElementId runId, ElementId problemId) {
+    public RunResultFiles(Run run, Problem problem, JudgementRecord judgementRecord) {
         super();
-        // TODO Auto-generated constructor stub
-        this.runId = runId;
-        this.problemId = problemId;
+        this.runId = run.getElementId();
+        this.problemId = problem.getElementId();
+        this.judgementId = judgementRecord.getElementId();
     }
 
     public SerializedFile getCompilerStderrFile() {
@@ -167,6 +170,10 @@ public class RunResultFiles implements Serializable {
 
     public void setValidateTimeMS(long validateTimeMS) {
         this.validateTimeMS = validateTimeMS;
+    }
+
+    public ElementId getJudgementId() {
+        return judgementId;
     }
 
 }
