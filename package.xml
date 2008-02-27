@@ -42,7 +42,11 @@
     </target>
 
 
-    <target name="zip" depends="jar,javadocs-api">
+<!--
+    XXX javadoc 1.5. <= 14 fails under cruisecontrol, not sure why
+        for now remove javadocs-api from depends
+-->
+   <target name="zip" depends="jar">
         <zip destfile="${zip.path}">
             <zipfileset dir="${basedir}" filemode="644" prefix="${release}">
                 <include name="README"/>
@@ -70,7 +74,10 @@
                 <include name="sleep.exe"/>
             </zipfileset>
             <zipfileset dir="${data.dir}" filemode="755" prefix="${release}/samps/data"/>
+<!--
+    XXX javadoc 1.5. <= 14 fails under cruisecontrol, not sure why
             <zipfileset dir="${docs.api.dir}" filemode="644" prefix="${release}/docs/api"/>
+-->
         </zip>
         <checksum file="${zip.path}" algorithm="MD5" fileext=".md5.txt"/>
         <checksum file="${zip.path}" algorithm="SHA" fileext=".sha1.txt"/>
@@ -125,7 +132,10 @@
         <property name="gzip.name" value="${release}-${repo.version}.tar.gz"/>
         <property name="gzip.path" value="${dist.dir}/${gzip.name}"/>
 
+<!--
+    XXX javadoc 1.5. <= 14 fails under cruisecontrol, not sure why
         <antcall target="apizip"/>
+-->
         <antcall target="zip"/> 
         <antcall target="gzip"/> 
     </target>
