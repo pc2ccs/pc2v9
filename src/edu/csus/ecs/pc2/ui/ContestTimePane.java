@@ -511,10 +511,27 @@ public class ContestTimePane extends JPanePlugin {
         }
 
         String[] fields = s.split(":");
+        long hh = 0;
+        long mm = 0;
+        long ss = 0;
+        
+        switch (fields.length ) {
+            case 3:
+                hh = stringToLong(fields[0]);
+                mm = stringToLong(fields[1]);
+                ss = stringToLong(fields[2]);
+                break;
+            case 2:
+                mm = stringToLong(fields[0]);
+                ss = stringToLong(fields[1]);
+                break;
+            case 1:
+                ss = stringToLong(fields[0]);
+                break;
 
-        long hh = stringToLong(fields[0]);
-        long mm = stringToLong(fields[1]);
-        long ss = stringToLong(fields[2]);
+            default:
+                break;
+        }
 
         // System.out.println(" values "+hh+":"+mm+":"+ss);
 
