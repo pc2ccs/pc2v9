@@ -483,6 +483,7 @@ public class GenerateAccountsPane extends JPanePlugin {
         if (otherClientsComboBox == null) {
             otherClientsComboBox = new JComboBox();
             otherClientsComboBox.setBounds(new java.awt.Rectangle(81, 162, 167, 20));
+            otherClientsComboBox.setVisible(false);
             otherClientsComboBox.addItem(Type.EXECUTOR);
             otherClientsComboBox.addItem(Type.SPECTATOR);
         }
@@ -499,6 +500,7 @@ public class GenerateAccountsPane extends JPanePlugin {
             otherClientCountTextBox = new JTextField();
             otherClientCountTextBox.setBounds(new java.awt.Rectangle(343, 160, 39, 22));
             otherClientCountTextBox.setDocument(new IntegerDocument());
+            otherClientCountTextBox.setVisible(false);
         }
         return otherClientCountTextBox;
     }
