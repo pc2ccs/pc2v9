@@ -18,11 +18,11 @@
     <property name="apizip.name" value="api-${version}.zip"/>
     <property name="apizip.path" value="${dist.dir}/${apizip.name}"/>
 
-    <target name="apizip" depends="javadocs" description="create zip of the javadocs">
+    <target name="apizip" depends="javadocs-api" description="create zip of the API javadocs">
         <!-- in case we are run before jar -->
         <mkdir dir="${dist.dir}" />
         <zip destfile="${apizip.path}">
-            <zipfileset dir="${docs.dir}/api" filemode="644" prefix="${release}/docs/api"/>
+            <zipfileset dir="${docs.api.dir}" filemode="644" prefix="${release}/docs/api"/>
         </zip>
     </target>
 
@@ -42,7 +42,7 @@
     </target>
 
 
-    <target name="zip" depends="jar">
+    <target name="zip" depends="jar,javadocs-api">
         <zip destfile="${zip.path}">
             <zipfileset dir="${basedir}" filemode="644" prefix="${release}">
                 <include name="README"/>
@@ -70,6 +70,7 @@
                 <include name="sleep.exe"/>
             </zipfileset>
             <zipfileset dir="${data.dir}" filemode="755" prefix="${release}/samps/data"/>
+            <zipfileset dir="${docs.api.dir}" filemode="644" prefix="${release}/docs/api"/>
         </zip>
         <checksum file="${zip.path}" algorithm="MD5" fileext=".md5.txt"/>
         <checksum file="${zip.path}" algorithm="SHA" fileext=".sha1.txt"/>
