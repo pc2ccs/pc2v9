@@ -18,7 +18,7 @@
     <property name="testresults.html.dir" location="${testresults.dir}/html" />
     <property name="compilelogs.dir" location="${build.dir}" />
     <property name="docs.dir" location="${build.dir}/docs" />
-	<property name="docs.api.dir" location="${docs.dir}/api" />
+    <property name="docs.api.dir" location="${docs.dir}/api" />
     <property name="dist.dir" location="dist" />
     <!-- this should change one the location of mclb.jar changes -->
     <property name="vendor.lib.dir" location="${basedir}/vendor/lib"/>
@@ -195,7 +195,7 @@
     <target name="javadocs-api" description="Creates API javadocs">
         <mkdir dir="${docs.api.dir}" />
     	<javadoc access="protected" additionalparam="-link  http://java.sun.com/j2se/1.5.0/docs/api/" author="true" classpath="vendor/lib/mclb.jar" 
-    	destdir="${docs.api.dir}" doctitle="PC&amp;sup2; Version 9 API" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" overview="api_overview.html" packagenames="edu.csus.ecs.pc2.api,edu.csus.ecs.pc2.api.exceptions,edu.csus.ecs.pc2.api.listener" source="1.5" sourcepath="src" splitindex="true" use="true" version="true"/>
+    	destdir="${docs.api.dir}" doctitle="PC&amp;sup2;&nbsp;Version&nbsp;9&nbsp;API" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" overview="api_overview.html" packagenames="edu.csus.ecs.pc2.api,edu.csus.ecs.pc2.api.exceptions,edu.csus.ecs.pc2.api.listener" source="1.5" sourcepath="src" splitindex="true" use="true" version="true"/>
     </target>
     <target name="javadocs" description="Creates project javadocs">
         <mkdir dir="${docs.dir}/api-full" />
