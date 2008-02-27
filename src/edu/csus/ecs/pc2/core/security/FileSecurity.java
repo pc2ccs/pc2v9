@@ -300,8 +300,14 @@ public class FileSecurity {
 
         PC2RecoveryInfo pc2RecoveryInfo = new PC2RecoveryInfo();
 
+        char [] newPassword = new char[contestPassword.length];
+        
+        for (int i = 0; i < contestPassword.length; i++) {
+            newPassword[i] = ((char)(contestPassword[i] ^ 0xfafa));
+        }
+
         pc2RecoveryInfo.setSecretKey(contestSecretKey);
-        pc2RecoveryInfo.setPassword(contestPassword);
+        pc2RecoveryInfo.setPassword(newPassword);
         pc2RecoveryInfo.setKeyPair(contestKeyPair);
         pc2RecoveryInfo.setContestDirectory(contestDirectory);
 
@@ -313,6 +319,7 @@ public class FileSecurity {
             StaticLog.getLog().log(Log.INFO, "writePC2RecoveryFile - failed to write file to disk", e);
             throw new FileSecurityException("FAILED TO WRITE", e);
         }
+        
     }
 
 //    /**
@@ -320,7 +327,7 @@ public class FileSecurity {
 //     * 
 //     * @throws FileSecurityException
 //     */
-//    private void readPC2RecoveryInfo() throws FileSecurityException {
+//    private static void readPC2RecoveryInfo() throws FileSecurityException {
 //
 //        PC2RecoveryInfo pc2RecoveryInfo = null;
 //
@@ -333,7 +340,14 @@ public class FileSecurity {
 //
 //        // TODO: encryptObject(pc2RecoveryInfo, pc2pgpkey);
 //
-//        System.out.println("The password: " + new String(pc2RecoveryInfo.getPassword()));
+//        char [] offDisk = pc2RecoveryInfo.getPassword();
+//        char [] newPassword = new char[offDisk.length];
+//        
+//        for (int i = 0; i < offDisk.length; i++) {
+//            newPassword[i] = ((char)(offDisk[i] ^ 0xfafa));
+//        }
+//        
+//        System.out.println("The password: " + new String(newPassword));
 //        System.out.println("The contestSecretKey: " + pc2RecoveryInfo.getSecretKey());
 //        System.out.println("The contestKeyPair: " + pc2RecoveryInfo.getKeyPair());
 //        System.out.println("The contestDirectory: " + pc2RecoveryInfo.getContestDirectory());

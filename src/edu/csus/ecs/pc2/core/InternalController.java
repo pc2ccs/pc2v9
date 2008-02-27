@@ -9,6 +9,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Properties;
 
+import javax.swing.JOptionPane;
+
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.archive.PacketArchiver;
 import edu.csus.ecs.pc2.core.exception.ContestSecurityException;
@@ -717,7 +719,12 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 info("initializeServer STARTED this site as Site 1");
                 new FileSecurity("db.1");
 
-        
+                String password = JOptionPane.showInputDialog(null, "Enter Contest Password");
+                if (password == null || password.trim().length() == 0){
+                    JOptionPane.showMessageDialog(null, "You must supply a password, exiting.");
+                    System.exit(44);
+                }
+                uberSecretatPassworden = password;
 
                 try {
                     FileSecurity.verifyPassword(uberSecretatPassworden.toCharArray());
@@ -730,16 +737,19 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                         } catch (Exception e) {
                             StaticLog.getLog().log(Log.SEVERE, "FATAL ERROR ", e);
                             System.err.println("FATAL ERROR " + e.getMessage() + " check logs");
+                            JOptionPane.showMessageDialog(null,"Invalid password");
                             System.exit(44);
                         }
                     } else {
                         StaticLog.getLog().log(Log.SEVERE, "FATAL ERROR ", fileSecurityException);
                         System.err.println("FATAL ERROR " + fileSecurityException.getMessage() + " check logs");
+                        JOptionPane.showMessageDialog(null,"Invalid password");
                         System.exit(44);
                     }
                 } catch (Exception e) {
                     StaticLog.getLog().log(Log.SEVERE, "FATAL ERROR ", e);
                     System.err.println("FATAL ERROR " + e.getMessage() + " check logs");
+                    JOptionPane.showMessageDialog(null,"Exception while validating contest password "+e.getMessage());
                     System.exit(44);
                 }
             }
