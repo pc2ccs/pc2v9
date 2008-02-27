@@ -1203,6 +1203,7 @@ public class InternalContest implements IInternalContest {
 
     public void updateProblem(Problem problem) {
         problemList.update(problem);
+        problemDisplayList.update(problem);
         ProblemEvent problemEvent = new ProblemEvent(ProblemEvent.Action.CHANGED, problem);
         fireProblemListener(problemEvent);
     }
