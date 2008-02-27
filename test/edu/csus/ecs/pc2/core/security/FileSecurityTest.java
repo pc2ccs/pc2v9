@@ -187,7 +187,7 @@ public class FileSecurityTest extends TestCase {
      * Test method for 'edu.csus.ecs.pc2.core.security.FileSecurity.getContestDirectory()'
      */
     public void testGetContestDirectory() {
-        String dirname = "fileSecVPDirGCD\\";
+        String dirname = "fileSecVPDirGCD"+File.separator;
 
         FileSecurity security = new FileSecurity(null, dirname);
         assertEquals("getContestDirectory", dirname, security.getContestDirectory());
