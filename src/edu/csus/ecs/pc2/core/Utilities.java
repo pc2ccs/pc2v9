@@ -2,12 +2,8 @@ package edu.csus.ecs.pc2.core;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
 import java.text.CharacterIterator;
@@ -18,6 +14,8 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.Vector;
+
+import edu.csus.ecs.pc2.core.security.FileSecurity;
 
 /**
  * Various common routines.
@@ -67,15 +65,12 @@ public final class Utilities {
      */
     public static Object readObjectFromFile(String filename)
             throws IOException, ClassNotFoundException {
-        Object object = new Object();
-
-        FileInputStream in = new FileInputStream(filename);
-        ObjectInputStream s = new ObjectInputStream(in);
-        object = s.readObject();
-        in.close();
-        s.close();
-        return object;
-
+        
+        try {
+            return FileSecurity.readSealedFile(filename);
+        } catch (Exception e) {
+            throw new IOException(e.getMessage());
+        }
     }
 
     /**
@@ -87,14 +82,12 @@ public final class Utilities {
      */
     public static boolean writeObjectToFile(String filename,
             Serializable serializable) throws IOException {
-        FileOutputStream f = new FileOutputStream(filename);
-        ObjectOutputStream s = new ObjectOutputStream(f);
-        s.writeObject(serializable);
-        s.flush();
-        s.close();
-        s = null;
+        try {
+            FileSecurity.writeSealedFile(filename, serializable);
+        } catch (Exception e) {
+            throw new IOException(e.getMessage());
+        }
         return true;
-
     }
 
     /**

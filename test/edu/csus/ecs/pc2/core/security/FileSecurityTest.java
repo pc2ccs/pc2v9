@@ -5,7 +5,6 @@ import java.io.File;
 import javax.crypto.SecretKey;
 
 import junit.framework.TestCase;
-import edu.csus.ecs.pc2.core.log.Log;
 
 /**
  * JUnit test for FileSecurity.
@@ -16,8 +15,6 @@ import edu.csus.ecs.pc2.core.log.Log;
 
 // $HeadURL$
 public class FileSecurityTest extends TestCase {
-
-    private Log pc2log = new Log("cryptTest");
 
     private FileSecurity fileSecurity = null;
 
@@ -36,14 +33,14 @@ public class FileSecurityTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        fileSecurity = new FileSecurity(pc2log, testDir);
+        fileSecurity = new FileSecurity( testDir);
     }
     
     private static void insureDirectoriesRemoved() {
         
         boolean ableToRemoveDirectories = true;
         
-        String[] dirNames = { "fileSecVPDir", "fileSecVPDirGCD", "getSecretK" };
+        String[] dirNames = { "fileSecVPDir", "fileSecVPDirGCD", "getSecretK", "getSecretKTwo" };
         for (String name : dirNames){
             ableToRemoveDirectories = ableToRemoveDirectories && insureDirRemoved (name);
 //            System.err.println("debug removing directory "+ableToRemoveDirectories+" "+name);
@@ -109,7 +106,7 @@ public class FileSecurityTest extends TestCase {
         }
 
         try {
-            String st = (String) fileSecurity.readSealedFile(cryptedFileName);
+            String st = (String) FileSecurity.readSealedFile(cryptedFileName);
             assertEquals("SECRETINFORMATION", st);
         } catch (FileSecurityException e) {
             e.printStackTrace();
@@ -121,7 +118,7 @@ public class FileSecurityTest extends TestCase {
 
         String badDirName = "/baddirname"; // save to bad directory
 
-        FileSecurity security = new FileSecurity(null, badDirName);
+        FileSecurity security = new FileSecurity(badDirName);
 
         String cryptedFileName = badDirName + File.separator + "secure.fil";
 
@@ -139,7 +136,7 @@ public class FileSecurityTest extends TestCase {
 
         String dirname = "fileSecVPDir";
 
-        FileSecurity security = new FileSecurity(pc2log, dirname);
+        FileSecurity security = new FileSecurity( dirname);
 
         String cryptedFileName = dirname + File.separator + "secure.fil";
 
@@ -163,7 +160,7 @@ public class FileSecurityTest extends TestCase {
 
         String dirname = "/baddirname";
 
-        FileSecurity security = new FileSecurity(null, dirname);
+        FileSecurity security = new FileSecurity(dirname);
 
         String cryptedFileName = dirname + File.separator + "secure.fil";
 
@@ -189,7 +186,7 @@ public class FileSecurityTest extends TestCase {
     public void testGetContestDirectory() {
         String dirname = "fileSecVPDirGCD"+File.separator;
 
-        FileSecurity security = new FileSecurity(null, dirname);
+        FileSecurity security = new FileSecurity(dirname);
         assertEquals("getContestDirectory", dirname, security.getContestDirectory());
 
     }
@@ -206,8 +203,8 @@ public class FileSecurityTest extends TestCase {
 
         String password = "foobar";
 
-        FileSecurity security = new FileSecurity(pc2log, dirname);
-        FileSecurity securityTwo = new FileSecurity(pc2log, dirnameTwo);
+        FileSecurity security = new FileSecurity( dirname);
+        FileSecurity securityTwo = new FileSecurity( dirnameTwo);
         
         try {
             securityTwo.saveSecretKey(password.toCharArray());   
@@ -221,7 +218,7 @@ public class FileSecurityTest extends TestCase {
             security.saveSecretKey(inKey, password.toCharArray());
             security = null;
 
-            security = new FileSecurity(pc2log, dirname);
+            security = new FileSecurity( dirname);
                
             security.verifyPassword(password.toCharArray());
             
@@ -257,7 +254,7 @@ public class FileSecurityTest extends TestCase {
         String dirname = "fileSecVPDir";
 
         try {
-            FileSecurity security = new FileSecurity(pc2log, dirname);
+            FileSecurity security = new FileSecurity( dirname);
 
             String password = "miwok";
 

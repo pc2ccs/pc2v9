@@ -45,6 +45,8 @@ import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.packet.PacketFactory;
 import edu.csus.ecs.pc2.core.packet.PacketType;
+import edu.csus.ecs.pc2.core.security.FileSecurity;
+import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 import edu.csus.ecs.pc2.core.transport.IBtoA;
@@ -242,7 +244,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      */
     private int securityLevel = SECURITY_HIGH_LEVEL;
 
-    
     public InternalController(IInternalContest contest) {
         super();
         this.contest = contest;
@@ -712,6 +713,33 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             if (contest.getSiteNumber() == 0) {
                 contest.setSiteNumber(1);
                 info("initializeServer STARTED this site as Site 1");
+                new FileSecurity("db.1");
+
+                String uberSecretatPassworden = "Finals2008";
+
+                try {
+                    FileSecurity.verifyPassword(uberSecretatPassworden.toCharArray());
+
+                } catch (FileSecurityException fileSecurityException) {
+                    if (fileSecurityException.getMessage().equals(FileSecurity.KEY_FILE_NOT_FOUND)) {
+
+                        try {
+                            FileSecurity.saveSecretKey(uberSecretatPassworden.toCharArray());
+                        } catch (Exception e) {
+                            StaticLog.getLog().log(Log.SEVERE, "FATAL ERROR ", e);
+                            System.err.println("FATAL ERROR " + e.getMessage() + " check logs");
+                            System.exit(44);
+                        }
+                    } else {
+                        StaticLog.getLog().log(Log.SEVERE, "FATAL ERROR ", fileSecurityException);
+                        System.err.println("FATAL ERROR " + fileSecurityException.getMessage() + " check logs");
+                        System.exit(44);
+                    }
+                } catch (Exception e) {
+                    StaticLog.getLog().log(Log.SEVERE, "FATAL ERROR ", e);
+                    System.err.println("FATAL ERROR " + e.getMessage() + " check logs");
+                    System.exit(44);
+                }
             }
         }
 
