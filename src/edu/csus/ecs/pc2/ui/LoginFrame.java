@@ -175,7 +175,7 @@ public class LoginFrame extends JFrame implements UIPlugin {
             mainTitleBottomLabel = new JLabel();
             mainTitleBottomLabel.setHorizontalAlignment(SwingConstants.CENTER);
             mainTitleBottomLabel.setHorizontalTextPosition(SwingConstants.CENTER);
-            mainTitleBottomLabel.setText("InternalContest Control System");
+            mainTitleBottomLabel.setText("Contest Control System");
             mainTitleBottomLabel.setFont(new Font("Dialog", Font.BOLD, 18));
             messageLabel = new JLabel();
             messageLabel.setForeground(Color.red);
@@ -191,7 +191,7 @@ public class LoginFrame extends JFrame implements UIPlugin {
             gridBagConstraints6.gridwidth = 2;
             mainTitleTopLabel = new JLabel();
             mainTitleTopLabel.setFont(new Font("Dialog", Font.BOLD, 18));
-            mainTitleTopLabel.setText("InternalContest Control System");
+            mainTitleTopLabel.setText("Contest Control System");
             mainTitleTopLabel.setHorizontalAlignment(SwingConstants.CENTER);
             passwordTitleLabel = new JLabel();
             passwordTitleLabel.setText("Password");
