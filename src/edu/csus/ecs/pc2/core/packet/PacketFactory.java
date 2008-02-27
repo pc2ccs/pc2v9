@@ -79,6 +79,8 @@ public final class PacketFactory {
 
     public static final String CLIENT_ID = "CLIENT_ID";
 
+    public static final String CONTEST_PASSWORD = "CONTEST_PASSWORD";
+    
     /**
      * Array of ClientIds of logged in users.
      */
@@ -921,6 +923,9 @@ public final class PacketFactory {
             prop.put(BALLOON_SETTINGS_LIST, data.getBalloonSettingsArray());
             prop.put(GROUP_LIST, data.getGroups());
             prop.put(GENERAL_PROBLEM, data.getGeneralProblem());
+            if (data.getContestSecurityPassword() != null){
+                prop.put(CONTEST_PASSWORD, data.getContestSecurityPassword());
+            }
 
             Packet packet = new Packet(Type.LOGIN_SUCCESS, source, destination, prop);
             return packet;

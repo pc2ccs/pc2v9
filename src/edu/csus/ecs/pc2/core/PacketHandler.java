@@ -12,6 +12,7 @@ import edu.csus.ecs.pc2.core.exception.UnableToUncheckoutRunException;
 import edu.csus.ecs.pc2.core.list.ClientIdComparator;
 import edu.csus.ecs.pc2.core.log.EvaluationLog;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.BalloonSettings;
 import edu.csus.ecs.pc2.core.model.Clarification;
@@ -38,6 +39,8 @@ import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.packet.PacketFactory;
 import edu.csus.ecs.pc2.core.packet.PacketType.Type;
+import edu.csus.ecs.pc2.core.security.FileSecurity;
+import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
@@ -569,6 +572,42 @@ public class PacketHandler {
         if (!contest.isLoggedIn()) {
             // Got the first LOGIN_SUCCESS, first connection into server.
             
+            ClientId clientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+            if (isServer(clientId)) {
+                String uberSecretatPassworden = (String) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_PASSWORD);
+                if (uberSecretatPassworden == null) {
+                    StaticLog.getLog().log(Log.SEVERE, "FATAL ERROR ");
+                    System.err.println("FATAL ERROR - Contest Security Password is null ");
+                    System.exit(44);
+                }
+
+                new FileSecurity("db." + clientId.getSiteNumber());
+
+                try {
+                    FileSecurity.verifyPassword(uberSecretatPassworden.toCharArray());
+
+                } catch (FileSecurityException fileSecurityException) {
+                    if (fileSecurityException.getMessage().equals(FileSecurity.KEY_FILE_NOT_FOUND)) {
+
+                        try {
+                            FileSecurity.saveSecretKey(uberSecretatPassworden.toCharArray());
+                        } catch (Exception e) {
+                            StaticLog.getLog().log(Log.SEVERE, "FATAL ERROR ", e);
+                            System.err.println("FATAL ERROR " + e.getMessage() + " check logs");
+                            System.exit(44);
+                        }
+                    } else {
+                        StaticLog.getLog().log(Log.SEVERE, "FATAL ERROR ", fileSecurityException);
+                        System.err.println("FATAL ERROR " + fileSecurityException.getMessage() + " check logs");
+                        System.exit(44);
+                    }
+                } catch (Exception e) {
+                    StaticLog.getLog().log(Log.SEVERE, "FATAL ERROR ", e);
+                    System.err.println("FATAL ERROR " + e.getMessage() + " check logs");
+                    System.exit(44);
+                }
+            }
+            
             info(" handlePacket original LOGIN_SUCCESS before ");
             loadDataIntoModel(packet, connectionHandlerID);
             info(" handlePacket original LOGIN_SUCCESS after -- all settings loaded ");
@@ -650,7 +689,7 @@ public class PacketHandler {
                 contest.updateContestTime(contestTime);
                 ContestTime updatedContestTime = contest.getContestTime(siteNumber);
                 controller.getLog().info(
-                        "Contest Settings updated by " + who + " running=" + updatedContestTime.isContestRunning() + " elapsed = " + updatedContestTime.getElapsedTimeStr() + " remaining= "
+                        "InternalContest Settings updated by " + who + " running=" + updatedContestTime.isContestRunning() + " elapsed = " + updatedContestTime.getElapsedTimeStr() + " remaining= "
                                 + updatedContestTime.getRemainingTimeStr() + " length=" + updatedContestTime.getContestLengthStr());
                 Packet updatePacket = PacketFactory.clonePacket(contest.getClientId(), PacketFactory.ALL_SERVERS, packet);
                 controller.sendToTeams(updatePacket);
@@ -2479,7 +2518,7 @@ public class PacketHandler {
     }
     
     public Packet createContestSettingsPacket (ClientId clientId) {
-        return PacketFactory.createContestSettingsPacket(contest.getClientId(), clientId, createLoginSuccessPacket(clientId));
+        return PacketFactory.createContestSettingsPacket(contest.getClientId(), clientId, createLoginSuccessPacket(clientId, null));
     }
     
     /**
@@ -2489,7 +2528,7 @@ public class PacketHandler {
      * @param clientId
      * @return Packet containing contest settings
      */
-    public Packet createLoginSuccessPacket (ClientId clientId){
+    public Packet createLoginSuccessPacket (ClientId clientId, String contestSecurityPassword){
 
         Run[] runs = null;
         Clarification[] clarifications = null;
@@ -2547,6 +2586,11 @@ public class PacketHandler {
         contestLoginSuccessData.setRuns(runs);
         contestLoginSuccessData.setSites(sites);
         contestLoginSuccessData.setGeneralProblem(contest.getGeneralProblem());
+        
+        if (isServer(clientId)){
+            contestLoginSuccessData.setContestSecurityPassword(contestSecurityPassword);
+        }
+        
         Packet loginSuccessPacket = PacketFactory.createLoginSuccess(contest.getClientId(), clientId, contest.getContestTime(), 
                 contest.getSiteNumber(), contest.getContestInformation(), contestLoginSuccessData);
      

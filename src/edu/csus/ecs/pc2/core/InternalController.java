@@ -244,6 +244,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      */
     private int securityLevel = SECURITY_HIGH_LEVEL;
 
+    private String uberSecretatPassworden = "Finals2008";
+
     public InternalController(IInternalContest contest) {
         super();
         this.contest = contest;
@@ -715,7 +717,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 info("initializeServer STARTED this site as Site 1");
                 new FileSecurity("db.1");
 
-                String uberSecretatPassworden = "Finals2008";
+        
 
                 try {
                     FileSecurity.verifyPassword(uberSecretatPassworden.toCharArray());
@@ -1387,7 +1389,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      */
     private void sendLoginSuccess(ClientId clientId, ConnectionHandlerID connectionHandlerID) {
 
-        sendToClient(packetHandler.createLoginSuccessPacket(clientId));
+        sendToClient(packetHandler.createLoginSuccessPacket(clientId, uberSecretatPassworden));
     }
 
     public void connectionEstablished(ConnectionHandlerID connectionHandlerID) {
