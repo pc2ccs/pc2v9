@@ -58,14 +58,14 @@ public class PacketHandler {
 
     private IInternalContest contest;
 
-    private IInternalController controller;
+    private InternalController controller;
     
     /**
      * Message handler for conditions where attention may be needed.
      */
     private EvaluationLog evaluationLog = null;
     
-    public PacketHandler(IInternalController controller, IInternalContest contest) {
+    public PacketHandler(InternalController controller, IInternalContest contest) {
         this.controller = controller;
         this.contest = contest;
     }
@@ -606,6 +606,8 @@ public class PacketHandler {
                     System.err.println("FATAL ERROR " + e.getMessage() + " check logs");
                     System.exit(44);
                 }
+                
+                controller.setContestPassword(uberSecretatPassworden);
             }
             
             info(" handlePacket original LOGIN_SUCCESS before ");

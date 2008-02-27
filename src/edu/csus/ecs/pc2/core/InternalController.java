@@ -246,7 +246,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      */
     private int securityLevel = SECURITY_HIGH_LEVEL;
 
-    private String uberSecretatPassworden = "Finals2008";
+    private String contestPassword = "Finals2008";
 
     public InternalController(IInternalContest contest) {
         super();
@@ -724,16 +724,16 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                     JOptionPane.showMessageDialog(null, "You must supply a password, exiting.");
                     System.exit(44);
                 }
-                uberSecretatPassworden = password;
+                contestPassword = password;
 
                 try {
-                    FileSecurity.verifyPassword(uberSecretatPassworden.toCharArray());
+                    FileSecurity.verifyPassword(contestPassword.toCharArray());
 
                 } catch (FileSecurityException fileSecurityException) {
                     if (fileSecurityException.getMessage().equals(FileSecurity.KEY_FILE_NOT_FOUND)) {
 
                         try {
-                            FileSecurity.saveSecretKey(uberSecretatPassworden.toCharArray());
+                            FileSecurity.saveSecretKey(contestPassword.toCharArray());
                         } catch (Exception e) {
                             StaticLog.getLog().log(Log.SEVERE, "FATAL ERROR ", e);
                             System.err.println("FATAL ERROR " + e.getMessage() + " check logs");
@@ -1399,7 +1399,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      */
     private void sendLoginSuccess(ClientId clientId, ConnectionHandlerID connectionHandlerID) {
 
-        sendToClient(packetHandler.createLoginSuccessPacket(clientId, uberSecretatPassworden));
+        sendToClient(packetHandler.createLoginSuccessPacket(clientId, contestPassword));
     }
 
     public void connectionEstablished(ConnectionHandlerID connectionHandlerID) {
@@ -2370,6 +2370,14 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         Packet securityMessagePacket = PacketFactory.createSecurityMessagePacket(contest.getClientId(), getServerClientId(), event, 
                     contestSecurityException.getClientId(), contestSecurityException.getConnectionHandlerID(), contestSecurityException, null);
         sendToLocalServer(securityMessagePacket);
+    }
+
+    public String getContestPassword() {
+        return contestPassword;
+    }
+
+    public void setContestPassword(String contestPassword) {
+        this.contestPassword = contestPassword;
     }
 
 }
