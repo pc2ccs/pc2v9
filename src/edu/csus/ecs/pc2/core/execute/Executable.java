@@ -514,11 +514,14 @@ public class Executable {
 
         log.log(Log.DEBUG, "after  substitution: " + cmdLine);
 
-        if (problem.isUsingPC2Validator()) {
-            cmdLine = cmdLine.replaceFirst("-cp ", "-cp \"");
-            cmdLine = cmdLine.replaceFirst("jar ", "jar\" ");
-            log.log(Log.DEBUG, "after replaceFirst: " + cmdLine);
+        if (File.separator.equals("\\")) {
+            if (problem.isUsingPC2Validator()) {
+                cmdLine = cmdLine.replaceFirst("-cp ", "-cp \"");
+                cmdLine = cmdLine.replaceFirst("jar ", "jar\" ");
+                log.log(Log.DEBUG, "after replaceFirst: " + cmdLine);
+            }
         }
+        
         try {
             String actFilename = new String(cmdLine);
 
