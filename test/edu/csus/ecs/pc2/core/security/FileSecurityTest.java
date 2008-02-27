@@ -2,8 +2,6 @@ package edu.csus.ecs.pc2.core.security;
 
 import java.io.File;
 
-import javax.crypto.SecretKey;
-
 import junit.framework.TestCase;
 
 /**
@@ -15,8 +13,6 @@ import junit.framework.TestCase;
 
 // $HeadURL$
 public class FileSecurityTest extends TestCase {
-
-    private FileSecurity fileSecurity = null;
 
     private String passwordString = "ThisPassword";
 
@@ -33,7 +29,7 @@ public class FileSecurityTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        fileSecurity = new FileSecurity( testDir);
+        new FileSecurity( testDir);
     }
     
     private static void insureDirectoriesRemoved() {
@@ -91,7 +87,7 @@ public class FileSecurityTest extends TestCase {
     public void testSaveWriteRead() {
 
         try {
-            fileSecurity.saveSecretKey(passwordString.toCharArray());
+            FileSecurity.saveSecretKey(passwordString.toCharArray());
         } catch (FileSecurityException e) {
             // 
             e.printStackTrace();
@@ -100,7 +96,7 @@ public class FileSecurityTest extends TestCase {
         String cryptedFileName = testDir + File.separator + "secure.sld";
 
         try {
-            fileSecurity.writeSealedFile(cryptedFileName, "SECRETINFORMATION");
+            FileSecurity.writeSealedFile(cryptedFileName, "SECRETINFORMATION");
         } catch (FileSecurityException e) {
             e.printStackTrace();
         }
@@ -114,29 +110,11 @@ public class FileSecurityTest extends TestCase {
         }
     }
 
-    public void testWriteSealedFileNegative() {
-
-        String badDirName = "/baddirname"; // save to bad directory
-
-        FileSecurity security = new FileSecurity(badDirName);
-
-        String cryptedFileName = badDirName + File.separator + "secure.fil";
-
-        try {
-            security.writeSealedFile(cryptedFileName, "SECRETINFORMATION");
-        } catch (FileSecurityException exception) {
-            assert (true); // bad dir does exist - this is what should happen
-        } catch (Exception e) {
-            e.printStackTrace();
-            failTest("Exception writeSealedFileNegative " + cryptedFileName, e);
-        }
-    }
-
     public void testVerifyPassword() {
 
         String dirname = "fileSecVPDir";
 
-        FileSecurity security = new FileSecurity( dirname);
+        new FileSecurity( dirname);
 
         String cryptedFileName = dirname + File.separator + "secure.fil";
 
@@ -144,9 +122,9 @@ public class FileSecurityTest extends TestCase {
 
         try {
 
-            security.saveSecretKey(password.toCharArray());
+            FileSecurity.saveSecretKey(password.toCharArray());
 
-            security.verifyPassword(password.toCharArray());
+            FileSecurity.verifyPassword(password.toCharArray());
         } catch (FileSecurityException exception) {
             failTest("Exception writeSealedFile " + cryptedFileName, exception);
             // System.out.println("debug Exception "+exception.getMessage());
@@ -160,7 +138,7 @@ public class FileSecurityTest extends TestCase {
 
         String dirname = "/baddirname";
 
-        FileSecurity security = new FileSecurity(dirname);
+        new FileSecurity(dirname);
 
         String cryptedFileName = dirname + File.separator + "secure.fil";
 
@@ -169,7 +147,7 @@ public class FileSecurityTest extends TestCase {
         // Negative Test
 
         try {
-            security.verifyPassword(password.toCharArray());
+            FileSecurity.verifyPassword(password.toCharArray());
         } catch (FileSecurityException exception) {
             assert (true);
             // System.out.println("debug Exception "+exception.getMessage());
@@ -178,6 +156,24 @@ public class FileSecurityTest extends TestCase {
             failTest("Exception writeSealedFile " + cryptedFileName, e);
         }
 
+    }
+
+    public void testWriteSealedFileNegative() {
+
+        String badDirName = "/baddirname"; // save to bad directory
+
+        new FileSecurity(badDirName);
+
+        String cryptedFileName = badDirName + File.separator + "secure.fil";
+
+        try {
+            FileSecurity.writeSealedFile(cryptedFileName, "SECRETINFORMATION");
+        } catch (FileSecurityException exception) {
+            assert (true); // bad dir does exist - this is what should happen
+        } catch (Exception e) {
+            e.printStackTrace();
+            failTest("Exception writeSealedFileNegative " + cryptedFileName, e);
+        }
     }
 
     /*
@@ -189,47 +185,6 @@ public class FileSecurityTest extends TestCase {
         FileSecurity security = new FileSecurity(dirname);
         assertEquals("getContestDirectory", dirname, security.getContestDirectory());
 
-    }
-
-    /*
-     * Test method for 'edu.csus.ecs.pc2.core.security.FileSecurity.getSecretKey()'
-     */
-    public void testGetSecretKey() {
-
-        // this also is testSaveSecretKeySecretKeyCharArray() {
-
-        String dirname = "getSecretK";
-        String dirnameTwo = "getSecretKTwo";
-
-        String password = "foobar";
-
-        FileSecurity security = new FileSecurity( dirname);
-        FileSecurity securityTwo = new FileSecurity( dirnameTwo);
-        
-        try {
-            securityTwo.saveSecretKey(password.toCharArray());   
-        } catch (Exception e) {
-            failTest("getSecretKey ", e);
-        }
-        
-        SecretKey inKey = securityTwo.getSecretKey();
-
-        try {
-            security.saveSecretKey(inKey, password.toCharArray());
-            security = null;
-
-            security = new FileSecurity( dirname);
-               
-            security.verifyPassword(password.toCharArray());
-            
-            SecretKey key = security.getSecretKey();
-
-            assertNotNull(key);
-            assertNotNull(key.getEncoded());
-
-        } catch (Exception e) {
-            failTest("getSecretKey ", e);
-        }
     }
 
     /*
@@ -258,7 +213,7 @@ public class FileSecurityTest extends TestCase {
 
             String password = "miwok";
 
-            security.saveSecretKey(password.toCharArray());
+            FileSecurity.saveSecretKey(password.toCharArray());
 
             String readPassword = security.getPassword();
 
