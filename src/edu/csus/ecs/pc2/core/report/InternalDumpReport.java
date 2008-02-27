@@ -117,7 +117,7 @@ public class InternalDumpReport implements IReport {
         ContestInformation contestInformation = contest.getContestInformation();
         
         printWriter.println();
-        printWriter.println("-- InternalContest Information --");
+        printWriter.println("-- Contest Information --");
         printWriter.println("  Title : '" + contestInformation.getContestTitle()+"'");
         printWriter.println("  URL   : '" + contestInformation.getContestURL()+"'");
         printWriter.println("  Judges' Default Answer: '" + contestInformation.getJudgesDefaultAnswer()+"'");
@@ -225,7 +225,7 @@ public class InternalDumpReport implements IReport {
         printWriter.println();
         ContestTime[] contestTimes = contest.getContestTimes();
         Arrays.sort(contestTimes, new ContestTimeComparator());
-        printWriter.println("-- " + contestTimes.length + " InternalContest Times --");
+        printWriter.println("-- " + contestTimes.length + " Contest Times --");
         for (ContestTime contestTime : contestTimes) {
 
             if (contest.getSiteNumber() == contestTime.getSiteNumber()) {

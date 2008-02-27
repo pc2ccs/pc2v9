@@ -46,7 +46,7 @@ public class EditContestTimeFrame extends JFrame implements UIPlugin {
         this.setSize(new java.awt.Dimension(549, 278));
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setContentPane(getContestTimePane());
-        this.setTitle("New InternalContest Time");
+        this.setTitle("New Contest Time");
 
         FrameUtilities.centerFrame(this);
 
@@ -63,9 +63,9 @@ public class EditContestTimeFrame extends JFrame implements UIPlugin {
 
     public void setContestTime(ContestTime contestTime) {
         if (contestTime == null) {
-            setTitle("Add New InternalContest Time");
+            setTitle("Add New Contest Time");
         } else {
-            setTitle("Edit InternalContest Time for Site " + contestTime.getSiteNumber());
+            setTitle("Edit Contest Time for Site " + contestTime.getSiteNumber());
         }
         getContestTimePane().setContestTime(contestTime);
         

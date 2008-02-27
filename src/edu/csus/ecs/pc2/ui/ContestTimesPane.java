@@ -244,7 +244,7 @@ public class ContestTimesPane extends JPanePlugin {
                 }
             } catch (Exception e) {
                 c[5] = "??";
-                log.log(Log.WARNING, "Exception updating InternalContest Time for site "+contestTime.getSiteNumber(), e);
+                log.log(Log.WARNING, "Exception updating Contest Time for site "+contestTime.getSiteNumber(), e);
             }
         }
 

@@ -26,7 +26,7 @@ public class ContestTimeList extends BaseElementList {
      */
     public void add(ContestTime contestTime) {
         if (get(contestTime) != null) {
-            throw new IllegalArgumentException("Attemped to add InternalContest time for " + contestTime.getSiteNumber()
+            throw new IllegalArgumentException("Attemped to add Contest time for " + contestTime.getSiteNumber()
                     + " site already added");
         }
         super.add(contestTime);

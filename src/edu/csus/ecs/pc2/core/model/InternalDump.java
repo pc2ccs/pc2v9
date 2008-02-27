@@ -175,7 +175,7 @@ public class InternalDump {
             log.println();
             ContestTime[] contestTimes = contest.getContestTimes();
             Arrays.sort(contestTimes, new ContestTimeComparator());
-            log.println("-- " + contestTimes.length + " InternalContest Times --");
+            log.println("-- " + contestTimes.length + " Contest Times --");
             for (ContestTime contestTime : contestTimes) {
 
                 if (contest.getSiteNumber() == contestTime.getSiteNumber()) {

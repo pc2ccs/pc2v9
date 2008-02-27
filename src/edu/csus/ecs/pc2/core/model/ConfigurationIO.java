@@ -273,7 +273,7 @@ public class ConfigurationIO {
                     if (configuration.containsKey(key)) {
                         ContestInformation contestInformation = (ContestInformation) configuration.get(key.toString());
                         contest.addContestInformation(contestInformation);
-                        log.info("Loaded InternalContest Information " + contestInformation.getContestTitle());
+                        log.info("Loaded Contest Information " + contestInformation.getContestTitle());
                     } 
                 } catch (Exception e) {
                     log.log(Log.WARNING, "Exception while loading contest information/title ", e);

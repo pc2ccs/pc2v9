@@ -221,7 +221,7 @@ public class InternalContest implements IInternalContest {
             Site site = createFakeSite(1);
             site.setActive(true);
             siteList.add(site);
-            contestInformation.setContestTitle("Default InternalContest Title");
+            contestInformation.setContestTitle("Default Contest Title");
             if (getGeneralProblem() == null){
                 setGeneralProblem(new Problem("General"));
             }
