@@ -81,7 +81,7 @@ public class ContestClockPane extends JPanePlugin {
 
     @Override
     public String getPluginTitle() {
-        return "InternalContest Clock Pane";
+        return "Contest Clock Pane";
     }
 
     /**

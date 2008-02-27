@@ -113,7 +113,7 @@ public class ContestInformationPane extends JPanePlugin {
             contestTitleLabel = new JLabel();
             contestTitleLabel.setBounds(new java.awt.Rectangle(55, 21, 134, 27));
             contestTitleLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-            contestTitleLabel.setText("InternalContest Title");
+            contestTitleLabel.setText("Contest Title");
             centerPane = new JPanel();
             centerPane.setLayout(null);
             centerPane.add(contestTitleLabel, null);
@@ -164,7 +164,7 @@ public class ContestInformationPane extends JPanePlugin {
 
     @Override
     public String getPluginTitle() {
-        return "InternalContest Information Pane";
+        return "Contest Information Pane";
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {

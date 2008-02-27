@@ -46,7 +46,7 @@ public class ContestClockFrame extends JFrame implements UIPlugin {
      */
     private void initialize() {
         this.setSize(new java.awt.Dimension(474, 287));
-        this.setTitle("InternalContest Clock");
+        this.setTitle("Contest Clock");
         this.setContentPane(getMainPanel1());
         this.addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent e) {
@@ -65,7 +65,7 @@ public class ContestClockFrame extends JFrame implements UIPlugin {
     }
 
     public String getPluginTitle() {
-        return "InternalContest Clock";
+        return "Contest Clock";
     }
 
     /**

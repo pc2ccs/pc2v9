@@ -105,7 +105,7 @@ public class ContestTimesPane extends JPanePlugin {
 
     @Override
     public String getPluginTitle() {
-        return "InternalContest Times";
+        return "Contest Times";
     }
 
     /**

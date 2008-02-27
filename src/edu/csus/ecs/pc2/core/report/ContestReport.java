@@ -166,7 +166,7 @@ public class ContestReport implements IReport {
     }
 
     public String getPluginTitle() {
-        return "InternalContest Report";
+        return "Contest Report";
     }
 
      public Filter getFilter() {

@@ -402,7 +402,7 @@ public class ContestTimePane extends JPanePlugin {
             contestLengthLabel = new JLabel();
             contestLengthLabel.setBounds(new java.awt.Rectangle(60, 103, 110, 23));
             contestLengthLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-            contestLengthLabel.setText("InternalContest Length");
+            contestLengthLabel.setText("Contest Length");
             elapsedTimeLabel = new JLabel();
             elapsedTimeLabel.setBounds(new java.awt.Rectangle(60, 60, 110, 23));
             elapsedTimeLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);

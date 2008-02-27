@@ -51,7 +51,7 @@ public class ContestAnalysisReport implements IReport {
     public void writeReport(PrintWriter printWriter) throws IOException {
 
         printWriter.println();
-        printWriter.println("InternalContest Title: " + contest.getContestInformation().getContestTitle());
+        printWriter.println("Contest Title: " + contest.getContestInformation().getContestTitle());
         printWriter.println();
 
         printWriter.println(contest.getSites().length + " sites.");
@@ -317,7 +317,7 @@ public class ContestAnalysisReport implements IReport {
     }
 
     public String getReportTitle() {
-        return "InternalContest Analysis";
+        return "Contest Analysis";
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
@@ -327,7 +327,7 @@ public class ContestAnalysisReport implements IReport {
     }
 
     public String getPluginTitle() {
-        return "InternalContest Analysis Report";
+        return "Contest Analysis Report";
     }
 
     public Filter getFilter() {

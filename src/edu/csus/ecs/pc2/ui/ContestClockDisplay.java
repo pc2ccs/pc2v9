@@ -450,7 +450,7 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
     }
 
     public String getPluginTitle() {
-        return "InternalContest Clock Display";
+        return "Contest Clock Display";
     }
     
     /**

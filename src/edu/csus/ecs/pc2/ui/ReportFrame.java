@@ -38,7 +38,7 @@ public class ReportFrame extends JFrame implements UIPlugin {
     private void initialize() {
         this.setSize(new java.awt.Dimension(496, 230));
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        this.setTitle("InternalContest Reports");
+        this.setTitle("Contest Reports");
         this.setContentPane(getReportPane());
 
     }

@@ -186,9 +186,9 @@ public class InternalDumpReport implements IReport {
         printWriter.println();
         if (localContestTime != null) {
             if (localContestTime.isContestRunning()) {
-                printWriter.print("InternalContest is RUNNING");
+                printWriter.print("Contest is RUNNING");
             } else {
-                printWriter.print("InternalContest is STOPPED");
+                printWriter.print("Contest is STOPPED");
             }
 
             printWriter.print(" elapsed = " + localContestTime.getElapsedTimeStr());
@@ -196,7 +196,7 @@ public class InternalDumpReport implements IReport {
             printWriter.print(" length = " + localContestTime.getContestLengthStr());
             printWriter.println();
         } else {
-            printWriter.println("InternalContest Time is undefined (null)");
+            printWriter.println("Contest Time is undefined (null)");
 
         }
         

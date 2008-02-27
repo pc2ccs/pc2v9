@@ -650,7 +650,7 @@ public class PacketHandler {
                 contest.updateContestTime(contestTime);
                 ContestTime updatedContestTime = contest.getContestTime(siteNumber);
                 controller.getLog().info(
-                        "InternalContest Settings updated by " + who + " running=" + updatedContestTime.isContestRunning() + " elapsed = " + updatedContestTime.getElapsedTimeStr() + " remaining= "
+                        "Contest Settings updated by " + who + " running=" + updatedContestTime.isContestRunning() + " elapsed = " + updatedContestTime.getElapsedTimeStr() + " remaining= "
                                 + updatedContestTime.getRemainingTimeStr() + " length=" + updatedContestTime.getContestLengthStr());
                 Packet updatePacket = PacketFactory.clonePacket(contest.getClientId(), PacketFactory.ALL_SERVERS, packet);
                 controller.sendToTeams(updatePacket);

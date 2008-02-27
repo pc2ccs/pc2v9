@@ -63,7 +63,7 @@ public class ContestTime implements IElementObject {
     private ElementId elementId;
 
     public ContestTime() {
-        this("InternalContest Time");
+        this("Contest Time");
     }
 
     /**
@@ -72,7 +72,7 @@ public class ContestTime implements IElementObject {
      * @param siteNumber
      */
     public ContestTime(int siteNumber) {
-        this("InternalContest Time Site " + siteNumber);
+        this("Contest Time Site " + siteNumber);
         this.siteNumber = siteNumber;
     }
 
