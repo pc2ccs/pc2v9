@@ -110,4 +110,11 @@ public interface IClient {
      * @return An integer hashcode for this object. 
      */
     int hashCode();
+
+    /**
+     * Return boolean indicating whether to display this client on the scoreboard or not.
+     * @return true if to be displayed on the scoreboard, else false.
+     */
+    boolean isDisplayableOnScoreboard();
+
 }

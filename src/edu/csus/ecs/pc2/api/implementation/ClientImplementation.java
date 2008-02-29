@@ -5,6 +5,7 @@ import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.security.Permission.Type;
 
 /**
  * API IClient implementation.  
@@ -26,6 +27,8 @@ public class ClientImplementation implements IClient {
     private ClientType clientType;
 
     private ElementId elementId;
+
+    private boolean displayableOnScoreboard;
     
     public ClientImplementation(ClientId clientId, IInternalContest contest) {
         Account account = contest.getAccount(clientId);
@@ -48,6 +51,7 @@ public class ClientImplementation implements IClient {
                 break;
         }
         elementId = account.getElementId();
+        displayableOnScoreboard = account.isAllowed(Type.DISPLAY_ON_SCOREBOARD);
     }
 
     public String getLoginName() {
@@ -88,5 +92,9 @@ public class ClientImplementation implements IClient {
     @Override
     public int hashCode() {
         return elementId.toString().hashCode();
+    }
+    
+    public boolean isDisplayableOnScoreboard() {
+        return displayableOnScoreboard;
     }
 }
