@@ -314,8 +314,7 @@ public class AccountsPane extends JPanePlugin {
             for (Account account : accounts) {
                 updateAccountRow(account, false);
             }
-            getRunsListBox().autoSizeAllColumns();
-            getRunsListBox().sort();
+            sortRunsListBox();
         }
 
         public void accountsModified(AccountEvent accountEvent) {
@@ -338,8 +337,7 @@ public class AccountsPane extends JPanePlugin {
                 }
 
             }
-            getRunsListBox().autoSizeAllColumns();
-            getRunsListBox().sort();
+            sortRunsListBox();
         }
     }
 
@@ -557,6 +555,20 @@ public class AccountsPane extends JPanePlugin {
                 messageLabel.setText(string);
                 messageLabel.setForeground(color);
 
+            }
+        });
+    }
+    
+    /**
+     * This method invokes the autoSizeAllColumns() and sort()
+     * for the runListBox on the awt thread.
+     *
+     */
+    private void sortRunsListBox() {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                getRunsListBox().autoSizeAllColumns();
+                getRunsListBox().sort();
             }
         });
     }
