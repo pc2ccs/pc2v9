@@ -955,6 +955,7 @@ public class ClarificationsPane extends JPanePlugin {
             questionTextArea.setBorder(BorderFactory.createTitledBorder(null, "", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
             questionTextArea.add(getAnswerTextArea(), java.awt.BorderLayout.CENTER);
 
+            questionTextArea.setEditable(false);
         }
         return questionTextArea;
     }
@@ -982,6 +983,7 @@ public class ClarificationsPane extends JPanePlugin {
     private JTextArea getAnswerTextArea() {
         if (answerTextArea == null) {
             answerTextArea = new JTextArea();
+            answerTextArea.setEditable(false);
         }
         return answerTextArea;
     }
