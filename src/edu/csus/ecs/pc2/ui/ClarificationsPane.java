@@ -846,7 +846,7 @@ public class ClarificationsPane extends JPanePlugin {
             Clarification clarificationToAnswer = getContest().getClarification(elementId);
 
             if ((!clarificationToAnswer.getState().equals(ClarificationStates.NEW)) || clarificationToAnswer.isDeleted()) {
-                showMessage("Not allowed to request run, already judged");
+                showMessage("Not allowed to request clarification, already answered");
                 return;
             }
 
