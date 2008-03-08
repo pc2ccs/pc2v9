@@ -339,9 +339,9 @@ public class ClarificationsPane extends JPanePlugin {
                 getAnswerPane().setVisible(true);
                 getAnswerTextArea().setText(clarification.getAnswer());
             } else {
-                // Don't show answer pane if no answer
                 getAnswerTextArea().setText("Not answered, yet.");
-                getAnswerPane().setVisible(true);
+                // Don't show answer pane if no answer & new clars view
+                getAnswerPane().setVisible(!isShowNewClarificationsOnly());
             }
             getAnswerTextArea().setCaretPosition(0);
         }
@@ -999,6 +999,8 @@ public class ClarificationsPane extends JPanePlugin {
             }
             filter.addClarificationState(ClarificationStates.NEW);
         }
+        // do not show the answer area for new clars view
+        getAnswerPane().setVisible(!showNewClarificationsOnly);
     }
 
     /**
