@@ -177,6 +177,7 @@ public class AnswerClarificationPane extends JPanePlugin {
 
     private Clarification getClarificationFromFields() {
 
+        // TODO this should be operating on a cloned Clarification, otherwise we are updating the model
         clarification.setAnswer(getAnswerTextArea().getText());
         clarification.setWhoJudgedItId(getContest().getClientId());
         clarification.setSendToAll(getSendToAllCheckBox().isSelected());
@@ -206,8 +207,7 @@ public class AnswerClarificationPane extends JPanePlugin {
     private void cancelClarification() {
 
         enableUpdateButtons(false);
-        Clarification newClarification = getClarificationFromFields();
-        getController().cancelClarification(newClarification);
+        getController().cancelClarification(clarification);
 
     }
 
