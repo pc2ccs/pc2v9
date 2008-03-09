@@ -407,6 +407,10 @@ public class ClarificationsPane extends JPanePlugin {
                     clarificationListBox.addRow(objects, clarification.getElementId());
                 } else {
                     clarificationListBox.replaceRow(objects, rowNumber);
+                    if (clarificationListBox.isRowSelected(rowNumber)) {
+                        // refresh the textAreas
+                        showSelectedClarification();
+                    }
                 }
                 clarificationListBox.autoSizeAllColumns();
                 clarificationListBox.sort();
