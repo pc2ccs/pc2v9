@@ -1403,7 +1403,11 @@ public class InternalContest implements IInternalContest {
     }
 
     public void cancelClarificationCheckOut(Clarification clarification, ClientId whoCancelledIt) {
+        // TODO verify the canceller has permissions to cancel this clar
         clarificationList.updateClarification(clarification, ClarificationStates.NEW, whoCancelledIt);
+        synchronized (clarCheckOutList) {
+            clarCheckOutList.remove(clarification.getElementId());
+        }
         Clarification theClarification = clarificationList.get(clarification);
         ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.CLARIFICATION_AVIALABLE, theClarification);
         fireClarificationListener(clarificationEvent);
