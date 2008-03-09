@@ -1640,6 +1640,7 @@ public class PacketHandler {
     
                         sendToJudgesAndOthers(checkOutPacket, true);
                     } catch (ClarificationUnavailableException clarUnavailableException) {
+                        controller.getLog().info("clarUnavailableException "+clarUnavailableException.getMessage());
                         Packet notAvailableRunPacket = PacketFactory.createClarificationNotAvailable(contest.getClientId(), requestFromId, clarification, requestFromId);
                         controller.sendToClient(notAvailableRunPacket);
                     }
@@ -1720,6 +1721,7 @@ public class PacketHandler {
                         
                         sendToJudgesAndOthers(checkOutPacket, true);
                     } catch (RunUnavailableException runUnavailableException) {
+                        controller.getLog().info("runUnvailableException "+runUnavailableException.getMessage());
                         theRun = contest.getRun(run.getElementId());
                         Packet notAvailableRunPacket = PacketFactory.createRunNotAvailable(contest.getClientId(), whoRequestsRunId, theRun);
                         controller.sendToClient(notAvailableRunPacket);
