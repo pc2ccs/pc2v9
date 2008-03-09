@@ -4,6 +4,7 @@ import java.util.Vector;
 
 import edu.csus.ecs.pc2.api.IRun;
 import edu.csus.ecs.pc2.api.listener.IRunEventListener;
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.RunEvent;
@@ -20,11 +21,13 @@ public class RunListenerList {
     private Vector<IRunEventListener> listenerList = new Vector<IRunEventListener>();
 
     private IInternalContest contest = null;
+    
+    private IInternalController controller = null;
 
     private void fireRunListener(RunEvent runEvent) {
         for (int i = 0; i < listenerList.size(); i++) {
 
-            IRun run = new RunImplementation(runEvent.getRun(), contest);
+            IRun run = new RunImplementation(runEvent.getRun(), contest, controller);
 
             switch (runEvent.getAction()) {
             case ADDED:
@@ -64,8 +67,9 @@ public class RunListenerList {
         return contest;
     }
 
-    public void setContest(IInternalContest contest) {
-        this.contest = contest;
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
+        this.contest = inContest;
+        this.controller = inController;
         contest.addRunListener(new Listener());
     }
 

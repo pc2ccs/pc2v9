@@ -15,6 +15,7 @@ import edu.csus.ecs.pc2.api.IStanding;
 import edu.csus.ecs.pc2.api.ITeam;
 import edu.csus.ecs.pc2.api.listener.IConfigurationUpdateListener;
 import edu.csus.ecs.pc2.api.listener.IRunEventListener;
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientType;
@@ -40,6 +41,8 @@ public class Contest implements IContest {
 
     private IInternalContest contest = null;
     
+    private IInternalController controller = null;
+    
     private RunListenerList runListenerList = new RunListenerList();
     
     private ConfigurationListenerList configurationListenerList = new ConfigurationListenerList();
@@ -48,10 +51,11 @@ public class Contest implements IContest {
     
     private Log log = null;
 
-    public Contest(IInternalContest contest, Log log) {
+    public Contest(IInternalContest contest, IInternalController controller, Log log) {
         this.contest = contest;
+        this.controller = controller;
         this.log = log;
-        runListenerList.setContest(contest);
+        runListenerList.setContestAndController(contest, controller);
         configurationListenerList.setContest(contest);
     }
 
@@ -124,7 +128,7 @@ public class Contest implements IContest {
         RunImplementation[] runImplementations = new RunImplementation[runs.length];
 
         for (int i = 0; i < runs.length; i++) {
-            runImplementations[i] = new RunImplementation(runs[i], contest);
+            runImplementations[i] = new RunImplementation(runs[i], contest, controller);
         }
         return runImplementations;
     }

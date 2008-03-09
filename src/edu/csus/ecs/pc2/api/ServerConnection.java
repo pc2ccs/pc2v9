@@ -80,7 +80,7 @@ public class ServerConnection {
             controller.start(new String[0]);
             internalContest = controller.clientLogin(login, password);
 
-            contest = new Contest(internalContest, controller.getLog());
+            contest = new Contest(internalContest,  controller, controller.getLog());
 
             return contest;
 

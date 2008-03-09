@@ -4,9 +4,12 @@ import edu.csus.ecs.pc2.api.ILanguage;
 import edu.csus.ecs.pc2.api.IProblem;
 import edu.csus.ecs.pc2.api.IRun;
 import edu.csus.ecs.pc2.api.ITeam;
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
+import edu.csus.ecs.pc2.core.model.RunFiles;
+import edu.csus.ecs.pc2.core.model.SerializedFile;
 
 /**
  * Implementation for IRun.
@@ -39,14 +42,23 @@ public class RunImplementation implements IRun {
     private long elapsedMins;
 
     private ElementId elementId;
+    
+    private RunFiles runFiles = null;
+    
+    // TODO: use this field
+//    private Boolean listening = new Boolean (true);
+
+    @SuppressWarnings("unused") // TODO: use this field
+    private IInternalController controller = null;
 
     /**
      * 
      * @param run
      * @param internalContest
      */
-    public RunImplementation(edu.csus.ecs.pc2.core.model.Run run, IInternalContest internalContest) {
+    public RunImplementation(edu.csus.ecs.pc2.core.model.Run run, IInternalContest internalContest, IInternalController controller) {
 
+        this.controller = controller;
         judged = run.isJudged();
         solved = run.isSolved();
         deleted = run.isDeleted();
@@ -121,13 +133,71 @@ public class RunImplementation implements IRun {
     }
 
     public String[] getSourceCodeFileNames() {
-        // TODO Auto-generated method stub
-        return null;
+        
+        if (runFiles == null) {
+            fetchRunFiles();
+        }
+        
+        if (runFiles != null){
+            
+            String [] names = new String[0];
+            names[0] = runFiles.getMainFile().getName();
+            
+            SerializedFile [] files = runFiles.getOtherFiles();
+            if (files != null){
+                if (files.length > 0){
+                    names = new String[1 + files.length];
+                    names[0] = runFiles.getMainFile().getName();
+                    for (int i = 0; i < files.length; i++) {
+                        SerializedFile file = files[i];
+                        names[i+1] = file.getName();                        
+                    }
+                    return names;
+                } else {
+                    return names;
+                }
+            } else {
+                // only main file
+                return names;
+            }
+        }
+        
+        return new String[0];
     }
 
     public byte[][] getSourceCodeFileContents() {
         // TODO Auto-generated method stub
-        return null;
+        if (runFiles != null){
+            
+            byte [] [] fileContents = new byte[1][1];
+            
+            fileContents[0] = runFiles.getMainFile().getBuffer();
+            
+            SerializedFile [] files = runFiles.getOtherFiles();
+            if (files != null){
+                if (files.length > 0){
+                    fileContents = new byte[1 + files.length][];
+                    fileContents[0] = runFiles.getMainFile().getBuffer();
+                    for (int i = 0; i < files.length; i++) {
+                        SerializedFile file = files[i];
+                        fileContents[i+1] = file.getBuffer();                        
+                    }
+                    return fileContents;
+                } else {
+                    return fileContents;
+                }
+            } else {
+                // only main file
+                return fileContents;
+            }
+        }
+        return new byte[0][0];
+    }
+    
+    private void fetchRunFiles(){
+        
+        
+        
     }
     
     @Override
