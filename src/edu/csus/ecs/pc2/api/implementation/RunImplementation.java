@@ -7,7 +7,10 @@ import edu.csus.ecs.pc2.api.ITeam;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
+import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 
@@ -45,11 +48,15 @@ public class RunImplementation implements IRun {
     
     private RunFiles runFiles = null;
     
-    // TODO: use this field
-//    private Boolean listening = new Boolean (true);
+    private Boolean listening = new Boolean (true);
 
-    @SuppressWarnings("unused") // TODO: use this field
     private IInternalController controller = null;
+    
+    private FetchRunListenerImplemenation fetchRunListenerImplemenation = null;
+
+    private IInternalContest internalContest = null;
+    
+    private Run run = null;
 
     /**
      * 
@@ -59,6 +66,7 @@ public class RunImplementation implements IRun {
     public RunImplementation(edu.csus.ecs.pc2.core.model.Run run, IInternalContest internalContest, IInternalController controller) {
 
         this.controller = controller;
+        this.internalContest  = internalContest;
         judged = run.isJudged();
         solved = run.isSolved();
         deleted = run.isDeleted();
@@ -89,6 +97,8 @@ public class RunImplementation implements IRun {
         elapsedMins = run.getElapsedMins();
         
         elementId = run.getElementId();
+        
+        this.run = run;
 
     }
 
@@ -166,7 +176,10 @@ public class RunImplementation implements IRun {
     }
 
     public byte[][] getSourceCodeFileContents() {
-        // TODO Auto-generated method stub
+        if (runFiles == null) {
+                fetchRunFiles();
+        }
+        
         if (runFiles != null){
             
             byte [] [] fileContents = new byte[1][1];
@@ -196,7 +209,25 @@ public class RunImplementation implements IRun {
     
     private void fetchRunFiles(){
         
+        if (runFiles != null){
+            return;
+        }
         
+        if (fetchRunListenerImplemenation == null){
+            fetchRunListenerImplemenation = new FetchRunListenerImplemenation();
+            internalContest.addRunListener(fetchRunListenerImplemenation);
+        }
+        controller.checkOutRun(run, true);
+        
+        while ( listening.booleanValue()){
+            try {
+                System.out.println("Waiting "+new java.util.Date());
+                listening.wait();
+            } catch (InterruptedException e) {
+                // ok, just loop again
+                listening.booleanValue(); // terrible kludge because empty block not allowed.
+            }
+        }
         
     }
     
@@ -220,5 +251,31 @@ public class RunImplementation implements IRun {
     }
     
     
+    /**
+     * Listener for run fetched from server.
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
 
+    protected class FetchRunListenerImplemenation implements IRunListener {
+
+        public void runAdded(RunEvent event) {
+            // run not added, ignored
+        }
+
+        public void runChanged(RunEvent event) {
+
+            if (event.getRun().getElementId().equals(elementId)) {
+                // found the run we requested
+                runFiles = event.getRunFiles();
+                listening = new Boolean(false);
+                listening.notify();
+            }
+        }
+
+        public void runRemoved(RunEvent event) {
+            // run not removed, ignored
+        }
+    }
 }
