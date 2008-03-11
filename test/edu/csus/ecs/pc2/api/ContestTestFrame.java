@@ -75,7 +75,9 @@ public class ContestTestFrame extends JFrame {
 
     private JButton jButton1 = null;
 
-    private JButton jButton2 = null;
+    private JButton clearButton = null;
+
+    private JButton oneRunTest = null;
 
     /**
      * This method initializes
@@ -171,6 +173,7 @@ public class ContestTestFrame extends JFrame {
             centerPane.add(getJButton(), null);
             centerPane.add(getJButton1(), null);
             centerPane.add(getJButton2(), null);
+            centerPane.add(getOneRunTest(), null);
         }
         return centerPane;
     }
@@ -632,17 +635,77 @@ public class ContestTestFrame extends JFrame {
      * @return javax.swing.JButton
      */
     private JButton getJButton2() {
-        if (jButton2 == null) {
-            jButton2 = new JButton();
-            jButton2.setBounds(new java.awt.Rectangle(421,219,94,32));
-            jButton2.setText("Clear");
-            jButton2.addActionListener(new java.awt.event.ActionListener() {
+        if (clearButton == null) {
+            clearButton = new JButton();
+            clearButton.setBounds(new java.awt.Rectangle(421,219,94,32));
+            clearButton.setText("Clear");
+            clearButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     scrollyFrame.removeAll();
                 }
             });
         }
-        return jButton2;
+        return clearButton;
+    }
+    
+    /**
+     * This method initializes oneRunTest
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getOneRunTest() {
+        if (oneRunTest == null) {
+            oneRunTest = new JButton();
+            oneRunTest.setBounds(new java.awt.Rectangle(205,75,141,32));
+            oneRunTest.setText("Run View Source");
+            oneRunTest.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    viewOneRunSource();
+                }
+            });
+        }
+        return oneRunTest;
+    }
+
+    protected void viewOneRunSource() {
+        if (contest == null) {
+            showMessage("Not logged in");
+            return;
+        }
+        
+        if (contest.getRuns().length == 0){
+            showMessage("No runs in system");
+            return;
+        }
+        
+        IRun run = contest.getRuns()[0];
+        
+        print("Run " + run.getNumber() + " Site " + run.getSiteNumber());
+        
+        print(" @ " + run.getSubmissionTime() + " by " + run.getTeam().getLoginName());
+        print(" problem: " + run.getProblem().getName());
+        print(" in " + run.getLanguage().getName());
+        
+        if (run.isJudged()) {
+            println("  Judgement: " + run.getJudgementName());
+        } else {
+            println("  Judgement: not judged yet ");
+        }
+        
+        println();
+        println("Getting source file name(s)");
+        
+        String [] names = run.getSourceCodeFileNames();
+        for (String s : names){
+            println("Name: "+s);
+        }
+        
+        println("done");
+        
+//        byte [] [] fileContents = run.getSourceCodeFileContents();
+        
+            
+            
     }
 
     public static void main(String[] args) {
