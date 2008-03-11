@@ -148,28 +148,32 @@ public class RunImplementation implements IRun {
             fetchRunFiles();
         }
         
-        if (runFiles != null){
-            
-            String [] names = new String[0];
-            names[0] = runFiles.getMainFile().getName();
-            
-            SerializedFile [] files = runFiles.getOtherFiles();
-            if (files != null){
-                if (files.length > 0){
-                    names = new String[1 + files.length];
-                    names[0] = runFiles.getMainFile().getName();
-                    for (int i = 0; i < files.length; i++) {
-                        SerializedFile file = files[i];
-                        names[i+1] = file.getName();                        
+        try {
+            if (runFiles != null) {
+
+                String[] names = new String[0];
+                names[0] = runFiles.getMainFile().getName();
+
+                SerializedFile[] files = runFiles.getOtherFiles();
+                if (files != null) {
+                    if (files.length > 0) {
+                        names = new String[1 + files.length];
+                        names[0] = runFiles.getMainFile().getName();
+                        for (int i = 0; i < files.length; i++) {
+                            SerializedFile file = files[i];
+                            names[i + 1] = file.getName();
+                        }
+                        return names;
+                    } else {
+                        return names;
                     }
-                    return names;
                 } else {
+                    // only main file
                     return names;
                 }
-            } else {
-                // only main file
-                return names;
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         
         return new String[0];
@@ -182,7 +186,7 @@ public class RunImplementation implements IRun {
         
         if (runFiles != null){
             
-            byte [] [] fileContents = new byte[1][1];
+            byte [] [] fileContents = new byte[1][64000];
             
             fileContents[0] = runFiles.getMainFile().getBuffer();
             
@@ -213,21 +217,31 @@ public class RunImplementation implements IRun {
             return;
         }
         
+        System.out.println("fetchRunFiles start debug");
+        System.out.flush();
+
         if (fetchRunListenerImplemenation == null){
             fetchRunListenerImplemenation = new FetchRunListenerImplemenation();
             internalContest.addRunListener(fetchRunListenerImplemenation);
         }
+        System.out.println("fetchRunFiles start checkout ");
+        System.out.flush();
         controller.checkOutRun(run, true);
         
         while ( listening.booleanValue()){
             try {
                 System.out.println("Waiting "+new java.util.Date());
-                listening.wait();
+                System.out.flush();
+                synchronized (listening) {
+                    listening.wait();
+                }
             } catch (InterruptedException e) {
                 // ok, just loop again
                 listening.booleanValue(); // terrible kludge because empty block not allowed.
             }
         }
+        System.out.println("After wait "+new java.util.Date());
+        System.out.flush();
         
     }
     
@@ -269,8 +283,16 @@ public class RunImplementation implements IRun {
             if (event.getRun().getElementId().equals(elementId)) {
                 // found the run we requested
                 runFiles = event.getRunFiles();
-                listening = new Boolean(false);
-                listening.notify();
+                synchronized (listening) {
+                    System.out.println("runChanged start notify ");
+                    System.out.println("runChanged start notify ");
+
+                    listening = new Boolean(false);
+                    listening.notify();
+                    System.out.println("runChanged after notify ");
+                    System.out.flush();
+                }
+                
             }
         }
 
