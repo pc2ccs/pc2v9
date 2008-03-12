@@ -25,12 +25,15 @@ public class QuickTest {
             if (runs.length == 0) {
                 info("No runs to view ");
             } else {
-                info(" Fetching files for run "+runs[0].getNumber());
-                String[] names = runs[0].getSourceCodeFileNames();
-                info( " fetched run, submitted names");
-                
-                for (String name : names){
-                    info(name);
+                for (IRun run : runs) {
+                    info(" Fetching files for run " + run.getNumber());
+                    String[] names = run.getSourceCodeFileNames();
+                    info(" fetched run, submitted names");
+                    byte[][] contents = run.getSourceCodeFileContents();
+                    for (int i = 0; i < names.length; i++) {
+                        String name = names[i];
+                        info(name + " " + contents[i].length);
+                    }
                 }
             }
 

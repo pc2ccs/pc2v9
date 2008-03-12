@@ -679,34 +679,34 @@ public class ContestTestFrame extends JFrame {
             return;
         }
         
-        IRun run = contest.getRuns()[0];
-        
-        print("Run " + run.getNumber() + " Site " + run.getSiteNumber());
-        
-        print(" @ " + run.getSubmissionTime() + " by " + run.getTeam().getLoginName());
-        print(" problem: " + run.getProblem().getName());
-        print(" in " + run.getLanguage().getName());
-        
-        if (run.isJudged()) {
-            println("  Judgement: " + run.getJudgementName());
-        } else {
-            println("  Judgement: not judged yet ");
+        for (IRun run : contest.getRuns()){
+            
+            print("Run " + run.getNumber() + " Site " + run.getSiteNumber());
+            
+            print(" @ " + run.getSubmissionTime() + " by " + run.getTeam().getLoginName());
+            print(" problem: " + run.getProblem().getName());
+            print(" in " + run.getLanguage().getName());
+            
+            if (run.isJudged()) {
+                println("  Judgement: " + run.getJudgementName());
+            } else {
+                println("  Judgement: not judged yet ");
+            }
+            
+            println();
+            println("Getting source file name(s)");
+            
+            byte [][] contents = run.getSourceCodeFileContents();
+            String [] names = run.getSourceCodeFileNames();
+            for (int i = 0; i < names.length; i++) {
+                String s = names[i];
+                println("Name["+i+"] "+s+" "+contents[i].length);
+            }
+            
         }
-        
-        println();
-        println("Getting source file name(s)");
-        
-        String [] names = run.getSourceCodeFileNames();
-        for (String s : names){
-            println("Name: "+s);
-        }
-        
+    
         println("done");
         
-//        byte [] [] fileContents = run.getSourceCodeFileContents();
-        
-            
-            
     }
 
     public static void main(String[] args) {
