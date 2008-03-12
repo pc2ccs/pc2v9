@@ -1328,7 +1328,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 // Already logged in, log them off
                 ConnectionHandlerID connectionHandlerID2 = contest.getConnectionHandleID(clientId);
                 log.info("login - " + clientId + " already logged in, will logoff client at connection " + connectionHandlerID2);
+                // this updates the model contest-wide
                 contest.removeLogin(clientId);
+                // but this is the actual logoff
+                forceConnectionDrop(connectionHandlerID2);
             }
             contest.addLocalLogin(clientId, connectionHandlerID);
             info("LOGIN logged in " + clientId + " at " + connectionHandlerID);
