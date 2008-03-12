@@ -1,5 +1,7 @@
 package edu.csus.ecs.pc2.api.implementation;
 
+import java.util.Date;
+
 import edu.csus.ecs.pc2.api.ILanguage;
 import edu.csus.ecs.pc2.api.IProblem;
 import edu.csus.ecs.pc2.api.IRun;
@@ -217,21 +219,18 @@ public class RunImplementation implements IRun {
             return;
         }
         
-        System.out.println("fetchRunFiles start debug");
-        System.out.flush();
+        info("fetchRunFiles start debug");
 
         if (fetchRunListenerImplemenation == null){
             fetchRunListenerImplemenation = new FetchRunListenerImplemenation();
             internalContest.addRunListener(fetchRunListenerImplemenation);
         }
-        System.out.println("fetchRunFiles start checkout ");
-        System.out.flush();
+        info("fetchRunFiles start checkout");
         controller.checkOutRun(run, true);
         
         while ( listening.booleanValue()){
             try {
-                System.out.println("Waiting "+new java.util.Date());
-                System.out.flush();
+                info("Waiting");
                 synchronized (listening) {
                     listening.wait();
                 }
@@ -240,8 +239,7 @@ public class RunImplementation implements IRun {
                 listening.booleanValue(); // terrible kludge because empty block not allowed.
             }
         }
-        System.out.println("After wait "+new java.util.Date());
-        System.out.flush();
+        info("After wait ");
         
     }
     
@@ -264,6 +262,10 @@ public class RunImplementation implements IRun {
         return elementId.toString().hashCode();
     }
     
+    public void info(String s) {
+        System.out.println(new Date() + " " +Thread.currentThread().getName() + " " + s);
+        System.out.flush();
+    }
     
     /**
      * Listener for run fetched from server.
@@ -284,13 +286,16 @@ public class RunImplementation implements IRun {
                 // found the run we requested
                 runFiles = event.getRunFiles();
                 synchronized (listening) {
-                    System.out.println("runChanged start notify ");
-                    System.out.println("runChanged start notify ");
+                   info("runChanged before notify ");
 
-                    listening = new Boolean(false);
-                    listening.notify();
-                    System.out.println("runChanged after notify ");
-                    System.out.flush();
+                    try {
+                        listening = new Boolean(false);
+                        listening.notify();
+                    } catch (Exception e) {
+                        info ("Exception "+e.getMessage());
+                        e.printStackTrace();
+                    }
+                    info("runChanged after notify ");
                 }
                 
             }

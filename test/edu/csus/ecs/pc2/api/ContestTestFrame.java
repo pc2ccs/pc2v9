@@ -338,6 +338,7 @@ public class ContestTestFrame extends JFrame {
 
     private void info(String string) {
         System.out.println(new Date() + " " + Thread.currentThread().getName() + " " + string);
+        System.out.flush();
     }
 
     private void showMessage(String string) {
