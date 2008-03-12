@@ -1,7 +1,5 @@
 package edu.csus.ecs.pc2.api.implementation;
 
-import java.util.Date;
-
 import edu.csus.ecs.pc2.api.ILanguage;
 import edu.csus.ecs.pc2.api.IProblem;
 import edu.csus.ecs.pc2.api.IRun;
@@ -57,6 +55,12 @@ public class RunImplementation implements IRun {
     private FetchRunListenerImplemenation fetchRunListenerImplemenation = null;
 
     private IInternalContest internalContest = null;
+    
+    /**
+     * Have we got the RunFiles from the server.
+     * 
+     */
+    private boolean answerReceived = false;
     
     private Run run = null;
 
@@ -219,19 +223,15 @@ public class RunImplementation implements IRun {
             return;
         }
         
-        info("fetchRunFiles start debug");
 
         if (fetchRunListenerImplemenation == null){
             fetchRunListenerImplemenation = new FetchRunListenerImplemenation();
             internalContest.addRunListener(fetchRunListenerImplemenation);
         }
-        info("fetchRunFiles start checkout");
         controller.checkOutRun(run, true);
         synchronized (listening) {
-            while (listening.booleanValue()) {
+            while (! answerReceived) {
                 try {
-                    info("Waiting");
-
                     listening.wait();
                 } catch (InterruptedException e) {
                     // ok, just loop again
@@ -239,8 +239,6 @@ public class RunImplementation implements IRun {
                 }
             }
         }
-        info("After wait ");
-        
     }
     
     @Override
@@ -262,10 +260,10 @@ public class RunImplementation implements IRun {
         return elementId.toString().hashCode();
     }
     
-    public void info(String s) {
-        System.out.println(new Date() + " " +Thread.currentThread().getName() + " " + s);
-        System.out.flush();
-    }
+//    public void info(String s) {
+//        System.out.println(new Date() + " " +Thread.currentThread().getName() + " " + s);
+//        System.out.flush();
+//    }
     
     /**
      * Listener for run fetched from server.
@@ -286,18 +284,13 @@ public class RunImplementation implements IRun {
                 // found the run we requested
                 runFiles = event.getRunFiles();
                 synchronized (listening) {
-                   info("runChanged before notify ");
-
                     try {
+                        answerReceived = true;
                         listening.notify();
-                        listening = new Boolean(false);
                     } catch (Exception e) {
-                        info ("Exception "+e.getMessage());
                         e.printStackTrace();
                     }
-                    info("runChanged after notify ");
                 }
-                
             }
         }
 
