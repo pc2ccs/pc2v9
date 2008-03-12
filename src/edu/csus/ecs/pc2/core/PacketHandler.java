@@ -1711,7 +1711,16 @@ public class PacketHandler {
                         securityCheck (Permission.Type.JUDGE_RUN, whoRequestsRunId, connectionHandlerID);
                         
                         theRun = contest.checkoutRun(run, whoRequestsRunId, false);
+                        
                         RunFiles runFiles = contest.getRunFiles(run);
+                        if (runFiles == null) {
+                            try {
+                                contest.cancelRunCheckOut(run, whoRequestsRunId);
+                            } catch (UnableToUncheckoutRunException e) {
+                                controller.getLog().severe("Problem canceling run checkout after error getting run files.");
+                            }
+                            throw new RunUnavailableException("Error retrieving files.");
+                        }
 
                         // send to Judge
                         Packet checkOutPacket = PacketFactory.createCheckedOutRun(contest.getClientId(), whoRequestsRunId, theRun, runFiles, whoRequestsRunId);
