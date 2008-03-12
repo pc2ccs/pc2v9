@@ -153,7 +153,7 @@ public class RunImplementation implements IRun {
         try {
             if (runFiles != null) {
 
-                String[] names = new String[0];
+                String[] names = new String[1];
                 names[0] = runFiles.getMainFile().getName();
 
                 SerializedFile[] files = runFiles.getOtherFiles();
@@ -227,16 +227,16 @@ public class RunImplementation implements IRun {
         }
         info("fetchRunFiles start checkout");
         controller.checkOutRun(run, true);
-        
-        while ( listening.booleanValue()){
-            try {
-                info("Waiting");
-                synchronized (listening) {
+        synchronized (listening) {
+            while (listening.booleanValue()) {
+                try {
+                    info("Waiting");
+
                     listening.wait();
+                } catch (InterruptedException e) {
+                    // ok, just loop again
+                    listening.booleanValue(); // terrible kludge because empty block not allowed.
                 }
-            } catch (InterruptedException e) {
-                // ok, just loop again
-                listening.booleanValue(); // terrible kludge because empty block not allowed.
             }
         }
         info("After wait ");
@@ -289,8 +289,8 @@ public class RunImplementation implements IRun {
                    info("runChanged before notify ");
 
                     try {
-                        listening = new Boolean(false);
                         listening.notify();
+                        listening = new Boolean(false);
                     } catch (Exception e) {
                         info ("Exception "+e.getMessage());
                         e.printStackTrace();
