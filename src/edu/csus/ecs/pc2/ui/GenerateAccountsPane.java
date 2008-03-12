@@ -5,7 +5,9 @@ import java.util.Arrays;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
@@ -20,6 +22,7 @@ import edu.csus.ecs.pc2.core.model.ISiteListener;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.SiteEvent;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import java.awt.FlowLayout;
 
 /**
  * Generate accounts pane.
@@ -72,6 +75,8 @@ public class GenerateAccountsPane extends JPanePlugin {
 
     private JTextField otherClientCountTextBox = null;
 
+    private JButton cancelButton = null;
+
     /**
      * This method initializes
      * 
@@ -91,6 +96,20 @@ public class GenerateAccountsPane extends JPanePlugin {
         this.add(getCenterPanel(), java.awt.BorderLayout.CENTER);
         this.add(getGenerateButtonPanel(), java.awt.BorderLayout.SOUTH);
 
+    }
+
+    private void addWindowCloserListener() {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                if (getParentFrame() != null) {
+                    getParentFrame().addWindowListener(new java.awt.event.WindowAdapter() {
+                        public void windowClosing(java.awt.event.WindowEvent e) {
+                            handleCancelButton();
+                        }
+                    });
+                } 
+            }
+        });
     }
 
     private void updateSiteComboBox() {
@@ -217,6 +236,11 @@ public class GenerateAccountsPane extends JPanePlugin {
             adminCountTextField = new JTextField();
             adminCountTextField.setBounds(new java.awt.Rectangle(343, 35, 39, 22));
             adminCountTextField.setDocument(new IntegerDocument());
+            adminCountTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
         }
         return adminCountTextField;
     }
@@ -231,6 +255,11 @@ public class GenerateAccountsPane extends JPanePlugin {
             boardCountTextField = new JTextField();
             boardCountTextField.setBounds(new java.awt.Rectangle(343, 127, 39, 22));
             boardCountTextField.setDocument(new IntegerDocument());
+            boardCountTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
         }
         return boardCountTextField;
     }
@@ -245,6 +274,11 @@ public class GenerateAccountsPane extends JPanePlugin {
             teamCountTextField = new JTextField();
             teamCountTextField.setBounds(new java.awt.Rectangle(343, 97, 39, 22));
             teamCountTextField.setDocument(new IntegerDocument());
+            teamCountTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
         }
         return teamCountTextField;
     }
@@ -259,6 +293,11 @@ public class GenerateAccountsPane extends JPanePlugin {
             judgeCountTextField = new JTextField();
             judgeCountTextField.setBounds(new java.awt.Rectangle(343, 67, 39, 22));
             judgeCountTextField.setDocument(new IntegerDocument());
+            judgeCountTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
         }
         return judgeCountTextField;
     }
@@ -270,9 +309,13 @@ public class GenerateAccountsPane extends JPanePlugin {
      */
     private JPanel getGenerateButtonPanel() {
         if (generateButtonPanel == null) {
+            FlowLayout flowLayout = new FlowLayout();
+            flowLayout.setHgap(40);
             generateButtonPanel = new JPanel();
+            generateButtonPanel.setLayout(flowLayout);
             generateButtonPanel.setPreferredSize(new java.awt.Dimension(35, 35));
             generateButtonPanel.add(getGenerateButton(), null);
+            generateButtonPanel.add(getCancelButton(), null);
         }
         return generateButtonPanel;
     }
@@ -399,6 +442,7 @@ public class GenerateAccountsPane extends JPanePlugin {
 
         getContest().addAccountListener(new AccountListenerImplementation());
         getContest().addSiteListener(new SiteListenerImplementation());
+        addWindowCloserListener();
     }
 
     /**
@@ -503,6 +547,97 @@ public class GenerateAccountsPane extends JPanePlugin {
             otherClientCountTextBox.setVisible(false);
         }
         return otherClientCountTextBox;
+    }
+
+    /**
+     * Enable or disable Cancel/Close button based on the count text fields.
+     * 
+     */
+    public void enableUpdateButton() {
+        boolean noData = false;
+        // in 2 lines to keep the line size down
+        noData = isTextFieldEmpty(getAdminCountTextField()) && isTextFieldEmpty(getJudgeCountTextField());
+        noData = noData && (isTextFieldEmpty(getTeamCountTextField()) && isTextFieldEmpty(getBoardCountTextField()));
+        enableUpdateButtons(!noData);
+    }
+
+    protected void enableUpdateButtons(boolean editedText) {
+        if (editedText){
+            getCancelButton().setText("Cancel");
+        }else{
+            getCancelButton().setText("Close");
+        }
+        getGenerateButton().setEnabled(editedText);
+    }
+    
+    private boolean isTextFieldEmpty(JTextField textField) {
+        return textField.getText().trim().equals("");
+    }
+    
+    protected void handleCancelButton() {
+        if (isTextFieldEmpty(getAdminCountTextField()) && isTextFieldEmpty(getJudgeCountTextField()) && isTextFieldEmpty(getTeamCountTextField()) && isTextFieldEmpty(getBoardCountTextField())){
+            // all the counte textFields are empty, eg no changes
+            if ( getParentFrame() != null){
+                getParentFrame().setVisible(false);
+            }
+        } else {
+            // Something changed, are they sure ?
+            
+            int result = FrameUtilities.yesNoCancelDialog("Counts modified, generate accounts?", "Confirm Choice");
+
+            if (result == JOptionPane.YES_OPTION) {
+                generateAccounts();
+                if ( getParentFrame() != null){
+                    getParentFrame().setVisible(false);
+                }
+            } else if (result == JOptionPane.NO_OPTION) {
+                clearCounts();
+                if ( getParentFrame() != null){
+                    getParentFrame().setVisible(false);
+                }
+            }
+        }
+
+    }
+    
+    private void clearCounts() {
+        getAdminCountTextField().setText("");
+        getJudgeCountTextField().setText("");
+        getTeamCountTextField().setText("");
+        getBoardCountTextField().setText("");
+        getStartNumberTextField().setText("");
+        enableUpdateButtons(false);
+    }
+
+    /**
+     * This method initializes cancelButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getCancelButton() {
+        if (cancelButton == null) {
+            cancelButton = new JButton();
+            cancelButton.setText("Cancel");
+            cancelButton.setMnemonic(java.awt.event.KeyEvent.VK_C);
+            cancelButton.setPreferredSize(new java.awt.Dimension(150,26));
+            cancelButton.setVisible(false);
+            cancelButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    handleCancelButton();
+                }
+            });
+        }
+        return cancelButton;
+    }
+
+    /* (non-Javadoc)
+     * @see edu.csus.ecs.pc2.ui.JPanePlugin#setParentFrame(javax.swing.JFrame)
+     */
+    @Override
+    public void setParentFrame(JFrame parentFrame) {
+        super.setParentFrame(parentFrame);
+        getCancelButton().setVisible(true);
+        enableUpdateButton();
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
