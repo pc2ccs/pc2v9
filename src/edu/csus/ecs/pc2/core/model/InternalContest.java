@@ -1645,6 +1645,7 @@ public class InternalContest implements IInternalContest {
             if (newClar.getState().equals(ClarificationStates.NEW)){
                 clarCheckOutList.put(newClar.getElementId(), whoChangedClar);
                 newClar.setState(ClarificationStates.BEING_ANSWERED);
+                newClar.setWhoCheckedItOutId(whoChangedClar);
                 clarificationList.updateClarification(newClar);
                 return clarificationList.get(clar.getElementId());
             } else {
