@@ -395,7 +395,7 @@ public class GenerateAccountsPane extends JPanePlugin {
             }
 
             getStartNumberTextField().setText("");
-
+            enableUpdateButtons(false);
         } catch (Exception e) {
             // TODO: handle exception
             e.printStackTrace();
