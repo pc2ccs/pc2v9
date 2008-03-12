@@ -112,8 +112,8 @@ public interface IClient {
     int hashCode();
 
     /**
-     * Return boolean indicating whether to display this client on the scoreboard or not.
-     * @return true if to be displayed on the scoreboard, else false.
+     * Return a boolean indicating whether this client should be displayed on the scoreboard or not.
+     * @return true if this client should be displayed on the scoreboard, else false.
      */
     boolean isDisplayableOnScoreboard();
 
