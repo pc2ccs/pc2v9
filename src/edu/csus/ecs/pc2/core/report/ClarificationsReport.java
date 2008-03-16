@@ -50,7 +50,14 @@ public class ClarificationsReport implements IReport {
             printWriter.println();
             printWriter.println("  Clarification "+clarification.getNumber()+" (Site "+clarification.getSiteNumber()+") "+clarification.getElementId());
             printWriter.println("         Elapsed : "+clarification.getElapsedMins());
-            printWriter.println("         State   : "+clarification.getState());
+            printWriter.print("           State   : "+clarification.getState());
+            if (clarification.getWhoJudgedItId() != null) {
+                printWriter.print(" by "+clarification.getWhoJudgedItId());
+            }
+            if (clarification.getWhoCheckedItOutId() != null) {
+                printWriter.print(" checked out by "+clarification.getWhoCheckedItOutId());
+            }
+            printWriter.println();
             printWriter.println("         To ALL? : "+clarification.isSendToAll());
             printWriter.println("         Question: "+clarification.getQuestion());
             printWriter.println("         Answer  : "+clarification.getAnswer());
