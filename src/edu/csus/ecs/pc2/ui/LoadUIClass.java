@@ -10,7 +10,7 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 
 /**
- * Contains methods to find/instantiate UI classes.
+ * Contains methods to find and instantiate UI classes.
  * 
  * @see #loadUIClass(String)
  * @author pc2@ecs.csus.edu
@@ -24,12 +24,18 @@ public final class LoadUIClass {
      * The base project path for all classes.
      */
     private static final String PROJECT_PACKAGE_PATH = "edu.csus.ecs.pc2";
-    /**
-     * name of the UI load properties class.
-     */
-    private static final String UI_PROPERTIES_FILENAME = "uiname.properties";
     
-    public static final String SVN_ID = "$Id$";
+    /**
+     * Filename for default ui properties filename. 
+     */
+    public static final String UI_PROPERTIES_FILENAME = "uiname.properties";
+    
+    /**
+     * Name of property which can contain a file name or path for uiname.
+     * 
+     * @see #loadUIClass(String)
+     */
+    public static final String UI_PROPERTY_NAME = "uiname";
     
     private LoadUIClass (){
         // present per CodeStyle
@@ -52,6 +58,8 @@ public final class LoadUIClass {
      */
 
     public static UIPlugin loadUIClass(String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+        
+        System.err.println("loadUIClass loading "+className);
 
         Class newClass = Class.forName(className);
         Object object = newClass.newInstance();
@@ -64,7 +72,8 @@ public final class LoadUIClass {
 
 
     /**
-     * return default class names per client type.
+     * A Properties, key is client type, value is default UI class name.
+     * @return default class names for each client type.
      */
     public static Properties getDefaultUIProperties() {
 
@@ -91,21 +100,55 @@ public final class LoadUIClass {
     }
     
     /**
+     * Search for uiname.properties file, using uiname property.
+     * <P>
+     * If uiname property value is an existing directory will return directory + file.seperator + uiname.properties. <br>
+     * Else If uiname property value is an existing file will return the name of that file. <br>
+     * Else returns the default filename {@link #UI_PROPERTIES_FILENAME}
+     * <P>
+     * 
+     * Here is an example of the command lines that can be used to set the uiname property.
+     * 
+     * <pre>
+     *  java -Duiname=dirname ...
+     *  java -Duiname=filename ...
+     * </pre>
+     * 
+     * @return filename for UI properties.
+     */
+    protected static String getUiFileName() {
+
+        String pathName = System.getProperty("uiname");
+
+        if (pathName != null) {
+            File file = new File(pathName);
+            if (file.isDirectory()) {
+                return pathName + File.separator + UI_PROPERTIES_FILENAME;
+            } else if (file.isFile()) {
+                return pathName;
+            }
+        }
+
+        return UI_PROPERTIES_FILENAME;
+    }
+    
+    
+    /**
      * Return the UI class name for the input client.
      * 
-     * Will read the properties file for loading custom UIs.
-     * If not found in properties file, will return a default
-     * UI name using {@link #defaultUIClassName(ClientId)}.
+     * Will read the properties file for loading custom UIs. If not found in properties file, will return a default UI name using {@link #defaultUIClassName(ClientId)}.
      * 
      * Code snippet.
+     * 
      * <pre>
      * String uiClassName = getUIClassName(clientId);
      * UIPlugin plugin = loadUIClass(uiClassName);
      * plugin.setModelAndController(model, controller);
      * </pre>
+     * 
      * @param clientId
      * @return name for the UI Class.
-     * @throws IOException 
+     * @throws IOException
      */
     public static String getUIClassName(ClientId clientId) throws IOException {
 
@@ -113,8 +156,10 @@ public final class LoadUIClass {
         
         Properties properties = new Properties();
         
-        if (new File(UI_PROPERTIES_FILENAME).exists()){
-            FileInputStream fileInputStream = new FileInputStream (UI_PROPERTIES_FILENAME);
+        String uiPropertiesFilename = getUiFileName();
+        
+        if (new File(uiPropertiesFilename).exists()){
+            FileInputStream fileInputStream = new FileInputStream (uiPropertiesFilename);
             properties.load(fileInputStream);
             fileInputStream.close();
             fileInputStream = null;
