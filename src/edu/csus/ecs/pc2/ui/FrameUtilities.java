@@ -218,6 +218,7 @@ public final class FrameUtilities {
                 });
         dialog.setContentPane(optionPane);
         dialog.pack();
+        centerFrame(dialog);
         dialog.setVisible(true);
     }
 
