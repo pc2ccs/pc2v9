@@ -181,15 +181,6 @@ public class ControllerTest extends TestCase {
 
     }
 
-    /**
-     * Stub for cases where some function required, like in catch block where the test passed if the exception is thrown.
-     * 
-     * @param string
-     */
-    private void passText(String string) {
-        // System.out.println("passed test: "+string);
-    }
-
     public void testLoginExpansion() {
 
         String[] positiveTests = { "r:administrator1", "judge1:judge1", "j3:judge3", "1:team1", "33:team33", "b1:scoreboard1", "r:administrator1", "spectator1:spectator1", "executor1:executor1",
