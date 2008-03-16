@@ -56,16 +56,24 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 // $HeadURL$
 public class PacketHandler {
 
-    private IInternalContest contest;
+    private IInternalContest contest = null;
 
-    private InternalController controller;
+    private IInternalController controller = null;
     
     /**
      * Message handler for conditions where attention may be needed.
      */
     private EvaluationLog evaluationLog = null;
-    
+
+    public PacketHandler(IInternalController controller, IInternalContest contest) {
+        this.controller = controller;
+        this.contest = contest;
+    }
+
     public PacketHandler(InternalController controller, IInternalContest contest) {
+        // TODO remove this constructor and keep IInternalController one, at
+        // this time that change causes a NoSuchMethodException
+       
         this.controller = controller;
         this.contest = contest;
     }

@@ -341,5 +341,11 @@ public interface IInternalController {
     
     void setSecurityLevel(int securityLevel);
 
-    
+    /**
+     * 
+     * @return contest password
+     */
+    String getContestPassword();
+
+    void setContestPassword(String contestPassword);
 }

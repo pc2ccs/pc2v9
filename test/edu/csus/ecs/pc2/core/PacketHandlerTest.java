@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.core;
 import java.io.File;
 
 import junit.framework.TestCase;
+import edu.csus.ecs.pc2.core.exception.ContestSecurityException;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Run;
@@ -26,7 +27,7 @@ public class PacketHandlerTest extends TestCase {
 
     private IInternalController controller;
 
-//    private PacketHandler packetHandler;
+    private PacketHandler packetHandler;
 
     protected void setUp() throws Exception {
         super.setUp();
@@ -50,7 +51,7 @@ public class PacketHandlerTest extends TestCase {
         Run[] runs = sampleContest.createRandomRuns(contest, 22, true, true, true);
         sampleContest.addRuns(contest, runs, loadFile);
 
-//        packetHandler = new PacketHandler(controller, contest);
+        packetHandler = new PacketHandler(controller, contest);
 
     }
 
@@ -76,13 +77,13 @@ public class PacketHandlerTest extends TestCase {
         try {
 
             ConnectionHandlerID connectionHandlerID = new ConnectionHandlerID("Client " + teamId.toString());
-//            packetHandler.handlePacket(packet, connectionHandlerID);
+            packetHandler.handlePacket(packet, connectionHandlerID);
 
             failTest("Expected packet to be NOT be allowed for: " + packet);
 
-//        } catch (ContestSecurityException sec) {
-//
-//            packet = null; // fake statement to satisfy CodeStyle
+        } catch (ContestSecurityException sec) {
+
+            packet = null; // fake statement to satisfy CodeStyle
 
         } catch (Exception e) {
 
@@ -97,14 +98,14 @@ public class PacketHandlerTest extends TestCase {
         try {
 
             ConnectionHandlerID connectionHandlerID = new ConnectionHandlerID("Client " + teamId.toString());
-//            packetHandler.handlePacket(packet, connectionHandlerID);
+            packetHandler.handlePacket(packet, connectionHandlerID);
 
             // success
 
-//        } catch (ContestSecurityException sec) {
-//
-//            failTest("Expected packet to be NOT be allowed for: " + packet, sec);
-//
+        } catch (ContestSecurityException sec) {
+
+            failTest("Expected packet to be NOT be allowed for: " + packet, sec);
+
         } catch (Exception e) {
 
             failTest("Expected packet to be NOT be allowed for: " + packet, e);
