@@ -59,8 +59,6 @@ public final class LoadUIClass {
 
     public static UIPlugin loadUIClass(String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         
-        System.err.println("loadUIClass loading "+className);
-
         Class newClass = Class.forName(className);
         Object object = newClass.newInstance();
         if (object instanceof UIPlugin) {
