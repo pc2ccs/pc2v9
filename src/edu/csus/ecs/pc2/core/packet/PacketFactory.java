@@ -1728,7 +1728,9 @@ public final class PacketFactory {
         if (connectionHandlerID != null){
             prop.put(CONNECTION_HANDLE_ID, connectionHandlerID);
         }
-        prop.put(PACKET, inPacket);
+        if (inPacket != null){
+            prop.put(PACKET, inPacket); 
+        }
         if (contestSecurityException != null){
             prop.put(EXCEPTION, contestSecurityException);
         }

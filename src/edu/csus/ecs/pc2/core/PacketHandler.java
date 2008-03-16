@@ -375,7 +375,7 @@ public class PacketHandler {
         
         controller.getLog().log(Log.WARNING, "Security violation "+clientId+" "+message);
 
-        contest.newSecurityMessage(clientId, message, message, contestSecurityException);
+        contest.newSecurityMessage(clientId, "", message, contestSecurityException);
         
         if (isServer()){
             Packet forwardPacket = PacketFactory.clonePacket(contest.getClientId(), PacketFactory.ALL_SERVERS, inPacket);

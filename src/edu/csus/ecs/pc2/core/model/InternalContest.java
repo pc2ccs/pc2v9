@@ -1660,7 +1660,7 @@ public class InternalContest implements IInternalContest {
      * 
      */
     public void newSecurityMessage(ClientId clientId, String message, String eventName, ContestSecurityException contestSecurityException) {
-        securityMessageHandler.newMessage(clientId, getTitle(), getTitle(), contestSecurityException);
+        securityMessageHandler.newMessage(clientId, eventName, message, contestSecurityException);
     }
     
     /**
