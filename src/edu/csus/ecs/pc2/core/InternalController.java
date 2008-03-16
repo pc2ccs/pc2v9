@@ -1336,7 +1336,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
                 System.err.println("debug 22 A Login "+clientId+" previous login - forced off ");
                 // Send out security alter to all servers and admins
-                ContestSecurityException contestSecurityException = new ContestSecurityException(clientId, connectionHandlerID, "");
+                ContestSecurityException contestSecurityException = new ContestSecurityException(clientId, connectionHandlerID, clientId+" already logged in logged off previous login");
                 sendSecurityMessageFromServer(contestSecurityException, connectionHandlerID, null);
             }
             contest.addLocalLogin(clientId, connectionHandlerID);
@@ -2387,7 +2387,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         sendToAdministrators(violationPacket);
         sendToServers(violationPacket);
         
-        contest.newSecurityMessage(contestSecurityException.getClientId(), "", contestSecurityException.getSecurityMessage(), contestSecurityException);
+        contest.newSecurityMessage(contestSecurityException.getClientId(), contestSecurityException.getSecurityMessage(), "", contestSecurityException);
   
     }
 
