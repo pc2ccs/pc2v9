@@ -714,10 +714,7 @@ public class RunsPanel extends JPanePlugin {
             takeButton.setVisible(false);
             rejudgeRunButton.setVisible(false);
             viewJudgementsButton.setVisible(false);
-            // TODO enable when auto judging works
-//            autoJudgeButton.setVisible(isAllowed(Permission.Type.ALLOWED_TO_AUTO_JUDGE));
             autoJudgeButton.setVisible(false);
-
         } else {
         
             // Show ALL Runs
@@ -729,10 +726,9 @@ public class RunsPanel extends JPanePlugin {
             
             takeButton.setVisible(false);
 //            takeButton.setVisible(isAllowed(Permission.Type.TAKE_RUN));
-            
             rejudgeRunButton.setVisible(isAllowed(Permission.Type.REJUDGE_RUN));
             viewJudgementsButton.setVisible(isAllowed(Permission.Type.VIEW_RUN_JUDGEMENT_HISTORIES));
-            autoJudgeButton.setVisible(false);
+            autoJudgeButton.setVisible(isAllowed(Permission.Type.ALLOWED_TO_AUTO_JUDGE));
             
         }
         
