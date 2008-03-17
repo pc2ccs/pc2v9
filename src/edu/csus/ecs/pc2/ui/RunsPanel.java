@@ -120,12 +120,20 @@ public class RunsPanel extends JPanePlugin {
     
     private boolean makeSoundOnOneRun = false;
 
+    private boolean bUseAutoJudgemonitor = true;
+    
     /**
      * This method initializes
      * 
      */
     public RunsPanel() {
         super();
+        initialize();
+     }
+
+    public RunsPanel(boolean bUseAutoJudge) {
+        super();
+        bUseAutoJudgemonitor = bUseAutoJudge;
         initialize();
     }
 
@@ -748,7 +756,9 @@ public class RunsPanel extends JPanePlugin {
             selectJudgementFrame.setContestAndController(getContest(), getController());
         }
         
-        autoJudgingMonitor.setContestAndController(getContest(), getController());
+        if (!bUseAutoJudgemonitor) {
+            autoJudgingMonitor.setContestAndController(getContest(), getController());
+        }
 
         getContest().addRunListener(new RunListenerImplementation());
         getContest().addAccountListener(new AccountListenerImplementation());
@@ -1324,12 +1334,16 @@ public class RunsPanel extends JPanePlugin {
      * @return javax.swing.JButton
      */
     private JButton getAutoJudgeButton() {
+
         if (autoJudgeButton == null) {
             autoJudgeButton = new JButton();
             autoJudgeButton.setText("Auto Judge");
             autoJudgeButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     // Turn auto judging on
+                    if (!bUseAutoJudgemonitor) {
+                        return;
+                    }
                     autoJudgingMonitor.setAutoJudgeDisabledLocally(false);
                     startAutoJudging();
                 }
@@ -1353,7 +1367,9 @@ public class RunsPanel extends JPanePlugin {
     }
 
     protected void startAutoJudging() {
-
+        if (!bUseAutoJudgemonitor) {
+            return;
+        }
         if (isAutoJudgeOn()) {
             // RE-enable local auto judge flag 
             autoJudgingMonitor.startAutoJudging();
