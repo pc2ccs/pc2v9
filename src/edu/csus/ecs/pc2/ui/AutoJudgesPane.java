@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.util.Vector;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -285,7 +286,8 @@ public class AutoJudgesPane extends JPanePlugin {
      */
     private String getProblemlist(Filter filter) {
         ElementId[] elementIds = filter.getProblemIdList();
-
+        Vector<String> problemNames = new Vector<String>();
+        
         if (elementIds.length == 0) {
             return "(none selected)";
         }
@@ -294,18 +296,30 @@ public class AutoJudgesPane extends JPanePlugin {
         for (Problem problem : getContest().getProblems()) {
             for (ElementId elementId : elementIds) {
                 if (problem.getElementId().equals(elementId)) {
-                    stringBuffer.append(problem.getDisplayName());
-                    stringBuffer.append(", ");
+                    problemNames.addElement(problem.getDisplayName());
                 }
             }
         }
-
-        if (stringBuffer.length() > 3) {
-            // stringBuffer.length() - 2 used to strip off trailing ", "
-            return new String(stringBuffer).substring(0, stringBuffer.length() - 2);
+        
+        if (problemNames.size() == 0){
+            return "(none selected)";
+        } else if (problemNames.size() == 1){
+            return problemNames.firstElement();
         } else {
-            return "(none active selected)";
+            return joinString (", ", problemNames);
+            
         }
+    }
+
+    public String joinString(String delimiter, Vector<String> names) {
+        StringBuffer stringBuffer = new StringBuffer();
+        int i = 0;
+        for (i = 0; i < names.size()-1; i++){
+            stringBuffer.append(names.elementAt(i));
+            stringBuffer.append(", ");
+        }
+        stringBuffer.append(names.elementAt(i));
+        return new String(stringBuffer);
     }
 
     /**
@@ -317,7 +331,7 @@ public class AutoJudgesPane extends JPanePlugin {
         if (editButton == null) {
             editButton = new JButton();
             editButton.setText("Edit");
-            editButton.setEnabled(false);
+            editButton.setEnabled(true);
             editButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     editSelectedAutoJudgeRow();
