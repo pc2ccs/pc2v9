@@ -99,12 +99,31 @@ public class JudgementRecord implements Serializable {
     private String validatorResultString = null;
     
     private ElementId runResultsElementId = null;
+    
+    /**
+     * 
+     */
+    private boolean computerJudgement = false;
 
+    private ElementId previousComputerJudgementId = null;
+
+    /**
+     * Create a Judgement Record.
+     * @param judgementId elementId for the run
+     * @param judgerClientId which judge judged this run
+     * @param solved solved this problem
+     * @param usedValidator did the judge accept the validator.
+     */
     public JudgementRecord(ElementId judgementId, ClientId judgerClientId, boolean solved, boolean usedValidator) {
         this.judgementId = judgementId;
         this.judgerClientId = judgerClientId;
         this.usedValidator = usedValidator;
         this.solved = solved;
+    }
+    
+    public JudgementRecord(ElementId judgementId, ClientId judgerClientId, boolean solved, boolean usedValidator, boolean computerJudgement) {
+        this(judgementId, judgerClientId, solved, usedValidator);
+        this.computerJudgement = computerJudgement; 
     }
 
     /**
@@ -331,4 +350,21 @@ public class JudgementRecord implements Serializable {
     public void setRunResultsElementId(ElementId runResultsElementId) {
         this.runResultsElementId = runResultsElementId;
     }
+
+    /**
+     * Was this judged by a computer (not a human) ?
+     * @return true if judged by computer.
+     */
+    public boolean isComputerJudgement() {
+        return computerJudgement;
+    }
+
+    public void setPreviousComputerJudgementId(ElementId previousComputerJudgementId) {
+        this.previousComputerJudgementId = previousComputerJudgementId;
+    }
+
+    public ElementId getPreviousComputerJudgementId() {
+        return previousComputerJudgementId;
+    }
+
 }

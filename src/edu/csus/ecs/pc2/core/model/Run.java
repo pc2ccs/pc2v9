@@ -152,7 +152,7 @@ public class Run extends ISubmission {
         // TODO should thow an Exception? JudgmentNotFound
         return null;
     }
-
+    
     /**
      * 
      * @return true if team given a Yes.
@@ -199,16 +199,50 @@ public class Run extends ISubmission {
         if (judgement == null) {
             throw new IllegalArgumentException("Input judgement is null");
         }
-
+        
         // Deactivate last judgement
 
         JudgementRecord lastJudgement = getJudgementRecord();
         if (lastJudgement != null) {
             lastJudgement.setActive(false);
         }
+        
+        if (lastJudgement.isComputerJudgement()){
+            if (! judgement.isComputerJudgement()){
+                judgement.setPreviousComputerJudgementId (judgement.getElementId());
+            }
+        }
 
         judgementList.addElement(judgement);
 
+    }
+    
+    public JudgementRecord getComputerJudgementRecord(){
+
+        if (judgementList.size() == 0) {
+            // TODO should thow an Exception? JudgmentNotFound
+            return null;
+        }
+
+        if (judgementList.size() == 1) {
+            // TODO should thow an Exception? JudgmentNotFound
+            JudgementRecord judgementRecord = judgementList.elementAt(0);
+            if (judgementRecord.isComputerJudgement()) {
+                return judgementRecord;
+            } else {
+                return null;
+            }
+        }
+        
+        for (int i = judgementList.size() - 1; i >= 0; i--) {
+            JudgementRecord judgement = judgementList.elementAt(i);
+            if (judgement.isActive() && judgement.isComputerJudgement()) {
+                return judgement;
+            }
+        }
+
+        // TODO should thow an Exception? JudgmentNotFound
+        return null;
     }
 
     /**
