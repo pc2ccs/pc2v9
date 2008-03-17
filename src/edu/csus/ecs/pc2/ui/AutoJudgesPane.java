@@ -292,7 +292,6 @@ public class AutoJudgesPane extends JPanePlugin {
             return "(none selected)";
         }
 
-        StringBuffer stringBuffer = new StringBuffer();
         for (Problem problem : getContest().getProblems()) {
             for (ElementId elementId : elementIds) {
                 if (problem.getElementId().equals(elementId)) {
