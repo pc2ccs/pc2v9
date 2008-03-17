@@ -205,11 +205,10 @@ public class Run extends ISubmission {
         JudgementRecord lastJudgement = getJudgementRecord();
         if (lastJudgement != null) {
             lastJudgement.setActive(false);
-        }
-        
-        if (lastJudgement.isComputerJudgement()){
-            if (! judgement.isComputerJudgement()){
-                judgement.setPreviousComputerJudgementId (judgement.getElementId());
+            if (lastJudgement.isComputerJudgement()){
+                if (! judgement.isComputerJudgement()){
+                    judgement.setPreviousComputerJudgementId (judgement.getElementId());
+                }
             }
         }
 
