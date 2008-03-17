@@ -226,7 +226,7 @@ public class AutoJudgingMonitor implements UIPlugin {
             if (event.getRun().getElementId().equals(runBeingAutoJudged.getElementId())) {
                 // found the run we requested
 
-                if (event.getAction().equals(RunEvent.Action.CHECKEDOUT_RUN)){
+                if (event.getAction().equals(RunEvent.Action.CHANGED)){
                     fetchedRunFiles = event.getRunFiles();
                     fetchedRun = event.getRun();
                 } else {
@@ -384,7 +384,7 @@ public class AutoJudgingMonitor implements UIPlugin {
 
             controller.submitRunJudgement(fetchedRun, judgementRecord, runResultFiles);
             autoJudgeStatusFrame.updateStatusLabel("Sending judgement to server");
-
+            
         }
 
         sleepMS(2000);
