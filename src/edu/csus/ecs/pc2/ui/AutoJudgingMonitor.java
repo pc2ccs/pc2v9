@@ -250,8 +250,7 @@ public class AutoJudgingMonitor implements UIPlugin {
     }
 
     /**
-     * Called when auto judging done, or run canceled.
-     * 
+     * Reset from last judged run and fetch next run.
      */
     private void cleanupLastAutoJudge() {
 
@@ -365,30 +364,30 @@ public class AutoJudgingMonitor implements UIPlugin {
             }
 
         } catch (Exception e) {
-            info("Exception logged ", e);
+            info("Exception during execute/validating run "+fetchedRun, e);
         }
 
         if (judgementRecord == null) {
 
+            info("Problem judging run "+fetchedRun+" unable to create judgement record");
             autoJudgeStatusFrame.updateStatusLabel("Problem judging run");
             // Cancel the run, hope for better luck.
 
             autoJudgeStatusFrame.updateStatusLabel("Returning run to server");
             controller.cancelRun(runBeingAutoJudged);
+            
+            cleanupLastAutoJudge();
+            
 
         } else {
 
-            controller.submitRunJudgement(fetchedRun, judgementRecord, runResultFiles);
+            info("Sending judgement to server "+fetchedRun);
             autoJudgeStatusFrame.updateStatusLabel("Sending judgement to server");
+            controller.submitRunJudgement(fetchedRun, judgementRecord, runResultFiles);
 
+            cleanupLastAutoJudge();
         }
 
-        if (!isAutoJudgingEnabled()) {
-            autoJudgeStatusFrame.updateStatusLabel("Auto-judging is OFF");
-            autoJudgeStatusFrame.updateMessage("");
-        }
-
-        attemptToFetchNextRun();
 
     }
 
@@ -414,7 +413,7 @@ public class AutoJudgingMonitor implements UIPlugin {
             return;
         }
         
-        if (! isCurrentlyAutoJudging()){
+        if (isCurrentlyAutoJudging()){
             // Already judging run, no need to fetch a new run
             return;
         }
@@ -497,7 +496,6 @@ public class AutoJudgingMonitor implements UIPlugin {
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                autoJudgeStatusFrame.setVisible(true);
                 
                 if (isAutoJudgingEnabled()) {
                     autoJudgeStatusFrame.updateStatusLabel("Waiting for runs");
@@ -508,6 +506,7 @@ public class AutoJudgingMonitor implements UIPlugin {
                     autoJudgeStatusFrame.updateStatusLabel("Auto-judging is OFF");
                     autoJudgeStatusFrame.updateMessage("");
                 }
+                autoJudgeStatusFrame.setVisible(true);
             }
         });
     }
