@@ -131,9 +131,12 @@ public class RunsPanel extends JPanePlugin {
         initialize();
      }
 
-    public RunsPanel(boolean bUseAutoJudge) {
+    /**
+     * @param useAutoJudge if true use 
+     */
+    public RunsPanel(boolean useAutoJudgeMonitor) {
         super();
-        bUseAutoJudgemonitor = bUseAutoJudge;
+        bUseAutoJudgemonitor = useAutoJudgeMonitor;
         initialize();
     }
 
@@ -1338,8 +1341,10 @@ public class RunsPanel extends JPanePlugin {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     // Turn auto judging on
                     if (!bUseAutoJudgemonitor) {
+                        log.info("Can not show Auto Judge Monitor, not enabled");
                         return;
                     }
+                    log.info("Starting Auto Judge monitor");
                     autoJudgingMonitor.setAutoJudgeDisabledLocally(false);
                     startAutoJudging();
                 }
@@ -1353,7 +1358,7 @@ public class RunsPanel extends JPanePlugin {
      * 
      * @return
      */
-    private boolean isAutoJudgeOn() {
+    private boolean isAutoJudgingEnabled() {
         ClientSettings clientSettings = getContest().getClientSettings();
         if (clientSettings != null && clientSettings.isAutoJudging()) {
             return true;
@@ -1366,7 +1371,7 @@ public class RunsPanel extends JPanePlugin {
         if (!bUseAutoJudgemonitor) {
             return;
         }
-        if (isAutoJudgeOn()) {
+        if (isAutoJudgingEnabled()) {
             // RE-enable local auto judge flag 
             autoJudgingMonitor.startAutoJudging();
         } else {
