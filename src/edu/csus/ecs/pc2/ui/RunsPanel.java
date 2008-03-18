@@ -755,7 +755,7 @@ public class RunsPanel extends JPanePlugin {
             selectJudgementFrame.setContestAndController(getContest(), getController());
         }
         
-        if (!bUseAutoJudgemonitor) {
+        if (bUseAutoJudgemonitor) {
             autoJudgingMonitor.setContestAndController(getContest(), getController());
         }
 

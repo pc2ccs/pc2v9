@@ -148,12 +148,12 @@ public class JudgeView extends JFrame implements UIPlugin {
                 setFrameTitle(contest.getContestTime().isContestRunning());
                 showMessage("");
         
-                RunsPanel newRunsPane = new RunsPanel();
+                RunsPanel newRunsPane = new RunsPanel(false);
                 newRunsPane.setShowNewRunsOnly(true);
                 newRunsPane.setMakeSoundOnOneRun(true);
                 addUIPlugin(getMainTabbedPane(), "New Runs", newRunsPane);
         
-                RunsPanel runsPanel = new RunsPanel(false);
+                RunsPanel runsPanel = new RunsPanel();
                 addUIPlugin(getMainTabbedPane(), "All Runs", runsPanel);
         
                 ClarificationsPane newClarificationsPane = new ClarificationsPane();
