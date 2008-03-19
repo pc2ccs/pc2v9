@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.core.list;
 
 import java.io.File;
 
+import edu.csus.ecs.pc2.core.execute.ExecutionData;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
@@ -66,7 +67,9 @@ public class RunResultsFileListTest extends TestCase {
         Judgement judgement = contest.getJudgements()[3];
         JudgementRecord judgementRecord = new JudgementRecord(judgement.getElementId(), judgeId, false, false);
         
-        RunResultFiles runResultFiles = new RunResultFiles(run, problem, judgementRecord);
+        ExecutionData executionData = null;
+        
+        RunResultFiles runResultFiles = new RunResultFiles(run, problem.getElementId(), judgementRecord, executionData);
         
         runResultsFileList.add(run, judgementRecord, runResultFiles);    
         
