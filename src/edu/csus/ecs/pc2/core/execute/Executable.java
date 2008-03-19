@@ -10,10 +10,10 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.Date;
 import java.util.Hashtable;
+import java.util.StringTokenizer;
 
 import javax.swing.JFileChooser;
 
-import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -674,9 +674,24 @@ public class Executable {
     }
 
     private String findPC2JarPath() {
-        String fs = File.separator;
-        VersionInfo versionInfo = new VersionInfo();
-        return versionInfo.locateHome()+fs+"lib"+fs;
+        String jarDir = "."; // default to current directory
+        try {
+            String cp = System.getProperty("java.class.path");
+            StringTokenizer st = new StringTokenizer(cp, File.pathSeparator);
+            while (st.hasMoreTokens()) {
+                String token = st.nextToken();
+                File dir = new File(token);
+                if (dir.exists() && dir.isFile()
+                        && dir.toString().endsWith("pc2.jar")) {
+                    jarDir = new File(dir.getParent()).getCanonicalPath();
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Trouble locating pc2home: " + e.getMessage());
+            jarDir = ".";
+        }
+        return jarDir+File.separator;
     }
 
     /**
