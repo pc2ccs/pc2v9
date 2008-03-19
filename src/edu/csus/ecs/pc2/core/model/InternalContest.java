@@ -1403,7 +1403,11 @@ public class InternalContest implements IInternalContest {
     }
 
     public void cancelClarificationCheckOut(Clarification clarification, ClientId whoCancelledIt) {
+        // TODO verify the canceller has permissions to cancel this clar
         clarificationList.updateClarification(clarification, ClarificationStates.NEW, whoCancelledIt);
+        synchronized (clarCheckOutList) {
+            clarCheckOutList.remove(clarification.getElementId());
+        }
         Clarification theClarification = clarificationList.get(clarification);
         ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.CLARIFICATION_AVIALABLE, theClarification);
         fireClarificationListener(clarificationEvent);
@@ -1641,6 +1645,7 @@ public class InternalContest implements IInternalContest {
             if (newClar.getState().equals(ClarificationStates.NEW)){
                 clarCheckOutList.put(newClar.getElementId(), whoChangedClar);
                 newClar.setState(ClarificationStates.BEING_ANSWERED);
+                newClar.setWhoCheckedItOutId(whoChangedClar);
                 clarificationList.updateClarification(newClar);
                 return clarificationList.get(clar.getElementId());
             } else {
@@ -1655,7 +1660,7 @@ public class InternalContest implements IInternalContest {
      * 
      */
     public void newSecurityMessage(ClientId clientId, String message, String eventName, ContestSecurityException contestSecurityException) {
-        securityMessageHandler.newMessage(clientId, getTitle(), getTitle(), contestSecurityException);
+        securityMessageHandler.newMessage(clientId, eventName, message, contestSecurityException);
     }
     
     /**

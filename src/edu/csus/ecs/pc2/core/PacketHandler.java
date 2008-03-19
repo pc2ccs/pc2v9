@@ -367,7 +367,7 @@ public class PacketHandler {
         
         controller.getLog().log(Log.WARNING, "Security violation "+clientId+" "+message);
 
-        contest.newSecurityMessage(clientId, message, message, contestSecurityException);
+        contest.newSecurityMessage(clientId, "", message, contestSecurityException);
         
         if (isServer()){
             Packet forwardPacket = PacketFactory.clonePacket(contest.getClientId(), PacketFactory.ALL_SERVERS, inPacket);
@@ -1640,6 +1640,7 @@ public class PacketHandler {
     
                         sendToJudgesAndOthers(checkOutPacket, true);
                     } catch (ClarificationUnavailableException clarUnavailableException) {
+                        controller.getLog().info("clarUnavailableException "+clarUnavailableException.getMessage());
                         Packet notAvailableRunPacket = PacketFactory.createClarificationNotAvailable(contest.getClientId(), requestFromId, clarification, requestFromId);
                         controller.sendToClient(notAvailableRunPacket);
                     }
@@ -1710,7 +1711,16 @@ public class PacketHandler {
                         securityCheck (Permission.Type.JUDGE_RUN, whoRequestsRunId, connectionHandlerID);
                         
                         theRun = contest.checkoutRun(run, whoRequestsRunId, false);
+                        
                         RunFiles runFiles = contest.getRunFiles(run);
+                        if (runFiles == null) {
+                            try {
+                                contest.cancelRunCheckOut(run, whoRequestsRunId);
+                            } catch (UnableToUncheckoutRunException e) {
+                                controller.getLog().severe("Problem canceling run checkout after error getting run files.");
+                            }
+                            throw new RunUnavailableException("Error retrieving files.");
+                        }
 
                         // send to Judge
                         Packet checkOutPacket = PacketFactory.createCheckedOutRun(contest.getClientId(), whoRequestsRunId, theRun, runFiles, whoRequestsRunId);
@@ -1720,6 +1730,7 @@ public class PacketHandler {
                         
                         sendToJudgesAndOthers(checkOutPacket, true);
                     } catch (RunUnavailableException runUnavailableException) {
+                        controller.getLog().info("runUnavailableException "+runUnavailableException.getMessage());
                         theRun = contest.getRun(run.getElementId());
                         Packet notAvailableRunPacket = PacketFactory.createRunNotAvailable(contest.getClientId(), whoRequestsRunId, theRun);
                         controller.sendToClient(notAvailableRunPacket);

@@ -770,7 +770,7 @@ public class SelectJudgementPane extends JPanePlugin {
         return tempEexecutable.getExecuteDirectoryName();
     }
 
-    private void createAndViewFile(IFileViewer fileViewer, SerializedFile file, String title) {
+    private void createAndViewFile(IFileViewer fileViewer, SerializedFile file, String title, boolean visible) {
         // TODO the executable dir name should be from the model, eh ?
         String targetDirectory = getExecuteDirectoryName();
         Utilities.insureDir(targetDirectory);
@@ -780,13 +780,13 @@ public class SelectJudgementPane extends JPanePlugin {
 
             if (new File(targetFileName).isFile()) {
                 fileViewer.addFilePane(title, targetFileName);
-                fileViewer.setVisible(true);
             } else {
                 fileViewer.addTextPane(title, "Could not create file at " + targetFileName);
-                fileViewer.setVisible(true);
             }
         } catch (IOException e) {
             fileViewer.addTextPane(title, "Could not create file at " + targetFileName + "Exception " + e.getMessage());
+        }
+        if (visible) {
             fileViewer.setVisible(true);
         }
     }
@@ -1043,7 +1043,18 @@ public class SelectJudgementPane extends JPanePlugin {
             sourceViewer.dispose();
         }
         sourceViewer = new MultipleFileViewer(getController().getLog());
-        createAndViewFile(sourceViewer, runFiles.getMainFile(), "Team's source");
+        createAndViewFiles(sourceViewer, runFiles.getMainFile(), "Main File ("+runFiles.getMainFile().getName()+")", runFiles.getOtherFiles());
+    }
+
+    private void createAndViewFiles(IFileViewer fileViewer, SerializedFile file, String title, SerializedFile[] otherFiles) {
+        if (otherFiles != null && otherFiles.length > 0) {
+            for (int i = otherFiles.length ; i > 0; i--) {
+                createAndViewFile(fileViewer, otherFiles[i-1], otherFiles[i-1].getName() , false);
+            }
+        }
+        createAndViewFile(fileViewer, file, title, false);
+        fileViewer.setSelectedIndex(0);
+        fileViewer.setVisible(true);
     }
 
     protected void viewDataFile() {
@@ -1053,7 +1064,7 @@ public class SelectJudgementPane extends JPanePlugin {
                     dataFileViewer.dispose();
                 }
                 dataFileViewer = new MultipleFileViewer(getController().getLog());
-                createAndViewFile(dataFileViewer, getProblemDataFiles().getJudgesDataFile(), "Judge's data file");
+                createAndViewFile(dataFileViewer, getProblemDataFiles().getJudgesDataFile(), "Judge's data file", true);
             } else {
                 JOptionPane.showMessageDialog(this, "No data file defined");
             }
@@ -1069,7 +1080,7 @@ public class SelectJudgementPane extends JPanePlugin {
                     answerFileViewer.dispose();
                 }
                 answerFileViewer = new MultipleFileViewer(getController().getLog());
-                createAndViewFile(answerFileViewer, getProblemDataFiles().getJudgesAnswerFile(), "Judge's answer file");
+                createAndViewFile(answerFileViewer, getProblemDataFiles().getJudgesAnswerFile(), "Judge's answer file", true);
             } else {
                 JOptionPane.showMessageDialog(this, "No Answer File defined");
             }

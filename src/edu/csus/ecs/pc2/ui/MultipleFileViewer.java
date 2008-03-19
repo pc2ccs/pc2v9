@@ -717,6 +717,10 @@ public class MultipleFileViewer extends JFrame implements IFileViewer {
         this.controller = inController;
     }
 
+    public void setSelectedIndex(int index) {
+        ivjFileTabbedPane.setSelectedIndex(index);
+    }
+    
     public String getPluginTitle() {
         return "Multi File Viewer";
     }

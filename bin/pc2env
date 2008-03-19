@@ -24,12 +24,12 @@ if [ -f $basedir/lib/mclb.jar ]; then
     mclbdir=$basedir/lib
 fi
 
-if [ x$libdir == x ]; then
+if [ x$libdir = x ]; then
     echo Could not find pc2.jar, please check your installation
     exit
 fi
 
-if [ x$mclbdir == x ]; then
+if [ x$mclbdir = x ]; then
     echo Could not find mclb.jar, please check your installation
     exit
 fi

@@ -339,9 +339,9 @@ public class ClarificationsPane extends JPanePlugin {
                 getAnswerPane().setVisible(true);
                 getAnswerTextArea().setText(clarification.getAnswer());
             } else {
-                // Don't show answer pane if no answer
                 getAnswerTextArea().setText("Not answered, yet.");
-                getAnswerPane().setVisible(true);
+                // Don't show answer pane if no answer & new clars view
+                getAnswerPane().setVisible(!isShowNewClarificationsOnly());
             }
             getAnswerTextArea().setCaretPosition(0);
         }
@@ -407,6 +407,10 @@ public class ClarificationsPane extends JPanePlugin {
                     clarificationListBox.addRow(objects, clarification.getElementId());
                 } else {
                     clarificationListBox.replaceRow(objects, rowNumber);
+                    if (clarificationListBox.isRowSelected(rowNumber)) {
+                        // refresh the textAreas
+                        showSelectedClarification();
+                    }
                 }
                 clarificationListBox.autoSizeAllColumns();
                 clarificationListBox.sort();
@@ -846,7 +850,7 @@ public class ClarificationsPane extends JPanePlugin {
             Clarification clarificationToAnswer = getContest().getClarification(elementId);
 
             if ((!clarificationToAnswer.getState().equals(ClarificationStates.NEW)) || clarificationToAnswer.isDeleted()) {
-                showMessage("Not allowed to request run, already judged");
+                showMessage("Not allowed to request clarification, already answered");
                 return;
             }
 
@@ -955,6 +959,7 @@ public class ClarificationsPane extends JPanePlugin {
             questionTextArea.setBorder(BorderFactory.createTitledBorder(null, "", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
             questionTextArea.add(getAnswerTextArea(), java.awt.BorderLayout.CENTER);
 
+            questionTextArea.setEditable(false);
         }
         return questionTextArea;
     }
@@ -982,6 +987,7 @@ public class ClarificationsPane extends JPanePlugin {
     private JTextArea getAnswerTextArea() {
         if (answerTextArea == null) {
             answerTextArea = new JTextArea();
+            answerTextArea.setEditable(false);
         }
         return answerTextArea;
     }
@@ -999,6 +1005,8 @@ public class ClarificationsPane extends JPanePlugin {
             }
             filter.addClarificationState(ClarificationStates.NEW);
         }
+        // do not show the answer area for new clars view
+        getAnswerPane().setVisible(!showNewClarificationsOnly);
     }
 
     /**

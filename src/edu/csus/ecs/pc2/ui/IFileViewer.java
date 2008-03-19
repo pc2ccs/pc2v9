@@ -34,6 +34,12 @@ public interface IFileViewer extends UIPlugin {
      * @param string
      */
     void setInformationLabelText(String string);
+    
+    /**
+     * 
+     * @param index
+     */
+    void setSelectedIndex(int index);
 
     /**
      * Set title for viewer window.

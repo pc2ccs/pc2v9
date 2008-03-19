@@ -1328,7 +1328,15 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 // Already logged in, log them off
                 ConnectionHandlerID connectionHandlerID2 = contest.getConnectionHandleID(clientId);
                 log.info("login - " + clientId + " already logged in, will logoff client at connection " + connectionHandlerID2);
+                // this updates the model contest-wide
                 contest.removeLogin(clientId);
+                
+                // but this is the actual causes the connection to be dropped/disconnected
+                forceConnectionDrop(connectionHandlerID2);
+
+                // Send out security alert to all servers and admins
+                ContestSecurityException contestSecurityException = new ContestSecurityException(clientId, connectionHandlerID, clientId+": duplicate login request; previous login forced off ");
+                sendSecurityMessageFromServer(contestSecurityException, connectionHandlerID, null);
             }
             contest.addLocalLogin(clientId, connectionHandlerID);
             info("LOGIN logged in " + clientId + " at " + connectionHandlerID);
@@ -1367,6 +1375,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             
             contest.newSecurityMessage(packet.getSourceId(), "Security violation", packet.getType().toString(), contestSecurityException);
             
+            // TODO use sendSecurityMessage method in place of createSecurityMessagePacket and sendToAdministrators, sendToServers
             Packet violationPacket = PacketFactory.createSecurityMessagePacket(contest.getClientId(), PacketFactory.ALL_SERVERS,
                     contestSecurityException.getSecurityMessage(), null, connectionHandlerID, contestSecurityException, packet);
 
@@ -2365,6 +2374,22 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     public void setSecurityLevel(int securityLevel) {
         this.securityLevel = securityLevel;
     }
+    
+    /**
+     * Server send out security packet.
+     *
+     */
+    public void sendSecurityMessageFromServer (ContestSecurityException contestSecurityException, ConnectionHandlerID connectionHandlerID, Packet packet){
+        Packet violationPacket = PacketFactory.createSecurityMessagePacket(contest.getClientId(), PacketFactory.ALL_SERVERS,
+                contestSecurityException.getSecurityMessage(), null, connectionHandlerID, contestSecurityException, packet);
+
+        sendToAdministrators(violationPacket);
+        sendToServers(violationPacket);
+        
+        contest.newSecurityMessage(contestSecurityException.getClientId(), contestSecurityException.getSecurityMessage(), "", contestSecurityException);
+  
+    }
+
 
     public void sendSecurityMessage(String event, String message, ContestSecurityException contestSecurityException) {
         Packet securityMessagePacket = PacketFactory.createSecurityMessagePacket(contest.getClientId(), getServerClientId(), event, 
