@@ -222,7 +222,7 @@ public class AutoJudgingMonitor implements UIPlugin {
         public void runChanged(RunEvent event) {
             System.out.println("runChanged " + event.getAction() + " " + event.getRun());
             
-            if (event.getRun().getElementId().equals(runBeingAutoJudged.getElementId())) {
+            if (runBeingAutoJudged != null && event.getRun().getElementId().equals(runBeingAutoJudged.getElementId())) {
                 // found the run we requested
 
                 System.out.println("Found run -- runChanged " + event.getAction() + " " + event.getRun());
