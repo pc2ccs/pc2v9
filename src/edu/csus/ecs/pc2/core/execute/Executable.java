@@ -674,7 +674,7 @@ public class Executable {
     }
 
     private String findPC2JarPath() {
-        String jarDir = "."; // default to current directory
+        String jarDir = ".classes"; // default to .classes (eclipse) directory
         try {
             String cp = System.getProperty("java.class.path");
             StringTokenizer st = new StringTokenizer(cp, File.pathSeparator);
@@ -689,7 +689,6 @@ public class Executable {
             }
         } catch (IOException e) {
             System.err.println("Trouble locating pc2home: " + e.getMessage());
-            jarDir = ".";
         }
         return jarDir+File.separator;
     }
