@@ -203,6 +203,7 @@ public class InternalContest implements IInternalContest {
         
         runList = new RunList(siteNum, true);
         runFilesList = new RunFilesList(siteNum);
+        runResultFilesList = new RunResultsFileList(siteNum);
         clarificationList = new ClarificationList(siteNum, true);
 
         try {
