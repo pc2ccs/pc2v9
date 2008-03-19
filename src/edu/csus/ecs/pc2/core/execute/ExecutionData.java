@@ -1,5 +1,7 @@
 package edu.csus.ecs.pc2.core.execute;
 
+import java.io.Serializable;
+
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 
 /**
@@ -12,7 +14,12 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
 
 // $HeadURL$
 // TODO handle multiple data sets for validator and execution.
-public class ExecutionData {
+public class ExecutionData implements Serializable {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 3095803815304273632L;
 
     public static final String SVN_ID = "$Id$";
 
