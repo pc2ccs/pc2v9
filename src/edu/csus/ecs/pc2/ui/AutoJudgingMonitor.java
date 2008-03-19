@@ -214,17 +214,14 @@ public class AutoJudgingMonitor implements UIPlugin {
     class RunListenerImplementation implements IRunListener {
 
         public void runAdded(RunEvent event) {
-            System.out.println("runAdded " + event.getAction() + " " + event.getRun());
             attemptToFetchNextRun(event.getRun());
         }
 
         public void runChanged(RunEvent event) {
-            System.out.println("runChanged " + event.getAction() + " " + event.getRun());
 
             if (runBeingAutoJudged != null && event.getRun().getElementId().equals(runBeingAutoJudged.getElementId())) {
                 // found the run we requested
 
-                System.out.println("Found run -- runChanged " + event.getAction() + " " + event.getRun());
                 if (fetchedRun == null) {
                     fetchedRunFiles = event.getRunFiles();
                     fetchedRun = event.getRun();
