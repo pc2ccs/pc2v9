@@ -1334,9 +1334,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 // but this is the actual causes the connection to be dropped/disconnected
                 forceConnectionDrop(connectionHandlerID2);
 
-                System.err.println("debug 22 A Login "+clientId+" previous login - forced off ");
-                // Send out security alter to all servers and admins
-                ContestSecurityException contestSecurityException = new ContestSecurityException(clientId, connectionHandlerID, clientId+" already logged in logged off previous login");
+                // Send out security alert to all servers and admins
+                ContestSecurityException contestSecurityException = new ContestSecurityException(clientId, connectionHandlerID, clientId+": duplicate login request; previous login forced off ");
                 sendSecurityMessageFromServer(contestSecurityException, connectionHandlerID, null);
             }
             contest.addLocalLogin(clientId, connectionHandlerID);
