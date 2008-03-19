@@ -229,18 +229,20 @@ public class AutoJudgingMonitor implements UIPlugin {
                 if (fetchedRun == null){
                     fetchedRunFiles = event.getRunFiles();
                     fetchedRun = event.getRun();
+                    
+                    synchronized (listening) {
+                        try {
+                            answerReceived = true;
+                            listening.notify();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    
                 } else {
                     log.info("Currently judging run "+fetchedRun);
                 }
                 
-                synchronized (listening) {
-                    try {
-                        answerReceived = true;
-                        listening.notify();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
             }
         }
 
@@ -445,6 +447,8 @@ public class AutoJudgingMonitor implements UIPlugin {
 
         controller.checkOutRun(run, false);
 
+        answerReceived = false;
+        
         synchronized (listening) {
             while (!answerReceived) {
                 try {
