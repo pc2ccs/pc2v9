@@ -1738,7 +1738,7 @@ public class PacketHandler {
                         
                         sendToJudgesAndOthers(checkOutPacket, true);
                     } catch (RunUnavailableException runUnavailableException) {
-                        controller.getLog().info("runUnvailableException "+runUnavailableException.getMessage());
+                        controller.getLog().info("runUnavailableException "+runUnavailableException.getMessage());
                         theRun = contest.getRun(run.getElementId());
                         Packet notAvailableRunPacket = PacketFactory.createRunNotAvailable(contest.getClientId(), whoRequestsRunId, theRun);
                         controller.sendToClient(notAvailableRunPacket);
