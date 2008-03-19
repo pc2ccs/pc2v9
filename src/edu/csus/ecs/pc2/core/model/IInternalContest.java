@@ -479,7 +479,7 @@ public interface IInternalContest {
      */
     void updateRun(Run run, ClientId whoChangedRun);
     
-    void updateRun(Run run, RunFiles runFiles, ClientId whoChangedRun);
+    void updateRun(Run run, RunFiles runFiles, ClientId whoChangedRun, RunResultFiles[] runResultFiles);
     /**
      * Get submitted files for input run.
      * 
@@ -487,6 +487,15 @@ public interface IInternalContest {
      */
     RunFiles getRunFiles(Run run);
 
+    /**
+     * Get run result files for input run.
+     * 
+     * @param run
+     * @param judgementRecord
+     */
+    RunResultFiles[] getRunResultFiles(Run run);
+
+    
     /**
      * Add a run judgement.
      * 

@@ -380,6 +380,9 @@ public class AutoJudgingMonitor implements UIPlugin {
 
             info("Sending judgement to server " + fetchedRun);
             autoJudgeStatusFrame.updateStatusLabel("Sending judgement to server");
+
+            runResultFiles = new RunResultFiles(fetchedRun, fetchedRun.getProblemId(), judgementRecord, executable.getExecutionData());
+
             controller.submitRunJudgement(fetchedRun, judgementRecord, runResultFiles);
 
             cleanupLastAutoJudge();

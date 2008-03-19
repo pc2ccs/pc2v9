@@ -477,7 +477,8 @@ public class PacketHandler {
         Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
         RunFiles runFiles = (RunFiles) PacketFactory.getObjectValue(packet, PacketFactory.RUN_FILES);
         ClientId whoCheckedOut = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-        contest.updateRun(run, runFiles, whoCheckedOut);
+        RunResultFiles[] runResultFiles = (RunResultFiles[]) PacketFactory.getObjectValue(packet, PacketFactory.RUN_RESULTS_FILE);
+        contest.updateRun(run, runFiles, whoCheckedOut, runResultFiles);
         
         if (isServer()){
             sendToJudgesAndOthers( packet, false);
@@ -1708,9 +1709,12 @@ public class PacketHandler {
                     
                     theRun = contest.getRun(run.getElementId());
                     RunFiles runFiles = contest.getRunFiles(run);
+                    
+                    RunResultFiles[] runResultFiles = contest.getRunResultFiles(run);
+                    
 
                     // send to Judge
-                    Packet checkOutPacket = PacketFactory.createCheckedOutRun(contest.getClientId(), whoRequestsRunId, theRun, runFiles, whoRequestsRunId);
+                    Packet checkOutPacket = PacketFactory.createCheckedOutRun(contest.getClientId(), whoRequestsRunId, theRun, runFiles, whoRequestsRunId, runResultFiles);
                     controller.sendToClient(checkOutPacket);
 
                 } else {
@@ -1730,8 +1734,9 @@ public class PacketHandler {
                             throw new RunUnavailableException("Error retrieving files.");
                         }
 
+                        RunResultFiles[] runResultFiles = contest.getRunResultFiles(run);
                         // send to Judge
-                        Packet checkOutPacket = PacketFactory.createCheckedOutRun(contest.getClientId(), whoRequestsRunId, theRun, runFiles, whoRequestsRunId);
+                        Packet checkOutPacket = PacketFactory.createCheckedOutRun(contest.getClientId(), whoRequestsRunId, theRun, runFiles, whoRequestsRunId, runResultFiles);
                         controller.sendToClient(checkOutPacket);
 
                         // TODO change this packet type so it is not confused with the actual checked out run.

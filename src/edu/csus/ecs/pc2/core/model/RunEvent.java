@@ -69,6 +69,8 @@ public class RunEvent {
     private Run run;
 
     private RunFiles runFiles;
+    
+    private RunResultFiles[] runResultFiles;
 
     /**
      * Who this run is sent to.
@@ -82,11 +84,12 @@ public class RunEvent {
 
     private String message;
 
-    public RunEvent(Action action, Run run, RunFiles runFiles) {
+    public RunEvent(Action action, Run run, RunFiles runFiles, RunResultFiles[] runResultFiles) {
         super();
         this.action = action;
         this.run = run;
         this.runFiles = runFiles;
+        this.runResultFiles = runResultFiles;
     }
 
     public Action getAction() {
@@ -135,6 +138,10 @@ public class RunEvent {
 
     public void setWhoModifiedRun(ClientId whoModifiedRun) {
         this.whoModifiedRun = whoModifiedRun;
+    }
+
+    public RunResultFiles[] getRunResultFiles() {
+        return runResultFiles;
     }
 
 }

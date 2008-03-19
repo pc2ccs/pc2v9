@@ -305,9 +305,10 @@ public class SelectJudgementPane extends JPanePlugin {
 
             boolean solved = getJudgementComboBox().getSelectedIndex() == 0;
             Judgement judgement = (Judgement) getJudgementComboBox().getSelectedItem();
-
             judgementRecord = new JudgementRecord(judgement.getElementId(), getContest().getClientId(), solved, false);
             judgementRecord.setSendToTeam(getNotifyTeamCheckBox().isSelected());
+            
+            runResultFiles = new RunResultFiles(run, run.getProblemId(), judgementRecord, executable.getExecutionData());
 
         }
         
@@ -969,6 +970,9 @@ public class SelectJudgementPane extends JPanePlugin {
         judgementRecord.setSendToTeam(getNotifyTeamCheckBox().isSelected());
 
         JudgeView.setAlreadyJudgingRun(false);
+
+        runResultFiles = new RunResultFiles(newRun, newRun.getProblemId(), judgementRecord, executable.getExecutionData());
+
         getController().submitRunJudgement(newRun, judgementRecord, runResultFiles);
 
         if (getParentFrame() != null) {

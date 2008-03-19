@@ -463,13 +463,17 @@ public final class PacketFactory {
      * @param runFiles
      *            run files or null (if run is not for destination client).
      * @param id
+     * @param runResultFiles 
      * @return checked out packet.
      */
-    public static Packet createCheckedOutRun(ClientId source, ClientId destination, Run run, RunFiles runFiles, ClientId id) {
+    public static Packet createCheckedOutRun(ClientId source, ClientId destination, Run run, RunFiles runFiles, ClientId id, RunResultFiles[] runResultFiles) {
         Properties prop = new Properties();
         prop.put(RUN, run);
         if (runFiles != null) {
             prop.put(RUN_FILES, runFiles);
+        }
+        if (runResultFiles!= null) {
+            prop.put(RUN_RESULTS_FILE, runResultFiles);
         }
         prop.put(CLIENT_ID, id);
 

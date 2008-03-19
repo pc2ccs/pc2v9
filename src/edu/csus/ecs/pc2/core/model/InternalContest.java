@@ -27,6 +27,7 @@ import edu.csus.ecs.pc2.core.list.ProblemDisplayList;
 import edu.csus.ecs.pc2.core.list.ProblemList;
 import edu.csus.ecs.pc2.core.list.RunFilesList;
 import edu.csus.ecs.pc2.core.list.RunList;
+import edu.csus.ecs.pc2.core.list.RunResultsFileList;
 import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
@@ -129,6 +130,8 @@ public class InternalContest implements IInternalContest {
     private RunList runList = new RunList();
 
     private RunFilesList runFilesList = new RunFilesList();
+
+    private RunResultsFileList runResultFilesList = new RunResultsFileList();
 
     private ClarificationList clarificationList = new ClarificationList();
 
@@ -551,21 +554,21 @@ public class InternalContest implements IInternalContest {
      */
     public void addRun(Run run) {
         runList.add(run);
-        RunEvent runEvent = new RunEvent(RunEvent.Action.ADDED, run, null);
+        RunEvent runEvent = new RunEvent(RunEvent.Action.ADDED, run, null, null);
         fireRunListener(runEvent);
     }
 
     public void addRun(Run run, RunFiles runFiles, ClientId whoCheckedOutRunId) {
         runList.add(run);
         runFilesList.add(run, runFiles);
-        RunEvent runEvent = new RunEvent(RunEvent.Action.CHECKEDOUT_RUN, run, runFiles);
+        RunEvent runEvent = new RunEvent(RunEvent.Action.CHECKEDOUT_RUN, run, runFiles, null);
         runEvent.setSentToClientId(whoCheckedOutRunId);
         fireRunListener(runEvent);
     }
 
     public void availableRun(Run run) {
         runList.add(run);
-        RunEvent runEvent = new RunEvent(RunEvent.Action.RUN_AVAILABLE, run, null);
+        RunEvent runEvent = new RunEvent(RunEvent.Action.RUN_AVAILABLE, run, null, null);
         fireRunListener(runEvent);
     }
 
@@ -970,13 +973,13 @@ public class InternalContest implements IInternalContest {
         // TODO handle run RunResultsFiles
         runList.updateRun(run, judgementRecord);
         Run newRun = runList.get(run.getElementId());
-        RunEvent runEvent = new RunEvent(RunEvent.Action.CHANGED, newRun, null);
+        RunEvent runEvent = new RunEvent(RunEvent.Action.CHANGED, newRun, null, null);
         runEvent.setWhoModifiedRun(whoUpdatedRun);
         fireRunListener(runEvent);
     }
 
     public void runNotAvailable(Run run) {
-        RunEvent runEvent = new RunEvent(RunEvent.Action.RUN_NOT_AVIALABLE, run, null);
+        RunEvent runEvent = new RunEvent(RunEvent.Action.RUN_NOT_AVIALABLE, run, null, null);
         fireRunListener(runEvent);
     }
     
@@ -1020,10 +1023,10 @@ public class InternalContest implements IInternalContest {
     }
     
     public void updateRun(Run run, ClientId whoChangedRun) {
-        updateRun (run, null, whoChangedRun);
+        updateRun (run, null, whoChangedRun, null);
     }
 
-    public void updateRun(Run run, RunFiles runFiles, ClientId whoChangedRun) {
+    public void updateRun(Run run, RunFiles runFiles, ClientId whoChangedRun, RunResultFiles[] runResultFiles) {
 
         /**
          * Should this run be un-checked out (removed from the checked out list) ? 
@@ -1065,7 +1068,7 @@ public class InternalContest implements IInternalContest {
         
         runList.updateRun(run);
         
-        RunEvent runEvent = new RunEvent(RunEvent.Action.CHANGED, runList.get(run), runFiles);
+        RunEvent runEvent = new RunEvent(RunEvent.Action.CHANGED, runList.get(run), runFiles, runResultFiles);
         runEvent.setWhoModifiedRun(whoChangedRun);
         
         if (checkOutRun) {
@@ -1105,14 +1108,16 @@ public class InternalContest implements IInternalContest {
         } // else - ok
 
         runList.updateRun(theRun, judgementRecord); // this sets run to JUDGED
-
+        
+        runResultFilesList.add(theRun, judgementRecord, runResultFiles);
+        
         if (whoCheckedOut != null) {
             info("Found checked out by " + whoCheckedOut + " judgement updated by " + judgementRecord.getJudgerClientId());
             runCheckOutList.remove(run.getElementId());
         }
         theRun = runList.get(run);
 
-        RunEvent runEvent = new RunEvent(RunEvent.Action.CHANGED, theRun, null);
+        RunEvent runEvent = new RunEvent(RunEvent.Action.CHANGED, theRun, null, null);
         fireRunListener(runEvent);
 
     }
@@ -1157,7 +1162,7 @@ public class InternalContest implements IInternalContest {
         runList.updateRun(run);
         theRun = runList.get(run);
 
-        RunEvent runEvent = new RunEvent(RunEvent.Action.RUN_AVAILABLE, theRun, null);
+        RunEvent runEvent = new RunEvent(RunEvent.Action.RUN_AVAILABLE, theRun, null, null);
         fireRunListener(runEvent);
     }
 
@@ -1681,6 +1686,11 @@ public class InternalContest implements IInternalContest {
      */
     public void removeSecurityMessageListener(ISecurityMessageListener securityMessageListener) {
         securityMessageHandler.addSecurityMessageListener(securityMessageListener);
+    }
+
+    public RunResultFiles[] getRunResultFiles(Run run) {
+        
+        return runResultFilesList.getRunResultFiles(run);
     }
 
 }

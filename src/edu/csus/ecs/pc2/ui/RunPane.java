@@ -254,6 +254,7 @@ public class RunPane extends JPanePlugin {
         
         newRun.setProblemId(problemId);
 
+        runResultFiles = new RunResultFiles(newRun, newRun.getProblemId(), judgementRecord, executable.getExecutionData());
         getController().updateRun(newRun, judgementRecord, runResultFiles);
 
         if (getParentFrame() != null) {

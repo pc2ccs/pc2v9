@@ -47,6 +47,11 @@ public class RunResultsFileList implements Serializable {
      */
     private String dirname = "db";
 
+    
+    public RunResultsFileList() {
+        
+    }
+    
     private RunResultsFileList(String dirname) {
         this.dirname = dirname;
         Utilities.insureDir(dirname);
@@ -139,5 +144,23 @@ public class RunResultsFileList implements Serializable {
                 return null;
             }
         }
+    }
+
+    /**
+     * returns a run result files
+     * 
+     * @param run
+     * @return
+     */
+    public RunResultFiles[] getRunResultFiles(Run run) {
+        
+        JudgementRecord[] judgementRecord = run.getAllJudgementRecords();
+        RunResultFiles[] runResultFiles = new RunResultFiles[judgementRecord.length];
+
+        for (int i = 0; i < judgementRecord.length; i++) {
+            runResultFiles[i] = getRunResultFiles(run.getSiteNumber(), run.getNumber(),judgementRecord[i]);
+        }
+        
+        return runResultFiles;
     }
 }

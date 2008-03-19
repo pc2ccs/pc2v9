@@ -35,8 +35,8 @@ public class ExecutionData {
     private SerializedFile executeProgramOutput; // this is STDOUT of the execution
 
     private int executeExitValue = 0;
-
-    private long executeTime = -1;
+    
+    private boolean executeSucess;
 
     private SerializedFile validationStdout;
 
@@ -47,6 +47,12 @@ public class ExecutionData {
     private boolean validationSuccess;
 
     private String validationResults;
+    
+    private long compileTimeMS = 0;
+    
+    private long executeTimeMS = 0;
+    
+    private long validateTimeMS = 0;
     
     private Exception executionException = null;
 
@@ -208,26 +214,11 @@ public class ExecutionData {
     }
 
     /**
-     * @return Returns the executeTime.
-     */
-    public long getExecuteTime() {
-        return executeTime;
-    }
-
-    /**
      * @param executeExitValue
      *            The executeExitValue to set.
      */
     public void setExecuteExitValue(int executeExitValue) {
         this.executeExitValue = executeExitValue;
-    }
-
-    /**
-     * @param executeTime
-     *            The executeTime to set.
-     */
-    public void setExecuteTime(long executeTime) {
-        this.executeTime = executeTime;
     }
 
     /**
@@ -287,4 +278,36 @@ public class ExecutionData {
         this.executionException = executionException;
     }
 
+    public void setCompileTimeMS(long compileTime) {
+        compileTimeMS = compileTime; 
+    }
+
+    public long getCompileTimeMS() {
+        return compileTimeMS;
+    }
+    
+    public void setExecuteTimeMS(long inExecuteTime){
+        executeTimeMS = inExecuteTime;
+    }
+    
+    public long getExecuteTimeMS(){
+        return executeTimeMS;
+    }
+
+    public void setvalidateTimeMS(long validateTime){
+        validateTimeMS = validateTime;
+    }
+    
+    public long getvalidateTimeMS(){
+        return validateTimeMS;
+    }
+    
+    public boolean isExecuteSucess() {
+        return executeSucess;
+    }
+    
+    public void setExecuteSucess(boolean executeSucess) {
+        this.executeSucess = executeSucess;
+    }
+    
 }

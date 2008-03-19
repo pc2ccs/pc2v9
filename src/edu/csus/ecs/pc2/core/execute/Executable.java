@@ -555,7 +555,8 @@ public class Executable {
             if (problem.isShowValidationToJudges()) {
                 msg = "Validating...";
             }
-
+            
+            long startSecs = System.currentTimeMillis();
             Process process = runProgram(cmdLine, msg);
 
             if (process == null) {
@@ -600,6 +601,7 @@ public class Executable {
             stdoutlog.close();
             stderrlog.close();
 
+            executionData.setvalidateTimeMS(System.currentTimeMillis() - startSecs);
             executionData.setValidationStdout(new SerializedFile(prefixExecuteDirname(VALIDATOR_STDOUT_FILENAME)));
             executionData.setValidationStderr(new SerializedFile(prefixExecuteDirname(VALIDATOR_STDERR_FILENAME)));
 
@@ -832,12 +834,14 @@ public class Executable {
             if (f.exists()) {
                 cmdline = f.getCanonicalPath();
             }
-
+            
+            long startSecs = System.currentTimeMillis();
             Process process = runProgram(cmdline, "Executing...");
             if (process == null) {
                 executionTimer.stopTimer();
                 stderrlog.close();
                 stdoutlog.close();
+                executionData.setExecuteSucess(false);
                 return false;
             }
 
@@ -886,7 +890,9 @@ public class Executable {
 
             stdoutlog.close();
             stderrlog.close();
-
+            
+            executionData.setExecuteSucess(true);
+            executionData.setExecuteTimeMS(System.currentTimeMillis() - startSecs);
             executionData.setExecuteProgramOutput(new SerializedFile(prefixExecuteDirname(EXECUTE_STDOUT_FILENAME)));
             executionData.setExecuteStderr(new SerializedFile(prefixExecuteDirname(EXECUTE_STDERR_FILENAME)));
 
@@ -934,6 +940,8 @@ public class Executable {
             executionTimer = new ExecuteTimer(log, problem.getTimeOutInSeconds());
             executionTimer.startTimer();
 
+            long startSecs = System.currentTimeMillis();
+            
             Process process = runProgram(cmdline, "Compiling...");
             if (process == null) {
                 executionTimer.stopTimer();
@@ -980,6 +988,7 @@ public class Executable {
             stdoutlog.close();
             stderrlog.close();
 
+            executionData.setCompileTimeMS(System.currentTimeMillis() - startSecs);
             executionData.setCompileStdout(new SerializedFile(prefixExecuteDirname(COMPILER_STDOUT_FILENAME)));
             executionData.setCompileStderr(new SerializedFile(prefixExecuteDirname(COMPILER_STDERR_FILENAME)));
 
@@ -1163,7 +1172,7 @@ public class Executable {
                     }
                 }
                 newString = replaceString(newString, "{:exitvalue}", Integer.toString(executionData.getExecuteExitValue()));
-                newString = replaceString(newString, "{:executetime}", Long.toString(executionData.getExecuteTime()));
+                newString = replaceString(newString, "{:executetime}", Long.toString(executionData.getExecuteTimeMS()));
             }
         } catch (Exception e) {
             // TODO LOG

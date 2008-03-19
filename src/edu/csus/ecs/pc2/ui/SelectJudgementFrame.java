@@ -34,7 +34,7 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
 
     private Run run = null;
 
-    private SelectJudgementPane selectJudgementPane = null;
+    private SelectJudgementPaneNew selectJudgementPane = null;
 
     /**
      * This method initializes
@@ -151,9 +151,9 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
      * 
      * @return edu.csus.ecs.pc2.ui.SelectJudgementPane
      */
-    private SelectJudgementPane getSelectJudgementPane() {
+    private SelectJudgementPaneNew getSelectJudgementPane() {
         if (selectJudgementPane == null) {
-            selectJudgementPane = new SelectJudgementPane();
+            selectJudgementPane = new SelectJudgementPaneNew();
         }
         return selectJudgementPane;
     }

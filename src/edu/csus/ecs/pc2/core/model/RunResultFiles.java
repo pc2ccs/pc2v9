@@ -2,6 +2,8 @@ package edu.csus.ecs.pc2.core.model;
 
 import java.io.Serializable;
 
+import edu.csus.ecs.pc2.core.execute.ExecutionData;
+
 /**
  * Run results files/statistics.
  * 
@@ -28,68 +30,48 @@ public class RunResultFiles implements Serializable {
     private ElementId problemId = null;
     
     private ElementId judgementId = null;
-    
-    private long compileTimeMS = 0;
-    
-    private long executeTimeMS = 0;
-    
-    private long validateTimeMS = 0;
-    
-    private SerializedFile compilerStdoutFile = null;
+        
+    private ExecutionData executionData = null;
 
-    private SerializedFile compilerStderrFile = null;
-
-    private SerializedFile executeStdoutFile = null;
-
-    private SerializedFile executeStderrFile = null;
-
-    private SerializedFile validatorStdoutFile = null;
-
-    private SerializedFile validatorStderrFile = null;
-
-    private boolean failedCompile = true;
-
-    private boolean failedExecute = true;
-
-    private boolean failedValidating = true;
-
-    public RunResultFiles(Run run, Problem problem, JudgementRecord judgementRecord) {
+    public RunResultFiles(Run run, ElementId problemId, JudgementRecord judgementRecord, ExecutionData executionData) {
         super();
         this.runId = run.getElementId();
-        this.problemId = problem.getElementId();
+        this.problemId = problemId;
         this.judgementId = judgementRecord.getElementId();
+        this.executionData = executionData;
+        
     }
 
     public SerializedFile getCompilerStderrFile() {
-        return compilerStderrFile;
+        return executionData.getCompileStderr();
     }
 
     public void setCompilerStderrFile(SerializedFile compilerStderrFile) {
-        this.compilerStderrFile = compilerStderrFile;
+        executionData.setCompileStderr(compilerStderrFile);
     }
 
     public SerializedFile getCompilerStdoutFile() {
-        return compilerStdoutFile;
+        return executionData.getCompileStdout();
     }
 
     public void setCompilerStdoutFile(SerializedFile compilerStdoutFile) {
-        this.compilerStdoutFile = compilerStdoutFile;
+        executionData.setCompileStderr(compilerStdoutFile);
     }
 
     public SerializedFile getExecuteStderrFile() {
-        return executeStderrFile;
+        return executionData.getExecuteStderr();
     }
 
     public void setExecuteStderrFile(SerializedFile executeStderrFile) {
-        this.executeStderrFile = executeStderrFile;
+        executionData.setExecuteStderr(executeStderrFile);
     }
 
     public SerializedFile getExecuteStdoutFile() {
-        return executeStdoutFile;
+        return executionData.getExecuteProgramOutput();
     }
 
     public void setExecuteStdoutFile(SerializedFile executeStdoutFile) {
-        this.executeStdoutFile = executeStdoutFile;
+        executionData.setExecuteProgramOutput(executeStdoutFile);
     }
 
     public ElementId getProblemId() {
@@ -109,67 +91,67 @@ public class RunResultFiles implements Serializable {
     }
 
     public SerializedFile getValidatorStderrFile() {
-        return validatorStderrFile;
+        return executionData.getValidationStderr();
     }
 
     public void setValidatorStderrFile(SerializedFile validatorStderrFile) {
-        this.validatorStderrFile = validatorStderrFile;
+        executionData.setValidationStderr(validatorStderrFile);
     }
 
     public SerializedFile getValidatorStdoutFile() {
-        return validatorStdoutFile;
+        return executionData.getValidationStdout();
     }
 
     public void setValidatorStdoutFile(SerializedFile validatorStdoutFile) {
-        this.validatorStdoutFile = validatorStdoutFile;
+        executionData.setValidationStdout(validatorStdoutFile);
     }
     
-    public boolean failedInComile(){
-        return failedCompile;
+    public boolean failedInCompile(){
+        return !executionData.isCompileSuccess();
     }
     
     public void setFailedInCompile(boolean failed){
-        failedCompile = failed;
+        executionData.setCompileSuccess(!failed);
     }
 
     public boolean failedInExecute(){
-        return failedExecute;
+        return !executionData.isExecuteSucess();
     }
     
     public void setFailedInExecute(boolean failed){
-        failedExecute = failed;
+        executionData.setExecuteSucess(!failed);
     }
 
     public boolean failedInValidating(){
-        return failedValidating;
+        return !executionData.isValidationSuccess();
     }
     
     public void setFailedInValidating(boolean failed){
-        failedValidating = failed;
+        executionData.setValidationSuccess(!failed);
     }
 
     public long getCompileTimeMS() {
-        return compileTimeMS;
+        return executionData.getCompileTimeMS();
     }
 
     public void setCompileTimeMS(long compileTimeMS) {
-        this.compileTimeMS = compileTimeMS;
+        executionData.setCompileTimeMS(compileTimeMS);
     }
 
     public long getExecuteTimeMS() {
-        return executeTimeMS;
+        return executionData.getExecuteTimeMS();
     }
 
     public void setExecuteTimeMS(long executeTimeMS) {
-        this.executeTimeMS = executeTimeMS;
+        executionData.setExecuteTimeMS(executeTimeMS);
     }
 
     public long getValidateTimeMS() {
-        return validateTimeMS;
+        return executionData.getvalidateTimeMS();
     }
 
     public void setValidateTimeMS(long validateTimeMS) {
-        this.validateTimeMS = validateTimeMS;
+        executionData.setvalidateTimeMS(validateTimeMS);
     }
 
     public ElementId getJudgementId() {
