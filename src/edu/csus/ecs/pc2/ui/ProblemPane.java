@@ -64,6 +64,8 @@ public class ProblemPane extends JPanePlugin {
 
     private JPanel generalPane = null;
 
+    private JPanel judgingTypePane = null;
+
     private JTextField problemNameTextField = null;
 
     private JTextField timeOutSecondTextField = null;
@@ -113,6 +115,8 @@ public class ProblemPane extends JPanePlugin {
 
     private ButtonGroup teamReadsFrombuttonGroup = null; // @jve:decl-index=0:visual-constraint="586,61"
 
+    private ButtonGroup judgingTypeGroup = null; // @jve:decl-index=0:visual-constraint="586,61"
+    
     private JPanel validatorPane = null;
 
     private JRadioButton useNOValidatatorRadioButton = null;
@@ -152,6 +156,14 @@ public class ProblemPane extends JPanePlugin {
     private ButtonGroup validatorChoiceButtonGroup = null; // @jve:decl-index=0:visual-constraint="595,128"
 
     private static final String NL = System.getProperty("line.separator");
+
+	private JRadioButton computerJudging = null;
+
+	private JRadioButton manualJudging = null;
+
+	private JCheckBox manualReview = null;
+
+	private JCheckBox prelimaryNotification = null;
 
     /**
      * This method initializes
@@ -270,7 +282,7 @@ public class ProblemPane extends JPanePlugin {
             showMessage("Enter a problem name");
             return;
         }
-        
+
         if (!validateProblemFields()) {
             // new problem is invalid, just return, message issued by validateProblemFields
             return;
@@ -303,7 +315,7 @@ public class ProblemPane extends JPanePlugin {
             showMessage(e.getMessage());
             return;
         }
-        
+
         getController().addNewProblem(newProblem, newProblemDataFiles);
 
         cancelButton.setText("Close");
@@ -334,7 +346,7 @@ public class ProblemPane extends JPanePlugin {
         }
 
         boolean enableButton = false;
-        
+
         showMessage("");
 
         if (problem != null) {
@@ -412,13 +424,13 @@ public class ProblemPane extends JPanePlugin {
                 checkProblem.setDataFileName(serializedFile.getName());
                 newProblemDataFiles.setJudgesDataFile(serializedFile);
             } else {
-                
+
                 SerializedFile serializedFile = getController().getProblemDataFiles(checkProblem).getJudgesDataFile();
-                if (serializedFile == null || !serializedFile.getAbsolutePath().equals(fileName)){
+                if (serializedFile == null || !serializedFile.getAbsolutePath().equals(fileName)) {
                     // they've added a new file
                     serializedFile = new SerializedFile(fileName);
-                    if (serializedFile == null){
-                        throw new InvalidFieldValue("Unable to find/load "+fileName);
+                    if (serializedFile == null) {
+                        throw new InvalidFieldValue("Unable to find/load " + fileName);
                     }
                     checkFileFormat(serializedFile);
                 } else {
@@ -452,17 +464,17 @@ public class ProblemPane extends JPanePlugin {
                 newProblemDataFiles.setJudgesAnswerFile(serializedFile);
             } else {
                 SerializedFile serializedFile = getController().getProblemDataFiles(checkProblem).getJudgesAnswerFile();
-                if (serializedFile == null || !serializedFile.getAbsolutePath().equals(fileName)){
+                if (serializedFile == null || !serializedFile.getAbsolutePath().equals(fileName)) {
                     // they've added a new file
                     serializedFile = new SerializedFile(fileName);
-                    if (serializedFile == null){
-                        throw new InvalidFieldValue("Unable to find/load "+fileName);
+                    if (serializedFile == null) {
+                        throw new InvalidFieldValue("Unable to find/load " + fileName);
                     }
                     checkFileFormat(serializedFile);
                 } else {
                     serializedFile = freshenIfNeeded(serializedFile, fileName);
                 }
-                
+
                 newProblemDataFiles.setJudgesAnswerFile(serializedFile);
                 checkProblem.setAnswerFileName(serializedFile.getName());
             }
@@ -536,26 +548,30 @@ public class ProblemPane extends JPanePlugin {
 
                 checkProblem.setValidatorProgramName(serializedFile.getName());
                 // for some reason on validator this is borked
-//                newProblemDataFiles.setValidatorFile(freshenIfNeeded(serializedFile, fileName));
+                // newProblemDataFiles.setValidatorFile(freshenIfNeeded(serializedFile, fileName));
                 newProblemDataFiles.setValidatorFile(serializedFile);
             } else {
                 SerializedFile serializedFile = getController().getProblemDataFiles(checkProblem).getValidatorFile();
-                if (serializedFile == null || !serializedFile.getAbsolutePath().equals(fileName)){
+                if (serializedFile == null || !serializedFile.getAbsolutePath().equals(fileName)) {
                     // they've added a new file
                     serializedFile = new SerializedFile(fileName);
-                    if (serializedFile == null){
-                        throw new InvalidFieldValue("Unable to find/load "+fileName);
+                    if (serializedFile == null) {
+                        throw new InvalidFieldValue("Unable to find/load " + fileName);
                     }
                     checkFileFormat(serializedFile);
                 } else {
                     serializedFile = freshenIfNeeded(serializedFile, fileName);
                 }
-                
+
                 newProblemDataFiles.setValidatorFile(serializedFile);
                 checkProblem.setValidatorProgramName(serializedFile.getName());
             }
         }
 
+        checkProblem.setComputerJudged(computerJudging.isSelected());
+        checkProblem.setManualReview(manualReview.isSelected());
+        checkProblem.setPrelimaryNotification(prelimaryNotification.isSelected());
+        
         return checkProblem;
 
     }
@@ -586,14 +602,14 @@ public class ProblemPane extends JPanePlugin {
             // new problem is invalid, just return, message issued by validateProblemFields
             return;
         }
-        
+
         Problem newProblem = null;
 
         try {
             newProblem = getProblemFromFields(problem);
         } catch (InvalidFieldValue e) {
             JOptionPane.showMessageDialog(this, e.getMessage());
-//            showMessage(e.getMessage());
+            // showMessage(e.getMessage());
             return;
         }
 
@@ -607,7 +623,7 @@ public class ProblemPane extends JPanePlugin {
             getParentFrame().setVisible(false);
         }
     }
-    
+
     /**
      * Validate that all problem fields are ok.
      * 
@@ -619,7 +635,7 @@ public class ProblemPane extends JPanePlugin {
             showMessage("Enter a problem name");
             return false;
         }
-        
+
         if (getUsePC2ValidatorRadioButton().isSelected()) {
             if (pc2ValidatorOptionComboBox.getSelectedIndex() < 1) {
                 showMessage("Select a Validator option");
@@ -628,7 +644,7 @@ public class ProblemPane extends JPanePlugin {
         }
 
         if (getProblemRequiresDataCheckBox().isSelected()) {
-            
+
             String fileName = inputDataFileLabel.getText();
             // this check is outside so we can provide a specific message
             if (fileName == null || fileName.trim().length() == 0) {
@@ -647,7 +663,7 @@ public class ProblemPane extends JPanePlugin {
         }
 
         if (getJudgesHaveAnswerFiles().isSelected()) {
-            
+
             String answerFileName = answerFileNameLabel.getText();
 
             // this check is outside so we can provide a specific message
@@ -655,17 +671,16 @@ public class ProblemPane extends JPanePlugin {
                 showMessage("Problem Requires Judges' Answer File checked, select a file ");
                 return false;
             }
-            
+
             if (answerFileName.trim().length() != answerFileNameLabel.getToolTipText().length()) {
                 answerFileName = answerFileNameLabel.getToolTipText() + "";
             }
-            
+
             if (!checkFile(answerFileName)) {
                 // note: if error, then checkFile will showMessage
                 return false;
             }
         }
-
 
         return true;
     }
@@ -808,7 +823,7 @@ public class ProblemPane extends JPanePlugin {
             getIgnoreCaseCheckBox().setSelected(true);
             externalValidatorLabel.setText("");
             externalValidatorLabel.setToolTipText("");
-            
+
             if (inProblem.isValidatedProblem()) {
 
                 if (inProblem.isUsingPC2Validator()) {
@@ -854,18 +869,18 @@ public class ProblemPane extends JPanePlugin {
             timeOutSecondTextField.setText("120");
             judgesHaveAnswerFiles.setSelected(false);
             problemRequiresDataCheckBox.setSelected(false);
-            
+
             inputDataFileLabel.setText("");
             inputDataFileLabel.setToolTipText("");
             answerFileNameLabel.setText("");
             answerFileNameLabel.setToolTipText("");
-            
+
             fileRadioButton.setSelected(false);
             stdinRadioButton.setSelected(false);
             useNOValidatatorRadioButton.setSelected(true);
             pc2ValidatorOptionComboBox.setSelectedIndex(0);
             ignoreCaseCheckBox.setSelected(false);
-            
+
             externalValidatorLabel.setText("");
             externalValidatorLabel.setToolTipText("");
 
@@ -875,13 +890,18 @@ public class ProblemPane extends JPanePlugin {
             getShowCompareCheckBox().setSelected(true);
 
         }
-        
+
         enableValidatorComponents();
-        
-        enableRequiresInputDataComponents (problemRequiresDataCheckBox.isSelected());
+
+        enableRequiresInputDataComponents(problemRequiresDataCheckBox.isSelected());
 
         enableProvideAnswerFileComponents(judgesHaveAnswerFiles.isSelected());
 
+        computerJudging.setSelected(inProblem.isComputerJudged());
+        manualReview.setSelected(inProblem.isManualReview());
+        prelimaryNotification.setSelected(inProblem.isPrelimaryNotification());
+        
+        
         // select the general tab
         getMainTabbedPane().setSelectedIndex(0);
         populatingGUI = false;
@@ -911,9 +931,28 @@ public class ProblemPane extends JPanePlugin {
             mainTabbedPane = new JTabbedPane();
             mainTabbedPane.setPreferredSize(new java.awt.Dimension(400, 400));
             mainTabbedPane.addTab("General", null, getGeneralPane(), null);
+            mainTabbedPane.addTab("Judging Type", null, getJudgingTypePanel(), null);
             mainTabbedPane.addTab("Validator", null, getValidatorPane(), null);
         }
         return mainTabbedPane;
+    }
+
+    /**
+     * This method initializes generalPane
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getJudgingTypePanel() {
+        if (judgingTypePane == null) {
+            judgingTypePane = new JPanel();
+            judgingTypePane.setLayout(null);
+            judgingTypePane.add(getComputerJudging(), null);
+            judgingTypePane.add(getManualJudging(), null);
+            judgingTypePane.add(getManualReview(), null);
+            judgingTypePane.add(getPrelimaryNotification(), null);
+            getJudgingTypeGroup().setSelected(getManualJudging().getModel(), true);
+        }
+        return judgingTypePane;
     }
 
     /**
@@ -997,7 +1036,7 @@ public class ProblemPane extends JPanePlugin {
             problemRequiresDataCheckBox.setText("Problem Requires Input Data");
             problemRequiresDataCheckBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    enableRequiresInputDataComponents (problemRequiresDataCheckBox.isSelected());
+                    enableRequiresInputDataComponents(problemRequiresDataCheckBox.isSelected());
                     enableUpdateButton();
                 }
             });
@@ -1255,7 +1294,7 @@ public class ProblemPane extends JPanePlugin {
      * @throws Exception
      */
     private boolean selectFile(JLabel label) {
-        boolean result= false;
+        boolean result = false;
         // toolTip should always have the full path
         String oldFile = label.getToolTipText();
         String startDir;
@@ -1274,7 +1313,7 @@ public class ProblemPane extends JPanePlugin {
             }
         } catch (Exception e) {
             log.log(Log.INFO, "Error getting selected file, try again.", e);
-            result=false;
+            result = false;
         }
         chooser = null;
         return result;
@@ -1294,6 +1333,15 @@ public class ProblemPane extends JPanePlugin {
         return teamReadsFrombuttonGroup;
     }
 
+    private ButtonGroup getJudgingTypeGroup() {
+        if (judgingTypeGroup == null) {
+            judgingTypeGroup = new ButtonGroup();
+            judgingTypeGroup.add(getComputerJudging());
+            judgingTypeGroup.add(getManualJudging());
+        }
+        return judgingTypeGroup;
+    }
+    
     /**
      * This method initializes validatorPane
      * 
@@ -1334,11 +1382,11 @@ public class ProblemPane extends JPanePlugin {
     }
 
     protected void enableValidatorComponents() {
-        if (usePC2ValidatorRadioButton.isSelected()){
+        if (usePC2ValidatorRadioButton.isSelected()) {
             enablePC2ValidatorComponents(true);
             enableExternalValidatorComponents(false);
             getShowValidatorToJudges().setEnabled(true);
-        } else if (useExternalValidatorRadioButton.isSelected()){
+        } else if (useExternalValidatorRadioButton.isSelected()) {
             enablePC2ValidatorComponents(false);
             enableExternalValidatorComponents(true);
             getShowValidatorToJudges().setEnabled(true);
@@ -1371,11 +1419,12 @@ public class ProblemPane extends JPanePlugin {
     }
 
     protected void enableExternalValidatorComponents(boolean enableComponents) {
-        
+
         getExternalValidatorFrame().setEnabled(enableComponents);
         getValidatorProgramJButton().setEnabled(enableComponents);
         getValidatorCommandLineTextBox().setEnabled(enableComponents);
     }
+
     protected void enablePC2ValidatorComponents(boolean enableComponents) {
         ignoreCaseCheckBox.setEnabled(enableComponents);
         pc2ValidatorOptionComboBox.setEnabled(enableComponents);
@@ -1628,6 +1677,7 @@ public class ProblemPane extends JPanePlugin {
 
     /**
      * Checks whether needs to freshen, prompt user before freshening.
+     * 
      * @param serializedFile
      * @param fileName
      * @return
@@ -1635,23 +1685,23 @@ public class ProblemPane extends JPanePlugin {
      */
     private SerializedFile freshenIfNeeded(SerializedFile serializedFile, String fileName) throws InvalidFieldValue {
 
-        if (serializedFile == null){
+        if (serializedFile == null) {
             return null;
-            
+
         }
         if (serializedFile.getBuffer() == null) {
             throw new InvalidFieldValue("Unable to read file " + fileName + " choose data file again (updating)");
         }
 
         if (needsFreshening(serializedFile, fileName)) {
-            
-            int result = JOptionPane.showConfirmDialog(this, "Datafile (" + fileName + ") has changed; reload from disk?", "Freshen file " + fileName + "?",
-                    JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+
+            int result = JOptionPane.showConfirmDialog(this, "Datafile (" + fileName + ") has changed; reload from disk?", "Freshen file " + fileName + "?", JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE);
 
             if (result == JOptionPane.YES_OPTION) {
                 serializedFile = new SerializedFile(fileName);
-                if (serializedFile == null){
-                    throw new InvalidFieldValue("Unable to find/load "+fileName);
+                if (serializedFile == null) {
+                    throw new InvalidFieldValue("Unable to find/load " + fileName);
                 }
                 checkFileFormat(serializedFile);
                 return serializedFile;
@@ -1667,8 +1717,10 @@ public class ProblemPane extends JPanePlugin {
     /**
      * Has this file been updated on disk ?
      * 
-     * @param serializedFile existing saved file
-     * @param fileName name for file that might need freshening.
+     * @param serializedFile
+     *            existing saved file
+     * @param fileName
+     *            name for file that might need freshening.
      * @return true if file on disk different than saved file.
      */
     public boolean needsFreshening(SerializedFile serializedFile, String fileName) {
@@ -1756,5 +1808,94 @@ public class ProblemPane extends JPanePlugin {
         }
         return false;
     }
+
+	/**
+	 * This method initializes computerJudging	
+	 * 	
+	 * @return javax.swing.JRadioButton	
+	 */
+	private JRadioButton getComputerJudging() {
+	    if (computerJudging == null) {
+	        computerJudging = new JRadioButton();
+	        computerJudging.setBounds(new java.awt.Rectangle(100,56,173,21));
+	        computerJudging.setText("Computer Judging");
+            computerJudging.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    manualReview.setEnabled(true);
+                    prelimaryNotification.setEnabled(manualReview.isSelected());
+                    prelimaryNotification.setEnabled(manualReview.isSelected());
+                    enableUpdateButton();
+                }
+            });
+
+            
+            
+	    }
+	    return computerJudging;
+	}
+
+	/**
+	 * This method initializes manualJudging	
+	 * 	
+	 * @return javax.swing.JRadioButton	
+	 */
+	private JRadioButton getManualJudging() {
+	    if (manualJudging == null) {
+	        manualJudging = new JRadioButton();
+	        manualJudging.setBounds(new java.awt.Rectangle(106,174,156,21));
+	        manualJudging.setText("Manual Judging");
+            manualJudging.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    manualReview.setEnabled(false);
+                    prelimaryNotification.setEnabled(false);
+                    enableUpdateButton();
+                }
+            });
+        }
+        
+        
+	    return manualJudging;
+	}
+
+	/**
+	 * This method initializes manualReview	
+	 * 	
+	 * @return javax.swing.JCheckBox	
+	 */
+	private JCheckBox getManualReview() {
+	    if (manualReview == null) {
+	        manualReview = new JCheckBox();
+	        manualReview.setBounds(new java.awt.Rectangle(125,89,186,21));
+	        manualReview.setText("Manual Review");
+            manualReview.setEnabled(false);
+            manualReview.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    prelimaryNotification.setEnabled(manualReview.isSelected());
+                    prelimaryNotification.setEnabled(manualReview.isSelected());
+                    enableUpdateButton();
+                }
+            });
+
+            
+	    }
+	    return manualReview;
+	}
+
+	/**
+	 * This method initializes prelimaryNotification	
+	 * 	
+	 * @return javax.swing.JCheckBox	
+	 */
+	private JCheckBox getPrelimaryNotification() {
+	    if (prelimaryNotification == null) {
+	        prelimaryNotification = new JCheckBox();
+	        prelimaryNotification.setBounds(new java.awt.Rectangle(168,122,328,21));
+	        prelimaryNotification.setText("Send Prelimary Notificaiton to the team");
+            prelimaryNotification.setEnabled(false);
+	    }
+	    return prelimaryNotification;
+	}
+    
+    
 
 } // @jve:decl-index=0:visual-constraint="10,10"

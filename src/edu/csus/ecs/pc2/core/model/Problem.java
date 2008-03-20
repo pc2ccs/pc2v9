@@ -143,6 +143,23 @@ public class Problem implements IElementObject {
     private boolean showCompareWindow = false;
 
     /**
+     * should the problem be "Auto Judged", this will require a validator be defined.
+     */
+    private boolean computerJudged = false;
+    
+    /**
+     * Should the problem be send to a human for review after it has been autojudged.
+     * only used if computerJudged is TRUE
+     */
+    private boolean manualReview = false;
+    
+    /**
+     * should a team be notified of the Computer Judgement (immediately)
+     * only used if manualReview is TRUE
+     */
+    private boolean prelimaryNotification = false;
+    
+    /**
      * Create a problem with the display name.
      * 
      * @param displayName
@@ -169,6 +186,7 @@ public class Problem implements IElementObject {
         }
     }
 
+    
     /**
      * Output the title for the problem.
      */
@@ -527,6 +545,30 @@ public class Problem implements IElementObject {
 
     public void setShowCompareWindow(boolean showCompareWindow) {
         this.showCompareWindow = showCompareWindow;
+    }
+
+    public boolean isComputerJudged() {
+        return computerJudged;
+    }
+
+    public void setComputerJudged(boolean computerJudged) {
+        this.computerJudged = computerJudged;
+    }
+
+    public boolean isManualReview() {
+        return manualReview;
+    }
+
+    public void setManualReview(boolean manualReview) {
+        this.manualReview = manualReview;
+    }
+
+    public boolean isPrelimaryNotification() {
+        return prelimaryNotification;
+    }
+
+    public void setPrelimaryNotification(boolean prelimaryNotification) {
+        this.prelimaryNotification = prelimaryNotification;
     }
 
 }
