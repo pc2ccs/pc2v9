@@ -50,7 +50,7 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(1126,675));
+        this.setSize(new java.awt.Dimension(1126,835));
         this.setContentPane(getSelectJudgementPane());
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setTitle("Select Run Judgement");
@@ -131,7 +131,7 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
                     } else {
                         if (event.getSentToClientId() != null && event.getSentToClientId().equals(contest.getClientId())) {
                             
-                            getSelectJudgementPane().setRunAndFiles(event.getRun(), event.getRunFiles());
+                            getSelectJudgementPane().setRunAndFiles(event.getRun(), event.getRunFiles(), event.getRunResultFiles());
                             // stop processing once we get it 
                             // stops both the duplicate checkedout_run and the run_not_available going to other judges
                             run = null;
@@ -158,4 +158,4 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
         return selectJudgementPane;
     }
 
-} // @jve:decl-index=0:visual-constraint="10,10"
+}  //  @jve:decl-index=0:visual-constraint="10,4"

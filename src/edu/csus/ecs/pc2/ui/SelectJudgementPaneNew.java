@@ -75,6 +75,8 @@ public class SelectJudgementPaneNew extends JPanePlugin {
      * This is used as an indicator as to whether this client/judge has a checked out run.
      */
     private RunFiles runFiles = null;
+    
+    private RunResultFiles [] runResultFiles = null;
 
     private JPanel runInfoPane = null;
 
@@ -138,11 +140,15 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
     private JPanel mainPanel = null;
 
-    private JPanel manualJudgementPanel = null;
+    private JPanel selectionPanel = null;
 
     private JPanel jValidatorPanel = null;
 
     private RunResultsPane computerJudgementPanel = null;
+
+    private JPanel manualJudgementPanel = null;
+
+    private RunResultsPane manualRunResultsPane = null;
 
     /**
      * This method initializes
@@ -160,10 +166,10 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     private void initialize() {
         BorderLayout borderLayout = new BorderLayout();
         borderLayout.setVgap(10);
-        this.setLayout(borderLayout);
-        this.setSize(new java.awt.Dimension(1086,800));
+        this.setLayout(new BorderLayout());
+        this.setSize(new java.awt.Dimension(1074, 826));
 
-        this.setPreferredSize(new java.awt.Dimension(1000,800));
+        this.setPreferredSize(new java.awt.Dimension(1000, 800));
         this.add(getMessagePane(), java.awt.BorderLayout.NORTH);
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
         this.add(getMainPanel(), java.awt.BorderLayout.CENTER);
@@ -304,7 +310,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         closeViewerWindows();
 
         JudgementRecord judgementRecord = null;
-        RunResultFiles runResultFiles = null;
+        RunResultFiles newRunResultFiles = null;
 
         if (judgementChanged()) {
             newRun.setStatus(RunStates.JUDGED);
@@ -319,9 +325,9 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
         JudgeView.setAlreadyJudgingRun(false);
 
-        runResultFiles = new RunResultFiles(newRun, newRun.getProblemId(), judgementRecord, executable.getExecutionData());
+        newRunResultFiles = new RunResultFiles(newRun, newRun.getProblemId(), judgementRecord, executable.getExecutionData());
 
-        getController().submitRunJudgement(newRun, judgementRecord, runResultFiles);
+        getController().submitRunJudgement(newRun, judgementRecord, newRunResultFiles);
 
         if (getParentFrame() != null) {
             getParentFrame().setVisible(false);
@@ -439,18 +445,32 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             getViewDataFileButton().setVisible(showFile);
             getViewSourceButton().setVisible(true);
 
-            // get the computer-assigned judgement record (if any)
+            // get the computer-assigned preliminary judgement record (if any)
             JudgementRecord computerJudgement = theRun.getComputerJudgementRecord();
-            // if (computerJudgement != null) {
-            // getComputerJudgementPanel().populatePane(null); // TODO: fix this so it passes the RunResultFiles from theRun
-            // getComputerJudgementPanel().setVisible(true);
-            // } else {
-            // getComputerJudgementPanel().setVisible(false);
-            // }
-            // temp:
-            getComputerJudgementPanel().populatePane(null);
-            getComputerJudgementPanel().setVisible(true);
+            
+            //try to find a corresponding RunResultFile record
+            RunResultFiles matchingResult = null;
+            if (computerJudgement != null) {
 
+                //search the RunResultFiles array for a matching result
+                if (runResultFiles != null) {
+                    for (int i=0; i<runResultFiles.length; i++) {
+                       if (runResultFiles[i].getJudgementId().equals(computerJudgement.getJudgementId())) {
+                           matchingResult = runResultFiles[i];
+                           break;                          
+                       }
+                    }
+                }
+            }
+            if (matchingResult != null) {
+                getComputerJudgementPanel().populatePane(matchingResult, "Preliminary Judgement"); 
+                getComputerJudgementPanel().setVisible(true);
+            } else {
+                //getComputerJudgementPanel().setVisible(false);
+                getComputerJudgementPanel().populatePane(null, "No Preliminary Judgement"); 
+                getComputerJudgementPanel().setVisible(true);   //TODO:  this should be false; it's set true here just for testing...
+            }
+            
         } else {
             getOkButton().setVisible(false);
 
@@ -733,7 +753,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         executableFileViewer.setVisible(true);
     }
 
-    public void setRunAndFiles(Run theRun, RunFiles runFiles2) {
+    public void setRunAndFiles(Run theRun, RunFiles runFiles2, RunResultFiles[] theRunResultFiles) {
 
         FrameUtilities.regularCursor(this);
 
@@ -742,6 +762,8 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
         run = theRun;
         runFiles = runFiles2;
+        runResultFiles = theRunResultFiles;
+        
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 populateGUI(run);
@@ -938,7 +960,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         enableUpdateButtons(false);
 
         closeViewerWindows();
-        RunResultFiles runResultFiles = null;
+        RunResultFiles newRunResultFiles = null;
 
         JudgementRecord judgementRecord = null;
 
@@ -972,9 +994,9 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
         JudgeView.setAlreadyJudgingRun(false);
 
-        runResultFiles = new RunResultFiles(newRun, newRun.getProblemId(), judgementRecord, executable.getExecutionData());
+        newRunResultFiles = new RunResultFiles(newRun, newRun.getProblemId(), judgementRecord, executable.getExecutionData());
 
-        getController().submitRunJudgement(newRun, judgementRecord, runResultFiles);
+        getController().submitRunJudgement(newRun, judgementRecord, newRunResultFiles);
 
         if (getParentFrame() != null) {
             getParentFrame().setVisible(false);
@@ -1150,6 +1172,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             mainPanel.add(getRunInfoPane(), java.awt.BorderLayout.NORTH);
             mainPanel.add(getManualJudgementPanel(), java.awt.BorderLayout.CENTER);
             mainPanel.add(getComputerJudgementPanel(), java.awt.BorderLayout.WEST);
+            mainPanel.add(getJPanel(), java.awt.BorderLayout.EAST);
         }
         return mainPanel;
     }
@@ -1160,25 +1183,25 @@ public class SelectJudgementPaneNew extends JPanePlugin {
      * @return javax.swing.JPanel
      */
     private JPanel getManualJudgementPanel() {
-        if (manualJudgementPanel == null) {
+        if (selectionPanel == null) {
             judgementLabel = new JLabel();
             judgementLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
             judgementLabel.setLocation(new java.awt.Point(7, 160));
             judgementLabel.setSize(new java.awt.Dimension(150, 19));
             judgementLabel.setText("Judgement");
 
-            manualJudgementPanel = new JPanel();
-            manualJudgementPanel.setLayout(null);
-            manualJudgementPanel.setPreferredSize(new java.awt.Dimension(300, 100));
-            manualJudgementPanel.add(getJudgementComboBox(), null);
-            manualJudgementPanel.add(judgementLabel, null);
+            selectionPanel = new JPanel();
+            selectionPanel.setLayout(null);
+            selectionPanel.setPreferredSize(new java.awt.Dimension(300, 100));
+            selectionPanel.add(getJudgementComboBox(), null);
+            selectionPanel.add(judgementLabel, null);
 
-            manualJudgementPanel.add(getExecuteButton(), null);
-            manualJudgementPanel.add(getOkButton(), null);
-            manualJudgementPanel.add(getJValidatorPanel(), null);
+            selectionPanel.add(getExecuteButton(), null);
+            selectionPanel.add(getOkButton(), null);
+            selectionPanel.add(getJValidatorPanel(), null);
 
         }
-        return manualJudgementPanel;
+        return selectionPanel;
     }
 
     /**
@@ -1221,6 +1244,31 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             computerJudgementPanel = new RunResultsPane(null);
         }
         return computerJudgementPanel;
+    }
+
+    /**
+     * This method initializes jPanel
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getJPanel() {
+        if (manualJudgementPanel == null) {
+            manualJudgementPanel = new JPanel();
+            manualJudgementPanel.add(getManualRunResultsPane(), null);
+        }
+        return manualJudgementPanel;
+    }
+
+    /**
+     * This method initializes manualRunResultsPane
+     * 
+     * @return edu.csus.ecs.pc2.ui.RunResultsPane
+     */
+    private RunResultsPane getManualRunResultsPane() {
+        if (manualRunResultsPane == null) {
+            manualRunResultsPane = new RunResultsPane();
+        }
+        return manualRunResultsPane;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
