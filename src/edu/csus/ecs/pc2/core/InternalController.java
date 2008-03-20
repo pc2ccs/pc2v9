@@ -259,7 +259,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      * 
      * @param packet
      */
-    private void sendToLocalServer(Packet packet) {
+    public void sendToLocalServer(Packet packet) {
         try {
             log.info("Sending packet to server " + packet);
             connectionManager.send(packet);

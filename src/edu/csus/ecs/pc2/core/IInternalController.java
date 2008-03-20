@@ -348,4 +348,6 @@ public interface IInternalController {
     String getContestPassword();
 
     void setContestPassword(String contestPassword);
+    
+    void sendToLocalServer(Packet packet);
 }
