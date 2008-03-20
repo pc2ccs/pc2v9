@@ -526,6 +526,15 @@ public class Problem implements IElementObject {
             if (showCompareWindow != problem.isShowCompareWindow()) {
                 return false;
             }
+            if (computerJudged != problem.isComputerJudged()) {
+                return false;
+            }
+            if (manualReview != problem.isManualReview()) {
+                return false;
+            }
+            if (prelimaryNotification != problem.isPrelimaryNotification()) {
+                return false;
+            }
             
             if (getSiteNumber() != problem.getSiteNumber()){
                 return false;

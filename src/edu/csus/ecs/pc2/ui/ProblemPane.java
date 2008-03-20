@@ -569,8 +569,18 @@ public class ProblemPane extends JPanePlugin {
         }
 
         checkProblem.setComputerJudged(computerJudging.isSelected());
-        checkProblem.setManualReview(manualReview.isSelected());
-        checkProblem.setPrelimaryNotification(prelimaryNotification.isSelected());
+
+        if (computerJudging.isSelected()) {
+            checkProblem.setManualReview(manualReview.isSelected());
+            if (manualReview.isSelected()) {
+                checkProblem.setPrelimaryNotification(prelimaryNotification.isSelected());
+            } else {
+                checkProblem.setPrelimaryNotification(false);
+            }
+        } else {
+            checkProblem.setManualReview(false);
+            checkProblem.setPrelimaryNotification(false);
+        }
         
         return checkProblem;
 
@@ -858,6 +868,11 @@ public class ProblemPane extends JPanePlugin {
                 e.printStackTrace();
             }
 
+            computerJudging.setSelected(inProblem.isComputerJudged());
+            manualReview.setSelected(inProblem.isManualReview());
+            prelimaryNotification.setSelected(inProblem.isPrelimaryNotification());
+
+            
         } else {
 
             getAddButton().setVisible(true);
@@ -889,6 +904,10 @@ public class ProblemPane extends JPanePlugin {
             getDoNotShowOutputWindowCheckBox().setSelected(false);
             getShowCompareCheckBox().setSelected(true);
 
+            computerJudging.setSelected(false);
+            manualReview.setSelected(false);
+            prelimaryNotification.setSelected(false);
+
         }
 
         enableValidatorComponents();
@@ -897,11 +916,6 @@ public class ProblemPane extends JPanePlugin {
 
         enableProvideAnswerFileComponents(judgesHaveAnswerFiles.isSelected());
 
-        computerJudging.setSelected(inProblem.isComputerJudged());
-        manualReview.setSelected(inProblem.isManualReview());
-        prelimaryNotification.setSelected(inProblem.isPrelimaryNotification());
-        
-        
         // select the general tab
         getMainTabbedPane().setSelectedIndex(0);
         populatingGUI = false;
@@ -1892,6 +1906,7 @@ public class ProblemPane extends JPanePlugin {
 	        prelimaryNotification.setBounds(new java.awt.Rectangle(168,122,328,21));
 	        prelimaryNotification.setText("Send Prelimary Notificaiton to the team");
             prelimaryNotification.setEnabled(false);
+            enableUpdateButton();
 	    }
 	    return prelimaryNotification;
 	}
