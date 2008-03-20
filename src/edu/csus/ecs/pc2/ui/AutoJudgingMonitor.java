@@ -175,7 +175,7 @@ public class AutoJudgingMonitor implements UIPlugin {
         }
 
         if (!problem.isValidatedProblem()) {
-            log.log(Log.WARNING, "Problem has not validator defined, can't be auto judged, run: " + run);
+            log.log(Log.WARNING, "Problem has no validator defined, can't be auto judged, run: " + run);
             return false;
         }
 
