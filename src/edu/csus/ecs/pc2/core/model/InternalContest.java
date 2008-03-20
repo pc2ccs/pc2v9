@@ -1000,7 +1000,7 @@ public class InternalContest implements IInternalContest {
                 throw new RunUnavailableException("Run "+ run.getNumber() + " (site " + run.getSiteNumber() + ") not found");
             }
             
-            boolean canBeCheckedOut = newRun.getStatus().equals(RunStates.NEW);
+            boolean canBeCheckedOut = newRun.getStatus().equals(RunStates.NEW) || newRun.getStatus().equals(RunStates.QUEUED_FOR_JUDGEMENT);
             
             if (reCheckoutRun && run.isJudged()){
                 canBeCheckedOut = true;

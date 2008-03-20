@@ -26,13 +26,20 @@ public class Run extends ISubmission {
      */
     public enum RunStates {
         /**
+         * Initial state before a run is assigned a real state
+         */
+        INITIAL,
+        
+        /**
          * Run submitted.
          */
         NEW,
+        
         /**
          * Judge has requested run.
          */
         CHECKED_OUT,
+        
         /**
          * Run is being judged.
          * 
@@ -51,14 +58,31 @@ public class Run extends ISubmission {
          * A judge has checked out the run and has chosen to put this run on hold and judge another run.
          */
         HOLD,
+        
         /**
          * A previously judged run is being rejudged.
          */
         REJUDGE,
+        
         /**
          * All judging has been done.
          */
-        JUDGED
+        JUDGED,
+        
+        /**
+         * Queued for Computer Judged "New"
+         */
+        QUEUED_FOR_JUDGEMENT,
+        
+        /**
+         *  Computer Judged "BEING_JUDGED"
+         */
+        BEING_COMPUTER_JUDGED,
+        
+        /**
+         * NEW, shown on New
+         */
+        READY_FOR_CONFIRMATION
     }
 
     private Vector<JudgementRecord> judgementList = new Vector <JudgementRecord>();
@@ -70,7 +94,7 @@ public class Run extends ISubmission {
     /**
      * State for this run.
      */
-    private Run.RunStates status = Run.RunStates.NEW;
+    private Run.RunStates status = Run.RunStates.INITIAL;
 
     /**
      * Operating System where Run was instanciated.
@@ -82,6 +106,14 @@ public class Run extends ISubmission {
         setSubmitter(submitter);
         setLanguageId(languageId.getElementId());
         setProblemId(problemId.getElementId());
+
+        // check if problem is to be "computer judged" or manual judged 
+        if (problemId.isComputerJudged()) {
+            status = Run.RunStates.QUEUED_FOR_JUDGEMENT;
+        } else {
+            status = Run.RunStates.NEW;
+        }
+        
         setElementId(new ElementId("Run"));
         systemOS = System.getProperty("os.name", "?");
     }

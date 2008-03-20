@@ -1314,6 +1314,7 @@ public class RunsPanel extends JPanePlugin {
                 filter = new Filter();
             }
             filter.addRunState(RunStates.NEW);
+            filter.addRunState(RunStates.QUEUED_FOR_JUDGEMENT);
         }
         // TODO code handle if they turn off the show new clarifications only.
         

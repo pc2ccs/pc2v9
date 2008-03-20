@@ -124,7 +124,7 @@ public class AutoJudgingMonitor implements UIPlugin {
         Run[] runs = contest.getRuns();
 
         for (Run run : runs) {
-            if (run.getStatus() == RunStates.NEW) {
+            if (run.getStatus() == RunStates.QUEUED_FOR_JUDGEMENT) {
                 if (filter.matches(run)) {
                     return run;
                 }
