@@ -157,5 +157,16 @@ public class RunResultFiles implements Serializable {
     public ElementId getJudgementId() {
         return judgementId;
     }
+    
+    public long getCompileResultCode() {
+        return executionData.getCompileResultCode();
+    }
 
+    public long getExecutionResultCode() {
+        return executionData.getExecuteExitValue();
+    }
+
+    public long getValidationResultCode() {
+        return executionData.getValidationReturnCode();
+    }
 }

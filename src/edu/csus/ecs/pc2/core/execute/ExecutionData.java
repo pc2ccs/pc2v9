@@ -30,8 +30,6 @@ public class ExecutionData implements Serializable {
 
     private String compileExeFileName;
 
-    private long compileCompilerReturnCode;
-
     private boolean compileSuccess;
 
     private long compileResultCode;
@@ -94,13 +92,6 @@ public class ExecutionData implements Serializable {
     }
 
     /**
-     * @return Returns the compileCompilerReturnCode.
-     */
-    public long getCompileCompilerReturnCode() {
-        return compileCompilerReturnCode;
-    }
-
-    /**
      * @return Returns the compileExeFileName.
      */
     public String getCompileExeFileName() {
@@ -133,14 +124,6 @@ public class ExecutionData implements Serializable {
      */
     public boolean isCompileSuccess() {
         return compileSuccess;
-    }
-
-    /**
-     * @param compileCompilerReturnCode
-     *            The compileCompilerReturnCode to set.
-     */
-    public void setCompileCompilerReturnCode(long compileCompilerReturnCode) {
-        this.compileCompilerReturnCode = compileCompilerReturnCode;
     }
 
     /**

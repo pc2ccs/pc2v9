@@ -76,7 +76,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
      */
     private RunFiles runFiles = null;
 
-    private JPanel generalPane = null;
+    private JPanel runInfoPane = null;
 
     private Log log = null;
 
@@ -136,11 +136,13 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
     private IFileViewer executableFileViewer;
 
-    private JPanel jTestPanel = null;
+    private JPanel mainPanel = null;
 
-    private JPanel jManualJudgementPanel = null;
+    private JPanel manualJudgementPanel = null;
 
     private JPanel jValidatorPanel = null;
+
+    private RunResultsPane computerJudgementPanel = null;
 
     /**
      * This method initializes
@@ -156,12 +158,15 @@ public class SelectJudgementPaneNew extends JPanePlugin {
      * 
      */
     private void initialize() {
-        this.setLayout(new BorderLayout());
-        this.setSize(new java.awt.Dimension(880, 633));
+        BorderLayout borderLayout = new BorderLayout();
+        borderLayout.setVgap(10);
+        this.setLayout(borderLayout);
+        this.setSize(new java.awt.Dimension(1086,800));
 
+        this.setPreferredSize(new java.awt.Dimension(1000,800));
         this.add(getMessagePane(), java.awt.BorderLayout.NORTH);
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
-        this.add(getJTestPanel(), java.awt.BorderLayout.CENTER);
+        this.add(getMainPanel(), java.awt.BorderLayout.CENTER);
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
@@ -176,7 +181,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     }
 
     public String getPluginTitle() {
-        return "Edit Run Pane";
+        return "Select Judgement Pane";
     }
 
     /**
@@ -231,7 +236,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             okButton.setText("Ok");
             okButton.setEnabled(false);
             okButton.setActionCommand("Ok");
-            okButton.setBounds(new java.awt.Rectangle(647, 220, 50, 26));
+            okButton.setBounds(new java.awt.Rectangle(355, 158, 50, 26));
             okButton.setMnemonic(java.awt.event.KeyEvent.VK_O);
             okButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -313,7 +318,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         }
 
         JudgeView.setAlreadyJudgingRun(false);
-        
+
         runResultFiles = new RunResultFiles(newRun, newRun.getProblemId(), judgementRecord, executable.getExecutionData());
 
         getController().submitRunJudgement(newRun, judgementRecord, runResultFiles);
@@ -434,6 +439,18 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             getViewDataFileButton().setVisible(showFile);
             getViewSourceButton().setVisible(true);
 
+            // get the computer-assigned judgement record (if any)
+            JudgementRecord computerJudgement = theRun.getComputerJudgementRecord();
+            // if (computerJudgement != null) {
+            // getComputerJudgementPanel().populatePane(null); // TODO: fix this so it passes the RunResultFiles from theRun
+            // getComputerJudgementPanel().setVisible(true);
+            // } else {
+            // getComputerJudgementPanel().setVisible(false);
+            // }
+            // temp:
+            getComputerJudgementPanel().populatePane(null);
+            getComputerJudgementPanel().setVisible(true);
+
         } else {
             getOkButton().setVisible(false);
 
@@ -545,8 +562,8 @@ public class SelectJudgementPaneNew extends JPanePlugin {
      * 
      * @return javax.swing.JPanel
      */
-    private JPanel getGeneralPane() {
-        if (generalPane == null) {
+    private JPanel getRunInfoPane() {
+        if (runInfoPane == null) {
             elapsedTimeLabel = new JLabel();
             elapsedTimeLabel.setText("Elapsed");
             elapsedTimeLabel.setSize(new java.awt.Dimension(254, 19));
@@ -592,24 +609,24 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             runInfoLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
             runInfoLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 14));
             runInfoLabel.setText("Run Info");
-            generalPane = new JPanel();
-            generalPane.setLayout(null);
-            generalPane.setPreferredSize(new java.awt.Dimension(300, 150));
-            generalPane.add(runInfoLabel, null);
-            generalPane.add(statusLabel, null);
-            generalPane.add(statusTitleLabel, null);
-            generalPane.add(problemTitleLabel, null);
-            generalPane.add(languageTitleLabel, null);
-            generalPane.add(elapsedTitleLabel, null);
-            generalPane.add(problemNameLabel, null);
-            generalPane.add(languageNameLabel, null);
-            generalPane.add(elapsedTimeLabel, null);
-            generalPane.add(getViewSourceButton(), null);
-            generalPane.add(getViewDataFileButton(), null);
-            generalPane.add(getViewAnswerFileButton(), null);
-            generalPane.add(getShellButton(), null);
+            runInfoPane = new JPanel();
+            runInfoPane.setLayout(null);
+            runInfoPane.setPreferredSize(new java.awt.Dimension(300, 150));
+            runInfoPane.add(runInfoLabel, null);
+            runInfoPane.add(statusLabel, null);
+            runInfoPane.add(statusTitleLabel, null);
+            runInfoPane.add(problemTitleLabel, null);
+            runInfoPane.add(languageTitleLabel, null);
+            runInfoPane.add(elapsedTitleLabel, null);
+            runInfoPane.add(problemNameLabel, null);
+            runInfoPane.add(languageNameLabel, null);
+            runInfoPane.add(elapsedTimeLabel, null);
+            runInfoPane.add(getViewSourceButton(), null);
+            runInfoPane.add(getViewDataFileButton(), null);
+            runInfoPane.add(getViewAnswerFileButton(), null);
+            runInfoPane.add(getShellButton(), null);
         }
-        return generalPane;
+        return runInfoPane;
     }
 
     public void showMessage(final String message) {
@@ -629,7 +646,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         if (executeButton == null) {
             executeButton = new JButton();
             executeButton.setText("Re-Execute");
-            executeButton.setBounds(new java.awt.Rectangle(667, 34, 131, 26));
+            executeButton.setBounds(new java.awt.Rectangle(163, 99, 131, 26));
             executeButton.setMnemonic(java.awt.event.KeyEvent.VK_X);
             executeButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -742,7 +759,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     private JComboBox getJudgementComboBox() {
         if (judgementComboBox == null) {
             judgementComboBox = new JComboBox();
-            judgementComboBox.setBounds(new java.awt.Rectangle(668, 190, 120, 25));
+            judgementComboBox.setBounds(new java.awt.Rectangle(174, 157, 120, 25));
             judgementComboBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableUpdateButton();
@@ -891,7 +908,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     private void showValidatorControls(boolean showControls) {
         getAcceptValidatorJudgementButton().setVisible(showControls);
         getJValidatorPanel().setVisible(showControls);
-//        validatorJudgementLabel.setVisible(showControls);
+        // validatorJudgementLabel.setVisible(showControls);
     }
 
     /*
@@ -954,9 +971,9 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         judgementRecord.setSendToTeam(getNotifyTeamCheckBox().isSelected());
 
         JudgeView.setAlreadyJudgingRun(false);
-        
+
         runResultFiles = new RunResultFiles(newRun, newRun.getProblemId(), judgementRecord, executable.getExecutionData());
-        
+
         getController().submitRunJudgement(newRun, judgementRecord, runResultFiles);
 
         if (getParentFrame() != null) {
@@ -1125,15 +1142,16 @@ public class SelectJudgementPaneNew extends JPanePlugin {
      * 
      * @return javax.swing.JPanel
      */
-    private JPanel getJTestPanel() {
-        if (jTestPanel == null) {
-            jTestPanel = new JPanel();
-            jTestPanel.setLayout(new BorderLayout());
-            jTestPanel.setPreferredSize(new java.awt.Dimension(403, 1));
-            jTestPanel.add(getGeneralPane(), java.awt.BorderLayout.NORTH);
-            jTestPanel.add(getJManualJudgementPanel(), java.awt.BorderLayout.CENTER);
+    private JPanel getMainPanel() {
+        if (mainPanel == null) {
+            mainPanel = new JPanel();
+            mainPanel.setLayout(new BorderLayout());
+            mainPanel.setPreferredSize(new java.awt.Dimension(403, 1));
+            mainPanel.add(getRunInfoPane(), java.awt.BorderLayout.NORTH);
+            mainPanel.add(getManualJudgementPanel(), java.awt.BorderLayout.CENTER);
+            mainPanel.add(getComputerJudgementPanel(), java.awt.BorderLayout.WEST);
         }
-        return jTestPanel;
+        return mainPanel;
     }
 
     /**
@@ -1141,26 +1159,26 @@ public class SelectJudgementPaneNew extends JPanePlugin {
      * 
      * @return javax.swing.JPanel
      */
-    private JPanel getJManualJudgementPanel() {
-        if (jManualJudgementPanel == null) {
+    private JPanel getManualJudgementPanel() {
+        if (manualJudgementPanel == null) {
             judgementLabel = new JLabel();
             judgementLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-            judgementLabel.setLocation(new java.awt.Point(507, 195));
+            judgementLabel.setLocation(new java.awt.Point(7, 160));
             judgementLabel.setSize(new java.awt.Dimension(150, 19));
             judgementLabel.setText("Judgement");
 
-            jManualJudgementPanel = new JPanel();
-            jManualJudgementPanel.setLayout(null);
-            jManualJudgementPanel.setPreferredSize(new java.awt.Dimension(300, 100));
-            jManualJudgementPanel.add(getJudgementComboBox(), null);
-            jManualJudgementPanel.add(judgementLabel, null);
+            manualJudgementPanel = new JPanel();
+            manualJudgementPanel.setLayout(null);
+            manualJudgementPanel.setPreferredSize(new java.awt.Dimension(300, 100));
+            manualJudgementPanel.add(getJudgementComboBox(), null);
+            manualJudgementPanel.add(judgementLabel, null);
 
-            jManualJudgementPanel.add(getExecuteButton(), null);
-            jManualJudgementPanel.add(getOkButton(), null);
-            jManualJudgementPanel.add(getJValidatorPanel(), null);
+            manualJudgementPanel.add(getExecuteButton(), null);
+            manualJudgementPanel.add(getOkButton(), null);
+            manualJudgementPanel.add(getJValidatorPanel(), null);
 
         }
-        return jManualJudgementPanel;
+        return manualJudgementPanel;
     }
 
     /**
@@ -1177,7 +1195,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             titledBorder.setTitleColor(java.awt.Color.blue);
             jValidatorPanel = new JPanel();
             jValidatorPanel.setLayout(null);
-            jValidatorPanel.setBounds(new java.awt.Rectangle(488, 272, 374, 128));
+            jValidatorPanel.setBounds(new java.awt.Rectangle(68, 219, 374, 128));
             jValidatorPanel.setBorder(titledBorder);
             jValidatorPanel.add(getAcceptValidatorJudgementButton(), null);
 
@@ -1191,6 +1209,18 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
         }
         return jValidatorPanel;
+    }
+
+    /**
+     * This method initializes computerJudgementPanel
+     * 
+     * @return edu.csus.ecs.pc2.ui.RunResultsPane
+     */
+    private RunResultsPane getComputerJudgementPanel() {
+        if (computerJudgementPanel == null) {
+            computerJudgementPanel = new RunResultsPane(null);
+        }
+        return computerJudgementPanel;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
