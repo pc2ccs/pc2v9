@@ -163,7 +163,7 @@ public class RunsReport implements IReport {
         }
         
         
-        if (run.isJudged() || run.getStatus().equals(RunStates.BEING_RE_JUDGED)) {
+        if (run.getAllJudgementRecords().length > 0){
 
             for (JudgementRecord judgementRecord : run.getAllJudgementRecords()) {
                 String judgementText = contest.getJudgement(judgementRecord.getJudgementId()).toString();
@@ -178,7 +178,9 @@ public class RunsReport implements IReport {
                 printWriter.print("     ");
                 printWriter.print(" '" + judgementText + "'");
                 printWriter.print(" by " + judgementRecord.getJudgerClientId().getName()+"/s"+judgementRecord.getJudgerClientId().getSiteNumber());
-                if (judgementRecord.isUsedValidator()) {
+                if (judgementRecord.isComputerJudgement()){
+                    printWriter.print("/Computer");
+                } else if (judgementRecord.isUsedValidator()) {
                     printWriter.print("/Validator");
                 }
                 printWriter.print(" at " + judgementRecord.getWhenJudgedTime());
