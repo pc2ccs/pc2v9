@@ -167,9 +167,9 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         BorderLayout borderLayout = new BorderLayout();
         borderLayout.setVgap(10);
         this.setLayout(new BorderLayout());
-        this.setSize(new java.awt.Dimension(1074, 826));
+        this.setSize(new java.awt.Dimension(851,714));
 
-        this.setPreferredSize(new java.awt.Dimension(1000, 800));
+        this.setPreferredSize(new java.awt.Dimension(800,600));
         this.add(getMessagePane(), java.awt.BorderLayout.NORTH);
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
         this.add(getMainPanel(), java.awt.BorderLayout.CENTER);
@@ -242,7 +242,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             okButton.setText("Ok");
             okButton.setEnabled(false);
             okButton.setActionCommand("Ok");
-            okButton.setBounds(new java.awt.Rectangle(355, 158, 50, 26));
+            okButton.setBounds(new java.awt.Rectangle(192,190,50,26));
             okButton.setMnemonic(java.awt.event.KeyEvent.VK_O);
             okButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -594,17 +594,17 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         if (runInfoPane == null) {
             elapsedTimeLabel = new JLabel();
             elapsedTimeLabel.setText("Elapsed");
-            elapsedTimeLabel.setSize(new java.awt.Dimension(254, 19));
+            elapsedTimeLabel.setSize(new java.awt.Dimension(222,19));
             elapsedTimeLabel.setLocation(new java.awt.Point(180, 57));
             elapsedTimeLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
             languageNameLabel = new JLabel();
             languageNameLabel.setText("Language");
-            languageNameLabel.setSize(new java.awt.Dimension(254, 19));
+            languageNameLabel.setSize(new java.awt.Dimension(211,19));
             languageNameLabel.setLocation(new java.awt.Point(600, 57));
             languageNameLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
             problemNameLabel = new JLabel();
             problemNameLabel.setText("Problem");
-            problemNameLabel.setSize(new java.awt.Dimension(254, 19));
+            problemNameLabel.setSize(new java.awt.Dimension(212,19));
             problemNameLabel.setLocation(new java.awt.Point(600, 32));
             problemNameLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
             elapsedTitleLabel = new JLabel();
@@ -629,7 +629,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             statusTitleLabel.setText("Status");
             statusLabel = new JLabel();
             statusLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-            statusLabel.setSize(new java.awt.Dimension(254, 19));
+            statusLabel.setSize(new java.awt.Dimension(221,19));
             statusLabel.setLocation(new java.awt.Point(180, 32));
             statusLabel.setText("JLabel");
             runInfoLabel = new JLabel();
@@ -639,7 +639,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             runInfoLabel.setText("Run Info");
             runInfoPane = new JPanel();
             runInfoPane.setLayout(null);
-            runInfoPane.setPreferredSize(new java.awt.Dimension(300, 150));
+            runInfoPane.setPreferredSize(new java.awt.Dimension(300,125));
             runInfoPane.add(runInfoLabel, null);
             runInfoPane.add(statusLabel, null);
             runInfoPane.add(statusTitleLabel, null);
@@ -674,7 +674,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         if (executeButton == null) {
             executeButton = new JButton();
             executeButton.setText("Re-Execute");
-            executeButton.setBounds(new java.awt.Rectangle(163, 99, 131, 26));
+            executeButton.setBounds(new java.awt.Rectangle(97,74,131,26));
             executeButton.setMnemonic(java.awt.event.KeyEvent.VK_X);
             executeButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -792,7 +792,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     private JComboBox getJudgementComboBox() {
         if (judgementComboBox == null) {
             judgementComboBox = new JComboBox();
-            judgementComboBox.setBounds(new java.awt.Rectangle(174, 157, 120, 25));
+            judgementComboBox.setBounds(new java.awt.Rectangle(13,189,163,25));
             judgementComboBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableUpdateButton();
@@ -927,7 +927,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             acceptValidatorJudgementButton = new JButton();
             acceptValidatorJudgementButton.setText("Accept Validator");
             acceptValidatorJudgementButton.setPreferredSize(new java.awt.Dimension(150, 26));
-            acceptValidatorJudgementButton.setBounds(new java.awt.Rectangle(117, 86, 150, 26));
+            acceptValidatorJudgementButton.setBounds(new java.awt.Rectangle(56,84,150,26));
             acceptValidatorJudgementButton.setForeground(Color.BLUE);
             acceptValidatorJudgementButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -1197,13 +1197,13 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         if (selectionPanel == null) {
             judgementLabel = new JLabel();
             judgementLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-            judgementLabel.setLocation(new java.awt.Point(7, 160));
+            judgementLabel.setLocation(new java.awt.Point(14,160));
             judgementLabel.setSize(new java.awt.Dimension(150, 19));
             judgementLabel.setText("Judgement");
 
             selectionPanel = new JPanel();
             selectionPanel.setLayout(null);
-            selectionPanel.setPreferredSize(new java.awt.Dimension(300, 100));
+            selectionPanel.setPreferredSize(new java.awt.Dimension(200,100));
             selectionPanel.add(getJudgementComboBox(), null);
             selectionPanel.add(judgementLabel, null);
 
@@ -1229,14 +1229,14 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             titledBorder.setTitleColor(java.awt.Color.blue);
             jValidatorPanel = new JPanel();
             jValidatorPanel.setLayout(null);
-            jValidatorPanel.setBounds(new java.awt.Rectangle(68, 219, 374, 128));
+            jValidatorPanel.setBounds(new java.awt.Rectangle(1,346,283,128));
             jValidatorPanel.setBorder(titledBorder);
             jValidatorPanel.add(getAcceptValidatorJudgementButton(), null);
 
             validatorJudgementLabel = new JLabel();
             validatorJudgementLabel.setText("Validator Judgement");
             validatorJudgementLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-            validatorJudgementLabel.setSize(new java.awt.Dimension(346, 19));
+            validatorJudgementLabel.setSize(new java.awt.Dimension(249,19));
             validatorJudgementLabel.setLocation(new java.awt.Point(17, 48));
             validatorJudgementLabel.setForeground(Color.BLUE);
             jValidatorPanel.add(validatorJudgementLabel, null);
