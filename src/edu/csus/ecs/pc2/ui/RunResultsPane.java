@@ -44,25 +44,19 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
 
     private JLabel compileResultCodeLabel = null;
 
-    private JButton showCompilerStdOutButton = null;
-
-    private JButton showCompilerStdErrButton = null;
+    private JButton showCompilerOutputButton = null;
 
     private JLabel executionSuccessLabel = null;
 
     private JLabel executionResultCodeLabel = null;
 
-    private JButton showExecutionStdOutButton = null;
-
-    private JButton showExecutionStdErrButton = null;
+    private JButton showExecutionOutputButton = null;
 
     private JLabel validationSuccessLabel = null;
 
     private JLabel validationResultCodeLabel = null;
 
-    private JButton showValidationStdOutButton = null;
-
-    private JButton showValidationStdErrButton = null;
+    private JButton showValidationOutputButton = null;
 
     private JLabel validationAnswerLabel = null;
 
@@ -71,12 +65,6 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
     private JLabel executionTimeLabel = null;
 
     private JLabel validationTimeLabel = null;
-
-    private JPanel compilationButtonPanel = null;
-
-    private JPanel executionButtonPanel = null;
-
-    private JPanel validationButtonPanel = null;
 
     /**
      * Constructs an empty RunResultsPane. This constructor is intended for internal use and is only public to comply with the JavaBean specification; it should not be called by external code.
@@ -126,14 +114,14 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
      */
     private void populateCompilerResults(RunResultFiles runResults) {
 
-        String successMsg = "Success: <undefined>";
-        String resultCode = "Result code: <undefined>";
-        String compileTime = "Compile time: <undefined>";
+        String successMsg = "Success: ";
+        String resultCode = "Result code: ";
+        String compileTime = "Compile time(ms): ";
 
         if (runResults != null) {
-            successMsg = "Successful: " + !runResults.failedInCompile();
-            resultCode = "Result code: " + runResults.getCompileResultCode();
-            compileTime = "Compile time(ms): " + runResults.getCompileTimeMS();
+            successMsg += !runResults.failedInCompile();
+            resultCode +=  runResults.getCompileResultCode();
+            compileTime += runResults.getCompileTimeMS();
         }
 
         compileSuccessLabel.setText(successMsg);
@@ -141,11 +129,9 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
         compileTimeLabel.setText(compileTime);
 
         if (runResults != null) {
-            showCompilerStdErrButton.setEnabled(true);
-            showCompilerStdOutButton.setEnabled(true);
+            showCompilerOutputButton.setEnabled(true);
         } else {
-            showCompilerStdErrButton.setEnabled(false);
-            showCompilerStdOutButton.setEnabled(false);
+            showCompilerOutputButton.setEnabled(false);
         }
     }
 
@@ -158,14 +144,14 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
      */
     private void populateExecutionResults(RunResultFiles runResults) {
 
-        String successMsg = "Success: <undefined>";
-        String resultCode = "Result code: <undefined>";
-        String executeTime = "Execution time: <undefined>";
+        String successMsg = "Success: ";
+        String resultCode = "Result code: ";
+        String executeTime = "Execution time(ms): ";
 
         if (runResults != null) {
-            successMsg = "Successful: " + !runResults.failedInExecute();
-            resultCode = "Result code: " + runResults.getExecutionResultCode();
-            executeTime = "Execution time(ms): " + runResults.getExecuteTimeMS();
+            successMsg += !runResults.failedInExecute();
+            resultCode +=  runResults.getExecutionResultCode();
+            executeTime += runResults.getExecuteTimeMS();
         }
 
         executionSuccessLabel.setText(successMsg);
@@ -173,11 +159,9 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
         executionTimeLabel.setText(executeTime);
 
         if (runResults != null) {
-            showExecutionStdErrButton.setEnabled(true);
-            showExecutionStdOutButton.setEnabled(true);
+            showExecutionOutputButton.setEnabled(true);
         } else {
-            showExecutionStdErrButton.setEnabled(false);
-            showExecutionStdOutButton.setEnabled(false);
+            showExecutionOutputButton.setEnabled(false);
         }
 
     }
@@ -191,16 +175,16 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
      */
     private void populateValidationResults(RunResultFiles runResults) {
 
-        String successMsg = "Success: <undefined>";
-        String resultCode = "Result code: <undefined>";
-        String validationTime = "Validation time: <undefined>";
-        String validationAnswer = "Judgement: <undefined>";
+        String successMsg = "Success: ";
+        String resultCode = "Result code: ";
+        String validationTime = "Validation time: ";
+        String validationAnswer = "Judgement: ";
 
         if (runResults != null) {
-            successMsg = "Successful: " + !runResults.failedInValidating();
-            resultCode = "Result code: " + runResults.getValidationResultCode();
-            validationTime = "Validation time(ms): " + runResults.getValidateTimeMS();
-            validationAnswer = "Judgement: " + getJudgement(runResults);
+            successMsg += !runResults.failedInValidating();
+            resultCode +=  runResults.getValidationResultCode();
+            validationTime += runResults.getValidateTimeMS();
+            validationAnswer += getJudgement(runResults);
         }
 
         validationSuccessLabel.setText(successMsg);
@@ -209,11 +193,9 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
         validationAnswerLabel.setText(validationAnswer);
 
         if (runResults != null) {
-            showValidationStdErrButton.setEnabled(true);
-            showValidationStdOutButton.setEnabled(true);
+            showValidationOutputButton.setEnabled(true);
         } else {
-            showValidationStdErrButton.setEnabled(false);
-            showValidationStdOutButton.setEnabled(false);
+            showValidationOutputButton.setEnabled(false);
         }
 
     }
@@ -246,9 +228,9 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
                 new java.awt.Font("Dialog", java.awt.Font.BOLD, 14), java.awt.Color.red);
         titledBorder1.setTitleFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 16));
         this.setLayout(flowLayout);
-        this.setSize(new java.awt.Dimension(297,558));
+        this.setSize(new java.awt.Dimension(210,531));
         this.setMinimumSize(new java.awt.Dimension(600, 400));
-        this.setPreferredSize(new java.awt.Dimension(300,600));
+        this.setPreferredSize(new java.awt.Dimension(200,600));
         this.setBorder(titledBorder1);
         this.add(getCompilationPanel(), null);
         this.add(getExecutionPanel(), null);
@@ -274,19 +256,19 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
     private JPanel getCompilationPanel() {
         if (compilationPanel == null) {
             compileTimeLabel = new JLabel();
-            compileTimeLabel.setText("Compile time (ms): <undefined>");
+            compileTimeLabel.setText("Compile time (ms): ");
             compileTimeLabel.setMaximumSize(new java.awt.Dimension(180, 30));
             compileTimeLabel.setMinimumSize(new java.awt.Dimension(180, 30));
             compileTimeLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEADING);
             compileTimeLabel.setPreferredSize(new java.awt.Dimension(180, 30));
             compileResultCodeLabel = new JLabel();
-            compileResultCodeLabel.setText("Result Code: <undefined>");
+            compileResultCodeLabel.setText("Result Code: ");
             compileResultCodeLabel.setMinimumSize(new java.awt.Dimension(150, 30));
             compileResultCodeLabel.setPreferredSize(new java.awt.Dimension(150, 30));
             compileResultCodeLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEADING);
             compileResultCodeLabel.setMaximumSize(new java.awt.Dimension(150, 30));
             compileSuccessLabel = new JLabel();
-            compileSuccessLabel.setText("Successful: <undefined> ");
+            compileSuccessLabel.setText("Successful:  ");
             compileSuccessLabel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
             compileSuccessLabel.setAlignmentY(3.0F);
             compileSuccessLabel.setMinimumSize(new java.awt.Dimension(150, 30));
@@ -297,11 +279,11 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
             compilationPanel.setLayout(new BoxLayout(getCompilationPanel(), BoxLayout.Y_AXIS));
             compilationPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, " Compilation ", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
                     javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Dialog", java.awt.Font.BOLD, 14), java.awt.Color.blue));
-            compilationPanel.setPreferredSize(new java.awt.Dimension(250, 160));
+            compilationPanel.setPreferredSize(new java.awt.Dimension(180,150));
             compilationPanel.add(compileSuccessLabel, null);
             compilationPanel.add(compileResultCodeLabel, null);
             compilationPanel.add(compileTimeLabel, null);
-            compilationPanel.add(getCompilationButtonPanel(), null);
+            compilationPanel.add(getShowCompilerOutputButton(), null);
         }
         return compilationPanel;
     }
@@ -314,19 +296,19 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
     private JPanel getExecutionPanel() {
         if (executionPanel == null) {
             executionTimeLabel = new JLabel();
-            executionTimeLabel.setText("Execution time (ms): <undefined>");
+            executionTimeLabel.setText("Execution time (ms): ");
             executionTimeLabel.setMinimumSize(new java.awt.Dimension(190, 30));
             executionTimeLabel.setMaximumSize(new java.awt.Dimension(190, 30));
             executionTimeLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEADING);
             executionTimeLabel.setPreferredSize(new java.awt.Dimension(190, 30));
             executionResultCodeLabel = new JLabel();
-            executionResultCodeLabel.setText("Result Code: <undefined>");
+            executionResultCodeLabel.setText("Result Code: ");
             executionResultCodeLabel.setMaximumSize(new java.awt.Dimension(150, 30));
             executionResultCodeLabel.setMinimumSize(new java.awt.Dimension(150, 30));
             executionResultCodeLabel.setPreferredSize(new java.awt.Dimension(150, 30));
             executionResultCodeLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEADING);
             executionSuccessLabel = new JLabel();
-            executionSuccessLabel.setText("Successful: <undefined>");
+            executionSuccessLabel.setText("Successful: ");
             executionSuccessLabel.setMinimumSize(new java.awt.Dimension(150, 30));
             executionSuccessLabel.setPreferredSize(new java.awt.Dimension(150, 30));
             executionSuccessLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEADING);
@@ -335,11 +317,11 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
             executionPanel.setLayout(new BoxLayout(getExecutionPanel(), BoxLayout.Y_AXIS));
             executionPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, " Execution ", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
                     javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Dialog", java.awt.Font.BOLD, 14), java.awt.Color.blue));
-            executionPanel.setPreferredSize(new java.awt.Dimension(250, 160));
+            executionPanel.setPreferredSize(new java.awt.Dimension(180,150));
             executionPanel.add(executionSuccessLabel, null);
             executionPanel.add(executionResultCodeLabel, null);
             executionPanel.add(executionTimeLabel, null);
-            executionPanel.add(getExecutionButtonPanel(), null);
+            executionPanel.add(getShowExecutionOutputButton(), null);
         }
         return executionPanel;
     }
@@ -352,25 +334,25 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
     private JPanel getValidationPanel() {
         if (validationPanel == null) {
             validationTimeLabel = new JLabel();
-            validationTimeLabel.setText("Validation time (ms): <undefined>");
+            validationTimeLabel.setText("Validation time (ms): ");
             validationTimeLabel.setMinimumSize(new java.awt.Dimension(200, 30));
             validationTimeLabel.setMaximumSize(new java.awt.Dimension(200, 30));
             validationTimeLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEADING);
             validationTimeLabel.setPreferredSize(new java.awt.Dimension(200, 30));
             validationAnswerLabel = new JLabel();
-            validationAnswerLabel.setText("Judgement: <undefined>");
+            validationAnswerLabel.setText("Judgement: ");
             validationAnswerLabel.setMinimumSize(new java.awt.Dimension(200, 30));
             validationAnswerLabel.setPreferredSize(new java.awt.Dimension(200, 30));
             validationAnswerLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEADING);
             validationAnswerLabel.setMaximumSize(new java.awt.Dimension(200, 30));
             validationResultCodeLabel = new JLabel();
-            validationResultCodeLabel.setText("Result Code: <undefined>");
+            validationResultCodeLabel.setText("Result Code: ");
             validationResultCodeLabel.setMinimumSize(new java.awt.Dimension(150, 30));
             validationResultCodeLabel.setPreferredSize(new java.awt.Dimension(150, 30));
             validationResultCodeLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEADING);
             validationResultCodeLabel.setMaximumSize(new java.awt.Dimension(150, 30));
             validationSuccessLabel = new JLabel();
-            validationSuccessLabel.setText("Successful: <undefined>");
+            validationSuccessLabel.setText("Successful: ");
             validationSuccessLabel.setMinimumSize(new java.awt.Dimension(150, 30));
             validationSuccessLabel.setPreferredSize(new java.awt.Dimension(150, 30));
             validationSuccessLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEADING);
@@ -381,13 +363,13 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
                     null, null));
             validationPanel = new JPanel();
             validationPanel.setLayout(new BoxLayout(getValidationPanel(), BoxLayout.Y_AXIS));
-            validationPanel.setPreferredSize(new java.awt.Dimension(250, 197));
+            validationPanel.setPreferredSize(new java.awt.Dimension(180,180));
             validationPanel.setBorder(titledBorder);
             validationPanel.add(validationSuccessLabel, null);
             validationPanel.add(validationResultCodeLabel, null);
             validationPanel.add(validationTimeLabel, null);
             validationPanel.add(validationAnswerLabel, null);
-            validationPanel.add(getValidationButtonPanel(), null);
+            validationPanel.add(getShowValidationOutputButton(), null);
         }
         return validationPanel;
     }
@@ -397,32 +379,20 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
      * 
      * @return javax.swing.JButton
      */
-    private JButton getShowCompilerStdOutButton() {
-        if (showCompilerStdOutButton == null) {
-            showCompilerStdOutButton = new JButton();
-            showCompilerStdOutButton.setText("Show Stdout");
-            showCompilerStdOutButton.setEnabled(false);
-            showCompilerStdOutButton.setPreferredSize(new java.awt.Dimension(106, 30));
-            showCompilerStdOutButton.setMaximumSize(new java.awt.Dimension(106, 30));
+    private JButton getShowCompilerOutputButton() {
+        if (showCompilerOutputButton == null) {
+            showCompilerOutputButton = new JButton();
+            showCompilerOutputButton.setText("Show");
+            showCompilerOutputButton.setEnabled(false);
+            showCompilerOutputButton.setPreferredSize(new java.awt.Dimension(130,30));
+            showCompilerOutputButton.setMaximumSize(new java.awt.Dimension(106, 30));
+            showCompilerOutputButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    System.out.println("actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+                }
+            });
         }
-        return showCompilerStdOutButton;
-    }
-
-    /**
-     * This method initializes showStdErrButton
-     * 
-     * @return javax.swing.JButton
-     */
-    private JButton getShowCompilerStdErrButton() {
-        if (showCompilerStdErrButton == null) {
-            showCompilerStdErrButton = new JButton();
-            showCompilerStdErrButton.setText("Show Stderr");
-            showCompilerStdErrButton.setMinimumSize(new java.awt.Dimension(106, 26));
-            showCompilerStdErrButton.setPreferredSize(new java.awt.Dimension(106, 30));
-            showCompilerStdErrButton.setEnabled(false);
-            showCompilerStdErrButton.setMaximumSize(new java.awt.Dimension(106, 30));
-        }
-        return showCompilerStdErrButton;
+        return showCompilerOutputButton;
     }
 
     /**
@@ -430,33 +400,21 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
      * 
      * @return javax.swing.JButton
      */
-    private JButton getShowExecutionStdOutButton() {
-        if (showExecutionStdOutButton == null) {
-            showExecutionStdOutButton = new JButton();
-            showExecutionStdOutButton.setMaximumSize(new java.awt.Dimension(106, 30));
-            showExecutionStdOutButton.setPreferredSize(new java.awt.Dimension(106, 30));
-            showExecutionStdOutButton.setText("Show Stdout");
-            showExecutionStdOutButton.setEnabled(false);
-            showExecutionStdOutButton.setMinimumSize(new java.awt.Dimension(106, 30));
+    private JButton getShowExecutionOutputButton() {
+        if (showExecutionOutputButton == null) {
+            showExecutionOutputButton = new JButton();
+            showExecutionOutputButton.setMaximumSize(new java.awt.Dimension(106, 30));
+            showExecutionOutputButton.setPreferredSize(new java.awt.Dimension(120,30));
+            showExecutionOutputButton.setText("Show");
+            showExecutionOutputButton.setEnabled(false);
+            showExecutionOutputButton.setMinimumSize(new java.awt.Dimension(106, 30));
+            showExecutionOutputButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    System.out.println("actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+                }
+            });
         }
-        return showExecutionStdOutButton;
-    }
-
-    /**
-     * This method initializes showExecutionStdErrButton
-     * 
-     * @return javax.swing.JButton
-     */
-    private JButton getShowExecutionStdErrButton() {
-        if (showExecutionStdErrButton == null) {
-            showExecutionStdErrButton = new JButton();
-            showExecutionStdErrButton.setText("Show Stderr");
-            showExecutionStdErrButton.setMinimumSize(new java.awt.Dimension(105, 30));
-            showExecutionStdErrButton.setPreferredSize(new java.awt.Dimension(106, 30));
-            showExecutionStdErrButton.setEnabled(false);
-            showExecutionStdErrButton.setMaximumSize(new java.awt.Dimension(105, 30));
-        }
-        return showExecutionStdErrButton;
+        return showExecutionOutputButton;
     }
 
     /**
@@ -464,77 +422,21 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
      * 
      * @return javax.swing.JButton
      */
-    private JButton getShowValidationStdOutButton() {
-        if (showValidationStdOutButton == null) {
-            showValidationStdOutButton = new JButton();
-            showValidationStdOutButton.setText("Show Stdout");
-            showValidationStdOutButton.setMaximumSize(new java.awt.Dimension(106, 30));
-            showValidationStdOutButton.setMinimumSize(new java.awt.Dimension(106, 30));
-            showValidationStdOutButton.setEnabled(false);
-            showValidationStdOutButton.setPreferredSize(new java.awt.Dimension(106, 30));
+    private JButton getShowValidationOutputButton() {
+        if (showValidationOutputButton == null) {
+            showValidationOutputButton = new JButton();
+            showValidationOutputButton.setText("Show");
+            showValidationOutputButton.setMaximumSize(new java.awt.Dimension(106, 30));
+            showValidationOutputButton.setMinimumSize(new java.awt.Dimension(106, 30));
+            showValidationOutputButton.setEnabled(false);
+            showValidationOutputButton.setPreferredSize(new java.awt.Dimension(120,30));
+            showValidationOutputButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    System.out.println("actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+                }
+            });
         }
-        return showValidationStdOutButton;
-    }
-
-    /**
-     * This method initializes showValidationStdErrButton
-     * 
-     * @return javax.swing.JButton
-     */
-    private JButton getShowValidationStdErrButton() {
-        if (showValidationStdErrButton == null) {
-            showValidationStdErrButton = new JButton();
-            showValidationStdErrButton.setText("Show Stderr");
-            showValidationStdErrButton.setMinimumSize(new java.awt.Dimension(105, 30));
-            showValidationStdErrButton.setEnabled(false);
-            showValidationStdErrButton.setPreferredSize(new java.awt.Dimension(106,30));
-            showValidationStdErrButton.setMaximumSize(new java.awt.Dimension(105, 30));
-        }
-        return showValidationStdErrButton;
-    }
-
-    /**
-     * This method initializes compilationButtonPanel
-     * 
-     * @return javax.swing.JPanel
-     */
-    private JPanel getCompilationButtonPanel() {
-        if (compilationButtonPanel == null) {
-            compilationButtonPanel = new JPanel();
-            compilationButtonPanel.setLayout(new FlowLayout());
-            compilationButtonPanel.setPreferredSize(new java.awt.Dimension(227, 30));
-            compilationButtonPanel.add(getShowCompilerStdOutButton(), null);
-            compilationButtonPanel.add(getShowCompilerStdErrButton(), null);
-        }
-        return compilationButtonPanel;
-    }
-
-    /**
-     * This method initializes executionButtonPanel
-     * 
-     * @return javax.swing.JPanel
-     */
-    private JPanel getExecutionButtonPanel() {
-        if (executionButtonPanel == null) {
-            executionButtonPanel = new JPanel();
-            executionButtonPanel.add(getShowExecutionStdOutButton(), null);
-            executionButtonPanel.add(getShowExecutionStdErrButton(), null);
-        }
-        return executionButtonPanel;
-    }
-
-    /**
-     * This method initializes validationButtonPanel
-     * 
-     * @return javax.swing.JPanel
-     */
-    private JPanel getValidationButtonPanel() {
-        if (validationButtonPanel == null) {
-            validationButtonPanel = new JPanel();
-            validationButtonPanel.add(getShowValidationStdOutButton(), null);
-            validationButtonPanel.add(getShowValidationStdErrButton(), null);
-        }
-        return validationButtonPanel;
+        return showValidationOutputButton;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
