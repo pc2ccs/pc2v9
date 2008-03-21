@@ -37,7 +37,9 @@ public class RunResultFiles implements Serializable {
         super();
         this.runId = run.getElementId();
         this.problemId = problemId;
-        this.judgementId = judgementRecord.getJudgementId();
+        if (judgementRecord != null) {
+            this.judgementId = judgementRecord.getJudgementId();
+        }
         this.executionData = executionData;
         
     }

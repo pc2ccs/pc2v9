@@ -451,10 +451,11 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             //try to find a corresponding RunResultFile record
             RunResultFiles matchingResult = null;
             if (computerJudgement != null) {
-
+                
                 //search the RunResultFiles array for a matching result
                 if (runResultFiles != null) {
                     for (int i=0; i<runResultFiles.length; i++) {
+                        System.out.println("hello '" + runResultFiles[i].getJudgementId()+ "'   '" + computerJudgement.getJudgementId()+ "'");
                        if (runResultFiles[i].getJudgementId().equals(computerJudgement.getJudgementId())) {
                            matchingResult = runResultFiles[i];
                            break;                          
@@ -466,9 +467,9 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                 getComputerJudgementPanel().populatePane(matchingResult, "Preliminary Judgement"); 
                 getComputerJudgementPanel().setVisible(true);
             } else {
-                //getComputerJudgementPanel().setVisible(false);
-                getComputerJudgementPanel().populatePane(null, "No Preliminary Judgement"); 
-                getComputerJudgementPanel().setVisible(true);   //TODO:  this should be false; it's set true here just for testing...
+                getComputerJudgementPanel().setVisible(false);
+//                getComputerJudgementPanel().populatePane(null, "No Preliminary Judgement"); 
+//                getComputerJudgementPanel().setVisible(true);   //TODO:  this should be false; it's set true here just for testing...
             }
             
         } else {
@@ -750,6 +751,9 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             }
         }
 
+        RunResultFiles rrf = new RunResultFiles(run, run.getProblemId(), null, executable.getExecutionData());
+        getManualRunResultsPane().populatePane(rrf, "Manual Results");
+        
         executableFileViewer.setVisible(true);
     }
 
