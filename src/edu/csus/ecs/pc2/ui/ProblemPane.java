@@ -869,6 +869,7 @@ public class ProblemPane extends JPanePlugin {
             }
 
             if (inProblem.isComputerJudged()) {
+                computerJudging.setSelected(true);
                 manualReview.setSelected(inProblem.isManualReview());
                 manualReview.setEnabled(true);
 
@@ -879,6 +880,7 @@ public class ProblemPane extends JPanePlugin {
                     prelimaryNotification.setEnabled(false);
                 }
             } else {
+                computerJudging.setSelected(false);
                 manualReview.setSelected(inProblem.isManualReview());
                 prelimaryNotification.setSelected(inProblem.isPrelimaryNotification());
 

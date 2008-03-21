@@ -1571,12 +1571,36 @@ public class PacketHandler {
                 Run theRun = contest.getRun(run.getElementId());
 
                 if (judgementRecord.isComputerJudgement()) {
-                    if (contest.getProblem(theRun.getProblemId()).isPrelimaryNotification()) {
-                        Packet judgementPacket = PacketFactory.createRunJudgement(contest.getClientId(), run.getSubmitter(), theRun, judgementRecord, runResultFiles);
+                    if (contest.getProblem(theRun.getProblemId()).isManualReview()) {
+                        if (contest.getProblem(theRun.getProblemId()).isPrelimaryNotification()) {
+
+                            // Do not send RunResultFiles to the team
+                            RunResultFiles rrf = runResultFiles;
+                            if (run.getSubmitter().getClientType().equals(ClientType.Type.TEAM)) {
+                                rrf = null;
+                            }
+                            Packet judgementPacket = PacketFactory.createRunJudgement(contest.getClientId(), run.getSubmitter(), theRun, judgementRecord, rrf);
+                            controller.sendToClient(judgementPacket);
+                        }
+                    } else {
+
+                        // Do not send RunResultFiles to the team
+                        RunResultFiles rrf = runResultFiles;
+                        if (run.getSubmitter().getClientType().equals(ClientType.Type.TEAM)) {
+                            rrf = null;
+                        }
+                        Packet judgementPacket = PacketFactory.createRunJudgement(contest.getClientId(), run.getSubmitter(), theRun, judgementRecord, rrf);
                         controller.sendToClient(judgementPacket);
                     }
                 } else {
-                    Packet judgementPacket = PacketFactory.createRunJudgement(contest.getClientId(), run.getSubmitter(), theRun, judgementRecord, runResultFiles);
+
+                    // Do not send RunResultFiles to the team
+                    RunResultFiles rrf = runResultFiles;
+                    if (run.getSubmitter().getClientType().equals(ClientType.Type.TEAM)) {
+                        rrf = null;
+                    }
+                    Packet judgementPacket = PacketFactory.createRunJudgement(contest.getClientId(), run.getSubmitter(), theRun, judgementRecord, rrf);
+
                     if (judgementRecord.isSendToTeam()) {
                         // Send to team who sent it, send to other server if needed.
                         controller.sendToClient(judgementPacket);

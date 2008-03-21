@@ -315,7 +315,7 @@ public class AutoJudgingMonitor implements UIPlugin {
                 autoJudgeStatusFrame.updateStatusLabel("Run failed to compile");
 
                 ElementId elementId = contest.getJudgements()[1].getElementId();
-                judgementRecord = new JudgementRecord(elementId, contest.getClientId(), false, true);
+                judgementRecord = new JudgementRecord(elementId, contest.getClientId(), false, true, true);
                 judgementRecord.setValidatorResultString("Source failed to compile (compilation error)");
 
             } else if (executionData.isValidationSuccess()) {
@@ -346,7 +346,7 @@ public class AutoJudgingMonitor implements UIPlugin {
                     solved = true;
                 }
 
-                judgementRecord = new JudgementRecord(elementId, contest.getClientId(), solved, true);
+                judgementRecord = new JudgementRecord(elementId, contest.getClientId(), solved, true, true);
                 judgementRecord.setValidatorResultString(results);
 
             } else {
@@ -356,7 +356,7 @@ public class AutoJudgingMonitor implements UIPlugin {
                 info("Run compiled but failed to validate " + fetchedRun);
 
                 ElementId elementId = contest.getJudgements()[1].getElementId();
-                judgementRecord = new JudgementRecord(elementId, contest.getClientId(), false, true);
+                judgementRecord = new JudgementRecord(elementId, contest.getClientId(), false, true, true);
                 judgementRecord.setValidatorResultString("Undetermined");
 
             }
