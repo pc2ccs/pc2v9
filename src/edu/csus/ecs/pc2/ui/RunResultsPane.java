@@ -237,6 +237,7 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
      * This method clears the RunResultsPane contents to the "default" (unknown) state.
      */
     public void clear() {
+        closeViewerWindows();
         populatePane(null, defaultTitle);
     }
 
@@ -397,6 +398,18 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
         return validationPanel;
     }
 
+    public void closeViewerWindows() {
+        closeViewer(compileFileviewer);
+        closeViewer(executeFileviewer);
+        closeViewer(validateFileviewer);
+    }
+
+    private void closeViewer(IFileViewer fileViewer) {
+        if (fileViewer != null) {
+            fileViewer.dispose();
+        }
+    }
+    
     /**
      * This method initializes showStdOutButton
      * 
@@ -411,6 +424,7 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
             showCompilerOutputButton.setMaximumSize(new java.awt.Dimension(106, 30));
             showCompilerOutputButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
+                    closeViewer(compileFileviewer);
                     compileFileviewer = new MultipleFileViewer(StaticLog.getLog(), "Compiler Output");
                     compileFileviewer.addFilePane("Standard Out", theRunResults.getCompilerStdoutFile());
                     compileFileviewer.addFilePane("Standard Error", theRunResults.getCompilerStderrFile());
@@ -436,6 +450,7 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
             showExecutionOutputButton.setMinimumSize(new java.awt.Dimension(106, 30));
             showExecutionOutputButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
+                    closeViewer(executeFileviewer);
                     executeFileviewer = new MultipleFileViewer(StaticLog.getLog(), "Execution Output");
                     executeFileviewer.addFilePane("Standard Out", theRunResults.getExecuteStdoutFile());
                     executeFileviewer.addFilePane("Standard Error", theRunResults.getExecuteStderrFile());
@@ -461,6 +476,7 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
             showValidationOutputButton.setPreferredSize(new java.awt.Dimension(120,30));
             showValidationOutputButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
+                    closeViewer(validateFileviewer);
                     validateFileviewer = new MultipleFileViewer(StaticLog.getLog(), "Validation Output");
                     validateFileviewer.addFilePane("Standard Out", theRunResults.getValidatorStdoutFile());
                     validateFileviewer.addFilePane("Standard Error", theRunResults.getValidatorStderrFile());

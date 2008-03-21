@@ -294,6 +294,8 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         closeViewer(answerFileViewer);
         closeViewer(sourceViewer);
         closeViewer(executableFileViewer);
+        getManualRunResultsPane().closeViewerWindows();
+        getComputerJudgementPanel().closeViewerWindows();
     }
 
     private void closeViewer(IFileViewer fileViewer) {
@@ -739,7 +741,8 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         System.gc();
 
         executable = new Executable(getContest(), getController(), run, runFiles);
-
+        
+        getManualRunResultsPane().clear();
         if (executableFileViewer != null) {
             executableFileViewer.dispose();
         }
