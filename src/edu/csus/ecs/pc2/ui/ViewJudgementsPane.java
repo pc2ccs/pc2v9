@@ -172,7 +172,7 @@ public class ViewJudgementsPane extends JPanePlugin implements UIPlugin {
         String name = "No";
         
         if (judgementRecord != null && judgementRecord.getJudgementId() != null) {
-            if (judgementRecord.isUsedValidator()){
+            if (judgementRecord.isUsedValidator() && judgementRecord.getValidatorResultString() != null) {
                 name = judgementRecord.getValidatorResultString();
             } else {
                 Judgement judgement = getContest().getJudgement(judgementRecord.getJudgementId());

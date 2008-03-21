@@ -268,7 +268,7 @@ public class RunsPanel extends JPanePlugin {
 
                 JudgementRecord judgementRecord = run.getJudgementRecord();
                 if (judgementRecord != null && judgementRecord.getJudgementId() != null) {
-                    if (judgementRecord.isUsedValidator()) {
+                    if (judgementRecord.isUsedValidator() && judgementRecord.getValidatorResultString() != null) {
                         result = judgementRecord.getValidatorResultString();
                     } else {
                         Judgement judgement = getContest().getJudgement(judgementRecord.getJudgementId());
