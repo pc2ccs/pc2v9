@@ -102,7 +102,7 @@ public class ProblemsPane extends JPanePlugin {
         if (problemListBox == null) {
             problemListBox = new MCLB();
 
-            Object[] cols = { "Problem Name", "Data File", "Input Method", "Answer File", "Run Time Limit", "SVTJ", "Validator" };
+            Object[] cols = { "Problem Name", "Data File", "Answer File", "Input Method", "Judging Type", "Time Limit", "SVTJ", "Validator" };
             problemListBox.addColumns(cols);
 
             /**
@@ -153,24 +153,40 @@ public class ProblemsPane extends JPanePlugin {
     }
 
     protected Object[] buildProblemRow(Problem problem) {
-        // Object[] cols = { "Problem Name", "Data File", "Input Method", "Answer File", "Run Time Limit", "SVTJ", "Validator" };
+        // Object[] cols = { "Problem Name", "Data File", "Answer File", "Input Method", "Judging Type", "Time Limit", "SVTJ", "Validator" };
 
         int numberColumns = problemListBox.getColumnCount();
         Object[] c = new String[numberColumns];
+        int i = 0;
 
-        c[0] = problem.getDisplayName();
-        c[1] = problem.getDataFileName();
+        c[i++] = problem.getDisplayName();
+        c[i++] = problem.getDataFileName();
+        c[i++] = problem.getAnswerFileName();
         String inputMethod = "";
         if (problem.isReadInputDataFromSTDIN()) {
             inputMethod = "STDIN";
         } else {
             inputMethod = "File I/O";
         }
-        c[2] = inputMethod;
-        c[3] = problem.getAnswerFileName();
-        c[4] = Integer.toString(problem.getTimeOutInSeconds());
-        c[5] = yesNoString(problem.isShowValidationToJudges());
-        c[6] = problem.getValidatorProgramName();
+        c[i++] = inputMethod;
+        String judgingType = "";
+        if (problem.isComputerJudged()){
+            judgingType = "Computer";
+            if (problem.isManualReview()){
+                judgingType = "Computer+Manual";
+                if (problem.isPrelimaryNotification()){
+                    judgingType = "Computer+Manual/Notify";
+                }
+            }
+        } else if (problem.isValidatedProblem()){
+            judgingType = "Manual w/Val.";
+        } else {
+            judgingType = "Manual";
+        }
+        c[i++] = judgingType;
+        c[i++] = Integer.toString(problem.getTimeOutInSeconds());
+        c[i++] = yesNoString(problem.isShowValidationToJudges());
+        c[i++] = problem.getValidatorProgramName();
 
         return c;
     }
