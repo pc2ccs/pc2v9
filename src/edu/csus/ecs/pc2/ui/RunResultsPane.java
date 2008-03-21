@@ -207,11 +207,12 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
      * @return
      */
     private String getJudgement(RunResultFiles runResult) {
-        if (runResult.getJudgementId() != null) {
-            return getContest().getJudgement(runResult.getJudgementId()).toString();
-        } else {
-            return ""; // todo return something better
+        try {
+            return runResult.getJudgementId().toString(); // TODO: map judgementID into judgement name (string)
+        } catch (Exception e) {
+            return "";
         }
+        
     }
 
     /**
