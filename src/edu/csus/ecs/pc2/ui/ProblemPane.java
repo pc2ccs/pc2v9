@@ -1917,7 +1917,7 @@ public class ProblemPane extends JPanePlugin {
         if (prelimaryNotification == null) {
             prelimaryNotification = new JCheckBox();
             prelimaryNotification.setBounds(new java.awt.Rectangle(168, 122, 328, 21));
-            prelimaryNotification.setText("Send Prelimary Notificaiton to the team");
+            prelimaryNotification.setText("Send Preliminary Notification to the team");
             prelimaryNotification.setEnabled(false);
             prelimaryNotification.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
