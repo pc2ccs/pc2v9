@@ -214,7 +214,9 @@ public class AutoJudgingMonitor implements UIPlugin {
     class RunListenerImplementation implements IRunListener {
 
         public void runAdded(RunEvent event) {
-            attemptToFetchNextRun(event.getRun());
+            if (event.getRun().getStatus().equals(RunStates.QUEUED_FOR_COMPUTER_JUDGEMENT)) {
+                attemptToFetchNextRun(event.getRun());
+            }
         }
 
         public void runChanged(RunEvent event) {
@@ -441,7 +443,7 @@ public class AutoJudgingMonitor implements UIPlugin {
         autoJudgeStatusFrame.updateStatusLabel("Fetching Run " + run.getNumber() + " (Site " + run.getSiteNumber() + ")");
         autoJudgeStatusFrame.updateMessage(getRunDescription(run));
 
-        controller.checkOutRun(run, false, true); 
+        controller.checkOutRun(run, false, true);
 
         answerReceived = false;
 

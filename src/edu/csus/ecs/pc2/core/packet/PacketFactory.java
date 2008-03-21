@@ -231,6 +231,8 @@ public final class PacketFactory {
     public static final String  EXCEPTION = "EXCEPTION";
 
     public static final String COMPUTER_JUDGE = "COMPUTER_JUDGE";
+    
+    public static final String FROM_HUMAN = "FROM_HUMAN";
 
     /**
      * Constructor is private as this is a utility class which should not be extended or invoked.
@@ -570,6 +572,7 @@ public final class PacketFactory {
         prop.put(CLIENT_ID, source);
         prop.put(RUN, run);
         prop.put(JUDGEMENT_RECORD, judgementRecord);
+
         if (runResultFiles != null) {
             prop.put(RUN_RESULTS_FILE, runResultFiles);
         }

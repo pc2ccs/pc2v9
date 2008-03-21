@@ -1550,7 +1550,8 @@ public class PacketHandler {
      * @param connectionHandlerID
      * @throws ContestSecurityException
      */
-    protected void judgeRun(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles, ClientId whoJudgedId, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
+    protected void judgeRun(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles, 
+            ClientId whoJudgedId, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
 
         if (isServer()) {
 

@@ -199,7 +199,7 @@ public class RunList implements Serializable {
 
         if (theRun.getStatus().equals(RunStates.BEING_JUDGED)) {
             
-            if (manualReview) {
+            if ((manualReview) && (judgement.isComputerJudgement())){
                 theRun.setStatus(RunStates.MANUAL_REVIEW);
             } else {
                 theRun.setStatus(RunStates.JUDGED);

@@ -426,6 +426,10 @@ public class RunsPanel extends JPanePlugin {
                                     + "Language: <FONT COLOR=BLUE>" + Utilities.forHTML(languageName) + "</FONT><BR><BR>" + "Run Id: <FONT COLOR=BLUE>" + runId + "</FONT><BR><BR><BR>"
                                     + "Judge's Response: " + responseFormat + Utilities.forHTML(response) + "</FONT><BR><BR><BR>";
 
+                            if (theRun.getStatus().equals(RunStates.MANUAL_REVIEW)) {
+                                displayString += "NOTE: This is a Preliminary Judgement<BR><BR><BR>";
+                            }
+                            
                             if (judgeComment != null) {
                                 if (judgeComment.length() > 0) {
                                     displayString += "Judge's Comment: " + Utilities.forHTML(judgeComment) + "<BR><BR><BR>";
@@ -1298,8 +1302,7 @@ public class RunsPanel extends JPanePlugin {
                 filter = new Filter();
             }
             filter.addRunState(RunStates.NEW);
-            filter.addRunState(RunStates.MANUAL_REVIEW
-                    );
+            filter.addRunState(RunStates.MANUAL_REVIEW);
         }
         // TODO code handle if they turn off the show new clarifications only.
 
