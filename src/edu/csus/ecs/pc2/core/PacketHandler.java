@@ -1575,21 +1575,20 @@ public class PacketHandler {
                 Run theRun = contest.getRun(run.getElementId());
 
                 if (judgementRecord.isComputerJudgement()) {
-                    if(contest.getProblem(theRun.getProblemId()).isPrelimaryNotification()) {
+                    if (contest.getProblem(theRun.getProblemId()).isPrelimaryNotification()) {
                         Packet judgementPacket = PacketFactory.createRunJudgement(contest.getClientId(), run.getSubmitter(), theRun, judgementRecord, runResultFiles);
                         controller.sendToClient(judgementPacket);
                     }
-                }
-                else {
+                } else {
                     Packet judgementPacket = PacketFactory.createRunJudgement(contest.getClientId(), run.getSubmitter(), theRun, judgementRecord, runResultFiles);
                     if (judgementRecord.isSendToTeam()) {
                         // Send to team who sent it, send to other server if needed.
                         controller.sendToClient(judgementPacket);
                     }
                 }
-                
+
                 Packet judgementUpdatePacket = PacketFactory.createRunJudgmentUpdate(contest.getClientId(), PacketFactory.ALL_SERVERS, theRun, whoJudgedId);
-                sendToJudgesAndOthers( judgementUpdatePacket, true);
+                sendToJudgesAndOthers(judgementUpdatePacket, true);
             }
 
         } else {

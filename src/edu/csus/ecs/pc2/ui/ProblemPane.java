@@ -116,7 +116,7 @@ public class ProblemPane extends JPanePlugin {
     private ButtonGroup teamReadsFrombuttonGroup = null; // @jve:decl-index=0:visual-constraint="586,61"
 
     private ButtonGroup judgingTypeGroup = null; // @jve:decl-index=0:visual-constraint="586,61"
-    
+
     private JPanel validatorPane = null;
 
     private JRadioButton useNOValidatatorRadioButton = null;
@@ -157,13 +157,13 @@ public class ProblemPane extends JPanePlugin {
 
     private static final String NL = System.getProperty("line.separator");
 
-	private JRadioButton computerJudging = null;
+    private JRadioButton computerJudging = null;
 
-	private JRadioButton manualJudging = null;
+    private JRadioButton manualJudging = null;
 
-	private JCheckBox manualReview = null;
+    private JCheckBox manualReview = null;
 
-	private JCheckBox prelimaryNotification = null;
+    private JCheckBox prelimaryNotification = null;
 
     /**
      * This method initializes
@@ -581,7 +581,7 @@ public class ProblemPane extends JPanePlugin {
             checkProblem.setManualReview(false);
             checkProblem.setPrelimaryNotification(false);
         }
-        
+
         return checkProblem;
 
     }
@@ -872,7 +872,6 @@ public class ProblemPane extends JPanePlugin {
             manualReview.setSelected(inProblem.isManualReview());
             prelimaryNotification.setSelected(inProblem.isPrelimaryNotification());
 
-            
         } else {
 
             getAddButton().setVisible(true);
@@ -1355,7 +1354,7 @@ public class ProblemPane extends JPanePlugin {
         }
         return judgingTypeGroup;
     }
-    
+
     /**
      * This method initializes validatorPane
      * 
@@ -1823,16 +1822,16 @@ public class ProblemPane extends JPanePlugin {
         return false;
     }
 
-	/**
-	 * This method initializes computerJudging	
-	 * 	
-	 * @return javax.swing.JRadioButton	
-	 */
-	private JRadioButton getComputerJudging() {
-	    if (computerJudging == null) {
-	        computerJudging = new JRadioButton();
-	        computerJudging.setBounds(new java.awt.Rectangle(100,56,173,21));
-	        computerJudging.setText("Computer Judging");
+    /**
+     * This method initializes computerJudging
+     * 
+     * @return javax.swing.JRadioButton
+     */
+    private JRadioButton getComputerJudging() {
+        if (computerJudging == null) {
+            computerJudging = new JRadioButton();
+            computerJudging.setBounds(new java.awt.Rectangle(100, 56, 173, 21));
+            computerJudging.setText("Computer Judging");
             computerJudging.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     manualReview.setEnabled(true);
@@ -1842,22 +1841,20 @@ public class ProblemPane extends JPanePlugin {
                 }
             });
 
-            
-            
-	    }
-	    return computerJudging;
-	}
+        }
+        return computerJudging;
+    }
 
-	/**
-	 * This method initializes manualJudging	
-	 * 	
-	 * @return javax.swing.JRadioButton	
-	 */
-	private JRadioButton getManualJudging() {
-	    if (manualJudging == null) {
-	        manualJudging = new JRadioButton();
-	        manualJudging.setBounds(new java.awt.Rectangle(106,174,156,21));
-	        manualJudging.setText("Manual Judging");
+    /**
+     * This method initializes manualJudging
+     * 
+     * @return javax.swing.JRadioButton
+     */
+    private JRadioButton getManualJudging() {
+        if (manualJudging == null) {
+            manualJudging = new JRadioButton();
+            manualJudging.setBounds(new java.awt.Rectangle(106, 174, 156, 21));
+            manualJudging.setText("Manual Judging");
             manualJudging.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     manualReview.setEnabled(false);
@@ -1866,21 +1863,20 @@ public class ProblemPane extends JPanePlugin {
                 }
             });
         }
-        
-        
-	    return manualJudging;
-	}
 
-	/**
-	 * This method initializes manualReview	
-	 * 	
-	 * @return javax.swing.JCheckBox	
-	 */
-	private JCheckBox getManualReview() {
-	    if (manualReview == null) {
-	        manualReview = new JCheckBox();
-	        manualReview.setBounds(new java.awt.Rectangle(125,89,186,21));
-	        manualReview.setText("Manual Review");
+        return manualJudging;
+    }
+
+    /**
+     * This method initializes manualReview
+     * 
+     * @return javax.swing.JCheckBox
+     */
+    private JCheckBox getManualReview() {
+        if (manualReview == null) {
+            manualReview = new JCheckBox();
+            manualReview.setBounds(new java.awt.Rectangle(125, 89, 186, 21));
+            manualReview.setText("Manual Review");
             manualReview.setEnabled(false);
             manualReview.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -1890,27 +1886,24 @@ public class ProblemPane extends JPanePlugin {
                 }
             });
 
-            
-	    }
-	    return manualReview;
-	}
+        }
+        return manualReview;
+    }
 
-	/**
-	 * This method initializes prelimaryNotification	
-	 * 	
-	 * @return javax.swing.JCheckBox	
-	 */
-	private JCheckBox getPrelimaryNotification() {
-	    if (prelimaryNotification == null) {
-	        prelimaryNotification = new JCheckBox();
-	        prelimaryNotification.setBounds(new java.awt.Rectangle(168,122,328,21));
-	        prelimaryNotification.setText("Send Prelimary Notificaiton to the team");
+    /**
+     * This method initializes prelimaryNotification
+     * 
+     * @return javax.swing.JCheckBox
+     */
+    private JCheckBox getPrelimaryNotification() {
+        if (prelimaryNotification == null) {
+            prelimaryNotification = new JCheckBox();
+            prelimaryNotification.setBounds(new java.awt.Rectangle(168, 122, 328, 21));
+            prelimaryNotification.setText("Send Prelimary Notificaiton to the team");
             prelimaryNotification.setEnabled(false);
             enableUpdateButton();
-	    }
-	    return prelimaryNotification;
-	}
-    
-    
+        }
+        return prelimaryNotification;
+    }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
