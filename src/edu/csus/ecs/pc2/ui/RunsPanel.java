@@ -83,45 +83,45 @@ public class RunsPanel extends JPanePlugin {
     private JButton rejudgeRunButton = null;
 
     private JButton viewJudgementsButton = null;
-    
+
     private PermissionList permissionList = new PermissionList();
-    
+
     private EditRunFrame editRunFrame = null;
-    
+
     private ViewJudgementsFrame viewJudgementsFrame = null;
-    
+
     private SelectJudgementFrame selectJudgementFrame = null;
 
     private JLabel messageLabel = null;
-    
+
     private Log log = null;
 
     private JLabel rowCountLabel = null;
-    
+
     private boolean showNewRunsOnly = false;
-    
+
     /**
      * Show who is judging column and status.
      * 
      */
     private boolean showJudgesInfo = true;
-    
+
     private Filter filter = null;
 
     private JButton autoJudgeButton = null;
-    
+
     private AutoJudgingMonitor autoJudgingMonitor = new AutoJudgingMonitor();
 
     private boolean usingTeamColumns = false;
 
     private boolean usingFullColumns = false;
-    
+
     private DisplayTeamName displayTeamName = null;
-    
+
     private boolean makeSoundOnOneRun = false;
 
     private boolean bUseAutoJudgemonitor = true;
-    
+
     /**
      * This method initializes
      * 
@@ -129,10 +129,11 @@ public class RunsPanel extends JPanePlugin {
     public RunsPanel() {
         super();
         initialize();
-     }
+    }
 
     /**
-     * @param useAutoJudge if true use 
+     * @param useAutoJudge
+     *            if true use
      */
     public RunsPanel(boolean useAutoJudgeMonitor) {
         super();
@@ -146,11 +147,11 @@ public class RunsPanel extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new java.awt.Dimension(744,216));
+        this.setSize(new java.awt.Dimension(744, 216));
         this.add(getButtonPanel(), java.awt.BorderLayout.SOUTH);
         this.add(getRunsListBox(), java.awt.BorderLayout.CENTER);
         this.add(getMessagePanel(), java.awt.BorderLayout.NORTH);
-        
+
         editRunFrame = new EditRunFrame();
         viewJudgementsFrame = new ViewJudgementsFrame();
         selectJudgementFrame = new SelectJudgementFrame();
@@ -163,30 +164,29 @@ public class RunsPanel extends JPanePlugin {
     }
 
     protected Object[] buildRunRow(Run run, ClientId judgeId) {
-        
 
         try {
             boolean autoJudgedRun = isAutoJudgedRun(run);
-            
+
             int cols = runListBox.getColumnCount();
             Object[] s = new String[cols];
-            
+
             int idx = 0;
-            
-            if (usingFullColumns){
-//              Object[] fullColumns = { "Site", "Team", "Run Id", "Time", "Status", "Problem", "Judge", "Language", "OS" };
-                
+
+            if (usingFullColumns) {
+                // Object[] fullColumns = { "Site", "Team", "Run Id", "Time", "Status", "Problem", "Judge", "Language", "OS" };
+
                 s[idx++] = getSiteTitle("" + run.getSubmitter().getSiteNumber());
                 s[idx++] = getTeamDisplayName(run);
                 s[idx++] = new Long(run.getNumber()).toString();
                 s[idx++] = new Long(run.getElapsedMins()).toString();
                 s[idx++] = getJudgementResultString(run);
                 s[idx++] = getProblemTitle(run.getProblemId());
-                s[idx++] = getJudgesTitle (run, judgeId, showJudgesInfo, autoJudgedRun);
+                s[idx++] = getJudgesTitle(run, judgeId, showJudgesInfo, autoJudgedRun);
                 s[idx++] = getLanguageTitle(run.getLanguageId());
                 s[idx++] = run.getSystemOS();
-            } else if (showJudgesInfo){
-//              Object[] fullColumnsNoJudge = { "Site", "Team", "Run Id", "Time", "Status", "Problem", "Language", "OS" };
+            } else if (showJudgesInfo) {
+                // Object[] fullColumnsNoJudge = { "Site", "Team", "Run Id", "Time", "Status", "Problem", "Language", "OS" };
                 s[idx++] = getSiteTitle("" + run.getSubmitter().getSiteNumber());
                 s[idx++] = getTeamDisplayName(run);
                 s[idx++] = new Long(run.getNumber()).toString();
@@ -195,9 +195,9 @@ public class RunsPanel extends JPanePlugin {
                 s[idx++] = getProblemTitle(run.getProblemId());
                 s[idx++] = getLanguageTitle(run.getLanguageId());
                 s[idx++] = run.getSystemOS();
-                
-            } else if (usingTeamColumns){
-//              Object[] teamColumns = { "Site", "Run Id", "Problem", "Time", "Status",  "Language"};
+
+            } else if (usingTeamColumns) {
+                // Object[] teamColumns = { "Site", "Run Id", "Problem", "Time", "Status", "Language"};
                 s[idx++] = getSiteTitle("" + run.getSubmitter().getSiteNumber());
                 s[idx++] = new Long(run.getNumber()).toString();
                 s[idx++] = getProblemTitle(run.getProblemId());
@@ -205,7 +205,7 @@ public class RunsPanel extends JPanePlugin {
                 s[idx++] = getJudgementResultString(run);
                 s[idx++] = getLanguageTitle(run.getLanguageId());
             } else {
-                log.log(Log.INFO,"In RunPanes no mclb columns set");
+                log.log(Log.INFO, "In RunPanes no mclb columns set");
             }
 
             return s;
@@ -214,17 +214,17 @@ public class RunsPanel extends JPanePlugin {
         }
         return null;
     }
-    
+
     private String getJudgesTitle(Run run, ClientId judgeId, boolean showJudgesInfo2, boolean autoJudgedRun) {
-        
+
         String result = "";
-        
-        if (showJudgesInfo){
+
+        if (showJudgesInfo) {
             if (judgeId != null) {
                 if (judgeId.equals(getContest().getClientId())) {
                     result = "Me";
                 } else {
-                    result = judgeId.getName() + " S"+judgeId.getSiteNumber();
+                    result = judgeId.getName() + " S" + judgeId.getSiteNumber();
                 }
                 if (autoJudgedRun) {
                     result = result + "/AJ";
@@ -250,13 +250,14 @@ public class RunsPanel extends JPanePlugin {
 
     /**
      * Return the judgement/status for the run.
+     * 
      * @param run
      * @return a string that represents the state of the run
      */
     private String getJudgementResultString(Run run) {
 
         String result = "";
-        
+
         if (run.isJudged()) {
 
             if (run.isSolved()) {
@@ -289,7 +290,7 @@ public class RunsPanel extends JPanePlugin {
             }
 
         } else {
-            if (showJudgesInfo){
+            if (showJudgesInfo) {
                 result = run.getStatus().toString();
             } else {
                 result = RunStates.NEW.toString();
@@ -305,11 +306,12 @@ public class RunsPanel extends JPanePlugin {
     private boolean isTeam(ClientId clientId) {
         return clientId == null || clientId.getClientType().equals(Type.TEAM);
     }
+
     private boolean isJudge(ClientId clientId) {
         return clientId == null || clientId.getClientType().equals(Type.JUDGE);
     }
-    
-    private boolean isJudge(){
+
+    private boolean isJudge() {
         return isJudge(getContest().getClientId());
     }
 
@@ -337,9 +339,9 @@ public class RunsPanel extends JPanePlugin {
     }
 
     private String getTeamDisplayName(Run run) {
-        
-        if (isJudge() && isTeam(run.getSubmitter())){
-            
+
+        if (isJudge() && isTeam(run.getSubmitter())) {
+
             return displayTeamName.getDisplayName(run.getSubmitter());
         }
         return run.getSubmitter().getName();
@@ -356,63 +358,59 @@ public class RunsPanel extends JPanePlugin {
 
         public void runAdded(RunEvent event) {
             updateRunRow(event.getRun(), event.getWhoModifiedRun(), true);
-            //check if this is a team; if so, pop up a confirmation dialog
-            if (getContest().getClientId().getClientType()==ClientType.Type.TEAM) {
+            // check if this is a team; if so, pop up a confirmation dialog
+            if (getContest().getClientId().getClientType() == ClientType.Type.TEAM) {
                 showResponseToTeam(event);
             }
         }
 
         public void runChanged(RunEvent event) {
             updateRunRow(event.getRun(), event.getWhoModifiedRun(), true);
-            
-            //check if this is a team; if so, pop up a response dialog
-            if (getContest().getClientId().getClientType()==ClientType.Type.TEAM) {
+
+            // check if this is a team; if so, pop up a response dialog
+            if (getContest().getClientId().getClientType() == ClientType.Type.TEAM) {
                 showResponseToTeam(event);
             }
         }
-                
+
         public void runRemoved(RunEvent event) {
             // TODO Auto-generated method stub
         }
-        
+
         /**
-         * Checks the run in the specified run event and (potentially) displays a results
-         * dialog.  If the run has been judged,
-         * has a valid judgement record, and is the "active" judgement for scoring
-         * purposes, displays a modal MessageDialog to the Team containing the judgement
-         * results.  This method assumes the caller has already verified this is a TEAM
-         * client; failure to do that on the caller's part will cause other clients to
-         * see the Run Response dialog...
+         * Checks the run in the specified run event and (potentially) displays a results dialog. If the run has been judged, has a valid judgement record, and is the "active" judgement for scoring
+         * purposes, displays a modal MessageDialog to the Team containing the judgement results. This method assumes the caller has already verified this is a TEAM client; failure to do that on the
+         * caller's part will cause other clients to see the Run Response dialog...
          */
-        private void showResponseToTeam (RunEvent event) {
-            
+        private void showResponseToTeam(RunEvent event) {
+
             Run theRun = event.getRun();
-            String problemName = getContest().getProblem(theRun.getProblemId()).toString() ;
-            String languageName = getContest().getLanguage(theRun.getLanguageId()).toString() ;
-            int runId = theRun.getNumber() ;
-            //build an HTML tag that sets the font size and color for the answer
+            String problemName = getContest().getProblem(theRun.getProblemId()).toString();
+            String languageName = getContest().getLanguage(theRun.getLanguageId()).toString();
+            int runId = theRun.getNumber();
+            // build an HTML tag that sets the font size and color for the answer
             String responseFormat = "";
 
-            //check if the run has been judged 
+            // check if the run has been judged
             if (theRun.isJudged()) {
-                
-                //check if there's a legit judgement
+
+                // check if there's a legit judgement
                 JudgementRecord judgementRecord = theRun.getJudgementRecord();
                 if (judgementRecord != null) {
-                    
-                    //check if this is the scoreable judgement
-                    boolean isActive = judgementRecord.isActive ();
+
+                    // check if this is the scoreable judgement
+                    boolean isActive = judgementRecord.isActive();
                     if (isActive) {
 
-                        String response = getContest().getJudgement(judgementRecord.getJudgementId()).toString() ;
+                        String response = getContest().getJudgement(judgementRecord.getJudgementId()).toString();
 
-                        //it's a valid judging response (presumably to a team); 
-                        //  get the info from the run and display it in a modal popup
+                        // it's a valid judging response (presumably to a team);
+                        // get the info from the run and display it in a modal popup
                         if (judgementRecord.isSolved()) {
-                            responseFormat += "<FONT COLOR=\"00FF00\" SIZE=+2>" ;  //green, larger
+                            responseFormat += "<FONT COLOR=\"00FF00\" SIZE=+2>"; // green, larger
                         } else {
-                            responseFormat += "<FONT COLOR=RED>";               //red, current size
-                            
+                            responseFormat += "<FONT COLOR=RED>"; // red, current size
+
                             String validatorJudgementName = judgementRecord.getValidatorResultString();
                             if (judgementRecord.isUsedValidator() && validatorJudgementName != null) {
                                 if (validatorJudgementName.trim().length() == 0) {
@@ -421,26 +419,23 @@ public class RunsPanel extends JPanePlugin {
                                 response = validatorJudgementName;
                             }
                         }
-                        
-                       String judgeComment = theRun.getCommentsForTeam();
-                       try {
-                            String displayString =
-                                "<HTML><FONT SIZE=+1>Judge's Response<BR><BR>"
-                                + "Problem: <FONT COLOR=BLUE>" +  Utilities.forHTML(problemName) + "</FONT><BR><BR>" 
-                                + "Language: <FONT COLOR=BLUE>" + Utilities.forHTML(languageName)   + "</FONT><BR><BR>" 
-                                + "Run Id: <FONT COLOR=BLUE>" + runId + "</FONT><BR><BR><BR>" 
-                                + "Judge's Response: " + responseFormat + Utilities.forHTML( response )+ "</FONT><BR><BR><BR>" ;
-    
-                            if (judgeComment!=null) {
+
+                        String judgeComment = theRun.getCommentsForTeam();
+                        try {
+                            String displayString = "<HTML><FONT SIZE=+1>Judge's Response<BR><BR>" + "Problem: <FONT COLOR=BLUE>" + Utilities.forHTML(problemName) + "</FONT><BR><BR>"
+                                    + "Language: <FONT COLOR=BLUE>" + Utilities.forHTML(languageName) + "</FONT><BR><BR>" + "Run Id: <FONT COLOR=BLUE>" + runId + "</FONT><BR><BR><BR>"
+                                    + "Judge's Response: " + responseFormat + Utilities.forHTML(response) + "</FONT><BR><BR><BR>";
+
+                            if (judgeComment != null) {
                                 if (judgeComment.length() > 0) {
                                     displayString += "Judge's Comment: " + Utilities.forHTML(judgeComment) + "<BR><BR><BR>";
                                 }
                             }
-                                
-                            displayString += "</FONT></HTML>" ;
+
+                            displayString += "</FONT></HTML>";
 
                             FrameUtilities.showMessage(getParentFrame(), "Run Judgement Received", displayString);
-    
+
                         } catch (Exception e) {
                             // TODO need to make this cleaner
                             JOptionPane.showMessageDialog(null, "Exception handling Run Response: " + e.getMessage());
@@ -451,13 +446,10 @@ public class RunsPanel extends JPanePlugin {
             } else {
                 // not judged
                 try {
-                    String displayString =
-                        "<HTML><FONT SIZE=+1>Confirmation of Run Receipt<BR><BR>"
-                        + "Problem: <FONT COLOR=BLUE>" +  Utilities.forHTML(problemName) + "</FONT><BR><BR>" 
-                        + "Language: <FONT COLOR=BLUE>" + Utilities.forHTML(languageName)   + "</FONT><BR><BR>" 
-                        + "Run Id: <FONT COLOR=BLUE>" + runId + "</FONT><BR><BR><BR>";
-                        
-                    displayString += "</FONT></HTML>" ;
+                    String displayString = "<HTML><FONT SIZE=+1>Confirmation of Run Receipt<BR><BR>" + "Problem: <FONT COLOR=BLUE>" + Utilities.forHTML(problemName) + "</FONT><BR><BR>"
+                            + "Language: <FONT COLOR=BLUE>" + Utilities.forHTML(languageName) + "</FONT><BR><BR>" + "Run Id: <FONT COLOR=BLUE>" + runId + "</FONT><BR><BR><BR>";
+
+                    displayString += "</FONT></HTML>";
 
                     FrameUtilities.showMessage(getParentFrame(), "Run Received", displayString);
 
@@ -484,6 +476,7 @@ public class RunsPanel extends JPanePlugin {
                         requestSelectedRun();
                     }
                 }
+
                 public void rowDeselected(com.ibm.webrunner.j2mclb.event.ListboxEvent e) {
                 }
             });
@@ -492,68 +485,68 @@ public class RunsPanel extends JPanePlugin {
     }
 
     private void resetRunsListBoxColumns() {
-        
+
         runListBox.removeAllRows();
         runListBox.removeAllColumns();
-        
+
         Object[] fullColumns = { "Site", "Team", "Run Id", "Time", "Status", "Problem", "Judge", "Language", "OS" };
         Object[] fullColumnsNoJudge = { "Site", "Team", "Run Id", "Time", "Status", "Problem", "Language", "OS" };
-        Object[] teamColumns = { "Site", "Run Id", "Problem", "Time", "Status",  "Language"};
+        Object[] teamColumns = { "Site", "Run Id", "Problem", "Time", "Status", "Language" };
 
         usingTeamColumns = false;
         usingFullColumns = false;
 
-        if (isTeam(getContest().getClientId())){
+        if (isTeam(getContest().getClientId())) {
             usingTeamColumns = true;
-            runListBox.addColumns(teamColumns);    
-        } else if (! showJudgesInfo){
-            runListBox.addColumns(fullColumnsNoJudge);    
+            runListBox.addColumns(teamColumns);
+        } else if (!showJudgesInfo) {
+            runListBox.addColumns(fullColumnsNoJudge);
         } else {
             usingFullColumns = true;
-            runListBox.addColumns(fullColumns);    
+            runListBox.addColumns(fullColumns);
         }
-        
+
         // Sorters
         HeapSorter sorter = new HeapSorter();
         HeapSorter numericStringSorter = new HeapSorter();
         numericStringSorter.setComparator(new NumericStringComparator());
 
         int idx = 0;
-        
-        if (isTeam(getContest().getClientId())){
-            
-//            Object[] teamColumns = { "Site", "Run Id", "Problem", "Time", "Status",  "Language"};
 
-            runListBox.setColumnSorter(idx++, sorter, 3);  // Site
+        if (isTeam(getContest().getClientId())) {
+
+            // Object[] teamColumns = { "Site", "Run Id", "Problem", "Time", "Status", "Language"};
+
+            runListBox.setColumnSorter(idx++, sorter, 3); // Site
             runListBox.setColumnSorter(idx++, numericStringSorter, 2); // Run Id
-            runListBox.setColumnSorter(idx++, sorter, 4); // Problem 
-            runListBox.setColumnSorter(idx++, numericStringSorter, 1); // Time 
-            runListBox.setColumnSorter(idx++, sorter, 5); // Status 
+            runListBox.setColumnSorter(idx++, sorter, 4); // Problem
+            runListBox.setColumnSorter(idx++, numericStringSorter, 1); // Time
+            runListBox.setColumnSorter(idx++, sorter, 5); // Status
             runListBox.setColumnSorter(idx++, sorter, 6); // Language
-            
+
         } else if (showJudgesInfo) {
 
-//          Object[] fullColumns = { "Site", "Team", "Run Id", "Time", "Status", "Problem", "Judge", "Language", "OS" };
+            // Object[] fullColumns = { "Site", "Team", "Run Id", "Time", "Status", "Problem", "Judge", "Language", "OS" };
 
-            runListBox.setColumnSorter(idx++, sorter, 3);  // Site
+            runListBox.setColumnSorter(idx++, sorter, 3); // Site
             runListBox.setColumnSorter(idx++, sorter, 2); // Team
             runListBox.setColumnSorter(idx++, numericStringSorter, 1); // Run Id
-            runListBox.setColumnSorter(idx++, numericStringSorter, 4); // Time 
-            runListBox.setColumnSorter(idx++, sorter, 5); // Status 
-            runListBox.setColumnSorter(idx++, sorter, 6); // Problem 
+            runListBox.setColumnSorter(idx++, numericStringSorter, 4); // Time
+            runListBox.setColumnSorter(idx++, sorter, 5); // Status
+            runListBox.setColumnSorter(idx++, sorter, 6); // Problem
             runListBox.setColumnSorter(idx++, sorter, 7); // Judge
             runListBox.setColumnSorter(idx++, sorter, 8); // Language
             runListBox.setColumnSorter(idx++, sorter, 9); // OS
-            
+
         } else {
 
-//          Object[] fullColumnsNoJudge = { "Site", "Team", "Run Id", "Time", "Status", "Problem", "Language", "OS" };
-            runListBox.setColumnSorter(idx++, sorter, 2);  // Site
+            // Object[] fullColumnsNoJudge = { "Site", "Team", "Run Id", "Time", "Status", "Problem", "Language", "OS" };
+            runListBox.setColumnSorter(idx++, sorter, 2); // Site
             runListBox.setColumnSorter(idx++, sorter, 3); // Team
             runListBox.setColumnSorter(idx++, numericStringSorter, 1); // Run Id
-            runListBox.setColumnSorter(idx++, numericStringSorter, 4); // Time 
-            runListBox.setColumnSorter(idx++, sorter, 5); // Status 
-            runListBox.setColumnSorter(idx++, sorter, 6); // Problem 
+            runListBox.setColumnSorter(idx++, numericStringSorter, 4); // Time
+            runListBox.setColumnSorter(idx++, sorter, 5); // Status
+            runListBox.setColumnSorter(idx++, sorter, 6); // Problem
             runListBox.setColumnSorter(idx++, sorter, 8); // Language
             runListBox.setColumnSorter(idx++, sorter, 9); // OS
         }
@@ -563,6 +556,7 @@ public class RunsPanel extends JPanePlugin {
 
     /**
      * Remove run from grid.
+     * 
      * @param run
      */
     private void removeRunRow(final Run run) {
@@ -580,19 +574,18 @@ public class RunsPanel extends JPanePlugin {
     }
 
     /**
-     * This updates the rowCountlabel & toolTipText.
-     * It should be called only while on the swing thread.
+     * This updates the rowCountlabel & toolTipText. It should be called only while on the swing thread.
      */
     private void updateRowCount() {
-        rowCountLabel.setText(""+runListBox.getRowCount());
-        rowCountLabel.setToolTipText("There are "+runListBox.getRowCount()+" runs");
+        rowCountLabel.setText("" + runListBox.getRowCount());
+        rowCountLabel.setToolTipText("There are " + runListBox.getRowCount() + " runs");
     }
-    
+
     public void updateRunRow(final Run run, final ClientId whoModifiedId, final boolean autoSizeAndSort) {
-        
-        if (filter != null){
-            
-            if (! filter.matches(run)){
+
+        if (filter != null) {
+
+            if (!filter.matches(run)) {
                 // if run does not match filter, be sure to remove it from grid
                 // This applies when a run is New then BEING_JUDGED and other conditions.
                 removeRunRow(run);
@@ -602,7 +595,7 @@ public class RunsPanel extends JPanePlugin {
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                
+
                 ClientId whoJudgedId = whoModifiedId;
                 if (run.isJudged()) {
                     JudgementRecord judgementRecord = run.getJudgementRecord();
@@ -610,7 +603,7 @@ public class RunsPanel extends JPanePlugin {
                         whoJudgedId = judgementRecord.getJudgerClientId();
                     }
                 }
-                
+
                 Object[] objects = buildRunRow(run, whoJudgedId);
                 int rowNumber = runListBox.getIndexByKey(run.getElementId());
                 if (rowNumber == -1) {
@@ -618,13 +611,13 @@ public class RunsPanel extends JPanePlugin {
                 } else {
                     runListBox.replaceRow(objects, rowNumber);
                 }
-                
+
                 if (isAllowed(Permission.Type.JUDGE_RUN)) {
                     if (runListBox.getRowCount() == 1) {
                         emitSound();
                     }
                 }
-                
+
                 if (autoSizeAndSort) {
                     updateRowCount();
                     runListBox.autoSizeAllColumns();
@@ -633,11 +626,8 @@ public class RunsPanel extends JPanePlugin {
                 if (selectJudgementFrame != null) {
                     // return focus to the other frame if it is around
                     /*
-                     * XXX this is hack which causes the frame to flicker
-                     * when coming from the listbox double click
-                     * as it comes in front, goes behind, then comes back in front. 
-                     * But could not find another way to keep focus on the selectJudgementFrame,
-                     * otherwise it would be beind the RunsPanel
+                     * XXX this is hack which causes the frame to flicker when coming from the listbox double click as it comes in front, goes behind, then comes back in front. But could not find
+                     * another way to keep focus on the selectJudgementFrame, otherwise it would be beind the RunsPanel
                      */
                     selectJudgementFrame.requestFocus();
                 }
@@ -648,18 +638,18 @@ public class RunsPanel extends JPanePlugin {
     public void reloadRunList() {
 
         Run[] runs = getContest().getRuns();
-        
-        if (isJudge()){
+
+        if (isJudge()) {
             ContestInformation contestInformation = getContest().getContestInformation();
             displayTeamName.setTeamDisplayMask(contestInformation.getTeamDisplayMode());
         }
-        
+
         // TODO bulk load these records, this is closer only do the count,size,sort at end
 
         for (Run run : runs) {
-            
-            if (filter != null){
-                if (! filter.matches(run)){
+
+            if (filter != null) {
+                if (!filter.matches(run)) {
                     continue;
                 }
             }
@@ -684,31 +674,30 @@ public class RunsPanel extends JPanePlugin {
             }
         });
     }
-    
+
     private void emitSound() {
         if (isMakeSoundOnOneRun()) {
             java.awt.Toolkit.getDefaultToolkit().beep();
         }
     }
-    
-    private boolean isAllowed (Permission.Type type){
+
+    private boolean isAllowed(Permission.Type type) {
         return permissionList.isAllowed(type);
     }
-    
-    
+
     private void initializePermissions() {
         Account account = getContest().getAccount(getContest().getClientId());
-        if (account != null){
+        if (account != null) {
             permissionList.clearAndLoadPermissions(account.getPermissionList());
         }
     }
 
     private void updateGUIperPermissions() {
-        
-        if (showNewRunsOnly){
+
+        if (showNewRunsOnly) {
 
             // Show New Runs
-            
+
             requestRunButton.setVisible(true);
             requestRunButton.setEnabled(isAllowed(Permission.Type.JUDGE_RUN));
             editRunButton.setVisible(false);
@@ -719,42 +708,42 @@ public class RunsPanel extends JPanePlugin {
             viewJudgementsButton.setVisible(false);
             autoJudgeButton.setVisible(false);
         } else {
-        
+
             // Show ALL Runs
-            
+
             requestRunButton.setVisible(isAllowed(Permission.Type.JUDGE_RUN));
             editRunButton.setVisible(isAllowed(Permission.Type.EDIT_RUN));
             extractButton.setVisible(isAllowed(Permission.Type.EXTRACT_RUNS));
             giveButton.setVisible(isAllowed(Permission.Type.GIVE_RUN));
-            
+
             takeButton.setVisible(false);
-//            takeButton.setVisible(isAllowed(Permission.Type.TAKE_RUN));
+            // takeButton.setVisible(isAllowed(Permission.Type.TAKE_RUN));
             rejudgeRunButton.setVisible(isAllowed(Permission.Type.REJUDGE_RUN));
             viewJudgementsButton.setVisible(isAllowed(Permission.Type.VIEW_RUN_JUDGEMENT_HISTORIES));
             autoJudgeButton.setVisible(isAllowed(Permission.Type.ALLOWED_TO_AUTO_JUDGE));
-            
+
         }
-        
+
         // TODO when this is working make visible
         filterButton.setVisible(false);
     }
-    
+
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
-        
+
         log = getController().getLog();
-        
+
         displayTeamName = new DisplayTeamName();
         displayTeamName.setContestAndController(inContest, inController);
 
         initializePermissions();
-        
+
         editRunFrame.setContestAndController(getContest(), getController());
         viewJudgementsFrame.setContestAndController(getContest(), getController());
         if (isAllowed(Permission.Type.JUDGE_RUN)) {
             selectJudgementFrame.setContestAndController(getContest(), getController());
         }
-        
+
         if (bUseAutoJudgemonitor) {
             autoJudgingMonitor.setContestAndController(getContest(), getController());
         }
@@ -789,7 +778,7 @@ public class RunsPanel extends JPanePlugin {
             messageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
             messagePanel = new JPanel();
             messagePanel.setLayout(new BorderLayout());
-            messagePanel.setPreferredSize(new java.awt.Dimension(30,30));
+            messagePanel.setPreferredSize(new java.awt.Dimension(30, 30));
             messagePanel.add(messageLabel, java.awt.BorderLayout.CENTER);
             messagePanel.add(rowCountLabel, java.awt.BorderLayout.EAST);
         }
@@ -807,7 +796,7 @@ public class RunsPanel extends JPanePlugin {
             flowLayout.setHgap(5);
             buttonPanel = new JPanel();
             buttonPanel.setLayout(flowLayout);
-            buttonPanel.setPreferredSize(new java.awt.Dimension(35,35));
+            buttonPanel.setPreferredSize(new java.awt.Dimension(35, 35));
             buttonPanel.add(getGiveButton(), null);
             buttonPanel.add(getTakeButton(), null);
             buttonPanel.add(getEditRunButton(), null);
@@ -846,25 +835,26 @@ public class RunsPanel extends JPanePlugin {
             showMessage("Unable to request run, check log");
             return;
         }
-        int [] selectedIndexes = runListBox.getSelectedIndexes();
-        
-        if (selectedIndexes.length < 1){
+        int[] selectedIndexes = runListBox.getSelectedIndexes();
+
+        if (selectedIndexes.length < 1) {
             showMessage("Please select a run ");
             return;
         }
-        
-        if (JudgeView.isAlreadyJudgingRun()){
+
+        if (JudgeView.isAlreadyJudgingRun()) {
             JOptionPane.showMessageDialog(this, "Already judging run");
             return;
         }
-        
+
         JudgeView.setAlreadyJudgingRun(true);
-        
+
         try {
             ElementId elementId = (ElementId) runListBox.getKeys()[selectedIndexes[0]];
             Run runToEdit = getContest().getRun(elementId);
-            
-            if ((! runToEdit.getStatus().equals(RunStates.NEW)) || runToEdit.isDeleted()){
+
+            if ((!(runToEdit.getStatus().equals(RunStates.NEW) || runToEdit.getStatus().equals(RunStates.MANUAL_REVIEW)))
+                    || runToEdit.isDeleted()) {
                 showMessage("Not allowed to request run (run not status NEW) ");
                 JudgeView.setAlreadyJudgingRun(false);
                 return;
@@ -875,9 +865,9 @@ public class RunsPanel extends JPanePlugin {
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception logged ", e);
             showMessage("Unable to request run, check log");
-        }   
+        }
     }
-    
+
     protected void rejudgeSelectedRun() {
 
         int[] selectedIndexes = runListBox.getSelectedIndexes();
@@ -939,15 +929,15 @@ public class RunsPanel extends JPanePlugin {
     }
 
     protected void filterRuns() {
-        
+
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 reloadRunList();
-                rowCountLabel.setText(""+runListBox.getRowCount());
-                rowCountLabel.setToolTipText("There are "+runListBox.getRowCount()+" runs");
+                rowCountLabel.setText("" + runListBox.getRowCount());
+                rowCountLabel.setToolTipText("There are " + runListBox.getRowCount() + " runs");
             }
         });
-        
+
     }
 
     /**
@@ -970,14 +960,14 @@ public class RunsPanel extends JPanePlugin {
     }
 
     protected void editSelectedRun() {
-        
-        int [] selectedIndexes = runListBox.getSelectedIndexes();
-        
-        if (selectedIndexes.length < 1){
+
+        int[] selectedIndexes = runListBox.getSelectedIndexes();
+
+        if (selectedIndexes.length < 1) {
             showMessage("Please select a run ");
             return;
         }
-        
+
         try {
             ElementId elementId = (ElementId) runListBox.getKeys()[selectedIndexes[0]];
             Run runToEdit = getContest().getRun(elementId);
@@ -988,8 +978,7 @@ public class RunsPanel extends JPanePlugin {
             log.log(Log.WARNING, "Exception logged ", e);
             showMessage("Unable to edit run, check log");
         }
-        
-        
+
     }
 
     /**
@@ -1070,7 +1059,7 @@ public class RunsPanel extends JPanePlugin {
             takeButton.setMnemonic(java.awt.event.KeyEvent.VK_T);
             takeButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.out.println("Take actionPerformed()"); 
+                    System.out.println("Take actionPerformed()");
                     // TODO Auto-generated Event stub actionPerformed()
                 }
             });
@@ -1113,36 +1102,32 @@ public class RunsPanel extends JPanePlugin {
         }
         return viewJudgementsButton;
     }
-    
+
     protected void viewSelectedRunJudgements() {
-        
-        int [] selectedIndexes = runListBox.getSelectedIndexes();
-        
-        if (selectedIndexes.length < 1){
+
+        int[] selectedIndexes = runListBox.getSelectedIndexes();
+
+        if (selectedIndexes.length < 1) {
             showMessage("Please select a run ");
             return;
         }
-        
+
         try {
             ElementId elementId = (ElementId) runListBox.getKeys()[selectedIndexes[0]];
             Run theRun = getContest().getRun(elementId);
-            
-            if (theRun != null){
+
+            if (theRun != null) {
                 viewJudgementsFrame.setRun(theRun);
                 viewJudgementsFrame.setVisible(true);
             } else {
                 showMessage("Can not display judgements for Run");
             }
 
-            
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception logged ", e);
             showMessage("Unable to view run, check log");
         }
-        
-        
 
-        
     }
 
     /**
@@ -1159,8 +1144,7 @@ public class RunsPanel extends JPanePlugin {
             // check if is this account
             Account account = event.getAccount();
             /**
-             * If this is the account then update the GUI display per
-             * the potential change in Permissions.
+             * If this is the account then update the GUI display per the potential change in Permissions.
              */
             if (getContest().getClientId().equals(account.getClientId())) {
                 // They modified us!!
@@ -1171,7 +1155,7 @@ public class RunsPanel extends JPanePlugin {
                         reloadRunList();
                     }
                 });
-                
+
             } else {
                 // not us, but update the grid anyways
                 SwingUtilities.invokeLater(new Runnable() {
@@ -1181,12 +1165,12 @@ public class RunsPanel extends JPanePlugin {
                 });
 
             }
-            
+
         }
 
         public void accountsAdded(AccountEvent accountEvent) {
             // ignore, this does not affect me
-            
+
         }
 
         public void accountsModified(AccountEvent accountEvent) {
@@ -1211,7 +1195,7 @@ public class RunsPanel extends JPanePlugin {
                 }
             });
         }
-        
+
     }
 
     /**
@@ -1259,13 +1243,13 @@ public class RunsPanel extends JPanePlugin {
             // ignore does not affect this pane
         }
     }
-    
+
     /**
      * 
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
-    
+
     public class ContestInformationListenerImplementation implements IContestInformationListener {
 
         public void contestInformationAdded(ContestInformationEvent event) {
@@ -1286,9 +1270,9 @@ public class RunsPanel extends JPanePlugin {
 
         public void contestInformationRemoved(ContestInformationEvent event) {
             // TODO Auto-generated method stub
-            
+
         }
-        
+
     }
 
     private void showMessage(final String string) {
@@ -1309,15 +1293,16 @@ public class RunsPanel extends JPanePlugin {
     public void setShowNewRunsOnly(boolean showNewRunsOnly) {
         this.showNewRunsOnly = showNewRunsOnly;
 
-        if (showNewRunsOnly){
-            if (filter == null){
+        if (showNewRunsOnly) {
+            if (filter == null) {
                 filter = new Filter();
             }
             filter.addRunState(RunStates.NEW);
-            filter.addRunState(RunStates.QUEUED_FOR_JUDGEMENT);
+            filter.addRunState(RunStates.MANUAL_REVIEW
+                    );
         }
         // TODO code handle if they turn off the show new clarifications only.
-        
+
     }
 
     public boolean isShowJudgesInfo() {
@@ -1373,7 +1358,7 @@ public class RunsPanel extends JPanePlugin {
             return;
         }
         if (isAutoJudgingEnabled()) {
-            // RE-enable local auto judge flag 
+            // RE-enable local auto judge flag
             autoJudgingMonitor.startAutoJudging();
         } else {
             showMessage("Administrator has turned off Auto Judging");
@@ -1387,6 +1372,5 @@ public class RunsPanel extends JPanePlugin {
     public void setMakeSoundOnOneRun(boolean makeSoundOnOneRun) {
         this.makeSoundOnOneRun = makeSoundOnOneRun;
     }
-    
-    
+
 } // @jve:decl-index=0:visual-constraint="10,10"

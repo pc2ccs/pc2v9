@@ -1937,9 +1937,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         return new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
     }
 
-    public void checkOutRun(Run run, boolean readOnly) {
+    public void checkOutRun(Run run, boolean readOnly, boolean computerJudge) {
         ClientId clientId = contest.getClientId();
-        Packet packet = PacketFactory.createRunRequest(clientId, getServerClientId(), run, clientId, readOnly);
+        Packet packet = PacketFactory.createRunRequest(clientId, getServerClientId(), run, clientId, readOnly, computerJudge);
         sendToLocalServer(packet);
     }
 

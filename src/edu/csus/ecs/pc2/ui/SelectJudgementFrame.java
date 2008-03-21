@@ -88,7 +88,7 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
             if (rejudgeRun){
                 controller.checkOutRejudgeRun(theRun);
             } else {
-                controller.checkOutRun(theRun, false);
+                controller.checkOutRun(theRun, false, false);
             }
         }
     }

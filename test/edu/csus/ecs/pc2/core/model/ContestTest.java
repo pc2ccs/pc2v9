@@ -67,7 +67,7 @@ public class ContestTest extends TestCase {
         // Judge gets run
         
         try {
-            contest.checkoutRun(submittedRun, judgeId, false);
+            contest.checkoutRun(submittedRun, judgeId, false, false);
             System.out.println(judgeId+" checked out"+submittedRun);
         } catch (RunUnavailableException e) {
             e.printStackTrace();
@@ -77,7 +77,7 @@ public class ContestTest extends TestCase {
         ClientId judgeId2 = judges[2].getClientId();
 
         try {
-            contest.checkoutRun(submittedRun, judgeId, false);
+            contest.checkoutRun(submittedRun, judgeId, false, false);
             assertTrue ("Checked out run, should have not checked out run ", false);
         } catch (RunUnavailableException e) {
             // Test passes if reaches here
@@ -92,7 +92,7 @@ public class ContestTest extends TestCase {
         }
         
         try {
-            contest.checkoutRun(submittedRun, judgeId2, false);
+            contest.checkoutRun(submittedRun, judgeId2, false, false);
         } catch (RunUnavailableException e) {
             e.printStackTrace();
             assertTrue ("Failed to checkout run, should have checked out run to "+judgeId2, false);

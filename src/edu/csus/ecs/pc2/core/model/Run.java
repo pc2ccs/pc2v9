@@ -72,7 +72,7 @@ public class Run extends ISubmission {
         /**
          * Queued for Computer Judged "New"
          */
-        QUEUED_FOR_JUDGEMENT,
+        QUEUED_FOR_COMPUTER_JUDGEMENT,
         
         /**
          *  Computer Judged "BEING_JUDGED"
@@ -82,7 +82,7 @@ public class Run extends ISubmission {
         /**
          * NEW, shown on New
          */
-        READY_FOR_CONFIRMATION
+        MANUAL_REVIEW
     }
 
     private Vector<JudgementRecord> judgementList = new Vector <JudgementRecord>();
@@ -109,7 +109,7 @@ public class Run extends ISubmission {
 
         // check if problem is to be "computer judged" or manual judged 
         if (problemId.isComputerJudged()) {
-            status = Run.RunStates.QUEUED_FOR_JUDGEMENT;
+            status = Run.RunStates.QUEUED_FOR_COMPUTER_JUDGEMENT;
         } else {
             status = Run.RunStates.NEW;
         }

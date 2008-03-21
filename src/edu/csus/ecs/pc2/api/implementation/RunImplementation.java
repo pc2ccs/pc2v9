@@ -228,7 +228,7 @@ public class RunImplementation implements IRun {
             fetchRunListenerImplemenation = new FetchRunListenerImplemenation();
             internalContest.addRunListener(fetchRunListenerImplemenation);
         }
-        controller.checkOutRun(run, true);
+        controller.checkOutRun(run, true, false);
         synchronized (listening) {
             while (! answerReceived) {
                 try {

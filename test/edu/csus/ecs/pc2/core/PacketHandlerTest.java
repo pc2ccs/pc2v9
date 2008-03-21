@@ -73,7 +73,7 @@ public class PacketHandlerTest extends TestCase {
 
         Run run = contest.getRuns()[1];
 
-        Packet packet = PacketFactory.createRunRequest(teamId, serverId, run, teamId, false);
+        Packet packet = PacketFactory.createRunRequest(teamId, serverId, run, teamId, false, false);
         try {
 
             ConnectionHandlerID connectionHandlerID = new ConnectionHandlerID("Client " + teamId.toString());
@@ -94,7 +94,7 @@ public class PacketHandlerTest extends TestCase {
         // Security Leve OFF
         controller.setSecurityLevel(InternalController.SECURITY_NONE_LEVEL);
 
-        packet = PacketFactory.createRunRequest(teamId, serverId, run, teamId, false);
+        packet = PacketFactory.createRunRequest(teamId, serverId, run, teamId, false, false);
         try {
 
             ConnectionHandlerID connectionHandlerID = new ConnectionHandlerID("Client " + teamId.toString());

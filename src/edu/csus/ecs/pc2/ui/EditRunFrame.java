@@ -77,7 +77,7 @@ public class EditRunFrame extends JFrame implements UIPlugin {
         } else {
             setTitle("Edit Run " + theRun.getNumber() + " (Site " + theRun.getSiteNumber() + ")");
             run = theRun;
-            controller.checkOutRun(theRun, true);
+            controller.checkOutRun(theRun, true, false);
         }
         getRunPane().setRun(theRun);
     }

@@ -124,7 +124,7 @@ public class AutoJudgingMonitor implements UIPlugin {
         Run[] runs = contest.getRuns();
 
         for (Run run : runs) {
-            if (run.getStatus() == RunStates.QUEUED_FOR_JUDGEMENT) {
+            if (run.getStatus() == RunStates.QUEUED_FOR_COMPUTER_JUDGEMENT) {
                 if (filter.matches(run)) {
                     return run;
                 }
@@ -441,7 +441,7 @@ public class AutoJudgingMonitor implements UIPlugin {
         autoJudgeStatusFrame.updateStatusLabel("Fetching Run " + run.getNumber() + " (Site " + run.getSiteNumber() + ")");
         autoJudgeStatusFrame.updateMessage(getRunDescription(run));
 
-        controller.checkOutRun(run, false);
+        controller.checkOutRun(run, false, true); 
 
         answerReceived = false;
 

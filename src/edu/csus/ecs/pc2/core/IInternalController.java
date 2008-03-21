@@ -157,9 +157,9 @@ public interface IInternalController {
      * Request a run from the server.
      * @param run - the run to retrieve
      * @param readOnly - do not check out run just fetch the run.
+     * @param computerJudge - is this a computer judger
      */
-    void checkOutRun (Run run, boolean readOnly);
-    
+    void checkOutRun (Run run, boolean readOnly, boolean computerJudge);
     
     /**
      * Request to checkout a judged run, to rejudge the run.

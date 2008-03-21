@@ -230,6 +230,8 @@ public final class PacketFactory {
     
     public static final String  EXCEPTION = "EXCEPTION";
 
+    public static final String COMPUTER_JUDGE = "COMPUTER_JUDGE";
+
     /**
      * Constructor is private as this is a utility class which should not be extended or invoked.
      */
@@ -1008,11 +1010,12 @@ public final class PacketFactory {
      * @param requesingId
      * @param readOnly - request a read only (fetch) of the run
      */
-    public static Packet createRunRequest(ClientId source, ClientId destination, Run run, ClientId requesingId, boolean readOnly) {
+    public static Packet createRunRequest(ClientId source, ClientId destination, Run run, ClientId requesingId, boolean readOnly, boolean computerJudge) {
         Properties props = new Properties();
         props.put(PacketFactory.RUN, run);
         props.put(PacketFactory.CLIENT_ID, requesingId);
         props.put(PacketFactory.READ_ONLY, new Boolean(readOnly));
+        props.put(PacketFactory.COMPUTER_JUDGE, new Boolean(computerJudge));
         Packet packet = new Packet(Type.RUN_REQUEST, source, destination, props);
         return packet;
     }

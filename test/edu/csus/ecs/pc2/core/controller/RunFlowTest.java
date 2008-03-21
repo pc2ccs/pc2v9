@@ -132,7 +132,7 @@ public class RunFlowTest extends TestCase {
                 
                 // Request the run
                 System.err.println("Judge - checking out run "+event.getRun());
-                checkOutRun (event.getRun(), false);
+                checkOutRun (event.getRun(), false, false);
             }
 
             public void runChanged(RunEvent event) {

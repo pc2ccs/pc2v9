@@ -193,14 +193,27 @@ public class RunList implements Serializable {
      * Update run, increment version number add judgement.
      * @param run
      */
-    public void updateRun(Run run, JudgementRecord judgement) {
+    public void updateRun(Run run, JudgementRecord judgement, boolean manualReview) {
         Run theRun = runHash.get(getRunKey(run));
         theRun.getElementId().incrementVersionNumber();
-        theRun.setStatus(RunStates.JUDGED);
+
+        if (theRun.getStatus().equals(RunStates.BEING_JUDGED)) {
+            
+            if (manualReview) {
+                theRun.setStatus(RunStates.MANUAL_REVIEW);
+            } else {
+                theRun.setStatus(RunStates.JUDGED);
+            }
+        } else {
+            theRun.setStatus(RunStates.JUDGED);
+        }
+            
+        
+        
         theRun.addJudgement(judgement);
         writeToDisk();
     }
-
+    
     public Enumeration <Run> getRunList() {
         return runHash.elements();
     }

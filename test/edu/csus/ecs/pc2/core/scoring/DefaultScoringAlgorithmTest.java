@@ -325,7 +325,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
     
     private void checkOutRun (IInternalContest contest, Run run, ClientId judgeId){
         try {
-            contest.checkoutRun(run, judgeId, false);
+            contest.checkoutRun(run, judgeId, false, false);
         } catch (Exception e) {
             e.printStackTrace();
         }

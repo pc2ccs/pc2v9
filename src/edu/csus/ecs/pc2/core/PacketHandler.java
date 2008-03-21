@@ -301,11 +301,12 @@ public class PacketHandler {
             Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
             ClientId requestFromId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
             Boolean readOnly = (Boolean) PacketFactory.getObjectValue(packet, PacketFactory.READ_ONLY);
+            Boolean computerJudge = (Boolean) PacketFactory.getObjectValue(packet, PacketFactory.COMPUTER_JUDGE);
             if (readOnly != null) {
-                fetchRun(packet, run, requestFromId, readOnly.booleanValue(), connectionHandlerID);
+                fetchRun(packet, run, requestFromId, readOnly.booleanValue(), computerJudge.booleanValue(), connectionHandlerID);
 
             } else {
-                requestRun(packet, run, requestFromId, connectionHandlerID);
+                requestRun(packet, run, requestFromId, connectionHandlerID, computerJudge);
             }
 
         } else if (packetType.equals(Type.RUN_REJUDGE_REQUEST)) {
@@ -524,7 +525,7 @@ public class PacketHandler {
                     
                     securityCheck (Permission.Type.REJUDGE_RUN, whoRequestsRunId, connectionHandlerID);
                     
-                    theRun = contest.checkoutRun(run, whoRequestsRunId, true);
+                    theRun = contest.checkoutRun(run, whoRequestsRunId, true, false);
                     RunFiles runFiles = contest.getRunFiles(run);
 
                     // send to Judge
@@ -1573,10 +1574,18 @@ public class PacketHandler {
 
                 Run theRun = contest.getRun(run.getElementId());
 
-                Packet judgementPacket = PacketFactory.createRunJudgement(contest.getClientId(), run.getSubmitter(), theRun, judgementRecord, runResultFiles);
-                if (judgementRecord.isSendToTeam()) {
-                    // Send to team who sent it, send to other server if needed.
-                    controller.sendToClient(judgementPacket);
+                if (judgementRecord.isComputerJudgement()) {
+                    if(contest.getProblem(theRun.getProblemId()).isPrelimaryNotification()) {
+                        Packet judgementPacket = PacketFactory.createRunJudgement(contest.getClientId(), run.getSubmitter(), theRun, judgementRecord, runResultFiles);
+                        controller.sendToClient(judgementPacket);
+                    }
+                }
+                else {
+                    Packet judgementPacket = PacketFactory.createRunJudgement(contest.getClientId(), run.getSubmitter(), theRun, judgementRecord, runResultFiles);
+                    if (judgementRecord.isSendToTeam()) {
+                        // Send to team who sent it, send to other server if needed.
+                        controller.sendToClient(judgementPacket);
+                    }
                 }
                 
                 Packet judgementUpdatePacket = PacketFactory.createRunJudgmentUpdate(contest.getClientId(), PacketFactory.ALL_SERVERS, theRun, whoJudgedId);
@@ -1597,8 +1606,8 @@ public class PacketHandler {
      * @param whoRequestsRunId
      * @throws ContestSecurityException 
      */
-    private void requestRun(Packet packet, Run run, ClientId whoRequestsRunId, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
-        fetchRun(packet,run,whoRequestsRunId, false, connectionHandlerID);
+    private void requestRun(Packet packet, Run run, ClientId whoRequestsRunId, ConnectionHandlerID connectionHandlerID, boolean computerJudge) throws ContestSecurityException {
+        fetchRun(packet,run,whoRequestsRunId, false, computerJudge, connectionHandlerID);
     }
     
     private void requestClarification(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
@@ -1679,7 +1688,7 @@ public class PacketHandler {
      * @param connectionHandlerID 
      * @throws ContestSecurityException 
      */
-    private void fetchRun(Packet packet, Run run, ClientId whoRequestsRunId, boolean readOnly, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
+    private void fetchRun(Packet packet, Run run, ClientId whoRequestsRunId, boolean readOnly, boolean computerJudge, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
 
         if (isServer()) {
 
@@ -1689,7 +1698,7 @@ public class PacketHandler {
                 if (contest.isLocalLoggedIn(serverClientId)) {
 
                     // send request to remote server
-                    Packet requestPacket = PacketFactory.createRunRequest(contest.getClientId(), serverClientId, run, whoRequestsRunId, readOnly);
+                    Packet requestPacket = PacketFactory.createRunRequest(contest.getClientId(), serverClientId, run, whoRequestsRunId, readOnly, computerJudge);
                     controller.sendToRemoteServer(run.getSiteNumber(), requestPacket);
 
                 } else {
@@ -1722,7 +1731,7 @@ public class PacketHandler {
                     try {
                         securityCheck (Permission.Type.JUDGE_RUN, whoRequestsRunId, connectionHandlerID);
                         
-                        theRun = contest.checkoutRun(run, whoRequestsRunId, false);
+                        theRun = contest.checkoutRun(run, whoRequestsRunId, false, computerJudge);
                         
                         RunFiles runFiles = contest.getRunFiles(run);
                         if (runFiles == null) {

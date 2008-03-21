@@ -128,7 +128,7 @@ public class ControllerTest extends TestCase {
         Run run = getSortedRuns(contest)[0];
 
         // Test Run Request
-        Packet packet = PacketFactory.createRunRequest(teamId, serverId, run, teamId, false);
+        Packet packet = PacketFactory.createRunRequest(teamId, serverId, run, teamId, false, false);
 
         testRequest(packet, connectionHandlerID);
 
@@ -136,7 +136,7 @@ public class ControllerTest extends TestCase {
         ClientId judgeId = judgeAccount.getClientId();
 
         try {
-            contest.checkoutRun(run, judgeId, false);
+            contest.checkoutRun(run, judgeId, false, false);
         } catch (RunUnavailableException e) {
             failTest("Judge could not checkout run " + run, e);
         }

@@ -972,7 +972,10 @@ public class InternalContest implements IInternalContest {
 
     public void runUpdated(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles, ClientId whoUpdatedRun) {
         // TODO handle run RunResultsFiles
-        runList.updateRun(run, judgementRecord);
+
+        boolean manualReview = getProblem(run.getProblemId()).isManualReview();
+
+        runList.updateRun(run, judgementRecord, manualReview);
         Run newRun = runList.get(run.getElementId());
         RunEvent runEvent = new RunEvent(RunEvent.Action.CHANGED, newRun, null, null);
         runEvent.setWhoModifiedRun(whoUpdatedRun);
@@ -984,7 +987,7 @@ public class InternalContest implements IInternalContest {
         fireRunListener(runEvent);
     }
     
-    public Run checkoutRun(Run run, ClientId whoChangedRun, boolean reCheckoutRun) throws RunUnavailableException {
+    public Run checkoutRun(Run run, ClientId whoChangedRun, boolean reCheckoutRun, boolean computerJudge) throws RunUnavailableException {
         
         synchronized (runCheckOutList) {
             ClientId clientId = runCheckOutList.get(run.getElementId());
@@ -1000,7 +1003,7 @@ public class InternalContest implements IInternalContest {
                 throw new RunUnavailableException("Run "+ run.getNumber() + " (site " + run.getSiteNumber() + ") not found");
             }
             
-            boolean canBeCheckedOut = newRun.getStatus().equals(RunStates.NEW) || newRun.getStatus().equals(RunStates.QUEUED_FOR_JUDGEMENT);
+            boolean canBeCheckedOut = newRun.getStatus().equals(RunStates.NEW) || newRun.getStatus().equals(RunStates.QUEUED_FOR_COMPUTER_JUDGEMENT);
             
             if (reCheckoutRun && run.isJudged()){
                 canBeCheckedOut = true;
@@ -1108,7 +1111,9 @@ public class InternalContest implements IInternalContest {
 
         } // else - ok
 
-        runList.updateRun(theRun, judgementRecord); // this sets run to JUDGED
+        boolean manualReview = getProblem(theRun.getProblemId()).isManualReview();
+        
+        runList.updateRun(theRun, judgementRecord, manualReview); // this sets run to JUDGED
         
         runResultFilesList.add(theRun, judgementRecord, runResultFiles);
         

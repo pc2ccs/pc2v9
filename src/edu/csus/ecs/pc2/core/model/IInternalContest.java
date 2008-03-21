@@ -471,7 +471,7 @@ public interface IInternalContest {
      * @param whoChangedRun
      * @throws RunUnavailableException - if run already checked out or not NEW.
      */
-    Run checkoutRun (Run run, ClientId whoChangedRun,  boolean reCheckoutRun) throws RunUnavailableException;
+    Run checkoutRun (Run run, ClientId whoChangedRun,  boolean reCheckoutRun, boolean computerJudge) throws RunUnavailableException;
 
     /**
      * Unconditionally update the run.
