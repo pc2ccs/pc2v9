@@ -868,9 +868,23 @@ public class ProblemPane extends JPanePlugin {
                 e.printStackTrace();
             }
 
-            computerJudging.setSelected(inProblem.isComputerJudged());
-            manualReview.setSelected(inProblem.isManualReview());
-            prelimaryNotification.setSelected(inProblem.isPrelimaryNotification());
+            if (inProblem.isComputerJudged()) {
+                manualReview.setSelected(inProblem.isManualReview());
+                manualReview.setEnabled(true);
+
+                if (manualReview.isSelected()) {
+                    prelimaryNotification.setEnabled(true);
+                    prelimaryNotification.setSelected(inProblem.isPrelimaryNotification());
+                } else {
+                    prelimaryNotification.setEnabled(false);
+                }
+            } else {
+                manualReview.setSelected(inProblem.isManualReview());
+                prelimaryNotification.setSelected(inProblem.isPrelimaryNotification());
+
+                manualReview.setSelected(false);
+                prelimaryNotification.setSelected(false);
+            }
 
         } else {
 
@@ -906,6 +920,8 @@ public class ProblemPane extends JPanePlugin {
             computerJudging.setSelected(false);
             manualReview.setSelected(false);
             prelimaryNotification.setSelected(false);
+            manualReview.setEnabled(false);
+            prelimaryNotification.setEnabled(false);
 
         }
 
@@ -1901,7 +1917,12 @@ public class ProblemPane extends JPanePlugin {
             prelimaryNotification.setBounds(new java.awt.Rectangle(168, 122, 328, 21));
             prelimaryNotification.setText("Send Prelimary Notificaiton to the team");
             prelimaryNotification.setEnabled(false);
-            enableUpdateButton();
+            prelimaryNotification.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableUpdateButton();
+                }
+            });
+
         }
         return prelimaryNotification;
     }
