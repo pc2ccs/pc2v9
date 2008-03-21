@@ -114,16 +114,20 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
      */
     private void populateCompilerResults(RunResultFiles runResults) {
 
-        String successMsg = "Success: ";
-        String resultCode = "Result code: ";
-        String compileTime = "Compile time(ms): ";
+        String successMsg = "<HTML>Success: <FONT COLOR=BLUE>";
+        String resultCode = "<HTML>Result code: <FONT COLOR=BLUE>";
+        String compileTime = "<HTML>Compile time(ms): <FONT COLOR=BLUE>";
 
         if (runResults != null) {
             successMsg += !runResults.failedInCompile();
             resultCode +=  runResults.getCompileResultCode();
             compileTime += runResults.getCompileTimeMS();
         }
+        successMsg += "</FONT></HTML>";
+        resultCode += "</FONT></HTML>";
+        compileTime += "</FONT></HTML>";
 
+        
         compileSuccessLabel.setText(successMsg);
         compileResultCodeLabel.setText(resultCode);
         compileTimeLabel.setText(compileTime);
@@ -144,15 +148,19 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
      */
     private void populateExecutionResults(RunResultFiles runResults) {
 
-        String successMsg = "Success: ";
-        String resultCode = "Result code: ";
-        String executeTime = "Execution time(ms): ";
+        String successMsg = "<HTML>Success: <FONT COLOR=BLUE>";
+        String resultCode = "<HTML>Result code: <FONT COLOR=BLUE>";
+        String executeTime = "<HTML>Execution time(ms): <FONT COLOR=BLUE>";
 
         if (runResults != null) {
             successMsg += !runResults.failedInExecute();
             resultCode +=  runResults.getExecutionResultCode();
             executeTime += runResults.getExecuteTimeMS();
         }
+
+        successMsg += "</FONT></HTML>";
+        resultCode += "</FONT></HTML>";
+        executeTime += "</FONT></HTML>";
 
         executionSuccessLabel.setText(successMsg);
         executionResultCodeLabel.setText(resultCode);
@@ -175,10 +183,10 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
      */
     private void populateValidationResults(RunResultFiles runResults) {
 
-        String successMsg = "Success: ";
-        String resultCode = "Result code: ";
-        String validationTime = "Validation time: ";
-        String validationAnswer = "Judgement: ";
+        String successMsg = "<HTML>Success: <FONT COLOR=BLUE>";
+        String resultCode = "<HTML>Result code: <FONT COLOR=BLUE>";
+        String validationTime = "<HTML>Validation time: <FONT COLOR=BLUE>";
+        String validationAnswer = "<HTML>Judgement: <FONT COLOR=BLUE>";
 
         if (runResults != null) {
             successMsg += !runResults.failedInValidating();
@@ -186,6 +194,10 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
             validationTime += runResults.getValidateTimeMS();
             validationAnswer += getJudgement(runResults);
         }
+        successMsg += "</FONT></HTML>";
+        resultCode += "</FONT></HTML>";
+        validationTime += "</FONT></HTML>";
+        validationAnswer += "</FONT></HTML>";
 
         validationSuccessLabel.setText(successMsg);
         validationResultCodeLabel.setText(resultCode);
