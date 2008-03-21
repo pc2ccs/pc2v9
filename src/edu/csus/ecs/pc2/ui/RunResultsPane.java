@@ -8,6 +8,7 @@ import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.border.TitledBorder;
 
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import java.awt.FlowLayout;
 import javax.swing.JButton;
@@ -65,6 +66,10 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
     private JLabel executionTimeLabel = null;
 
     private JLabel validationTimeLabel = null;
+    
+    private MultipleFileViewer compileFileviewer = null;
+    private MultipleFileViewer executeFileviewer = null;
+    private MultipleFileViewer validateFileviewer = null;
 
     /**
      * Constructs an empty RunResultsPane. This constructor is intended for internal use and is only public to comply with the JavaBean specification; it should not be called by external code.
@@ -92,6 +97,7 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
      */
     public void populatePane(RunResultFiles runResults, String title) {
         
+        theRunResults = runResults;
         populateCompilerResults(runResults);
         populateExecutionResults(runResults);
         populateValidationResults(runResults);
@@ -405,7 +411,10 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
             showCompilerOutputButton.setMaximumSize(new java.awt.Dimension(106, 30));
             showCompilerOutputButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.out.println("actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+                    compileFileviewer = new MultipleFileViewer(StaticLog.getLog(), "Compiler Output");
+                    compileFileviewer.addFilePane("Standard Out", theRunResults.getCompilerStdoutFile());
+                    compileFileviewer.addFilePane("Standard Error", theRunResults.getCompilerStderrFile());
+                    compileFileviewer.setVisible(true);
                 }
             });
         }
@@ -427,7 +436,10 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
             showExecutionOutputButton.setMinimumSize(new java.awt.Dimension(106, 30));
             showExecutionOutputButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.out.println("actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+                    executeFileviewer = new MultipleFileViewer(StaticLog.getLog(), "Execution Output");
+                    executeFileviewer.addFilePane("Standard Out", theRunResults.getExecuteStdoutFile());
+                    executeFileviewer.addFilePane("Standard Error", theRunResults.getExecuteStderrFile());
+                    executeFileviewer.setVisible(true);
                 }
             });
         }
@@ -449,7 +461,10 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
             showValidationOutputButton.setPreferredSize(new java.awt.Dimension(120,30));
             showValidationOutputButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.out.println("actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+                    validateFileviewer = new MultipleFileViewer(StaticLog.getLog(), "Validation Output");
+                    validateFileviewer.addFilePane("Standard Out", theRunResults.getValidatorStdoutFile());
+                    validateFileviewer.addFilePane("Standard Error", theRunResults.getValidatorStderrFile());
+                    validateFileviewer.setVisible(true);
                 }
             });
         }

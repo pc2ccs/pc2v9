@@ -408,6 +408,10 @@ public class MultipleFileViewer extends JFrame implements IFileViewer {
      */
     public boolean addFilePane(String title, SerializedFile inFile) {
 
+        if (inFile == null) {
+            return false;
+        }
+        
         if (inFile.getBuffer().length < 1) {
             return false;
         }
