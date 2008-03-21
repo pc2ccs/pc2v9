@@ -463,11 +463,16 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                     }
                 }
             }
+            getManualRunResultsPane().clear();
+
             if (matchingResult != null) {
                 getComputerJudgementPanel().populatePane(matchingResult, "Preliminary Judgement"); 
                 getComputerJudgementPanel().setVisible(true);
+                getExecuteButton().setText("Re-Execute");
             } else {
+                
                 getComputerJudgementPanel().setVisible(false);
+                getExecuteButton().setText("Execute");
 //                getComputerJudgementPanel().populatePane(null, "No Preliminary Judgement"); 
 //                getComputerJudgementPanel().setVisible(true);   //TODO:  this should be false; it's set true here just for testing...
             }
@@ -484,7 +489,9 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             getViewAnswerFileButton().setVisible(false);
             getViewDataFileButton().setVisible(false);
             getViewSourceButton().setVisible(false);
-
+            getManualRunResultsPane().clear();
+            getComputerJudgementPanel().clear();
+            getComputerJudgementPanel().setVisible(false);
         }
         populateComboBoxes();
 
