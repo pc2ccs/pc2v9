@@ -63,10 +63,6 @@ public class Ini {
      */
     private URL iniFileURL = null;
 
-    public Ini() {
-        load();
-    }
-
     /**
      * returns true if key is in file.
      * 
@@ -272,6 +268,7 @@ public class Ini {
        try {
            URL url = new URL(newIni);
            setIniFileURL(url);
+           load();
        } catch (java.net.MalformedURLException e) {
            // it better be a normal file then...
            setIniFile(newIni);
