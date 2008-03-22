@@ -214,9 +214,10 @@ public class Executable {
         fileViewer = new MultipleFileViewer(log);
 
         try {
+            executionData = new ExecutionData();
+
             boolean dirThere = insureDir(executeDirectoryName);
             
-            executionData = new ExecutionData();
 
             if (!dirThere) {
                 log.config("Directory could not be created: " + executeDirectoryName);
