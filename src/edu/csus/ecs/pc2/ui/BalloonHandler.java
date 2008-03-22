@@ -580,6 +580,8 @@ public class BalloonHandler extends JPanePlugin {
     private Balloon buildBalloon(String answer, ClientId submitter, ElementId problemId, Run aRun) {
         BalloonSettings bSettings = balloonSettingsHash.get(Integer.valueOf(submitter.getSiteNumber()));
         Balloon balloon = new Balloon(bSettings, submitter, getContest().getAccount(submitter).getDisplayName(), problemId, getContest().getProblem(problemId).getDisplayName(), answer, aRun);
+        balloon.setContestTitle(getContest().getContestInformation().getContestTitle());
+        balloon.setSiteTitle(getContest().getSite(aRun.getSiteNumber()).getDisplayName());
         Run[] runs = getContest().getRuns(submitter);
         Vector<Problem> v = new Vector<Problem>();
         for (int i = 0; i < runs.length; i++) {

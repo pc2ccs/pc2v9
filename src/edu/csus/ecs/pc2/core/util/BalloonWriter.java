@@ -36,6 +36,8 @@ public class BalloonWriter {
 
     private String myHostName = "";
 
+    private String contestTitle = "";
+    
     /**
      * 
      */
@@ -128,6 +130,9 @@ public class BalloonWriter {
             message.append(print("Team: "+balloon.getClientId().getName()+" ("+balloon.getClientTitle()+")",postscript,x,y));
             message.append(NL);
             y -= 20;
+            message.append(print("Site: "+balloon.getClientId().getSiteNumber()+" - "+balloon.getSiteTitle(),postscript, x, y));
+            message.append(NL);
+            y -= 20;
             message.append(print("Problem: "+balloon.getProblemTitle(),postscript,x,y));
             message.append(NL);
             y -= 20;
@@ -137,6 +142,11 @@ public class BalloonWriter {
                 message.append(NL);
                 y -= 20;
                 message.append(print("RunID: "+balloon.getRun().getNumber(),postscript, x, y));
+                message.append(NL);
+                y -= 20;
+            }
+            if (contestTitle.trim().length() > 0) {
+                message.append(print("Contest Title: "+contestTitle.trim(),postscript, x, y));
                 message.append(NL);
                 y -= 20;
             }
@@ -273,6 +283,9 @@ public class BalloonWriter {
         BalloonSettings balloonSettings = balloon.getBalloonSettings();
         try {
             log.entering(getClass().getName(), "sendBalloon", balloon.getAnswer());
+            if (balloon.getContestTitle() != null) {
+                contestTitle = balloon.getContestTitle();
+            }
             String message = buildBalloonMessage(balloon, false);
             String answer = balloon.getAnswer();
 
@@ -438,7 +451,11 @@ public class BalloonWriter {
                 // "mail from: pc2@ecs.csus.edu"+NL+
                 // "rcpt to: "+to+NL+
                 // "data"+NL+
-                mess = "From: Balloons <pc2@ecs.csus.edu>" + NL + "To: " + mailTo + NL;
+                StringBuffer fromName = new StringBuffer("Balloons");
+                if (contestTitle.trim().length() > 0) {
+                    fromName.append(" - "+contestTitle.trim());
+                }
+                mess = "From: "+fromName.toString()+" <pc2@ecs.csus.edu>" + NL + "To: " + mailTo + NL;
                 os.write(mess.getBytes());
                 message = message + "." + NL;
                 os.write(message.getBytes());
