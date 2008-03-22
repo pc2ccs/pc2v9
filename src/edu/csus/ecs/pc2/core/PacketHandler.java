@@ -460,7 +460,7 @@ public class PacketHandler {
         JudgementRecord judgementRecord = (JudgementRecord) PacketFactory.getObjectValue(packet, PacketFactory.JUDGEMENT_RECORD);
         RunResultFiles runResultFiles = (RunResultFiles) PacketFactory.getObjectValue(packet, PacketFactory.RUN_RESULTS_FILE);
         ClientId whoJudgedRunId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-        judgeRun(run, judgementRecord, runResultFiles, whoJudgedRunId, connectionHandlerID);
+        judgeRun(run, judgementRecord, runResultFiles, whoJudgedRunId, connectionHandlerID, packet);
 
     }
 
@@ -1551,13 +1551,14 @@ public class PacketHandler {
      * @throws ContestSecurityException
      */
     protected void judgeRun(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles, 
-            ClientId whoJudgedId, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
+            ClientId whoJudgedId, ConnectionHandlerID connectionHandlerID, Packet packet) throws ContestSecurityException {
 
         if (isServer()) {
 
             if (!isThisSite(run)) {
 
-                Packet judgementPacket = PacketFactory.createRunJudgement(contest.getClientId(), run.getSubmitter(), run, judgementRecord, runResultFiles);
+                ClientId serverClientId = new ClientId(run.getSiteNumber(), ClientType.Type.SERVER, 0);
+                Packet judgementPacket = PacketFactory.clonePacket(contest.getClientId(), serverClientId, packet);
                 controller.sendToRemoteServer(run.getSiteNumber(), judgementPacket);
 
             } else {
