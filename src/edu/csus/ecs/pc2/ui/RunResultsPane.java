@@ -3,16 +3,19 @@
  */
 package edu.csus.ecs.pc2.ui;
 
+import java.awt.FlowLayout;
 import java.io.Serializable;
-import javax.swing.JPanel;
+
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.StaticLog;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
-import java.awt.FlowLayout;
-import javax.swing.JButton;
-import javax.swing.BoxLayout;
 
 /**
  * This class is a JPanel (extension of JPanePlugin) designed to display the contents of 
@@ -92,6 +95,10 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
         populatePane(theRunResults, defaultTitle);
     }
 
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
+        super.setContestAndController(inContest, inController);
+    }
+    
     /**
      * This method populates this RunResultsPane from the specified RunResultsFile object, or assigns default values if the received RunResultsFile parameter is null.
      */
@@ -226,11 +233,10 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
      */
     private String getJudgement(RunResultFiles runResult) {
         try {
-            return runResult.getJudgementId().toString(); // TODO: map judgementID into judgement name (string)
+            return getContest().getJudgement(runResult.getJudgementId()).toString();
         } catch (Exception e) {
             return "";
         }
-        
     }
 
     /**

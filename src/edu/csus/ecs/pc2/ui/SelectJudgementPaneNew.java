@@ -182,6 +182,9 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         displayTeamName = new DisplayTeamName();
         displayTeamName.setContestAndController(inContest, inController);
 
+        getComputerJudgementPanel().setContestAndController(getContest(), getController());
+        getManualRunResultsPane().setContestAndController(getContest(), getController());
+
         initializePermissions();
 
     }
@@ -457,7 +460,6 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                 //search the RunResultFiles array for a matching result
                 if (runResultFiles != null) {
                     for (int i=0; i<runResultFiles.length; i++) {
-                        System.out.println("hello '" + runResultFiles[i].getJudgementId()+ "'   '" + computerJudgement.getJudgementId()+ "'");
                        if (runResultFiles[i].getJudgementId().equals(computerJudgement.getJudgementId())) {
                            matchingResult = runResultFiles[i];
                            break;                          
