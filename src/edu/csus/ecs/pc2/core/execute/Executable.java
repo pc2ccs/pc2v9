@@ -677,7 +677,7 @@ public class Executable {
     }
 
     private String findPC2JarPath() {
-        String jarDir = ".classes"; // default to .classes (eclipse) directory
+        String jarDir = ".."+File.separator+".classes"+File.pathSeparator; // default to ..\.classes (eclipse) directory
         try {
             String cp = System.getProperty("java.class.path");
             StringTokenizer st = new StringTokenizer(cp, File.pathSeparator);
