@@ -18,6 +18,7 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.Executable;
+import edu.csus.ecs.pc2.core.execute.ExecutionData;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
@@ -308,7 +309,12 @@ public class SelectJudgementPane extends JPanePlugin {
             judgementRecord = new JudgementRecord(judgement.getElementId(), getContest().getClientId(), solved, false);
             judgementRecord.setSendToTeam(getNotifyTeamCheckBox().isSelected());
             
-            runResultFiles = new RunResultFiles(run, run.getProblemId(), judgementRecord, executable.getExecutionData());
+            ExecutionData executionData = null;
+            if (executable != null) {
+                executionData = executable.getExecutionData();
+            }
+            
+            runResultFiles = new RunResultFiles(run, run.getProblemId(), judgementRecord, executionData);
 
         }
         

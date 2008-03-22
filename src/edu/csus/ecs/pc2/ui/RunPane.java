@@ -20,6 +20,7 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.Executable;
+import edu.csus.ecs.pc2.core.execute.ExecutionData;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ElementId;
@@ -254,7 +255,12 @@ public class RunPane extends JPanePlugin {
         
         newRun.setProblemId(problemId);
 
-        runResultFiles = new RunResultFiles(newRun, newRun.getProblemId(), judgementRecord, executable.getExecutionData());
+        ExecutionData executionData = null;
+        if (executable != null) {
+            executionData = executable.getExecutionData();
+        }
+ 
+        runResultFiles = new RunResultFiles(newRun, newRun.getProblemId(), judgementRecord, executionData);
         getController().updateRun(newRun, judgementRecord, runResultFiles);
 
         if (getParentFrame() != null) {

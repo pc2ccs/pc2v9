@@ -18,6 +18,7 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.Executable;
+import edu.csus.ecs.pc2.core.execute.ExecutionData;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
@@ -330,7 +331,12 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
         JudgeView.setAlreadyJudgingRun(false);
 
-        newRunResultFiles = new RunResultFiles(newRun, newRun.getProblemId(), judgementRecord, executable.getExecutionData());
+        ExecutionData executionData = null;
+        if (executable != null) {
+            executionData = executable.getExecutionData();
+        }
+        
+        newRunResultFiles = new RunResultFiles(newRun, newRun.getProblemId(), judgementRecord, executionData);
 
         getController().submitRunJudgement(newRun, judgementRecord, newRunResultFiles);
 
@@ -752,18 +758,34 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
         // Show validator results, if there are any.
 
+        JudgementRecord judgementRecord = null;
+        
         showValidatorControls(false);
         if (executable.isValidationSuccess()) {
             String results = executable.getValidationResults();
             if (results != null && results.trim().length() > 1) {
                 validatorJudgementLabel.setText(executable.getValidationResults());
                 showValidatorControls(true);
+                
+                // working here
+                boolean solved = false;
+
+                ElementId elementId = getValidatorResult(results);
+                Judgement yesJudgement = getContest().getJudgements()[0];
+                if (yesJudgement.getElementId().equals(elementId)) {
+                    solved = true;
+                }
+                judgementRecord = new JudgementRecord(elementId, run.getSubmitter(), solved, true);
+                judgementRecord.setValidatorResultString(results);
+
+                judgementRecord.setSendToTeam(getNotifyTeamCheckBox().isSelected());
+                
             } else {
                 log.warning("execute indicated validator success but getValidationResults returns \"\" or null");
             }
         }
 
-        RunResultFiles rrf = new RunResultFiles(run, run.getProblemId(), null, executable.getExecutionData());
+        RunResultFiles rrf = new RunResultFiles(run, run.getProblemId(), judgementRecord, executable.getExecutionData());
         getManualRunResultsPane().populatePane(rrf, "Manual Results");
         
         executableFileViewer.setVisible(true);

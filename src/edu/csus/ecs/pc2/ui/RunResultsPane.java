@@ -18,8 +18,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
 
 /**
- * This class is a JPanel (extension of JPanePlugin) designed to display the contents of 
- * a {@link RunResult} -- that is, the result of one execution of a submitted run from a team.
+ * This class is a JPanel (extension of JPanePlugin) designed to display the contents of a {@link RunResult} -- that is, the result of one execution of a submitted run from a team.
  * 
  * @author John
  * 
@@ -30,7 +29,7 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
      * 
      */
     private static final long serialVersionUID = 2702736596302432093L;
-    
+
     private final String defaultTitle = "Run Results";
 
     private JPanel compilationPanel = null;
@@ -69,9 +68,11 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
     private JLabel executionTimeLabel = null;
 
     private JLabel validationTimeLabel = null;
-    
+
     private MultipleFileViewer compileFileviewer = null;
+
     private MultipleFileViewer executeFileviewer = null;
+
     private MultipleFileViewer validateFileviewer = null;
 
     /**
@@ -92,18 +93,22 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
     public RunResultsPane(RunResultFiles rrf) {
         this();
         theRunResults = rrf;
-        populatePane(theRunResults, defaultTitle);
+        if (rrf == null) {
+            clear();
+        } else {
+            populatePane(theRunResults, defaultTitle);
+        }
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
     }
-    
+
     /**
      * This method populates this RunResultsPane from the specified RunResultsFile object, or assigns default values if the received RunResultsFile parameter is null.
      */
     public void populatePane(RunResultFiles runResults, String title) {
-        
+
         theRunResults = runResults;
         populateCompilerResults(runResults);
         populateExecutionResults(runResults);
@@ -114,10 +119,10 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
     /**
      * This method sets the "Titled Border" label on the panel.
      */
-    private void setTitle (String title) {
-        ((TitledBorder)this.getBorder()).setTitle(title);
+    private void setTitle(String title) {
+        ((TitledBorder) this.getBorder()).setTitle(title);
     }
-    
+
     /**
      * This method populates the Compiler result fields of the RunResultsPane from the received RunResultFile object. If the pane gets successfully populated, the Compiler "show output" buttons are
      * enabled.
@@ -132,15 +137,18 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
         String compileTime = "<HTML>Compile time(ms): <FONT COLOR=BLUE>";
 
         if (runResults != null) {
-            successMsg += !runResults.failedInCompile();
-            resultCode +=  runResults.getCompileResultCode();
+            successMsg += getYesNo(!runResults.failedInCompile());
+            resultCode += runResults.getCompileResultCode();
             compileTime += runResults.getCompileTimeMS();
+        } else {
+            successMsg += " -- ";
+            resultCode += " -- ";
+            compileTime += " -- ";
         }
         successMsg += "</FONT></HTML>";
         resultCode += "</FONT></HTML>";
         compileTime += "</FONT></HTML>";
 
-        
         compileSuccessLabel.setText(successMsg);
         compileResultCodeLabel.setText(resultCode);
         compileTimeLabel.setText(compileTime);
@@ -149,6 +157,14 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
             showCompilerOutputButton.setEnabled(true);
         } else {
             showCompilerOutputButton.setEnabled(false);
+        }
+    }
+
+    private String getYesNo(boolean b) {
+        if (b) {
+            return "Yes";
+        } else {
+            return "No";
         }
     }
 
@@ -166,11 +182,14 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
         String executeTime = "<HTML>Execution time(ms): <FONT COLOR=BLUE>";
 
         if (runResults != null) {
-            successMsg += !runResults.failedInExecute();
-            resultCode +=  runResults.getExecutionResultCode();
+            successMsg += getYesNo(!runResults.failedInExecute());
+            resultCode += runResults.getExecutionResultCode();
             executeTime += runResults.getExecuteTimeMS();
+        } else {
+            successMsg += " -- ";
+            resultCode += " -- ";
+            executeTime += " -- ";
         }
-
         successMsg += "</FONT></HTML>";
         resultCode += "</FONT></HTML>";
         executeTime += "</FONT></HTML>";
@@ -196,17 +215,34 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
      */
     private void populateValidationResults(RunResultFiles runResults) {
 
+        if (runResults == null) {
+            validationPanel.setVisible(false);
+            return;
+        }
+
+        if (!getContest().getProblem(runResults.getProblemId()).isValidatedProblem()) {
+            validationPanel.setVisible(false);
+        } else {
+            validationPanel.setVisible(true);
+        }
+
         String successMsg = "<HTML>Success: <FONT COLOR=BLUE>";
         String resultCode = "<HTML>Result code: <FONT COLOR=BLUE>";
-        String validationTime = "<HTML>Validation time: <FONT COLOR=BLUE>";
+        String validationTime = "<HTML>Validation time(ms): <FONT COLOR=BLUE>";
         String validationAnswer = "<HTML>Judgement: <FONT COLOR=BLUE>";
 
         if (runResults != null) {
-            successMsg += !runResults.failedInValidating();
-            resultCode +=  runResults.getValidationResultCode();
+            successMsg += getYesNo(!runResults.failedInValidating());
+            resultCode += runResults.getValidationResultCode();
             validationTime += runResults.getValidateTimeMS();
             validationAnswer += getJudgement(runResults);
+        } else {
+            successMsg += " -- ";
+            resultCode += " -- ";
+            validationTime += " -- ";
+            validationAnswer += " -- ";
         }
+
         successMsg += "</FONT></HTML>";
         resultCode += "</FONT></HTML>";
         validationTime += "</FONT></HTML>";
@@ -258,9 +294,9 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
                 new java.awt.Font("Dialog", java.awt.Font.BOLD, 14), java.awt.Color.red);
         titledBorder1.setTitleFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 16));
         this.setLayout(flowLayout);
-        this.setSize(new java.awt.Dimension(210,531));
+        this.setSize(new java.awt.Dimension(210, 531));
         this.setMinimumSize(new java.awt.Dimension(600, 400));
-        this.setPreferredSize(new java.awt.Dimension(200,600));
+        this.setPreferredSize(new java.awt.Dimension(200, 600));
         this.setBorder(titledBorder1);
         this.add(getCompilationPanel(), null);
         this.add(getExecutionPanel(), null);
@@ -309,7 +345,7 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
             compilationPanel.setLayout(new BoxLayout(getCompilationPanel(), BoxLayout.Y_AXIS));
             compilationPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, " Compilation ", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
                     javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Dialog", java.awt.Font.BOLD, 14), java.awt.Color.blue));
-            compilationPanel.setPreferredSize(new java.awt.Dimension(180,150));
+            compilationPanel.setPreferredSize(new java.awt.Dimension(180, 150));
             compilationPanel.add(compileSuccessLabel, null);
             compilationPanel.add(compileResultCodeLabel, null);
             compilationPanel.add(compileTimeLabel, null);
@@ -347,7 +383,7 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
             executionPanel.setLayout(new BoxLayout(getExecutionPanel(), BoxLayout.Y_AXIS));
             executionPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, " Execution ", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
                     javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Dialog", java.awt.Font.BOLD, 14), java.awt.Color.blue));
-            executionPanel.setPreferredSize(new java.awt.Dimension(180,150));
+            executionPanel.setPreferredSize(new java.awt.Dimension(180, 150));
             executionPanel.add(executionSuccessLabel, null);
             executionPanel.add(executionResultCodeLabel, null);
             executionPanel.add(executionTimeLabel, null);
@@ -393,7 +429,7 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
                     null, null));
             validationPanel = new JPanel();
             validationPanel.setLayout(new BoxLayout(getValidationPanel(), BoxLayout.Y_AXIS));
-            validationPanel.setPreferredSize(new java.awt.Dimension(180,180));
+            validationPanel.setPreferredSize(new java.awt.Dimension(180, 180));
             validationPanel.setBorder(titledBorder);
             validationPanel.add(validationSuccessLabel, null);
             validationPanel.add(validationResultCodeLabel, null);
@@ -415,7 +451,7 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
             fileViewer.dispose();
         }
     }
-    
+
     /**
      * This method initializes showStdOutButton
      * 
@@ -426,7 +462,7 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
             showCompilerOutputButton = new JButton();
             showCompilerOutputButton.setText("Show");
             showCompilerOutputButton.setEnabled(false);
-            showCompilerOutputButton.setPreferredSize(new java.awt.Dimension(130,30));
+            showCompilerOutputButton.setPreferredSize(new java.awt.Dimension(130, 30));
             showCompilerOutputButton.setMaximumSize(new java.awt.Dimension(106, 30));
             showCompilerOutputButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -450,7 +486,7 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
         if (showExecutionOutputButton == null) {
             showExecutionOutputButton = new JButton();
             showExecutionOutputButton.setMaximumSize(new java.awt.Dimension(106, 30));
-            showExecutionOutputButton.setPreferredSize(new java.awt.Dimension(120,30));
+            showExecutionOutputButton.setPreferredSize(new java.awt.Dimension(120, 30));
             showExecutionOutputButton.setText("Show");
             showExecutionOutputButton.setEnabled(false);
             showExecutionOutputButton.setMinimumSize(new java.awt.Dimension(106, 30));
@@ -479,7 +515,7 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
             showValidationOutputButton.setMaximumSize(new java.awt.Dimension(106, 30));
             showValidationOutputButton.setMinimumSize(new java.awt.Dimension(106, 30));
             showValidationOutputButton.setEnabled(false);
-            showValidationOutputButton.setPreferredSize(new java.awt.Dimension(120,30));
+            showValidationOutputButton.setPreferredSize(new java.awt.Dimension(120, 30));
             showValidationOutputButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     closeViewer(validateFileviewer);

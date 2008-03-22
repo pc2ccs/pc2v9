@@ -7,12 +7,9 @@ import edu.csus.ecs.pc2.core.execute.ExecutionData;
 /**
  * Run results files/statistics.
  * 
- * This is a collection of files and statistics produced as output for a run,
- * judgement and validation.
+ * This is a collection of files and statistics produced as output for a run, judgement and validation.
  * <P>
- * Each RunResultsFile is associated with a Run and RunJudgement, because
- * each time a submitted run is executed a new judgement/set of statistics
- * can be produced.  
+ * Each RunResultsFile is associated with a Run and RunJudgement, because each time a submitted run is executed a new judgement/set of statistics can be produced.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -28,9 +25,9 @@ public class RunResultFiles implements Serializable {
     private ElementId runId = null;
 
     private ElementId problemId = null;
-    
+
     private ElementId judgementId = null;
-        
+
     private ExecutionData executionData = null;
 
     public RunResultFiles(Run run, ElementId problemId, JudgementRecord judgementRecord, ExecutionData executionData) {
@@ -41,39 +38,63 @@ public class RunResultFiles implements Serializable {
             this.judgementId = judgementRecord.getJudgementId();
         }
         this.executionData = executionData;
-        
+
     }
 
     public SerializedFile getCompilerStderrFile() {
-        return executionData.getCompileStderr();
+        if (executionData == null) {
+            return null;
+        } else {
+            return executionData.getCompileStderr();
+        }
     }
 
     public void setCompilerStderrFile(SerializedFile compilerStderrFile) {
-        executionData.setCompileStderr(compilerStderrFile);
+        if (executionData != null) {
+            executionData.setCompileStderr(compilerStderrFile);
+        }
     }
 
     public SerializedFile getCompilerStdoutFile() {
-        return executionData.getCompileStdout();
+        if (executionData == null) {
+            return null;
+        } else {
+            return executionData.getCompileStdout();
+        }
     }
 
     public void setCompilerStdoutFile(SerializedFile compilerStdoutFile) {
-        executionData.setCompileStderr(compilerStdoutFile);
+        if (executionData != null) {
+            executionData.setCompileStderr(compilerStdoutFile);
+        }
     }
 
     public SerializedFile getExecuteStderrFile() {
-        return executionData.getExecuteStderr();
+        if (executionData == null) {
+            return null;
+        } else {
+            return executionData.getExecuteStderr();
+        }
     }
 
     public void setExecuteStderrFile(SerializedFile executeStderrFile) {
-        executionData.setExecuteStderr(executeStderrFile);
+        if (executionData != null) {
+            executionData.setExecuteStderr(executeStderrFile);
+        }
     }
 
     public SerializedFile getExecuteStdoutFile() {
-        return executionData.getExecuteProgramOutput();
+        if (executionData == null) {
+            return null;
+        } else {
+            return executionData.getExecuteProgramOutput();
+        }
     }
 
     public void setExecuteStdoutFile(SerializedFile executeStdoutFile) {
-        executionData.setExecuteProgramOutput(executeStdoutFile);
+        if (executionData != null) {
+            executionData.setExecuteProgramOutput(executeStdoutFile);
+        }
     }
 
     public ElementId getProblemId() {
@@ -93,82 +114,142 @@ public class RunResultFiles implements Serializable {
     }
 
     public SerializedFile getValidatorStderrFile() {
-        return executionData.getValidationStderr();
+        if (executionData == null) {
+            return null;
+        } else {
+            return executionData.getValidationStderr();
+        }
     }
 
     public void setValidatorStderrFile(SerializedFile validatorStderrFile) {
-        executionData.setValidationStderr(validatorStderrFile);
+        if (executionData != null) {
+            executionData.setValidationStderr(validatorStderrFile);
+        }
     }
 
     public SerializedFile getValidatorStdoutFile() {
-        return executionData.getValidationStdout();
+        if (executionData == null) {
+            return null;
+        } else {
+            return executionData.getValidationStdout();
+        }
     }
 
     public void setValidatorStdoutFile(SerializedFile validatorStdoutFile) {
-        executionData.setValidationStdout(validatorStdoutFile);
-    }
-    
-    public boolean failedInCompile(){
-        return !executionData.isCompileSuccess();
-    }
-    
-    public void setFailedInCompile(boolean failed){
-        executionData.setCompileSuccess(!failed);
+        if (executionData != null) {
+            executionData.setValidationStdout(validatorStdoutFile);
+        }
     }
 
-    public boolean failedInExecute(){
-        return !executionData.isExecuteSucess();
-    }
-    
-    public void setFailedInExecute(boolean failed){
-        executionData.setExecuteSucess(!failed);
+    public boolean failedInCompile() {
+        if (executionData == null) {
+            return false;
+        } else {
+            return !executionData.isCompileSuccess();
+        }
     }
 
-    public boolean failedInValidating(){
-        return !executionData.isValidationSuccess();
+    public void setFailedInCompile(boolean failed) {
+        if (executionData == null) {
+            executionData.setCompileSuccess(!failed);
+        }
     }
-    
-    public void setFailedInValidating(boolean failed){
-        executionData.setValidationSuccess(!failed);
+
+    public boolean failedInExecute() {
+        if (executionData == null) {
+            return false;
+        } else {
+            return !executionData.isExecuteSucess();
+        }
+    }
+
+    public void setFailedInExecute(boolean failed) {
+        if (executionData == null) {
+            executionData.setExecuteSucess(!failed);
+        }
+    }
+
+    public boolean failedInValidating() {
+        if (executionData == null) {
+            return false;
+        } else {
+            return !executionData.isValidationSuccess();
+        }
+    }
+
+    public void setFailedInValidating(boolean failed) {
+        if (executionData == null) {
+            executionData.setValidationSuccess(!failed);
+        }
     }
 
     public long getCompileTimeMS() {
-        return executionData.getCompileTimeMS();
+        if (executionData == null) {
+            return 0;
+        } else {
+            return executionData.getCompileTimeMS();
+        }
     }
 
     public void setCompileTimeMS(long compileTimeMS) {
-        executionData.setCompileTimeMS(compileTimeMS);
+        if (executionData != null) {
+            executionData.setCompileTimeMS(compileTimeMS);
+        }
     }
 
     public long getExecuteTimeMS() {
-        return executionData.getExecuteTimeMS();
+        if (executionData == null) {
+            return 0;
+        } else {
+            return executionData.getExecuteTimeMS();
+        }
     }
 
     public void setExecuteTimeMS(long executeTimeMS) {
-        executionData.setExecuteTimeMS(executeTimeMS);
+        if (executionData != null) {
+            executionData.setExecuteTimeMS(executeTimeMS);
+        }
     }
 
     public long getValidateTimeMS() {
-        return executionData.getvalidateTimeMS();
+        if (executionData == null) {
+            return 0;
+        } else {
+            return executionData.getvalidateTimeMS();
+        }
     }
 
     public void setValidateTimeMS(long validateTimeMS) {
-        executionData.setvalidateTimeMS(validateTimeMS);
+        if (executionData != null) {
+            executionData.setvalidateTimeMS(validateTimeMS);
+        }
     }
 
     public ElementId getJudgementId() {
         return judgementId;
     }
-    
+
     public long getCompileResultCode() {
-        return executionData.getCompileResultCode();
+        if (executionData == null) {
+            return 0;
+        } else {
+            return executionData.getCompileResultCode();
+        }
     }
 
     public long getExecutionResultCode() {
-        return executionData.getExecuteExitValue();
+        if (executionData == null) {
+            return 0;
+        } else {
+            return executionData.getExecuteExitValue();
+        }
     }
 
     public long getValidationResultCode() {
-        return executionData.getValidationReturnCode();
+        if (executionData == null) {
+            return 0;
+        } else {
+            return executionData.getValidationReturnCode();
+        }
     }
 }
