@@ -213,6 +213,13 @@ public class InternalContest implements IInternalContest {
         }
         try {
             clarificationList.loadFromDisk(siteNum);
+            Clarification[] clarList = clarificationList.getList();
+            for (int i = 0; i < clarList.length; i++) {
+                if (clarList[i].getState().equals(ClarificationStates.BEING_ANSWERED)) {
+                    StaticLog.info("Changing Clarification "+clarList[i].getElementId()+" from BEING_ANSWERED by "+ clarList[i].getWhoCheckedItOutId()+ "to NEW");
+                    clarificationList.updateClarification(clarList[i], ClarificationStates.NEW, null);
+                }
+            }
         } catch (Exception e) {
             StaticLog.log("Trouble loading clarifications from disk ", e);
         }
