@@ -788,7 +788,9 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         RunResultFiles rrf = new RunResultFiles(run, run.getProblemId(), judgementRecord, executable.getExecutionData());
         getManualRunResultsPane().populatePane(rrf, "Manual Results");
         
-        executableFileViewer.setVisible(true);
+        if (!getContest().getProblem(run.getProblemId()).isHideOutputWindow()) {
+            executableFileViewer.setVisible(true);
+        }
     }
 
     public void setRunAndFiles(Run theRun, RunFiles runFiles2, RunResultFiles[] theRunResultFiles) {
