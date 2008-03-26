@@ -34,15 +34,14 @@ public class PermissionGroup {
     private void initialize() {
 
         // Give admin all permissions
-        // Give server all permissions
 
         for (Type type : Permission.Type.values()) {
             administratorPermissionList.addPermission(type);
-            serverPermissionList.addPermission(type);
         }
         
         administratorPermissionList.removePermission(Type.DISPLAY_ON_SCOREBOARD);
-        serverPermissionList.removePermission(Type.DISPLAY_ON_SCOREBOARD);
+
+        serverPermissionList.addPermission(Type.VIEW_SECURITY_ALERTS);
 
         /**
          * Team permissions

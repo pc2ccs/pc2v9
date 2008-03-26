@@ -725,7 +725,9 @@ public class SelectJudgementPane extends JPanePlugin {
             }
         }
 
-        executableFileViewer.setVisible(true);
+        if (!getContest().getProblem(run.getProblemId()).isHideOutputWindow()) {
+            executableFileViewer.setVisible(true);
+        }
     }
 
     public void setRunAndFiles(Run theRun, RunFiles runFiles2) {

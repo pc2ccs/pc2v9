@@ -480,6 +480,7 @@ public class ExecuteTimer extends Thread implements
     public void stopTimer() {
         timer.stop();
         getExecuteTimerFrame().setVisible(false);
+        getExecuteTimerFrame().dispose();
     }
 
 }

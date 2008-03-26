@@ -22,6 +22,10 @@ public class Balloon {
 
     private String clientTitle = "";
 
+    private String contestTitle = "";
+
+    private String siteTitle = "";
+    
     private Run run;
 
     // TODO consider changing this to use an enum
@@ -164,6 +168,34 @@ public class Balloon {
      */
     public void setRun(Run run) {
         this.run = run;
+    }
+
+    /**
+     * @return Returns the contestTitle.
+     */
+    public String getContestTitle() {
+        return contestTitle;
+    }
+
+    /**
+     * @param contestTitle The contestTitle to set.
+     */
+    public void setContestTitle(String contestTitle) {
+        this.contestTitle = contestTitle;
+    }
+
+    /**
+     * @return Returns the siteTitle.
+     */
+    public String getSiteTitle() {
+        return siteTitle;
+    }
+
+    /**
+     * @param siteTitle The siteTitle to set.
+     */
+    public void setSiteTitle(String siteTitle) {
+        this.siteTitle = siteTitle;
     }
 
 }
