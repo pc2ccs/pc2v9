@@ -3,7 +3,6 @@
  */
 package edu.csus.ecs.pc2.ui;
 
-import java.awt.FlowLayout;
 import java.io.Serializable;
 
 import javax.swing.BoxLayout;
@@ -134,7 +133,7 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
 
         String successMsg = "<HTML>Success: <FONT COLOR=BLUE>";
         String resultCode = "<HTML>Result code: <FONT COLOR=BLUE>";
-        String compileTime = "<HTML>Compile time(ms): <FONT COLOR=BLUE>";
+        String compileTime = "<HTML>Compile time (ms): <FONT COLOR=BLUE>";
 
         if (runResults != null) {
             successMsg += getYesNo(!runResults.failedInCompile());
@@ -179,7 +178,7 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
 
         String successMsg = "<HTML>Success: <FONT COLOR=BLUE>";
         String resultCode = "<HTML>Result code: <FONT COLOR=BLUE>";
-        String executeTime = "<HTML>Execution time(ms): <FONT COLOR=BLUE>";
+        String executeTime = "<HTML>Execution time (ms): <FONT COLOR=BLUE>";
 
         if (runResults != null) {
             successMsg += getYesNo(!runResults.failedInExecute());
@@ -228,7 +227,7 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
 
         String successMsg = "<HTML>Success: <FONT COLOR=BLUE>";
         String resultCode = "<HTML>Result code: <FONT COLOR=BLUE>";
-        String validationTime = "<HTML>Validation time(ms): <FONT COLOR=BLUE>";
+        String validationTime = "<HTML>Validation time (ms): <FONT COLOR=BLUE>";
         String validationAnswer = "<HTML>Judgement: <FONT COLOR=BLUE>";
 
         if (runResults != null) {
@@ -288,15 +287,15 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
      * 
      */
     private void initialize() {
-        FlowLayout flowLayout = new FlowLayout();
-        flowLayout.setHgap(15);
-        TitledBorder titledBorder1 = javax.swing.BorderFactory.createTitledBorder(null, "Run Results", javax.swing.border.TitledBorder.LEFT, javax.swing.border.TitledBorder.DEFAULT_POSITION,
+        TitledBorder titledBorder1 = javax.swing.BorderFactory.createTitledBorder(null, "Run Results", 
+                javax.swing.border.TitledBorder.LEFT, javax.swing.border.TitledBorder.DEFAULT_POSITION,
                 new java.awt.Font("Dialog", java.awt.Font.BOLD, 14), java.awt.Color.red);
         titledBorder1.setTitleFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 16));
-        this.setLayout(flowLayout);
-        this.setSize(new java.awt.Dimension(210, 531));
-        this.setMinimumSize(new java.awt.Dimension(600, 400));
-        this.setPreferredSize(new java.awt.Dimension(200, 600));
+        titledBorder1.setBorder(javax.swing.BorderFactory.createEtchedBorder(javax.swing.border.EtchedBorder.RAISED));
+        this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+        this.setSize(new java.awt.Dimension(600,220));
+        this.setMinimumSize(new java.awt.Dimension(100, 200));
+        this.setPreferredSize(new java.awt.Dimension(200,300));
         this.setBorder(titledBorder1);
         this.add(getCompilationPanel(), null);
         this.add(getExecutionPanel(), null);
@@ -322,34 +321,39 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
     private JPanel getCompilationPanel() {
         if (compilationPanel == null) {
             compileTimeLabel = new JLabel();
-            compileTimeLabel.setText("Compile time (ms): ");
             compileTimeLabel.setMaximumSize(new java.awt.Dimension(180, 30));
-            compileTimeLabel.setMinimumSize(new java.awt.Dimension(180, 30));
+            compileTimeLabel.setMinimumSize(new java.awt.Dimension(120, 20));
+            compileTimeLabel.setText("Compile Time (ms): ");
             compileTimeLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEADING);
-            compileTimeLabel.setPreferredSize(new java.awt.Dimension(180, 30));
+            compileTimeLabel.setPreferredSize(new java.awt.Dimension(120,20));
             compileResultCodeLabel = new JLabel();
             compileResultCodeLabel.setText("Result Code: ");
-            compileResultCodeLabel.setMinimumSize(new java.awt.Dimension(150, 30));
-            compileResultCodeLabel.setPreferredSize(new java.awt.Dimension(150, 30));
+            compileResultCodeLabel.setMinimumSize(new java.awt.Dimension(100, 20));
+            compileResultCodeLabel.setPreferredSize(new java.awt.Dimension(100,20));
+            compileResultCodeLabel.setText("Result Code: ");
             compileResultCodeLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEADING);
             compileResultCodeLabel.setMaximumSize(new java.awt.Dimension(150, 30));
             compileSuccessLabel = new JLabel();
             compileSuccessLabel.setText("Successful:  ");
             compileSuccessLabel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-            compileSuccessLabel.setAlignmentY(3.0F);
-            compileSuccessLabel.setMinimumSize(new java.awt.Dimension(150, 30));
-            compileSuccessLabel.setPreferredSize(new java.awt.Dimension(150, 30));
+            //compileSuccessLabel.setAlignmentY(3.0F);
+            compileSuccessLabel.setMinimumSize(new java.awt.Dimension(100, 20));
+            compileSuccessLabel.setPreferredSize(new java.awt.Dimension(100,20));
+            compileSuccessLabel.setText("Successful: ");
             compileSuccessLabel.setMaximumSize(new java.awt.Dimension(150, 30));
             compileSuccessLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEADING);
             compilationPanel = new JPanel();
             compilationPanel.setLayout(new BoxLayout(getCompilationPanel(), BoxLayout.Y_AXIS));
-            compilationPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, " Compilation ", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
-                    javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Dialog", java.awt.Font.BOLD, 14), java.awt.Color.blue));
-            compilationPanel.setPreferredSize(new java.awt.Dimension(180, 150));
+            compilationPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, " Compilation ", 
+                    javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+                    javax.swing.border.TitledBorder.DEFAULT_POSITION, 
+                    new java.awt.Font("Dialog", java.awt.Font.BOLD, 14), java.awt.Color.blue));
+            compilationPanel.setPreferredSize(new java.awt.Dimension(150,150));
             compilationPanel.add(compileSuccessLabel, null);
             compilationPanel.add(compileResultCodeLabel, null);
             compilationPanel.add(compileTimeLabel, null);
             compilationPanel.add(getShowCompilerOutputButton(), null);
+            compilationPanel.setAlignmentY((float) 1.0);
         }
         return compilationPanel;
     }
@@ -363,31 +367,36 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
         if (executionPanel == null) {
             executionTimeLabel = new JLabel();
             executionTimeLabel.setText("Execution time (ms): ");
-            executionTimeLabel.setMinimumSize(new java.awt.Dimension(190, 30));
-            executionTimeLabel.setMaximumSize(new java.awt.Dimension(190, 30));
+            executionTimeLabel.setMinimumSize(new java.awt.Dimension(110, 20));
+            executionTimeLabel.setMaximumSize(new java.awt.Dimension(140, 30));
+            executionTimeLabel.setText("ExecuteTime (ms): ");
             executionTimeLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEADING);
-            executionTimeLabel.setPreferredSize(new java.awt.Dimension(190, 30));
+            executionTimeLabel.setPreferredSize(new java.awt.Dimension(100,20));
             executionResultCodeLabel = new JLabel();
             executionResultCodeLabel.setText("Result Code: ");
             executionResultCodeLabel.setMaximumSize(new java.awt.Dimension(150, 30));
-            executionResultCodeLabel.setMinimumSize(new java.awt.Dimension(150, 30));
-            executionResultCodeLabel.setPreferredSize(new java.awt.Dimension(150, 30));
+            executionResultCodeLabel.setMinimumSize(new java.awt.Dimension(100, 20));
+            executionResultCodeLabel.setText("Result Code: ");
+            executionResultCodeLabel.setPreferredSize(new java.awt.Dimension(100,20));
             executionResultCodeLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEADING);
             executionSuccessLabel = new JLabel();
             executionSuccessLabel.setText("Successful: ");
-            executionSuccessLabel.setMinimumSize(new java.awt.Dimension(150, 30));
-            executionSuccessLabel.setPreferredSize(new java.awt.Dimension(150, 30));
+            executionSuccessLabel.setMinimumSize(new java.awt.Dimension(100, 20));
+            executionSuccessLabel.setPreferredSize(new java.awt.Dimension(100,20));
             executionSuccessLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEADING);
             executionSuccessLabel.setMaximumSize(new java.awt.Dimension(150, 30));
             executionPanel = new JPanel();
             executionPanel.setLayout(new BoxLayout(getExecutionPanel(), BoxLayout.Y_AXIS));
-            executionPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, " Execution ", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
-                    javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Dialog", java.awt.Font.BOLD, 14), java.awt.Color.blue));
-            executionPanel.setPreferredSize(new java.awt.Dimension(180, 150));
+            executionPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, " Execution ", 
+                    javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+                    javax.swing.border.TitledBorder.DEFAULT_POSITION, 
+                    new java.awt.Font("Dialog", java.awt.Font.BOLD, 14), java.awt.Color.blue));
+            executionPanel.setPreferredSize(new java.awt.Dimension(150,150));
             executionPanel.add(executionSuccessLabel, null);
             executionPanel.add(executionResultCodeLabel, null);
             executionPanel.add(executionTimeLabel, null);
             executionPanel.add(getShowExecutionOutputButton(), null);
+            executionPanel.setAlignmentY((float)1.0);
         }
         return executionPanel;
     }
@@ -401,41 +410,43 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
         if (validationPanel == null) {
             validationTimeLabel = new JLabel();
             validationTimeLabel.setText("Validation time (ms): ");
-            validationTimeLabel.setMinimumSize(new java.awt.Dimension(200, 30));
-            validationTimeLabel.setMaximumSize(new java.awt.Dimension(200, 30));
+            validationTimeLabel.setMinimumSize(new java.awt.Dimension(100, 20));
+            validationTimeLabel.setMaximumSize(new java.awt.Dimension(150, 30));
+            validationTimeLabel.setText("Validation Time (ms): ");
             validationTimeLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEADING);
-            validationTimeLabel.setPreferredSize(new java.awt.Dimension(200, 30));
+            validationTimeLabel.setPreferredSize(new java.awt.Dimension(100,20));
             validationAnswerLabel = new JLabel();
             validationAnswerLabel.setText("Judgement: ");
-            validationAnswerLabel.setMinimumSize(new java.awt.Dimension(200, 30));
-            validationAnswerLabel.setPreferredSize(new java.awt.Dimension(200, 30));
+            validationAnswerLabel.setMinimumSize(new java.awt.Dimension(100, 20));
+            validationAnswerLabel.setPreferredSize(new java.awt.Dimension(100,20));
             validationAnswerLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEADING);
-            validationAnswerLabel.setMaximumSize(new java.awt.Dimension(200, 30));
+            validationAnswerLabel.setMaximumSize(new java.awt.Dimension(150, 30));
             validationResultCodeLabel = new JLabel();
             validationResultCodeLabel.setText("Result Code: ");
-            validationResultCodeLabel.setMinimumSize(new java.awt.Dimension(150, 30));
-            validationResultCodeLabel.setPreferredSize(new java.awt.Dimension(150, 30));
+            validationResultCodeLabel.setMinimumSize(new java.awt.Dimension(100, 20));
+            validationResultCodeLabel.setPreferredSize(new java.awt.Dimension(100,20));
             validationResultCodeLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEADING);
             validationResultCodeLabel.setMaximumSize(new java.awt.Dimension(150, 30));
             validationSuccessLabel = new JLabel();
             validationSuccessLabel.setText("Successful: ");
-            validationSuccessLabel.setMinimumSize(new java.awt.Dimension(150, 30));
-            validationSuccessLabel.setPreferredSize(new java.awt.Dimension(150, 30));
+            validationSuccessLabel.setMinimumSize(new java.awt.Dimension(100, 20));
+            validationSuccessLabel.setPreferredSize(new java.awt.Dimension(100,20));
             validationSuccessLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEADING);
             validationSuccessLabel.setMaximumSize(new java.awt.Dimension(150, 30));
-            TitledBorder titledBorder = javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED), " Validation",
-                    javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Dialog", java.awt.Font.BOLD, 14), java.awt.Color.blue);
-            titledBorder.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION,
-                    null, null));
             validationPanel = new JPanel();
             validationPanel.setLayout(new BoxLayout(getValidationPanel(), BoxLayout.Y_AXIS));
-            validationPanel.setPreferredSize(new java.awt.Dimension(180, 180));
-            validationPanel.setBorder(titledBorder);
+            validationPanel.setPreferredSize(new java.awt.Dimension(150,150));
+            validationPanel.setComponentOrientation(java.awt.ComponentOrientation.UNKNOWN);
+            validationPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, " Validation ", 
+                    javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
+                    javax.swing.border.TitledBorder.DEFAULT_POSITION, 
+                    new java.awt.Font("Dialog", java.awt.Font.BOLD, 14), java.awt.Color.blue));
             validationPanel.add(validationSuccessLabel, null);
             validationPanel.add(validationResultCodeLabel, null);
             validationPanel.add(validationTimeLabel, null);
             validationPanel.add(validationAnswerLabel, null);
             validationPanel.add(getShowValidationOutputButton(), null);
+            validationPanel.setAlignmentY((float)0.84);
         }
         return validationPanel;
     }
@@ -462,8 +473,8 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
             showCompilerOutputButton = new JButton();
             showCompilerOutputButton.setText("Show");
             showCompilerOutputButton.setEnabled(false);
-            showCompilerOutputButton.setPreferredSize(new java.awt.Dimension(130, 30));
-            showCompilerOutputButton.setMaximumSize(new java.awt.Dimension(106, 30));
+            showCompilerOutputButton.setPreferredSize(new java.awt.Dimension(40,20));
+            showCompilerOutputButton.setMaximumSize(new java.awt.Dimension(100, 30));
             showCompilerOutputButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     closeViewer(compileFileviewer);
@@ -485,11 +496,11 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
     private JButton getShowExecutionOutputButton() {
         if (showExecutionOutputButton == null) {
             showExecutionOutputButton = new JButton();
-            showExecutionOutputButton.setMaximumSize(new java.awt.Dimension(106, 30));
-            showExecutionOutputButton.setPreferredSize(new java.awt.Dimension(120, 30));
+            showExecutionOutputButton.setMaximumSize(new java.awt.Dimension(100, 30));
+            showExecutionOutputButton.setPreferredSize(new java.awt.Dimension(40,20));
             showExecutionOutputButton.setText("Show");
             showExecutionOutputButton.setEnabled(false);
-            showExecutionOutputButton.setMinimumSize(new java.awt.Dimension(106, 30));
+            showExecutionOutputButton.setMinimumSize(new java.awt.Dimension(40, 20));
             showExecutionOutputButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     closeViewer(executeFileviewer);
@@ -512,10 +523,10 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
         if (showValidationOutputButton == null) {
             showValidationOutputButton = new JButton();
             showValidationOutputButton.setText("Show");
-            showValidationOutputButton.setMaximumSize(new java.awt.Dimension(106, 30));
-            showValidationOutputButton.setMinimumSize(new java.awt.Dimension(106, 30));
+            showValidationOutputButton.setMaximumSize(new java.awt.Dimension(100, 30));
+            showValidationOutputButton.setMinimumSize(new java.awt.Dimension(40, 20));
             showValidationOutputButton.setEnabled(false);
-            showValidationOutputButton.setPreferredSize(new java.awt.Dimension(120, 30));
+            showValidationOutputButton.setPreferredSize(new java.awt.Dimension(40,20));
             showValidationOutputButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     closeViewer(validateFileviewer);
