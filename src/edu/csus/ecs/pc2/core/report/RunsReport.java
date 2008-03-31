@@ -12,6 +12,7 @@ import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
@@ -90,7 +91,7 @@ public class RunsReport implements IReport {
     }
     
     private void writeRow(PrintWriter printWriter, Run run) {
-
+        
         ClientId clientId = run.getSubmitter();
         printWriter.print("run " + run.getNumber() + " ");
         if (run.isDeleted()){
@@ -166,7 +167,14 @@ public class RunsReport implements IReport {
         if (run.getAllJudgementRecords().length > 0){
 
             for (JudgementRecord judgementRecord : run.getAllJudgementRecords()) {
-                String judgementText = contest.getJudgement(judgementRecord.getJudgementId()).toString();
+                if (contest == null){
+                    printWriter.println("Contest is null");
+                }
+                if (judgementRecord.getJudgementId() == null){
+                    printWriter.println("Judgement is null for "+run);
+                }
+                ElementId elmentId = judgementRecord.getJudgementId();
+                String judgementText = contest.getJudgement(elmentId).toString();
                 String validatorJudgementName = judgementRecord.getValidatorResultString();
                 if (judgementRecord.isUsedValidator() && validatorJudgementName != null) {
                     if (validatorJudgementName.trim().length() == 0) {
@@ -219,7 +227,12 @@ public class RunsReport implements IReport {
                 printWriter.println("-- " + count + " of " + runs.length + " runs (filtered) --");
                 for (Run run : runs) {
                     if (filter.matches(run)) {
-                        writeRow(printWriter, run);
+                        try {
+                            writeRow(printWriter, run);
+                        } catch (Exception e) {
+                            printWriter.println("Exception in report: "+e.getMessage());
+                            e.printStackTrace(printWriter);
+                        }
                     }
                 }
             }
@@ -227,7 +240,12 @@ public class RunsReport implements IReport {
         } else {
             printWriter.println("-- " + runs.length + " runs --");
             for (Run run : runs) {
-                writeRow(printWriter, run);
+                try {
+                    writeRow(printWriter, run);
+                } catch (Exception e) {
+                    printWriter.println("Exception in report: "+e.getMessage());
+                    e.printStackTrace(printWriter);
+                }
             }
             
         }

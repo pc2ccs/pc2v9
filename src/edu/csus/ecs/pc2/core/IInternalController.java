@@ -350,4 +350,21 @@ public interface IInternalController {
     void setContestPassword(String contestPassword);
     
     void sendToLocalServer(Packet packet);
+    
+    /**
+     * Get name of host contacted.
+     * 
+     * On server, gets name of host where listener listens.
+     * 
+     * @return name of host server
+     */
+    String getHostContacted();
+    
+    /**
+     * Get port number of host contacted.
+     * 
+     * On server, gets port where listening.
+     * @return
+     */
+    int getPortContacted();
 }

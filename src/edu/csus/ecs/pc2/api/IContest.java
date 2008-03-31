@@ -296,4 +296,18 @@ public interface IContest {
      */
     IStanding [] getStandings();
     
+    /**
+     * Returns name 
+     * @return
+     */
+    // TODO java doc
+    String getLocalContactedHostName();
+    
+    /**
+     * 
+     * @return
+     */
+    // TODO java doc
+    int getLocalContactedPortNumber();
+    
 }

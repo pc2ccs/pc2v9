@@ -126,6 +126,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     private Log log;
     
+    private Ini ini = new Ini();
+    
     private String judgementINIFileName = "reject.ini";
 
     private static final String SITE_OPTION_STRING = "--site";
@@ -150,14 +152,14 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      * 
      * Both client and server who are connecting a server use this host as the host to contact.
      */
-    private static String remoteHostName = "127.0.0.1";
+    private String remoteHostName = "127.0.0.1";
 
     /**
      * The port for a client or server to login to/contact.
      * 
      * Both client and server who are connecting a server use this port as the portt to contact.
      */
-    private static int remoteHostPort;
+    private int remoteHostPort;
 
     /**
      * .ini key for an override port for the server to listen on.
@@ -891,9 +893,27 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
         remoteHostName = "localhost";
         remoteHostPort = Integer.parseInt(ConnectionManager.DEFAULT_PC2_PORT);
-
-        if (containsINIKey(CLIENT_SERVER_KEY)) {
+        
+        if (ini.containsKey(CLIENT_SERVER_KEY)){
+            
+            remoteHostName = ini.getValue(CLIENT_SERVER_KEY);
+            System.err.println("From new: "+ini.getIniFileURL());
+            System.err.print("setClientServerAndPort - old code "+remoteHostName);
+            
+            int idx = remoteHostName.lastIndexOf(":");
+            int literalClose = remoteHostName.indexOf("]");
+            if (idx > literalClose && idx > 2) {
+                remoteHostPort = Integer.parseInt(remoteHostName.substring(idx + 1));
+                remoteHostName = remoteHostName.substring(0, idx);
+            }
+            
+            System.err.println(" which is "+remoteHostName+" port "+remoteHostPort);
+            
+        } else if (containsINIKey(CLIENT_SERVER_KEY)) {
             remoteHostName = getINIValue(CLIENT_SERVER_KEY);
+            
+            System.err.println("From new: "+IniFile.getIniFileURL());
+            System.err.print("setClientServerAndPort - old code "+remoteHostName);
             /*
              * Examples:
              * server=[2001:DB8::1] (default port)
@@ -907,6 +927,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 remoteHostPort = Integer.parseInt(remoteHostName.substring(idx + 1));
                 remoteHostName = remoteHostName.substring(0, idx);
             }
+            
+            System.err.println(" which is "+remoteHostName+" port "+remoteHostPort);
         }
 
         if (containsINIKey(CLIENT_PORT_KEY)) {
@@ -1796,12 +1818,16 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             // TODO handle URL too
             String iniName = parseArguments.getOptValue("--ini");
             try {
-                IniFile.setIniFile(iniName);
+//                IniFile.setIniFile(iniName);
+                System.err.println("Loading INI from "+iniName);
+                if (! new File(iniName).exists()){
+                    System.err.println("Unable to load INI from "+iniName);
+                }
+                ini.setIniFile(iniName);
             } catch (MalformedURLException e) {
                 getLog().log(Log.WARNING, "Unable to read ini URL " + iniName, e);
                 savedTransportException = new TransportException("Unable to read ini file " + iniName);
             }
-
         }
 
         contest.setSiteNumber(0);
@@ -2403,6 +2429,14 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     public void setContestPassword(String contestPassword) {
         this.contestPassword = contestPassword;
+    }
+
+    public String getHostContacted() {
+        return remoteHostName;
+    }
+
+    public int getPortContacted() {
+        return port;
     }
 
 }

@@ -200,4 +200,12 @@ public class Contest implements IContest {
         }
         return siteImplementations;
     }
+
+    public String getLocalContactedHostName() {
+        return controller.getHostContacted();
+    }
+
+    public int getLocalContactedPortNumber() {
+        return controller.getPortContacted();
+    }
 }

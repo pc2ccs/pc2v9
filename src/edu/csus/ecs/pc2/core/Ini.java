@@ -109,13 +109,6 @@ public class Ini {
         }
     }
 
-    /**
-     * Get input filename.
-     * @return the name of the .ini file.
-     */
-    public static String getINIFilename() {
-        return new String(INI_FILENAME);
-    }
 
     /**
      * Get filename in URL form.
@@ -162,18 +155,6 @@ public class Ini {
     }
 
     /**
-     * return true if .ini file is present.
-     * 
-     * @see #getINIFilename()
-     * @see #setIniFile(String)
-     * @return true if it file is present; false otherwise.
-     */
-    public static boolean isFilePresent() {
-        File iniFilefile = new File(getINIFilename());
-        return iniFilefile.exists();
-    }
-
-    /**
      * Load the name value pairs from the input file.
      * @see #getIniFileURL()
      * @see #iniFileURL
@@ -181,13 +162,13 @@ public class Ini {
     private void load() {
         FileReader fileReader = null;
         try {
-            // default to reading ini file from current directory
+            // if no URL, default to reading ini file from current directory
             if (iniFileURL == null) {
-                File iniFilefile = new File(getINIFilename());
+                File iniFilefile = new File(Ini.INI_FILENAME);
                 if (!iniFilefile.exists()) {
                     File curdir = new File(".");
 
-                    System.out.println("Unable to read " + getINIFilename() + " file not found in " + curdir.getCanonicalPath());
+                    System.out.println("Unable to read " + Ini.INI_FILENAME + " file not found in " + curdir.getCanonicalPath());
                     (new Exception("Unable to read .ini file ")).printStackTrace();
                     return;
                 }
@@ -288,6 +269,7 @@ public class Ini {
         }
 
         setIniFileURL(inFilefile.toURI().toURL());
+        load();
     }
 
     /**
