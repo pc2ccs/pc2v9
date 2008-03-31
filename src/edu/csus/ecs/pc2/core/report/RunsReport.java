@@ -145,6 +145,8 @@ public class RunsReport implements IReport {
                         }
                     }
                 }
+            } catch (java.lang.NullPointerException nullPointerException) {
+                printWriter.println("    No submitted files found (not on server?).");
             } catch (Exception ex) {
 
                 if (ex.getMessage().startsWith("Unable to read object from file")) {
