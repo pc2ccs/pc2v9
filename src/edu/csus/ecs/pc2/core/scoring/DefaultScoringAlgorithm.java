@@ -461,6 +461,11 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             standingsRecordMemento.putInteger("teamSiteId", account.getClientId().getSiteNumber());
             standingsRecordMemento.putString("teamKey", account.getClientId().getTripletKey());
             standingsRecordMemento.putString("teamExternalId", account.getExternalId());
+            if (account.getAliasName().trim().equals("")) {
+                standingsRecordMemento.putString("teamAlias", account.getDisplayName()+" (not aliasesd)");
+            } else {
+                standingsRecordMemento.putString("teamAlias", account.getAliasName().trim());
+            }
             Group group = null;
             if (account.getGroupId() != null) {
                 group = groupHash.get(account.getGroupId());
@@ -471,6 +476,9 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 // do the same thing as above, now for the group
                 groupIndexRank[groupIndex]++;
                 if (!isTeamTied(standingsRecord,groupNumSolved[groupIndex], groupScore[groupIndex],groupLastSolved[groupIndex])) {
+                    groupNumSolved[groupIndex] = standingsRecord.getNumberSolved();
+                    groupScore[groupIndex] = standingsRecord.getPenaltyPoints();
+                    groupLastSolved[groupIndex] = standingsRecord.getLastSolved();
                     groupRank[groupIndex] = groupIndexRank[groupIndex];
                     standingsRecord.setGroupRankNumber(groupRank[groupIndex]);
                 } else {
