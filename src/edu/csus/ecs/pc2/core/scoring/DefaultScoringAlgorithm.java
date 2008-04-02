@@ -471,6 +471,9 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 // do the same thing as above, now for the group
                 groupIndexRank[groupIndex]++;
                 if (!isTeamTied(standingsRecord,groupNumSolved[groupIndex], groupScore[groupIndex],groupLastSolved[groupIndex])) {
+                    groupNumSolved[groupIndex] = standingsRecord.getNumberSolved();
+                    groupScore[groupIndex] = standingsRecord.getPenaltyPoints();
+                    groupLastSolved[groupIndex] = standingsRecord.getLastSolved();
                     groupRank[groupIndex] = groupIndexRank[groupIndex];
                     standingsRecord.setGroupRankNumber(groupRank[groupIndex]);
                 } else {
