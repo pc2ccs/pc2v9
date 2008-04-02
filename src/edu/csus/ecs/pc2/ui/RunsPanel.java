@@ -259,12 +259,12 @@ public class RunsPanel extends JPanePlugin {
         String result = "";
 
         if (run.isJudged()) {
-
+            
             if (run.isSolved()) {
-                result = run.getStatus().toString() + " Yes";
+                result = "Yes";
 
             } else {
-                result = run.getStatus().toString() + " No";
+                result = "No";
 
                 JudgementRecord judgementRecord = run.getJudgementRecord();
                 if (judgementRecord != null && judgementRecord.getJudgementId() != null) {
@@ -277,6 +277,10 @@ public class RunsPanel extends JPanePlugin {
                         }
                     }
 
+                    if (run.getStatus().equals(RunStates.MANUAL_REVIEW)) {
+                        result = RunStates.MANUAL_REVIEW + " (" + result + ")";
+                    }
+                    
                     if (isTeam(getContest().getClientId())) {
                         if (!judgementRecord.isSendToTeam()) {
                             result = RunStates.NEW.toString();
@@ -288,6 +292,7 @@ public class RunsPanel extends JPanePlugin {
                     }
                 }
             }
+       
 
         } else {
             if (showJudgesInfo) {
