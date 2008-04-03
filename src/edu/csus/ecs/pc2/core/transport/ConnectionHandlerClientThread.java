@@ -54,15 +54,22 @@ public class ConnectionHandlerClientThread extends ConnectionHandlerThread {
             // Code should insure that the send worked!
             sendUnencrypted(getTmCallBack().getPublicKeyPacket());
 
+            System.out.println("*********** -- Step 1 ");
+            
             getMyConnectionID().setReadyToCommunicate(true);
 
+            System.out.println("*********** -- Step 2 ");
+
             setStillListening(true);
+
+            System.out.println("*********** -- Step 3 ");
 
             while (isStillListening()) {
                 SealedObject sealedObject = null;
                 try {
-                    sealedObject = receive();
-
+                    System.out.println("********** b4 in loop ");
+                   sealedObject = receive();
+                    System.out.println("********** after in loop ");
                     getTmCallBack().receive(sealedObject, getMyConnectionID());
                 } catch (TransportException e) {
                     getLog().throwing(getClass().getName(), "run", e);
@@ -74,6 +81,8 @@ public class ConnectionHandlerClientThread extends ConnectionHandlerThread {
                     }
                 }
             }
+
+            System.out.println("*********** -- Outside While ");
 
         } catch (SocketException e) {
             getLog().info("Lost connection to this client!");

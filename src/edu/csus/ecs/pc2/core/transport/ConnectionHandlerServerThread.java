@@ -42,9 +42,12 @@ public class ConnectionHandlerServerThread extends ConnectionHandlerThread {
             // Code should ensure that the send worked!
             sendUnencrypted(getTmCallBack().getPublicKeyPacket());
 
+            System.out.println("*********** -- Step 1 ");
+
             // Code should ensure that the receive worked!
             try {
                 getTmCallBack().receiveUnencrypted(receiveUnencrypted(), getMyConnectionID());
+                getLog().info("*********** -- Step 2 ");
             } catch (Exception e) {
                 getLog().log(Log.INFO, "Exception - Could not receive unencrypted packet for: "+getMyConnectionID(), e);
                 if (getMyConnectionID().getSecretKey() == null) {
@@ -57,14 +60,22 @@ public class ConnectionHandlerServerThread extends ConnectionHandlerThread {
                 }
             }
 
+            System.out.println("*********** -- Step 3 ");
+            
             getMyConnectionID().setReadyToCommunicate(true);
 
+            System.out.println("*********** -- Step 4 ");
             setStillListening(true);
 
+            System.out.println("*********** -- Step 5 ");
+            
             while (isStillListening()) {
+                System.out.println("*********** -- Step 6 ");
                 SealedObject sealedObject = null;
                 try {
-                    sealedObject = receive();
+                    System.out.println("**************** b4 in loop");
+                   sealedObject = receive();
+                    System.out.println("**************** after in loop");
                     getTmCallBack().receive(sealedObject, getMyConnectionID());
                 } catch (TransportException e) {
                     if (e.getMessage() == null ) {
@@ -75,6 +86,9 @@ public class ConnectionHandlerServerThread extends ConnectionHandlerThread {
                     }
                 }
             }
+            
+            System.out.println("*********** -- Outside while");
+
         } catch (SocketException e) {
             getLog().info("Lost connection to "+getMyConnectionID());
         } catch (Exception e) {

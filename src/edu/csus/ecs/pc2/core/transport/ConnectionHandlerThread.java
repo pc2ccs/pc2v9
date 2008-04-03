@@ -75,6 +75,7 @@ public abstract class ConnectionHandlerThread extends Thread {
     public abstract void run();
 
     protected boolean isStillListening() {
+        System.out.println("*********** -- isStillListing " + stillListening);
         return stillListening;
     }
 
@@ -111,7 +112,9 @@ public abstract class ConnectionHandlerThread extends Thread {
 
     protected void sendUnencrypted(TransportWrapper msgObj) throws TransportException {
         try {
+            System.out.println("**************** about to write ");
             getToOtherModule().writeObject(msgObj);
+            System.out.println("**************** finished write ");
         } catch (Exception e) {
             getLog().throwing(getClass().getName(),"sendUnencrypted",e);
             throw new TransportException(e.getMessage());
@@ -122,7 +125,9 @@ public abstract class ConnectionHandlerThread extends Thread {
         TransportWrapper msgObj = null;
 
         try {
+            System.out.println("**************** about to read ");
             msgObj = (TransportWrapper) getFromOtherModule().readObject();
+            System.out.println("**************** finished read");
         } catch (Exception e) {
             getLog().throwing(getClass().getName(),"receiveUnencrypted",e);
             throw new TransportException(e.getMessage());
