@@ -666,6 +666,12 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             // TODO review this message
             throw new SecurityException("Invalid sequence, must call start(String[]) method before login(String, String).");
         }
+        
+        if (connectionManager == null){
+            isStarted = false;
+            throw new Exception("unable to contact server (server started?), see log");
+        }
+        
         ClientId clientId = loginShortcutExpansion(0, loginName);
 
         log = new Log(stripChar(clientId.toString(),' '));
@@ -1955,6 +1961,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         if (savedTransportException != null && loginUI != null) {
             loginUI.disableLoginButton();
             loginUI.setStatusMessage("Unable to contact server, contact staff");
+        } else if ( savedTransportException != null){
+            connectionManager = null;
+            log.log(Log.INFO, "Unable to contact server, contact staff", savedTransportException);
+            log.log(Log.INFO, "internal debug, note connectionManager set to null");
         }
     }
 
