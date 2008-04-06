@@ -90,6 +90,9 @@ public class PacketHandler {
 
         info("handlePacket start " + packet);
         PacketFactory.dumpPacket(controller.getLog(), packet, "handlePacket");
+        if (Utilities.isDebugMode()){
+            PacketFactory.dumpPacket(System.out, packet, "handlePacket");
+        }
 
         if (isServer() || isAdministrator()) {
             PacketFactory.dumpPacket(System.err, packet, "handlePacket");

@@ -25,6 +25,8 @@ import edu.csus.ecs.pc2.core.security.FileSecurity;
  */
 
 public final class Utilities {
+    
+    private static boolean debugMode = false;
 
     /**
      * Constructor is private as this is a utility class which
@@ -311,5 +313,13 @@ public final class Utilities {
             character = iterator.next();
         }
         return result.toString();
+    }
+
+    public static boolean isDebugMode() {
+        return debugMode;
+    }
+
+    public static void setDebugMode(boolean debugMode) {
+        Utilities.debugMode = debugMode;
     }
 }
