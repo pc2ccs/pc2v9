@@ -41,9 +41,7 @@ public class RunListenerList {
             case CHANGED:
                 if (run.isJudged()) {
                     listenerList.elementAt(i).runJudged(run);
-                } else {
-                    listenerList.elementAt(i).runUpdated(run);
-                }
+                } 
                 break;
                 
             case CHECKEDOUT_REJUDGE_RUN:
