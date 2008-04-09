@@ -16,7 +16,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 
 /**
- * Print All BalloonSettings Information.
+ * Print All Balloon Settings Information.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -28,7 +28,7 @@ public class BalloonSettingsReport implements IReport {
     /**
      * 
      */
-    private static final long serialVersionUID = -2481037621846733149L;
+    private static final long serialVersionUID = -3705067685117724687L;
 
     private IInternalContest contest;
 
@@ -49,24 +49,29 @@ public class BalloonSettingsReport implements IReport {
 
         printWriter.println("-- " + balloonSettings.length + " BalloonSettings--");
         for (BalloonSettings balloonSetting : balloonSettings) {
-            printWriter.println("Site '" + balloonSetting.getSiteNumber() + "' id=" + balloonSetting.getElementId());
-            printWriter.println("      Balloon Client     : " + balloonSetting.getBalloonClient());
-            printWriter.println("      Print balloons     : " + balloonSetting.isPrintBalloons());
-            printWriter.println("      Print device       : " + balloonSetting.getPrintDevice());
-            printWriter.println("      Postscript capable : " + balloonSetting.isPostscriptCapable());
-            printWriter.println();
-            printWriter.println("      email Balloons     : " + balloonSetting.isEmailBalloons());
-            printWriter.println("      email to           : " + balloonSetting.getEmailContact());
-            printWriter.println("      SMTP  server       : " + balloonSetting.getMailServer());
-            printWriter.println("      Lines Per Page     : " + balloonSetting.getLinesPerPage());
-            printWriter.println("      send No judgements : " + balloonSetting.isIncludeNos());
+            try {
+                printWriter.println("Site '" + balloonSetting.getSiteNumber() + "' id=" + balloonSetting.getElementId());
+                printWriter.println("      Balloon Client     : " + balloonSetting.getBalloonClient());
+                printWriter.println("      Print balloons     : " + balloonSetting.isPrintBalloons());
+                printWriter.println("      Print device       : " + balloonSetting.getPrintDevice());
+                printWriter.println("      Postscript capable : " + balloonSetting.isPostscriptCapable());
+                printWriter.println();
+                printWriter.println("      email Balloons     : " + balloonSetting.isEmailBalloons());
+                printWriter.println("      email to           : " + balloonSetting.getEmailContact());
+                printWriter.println("      SMTP  server       : " + balloonSetting.getMailServer());
+                printWriter.println("      Lines Per Page     : " + balloonSetting.getLinesPerPage());
+                printWriter.println("      send No judgements : " + balloonSetting.isIncludeNos());
+                printWriter.println();
 
-            int counter = 1;
-            for (Problem problem : problems) {
-                printWriter.println("      ["+counter+"] "+balloonSetting.getColor(problem)+" "+problem.getDisplayName());
-                counter ++;
+                int counter = 1;
+                for (Problem problem : problems) {
+                    printWriter.println("      ["+counter+"] "+balloonSetting.getColor(problem)+" "+problem.getDisplayName());
+                    counter ++;
+                }
+                printWriter.println();
+            } catch (Exception e) {
+                e.printStackTrace(printWriter);
             }
-            printWriter.println();
         }
     }
 
@@ -115,7 +120,7 @@ public class BalloonSettingsReport implements IReport {
     }
 
     public String getReportTitle() {
-        return "BalloonSettings";
+        return "Balloon Settings";
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
@@ -125,7 +130,7 @@ public class BalloonSettingsReport implements IReport {
     }
 
     public String getPluginTitle() {
-        return "BalloonSettingsReport";
+        return "Balloon Settings Report";
     }
     
     public Filter getFilter() {
