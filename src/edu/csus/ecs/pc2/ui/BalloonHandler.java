@@ -586,8 +586,9 @@ public class BalloonHandler extends JPanePlugin {
         Vector<Problem> v = new Vector<Problem>();
         for (int i = 0; i < runs.length; i++) {
             Run run = runs[i];
-            if (!run.isDeleted() && run.isJudged() && run.isSolved()) {
-                v.add(getContest().getProblem(run.getProblemId()));
+            Problem problem = getContest().getProblem(run.getProblemId());
+            if (!run.isDeleted() && run.isJudged() && run.isSolved() && !v.contains(problem)) {
+                v.add(problem);
             }
         }
         // now put them in the right order
