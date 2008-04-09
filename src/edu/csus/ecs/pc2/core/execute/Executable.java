@@ -761,7 +761,7 @@ public class Executable {
         String inputDataFileName = null;
 
         try {
-            executionTimer = new ExecuteTimer(log, problem.getTimeOutInSeconds());
+            executionTimer = new ExecuteTimer(log, problem.getTimeOutInSeconds(), executorId);
             executionTimer.startTimer();
 
             if (problem.getDataFileName() != null) {
@@ -938,7 +938,7 @@ public class Executable {
             PrintWriter stdoutlog = new PrintWriter(new FileOutputStream(prefixExecuteDirname(COMPILER_STDOUT_FILENAME), false), true);
             PrintWriter stderrlog = new PrintWriter(new FileOutputStream(prefixExecuteDirname(COMPILER_STDERR_FILENAME), false), true);
 
-            executionTimer = new ExecuteTimer(log, problem.getTimeOutInSeconds());
+            executionTimer = new ExecuteTimer(log, problem.getTimeOutInSeconds(), executorId);
             executionTimer.startTimer();
 
             long startSecs = System.currentTimeMillis();
