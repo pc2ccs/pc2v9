@@ -85,6 +85,10 @@ public class ListRunLanguages implements IReport {
     protected void printClients(PrintWriter printWriter, ClientId[] clientIds) {
 
         ClientId clientId = null;
+        
+        if (clientIds.length == 0){
+            return;
+        }
 
         ClientId lastClientId = clientIds[0];
         printWriter.print("Site " + lastClientId.getSiteNumber() + " team " + lastClientId.getClientNumber());
