@@ -10,6 +10,8 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 
 /**
  * Count up timer window.
@@ -57,18 +59,22 @@ public class ExecuteTimer extends Thread implements
 
     private Log log = null;
 
+    private ClientId clientId;
+
     /**
      * Constructor
      */
     /* WARNING: THIS METHOD WILL BE REGENERATED. */
-    public ExecuteTimer() {
+    public ExecuteTimer(ClientId clientId) {
         super();
+        this.clientId = clientId;
         initialize();
     }
 
-    public ExecuteTimer(Log log, int timeLimit) {
+    public ExecuteTimer(Log log, int timeLimit, ClientId clientId) {
         super();
         this.log = log;
+        this.clientId = clientId;
         maxTime = timeLimit;
         initialize();
     }
@@ -101,7 +107,7 @@ public class ExecuteTimer extends Thread implements
         newTime = newTime + seconds;
 
         // check if time is past upper limit; if so, change to RED
-        if (currentTime > maxTime) {
+        if (currentTime > maxTime && (! isTeam())) {
             getTimerCount().setForeground(java.awt.Color.red);
 
             if (doAutoStop) {
@@ -481,6 +487,10 @@ public class ExecuteTimer extends Thread implements
         timer.stop();
         getExecuteTimerFrame().setVisible(false);
         getExecuteTimerFrame().dispose();
+    }
+    
+    private boolean isTeam (){
+        return clientId.getClientType().equals(Type.TEAM);
     }
 
 }

@@ -303,6 +303,8 @@ public final class Utilities {
                 result.append("&#043;");
             } else if (character == '-') {
                 result.append("&#045;");
+            } else if (character == '\n') {
+                result.append("<br>");
             } else {
                 // the char is not a special one
                 // add it to the result as is
