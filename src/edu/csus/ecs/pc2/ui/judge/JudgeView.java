@@ -14,9 +14,10 @@ import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
-import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.ui.ClarificationsPane;
+import edu.csus.ecs.pc2.ui.ContestClockDisplay;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
 import edu.csus.ecs.pc2.ui.LogWindow;
@@ -25,6 +26,7 @@ import edu.csus.ecs.pc2.ui.RunsPanel;
 import edu.csus.ecs.pc2.ui.SubmissionBiffPane;
 import edu.csus.ecs.pc2.ui.SubmitRunPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
+import edu.csus.ecs.pc2.ui.ContestClockDisplay.DisplayTimes;
 
 /**
  * Judge GUI.
@@ -62,13 +64,17 @@ public class JudgeView extends JFrame implements UIPlugin {
 
     private JButton exitButton = null;
 
-    private JLabel timeLabel = null;
-
     private JPanel northPane = null;
 
     private JPanel judgeBiffPane = null;
-    
+
+    private ContestClockDisplay contestClockDisplay = null;
+
     private static boolean alreadyJudgingRun = false;
+
+    private JPanel clockPane = null;
+
+    private JLabel clockLabel = null;
 
     public JudgeView() {
         super();
@@ -116,18 +122,29 @@ public class JudgeView extends JFrame implements UIPlugin {
         tabbedPane.add(plugin, tabTitle);
     }
 
+    protected JudgeView getThisFrame() {
+        return this;
+    }
+
     private void setFrameTitle(final boolean contestStarted) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
+
+                if (contestClockDisplay.getClientFrame() == null) {
+                    contestClockDisplay.setClientFrame(getThisFrame());
+                }
+
                 if (contestStarted) {
                     setTitle("PC^2 Judge " + contest.getTitle() + " [STARTED] Build " + new VersionInfo().getBuildNumber());
-                    timeLabel.setText("");
+                    contestClockDisplay.fireClockStateChange(contest.getContestTime());
                 } else {
                     setTitle("PC^2 Judge " + contest.getTitle() + " [STOPPED] Build " + new VersionInfo().getBuildNumber());
-                    timeLabel.setText("STOPPED");
+                    clockLabel.setText("STOPPED");
                 }
+
             }
         });
+
         FrameUtilities.regularCursor(this);
     }
 
@@ -136,40 +153,44 @@ public class JudgeView extends JFrame implements UIPlugin {
         this.controller = inController;
 
         SwingUtilities.invokeLater(new Runnable() {
+
             public void run() {
                 if (logWindow == null) {
                     logWindow = new LogWindow();
                 }
                 logWindow.setContestAndController(contest, controller);
                 logWindow.setTitle("Log " + contest.getClientId().toString());
-        
+
                 contest.addContestTimeListener(new ContestTimeListenerImplementation());
-        
+
                 setFrameTitle(contest.getContestTime().isContestRunning());
                 showMessage("");
-        
+
                 RunsPanel newRunsPane = new RunsPanel(false);
                 newRunsPane.setShowNewRunsOnly(true);
                 newRunsPane.setMakeSoundOnOneRun(true);
                 addUIPlugin(getMainTabbedPane(), "New Runs", newRunsPane);
-        
+
                 RunsPanel runsPanel = new RunsPanel();
                 addUIPlugin(getMainTabbedPane(), "All Runs", runsPanel);
-        
+
                 ClarificationsPane newClarificationsPane = new ClarificationsPane();
                 newClarificationsPane.setShowNewClarificationsOnly(true);
                 addUIPlugin(getMainTabbedPane(), "New Clars", newClarificationsPane);
-        
+
                 ClarificationsPane clarificationsPane = new ClarificationsPane();
                 addUIPlugin(getMainTabbedPane(), "All clarifications", clarificationsPane);
-        
+
                 SubmitRunPane submitRunPane = new SubmitRunPane();
                 addUIPlugin(getMainTabbedPane(), "Test Run", submitRunPane);
-        
+
                 OptionsPanel optionsPanel = new OptionsPanel();
                 addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
                 optionsPanel.setLogWindow(logWindow);
-                
+
+                contestClockDisplay = new ContestClockDisplay(controller.getLog(), contest.getContestTime(), contest.getSiteNumber(), true, null);
+                contestClockDisplay.addLabeltoUpdateList(clockLabel, DisplayTimes.REMAINING_TIME, contest.getSiteNumber());
+
                 SubmissionBiffPane submissionBiffPane = new SubmissionBiffPane();
                 getJudgeBiffPane().add(submissionBiffPane, java.awt.BorderLayout.CENTER);
                 submissionBiffPane.setContestAndController(contest, controller);
@@ -193,16 +214,14 @@ public class JudgeView extends JFrame implements UIPlugin {
      */
     private JPanel getMessagePane() {
         if (messagePane == null) {
-            timeLabel = new JLabel();
-            timeLabel.setText("STOPPED ");
             messageLabel = new JLabel();
             messageLabel.setText("JLabel");
             messageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
             messagePane = new JPanel();
             messagePane.setLayout(new BorderLayout());
-            messagePane.add(timeLabel, java.awt.BorderLayout.WEST);
             messagePane.add(messageLabel, java.awt.BorderLayout.CENTER);
             messagePane.add(getExitPane(), java.awt.BorderLayout.EAST);
+            messagePane.add(getClockPane(), java.awt.BorderLayout.WEST);
         }
         return messagePane;
     }
@@ -324,7 +343,7 @@ public class JudgeView extends JFrame implements UIPlugin {
         if (northPane == null) {
             northPane = new JPanel();
             northPane.setLayout(new BorderLayout());
-            northPane.setPreferredSize(new java.awt.Dimension(65,65));
+            northPane.setPreferredSize(new java.awt.Dimension(65, 65));
             northPane.add(getMessagePane(), java.awt.BorderLayout.NORTH);
             northPane.add(getJudgeBiffPane(), java.awt.BorderLayout.CENTER);
         }
@@ -351,6 +370,28 @@ public class JudgeView extends JFrame implements UIPlugin {
 
     public static void setAlreadyJudgingRun(boolean alreadyJudgingRun) {
         JudgeView.alreadyJudgingRun = alreadyJudgingRun;
+    }
+
+    /**
+     * This method initializes clockPane
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getClockPane() {
+        if (clockPane == null) {
+            BorderLayout borderLayout = new BorderLayout();
+            borderLayout.setHgap(0);
+            clockLabel = new JLabel();
+            clockLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 16));
+            clockLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+            clockLabel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+            clockLabel.setText("STOPPED ");
+            clockPane = new JPanel();
+            clockPane.setLayout(borderLayout);
+            clockPane.setPreferredSize(new java.awt.Dimension(85,34));
+            clockPane.add(clockLabel, java.awt.BorderLayout.CENTER);
+        }
+        return clockPane;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
