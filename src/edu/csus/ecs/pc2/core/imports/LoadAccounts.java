@@ -10,6 +10,7 @@ import java.util.HashMap;
 import edu.csus.ecs.pc2.core.exception.IllegalTSVFormatException;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.security.Permission;
@@ -96,18 +97,21 @@ public class LoadAccounts {
                 }
             }
         }
-        if (permDisplayColumn != -1 && values.length > permDisplayColumn && values[permDisplayColumn].length() > 0) {
-            if (Boolean.parseBoolean(values[permDisplayColumn])) {
-                account.addPermission(Permission.Type.DISPLAY_ON_SCOREBOARD);
-            } else {
-                account.removePermission(Permission.Type.DISPLAY_ON_SCOREBOARD);
+        // do not allow permission changes for root
+        if (!(clientId.getClientType().equals(ClientType.Type.ADMINISTRATOR) && clientId.getClientNumber() == 1)) {
+            if (permDisplayColumn != -1 && values.length > permDisplayColumn && values[permDisplayColumn].length() > 0) {
+                if (Boolean.parseBoolean(values[permDisplayColumn])) {
+                    account.addPermission(Permission.Type.DISPLAY_ON_SCOREBOARD);
+                } else {
+                    account.removePermission(Permission.Type.DISPLAY_ON_SCOREBOARD);
+                }
             }
-        }
-        if (permLoginColumn != -1 && values.length > permLoginColumn && values[permLoginColumn].length() > 0) {
-            if (Boolean.parseBoolean(values[permLoginColumn])) {
-                account.addPermission(Permission.Type.LOGIN);
-            } else {
-                account.removePermission(Permission.Type.LOGIN);
+            if (permLoginColumn != -1 && values.length > permLoginColumn && values[permLoginColumn].length() > 0) {
+                if (Boolean.parseBoolean(values[permLoginColumn])) {
+                    account.addPermission(Permission.Type.LOGIN);
+                } else {
+                    account.removePermission(Permission.Type.LOGIN);
+                }
             }
         }
         return account;
