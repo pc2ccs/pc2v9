@@ -8,6 +8,7 @@ import java.io.FileReader;
 import java.util.HashMap;
 
 import edu.csus.ecs.pc2.core.exception.IllegalTSVFormatException;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
@@ -98,15 +99,31 @@ public class LoadAccounts {
             }
         }
         // do not allow permission changes for root
-        if (!(clientId.getClientType().equals(ClientType.Type.ADMINISTRATOR) && clientId.getClientNumber() == 1)) {
-            if (permDisplayColumn != -1 && values.length > permDisplayColumn && values[permDisplayColumn].length() > 0) {
-                if (Boolean.parseBoolean(values[permDisplayColumn])) {
+        if (permDisplayColumn != -1 && values.length > permDisplayColumn && values[permDisplayColumn].length() > 0) {
+            boolean newValue = Boolean.parseBoolean(values[permDisplayColumn]);
+            if (clientId.getClientType().equals(ClientType.Type.ADMINISTRATOR) && clientId.getClientNumber() == 1) {
+                if (account.getPermissionList().isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD) != newValue) {
+                    String message = "Attempt to change root permission DISPLAY_ON_SCOREBOARD denied.";
+                    StaticLog.warning(message);
+                    System.out.println("WARNING: "+message);
+                }
+            } else {
+                if (newValue) {
                     account.addPermission(Permission.Type.DISPLAY_ON_SCOREBOARD);
                 } else {
                     account.removePermission(Permission.Type.DISPLAY_ON_SCOREBOARD);
                 }
             }
-            if (permLoginColumn != -1 && values.length > permLoginColumn && values[permLoginColumn].length() > 0) {
+        }
+        if (permLoginColumn != -1 && values.length > permLoginColumn && values[permLoginColumn].length() > 0) {
+            boolean newValue = Boolean.parseBoolean(values[permLoginColumn]);
+            if (clientId.getClientType().equals(ClientType.Type.ADMINISTRATOR) && clientId.getClientNumber() == 1) {
+                if (account.getPermissionList().isAllowed(Permission.Type.LOGIN) != newValue) {
+                    String message = "Attempt to change root permission LOGIN denied.";
+                    StaticLog.warning(message);
+                    System.out.println("WARNING: "+message);
+                }
+            } else {
                 if (Boolean.parseBoolean(values[permLoginColumn])) {
                     account.addPermission(Permission.Type.LOGIN);
                 } else {
