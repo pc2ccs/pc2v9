@@ -100,9 +100,11 @@ public class ProfilesPane extends JPanePlugin {
     private JButton getSwitchButton() {
         if (switchButton == null) {
             switchButton = new JButton();
-            switchButton.setBounds(new java.awt.Rectangle(497, 85, 73, 28));
             switchButton.setEnabled(false);
             switchButton.setMnemonic(java.awt.event.KeyEvent.VK_W);
+            switchButton.setPreferredSize(new java.awt.Dimension(100,26));
+            switchButton.setLocation(new java.awt.Point(497,85));
+            switchButton.setSize(new java.awt.Dimension(100,28));
             switchButton.setText("Switch");
         }
         return switchButton;
@@ -116,9 +118,10 @@ public class ProfilesPane extends JPanePlugin {
     private JButton getSetButton() {
         if (setButton == null) {
             setButton = new JButton();
-            setButton.setBounds(new java.awt.Rectangle(497, 38, 73, 26));
             setButton.setEnabled(false);
             setButton.setMnemonic(java.awt.event.KeyEvent.VK_S);
+            setButton.setLocation(new java.awt.Point(497,38));
+            setButton.setSize(new java.awt.Dimension(100,26));
             setButton.setText("Set");
             setButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
