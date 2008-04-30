@@ -7,9 +7,12 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.security.InvalidKeyException;
+import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
+import java.security.spec.EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -47,7 +50,20 @@ public class FileSecurity {
 
     private static final String CONTEST_KEY_FILENAME = "contest.key";
 
-    private static final String PC2_KEY_FILENAME = "pc2.key";
+    private static final String RECOVERY_KEY_FILENAME = "recovery.key";
+
+    private static final byte[] PUBLIC_KEY = { (byte)0x30, (byte)0x81, (byte)0x9f, (byte)0x30, (byte)0x0d, (byte)0x06, (byte)0x09, (byte)0x2a, (byte)0x86, (byte)0x48, (byte)0x86,
+        (byte)0xf7, (byte)0x0d, (byte)0x01, (byte)0x01, (byte)0x01, (byte)0x05, (byte)0x00, (byte)0x03, (byte)0x81, (byte)0x8d, (byte)0x00, (byte)0x30, (byte)0x81, (byte)0x89,
+        (byte)0x02, (byte)0x81, (byte)0x81, (byte)0x00, (byte)0x88, (byte)0xe0, (byte)0xa1, (byte)0xf6, (byte)0x76, (byte)0xc2, (byte)0x38, (byte)0xb7, (byte)0xcd, (byte)0x68,
+        (byte)0x05, (byte)0x0d, (byte)0x9c, (byte)0xdd, (byte)0x31, (byte)0x1b, (byte)0xdd, (byte)0x5c, (byte)0x6e, (byte)0xb4, (byte)0x69, (byte)0x68, (byte)0x15, (byte)0xb5,
+        (byte)0x57, (byte)0x7a, (byte)0xc9, (byte)0x1c, (byte)0xcd, (byte)0xf3, (byte)0x37, (byte)0xea, (byte)0x4b, (byte)0x37, (byte)0x25, (byte)0xb8, (byte)0x1a, (byte)0xb9,
+        (byte)0xbf, (byte)0xfe, (byte)0x25, (byte)0x45, (byte)0xb9, (byte)0x7c, (byte)0x08, (byte)0xb2, (byte)0xe3, (byte)0xba, (byte)0x2d, (byte)0x39, (byte)0xad, (byte)0xe7,
+        (byte)0x8f, (byte)0x71, (byte)0x66, (byte)0xc4, (byte)0x06, (byte)0xe2, (byte)0xe8, (byte)0x84, (byte)0x5e, (byte)0xe1, (byte)0xef, (byte)0xe7, (byte)0xe9, (byte)0xda,
+        (byte)0xee, (byte)0x83, (byte)0xd2, (byte)0x46, (byte)0x44, (byte)0x61, (byte)0x1c, (byte)0x56, (byte)0xe8, (byte)0xbc, (byte)0xd7, (byte)0x7c, (byte)0x26, (byte)0xab,
+        (byte)0xfb, (byte)0xcd, (byte)0x2e, (byte)0xe7, (byte)0x87, (byte)0x54, (byte)0x2e, (byte)0x63, (byte)0xfb, (byte)0xdc, (byte)0xa2, (byte)0xa8, (byte)0xe1, (byte)0x09,
+        (byte)0x8b, (byte)0x11, (byte)0xf6, (byte)0x16, (byte)0x98, (byte)0xf3, (byte)0x11, (byte)0x8d, (byte)0x4a, (byte)0x4e, (byte)0x37, (byte)0x5f, (byte)0x84, (byte)0xfb,
+        (byte)0xa4, (byte)0x46, (byte)0xb8, (byte)0x1a, (byte)0xc0, (byte)0xd3, (byte)0x20, (byte)0x93, (byte)0xc5, (byte)0xae, (byte)0x3c, (byte)0xb1, (byte)0x4c, (byte)0x45,
+        (byte)0x20, (byte)0xb8, (byte)0x5f, (byte)0x5b, (byte)0x74, (byte)0x21, (byte)0x02, (byte)0x03, (byte)0x01, (byte)0x00, (byte)0x01 };
 
     private static boolean readyToReadWrite = false;
 
@@ -298,23 +314,13 @@ public class FileSecurity {
 
     private static void writePC2RecoveryInfo() throws FileSecurityException {
 
-        PC2RecoveryInfo pc2RecoveryInfo = new PC2RecoveryInfo();
-
-        char [] newPassword = new char[contestPassword.length];
-        
-        for (int i = 0; i < contestPassword.length; i++) {
-            newPassword[i] = ((char)(contestPassword[i] ^ 0xfafa));
-        }
-
-        pc2RecoveryInfo.setSecretKey(contestSecretKey);
-        pc2RecoveryInfo.setPassword(newPassword);
-        pc2RecoveryInfo.setKeyPair(contestKeyPair);
-        pc2RecoveryInfo.setContestDirectory(contestDirectory);
-
-        // TODO: encryptObject(pc2RecoveryInfo, pc2pgpkey);
-
+        EncodedKeySpec keySpec = new X509EncodedKeySpec(PUBLIC_KEY); 
         try {
-            writeObjectToFile(contestDirectory + PC2_KEY_FILENAME, pc2RecoveryInfo);
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA"); 
+            PublicKey publicKey = keyFactory.generatePublic(keySpec); 
+            System.out.println("contestPassword="+new String(contestPassword));
+            KeyUtilities.encryptString(contestDirectory+new String(contestPassword),contestDirectory+RECOVERY_KEY_FILENAME, publicKey);
+
         } catch (Exception e) {
             StaticLog.getLog().log(Log.INFO, "writePC2RecoveryFile - failed to write file to disk", e);
             throw new FileSecurityException("FAILED TO WRITE", e);
