@@ -388,7 +388,7 @@ public class ReportPane extends JPanePlugin {
     private JCheckBox getThisClientFilterButton() {
         if (thisClientFilterButton == null) {
             thisClientFilterButton = new JCheckBox();
-            thisClientFilterButton.setBounds(new java.awt.Rectangle(30,121,165,21));
+            thisClientFilterButton.setBounds(new java.awt.Rectangle(30,121,213,21));
             thisClientFilterButton.setMnemonic(java.awt.event.KeyEvent.VK_C);
             thisClientFilterButton.setText("Filter for this client only");
         }

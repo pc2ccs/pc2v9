@@ -107,7 +107,9 @@ public class FastestSolvedReport implements IReport {
                         printWriter.println(teamName);
                     }
                 } else {
-                    numDeleted++;
+                    if (run.isDeleted()) {
+                        numDeleted++;
+                    }
                 }
             }
 

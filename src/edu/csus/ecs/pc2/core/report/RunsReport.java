@@ -113,6 +113,12 @@ public class RunsReport implements IReport {
             printWriter.println("    Checked out by: "+whoCheckedOutId);
         }
         
+        if (run.isSendToTeams()) {
+            printWriter.println("    Judgement was sent to team.");
+        } else {
+            printWriter.println("    Judgement was _not_ sent to team.");
+        }
+
         if (isThisSite(run.getSiteNumber())) {
 
             try {
@@ -144,6 +150,8 @@ public class RunsReport implements IReport {
                         }
                     }
                 }
+            } catch (java.lang.NullPointerException nullPointerException) {
+                printWriter.println("    No submitted files found (not on server?).");
             } catch (Exception ex) {
 
                 if (ex.getMessage().startsWith("Unable to read object from file")) {

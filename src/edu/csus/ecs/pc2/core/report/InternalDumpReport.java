@@ -341,7 +341,10 @@ public class InternalDumpReport implements IReport {
 
     public void createReportFile(String filename, Filter inFilter) throws IOException {
 
-        accountFilter = filter;
+        if (inFilter == null){
+            throw new IllegalArgumentException("filter must not be null");
+        }
+        accountFilter = inFilter;
 
         PrintWriter printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
 
