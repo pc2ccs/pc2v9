@@ -318,7 +318,7 @@ public class FileSecurity {
         try {
             KeyFactory keyFactory = KeyFactory.getInstance("RSA"); 
             PublicKey publicKey = keyFactory.generatePublic(keySpec); 
-            System.out.println("contestPassword="+new String(contestPassword));
+
             KeyUtilities.encryptString(contestDirectory+new String(contestPassword),contestDirectory+RECOVERY_KEY_FILENAME, publicKey);
 
         } catch (Exception e) {
