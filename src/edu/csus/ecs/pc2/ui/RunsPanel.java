@@ -519,6 +519,8 @@ public class RunsPanel extends JPanePlugin {
         HeapSorter sorter = new HeapSorter();
         HeapSorter numericStringSorter = new HeapSorter();
         numericStringSorter.setComparator(new NumericStringComparator());
+        HeapSorter accountNameSorter = new HeapSorter();
+        accountNameSorter.setComparator(new AccountColumnComparator());
 
         int idx = 0;
 
@@ -538,12 +540,12 @@ public class RunsPanel extends JPanePlugin {
             // Object[] fullColumns = { "Site", "Team", "Run Id", "Time", "Status", "Problem", "Judge", "Language", "OS" };
 
             runListBox.setColumnSorter(idx++, sorter, 3); // Site
-            runListBox.setColumnSorter(idx++, sorter, 2); // Team
+            runListBox.setColumnSorter(idx++, accountNameSorter, 2); // Team
             runListBox.setColumnSorter(idx++, numericStringSorter, 1); // Run Id
             runListBox.setColumnSorter(idx++, numericStringSorter, 4); // Time
             runListBox.setColumnSorter(idx++, sorter, 5); // Status
             runListBox.setColumnSorter(idx++, sorter, 6); // Problem
-            runListBox.setColumnSorter(idx++, sorter, 7); // Judge
+            runListBox.setColumnSorter(idx++, accountNameSorter, 7); // Judge
             runListBox.setColumnSorter(idx++, sorter, 8); // Language
             runListBox.setColumnSorter(idx++, sorter, 9); // OS
 

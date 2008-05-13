@@ -247,6 +247,9 @@ public class ClarificationsPane extends JPanePlugin {
         HeapSorter sorter = new HeapSorter();
         HeapSorter numericStringSorter = new HeapSorter();
         numericStringSorter.setComparator(new NumericStringComparator());
+        HeapSorter accountNameSorter = new HeapSorter();
+        accountNameSorter.setComparator(new AccountColumnComparator());
+        // TODO consider using accountNameSorter on Site columns
 
         int idx = 0;
 
@@ -255,7 +258,7 @@ public class ClarificationsPane extends JPanePlugin {
             clarificationListBox.setColumnSorter(idx++, sorter, 1);
 
             // Team
-            clarificationListBox.setColumnSorter(idx++, sorter, 2);
+            clarificationListBox.setColumnSorter(idx++, accountNameSorter, 2);
 
             // Clar Id
             clarificationListBox.setColumnSorter(idx++, numericStringSorter, 3);
@@ -267,10 +270,10 @@ public class ClarificationsPane extends JPanePlugin {
             clarificationListBox.setColumnSorter(idx++, sorter, 5);
 
             // Judge
-            clarificationListBox.setColumnSorter(idx++, sorter, 6);
+            clarificationListBox.setColumnSorter(idx++, accountNameSorter, 6);
 
             // Sent to
-            clarificationListBox.setColumnSorter(idx++, sorter, 7);
+            clarificationListBox.setColumnSorter(idx++, accountNameSorter, 7);
 
             // Problem
             clarificationListBox.setColumnSorter(idx++, sorter, 8);
@@ -286,7 +289,7 @@ public class ClarificationsPane extends JPanePlugin {
             clarificationListBox.setColumnSorter(idx++, sorter, 1);
 
             // Team
-            clarificationListBox.setColumnSorter(idx++, sorter, 2);
+            clarificationListBox.setColumnSorter(idx++, accountNameSorter, 2);
 
             // Clar Id
             clarificationListBox.setColumnSorter(idx++, numericStringSorter, 3);
