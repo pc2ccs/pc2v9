@@ -8,7 +8,6 @@ import java.awt.GridLayout;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
@@ -374,7 +373,7 @@ public class ClarificationsPane extends JPanePlugin {
             displayString = displayString + "* For All Teams *" + "\n";
         }
 
-        JOptionPane.showMessageDialog(this, displayString, "Clarification " + clarification.getNumber(), JOptionPane.INFORMATION_MESSAGE);
+        FrameUtilities.showMessage(getParentFrame(), "Clarification " + clarification.getNumber(), displayString);
     }
 
     private void removeClarificationRow(final Clarification clarification) {
