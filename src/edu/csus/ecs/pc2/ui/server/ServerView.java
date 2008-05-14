@@ -376,6 +376,7 @@ public class ServerView extends JFrame implements UIPlugin {
 
     protected void addUIPlugin(JTabbedPane tabbedPane, String tabTitle, JPanePlugin plugin) {
 
+        plugin.setParentFrame(this);
         plugin.setContestAndController(model, controller);
         tabbedPane.add(plugin, tabTitle);
 
@@ -389,6 +390,7 @@ public class ServerView extends JFrame implements UIPlugin {
      */
     public void addUIPlugin(String tabTitle, JPanePlugin plugin) {
 
+        plugin.setParentFrame(this);
         plugin.setContestAndController(model, controller);
         getMainTabbedPane().add(plugin, tabTitle);
 

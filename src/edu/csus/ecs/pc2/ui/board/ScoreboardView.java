@@ -189,6 +189,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
     }
 
     protected void addUIPlugin(JTabbedPane tabbedPane, String tabTitle, JPanePlugin plugin) {
+        plugin.setParentFrame(this);
         plugin.setContestAndController(contest, controller);
         tabbedPane.add(plugin, tabTitle);
     }
