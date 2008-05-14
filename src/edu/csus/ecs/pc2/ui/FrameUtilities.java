@@ -95,6 +95,35 @@ public final class FrameUtilities {
     }
 
     /**
+     * 
+     * Center frame/component over a parentFrame.  If parentFrame is null
+     * centers across screen.  If the parent is smaller, match the x and/or y.
+     * 
+     * @param parentFrame
+     * @param component
+     */
+    public static void centerFrameOver(Component parentFrame, Component component) {
+        if (parentFrame == null) {
+            centerFrame(component);
+        } else {
+            Rectangle parentRect = parentFrame.getBounds();
+            Rectangle myRect = component.getBounds();
+            int x, y;
+            if (myRect.width > parentRect.width) {
+                x = parentRect.x;
+            } else {
+                x = (parentRect.width - myRect.width)/2 + parentRect.x;
+            }
+            if (myRect.height > parentRect.height) {
+                y = parentRect.y;
+            } else {
+                y = (parentRect.height - myRect.height)/2 + parentRect.y;
+            }
+            component.setBounds(x, y, myRect.width, myRect.height);
+        }
+
+    }
+    /**
      * Center frame at top of screen.
      * 
      * @param component
@@ -219,24 +248,7 @@ public final class FrameUtilities {
                 });
         dialog.setContentPane(optionPane);
         dialog.pack();
-        if (parentFrame == null) {
-            centerFrame(dialog);
-        } else {
-            Rectangle parentRect = parentFrame.getBounds();
-            Rectangle myRect = dialog.getBounds();
-            int x, y;
-            if (myRect.width > parentRect.width) {
-                x = parentRect.x;
-            } else {
-                x = (parentRect.width - myRect.width)/2 + parentRect.x;
-            }
-            if (myRect.height > parentRect.height) {
-                y = parentRect.y;
-            } else {
-                y = (parentRect.height - myRect.height)/2 + parentRect.y;
-            }
-            dialog.setBounds(x, y, myRect.width, myRect.height);
-        }
+        centerFrameOver(parentFrame, dialog);
         dialog.setVisible(true);
     }
 
