@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
@@ -218,7 +219,24 @@ public final class FrameUtilities {
                 });
         dialog.setContentPane(optionPane);
         dialog.pack();
-        centerFrame(dialog);
+        if (parentFrame == null) {
+            centerFrame(dialog);
+        } else {
+            Rectangle parentRect = parentFrame.getBounds();
+            Rectangle myRect = dialog.getBounds();
+            int x, y;
+            if (myRect.width > parentRect.width) {
+                x = parentRect.x;
+            } else {
+                x = (parentRect.width - myRect.width)/2 + parentRect.x;
+            }
+            if (myRect.height > parentRect.height) {
+                y = parentRect.y;
+            } else {
+                y = (parentRect.height - myRect.height)/2 + parentRect.y;
+            }
+            dialog.setBounds(x, y, myRect.width, myRect.height);
+        }
         dialog.setVisible(true);
     }
 
