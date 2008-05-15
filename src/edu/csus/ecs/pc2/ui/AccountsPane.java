@@ -11,7 +11,6 @@ import java.util.Vector;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -20,8 +19,6 @@ import com.ibm.webrunner.j2mclb.util.HeapSorter;
 import com.ibm.webrunner.j2mclb.util.NumericStringComparator;
 
 import edu.csus.ecs.pc2.core.IInternalController;
-import edu.csus.ecs.pc2.core.imports.ICPCImportData;
-import edu.csus.ecs.pc2.core.imports.LoadICPCData;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -75,10 +72,6 @@ public class AccountsPane extends JPanePlugin {
     private String lastDir = ".";
 
     private ReviewAccountLoadFrame reviewAccountLoadFrame;
-
-    private JButton loadICPCButton = null;
-
-    private ICPCAccountFrame icpcAccountFrame = null; // @jve:decl-index=0:visual-constraint="701,102"
 
     private JButton generateAccountsButton = null;
 
@@ -358,7 +351,6 @@ public class AccountsPane extends JPanePlugin {
             buttonPane.add(getEditButton(), null);
             buttonPane.add(getFilterButton(), null);
             buttonPane.add(getLoadButton(), null);
-            buttonPane.add(getLoadICPCButton(), null);
         }
         return buttonPane;
     }
@@ -571,75 +563,6 @@ public class AccountsPane extends JPanePlugin {
                 getRunsListBox().sort();
             }
         });
-    }
-
-    /**
-     * This method initializes loadICPCButton
-     * 
-     * @return javax.swing.JButton
-     */
-    private JButton getLoadICPCButton() {
-        if (loadICPCButton == null) {
-            loadICPCButton = new JButton();
-            loadICPCButton.setText("Load ICPC");
-            loadICPCButton.setToolTipText("Load ICPC PC2_Team.tab");
-            loadICPCButton.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    loadICPCAccounts();
-                }
-            });
-        }
-        return loadICPCButton;
-    }
-
-    protected void loadICPCAccounts() {
-        try {
-            JFileChooser chooser = new JFileChooser(lastDir);
-            chooser.setDialogTitle("Select PC2_Team.tab");
-            chooser.setFileFilter(new TabFileFilter());
-            int returnVal = chooser.showOpenDialog(this);
-            if (returnVal == JFileChooser.APPROVE_OPTION) {
-                File newFile = chooser.getSelectedFile().getCanonicalFile();
-                boolean newFileProblem = true;
-                if (newFile.exists()) {
-                    if (newFile.isFile()) {
-                        if (newFile.canRead()) {
-                            lastDir = chooser.getCurrentDirectory().toString();
-                            // TODO move this off the swing thread, maybe into its own class
-                            Account[] accounts;
-                            Vector<Account> accountVector = getContest().getAccounts(ClientType.Type.TEAM);
-                            accounts = accountVector.toArray(new Account[accountVector.size()]);
-                            ICPCImportData importData = LoadICPCData.loadAccounts(lastDir, getContest().getGroups(), accounts);
-                            if (importData.getAccounts() != null) {
-                                newFileProblem = false;
-                                getICPCAccountFrame().setICPCAccounts(importData.getAccounts());
-                                getICPCAccountFrame().setContestAndController(getContest(), getController());
-                                getICPCAccountFrame().setVisible(true);
-                            }
-                        }
-                    }
-                }
-                if (newFileProblem) {
-                    log.warning("Problem reading PC2_Contest.tab " + newFile.getCanonicalPath() + "");
-                    JOptionPane.showMessageDialog(null, "Could not open file " + newFile, "Warning", JOptionPane.WARNING_MESSAGE);
-                }
-            }
-
-        } catch (Exception e) {
-            log.log(Log.WARNING, "Exception ", e);
-        }
-    }
-
-    /**
-     * This method initializes ICPCAccountFrame
-     * 
-     * @return edu.csus.ecs.pc2.ui.ICPCAccountFrame
-     */
-    private ICPCAccountFrame getICPCAccountFrame() {
-        if (icpcAccountFrame == null) {
-            icpcAccountFrame = new ICPCAccountFrame();
-        }
-        return icpcAccountFrame;
     }
 
     /**

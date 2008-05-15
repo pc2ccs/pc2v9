@@ -2,21 +2,14 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.io.File;
-import java.util.HashMap;
 
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
-import edu.csus.ecs.pc2.core.imports.ICPCImportData;
-import edu.csus.ecs.pc2.core.imports.LoadICPCData;
 import edu.csus.ecs.pc2.core.log.Log;
-import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IGroupListener;
@@ -54,10 +47,6 @@ public class GroupsPane extends JPanePlugin {
     private EditGroupFrame editGroupFrame = null;
     
     private Log log;
-
-    private JButton icpcButton = null;
-
-    private String lastOpenedFile;
 
     /**
      * This method initializes
@@ -102,7 +91,6 @@ public class GroupsPane extends JPanePlugin {
             groupButtonPane.setPreferredSize(new java.awt.Dimension(35, 35));
             groupButtonPane.add(getAddButton(), null);
             groupButtonPane.add(getEditButton(), null);
-            groupButtonPane.add(getIcpcButton(), null);
         }
         return groupButtonPane;
     }
@@ -304,111 +292,4 @@ public class GroupsPane extends JPanePlugin {
 
     }
 
-    /**
-     * This method initializes icpcButton
-     * 
-     * @return javax.swing.JButton
-     */
-    private JButton getIcpcButton() {
-        if (icpcButton == null) {
-            icpcButton = new JButton();
-            icpcButton.setText("Load ICPC");
-            icpcButton.setToolTipText("Load ICPC PC2_Site.tab");
-            icpcButton.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    loadICPCData();
-                }
-            });
-        }
-        return icpcButton;
-    }
-
-    protected void loadICPCData() {
-        try {
-            JFileChooser chooser = new JFileChooser(lastOpenedFile);
-            chooser.setDialogTitle("Select PC2_Contest.tab");
-            chooser.setFileFilter(new TabFileFilter());
-            int returnVal = chooser.showOpenDialog(this);
-            if (returnVal == JFileChooser.APPROVE_OPTION) {
-                File newFile = chooser.getSelectedFile().getCanonicalFile();
-                boolean newFileProblem = true;
-                if (newFile.exists()) {
-                    if (newFile.isFile()) {
-                        if (newFile.canRead()) {
-                            lastOpenedFile = chooser.getCurrentDirectory().toString();
-                            // TODO move this off the swing thread, maybe into its own class
-                            ICPCImportData importData = LoadICPCData.loadSites(lastOpenedFile, getContest().getSites());
-                            newFileProblem = false;
-                            Group[] importedGroups = importData.getGroups();
-                            Group[] modelGroups = getContest().getGroups();
-                            // XXX this is a funky location, but we do not want to add a 3rd icpc load for it
-                            String contestTitle = importData.getContestTitle();
-                            if (contestTitle != null && contestTitle.trim().length() > 0) {
-                                ContestInformation ci = getContest().getContestInformation();
-                                ci.setContestTitle(contestTitle);
-                                getController().updateContestInformation(ci);
-                            }
-                            if (importedGroups != null && importedGroups.length > 0) {
-                                if (modelGroups == null || modelGroups.length == 0) {
-                                    for (Group group : importedGroups) {
-                                        getController().addNewGroup(group);
-                                    }
-                                } else {
-                                    // there exists modelGroups, that we need to merge with
-                                    // primary match should be based on external id
-                                    // secondary match based on name
-                                    HashMap<String, Group> groupMap = new HashMap<String, Group>();
-                                    for (Group group : modelGroups) {
-                                        groupMap.put(group.getDisplayName(), group);
-                                        groupMap.put(Integer.toString(group.getGroupId()), group);
-                                    }
-                                    for (Group group : importedGroups) {
-                                        if (groupMap.containsKey(Integer.toString(group.getGroupId()))) {
-                                            mergeGroups(groupMap.get(Integer.toString(group.getGroupId())), group);
-                                        } else {
-                                            if (groupMap.containsKey(group.getDisplayName())) {
-                                                mergeGroups(groupMap.get(group.getDisplayName()), group);
-                                            } else {
-                                                // new group
-                                                getController().addNewGroup(group);
-                                            }
-                                        }
-                                    }
-                                }
-                            } // XXX odd, but is it an error if we have no groups?
-                        }
-                    }
-                }
-                if (newFileProblem) {
-                    log.warning("Problem reading PC2_Contest.tab " + newFile.getCanonicalPath() + "");
-                    JOptionPane.showMessageDialog(null, "Could not open file " + newFile, "Warning", JOptionPane.WARNING_MESSAGE);
-                }
-            }
-            
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        // TODO Auto-generated method stub
-        
-    }
-
-    /**
-     * This method merges the data read from PC2_Site.tab into the model.
-     * 
-     * @param destGroup
-     * @param srcGroup
-     */
-    private void mergeGroups(Group dstGroup, Group srcGroup) {
-        // no-op if the groups are the same
-        if (dstGroup.isSameAs(srcGroup)) {
-            return;
-        }
-        dstGroup.setDisplayName(srcGroup.getDisplayName());
-        dstGroup.setGroupId(srcGroup.getGroupId());
-        if (srcGroup.getSite() != null) { // do not overwrite this
-            dstGroup.setSite(srcGroup.getSite());
-        }
-        getController().updateGroup(dstGroup);
-    }
 } // @jve:decl-index=0:visual-constraint="10,10"
