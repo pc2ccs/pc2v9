@@ -113,7 +113,7 @@ public class ServerView extends JFrame implements UIPlugin {
     }
 
     protected void promptAndExit() {
-        int result = FrameUtilities.yesNoCancelDialog("Are you sure you want to exit PC^2?", "Exit PC^2 Server Module");
+        int result = FrameUtilities.yesNoCancelDialog(null, "Are you sure you want to exit PC^2?", "Exit PC^2 Server Module");
 
         if (result == JOptionPane.YES_OPTION) {
             log.info("Server "+model.getSiteNumber()+" halted");
