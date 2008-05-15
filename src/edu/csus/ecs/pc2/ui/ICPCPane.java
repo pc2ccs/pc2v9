@@ -204,7 +204,6 @@ public class ICPCPane extends JPanePlugin {
                     changeDisplayFormat();
                 }
             });
-            changeDisplayFormatButton.setVisible(false);
         }
         return changeDisplayFormatButton;
     }
@@ -212,7 +211,7 @@ public class ICPCPane extends JPanePlugin {
     protected void changeDisplayFormat() {
         if (importData == null) {
 //            importData = new ICPCImportData(getContest().getAccounts(Type.TEAM), getContest().getGroups(), getContest().getContestInformation().getContestTitle());
-            JOptionPane.showMessageDialog(this, "Please 'Load ICPC Data' first.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Please 'Import' icpc data first.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
         if (importData.getAccounts() != null) {
