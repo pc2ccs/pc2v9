@@ -3,6 +3,7 @@
  */
 package edu.csus.ecs.pc2.core.imports;
 
+import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ElementId;
 
@@ -37,6 +38,19 @@ public class ICPCAccount {
      */
     public ICPCAccount() {
         super();
+    }
+    public ICPCAccount(Account account, String inGroupExternalId) {
+        accountNumber = account.getClientId().getClientNumber();
+        clientId = account.getClientId();
+        externalId = account.getExternalId();
+        externalName = account.getExternalName();
+        if (inGroupExternalId != null) {
+        // need to convert this groupId to the externalId
+            groupExternalId = inGroupExternalId;
+        }
+        groupId = account.getGroupId();
+        longSchoolName = account.getLongSchoolName();
+        shortSchoolName = account.getShortSchoolName();
     }
     public void setExternalId(String id) {
         externalId = id;

@@ -29,6 +29,7 @@ import edu.csus.ecs.pc2.ui.ContestInformationPane;
 import edu.csus.ecs.pc2.ui.ContestTimesPane;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.GroupsPane;
+import edu.csus.ecs.pc2.ui.ICPCPane;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
 import edu.csus.ecs.pc2.ui.JudgementsPanel;
 import edu.csus.ecs.pc2.ui.LanguagesPane;
@@ -157,6 +158,9 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
                 GroupsPane groupsPane = new GroupsPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Groups", groupsPane);
+
+                ICPCPane icpcPane = new ICPCPane();
+                addUIPlugin(getConfigureContestTabbedPane(), "ICPC", icpcPane);
 
                 JudgementsPanel judgementsPanel = new JudgementsPanel();
                 addUIPlugin(getConfigureContestTabbedPane(), "Judgements", judgementsPanel);

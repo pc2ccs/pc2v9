@@ -3,6 +3,12 @@
  */
 package edu.csus.ecs.pc2.core.imports;
 
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Vector;
+
+import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Group;
 
 /**
@@ -19,6 +25,23 @@ public class ICPCImportData {
      */
     public ICPCImportData() {
         super();
+    }
+    public ICPCImportData(Vector<Account> inAccounts, Group[] inGroups, String inContestTitle) {
+        HashMap<ElementId, String> groupHash = new HashMap<ElementId, String>();
+        groups = inGroups;
+        for (int i = 0; i < inGroups.length; i++) {
+            groupHash.put(inGroups[i].getElementId(), Integer.toString(inGroups[i].getGroupId()));
+        }
+        contestTitle = inContestTitle;
+        Enumeration accountsEnum = inAccounts.elements();
+        accounts = new ICPCAccount[inAccounts.size()];
+        int accountCount = 0;
+        while (accountsEnum.hasMoreElements()) {
+            Account account = (Account) accountsEnum.nextElement();
+            ICPCAccount icpcAccount = new ICPCAccount(account, groupHash.get(account.getGroupId()));
+            accounts[accountCount] = icpcAccount;
+            accountCount++;
+        }
     }
     /**
      * @return Returns the accounts.
