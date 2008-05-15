@@ -657,7 +657,7 @@ public class ContestTimesPane extends JPanePlugin {
     }
 
     protected void stopAllContestTimes() {
-        int result = FrameUtilities.yesNoCancelDialog("Are you sure you want to stop all contest clocks?", "Confirm stop all clocks");
+        int result = FrameUtilities.yesNoCancelDialog(getParentFrame(), "Are you sure you want to stop all contest clocks?", "Confirm stop all clocks");
 
         if (result == JOptionPane.YES_OPTION) {
             showMessage("STOP ALL sites");

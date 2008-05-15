@@ -174,14 +174,14 @@ public final class FrameUtilities {
      * @param message
      * @return the result
      */
-    public static int yesNoCancelDialog(String message, String title) {
+    public static int yesNoCancelDialog(Component parentFrame, String message, String title) {
         if (message == null) {
             throw new IllegalArgumentException("message is null");
         }
 
         Object[] options = { "Yes", "No", "Cancel" };
 
-        int result = JOptionPane.showOptionDialog(null, message, title, JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[2]);
+        int result = JOptionPane.showOptionDialog(parentFrame, message, title, JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[2]);
         return result;
     }
 

@@ -198,7 +198,7 @@ public class SubmitClarificationPane extends JPanePlugin {
         }
 
         // TODO replace with clarification confirmation 
-        int result = FrameUtilities.yesNoCancelDialog("Submit Clarification?", "Submit Clarification Confirm");
+        int result = FrameUtilities.yesNoCancelDialog(getParentFrame(), "Submit Clarification?", "Submit Clarification Confirm");
 
         if (result != JOptionPane.YES_OPTION) {
             return;

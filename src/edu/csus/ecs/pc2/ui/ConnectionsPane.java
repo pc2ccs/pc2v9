@@ -239,7 +239,7 @@ public class ConnectionsPane extends JPanePlugin {
             return;
         }
 
-        int result = FrameUtilities.yesNoCancelDialog("Disconnect " + selectedIndex.length + " connections?", "Confirm Disconnect");
+        int result = FrameUtilities.yesNoCancelDialog(getParentFrame(), "Disconnect " + selectedIndex.length + " connections?", "Confirm Disconnect");
 
         if (result == JOptionPane.YES_OPTION) {
             for (int i : selectedIndex) {

@@ -412,7 +412,7 @@ public class ICPCAccountPane extends JPanePlugin {
         if (updatedAccountVector.size() > 0) {
             // Something changed, are they sure ?
     
-            int result = FrameUtilities.yesNoCancelDialog("Accounts modified, save changes?", "Confirm Choice");
+            int result = FrameUtilities.yesNoCancelDialog(getParentFrame(), "Accounts modified, save changes?", "Confirm Choice");
             
             if (result == JOptionPane.YES_OPTION) {
                 // pretend that hit update in that case

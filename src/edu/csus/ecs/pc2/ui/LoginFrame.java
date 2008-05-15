@@ -341,7 +341,7 @@ public class LoginFrame extends JFrame implements UIPlugin {
     protected void promptBeforeExit() {
 
         setStatusMessage("");
-        int result = FrameUtilities.yesNoCancelDialog("Are you sure you want to exit?", "Exit PC^2");
+        int result = FrameUtilities.yesNoCancelDialog(null, "Are you sure you want to exit?", "Exit PC^2");
 
         if (result == JOptionPane.YES_OPTION) {
             System.exit(0);

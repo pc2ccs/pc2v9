@@ -111,7 +111,7 @@ public class SubmitRunPane extends JPanePlugin {
     }
 
     protected void promptAndExit() {
-        int result = FrameUtilities.yesNoCancelDialog("Are you sure you want to exit PC^2?", "Exit PC^2");
+        int result = FrameUtilities.yesNoCancelDialog(null, "Are you sure you want to exit PC^2?", "Exit PC^2");
 
         if (result == JOptionPane.YES_OPTION) {
             System.exit(0);
@@ -472,7 +472,7 @@ public class SubmitRunPane extends JPanePlugin {
                         + "Language:  <FONT COLOR=BLUE>" + Utilities.forHTML(language.toString()) + "</FONT><BR><BR>" + "File: <FONT COLOR=BLUE>" + Utilities.forHTML(filename)
                         + "</FONT><BR><BR></FONT>";
 
-                int result = FrameUtilities.yesNoCancelDialog(confirmQuestion, "Confirm Submission");
+                int result = FrameUtilities.yesNoCancelDialog(getParentFrame(), confirmQuestion, "Confirm Submission");
 
                 if (result == JOptionPane.YES_OPTION) {
 

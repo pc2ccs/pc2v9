@@ -359,7 +359,7 @@ public class SelectJudgementPane extends JPanePlugin {
 
             // Something changed, are they sure ?
 
-            int result = FrameUtilities.yesNoCancelDialog("Run modified, save changes?", "Confirm Choice");
+            int result = FrameUtilities.yesNoCancelDialog(getParentFrame(), "Run modified, save changes?", "Confirm Choice");
 
             if (result == JOptionPane.YES_OPTION) {
                 if (confirmInconsistentJudgements()) {

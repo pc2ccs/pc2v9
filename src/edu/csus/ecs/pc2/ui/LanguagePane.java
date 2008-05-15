@@ -278,7 +278,7 @@ public class LanguagePane extends JPanePlugin {
 
             // Something changed, are they sure ?
             
-            int result = FrameUtilities.yesNoCancelDialog("Language modified, save changes?", "Confirm Choice");
+            int result = FrameUtilities.yesNoCancelDialog(getParentFrame(), "Language modified, save changes?", "Confirm Choice");
 
             if (result == JOptionPane.YES_OPTION) {
                 if (getAddButton().isEnabled()) {

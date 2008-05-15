@@ -249,7 +249,7 @@ public class AnswerClarificationPane extends JPanePlugin {
 
             // Something changed, are they sure ?
 
-            int result = FrameUtilities.yesNoCancelDialog("Clarification modified, save changes?", "Confirm Choice");
+            int result = FrameUtilities.yesNoCancelDialog(getParentFrame(), "Clarification modified, save changes?", "Confirm Choice");
 
             if (result == JOptionPane.YES_OPTION) {
                 updateClarification();

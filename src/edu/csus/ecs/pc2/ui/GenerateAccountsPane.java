@@ -583,7 +583,7 @@ public class GenerateAccountsPane extends JPanePlugin {
         } else {
             // Something changed, are they sure ?
             
-            int result = FrameUtilities.yesNoCancelDialog("Counts modified, generate accounts?", "Confirm Choice");
+            int result = FrameUtilities.yesNoCancelDialog(getParentFrame(), "Counts modified, generate accounts?", "Confirm Choice");
 
             if (result == JOptionPane.YES_OPTION) {
                 generateAccounts();
