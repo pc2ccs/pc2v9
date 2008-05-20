@@ -72,9 +72,29 @@ public class Filter implements Serializable {
     private boolean filteringProblems = false;
 
     /**
-     * Collection of Account
+     * collection of language ids
      */
-    private Hashtable<ElementId, Date> accountIdHash = new Hashtable<ElementId, Date>();
+    private Hashtable<ElementId, Date> languageIdHash = new Hashtable<ElementId, Date>();
+
+    /**
+     * filtering on language (language id)
+     */
+    private boolean filteringLanguages = false;
+
+    /**
+     * collection of judgement ids
+     */
+    private Hashtable<ElementId, Date> judgementIdHash = new Hashtable<ElementId, Date>();
+
+    /**
+     * filtering on judgements (judgement id)
+     */
+    private boolean filteringJudgements = false;
+
+    /**
+     * Collection of Account/Clients
+     */
+    private Hashtable<ClientId, Date> clientIdHash = new Hashtable<ClientId, Date>();
 
     private Hashtable<Type, Date> clientTypeHash = new Hashtable<Type, Date>();
 
@@ -101,17 +121,17 @@ public class Filter implements Serializable {
      * @param run
      */
     public boolean matches(Run run) {
-        return isThisSite(run) && matchesRunState(run.getStatus()) && matchesProblem(run.getProblemId());
+        return isThisSite(run) && matchesAccount(run.getSubmitter()) && matchesRunState(run.getStatus()) && matchesProblem(run.getProblemId()) && matchesLanguage(run.getLanguageId());
     }
 
     /**
      * Match criteria against a clar.
      * 
      * @param clarification
-     * @return true if the clarifcations matches the filter
+     * @return true if the clarifications matches the filter
      */
     public boolean matches(Clarification clarification) {
-        return isThisSite(clarification) && matchesClarificationState(clarification.getState()) && matchesProblem(clarification.getProblemId());
+        return isThisSite(clarification) && matchesAccount(clarification.getSubmitter()) && matchesClarificationState(clarification.getState()) && matchesProblem(clarification.getProblemId());
     }
 
     /**
@@ -142,6 +162,62 @@ public class Filter implements Serializable {
 
     public int getSiteNumber() {
         return siteNumber;
+    }
+
+    public void setUsingJudgementFilter(boolean turnOn) {
+        filteringJudgements = turnOn;
+    }
+
+    /**
+     * Is filtering using judgement list.
+     * 
+     * @return true if filter judgements.
+     */
+    public boolean isFilteringJudgements() {
+        return filteringJudgements;
+    }
+
+    /**
+     * Add a judgement to match against.
+     * 
+     * @param judgement
+     */
+    public void addJudgement(Judgement judgement) {
+        addJudgement(judgement.getElementId());
+    }
+
+    /**
+     * Add a judgement to match against.
+     * 
+     * Also turns filtering on for judgement list.
+     * 
+     * @param elementId
+     */
+    private void addJudgement(ElementId elementId) {
+        judgementIdHash.put(elementId, new Date());
+        filteringJudgements = true;
+    }
+
+    /**
+     * Return true if judgement filter ON and matches a judgement in the filter list.
+     * 
+     * @param judgement
+     */
+    public boolean matchesJudgement(Judgement judgement) {
+        return matchesJudgement(judgement.getElementId());
+    }
+
+    /**
+     * Return true if judgement filter ON and matches a judgement in the filter list.
+     * 
+     * @param judgementId
+     */
+    public boolean matchesJudgement(ElementId judgementId) {
+        if (filteringJudgements) {
+            return judgementIdHash.containsKey(judgementId);
+        } else {
+            return true;
+        }
     }
 
     public void setUsingProblemFilter(boolean turnOn) {
@@ -200,9 +276,65 @@ public class Filter implements Serializable {
         }
     }
 
+    public void setUsingLanguageFilter(boolean turnOn) {
+        filteringLanguages = turnOn;
+    }
+
+    /**
+     * Is filtering using language list.
+     * 
+     * @return true if filter languages.
+     */
+    public boolean isFilteringLanguages() {
+        return filteringLanguages;
+    }
+
+    /**
+     * Add a language to match against.
+     * 
+     * @param language
+     */
+    public void addLanguage(Language language) {
+        addLanguage(language.getElementId());
+    }
+
+    /**
+     * Add a language to match against.
+     * 
+     * Also turns filtering on for language list.
+     * 
+     * @param elementId
+     */
+    private void addLanguage(ElementId elementId) {
+        languageIdHash.put(elementId, new Date());
+        filteringLanguages = true;
+    }
+
+    /**
+     * Return true if language filter ON and matches a language in the filter list.
+     * 
+     * @param language
+     */
+    public boolean matchesLanguage(Language language) {
+        return matchesLanguage(language.getElementId());
+    }
+
+    /**
+     * Return true if language filter ON and matches a language in the filter list.
+     * 
+     * @param languageId
+     */
+    public boolean matchesLanguage(ElementId languageId) {
+        if (filteringLanguages) {
+            return languageIdHash.containsKey(languageId);
+        } else {
+            return true;
+        }
+    }
+
     public boolean matchesAccount(Account account) {
         if (filteringAccounts) {
-            if (matchesAccount(account.getElementId())) {
+            if (matchesAccount(account.getClientId())) {
                 return true;
             } else if (matchesClientType(account.getClientId().getClientType())) {
                 return true;
@@ -221,16 +353,17 @@ public class Filter implements Serializable {
         }
     }
 
-    public boolean matchesAccount(ElementId elementId) {
+    public boolean matchesAccount(ClientId clientId) {
         if (filteringAccounts) {
-            return accountIdHash.containsKey(elementId);
+            return clientIdHash.containsKey(clientId);
         } else {
             return true;
         }
     }
 
     public void clearAccountList() {
-        throw new UnsupportedOperationException();
+        filteringAccounts = false;
+        clientIdHash = new Hashtable<ClientId, Date>();
     }
 
     /**
@@ -277,11 +410,11 @@ public class Filter implements Serializable {
     }
 
     public void addAccount(Account account) {
-        addAccount(account.getElementId());
+        addAccount(account.getClientId());
     }
 
-    protected void addAccount(ElementId elementId) {
-        accountIdHash.put(elementId, new Date());
+    protected void addAccount(ClientId clientId) {
+        clientIdHash.put(clientId, new Date());
     }
 
     public void addAccounts(Account[] accounts) {
@@ -291,8 +424,8 @@ public class Filter implements Serializable {
     }
 
     public void removeAccount(Account account) {
-        if (accountIdHash.get(account.getElementId()) != null) {
-            accountIdHash.remove(account.getElementId());
+        if (clientIdHash.get(account.getClientId()) != null) {
+            clientIdHash.remove(account.getClientId());
         }
     }
 
@@ -396,7 +529,7 @@ public class Filter implements Serializable {
 
     public String toString() {
 
-        if (isFilterOn() ) {
+        if (isFilterOn()) {
             String filterInfo = "Filter ON";
             if (thisSiteOnly) {
                 filterInfo += " Site " + siteNumber;
@@ -412,6 +545,9 @@ public class Filter implements Serializable {
             }
             if (filteringClarificationStates) {
                 filterInfo += " account(s))";
+            }
+            if (filteringLanguages) {
+                filterInfo += " language(s) ";
             }
 
             return filterInfo;
@@ -456,6 +592,7 @@ public class Filter implements Serializable {
 
     /**
      * Is one of the filters active?.
+     * 
      * @return true if filter is on, false if not filtering.
      */
     public boolean isFilterOn() {
