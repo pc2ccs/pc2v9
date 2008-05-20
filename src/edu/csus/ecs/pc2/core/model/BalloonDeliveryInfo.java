@@ -1,11 +1,10 @@
-/**
- * 
- */
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.Serializable;
 
 /**
+ * Info for a single balloon delivery.
+ * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -60,6 +59,9 @@ public class BalloonDeliveryInfo implements Serializable {
     }
 
     /**
+     * Get time sent.
+     * 
+     *  Typically set using Calendar.getInstance().getTime().getTime()
      * @return Returns the timeSent.
      */
     public long getTimeSent() {

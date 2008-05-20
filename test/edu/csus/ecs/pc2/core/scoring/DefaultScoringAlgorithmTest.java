@@ -335,7 +335,6 @@ public class DefaultScoringAlgorithmTest extends TestCase {
      * Test based on data from boardtest.html.
      */
     public void testScoreboardCaseOne () {
-        
         // RunID    TeamID  Prob    Time    Result
         
         String [] runsData = {
@@ -352,7 +351,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
                 "11,2,B,45,No",
                 "12,2,B,50,No",
                 "13,2,B,55,No"
-                };
+        };
         
         // Rank  TeamId Solved Penalty
         
@@ -360,54 +359,237 @@ public class DefaultScoringAlgorithmTest extends TestCase {
                 "1,team1,1,23",
                 "2,team2,1,30"
         };
+        
+        scoreboardTest (2, runsData, rankData);
+    }
+    
+    public void testScoreboardCaseOneA(){
+        
+        // RunID    TeamID  Prob    Time    Result
+        
+        String [] runsData = {
+                "2,8,C,1,No",
+                "15,8,D,1,Yes",
+                "23,8,D,1,No",
+                "29,8,D,1,No",
+                "43,8,C,1,No",
+                "44,8,A,1,Yes",
+                "52,8,C,1,Yes",
+                "65,8,B,2,Yes",
+        };
+        
+        /**
+         * 
+         * 
+         * 
+         */
+        
+        // Rank  TeamId Solved Penalty
+        
+        String [] rankData = {
+                "1,team8,4,45",
+                "2,team1,0,0",
+                "2,team2,0,0",
+                "2,team3,0,0",
+                "2,team4,0,0",
+                "2,team5,0,0",
+                "2,team6,0,0",
+                "2,team7,0,0",
+        };
+        
+        scoreboardTest (8, runsData, rankData);
+    }
+    
+
+    /**
+     * 
+     */
+    public void testScoreboardCaseTwo (){
+
+        String [] runsData = {
+                "1,16,B,1,No",
+                "2,8,C,1,No",
+                "3,5,B,1,No",
+                "4,4,C,1,No",
+                "5,4,D,1,No",
+                "6,3,A,1,No",
+                "7,1,A,1,No",
+                "8,6,B,1,New",
+                "9,18,A,1,No",
+                "10,6,A,1,No",
+                "11,21,D,1,Yes",
+                "12,6,D,1,No",
+                "13,12,A,1,Yes",
+                "14,13,A,1,No",
+                "15,8,D,1,Yes",
+                "16,3,B,1,No",
+                "17,3,A,1,No",
+                "18,16,C,1,No",
+                "19,20,D,1,Yes",
+                "20,12,B,1,No",
+                "21,14,A,1,No",
+                "22,15,C,1,No",
+                "23,8,D,1,No",
+                "24,13,D,1,No",
+                "25,21,A,1,No",
+                "26,18,D,1,Yes",
+                "27,6,C,1,No",
+                "28,20,B,1,Yes",
+                "29,8,D,1,No",
+                "30,19,B,1,No",
+                "31,22,C,1,No",
+                "32,7,A,1,No",
+                "33,7,A,1,No",
+                "34,4,D,1,New",
+                "35,18,B,1,No",
+                "36,4,D,1,Yes",
+                "37,19,C,1,No",
+                "38,2,B,1,No",
+                "39,15,C,1,No",
+                "40,12,B,1,No",
+                "41,10,D,1,Yes",
+                "42,22,A,1,No",
+                "43,8,C,1,No",
+                "44,8,A,1,Yes",
+                "45,18,D,1,No",
+                "46,13,C,1,No",
+                "47,7,D,1,No",
+                "48,7,C,1,New",
+                "49,5,C,1,No",
+                "50,7,B,1,New",
+                "51,21,B,1,No",
+                "52,8,D,1,Yes",
+                "53,16,A,1,No",
+                "54,10,A,1,No",
+                "55,22,B,1,No",
+                "56,18,C,1,No",
+                "57,5,D,2,Yes",
+                "58,10,C,2,No",
+                "59,9,C,2,Yes",
+                "60,5,D,2,Yes",
+                "61,12,D,2,No",
+                "62,10,C,2,No",
+                "63,3,B,2,Yes",
+                "64,21,C,2,No",
+                "65,8,B,2,Yes",
+                "66,19,B,2,Yes",
+                "67,18,A,2,No",
+                "68,12,D,2,Yes",
+                "69,5,B,2,Yes",
+                "70,2,A,2,No",
+                "71,21,D,2,No",
+                "72,12,D,2,No",
+                "73,18,C,2,No",
+                "74,14,D,2,Yes",
+                "75,2,A,2,No",
+                "76,20,D,2,No",
+                "77,7,C,2,No",
+                "78,14,D,2,No",
+                "79,15,A,2,No",
+                "80,16,B,2,No",
+                "81,2,C,2,No",
+                "82,2,C,2,No",
+                "83,22,A,2,No",
+                "84,21,D,2,Yes",
+                "85,2,C,2,No",
+                "86,10,C,2,No",
+                "87,17,C,2,No",
+                "88,7,A,2,New",
+                "89,20,B,2,No",
+                "90,12,C,2,No" 
+        };
+        
+        // Rank  TeamId Solved Penalty
+        
+        String [] rankData = {
+                "1,team8,3,4",
+                "2,team20,2,2",
+                "3,team12,2,23",
+                "4,team5,2,24",
+                "5,team10,1,1",
+                "5,team18,1,1",
+                "5,team21,1,1",
+                "8,team9,1,2",
+                "8,team14,1,2",
+                "10,team3,1,22",
+                "10,team19,1,22",
+                "12,team4,1,41",
+                "13,team1,0,0",
+                "13,team2,0,0",
+                "13,team6,0,0",
+                "13,team7,0,0",
+                "13,team11,0,0",
+                "13,team13,0,0",
+                "13,team15,0,0",
+                "13,team16,0,0",
+                "13,team17,0,0",
+                "13,team22,0,0",
+        };
+        
+        scoreboardTest (22, runsData, rankData);
+    }
+    
+    public void scoreboardTest(int numTeams, String[] runsDataList, String[] rankDataList) {
 
         InternalContest contest = new InternalContest();
 
-        initData(contest, 2, 2);
+        initData(contest, numTeams, 5);
 
+        for (String runInfoLine : runsDataList) {
+            addTheRun(contest, runInfoLine);
+        }
+
+        checkOutputXML(contest);
+
+        confirmRanks(contest, rankDataList);
+    }
+    
+    /**
+     * add run to list
+     * @param contest
+     * @param runInfoLine
+     */
+    private void addTheRun(InternalContest contest, String runInfoLine) {
+
+        // get 5th judge
+        ClientId judgeId = contest.getAccounts(Type.JUDGE).elementAt(4).getClientId();
+        
         Problem[] problemList = contest.getProblems();
         Language languageId = contest.getLanguages()[0];
 
         Judgement yesJudgement = contest.getJudgements()[0];
         Judgement noJudgement = contest.getJudgements()[1];
+        
+        String[] data = runInfoLine.split(",");
 
-        // get 5th judge
-        ClientId judgeId = contest.getAccounts(Type.JUDGE).elementAt(4).getClientId();
+        int runId = getIntegerValue(data[0]);
+        int teamId = getIntegerValue(data[1]);
+        String probLet = data[2];
+        int elapsed = getIntegerValue(data[3]);
+        boolean solved = data[4].equals("Yes");
 
-        for (String runInfoLine : runsData) {
+        int problemIndex = probLet.charAt(0) - 'A';
+        Problem problem = problemList[problemIndex];
+        ClientId clientId = new ClientId(contest.getSiteNumber(), Type.TEAM, teamId);
 
-            String[] data = runInfoLine.split(",");
-
-            int runId = getIntegerValue(data[0]);
-            int teamId = getIntegerValue(data[1]);
-            String probLet = data[2];
-            int elapsed = getIntegerValue(data[3]);
-            boolean solved = data[4].equals("Yes");
-
-            int problemIndex = probLet.charAt(0) - 'A';
-            Problem problem = problemList[problemIndex];
-            ClientId clientId = new ClientId(contest.getSiteNumber(), Type.TEAM, teamId);
-
-            Run run = new Run(clientId, languageId, problem);
-            run.setNumber(runId);
-            run.setElapsedMins(elapsed);
-            ElementId judgementId = noJudgement.getElementId();
-            if (solved) {
-                judgementId = yesJudgement.getElementId();
-            }
-            JudgementRecord judgementRecord = new JudgementRecord(judgementId, judgeId, solved, false);
-            contest.addRun(run);
-            
-            checkOutRun(contest, run, judgeId);
-
-            contest.addRunJudgement(run, judgementRecord, null, judgeId);
+        Run run = new Run(clientId, languageId, problem);
+        run.setNumber(runId);
+        run.setElapsedMins(elapsed);
+        ElementId judgementId = noJudgement.getElementId();
+        if (solved) {
+            judgementId = yesJudgement.getElementId();
         }
+        JudgementRecord judgementRecord = new JudgementRecord(judgementId, judgeId, solved, false);
+        contest.addRun(run);
+        
+        checkOutRun(contest, run, judgeId);
 
-        checkOutputXML(contest);
+        contest.addRunJudgement(run, judgementRecord, null, judgeId);
 
-        confirmRanks(contest, rankData);
+        System.out.println("Added run "+run);
+        
     }
-    
+
     /**
      * Fetch string from nodes.
      * 
@@ -507,13 +689,17 @@ public class DefaultScoringAlgorithmTest extends TestCase {
 //        Object[] cols = { "Rank", "Name", "Solved", "Points" };
         
         int idx = 0;
-        assertTrue ("Standings row "+rankIndex+" rank wrong expected "+expectedRow[idx]+" found "+standingsRow[idx], standingsRow[idx].equals(expectedRow[idx]));
+        assertEquals("Standings row "+rankIndex+" rank incorrect, ", expectedRow[idx], standingsRow[idx]);
+//        assertTrue ("Standings row "+rankIndex+" rank wrong expected "+expectedRow[idx]+" found "+standingsRow[idx], standingsRow[idx].equals(expectedRow[idx]));
         idx++;
-        assertTrue ("Standings row "+rankIndex+" name wrong expected "+expectedRow[idx]+" found "+standingsRow[idx], standingsRow[idx].equals(expectedRow[idx]));
+        assertEquals("Standings row "+rankIndex+" team name incorrect, ", expectedRow[idx], standingsRow[idx]);
+//        assertTrue ("Standings row "+rankIndex+" name wrong expected "+expectedRow[idx]+" found "+standingsRow[idx], standingsRow[idx].equals(expectedRow[idx]));
         idx++;
-        assertTrue ("Standings row "+rankIndex+" number solved wrong expected "+expectedRow[idx]+" found "+standingsRow[idx], standingsRow[idx].equals(expectedRow[idx]));
+        assertEquals("Standings row "+rankIndex+" number solved incorrect, ", expectedRow[idx], standingsRow[idx]);
+//        assertTrue ("Standings row "+rankIndex+" number solved wrong expected "+expectedRow[idx]+" found "+standingsRow[idx], standingsRow[idx].equals(expectedRow[idx]));
         idx++;
-        assertTrue ("Standings row "+rankIndex+" points wrong expected "+expectedRow[idx]+" found "+standingsRow[idx], standingsRow[idx].equals(expectedRow[idx]));
+        assertEquals("Standings row "+rankIndex+" penalty points incorrect ", expectedRow[idx], standingsRow[idx]);
+//        assertTrue ("Standings row "+rankIndex+" points wrong expected "+expectedRow[idx]+" found "+standingsRow[idx], standingsRow[idx].equals(expectedRow[idx]));
     }
 
     protected void tearDown() throws Exception {

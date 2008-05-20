@@ -21,6 +21,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.report.AccountPermissionReport;
 import edu.csus.ecs.pc2.core.report.AccountsReport;
 import edu.csus.ecs.pc2.core.report.AllReports;
+import edu.csus.ecs.pc2.core.report.BalloonDeliveryReport;
 import edu.csus.ecs.pc2.core.report.BalloonSettingsReport;
 import edu.csus.ecs.pc2.core.report.BalloonSummaryReport;
 import edu.csus.ecs.pc2.core.report.ClarificationsReport;
@@ -40,6 +41,7 @@ import edu.csus.ecs.pc2.core.report.OldRunsReport;
 import edu.csus.ecs.pc2.core.report.ProblemsReport;
 import edu.csus.ecs.pc2.core.report.RunsByTeamReport;
 import edu.csus.ecs.pc2.core.report.RunsReport;
+import edu.csus.ecs.pc2.core.report.RunsReport5;
 import edu.csus.ecs.pc2.core.report.SolutionsByProblemReport;
 import edu.csus.ecs.pc2.core.report.StandingsReport;
 
@@ -120,7 +122,7 @@ public class ReportPane extends JPanePlugin {
         this.add(getMainPane(), java.awt.BorderLayout.CENTER);
 
         // populate list of reports
-        listOfReports = new IReport[23];
+        listOfReports = new IReport[25];
         int repNo = 0;
         listOfReports[repNo++] = new AccountsReport();
         listOfReports[repNo++] = new BalloonSummaryReport();
@@ -150,7 +152,10 @@ public class ReportPane extends JPanePlugin {
         listOfReports[repNo++] = new EvaluationReport();
         
         listOfReports[repNo++] = new OldRunsReport();
+        listOfReports[repNo++] = new RunsReport5();
+        
         listOfReports[repNo++] = new AccountPermissionReport();
+        listOfReports[repNo++] = new BalloonDeliveryReport();
         listOfReports[repNo++] = new InternalDumpReport();
         
     }
