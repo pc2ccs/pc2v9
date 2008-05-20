@@ -22,7 +22,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.core.util.XSLTransformer;
 import edu.csus.ecs.pc2.ui.BalloonColorListPane;
-import edu.csus.ecs.pc2.ui.BalloonHandler;
+import edu.csus.ecs.pc2.ui.BalloonPane;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
 import edu.csus.ecs.pc2.ui.LogWindow;
@@ -169,7 +169,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
                 standingsPane.addPropertyChangeListener("standings", new PropertyChangeListenerImplementation());
                 BalloonColorListPane colorsPane = new BalloonColorListPane();
                 addUIPlugin(getMainTabbedPane(), "Colors", colorsPane);
-                BalloonHandler balloonHandler = new BalloonHandler();
+                BalloonPane balloonHandler = new BalloonPane();
                 // TODO replace with addUIPlugin when/if it is graphical
 //                balloonHandler.setContestAndController(contest, controller);
                 addUIPlugin(getMainTabbedPane(), "Balloon Test", balloonHandler);

@@ -1,6 +1,3 @@
-/**
- * 
- */
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
@@ -13,8 +10,9 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.TreeMap;
-import java.util.Vector;
 
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -32,22 +30,22 @@ import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IBalloonSettingsListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IRunListener;
-import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.RunEvent.Action;
+import edu.csus.ecs.pc2.core.util.BalloonHandler;
 import edu.csus.ecs.pc2.core.util.BalloonWriter;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
 
 /**
+ * Balloon Grid for ScoreboardView.
+ * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
 
 //$HeadURL$
-public class BalloonHandler extends JPanePlugin {
+public class BalloonPane extends JPanePlugin {
     /**
      * 
      */
@@ -56,6 +54,8 @@ public class BalloonHandler extends JPanePlugin {
     private static final int EMAIL_COLUMN = 2;
 
     private static final int FILE_PRINT_COLUMN = 1;
+    
+    private BalloonHandler balloonHandler = new BalloonHandler();
 
     /**
      * @author pc2@ecs.csus.edu
@@ -112,13 +112,15 @@ public class BalloonHandler extends JPanePlugin {
                 }
                 // TODO are we allowed to send this balloon (based on time?)
                 ElementId what = run.getProblemId();
-                String key = getBalloonKey(who, what);
-                if (isBalloonSentFor(key)) {
+                String key = balloonHandler.getBalloonKey(who, what);
+                if (balloonHandler.hasBalloonBeenSent(key)) {
                     // yes -> recomputeBalloonStatus(who, what);
                     recomputeBalloonStatus(who, what);
                 } else { // have not processed any balloons for this key
-                    if (!run.isDeleted() && run.isJudged() && run.isSolved()) {
-                        if (sendBalloon(buildBalloon("yes", who, what, run))) {
+                    
+                    if (balloonHandler.shouldSendBalloon(run)){
+                        
+                        if (sendBalloon(balloonHandler.buildBalloon("yes", who, what, run))) {
                             sentBalloonFor(key, who, what);
                         }
                     } // else we do not send balloons for deleted/new/no
@@ -131,8 +133,8 @@ public class BalloonHandler extends JPanePlugin {
             Run run = event.getRun();
             ClientId who = run.getSubmitter();
             ElementId what = run.getProblemId();
-            String key = getBalloonKey(who, what);
-            if (isBalloonSentFor(key)) {
+            String key = balloonHandler.getBalloonKey(who, what);
+            if (balloonHandler.hasBalloonBeenSent(key)) {
                 // will revoke if this was the only yes
                 recomputeBalloonStatus(who, what);
             }
@@ -142,14 +144,8 @@ public class BalloonHandler extends JPanePlugin {
 
     private Log log;
     
-    private Hashtable<String,BalloonDeliveryInfo> sentBalloons = new Hashtable<String,BalloonDeliveryInfo>();
     
-    /**
-     * Quick access to the BalloonSettings by SiteId.
-     */
-    private Hashtable<Integer, BalloonSettings> balloonSettingsHash = new Hashtable<Integer, BalloonSettings>();
-
-    private BalloonWriter balloonWriter;
+   private BalloonWriter balloonWriter;
 
     private JLabel messageLabel;
 
@@ -172,7 +168,7 @@ public class BalloonHandler extends JPanePlugin {
     /**
      * 
      */
-    public BalloonHandler() {
+    public BalloonPane() {
         super();
         initialize();
     }
@@ -190,9 +186,7 @@ public class BalloonHandler extends JPanePlugin {
         this.add(getTestMCLB(), java.awt.BorderLayout.CENTER);
     }
 
-    private String getBalloonKey(ClientId who, ElementId problemId) {
-        return who.getTripletKey() + " " + problemId.toString();
-    }
+  
     
     private void addTestRow(int siteID) {
 
@@ -447,26 +441,12 @@ public class BalloonHandler extends JPanePlugin {
         return testMCLB;
     }
     
-    private boolean isBalloonSentFor(String key) {
-        boolean result = false;
-        if (sentBalloons.containsKey(key)) {
-            result = true;
-        }
-        return result;
-    }
+
     
     void loadBalloonSettings() {
-        BalloonSettings[] balloonSettings = getContest().getBalloonSettings();
-        synchronized (balloonSettingsHash) {
-            balloonSettingsHash.clear();
-            for (int i = 0; i < balloonSettings.length; i++) {
-                BalloonSettings settings = balloonSettings[i];
-                if (settings.isMatchesBalloonClient(getContest().getClientId())) {
-                    Integer siteNum = settings.getSiteNumber();
-                    balloonSettingsHash.put(siteNum, settings);
-                }
-            }
-        }
+
+        balloonHandler.reloadBalloonSettings();
+        
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 reloadListBox();
@@ -491,37 +471,27 @@ public class BalloonHandler extends JPanePlugin {
         // TODO we should have some sort of locking here, or
         //  otherwise some sort of automatic updates
         ClientSettings clientSettings = getContest().getClientSettings();
-        clientSettings.setBalloonList(sentBalloons);
+        clientSettings.setBalloonList(balloonHandler.getBalloonDeliveryList());
         getController().updateClientSettings(clientSettings);
     }
     
+
     /**
-     * Should only be called if a balloon has been sent out for this pair.
+     * Should only be called if a balloon has been sent out for this user and problem.
      * Will issue a revoke if required.
      * @param who
      * @param problemId
      */
     void recomputeBalloonStatus(ClientId who, ElementId problemId) {
-        boolean isSolved = false;
-        Run[] runs = getContest().getRuns(who);
-        for (int i = 0; i < runs.length; i++) {
-            Run run = runs[i];
-            if (run.getProblemId().equals(problemId)) {
-                if (!run.isDeleted() && run.isJudged() && run.isSolved()) {
-                    isSolved = true;
-                    break;
-                }
-            }
-        }
-        if (!isSolved) {
-            if (takeBalloon(buildBalloon("take", who, problemId, null))) {
-                tookBalloonFrom(getBalloonKey(who, problemId));
+        if (!balloonHandler.isRunSolved(who, problemId)) {
+            if (takeBalloon(balloonHandler.buildBalloon("take", who, problemId, null))) {
+                tookBalloonFrom(balloonHandler.getBalloonKey(who, problemId));
             }
         }
     }
 
     private void recomputeBalloons(int siteNumber) {
-        BalloonSettings balloonSettings = balloonSettingsHash.get(Integer.valueOf(siteNumber));
+        BalloonSettings balloonSettings = balloonHandler.getBalloonSettingsHash().get(Integer.valueOf(siteNumber));
         if (balloonSettings == null) {
             return;
         }
@@ -547,10 +517,10 @@ public class BalloonHandler extends JPanePlugin {
             Run run = (Run) o;
             if (!run.isDeleted() && run.isJudged() && run.isSolved()) {
                 // there should be a yes for this run
-                String key = getBalloonKey(run.getSubmitter(), run.getProblemId()); 
+                String key = balloonHandler.getBalloonKey(run.getSubmitter(), run.getProblemId()); 
                 goodBalloons.put(key, Long.valueOf(0));
-                if (!isBalloonSentFor(key)) { // no balloon has been sent
-                    if (sendBalloon(buildBalloon("yes", run.getSubmitter(), run.getProblemId(), run))) {
+                if (!balloonHandler.hasBalloonBeenSent(key)) { // no balloon has been sent
+                    if (sendBalloon(balloonHandler.buildBalloon("yes", run.getSubmitter(), run.getProblemId(), run))) {
                         sentBalloonFor(key, run.getSubmitter(), run.getProblemId());
                     } else {
                         // TODO error sending balloon
@@ -559,17 +529,19 @@ public class BalloonHandler extends JPanePlugin {
                 }
             }
         }
-        Enumeration balloonEnum = sentBalloons.keys();
+        
+        
+        Enumeration balloonEnum = balloonHandler.getBalloonDeliveryInfoKeys();
         while (balloonEnum.hasMoreElements()) {
             String key = (String) balloonEnum.nextElement();
             if (!goodBalloons.containsKey(key)) {
                 // pull apart key into ClientId & ElementId
-                BalloonDeliveryInfo bdi = sentBalloons.get(key);
-                ClientId clientId = bdi.getClientId();
+                BalloonDeliveryInfo balloonDeliveryInfo = balloonHandler.getBalloonDeliveryInfo(key);
+                ClientId clientId = balloonDeliveryInfo.getClientId();
                 // sentBalloons includes all sites, filter for this site
                 if (clientId.getSiteNumber() == siteNumber) {
-                    ElementId problemId = bdi.getProblemId();
-                    if (takeBalloon(buildBalloon("take", clientId, problemId, null))) {
+                    ElementId problemId = balloonDeliveryInfo.getProblemId();
+                    if (takeBalloon(balloonHandler.buildBalloon("take", clientId, problemId, null))) {
                         tookBalloonFrom(key);
                     }
                 }
@@ -577,42 +549,27 @@ public class BalloonHandler extends JPanePlugin {
         }
 
     }
-    private Balloon buildBalloon(String answer, ClientId submitter, ElementId problemId, Run aRun) {
-        BalloonSettings bSettings = balloonSettingsHash.get(Integer.valueOf(submitter.getSiteNumber()));
-        Balloon balloon = new Balloon(bSettings, submitter, getContest().getAccount(submitter).getDisplayName(), problemId, getContest().getProblem(problemId).getDisplayName(), answer, aRun);
-        balloon.setContestTitle(getContest().getContestInformation().getContestTitle());
-        balloon.setSiteTitle(getContest().getSite(aRun.getSiteNumber()).getDisplayName());
-        Run[] runs = getContest().getRuns(submitter);
-        Vector<Problem> v = new Vector<Problem>();
-        for (int i = 0; i < runs.length; i++) {
-            Run run = runs[i];
-            Problem problem = getContest().getProblem(run.getProblemId());
-            if (!run.isDeleted() && run.isJudged() && run.isSolved() && !v.contains(problem)) {
-                v.add(problem);
-            }
-        }
-        // now put them in the right order
-        Problem[] result=new Problem[v.size()];
-        int j=0;
-        for (Problem problem : getContest().getProblems()) {
-            if (v.contains(problem)) {
-                result[j]=problem;
-                j++;
-            }
-        }
-        balloon.setProblems(result);
-        return balloon;
-    }
-
+  
+    /**
+     * Send a balloon notification.
+     * @param balloon
+     * @return
+     */
     boolean sendBalloon(Balloon balloon) {
         log.finest("send a balloon to "+balloon.getClientId().getTripletKey()+ " for "+balloon.getProblemTitle());
         // TODO fire some event to notify others, or just do it ourselves
         return balloonWriter.sendBalloon(balloon);
     }
 
+    /**
+     * Update balloon delivery info.
+     * @param key
+     * @param clientId
+     * @param problemId
+     */
     private void sentBalloonFor(String key, ClientId clientId, ElementId problemId) {
         // record the time the balloon was sent, may be useful later
-        sentBalloons.put(key, new BalloonDeliveryInfo(clientId, problemId, Calendar.getInstance().getTime().getTime()));
+        balloonHandler.updateDeliveryInfo(key, new BalloonDeliveryInfo(clientId, problemId, Calendar.getInstance().getTime().getTime()));
         // TODO consider batching these updates
         saveClientSettings();
     }
@@ -626,9 +583,11 @@ public class BalloonHandler extends JPanePlugin {
         
         log = getController().getLog();
         
+        balloonHandler.setContestAndController(inContest, inController);
+        
         loadBalloonSettings();
         balloonWriter = new BalloonWriter(log);
-        sentBalloons = getContest().getClientSettings().getBalloonList();
+        balloonHandler.setBalloonDeliveryList(getContest().getClientSettings().getBalloonList());
         Site[] sites = inContest.getSites();
         // TODO put this on a separate thread?
         // TODO #2 recompute after or before listeners, seems there is a timing window either way...
@@ -653,7 +612,7 @@ public class BalloonHandler extends JPanePlugin {
     }
 
     private void tookBalloonFrom(String balloonKey) {
-        sentBalloons.remove(balloonKey);
+        balloonHandler.removeBalloonDelivery(balloonKey);
         // TODO consider batching these updates
         saveClientSettings();
     }

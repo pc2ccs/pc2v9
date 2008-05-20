@@ -1,0 +1,98 @@
+package edu.csus.ecs.pc2.core.util;
+
+import java.util.Calendar;
+
+import junit.framework.TestCase;
+import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.InternalController;
+import edu.csus.ecs.pc2.core.model.BalloonDeliveryInfo;
+import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Judgement;
+import edu.csus.ecs.pc2.core.model.JudgementRecord;
+import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.SampleContest;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.Run.RunStates;
+
+/**
+ * Test BalloonHandler.
+ * 
+ * @author pc2@ecs.csus.edu
+ * @version $Id$
+ */
+
+// $HeadURL$
+public class BalloonHandlerTest extends TestCase {
+
+    @Override
+    protected void setUp() throws Exception {
+        // TODO Auto-generated method stub
+        super.setUp();
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        // TODO Auto-generated method stub
+        super.tearDown();
+    }
+
+    public void testOne() {
+
+        IInternalContest contest;
+        IInternalController controller;
+
+        SampleContest sampleContest = new SampleContest();
+
+        contest = sampleContest.createContest(2, 2, 20, 2, false);
+        controller = new InternalController(contest);
+
+        BalloonHandler balloonHandler = new BalloonHandler();
+        balloonHandler.setContestAndController(contest, controller);
+
+        Judgement solvedJudgement = contest.getJudgements()[0];
+        ClientId judgeId = contest.getAccounts(Type.JUDGE).firstElement().getClientId();
+
+        Run[] runs = sampleContest.createRandomRuns(contest, 5, true, true, true);
+
+        for (Run run : runs) {
+            // Set them to all solved
+            JudgementRecord judgementRecord = new JudgementRecord(solvedJudgement.getElementId(), judgeId, true, false);
+            run.addJudgement(judgementRecord);
+            run.setStatus(RunStates.JUDGED);
+        }
+
+        int sendCount = 0; // number of teams that should be send a balloon.
+        for (Run run : runs) {
+            if (balloonHandler.shouldSendBalloon(run)) {
+                sendCount++;
+            }
+        }
+
+        assertEquals("Failed shouldSendBalloon method ", sendCount, runs.length);
+
+        // Send a single balloon delivered
+
+        String key = balloonHandler.getBalloonKey(runs[0].getSubmitter(), runs[0].getProblemId());
+        BalloonDeliveryInfo balloonDeliveryInfo = createBalloonDeliveryInfo(runs[0]);
+
+        balloonHandler.updateDeliveryInfo(key, balloonDeliveryInfo);
+
+        sendCount = 0; // number of teams that should be send a balloon.
+        for (Run run : runs) {
+            if (balloonHandler.shouldSendBalloon(run)) {
+                sendCount++;
+            }
+        }
+
+        assertEquals("Failed updateDeliveryInfo and shouldSendBalloon method  ", sendCount, runs.length - 1);
+        
+        assertFalse ("Failed updateDeliveryInfo and shouldRemoveBalloon ", balloonHandler.shouldRemoveBalloon(runs[0]));
+        
+    }
+
+    private BalloonDeliveryInfo createBalloonDeliveryInfo(Run run) {
+        BalloonDeliveryInfo balloonDeliveryInfo = new BalloonDeliveryInfo(run.getSubmitter(), run.getProblemId(), Calendar.getInstance().getTime().getTime());
+        return balloonDeliveryInfo;
+    }
+}
