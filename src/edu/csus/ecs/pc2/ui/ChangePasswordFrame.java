@@ -15,6 +15,10 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
  */
 public class ChangePasswordFrame extends JFrame implements UIPlugin {
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -1776246146720515119L;
     private ChangePasswordPane changePasswordPane = null;
 
     /**
