@@ -1,0 +1,3 @@
+site	account	permPassword	permLogin
+1	judge1	false	true
+1	team2	true	true

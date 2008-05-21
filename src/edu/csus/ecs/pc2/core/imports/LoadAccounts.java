@@ -42,6 +42,8 @@ public class LoadAccounts {
     private int aliasColumn = -1;
     
     private int externalIdColumn = -1;
+    
+    private int permPasswordColumn = -1;
 
     private HashMap<ClientId, Account> existingAccountsMap = new HashMap<ClientId, Account>();
     
@@ -131,6 +133,23 @@ public class LoadAccounts {
                 }
             }
         }
+        if (permPasswordColumn != -1 && values.length > permPasswordColumn && values[permPasswordColumn].length() > 0) {
+            Permission.Type perm = Permission.Type.CHANGE_PASSWORD;
+            boolean newValue = Boolean.parseBoolean(values[permPasswordColumn]);
+            if (clientId.getClientType().equals(ClientType.Type.ADMINISTRATOR) && clientId.getClientNumber() == 1) {
+                if (account.getPermissionList().isAllowed(perm) != newValue) {
+                    String message = "Attempt to change root permission "+perm+" denied.";
+                    StaticLog.warning(message);
+                    System.out.println("WARNING: "+message);
+                }
+            } else {
+                if (Boolean.parseBoolean(values[permPasswordColumn])) {
+                    account.addPermission(perm);
+                } else {
+                    account.removePermission(perm);
+                }
+            }
+        }
         return account;
     }
    
@@ -182,6 +201,7 @@ public class LoadAccounts {
             groupColumn = -1;
             aliasColumn = -1;
             externalIdColumn = -1;
+            permPasswordColumn = -1;
             for (int i = 0; i < columns.length; i++) {
                 if (columns[i].equalsIgnoreCase("site")) {
                     siteColumn = i;
@@ -209,6 +229,9 @@ public class LoadAccounts {
                 }
                 if (columns[i].equalsIgnoreCase("alias")) {
                     aliasColumn = i;
+                }
+                if (columns[i].equalsIgnoreCase("permpassword")) {
+                    permPasswordColumn = i;
                 }
             }
             if (accountColumn == -1 || siteColumn == -1) {

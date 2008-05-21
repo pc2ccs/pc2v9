@@ -309,6 +309,9 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
             if (account.isAllowed(Permission.Type.LOGIN)) {
                 perms = perms + "LOGIN ";
             }
+            if (account.isAllowed(Permission.Type.CHANGE_PASSWORD)) {
+                perms = perms + "CHANGE_PASSWORD ";
+            }
             s[5] = perms.trim();
             if (accountOrig.getGroupId() == null && account.getGroupId() == null) {
                 s[6] = "";
