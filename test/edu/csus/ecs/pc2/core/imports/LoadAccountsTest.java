@@ -109,6 +109,10 @@ public class LoadAccountsTest extends TestCase {
             // perm1 has site & account & permpassword & permlogin
             Account[] accounts = loadAccounts.fromTSVFile(loadDir + "loadaccount" + File.separator + "accounts.perm1.txt", accountList.getList(), new Group[0]);
             checkPermissions(accounts);
+            // test for bug 154
+            // perm2 has site & account & permpassword & permdisplay
+            accounts = loadAccounts.fromTSVFile(loadDir + "loadaccount" + File.separator + "accounts.perm2.txt", accountList.getList(), new Group[0]);
+            checkPermissions(accounts);
         } catch (Exception e) {
             e.printStackTrace();
             assertTrue("exception", false);

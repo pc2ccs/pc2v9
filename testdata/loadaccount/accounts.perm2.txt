@@ -1,0 +1,3 @@
+site	account	permPassword	permdisplay	displayname
+1	judge1	false	false	judgeA
+1	team2	true	true	teamA
