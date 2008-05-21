@@ -1,6 +1,3 @@
-/**
- * 
- */
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.Component;
@@ -22,6 +19,10 @@ import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 
 /**
+ * A JList full of check boxes.
+ * 
+ * Use Ctrl-A to select and deselect all checkboxes.
+ * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  * 
@@ -119,7 +120,35 @@ public class JCheckBoxJList extends JList {
         public void keyPressed(KeyEvent e) {
             if (e.getKeyChar() == ' ') {
                 processAction();
+            } else if ((e.getKeyCode() == 65) && e.isControlDown()){
+                // Ctrl-A select or deselect
+                selectDeselectAll();
             }
+        }
+
+        /**
+         * Select all or deselect all checkboxes.
+         * 
+         * Sets all checkboxes to the opposite (logical not) of the
+         * first checkbox in the list. 
+         *
+         */
+        private void selectDeselectAll() {
+
+            if (getModel().getSize() < 1) {
+                // Nothing to select or deselect
+                return;
+            }
+
+            JCheckBox checkBox = (JCheckBox) jCheckBoxJList.getModel().getElementAt(0);
+            boolean opposite = !checkBox.isSelected();
+
+            for (int i = 0; i < getModel().getSize(); i++) {
+                checkBox = (JCheckBox) jCheckBoxJList.getModel().getElementAt(i);
+                checkBox.setSelected(opposite);
+            }
+            repaint();
+            jCheckBoxJList.firePropertyChange("change", false, true);
         }
 
         public void keyReleased(KeyEvent e) {
@@ -205,8 +234,13 @@ public class JCheckBoxJList extends JList {
 }
 
 /**
- * 
+ * Special Renderer.
+ *  
+ * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
+
+// $HeadURL$
 class CheckBoxListCellRenderer extends JCheckBox implements ListCellRenderer {
 
     /**
