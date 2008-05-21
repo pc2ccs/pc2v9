@@ -201,6 +201,8 @@ public class LoadAccounts {
             groupColumn = -1;
             aliasColumn = -1;
             externalIdColumn = -1;
+            permDisplayColumn = -1;
+            permLoginColumn = -1;
             permPasswordColumn = -1;
             for (int i = 0; i < columns.length; i++) {
                 if (columns[i].equalsIgnoreCase("site")) {
