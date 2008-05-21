@@ -23,6 +23,11 @@ import javax.swing.JPasswordField;
 
 public class ChangePasswordPane extends JPanePlugin {
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 8687088072866264762L;
+
     private JPanel buttonPane = null;
 
     private JButton cancelButton = null;
