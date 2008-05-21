@@ -2449,4 +2449,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         return port;
     }
 
+    public void changePassword(char[] oldPassword, char[] newPassword) {
+        // TODO send some packet with passwords to the local server
+        System.out.println("TODO send a packet to the local server to change passwords");
+    }
+
 }

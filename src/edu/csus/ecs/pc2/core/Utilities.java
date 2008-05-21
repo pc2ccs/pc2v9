@@ -104,6 +104,32 @@ public final class Utilities {
     }
 
     /**
+     * Compares 2 char arrays for equality.
+     * 
+     * @param oldBuffer
+     * @param newBuffer
+     * @return true if oldBuffer is the same size and has the same contents of newBuffer
+     */
+    public static boolean isEquals(char[] oldBuffer, char[] newBuffer) {
+        if (oldBuffer == null) {
+            return(newBuffer == null);
+        } else if (newBuffer == null) {
+            // oldBuffer not null, but new buffer is
+            return false;
+        }
+        // sizes no not match
+        if (oldBuffer.length != newBuffer.length) {
+            return false;
+        }
+        for (int i = 0; i < newBuffer.length; i++) {
+            if (newBuffer[i] != oldBuffer[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    /**
      * Returns lines from file.
      * 
      * @param filename

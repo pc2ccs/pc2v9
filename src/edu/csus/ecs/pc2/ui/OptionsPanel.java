@@ -54,8 +54,11 @@ public class OptionsPanel extends JPanePlugin {
     private PermissionList permissionList = new PermissionList();
 
     private JButton showSecurityAlertWindowButton = null;
-    
 
+    private JButton changePasswordButton = null;
+    
+    private ChangePasswordFrame changePasswordFrame = null;
+    
     /**
      * This method initializes
      * 
@@ -102,6 +105,7 @@ public class OptionsPanel extends JPanePlugin {
     private void updateGUIperPermissions() {
         getShowBiffWindow().setVisible(isAllowed(Permission.Type.JUDGE_RUN));
         getShowSecurityAlertWindowButton().setVisible(isAllowedToViewSecurityWindow());
+        getChangePasswordButton().setVisible(isAllowed(Permission.Type.CHANGE_PASSWORD));
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
@@ -197,6 +201,7 @@ public class OptionsPanel extends JPanePlugin {
             contentPane.add(getShowLogButton(), null);
             contentPane.add(getShowSecurityAlertWindowButton(), null);
             contentPane.add(getShowBiffWindow(), null);
+            contentPane.add(getChangePasswordButton(), null);
             contentPane.addMouseListener(new java.awt.event.MouseAdapter() {
                 public void mouseClicked(java.awt.event.MouseEvent e) {
                     if (e.getClickCount() > 1 && e.isControlDown() && e.isShiftDown()) {
@@ -293,6 +298,34 @@ public class OptionsPanel extends JPanePlugin {
             if (isAllowedToViewSecurityWindow()){
                 showSecurityLog(true);
             }
+        }
+    }
+
+    /**
+     * This method initializes changePasswordButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getChangePasswordButton() {
+        if (changePasswordButton == null) {
+            changePasswordButton = new JButton();
+            changePasswordButton.setText("Change Password");
+            changePasswordButton.setMnemonic(java.awt.event.KeyEvent.VK_P);
+            changePasswordButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    showChangePassword();
+                }
+            });
+        }
+        return changePasswordButton;
+    }
+    protected void showChangePassword() {
+        if (isAllowed(Permission.Type.CHANGE_PASSWORD)) {
+            if (changePasswordFrame == null){
+                changePasswordFrame = new ChangePasswordFrame();
+                changePasswordFrame.setContestAndController(getContest(), getController());
+            }
+            changePasswordFrame.setVisible(true);
         }
     }
 } // @jve:decl-index=0:visual-constraint="10,10"
