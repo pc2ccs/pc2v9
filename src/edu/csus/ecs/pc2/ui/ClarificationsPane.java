@@ -483,7 +483,12 @@ public class ClarificationsPane extends JPanePlugin {
                         obj[idx++] = clar.getWhoJudgedItId().getName();
                     }
                 } else {
-                    obj[idx++] = "";
+                    if (clientId == null) {
+                        // eg not being judged
+                        obj[idx++] = "";
+                    } else {
+                        obj[idx++] = clientId.getName();
+                    }
                 }
                 if (clar.isSendToAll()) {
                     obj[idx++] = "All Teams";

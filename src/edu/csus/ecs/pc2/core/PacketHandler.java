@@ -412,7 +412,7 @@ public class PacketHandler {
             securityCheck(Permission.Type.ANSWER_CLARIFICATION, whoCheckedOut, connectionHandlerID);
         }
 
-        contest.addClarification(clarification, whoCheckedOut);
+        contest.updateClarification(clarification, whoCheckedOut);
         if (isServer()) {
             sendToJudgesAndOthers(packet, false);
         }

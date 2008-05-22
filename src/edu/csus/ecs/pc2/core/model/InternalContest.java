@@ -532,11 +532,13 @@ public class InternalContest implements IInternalContest {
         if (clarificationList.get(clarification) != null) {
             Clarification answerClarification = clarificationList.updateClarification(clarification, ClarificationStates.ANSWERED, whoAnsweredIt, answer, sendToAll);
             ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.ANSWERED_CLARIFICATION, answerClarification);
+            clarificationEvent.setWhoModifiedClarification(whoAnsweredIt);
             fireClarificationListener(clarificationEvent);
         } else {
             clarificationList.add(clarification);
             Clarification updatedClarification = clarificationList.get(clarification);
             ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.ANSWERED_CLARIFICATION, updatedClarification);
+            clarificationEvent.setWhoModifiedClarification(whoAnsweredIt);
             fireClarificationListener(clarificationEvent);
         }
     }
@@ -547,6 +549,7 @@ public class InternalContest implements IInternalContest {
         if (whoChangedIt != null){
             clarificationEvent.setWhoModifiedClarification(whoChangedIt);
         }
+        clarificationEvent.setSentToClientId(whoChangedIt);
         fireClarificationListener(clarificationEvent);
     }
 
