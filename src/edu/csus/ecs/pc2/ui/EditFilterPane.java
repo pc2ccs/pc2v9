@@ -3,11 +3,11 @@ package edu.csus.ecs.pc2.ui;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.Vector;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JCheckBox;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
@@ -15,7 +15,9 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.Language;
@@ -60,36 +62,66 @@ public class EditFilterPane extends JPanePlugin {
 
     private JScrollPane languagesScroll = null;
 
-    private JList judgementListBox = null;
+    private JCheckBoxJList judgementListBox = null;
 
     private DefaultListModel judgementListModel = new DefaultListModel();
 
-    private JList teamListBox = null;
+    private JCheckBoxJList teamListBox = null;
 
     private DefaultListModel teamListModel = new DefaultListModel();
 
-    private JList problemsListBox = null;
+    private JCheckBoxJList problemsListBox = null;
 
     private DefaultListModel problemListModel = new DefaultListModel();
 
-    private JList languagesListBox = null;
+    private JCheckBoxJList languagesListBox = null;
 
     private DefaultListModel languageListModel = new DefaultListModel();
 
-    // TODO
-    // private Filter filter = new Filter();
+    private Filter filter = new Filter();
 
     public EditFilterPane() {
         super();
         initialize();
     }
 
-    // TODO 
-//    public EditFilterPane(Filter filter) {
-//        super();
-//        initialize();
-//        this.filter = filter;
-//    }
+    /**
+     * Wrapper class for JCheckBox object.
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+
+    // $HeadURL$
+    protected class WrapperJCheckBox extends JCheckBox {
+
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 991427730095971274L;
+
+        private Object contents;
+
+        public WrapperJCheckBox(Object object) {
+            this(object, object.toString());
+        }
+
+        public WrapperJCheckBox(Object object, String text) {
+            super();
+            contents = object;
+            setText(text);
+        }
+
+        public Object getContents() {
+            return contents;
+        }
+    }
+
+    public EditFilterPane(Filter filter) {
+        super();
+        initialize();
+        this.filter = filter;
+    }
 
     private void initialize() {
         this.setLayout(new BorderLayout());
@@ -287,9 +319,9 @@ public class EditFilterPane extends JPanePlugin {
      * 
      * @return javax.swing.JList
      */
-    private JList getJudgementListBox() {
+    private JCheckBoxJList getJudgementListBox() {
         if (judgementListBox == null) {
-            judgementListBox = new JList();
+            judgementListBox = new JCheckBoxJList(judgementListModel);
         }
         return judgementListBox;
     }
@@ -299,9 +331,9 @@ public class EditFilterPane extends JPanePlugin {
      * 
      * @return javax.swing.JTextArea
      */
-    private JList getTeamListBox() {
+    private JCheckBoxJList getTeamListBox() {
         if (teamListBox == null) {
-            teamListBox = new JList();
+            teamListBox = new JCheckBoxJList(teamListModel);
         }
         return teamListBox;
     }
@@ -311,9 +343,9 @@ public class EditFilterPane extends JPanePlugin {
      * 
      * @return javax.swing.JList
      */
-    private JList getProblemsListBox() {
+    private JCheckBoxJList getProblemsListBox() {
         if (problemsListBox == null) {
-            problemsListBox = new JList(problemListModel);
+            problemsListBox = new JCheckBoxJList(problemListModel);
         }
         return problemsListBox;
     }
@@ -323,9 +355,9 @@ public class EditFilterPane extends JPanePlugin {
      * 
      * @return javax.swing.JList
      */
-    private JList getLanguagesListBox() {
+    private JCheckBoxJList getLanguagesListBox() {
         if (languagesListBox == null) {
-            languagesListBox = new JList();
+            languagesListBox = new JCheckBoxJList(languageListModel);
         }
         return languagesListBox;
     }
@@ -335,33 +367,35 @@ public class EditFilterPane extends JPanePlugin {
      * 
      */
     public void populateFields() {
-
-        // TODO populate problem list
-        // problemsListBox
+        
+        getFilterOnCheckBox().setSelected(filter.isFilterOn());
 
         problemListModel.removeAllElements();
         for (Problem problem : getContest().getProblems()) {
-            problemListModel.addElement(problem);
+            WrapperJCheckBox wrapperJCheckBox = new WrapperJCheckBox(problem);
+            if (filter.isFilteringProblems()) {
+                wrapperJCheckBox.setSelected(filter.matchesProblem(problem.getElementId()));
+            }
+            problemListModel.addElement(wrapperJCheckBox);
         }
-
-        // TODO populate language list
-        // languagesListBox
 
         languageListModel.removeAllElements();
         for (Language language : getContest().getLanguages()) {
-            languageListModel.addElement(language);
+            WrapperJCheckBox wrapperJCheckBox = new WrapperJCheckBox(language);
+            if (filter.isFilteringLanguages()) {
+                wrapperJCheckBox.setSelected(filter.matchesProblem(language.getElementId()));
+            }
+            languageListModel.addElement(wrapperJCheckBox);
         }
-
-        // TODO populate judgement list
-        // judgementListBox
 
         judgementListModel.removeAllElements();
         for (Judgement judgement : getContest().getJudgements()) {
-            judgementListModel.addElement(judgement);
+            WrapperJCheckBox wrapperJCheckBox = new WrapperJCheckBox(judgement);
+            if (filter.isFilteringJudgements()) {
+                wrapperJCheckBox.setSelected(filter.matchesProblem(judgement.getElementId()));
+            }
+            judgementListModel.addElement(wrapperJCheckBox);
         }
-
-        // TODO populate team list
-        // teamListBox
 
         Vector<Account> vector = getContest().getAccounts(ClientType.Type.TEAM);
         Account[] accounts = (Account[]) vector.toArray(new Account[vector.size()]);
@@ -369,9 +403,12 @@ public class EditFilterPane extends JPanePlugin {
 
         teamListModel.removeAllElements();
         for (Account account : accounts) {
-            teamListModel.addElement(account.getClientId());
+            WrapperJCheckBox wrapperJCheckBox = new WrapperJCheckBox(account.getClientId());
+            if (filter.isFilteringAccounts()) {
+                wrapperJCheckBox.setSelected(filter.matchesAccount(account.getClientId()));
+            }
+            teamListModel.addElement(wrapperJCheckBox);
         }
-
     }
 
     @Override
@@ -379,6 +416,71 @@ public class EditFilterPane extends JPanePlugin {
 
         super.setContestAndController(inContest, inController);
 
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                populateFields();
+            }
+        });
+    }
+
+    public Filter getFilter() {
+
+        // Derive filter based on settings
+
+        filter.setFilter(getFilterOnCheckBox().isSelected());
+
+        filter.clearProblemList();
+        Enumeration enumeration = problemListModel.elements();
+        while (enumeration.hasMoreElements()) {
+            WrapperJCheckBox element = (WrapperJCheckBox) enumeration.nextElement();
+            if (element.isSelected()) {
+                Object object = element.getContents();
+                filter.addProblem((Problem) object);
+            }
+        }
+
+        filter.clearLanguageList();
+        enumeration = languageListModel.elements();
+        while (enumeration.hasMoreElements()) {
+            WrapperJCheckBox element = (WrapperJCheckBox) enumeration.nextElement();
+            if (element.isSelected()) {
+                Object object = element.getContents();
+                filter.addLanguage((Language) object);
+            }
+        }
+
+        filter.clearAccountList();
+        enumeration = teamListModel.elements();
+        while (enumeration.hasMoreElements()) {
+            WrapperJCheckBox element = (WrapperJCheckBox) enumeration.nextElement();
+            if (element.isSelected()) {
+                Object object = element.getContents();
+                filter.addAccount((ClientId) object);
+            }
+        }
+        
+
+        filter.clearJudgementList();
+        enumeration = judgementListModel.elements();
+        while (enumeration.hasMoreElements()) {
+            WrapperJCheckBox element = (WrapperJCheckBox) enumeration.nextElement();
+            if (element.isSelected()) {
+                Object object = element.getContents();
+                filter.addJudgement((Judgement) object);
+            }
+        }
+
+
+        return filter;
+    }
+
+    /**
+     * Assigns filter and repopulates fields.
+     * 
+     * @param filter
+     */
+    public void setFilter(Filter filter) {
+        this.filter = filter;
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 populateFields();

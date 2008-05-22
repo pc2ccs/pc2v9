@@ -5,9 +5,13 @@ import javax.swing.JPanel;
 import java.awt.BorderLayout;
 import javax.swing.JButton;
 
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.Filter;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.report.FilterReport;
 
 import java.awt.FlowLayout;
+import java.io.PrintWriter;
 
 /**
  * Edit a filter.
@@ -17,7 +21,7 @@ import java.awt.FlowLayout;
  */
 
 // $HeadURL$
-public class EditFilterFrame extends JFrame {
+public class EditFilterFrame extends JFrame implements UIPlugin {
 
     /**
      * 
@@ -30,13 +34,17 @@ public class EditFilterFrame extends JFrame {
 
     private JButton saveButton = null;
 
-    private JButton refreshButton = null;
-
     private JButton closeButton = null;
 
     private EditFilterPane editFilterPane = null;
-    
+
     private Filter filter = new Filter();
+
+    private IInternalContest contest;
+
+    private IInternalController controller;
+
+    private Runnable refreshCallback = null;
 
     /**
      * This method initializes
@@ -48,10 +56,25 @@ public class EditFilterFrame extends JFrame {
     }
 
     /**
+     * 
+     * @param filter
+     * @param title
+     * @param refreshCallback
+     *            when filter changes, invokes this method.
+     */
+    public EditFilterFrame(Filter filter, String title, Runnable refreshCallback) {
+        super();
+        initialize();
+        this.filter = filter;
+        setTitle(title);
+        this.refreshCallback = refreshCallback;
+    }
+
+    /**
      * This method initializes this
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(459, 313));
+        this.setSize(new java.awt.Dimension(784, 313));
         this.setTitle("Edit Filter");
         this.setContentPane(getMainPane());
 
@@ -85,7 +108,6 @@ public class EditFilterFrame extends JFrame {
             buttonPane = new JPanel();
             buttonPane.setLayout(flowLayout);
             buttonPane.add(getSaveButton(), null);
-            buttonPane.add(getRefreshButton(), null);
             buttonPane.add(getCloseButton(), null);
         }
         return buttonPane;
@@ -103,30 +125,50 @@ public class EditFilterFrame extends JFrame {
             saveButton.setMnemonic(java.awt.event.KeyEvent.VK_S);
             saveButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.out.println("saveButton actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+                    System.out.println("debug - getSaveButton actionPerformed ");
+                    updateFilter(editFilterPane.getFilter());
                 }
             });
         }
         return saveButton;
     }
 
-    /**
-     * This method initializes refreshButton
-     * 
-     * @return javax.swing.JButton
-     */
-    private JButton getRefreshButton() {
-        if (refreshButton == null) {
-            refreshButton = new JButton();
-            refreshButton.setText("Refresh");
-            refreshButton.setMnemonic(java.awt.event.KeyEvent.VK_R);
-            refreshButton.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.out.println("refreshButton actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
-                }
-            });
+    protected void updateFilter(Filter filter2) {
+        
+        System.out.println("debug updateFilter " + filter2);
+        System.out.flush();
+
+        dumpFilter(filter2);
+
+        if (refreshCallback != null) {
+            refreshCallback.run();
+        } else {
+            System.err.println("Warning: no callback set, no refresh of list based on this filter");
         }
-        return refreshButton;
+    }
+
+    protected void dumpFilter(Filter filter2) {
+
+        try {
+            System.out.println("dumpFilter " + filter2);
+            System.out.flush();
+
+            FilterReport filterReport = new FilterReport();
+            filterReport.setContestAndController(contest, controller);
+
+            PrintWriter printWriter = new PrintWriter(System.out);
+            filterReport.writeReportDetailed(printWriter, filter2);
+            printWriter.flush();
+            printWriter = null;
+
+            System.out.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+            // TODO: log handle exception
+//            log.log(Log.WARNING, "Exception logged ", e);
+        }
+        
+        
     }
 
     /**
@@ -160,6 +202,21 @@ public class EditFilterFrame extends JFrame {
         }
         return editFilterPane;
     }
-    
- 
+
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
+        this.contest = inContest;
+        this.controller = inController;
+
+        editFilterPane.setContestAndController(inContest, inController);
+        editFilterPane.setFilter(filter);
+    }
+
+    public String getPluginTitle() {
+        return "Edit Filter Frame";
+    }
+
+    public void setRefreshCallback(Runnable refreshCallback) {
+        this.refreshCallback = refreshCallback;
+    }
+
 } // @jve:decl-index=0:visual-constraint="10,10"
