@@ -280,20 +280,14 @@ public interface IInternalController {
      */
     void forceConnectionDrop(ConnectionHandlerID connectionHandlerID);
     
-    /**
-     * Change the client password.
-     * 
-     * @param oldPassword client current password
-     * @param newPassword client new password
-     */
-    void changePassword(char[] oldPassword, char[] newPassword);
-    
     void updateClientSettings (ClientSettings clientSettings);
     
     void updateContestInformation (ContestInformation contestInformation);
     
     void removeLogin (ClientId clientId);
 
+    void requestChangePassword(String oldPassword, String newPassword);
+    
     /**
      * Remove connection from connection list.
      */

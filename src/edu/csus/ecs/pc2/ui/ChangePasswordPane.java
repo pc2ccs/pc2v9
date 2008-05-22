@@ -313,7 +313,7 @@ public class ChangePasswordPane extends JPanePlugin {
                 return;
             }
         }
-        getController().changePassword(getCurrentPasswordField().getPassword(), getNewPasswordField().getPassword());
+        getController().requestChangePassword(String.valueOf(getCurrentPasswordField().getPassword()), String.valueOf(getNewPasswordField().getPassword()));
         handleCancelButton();
     }
 
