@@ -8,9 +8,13 @@ import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Judgement;
+import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 
@@ -38,49 +42,86 @@ public class FilterReport implements IReport {
     private Filter filter;
 
     public void writeReport(PrintWriter printWriter) {
-        
+
         // find any filters in contes and dump them here.
-        
+
         throw new UnsupportedOperationException(); // TODO code
     }
 
     public void writeReportDetailed(PrintWriter printWriter, Filter inFilter) {
 
         filter = null;
-        
-        printWriter.println("  '" + inFilter + " " + inFilter);
 
+        printWriter.println("              Filter: " + inFilter);
+
+        printWriter.println("           Filter On: " + inFilter.isFilterOn());
         printWriter.println("     Filter problems: " + inFilter.isFilteringProblems());
+        printWriter.println("    Filter languages: " + inFilter.isFilteringLanguages());
+        printWriter.println("   Filter judgements: " + inFilter.isFilteringJudgements());
         printWriter.println("   Filter run states: " + inFilter.isFilteringRunStates());
         printWriter.println();
 
-        try {
-            ElementId[] elementIds = inFilter.getProblemIdList();
-            printWriter.println("-- " + elementIds.length + " Problems filtered --");
-            for (ElementId elementId : elementIds) {
-                Problem problem = contest.getProblem(elementId);
-                if (problem == null) {
-                    printWriter.println("   Not displayed " + problem);
-                } else {
-                    printWriter.println("   " + problem);
-                }
+        ElementId[] elementIds = null;
+        
+        elementIds = inFilter.getProblemIdList();
+        printWriter.println("-- " + elementIds.length + " Problems filtered --");
+        for (ElementId elementId : elementIds) {
+            Problem problem = contest.getProblem(elementId);
+            if (problem == null) {
+                printWriter.println("   Not displayed " + problem);
+            } else {
+                printWriter.println("   " + problem);
             }
-
-        } catch (UnsupportedOperationException notex) {
-            printWriter.println(notex.getMessage());
         }
 
         printWriter.println();
-        
-        try {
-            RunStates[] runStatesList = inFilter.getRunStates();
-            printWriter.println("-- " + runStatesList.length + " Run states filtered --");
-            for (RunStates runStates : runStatesList) {
-                printWriter.println("   " + runStates);
+
+        elementIds = inFilter.getLanguageIdList();
+        printWriter.println("-- " + elementIds.length + " Languages filtered --");
+        for (ElementId elementId : elementIds) {
+            Language language = contest.getLanguage(elementId);
+            if (language == null) {
+                printWriter.println("   Not displayed " + language);
+            } else {
+                printWriter.println("   " + language);
             }
-        } catch (UnsupportedOperationException notex) {
-            printWriter.println(notex.getMessage());
         }
+
+        printWriter.println();
+
+        elementIds = inFilter.getJudgementIdList();
+        printWriter.println("-- " + elementIds.length + " Judgements filtered --");
+        for (ElementId elementId : elementIds) {
+            Judgement judgement = contest.getJudgement(elementId);
+            if (judgement == null) {
+                printWriter.println("   Not displayed " + judgement);
+            } else {
+                printWriter.println("   " + judgement);
+            }
+        }
+
+        printWriter.println();
+
+        ClientId[] clientIds = inFilter.getAccountList();
+        printWriter.println("-- " + clientIds.length + " Accounts filtered --");
+        for (ClientId clientId : clientIds) {
+            Account account = contest.getAccount(clientId);
+            if (account == null) {
+                printWriter.println("   Not displayed " + account);
+            } else {
+                printWriter.println("   " + clientId + " " + account.getDisplayName());
+            }
+        }
+
+        printWriter.println();
+
+        RunStates[] runStatesList = inFilter.getRunStates();
+        printWriter.println("-- " + runStatesList.length + " Run states filtered --");
+        for (RunStates runStates : runStatesList) {
+            printWriter.println("   " + runStates);
+        }
+
+        printWriter.println();
 
     }
 
@@ -107,7 +148,7 @@ public class FilterReport implements IReport {
 
         PrintWriter printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
         filter = inFilter;
-        
+
         try {
             printHeader(printWriter);
 

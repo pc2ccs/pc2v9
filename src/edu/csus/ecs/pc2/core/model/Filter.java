@@ -28,7 +28,8 @@ import edu.csus.ecs.pc2.core.model.Run.RunStates;
 public class Filter implements Serializable {
 
     // TODO filter for site
-    // TODO filter for permissions, etc.
+    // TODO filter for permissions
+    // TODO filter for 
 
     /**
      * 
@@ -106,6 +107,8 @@ public class Filter implements Serializable {
     private boolean thisSiteOnly;
 
     private int siteNumber = 0;
+
+    private boolean filterEnabled = true;
 
     private boolean isThisSite(ISubmission submission) {
         return siteNumber == submission.getSiteNumber() || siteNumber == 0;
@@ -360,18 +363,43 @@ public class Filter implements Serializable {
             return true;
         }
     }
+    
+    /**
+     * Clear judgements and turn judgement filtering off.
+     *
+     */
+    public void clearJudgementList() {
+        filteringJudgements = false;
+        judgementIdHash = new Hashtable<ElementId, Date>();
+    }
 
+
+
+    /**
+     * Clear accounts and turn account filtering off.
+     *
+     */
     public void clearAccountList() {
         filteringAccounts = false;
         clientIdHash = new Hashtable<ClientId, Date>();
     }
 
     /**
-     * Clears all problems from filter, sets to not filtering Problems.
+     * Clear problem and turn problem filtering off.
+     *
      */
     public void clearProblemList() {
         filteringProblems = false;
         problemIdHash = new Hashtable<ElementId, Date>();
+    }
+    
+    /**
+     * Clear language and turn language filtering off.
+     *
+     */
+    public void clearLanguageList() {
+        filteringLanguages = false;
+        languageIdHash = new Hashtable<ElementId, Date>();
     }
 
     public void removeProblem(Problem problem) {
@@ -379,6 +407,24 @@ public class Filter implements Serializable {
             problemIdHash.remove(problem.getElementId());
         }
     }
+    
+    /**
+     * Get list of ElementIds for the judgement in the filter list.
+     * 
+     * @return list of element ids.
+     */
+    public ElementId[] getJudgementIdList() {
+        ElementId[] elementIds = new ElementId[judgementIdHash.size()];
+        Enumeration<ElementId> enumeration = judgementIdHash.keys();
+        int i = 0;
+        while (enumeration.hasMoreElements()) {
+            ElementId element = (ElementId) enumeration.nextElement();
+            elementIds[i] = element;
+            i++;
+        }
+        return elementIds;
+    }
+   
 
     /**
      * Get list of ElementIds for the problems in the filter list.
@@ -396,11 +442,41 @@ public class Filter implements Serializable {
         }
         return elementIds;
     }
-
-    public Account[] getAccountList() {
-        throw new UnsupportedOperationException();
+    
+    /**
+     * Get list of ElementIds for the languages in the filter list.
+     * 
+     * @return list of element ids.
+     */
+    public ElementId[] getLanguageIdList() {
+        ElementId[] elementIds = new ElementId[languageIdHash.size()];
+        Enumeration<ElementId> enumeration = languageIdHash.keys();
+        int i = 0;
+        while (enumeration.hasMoreElements()) {
+            ElementId element = (ElementId) enumeration.nextElement();
+            elementIds[i] = element;
+            i++;
+        }
+        return elementIds;
     }
 
+    /**
+     * Get list of ClientIds for the accounts in the filter list.
+     * 
+     * @return list of ClientId.
+     */
+    public ClientId[] getAccountList() {
+        ClientId[] clientIds = new ClientId[clientIdHash.size()];
+        Enumeration<ClientId> enumeration = clientIdHash.keys();
+        int i = 0;
+        while (enumeration.hasMoreElements()) {
+            ClientId element = (ClientId) enumeration.nextElement();
+            clientIds[i] = element;
+            i++;
+        }
+        return clientIds;
+    }
+    
     public void setUsingRunStatesFilter(boolean turnOn) {
         filteringRunStates = turnOn;
     }
@@ -413,7 +489,7 @@ public class Filter implements Serializable {
         addAccount(account.getClientId());
     }
 
-    protected void addAccount(ClientId clientId) {
+    public void addAccount(ClientId clientId) {
         clientIdHash.put(clientId, new Date());
     }
 
@@ -490,23 +566,37 @@ public class Filter implements Serializable {
     }
 
     public void removeRunState(RunStates runStates) {
-        throw new UnsupportedOperationException(); // TODO code
-    }
-
-    public ElementId[] getClarificationStateList() {
-        throw new UnsupportedOperationException(); // TODO code
+        if (runStateHash.containsKey(runStates)) {
+            runStateHash.remove(runStates);
+        }
     }
 
     public void removeClarificationStates(ClarificationStates clarificationStates) {
-        throw new UnsupportedOperationException(); // TODO code
+        if (clarificationStateHash.containsKey(clarificationStates)) {
+            clarificationStateHash.remove(clarificationStates);
+        }
     }
 
     public ClarificationStates[] getClarificationStatesList() {
-        throw new UnsupportedOperationException(); // TODO code
+        ClarificationStates[] clarificationStates = new ClarificationStates[clarificationStateHash.size()];
+        Enumeration<ClarificationStates> enumeration = clarificationStateHash.keys();
+        int i = 0;
+        while (enumeration.hasMoreElements()) {
+            clarificationStates[i] = (ClarificationStates) enumeration.nextElement();
+            i++;
+        }
+        return clarificationStates;
     }
 
     public RunStates[] getRunStates() {
-        throw new UnsupportedOperationException(); // TODO code
+        RunStates[] runStates = new RunStates[runStateHash.size()];
+        Enumeration<RunStates> enumeration = runStateHash.keys();
+        int i = 0;
+        while (enumeration.hasMoreElements()) {
+            runStates[i] = (RunStates) enumeration.nextElement();
+            i++;
+        }
+        return runStates;
     }
 
     public boolean matchesClarificationState(ClarificationStates clarificationStates) {
@@ -529,13 +619,18 @@ public class Filter implements Serializable {
 
     public String toString() {
 
-        if (isFilterOn()) {
+        if (filterEnabled) {
+            
             String filterInfo = "Filter ON";
+            
             if (thisSiteOnly) {
                 filterInfo += " Site " + siteNumber;
             }
             if (filteringProblems) {
                 filterInfo += " problem(s) ";
+            }
+            if (filteringLanguages) {
+                filterInfo += " language(s) ";
             }
             if (filteringRunStates) {
                 filterInfo += " run state(s)";
@@ -543,11 +638,8 @@ public class Filter implements Serializable {
             if (filteringClarificationStates) {
                 filterInfo += " clar state(s)";
             }
-            if (filteringClarificationStates) {
+            if (filteringAccounts) {
                 filterInfo += " account(s))";
-            }
-            if (filteringLanguages) {
-                filterInfo += " language(s) ";
             }
 
             return filterInfo;
@@ -590,12 +682,29 @@ public class Filter implements Serializable {
         this.filteringAccounts = filteringAccounts;
     }
 
+    public void setFilterOff() {
+        filterEnabled = false;
+    }
+
+    public void setFilter (boolean filterOn){
+        filterEnabled = filterOn;
+    }
+    
+    public void setFilterOn () {
+        filterEnabled = true;
+    }
+
     /**
      * Is one of the filters active?.
      * 
      * @return true if filter is on, false if not filtering.
      */
     public boolean isFilterOn() {
-        return filteringAccounts || filteringClarificationStates || filteringElapsedTime || filteringRunStates || thisSiteOnly;
+        if (filterEnabled) {
+            return filteringAccounts || filteringClarificationStates || filteringProblems || filteringLanguages || filteringElapsedTime || filteringRunStates || thisSiteOnly;
+        } else {
+            return false;
+        }
     }
+
 }
