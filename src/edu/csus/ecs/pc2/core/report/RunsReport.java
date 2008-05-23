@@ -220,6 +220,7 @@ public class RunsReport implements IReport {
 
         if (filter.isFilterOn()){
             printWriter.println("Filter: "+filter.toString());
+            printWriter.println();
 
             int count = 0;
             for (Run run : runs) {

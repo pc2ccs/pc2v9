@@ -85,11 +85,7 @@ public class RunsReport5 implements IReport {
         printWriter.println();
     }
 
-    private boolean isThisSite(int siteNumber) {
-        return contest.getSiteNumber() == siteNumber;
-    }
-
-    public void writeReport(PrintWriter printWriter) {
+     public void writeReport(PrintWriter printWriter) {
 
         // Runs
         printWriter.println();

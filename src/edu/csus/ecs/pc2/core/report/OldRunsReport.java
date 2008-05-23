@@ -12,8 +12,10 @@ import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
@@ -76,7 +78,16 @@ public class OldRunsReport implements IReport {
             jbyString = judgementRecord.getJudgerClientId().getName();
             jtString = new Long(judgementRecord.getJudgedMinutes()).toString();
             
-            jciString = contest.getJudgement(judgementRecord.getJudgementId()).toString();
+            ElementId elementId = judgementRecord.getJudgementId();
+            jciString = "??";
+            if (elementId != null) {
+                Judgement judgement = contest.getJudgement(elementId);
+                if (judgement != null){
+                    jciString = judgement.toString();
+                } else {
+                    System.err.println(" Run "+run+" judgement not found for judgement id "+elementId);
+                }
+            }
             
             String validatorJudgementName = judgementRecord.getValidatorResultString();
             if (judgementRecord.isUsedValidator() && validatorJudgementName != null) {

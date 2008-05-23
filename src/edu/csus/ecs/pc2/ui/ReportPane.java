@@ -15,7 +15,6 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
-import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.report.AccountPermissionReport;
@@ -86,16 +85,28 @@ public class ReportPane extends JPanePlugin {
     private String reportDirectory = "reports";
 
     private JCheckBox thisClientFilterButton = null;
+
+    private JPanel filterPane = null;
+
+    private JPanel filterButtonPane = null;
+
+    private JButton editReportFilter = null;
+
+    private JLabel filterLabel = null;
+
+    private Filter filter = new Filter();
     
+    private EditFilterFrame editFilterFrame = null;
+
     public String getReportDirectory() {
         return reportDirectory;
     }
 
     /**
-     * This method can change the directory that the reports will be written to.
-     * The default is "reports".
+     * This method can change the directory that the reports will be written to. The default is "reports".
      * 
-     * @param reportDirectory what directory to write the reports to
+     * @param reportDirectory
+     *            what directory to write the reports to
      */
     public void setReportDirectory(String reportDirectory) {
         this.reportDirectory = reportDirectory;
@@ -116,7 +127,7 @@ public class ReportPane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new java.awt.Dimension(505, 251));
+        this.setSize(new java.awt.Dimension(505, 291));
         this.add(getJPanel(), java.awt.BorderLayout.NORTH);
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
         this.add(getMainPane(), java.awt.BorderLayout.CENTER);
@@ -126,44 +137,46 @@ public class ReportPane extends JPanePlugin {
         int repNo = 0;
         listOfReports[repNo++] = new AccountsReport();
         listOfReports[repNo++] = new BalloonSummaryReport();
-        
+
         listOfReports[repNo++] = new AllReports();
         listOfReports[repNo++] = new ContestReport();
-        
+
         listOfReports[repNo++] = new ContestAnalysisReport();
         listOfReports[repNo++] = new SolutionsByProblemReport();
         listOfReports[repNo++] = new ListRunLanguages();
         listOfReports[repNo++] = new FastestSolvedReport();
-        
+
         listOfReports[repNo++] = new StandingsReport();
         listOfReports[repNo++] = new LoginReport();
-        
+
         listOfReports[repNo++] = new RunsReport();
         listOfReports[repNo++] = new ClarificationsReport();
         listOfReports[repNo++] = new ProblemsReport();
         listOfReports[repNo++] = new LanguagesReport();
-        
+
         listOfReports[repNo++] = new JudgementReport();
         listOfReports[repNo++] = new RunsByTeamReport();
         listOfReports[repNo++] = new BalloonSettingsReport();
         listOfReports[repNo++] = new ClientSettingsReport();
         listOfReports[repNo++] = new GroupsReport();
-        
+
         listOfReports[repNo++] = new EvaluationReport();
-        
+
         listOfReports[repNo++] = new OldRunsReport();
         listOfReports[repNo++] = new RunsReport5();
-        
+
         listOfReports[repNo++] = new AccountPermissionReport();
         listOfReports[repNo++] = new BalloonDeliveryReport();
         listOfReports[repNo++] = new InternalDumpReport();
-        
+
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
 
         this.log = getController().getLog();
+        
+        getEditFilterFrame().setContestAndController(inContest, inController);
         refreshGUI();
     }
 
@@ -183,7 +196,7 @@ public class ReportPane extends JPanePlugin {
         for (IReport report : listOfReports) {
             getReportsComboBox().addItem(report.getReportTitle());
         }
-        
+
         getReportsComboBox().setSelectedIndex(0);
 
     }
@@ -237,6 +250,7 @@ public class ReportPane extends JPanePlugin {
             mainPane.add(getThisSiteCheckBox(), null);
             mainPane.add(getReportChoicePane(), null);
             mainPane.add(getThisClientFilterButton(), null);
+            mainPane.add(getFilterPane(), null);
         }
         return mainPane;
     }
@@ -266,36 +280,19 @@ public class ReportPane extends JPanePlugin {
         return "report." + simpleDateFormat.format(new Date()) + ".txt";
 
     }
-    
-    private void viewFile (String filename, String title){
+
+    private void viewFile(String filename, String title) {
         MultipleFileViewer multipleFileViewer = new MultipleFileViewer(log);
         multipleFileViewer.addFilePane(title, filename);
-        multipleFileViewer.setTitle("PC^2 Report (Build "+new VersionInfo().getBuildNumber()+")");
+        multipleFileViewer.setTitle("PC^2 Report (Build " + new VersionInfo().getBuildNumber() + ")");
         FrameUtilities.centerFrameFullScreenHeight(multipleFileViewer);
         multipleFileViewer.setVisible(true);
     }
 
     protected void generateSelectedReport() {
 
-        // TODO code populate filter.
-        Filter filter = new Filter();
-        
-        // Site filter
-        if (getThisSiteCheckBox().isSelected()){
-            filter.setSiteNumber(getContest().getSiteNumber());
-            filter.setThisSiteOnly(true);
-        }
-        
-        // Client filter
-        if (getThisClientFilterButton().isSelected()){
-            Account account = getContest().getAccount(getContest().getClientId());
-            if (account != null){
-                filter.addAccount(account);
-            }
-        }
-
         try {
-            
+
             String filename = getFileName();
             File reportDirectoryFile = new File(getReportDirectory());
             if (reportDirectoryFile.exists()) {
@@ -308,17 +305,17 @@ public class ReportPane extends JPanePlugin {
                 }
             }
             IReport selectedReport = null;
-            
+
             String selectedReportTitle = (String) getReportsComboBox().getSelectedItem();
             for (IReport report : listOfReports) {
                 if (selectedReportTitle.equals(report.getReportTitle())) {
                     selectedReport = report;
                 }
             }
-            
+
             selectedReport.setContestAndController(getContest(), getController());
             selectedReport.createReportFile(filename, filter);
-            viewFile (filename, selectedReport.getReportTitle());
+            viewFile(filename, selectedReport.getReportTitle());
 
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception logged ", e);
@@ -329,16 +326,17 @@ public class ReportPane extends JPanePlugin {
 
     /**
      * show message to user
+     * 
      * @param string
      */
     private void showMessage(final String string) {
-        
+
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 messageLabel.setText(string);
             }
         });
-        
+
     }
 
     /**
@@ -349,11 +347,28 @@ public class ReportPane extends JPanePlugin {
     private JCheckBox getThisSiteCheckBox() {
         if (thisSiteCheckBox == null) {
             thisSiteCheckBox = new JCheckBox();
-            thisSiteCheckBox.setBounds(new java.awt.Rectangle(30, 87, 165, 21));
+            thisSiteCheckBox.setBounds(new java.awt.Rectangle(21,80,187,21));
             thisSiteCheckBox.setMnemonic(java.awt.event.KeyEvent.VK_F);
             thisSiteCheckBox.setText("Filter for this site only");
+            thisSiteCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    changeSiteFiltering();
+                }
+            });
         }
         return thisSiteCheckBox;
+    }
+
+    protected void changeSiteFiltering() {
+        if (getThisClientFilterButton().isSelected()){
+            filter.setFilterOn();
+            filter.setSiteNumber(getContest().getSiteNumber());
+            filter.setThisSiteOnly(true);
+        } else {
+            filter.setThisSiteOnly(false);
+        }
+        
+        refreshFilterLabel();
     }
 
     /**
@@ -365,7 +380,7 @@ public class ReportPane extends JPanePlugin {
         if (reportChoicePane == null) {
             reportChoicePane = new JPanel();
             reportChoicePane.setLayout(new BorderLayout());
-            reportChoicePane.setBounds(new java.awt.Rectangle(31, 16, 445, 53));
+            reportChoicePane.setBounds(new java.awt.Rectangle(22,9,445,53));
             reportChoicePane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Reports", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
                     javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
             reportChoicePane.add(getReportsComboBox(), java.awt.BorderLayout.CENTER);
@@ -393,11 +408,101 @@ public class ReportPane extends JPanePlugin {
     private JCheckBox getThisClientFilterButton() {
         if (thisClientFilterButton == null) {
             thisClientFilterButton = new JCheckBox();
-            thisClientFilterButton.setBounds(new java.awt.Rectangle(30,121,213,21));
+            thisClientFilterButton.setBounds(new java.awt.Rectangle(21,114,192,21));
             thisClientFilterButton.setMnemonic(java.awt.event.KeyEvent.VK_C);
             thisClientFilterButton.setText("Filter for this client only");
+            thisClientFilterButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    changeThisClientFiltering();
+                }
+            });
         }
         return thisClientFilterButton;
     }
 
+    protected void changeThisClientFiltering() {
+        if (thisClientFilterButton.isSelected()){
+            filter.clearAccountList();
+
+        } else {
+            filter.setFilterOn();
+            filter.clearAccountList();
+            filter.addAccount(getContest().getClientId());
+        }
+        
+        refreshFilterLabel();
+    }
+
+    /**
+     * This method initializes filterPane
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getFilterPane() {
+        if (filterPane == null) {
+            filterLabel = new JLabel();
+            filterLabel.setText("");
+            filterLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+            filterPane = new JPanel();
+            filterPane.setLayout(new BorderLayout());
+            filterPane.setBounds(new java.awt.Rectangle(233,76,231,93));
+            filterPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Filter", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION,
+                    null, null));
+            filterPane.add(getFilterButtonPane(), java.awt.BorderLayout.SOUTH);
+            filterPane.add(filterLabel, java.awt.BorderLayout.CENTER);
+        }
+        return filterPane;
+    }
+
+    /**
+     * This method initializes filterButtonPane
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getFilterButtonPane() {
+        if (filterButtonPane == null) {
+            filterButtonPane = new JPanel();
+            filterButtonPane.add(getEditReportFilter(), null);
+        }
+        return filterButtonPane;
+    }
+
+    /**
+     * This method initializes editReportFilter
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getEditReportFilter() {
+        if (editReportFilter == null) {
+            editReportFilter = new JButton();
+            editReportFilter.setText("Edit Filter");
+            editReportFilter.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    showReportFilter();
+                }
+            });
+        }
+        return editReportFilter;
+    }
+
+    protected void showReportFilter() {
+        getEditFilterFrame().setVisible(true);
+    }
+
+    public EditFilterFrame getEditFilterFrame() {
+        if (editFilterFrame == null){
+            Runnable callback = new Runnable() {
+                public void run() {
+                    refreshFilterLabel();
+                };
+            };
+            editFilterFrame = new EditFilterFrame(filter, "Report Filter", callback);
+        }
+        return editFilterFrame;
+    }
+
+    private void refreshFilterLabel() {
+        filterLabel.setText(filter.toString());
+    }
+    
 } // @jve:decl-index=0:visual-constraint="10,10"

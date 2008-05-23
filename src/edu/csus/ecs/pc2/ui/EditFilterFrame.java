@@ -22,6 +22,9 @@ import java.io.PrintWriter;
 
 // $HeadURL$
 public class EditFilterFrame extends JFrame implements UIPlugin {
+    
+    // TODO code close button
+    // TODO on close button if they say yes, invoke callback.
 
     /**
      * 
@@ -217,6 +220,10 @@ public class EditFilterFrame extends JFrame implements UIPlugin {
 
     public void setRefreshCallback(Runnable refreshCallback) {
         this.refreshCallback = refreshCallback;
+    }
+
+    public void setFilter(Filter filter2) {
+        getEditFilterPane().setFilter(filter2);
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

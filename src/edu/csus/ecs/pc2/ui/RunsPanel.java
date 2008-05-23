@@ -106,7 +106,7 @@ public class RunsPanel extends JPanePlugin {
      */
     private boolean showJudgesInfo = true;
 
-    private Filter filter = null;
+    private Filter filter = new Filter();
 
     private JButton autoJudgeButton = null;
 
@@ -121,6 +121,8 @@ public class RunsPanel extends JPanePlugin {
     private boolean makeSoundOnOneRun = false;
 
     private boolean bUseAutoJudgemonitor = true;
+    
+    private EditFilterFrame editFilterFrame = null;
 
     /**
      * This method initializes
@@ -656,11 +658,15 @@ public class RunsPanel extends JPanePlugin {
         }
 
         // TODO bulk load these records, this is closer only do the count,size,sort at end
+        
+        System.out.println("debug22 Filter is "+filter);
 
         for (Run run : runs) {
 
+            System.out.println("debug22 matches "+filter.matches(run)+" run is "+run);
             if (filter != null) {
                 if (!filter.matches(run)) {
+                    removeRunRow(run);
                     continue;
                 }
             }
@@ -735,8 +741,7 @@ public class RunsPanel extends JPanePlugin {
 
         }
 
-        // TODO when this is working make visible
-        filterButton.setVisible(false);
+        filterButton.setVisible(true);
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
@@ -764,6 +769,8 @@ public class RunsPanel extends JPanePlugin {
         getContest().addProblemListener(new ProblemListenerImplementation());
         getContest().addLanguageListener(new LanguageListenerImplementation());
         getContest().addContestInformationListener(new ContestInformationListenerImplementation());
+        
+        getEditFilterFrame().setContestAndController(inContest, inController);
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -940,15 +947,8 @@ public class RunsPanel extends JPanePlugin {
     }
 
     protected void filterRuns() {
-
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                reloadRunList();
-                rowCountLabel.setText("" + runListBox.getRowCount());
-                rowCountLabel.setToolTipText("There are " + runListBox.getRowCount() + " runs");
-            }
-        });
-
+        getEditFilterFrame().setFilter(filter);
+        getEditFilterFrame().setVisible(true);
     }
 
     /**
@@ -1381,6 +1381,24 @@ public class RunsPanel extends JPanePlugin {
 
     public void setMakeSoundOnOneRun(boolean makeSoundOnOneRun) {
         this.makeSoundOnOneRun = makeSoundOnOneRun;
+    }
+
+    public EditFilterFrame getEditFilterFrame() {
+        if (editFilterFrame == null){
+            Runnable callback = new Runnable(){
+                public void run() {
+                    if (showNewRunsOnly) {
+                        filter.setFilterOn();
+                        filter.addRunState(RunStates.NEW);
+                        filter.addRunState(RunStates.MANUAL_REVIEW);
+                    }
+
+                    reloadRunList();
+                }
+            };
+            editFilterFrame = new EditFilterFrame(filter, "Run filter", callback);
+        }
+        return editFilterFrame;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
