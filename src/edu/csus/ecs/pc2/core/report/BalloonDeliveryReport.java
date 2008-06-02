@@ -41,7 +41,7 @@ public class BalloonDeliveryReport implements IReport {
 
     private Log log;
 
-    private Filter filter;
+    private Filter filter = new Filter();
 
     public void writeReport(PrintWriter printWriter) {
 
@@ -96,10 +96,12 @@ public class BalloonDeliveryReport implements IReport {
 
         printWriter.println();
         printWriter.println("There were " + balloonDeliveries + " delivered");
-        if (foundMatching > 0) {
-            printWriter.println("There were only " + foundMatching + " deliveries that matched the filter.");
-        } else {
-            printWriter.println("There were no matching balloons for this report");
+        if (balloonDeliveries > 0){
+            if (foundMatching > 0) {
+                printWriter.println("There were only " + foundMatching + " deliveries that matched the filter.");
+            } else {
+                printWriter.println("There were no matching balloons for this report");
+            }
         }
 
     }
