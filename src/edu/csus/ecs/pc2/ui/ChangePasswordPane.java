@@ -11,6 +11,8 @@ import java.awt.GridLayout;
 
 import javax.swing.JPanel;
 import java.awt.FlowLayout;
+import java.awt.event.KeyEvent;
+
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPasswordField;
@@ -213,6 +215,11 @@ public class ChangePasswordPane extends JPanePlugin {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableOk();
                 }
+                public void keyPressed(java.awt.event.KeyEvent e) {
+                    if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                        newPasswordField.requestFocus();
+                    }
+                }
             });
         }
         return currentPasswordField;
@@ -238,6 +245,11 @@ public class ChangePasswordPane extends JPanePlugin {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableOk();
                 }
+                public void keyPressed(java.awt.event.KeyEvent e) {
+                    if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                        confirmPasswordField.requestFocus();
+                    }
+                }
             });
         }
         return newPasswordField;
@@ -254,6 +266,11 @@ public class ChangePasswordPane extends JPanePlugin {
             confirmPasswordField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableOk();
+                    if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                        if (getOkButton().isEnabled()){
+                            handleOkButton();
+                        }
+                    }
                 }
             });
         }

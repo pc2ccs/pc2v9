@@ -7,6 +7,7 @@ import javax.swing.JFrame;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Site;
 
 /**
  * @author pc2@ecs.csus.edu
@@ -41,9 +42,11 @@ public class ChangePasswordFrame extends JFrame implements UIPlugin {
         this.setTitle("Change Password");
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setMinimumSize(new java.awt.Dimension(500,200));
-        this.setVisible(true);
         this.setContentPane(getChangePasswordPane());
-
+        
+        FrameUtilities.centerFrame(this);
+        
+        this.setVisible(true);
     }
 
     /*
@@ -54,6 +57,8 @@ public class ChangePasswordFrame extends JFrame implements UIPlugin {
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         changePasswordPane.setContestAndController(inContest, inController);
         changePasswordPane.setParentFrame(this);
+        Site site = inContest.getSite(inContest.getClientId().getSiteNumber());
+        setTitle("Change Password for "+inContest.getClientId().getName()+" (Site "+site.getDisplayName()+")");
     }
 
     /*
