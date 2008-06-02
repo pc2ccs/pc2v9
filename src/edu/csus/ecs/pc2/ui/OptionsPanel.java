@@ -11,6 +11,8 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.AccountEvent;
+import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.security.ISecurityMessageListener;
@@ -110,6 +112,8 @@ public class OptionsPanel extends JPanePlugin {
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
+        
+        getContest().addAccountListener(new AccountListenerImplementation());
         
         initializePermissions();
         
@@ -328,4 +332,53 @@ public class OptionsPanel extends JPanePlugin {
             changePasswordFrame.setVisible(true);
         }
     }
+    /**
+     * Account Listener for OptionsPanel.
+     *  
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    public class AccountListenerImplementation implements IAccountListener {
+
+        public void accountAdded(AccountEvent accountEvent) {
+            // ignore doesn't affect this pane
+        }
+
+        public void accountModified(AccountEvent event) {
+            // check if is this account
+            Account account = event.getAccount();
+            /**
+             * If this is the account then update the GUI display per the potential change in Permissions.
+             */
+            if (getContest().getClientId().equals(account.getClientId())) {
+                updateThisClient();
+            }
+        }
+
+        private void updateThisClient() {
+            initializePermissions();
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    updateGUIperPermissions();
+                }
+            });
+        }
+
+        public void accountsAdded(AccountEvent accountEvent) {
+            // ignore, this does not affect me
+
+        }
+
+        public void accountsModified(AccountEvent accountEvent) {
+            for (Account account : accountEvent.getAccounts()) {
+                /**
+                 * If this is the account then update the GUI display per the potential change in Permissions.
+                 */
+                if (getContest().getClientId().equals(account.getClientId())) {
+                    updateThisClient();
+                }
+            }
+        }
+    }
+    
 } // @jve:decl-index=0:visual-constraint="10,10"
