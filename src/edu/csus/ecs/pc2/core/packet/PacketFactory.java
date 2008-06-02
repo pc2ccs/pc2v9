@@ -268,11 +268,12 @@ public final class PacketFactory {
         return createPacket(PacketType.Type.PASSWORD_CHANGE_REQUEST, source, destination, prop);
     }
     
-    public static Packet createPasswordChangeResult(ClientId source,  ClientId destination, boolean passwordChanged) {
+    public static Packet createPasswordChangeResult(ClientId source,  ClientId destination, boolean passwordChanged, String message) {
         Properties prop = new Properties();
         prop.put(CLIENT_ID, source);
-        prop.put(PASSWORD_CHANGED, passwordChanged);
-        return createPacket(PacketType.Type.PASSWORD_CHANGE_CONFIRM, source, destination, prop);
+        prop.put(PASSWORD_CHANGED, new Boolean(passwordChanged));
+        prop.put(PacketFactory.MESSAGE_STRING, message);
+        return createPacket(PacketType.Type.PASSWORD_CHANGE_RESULTS, source, destination, prop);
     }
     
     /**

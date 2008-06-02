@@ -323,6 +323,16 @@ public class PacketHandler {
         } else if (packetType.equals(Type.LOGIN)) {
             // client logged in
             loginClient(packet);
+            
+        } else if (packetType.equals(Type.PASSWORD_CHANGE_REQUEST)) {
+            // Client requests password change
+            attemptChangePassword(packet);
+
+        } else if (packetType.equals(Type.PASSWORD_CHANGE_RESULTS)) {
+            // Server to individual client
+            // An Update Settings packet will be used to update Admin and Servers (update Account)
+
+            handlePasswordChangeResults(packet);
 
         } else if (packetType.equals(Type.LOGIN_SUCCESS)) {
             // from server to client/server on a successful login
@@ -355,6 +365,114 @@ public class PacketHandler {
 
         info("handlePacket end " + packet);
 
+    }
+
+    private void handlePasswordChangeResults(Packet packet) {
+        
+        // TODO show them what happened in GUI, eh ? invoke contest message to invoke a listner, or two.
+        
+//        prop.put(CLIENT_ID, source);
+//        prop.put(PASSWORD_CHANGED, new Boolean(passwordChanged));
+//        prop.put(PacketFactory.MESSAGE_STRING, message);
+        
+        Boolean passwordChanged = (Boolean) PacketFactory.getObjectValue(packet, PacketFactory.PASSWORD_CHANGED);
+        String message = (String) PacketFactory.getObjectValue(packet, PacketFactory.MESSAGE_STRING);
+        
+        String mess;
+        if (passwordChanged.booleanValue()){
+            mess = "Password changed "+ message;
+        } else {
+            mess = "Password NOT changed "+ message;
+        }
+        
+        controller.getLog().log(Log.INFO, mess);
+    }
+
+    /**
+     * Change password request from client.
+     * 
+     * This change assumes only that a client is changing their own password.
+     * If the client requesting is not from this site, their password will NOT 
+     * be changed.
+     * 
+     * @param packet input change password packet
+     */
+    private void attemptChangePassword(Packet packet) {
+
+        ClientId clientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+        String password = (String) PacketFactory.getObjectValue(packet, PacketFactory.PASSWORD);
+        String newPassword = (String) PacketFactory.getObjectValue(packet, PacketFactory.NEW_PASSWORD);
+
+        if (clientId == null || password == null || newPassword == null) {
+            // TODO invalid request, send it back
+            String mess = "Invalid request ";
+            if (password == null) {
+                mess += " password not specified";
+            }
+            if (newPassword == null) {
+                mess += " no new password specified ";
+            }
+
+            sendPasswordResultsBackToClient(packet.getSourceId(), false, mess);
+
+        } else if (!isThisSite(clientId)) {
+            // Not this site client changing their password, something just wrong, spoof ??
+            // Note that admin uses an update account method to change passwords.
+
+            String mess = "Security Warning client from other site tried to change password " + clientId;
+            controller.getLog().log(Log.WARNING, mess);
+
+            // Send Security warning to all admins and servers
+
+            Packet violationPacket = PacketFactory.createSecurityMessagePacket(contest.getClientId(), PacketFactory.ALL_SERVERS, mess, packet.getSourceId(), null, null, packet);
+
+            controller.sendToAdministrators(violationPacket);
+            controller.sendToServers(violationPacket);
+
+            // send them back a - not likely.
+            sendPasswordResultsBackToClient(clientId, false, "Can not change password from site " + clientId);
+
+        } else {
+            
+            try {
+                if (contest.isValidLoginAndPassword(clientId, password)) {
+
+                    // Got a correct current password, update their password
+
+                    Account account = contest.getAccount(clientId);
+                    account.setPassword(newPassword);
+                    contest.updateAccount(account);
+                    
+                    Account account2 = contest.getAccount(clientId);
+                    System.out.println("debug 22 passwords match "+account2.getPassword().equals(newPassword));
+                    
+                    account = contest.getAccount(clientId);
+
+                    sendPasswordResultsBackToClient(clientId, true, "Password changed");
+
+                    // Send this update to all servers and such.
+                    Packet updatePacket = PacketFactory.createUpdateSetting(contest.getClientId(), account.getClientId(), contest.getAccount(account.getClientId()));
+
+                    controller.sendToAdministrators(updatePacket);
+                    controller.sendToServers(updatePacket);
+                }
+            } catch (Exception e) {
+                sendPasswordResultsBackToClient(clientId, false, "Current password does not match, try again");
+            }
+        }
+    }
+
+    /**
+     * Send password results back to client.
+     * 
+     * @param clientId client who requested password change.
+     * @param changed was password changed?
+     * @param message error or confirm message.
+     */
+    private void sendPasswordResultsBackToClient(ClientId clientId, boolean changed, String message) {
+        
+        Packet passwordChangeResult = PacketFactory.createPasswordChangeResult(clientId, clientId, changed, message);
+        controller.sendToClient(passwordChangeResult);
     }
 
     protected void droppedConnection(Packet packet, ConnectionHandlerID connectionHandlerID) {

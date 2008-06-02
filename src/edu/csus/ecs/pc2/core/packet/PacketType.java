@@ -301,9 +301,9 @@ public final class PacketType implements Serializable {
          * Confirmation of password change (or not :).
          * <P>
          * Package indicates whether password change was successful or not. From server to client <br>
-         * Contents: boolean (true - changed, false - not changed)
+         * Contents: boolean (true - changed, false - not changed) and a message.
          */
-        PASSWORD_CHANGE_CONFIRM,
+        PASSWORD_CHANGE_RESULTS,
 
         /**
          * Export data used to manually send/receive data.
