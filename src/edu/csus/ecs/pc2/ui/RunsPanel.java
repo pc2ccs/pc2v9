@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.FlowLayout;
 
 import javax.swing.JButton;
@@ -590,8 +591,14 @@ public class RunsPanel extends JPanePlugin {
      * This updates the rowCountlabel & toolTipText. It should be called only while on the swing thread.
      */
     private void updateRowCount() {
-        rowCountLabel.setText("" + runListBox.getRowCount());
-        rowCountLabel.setToolTipText("There are " + runListBox.getRowCount() + " runs");
+        if (filter.isFilterOn()){
+            int totalRuns = getContest().getRuns().length;
+            rowCountLabel.setText(runListBox.getRowCount()+" of "+totalRuns);
+            rowCountLabel.setToolTipText(runListBox.getRowCount() + " filtered runs");
+        } else {
+            rowCountLabel.setText("" + runListBox.getRowCount());
+            rowCountLabel.setToolTipText(runListBox.getRowCount() + " runs");
+        }
     }
 
     public void updateRunRow(final Run run, final ClientId whoModifiedId, final boolean autoSizeAndSort) {
@@ -659,11 +666,21 @@ public class RunsPanel extends JPanePlugin {
 
         // TODO bulk load these records, this is closer only do the count,size,sort at end
         
-        System.out.println("debug22 Filter is "+filter);
+//        System.out.println("debug22 Filter is "+filter);
+        
+        if (filter.isFilterOn()){
+            getFilterButton().setForeground(Color.BLUE);
+            getFilterButton().setToolTipText("Edit filter - filter ON");
+            rowCountLabel.setForeground(Color.BLUE);
+        } else {
+            getFilterButton().setForeground(Color.BLACK);
+            getFilterButton().setToolTipText("Edit filter");
+            rowCountLabel.setForeground(Color.BLACK);
+        }
 
         for (Run run : runs) {
 
-            System.out.println("debug22 matches "+filter.matches(run)+" run is "+run);
+//            System.out.println("debug22 matches "+filter.matches(run)+" run is "+run);
             if (filter != null) {
                 if (!filter.matches(run)) {
                     removeRunRow(run);
@@ -790,6 +807,8 @@ public class RunsPanel extends JPanePlugin {
         if (messagePanel == null) {
             rowCountLabel = new JLabel();
             rowCountLabel.setText("###");
+            rowCountLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+            rowCountLabel.setPreferredSize(new java.awt.Dimension(45,16));
             messageLabel = new JLabel();
             messageLabel.setText("");
             messageLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 14));
@@ -1005,6 +1024,7 @@ public class RunsPanel extends JPanePlugin {
             extractButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     System.out.println("Extract actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+                    // TODO code extract
                 }
             });
         }

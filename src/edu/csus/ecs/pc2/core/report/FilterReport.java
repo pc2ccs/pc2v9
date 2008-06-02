@@ -16,6 +16,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 
 /**
@@ -56,9 +57,11 @@ public class FilterReport implements IReport {
 
         printWriter.println("           Filter On: " + inFilter.isFilterOn());
         printWriter.println("     Filter problems: " + inFilter.isFilteringProblems());
+        printWriter.println("      Filter clients: " + inFilter.isFilteringAccounts());
         printWriter.println("    Filter languages: " + inFilter.isFilteringLanguages());
         printWriter.println("   Filter judgements: " + inFilter.isFilteringJudgements());
         printWriter.println("   Filter run states: " + inFilter.isFilteringRunStates());
+        printWriter.println("  Filter clar states: " + inFilter.isFilteringClarificationStates());
         printWriter.println();
 
         ElementId[] elementIds = null;
@@ -119,6 +122,14 @@ public class FilterReport implements IReport {
         printWriter.println("-- " + runStatesList.length + " Run states filtered --");
         for (RunStates runStates : runStatesList) {
             printWriter.println("   " + runStates);
+        }
+
+        printWriter.println();
+        
+        ClarificationStates [] clarificationStatesList = inFilter.getClarificationStatesList();
+        printWriter.println("-- " + clarificationStatesList.length + " Clarirification states filtered --");
+        for (ClarificationStates clarificationStates : clarificationStatesList) {
+            printWriter.println("   " + clarificationStates);
         }
 
         printWriter.println();

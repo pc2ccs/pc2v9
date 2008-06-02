@@ -118,13 +118,27 @@ public class Filter implements Serializable {
         return siteNumber == clientId.getSiteNumber() || siteNumber == 0;
     }
 
+    private ElementId getJudgementId(Run run) {
+        JudgementRecord judgementRecord = run.getJudgementRecord();
+        if (judgementRecord != null) {
+            return judgementRecord.getJudgementId();
+        }
+        return null;
+    }
+    
     /**
      * Match criteria against a run.
      * 
      * @param run
      */
     public boolean matches(Run run) {
-        return isThisSite(run) && matchesAccount(run.getSubmitter()) && matchesRunState(run.getStatus()) && matchesProblem(run.getProblemId()) && matchesLanguage(run.getLanguageId());
+        if (filterEnabled){
+            ElementId judgementElementId = getJudgementId(run);
+            return isThisSite(run) && matchesAccount(run.getSubmitter()) && matchesRunState(run.getStatus()) && matchesProblem(run.getProblemId()) && matchesLanguage(run.getLanguageId())
+             && matchesJudgement(judgementElementId);
+        } else {
+            return true;
+        }
     }
 
     /**
@@ -134,7 +148,11 @@ public class Filter implements Serializable {
      * @return true if the clarifications matches the filter
      */
     public boolean matches(Clarification clarification) {
-        return isThisSite(clarification) && matchesAccount(clarification.getSubmitter()) && matchesClarificationState(clarification.getState()) && matchesProblem(clarification.getProblemId());
+        if (filterEnabled){
+            return isThisSite(clarification) && matchesAccount(clarification.getSubmitter()) && matchesClarificationState(clarification.getState()) && matchesProblem(clarification.getProblemId());
+        } else {
+            return true;
+        }
     }
 
     /**
@@ -144,7 +162,11 @@ public class Filter implements Serializable {
      * @return true if the sites match
      */
     public boolean matches(ClientId clientId) {
-        return isThisSite(clientId);
+        if (filterEnabled){
+            return isThisSite(clientId) && matchesAccount(clientId);
+        } else {
+            return true;
+        }
     }
 
     public boolean isThisSiteOnly() {
@@ -197,8 +219,8 @@ public class Filter implements Serializable {
      * @param elementId
      */
     private void addJudgement(ElementId elementId) {
-        judgementIdHash.put(elementId, new Date());
         filteringJudgements = true;
+        judgementIdHash.put(elementId, new Date());
     }
 
     /**
@@ -216,8 +238,14 @@ public class Filter implements Serializable {
      * @param judgementId
      */
     public boolean matchesJudgement(ElementId judgementId) {
+
         if (filteringJudgements) {
-            return judgementIdHash.containsKey(judgementId);
+            if (judgementId == null) {
+                return false;
+            } else {
+                return judgementIdHash.containsKey(judgementId);
+            }
+
         } else {
             return true;
         }
@@ -358,6 +386,7 @@ public class Filter implements Serializable {
 
     public boolean matchesAccount(ClientId clientId) {
         if (filteringAccounts) {
+//            System.out.println(new FilterFormatter().getClientsShortList(getAccountList()));
             return clientIdHash.containsKey(clientId);
         } else {
             return true;
@@ -484,12 +513,13 @@ public class Filter implements Serializable {
     public boolean isFilteringRunStates() {
         return filteringRunStates;
     }
-
+    
     public void addAccount(Account account) {
         addAccount(account.getClientId());
     }
 
     public void addAccount(ClientId clientId) {
+        filteringAccounts = true;
         clientIdHash.put(clientId, new Date());
     }
 
@@ -705,6 +735,10 @@ public class Filter implements Serializable {
         } else {
             return false;
         }
+    }
+
+    public boolean isFilteringClarificationStates() {
+        return filteringClarificationStates;
     }
 
 }

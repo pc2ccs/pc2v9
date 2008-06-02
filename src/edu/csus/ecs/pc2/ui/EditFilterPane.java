@@ -18,10 +18,12 @@ import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.Filter;
+import edu.csus.ecs.pc2.core.model.FilterFormatter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Run.RunStates;
 
 /**
  * Edit Filter GUI.
@@ -79,6 +81,14 @@ public class EditFilterPane extends JPanePlugin {
     private DefaultListModel languageListModel = new DefaultListModel();
 
     private Filter filter = new Filter();
+
+    private JScrollPane jScrollPane = null;
+
+    private JPanel runStatesPane = null;
+
+    private JCheckBoxJList runStatesListBox = null;
+    
+    private DefaultListModel runStatesListModel = new DefaultListModel();
 
     public EditFilterPane() {
         super();
@@ -143,6 +153,7 @@ public class EditFilterPane extends JPanePlugin {
         if (filterOnCheckBox == null) {
             filterOnCheckBox = new JCheckBox();
             filterOnCheckBox.setText("Filter On");
+            filterOnCheckBox.setMnemonic(java.awt.event.KeyEvent.VK_F);
         }
         return filterOnCheckBox;
     }
@@ -243,6 +254,7 @@ public class EditFilterPane extends JPanePlugin {
             otherPanel.add(getJudgementFrame(), null);
             otherPanel.add(getTeamFrame(), null);
             otherPanel.add(getLanguagePane(), null);
+            otherPanel.add(getRunStatesPane(), null);
         }
         return otherPanel;
     }
@@ -409,6 +421,18 @@ public class EditFilterPane extends JPanePlugin {
             }
             teamListModel.addElement(wrapperJCheckBox);
         }
+        
+        
+        runStatesListModel.removeAllElements();
+        RunStates[] runStates = RunStates.values();
+        for (RunStates runState : runStates) {
+            WrapperJCheckBox wrapperJCheckBox = new WrapperJCheckBox(runState);
+            if (filter.isFilteringRunStates()) {
+                wrapperJCheckBox.setSelected(filter.matchesRunState(runState));
+            }
+            runStatesListModel.addElement(wrapperJCheckBox);
+        }
+        
     }
 
     @Override
@@ -458,8 +482,17 @@ public class EditFilterPane extends JPanePlugin {
                 filter.addAccount((ClientId) object);
             }
         }
-        
 
+        filter.clearRunStatesList();
+        enumeration = runStatesListModel.elements();
+        while (enumeration.hasMoreElements()) {
+            WrapperJCheckBox element = (WrapperJCheckBox) enumeration.nextElement();
+            if (element.isSelected()) {
+                Object object = element.getContents();
+                filter.addRunState((RunStates) object);
+            }
+        }
+        
         filter.clearJudgementList();
         enumeration = judgementListModel.elements();
         while (enumeration.hasMoreElements()) {
@@ -470,6 +503,7 @@ public class EditFilterPane extends JPanePlugin {
             }
         }
 
+        printAllSpecifiers("getFilter", getContest(), filter);
 
         return filter;
     }
@@ -487,5 +521,62 @@ public class EditFilterPane extends JPanePlugin {
             }
         });
     }
+    
+
+    protected void printAllSpecifiers(String prefix, IInternalContest contest, Filter inFilter) {
+        String[] names = { FilterFormatter.ACCOUNT_SPECIFIER, FilterFormatter.JUDGMENTS_SPECIFIER, FilterFormatter.LANGUAGES_SPECIFIER, FilterFormatter.NUMBER_ACCOUNTS_SPECIFIER,
+                FilterFormatter.NUMBER_JUDGEMENTS_SPECIFIER, FilterFormatter.NUMBER_LANGUAGES_SPECIFIER, FilterFormatter.NUMBER_PROBLEMS_SPECIFIER, FilterFormatter.PROBLEMS_SPECIFIER,
+                FilterFormatter.SHORT_ACCOUNT_NAMES_SPECIFIER, FilterFormatter.TEAM_LIST_SPECIFIER, FilterFormatter.TEAM_LONG_LIST_SPECIFIER, };
+
+        Arrays.sort(names);
+
+        FilterFormatter filterFormatter = new FilterFormatter();
+        for (String string : names) {
+            System.out.println(prefix + " " + string + " '" + filterFormatter.format(string, contest, inFilter) + "'");
+        }
+
+    }
+
+    /**
+     * This method initializes jScrollPane
+     * 
+     * @return javax.swing.JScrollPane
+     */
+    private JScrollPane getJScrollPane() {
+        if (jScrollPane == null) {
+            jScrollPane = new JScrollPane();
+            jScrollPane.setViewportView(getRunStatesListBox());
+        }
+        return jScrollPane;
+    }
+
+    /**
+     * This method initializes runStatesPane
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getRunStatesPane() {
+        if (runStatesPane == null) {
+            runStatesPane = new JPanel();
+            runStatesPane.setLayout(new BorderLayout());
+            runStatesPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Run States", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+                    javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
+            runStatesPane.add(getJScrollPane(), java.awt.BorderLayout.CENTER);
+        }
+        return runStatesPane;
+    }
+
+    /**
+     * This method initializes runStatesListBox
+     * 
+     * @return edu.csus.ecs.pc2.ui.JCheckBoxJList
+     */
+    private JCheckBoxJList getRunStatesListBox() {
+        if (runStatesListBox == null) {
+            runStatesListBox = new JCheckBoxJList(runStatesListModel);
+        }
+        return runStatesListBox;
+    }
+
 
 } // @jve:decl-index=0:visual-constraint="10,10"

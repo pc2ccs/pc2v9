@@ -22,7 +22,7 @@ import java.io.PrintWriter;
 
 // $HeadURL$
 public class EditFilterFrame extends JFrame implements UIPlugin {
-    
+
     // TODO code close button
     // TODO on close button if they say yes, invoke callback.
 
@@ -35,7 +35,7 @@ public class EditFilterFrame extends JFrame implements UIPlugin {
 
     private JPanel buttonPane = null;
 
-    private JButton saveButton = null;
+    private JButton applyButton = null;
 
     private JButton closeButton = null;
 
@@ -48,6 +48,8 @@ public class EditFilterFrame extends JFrame implements UIPlugin {
     private IInternalController controller;
 
     private Runnable refreshCallback = null;
+
+    private JButton okButton = null;
 
     /**
      * This method initializes
@@ -81,6 +83,7 @@ public class EditFilterFrame extends JFrame implements UIPlugin {
         this.setTitle("Edit Filter");
         this.setContentPane(getMainPane());
 
+
         FrameUtilities.centerFrame(this);
     }
 
@@ -110,7 +113,8 @@ public class EditFilterFrame extends JFrame implements UIPlugin {
             flowLayout.setHgap(45);
             buttonPane = new JPanel();
             buttonPane.setLayout(flowLayout);
-            buttonPane.add(getSaveButton(), null);
+            buttonPane.add(getOkButton(), null);
+            buttonPane.add(getApplyButton(), null);
             buttonPane.add(getCloseButton(), null);
         }
         return buttonPane;
@@ -121,23 +125,23 @@ public class EditFilterFrame extends JFrame implements UIPlugin {
      * 
      * @return javax.swing.JButton
      */
-    private JButton getSaveButton() {
-        if (saveButton == null) {
-            saveButton = new JButton();
-            saveButton.setText("Save");
-            saveButton.setMnemonic(java.awt.event.KeyEvent.VK_S);
-            saveButton.addActionListener(new java.awt.event.ActionListener() {
+    private JButton getApplyButton() {
+        if (applyButton == null) {
+            applyButton = new JButton();
+            applyButton.setText("Apply");
+            applyButton.setToolTipText("Apply this filter to listbox");
+            applyButton.setMnemonic(java.awt.event.KeyEvent.VK_A);
+            applyButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.out.println("debug - getSaveButton actionPerformed ");
                     updateFilter(editFilterPane.getFilter());
                 }
             });
         }
-        return saveButton;
+        return applyButton;
     }
 
     protected void updateFilter(Filter filter2) {
-        
+
         System.out.println("debug updateFilter " + filter2);
         System.out.flush();
 
@@ -168,10 +172,9 @@ public class EditFilterFrame extends JFrame implements UIPlugin {
         } catch (Exception e) {
             e.printStackTrace();
             // TODO: log handle exception
-//            log.log(Log.WARNING, "Exception logged ", e);
+            // log.log(Log.WARNING, "Exception logged ", e);
         }
-        
-        
+
     }
 
     /**
@@ -183,14 +186,22 @@ public class EditFilterFrame extends JFrame implements UIPlugin {
         if (closeButton == null) {
             closeButton = new JButton();
             closeButton.setText("Close");
+            closeButton.setToolTipText("Close this window");
             closeButton.setMnemonic(java.awt.event.KeyEvent.VK_C);
             closeButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.out.println("closeButton actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+                    checkForChangesAndExit();
                 }
             });
         }
         return closeButton;
+    }
+
+    protected void checkForChangesAndExit() {
+        
+        // TODO check for changes in filter. 
+        
+        setVisible(false);
     }
 
     /**
@@ -224,6 +235,26 @@ public class EditFilterFrame extends JFrame implements UIPlugin {
 
     public void setFilter(Filter filter2) {
         getEditFilterPane().setFilter(filter2);
+    }
+
+    /**
+     * This method initializes okButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getOkButton() {
+        if (okButton == null) {
+            okButton = new JButton();
+            okButton.setText("Ok");
+            okButton.setMnemonic(java.awt.event.KeyEvent.VK_O);
+            okButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    updateFilter(editFilterPane.getFilter());
+                    setVisible(false);
+                }
+            });
+        }
+        return okButton;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
