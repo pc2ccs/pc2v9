@@ -21,7 +21,8 @@ import javax.swing.border.EmptyBorder;
 /**
  * A JList full of check boxes.
  * 
- * Use Ctrl-A to select and deselect all checkboxes.
+ * Use Ctrl-A to select and deselect all checkboxes. <br>
+ * Use Ctrl-I to invert the selection for all checkboxes.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -120,9 +121,12 @@ public class JCheckBoxJList extends JList {
         public void keyPressed(KeyEvent e) {
             if (e.getKeyChar() == ' ') {
                 processAction();
-            } else if ((e.getKeyCode() == 65) && e.isControlDown()){
+            } else if ((e.getKeyCode() == 65) && e.isControlDown()) {
                 // Ctrl-A select or deselect
                 selectDeselectAll();
+            } else if ((e.getKeyCode() == 73) && e.isControlDown()) {
+                // Ctrl-I invert selection
+                invertSelection();
             }
         }
 
@@ -131,7 +135,6 @@ public class JCheckBoxJList extends JList {
          * 
          * Sets all checkboxes to the opposite (logical not) of the
          * first checkbox in the list. 
-         *
          */
         private void selectDeselectAll() {
 
@@ -150,6 +153,27 @@ public class JCheckBoxJList extends JList {
             repaint();
             jCheckBoxJList.firePropertyChange("change", false, true);
         }
+        
+        /**
+         * Invert the selection for each element in checklist.
+         *
+         */
+        private void invertSelection() {
+
+            if (getModel().getSize() < 1) {
+                // Nothing to invert
+                return;
+            }
+
+            JCheckBox checkBox = null;
+            for (int i = 0; i < getModel().getSize(); i++) {
+                checkBox = (JCheckBox) jCheckBoxJList.getModel().getElementAt(i);
+                checkBox.setSelected(! checkBox.isSelected());
+            }
+            repaint();
+            jCheckBoxJList.firePropertyChange("change", false, true);
+        }
+
 
         public void keyReleased(KeyEvent e) {
             // ignore
