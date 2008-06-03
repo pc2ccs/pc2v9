@@ -1785,7 +1785,7 @@ public class ProblemPane extends JPanePlugin {
      * @param newFile
      * @return true if the file was converted
      */
-    public boolean checkFileFormat(SerializedFile newFile) {
+    public boolean checkFileFormat(SerializedFile newFile) throws InvalidFieldValue {
 
         /*
          * DOS FILE 0x0D 0x0A UNIX FILE 0xA MAC FILE 0xD
@@ -1829,11 +1829,13 @@ public class ProblemPane extends JPanePlugin {
 
             question = question + "Do you want the file converted to the current OS file format as it is loaded into PC^2?";
 
-            int answer = JOptionPane.showConfirmDialog(this, question, "File Format Mismatch", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+            int answer = JOptionPane.showConfirmDialog(this, question, "File Format Mismatch", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
 
             if (answer == JOptionPane.YES_OPTION) {
                 newFile.convertFile(currentOS);
                 return true;
+            } else if (answer == JOptionPane.CANCEL_OPTION) {
+                throw new InvalidFieldValue("Update canceled");
             }
 
         }
