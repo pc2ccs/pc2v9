@@ -48,6 +48,8 @@ public class Contest implements IContest {
     
     private RunListenerList runListenerList = new RunListenerList();
     
+    private ClarificationListenerList clarificationListenerList = new ClarificationListenerList();
+    
     private ConfigurationListenerList configurationListenerList = new ConfigurationListenerList();
     
     private GenerateStandings generateStandings = new GenerateStandings();
@@ -59,6 +61,7 @@ public class Contest implements IContest {
         this.controller = controller;
         this.log = log;
         runListenerList.setContestAndController(contest, controller);
+        clarificationListenerList.setContestAndController(contest, controller);
         configurationListenerList.setContest(contest);
     }
 
@@ -224,12 +227,10 @@ public class Contest implements IContest {
     }
 
     public void removeClarificationListener(IClarificationEventListener clarificationEventListener) {
-        // TODO Auto-generated method stub
-        
+        clarificationListenerList.addClarificationListener(clarificationEventListener);
     }
 
     public void addClarificationListener(IClarificationEventListener clarificationEventListener) {
-        // TODO Auto-generated method stub
-        
+        clarificationListenerList.removeClarificationListener(clarificationEventListener);
     }
 }
