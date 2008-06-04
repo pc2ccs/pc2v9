@@ -208,6 +208,26 @@ public class InternalContest implements IInternalContest {
 
         try {
             runList.loadFromDisk(siteNum);
+            Run[] runs = runList.getList();
+            for (int i = 0; i < runs.length; i++) {
+                RunStates status = runs[i].getStatus();
+                if (status.equals(RunStates.BEING_COMPUTER_JUDGED)) {
+                    status = RunStates.QUEUED_FOR_COMPUTER_JUDGEMENT;
+                } else if (status.equals(RunStates.BEING_JUDGED)) {
+                    if (runs[i].getComputerJudgementRecord() == null) {
+                        status = RunStates.NEW;
+                    } else {
+                        status = RunStates.MANUAL_REVIEW;
+                    }
+                } else if (status.equals(RunStates.BEING_RE_JUDGED)) {
+                    status = RunStates.JUDGED;
+                }
+                if (!runs[i].getStatus().equals(status)) {
+                    StaticLog.info("Changing Run "+runs[i].getElementId()+" from "+runs[i].getStatus()+"to NEW");
+                    runList.updateRunStatus(runs[i], status);
+                    
+                }
+            }
         } catch (Exception e) {
             StaticLog.log("Trouble loading runs from disk ", e);
         }
