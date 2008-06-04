@@ -175,6 +175,12 @@ public interface IContest {
      * @return An unordered list of Runs for all sites currently connected to the contest.
      */
     IRun[] getRuns();
+    
+    /**
+     * 
+     * @return
+     */
+    IClarification [] getClarifications();
 
     /**
      * Add a Run Event listener to the contest.  A run event listener (object of type {@link IRunEventListener}) will be
@@ -194,6 +200,12 @@ public interface IContest {
      *            The {@link IRunEventListener} listener to be removed.
      */
     void removeRunListener(IRunEventListener runEventListener);
+    
+    // TODO javadoc
+    void removeClarificationListener(IClarificationEventListener clarificationEventListener);
+    
+    // TODO java doc
+    void addClarificationListener(IClarificationEventListener clarificationEventListener);
 
     /**
      * Add a Contest Configuration Update listener to the contest.

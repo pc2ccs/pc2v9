@@ -2,6 +2,8 @@ package edu.csus.ecs.pc2.api.implementation;
 
 import java.util.Vector;
 
+import edu.csus.ecs.pc2.api.IClarification;
+import edu.csus.ecs.pc2.api.IClarificationEventListener;
 import edu.csus.ecs.pc2.api.IClient;
 import edu.csus.ecs.pc2.api.IContest;
 import edu.csus.ecs.pc2.api.IContestClock;
@@ -18,6 +20,7 @@ import edu.csus.ecs.pc2.api.listener.IRunEventListener;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -207,5 +210,26 @@ public class Contest implements IContest {
 
     public int getLocalContactedPortNumber() {
         return controller.getPortContacted();
+    }
+
+    public IClarification[] getClarifications() {
+        
+        Clarification[] clarifications = contest.getClarifications();
+        ClarificationImplementation[] clarificationImplementations = new ClarificationImplementation[clarifications.length];
+
+        for (int i = 0; i < clarifications.length; i++) {
+            clarificationImplementations[i] = new ClarificationImplementation(clarifications[i], contest, controller);
+        }
+        return clarificationImplementations;
+    }
+
+    public void removeClarificationListener(IClarificationEventListener clarificationEventListener) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void addClarificationListener(IClarificationEventListener clarificationEventListener) {
+        // TODO Auto-generated method stub
+        
     }
 }
