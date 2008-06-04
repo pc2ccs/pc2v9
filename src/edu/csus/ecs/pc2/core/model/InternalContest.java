@@ -1187,7 +1187,11 @@ public class InternalContest implements IInternalContest {
         Run theRun = getRun(run.getElementId());
 
         if (theRun.getStatus().equals(RunStates.BEING_JUDGED)) {
-            run.setStatus(RunStates.NEW);
+            if (theRun.getComputerJudgementRecord() == null) {
+                run.setStatus(RunStates.NEW);
+            } else {
+                run.setStatus(RunStates.MANUAL_REVIEW);
+            }
         } else if (theRun.getStatus().equals(RunStates.BEING_RE_JUDGED)) {
             run.setStatus(RunStates.JUDGED);
         }
