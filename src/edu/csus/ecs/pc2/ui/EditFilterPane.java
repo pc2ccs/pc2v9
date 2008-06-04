@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.security.InvalidParameterException;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Vector;
@@ -42,17 +43,17 @@ public class EditFilterPane extends JPanePlugin {
 
     private JCheckBox filterOnCheckBox = null;
 
-    private JPanel problemFrame = null;
+    private JPanel problemsPane = null;
 
     private JPanel bottomPanel = null;
 
-    private JPanel languagePane = null;
+    private JPanel languagesPane = null;
 
-    private JPanel teamFrame = null;
+    private JPanel teamsPane = null;
 
-    private JPanel judgementFrame = null;
+    private JPanel judgementsPane = null;
 
-    private JPanel otherPanel = null;
+    private JPanel listsPanel = null;
 
     private JPanel mainPane = null;
 
@@ -89,6 +90,32 @@ public class EditFilterPane extends JPanePlugin {
     private JCheckBoxJList runStatesListBox = null;
     
     private DefaultListModel runStatesListModel = new DefaultListModel();
+    
+    /**
+     * JList names in EditFilterPane.
+     *  
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    
+    public enum ListNames {
+        /**
+         * Language Jlist.
+         */
+        LANGUAGES,
+        /**
+         * Problem Jlist.
+         */
+        PROBLEMS,
+        /**
+         * Run States JList.
+         */
+        RUN_STATES,
+        /**
+         * Accounts JList.
+         */
+        ACCOUNTS,
+    }
 
     public EditFilterPane() {
         super();
@@ -163,16 +190,16 @@ public class EditFilterPane extends JPanePlugin {
      * 
      * @return javax.swing.JPanel
      */
-    private JPanel getProblemFrame() {
-        if (problemFrame == null) {
-            problemFrame = new JPanel();
-            problemFrame.setLayout(new BorderLayout());
-            problemFrame.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Problems", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+    private JPanel getProblemsPane() {
+        if (problemsPane == null) {
+            problemsPane = new JPanel();
+            problemsPane.setLayout(new BorderLayout());
+            problemsPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Problems", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
                     javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
-            problemFrame.setName("problemFrame");
-            problemFrame.add(getProblemsScroll(), java.awt.BorderLayout.CENTER);
+            problemsPane.setName("problemFrame");
+            problemsPane.add(getProblemsScroll(), java.awt.BorderLayout.CENTER);
         }
-        return problemFrame;
+        return problemsPane;
     }
 
     /**
@@ -193,16 +220,16 @@ public class EditFilterPane extends JPanePlugin {
      * 
      * @return javax.swing.JPanel
      */
-    private JPanel getLanguagePane() {
-        if (languagePane == null) {
-            languagePane = new JPanel();
-            languagePane.setLayout(new BorderLayout());
-            languagePane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Languages", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+    private JPanel getLanguagesPane() {
+        if (languagesPane == null) {
+            languagesPane = new JPanel();
+            languagesPane.setLayout(new BorderLayout());
+            languagesPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Languages", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
                     javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
-            languagePane.setName("languagePane");
-            languagePane.add(getLanguagesScroll(), java.awt.BorderLayout.CENTER);
+            languagesPane.setName("languagePane");
+            languagesPane.add(getLanguagesScroll(), java.awt.BorderLayout.CENTER);
         }
-        return languagePane;
+        return languagesPane;
     }
 
     /**
@@ -210,16 +237,16 @@ public class EditFilterPane extends JPanePlugin {
      * 
      * @return javax.swing.JPanel
      */
-    private JPanel getTeamFrame() {
-        if (teamFrame == null) {
-            teamFrame = new JPanel();
-            teamFrame.setLayout(new BorderLayout());
-            teamFrame.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Teams", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION,
+    private JPanel getTeamsPane() {
+        if (teamsPane == null) {
+            teamsPane = new JPanel();
+            teamsPane.setLayout(new BorderLayout());
+            teamsPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Teams", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION,
                     null, null));
-            teamFrame.setName("teamFrame");
-            teamFrame.add(getTeamsScroll(), java.awt.BorderLayout.CENTER);
+            teamsPane.setName("teamFrame");
+            teamsPane.add(getTeamsScroll(), java.awt.BorderLayout.CENTER);
         }
-        return teamFrame;
+        return teamsPane;
     }
 
     /**
@@ -227,16 +254,16 @@ public class EditFilterPane extends JPanePlugin {
      * 
      * @return javax.swing.JPanel
      */
-    private JPanel getJudgementFrame() {
-        if (judgementFrame == null) {
-            judgementFrame = new JPanel();
-            judgementFrame.setLayout(new BorderLayout());
-            judgementFrame.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Judgements", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+    private JPanel getJudgementsPane() {
+        if (judgementsPane == null) {
+            judgementsPane = new JPanel();
+            judgementsPane.setLayout(new BorderLayout());
+            judgementsPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Judgements", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
                     javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
-            judgementFrame.setName("judgementFrame");
-            judgementFrame.add(getJudgementsScroll(), java.awt.BorderLayout.CENTER);
+            judgementsPane.setName("judgementFrame");
+            judgementsPane.add(getJudgementsScroll(), java.awt.BorderLayout.CENTER);
         }
-        return judgementFrame;
+        return judgementsPane;
     }
 
     /**
@@ -244,19 +271,20 @@ public class EditFilterPane extends JPanePlugin {
      * 
      * @return javax.swing.JPanel
      */
-    private JPanel getOtherPanel() {
-        if (otherPanel == null) {
+    private JPanel getListsPanel() {
+        if (listsPanel == null) {
             GridLayout gridLayout = new GridLayout();
             gridLayout.setRows(1);
-            otherPanel = new JPanel();
-            otherPanel.setLayout(gridLayout);
-            otherPanel.add(getProblemFrame(), null);
-            otherPanel.add(getJudgementFrame(), null);
-            otherPanel.add(getTeamFrame(), null);
-            otherPanel.add(getLanguagePane(), null);
-            otherPanel.add(getRunStatesPane(), null);
+            listsPanel = new JPanel();
+            listsPanel.setLayout(gridLayout);
+            listsPanel.add(getProblemsPane(), null);
+            listsPanel.add(getJudgementsPane(), null);
+            listsPanel.add(getTeamsPane(), null);
+            listsPanel.add(getLanguagesPane(), null);
+            listsPanel.add(getLanguagesPane(), null);
+            listsPanel.add(getRunStatesPane(), null);
         }
-        return otherPanel;
+        return listsPanel;
     }
 
     /**
@@ -269,7 +297,7 @@ public class EditFilterPane extends JPanePlugin {
             mainPane = new JPanel();
             mainPane.setLayout(new BorderLayout());
             mainPane.add(getBottomPanel(), java.awt.BorderLayout.SOUTH);
-            mainPane.add(getOtherPanel(), java.awt.BorderLayout.CENTER);
+            mainPane.add(getListsPanel(), java.awt.BorderLayout.CENTER);
         }
         return mainPane;
     }
@@ -577,6 +605,35 @@ public class EditFilterPane extends JPanePlugin {
         }
         return runStatesListBox;
     }
+    
 
+    /**
+     * Show or hide list on edit filter frame.
+     * 
+     * @param listNames list to show or hid
+     * @param showList true show list, false do not show list.
+     */
+    public void showJList(ListNames listNames, boolean showList) {
+        switch (listNames) {
+            case ACCOUNTS:
+                getTeamsPane().setVisible(showList);
+                break;
+            case LANGUAGES:
+                getLanguagesPane().setVisible(showList);
+                break;
+            case PROBLEMS:
+                getProblemsPane().setVisible(showList);
+                break;
+            case RUN_STATES:
+                getRunStatesPane().setVisible(showList);
+                break;
+            default:
+                throw new InvalidParameterException("Invalid listNames: "+listNames);
+        }
+
+        // TODO tighten up layout somehow 
+        
+        this.doLayout();
+    }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

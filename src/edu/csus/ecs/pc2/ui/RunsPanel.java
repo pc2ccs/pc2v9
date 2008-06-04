@@ -44,6 +44,7 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
+import edu.csus.ecs.pc2.ui.EditFilterPane.ListNames;
 import edu.csus.ecs.pc2.ui.judge.JudgeView;
 
 import javax.swing.JLabel;
@@ -124,6 +125,8 @@ public class RunsPanel extends JPanePlugin {
     private boolean bUseAutoJudgemonitor = true;
     
     private EditFilterFrame editFilterFrame = null;
+
+    private String filterFrameTitle = "Run filter";
 
     /**
      * This method initializes
@@ -958,14 +961,24 @@ public class RunsPanel extends JPanePlugin {
             filterButton.setMnemonic(java.awt.event.KeyEvent.VK_F);
             filterButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    filterRuns();
+                    showFilterRunsFrame();
                 }
             });
         }
         return filterButton;
     }
 
-    protected void filterRuns() {
+    protected void showFilterRunsFrame() {
+        
+        if (usingTeamColumns) {
+            getEditFilterFrame().showJList(ListNames.ACCOUNTS, false);
+            getEditFilterFrame().showJList(ListNames.RUN_STATES, false);
+        }
+
+        if (showNewRunsOnly) {
+            getEditFilterFrame().showJList(ListNames.RUN_STATES, false);
+        }
+
         getEditFilterFrame().setFilter(filter);
         getEditFilterFrame().setVisible(true);
     }
@@ -1416,9 +1429,21 @@ public class RunsPanel extends JPanePlugin {
                     reloadRunList();
                 }
             };
-            editFilterFrame = new EditFilterFrame(filter, "Run filter", callback);
+            editFilterFrame = new EditFilterFrame(filter, filterFrameTitle,  callback);
         }
         return editFilterFrame;
+    }
+    
+    /**
+     * Set title for the Filter Frame.
+     * 
+     * @param title
+     */
+    public void setFilterFrameTitle (String title){
+        filterFrameTitle = title;
+        if (editFilterFrame != null){
+            editFilterFrame.setTitle(title);
+        }
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

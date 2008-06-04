@@ -171,9 +171,11 @@ public class JudgeView extends JFrame implements UIPlugin {
                 newRunsPane.setShowNewRunsOnly(true);
                 newRunsPane.setMakeSoundOnOneRun(true);
                 addUIPlugin(getMainTabbedPane(), "New Runs", newRunsPane);
+                newRunsPane.setFilterFrameTitle("New Runs Filter");
 
                 RunsPanel runsPanel = new RunsPanel();
                 addUIPlugin(getMainTabbedPane(), "All Runs", runsPanel);
+                runsPanel.setFilterFrameTitle("All Runs Filter");
 
                 ClarificationsPane newClarificationsPane = new ClarificationsPane();
                 newClarificationsPane.setShowNewClarificationsOnly(true);

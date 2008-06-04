@@ -9,6 +9,7 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.report.FilterReport;
+import edu.csus.ecs.pc2.ui.EditFilterPane.ListNames;
 
 import java.awt.FlowLayout;
 import java.io.PrintWriter;
@@ -255,6 +256,18 @@ public class EditFilterFrame extends JFrame implements UIPlugin {
             });
         }
         return okButton;
+    }
+
+    /**
+     * Show or hide list on edit filter frame.
+     * 
+     * @param listNames
+     *            list to show or hid
+     * @param showList
+     *            true show list, false do not show list.
+     */
+    public void showJList(ListNames listNames, boolean showList) {
+        editFilterPane.showJList(listNames, showList);
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
