@@ -242,13 +242,15 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      * Security Level, security turned off.
      */
     public static final int SECURITY_NONE_LEVEL = 0;
+
+    private static final String CONTEST_PASSWORD_OPTION = "--contestpassword";
     
     /**
      * Security Level for Server.
      */
     private int securityLevel = SECURITY_HIGH_LEVEL;
 
-    private String contestPassword = "Finals2008";
+    private String contestPassword = null;
 
     public InternalController(IInternalContest contest) {
         super();
@@ -726,13 +728,15 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 contest.setSiteNumber(1);
                 info("initializeServer STARTED this site as Site 1");
                 new FileSecurity("db.1");
-
-                String password = JOptionPane.showInputDialog(null, "Enter Contest Password");
-                if (password == null || password.trim().length() == 0){
-                    JOptionPane.showMessageDialog(null, "You must supply a password, exiting.");
-                    System.exit(44);
+                
+                if (contestPassword == null) {
+                    String password = JOptionPane.showInputDialog(null, "Enter Contest Password");
+                    if (password == null || password.trim().length() == 0) {
+                        JOptionPane.showMessageDialog(null, "You must supply a password, exiting.");
+                        System.exit(44);
+                    }
+                    contestPassword = password;
                 }
-                contestPassword = password;
 
                 try {
                     FileSecurity.verifyPassword(contestPassword.toCharArray());
@@ -1792,13 +1796,23 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
          * If TransportException thrown before UI has been created, save the exception and present it on the UI later.
          */
         TransportException savedTransportException = null;
-
-        String[] arguments = { "--login", "--id", "--password", "--loginUI", "--remoteServer", "--server", "--port", "--ini", "--nosave" };
+        
+        String[] arguments = { "--login", "--id", "--password", "--loginUI", "--remoteServer", "--server", "--port", "--ini", "--nosave", CONTEST_PASSWORD_OPTION };
         parseArguments = new ParseArguments(stringArray, arguments);
 
         if (parseArguments.isOptPresent("--help")) {
             System.out.println("Usage: Starter [--help] [--server] [--first] [--login <login>] [--password <pass>] [--site ##] [--ini filename] ");
             System.exit(0);
+        }
+        
+        if (parseArguments.isOptPresent(CONTEST_PASSWORD_OPTION)){
+            
+            String newContestPassword = parseArguments.getOptValue(CONTEST_PASSWORD_OPTION);
+            if (newContestPassword == null){
+                System.err.println("No contest password found after "+CONTEST_PASSWORD_OPTION);
+                System.exit(44);
+            }
+            setContestPassword(newContestPassword);
         }
 
         for (String arg : stringArray) {
