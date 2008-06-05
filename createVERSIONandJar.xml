@@ -102,9 +102,11 @@ dal
              then the Version can be ommitted if not set -->
 		<jar jarfile="${jar.path}" basedir="${build.prod.dir}">
 			<manifest>
-				<attribute name="Version" value="${version}" />
-				<attribute name="Package-Title" value="CSUS Programming Contest Control System" />
-				<attribute name="Package-Version" value="${repo.version}" />
+                <attribute name="Specification-Version" value="${version}"/>
+                <attribute name="Implementation-Title" value="CSUS Programming Contest Control System"/>
+                <attribute name="Implementation-Version" value="${repo.version}"/>
+                <attribute name="Built-On" value="${timestamp.english}"/>
+                <attribute name="Main-Class" value="edu.csus.ecs.pc2.Starter"/>
 			</manifest>
 		</jar>
 		<tstamp>
