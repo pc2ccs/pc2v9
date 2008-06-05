@@ -5,6 +5,7 @@ import java.awt.FlowLayout;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
@@ -124,6 +125,7 @@ public class GroupsPane extends JPanePlugin {
                 }
                 groupListBox.autoSizeAllColumns();
 //                groupListBox.sort();
+                getEditButton().setEnabled(groupListBox.getRowCount() > 0);
             }
         });
     }
@@ -153,6 +155,7 @@ public class GroupsPane extends JPanePlugin {
         for (Group group : groups) {
             addGroupRow(group);
         }
+        getEditButton().setEnabled(groupListBox.getRowCount() > 0);
     }
 
     private void addGroupRow(Group group) {
@@ -286,7 +289,7 @@ public class GroupsPane extends JPanePlugin {
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                messageLabel.setText(string);
+                JOptionPane.showMessageDialog(getParentFrame(), string, "Warning", JOptionPane.WARNING_MESSAGE);
             }
         });
 
