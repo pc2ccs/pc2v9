@@ -100,8 +100,8 @@ public class SitesPanel extends JPanePlugin {
             siteButtonPanel.setPreferredSize(new java.awt.Dimension(35, 35));
             siteButtonPanel.add(getAddSiteButton(), null);
             siteButtonPanel.add(getUpdateSiteButton(), null);
-            siteButtonPanel.add(getReconnectButton(), null);
             siteButtonPanel.add(getCancelSiteEditButton(), null);
+            siteButtonPanel.add(getReconnectButton(), null);
         }
         return siteButtonPanel;
     }
@@ -181,8 +181,8 @@ public class SitesPanel extends JPanePlugin {
     private JButton getUpdateSiteButton() {
         if (updateSiteButton == null) {
             updateSiteButton = new JButton();
-            updateSiteButton.setText("Update");
-            updateSiteButton.setToolTipText("Update site changes");
+            updateSiteButton.setText("Apply");
+            updateSiteButton.setToolTipText("Apply all site changes");
             updateSiteButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     updateSitesData();
