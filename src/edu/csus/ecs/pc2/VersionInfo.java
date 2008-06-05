@@ -46,20 +46,22 @@ public class VersionInfo {
     /**
      * Human readable version.
      */
-    private String versionNumber = " 9 YYYYMMDD ";
+    private static String versionNumber = "9";
 
     /**
      * Date the code was changed.
      */
-    private String versionDate = "MMM D, YY HH:MMam";
+    private static String versionDate = "";
 
     /**
      * Maintainer of this system.
      */
     private String contactEMail = "mailto:pc2@ecs.csus.edu";
 
-    private String buildNumber = "BBB";
+    private static String buildNumber = "";
 
+    private static boolean versionFileRead = false;
+    
     /**
      * If available, the Specification-Version from the manifest (eg the version number).
      */
@@ -71,19 +73,21 @@ public class VersionInfo {
     private String manifestImplementationVersion = "";
 
     public VersionInfo() {
-        loadVersionInfoFromFile(locateHome() + File.separator + VERSION_FILENAME);
-
-        int violation = checkAgainstManifest();
-        if (violation == 1) {
-            int versionWithoutDate = getVersionNumber().indexOf(' ');
-            System.out.println("Problem with version numbers.  Expected " + getVersionNumber().substring(0, versionWithoutDate) 
-                    + ", but got " + manifestSpecificationVersion);
-            System.exit(1);
-        }
-        if (violation == 2) {
-            System.out.println("Problem with build numbers.  Expected " + getBuildNumber() 
-                    + ", but got " + manifestImplementationVersion);
-            System.exit(2);
+        if (buildNumber.equals("")) {
+            loadVersionInfoFromFile(locateHome() + File.separator + VERSION_FILENAME);
+    
+            int violation = checkAgainstManifest();
+            if (violation == 1) {
+                int versionWithoutDate = getVersionNumber().indexOf(' ');
+                System.out.println("Problem with version numbers.  Expected " + getVersionNumber().substring(0, versionWithoutDate) 
+                        + ", but got " + manifestSpecificationVersion);
+                System.exit(1);
+            }
+            if (violation == 2) {
+                System.out.println("Problem with build numbers.  Expected " + getBuildNumber() 
+                        + ", but got " + manifestImplementationVersion);
+                System.exit(2);
+            }
         }
     }
 
@@ -155,7 +159,13 @@ public class VersionInfo {
 
         System.out.println();
         System.out.println(sri.getSystemName());
-        System.out.println("Version " + sri.getVersionNumber() + " (" + sri.getVersionDate() + ") build " + sri.getBuildNumber());
+        System.out.print("Version " + sri.getVersionNumber());
+        if (!sri.getVersionDate().trim().equals("")) {
+            System.out.print(" (" + sri.getVersionDate() + ")");
+        }
+        if (!sri.getBuildNumber().trim().equals("")) {
+            System.out.print(" build " + sri.getBuildNumber());
+        }
         System.out.println();
         System.out.println("Java version " + javaVer);
         System.out.println("OS: " + osName + " " + osVer + " (" + osArch + ") ");
@@ -245,6 +255,10 @@ public class VersionInfo {
     protected void loadVersionInfoFromFile(String filename) {
 
         try {
+            if (!new File(filename).exists()) {
+                // api usage
+                return;
+            }
             String[] lines = Utilities.loadFile(filename);
 
             if (lines.length == 0) {
@@ -259,6 +273,7 @@ public class VersionInfo {
                     String versionString = fields[4] + " " + fields[5] + " " + fields[6] + addNumberEnding(fields[6]) + " " + fields[7] + " " + fields[8] + " " + fields[9];
                     setVersionDate(versionString.substring(1, versionString.length() - 1));
                     setBuildNumber(fields[3]);
+                    versionFileRead = true;
                 } else {
                     System.err.println("Incorrect number of fields on line 2 in file: \"" + filename + "\", version information unavailable");
                     System.err.println("Expecting 10 fields, found " + fields.length + " fields.");
@@ -285,12 +300,17 @@ public class VersionInfo {
                     .getImplementationVersion();
             int versionWithoutDate = getVersionNumber().indexOf(' ');
             if (manifestSpecificationVersion != null) {
-                if (!getVersionNumber().substring(0, versionWithoutDate).equals(
-                        corePackage.getSpecificationVersion())) {
-                    return 1;
-                }
-                if (!getBuildNumber().equals(corePackage.getImplementationVersion())) {
-                    return 2;
+                if (versionFileRead) {
+                    if (!getVersionNumber().substring(0, versionWithoutDate).equals(
+                            corePackage.getSpecificationVersion())) {
+                        return 1;
+                    }
+                    if (!getBuildNumber().equals(corePackage.getImplementationVersion())) {
+                        return 2;
+                    }
+                } else {
+                    setVersionNumber(corePackage.getSpecificationVersion());
+                    setBuildNumber(corePackage.getImplementationVersion());
                 }
             }
         }
@@ -324,16 +344,16 @@ public class VersionInfo {
         return (pc2home);
     }
     
-    public void setBuildNumber(String buildNumber) {
-        this.buildNumber = buildNumber;
+    public void setBuildNumber(String newBuildNumber) {
+        buildNumber = newBuildNumber;
     }
 
-    public void setVersionDate(String versionDate) {
-        this.versionDate = versionDate;
+    public void setVersionDate(String newVersionDate) {
+        versionDate = newVersionDate;
     }
 
-    public void setVersionNumber(String versionNumber) {
-        this.versionNumber = versionNumber;
+    public void setVersionNumber(String newVersionNumber) {
+        versionNumber = newVersionNumber;
     }
 
     public String getSystemURL() {
