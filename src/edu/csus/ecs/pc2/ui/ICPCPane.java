@@ -180,7 +180,7 @@ public class ICPCPane extends JPanePlugin {
                 }
                 if (newFileProblem) {
                     log.warning("Problem reading PC2_Contest.tab " + newFile.getCanonicalPath() + "");
-                    JOptionPane.showMessageDialog(null, "Could not open file " + newFile, "Warning", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(getParentFrame(), "Could not open file " + newFile, "Warning", JOptionPane.WARNING_MESSAGE);
                 }
             }
 

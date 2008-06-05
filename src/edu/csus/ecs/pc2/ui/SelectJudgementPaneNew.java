@@ -1200,7 +1200,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             try {
                 Runtime.getRuntime().exec("cmd /C start cmd", env, runDir);
             } catch (IOException e) {
-                JOptionPane.showMessageDialog(null, "Unable to run command cmd.exe " + e.getMessage());
+                JOptionPane.showMessageDialog(getParentFrame(), "Unable to run command cmd.exe " + e.getMessage());
                 e.printStackTrace();
             }
         } else if (fs.equals("/")) {
@@ -1210,7 +1210,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             try {
                 Runtime.getRuntime().exec("/usr/bin/sh", env, runDir);
             } catch (IOException e) {
-                JOptionPane.showMessageDialog(null, "Unable to run command /usr/bin/sh " + e.getMessage());
+                JOptionPane.showMessageDialog(getParentFrame(), "Unable to run command /usr/bin/sh " + e.getMessage());
                 e.printStackTrace();
             }
         } else {

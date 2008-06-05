@@ -647,7 +647,7 @@ public class SubmitRunPane extends JPanePlugin {
                 }
                 if (newFileProblem) {
                     log.warning("Problem reading new main file selection " + newFile.getCanonicalPath() + ", main file not changed");
-                    JOptionPane.showMessageDialog(null, "Main file not changed, could not open file " + newFile, "Warning", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(getParentFrame(), "Main file not changed, could not open file " + newFile, "Warning", JOptionPane.WARNING_MESSAGE);
                 }
             }
         } catch (Exception e) {
@@ -925,7 +925,7 @@ public class SubmitRunPane extends JPanePlugin {
                 }
                 if (newFileProblem) {
                     log.warning("Problem reading additional file selection " + newFile.getCanonicalPath() + ", file not added");
-                    JOptionPane.showMessageDialog(null, "File not added, could not open file " + newFile, "Warning", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(getParentFrame(), "File not added, could not open file " + newFile, "Warning", JOptionPane.WARNING_MESSAGE);
                 }
             }
         } catch (Exception e) {
@@ -974,7 +974,7 @@ public class SubmitRunPane extends JPanePlugin {
         
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                JOptionPane.showMessageDialog(null, string);
+                JOptionPane.showMessageDialog(getParentFrame(), string);
             }
         });
     }

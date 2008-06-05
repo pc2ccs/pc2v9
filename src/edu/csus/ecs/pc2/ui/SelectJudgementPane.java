@@ -1139,7 +1139,7 @@ public class SelectJudgementPane extends JPanePlugin {
             try {
                 Runtime.getRuntime().exec("cmd.exe", env, runDir);
             } catch (IOException e) {
-                JOptionPane.showMessageDialog(null, "Unable to run command " + winShellCommand + " " + e.getMessage());
+                JOptionPane.showMessageDialog(getParentFrame(), "Unable to run command " + winShellCommand + " " + e.getMessage());
                 e.printStackTrace();
             }
         } else if (new File(unixShellCommand).exists()) {
@@ -1149,7 +1149,7 @@ public class SelectJudgementPane extends JPanePlugin {
             try {
                 Runtime.getRuntime().exec(unixShellCommand, env, runDir);
             } catch (IOException e) {
-                JOptionPane.showMessageDialog(null, "Unable to run command " + unixShellCommand + " " + e.getMessage());
+                JOptionPane.showMessageDialog(getParentFrame(), "Unable to run command " + unixShellCommand + " " + e.getMessage());
                 e.printStackTrace();
             }
         }

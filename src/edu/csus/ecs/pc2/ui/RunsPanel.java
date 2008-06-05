@@ -453,7 +453,7 @@ public class RunsPanel extends JPanePlugin {
 
                         } catch (Exception e) {
                             // TODO need to make this cleaner
-                            JOptionPane.showMessageDialog(null, "Exception handling Run Response: " + e.getMessage());
+                            JOptionPane.showMessageDialog(getParentFrame(), "Exception handling Run Response: " + e.getMessage());
                             log.warning("Exception handling Run Response: " + e.getMessage());
                         }
                     }
@@ -469,7 +469,7 @@ public class RunsPanel extends JPanePlugin {
                     FrameUtilities.showMessage(getParentFrame(), "Run Received", displayString);
 
                 } catch (Exception e) {
-                    JOptionPane.showMessageDialog(null, "Exception handling Run Confirmation: " + e.getMessage());
+                    JOptionPane.showMessageDialog(getParentFrame(), "Exception handling Run Confirmation: " + e.getMessage());
                     log.warning("Exception handling Run Confirmation: " + e.getMessage());
                 }
             }
