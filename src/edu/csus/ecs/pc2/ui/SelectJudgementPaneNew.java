@@ -1208,9 +1208,9 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             System.out.println("unix debug to " + executeDir);
 
             try {
-                Runtime.getRuntime().exec("/usr/bin/sh", env, runDir);
+                Runtime.getRuntime().exec("/bin/sh", env, runDir);
             } catch (IOException e) {
-                JOptionPane.showMessageDialog(getParentFrame(), "Unable to run command /usr/bin/sh " + e.getMessage());
+                JOptionPane.showMessageDialog(getParentFrame(), "Unable to run command /bin/sh"+ " "+ e.getMessage());
                 e.printStackTrace();
             }
         } else {
