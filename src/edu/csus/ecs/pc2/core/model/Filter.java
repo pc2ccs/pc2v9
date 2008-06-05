@@ -135,7 +135,7 @@ public class Filter implements Serializable {
         if (filterEnabled){
             ElementId judgementElementId = getJudgementId(run);
             return isThisSite(run) && matchesAccount(run.getSubmitter()) && matchesRunState(run.getStatus()) && matchesProblem(run.getProblemId()) && matchesLanguage(run.getLanguageId())
-             && matchesJudgement(judgementElementId);
+             && matchesJudgement(judgementElementId) && matchesElapsedTimeSubmission(run);
         } else {
             return true;
         }
@@ -149,7 +149,9 @@ public class Filter implements Serializable {
      */
     public boolean matches(Clarification clarification) {
         if (filterEnabled){
-            return isThisSite(clarification) && matchesAccount(clarification.getSubmitter()) && matchesClarificationState(clarification.getState()) && matchesProblem(clarification.getProblemId());
+            return isThisSite(clarification) && matchesAccount(clarification.getSubmitter()) && matchesClarificationState(clarification.getState()) 
+            && matchesProblem(clarification.getProblemId()) && matchesLanguage(clarification.getLanguageId()) && matchesElapsedTimeSubmission(clarification);
+
         } else {
             return true;
         }
@@ -739,6 +741,10 @@ public class Filter implements Serializable {
 
     public boolean isFilteringClarificationStates() {
         return filteringClarificationStates;
+    }
+
+    public void clearElapsedTime() {
+        filteringElapsedTime = false;
     }
 
 }

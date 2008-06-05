@@ -9,8 +9,10 @@ import java.util.Vector;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JCheckBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -88,16 +90,26 @@ public class EditFilterPane extends JPanePlugin {
     private JPanel runStatesPane = null;
 
     private JCheckBoxJList runStatesListBox = null;
-    
+
     private DefaultListModel runStatesListModel = new DefaultListModel();
-    
+
+    private JPanel timeRangePane = null;
+
+    private JLabel fromTimeLabel = null;
+
+    private JTextField fromTimeTextField = null;
+
+    private JLabel toTimeLabel = null;
+
+    private JTextField toTimeTextField = null;
+
     /**
      * JList names in EditFilterPane.
-     *  
+     * 
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
-    
+
     public enum ListNames {
         /**
          * Language Jlist.
@@ -115,6 +127,10 @@ public class EditFilterPane extends JPanePlugin {
          * Accounts JList.
          */
         ACCOUNTS,
+        /**
+         * Elapsed Time (both From and To) 
+         */
+        TIME_RANGE,
     }
 
     public EditFilterPane() {
@@ -283,6 +299,7 @@ public class EditFilterPane extends JPanePlugin {
             listsPanel.add(getLanguagesPane(), null);
             listsPanel.add(getLanguagesPane(), null);
             listsPanel.add(getRunStatesPane(), null);
+            listsPanel.add(getTimeRangePane(), null);
         }
         return listsPanel;
     }
@@ -407,7 +424,7 @@ public class EditFilterPane extends JPanePlugin {
      * 
      */
     public void populateFields() {
-        
+
         getFilterOnCheckBox().setSelected(filter.isFilterOn());
 
         problemListModel.removeAllElements();
@@ -449,8 +466,7 @@ public class EditFilterPane extends JPanePlugin {
             }
             teamListModel.addElement(wrapperJCheckBox);
         }
-        
-        
+
         runStatesListModel.removeAllElements();
         RunStates[] runStates = RunStates.values();
         for (RunStates runState : runStates) {
@@ -461,6 +477,16 @@ public class EditFilterPane extends JPanePlugin {
             runStatesListModel.addElement(wrapperJCheckBox);
         }
         
+        getFromTimeTextField().setText("");
+        getToTimeTextField().setText("");
+        if (filter.isFilteringElapsedTime()) {
+            if (filter.getStartElapsedTime() >= 0) {
+                getFromTimeTextField().setText("" + filter.getStartElapsedTime());
+            }
+            if (filter.getEndElapsedTime() >= 0) {
+                getToTimeTextField().setText("" + filter.getEndElapsedTime());
+            }
+        }
     }
 
     @Override
@@ -520,7 +546,7 @@ public class EditFilterPane extends JPanePlugin {
                 filter.addRunState((RunStates) object);
             }
         }
-        
+
         filter.clearJudgementList();
         enumeration = judgementListModel.elements();
         while (enumeration.hasMoreElements()) {
@@ -531,6 +557,15 @@ public class EditFilterPane extends JPanePlugin {
             }
         }
 
+        filter.clearElapsedTime();
+        if (getFromTimeTextField().getText().length() > 0){
+            filter.setStartElapsedTime(Long.parseLong(getFromTimeTextField().getText()));
+        }
+        
+        if (getToTimeTextField().getText().length() > 0){
+            filter.setEndElapsedTime(Long.parseLong(getToTimeTextField().getText()));
+        }
+        
         printAllSpecifiers("getFilter", getContest(), filter);
 
         return filter;
@@ -549,7 +584,6 @@ public class EditFilterPane extends JPanePlugin {
             }
         });
     }
-    
 
     protected void printAllSpecifiers(String prefix, IInternalContest contest, Filter inFilter) {
         String[] names = { FilterFormatter.ACCOUNT_SPECIFIER, FilterFormatter.JUDGMENTS_SPECIFIER, FilterFormatter.LANGUAGES_SPECIFIER, FilterFormatter.NUMBER_ACCOUNTS_SPECIFIER,
@@ -605,13 +639,14 @@ public class EditFilterPane extends JPanePlugin {
         }
         return runStatesListBox;
     }
-    
 
     /**
      * Show or hide list on edit filter frame.
      * 
-     * @param listNames list to show or hid
-     * @param showList true show list, false do not show list.
+     * @param listNames
+     *            list to show or hid
+     * @param showList
+     *            true show list, false do not show list.
      */
     public void showJList(ListNames listNames, boolean showList) {
         switch (listNames) {
@@ -627,13 +662,64 @@ public class EditFilterPane extends JPanePlugin {
             case RUN_STATES:
                 getRunStatesPane().setVisible(showList);
                 break;
+            case TIME_RANGE:
+                getTimeRangePane().setVisible(showList);
             default:
-                throw new InvalidParameterException("Invalid listNames: "+listNames);
+                throw new InvalidParameterException("Invalid listNames: " + listNames);
         }
 
-        // TODO tighten up layout somehow 
-        
+        // TODO tighten up layout somehow
+
         this.doLayout();
+    }
+
+    /**
+     * This method initializes timeRangePane
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getTimeRangePane() {
+        if (timeRangePane == null) {
+            toTimeLabel = new JLabel();
+            toTimeLabel.setText("To");
+            fromTimeLabel = new JLabel();
+            fromTimeLabel.setText("From");
+            timeRangePane = new JPanel();
+            timeRangePane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Time Range", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+                    javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
+            timeRangePane.add(fromTimeLabel, null);
+            timeRangePane.add(getFromTimeTextField(), null);
+            timeRangePane.add(toTimeLabel, null);
+            timeRangePane.add(getToTimeTextField(), null);
+        }
+        return timeRangePane;
+    }
+
+    /**
+     * This method initializes fromTimeTextField
+     * 
+     * @return javax.swing.JTextField
+     */
+    private JTextField getFromTimeTextField() {
+        if (fromTimeTextField == null) {
+            fromTimeTextField = new JTextField();
+            fromTimeTextField.setDocument(new IntegerDocument());
+            fromTimeTextField.setPreferredSize(new java.awt.Dimension(60, 20));
+        }
+        return fromTimeTextField;
+    }
+
+    /**
+     * This method initializes toTimeTextField
+     * 
+     * @return javax.swing.JTextField
+     */
+    private JTextField getToTimeTextField() {
+        if (toTimeTextField == null) {
+            toTimeTextField = new JTextField();
+            toTimeTextField.setPreferredSize(new java.awt.Dimension(60, 20));
+        }
+        return toTimeTextField;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
