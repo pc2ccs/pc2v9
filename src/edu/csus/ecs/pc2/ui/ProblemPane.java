@@ -151,7 +151,7 @@ public class ProblemPane extends JPanePlugin {
 
     private JCheckBox showCompareCheckBox = null;
 
-    private JCheckBox doNotShowOutputWindowCheckBox = null;
+    private JCheckBox doShowOutputWindowCheckBox = null;
 
     private ButtonGroup validatorChoiceButtonGroup = null; // @jve:decl-index=0:visual-constraint="595,128"
 
@@ -523,7 +523,7 @@ public class ProblemPane extends JPanePlugin {
 
         checkProblem.setShowValidationToJudges(showValidatorToJudges.isSelected());
 
-        checkProblem.setHideOutputWindow(getDoNotShowOutputWindowCheckBox().isSelected());
+        checkProblem.setHideOutputWindow(!getDoShowOutputWindowCheckBox().isSelected());
         checkProblem.setShowCompareWindow(getShowCompareCheckBox().isSelected());
 
         // selecting a file is optional
@@ -858,9 +858,10 @@ public class ProblemPane extends JPanePlugin {
 
             getValidatorCommandLineTextBox().setText(problem.getValidatorCommandLine());
             getShowValidatorToJudges().setSelected(problem.isShowValidationToJudges());
-            getDoNotShowOutputWindowCheckBox().setSelected(problem.isHideOutputWindow());
+            getDoShowOutputWindowCheckBox().setSelected(!problem.isHideOutputWindow());
             getShowCompareCheckBox().setSelected(problem.isShowCompareWindow());
-
+            getShowCompareCheckBox().setEnabled(getDoShowOutputWindowCheckBox().isSelected());
+            
             try {
                 @SuppressWarnings("unused")
                 Problem changedProblem = getProblemFromFields(null);
@@ -916,7 +917,7 @@ public class ProblemPane extends JPanePlugin {
 
             getValidatorCommandLineTextBox().setText(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
             getShowValidatorToJudges().setSelected(true);
-            getDoNotShowOutputWindowCheckBox().setSelected(false);
+            getDoShowOutputWindowCheckBox().setSelected(true);
             getShowCompareCheckBox().setSelected(true);
 
             computerJudging.setSelected(false);
@@ -1010,7 +1011,7 @@ public class ProblemPane extends JPanePlugin {
             generalPane.add(problemNameLabel, null);
             generalPane.add(timeoutLabel, null);
             generalPane.add(getShowCompareCheckBox(), null);
-            generalPane.add(getDoNotShowOutputWindowCheckBox(), null);
+            generalPane.add(getDoShowOutputWindowCheckBox(), null);
         }
         return generalPane;
     }
@@ -1661,7 +1662,7 @@ public class ProblemPane extends JPanePlugin {
     private JCheckBox getShowCompareCheckBox() {
         if (showCompareCheckBox == null) {
             showCompareCheckBox = new JCheckBox();
-            showCompareCheckBox.setBounds(new java.awt.Rectangle(51, 342, 207, 21));
+            showCompareCheckBox.setBounds(new java.awt.Rectangle(44,372,207,21));
             showCompareCheckBox.setText("Show Compare");
             showCompareCheckBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -1677,18 +1678,20 @@ public class ProblemPane extends JPanePlugin {
      * 
      * @return javax.swing.JCheckBox
      */
-    private JCheckBox getDoNotShowOutputWindowCheckBox() {
-        if (doNotShowOutputWindowCheckBox == null) {
-            doNotShowOutputWindowCheckBox = new JCheckBox();
-            doNotShowOutputWindowCheckBox.setBounds(new java.awt.Rectangle(50, 369, 303, 24));
-            doNotShowOutputWindowCheckBox.setText("Do not show the output window");
-            doNotShowOutputWindowCheckBox.addActionListener(new java.awt.event.ActionListener() {
+    private JCheckBox getDoShowOutputWindowCheckBox() {
+        if (doShowOutputWindowCheckBox == null) {
+            doShowOutputWindowCheckBox = new JCheckBox();
+            doShowOutputWindowCheckBox.setBounds(new java.awt.Rectangle(23,338,303,24));
+            doShowOutputWindowCheckBox.setSelected(true);
+            doShowOutputWindowCheckBox.setText("Show the output window");
+            doShowOutputWindowCheckBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableUpdateButton();
+                    getShowCompareCheckBox().setEnabled(getDoShowOutputWindowCheckBox().isSelected());
                 }
             });
         }
-        return doNotShowOutputWindowCheckBox;
+        return doShowOutputWindowCheckBox;
     }
 
     /**
