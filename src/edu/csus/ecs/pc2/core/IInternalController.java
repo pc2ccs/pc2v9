@@ -137,7 +137,7 @@ public interface IInternalController {
      * @return
      * @throws Exception
      */
-    IInternalContest clientLogin(String loginName, String password) throws Exception;
+    IInternalContest clientLogin(IInternalContest internalContest, String loginName, String password) throws Exception;
     
     /**
      * Logoff a client.

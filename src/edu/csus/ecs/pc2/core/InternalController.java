@@ -621,7 +621,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         public void setContestAndController(IInternalContest inContest, IInternalController inController) {
             contest = inContest;
             controller = inController;
-            
         }
 
         public String getPluginTitle() {
@@ -662,7 +661,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
     }
     
-    public IInternalContest clientLogin(String loginName, String password) throws Exception {
+    public IInternalContest clientLogin(IInternalContest internalContest, String loginName, String password) throws Exception {
 
         if (!isStarted) {
             // TODO review this message
@@ -703,6 +702,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
             
             TemporaryClientUI temporaryClientUI = new TemporaryClientUI();
+            internalContest.addLoginListener(temporaryClientUI);
             setUsingMainUI(true);
             setUiPlugin(temporaryClientUI);
 

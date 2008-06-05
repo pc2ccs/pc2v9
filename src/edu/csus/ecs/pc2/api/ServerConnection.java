@@ -78,7 +78,7 @@ public class ServerConnection {
         controller.setUsingMainUI(false);
         try {
             controller.start(new String[0]);
-            internalContest = controller.clientLogin(login, password);
+            internalContest = controller.clientLogin(internalContest, login, password);
 
             contest = new Contest(internalContest,  controller, controller.getLog());
 
