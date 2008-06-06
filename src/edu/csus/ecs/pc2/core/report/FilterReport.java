@@ -58,10 +58,28 @@ public class FilterReport implements IReport {
         printWriter.println("           Filter On: " + inFilter.isFilterOn());
         printWriter.println("     Filter problems: " + inFilter.isFilteringProblems());
         printWriter.println("      Filter clients: " + inFilter.isFilteringAccounts());
+        printWriter.println("      Filter on time: " + inFilter.isFilteringElapsedTime());
         printWriter.println("    Filter languages: " + inFilter.isFilteringLanguages());
         printWriter.println("   Filter judgements: " + inFilter.isFilteringJudgements());
         printWriter.println("   Filter run states: " + inFilter.isFilteringRunStates());
         printWriter.println("  Filter clar states: " + inFilter.isFilteringClarificationStates());
+        printWriter.println();
+        
+        if (inFilter.isFilteringElapsedTime()) {
+            printWriter.println("-- Filtering on submitted time --");
+            if (inFilter.getStartElapsedTime() == -1) {
+                printWriter.println("   Filtering up to and including " + inFilter.getEndElapsedTime() + " minutes");
+                
+            } else if (inFilter.getEndElapsedTime() == -1) {
+                printWriter.println("   Filtering starting " + inFilter.getStartElapsedTime() + " minutes (inclusive)");
+                
+            } else {
+                // filtering on both
+                printWriter.println("   Filtering " + inFilter.getStartElapsedTime() + " through "+ inFilter.getEndElapsedTime()+" minutes");
+            }
+        } else {
+            printWriter.println("-- Not filtering on submitted time --");
+        }
         printWriter.println();
 
         ElementId[] elementIds = null;

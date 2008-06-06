@@ -431,7 +431,7 @@ public class EditFilterPane extends JPanePlugin {
         for (Problem problem : getContest().getProblems()) {
             WrapperJCheckBox wrapperJCheckBox = new WrapperJCheckBox(problem);
             if (filter.isFilteringProblems()) {
-                wrapperJCheckBox.setSelected(filter.matchesProblem(problem.getElementId()));
+                wrapperJCheckBox.setSelected(filter.matchesProblem(problem));
             }
             problemListModel.addElement(wrapperJCheckBox);
         }
@@ -440,7 +440,7 @@ public class EditFilterPane extends JPanePlugin {
         for (Language language : getContest().getLanguages()) {
             WrapperJCheckBox wrapperJCheckBox = new WrapperJCheckBox(language);
             if (filter.isFilteringLanguages()) {
-                wrapperJCheckBox.setSelected(filter.matchesProblem(language.getElementId()));
+                wrapperJCheckBox.setSelected(filter.matchesLanguage(language));
             }
             languageListModel.addElement(wrapperJCheckBox);
         }
@@ -449,7 +449,7 @@ public class EditFilterPane extends JPanePlugin {
         for (Judgement judgement : getContest().getJudgements()) {
             WrapperJCheckBox wrapperJCheckBox = new WrapperJCheckBox(judgement);
             if (filter.isFilteringJudgements()) {
-                wrapperJCheckBox.setSelected(filter.matchesProblem(judgement.getElementId()));
+                wrapperJCheckBox.setSelected(filter.matchesJudgement(judgement));
             }
             judgementListModel.addElement(wrapperJCheckBox);
         }
@@ -462,7 +462,7 @@ public class EditFilterPane extends JPanePlugin {
         for (Account account : accounts) {
             WrapperJCheckBox wrapperJCheckBox = new WrapperJCheckBox(account.getClientId());
             if (filter.isFilteringAccounts()) {
-                wrapperJCheckBox.setSelected(filter.matchesAccount(account.getClientId()));
+                wrapperJCheckBox.setSelected(filter.matchesAccount(account));
             }
             teamListModel.addElement(wrapperJCheckBox);
         }
@@ -588,8 +588,9 @@ public class EditFilterPane extends JPanePlugin {
     protected void printAllSpecifiers(String prefix, IInternalContest contest, Filter inFilter) {
         String[] names = { FilterFormatter.ACCOUNT_SPECIFIER, FilterFormatter.JUDGMENTS_SPECIFIER, FilterFormatter.LANGUAGES_SPECIFIER, FilterFormatter.NUMBER_ACCOUNTS_SPECIFIER,
                 FilterFormatter.NUMBER_JUDGEMENTS_SPECIFIER, FilterFormatter.NUMBER_LANGUAGES_SPECIFIER, FilterFormatter.NUMBER_PROBLEMS_SPECIFIER, FilterFormatter.PROBLEMS_SPECIFIER,
-                FilterFormatter.SHORT_ACCOUNT_NAMES_SPECIFIER, FilterFormatter.TEAM_LIST_SPECIFIER, FilterFormatter.TEAM_LONG_LIST_SPECIFIER, };
-
+                FilterFormatter.SHORT_ACCOUNT_NAMES_SPECIFIER, FilterFormatter.TEAM_LIST_SPECIFIER, FilterFormatter.TEAM_LONG_LIST_SPECIFIER, FilterFormatter.START_TIME_RANGE_SPECIFIER,
+                FilterFormatter.END_TIME_RANGE_SPECIFIER };
+        
         Arrays.sort(names);
 
         FilterFormatter filterFormatter = new FilterFormatter();

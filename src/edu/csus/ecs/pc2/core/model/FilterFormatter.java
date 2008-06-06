@@ -76,6 +76,12 @@ public class FilterFormatter {
      * @see #getClientsLongList(ClientId[])
      */
     public static final String TEAM_LONG_LIST_SPECIFIER = "%C";
+    
+    public static final String START_TIME_RANGE_SPECIFIER = "%s";
+    
+    public static final String END_TIME_RANGE_SPECIFIER = "%e";
+    
+    
 
     /**
      * Replace all instances of beforeString with afterString.
@@ -191,6 +197,17 @@ public class FilterFormatter {
             outString = replaceString(outString, formatSpecifier, getClientsShortList(filter.getAccountList()));
         }
 
+        formatSpecifier = START_TIME_RANGE_SPECIFIER;
+        if (outString.lastIndexOf(formatSpecifier) > -1) {
+            outString = replaceString(outString, formatSpecifier, ""+filter.getStartElapsedTime());
+        }
+
+        formatSpecifier = END_TIME_RANGE_SPECIFIER;
+        if (outString.lastIndexOf(formatSpecifier) > -1) {
+            outString = replaceString(outString, formatSpecifier, ""+filter.getEndElapsedTime());
+        }
+
+        
         return outString;
     }
 

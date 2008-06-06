@@ -744,6 +744,8 @@ public class Filter implements Serializable {
     }
 
     public void clearElapsedTime() {
+        startElapsedTime = -1;
+        endElapsedTime = -1;
         filteringElapsedTime = false;
     }
 
