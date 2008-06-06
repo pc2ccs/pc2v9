@@ -354,15 +354,23 @@ public class BalloonSettingPane extends JPanePlugin {
      */
     private boolean validateBalloonSettingsFields() {
         
-        // TODO code validateBalloonSettingsFields
+        if (getSiteComboBox().getSelectedIndex() < 1) {
+            showMessage("You must specify a site number");
+            return false;
+        }
+
+        if (getBalloonClientComboBox().getSelectedIndex() < 1) {
+            showMessage("You must specify a Balloon Client");
+            return false;
+        }
 
         if (getPrintNotificationsCheckBox().isSelected()) {
-
             if (getPrintDeviceTextBox().getText().length() < 1) {
                 showMessage("You must specify a print device");
                 return false;
             }
         }
+
         if (getSendEmailNotificationsCheckBox().isSelected()) {
             if (getEmailContactTextBox().getText().length() < 1) {
                 showMessage("You must specify an email address/contact");
@@ -374,19 +382,7 @@ public class BalloonSettingPane extends JPanePlugin {
             }
         }
 
-        if (getBalloonClientComboBox().getSelectedIndex() == 0) {
-            showMessage("You must specify a Balloon Client");
-            return false;
-        }
-        // TODO validate site combo working
-//        if (getSiteComboBox().getSelectedIndex() < 1) {
-//            showMessage("You must specify a site number");
-//            return false;
-//        }
-
-       
         return true;
-
     }
 
     /**
@@ -591,9 +587,12 @@ public class BalloonSettingPane extends JPanePlugin {
     }
 
     public void showMessage(final String message) {
+        if (message.trim().length() == 0) {
+            return;
+        }
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                messageLabel.setText(message);
+                JOptionPane.showMessageDialog(getParentFrame(), message, "Warning", JOptionPane.WARNING_MESSAGE);
             }
         });
     }
@@ -691,8 +690,22 @@ public class BalloonSettingPane extends JPanePlugin {
                 enableButton = true;
             }
         } else {
-            if (getSiteComboBox().getSelectedIndex() > 0 && getBalloonClientComboBox().getSelectedIndex() > 0 && getAddButton().isVisible()) {
-                enableButton = true;
+            if (getAddButton().isVisible()) {
+                if (getSiteComboBox().getSelectedIndex() > 0 || getBalloonClientComboBox().getSelectedIndex() > 0) {
+                    enableButton = true;
+                }
+                if (getPrintNotificationsCheckBox().isSelected() || getSendEmailNotificationsCheckBox().isSelected()) {
+                    enableButton = true;
+                }
+                for (int i = 0; i < getColorListBox().getRowCount(); i++) {
+                    Object[] o = getColorListBox().getRow(i);
+                    JTextField colorTextField = (JTextField)o[1];
+                    String color = colorTextField.getText().trim();
+                    if (color.length() > 0) {
+                        enableButton = true;
+                        break;
+                    }
+                }
             }
         }
 
