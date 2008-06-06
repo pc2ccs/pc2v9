@@ -106,6 +106,10 @@ public class AccountPane extends JPanePlugin {
 
     private JComboBox accountTypeComboBox = null;
 
+    private JLabel accountLabel = null;
+
+    private JTextField accountTextField = null;
+
     /**
      * This method initializes
      * 
@@ -121,7 +125,7 @@ public class AccountPane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new java.awt.Dimension(536,367));
+        this.setSize(new java.awt.Dimension(536,400));
 
         this.add(getMessagePane(), java.awt.BorderLayout.NORTH);
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
@@ -361,6 +365,7 @@ public class AccountPane extends JPanePlugin {
         
         if (account2 == null) {
             
+            getAccountTextField().setText(""); // XXX this is not right
             getDisplayNameTextField().setText("");
             getPasswordTextField().setText("");
             getPasswordConfirmField().setText("");
@@ -374,6 +379,7 @@ public class AccountPane extends JPanePlugin {
 
         } else {
             
+            getAccountTextField().setText(account2.getClientId().getName());
             getDisplayNameTextField().setText(account2.getDisplayName());
             getPasswordTextField().setText(account2.getPassword());
             getPasswordConfirmField().setText(account2.getPassword());
@@ -531,21 +537,30 @@ public class AccountPane extends JPanePlugin {
      */
     private JPanel getPermissionPane() {
         if (accountDetailPane == null) {
+            accountLabel = new JLabel();
+            accountLabel.setText("Account");
+            accountLabel.setLocation(new java.awt.Point(15,15));
+            accountLabel.setSize(new java.awt.Dimension(86,16));
             jLabel1 = new JLabel();
-            jLabel1.setBounds(new java.awt.Rectangle(13,185,191,16));
             jLabel1.setText("Account Type");
+            jLabel1.setLocation(new java.awt.Point(15,220));
+            jLabel1.setSize(new java.awt.Dimension(191,16));
             groupTitleLabel = new JLabel();
-            groupTitleLabel.setBounds(new java.awt.Rectangle(13,242,191,16));
             groupTitleLabel.setText("Group");
+            groupTitleLabel.setLocation(new java.awt.Point(15,270));
+            groupTitleLabel.setSize(new java.awt.Dimension(191,16));
             jLabel = new JLabel();
-            jLabel.setBounds(new java.awt.Rectangle(13,126,191,21));
             jLabel.setText("Password Confirmation ");
+            jLabel.setSize(new java.awt.Dimension(191,16));
+            jLabel.setLocation(new java.awt.Point(15,168));
             passwordLabel = new JLabel();
-            passwordLabel.setBounds(new java.awt.Rectangle(13,67,191,21));
             passwordLabel.setText("Password");
+            passwordLabel.setSize(new java.awt.Dimension(191,16));
+            passwordLabel.setLocation(new java.awt.Point(15,116));
             displayNameLabel = new JLabel();
-            displayNameLabel.setBounds(new java.awt.Rectangle(13,8,191,21));
             displayNameLabel.setText("Display Name");
+            displayNameLabel.setSize(new java.awt.Dimension(191,16));
+            displayNameLabel.setLocation(new java.awt.Point(15,65));
             accountDetailPane = new JPanel();
             accountDetailPane.setLayout(null);
             accountDetailPane.setPreferredSize(new java.awt.Dimension(120, 120));
@@ -559,6 +574,8 @@ public class AccountPane extends JPanePlugin {
             accountDetailPane.add(getGroupComboBox(), null);
             accountDetailPane.add(jLabel1, null);
             accountDetailPane.add(getAccountTypeComboBox(), null);
+            accountDetailPane.add(accountLabel, null);
+            accountDetailPane.add(getAccountTextField(), null);
         }
         return accountDetailPane;
     }
@@ -629,7 +646,7 @@ public class AccountPane extends JPanePlugin {
     private JTextField getDisplayNameTextField() {
         if (displayNameTextField == null) {
             displayNameTextField = new JTextField();
-            displayNameTextField.setBounds(new java.awt.Rectangle(13,37,272,22));
+            displayNameTextField.setBounds(new java.awt.Rectangle(14,88,272,22));
             displayNameTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
@@ -647,7 +664,7 @@ public class AccountPane extends JPanePlugin {
     private JTextField getPasswordTextField() {
         if (passwordTextField == null) {
             passwordTextField = new JTextField();
-            passwordTextField.setBounds(new java.awt.Rectangle(13,96,272,22));
+            passwordTextField.setBounds(new java.awt.Rectangle(14,140,272,22));
             passwordTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
@@ -665,7 +682,7 @@ public class AccountPane extends JPanePlugin {
     private JTextField getPasswordConfirmField() {
         if (passwordConfirmField == null) {
             passwordConfirmField = new JTextField();
-            passwordConfirmField.setBounds(new java.awt.Rectangle(13,155,272,22));
+            passwordConfirmField.setBounds(new java.awt.Rectangle(14,191,272,22));
             passwordConfirmField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
@@ -683,7 +700,7 @@ public class AccountPane extends JPanePlugin {
     private JComboBox getGroupComboBox() {
         if (groupComboBox == null) {
             groupComboBox = new JComboBox();
-            groupComboBox.setBounds(new java.awt.Rectangle(13,266,272,22));
+            groupComboBox.setBounds(new java.awt.Rectangle(14,291,272,22));
             groupComboBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableUpdateButton();
@@ -795,7 +812,7 @@ public class AccountPane extends JPanePlugin {
     private JComboBox getAccountTypeComboBox() {
         if (accountTypeComboBox == null) {
             accountTypeComboBox = new JComboBox();
-            accountTypeComboBox.setBounds(new java.awt.Rectangle(13,209,272,25));
+            accountTypeComboBox.setBounds(new java.awt.Rectangle(14,242,272,25));
             
             accountTypeComboBox.addItem(ClientType.Type.TEAM);
             accountTypeComboBox.addItem(ClientType.Type.JUDGE);
@@ -805,5 +822,20 @@ public class AccountPane extends JPanePlugin {
         }
         return accountTypeComboBox;
     }
-   
+
+    /**
+     * This method initializes accountTextField
+     * 
+     * @return javax.swing.JTextField
+     */
+    private JTextField getAccountTextField() {
+        if (accountTextField == null) {
+            accountTextField = new JTextField();
+            accountTextField.setEditable(false);
+            accountTextField.setSize(new java.awt.Dimension(272, 22));
+            accountTextField.setLocation(new java.awt.Point(14, 38));
+        }
+        return accountTextField;
+    }
+
 } // @jve:decl-index=0:visual-constraint="10,10"
