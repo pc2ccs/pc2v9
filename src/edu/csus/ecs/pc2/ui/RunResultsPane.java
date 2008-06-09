@@ -15,6 +15,7 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
+import edu.csus.ecs.pc2.core.model.SerializedFile;
 
 /**
  * This class is a JPanel (extension of JPanePlugin) designed to display the contents of a {@link RunResult} -- that is, the result of one execution of a submitted run from a team.
@@ -479,13 +480,33 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     closeViewer(compileFileviewer);
                     compileFileviewer = new MultipleFileViewer(StaticLog.getLog(), "Compiler Output");
-                    compileFileviewer.addFilePane("Standard Out", theRunResults.getCompilerStdoutFile());
-                    compileFileviewer.addFilePane("Standard Error", theRunResults.getCompilerStderrFile());
+                    if (emptyFile(theRunResults.getCompilerStderrFile()) && emptyFile(theRunResults.getCompilerStdoutFile())) {
+                        compileFileviewer.addTextPane("No output", "***** No output was generated *****");
+                    } else {
+                        compileFileviewer.addFilePane("Standard Out", theRunResults.getCompilerStdoutFile());
+                        compileFileviewer.addFilePane("Standard Error", theRunResults.getCompilerStderrFile());
+                    }
                     compileFileviewer.setVisible(true);
                 }
             });
         }
         return showCompilerOutputButton;
+    }
+
+    /**
+     * Determines whether the given file is empty.
+     * 
+     * @param file
+     * @return true if the file was null or had a zero length.
+     */
+    protected boolean emptyFile(SerializedFile file) {
+        if (file == null) {
+            return true;
+        }
+        if (file.getBuffer().length == 0) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -505,8 +526,12 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     closeViewer(executeFileviewer);
                     executeFileviewer = new MultipleFileViewer(StaticLog.getLog(), "Execution Output");
-                    executeFileviewer.addFilePane("Standard Out", theRunResults.getExecuteStdoutFile());
-                    executeFileviewer.addFilePane("Standard Error", theRunResults.getExecuteStderrFile());
+                    if (emptyFile(theRunResults.getExecuteStdoutFile()) && emptyFile(theRunResults.getExecuteStderrFile())) {
+                        executeFileviewer.addTextPane("No output", "***** No output was generated *****");
+                    } else {
+                        executeFileviewer.addFilePane("Standard Out", theRunResults.getExecuteStdoutFile());
+                        executeFileviewer.addFilePane("Standard Error", theRunResults.getExecuteStderrFile());
+                    }
                     executeFileviewer.setVisible(true);
                 }
             });
@@ -531,8 +556,12 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     closeViewer(validateFileviewer);
                     validateFileviewer = new MultipleFileViewer(StaticLog.getLog(), "Validation Output");
-                    validateFileviewer.addFilePane("Standard Out", theRunResults.getValidatorStdoutFile());
-                    validateFileviewer.addFilePane("Standard Error", theRunResults.getValidatorStderrFile());
+                    if (emptyFile(theRunResults.getValidatorStdoutFile()) && emptyFile(theRunResults.getValidatorStderrFile())) {
+                        validateFileviewer.addTextPane("No output", "***** No output was generated *****");
+                    } else {
+                        validateFileviewer.addFilePane("Standard Out", theRunResults.getValidatorStdoutFile());
+                        validateFileviewer.addFilePane("Standard Error", theRunResults.getValidatorStderrFile());
+                    }
                     validateFileviewer.setVisible(true);
                 }
             });
