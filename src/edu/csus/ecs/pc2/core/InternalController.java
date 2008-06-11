@@ -1362,7 +1362,16 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 log.info("login - " + clientId + " already logged in, will logoff client at connection " + connectionHandlerID2);
                 // this updates the model contest-wide
                 contest.removeLogin(clientId);
-                
+
+                if (canCheckoutRunsAndClars(clientId)) {
+                    try {
+                        cancellAll(clientId);
+                    } catch (ContestSecurityException e) {
+                        log.log(Log.WARNING, "Warning on canceling runs/clars for "+clientId, e);
+                    }
+                }
+
+             
                 // but this is the actual causes the connection to be dropped/disconnected
                 forceConnectionDrop(connectionHandlerID2);
 
@@ -1380,6 +1389,15 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             // isValidLogin will throw a SecurityException.
             throw new SecurityException("Failed attempt to login");
         }
+    }
+    
+    /**
+     * Can this user checkout clars and runs.
+     * @param theClient
+     * @return
+     */
+    protected boolean canCheckoutRunsAndClars (ClientId theClient){
+        return contest.isAllowed(theClient, Permission.Type.JUDGE_RUN) || contest.isAllowed(theClient, Permission.Type.ANSWER_CLARIFICATION);
     }
 
     /**
@@ -1463,11 +1481,11 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             getLog().log(Log.INFO, "connection Dropped for "+connectionHandlerID+ " which is "+clientId);
             // Logged in
             removeLogin(clientId);
-            if (clientId.getClientType().equals(ClientType.Type.JUDGE)) {
+            if (canCheckoutRunsAndClars(clientId)) {
                 try {
-                    cancelAllByThisJudge(clientId);
+                    cancellAll(clientId);
                 } catch (ContestSecurityException e) {
-                    log.log(Log.WARNING, "Warning on canceling runs for "+clientId, e);
+                    log.log(Log.WARNING, "Warning on canceling runs/clars for "+clientId, e);
                 }
             }
         }
@@ -1488,7 +1506,13 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
     }
 
-    protected void cancelAllByThisJudge(ClientId judgeId) throws ContestSecurityException {
+    /**
+     * Cancel all checked out runs and clarifications by this client.
+     * 
+     * @param judgeId
+     * @throws ContestSecurityException
+     */
+    protected void cancellAll(ClientId judgeId) throws ContestSecurityException {
         cancelAllRunsByThisJudge(judgeId);
         cancelAllClarsByThisJudge(judgeId);
     }
@@ -1514,11 +1538,11 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             info("LOGOFF (logoffUser) " + clientId + " " + connectionHandlerID);
             removeLogin(clientId);
 
-            if (clientId.getClientType().equals(ClientType.Type.JUDGE)) {
+            if (canCheckoutRunsAndClars(clientId)) {
                 try {
-                    cancelAllByThisJudge(clientId);
+                    cancellAll(clientId);
                 } catch (ContestSecurityException e) {
-                    log.log(Log.WARNING, "Warning on canceling runs for "+clientId, e);
+                    log.log(Log.WARNING, "Warning on canceling runs/clars for "+clientId, e);
                 }
             }
 
