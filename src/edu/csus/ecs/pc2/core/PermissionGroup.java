@@ -43,6 +43,10 @@ public class PermissionGroup {
         
         administratorPermissionList.removePermission(Type.DISPLAY_ON_SCOREBOARD);
         serverPermissionList.removePermission(Type.DISPLAY_ON_SCOREBOARD);
+        administratorPermissionList.removePermission(Type.BALLOON_EMAIL);
+        serverPermissionList.removePermission(Type.BALLOON_EMAIL);
+        administratorPermissionList.removePermission(Type.BALLOON_PRINT);
+        serverPermissionList.removePermission(Type.BALLOON_PRINT);
 
         /**
          * Team permissions
@@ -60,7 +64,6 @@ public class PermissionGroup {
          * Judge permissions
          */
 
-        judgePermissionList.addPermission(Type.BALLOON_EMAIL);
         judgePermissionList.addPermission(Type.CHANGE_PASSWORD);
         judgePermissionList.addPermission(Type.JUDGE_RUN);
         judgePermissionList.addPermission(Type.LOGIN);
@@ -81,7 +84,6 @@ public class PermissionGroup {
          * Spectator Permissions
          */
 
-        spectatorPermissionList.addPermission(Type.BALLOON_EMAIL);
         spectatorPermissionList.addPermission(Type.CHANGE_PASSWORD);
         spectatorPermissionList.addPermission(Type.JUDGE_RUN);
         spectatorPermissionList.addPermission(Type.LOGIN);

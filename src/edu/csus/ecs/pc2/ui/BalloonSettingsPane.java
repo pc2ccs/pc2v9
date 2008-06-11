@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.util.Vector;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -13,11 +14,14 @@ import com.ibm.webrunner.j2mclb.util.NumericStringComparator;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.BalloonSettings;
 import edu.csus.ecs.pc2.core.model.BalloonSettingsEvent;
+import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IBalloonSettingsListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.security.Permission.Type;
 
 /**
  * View List (Grid) of Balloon Settings.
@@ -231,9 +235,32 @@ public class BalloonSettingsPane extends JPanePlugin {
         return addButton;
     }
 
+    public boolean isAllowed(Account account, Type perm) {
+        if (account == null) {
+            return false;
+        }
+        return account.getPermissionList().isAllowed(perm);
+    }
+
     protected void addBalloonSettings() {
-        editBalloonSettingsFrame.setBalloonSettings(null);
-        editBalloonSettingsFrame.setVisible(true);
+        Vector<Account> accounts = getContest().getAccounts(ClientType.Type.SCOREBOARD);
+        accounts.addAll(getContest().getAccounts(ClientType.Type.ADMINISTRATOR));
+        accounts.addAll(getContest().getAccounts(ClientType.Type.JUDGE));
+        accounts.addAll(getContest().getAccounts(ClientType.Type.SPECTATOR));
+        boolean clientFound = false;
+        Account[] accountArray = accounts.toArray(new Account[accounts.size()]);
+        for (Account account : accountArray) {
+            if (account.isAllowed(Type.BALLOON_EMAIL) || account.isAllowed(Type.BALLOON_PRINT)) {
+                clientFound = true;
+                break;
+            }
+        }
+        if (clientFound) {
+            editBalloonSettingsFrame.setBalloonSettings(null);
+            editBalloonSettingsFrame.setVisible(true);
+        } else {
+            FrameUtilities.showMessage(getParentFrame(), "ERROR", "No accounts have permission to send a balloon, have you created a scoreboard account?");
+        }
     }
 
     /**

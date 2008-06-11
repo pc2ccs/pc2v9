@@ -228,9 +228,9 @@ public class Permission implements Serializable {
      */
     private void loadDescription() {
 
-        hash.put(Type.BALLOON_EMAIL, "Allow balloon e-mail");
+        hash.put(Type.BALLOON_EMAIL, "Allowed to e-mail balloons");
         hash.put(Type.BALLOON_OUTPUT_SHUTOFF, "Allowed to shutoff output");
-        hash.put(Type.BALLOON_PRINT, "Allowed to do balloon print");
+        hash.put(Type.BALLOON_PRINT, "Allowed to print balloons");
         hash.put(Type.CHANGE_PASSWORD, "Change password");
         hash.put(Type.ADD_ACCOUNT, "Add Accounts");
         hash.put(Type.EDIT_ACCOUNT, "Edit Accounts");

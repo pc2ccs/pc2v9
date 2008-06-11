@@ -26,6 +26,7 @@ import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Site;
+import edu.csus.ecs.pc2.core.security.Permission.Type;
 
 /**
  * Add/Edit BalloonSettings Pane.
@@ -504,6 +505,8 @@ public class BalloonSettingPane extends JPanePlugin {
         // combo should be populate with all admin and board clients for all sites
         Vector<Account> accounts = getContest().getAccounts(ClientType.Type.SCOREBOARD);
         accounts.addAll(getContest().getAccounts(ClientType.Type.ADMINISTRATOR));
+        accounts.addAll(getContest().getAccounts(ClientType.Type.JUDGE));
+        accounts.addAll(getContest().getAccounts(ClientType.Type.SPECTATOR));
         Account[] accountArray;
         getBalloonClientComboBox().removeAllItems();
         getBalloonClientComboBox().addItem("Select User");
@@ -514,10 +517,12 @@ public class BalloonSettingPane extends JPanePlugin {
             int found = 0;
             int count = 0;
             for (Account account : accountArray) {
-                getBalloonClientComboBox().addItem(account.getClientId());
-                count++;
-                if (balloonClient != null && account.getClientId().equals(balloonClient)) {
-                    found = count;
+                if (account.isAllowed(Type.BALLOON_EMAIL) || account.isAllowed(Type.BALLOON_PRINT)) {
+                    getBalloonClientComboBox().addItem(account.getClientId());
+                    count++;
+                    if (balloonClient != null && account.getClientId().equals(balloonClient)) {
+                        found = count;
+                    }
                 }
             }
             if (balloonClient == null ) {
