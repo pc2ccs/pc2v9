@@ -18,6 +18,7 @@
                 <attribute name="Implementation-Title" value="CSUS Programming Contest Control System"/>
                 <attribute name="Implementation-Version" value="${repo.version}"/>
                 <attribute name="Built-On" value="${timestamp.english}"/>
+                <attribute name="Built-On-Date" value="${date}"/>
                 <attribute name="Main-Class" value="edu.csus.ecs.pc2.Starter"/>
             </manifest>
         </jar>
