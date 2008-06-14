@@ -112,7 +112,12 @@ public class ViewJudgementsPane extends JPanePlugin implements UIPlugin {
             judgementsListbox.addRow(objects);
         }
         judgementsListbox.autoSizeAllColumns();
-        showMessage("There are " + records.length + " judgements");
+        
+        if (records.length == 1) {
+            showMessage("There is " + records.length + " judgement");
+        } else {
+            showMessage("There are " + records.length + " judgements");
+        }
     }
 
     private String yesNoString(boolean b) {
