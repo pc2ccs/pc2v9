@@ -8,6 +8,7 @@ import java.awt.GridLayout;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
@@ -740,7 +741,6 @@ public class ClarificationsPane extends JPanePlugin {
             filterButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     reloadListBox();
-                    showMessage("");
                 }
             });
         }
@@ -917,8 +917,7 @@ public class ClarificationsPane extends JPanePlugin {
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                messageLabel.setText(string);
-                messageLabel.setToolTipText(string);
+                JOptionPane.showMessageDialog(getParentFrame(), string, "Warning", JOptionPane.WARNING_MESSAGE);
             }
         });
     }
