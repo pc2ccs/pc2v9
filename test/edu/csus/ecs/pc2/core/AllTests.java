@@ -25,6 +25,8 @@ public final class AllTests {
         suite.addTestSuite(ElementIdTest.class);
         suite.addTestSuite(ClientIdTest.class);
         suite.addTestSuite(ParseArgumentsTest.class);
+        suite.addTestSuite(IniFileTest.class);
+        suite.addTestSuite(IniTest.class);
         //$JUnit-END$
         return suite;
     }
