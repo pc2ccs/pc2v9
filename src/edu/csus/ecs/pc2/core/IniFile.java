@@ -200,8 +200,8 @@ public class IniFile {
                 setIniFileURL(iniFilefile.toURI().toURL());
             }
             iniFileURL.openStream();
-            nameValueHash.put("_source", iniFileURL.toString());
             nameValueHash.clear();
+            nameValueHash.put("_source", iniFileURL.toString());
             currentSectionName = "";
             BufferedReader in = new BufferedReader(new InputStreamReader(iniFileURL.openStream()));
             String line = in.readLine();
