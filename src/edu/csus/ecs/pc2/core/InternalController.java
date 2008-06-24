@@ -3,7 +3,6 @@ package edu.csus.ecs.pc2.core;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.net.MalformedURLException;
 import java.security.MessageDigest;
 import java.util.Date;
 import java.util.Iterator;
@@ -1859,16 +1858,18 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
         // TODO code add INI_FILENAME_OPTION_STRING
         if (parseArguments.isOptPresent("--ini")) {
-            // TODO handle URL too
             String iniName = parseArguments.getOptValue("--ini");
             try {
-//                IniFile.setIniFile(iniName);
                 System.err.println("Loading INI from "+iniName);
-                if (! new File(iniName).exists()){
+                ini.setIniURLorFile(iniName);
+                // _source is set if we can successfully open the stream
+                if (!ini.containsKey("_source")) {
                     System.err.println("Unable to load INI from "+iniName);
+                    getLog().log(Log.WARNING, "Unable to read ini URL " + iniName);
+                    savedTransportException = new TransportException("Unable to read ini file " + iniName);
                 }
-                ini.setIniFile(iniName);
-            } catch (MalformedURLException e) {
+            } catch (Exception e) {
+                System.err.println("Unable to load INI from "+iniName);
                 getLog().log(Log.WARNING, "Unable to read ini URL " + iniName, e);
                 savedTransportException = new TransportException("Unable to read ini file " + iniName);
             }
