@@ -39,15 +39,15 @@ public class ClarificationListenerList {
                 listenerList.elementAt(i).clarificationRemoved(clarification);
                 break;
                 
-            case CHECKEDOUT_REANSWER_CLARIFICATION:
-            case CHANGED:
-                listenerList.elementAt(i).clarificationUpdated(clarification);
-                break;
+
+                // TODO better handle the clarification states interface to the API.
+//                listenerList.elementAt(i).clarificationUpdated(clarification);
                 
             case ANSWERED_CLARIFICATION:
                 listenerList.elementAt(i).clarificationAnswered(clarification);
                 break;
-                
+            case CHECKEDOUT_REANSWER_CLARIFICATION:
+            case CHANGED:    
             case CHECKEDOUT_CLARIFICATION:
             case CLARIFICATION_AVIALABLE:
             case CLARIFICATION_REVOKED:

@@ -227,10 +227,10 @@ public class Contest implements IContest {
     }
 
     public void removeClarificationListener(IClarificationEventListener clarificationEventListener) {
-        clarificationListenerList.addClarificationListener(clarificationEventListener);
-    }
-
-    public void addClarificationListener(IClarificationEventListener clarificationEventListener) {
         clarificationListenerList.removeClarificationListener(clarificationEventListener);
+    }
+    
+    public void addClarificationListener(IClarificationEventListener clarificationEventListener) {
+        clarificationListenerList.addClarificationListener(clarificationEventListener);
     }
 }

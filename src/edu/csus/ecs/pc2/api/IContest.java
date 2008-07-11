@@ -200,11 +200,24 @@ public interface IContest {
      *            The {@link IRunEventListener} listener to be removed.
      */
     void removeRunListener(IRunEventListener runEventListener);
-    
-    // TODO javadoc
+
+    /**
+     * Remove the specified clarification event listener from the contest.
+     * 
+     * @param clarificationEventListener
+     */
     void removeClarificationListener(IClarificationEventListener clarificationEventListener);
-    
-    // TODO java doc
+
+    /**
+     * Add a Clarification Event listener to contest.
+     * A clarification event listener (object of type {@link IClarificationEventListener}) will be
+     * invoked every time a clarification is added to the contest, modified (e.g. Answered), or marked as deleted from the contest.
+     * Custom clients using the PC<sup>2</sup> API can therefore arrange to be notified when any of these conditions occurs.
+     * 
+     * @see IClarificationEventListener
+     * @see IClarification
+     * @param clarificationEventListener an {@link IClarificationEventListener} listener for Clarification events.
+     */
     void addClarificationListener(IClarificationEventListener clarificationEventListener);
 
     /**

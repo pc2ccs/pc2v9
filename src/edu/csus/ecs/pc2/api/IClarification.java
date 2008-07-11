@@ -22,13 +22,14 @@ public interface IClarification {
     
     /**
      * Return a string of the team's question for the judges.
-     * @return
+     * @return question from team.
      */
     String getQuestion();
     
     /**
      * Return a string of the judge's answer for the team's question.
-     * @return
+     * 
+     * @return answer from judge or null if not answered.
      */
     String getAnswer();
 

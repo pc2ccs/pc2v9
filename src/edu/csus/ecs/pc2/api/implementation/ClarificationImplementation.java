@@ -40,7 +40,10 @@ public class ClarificationImplementation implements IClarification {
 
         answered = clarification.isAnswered();
         question = new String(clarification.getQuestion());
-        answer = new String(clarification.getAnswer());
+        answer = null;
+        if (clarification.getAnswer() != null) {
+            answer = new String(clarification.getAnswer());
+        }
         deleted = clarification.isDeleted();
         team = new TeamImplementation(clarification.getSubmitter(), contest);
         problem = new ProblemImplementation(clarification.getProblemId(), contest);

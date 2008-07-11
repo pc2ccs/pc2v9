@@ -1,9 +1,8 @@
 package edu.csus.ecs.pc2.api;
 
-//TODO java doc
-
 /**
  * This interface describes the set of methods that any Clarification Listener must implement.
+ * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -11,7 +10,11 @@ package edu.csus.ecs.pc2.api;
 // $HeadURL$
 public interface IClarificationEventListener {
 
-    // TODO java doc
+    /**
+     * New Clarification submitted.
+     * 
+     * @param clarification - the added {@link IClarification}
+     */
     void clarificationAdded(IClarification clarification);
 
     /**
@@ -20,16 +23,20 @@ public interface IClarificationEventListener {
      * @param clarification
      *            the deleted {@link IClarification}
      */
-
-    // TODO java doc
     void clarificationRemoved(IClarification clarification);
 
-    // TODO java doc
-
+    /**
+     * Clarification answered by judge.
+     * 
+     * @param clarification - the answered {@link IClarification}
+     */
     void clarificationAnswered(IClarification clarification);
 
-    // TODO java doc
-
+    /**
+     * Invoked when clarification edited/changed.
+     * 
+     * @param clarification the changed {@link IClarification}
+     */
     void clarificationUpdated(IClarification clarification);
 
 }
