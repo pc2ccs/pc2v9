@@ -17,7 +17,9 @@ import edu.csus.ecs.pc2.api.listener.IRunEventListener;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 
 /**
- * API Contest Test Frame
+ * API Contest Test Frame.
+ * 
+ * Used to test the API functions, shows events and such.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -36,8 +38,6 @@ public class ContestTestFrame extends JFrame {
     private JPanel centerPane = null;
 
     private JPanel buttonPane = null;
-
-    private JButton goButton = null;
 
     private JButton exitButton = null;
 
@@ -79,6 +79,12 @@ public class ContestTestFrame extends JFrame {
 
     private JButton oneRunTest = null;
 
+    private JButton showClarsButton = null;
+
+    private JCheckBox clarListenerCheckBox = null;
+
+    private ClarificationListener clarificationListener = null;;
+
     /**
      * This method initializes
      * 
@@ -103,7 +109,8 @@ public class ContestTestFrame extends JFrame {
     }
 
     /**
-     * 
+     * Run Listener for ContestTestFrame.
+     *  
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
@@ -127,7 +134,36 @@ public class ContestTestFrame extends JFrame {
             println("Run updated Site " + run.getSiteNumber() + " Run " + run.getNumber() + " from " + run.getTeam().getLoginName() + " at " + run.getSubmissionTime());
         }
     }
+    
+    /**
+     * Clar Listener for ContestTestFrame.
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    protected class ClarificationListener implements IClarificationEventListener {
 
+        public void clarificationAdded(IClarification clarification) {
+            println("Clar added Site " + clarification.getSiteNumber() + " Run " + clarification.getNumber() + " from " + clarification.getTeam().getLoginName() + " at "
+                    + clarification.getSubmissionTime()+" Problem "+clarification.getProblem().getName());
+        }
+
+        public void clarificationRemoved(IClarification clarification) {
+            println("Clar removed Site " + clarification.getSiteNumber() + " Run " + clarification.getNumber() + " from " + clarification.getTeam().getLoginName() + " at "
+                    + clarification.getSubmissionTime()+" Problem "+clarification.getProblem().getName());
+        }
+
+        public void clarificationAnswered(IClarification clarification) {
+            println("Clar answered Site " + clarification.getSiteNumber() + " Run " + clarification.getNumber() + " from " + clarification.getTeam().getLoginName() + " at "
+                    + clarification.getSubmissionTime()+" Problem "+clarification.getProblem().getName());
+        }
+
+        public void clarificationUpdated(IClarification clarification) {
+            println("Clar updated Site " + clarification.getSiteNumber() + " Run " + clarification.getNumber() + " from " + clarification.getTeam().getLoginName() + " at "
+                    + clarification.getSubmissionTime()+" Problem "+clarification.getProblem().getName());
+        }
+    }
+    
     /**
      * This method initializes mainPain
      * 
@@ -174,6 +210,8 @@ public class ContestTestFrame extends JFrame {
             centerPane.add(getJButton1(), null);
             centerPane.add(getJButton2(), null);
             centerPane.add(getOneRunTest(), null);
+            centerPane.add(getShowClarsButton(), null);
+            centerPane.add(getClarListenerCheckBox(), null);
         }
         return centerPane;
     }
@@ -190,28 +228,9 @@ public class ContestTestFrame extends JFrame {
             buttonPane = new JPanel();
             buttonPane.setPreferredSize(new java.awt.Dimension(269, 42));
             buttonPane.setLayout(flowLayout);
-            buttonPane.add(getGoButton(), null);
             buttonPane.add(getExitButton(), null);
         }
         return buttonPane;
-    }
-
-    /**
-     * This method initializes goButton
-     * 
-     * @return javax.swing.JButton
-     */
-    private JButton getGoButton() {
-        if (goButton == null) {
-            goButton = new JButton();
-            goButton.setText("Go");
-            goButton.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    println("actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
-                }
-            });
-        }
-        return goButton;
     }
 
     /**
@@ -223,6 +242,7 @@ public class ContestTestFrame extends JFrame {
         if (exitButton == null) {
             exitButton = new JButton();
             exitButton.setText("Exit");
+            exitButton.setToolTipText("Exit this program");
             exitButton.setMnemonic(java.awt.event.KeyEvent.VK_X);
             exitButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -241,7 +261,8 @@ public class ContestTestFrame extends JFrame {
     private JButton getTestRunButton() {
         if (testRunButton == null) {
             testRunButton = new JButton();
-            testRunButton.setBounds(new java.awt.Rectangle(248,121,94,32));
+            testRunButton.setBounds(new java.awt.Rectangle(306, 122, 94, 29));
+            testRunButton.setToolTipText("Print Run information list");
             testRunButton.setText("Runs");
             testRunButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -266,7 +287,10 @@ public class ContestTestFrame extends JFrame {
 
         println();
 
-        for (IRun run : contest.getRuns()) {
+        IRun[] runs = contest.getRuns();
+        println("There are " + runs.length + " runs.");
+
+        for (IRun run : runs) {
 
             print("Run " + run.getNumber() + " Site " + run.getSiteNumber());
 
@@ -294,7 +318,8 @@ public class ContestTestFrame extends JFrame {
     private JButton getLoginButton() {
         if (loginButton == null) {
             loginButton = new JButton();
-            loginButton.setBounds(new java.awt.Rectangle(421, 20, 93, 32));
+            loginButton.setBounds(new java.awt.Rectangle(421, 20, 93, 29));
+            loginButton.setToolTipText("Login to contest");
             loginButton.setText("Login");
             loginButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -380,7 +405,8 @@ public class ContestTestFrame extends JFrame {
     private JButton getListTeamsButton() {
         if (listTeamsButton == null) {
             listTeamsButton = new JButton();
-            listTeamsButton.setBounds(new java.awt.Rectangle(248,172,94,32));
+            listTeamsButton.setBounds(new java.awt.Rectangle(306, 173, 94, 29));
+            listTeamsButton.setToolTipText("Print teams info");
             listTeamsButton.setText("Teams");
             listTeamsButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -405,7 +431,6 @@ public class ContestTestFrame extends JFrame {
         println("");
 
     }
-    
 
     protected void printProblemsTest() {
 
@@ -416,42 +441,40 @@ public class ContestTestFrame extends JFrame {
 
         println("There are " + contest.getProblems().length + " team ");
         for (IProblem problem : contest.getProblems()) {
-            print("Problem name = "+problem.getName());
-            
+            print("Problem name = " + problem.getName());
+
             print(" data file = ");
-            if (problem.hasDataFile()){
-               print(problem.getJudgesDataFileName()); 
+            if (problem.hasDataFile()) {
+                print(problem.getJudgesDataFileName());
             } else {
-                print ("<none>");
+                print("<none>");
             }
-            
-            print (" answer file = ");
-            if (problem.hasAnswerFile()){
-                print(problem.getJudgesAnswerFileName()); 
+
+            print(" answer file = ");
+            if (problem.hasAnswerFile()) {
+                print(problem.getJudgesAnswerFileName());
             } else {
-                print ("<none>");
+                print("<none>");
             }
-            
+
             print(" validator = ");
-            if (problem.hasExternalValidator()){
+            if (problem.hasExternalValidator()) {
                 print(problem.getValidatorFileName());
             } else {
-                print ("<none>");
+                print("<none>");
             }
-            
-            if (problem.readsInputFromFile()){
-                print (" reads from FILE");
+
+            if (problem.readsInputFromFile()) {
+                print(" reads from FILE");
             }
-            if (problem.readsInputFromStdIn()){
-                print (" reads from stdin");
+            if (problem.readsInputFromStdIn()) {
+                print(" reads from stdin");
             }
             println();
         }
         println();
 
     }
-    
-        
 
     /**
      * This method initializes logoffButton
@@ -461,7 +484,8 @@ public class ContestTestFrame extends JFrame {
     private JButton getLogoffButton() {
         if (logoffButton == null) {
             logoffButton = new JButton();
-            logoffButton.setBounds(new java.awt.Rectangle(421,77,93,32));
+            logoffButton.setBounds(new java.awt.Rectangle(421, 77, 93, 29));
+            logoffButton.setToolTipText("Logoff of contest");
             logoffButton.setText("Logoff");
             logoffButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -496,7 +520,8 @@ public class ContestTestFrame extends JFrame {
     private JCheckBox getRunListenerCheckBox() {
         if (runListenerCheckBox == null) {
             runListenerCheckBox = new JCheckBox();
-            runListenerCheckBox.setBounds(new java.awt.Rectangle(25, 158, 152, 18));
+            runListenerCheckBox.setBounds(new java.awt.Rectangle(26, 157, 152, 18));
+            runListenerCheckBox.setToolTipText("Listen for run events");
             runListenerCheckBox.setText("Run Listener On");
             runListenerCheckBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -543,7 +568,8 @@ public class ContestTestFrame extends JFrame {
     private JCheckBox getConfigListenerCheckBox() {
         if (configListenerCheckBox == null) {
             configListenerCheckBox = new JCheckBox();
-            configListenerCheckBox.setBounds(new java.awt.Rectangle(24, 192, 157, 21));
+            configListenerCheckBox.setBounds(new java.awt.Rectangle(26, 218, 152, 21));
+            configListenerCheckBox.setToolTipText("Listen for all configuration change events");
             configListenerCheckBox.setText("Config Listener On");
             configListenerCheckBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -572,7 +598,8 @@ public class ContestTestFrame extends JFrame {
     private JButton getJButton() {
         if (jButton == null) {
             jButton = new JButton();
-            jButton.setBounds(new java.awt.Rectangle(248,219,94,32));
+            jButton.setBounds(new java.awt.Rectangle(306, 220, 94, 29));
+            jButton.setToolTipText("Print Standings");
             jButton.setText("Standings");
             jButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -605,7 +632,8 @@ public class ContestTestFrame extends JFrame {
     private JButton getJButton1() {
         if (jButton1 == null) {
             jButton1 = new JButton();
-            jButton1.setBounds(new java.awt.Rectangle(421,172,94,32));
+            jButton1.setBounds(new java.awt.Rectangle(421, 172, 94, 29));
+            jButton1.setToolTipText("Print all contest info");
             jButton1.setText("Print ALL");
             jButton1.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -622,11 +650,12 @@ public class ContestTestFrame extends JFrame {
             showMessage("Not logged in");
             return;
         }
-        
-        printRunsTest();
+
         printStandingsTest();
         printTeamsTest();
         printProblemsTest();
+        printRunsTest();
+        printClarTest();
 
     }
 
@@ -638,7 +667,8 @@ public class ContestTestFrame extends JFrame {
     private JButton getJButton2() {
         if (clearButton == null) {
             clearButton = new JButton();
-            clearButton.setBounds(new java.awt.Rectangle(421,219,94,32));
+            clearButton.setBounds(new java.awt.Rectangle(421, 219, 94, 29));
+            clearButton.setToolTipText("Clear Message List");
             clearButton.setText("Clear");
             clearButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -648,7 +678,7 @@ public class ContestTestFrame extends JFrame {
         }
         return clearButton;
     }
-    
+
     /**
      * This method initializes oneRunTest
      * 
@@ -657,7 +687,8 @@ public class ContestTestFrame extends JFrame {
     private JButton getOneRunTest() {
         if (oneRunTest == null) {
             oneRunTest = new JButton();
-            oneRunTest.setBounds(new java.awt.Rectangle(205,75,141,32));
+            oneRunTest.setBounds(new java.awt.Rectangle(263, 76, 141, 29));
+            oneRunTest.setToolTipText("View all Run's Source");
             oneRunTest.setText("Run View Source");
             oneRunTest.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -673,40 +704,141 @@ public class ContestTestFrame extends JFrame {
             showMessage("Not logged in");
             return;
         }
-        
-        if (contest.getRuns().length == 0){
+
+        if (contest.getRuns().length == 0) {
             showMessage("No runs in system");
             return;
         }
-        
-        for (IRun run : contest.getRuns()){
-            
+
+        for (IRun run : contest.getRuns()) {
+
             print("Run " + run.getNumber() + " Site " + run.getSiteNumber());
-            
+
             print(" @ " + run.getSubmissionTime() + " by " + run.getTeam().getLoginName());
             print(" problem: " + run.getProblem().getName());
             print(" in " + run.getLanguage().getName());
-            
+
             if (run.isJudged()) {
                 println("  Judgement: " + run.getJudgementName());
             } else {
                 println("  Judgement: not judged yet ");
             }
-            
+
             println();
             println("Getting source file name(s)");
-            
-            byte [][] contents = run.getSourceCodeFileContents();
-            String [] names = run.getSourceCodeFileNames();
+
+            byte[][] contents = run.getSourceCodeFileContents();
+            String[] names = run.getSourceCodeFileNames();
             for (int i = 0; i < names.length; i++) {
                 String s = names[i];
-                println("Name["+i+"] "+s+" "+contents[i].length);
+                println("Name[" + i + "] " + s + " " + contents[i].length);
             }
-            
+
         }
-    
+
         println("done");
+
+    }
+
+    /**
+     * This method initializes showClarsButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getShowClarsButton() {
+        if (showClarsButton == null) {
+            showClarsButton = new JButton();
+            showClarsButton.setBounds(new java.awt.Rectangle(201, 123, 82, 29));
+            showClarsButton.setToolTipText("Print clarification info list");
+            showClarsButton.setText("Clars");
+            showClarsButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    printClarTest();
+                }
+            });
+        }
+        return showClarsButton;
+    }
+
+    protected void printClarTest() {
+        if (contest == null) {
+            showMessage("Not logged in");
+            return;
+        }
+
+        println();
+
+        IClarification[] clarifications = contest.getClarifications();
+        println("There are " + clarifications.length + " clarifications ");
+
+        for (IClarification clarification : clarifications) {
+
+            print("Clar " + clarification.getNumber() + " Site " + clarification.getSiteNumber());
+
+            print(" @ " + clarification.getSubmissionTime() + " by " + clarification.getTeam().getLoginName());
+            print(" problem: " + clarification.getProblem().getName());
+            print(" " + trueFalseString(clarification.isAnswered(), "ANSWERED", "NOT ANSWERED"));
+            print(" " + trueFalseString(clarification.isDeleted(), "DELETED", ""));
+            println();
+            println("  Question: " + clarification.getQuestion());
+            if (clarification.isAnswered()) {
+                println("    Answer: " + clarification.getAnswer());
+            }
+        }
+        println();
+
+    }
+
+    protected String trueFalseString(boolean value, String trueString, String falseString) {
+        if (value) {
+            return trueString;
+        } else {
+            return falseString;
+        }
+    }
+
+    /**
+     * This method initializes clarListenerCheckBox
+     * 
+     * @return javax.swing.JCheckBox
+     */
+    private JCheckBox getClarListenerCheckBox() {
+        if (clarListenerCheckBox == null) {
+            clarListenerCheckBox = new JCheckBox();
+            clarListenerCheckBox.setBounds(new java.awt.Rectangle(26, 186, 152, 21));
+            clarListenerCheckBox.setToolTipText("Listen for Clarification events");
+            clarListenerCheckBox.setText("Clar Listener On");
+            clarListenerCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    clarListenerChanged(clarListenerCheckBox.isSelected());
+                }
+            });
+        }
+        return clarListenerCheckBox;
+    }
+
+    protected void clarListenerChanged(boolean listenerON) {
+        // TODO Auto-generated method stub
+
+        if (contest == null) {
+            showMessage("Not logged in");
+            return;
+        }
         
+        if (listenerON) {
+            // turn it on
+            if (clarificationListener  == null) {
+                clarificationListener = new ClarificationListener();
+            }
+            contest.addClarificationListener(clarificationListener);
+            println("Clarification Listener added");
+        } else {
+            if (clarificationListener != null) {
+                contest.removeClarificationListener(clarificationListener);
+                println("Clarification Listener removed");
+            }
+        }
+
     }
 
     public static void main(String[] args) {
