@@ -90,7 +90,7 @@ public class PacketHandler {
 
         info("handlePacket start " + packet);
         PacketFactory.dumpPacket(controller.getLog(), packet, "handlePacket");
-        if (Utilities.isDebugMode()){
+        if (Utilities.isDebugMode()) {
             PacketFactory.dumpPacket(System.out, packet, "handlePacket");
         }
 
@@ -100,271 +100,302 @@ public class PacketHandler {
 
         ClientId fromId = packet.getSourceId();
 
-        if (packetType.equals(Type.MESSAGE)) {
-            PacketFactory.dumpPacket(System.err, packet, null);
-            handleMessagePacket(packet);
-        } else if (packetType.equals(Type.RUN_SUBMISSION_CONFIRM)) {
-            Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
-            contest.addRun(run);
-            if (isServer()) {
-                sendToJudgesAndOthers(packet, isThisSite(run));
-            }
+        Run run;
+        Clarification clarification;
 
-        } else if (packetType.equals(Type.RUN_SUBMISSION)) {
-            // RUN submitted by team to server
+        switch (packetType) {
+            case MESSAGE:
+                PacketFactory.dumpPacket(System.err, packet, null);
+                handleMessagePacket(packet);
+                break;
+            case RUN_SUBMISSION_CONFIRM:
+                run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
+                contest.addRun(run);
+                if (isServer()) {
+                    sendToJudgesAndOthers(packet, isThisSite(run));
+                }
+                break;
+            case RUN_SUBMISSION:
+                // RUN submitted by team to server
+                runSubmission(packet, fromId);
+                break;
+            case CLARIFICATION_SUBMISSION:
+                // Clarification submitted by team to server
+                confirmSubmission(packet, fromId);
+                break;
+            case CLARIFICATION_ANSWER:
+                // Answer from client to server
+                answerClarification(packet, connectionHandlerID);
+                break;
+            case CLARIFICATION_ANSWER_UPDATE:
+                // Answer from server to client
+                sendAnswerClarification(packet);
+                break;
+            case CLARIFICATION_SUBMISSION_CONFIRM:
+                clarification = (Clarification) PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION);
+                contest.addClarification(clarification);
+                if (isServer()) {
+                    sendToJudgesAndOthers(packet, isThisSite(clarification));
+                }
+                break;
+            case CLARIFICATION_UNCHECKOUT:
+                // Clarification cancel or un-checkout, client to server
+                cancelClarificationCheckOut(packet, connectionHandlerID);
+                break;
+            case CLARIFICATION_CHECKOUT:
+                // The clarification that was checked out, sent from server to clients
+                checkoutClarification(packet, connectionHandlerID);
+                break;
+            case CLARIFICATION_AVAILABLE:
+                // Server to client, run was canceled, now available
+                sendClarificationAvailable(packet);
+                break;
+            case LOGIN_FAILED:
+                String message = PacketFactory.getStringValue(packet, PacketFactory.MESSAGE_STRING);
+                contest.loginDenied(packet.getDestinationId(), connectionHandlerID, message);
+                break;
+            case CLARIFICATION_NOT_AVAILABLE:
+                // Run not available from server
+                Clarification clar = (Clarification) PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION);
+                contest.clarificationNotAvailable(clar);
+                if (isServer()) {
+                    sendToJudgesAndOthers(packet, isThisSite(clar));
+                }
+                break;
+            case RUN_NOTAVAILABLE:
+                // Run not available from server
+                run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
+                contest.runNotAvailable(run);
 
-            Run submittedRun = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
-            RunFiles runFiles = (RunFiles) PacketFactory.getObjectValue(packet, PacketFactory.RUN_FILES);
-            Run run = contest.acceptRun(submittedRun, runFiles);
+                if (isServer()) {
+                    sendToJudgesAndOthers(packet, isThisSite(run));
+                }
+                break;
+            case FORCE_DISCONNECTION:
+                sendForceDisconnection(packet);
+                break;
+            case ESTABLISHED_CONNECTION:
+                establishConnection(packet, connectionHandlerID);
+                break;
+            case DROPPED_CONNECTION:
+                droppedConnection(packet, connectionHandlerID);
+                break;
+            case RUN_AVAILABLE:
+                runAvailable(packet);
+                break;
+            case RUN_JUDGEMENT:
+                // Judgement from judge to server
+                acceptRunJudgement(packet, connectionHandlerID);
+                break;
+            case RUN_JUDGEMENT_UPDATE:
+                sendJudgementUpdate(packet);
+                break;
+            case RUN_UPDATE:
+                updateRun(packet, connectionHandlerID);
+                break;
+            case RUN_UPDATE_NOTIFICATION:
+                sendRunUpdateNotification(packet);
+                break;
+            case RUN_UNCHECKOUT:
+                // Cancel run from requestor to server
+                run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
+                ClientId whoCanceledId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+                cancelRun(packet, run, whoCanceledId, connectionHandlerID);
+                break;
+            case START_ALL_CLOCKS:
+                // Start All Clocks from admin to server
+                startContest(packet, connectionHandlerID);
 
-            // Send to team
-            Packet confirmPacket = PacketFactory.createRunSubmissionConfirm(contest.getClientId(), fromId, run);
-            controller.sendToClient(confirmPacket);
+                if (isThisSite(packet.getSourceId())) {
+                    controller.sendToServers(packet);
+                }
+                break;
+            case STOP_ALL_CLOCKS:
+                // Start All Clocks from admin to server
+                stopContest(packet, connectionHandlerID);
 
-            // Send to clients and servers
-            if (isServer()) {
-                sendToJudgesAndOthers(confirmPacket, true);
-            }
-        } else if (packetType.equals(Type.CLARIFICATION_SUBMISSION)) {
-            // Clarification submitted by team to server
+                if (isThisSite(packet.getSourceId())) {
+                    controller.sendToServers(packet);
+                }
+                break;
+            case START_CONTEST_CLOCK:
+                // Admin to server, start the clock
+                startContest(packet, connectionHandlerID);
+                break;
 
-            Clarification submittedClarification = (Clarification) PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION);
-            Clarification clarification = contest.acceptClarification(submittedClarification);
+            case STOP_CONTEST_CLOCK:
+                // Admin to server, stop the clock
+                stopContest(packet, connectionHandlerID);
+                break;
+            case UPDATE_CONTEST_CLOCK:
+                // Admin to server, stop the clock
+                updateContestClock(packet);
+                break;
+            case CLOCK_STARTED:
+                // InternalContest Clock started sent from server to clients
+                startClock(packet);
+                break;
+            case CLOCK_STOPPED:
+                // InternalContest Clock stopped sent from server to clients
+                clockStopped(packet);
+                break;
+            case ADD_SETTING:
+                addNewSetting(packet);
+                break;
+            case DELETE_SETTING:
+                deleteSetting(packet);
+                break;
+            case GENERATE_ACCOUNTS:
+                generateAccounts(packet);
+                break;
+            case UPDATE_SETTING:
+                updateSetting(packet);
+                break;
+            case RUN_CHECKOUT:
+                // Run from server to clients
+                runCheckout(packet);
+                break;
+            case RUN_REJUDGE_CHECKOUT:
+                // Run from server to clients
+                runCheckout(packet); // this works for rejudge as well.
+                break;
+            case CLARIFICATION_REQUEST:
+                requestClarification(packet, connectionHandlerID);
+                break;
+            case RUN_REQUEST:
+                // Request Run from requestor to server
+                runRequest(packet, connectionHandlerID);
+                break;
+            case RUN_REJUDGE_REQUEST:
+                // REJUDGE Request Run from requestor to server
+                requestRejudgeRun(packet, connectionHandlerID);
+                break;
+            case LOGOUT:
+                // client logged out
+                logoutClient(packet);
+                break;
+            case LOGIN:
+                // client logged in
+                loginClient(packet);
+                break;
+            case PASSWORD_CHANGE_REQUEST:
+                // Client requests password change
+                attemptChangePassword(packet);
+                break;
+            case PASSWORD_CHANGE_RESULTS:
+                // Server to individual client
+                // An Update Settings packet will be used to update Admin and Servers (update Account)
+                handlePasswordChangeResults(packet);
+                break;
+            case LOGIN_SUCCESS:
+                // from server to client/server on a successful login
+                loginSuccess(packet, connectionHandlerID, fromId);
+                break;
+            case SERVER_SETTINGS:
+                // This is settings from a recently logged in server
+                loadSettingsFromRemoteServer(packet, connectionHandlerID);
+                info(" handlePacket SERVER_SETTINGS - from another site -- all settings loaded " + packet);
 
-            // Send to team
-            Packet confirmPacket = PacketFactory.createClarSubmissionConfirm(contest.getClientId(), fromId, clarification);
-            controller.sendToClient(confirmPacket);
+                if (isServer()) {
+                    sendToJudgesAndOthers(packet, false);
+                }
 
-            // Send to clients and other servers
-            if (isServer()) {
-                sendToJudgesAndOthers(confirmPacket, true);
-            }
+                break;
+            case RECONNECT_SITE_REQUEST:
+                reconnectSite(packet);
+                break;
+            case SECURITY_MESSAGE:
+                // From server to admins
+                handleSecurityMessage(packet);
+                break;
+//            case FETCHED_RUN:
+//            case RUN_FETCH:
+                
+            default:
+                Exception exception = new Exception("PacketHandler.handlePacket Unhandled packet " + packet);
+                controller.getLog().log(Log.WARNING, "Unhandled Packet ", exception);
+        }
+        info("handlePacket end " + packet);
+    }
 
-        } else if (packetType.equals(Type.CLARIFICATION_ANSWER)) {
-            // Answer from client to server
-            answerClarification(packet, connectionHandlerID);
+    private void runAvailable(Packet packet) {
+        Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
+        contest.availableRun(run);
 
-        } else if (packetType.equals(Type.CLARIFICATION_ANSWER_UPDATE)) {
-            // Answer from server to client
-            sendAnswerClarification(packet);
+        if (isServer()) {
+            sendToJudgesAndOthers(packet, isThisSite(run));
+        }
+    }
 
-        } else if (packetType.equals(Type.CLARIFICATION_SUBMISSION_CONFIRM)) {
-            Clarification clarification = (Clarification) PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION);
-            contest.addClarification(clarification);
-            if (isServer()) {
-                sendToJudgesAndOthers(packet, isThisSite(clarification));
-            }
+    private void runSubmission(Packet packet, ClientId fromId) {
+        Run submittedRun = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
+        RunFiles runFiles = (RunFiles) PacketFactory.getObjectValue(packet, PacketFactory.RUN_FILES);
+        Run run = contest.acceptRun(submittedRun, runFiles);
 
-        } else if (packetType.equals(Type.CLARIFICATION_UNCHECKOUT)) {
-            // Clarification cancel or un-checkout, client to server
-            cancelClarificationCheckOut(packet, connectionHandlerID);
+        // Send to team
+        Packet confirmPacket = PacketFactory.createRunSubmissionConfirm(contest.getClientId(), fromId, run);
+        controller.sendToClient(confirmPacket);
 
-        } else if (packetType.equals(Type.CLARIFICATION_CHECKOUT)) {
-            // The clarification that was checked out, sent from server to clients
-            checkoutClarification(packet, connectionHandlerID);
-        } else if (packetType.equals(Type.CLARIFICATION_AVAILABLE)) {
-            // Server to client, run was canceled, now available
-            sendClarificationAvailable(packet);
+        // Send to clients and servers
+        if (isServer()) {
+            sendToJudgesAndOthers(confirmPacket, true);
+        }
+        
+    }
 
-        } else if (packetType.equals(Type.LOGIN_FAILED)) {
-            String message = PacketFactory.getStringValue(packet, PacketFactory.MESSAGE_STRING);
-            contest.loginDenied(packet.getDestinationId(), connectionHandlerID, message);
+    private void confirmSubmission(Packet packet, ClientId fromId) {
 
-        } else if (packetType.equals(Type.CLARIFICATION_NOT_AVAILABLE)) {
-            // Run not available from server
-            Clarification clar = (Clarification) PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION);
-            contest.clarificationNotAvailable(clar);
+        Clarification submittedClarification = (Clarification) PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION);
+        Clarification clarification = contest.acceptClarification(submittedClarification);
 
-            if (isServer()) {
-                sendToJudgesAndOthers(packet, isThisSite(clar));
-            }
-        } else if (packetType.equals(Type.RUN_NOTAVAILABLE)) {
-            // Run not available from server
-            Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
-            contest.runNotAvailable(run);
+        // Send to team
+        Packet confirmPacket = PacketFactory.createClarSubmissionConfirm(contest.getClientId(), fromId, clarification);
+        controller.sendToClient(confirmPacket);
 
-            if (isServer()) {
-                sendToJudgesAndOthers(packet, isThisSite(run));
-            }
+        // Send to clients and other servers
+        if (isServer()) {
+            sendToJudgesAndOthers(confirmPacket, true);
+        }
+    }
 
-        } else if (packetType.equals(Type.FORCE_DISCONNECTION)) {
-            sendForceDisconnection(packet);
-
-        } else if (packetType.equals(Type.ESTABLISHED_CONNECTION)) {
-            establishConnection(packet, connectionHandlerID);
-        } else if (packetType.equals(Type.DROPPED_CONNECTION)) {
-            droppedConnection(packet, connectionHandlerID);
-
-        } else if (packetType.equals(Type.RUN_AVAILABLE)) {
-            Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
-            contest.availableRun(run);
-
-            if (isServer()) {
-                sendToJudgesAndOthers(packet, isThisSite(run));
-            }
-
-        } else if (packetType.equals(Type.RUN_JUDGEMENT)) {
-            // Judgement from judge to server
-            acceptRunJudgement(packet, connectionHandlerID);
-
-        } else if (packetType.equals(Type.RUN_JUDGEMENT_UPDATE)) {
-            sendJudgementUpdate(packet);
-
-        } else if (packetType.equals(Type.RUN_UPDATE)) {
-            updateRun(packet, connectionHandlerID);
-
-        } else if (packetType.equals(Type.RUN_UPDATE_NOTIFICATION)) {
-            sendRunUpdateNotification(packet);
-
-        } else if (packetType.equals(Type.RUN_UNCHECKOUT)) {
-            // Cancel run from requestor to server
-            Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
-            ClientId whoCanceledId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-            cancelRun(packet, run, whoCanceledId, connectionHandlerID);
-
-        } else if (packetType.equals(Type.START_ALL_CLOCKS)) {
-            // Start All Clocks from admin to server
-            startContest(packet, connectionHandlerID);
-
-            if (isThisSite(packet.getSourceId())) {
-                controller.sendToServers(packet);
-            }
-
-        } else if (packetType.equals(Type.STOP_ALL_CLOCKS)) {
-            // Start All Clocks from admin to server
-            stopContest(packet, connectionHandlerID);
-
-            if (isThisSite(packet.getSourceId())) {
-                controller.sendToServers(packet);
-            }
-
-        } else if (packetType.equals(Type.START_CONTEST_CLOCK)) {
-            // Admin to server, start the clock
-            startContest(packet, connectionHandlerID);
-
-        } else if (packetType.equals(Type.STOP_CONTEST_CLOCK)) {
-            // Admin to server, stop the clock
-            stopContest(packet, connectionHandlerID);
-
-        } else if (packetType.equals(Type.UPDATE_CONTEST_CLOCK)) {
-            // Admin to server, stop the clock
-            updateContestClock(packet);
-
-        } else if (packetType.equals(Type.CLOCK_STARTED)) {
-            // InternalContest Clock started sent from server to clients
-            Integer siteNumber = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
-            contest.startContest(siteNumber);
-            ContestTime contestTime = contest.getContestTime(siteNumber);
-            ClientId clientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-            info("Clock for site " + contestTime.getSiteNumber() + " started by " + clientId + " elapsed " + contestTime.getElapsedTimeStr());
-
-            if (isServer()) {
-                controller.sendToTeams(packet);
-                sendToJudgesAndOthers(packet, false);
-            }
-
-        } else if (packetType.equals(Type.CLOCK_STOPPED)) {
-            // InternalContest Clock stopped sent from server to clients
-            Integer siteNumber = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
-            contest.stopContest(siteNumber);
-            ClientId clientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-            ContestTime contestTime = contest.getContestTime(siteNumber);
-            info("Clock for site " + contestTime.getSiteNumber() + " stopped by " + clientId + " elapsed " + contestTime.getElapsedTimeStr());
-
-            if (isServer()) {
-                controller.sendToTeams(packet);
-                sendToJudgesAndOthers(packet, false);
-            }
-
-        } else if (packetType.equals(Type.ADD_SETTING)) {
-            addNewSetting(packet);
-
-        } else if (packetType.equals(Type.DELETE_SETTING)) {
-            deleteSetting(packet);
-
-        } else if (packetType.equals(Type.GENERATE_ACCOUNTS)) {
-            generateAccounts(packet);
-
-        } else if (packetType.equals(Type.UPDATE_SETTING)) {
-            updateSetting(packet);
-
-        } else if (packetType.equals(Type.RUN_CHECKOUT)) {
-            // Run from server to clients
-            runCheckout(packet);
-
-        } else if (packetType.equals(Type.RUN_REJUDGE_CHECKOUT)) {
-            // Run from server to clients
-            runCheckout(packet); // this works for rejudge as well.
-
-        } else if (packetType.equals(Type.CLARIFICATION_REQUEST)) {
-            requestClarification(packet, connectionHandlerID);
-
-        } else if (packetType.equals(Type.RUN_REQUEST)) {
-            // Request Run from requestor to server
-            Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
-            ClientId requestFromId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-            Boolean readOnly = (Boolean) PacketFactory.getObjectValue(packet, PacketFactory.READ_ONLY);
-            Boolean computerJudge = (Boolean) PacketFactory.getObjectValue(packet, PacketFactory.COMPUTER_JUDGE);
-            if (readOnly != null) {
-                fetchRun(packet, run, requestFromId, readOnly.booleanValue(), computerJudge.booleanValue(), connectionHandlerID);
-
-            } else {
-                requestRun(packet, run, requestFromId, connectionHandlerID, computerJudge);
-            }
-
-        } else if (packetType.equals(Type.RUN_REJUDGE_REQUEST)) {
-            // REJUDGE Request Run from requestor to server
-            requestRejudgeRun(packet, connectionHandlerID);
-
-        } else if (packetType.equals(Type.LOGOUT)) {
-            // client logged out
-            logoutClient(packet);
-
-        } else if (packetType.equals(Type.LOGIN)) {
-            // client logged in
-            loginClient(packet);
-            
-        } else if (packetType.equals(Type.PASSWORD_CHANGE_REQUEST)) {
-            // Client requests password change
-            attemptChangePassword(packet);
-
-        } else if (packetType.equals(Type.PASSWORD_CHANGE_RESULTS)) {
-            // Server to individual client
-            // An Update Settings packet will be used to update Admin and Servers (update Account)
-
-            handlePasswordChangeResults(packet);
-
-        } else if (packetType.equals(Type.LOGIN_SUCCESS)) {
-            // from server to client/server on a successful login
-
-            loginSuccess(packet, connectionHandlerID, fromId);
-
-        } else if (packetType.equals(Type.SERVER_SETTINGS)) {
-
-            // This is settings from a recently logged in server
-            loadSettingsFromRemoteServer(packet, connectionHandlerID);
-            info(" handlePacket SERVER_SETTINGS - from another site -- all settings loaded " + packet);
-
-            if (isServer()) {
-                sendToJudgesAndOthers(packet, false);
-            }
-
-        } else if (packetType.equals(Type.RECONNECT_SITE_REQUEST)) {
-
-            reconnectSite(packet);
-
-        } else if (packetType.equals(Type.SECURITY_MESSAGE)) {
-            // From server to admins
-            handleSecurityMessage(packet);
+    private void runRequest(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
+        Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
+        ClientId requestFromId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+        Boolean readOnly = (Boolean) PacketFactory.getObjectValue(packet, PacketFactory.READ_ONLY);
+        Boolean computerJudge = (Boolean) PacketFactory.getObjectValue(packet, PacketFactory.COMPUTER_JUDGE);
+        if (readOnly != null) {
+            fetchRun(packet, run, requestFromId, readOnly.booleanValue(), computerJudge.booleanValue(), connectionHandlerID);
 
         } else {
-
-            Exception exception = new Exception("PacketHandler.handlePacket Unhandled packet " + packet);
-            controller.getLog().log(Log.WARNING, "Unhandled Packet ", exception);
+            requestRun(packet, run, requestFromId, connectionHandlerID, computerJudge);
         }
+        
+    }
 
-        info("handlePacket end " + packet);
+    private void clockStopped(Packet packet) {
+        Integer siteNumber = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
+        contest.stopContest(siteNumber);
+        ClientId clientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+        ContestTime contestTime = contest.getContestTime(siteNumber);
+        info("Clock for site " + contestTime.getSiteNumber() + " stopped by " + clientId + " elapsed " + contestTime.getElapsedTimeStr());
 
+        if (isServer()) {
+            controller.sendToTeams(packet);
+            sendToJudgesAndOthers(packet, false);
+        }
+    }
+
+    private void startClock(Packet packet) {
+        Integer siteNumber = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
+        contest.startContest(siteNumber);
+        ContestTime contestTime = contest.getContestTime(siteNumber);
+        ClientId clientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+        info("Clock for site " + contestTime.getSiteNumber() + " started by " + clientId + " elapsed " + contestTime.getElapsedTimeStr());
+
+        if (isServer()) {
+            controller.sendToTeams(packet);
+            sendToJudgesAndOthers(packet, false);
+        }
     }
 
     private void handlePasswordChangeResults(Packet packet) {

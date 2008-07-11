@@ -622,6 +622,14 @@ public final class PacketType implements Serializable {
          * Clarification taken from judge.
          */
         CLARIFICATION_REVOKED,
+        /**
+         * Fetch a run (do not checkout or change run state).
+         */
+        RUN_FETCH,
+        /**
+         * Fetched run.
+         */
+        FETCHED_RUN,
     }
 
     /**

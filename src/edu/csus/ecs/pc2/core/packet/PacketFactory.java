@@ -1023,6 +1023,17 @@ public final class PacketFactory {
         Packet packet = new Packet(Type.RUN_REQUEST, source, destination, props);
         return packet;
     }
+    
+    
+    public static Packet createFetchRun(ClientId source, ClientId destination, Run run, ClientId requesingId) {
+        Properties props = new Properties();
+        props.put(PacketFactory.RUN, run);
+        props.put(PacketFactory.CLIENT_ID, requesingId);
+        Packet packet = new Packet(Type.RUN_FETCH, source, destination, props);
+        return packet;
+    }
+    
+    
 
     /**
      * Create packet for {@link PacketType.Type#CLARIFICATION_REQUEST}.
