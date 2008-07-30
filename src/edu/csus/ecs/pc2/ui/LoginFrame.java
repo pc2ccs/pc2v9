@@ -398,12 +398,12 @@ public class LoginFrame extends JFrame implements UIPlugin {
 
         public void loginAdded(LoginEvent event) {
             // TODO log this.
-            System.err.println("Login " + event.getAction() + " " + event.getClientId());
+//            System.err.println("Login " + event.getAction() + " " + event.getClientId());
         }
 
         public void loginRemoved(LoginEvent event) {
             // TODO log this.
-            System.err.println("Login " + event.getAction() + " " + event.getClientId());
+//            System.err.println("Login " + event.getAction() + " " + event.getClientId());
         }
 
         public void loginDenied(LoginEvent event) {
