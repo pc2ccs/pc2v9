@@ -268,7 +268,11 @@ public class RunsPanel extends JPanePlugin {
             
             if (run.isSolved()) {
                 result = "Yes";
-
+                if (!isTeam(getContest().getClientId())) {
+                    if (run.getStatus().equals(RunStates.MANUAL_REVIEW)) {
+                        result = RunStates.MANUAL_REVIEW + " (" + result + ")";
+                    }
+                }
             } else {
                 result = "No";
 
