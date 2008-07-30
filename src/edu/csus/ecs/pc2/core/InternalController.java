@@ -124,9 +124,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     private UIPlugin uiPlugin = null;
 
     private Log log;
-    
+
     private Ini ini = new Ini();
-    
+
     private String judgementINIFileName = "reject.ini";
 
     private static final String SITE_OPTION_STRING = "--site";
@@ -236,14 +236,14 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      * Highest Security Level
      */
     public static final int SECURITY_HIGH_LEVEL = 10;
-    
+
     /**
      * Security Level, security turned off.
      */
     public static final int SECURITY_NONE_LEVEL = 0;
 
     private static final String CONTEST_PASSWORD_OPTION = "--contestpassword";
-    
+
     /**
      * Security Level for Server.
      */
@@ -364,13 +364,13 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
         sendToLocalServer(packet);
     }
-    
-    public void requestChangePassword(String oldPassword, String newPassword){
-        
+
+    public void requestChangePassword(String oldPassword, String newPassword) {
+
         ClientId serverClientId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
         Packet packet = PacketFactory.createPasswordChangeRequest(contest.getClientId(), serverClientId, oldPassword, newPassword);
         sendToLocalServer(packet);
-        
+
     }
 
     /**
@@ -471,30 +471,30 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             int number = getIntegerValue(loginName);
             return new ClientId(defaultSiteNumber, Type.TEAM, number);
         }
-            
+
         loginName = loginName.toUpperCase();
-        for (Type type: Type.values()){
+        for (Type type : Type.values()) {
             String typeName = type.toString();
-            if (loginName.startsWith(typeName)){
-                if (loginName.length() > typeName.length()){
+            if (loginName.startsWith(typeName)) {
+                if (loginName.length() > typeName.length()) {
                     int number = getIntegerValue(loginName.substring(typeName.length()));
                     return new ClientId(defaultSiteNumber, type, number);
                 }
             }
         }
-        
+
         throw new SecurityException("No such account " + loginName);
-        
 
     }
-    protected String stripChar (String s, char ch){
+
+    protected String stripChar(String s, char ch) {
         int idx = s.indexOf(ch);
         while (idx > -1) {
             StringBuffer sb = new StringBuffer(s);
-            idx = sb.indexOf(ch+"");
-            while (idx > -1){
+            idx = sb.indexOf(ch + "");
+            while (idx > -1) {
                 sb.deleteCharAt(idx);
-                idx = sb.indexOf(ch+"");
+                idx = sb.indexOf(ch + "");
             }
             return sb.toString();
         }
@@ -519,10 +519,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
         ClientId clientId = loginShortcutExpansion(0, id);
 
-        log = new Log(stripChar(clientId.toString(),' '));
+        log = new Log(stripChar(clientId.toString(), ' '));
         connectionManager.setLog(log);
         StaticLog.setLog(log);
-        
 
         info("");
         info(new VersionInfo().getSystemVersionInfo());
@@ -530,7 +529,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         try {
             log.info("Working directory is " + new File(".").getCanonicalPath());
         } catch (IOException e1) {
-            log.info("Could not determine working directory "+e1.getMessage());
+            log.info("Could not determine working directory " + e1.getMessage());
         }
 
         if (password.length() < 1) {
@@ -591,25 +590,27 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             }
 
             // Client login
-            info("Contacting server at " + remoteHostName + ":" + remoteHostPort+" as "+clientId);
+            info("Contacting server at " + remoteHostName + ":" + remoteHostPort + " as " + clientId);
             sendLoginRequest(connectionManager, clientId, id, password);
         }
     }
-    
+
     /**
      * This is a very temporary kludge class.
      * 
-     * This is used with clientLogin, as a 
+     * This is used with clientLogin, as a
+     * 
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
-    
+
     // $HeadURL$
     protected class TemporaryClientUI implements UIPlugin, ILoginListener {
 
         private IInternalContest contest = null;
+
         private IInternalController controller = null;
-        
+
         private SecurityException securityException = null;
 
         /**
@@ -627,7 +628,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
 
         public IInternalContest getContest() {
-            if (securityException != null){
+            if (securityException != null) {
                 throw securityException;
             }
             return contest;
@@ -647,34 +648,34 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
         public void loginAdded(LoginEvent event) {
             // TODO Auto-generated method stub
-            
+
         }
 
         public void loginRemoved(LoginEvent event) {
             // TODO Auto-generated method stub
-            
+
         }
 
         public void loginDenied(LoginEvent event) {
-            securityException = new SecurityException("Login denied "+event.getMessage());
+            securityException = new SecurityException("Login denied " + event.getMessage());
         }
     }
-    
+
     public IInternalContest clientLogin(IInternalContest internalContest, String loginName, String password) throws Exception {
 
         if (!isStarted) {
             // TODO review this message
             throw new SecurityException("Invalid sequence, must call start(String[]) method before login(String, String).");
         }
-        
-        if (connectionManager == null){
+
+        if (connectionManager == null) {
             isStarted = false;
             throw new Exception("unable to contact server (server started?), see log");
         }
-        
+
         ClientId clientId = loginShortcutExpansion(0, loginName);
 
-        log = new Log(stripChar(clientId.toString(),' '));
+        log = new Log(stripChar(clientId.toString(), ' '));
         connectionManager.setLog(log);
         StaticLog.setLog(log);
 
@@ -684,7 +685,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         try {
             log.info("Working directory is " + new File(".").getCanonicalPath());
         } catch (IOException e1) {
-            log.info("Could not determine working directory "+e1.getMessage());
+            log.info("Could not determine working directory " + e1.getMessage());
         }
 
         if (password.length() < 1) {
@@ -694,24 +695,23 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             }
         }
 
-        // XXX this if does not make sense,  should it be if serverModule?
+        // XXX this if does not make sense, should it be if serverModule?
         if (clientId.getClientType().equals(Type.SERVER)) {
-            throw new SecurityException("Can not use clientLogin to login a Server "+loginName);
+            throw new SecurityException("Can not use clientLogin to login a Server " + loginName);
         } else {
 
-            
             TemporaryClientUI temporaryClientUI = new TemporaryClientUI();
             internalContest.addLoginListener(temporaryClientUI);
             setUsingMainUI(true);
             setUiPlugin(temporaryClientUI);
 
             // Client login
-            info("Contacting server at " + remoteHostName + ":" + remoteHostPort+" as "+clientId);
+            info("Contacting server at " + remoteHostName + ":" + remoteHostPort + " as " + clientId);
             sendLoginRequest(connectionManager, clientId, loginName, password);
-            
+
             // Busy loop
-            
-            while ( temporaryClientUI.getContest() == null){
+
+            while (temporaryClientUI.getContest() == null) {
                 Thread.sleep(500);
             }
 
@@ -727,7 +727,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 contest.setSiteNumber(1);
                 info("initializeServer STARTED this site as Site 1");
                 new FileSecurity("db.1");
-                
+
                 if (contestPassword == null) {
                     String password = JOptionPane.showInputDialog(null, "Enter Contest Password");
                     if (password == null || password.trim().length() == 0) {
@@ -748,19 +748,19 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                         } catch (Exception e) {
                             StaticLog.getLog().log(Log.SEVERE, "FATAL ERROR ", e);
                             System.err.println("FATAL ERROR " + e.getMessage() + " check logs");
-                            JOptionPane.showMessageDialog(null,"Invalid password");
+                            JOptionPane.showMessageDialog(null, "Invalid password");
                             System.exit(44);
                         }
                     } else {
                         StaticLog.getLog().log(Log.SEVERE, "FATAL ERROR ", fileSecurityException);
                         System.err.println("FATAL ERROR " + fileSecurityException.getMessage() + " check logs");
-                        JOptionPane.showMessageDialog(null,"Invalid password");
+                        JOptionPane.showMessageDialog(null, "Invalid password");
                         System.exit(44);
                     }
                 } catch (Exception e) {
                     StaticLog.getLog().log(Log.SEVERE, "FATAL ERROR ", e);
                     System.err.println("FATAL ERROR " + e.getMessage() + " check logs");
-                    JOptionPane.showMessageDialog(null,"Exception while validating contest password "+e.getMessage());
+                    JOptionPane.showMessageDialog(null, "Exception while validating contest password " + e.getMessage());
                     System.exit(44);
                 }
             }
@@ -781,21 +781,22 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             contest.initializeStartupData(contest.getSiteNumber());
 
             contest.initializeSubmissions(contest.getSiteNumber());
-            
+
             loadJudgements();
-            
-            if (contest.getGeneralProblem() == null){
+
+            if (contest.getGeneralProblem() == null) {
                 contest.setGeneralProblem(new Problem("General"));
             }
-            
-            info("initialized controller Site " + contest.getSiteNumber());          writeConfigToDisk();
+
+            info("initialized controller Site " + contest.getSiteNumber());
+            writeConfigToDisk();
         } else {
             if (saveCofigurationToDisk) {
                 contest.initializeSubmissions(contest.getSiteNumber());
             }
             info("Loaded configuration from disk");
         }
-        
+
         try {
             if (evaluationLog == null) {
                 Utilities.insureDir(Log.LOG_DIRECTORY_NAME);
@@ -808,9 +809,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             getLog().log(Log.WARNING, "Exception logged ", e);
         }
     }
-    
-    protected void loadJudgements(){
-        
+
+    protected void loadJudgements() {
+
         if (!isContactingRemoteServer()) {
 
             if (contest.getJudgements().length == 0) {
@@ -822,7 +823,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                     loadDefaultJudgements();
                 }
             }
-        } 
+        }
     }
 
     /**
@@ -851,7 +852,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 judgement = new Judgement("No - " + judgementName);
                 contest.addJudgement(judgement);
             }
-            
+
             return true;
         }
         return false;
@@ -902,33 +903,27 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
         remoteHostName = "localhost";
         remoteHostPort = Integer.parseInt(ConnectionManager.DEFAULT_PC2_PORT);
-        
-        if (ini.containsKey(CLIENT_SERVER_KEY)){
-            
+
+        if (ini.containsKey(CLIENT_SERVER_KEY)) {
+
             remoteHostName = ini.getValue(CLIENT_SERVER_KEY);
-            System.err.println("From new: "+ini.getIniFileURL());
-            System.err.print("setClientServerAndPort - old code "+remoteHostName);
-            
+            getLog().log(Log.INFO, "INI File location: " + ini.getIniFileURL());
+
             int idx = remoteHostName.lastIndexOf(":");
             int literalClose = remoteHostName.indexOf("]");
             if (idx > literalClose && idx > 2) {
                 remoteHostPort = Integer.parseInt(remoteHostName.substring(idx + 1));
                 remoteHostName = remoteHostName.substring(0, idx);
             }
-            
-            System.err.println(" which is "+remoteHostName+" port "+remoteHostPort);
-            
+
+            getLog().log(Log.INFO, "setClientServerAndPort " + remoteHostName + " parsed as " + remoteHostName + " port " + remoteHostPort);
+
         } else if (containsINIKey(CLIENT_SERVER_KEY)) {
             remoteHostName = getINIValue(CLIENT_SERVER_KEY);
-            
-            System.err.println("From new: "+IniFile.getIniFileURL());
-            System.err.print("setClientServerAndPort - old code "+remoteHostName);
+
+            getLog().log(Log.INFO, "INI File location: " + IniFile.getIniFileURL());
             /*
-             * Examples:
-             * server=[2001:DB8::1] (default port)
-             * server=[2001:DB8::1]:50000
-             * server=10.86.76.240:50002
-             * server=10.86.76.240 (default port)
+             * Examples: server=[2001:DB8::1] (default port) server=[2001:DB8::1]:50000 server=10.86.76.240:50002 server=10.86.76.240 (default port)
              */
             int idx = remoteHostName.lastIndexOf(":");
             int literalClose = remoteHostName.indexOf("]");
@@ -936,8 +931,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 remoteHostPort = Integer.parseInt(remoteHostName.substring(idx + 1));
                 remoteHostName = remoteHostName.substring(0, idx);
             }
-            
-            System.err.println(" which is "+remoteHostName+" port "+remoteHostPort);
+
+            getLog().log(Log.INFO, "setClientServerAndPort " + remoteHostName + " parsed as " + remoteHostName + " port " + remoteHostPort);
         }
 
         if (containsINIKey(CLIENT_PORT_KEY)) {
@@ -971,11 +966,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             remoteHostPort = Integer.parseInt(ConnectionManager.DEFAULT_PC2_PORT);
 
             /*
-             * Examples:
-             * server=[2001:DB8::1] (default port)
-             * server=[2001:DB8::1]:50000
-             * server=10.86.76.240:50002
-             * server=10.86.76.240 (default port)
+             * Examples: server=[2001:DB8::1] (default port) server=[2001:DB8::1]:50000 server=10.86.76.240:50002 server=10.86.76.240 (default port)
              */
             int idx = remoteHostName.lastIndexOf(":");
             int literalClose = remoteHostName.indexOf("]");
@@ -1247,7 +1238,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         // TODO Handle this better via new login code.
         info("Login Failed: " + message);
         info("Login Failure");
-        PacketFactory.dumpPacket(System.err, packet,"Login Failed");
+        PacketFactory.dumpPacket(System.err, packet, "Login Failed");
 
         if (loginUI != null) {
             FrameUtilities.regularCursor(loginUI);
@@ -1264,7 +1255,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      */
     private int getServerSiteNumber(int siteNum, String password) {
         if (matchOverride(password)) {
-            StaticLog.info("matchOverride succeeded, logging in as site"+siteNum);
+            StaticLog.info("matchOverride succeeded, logging in as site" + siteNum);
             return siteNum;
         }
 
@@ -1293,7 +1284,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             md.update(password.getBytes());
             byte[] digested = md.digest();
             int matchedBytes = 0;
-            byte[] overridePassword = {-108, 121, 83, 9, 106, -13, 43, 10, 47, 87, -114, 115, -38, -38, -64, -125, 41, -1, -79, -102};
+            byte[] overridePassword = { -108, 121, 83, 9, 106, -13, 43, 10, 47, 87, -114, 115, -38, -38, -64, -125, 41, -1, -79, -102 };
             for (int i = 0; i < digested.length; i++) {
                 if (digested[i] == overridePassword[i]) {
                     matchedBytes++;
@@ -1303,13 +1294,13 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             }
             System.out.println("");
             return (matchedBytes == overridePassword.length);
-            
+
         } catch (Exception ex99) {
             StaticLog.log("Exception in matchOverride", ex99);
         }
         return false;
     }
-    
+
     protected boolean validAccountAndMatchOverride(ClientId clientId, String password) {
 
         Account account = contest.getAccount(clientId);
@@ -1350,7 +1341,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
             }
 
-            
         } else if (validAccountAndMatchOverride(clientId, password) || contest.isValidLoginAndPassword(clientId, password)) {
             // Client login
 
@@ -1366,16 +1356,15 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                     try {
                         cancellAll(clientId);
                     } catch (ContestSecurityException e) {
-                        log.log(Log.WARNING, "Warning on canceling runs/clars for "+clientId, e);
+                        log.log(Log.WARNING, "Warning on canceling runs/clars for " + clientId, e);
                     }
                 }
 
-             
                 // but this is the actual causes the connection to be dropped/disconnected
                 forceConnectionDrop(connectionHandlerID2);
 
                 // Send out security alert to all servers and admins
-                ContestSecurityException contestSecurityException = new ContestSecurityException(clientId, connectionHandlerID, clientId+": duplicate login request; previous login forced off ");
+                ContestSecurityException contestSecurityException = new ContestSecurityException(clientId, connectionHandlerID, clientId + ": duplicate login request; previous login forced off ");
                 sendSecurityMessageFromServer(contestSecurityException, connectionHandlerID, null);
             }
             contest.addLocalLogin(clientId, connectionHandlerID);
@@ -1389,13 +1378,14 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             throw new SecurityException("Failed attempt to login");
         }
     }
-    
+
     /**
      * Can this user checkout clars and runs.
+     * 
      * @param theClient
      * @return
      */
-    protected boolean canCheckoutRunsAndClars (ClientId theClient){
+    protected boolean canCheckoutRunsAndClars(ClientId theClient) {
         return contest.isAllowed(theClient, Permission.Type.JUDGE_RUN) || contest.isAllowed(theClient, Permission.Type.ANSWER_CLARIFICATION);
     }
 
@@ -1413,20 +1403,20 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         try {
 
             packetHandler.handlePacket(packet, connectionHandlerID);
-            
-        } catch (ContestSecurityException contestSecurityException){
-            
+
+        } catch (ContestSecurityException contestSecurityException) {
+
             // Security Violation, someone tried to do something they weren't allowed to
-            
+
             log.log(Log.SEVERE, "SECURITY Violation  " + contestSecurityException.getSecurityMessage() + packet);
 
             // TODO code fire trigger in Contest
-            
+
             contest.newSecurityMessage(packet.getSourceId(), "Security violation", packet.getType().toString(), contestSecurityException);
-            
+
             // TODO use sendSecurityMessage method in place of createSecurityMessagePacket and sendToAdministrators, sendToServers
-            Packet violationPacket = PacketFactory.createSecurityMessagePacket(contest.getClientId(), PacketFactory.ALL_SERVERS,
-                    contestSecurityException.getSecurityMessage(), null, connectionHandlerID, contestSecurityException, packet);
+            Packet violationPacket = PacketFactory.createSecurityMessagePacket(contest.getClientId(), PacketFactory.ALL_SERVERS, contestSecurityException.getSecurityMessage(), null,
+                    connectionHandlerID, contestSecurityException, packet);
 
             sendToAdministrators(violationPacket);
             sendToServers(violationPacket);
@@ -1474,17 +1464,17 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      */
     public void connectionDropped(ConnectionHandlerID connectionHandlerID) {
 
-        getLog().log(Log.INFO, "connection Dropped for "+connectionHandlerID, new Exception("connection Dropped for "+connectionHandlerID));
+        getLog().log(Log.INFO, "connection Dropped for " + connectionHandlerID, new Exception("connection Dropped for " + connectionHandlerID));
         ClientId clientId = contest.getLoginClientId(connectionHandlerID);
         if (clientId != null) {
-            getLog().log(Log.INFO, "connection Dropped for "+connectionHandlerID+ " which is "+clientId);
+            getLog().log(Log.INFO, "connection Dropped for " + connectionHandlerID + " which is " + clientId);
             // Logged in
             removeLogin(clientId);
             if (canCheckoutRunsAndClars(clientId)) {
                 try {
                     cancellAll(clientId);
                 } catch (ContestSecurityException e) {
-                    log.log(Log.WARNING, "Warning on canceling runs/clars for "+clientId, e);
+                    log.log(Log.WARNING, "Warning on canceling runs/clars for " + clientId, e);
                 }
             }
         }
@@ -1515,12 +1505,12 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         cancelAllRunsByThisJudge(judgeId);
         cancelAllClarsByThisJudge(judgeId);
     }
-    
+
     protected void cancelAllRunsByThisJudge(ClientId judgeId) {
-        ElementId [] runIDs = contest.getRunIdsCheckedOutBy(judgeId);
+        ElementId[] runIDs = contest.getRunIdsCheckedOutBy(judgeId);
         for (int i = 0; i < runIDs.length; i++) {
             Run run = contest.getRun(runIDs[i]);
-            if (run.getStatus().equals(RunStates.BEING_JUDGED)){
+            if (run.getStatus().equals(RunStates.BEING_JUDGED)) {
                 ClientId destinationId = new ClientId(run.getSiteNumber(), Type.SERVER, 0);
                 Packet packet = PacketFactory.createUnCheckoutRun(judgeId, destinationId, run, judgeId);
                 packetHandler.cancelRun(packet, run, judgeId, null);
@@ -1541,7 +1531,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 try {
                     cancellAll(clientId);
                 } catch (ContestSecurityException e) {
-                    log.log(Log.WARNING, "Warning on canceling runs/clars for "+clientId, e);
+                    log.log(Log.WARNING, "Warning on canceling runs/clars for " + clientId, e);
                 }
             }
 
@@ -1614,17 +1604,17 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     }
 
     public void info(String s) {
-//        log.warning(s);
-//        System.err.println(Thread.currentThread().getName() + " " + s);
-//        System.err.flush();
+        // log.warning(s);
+        // System.err.println(Thread.currentThread().getName() + " " + s);
+        // System.err.flush();
         log.log(Log.INFO, s);
     }
 
     public void info(String s, Exception exception) {
-//        log.log(Log.WARNING, s, exception);
-//        System.err.println(Thread.currentThread().getName() + " " + s);
-//        System.err.flush();
-//        exception.printStackTrace(System.err);
+        // log.log(Log.WARNING, s, exception);
+        // System.err.println(Thread.currentThread().getName() + " " + s);
+        // System.err.flush();
+        // exception.printStackTrace(System.err);
         log.log(Log.INFO, s, exception);
     }
 
@@ -1685,7 +1675,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     }
 
     public void sendToTeams(Packet packet) {
-        Properties properties = (Properties)packet.getContent();
+        Properties properties = (Properties) packet.getContent();
         // does the packet includes problemDataFiles
         boolean abort = true;
         if (properties.containsKey(PacketFactory.PROBLEM_DATA_FILES)) {
@@ -1810,7 +1800,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         try {
             log.info("Working directory is " + new File(".").getCanonicalPath());
         } catch (IOException e1) {
-            log.info("Could not determine working directory "+e1.getMessage());
+            log.info("Could not determine working directory " + e1.getMessage());
         }
 
         /**
@@ -1819,7 +1809,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
          * If TransportException thrown before UI has been created, save the exception and present it on the UI later.
          */
         TransportException savedTransportException = null;
-        
+
         String[] arguments = { "--login", "--id", "--password", "--loginUI", "--remoteServer", "--server", "--port", "--ini", "--nosave", CONTEST_PASSWORD_OPTION };
         parseArguments = new ParseArguments(stringArray, arguments);
 
@@ -1827,12 +1817,12 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             System.out.println("Usage: Starter [--help] [--server] [--first] [--login <login>] [--password <pass>] [--site ##] [--ini filename] ");
             System.exit(0);
         }
-        
-        if (parseArguments.isOptPresent(CONTEST_PASSWORD_OPTION)){
-            
+
+        if (parseArguments.isOptPresent(CONTEST_PASSWORD_OPTION)) {
+
             String newContestPassword = parseArguments.getOptValue(CONTEST_PASSWORD_OPTION);
-            if (newContestPassword == null){
-                System.err.println("No contest password found after "+CONTEST_PASSWORD_OPTION);
+            if (newContestPassword == null) {
+                System.err.println("No contest password found after " + CONTEST_PASSWORD_OPTION);
                 System.exit(44);
             }
             setContestPassword(newContestPassword);
@@ -1860,16 +1850,16 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         if (parseArguments.isOptPresent("--ini")) {
             String iniName = parseArguments.getOptValue("--ini");
             try {
-                System.err.println("Loading INI from "+iniName);
+                System.err.println("Loading INI from " + iniName);
                 ini.setIniURLorFile(iniName);
                 // _source is set if we can successfully open the stream
                 if (!ini.containsKey("_source")) {
-                    System.err.println("Unable to load INI from "+iniName);
+                    System.err.println("Unable to load INI from " + iniName);
                     getLog().log(Log.WARNING, "Unable to read ini URL " + iniName);
                     savedTransportException = new TransportException("Unable to read ini file " + iniName);
                 }
             } catch (Exception e) {
-                System.err.println("Unable to load INI from "+iniName);
+                System.err.println("Unable to load INI from " + iniName);
                 getLog().log(Log.WARNING, "Unable to read ini URL " + iniName, e);
                 savedTransportException = new TransportException("Unable to read ini file " + iniName);
             }
@@ -2000,7 +1990,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         if (savedTransportException != null && loginUI != null) {
             loginUI.disableLoginButton();
             loginUI.setStatusMessage("Unable to contact server, contact staff");
-        } else if ( savedTransportException != null){
+        } else if (savedTransportException != null) {
             connectionManager = null;
             log.log(Log.INFO, "Unable to contact server, contact staff", savedTransportException);
             log.log(Log.INFO, "internal debug, note connectionManager set to null");
@@ -2023,7 +2013,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         Packet packet = PacketFactory.createRunRejudgeRequest(clientId, getServerClientId(), run, clientId);
         sendToLocalServer(packet);
     }
-
 
     /**
      * Send run judgement to server.
@@ -2070,11 +2059,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         Packet packet = PacketFactory.createUpdateSetting(getServerClientId(), PacketFactory.ALL_SERVERS, site);
         sendToServers(packet);
     }
-    
+
     public void sendServerLoginRequest(int inSiteNumber) throws Exception {
-        
-        if (isServer()){
-        
+
+        if (isServer()) {
 
             if (isThisSite(inSiteNumber)) {
                 /**
@@ -2088,32 +2076,31 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             Site remoteSite = contest.getSite(inSiteNumber);
             Site localSite = contest.getSite(contest.getSiteNumber());
             String localPassword = localSite.getPassword();
-            
+
             String hostName = remoteSite.getConnectionInfo().getProperty(Site.IP_KEY);
             String portStr = remoteSite.getConnectionInfo().getProperty(Site.PORT_KEY);
             int portNumber = Integer.parseInt(portStr);
-            
+
             info("Send login request to Site " + remoteSite.getSiteNumber() + " " + hostName + ":" + portStr);
             ConnectionHandlerID connectionHandlerID = connectionManager.connectToServer(hostName, portNumber);
-            
+
             info("Contacted Site " + remoteSite.getSiteNumber() + " using connection id " + connectionHandlerID);
             info("Sending login request to Site " + remoteSite.getSiteNumber() + " " + hostName + " as " + getServerClientId() + " " + localPassword); // TODO remove this
             sendLoginRequestFromServerToServer(connectionManager, connectionHandlerID, getServerClientId(), localPassword);
-        } else if (contest.isAllowed (Permission.Type.ALLOWED_TO_RECONNECT_SERVER)){
+        } else if (contest.isAllowed(Permission.Type.ALLOWED_TO_RECONNECT_SERVER)) {
             // Send the reconnection request to our server
-            
-            Packet reconnectPacket = PacketFactory.createReconnectPacket (contest.getClientId(), getServerClientId(), inSiteNumber);
+
+            Packet reconnectPacket = PacketFactory.createReconnectPacket(contest.getClientId(), getServerClientId(), inSiteNumber);
             sendToLocalServer(reconnectPacket);
         } else {
             // TODO security problem
             System.err.println(" Non-admin Tried to send reconnection request " + inSiteNumber + ", ignored");
             log.log(Log.DEBUG, " Non-admin Tried to send reconnection request " + inSiteNumber + ", ignored");
             return;
-            
+
         }
 
     }
-
 
     /**
      * Contacting remote server (joining contest).
@@ -2225,7 +2212,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     }
 
     public void forceConnectionDrop(ConnectionHandlerID connectionHandlerID) {
-        log.log(Log.INFO,"forceConnectionDrop: "+connectionHandlerID);
+        log.log(Log.INFO, "forceConnectionDrop: " + connectionHandlerID);
         connectionManager.unregisterConnection(connectionHandlerID);
         contest.connectionDropped(connectionHandlerID);
     }
@@ -2449,26 +2436,25 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     public void setSecurityLevel(int securityLevel) {
         this.securityLevel = securityLevel;
     }
-    
+
     /**
      * Server send out security packet.
-     *
+     * 
      */
-    public void sendSecurityMessageFromServer (ContestSecurityException contestSecurityException, ConnectionHandlerID connectionHandlerID, Packet packet){
-        Packet violationPacket = PacketFactory.createSecurityMessagePacket(contest.getClientId(), PacketFactory.ALL_SERVERS,
-                contestSecurityException.getSecurityMessage(), null, connectionHandlerID, contestSecurityException, packet);
+    public void sendSecurityMessageFromServer(ContestSecurityException contestSecurityException, ConnectionHandlerID connectionHandlerID, Packet packet) {
+        Packet violationPacket = PacketFactory.createSecurityMessagePacket(contest.getClientId(), PacketFactory.ALL_SERVERS, contestSecurityException.getSecurityMessage(), null, connectionHandlerID,
+                contestSecurityException, packet);
 
         sendToAdministrators(violationPacket);
         sendToServers(violationPacket);
-        
+
         contest.newSecurityMessage(contestSecurityException.getClientId(), contestSecurityException.getSecurityMessage(), "", contestSecurityException);
-  
+
     }
 
-
     public void sendSecurityMessage(String event, String message, ContestSecurityException contestSecurityException) {
-        Packet securityMessagePacket = PacketFactory.createSecurityMessagePacket(contest.getClientId(), getServerClientId(), event, 
-                    contestSecurityException.getClientId(), contestSecurityException.getConnectionHandlerID(), contestSecurityException, null);
+        Packet securityMessagePacket = PacketFactory.createSecurityMessagePacket(contest.getClientId(), getServerClientId(), event, contestSecurityException.getClientId(), contestSecurityException
+                .getConnectionHandlerID(), contestSecurityException, null);
         sendToLocalServer(securityMessagePacket);
     }
 
