@@ -923,8 +923,7 @@ public class ProblemPane extends JPanePlugin {
             computerJudging.setSelected(false);
             manualReview.setSelected(false);
             prelimaryNotification.setSelected(false);
-            manualReview.setEnabled(false);
-            prelimaryNotification.setEnabled(false);
+            manualJudging.setEnabled(true);
 
         }
 
