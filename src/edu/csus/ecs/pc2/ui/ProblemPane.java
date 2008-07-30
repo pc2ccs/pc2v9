@@ -1875,7 +1875,7 @@ public class ProblemPane extends JPanePlugin {
     private JRadioButton getManualJudging() {
         if (manualJudging == null) {
             manualJudging = new JRadioButton();
-            manualJudging.setBounds(new java.awt.Rectangle(106, 174, 156, 21));
+            manualJudging.setBounds(new java.awt.Rectangle(100,174,156,21));
             manualJudging.setText("Manual Judging");
             manualJudging.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
