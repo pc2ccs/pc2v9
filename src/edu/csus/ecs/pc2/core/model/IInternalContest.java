@@ -248,6 +248,10 @@ public interface IInternalContest {
 
     void removeLanguageListener(ILanguageListener languageListener);
 
+    void addChangePasswordListener(IChangePasswordListener changePasswordListener);
+
+    void removeChangePasswordListener(IChangePasswordListener changePasswordListener);
+
     void addLoginListener(ILoginListener loginListener);
 
     void removeLoginListener(ILoginListener loginListener);
@@ -696,5 +700,14 @@ public interface IInternalContest {
     void addSecurityMessageListener(ISecurityMessageListener securityMessageListener);
 
     void removeSecurityMessageListener(ISecurityMessageListener securityMessageListener);
+
+    /**
+     * Password change attempted.
+     * 
+     * @param success if true, password was changed
+     * @param clientId which client's attempted to change their password 
+     * @param message a helpful message about why the password was or was not changed
+     */
+    void passwordChanged(boolean success, ClientId clientId, String message);
 
 }

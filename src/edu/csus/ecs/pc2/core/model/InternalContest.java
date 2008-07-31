@@ -33,6 +33,7 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.PasswordChangeEvent.Action;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.security.ISecurityMessageListener;
 import edu.csus.ecs.pc2.core.security.Permission;
@@ -62,6 +63,8 @@ public class InternalContest implements IInternalContest {
     private Vector<IProblemListener> problemListenerList = new Vector<IProblemListener>();
 
     private Vector<ILanguageListener> languageListenerList = new Vector<ILanguageListener>();
+
+    private Vector<IChangePasswordListener> changePasswordListenerList = new Vector<IChangePasswordListener>();
 
     private Vector<ILoginListener> loginListenerList = new Vector<ILoginListener>();
 
@@ -466,7 +469,7 @@ public class InternalContest implements IInternalContest {
         LoginEvent loginEvent = new LoginEvent(LoginEvent.Action.LOGIN_DENIED, clientId, connectionHandlerID, message);
         fireLoginListener(loginEvent);
     }
-
+    
     public void addLanguage(Language language) {
         languageDisplayList.add(language);
         languageList.add(language);
@@ -741,6 +744,14 @@ public class InternalContest implements IInternalContest {
 
     public void removeLanguageListener(ILanguageListener languageListener) {
         languageListenerList.remove(languageListener);
+    }
+    
+    public void addChangePasswordListener(IChangePasswordListener changePasswordListener){
+        changePasswordListenerList.add(changePasswordListener);
+    }
+
+    public void removeChangePasswordListener(IChangePasswordListener changePasswordListener){
+        changePasswordListenerList.remove(changePasswordListener);
     }
 
     public void addLoginListener(ILoginListener loginListener) {
@@ -1238,6 +1249,29 @@ public class InternalContest implements IInternalContest {
     
     public Clarification[] getClarifications() {
         return clarificationList.getList();
+    }
+    
+    public void passwordChanged(boolean success, ClientId clientId, String message) {
+        Action action = Action.PASSWORD_NOT_CHANGED;
+        if (success) {
+            action = Action.PASSWORD_CHANGED;
+        }
+        PasswordChangeEvent passwordChangeEvent = new PasswordChangeEvent(clientId, action, message);
+        firePasswordChangeListener(passwordChangeEvent);
+    }
+
+    private void firePasswordChangeListener(PasswordChangeEvent passwordChangeEvent) {
+
+        for (int i = 0; i < changePasswordListenerList.size(); i++) {
+
+            if (passwordChangeEvent.getAction() == PasswordChangeEvent.Action.PASSWORD_CHANGED) {
+                changePasswordListenerList.elementAt(i).passwordChanged(passwordChangeEvent);
+            } else if (passwordChangeEvent.getAction() == PasswordChangeEvent.Action.PASSWORD_NOT_CHANGED) {
+                changePasswordListenerList.elementAt(i).passwordNotChanged(passwordChangeEvent);
+            } else {
+                throw new IllegalArgumentException("Unhandled  ");
+            }
+        }
     }
 
     public void updateLanguage(Language language) {

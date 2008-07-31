@@ -400,12 +400,7 @@ public class PacketHandler {
 
     private void handlePasswordChangeResults(Packet packet) {
         
-        // TODO show them what happened in GUI, eh ? invoke contest message to invoke a listner, or two.
-        
-//        prop.put(CLIENT_ID, source);
-//        prop.put(PASSWORD_CHANGED, new Boolean(passwordChanged));
-//        prop.put(PacketFactory.MESSAGE_STRING, message);
-        
+        ClientId clientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
         Boolean passwordChanged = (Boolean) PacketFactory.getObjectValue(packet, PacketFactory.PASSWORD_CHANGED);
         String message = (String) PacketFactory.getObjectValue(packet, PacketFactory.MESSAGE_STRING);
         
@@ -417,6 +412,9 @@ public class PacketHandler {
         }
         
         controller.getLog().log(Log.INFO, mess);
+        
+        contest.passwordChanged (passwordChanged.booleanValue(), clientId, message);
+        
     }
 
     /**

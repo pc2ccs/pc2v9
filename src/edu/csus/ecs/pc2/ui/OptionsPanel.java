@@ -5,6 +5,7 @@ import java.awt.FlowLayout;
 import java.util.logging.Logger;
 
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
@@ -13,7 +14,9 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
+import edu.csus.ecs.pc2.core.model.IChangePasswordListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.PasswordChangeEvent;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.security.ISecurityMessageListener;
 import edu.csus.ecs.pc2.core.security.Permission;
@@ -114,6 +117,7 @@ public class OptionsPanel extends JPanePlugin {
         super.setContestAndController(inContest, inController);
         
         getContest().addAccountListener(new AccountListenerImplementation());
+        getContest().addChangePasswordListener(new ChangePasswordListenerImplementation());
         
         initializePermissions();
         
@@ -332,6 +336,31 @@ public class OptionsPanel extends JPanePlugin {
             changePasswordFrame.setVisible(true);
         }
     }
+    
+    protected void showPasswordMessage(final String message) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                JOptionPane.showMessageDialog(null, message);
+            }
+        });
+    }
+
+    /**
+     * Change Password Listener Implementation.
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    public class ChangePasswordListenerImplementation implements IChangePasswordListener {
+        public void passwordChanged(PasswordChangeEvent event) {
+            showPasswordMessage(event.getMessage());
+        }
+
+        public void passwordNotChanged(PasswordChangeEvent event) {
+            showPasswordMessage(event.getMessage());
+        }
+    }
+    
     /**
      * Account Listener for OptionsPanel.
      *  
