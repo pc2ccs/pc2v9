@@ -1462,6 +1462,9 @@ public class RunsPanel extends JPanePlugin {
                 }
             };
             editFilterFrame = new EditFilterFrame(filter, filterFrameTitle,  callback);
+            if (displayTeamName != null){
+                editFilterFrame.setDisplayTeamName(displayTeamName);
+            }
         }
         return editFilterFrame;
     }

@@ -6,6 +6,7 @@ import java.awt.BorderLayout;
 import javax.swing.JButton;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.model.DisplayTeamName;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.report.FilterReport;
@@ -268,6 +269,10 @@ public class EditFilterFrame extends JFrame implements UIPlugin {
      */
     public void showJList(ListNames listNames, boolean showList) {
         editFilterPane.showJList(listNames, showList);
+    }
+    
+    public void setDisplayTeamName(DisplayTeamName displayTeamName) {
+        editFilterPane.setDisplayTeamName(displayTeamName);
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

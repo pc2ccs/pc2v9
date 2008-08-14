@@ -20,6 +20,7 @@ import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.DisplayTeamName;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.FilterFormatter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -102,6 +103,8 @@ public class EditFilterPane extends JPanePlugin {
     private JLabel toTimeLabel = null;
 
     private JTextField toTimeTextField = null;
+    
+    private DisplayTeamName displayTeamName = null;
 
     /**
      * JList names in EditFilterPane.
@@ -154,7 +157,7 @@ public class EditFilterPane extends JPanePlugin {
         private static final long serialVersionUID = 991427730095971274L;
 
         private Object contents;
-
+        
         public WrapperJCheckBox(Object object) {
             this(object, object.toString());
         }
@@ -163,6 +166,12 @@ public class EditFilterPane extends JPanePlugin {
             super();
             contents = object;
             setText(text);
+        }
+
+        public WrapperJCheckBox(ClientId clientId, DisplayTeamName displayTeamName) {
+            super();
+            contents = clientId;
+            setText(displayTeamName.getDisplayName(clientId));
         }
 
         public Object getContents() {
@@ -459,8 +468,13 @@ public class EditFilterPane extends JPanePlugin {
         Arrays.sort(accounts, new AccountComparator());
 
         teamListModel.removeAllElements();
+        WrapperJCheckBox wrapperJCheckBox = null;
         for (Account account : accounts) {
-            WrapperJCheckBox wrapperJCheckBox = new WrapperJCheckBox(account.getClientId());
+            if (displayTeamName != null) {
+                wrapperJCheckBox = new WrapperJCheckBox(account.getClientId(), displayTeamName);
+            } else {
+                wrapperJCheckBox = new WrapperJCheckBox(account.getClientId());
+            }
             if (filter.isFilteringAccounts()) {
                 wrapperJCheckBox.setSelected(filter.matchesAccount(account));
             }
@@ -470,7 +484,7 @@ public class EditFilterPane extends JPanePlugin {
         runStatesListModel.removeAllElements();
         RunStates[] runStates = RunStates.values();
         for (RunStates runState : runStates) {
-            WrapperJCheckBox wrapperJCheckBox = new WrapperJCheckBox(runState);
+            wrapperJCheckBox = new WrapperJCheckBox(runState);
             if (filter.isFilteringRunStates()) {
                 wrapperJCheckBox.setSelected(filter.matchesRunState(runState));
             }
@@ -721,6 +735,14 @@ public class EditFilterPane extends JPanePlugin {
             toTimeTextField.setPreferredSize(new java.awt.Dimension(60, 20));
         }
         return toTimeTextField;
+    }
+
+    public DisplayTeamName getDisplayTeamName() {
+        return displayTeamName;
+    }
+
+    public void setDisplayTeamName(DisplayTeamName displayTeamName) {
+        this.displayTeamName = displayTeamName;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
