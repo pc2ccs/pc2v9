@@ -20,13 +20,17 @@ import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
+import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
 import edu.csus.ecs.pc2.core.model.DisplayTeamName;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.FilterFormatter;
+import edu.csus.ecs.pc2.core.model.IContestInformationListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 
 /**
@@ -105,6 +109,8 @@ public class EditFilterPane extends JPanePlugin {
     private JTextField toTimeTextField = null;
     
     private DisplayTeamName displayTeamName = null;
+
+    private boolean isJudgeModule = false;
 
     /**
      * JList names in EditFilterPane.
@@ -190,7 +196,7 @@ public class EditFilterPane extends JPanePlugin {
         this.setSize(new java.awt.Dimension(493, 337));
         this.add(getMainPane(), java.awt.BorderLayout.CENTER);
     }
-
+    
     @Override
     public String getPluginTitle() {
         return "Edit Filter";
@@ -462,29 +468,13 @@ public class EditFilterPane extends JPanePlugin {
             }
             judgementListModel.addElement(wrapperJCheckBox);
         }
-
-        Vector<Account> vector = getContest().getAccounts(ClientType.Type.TEAM);
-        Account[] accounts = (Account[]) vector.toArray(new Account[vector.size()]);
-        Arrays.sort(accounts, new AccountComparator());
-
-        teamListModel.removeAllElements();
-        WrapperJCheckBox wrapperJCheckBox = null;
-        for (Account account : accounts) {
-            if (displayTeamName != null) {
-                wrapperJCheckBox = new WrapperJCheckBox(account.getClientId(), displayTeamName);
-            } else {
-                wrapperJCheckBox = new WrapperJCheckBox(account.getClientId());
-            }
-            if (filter.isFilteringAccounts()) {
-                wrapperJCheckBox.setSelected(filter.matchesAccount(account));
-            }
-            teamListModel.addElement(wrapperJCheckBox);
-        }
+        
+        loadTeamNames (filter);
 
         runStatesListModel.removeAllElements();
         RunStates[] runStates = RunStates.values();
         for (RunStates runState : runStates) {
-            wrapperJCheckBox = new WrapperJCheckBox(runState);
+            WrapperJCheckBox wrapperJCheckBox = new WrapperJCheckBox(runState);
             if (filter.isFilteringRunStates()) {
                 wrapperJCheckBox.setSelected(filter.matchesRunState(runState));
             }
@@ -502,11 +492,73 @@ public class EditFilterPane extends JPanePlugin {
             }
         }
     }
+    
+    /**
+     * Populate the team names when with display mask.
+     * 
+     * This method also retains and re-populates the teams selected
+     * not based on the input filter, but based on what the user has
+     * selected.
+     */
+    protected void populateTeamNamesWithDisplayMask(){
+        
+        if (isJudgeModule) {
+            ContestInformation contestInformation = getContest().getContestInformation();
+
+            if (displayTeamName == null) {
+                displayTeamName = new DisplayTeamName();
+            }
+
+            displayTeamName.setTeamDisplayMask(contestInformation.getTeamDisplayMode());
+
+            // Save off selected teams into a filter.
+
+            Filter teamsFilter = new Filter();
+
+            teamsFilter.clearAccountList();
+            Enumeration enumeration = teamListModel.elements();
+            while (enumeration.hasMoreElements()) {
+                WrapperJCheckBox element = (WrapperJCheckBox) enumeration.nextElement();
+                if (element.isSelected()) {
+                    Object object = element.getContents();
+                    teamsFilter.addAccount((ClientId) object);
+                }
+            }
+
+            // load selected teams and set checkbox based on filter
+            loadTeamNames(teamsFilter);
+
+        }
+    }
+
+    private void loadTeamNames(Filter inFilter) {
+        Vector<Account> vector = getContest().getAccounts(ClientType.Type.TEAM);
+        Account[] accounts = (Account[]) vector.toArray(new Account[vector.size()]);
+        Arrays.sort(accounts, new AccountComparator());
+
+        teamListModel.removeAllElements();
+        WrapperJCheckBox wrapperJCheckBox = null;
+        for (Account account : accounts) {
+            if (displayTeamName != null) {
+                wrapperJCheckBox = new WrapperJCheckBox(account.getClientId(), displayTeamName);
+            } else {
+                wrapperJCheckBox = new WrapperJCheckBox(account.getClientId());
+            }
+            if (inFilter.isFilteringAccounts()) {
+                wrapperJCheckBox.setSelected(inFilter.matchesAccount(account));
+            }
+            teamListModel.addElement(wrapperJCheckBox);
+        }
+    }
 
     @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
 
         super.setContestAndController(inContest, inController);
+        
+        getContest().addContestInformationListener(new ContestInformationListenerImplementation());
+
+        isJudgeModule = getContest().getClientId().getClientType().equals(Type.JUDGE);
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -580,8 +632,6 @@ public class EditFilterPane extends JPanePlugin {
             filter.setEndElapsedTime(Long.parseLong(getToTimeTextField().getText()));
         }
         
-//        printAllSpecifiers("getFilter", getContest(), filter);
-
         return filter;
     }
 
@@ -683,7 +733,8 @@ public class EditFilterPane extends JPanePlugin {
                 throw new InvalidParameterException("Invalid listNames: " + listNames);
         }
 
-        // TODO tighten up layout somehow
+        // TODO tighten up layout somehow, when the above changes are
+        // made there are gaps where the hidden frames are
 
         this.doLayout();
     }
@@ -744,5 +795,32 @@ public class EditFilterPane extends JPanePlugin {
     public void setDisplayTeamName(DisplayTeamName displayTeamName) {
         this.displayTeamName = displayTeamName;
     }
+    
+    /**
+     * Contest Listener for Edit Filter Pane.
+     * 
+     * This listens for changes in the way the team display is to 
+     * displayed aka the  Team Information Displayed to Judges setting
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+
+    public class ContestInformationListenerImplementation implements IContestInformationListener {
+
+        public void contestInformationAdded(ContestInformationEvent event) {
+            populateTeamNamesWithDisplayMask();
+        }
+
+        public void contestInformationChanged(ContestInformationEvent event) {
+            populateTeamNamesWithDisplayMask();
+        }
+
+        public void contestInformationRemoved(ContestInformationEvent event) {
+            populateTeamNamesWithDisplayMask();
+        }
+
+    }
+
 
 } // @jve:decl-index=0:visual-constraint="10,10"
