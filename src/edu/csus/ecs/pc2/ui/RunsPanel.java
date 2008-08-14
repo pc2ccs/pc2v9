@@ -100,7 +100,17 @@ public class RunsPanel extends JPanePlugin {
 
     private JLabel rowCountLabel = null;
 
+    /**
+     * Show huh
+     */
     private boolean showNewRunsOnly = false;
+    
+    /**
+     * Filter that does not change.
+     * 
+     * Used to do things like insure only New runs or Judged runs 
+     */
+    private Filter requiredFilter = new Filter();
 
     /**
      * Show who is judging column and status.
@@ -108,6 +118,9 @@ public class RunsPanel extends JPanePlugin {
      */
     private boolean showJudgesInfo = true;
 
+    /**
+     * User filter
+     */
     private Filter filter = new Filter();
 
     private JButton autoJudgeButton = null;
@@ -331,7 +344,6 @@ public class RunsPanel extends JPanePlugin {
     }
 
     private String getLanguageTitle(ElementId languageId) {
-        // TODO Auto-generated method stub
         for (Language language : getContest().getLanguages()) {
             if (language.getElementId().equals(languageId)) {
                 return language.toString();
@@ -349,7 +361,6 @@ public class RunsPanel extends JPanePlugin {
     }
 
     private String getSiteTitle(String string) {
-        // TODO Auto-generated method stub
         return "Site " + string;
     }
 
@@ -389,7 +400,7 @@ public class RunsPanel extends JPanePlugin {
         }
 
         public void runRemoved(RunEvent event) {
-            // TODO Auto-generated method stub
+            updateRunRow(event.getRun(), event.getWhoModifiedRun(), true);
         }
 
         /**
@@ -611,9 +622,17 @@ public class RunsPanel extends JPanePlugin {
     public void updateRunRow(final Run run, final ClientId whoModifiedId, final boolean autoSizeAndSort) {
 
         if (filter != null) {
-
             if (!filter.matches(run)) {
                 // if run does not match filter, be sure to remove it from grid
+                // This applies when a run is New then BEING_JUDGED and other conditions.
+                removeRunRow(run);
+                return;
+            }
+        }
+        
+        if (requiredFilter != null) {
+            if (!requiredFilter.matches(run)) {
+                // if run does not match requiredFilter, be sure to remove it from grid
                 // This applies when a run is New then BEING_JUDGED and other conditions.
                 removeRunRow(run);
                 return;
@@ -654,7 +673,7 @@ public class RunsPanel extends JPanePlugin {
                     // return focus to the other frame if it is around
                     /*
                      * XXX this is hack which causes the frame to flicker when coming from the listbox double click as it comes in front, goes behind, then comes back in front. But could not find
-                     * another way to keep focus on the selectJudgementFrame, otherwise it would be beind the RunsPanel
+                     * another way to keep focus on the selectJudgementFrame, otherwise it would be behind the RunsPanel
                      */
                     selectJudgementFrame.requestFocus();
                 }
@@ -686,6 +705,13 @@ public class RunsPanel extends JPanePlugin {
         }
 
         for (Run run : runs) {
+
+            if (requiredFilter != null) {
+                if (!requiredFilter.matches(run)) {
+                    removeRunRow(run);
+                    continue;
+                }
+            }
 
 //            System.out.println("debug22 matches "+filter.matches(run)+" run is "+run);
             if (filter != null) {
@@ -1040,8 +1066,8 @@ public class RunsPanel extends JPanePlugin {
             extractButton.setMnemonic(java.awt.event.KeyEvent.VK_X);
             extractButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.out.println("Extract actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
-                    // TODO code extract
+                    System.out.println("Extract actionPerformed()"); 
+                    // TODO code run extract
                 }
             });
         }
@@ -1107,8 +1133,8 @@ public class RunsPanel extends JPanePlugin {
             takeButton.setMnemonic(java.awt.event.KeyEvent.VK_T);
             takeButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.out.println("Take actionPerformed()");
-                    // TODO Auto-generated Event stub actionPerformed()
+                    System.out.println("TODO Take actionPerformed()");
+                    // TODO code Take Run
                 }
             });
         }
@@ -1317,8 +1343,11 @@ public class RunsPanel extends JPanePlugin {
         }
 
         public void contestInformationRemoved(ContestInformationEvent event) {
-            // TODO Auto-generated method stub
-
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadRunList();
+                }
+            });
         }
 
     }
@@ -1338,18 +1367,23 @@ public class RunsPanel extends JPanePlugin {
         return showNewRunsOnly;
     }
 
+    /**
+     * Shows only runs that are RunStates.NEW and RunStates.MANUAL_REVIEW.
+     * 
+     * @param showNewRunsOnly
+     */
     public void setShowNewRunsOnly(boolean showNewRunsOnly) {
         this.showNewRunsOnly = showNewRunsOnly;
-
+    
         if (showNewRunsOnly) {
-            if (filter == null) {
-                filter = new Filter();
+            if (requiredFilter == null) {
+                requiredFilter = new Filter();
             }
-            filter.addRunState(RunStates.NEW);
-            filter.addRunState(RunStates.MANUAL_REVIEW);
+            requiredFilter.addRunState(RunStates.NEW);
+            requiredFilter.addRunState(RunStates.MANUAL_REVIEW);
+        } else {
+            requiredFilter = new Filter();
         }
-        // TODO code handle if they turn off the show new clarifications only.
-
     }
 
     public boolean isShowJudgesInfo() {
@@ -1424,12 +1458,6 @@ public class RunsPanel extends JPanePlugin {
         if (editFilterFrame == null){
             Runnable callback = new Runnable(){
                 public void run() {
-                    if (showNewRunsOnly) {
-                        filter.setFilterOn();
-                        filter.addRunState(RunStates.NEW);
-                        filter.addRunState(RunStates.MANUAL_REVIEW);
-                    }
-
                     reloadRunList();
                 }
             };

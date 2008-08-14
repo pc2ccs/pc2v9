@@ -566,7 +566,7 @@ public class EditFilterPane extends JPanePlugin {
             filter.setEndElapsedTime(Long.parseLong(getToTimeTextField().getText()));
         }
         
-        printAllSpecifiers("getFilter", getContest(), filter);
+//        printAllSpecifiers("getFilter", getContest(), filter);
 
         return filter;
     }
