@@ -185,6 +185,7 @@ public class BalloonColorListPane extends JPanePlugin {
                 }
             }
             c[i] = color;
+            i++;
         }
         return c;
     }
