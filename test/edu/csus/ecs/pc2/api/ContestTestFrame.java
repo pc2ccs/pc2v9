@@ -13,6 +13,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
+import edu.csus.ecs.pc2.api.exceptions.NotLoggedInException;
 import edu.csus.ecs.pc2.api.listener.IRunEventListener;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 
@@ -489,14 +490,19 @@ public class ContestTestFrame extends JFrame {
             logoffButton.setText("Logoff");
             logoffButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    logoff();
+                    try {
+                        logoff();
+                    } catch (NotLoggedInException e1) {
+                        JOptionPane.showMessageDialog(null, "unable to logoff "+e1.getMessage());
+                        e1.printStackTrace();
+                    }
                 }
             });
         }
         return logoffButton;
     }
 
-    protected void logoff() {
+    protected void logoff() throws NotLoggedInException {
 
         if (contest == null) {
             showMessage("Not logged in");
