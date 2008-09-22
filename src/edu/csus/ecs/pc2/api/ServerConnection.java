@@ -1,9 +1,9 @@
 package edu.csus.ecs.pc2.api;
 
 import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
+import edu.csus.ecs.pc2.api.exceptions.NotLoggedInException;
 import edu.csus.ecs.pc2.api.implementation.Contest;
 import edu.csus.ecs.pc2.core.InternalController;
-import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.InternalContest;
 
@@ -72,6 +72,9 @@ public class ServerConnection {
      */
     public IContest login(String login, String password) throws LoginFailureException {
 
+        if (contest != null){
+            throw new LoginFailureException("Already logged in as: "+contest.getMyClient().getLoginName());
+        }
         internalContest = new InternalContest();
         controller = new InternalController(internalContest);
 
@@ -88,24 +91,65 @@ public class ServerConnection {
             throw new LoginFailureException(e.getMessage());
         }
     }
+    
 
     /**
      * Logoff/disconnect from the PC<sup>2</sup> server.
      * 
      * @return true if logged off, else false.
+     * @throws NotLoggedInException 
      */
-    public boolean logoff() {
-        try {
-            if (controller != null) {
-                controller.logoffUser(internalContest.getClientId());
-                contest.setLoggedIn(false);
-                return true;
-            }
-        } catch (Exception e) {
-            controller.getLog().log(Log.WARNING, "Logoff exception",e);
-            return false;
+    public boolean logoff() throws NotLoggedInException {
+            
+        if (contest == null) {
+            throw new NotLoggedInException("Can not log off, not logged in");
         }
-        return false;
+
+        try {
+            controller.logoffUser(internalContest.getClientId());
+            contest.setLoggedIn(false);
+            return true;
+        } catch (Exception e) {
+            throw new NotLoggedInException(e);
+        }
     }
 
+    /**
+     * Returns a IContest, if not connected to a server throws a NotLoggedInException.
+     * 
+     * @return contest
+     * @throws NotLoggedInException
+     */
+    public Contest getContest() throws NotLoggedInException {
+        if (contest != null) {
+            return contest;
+        } else {
+            throw new NotLoggedInException("Can not get IContest, not logged in");
+        }
+    }
+
+    /**
+     * Is this ServerConnection connected to a server ?
+     * 
+     * @return true if connected to server, false if not connected to server.
+     */
+    public boolean isLoggedIn() {
+        return contest != null && contest.isLoggedIn();
+    }
+
+    /**
+     * Returns a IClient if logged into a server.
+     * 
+     * @see IContest#getMyClient()
+     * @return Client class
+     * @throws NotLoggedInException
+     *             if not logged in throws this exception
+     */
+    public IClient getMyClient() throws NotLoggedInException {
+        if (contest != null) {
+            return contest.getMyClient();
+        } else {
+            throw new NotLoggedInException("Not logged in");
+        }
+    }
 }
