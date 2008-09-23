@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
@@ -10,6 +11,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
@@ -34,8 +36,8 @@ import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IClarificationListener;
-import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IContestInformationListener;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.ILanguageListener;
 import edu.csus.ecs.pc2.core.model.IProblemListener;
 import edu.csus.ecs.pc2.core.model.LanguageEvent;
@@ -45,7 +47,7 @@ import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
-import javax.swing.JScrollPane;
+import edu.csus.ecs.pc2.ui.EditFilterPane.ListNames;
 
 /**
  * Shows clarifications in a list box.
@@ -100,13 +102,17 @@ public class ClarificationsPane extends JPanePlugin {
 
     private boolean showNewClarificationsOnly = false;
 
-    private Filter filter = null;
+    private Filter filter =  new Filter();
 
     private DisplayTeamName displayTeamName = null;
 
     private JScrollPane jQuestionScrollPane = null;
 
     private JScrollPane jAnswerScrollPane = null;
+    
+    private EditFilterFrame editFilterFrame = null;
+    
+    private String filterFrameTitle = "Clarification filter";
 
     /**
      * This method initializes
@@ -508,10 +514,23 @@ public class ClarificationsPane extends JPanePlugin {
     }
 
     void reloadListBox() {
+        
         if (isJudge()) {
             ContestInformation contestInformation = getContest().getContestInformation();
             displayTeamName.setTeamDisplayMask(contestInformation.getTeamDisplayMode());
         }
+        
+        if (filter.isFilterOn()){
+            getFilterButton().setForeground(Color.BLUE);
+            getFilterButton().setToolTipText("Edit filter - filter ON");
+            // TODO code row count label 
+//            rowCountLabel.setForeground(Color.BLUE);
+        } else {
+            getFilterButton().setForeground(Color.BLACK);
+            getFilterButton().setToolTipText("Edit filter");
+//            rowCountLabel.setForeground(Color.BLACK);
+        }
+
 
         clarificationListBox.removeAllRows();
         Clarification[] clarifications = getContest().getClarifications();
@@ -611,6 +630,8 @@ public class ClarificationsPane extends JPanePlugin {
         displayTeamName.setContestAndController(inContest, inController);
 
         initializePermissions();
+        
+        getEditFilterFrame().setContestAndController(inContest, inController);
 
         getContest().addClarificationListener(new ClarificationListenerImplementation());
         getContest().addAccountListener(new AccountListenerImplementation());
@@ -737,14 +758,48 @@ public class ClarificationsPane extends JPanePlugin {
         if (filterButton == null) {
             filterButton = new JButton();
             filterButton.setText("Filter");
-            filterButton.setVisible(false);
+            filterButton.setVisible(true);
             filterButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    reloadListBox();
+                    showFilterClarificationsFrame();
                 }
             });
         }
         return filterButton;
+    }
+    
+    protected void showFilterClarificationsFrame() {
+        
+        if (isTeam(getContest().getClientId())) {
+            getEditFilterFrame().showJList(ListNames.ACCOUNTS, false);
+            getEditFilterFrame().showJList(ListNames.CLARIFICATION_STATES, false);
+        } else{
+            getEditFilterFrame().showJList(ListNames.CLARIFICATION_STATES, true);
+        }
+            
+        getEditFilterFrame().showJList(ListNames.RUN_STATES, false);
+        getEditFilterFrame().showJList(ListNames.LANGUAGES, false);
+        getEditFilterFrame().showJList(ListNames.JUDGEMENTS, false);
+
+        getEditFilterFrame().setFilter(filter);
+        getEditFilterFrame().doLayout();
+        getEditFilterFrame().setVisible(true);
+    }
+    
+    public EditFilterFrame getEditFilterFrame() {
+        if (editFilterFrame == null){
+            Runnable callback = new Runnable(){
+                public void run() {
+                    reloadListBox();
+                }
+            };
+            editFilterFrame = new EditFilterFrame(filter, filterFrameTitle,  callback);
+            editFilterFrame.setFilteringClarifications(true);
+            if (displayTeamName != null){
+                editFilterFrame.setDisplayTeamName(displayTeamName);
+            }
+        }
+        return editFilterFrame;
     }
 
     private boolean isAllowed(Permission.Type type) {
@@ -1067,4 +1122,16 @@ public class ClarificationsPane extends JPanePlugin {
         return jAnswerScrollPane;
     }
 
+    /**
+     * Set title for the Filter Frame.
+     * 
+     * @param title
+     */
+    public void setFilterFrameTitle (String title){
+        filterFrameTitle = title;
+        if (editFilterFrame != null){
+            editFilterFrame.setTitle(title);
+        }
+    }
+    
 } // @jve:decl-index=0:visual-constraint="10,10"

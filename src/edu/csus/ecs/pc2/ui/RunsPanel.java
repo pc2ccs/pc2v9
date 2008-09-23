@@ -1010,6 +1010,7 @@ public class RunsPanel extends JPanePlugin {
         }
 
         getEditFilterFrame().setFilter(filter);
+        getEditFilterFrame().validate();
         getEditFilterFrame().setVisible(true);
     }
 

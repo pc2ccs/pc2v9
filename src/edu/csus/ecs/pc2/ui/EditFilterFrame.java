@@ -275,4 +275,12 @@ public class EditFilterFrame extends JFrame implements UIPlugin {
         editFilterPane.setDisplayTeamName(displayTeamName);
     }
 
+    /**
+     * If filtering clarification, set this to true.
+     * @param filteringClarifications 
+     */
+    public void setFilteringClarifications(boolean filteringClarifications) {
+        editFilterPane.setFilteringClarifications(filteringClarifications);
+    }
+
 } // @jve:decl-index=0:visual-constraint="10,10"

@@ -30,8 +30,10 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
+import javax.swing.JList;
 
 /**
  * Edit Filter GUI.
@@ -97,6 +99,8 @@ public class EditFilterPane extends JPanePlugin {
     private JCheckBoxJList runStatesListBox = null;
 
     private DefaultListModel runStatesListModel = new DefaultListModel();
+    
+    private DefaultListModel clarificationStatesListModel = new DefaultListModel();
 
     private JPanel timeRangePane = null;
 
@@ -111,6 +115,14 @@ public class EditFilterPane extends JPanePlugin {
     private DisplayTeamName displayTeamName = null;
 
     private boolean isJudgeModule = false;
+    
+    private boolean filteringClarifications = false;
+
+    private JPanel clarificationStatesPane = null;
+
+    private JScrollPane clarificationStateScrollPane = null;
+
+    private JList clarificationStatesListBox = null;
 
     /**
      * JList names in EditFilterPane.
@@ -129,9 +141,17 @@ public class EditFilterPane extends JPanePlugin {
          */
         PROBLEMS,
         /**
+         * Judgements Jlist.
+         */
+        JUDGEMENTS,
+        /**
          * Run States JList.
          */
         RUN_STATES,
+        /**
+         * Clarification States JList.
+         */
+        CLARIFICATION_STATES,        
         /**
          * Accounts JList.
          */
@@ -149,6 +169,9 @@ public class EditFilterPane extends JPanePlugin {
 
     /**
      * Wrapper class for JCheckBox object.
+     * 
+     * for the text.
+     * This class is used to wrap the class and provide an override
      * 
      * @author pc2@ecs.csus.edu
      * @version $Id$
@@ -312,6 +335,7 @@ public class EditFilterPane extends JPanePlugin {
             listsPanel.add(getJudgementsPane(), null);
             listsPanel.add(getTeamsPane(), null);
             listsPanel.add(getLanguagesPane(), null);
+            listsPanel.add(getClarificationStatesPane(), null);
             listsPanel.add(getLanguagesPane(), null);
             listsPanel.add(getRunStatesPane(), null);
             listsPanel.add(getTimeRangePane(), null);
@@ -435,7 +459,7 @@ public class EditFilterPane extends JPanePlugin {
     }
 
     /**
-     * Populate
+     * Populate the values for all JLists.
      * 
      */
     public void populateFields() {
@@ -443,6 +467,16 @@ public class EditFilterPane extends JPanePlugin {
         getFilterOnCheckBox().setSelected(filter.isFilterOn());
 
         problemListModel.removeAllElements();
+        if (isFilteringClarifications()){
+            // Add General problem is filtering Clarification settings
+            Problem problem = getContest().getGeneralProblem();
+            WrapperJCheckBox wrapperJCheckBox = new WrapperJCheckBox(problem);
+            if (filter.isFilteringProblems()) {
+                wrapperJCheckBox.setSelected(filter.matchesProblem(problem));
+            }
+            problemListModel.addElement(wrapperJCheckBox);
+        }
+        
         for (Problem problem : getContest().getProblems()) {
             WrapperJCheckBox wrapperJCheckBox = new WrapperJCheckBox(problem);
             if (filter.isFilteringProblems()) {
@@ -479,6 +513,16 @@ public class EditFilterPane extends JPanePlugin {
                 wrapperJCheckBox.setSelected(filter.matchesRunState(runState));
             }
             runStatesListModel.addElement(wrapperJCheckBox);
+        }
+
+        clarificationStatesListModel.removeAllElements();
+        ClarificationStates[] clarificationStates = ClarificationStates.values();
+        for (ClarificationStates clarificationState : clarificationStates) {
+            WrapperJCheckBox wrapperJCheckBox = new WrapperJCheckBox(clarificationState);
+            if (filter.isFilteringClarificationStates()) {
+                wrapperJCheckBox.setSelected(filter.matchesClarificationState(clarificationState));
+            }
+            clarificationStatesListModel.addElement(wrapperJCheckBox);
         }
         
         getFromTimeTextField().setText("");
@@ -613,6 +657,16 @@ public class EditFilterPane extends JPanePlugin {
             }
         }
 
+        filter.clearClarificationStateList();
+        enumeration = clarificationStatesListModel.elements();
+        while (enumeration.hasMoreElements()) {
+            WrapperJCheckBox element = (WrapperJCheckBox) enumeration.nextElement();
+            if (element.isSelected()) {
+                Object object = element.getContents();
+                filter.addClarificationState((ClarificationStates) object);
+            }
+        }
+        
         filter.clearJudgementList();
         enumeration = judgementListModel.elements();
         while (enumeration.hasMoreElements()) {
@@ -724,19 +778,20 @@ public class EditFilterPane extends JPanePlugin {
             case PROBLEMS:
                 getProblemsPane().setVisible(showList);
                 break;
+            case JUDGEMENTS:
+                getJudgementsPane().setVisible(showList);
+                break;
             case RUN_STATES:
                 getRunStatesPane().setVisible(showList);
+                break;
+            case CLARIFICATION_STATES:
+                getClarificationStatesPane().setVisible(showList);
                 break;
             case TIME_RANGE:
                 getTimeRangePane().setVisible(showList);
             default:
                 throw new InvalidParameterException("Invalid listNames: " + listNames);
         }
-
-        // TODO tighten up layout somehow, when the above changes are
-        // made there are gaps where the hidden frames are
-
-        this.doLayout();
     }
 
     /**
@@ -820,6 +875,56 @@ public class EditFilterPane extends JPanePlugin {
             populateTeamNamesWithDisplayMask();
         }
 
+    }
+
+    /**
+     * This method initializes clarificationsPane
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getClarificationStatesPane() {
+        if (clarificationStatesPane == null) {
+            clarificationStatesPane = new JPanel();
+            clarificationStatesPane.setLayout(new BorderLayout());
+            clarificationStatesPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Clar States", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+                    javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
+            clarificationStatesPane.setVisible(false);
+            clarificationStatesPane.add(getClarificationStateScrollPane(), java.awt.BorderLayout.CENTER);
+        }
+        return clarificationStatesPane;
+    }
+
+    /**
+     * This method initializes clarificationStateScrollPane
+     * 
+     * @return javax.swing.JScrollPane
+     */
+    private JScrollPane getClarificationStateScrollPane() {
+        if (clarificationStateScrollPane == null) {
+            clarificationStateScrollPane = new JScrollPane();
+            clarificationStateScrollPane.setViewportView(getClarificationStatesListBox());
+        }
+        return clarificationStateScrollPane;
+    }
+
+    /**
+     * This method initializes clarificationStatesListBox
+     * 
+     * @return javax.swing.JList
+     */
+    private JList getClarificationStatesListBox() {
+        if (clarificationStatesListBox == null) {
+            clarificationStatesListBox = new JList(clarificationStatesListModel);
+        }
+        return clarificationStatesListBox;
+    }
+
+    public boolean isFilteringClarifications() {
+        return filteringClarifications;
+    }
+
+    public void setFilteringClarifications(boolean filteringClarifications) {
+        this.filteringClarifications = filteringClarifications;
     }
 
 
