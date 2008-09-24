@@ -187,7 +187,7 @@ public class OptionsPanel extends JPanePlugin {
      * @param showLogWindow
      */
     protected void showSecurityLog(boolean showLogWindow) {
-        try {
+        try {          
             securityLogWindow.setVisible(showLogWindow);
         } catch (Exception e) {
             getLog().log(Log.WARNING, "Exception showing security log window", e);
@@ -304,7 +304,11 @@ public class OptionsPanel extends JPanePlugin {
          */
         public void newMessage(SecurityMessageEvent event) {
             if (isAllowedToViewSecurityWindow()){
-                showSecurityLog(true);
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        showSecurityLog(true);
+                    }
+                });
             }
         }
     }
