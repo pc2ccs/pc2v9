@@ -100,6 +100,7 @@ public class SubmissionBiffPane extends JPanePlugin {
         
         newSubmissionFilter.addClarificationState(ClarificationStates.NEW);
         newSubmissionFilter.addRunState(RunStates.NEW);
+        newSubmissionFilter.addRunState(RunStates.MANUAL_REVIEW);
         
         unansweredClarificationsCount = getNewClarificationsCount();
         unjudgedRunsCount = getNewRunsCount();
