@@ -519,12 +519,14 @@ public class TransportManager implements ITransportManager {
 
                 getLog().info("send(Serializable, ConnectionHandlerID) to " + fConnectionHandlerID);
 
-                int busyWait = 0;
                 // Wait for connectionHandler to be ready
                 while (!fConnectionHandlerID.isReadyToCommunicate()) {
-                    // intentional empty
                     // TODO: Change to Monitor rather than Busywait
-                    busyWait++;
+                    try {
+                        Thread.sleep(50);
+                    } catch (InterruptedException e) {
+                        getLog().throwing("TransportManager", "Busy wait failed", e);
+                    }
                 }
 
                 SecretKey secretKey = fConnectionHandlerID.getSecretKey();
