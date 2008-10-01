@@ -457,17 +457,18 @@ public class TransportManager implements ITransportManager {
             public void run() {
                 getLog().info("send(Serializable)");
 
-                // Wait for connectionHandler to be ready
-                while (!getMyConnection().getConnectionHandlerClientThread().getMyConnectionID().isReadyToCommunicate()) {
-
-                    // TODO: Change to Monitor rather than busy wait.
-                    
-                    try {
-                        Thread.sleep(50);
-                    } catch (InterruptedException e) {
-                        getLog().throwing("TransportManager", "Busy wait failed", e);
+                ConnectionHandlerID fConnectionHandlerID = getMyConnection().getConnectionHandlerClientThread().getMyConnectionID();
+                synchronized (fConnectionHandlerID) {
+                    // Wait for connectionHandler to be ready
+                    // this is still a loop since the wait may be awakened
+                    // for other reasons
+                    while (!fConnectionHandlerID.isReadyToCommunicate()) {
+                        try {
+                            fConnectionHandlerID.wait();
+                        } catch (InterruptedException e) {
+                            getLog().throwing("TransportManager", "Busy wait", e);
+                        }
                     }
-                    
                 }
 
                 SecretKey secretKey = getMyConnection().getConnectionHandlerClientThread().getMyConnectionID().getSecretKey();
@@ -519,13 +520,16 @@ public class TransportManager implements ITransportManager {
 
                 getLog().info("send(Serializable, ConnectionHandlerID) to " + fConnectionHandlerID);
 
-                // Wait for connectionHandler to be ready
-                while (!fConnectionHandlerID.isReadyToCommunicate()) {
-                    // TODO: Change to Monitor rather than Busywait
-                    try {
-                        Thread.sleep(50);
-                    } catch (InterruptedException e) {
-                        getLog().throwing("TransportManager", "Busy wait failed", e);
+                synchronized (fConnectionHandlerID) {
+                    // Wait for connectionHandler to be ready
+                    // this is still a loop since the wait may be awakened
+                    // for other reasons
+                    while (!fConnectionHandlerID.isReadyToCommunicate()) {
+                        try {
+                            fConnectionHandlerID.wait();
+                        } catch (InterruptedException e) {
+                            getLog().throwing("TransportManager", "Busy wait", e);
+                        }
                     }
                 }
 

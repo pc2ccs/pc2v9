@@ -75,8 +75,9 @@ public class ConnectionHandlerID implements Serializable {
         return readyToCommunicate;
     }
 
-    public void setReadyToCommunicate(boolean readyToSend) {
+    public synchronized void setReadyToCommunicate(boolean readyToSend) {
         readyToCommunicate = readyToSend;
+        notifyAll();
     }
 
     public int hashCode() {

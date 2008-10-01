@@ -84,10 +84,14 @@ public abstract class ConnectionHandlerThread extends Thread {
 
     public void send(SealedObject msgObj) throws TransportException {
 
-        int busywait = 0;
-        while (!getMyConnectionID().isReadyToCommunicate()) {
-            // TODO: Change this code to be a monitor
-            busywait++;
+        synchronized (getMyConnectionID()) {
+            while(!getMyConnectionID().isReadyToCommunicate()) {
+                try {
+                    getMyConnectionID().wait();
+                } catch (InterruptedException e) {
+                    getLog().throwing("ConnectionHandlerThread", "Busy wait send", e);
+                }
+            }
         }
 
         try {
@@ -132,10 +136,14 @@ public abstract class ConnectionHandlerThread extends Thread {
 
     protected SealedObject receive() throws TransportException {
         SealedObject msgObj = null;
-
-        while (!getMyConnectionID().isReadyToCommunicate()) {
-            msgObj = null;
-            // TODO: Change this code to be a monitor
+        synchronized (getMyConnectionID()) {
+            while(!getMyConnectionID().isReadyToCommunicate()) {
+                try {
+                    getMyConnectionID().wait();
+                } catch (InterruptedException e) {
+                    getLog().throwing("ConnectionHandlerThread", "Busy wait receive", e);
+                }
+            }
         }
 
         try {
