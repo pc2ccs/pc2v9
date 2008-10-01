@@ -257,7 +257,6 @@ public class ContestTimesPane extends JPanePlugin {
 
     private void reloadListBox() {
 
-        showMessage("");
         contestTimeListBox.removeAllRows();
         ContestTime[] contestTimes = getContest().getContestTimes();
 
@@ -452,8 +451,6 @@ public class ContestTimesPane extends JPanePlugin {
      * @return javax.swing.JButton
      */
     private JButton getStartClockButton() {
-        showMessage("");
-
         if (startClockButton == null) {
             startClockButton = new JButton();
             startClockButton.setText("Start");
@@ -469,7 +466,6 @@ public class ContestTimesPane extends JPanePlugin {
 
     protected void startClockTimes() {
         int[] selectedSites = contestTimeListBox.getSelectedIndexes();
-        showMessage("");
         if (selectedSites.length == 0) {
             showMessage("Please select site");
             return;
@@ -492,8 +488,6 @@ public class ContestTimesPane extends JPanePlugin {
      * @return javax.swing.JButton
      */
     private JButton getStopClockButton() {
-        showMessage("");
-
         if (stopClockButton == null) {
             stopClockButton = new JButton();
             stopClockButton.setText("Stop");
@@ -549,8 +543,7 @@ public class ContestTimesPane extends JPanePlugin {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 if (messageLabel != null) {
-                    messageLabel.setText(string);
-                    messageLabel.setToolTipText(string);
+                    JOptionPane.showMessageDialog(getParentFrame(), string, "Warning", JOptionPane.WARNING_MESSAGE);
                 }
             }
         });
@@ -690,7 +683,6 @@ public class ContestTimesPane extends JPanePlugin {
      */
     protected void editSelectedContestTime() {
         int[] selectedSites = contestTimeListBox.getSelectedIndexes();
-        showMessage("");
         if (selectedSites.length == 0) {
             showMessage("Please select site");
             return;

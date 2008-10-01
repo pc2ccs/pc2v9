@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Vector;
 
@@ -277,8 +278,18 @@ public class TeamStatusPane extends JPanePlugin {
                     toolTipText = toolTipText + " " + runs.length + " runs";
                 }
                 Clarification[] clarifications = getContest().getClarifications(clientId);
+                ArrayList<Clarification> myClarList = new ArrayList<Clarification>();
                 if (clarifications.length > 0) {
-                    toolTipText = toolTipText + " " + clarifications.length + " clarifications ";
+                    for (int i = 0; i < clarifications.length; i++) {
+                        Clarification clarification = clarifications[i];
+                        if (clarification.getSubmitter().equals(clientId)) { // did I submit it?
+                            myClarList.add(clarification);
+                        }
+                    }
+                    clarifications = myClarList.toArray(new Clarification[myClarList.size()]);
+                    if (clarifications.length > 0) {
+                        toolTipText = toolTipText + " " + clarifications.length + " clarifications ";
+                    }
                 }
 
                 teamStatusColor = getStatusColor(clientId, runs, clarifications);
