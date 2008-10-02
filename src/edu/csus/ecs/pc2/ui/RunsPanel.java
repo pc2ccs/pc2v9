@@ -3,6 +3,8 @@ package edu.csus.ecs.pc2.ui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
+import java.io.IOException;
+import java.util.Vector;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -42,6 +44,7 @@ import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
+import edu.csus.ecs.pc2.core.report.ExtractRuns;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.ui.EditFilterPane.ListNames;
@@ -140,6 +143,8 @@ public class RunsPanel extends JPanePlugin {
     private EditFilterFrame editFilterFrame = null;
 
     private String filterFrameTitle = "Run filter";
+    
+    private ExtractRuns extractRuns = null;
 
     /**
      * This method initializes
@@ -803,6 +808,8 @@ public class RunsPanel extends JPanePlugin {
         displayTeamName.setContestAndController(inContest, inController);
 
         initializePermissions();
+        
+        extractRuns = new ExtractRuns(inContest);
 
         editRunFrame.setContestAndController(getContest(), getController());
         viewJudgementsFrame.setContestAndController(getContest(), getController());
@@ -827,6 +834,10 @@ public class RunsPanel extends JPanePlugin {
                 updateGUIperPermissions();
                 resetRunsListBoxColumns();
                 reloadRunList();
+                
+                if (isAllowed(Permission.Type.EXTRACT_RUNS)){
+                    getRunsListBox().setMultipleSelections(true);
+                }
             }
         });
     }
@@ -1067,12 +1078,102 @@ public class RunsPanel extends JPanePlugin {
             extractButton.setMnemonic(java.awt.event.KeyEvent.VK_X);
             extractButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.out.println("Extract actionPerformed()"); 
-                    // TODO code run extract
+                    extractRuns(getRunsListBox());
                 }
             });
         }
         return extractButton;
+    }
+
+    protected void extractRuns(MCLB runsListBox) {
+
+        if (runListBox.getRowCount() < 1) {
+            showMessageToUser("No runs to extract");
+            return;
+        }
+
+        int[] selectedRows = runListBox.getSelectedIndexes();
+
+        if (selectedRows.length < 1) {
+            // Extract all runs
+
+            int numRuns = runsListBox.getRowCount();
+            String confirmMessage = "Extract ALL (" + numRuns + ") runs listed?";
+            int response = FrameUtilities.yesNoCancelDialog(this, confirmMessage, "Extract Runs");
+
+            if (response == JOptionPane.YES_OPTION) {
+                // They said Yes, go for it.
+                FrameUtilities.waitCursor(this);
+                int numberRuns = runsListBox.getRowCount();
+                int numExtracted = extractSelectedRuns(runsListBox, getRunKeys(runsListBox));
+                showMessageToUser("Extracted " + numExtracted + " of " + numberRuns + " runs to \"" + extractRuns.getExtractDirectory() + "\" dir.");
+                FrameUtilities.regularCursor(this);
+            }
+
+        } else {
+
+            String confirmMsg = "Extract " + selectedRows.length + " runs?";
+            int response = JOptionPane.showConfirmDialog(this, confirmMsg);
+
+            if (response == JOptionPane.YES_OPTION) {
+                // They said Yes, go for it.
+                FrameUtilities.waitCursor(this);
+                int numExtracted = extractSelectedRuns(runsListBox, getRunKeys(runsListBox, selectedRows));
+                showMessageToUser("Extracted " + numExtracted + " of " + selectedRows.length + " runs to \"" + extractRuns.getExtractDirectory() + "\" dir.");
+                FrameUtilities.regularCursor(this);
+            }
+        }
+
+        FrameUtilities.regularCursor(this);
+    }
+
+    private ElementId[] getRunKeys(MCLB runsListBox) {
+        Vector<ElementId> vector = new Vector<ElementId>();
+        int totalRows = runsListBox.getRowCount();
+        for (int rowNumber = 0; rowNumber < totalRows; rowNumber++) {
+            vector.addElement((ElementId) runsListBox.getRowKey(rowNumber));
+        }
+        return (ElementId[]) vector.toArray(new ElementId[vector.size()]);
+    }
+
+    private ElementId[] getRunKeys(MCLB runsListBox, int[] selectedRows) {
+        Vector<ElementId> vector = new Vector<ElementId>();
+        for (int rowNumber : selectedRows) {
+            vector.addElement((ElementId) runsListBox.getRowKey(rowNumber));
+        }
+        return (ElementId[]) vector.toArray(new ElementId[vector.size()]);
+    }
+
+
+    private int extractSelectedRuns(MCLB runsListBox, ElementId[] runKeys) {
+        int extractCount = 0;
+        
+        int totalRows = runKeys.length;
+        
+        for (int i = 0; i < runKeys.length; i++) {
+            try {
+                boolean extracted = extractRuns.extractRun(runKeys[i]);
+                
+                if (extracted){
+                    extractCount ++;
+                }
+                
+                updateRunCount (extractCount, totalRows);
+                
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        return extractCount;
+    }
+
+    private void updateRunCount(int extractCount, int totalRows) {
+        System.out.println("Extracted "+extractCount+" of "+totalRows);
+    }
+
+    private void showMessageToUser(String message) {
+        JOptionPane.showMessageDialog(this, message);
     }
 
     /**
