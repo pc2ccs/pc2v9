@@ -15,6 +15,7 @@ import com.ibm.webrunner.j2mclb.util.HeapSorter;
 import com.ibm.webrunner.j2mclb.util.NumericStringComparator;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.PermissionGroup;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
@@ -339,6 +340,11 @@ public class RunsPanel extends JPanePlugin {
     private boolean isTeam(ClientId clientId) {
         return clientId == null || clientId.getClientType().equals(Type.TEAM);
     }
+    
+    private boolean isServer(ClientId clientId) {
+        return clientId == null || clientId.getClientType().equals(Type.SERVER);
+    }
+
 
     private boolean isJudge(ClientId clientId) {
         return clientId == null || clientId.getClientType().equals(Type.JUDGE);
@@ -761,6 +767,9 @@ public class RunsPanel extends JPanePlugin {
         Account account = getContest().getAccount(getContest().getClientId());
         if (account != null) {
             permissionList.clearAndLoadPermissions(account.getPermissionList());
+        } else {
+            // Set default conditions
+            permissionList.clearAndLoadPermissions(new PermissionGroup().getPermissionList(getContest().getClientId().getClientType()));
         }
     }
 
@@ -1079,6 +1088,7 @@ public class RunsPanel extends JPanePlugin {
             extractButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     extractRuns(getRunsListBox());
+                    
                 }
             });
         }
@@ -1094,37 +1104,41 @@ public class RunsPanel extends JPanePlugin {
 
         int[] selectedRows = runListBox.getSelectedIndexes();
 
-        if (selectedRows.length < 1) {
-            // Extract all runs
+        try {
+            if (selectedRows.length < 1) {
+                // Extract all runs
 
-            int numRuns = runsListBox.getRowCount();
-            String confirmMessage = "Extract ALL (" + numRuns + ") runs listed?";
-            int response = FrameUtilities.yesNoCancelDialog(this, confirmMessage, "Extract Runs");
+                int numRuns = runsListBox.getRowCount();
+                String confirmMessage = "Extract ALL (" + numRuns + ") runs listed?";
+                int response = FrameUtilities.yesNoCancelDialog(this, confirmMessage, "Extract Runs");
 
-            if (response == JOptionPane.YES_OPTION) {
-                // They said Yes, go for it.
-                FrameUtilities.waitCursor(this);
-                int numberRuns = runsListBox.getRowCount();
-                int numExtracted = extractSelectedRuns(runsListBox, getRunKeys(runsListBox));
-                showMessageToUser("Extracted " + numExtracted + " of " + numberRuns + " runs to \"" + extractRuns.getExtractDirectory() + "\" dir.");
-                FrameUtilities.regularCursor(this);
+                if (response == JOptionPane.YES_OPTION) {
+                    // They said Yes, go for it.
+                    FrameUtilities.waitCursor(this);
+                    int numberRuns = runsListBox.getRowCount();
+                    int numExtracted = extractSelectedRuns(runsListBox, getRunKeys(runsListBox));
+                    FrameUtilities.regularCursor(this);
+                    showMessageToUser("Extracted " + numExtracted + " of " + numberRuns + " runs to \"" + extractRuns.getExtractDirectory() + "\" dir.");
+                }
+
+            } else {
+
+                String confirmMsg = "Extract " + selectedRows.length + " runs?";
+                int response = JOptionPane.showConfirmDialog(this, confirmMsg);
+
+                if (response == JOptionPane.YES_OPTION) {
+                    // They said Yes, go for it.
+                    FrameUtilities.waitCursor(this);
+                    int numExtracted = extractSelectedRuns(runsListBox, getRunKeys(runsListBox, selectedRows));
+                    FrameUtilities.regularCursor(this);
+                    showMessageToUser("Extracted " + numExtracted + " of " + selectedRows.length + " runs to \"" + extractRuns.getExtractDirectory() + "\" dir.");
+                }
             }
-
-        } else {
-
-            String confirmMsg = "Extract " + selectedRows.length + " runs?";
-            int response = JOptionPane.showConfirmDialog(this, confirmMsg);
-
-            if (response == JOptionPane.YES_OPTION) {
-                // They said Yes, go for it.
-                FrameUtilities.waitCursor(this);
-                int numExtracted = extractSelectedRuns(runsListBox, getRunKeys(runsListBox, selectedRows));
-                showMessageToUser("Extracted " + numExtracted + " of " + selectedRows.length + " runs to \"" + extractRuns.getExtractDirectory() + "\" dir.");
-                FrameUtilities.regularCursor(this);
-            }
+        } catch (Exception e) {
+            log.log(Log.WARNING, "Exception logged ", e);
+        } finally{
+            FrameUtilities.regularCursor(this);
         }
-
-        FrameUtilities.regularCursor(this);
     }
 
     private ElementId[] getRunKeys(MCLB runsListBox) {
