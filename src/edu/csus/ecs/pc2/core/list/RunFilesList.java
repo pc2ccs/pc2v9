@@ -122,7 +122,7 @@ public class RunFilesList implements Serializable {
         if (writeToDisk) {
             return getRunFiles(run.getSiteNumber(), run.getNumber());
         } else {
-            if (singleRunFiles.getRunId().equals(run)) {
+            if (singleRunFiles != null && run.equals(singleRunFiles.getRunId())) {
                 return singleRunFiles;
             } else {
                 return null;
