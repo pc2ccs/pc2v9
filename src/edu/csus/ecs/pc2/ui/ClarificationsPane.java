@@ -770,17 +770,13 @@ public class ClarificationsPane extends JPanePlugin {
     
     protected void showFilterClarificationsFrame() {
         
-        if (isTeam(getContest().getClientId())) {
-            getEditFilterFrame().showJList(ListNames.ACCOUNTS, false);
-            getEditFilterFrame().showJList(ListNames.CLARIFICATION_STATES, false);
-        } else{
-            getEditFilterFrame().showJList(ListNames.CLARIFICATION_STATES, true);
+        getEditFilterFrame().addList(ListNames.PROBLEMS);
+        
+        if (! isTeam(getContest().getClientId())) {
+            getEditFilterFrame().addList(ListNames.CLARIFICATION_STATES);
+            getEditFilterFrame().addList(ListNames.ACCOUNTS);
         }
             
-        getEditFilterFrame().showJList(ListNames.RUN_STATES, false);
-        getEditFilterFrame().showJList(ListNames.LANGUAGES, false);
-        getEditFilterFrame().showJList(ListNames.JUDGEMENTS, false);
-
         getEditFilterFrame().setFilter(filter);
         getEditFilterFrame().doLayout();
         getEditFilterFrame().setVisible(true);

@@ -267,8 +267,8 @@ public class EditFilterFrame extends JFrame implements UIPlugin {
      * @param showList
      *            true show list, false do not show list.
      */
-    public void showJList(ListNames listNames, boolean showList) {
-        editFilterPane.showJList(listNames, showList);
+    public void addList(ListNames listName) {
+        editFilterPane.addList(listName);
     }
     
     public void setDisplayTeamName(DisplayTeamName displayTeamName) {

@@ -341,9 +341,9 @@ public class RunsPanel extends JPanePlugin {
         return clientId == null || clientId.getClientType().equals(Type.TEAM);
     }
     
-    private boolean isServer(ClientId clientId) {
-        return clientId == null || clientId.getClientType().equals(Type.SERVER);
-    }
+//    private boolean isServer(ClientId clientId) {
+//        return clientId == null || clientId.getClientType().equals(Type.SERVER);
+//    }
 
 
     private boolean isJudge(ClientId clientId) {
@@ -1019,14 +1019,13 @@ public class RunsPanel extends JPanePlugin {
     }
 
     protected void showFilterRunsFrame() {
-        
-        if (usingTeamColumns) {
-            getEditFilterFrame().showJList(ListNames.ACCOUNTS, false);
-            getEditFilterFrame().showJList(ListNames.RUN_STATES, false);
-        }
-
-        if (showNewRunsOnly) {
-            getEditFilterFrame().showJList(ListNames.RUN_STATES, false);
+        getEditFilterFrame().addList(ListNames.PROBLEMS);
+        getEditFilterFrame().addList(ListNames.JUDGEMENTS);
+        getEditFilterFrame().addList(ListNames.LANGUAGES);
+              
+        if (! usingTeamColumns) {
+            getEditFilterFrame().addList(ListNames.ACCOUNTS);
+            getEditFilterFrame().addList(ListNames.RUN_STATES);
         }
 
         getEditFilterFrame().setFilter(filter);
