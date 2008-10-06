@@ -1,14 +1,22 @@
 package edu.csus.ecs.pc2.ui;
 
-import javax.swing.JLabel;
-import javax.swing.JComboBox;
-import javax.swing.JButton;
-import javax.swing.JTextField;
-import javax.swing.JPanel;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+
+import edu.csus.ecs.pc2.core.model.Profile;
+
 /**
+ * Profile administration pane.
+ * 
+ * Provides a front end to all profile functions, like rename, change, clone, etc.
+ * 
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -21,6 +29,8 @@ public class ProfilesPane extends JPanePlugin {
      * 
      */
     private static final long serialVersionUID = 9075523788534575300L;
+
+    private ProfileSaveFrame profileSaveFrame = null;
 
     private JLabel profileNameLabel = null;
 
@@ -69,7 +79,7 @@ public class ProfilesPane extends JPanePlugin {
         profileNameLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         profileNameLabel.setText("Profile Name");
         this.setLayout(new BorderLayout());
-        this.setSize(new java.awt.Dimension(729,319));
+        this.setSize(new java.awt.Dimension(729, 319));
         this.add(getCenterPane(), java.awt.BorderLayout.CENTER);
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
 
@@ -100,12 +110,17 @@ public class ProfilesPane extends JPanePlugin {
     private JButton getSwitchButton() {
         if (switchButton == null) {
             switchButton = new JButton();
-            switchButton.setEnabled(false);
+            switchButton.setEnabled(true);
             switchButton.setMnemonic(java.awt.event.KeyEvent.VK_W);
-            switchButton.setPreferredSize(new java.awt.Dimension(100,26));
-            switchButton.setLocation(new java.awt.Point(497,85));
-            switchButton.setSize(new java.awt.Dimension(100,28));
+            switchButton.setPreferredSize(new java.awt.Dimension(100, 26));
+            switchButton.setLocation(new java.awt.Point(497, 85));
+            switchButton.setSize(new java.awt.Dimension(100, 28));
             switchButton.setText("Switch");
+            switchButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    switchSelectedProfile();
+                }
+            });
         }
         return switchButton;
     }
@@ -118,14 +133,14 @@ public class ProfilesPane extends JPanePlugin {
     private JButton getSetButton() {
         if (setButton == null) {
             setButton = new JButton();
-            setButton.setEnabled(false);
+            setButton.setEnabled(true);
             setButton.setMnemonic(java.awt.event.KeyEvent.VK_S);
-            setButton.setLocation(new java.awt.Point(497,38));
-            setButton.setSize(new java.awt.Dimension(100,26));
+            setButton.setLocation(new java.awt.Point(497, 38));
+            setButton.setSize(new java.awt.Dimension(100, 26));
             setButton.setText("Set");
             setButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.out.println("SET actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+                    renameProfile();
                 }
             });
         }
@@ -153,7 +168,7 @@ public class ProfilesPane extends JPanePlugin {
     private JPanel getCenterPane() {
         if (centerPane == null) {
             notificationOfNonImplementationLabel = new JLabel();
-            notificationOfNonImplementationLabel.setBounds(new java.awt.Rectangle(0,132,733,113));
+            notificationOfNonImplementationLabel.setBounds(new java.awt.Rectangle(0, 132, 733, 113));
             notificationOfNonImplementationLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
             notificationOfNonImplementationLabel.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
             notificationOfNonImplementationLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 14));
@@ -201,7 +216,12 @@ public class ProfilesPane extends JPanePlugin {
             newButton = new JButton();
             newButton.setText("New");
             newButton.setMnemonic(java.awt.event.KeyEvent.VK_N);
-            newButton.setEnabled(false);
+            newButton.setEnabled(true);
+            newButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    newProfile();
+                }
+            });
         }
         return newButton;
     }
@@ -216,7 +236,12 @@ public class ProfilesPane extends JPanePlugin {
             exportButton = new JButton();
             exportButton.setText("Export");
             exportButton.setMnemonic(java.awt.event.KeyEvent.VK_X);
-            exportButton.setEnabled(false);
+            exportButton.setEnabled(true);
+            exportButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    exportProfile();
+                }
+            });
         }
         return exportButton;
     }
@@ -231,13 +256,72 @@ public class ProfilesPane extends JPanePlugin {
             cloneButton = new JButton();
             cloneButton.setText("Clone");
             cloneButton.setMnemonic(java.awt.event.KeyEvent.VK_C);
-            cloneButton.setEnabled(false);
+            cloneButton.setEnabled(true);
             cloneButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.out.println("actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+                    cloneProfile();
                 }
             });
         }
         return cloneButton;
     }
+
+    protected void cloneProfile() {
+        getProfileSaveFrame().setTitle("Clone settings for " + getProfileName());
+        getProfileSaveFrame().setSaveButtonName(ProfileSavePane.CLONE_BUTTON_NAME);
+        getProfileSaveFrame().setVisible(true);
+    }
+
+    private String getProfileName() {
+        Profile profile = new Profile("Default");
+        return profile.getName();
+    }
+
+    protected void newProfile() {
+        // TODO code newProfile
+
+        showMessage("New Profile, almost coded");
+    }
+
+    protected void exportProfile() {
+        getProfileSaveFrame().setTitle("Export settings " + getProfileName());
+        getProfileSaveFrame().setSaveButtonName(ProfileSavePane.EXPORT_BUTTON_NAME);
+        getProfileSaveFrame().setVisible(true);
+    }
+
+    protected void switchSelectedProfile() {
+        // TODO code switchSelectedProfile
+
+        if (getProfileComboBox().getSelectedIndex() < 0) {
+            showMessage("No profile selected");
+            return;
+        }
+
+        showMessage("Switch Profile, almost coded");
+    }
+
+    protected void renameProfile() {
+        // TODO code renameProfile
+
+        if (getProfileTextField() == null || getProfileTextField().getText().trim().length() < 1) {
+            showMessage("No profile name specified");
+            return;
+        }
+
+        String newProfileName = getProfileTextField().getText().trim();
+
+        showMessage("Set/Rename Profile, almost coded: " + newProfileName);
+    }
+
+    private void showMessage(String string) {
+        JOptionPane.showMessageDialog(this, string);
+    }
+
+    public ProfileSaveFrame getProfileSaveFrame() {
+        if (profileSaveFrame == null) {
+            profileSaveFrame = new ProfileSaveFrame();
+        }
+        return profileSaveFrame;
+    }
+
 } // @jve:decl-index=0:visual-constraint="25,9"
