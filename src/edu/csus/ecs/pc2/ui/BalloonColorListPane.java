@@ -265,15 +265,27 @@ public class BalloonColorListPane extends JPanePlugin {
     private class ProblemListenerImplementation implements IProblemListener {
 
         public void problemAdded(ProblemEvent event) {
-            reloadListBox();
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                }
+            });
         }
 
         public void problemChanged(ProblemEvent event) {
-            reloadListBox();
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                }
+            });
         }
 
         public void problemRemoved(ProblemEvent event) {
-            reloadListBox();
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                }
+            });
         }
         
     }
@@ -286,23 +298,43 @@ public class BalloonColorListPane extends JPanePlugin {
     private class SiteListenerImplementation implements ISiteListener {
 
         public void siteAdded(SiteEvent event) {
-            reloadListBox();
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                }
+            });
         }
 
         public void siteRemoved(SiteEvent event) {
-            reloadListBox();
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                }
+            });
         }
 
         public void siteChanged(SiteEvent event) {
-            reloadListBox();
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                }
+            });
         }
 
         public void siteLoggedOn(SiteEvent event) {
-            reloadListBox();
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                }
+            });
         }
 
         public void siteLoggedOff(SiteEvent event) {
-            reloadListBox();
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                }
+            });
         }
     }
 } // @jve:decl-index=0:visual-constraint="10,10"
