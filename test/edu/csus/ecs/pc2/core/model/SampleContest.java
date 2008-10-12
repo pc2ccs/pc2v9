@@ -250,6 +250,8 @@ public class SampleContest {
             }
 
             Run run = new Run(teamId, language, problem);
+            run.setElapsedMins(9 + i);
+            run.setNumber(i);
             runs[i] = run;
         }
         return runs;
