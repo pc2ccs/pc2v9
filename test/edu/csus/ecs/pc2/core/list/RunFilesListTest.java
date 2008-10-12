@@ -90,18 +90,13 @@ public class RunFilesListTest extends TestCase {
         assertNull(runFiles2);
 
         // Add first run files
-        String filename1 = "Sunit.java"; 
+        String filename1 = "Sumit.java"; 
         runFiles = new RunFiles(theRun, "samps/"+filename1);
         filesList.add(theRun, runFiles);
 
-        /**
-         * This overwrites the runFiles stored because RunFilesList holds the last runFildes only
-         * 
-         * In other tests it will test the cache which will contain all runFiles added.
-         */
-
-        String filename = "hello.java";
-        RunFiles secondRunFiles = new RunFiles(secondRun, "samps/"+filename);
+        // Add second run files
+        String filename2 = "hello.java";
+        RunFiles secondRunFiles = new RunFiles(secondRun, "samps/"+filename2);
         filesList.add(secondRun, secondRunFiles);
 
         runFiles2 = filesList.getRunFiles(theRun);
@@ -112,6 +107,12 @@ public class RunFilesListTest extends TestCase {
         runFiles2 = filesList.getRunFiles(secondRun);
 
         assertNotNull(runFiles2);
-        assertEquals (runFiles2.getMainFile().getName(), filename);
+        assertEquals (runFiles2.getMainFile().getName(), filename2);
+        
+        runFiles2 = filesList.getRunFiles(theRun);
+
+        assertNotNull(runFiles2); 
+        assertEquals (runFiles2.getMainFile().getName(), filename1);
+
     }
 }
