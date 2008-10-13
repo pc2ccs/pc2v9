@@ -16,7 +16,7 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
 
 /**
  * Implementation for IRun.
- *  
+ * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -45,23 +45,23 @@ public class RunImplementation implements IRun {
     private long elapsedMins;
 
     private ElementId elementId;
-    
+
     private RunFiles runFiles = null;
-    
-    private Boolean listening = new Boolean (true);
+
+    private Boolean listening = new Boolean(true);
 
     private IInternalController controller = null;
-    
+
     private FetchRunListenerImplemenation fetchRunListenerImplemenation = null;
 
     private IInternalContest internalContest = null;
-    
+
     /**
      * Have we got the RunFiles from the server.
      * 
      */
     private boolean answerReceived = false;
-    
+
     private Run run = null;
 
     /**
@@ -72,7 +72,7 @@ public class RunImplementation implements IRun {
     public RunImplementation(edu.csus.ecs.pc2.core.model.Run run, IInternalContest internalContest, IInternalController controller) {
 
         this.controller = controller;
-        this.internalContest  = internalContest;
+        this.internalContest = internalContest;
         judged = run.isJudged();
         solved = run.isSolved();
         deleted = run.isDeleted();
@@ -95,15 +95,15 @@ public class RunImplementation implements IRun {
         problem = new ProblemImplementation(run.getProblemId(), internalContest);
 
         language = new LanguageImplementation(run.getLanguageId(), internalContest);
-        
+
         number = run.getNumber();
-        
+
         siteNumber = run.getSiteNumber();
-        
+
         elapsedMins = run.getElapsedMins();
-        
+
         elementId = run.getElementId();
-        
+
         this.run = run;
 
     }
@@ -149,11 +149,11 @@ public class RunImplementation implements IRun {
     }
 
     public String[] getSourceCodeFileNames() {
-        
+
         if (runFiles == null) {
             fetchRunFiles();
         }
-        
+
         try {
             if (runFiles != null) {
 
@@ -181,29 +181,29 @@ public class RunImplementation implements IRun {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
+
         return new String[0];
     }
 
     public byte[][] getSourceCodeFileContents() {
         if (runFiles == null) {
-                fetchRunFiles();
+            fetchRunFiles();
         }
-        
-        if (runFiles != null){
-            
-            byte [] [] fileContents = new byte[1][64000];
-            
+
+        if (runFiles != null) {
+
+            byte[][] fileContents = new byte[1][64000];
+
             fileContents[0] = runFiles.getMainFile().getBuffer();
-            
-            SerializedFile [] files = runFiles.getOtherFiles();
-            if (files != null){
-                if (files.length > 0){
+
+            SerializedFile[] files = runFiles.getOtherFiles();
+            if (files != null) {
+                if (files.length > 0) {
                     fileContents = new byte[1 + files.length][];
                     fileContents[0] = runFiles.getMainFile().getBuffer();
                     for (int i = 0; i < files.length; i++) {
                         SerializedFile file = files[i];
-                        fileContents[i+1] = file.getBuffer();                        
+                        fileContents[i + 1] = file.getBuffer();
                     }
                     return fileContents;
                 } else {
@@ -216,21 +216,20 @@ public class RunImplementation implements IRun {
         }
         return new byte[0][0];
     }
-    
-    private void fetchRunFiles(){
-        
-        if (runFiles != null){
+
+    private void fetchRunFiles() {
+
+        if (runFiles != null) {
             return;
         }
-        
 
-        if (fetchRunListenerImplemenation == null){
+        if (fetchRunListenerImplemenation == null) {
             fetchRunListenerImplemenation = new FetchRunListenerImplemenation();
             internalContest.addRunListener(fetchRunListenerImplemenation);
         }
-        controller.checkOutRun(run, true, false);
+        controller.fetchRun(run);
         synchronized (listening) {
-            while (! answerReceived) {
+            while (!answerReceived) {
                 try {
                     listening.wait();
                 } catch (InterruptedException e) {
@@ -240,7 +239,7 @@ public class RunImplementation implements IRun {
             }
         }
     }
-    
+
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {
@@ -254,17 +253,17 @@ public class RunImplementation implements IRun {
             return false;
         }
     }
-    
+
     @Override
     public int hashCode() {
         return elementId.toString().hashCode();
     }
-    
-//    public void info(String s) {
-//        System.out.println(new Date() + " " +Thread.currentThread().getName() + " " + s);
-//        System.out.flush();
-//    }
-    
+
+    // public void info(String s) {
+    // System.out.println(new Date() + " " +Thread.currentThread().getName() + " " + s);
+    // System.out.flush();
+    // }
+
     /**
      * Listener for run fetched from server.
      * 
@@ -275,7 +274,7 @@ public class RunImplementation implements IRun {
     protected class FetchRunListenerImplemenation implements IRunListener {
 
         public void runAdded(RunEvent event) {
-            // run not added, ignored
+            runChanged(event);
         }
 
         public void runChanged(RunEvent event) {

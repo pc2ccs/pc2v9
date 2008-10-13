@@ -625,11 +625,11 @@ public final class PacketType implements Serializable {
         /**
          * Fetch a run (do not checkout or change run state).
          */
-        RUN_FETCH,
+        FETCH_RUN,
         /**
          * Fetched run.
          */
-        FETCHED_RUN,
+        FETCHED_REQUESTED_RUN,
     }
 
     /**

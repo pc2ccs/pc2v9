@@ -308,14 +308,69 @@ public class PacketHandler {
                 // From server to admins
                 handleSecurityMessage(packet);
                 break;
-//            case FETCHED_RUN:
-//            case RUN_FETCH:
+            case FETCH_RUN:
+                // From judge (non-team) to sever
+                requestFetchedRun(packet, connectionHandlerID);
+                break;
+                
+            case FETCHED_REQUESTED_RUN:
+                // from server to non-team client.
+                handleFetchedRun (packet, connectionHandlerID);
+                break;
                 
             default:
                 Exception exception = new Exception("PacketHandler.handlePacket Unhandled packet " + packet);
                 controller.getLog().log(Log.WARNING, "Unhandled Packet ", exception);
         }
         info("handlePacket end " + packet);
+    }
+
+
+    private void requestFetchedRun(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
+
+        Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
+        ClientId whoRequestsRunId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+        
+        securityCheck(Permission.Type.ALLOWED_TO_FETCH_RUN, whoRequestsRunId, connectionHandlerID);
+        
+        if (isServer()) {
+
+            if (!isThisSite(run)) {
+                
+                ClientId serverClientId = new ClientId(run.getSiteNumber(), ClientType.Type.SERVER, 0);
+                if (contest.isLocalLoggedIn(serverClientId)) {
+
+                    // send request to remote server
+                    Packet fetchRunPacket = PacketFactory.createFetchRun(serverClientId, whoRequestsRunId, run, serverClientId);
+                    controller.sendToRemoteServer(run.getSiteNumber(), fetchRunPacket);
+
+                } else {
+
+                    // send NOT_AVAILABLE back to client
+                    Packet notAvailableRunPacket = PacketFactory.createRunNotAvailable(contest.getClientId(), whoRequestsRunId, run);
+                    controller.sendToClient(notAvailableRunPacket);
+                }
+
+            } else {
+                // This Site's run, if we can check it out and send to client
+
+                Run theRun = contest.getRun(run.getElementId());
+
+                // just get run and sent it to them.
+
+                theRun = contest.getRun(run.getElementId());
+                RunFiles runFiles = contest.getRunFiles(run);
+
+                RunResultFiles[] runResultFiles = contest.getRunResultFiles(run);
+
+                // send to Client/Judge
+                Packet fetchedRunPacket = PacketFactory.createFetchedRun(contest.getClientId(), whoRequestsRunId, theRun, runFiles, whoRequestsRunId, runResultFiles);
+                controller.sendToClient(fetchedRunPacket);
+            }
+        } else {
+            // non-server
+            throw new SecurityException("requestRun - sent to client " + contest.getClientId());
+        }
     }
 
     private void runAvailable(Packet packet) {
@@ -364,7 +419,7 @@ public class PacketHandler {
         Boolean readOnly = (Boolean) PacketFactory.getObjectValue(packet, PacketFactory.READ_ONLY);
         Boolean computerJudge = (Boolean) PacketFactory.getObjectValue(packet, PacketFactory.COMPUTER_JUDGE);
         if (readOnly != null) {
-            fetchRun(packet, run, requestFromId, readOnly.booleanValue(), computerJudge.booleanValue(), connectionHandlerID);
+            checkoutRun(packet, run, requestFromId, readOnly.booleanValue(), computerJudge.booleanValue(), connectionHandlerID);
 
         } else {
             requestRun(packet, run, requestFromId, connectionHandlerID, computerJudge);
@@ -634,6 +689,15 @@ public class PacketHandler {
 
     }
 
+    private void handleFetchedRun (Packet packet, ConnectionHandlerID connectionHandlerID){
+        Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
+        RunFiles runFiles = (RunFiles) PacketFactory.getObjectValue(packet, PacketFactory.RUN_FILES);
+        ClientId whoCheckedOut = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+        RunResultFiles[] runResultFiles = (RunResultFiles[]) PacketFactory.getObjectValue(packet, PacketFactory.RUN_RESULTS_FILE);
+        
+        contest.updateRun(run, runFiles, whoCheckedOut, runResultFiles);
+    }
+    
     /**
      * Re-judge run request, parse packet, attempt to checkout run.
      * 
@@ -1771,16 +1835,16 @@ public class PacketHandler {
     /**
      * Checkout a run.
      * 
-     * @see #fetchRun(Packet, Run, ClientId, boolean)
+     * @see #checkoutRun(Packet, Run, ClientId, boolean)
      * @param packet
      * @param run
      * @param whoRequestsRunId
      * @throws ContestSecurityException
      */
     private void requestRun(Packet packet, Run run, ClientId whoRequestsRunId, ConnectionHandlerID connectionHandlerID, boolean computerJudge) throws ContestSecurityException {
-        fetchRun(packet, run, whoRequestsRunId, false, computerJudge, connectionHandlerID);
+        checkoutRun(packet, run, whoRequestsRunId, false, computerJudge, connectionHandlerID);
     }
-
+    
     private void requestClarification(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
         ElementId clarificationId = (ElementId) PacketFactory.getObjectValue(packet, PacketFactory.REQUESTED_CLARIFICATION_ELEMENT_ID);
         ClientId requestFromId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
@@ -1858,7 +1922,7 @@ public class PacketHandler {
      * @param connectionHandlerID
      * @throws ContestSecurityException
      */
-    private void fetchRun(Packet packet, Run run, ClientId whoRequestsRunId, boolean readOnly, boolean computerJudge, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
+    private void checkoutRun(Packet packet, Run run, ClientId whoRequestsRunId, boolean readOnly, boolean computerJudge, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
 
         if (isServer()) {
 

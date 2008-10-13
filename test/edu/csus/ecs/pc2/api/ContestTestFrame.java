@@ -526,9 +526,9 @@ public class ContestTestFrame extends JFrame {
     private JCheckBox getRunListenerCheckBox() {
         if (runListenerCheckBox == null) {
             runListenerCheckBox = new JCheckBox();
-            runListenerCheckBox.setBounds(new java.awt.Rectangle(26, 157, 152, 18));
+            runListenerCheckBox.setBounds(new java.awt.Rectangle(24,182,177,18));
             runListenerCheckBox.setToolTipText("Listen for run events");
-            runListenerCheckBox.setText("Run Listener On");
+            runListenerCheckBox.setText("View Run Listener");
             runListenerCheckBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     runListenerChanged(runListenerCheckBox.isSelected());
@@ -574,9 +574,9 @@ public class ContestTestFrame extends JFrame {
     private JCheckBox getConfigListenerCheckBox() {
         if (configListenerCheckBox == null) {
             configListenerCheckBox = new JCheckBox();
-            configListenerCheckBox.setBounds(new java.awt.Rectangle(26, 218, 152, 21));
+            configListenerCheckBox.setBounds(new java.awt.Rectangle(24,243,177,21));
             configListenerCheckBox.setToolTipText("Listen for all configuration change events");
-            configListenerCheckBox.setText("Config Listener On");
+            configListenerCheckBox.setText("View Config Listener");
             configListenerCheckBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     configListenerChanged(configListenerCheckBox.isSelected());
@@ -811,9 +811,9 @@ public class ContestTestFrame extends JFrame {
     private JCheckBox getClarListenerCheckBox() {
         if (clarListenerCheckBox == null) {
             clarListenerCheckBox = new JCheckBox();
-            clarListenerCheckBox.setBounds(new java.awt.Rectangle(26, 186, 152, 21));
+            clarListenerCheckBox.setBounds(new java.awt.Rectangle(24,211,177,21));
             clarListenerCheckBox.setToolTipText("Listen for Clarification events");
-            clarListenerCheckBox.setText("Clar Listener On");
+            clarListenerCheckBox.setText("View Clar Listener Listener");
             clarListenerCheckBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     clarListenerChanged(clarListenerCheckBox.isSelected());

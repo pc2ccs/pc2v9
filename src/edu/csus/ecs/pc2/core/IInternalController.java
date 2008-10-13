@@ -369,4 +369,14 @@ public interface IInternalController {
      * @return
      */
     int getPortContacted();
+
+    /**
+     * Gets a run from the server.
+     * 
+     * Does not checkout run, simply requests the run info.
+     * Security note: only a non-team client can request runs.
+     * 
+     * @param run
+     */
+    void fetchRun(Run run);
 }

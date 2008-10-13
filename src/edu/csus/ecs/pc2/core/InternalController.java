@@ -2474,4 +2474,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         return port;
     }
 
+    public void fetchRun(Run run) {
+        Packet fetchRunPacket = PacketFactory.createFetchRun(contest.getClientId(), getServerClientId(), run, contest.getClientId());
+        sendToLocalServer(fetchRunPacket);
+    }
 }

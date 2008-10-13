@@ -275,7 +275,7 @@ public final class PacketFactory {
         prop.put(PacketFactory.MESSAGE_STRING, message);
         return createPacket(PacketType.Type.PASSWORD_CHANGE_RESULTS, source, destination, prop);
     }
-    
+   
     /**
      * Create a packet.
      * 
@@ -1024,16 +1024,46 @@ public final class PacketFactory {
         return packet;
     }
     
-    
+    /**
+     * Create a request to fetch a run from the server.
+     * @param source
+     * @param destination
+     * @param run
+     * @param requesingId
+     * @return
+     */
     public static Packet createFetchRun(ClientId source, ClientId destination, Run run, ClientId requesingId) {
         Properties props = new Properties();
         props.put(PacketFactory.RUN, run);
         props.put(PacketFactory.CLIENT_ID, requesingId);
-        Packet packet = new Packet(Type.RUN_FETCH, source, destination, props);
+        Packet packet = new Packet(Type.FETCH_RUN, source, destination, props);
         return packet;
     }
     
-    
+    /**
+     * Create a run fetched (but not checked out) from server packet.
+     * 
+     * Response to createFetchRun.
+     * 
+     * @param source
+     * @param destination
+     * @param run
+     * @param runFiles
+     * @param requesingId
+     * @param runResultFiles
+     * @return
+     */
+    public static Packet createFetchedRun(ClientId source, ClientId destination, Run run, RunFiles runFiles, ClientId requesingId, RunResultFiles[] runResultFiles) {
+        Properties props = new Properties();
+        props.put(PacketFactory.RUN, run);
+        props.put(PacketFactory.CLIENT_ID, requesingId);
+        props.put(RUN_FILES, runFiles);
+        if (runResultFiles != null) {
+            props.put(RUN_RESULTS_FILE, runResultFiles);
+        }
+        Packet packet = new Packet(Type.FETCHED_REQUESTED_RUN, source, destination, props);
+        return packet;
+    }
 
     /**
      * Create packet for {@link PacketType.Type#CLARIFICATION_REQUEST}.

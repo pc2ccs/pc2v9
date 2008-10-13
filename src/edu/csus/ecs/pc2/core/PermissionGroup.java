@@ -79,7 +79,9 @@ public class PermissionGroup {
         judgePermissionList.addPermission(Type.VIEW_RUN_JUDGEMENT_HISTORIES);
         judgePermissionList.addPermission(Type.GENERATE_NEW_CLARIFICATION);
         judgePermissionList.addPermission(Type.ALLOWED_TO_AUTO_JUDGE);
-        
+
+        judgePermissionList.addPermission(Type.ALLOWED_TO_FETCH_RUN);
+
         /**
          * Spectator Permissions
          */
@@ -99,6 +101,7 @@ public class PermissionGroup {
         spectatorPermissionList.addPermission(Type.VIEW_RUN_JUDGEMENT_HISTORIES);
 //        spectatorPermissionList.addPermission(Type.GENERATE_NEW_CLARIFICATION);
         spectatorPermissionList.addPermission(Type.ALLOWED_TO_AUTO_JUDGE);
+        spectatorPermissionList.addPermission(Type.ALLOWED_TO_FETCH_RUN);
 
         
         /**
