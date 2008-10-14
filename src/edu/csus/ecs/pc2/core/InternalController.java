@@ -2475,7 +2475,13 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     }
 
     public void fetchRun(Run run) {
-        Packet fetchRunPacket = PacketFactory.createFetchRun(contest.getClientId(), getServerClientId(), run, contest.getClientId());
-        sendToLocalServer(fetchRunPacket);
+        
+        RunFiles runFiles = contest.getRunFiles(run);
+        if (runFiles != null){
+            contest.updateRun(run, runFiles, null, null);       
+        } else {
+            Packet fetchRunPacket = PacketFactory.createFetchRun(contest.getClientId(), getServerClientId(), run, contest.getClientId());
+            sendToLocalServer(fetchRunPacket);
+        }
     }
 }

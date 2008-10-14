@@ -709,5 +709,11 @@ public interface IInternalContest {
      * @param message a helpful message about why the password was or was not changed
      */
     void passwordChanged(boolean success, ClientId clientId, String message);
+    
+    /**
+     * Clear data caches.
+     *
+     */
+    void resetData();
 
 }

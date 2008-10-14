@@ -528,7 +528,7 @@ public class PacketHandler {
                     contest.updateAccount(account);
                     
                     Account account2 = contest.getAccount(clientId);
-                    System.out.println("debug 22 passwords match "+account2.getPassword().equals(newPassword));
+//                    System.out.println("debug 22 passwords match "+account2.getPassword().equals(newPassword));
                     
                     account = contest.getAccount(clientId);
 
@@ -694,7 +694,7 @@ public class PacketHandler {
         RunFiles runFiles = (RunFiles) PacketFactory.getObjectValue(packet, PacketFactory.RUN_FILES);
         ClientId whoCheckedOut = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
         RunResultFiles[] runResultFiles = (RunResultFiles[]) PacketFactory.getObjectValue(packet, PacketFactory.RUN_RESULTS_FILE);
-        
+        // huh
         contest.updateRun(run, runFiles, whoCheckedOut, runResultFiles);
     }
     

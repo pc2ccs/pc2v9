@@ -709,6 +709,16 @@ public class InternalContest implements IInternalContest {
             e.printStackTrace(System.err);
         }
         
+        if (isAllowed(localClientId, Permission.Type.ALLOWED_TO_FETCH_RUN)){
+            // This client can cache run files
+            if ( ! runFilesList.isWriteToDisk() ){
+                // This client is not writing run files cache to disk already
+                if ( ! runFilesList.isCacheRunFiles()){
+                    // This client is not already caching run files.
+                    runFilesList.setCacheRunFiles(true);
+                }
+            }
+        }
     }
     
     public Log getSecurityAlertLog() {
@@ -1113,6 +1123,10 @@ public class InternalContest implements IInternalContest {
         }
         
         runList.updateRun(run);
+        
+        if (runFilesList.isCacheRunFiles()){
+            runFilesList.add(run, runFiles);
+        }
         
         RunEvent runEvent = new RunEvent(RunEvent.Action.CHANGED, runList.get(run), runFiles, runResultFiles);
         runEvent.setWhoModifiedRun(whoChangedRun);
@@ -1766,6 +1780,10 @@ public class InternalContest implements IInternalContest {
     public RunResultFiles[] getRunResultFiles(Run run) {
         
         return runResultFilesList.getRunResultFiles(run);
+    }
+
+    public void resetData() {
+        runFilesList.clearCache();
     }
 
 }
