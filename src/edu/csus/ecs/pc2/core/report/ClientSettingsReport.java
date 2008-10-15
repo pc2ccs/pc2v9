@@ -42,7 +42,7 @@ public class ClientSettingsReport implements IReport {
 
     private Log log;
 
-    private Filter filter;
+    private Filter filter = new Filter();
 
     /**
      * Return a list of comma delimited problem names.
