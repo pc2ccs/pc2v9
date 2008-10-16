@@ -1662,8 +1662,13 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         return siteNumber == contest.getSiteNumber();
     }
 
+    /**
+     * Send to judges and spectators clients.
+     * 
+     */
     public void sendToJudges(Packet packet) {
         sendPacketToClients(packet, ClientType.Type.JUDGE);
+        sendPacketToClients(packet, ClientType.Type.SPECTATOR);
     }
 
     public void sendToAdministrators(Packet packet) {

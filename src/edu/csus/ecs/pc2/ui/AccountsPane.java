@@ -239,9 +239,6 @@ public class AccountsPane extends JPanePlugin {
 
         if (isAllowed(Permission.Type.ADD_ACCOUNT)) {
             addButton.setVisible(isAllowed(Permission.Type.ADD_ACCOUNT));
-            
-            // TODO eventually set to true when add account works.
-            addButton.setEnabled(false);
         }
 
         editButton.setVisible(isAllowed(Permission.Type.EDIT_ACCOUNT));
@@ -365,7 +362,7 @@ public class AccountsPane extends JPanePlugin {
         if (addButton == null) {
             addButton = new JButton();
             addButton.setText("Add");
-            addButton.setEnabled(false);
+            addButton.setEnabled(true);
             addButton.setToolTipText("Add new account");
             addButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {

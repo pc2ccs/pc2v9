@@ -527,9 +527,6 @@ public class PacketHandler {
                     account.setPassword(newPassword);
                     contest.updateAccount(account);
                     
-                    Account account2 = contest.getAccount(clientId);
-//                    System.out.println("debug 22 passwords match "+account2.getPassword().equals(newPassword));
-                    
                     account = contest.getAccount(clientId);
 
                     sendPasswordResultsBackToClient(clientId, true, "Password changed");
@@ -1345,13 +1342,15 @@ public class PacketHandler {
             contest.addBalloonSettings(balloonSettings);
             sendToTeams = true;
         }
+        
+        Packet updatePacket = null;
 
         Account oneAccount = (Account) PacketFactory.getObjectValue(packet, PacketFactory.ACCOUNT);
         if (oneAccount != null) {
             if (isServer()) {
                 if (isThisSite(oneAccount)) {
                     ClientId clientId = oneAccount.getClientId();
-
+                    
                     // Add account, this assigns the new account a client number.
                     Vector<Account> accountVector = contest.generateNewAccounts(clientId.getClientType().toString(), 1, true);
                     Account addedAccount = accountVector.firstElement();
@@ -1360,11 +1359,10 @@ public class PacketHandler {
                     addedAccount.setDisplayName(oneAccount.getDisplayName());
                     addedAccount.setPassword(oneAccount.getPassword());
                     addedAccount.clearListAndLoadPermissions(oneAccount.getPermissionList());
-                    contest.updateAccount(oneAccount);
+                    contest.updateAccount(addedAccount);
 
-                    // Send new account to all servers, admins and judges
-                    Packet updatePacket = PacketFactory.createUpdateSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, contest.getAccount(oneAccount.getClientId()));
-                    sendToJudgesAndOthers(updatePacket, true);
+                    // create updated packet to be sent to others, if this is the Server.
+                    updatePacket = PacketFactory.createUpdateSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, contest.getAccount(addedAccount.getClientId()));
                 }
             } else {
                 contest.updateAccount(oneAccount);
@@ -1387,13 +1385,13 @@ public class PacketHandler {
             if (isServer()) {
                 for (Account account : accounts) {
                     if (contest.isLocalLoggedIn(account.getClientId())) {
-                        Packet updatePacket;
+                        Packet newPacket;
                         if (account.getClientId().getClientType().equals(ClientType.Type.TEAM)) {
-                            updatePacket = PacketFactory.createUpdateSetting(contest.getClientId(), account.getClientId(), contest.getAccount(account.getClientId()));
+                            newPacket = PacketFactory.createUpdateSetting(contest.getClientId(), account.getClientId(), contest.getAccount(account.getClientId()));
                         } else {
-                            updatePacket = PacketFactory.clonePacket(contest.getClientId(), account.getClientId(), packet);
+                            newPacket = PacketFactory.clonePacket(contest.getClientId(), account.getClientId(), packet);
                         }
-                        controller.sendToClient(updatePacket);
+                        controller.sendToClient(newPacket);
                     }
                 }
             }
@@ -1429,12 +1427,15 @@ public class PacketHandler {
 
             controller.writeConfigToDisk();
 
-            Packet addPacket = PacketFactory.clonePacket(contest.getClientId(), PacketFactory.ALL_SERVERS, packet);
-            boolean sendToOtherServers = isThisSite(packet.getSourceId().getSiteNumber());
-            sendToJudgesAndOthers(addPacket, sendToOtherServers);
-
-            if (sendToTeams) {
-                controller.sendToTeams(addPacket);
+            if (updatePacket != null) {
+                sendToJudgesAndOthers(updatePacket, true);
+            } else {
+                Packet addPacket = PacketFactory.clonePacket(contest.getClientId(), PacketFactory.ALL_SERVERS, packet);
+                boolean sendToOtherServers = isThisSite(packet.getSourceId().getSiteNumber());
+                sendToJudgesAndOthers(addPacket, sendToOtherServers);
+                if (sendToTeams) {
+                    controller.sendToTeams(addPacket);
+                }
             }
         }
     }
