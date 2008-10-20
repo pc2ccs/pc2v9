@@ -1520,27 +1520,34 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     public void logoffUser(ClientId clientId) {
 
-        if (contest.isLocalLoggedIn(clientId)) {
-
+        if (isServer() && contest.isLocalLoggedIn(clientId)) {
+            // Logged into this server, so we log them off and send out packet.
+            
+            /**
+             * This is a condition where the ServerView, for instance, logs off a user,
+             * there is no need to send a packet to the local server, just log them off
+             * locally and send out a logoff packet.
+             */
+            
             ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(clientId);
+            
+            contest.removeLogin(clientId);
+            
+            forceConnectionDrop(connectionHandlerID);
+            
+            Packet packet = PacketFactory.createLogoff(contest.getClientId(), PacketFactory.ALL_SERVERS, clientId);
 
-            info("LOGOFF (logoffUser) " + clientId + " " + connectionHandlerID);
-            removeLogin(clientId);
-
-            if (canCheckoutRunsAndClars(clientId)) {
-                try {
-                    cancellAll(clientId);
-                } catch (ContestSecurityException e) {
-                    log.log(Log.WARNING, "Warning on canceling runs/clars for " + clientId, e);
-                }
-            }
+            sendToServers(packet);
+            sendToAdministrators(packet);
 
         } else {
-            info("LOGOFF remote (logoffUser) " + clientId);
-            contest.removeLogin(clientId); // remove from remote login list
+            // Send packet to my sever
+            Packet packet = PacketFactory.createLogoff(contest.getClientId(), getServerClientId(), clientId);
+            sendToLocalServer(packet);
         }
-    }
 
+    }
+    
     public void connectionError(Serializable object, ConnectionHandlerID connectionHandlerID, String causeDescription) {
 
         // TODO code create a packet and send it to servers and admins
@@ -1671,6 +1678,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         sendPacketToClients(packet, ClientType.Type.SPECTATOR);
     }
 
+    public void sendToSpectators(Packet packet) {
+        sendPacketToClients(packet, ClientType.Type.SPECTATOR);
+    }
     public void sendToAdministrators(Packet packet) {
         sendPacketToClients(packet, ClientType.Type.ADMINISTRATOR);
     }
@@ -2217,9 +2227,24 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     }
 
     public void forceConnectionDrop(ConnectionHandlerID connectionHandlerID) {
-        log.log(Log.INFO, "forceConnectionDrop: " + connectionHandlerID);
-        connectionManager.unregisterConnection(connectionHandlerID);
-        contest.connectionDropped(connectionHandlerID);
+        
+        if (isServer()){
+            
+            if (contest.isConnected(connectionHandlerID)){
+                log.log(Log.INFO, "forceConnectionDrop: " + connectionHandlerID);
+                connectionManager.unregisterConnection(connectionHandlerID);
+                contest.connectionDropped(connectionHandlerID);
+            } else {
+                // must be another server, send to all servers
+                
+                Packet forceDiscoPacket = PacketFactory.createForceLogoff(contest.getClientId(), PacketFactory.ALL_SERVERS, connectionHandlerID);
+                sendToServers(forceDiscoPacket);
+            }
+        
+        } else {
+            // Local connection list, remove them
+            contest.connectionDropped(connectionHandlerID);
+        }
     }
 
     public void addNewProblem(Problem problem, ProblemDataFiles problemDataFiles) {
@@ -2277,7 +2302,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
         try {
             Packet logoffPacket = PacketFactory.createLogoff(contest.getClientId(), PacketFactory.ALL_SERVERS, clientId);
-            PacketFactory.dumpPacket(log, logoffPacket, "removeLogin");
             sendToAdministrators(logoffPacket);
             if (!isServer(clientId)) {
                 // Each server tracks its own list of server logins.

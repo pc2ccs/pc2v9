@@ -141,8 +141,9 @@ public interface IInternalController {
     
     /**
      * Logoff a client.
+     *
+     * Logs this client off, or sends request to log client off.
      * 
-     * Either a force logoff or the client themselves logs off.
      * @param clientId
      */
     void logoffUser(ClientId clientId);
@@ -275,6 +276,8 @@ public interface IInternalController {
     
     /**
      * Force connection off.
+     * 
+     * Remove local connection, or send to server to remove connection.
      * 
      * @param connectionHandlerID
      */

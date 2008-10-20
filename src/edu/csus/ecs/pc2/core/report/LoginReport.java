@@ -50,8 +50,13 @@ public class LoginReport implements IReport {
                 printWriter.println("Logged in " + ctype.toString());
 
                 for (ClientId clientId : clientIds) {
-                    ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(clientId);
-                    printWriter.println("   " + clientId + " on " + connectionHandlerID);
+                    try {
+                        ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(clientId);
+                        printWriter.println("   " + clientId + " on " + connectionHandlerID);
+                    } catch (Exception e) {
+                        printWriter.println("Exception in report: " + e.getMessage());
+                        e.printStackTrace(printWriter);
+                    }
                 }
             }
         }
@@ -67,10 +72,34 @@ public class LoginReport implements IReport {
                 printWriter.println("Logged in " + ctype.toString());
 
                 for (ClientId clientId : clientIds) {
-                    ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(clientId);
-                    printWriter.println("   " + clientId + " on " + connectionHandlerID);
+                    try {
+                        ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(clientId);
+                        printWriter.println("   " + clientId + " on " + connectionHandlerID);
+                    } catch (Exception e) {
+                        printWriter.println("Exception in report: " + e.getMessage());
+                        e.printStackTrace(printWriter);
+                    }
                 }
             }
+        }
+
+        printWriter.println();
+        printWriter.println("-- Connection Ids  -- ");
+
+        for (ConnectionHandlerID connectionHandlerID : contest.getConnectionHandleIDs()) {
+
+            try {
+                ClientId clientId = contest.getClientId(connectionHandlerID);
+                if (clientId != null) {
+                    printWriter.print(" client " + clientId);
+                }
+                printWriter.print("   " + connectionHandlerID);
+                printWriter.println();
+            } catch (Exception e) {
+                printWriter.println("Exception in report: " + e.getMessage());
+                e.printStackTrace(printWriter);
+            }
+
         }
 
     }

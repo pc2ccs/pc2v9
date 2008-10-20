@@ -1036,7 +1036,7 @@ public class PacketHandler {
     }
 
     /**
-     * Login from a remote server.
+     * Login from a server,
      * 
      * @param packet
      */
@@ -1059,6 +1059,9 @@ public class PacketHandler {
                                 contest.addRemoteLogin(whoLoggedIn, connectionHandlerID);
                                 sendToJudgesAndOthers(packet, false);
                             }
+                        } else {
+                            contest.addRemoteLogin(whoLoggedIn, connectionHandlerID);
+                            sendToJudgesAndOthers(packet, false);
                         }
                     }
                 } else {
@@ -1074,26 +1077,46 @@ public class PacketHandler {
 
     }
 
+    /**
+     * Got logoff packet from either a server or client.
+     * @param packet
+     */
     private void logoutClient(Packet packet) {
 
         ClientId whoLoggedOff = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
         if (isServer()) {
 
-            if (contest.isLocalLoggedIn(whoLoggedOff)) {
-                controller.logoffUser(whoLoggedOff);
-                // Only send to servers if this clientId is NOT a server
+            // TODO Security code - only allow certain users to logoff other users
+            // TEST CASE - attempt to logoff client as say a team 
+//            throw new SecurityException("Client " + contest.getClientId() + " attempted to logoff another client "+whoLoggedOff);
+            
+            if (isServer(whoLoggedOff)){
 
-                // TODO look at this logic, see if isServer(whoLoggedOff) is ok to use.
-                sendToJudgesAndOthers(packet, false);
-                // sendToJudgesAndOthers(packet, !isServer(whoLoggedOff));
-            } else if (!isServer(whoLoggedOff)) {
-                // if not a sever log in, forward packet to other server
-                controller.sendToRemoteServer(whoLoggedOff.getSiteNumber(), packet);
+                // Special logic, ignore any logoff from any client about any server.
+                // Only disconnect logic will work on a server.
+                
+                controller.getLog().info("No logoff server allowed, logoff packet "+packet+" ignored");
+                
+            } else if (contest.isLocalLoggedIn(whoLoggedOff)) {
+                // Logged into this server, so we log them off and send out packet.
+                controller.logoffUser(whoLoggedOff);
+                
             } else {
-                // This is a server logoff from another server
-                if (contest.isRemoteLoggedIn(whoLoggedOff)) {
+                // Log them off, only notify local clients.
+                if (isServer(packet.getSourceId()) && whoLoggedOff.getSiteNumber() == packet.getSourceId().getSiteNumber()){
+                    /**
+                     * Logoff from a remote server for that site's remote client
+                     * and notify local clients
+                     */
                     contest.removeRemoteLogin(whoLoggedOff);
                     sendToJudgesAndOthers(packet, false);
+                } else {
+                    /**
+                     * In this block, client is not logged in locally, client is not a notification
+                     * from another server.
+                     */
+                    // Send to the server where client is logged in.
+                    controller.sendToRemoteServer(whoLoggedOff.getSiteNumber(), packet);
                 }
             }
         } else {
@@ -1424,14 +1447,15 @@ public class PacketHandler {
         }
 
         if (isServer()) {
-
+            
             controller.writeConfigToDisk();
+            
+            boolean sendToOtherServers = isThisSite(packet.getSourceId().getSiteNumber());
 
             if (updatePacket != null) {
-                sendToJudgesAndOthers(updatePacket, true);
+                sendToJudgesAndOthers(updatePacket, sendToOtherServers);
             } else {
                 Packet addPacket = PacketFactory.clonePacket(contest.getClientId(), PacketFactory.ALL_SERVERS, packet);
-                boolean sendToOtherServers = isThisSite(packet.getSourceId().getSiteNumber());
                 sendToJudgesAndOthers(addPacket, sendToOtherServers);
                 if (sendToTeams) {
                     controller.sendToTeams(addPacket);
@@ -1448,6 +1472,8 @@ public class PacketHandler {
     private void updateSetting(Packet packet) {
 
         boolean sendToTeams = false;
+        
+        Packet oneUpdatePacket = null;
 
         Site site = (Site) PacketFactory.getObjectValue(packet, PacketFactory.SITE);
         if (site != null) {
@@ -1501,8 +1527,8 @@ public class PacketHandler {
             contest.updateAccount(oneAccount);
             if (isThisSite(oneAccount.getClientId().getSiteNumber())) {
                 if (isServer()) {
-                    Packet updatePacket = PacketFactory.clonePacket(contest.getClientId(), oneAccount.getClientId(), packet);
-                    controller.sendToClient(updatePacket);
+                    oneUpdatePacket = PacketFactory.clonePacket(contest.getClientId(), oneAccount.getClientId(), packet);
+                    controller.sendToClient(oneUpdatePacket);
                 }
             }
         }
@@ -1574,13 +1600,18 @@ public class PacketHandler {
         if (isServer()) {
 
             controller.writeConfigToDisk();
-
-            Packet updatePacket = PacketFactory.clonePacket(contest.getClientId(), PacketFactory.ALL_SERVERS, packet);
+            
             boolean sendToOtherServers = isThisSite(packet.getSourceId().getSiteNumber());
-            sendToJudgesAndOthers(updatePacket, sendToOtherServers);
+            
+            if (oneUpdatePacket != null) {
+                sendToJudgesAndOthers(oneUpdatePacket, sendToOtherServers);
+            } else {
+                Packet updatePacket = PacketFactory.clonePacket(contest.getClientId(), PacketFactory.ALL_SERVERS, packet);
+                sendToJudgesAndOthers(updatePacket, sendToOtherServers);
 
-            if (sendToTeams) {
-                controller.sendToTeams(updatePacket);
+                if (sendToTeams) {
+                    controller.sendToTeams(updatePacket);
+                }
             }
         }
     }

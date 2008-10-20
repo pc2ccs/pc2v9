@@ -301,10 +301,9 @@ public class LoginsPane extends JPanePlugin {
         }
         
         ClientId clientId = (ClientId) getLoginListBox().getKeys()[selected];
-        
-        // TODO log off user
-        showMessage("todo: Logging off "+clientId);
-
+        ConnectionHandlerID connectionHandlerID = getContest().getConnectionHandleID(clientId);
+        getController().getLog().info("Send Force logoff "+clientId+" "+connectionHandlerID);
+        getController().logoffUser(clientId);
     }
 
     /**
