@@ -380,7 +380,7 @@ public class ContestTestFrame extends JFrame {
         if (loginTextField == null) {
             loginTextField = new JTextField();
             loginTextField.setBounds(new java.awt.Rectangle(90, 21, 89, 24));
-            loginTextField.setText("scoreboard1");
+            loginTextField.setText("judge1");
         }
         return loginTextField;
     }
