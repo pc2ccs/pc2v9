@@ -13,6 +13,7 @@ import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.IniFile;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
@@ -105,12 +106,25 @@ public class ServerView extends JFrame implements UIPlugin {
             }
         });
 
+        overRideLookAndFeel();
         FrameUtilities.centerFrameTop(this);
         setVisible(true);
         
         VersionInfo versionInfo = new VersionInfo();
         showMessage("Version "+versionInfo.getVersionNumber()+" (Build "+versionInfo.getBuildNumber()+")");
     }
+    
+    private void overRideLookAndFeel(){
+        // TODO eventually move this method to on location 
+        String value = IniFile.getValue("client.plaf");
+        if (value != null && value.equalsIgnoreCase("java")){
+            FrameUtilities.setJavaLookAndFeel();
+        }
+        if (value != null && value.equalsIgnoreCase("native")){
+            FrameUtilities.setNativeLookAndFeel();
+        }
+    }
+
 
     protected void promptAndExit() {
         int result = FrameUtilities.yesNoCancelDialog(null, "Are you sure you want to exit PC^2?", "Exit PC^2 Server Module");

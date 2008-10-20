@@ -12,6 +12,7 @@ import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.IniFile;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
@@ -86,6 +87,7 @@ public class JudgeView extends JFrame implements UIPlugin {
         this.setContentPane(getMainPane());
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("PC^2 Judge - Not Logged In ");
+        overRideLookAndFeel();
         FrameUtilities.centerFrame(this);
         setVisible(true);
         this.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -96,6 +98,16 @@ public class JudgeView extends JFrame implements UIPlugin {
 
     }
 
+    private void overRideLookAndFeel(){
+        // TODO eventually move this method to on location 
+        String value = IniFile.getValue("client.plaf");
+        if (value != null && value.equalsIgnoreCase("java")){
+            FrameUtilities.setJavaLookAndFeel();
+        }
+        if (value != null && value.equalsIgnoreCase("native")){
+            FrameUtilities.setNativeLookAndFeel();
+        }
+    }
     protected void promptAndExit() {
         int result = FrameUtilities.yesNoCancelDialog(null, "Are you sure you want to exit PC^2?", "Exit PC^2");
 

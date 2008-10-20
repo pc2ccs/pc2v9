@@ -12,6 +12,7 @@ import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.IniFile;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
@@ -96,10 +97,22 @@ public class TeamView extends JFrame implements UIPlugin {
             }
         });
 
+        overRideLookAndFeel();
         FrameUtilities.centerFrame(this);
         setTitle("PC^2 Team - Not Logged In ");
         FrameUtilities.waitCursor(this);
 
+    }
+    
+    private void overRideLookAndFeel(){
+        // TODO eventually move this method to on location 
+        String value = IniFile.getValue("client.plaf");
+        if (value != null && value.equalsIgnoreCase("java")){
+            FrameUtilities.setJavaLookAndFeel();
+        }
+        if (value != null && value.equalsIgnoreCase("native")){
+            FrameUtilities.setNativeLookAndFeel();
+        }
     }
 
     protected void promptAndExit() {

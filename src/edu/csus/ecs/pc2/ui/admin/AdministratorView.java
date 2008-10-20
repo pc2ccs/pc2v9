@@ -17,6 +17,7 @@ import javax.swing.event.ChangeListener;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.IniFile;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.ui.AccountsPane;
@@ -119,9 +120,20 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
         });
 
         getMainTabbedPanel().addChangeListener(this);
-
+        
+        overRideLookAndFeel();
+    
         FrameUtilities.centerFrame(this);
-
+    }
+    
+    private void overRideLookAndFeel(){
+        String value = IniFile.getValue("client.plaf");
+        if (value != null && value.equalsIgnoreCase("java")){
+            FrameUtilities.setJavaLookAndFeel();
+        }
+        if (value != null && value.equalsIgnoreCase("native")){
+            FrameUtilities.setNativeLookAndFeel();
+        }
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
