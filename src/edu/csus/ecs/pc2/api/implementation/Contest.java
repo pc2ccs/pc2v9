@@ -91,8 +91,7 @@ public class Contest implements IContest {
     }
 
     public String getContestTitle() {
-        Site site = contest.getSite(contest.getSiteNumber());
-        return site.getDisplayName();
+        return contest.getContestInformation().getContestTitle();
     }
 
     public String getSiteName() {
