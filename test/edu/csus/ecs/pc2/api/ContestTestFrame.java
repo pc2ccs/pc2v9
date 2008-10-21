@@ -105,6 +105,10 @@ public class ContestTestFrame extends JFrame {
             new  PrintProblems (),
             new  PrintStandings (),
             new  PrintClarifications (),
+            new  PrintContestRunning(),
+            new  PrintSiteName(),
+            new  PrintGroups(),
+            new  PrintLocalContactInfo(),
     };
 
     private JPanel topPane = null;
@@ -1018,6 +1022,83 @@ public class ContestTestFrame extends JFrame {
             return "getClarifications";
         }
     }
+    
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    protected class PrintGroups extends APIAbstractTest {
+
+        @Override
+        public void printTest() {
+            IGroup [] groups = contest.getGroups();
+            println("There are " + groups.length + " groups");
+            for (IGroup group : contest.getGroups()){
+                println("Group = "+group.getName());
+            }
+        }
+
+        @Override
+        String getTitle() {
+            return "getGroups";
+        }
+    }
+    
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    protected class PrintLocalContactInfo extends APIAbstractTest {
+
+        @Override
+        public void printTest() {
+            println("Contacted: " + contest.getLocalContactedHostName() + " port=" + contest.getLocalContactedPortNumber());
+        }
+
+        @Override
+        String getTitle() {
+            return "getLocalContactedHostName";
+        }
+    }    
+    
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    protected class PrintSiteName extends APIAbstractTest {
+
+        @Override
+        public void printTest() {
+            println("Site Name = "+contest.getSiteName());
+        }
+
+        @Override
+        String getTitle() {
+            return "getSiteName";
+        }
+    }
+    
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    protected class PrintContestRunning extends APIAbstractTest {
+
+        @Override
+        public void printTest() {
+            println("Contest running ? "+contest.isContestClockRunning());
+        }
+
+        @Override
+        String getTitle() {
+            return "isContestClockRunning";
+        }
+    }
+
 
     protected String trueFalseString(boolean value, String trueString, String falseString) {
         if (value) {
