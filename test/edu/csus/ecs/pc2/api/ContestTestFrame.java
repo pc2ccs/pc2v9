@@ -103,12 +103,17 @@ public class ContestTestFrame extends JFrame {
             new  PrintContestTitle (),
             new  PrintTeams (),
             new  PrintProblems (),
+            new  PrintLanguages(),
             new  PrintStandings (),
             new  PrintClarifications (),
             new  PrintContestRunning(),
             new  PrintSiteName(),
             new  PrintGroups(),
             new  PrintLocalContactInfo(),
+            new PrintMyClientSC(),
+            new PrintGetContestSC(),
+            new PrintLoggedInSC(),
+            new PrintMyClientSC(),
     };
 
     private JPanel topPane = null;
@@ -135,7 +140,7 @@ public class ContestTestFrame extends JFrame {
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(519,493));
+        this.setSize(new java.awt.Dimension(609,493));
         this.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
         this.setContentPane(getMainPain());
         this.setTitle("Contest Test Frame [NOT LOGGED IN]");
@@ -870,9 +875,11 @@ public class ContestTestFrame extends JFrame {
             }
 
             for (APIAbstractTest abstractTest : reportsList) {
-                abstractTest.setScrollyFrame(scrollyFrame, contest);
+                println("-- Report "+abstractTest.getTitle());
+                abstractTest.setAPISettings(scrollyFrame, contest, serverConnection);
                 abstractTest.printTest();
             }
+            println();
             println();
         }
 
@@ -1184,13 +1191,6 @@ public class ContestTestFrame extends JFrame {
         if (reportScrollPane == null) {
             reportScrollPane = new JScrollPane();
             reportScrollPane.setViewportView(getReportJList());
-            reportScrollPane.addMouseListener(new java.awt.event.MouseAdapter() {
-                public void mouseClicked(java.awt.event.MouseEvent e) {
-                    if (e.getClickCount() >= 2) {
-                        runReport(e.getSource());
-                    }
-                }
-            });
         }
         return reportScrollPane;
     }
@@ -1207,11 +1207,112 @@ public class ContestTestFrame extends JFrame {
 
         try {
             APIAbstractTest test = (APIAbstractTest) source;
-            test.setScrollyFrame(scrollyFrame, contest);
+            test.setAPISettings(scrollyFrame, contest, serverConnection);
             test.printTest();
         } catch (Exception e) {
             println("Exception during report "+e.getLocalizedMessage()+" "+e.getStackTrace()[0].getClassName());
             e.printStackTrace();
+        }
+    }
+    
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    protected class PrintLanguages extends APIAbstractTest {
+
+        @Override
+        public void printTest() {
+            ILanguage [] languages = contest.getLanguages();
+            
+            println("There are " + languages.length + " languages");
+            for (ILanguage language : languages){
+                println("Language "+language.getName());
+            }
+        }
+
+        @Override
+        String getTitle() {
+            return "getLanguages";
+        }
+    }
+    
+    
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    protected class PrintMyClientSC extends APIAbstractTest {
+        @Override
+        public void printTest() {
+
+            IClient client;
+            try {
+                client = serverConnection.getMyClient();
+                print("This client");
+                print(", login=" + client.getLoginName());
+                print(", name=" + client.getDisplayName());
+                print(", type=" + client.getType());
+                print(", account#" + client.getAccountNumber());
+                print(", site=" + client.getSiteNumber());
+            } catch (NotLoggedInException e) {
+                println("Exception during report "+e.getLocalizedMessage()+" "+e.getStackTrace()[0].getClassName());
+                e.printStackTrace();
+            }
+            println();
+        }
+
+        @Override
+        String getTitle() {
+            return "getMyClient (ServerConnection)";
+        }
+    }
+    
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    protected class PrintLoggedInSC extends APIAbstractTest {
+        @Override
+        public void printTest() {
+            print("This client, logged in = "+serverConnection.isLoggedIn());
+            println();
+        }
+
+        @Override
+        String getTitle() {
+            return "isLoggedIn (ServerConnection)";
+        }
+    }
+    
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    protected class PrintGetContestSC extends APIAbstractTest {
+        @Override
+        public void printTest() {
+            try {
+                IContest serverConnContest = serverConnection.getContest();
+                if (serverConnContest != null) {
+                    println("getContest from ServerConnection is " + serverConnContest);
+                } else {
+                    println("getContest from ServerConnection returns null");
+                }
+            } catch (NotLoggedInException e) {
+                println("Exception during report " + e.getLocalizedMessage() + " " + e.getStackTrace()[0].getClassName());
+                e.printStackTrace();
+            }
+            println();
+        }
+
+        @Override
+        String getTitle() {
+            return "isLoggedIn (ServerConnection)";
         }
     }
 
@@ -1223,6 +1324,13 @@ public class ContestTestFrame extends JFrame {
     private JList getReportJList() {
         if (reportJList == null) {
             reportJList = new JList(listModel);
+            reportJList.addMouseListener(new java.awt.event.MouseAdapter() {
+                public void mouseClicked(java.awt.event.MouseEvent e) {
+                    if (e.getClickCount() >= 2) {
+                        runReport(getReportJList().getSelectedValue());
+                    }
+                }
+            });
         }
         return reportJList;
     }
@@ -1266,6 +1374,7 @@ public class ContestTestFrame extends JFrame {
             borderLayout.setHgap(0);
             borderLayout.setVgap(3);
             eastPane = new JPanel();
+            eastPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "API Methods", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
             eastPane.setLayout(borderLayout);
             eastPane.add(getRunContestButton(), java.awt.BorderLayout.SOUTH);
             eastPane.add(getReportScrollPane(), java.awt.BorderLayout.CENTER);

@@ -16,6 +16,9 @@ public abstract class APIAbstractTest {
     @SuppressWarnings("unused")
     private IContest contest = null;
 
+    @SuppressWarnings("unused")
+    private ServerConnection serverConnection = null;
+
     public APIAbstractTest() {
     }
 
@@ -56,9 +59,10 @@ public abstract class APIAbstractTest {
         scrollyFrame.addLine(s);
     }
 
-    public void setScrollyFrame(ScrollyFrame frame, IContest inContest) {
+    public void setAPISettings(ScrollyFrame frame, IContest inContest, ServerConnection inServerConnection) {
         this.scrollyFrame = frame;
         this.contest = inContest;
+        this.serverConnection  = inServerConnection;
     }
 
     @Override
