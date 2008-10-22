@@ -85,22 +85,21 @@ public class PermissionGroup {
          */
 
         spectatorPermissionList.addPermission(Type.CHANGE_PASSWORD);
-        spectatorPermissionList.addPermission(Type.JUDGE_RUN);
+//        spectatorPermissionList.addPermission(Type.JUDGE_RUN);
         spectatorPermissionList.addPermission(Type.LOGIN);
 //        spectatorPermissionList.addPermission(Type.REJUDGE_RUN);
         spectatorPermissionList.addPermission(Type.TEST_RUN);
         spectatorPermissionList.addPermission(Type.VIEW_CLARIFICATIONS);
         spectatorPermissionList.addPermission(Type.VIEW_RUNS);
 //        spectatorPermissionList.addPermission(Type.ANSWER_CLARIFICATION);
-        spectatorPermissionList.addPermission(Type.SUBMIT_CLARIFICATION);
+//        spectatorPermissionList.addPermission(Type.SUBMIT_CLARIFICATION);
         spectatorPermissionList.addPermission(Type.VIEW_ALL_JUDGEMENTS);
         spectatorPermissionList.addPermission(Type.VIEW_STANDINGS);
         spectatorPermissionList.addPermission(Type.VIEW_SUMMARY_ATTEMPTS_GRID);
         spectatorPermissionList.addPermission(Type.VIEW_RUN_JUDGEMENT_HISTORIES);
 //        spectatorPermissionList.addPermission(Type.GENERATE_NEW_CLARIFICATION);
-        spectatorPermissionList.addPermission(Type.ALLOWED_TO_AUTO_JUDGE);
+//        spectatorPermissionList.addPermission(Type.ALLOWED_TO_AUTO_JUDGE);
         spectatorPermissionList.addPermission(Type.ALLOWED_TO_FETCH_RUN);
-
         
         /**
          * Board Permissions
