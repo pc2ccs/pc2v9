@@ -14,12 +14,14 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
 import edu.csus.ecs.pc2.api.exceptions.NotLoggedInException;
+import edu.csus.ecs.pc2.api.listener.ContestEvent;
+import edu.csus.ecs.pc2.api.listener.IConfigurationUpdateListener;
 import edu.csus.ecs.pc2.api.listener.IRunEventListener;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
-import javax.swing.SwingConstants;
 
 /**
  * API Contest Test Frame.
@@ -85,6 +87,8 @@ public class ContestTestFrame extends JFrame {
     private JCheckBox clarListenerCheckBox = null;
 
     private ClarificationListener clarificationListener = null;
+    
+    private ConfigurationUpdateListener configurationUpdateListener = null;
 
     private JButton runContestButton = null;
 
@@ -198,23 +202,45 @@ public class ContestTestFrame extends JFrame {
     protected class ClarificationListener implements IClarificationEventListener {
 
         public void clarificationAdded(IClarification clarification) {
-            println("Clar added Site " + clarification.getSiteNumber() + " Run " + clarification.getNumber() + " from " + clarification.getTeam().getLoginName() + " at "
+            println("Clar added Site " + clarification.getSiteNumber() + " Clarification " + clarification.getNumber() + " from " + clarification.getTeam().getLoginName() + " at "
                     + clarification.getSubmissionTime() + " Problem " + clarification.getProblem().getName());
         }
 
         public void clarificationRemoved(IClarification clarification) {
-            println("Clar removed Site " + clarification.getSiteNumber() + " Run " + clarification.getNumber() + " from " + clarification.getTeam().getLoginName() + " at "
+            println("Clar removed Site " + clarification.getSiteNumber() + " Clarification " + clarification.getNumber() + " from " + clarification.getTeam().getLoginName() + " at "
                     + clarification.getSubmissionTime() + " Problem " + clarification.getProblem().getName());
         }
 
         public void clarificationAnswered(IClarification clarification) {
-            println("Clar answered Site " + clarification.getSiteNumber() + " Run " + clarification.getNumber() + " from " + clarification.getTeam().getLoginName() + " at "
+            println("Clar answered Site " + clarification.getSiteNumber() + " Clarification " + clarification.getNumber() + " from " + clarification.getTeam().getLoginName() + " at "
                     + clarification.getSubmissionTime() + " Problem " + clarification.getProblem().getName());
         }
 
         public void clarificationUpdated(IClarification clarification) {
-            println("Clar updated Site " + clarification.getSiteNumber() + " Run " + clarification.getNumber() + " from " + clarification.getTeam().getLoginName() + " at "
+            println("Clar updated Site " + clarification.getSiteNumber() + " Clarification " + clarification.getNumber() + " from " + clarification.getTeam().getLoginName() + " at "
                     + clarification.getSubmissionTime() + " Problem " + clarification.getProblem().getName());
+        }
+    }
+    
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    
+    // $HeadURL$
+    protected class ConfigurationUpdateListener implements IConfigurationUpdateListener {
+
+        public void configurationItemAdded(ContestEvent contestEvent) {
+            println("Config item added "+contestEvent.getEventType()+" "+getConfigInfo(contestEvent));
+        }
+
+        public void configurationItemUpdated(ContestEvent contestEvent) {
+            println("Config item updated "+contestEvent.getEventType()+" "+getConfigInfo(contestEvent));
+        }
+
+        public void configurationItemRemoved(ContestEvent contestEvent) {
+            println("Config item removed "+contestEvent.getEventType()+" "+getConfigInfo(contestEvent));
         }
     }
 
@@ -231,6 +257,29 @@ public class ContestTestFrame extends JFrame {
             mainPain.add(getMainPanel(), java.awt.BorderLayout.CENTER);
         }
         return mainPain;
+    }
+
+    public String getConfigInfo(ContestEvent contestEvent) {
+        switch (contestEvent.getEventType()) {
+            case CLIENT:
+                return contestEvent.getClient().toString();
+            case CONTEST_CLOCK:
+                return "running " + contestEvent.getContestClock().isContestClockRunning();
+            case CONTEST_TITLE:
+                return contestEvent.getContestTitle();
+            case GROUP:
+                return contestEvent.getGroup().getName();
+            case JUDGEMENT:
+                return contestEvent.getJudgement().getName();
+            case LANGUAGE:
+                return contestEvent.getLanguage().getName();
+            case PROBLEM:
+                return contestEvent.getProblem().getName();
+            case SITE:
+                return contestEvent.getSite().getName();
+            default:
+                return "Unknown type " + contestEvent.getEventType();
+        }
     }
 
     /**
@@ -783,8 +832,20 @@ public class ContestTestFrame extends JFrame {
             showMessage("Not logged in");
             return;
         }
-
-        println("configListenerChanged todo " + listenerON); // todo CODE
+        
+        if (listenerON) {
+            // turn it on
+            if (configurationUpdateListener == null) {
+                configurationUpdateListener = new ConfigurationUpdateListener();
+            }
+            contest.addContestConfigurationUpdateListener(configurationUpdateListener);
+            println("Configuration Listener added");
+        } else {
+            if (configurationUpdateListener != null) {
+                contest.removeContestConfigurationUpdateListener(configurationUpdateListener);
+                println("Configuration Listener removed");
+            }
+        }
     }
 
     /**
@@ -1125,7 +1186,7 @@ public class ContestTestFrame extends JFrame {
             clarListenerCheckBox = new JCheckBox();
             clarListenerCheckBox.setBounds(new java.awt.Rectangle(24, 232, 200, 21));
             clarListenerCheckBox.setToolTipText("Listen for Clarification events");
-            clarListenerCheckBox.setText("View Clar Listener Listener");
+            clarListenerCheckBox.setText("View Clar Listener");
             clarListenerCheckBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     clarListenerChanged(clarListenerCheckBox.isSelected());
