@@ -8,6 +8,7 @@ import edu.csus.ecs.pc2.api.IGroup;
 import edu.csus.ecs.pc2.api.IJudgement;
 import edu.csus.ecs.pc2.api.ILanguage;
 import edu.csus.ecs.pc2.api.IProblem;
+import edu.csus.ecs.pc2.api.ISite;
 import edu.csus.ecs.pc2.api.listener.ContestEvent;
 import edu.csus.ecs.pc2.api.listener.IConfigurationUpdateListener;
 import edu.csus.ecs.pc2.api.listener.ContestEvent.EventType;
@@ -25,9 +26,11 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IJudgementListener;
 import edu.csus.ecs.pc2.core.model.ILanguageListener;
 import edu.csus.ecs.pc2.core.model.IProblemListener;
+import edu.csus.ecs.pc2.core.model.ISiteListener;
 import edu.csus.ecs.pc2.core.model.JudgementEvent;
 import edu.csus.ecs.pc2.core.model.LanguageEvent;
 import edu.csus.ecs.pc2.core.model.ProblemEvent;
+import edu.csus.ecs.pc2.core.model.SiteEvent;
 
 /**
  * API Configuration Listener list.
@@ -251,7 +254,7 @@ public class ConfigurationListenerList {
         for (int i = 0; i < listenerList.size(); i++) {
 
             IJudgement judgement = new JudgementImplementation(judgementEvent.getJudgement());
-            ContestEvent contestEvent = new ContestEvent(EventType.LANGUAGE, judgement);
+            ContestEvent contestEvent = new ContestEvent(EventType.JUDGEMENT, judgement);
 
             switch (judgementEvent.getAction()) {
                 case ADDED:
@@ -386,7 +389,62 @@ public class ConfigurationListenerList {
           }
       }
 
+      private void fireSiteListener(SiteEvent event)  {
+          for (int i = 0; i < listenerList.size(); i++) {
 
+              ISite site = new SiteImplementation(event.getSite());
+              ContestEvent contestEvent = new ContestEvent(EventType.SITE, site);
+              
+              switch (event.getAction()){
+                  case ADDED:
+                      listenerList.elementAt(i).configurationItemAdded(contestEvent);
+                      break;
+                  case DELETED:
+                      listenerList.elementAt(i).configurationItemRemoved(contestEvent);
+                      break;
+                  case CHANGED:
+                      listenerList.elementAt(i).configurationItemUpdated(contestEvent);
+                      break;
+                      
+                  case LOGIN:
+                      break; // ignored for now
+                  case LOGOFF:
+                      break; // ignored for now
+                     default:
+                         break; // ignored for now
+              }
+          }
+      }
+      
+      /**
+       * 
+       * @author pc2@ecs.csus.edu
+       * @version $Id$
+       */
+      class SiteListener implements ISiteListener {
+
+        public void siteAdded(SiteEvent event) {
+            fireSiteListener(event);
+        }
+
+        public void siteRemoved(SiteEvent event) {
+            fireSiteListener(event);
+        }
+
+        public void siteChanged(SiteEvent event) {
+            fireSiteListener(event);
+        }
+
+        public void siteLoggedOn(SiteEvent event) {
+            fireSiteListener(event);
+        }
+
+        public void siteLoggedOff(SiteEvent event) {
+            // TODO Auto-generated method stub
+            
+        }
+      }
+      
     public void setContest(IInternalContest contest) {
         this.contest = contest;
         
@@ -397,6 +455,16 @@ public class ConfigurationListenerList {
         contest.addGroupListener(new GroupListener());
         contest.addContestTimeListener(new ContestTimeListener());
         contest.addContestInformationListener(new ContestInformationListener());
+        contest.addJudgementListener(new JudgementListener());
+        contest.addSiteListener(new SiteListener());
+        
+//        contest.addBalloonSettingsListener
+//        contest.addChangePasswordListener
+//        contest.addClarificationListener
+//        contest.addClientSettingsListener
+//        contest.addConnectionListener
+//        contest.addLoginListener
+//        contest.addRunListener
+//        contest.addSecurityMessageListener
     }
-
 }
