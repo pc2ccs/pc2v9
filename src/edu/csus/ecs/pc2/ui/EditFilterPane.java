@@ -513,7 +513,6 @@ public class EditFilterPane extends JPanePlugin {
         ClarificationStates[] clarificationStates = ClarificationStates.values();
         for (ClarificationStates clarificationState : clarificationStates) {
             WrapperJCheckBox wrapperJCheckBox = new WrapperJCheckBox(clarificationState);
-            System.out.println("debug 22 "+wrapperJCheckBox.getText());
             if (filter.isFilteringClarificationStates()) {
                 wrapperJCheckBox.setSelected(filter.matchesClarificationState(clarificationState));
             }
