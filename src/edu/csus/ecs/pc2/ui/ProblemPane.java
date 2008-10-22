@@ -869,25 +869,7 @@ public class ProblemPane extends JPanePlugin {
                 e.printStackTrace();
             }
 
-            if (inProblem.isComputerJudged()) {
-                computerJudging.setSelected(true);
-                manualReview.setSelected(inProblem.isManualReview());
-                manualReview.setEnabled(true);
-
-                if (manualReview.isSelected()) {
-                    prelimaryNotification.setEnabled(true);
-                    prelimaryNotification.setSelected(inProblem.isPrelimaryNotification());
-                } else {
-                    prelimaryNotification.setEnabled(false);
-                }
-            } else {
-                computerJudging.setSelected(false);
-                manualReview.setSelected(inProblem.isManualReview());
-                prelimaryNotification.setSelected(inProblem.isPrelimaryNotification());
-
-                manualReview.setSelected(false);
-                prelimaryNotification.setSelected(false);
-            }
+            populateJudging(inProblem);
 
         } else {
 
@@ -920,11 +902,7 @@ public class ProblemPane extends JPanePlugin {
             getDoShowOutputWindowCheckBox().setSelected(true);
             getShowCompareCheckBox().setSelected(true);
 
-            computerJudging.setSelected(false);
-            manualReview.setSelected(false);
-            prelimaryNotification.setSelected(false);
-            manualJudging.setEnabled(true);
-
+            populateJudging(null);
         }
 
         enableValidatorComponents();
@@ -936,6 +914,37 @@ public class ProblemPane extends JPanePlugin {
         // select the general tab
         getMainTabbedPane().setSelectedIndex(0);
         populatingGUI = false;
+    }
+
+    /*
+     * Sets the Judging Type radio and checkboxes in a sane manner.
+     */
+    private void populateJudging(Problem inProblem) {
+        if (inProblem != null && inProblem.isComputerJudged()) {
+            computerJudging.setSelected(true);
+            manualReview.setSelected(inProblem.isManualReview());
+            manualReview.setEnabled(true);
+
+            prelimaryNotification.setSelected(inProblem.isPrelimaryNotification());
+            if (manualReview.isSelected()) {
+                prelimaryNotification.setEnabled(true);
+            } else {
+                prelimaryNotification.setEnabled(false);
+            }
+        } else {
+            computerJudging.setSelected(false);
+            manualJudging.setSelected(true);
+            if (inProblem == null) {
+                manualReview.setSelected(false);
+                prelimaryNotification.setSelected(false);
+            } else {
+                manualReview.setSelected(inProblem.isManualReview());
+                prelimaryNotification.setSelected(inProblem.isPrelimaryNotification());
+            }
+
+            manualReview.setEnabled(false);
+            prelimaryNotification.setEnabled(false);
+        }
     }
 
     protected void enableUpdateButtons(boolean fieldsChanged) {
