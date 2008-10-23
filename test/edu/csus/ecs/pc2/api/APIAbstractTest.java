@@ -8,7 +8,14 @@ package edu.csus.ecs.pc2.api;
 
 // $HeadURL$
 public abstract class APIAbstractTest {
-
+    
+    /**
+     * Run number
+     */
+    private int number = 0;
+    
+    private int siteNumber = 0;
+    
     private String line = "";
 
     private ScrollyFrame scrollyFrame = null;
@@ -69,7 +76,20 @@ public abstract class APIAbstractTest {
     public String toString() {
         return getTitle();
     }
-    
-    
 
+    public int getNumber() {
+        return number;
+    }
+
+    public void setNumber(int number) {
+        this.number = number;
+    }
+
+    public int getSiteNumber() {
+        return siteNumber;
+    }
+
+    public void setSiteNumber(int siteNumber) {
+        this.siteNumber = siteNumber;
+    }
 }

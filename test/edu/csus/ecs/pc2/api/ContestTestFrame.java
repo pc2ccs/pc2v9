@@ -22,6 +22,7 @@ import edu.csus.ecs.pc2.api.listener.ContestEvent;
 import edu.csus.ecs.pc2.api.listener.IConfigurationUpdateListener;
 import edu.csus.ecs.pc2.api.listener.IRunEventListener;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
+import edu.csus.ecs.pc2.ui.IntegerDocument;
 
 /**
  * API Contest Test Frame.
@@ -100,6 +101,7 @@ public class ContestTestFrame extends JFrame {
 
     private APIAbstractTest[] reportsList = { 
             new  PrintRuns (),
+            new PrintRun(),
             new  PrintMyClient (),
             new  PrintSites (),
             new  PrintClockInfo (),
@@ -129,6 +131,10 @@ public class ContestTestFrame extends JFrame {
     private JPanel eastPane = null;
 
     private JPanel mainPanel = null;
+
+    private JTextField numberTextField = null;
+
+    private JLabel jLabel = null;
 
     /**
      * This method initializes
@@ -289,6 +295,10 @@ public class ContestTestFrame extends JFrame {
      */
     private JPanel getCenterPane() {
         if (centerPane == null) {
+            jLabel = new JLabel();
+            jLabel.setBounds(new java.awt.Rectangle(28,171,138,16));
+            jLabel.setText("Run/Clar Number");
+            jLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             centerPane = new JPanel();
             centerPane.setLayout(null);
             centerPane.setPreferredSize(new java.awt.Dimension(350,350));
@@ -302,6 +312,8 @@ public class ContestTestFrame extends JFrame {
             centerPane.add(getOneRunTest(), null);
             centerPane.add(getShowClarsButton(), null);
             centerPane.add(getClarListenerCheckBox(), null);
+            centerPane.add(getNumberTextField(), null);
+            centerPane.add(jLabel, null);
         }
         return centerPane;
     }
@@ -363,6 +375,73 @@ public class ContestTestFrame extends JFrame {
         return testRunButton;
     }
 
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    
+    // $HeadURL$
+    protected class PrintRun extends APIAbstractTest {
+
+        @Override
+        public void printTest() {
+
+            int runNumber = getNumber();
+            if (runNumber < 1) {
+                println("No run number " + runNumber + " submitted/exists");
+            } else {
+                int siteNum = getSiteNumber();
+                if (siteNum == 0) {
+                    siteNum = contest.getMyClient().getSiteNumber();
+                }
+                boolean foundRun = false;
+
+                for (IRun run : contest.getRuns()) {
+                    if (run.getNumber() == runNumber && run.getSiteNumber() == siteNum) {
+                        foundRun = true;
+                        print("   Site " + run.getSiteNumber());
+                        print(" Run " + run.getNumber());
+                        print(", " + run.getProblem().getName());
+                        print(", " + run.getLanguage().getName());
+                        print(", del=" + run.isDeleted());
+                        print(", judged=" + run.isJudged());
+                        print(", solved=" + run.isSolved());
+                        println();
+                        if (run.isJudged()) {
+                            for (IRunJudgement runJudgement : run.getRunJudgements()) {
+                                println("     " + run.getJudgementName());
+                                print("     ");
+                                if (runJudgement.isActive()) {
+                                    print("active");
+                                } else {
+                                    print("      ");
+                                }
+                                print(" " + runJudgement.getJudgement().getName());
+                                print(", sendToTeam=" + runJudgement.isSendToTeam());
+                                print(", computerJudged=" + runJudgement.isComputerJudgement());
+                                println();
+                            }
+
+                        } else {
+                            print("     ");
+                            println("Run not judged.");
+                        }
+                        break;
+                    }
+                } // for IRun
+                
+                if (! foundRun){
+                    println("No run number " + runNumber + " submitted/exists");
+                }
+            }
+        }
+
+        @Override
+        String getTitle() {
+            return "getRun";
+        }
+    }
     /**
      * 
      * @author pc2@ecs.csus.edu
@@ -935,18 +1014,29 @@ public class ContestTestFrame extends JFrame {
                 return;
             }
 
+            int submissionNumber = getIntegerValue (getNumberTextField().getText());
+            
             for (APIAbstractTest abstractTest : reportsList) {
                 println("-- Report "+abstractTest.getTitle());
                 abstractTest.setAPISettings(scrollyFrame, contest, serverConnection);
+                abstractTest.setNumber(submissionNumber);
                 abstractTest.printTest();
             }
             println();
             println();
         }
-
+   
         @Override
         String getTitle() {
             return "ALL Reports";
+        }
+    }
+    
+    private int getIntegerValue(String s) {
+        try {
+            return Integer.parseInt(s);
+        } catch (Exception e) {
+            return 0;
         }
     }
 
@@ -1266,9 +1356,12 @@ public class ContestTestFrame extends JFrame {
             return;
         }
 
+        int submissionNumber = getIntegerValue (getNumberTextField().getText());
+        
         try {
             APIAbstractTest test = (APIAbstractTest) source;
             test.setAPISettings(scrollyFrame, contest, serverConnection);
+            test.setNumber(submissionNumber);
             test.printTest();
         } catch (Exception e) {
             println("Exception during report "+e.getLocalizedMessage()+" "+e.getStackTrace()[0].getClassName());
@@ -1457,6 +1550,20 @@ public class ContestTestFrame extends JFrame {
             mainPanel.add(getCenterPane(), java.awt.BorderLayout.WEST);
         }
         return mainPanel;
+    }
+
+    /**
+     * This method initializes numberTextField
+     * 
+     * @return javax.swing.JTextField
+     */
+    private JTextField getNumberTextField() {
+        if (numberTextField == null) {
+            numberTextField = new JTextField();
+            numberTextField.setDocument(new IntegerDocument());
+            numberTextField.setBounds(new java.awt.Rectangle(178,170,73,22));
+        }
+        return numberTextField;
     }
 
     public static void main(String[] args) {
