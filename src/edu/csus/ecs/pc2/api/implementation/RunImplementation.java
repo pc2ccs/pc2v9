@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.api.implementation;
 import edu.csus.ecs.pc2.api.ILanguage;
 import edu.csus.ecs.pc2.api.IProblem;
 import edu.csus.ecs.pc2.api.IRun;
+import edu.csus.ecs.pc2.api.IRunJudgement;
 import edu.csus.ecs.pc2.api.ITeam;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.ElementId;
@@ -295,6 +296,21 @@ public class RunImplementation implements IRun {
 
         public void runRemoved(RunEvent event) {
             // run not removed, ignored
+        }
+    }
+
+    public IRunJudgement[] getRunJudgements() {
+        if (run != null && run.isJudged()) {
+            JudgementRecord[] records = run.getAllJudgementRecords();
+            RunJudgementImplemenation[] implemenations = new RunJudgementImplemenation[records.length];
+
+            for (int i = 0; i < records.length; i++) {
+                implemenations[i] = new RunJudgementImplemenation(records[i], internalContest, controller);
+            }
+            return implemenations;
+
+        } else {
+            return new RunJudgementImplemenation[0];
         }
     }
 }
