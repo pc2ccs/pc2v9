@@ -2500,7 +2500,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     }
 
     public int getPortContacted() {
-        return port;
+        return remoteHostPort;
     }
 
     public void fetchRun(Run run) {
