@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.api.apireports;
 
 import edu.csus.ecs.pc2.api.APIAbstractTest;
+import edu.csus.ecs.pc2.api.IClient;
 import edu.csus.ecs.pc2.api.IStanding;
 
 /**
@@ -16,7 +17,9 @@ public class PrintStandings extends APIAbstractTest {
 
         println("Standings - " + getContest().getStandings().length + " teams to rank");
         for (IStanding standing : getContest().getStandings()) {
-            println("Rank " + standing.getRank() + " solved= " + standing.getNumProblemsSolved() + " pts= " + standing.getPenaltyPoints() + " " + standing.getClient().getLoginName());
+            IClient client = standing.getClient();
+            println("Rank " + standing.getRank() + " solved= " + standing.getNumProblemsSolved() + " pts= " + standing.getPenaltyPoints() + " " + "s" + client.getSiteNumber() + "t"
+                    + client.getAccountNumber() + " " + client.getDisplayName());
         }
 
         println();
