@@ -11,6 +11,9 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.FrameUtilities.HorizontalPosition;
 import edu.csus.ecs.pc2.ui.FrameUtilities.VerticalPosition;
+import javax.swing.JPanel;
+import java.awt.BorderLayout;
+import javax.swing.JButton;
 
 /**
  * Frame with JList.
@@ -32,6 +35,12 @@ public class ScrollyFrame extends JFrame {
     
     private DefaultListModel defaultListModel = new DefaultListModel();
 
+    private JPanel mainPanel = null;
+
+    private JPanel buttonPane = null;
+
+    private JButton clearButton = null;
+
 
     /**
      * This method initializes
@@ -47,10 +56,9 @@ public class ScrollyFrame extends JFrame {
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(701,291));
+        this.setSize(new java.awt.Dimension(481,291));
+        this.setContentPane(getMainPanel());
         this.setTitle("List");
-        this.setContentPane(getScrollPane());
-
         setHeightScreenLength (120);
         FrameUtilities.setFramePosition(this, HorizontalPosition.RIGHT, VerticalPosition.CENTER);
 
@@ -108,6 +116,54 @@ public class ScrollyFrame extends JFrame {
                 defaultListModel.removeAllElements();
             }
         });
+    }
+
+    /**
+     * This method initializes mainPanel
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getMainPanel() {
+        if (mainPanel == null) {
+            mainPanel = new JPanel();
+            mainPanel.setLayout(new BorderLayout());
+            mainPanel.add(getScrollPane(), java.awt.BorderLayout.CENTER);
+            mainPanel.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
+        }
+        return mainPanel;
+    }
+
+    /**
+     * This method initializes buttonPane
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getButtonPane() {
+        if (buttonPane == null) {
+            buttonPane = new JPanel();
+            buttonPane.setPreferredSize(new java.awt.Dimension(35,35));
+            buttonPane.add(getClearButton(), null);
+        }
+        return buttonPane;
+    }
+
+    /**
+     * This method initializes clearButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getClearButton() {
+        if (clearButton == null) {
+            clearButton = new JButton();
+            clearButton.setText("Clear");
+            clearButton.setMnemonic(java.awt.event.KeyEvent.VK_C);
+            clearButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    removeAll();
+                }
+            });
+        }
+        return clearButton;
     }
 
     /**

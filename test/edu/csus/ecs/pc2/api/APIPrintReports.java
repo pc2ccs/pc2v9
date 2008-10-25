@@ -14,6 +14,7 @@ import edu.csus.ecs.pc2.api.apireports.PrintLoggedInSC;
 import edu.csus.ecs.pc2.api.apireports.PrintMyClient;
 import edu.csus.ecs.pc2.api.apireports.PrintMyClientSC;
 import edu.csus.ecs.pc2.api.apireports.PrintProblems;
+import edu.csus.ecs.pc2.api.apireports.PrintRun;
 import edu.csus.ecs.pc2.api.apireports.PrintRuns;
 import edu.csus.ecs.pc2.api.apireports.PrintSiteName;
 import edu.csus.ecs.pc2.api.apireports.PrintSites;
@@ -35,7 +36,7 @@ public class APIPrintReports {
     
     private APIAbstractTest[] reportsList = { 
             new  PrintRuns (),
-//            new  PrintRun(),
+            new  PrintRun(),
             new  PrintMyClient (),
             new  PrintSites (),
             new  PrintClockInfo (),

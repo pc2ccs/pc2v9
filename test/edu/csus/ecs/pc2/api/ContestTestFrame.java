@@ -10,6 +10,7 @@ import java.util.Date;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -18,12 +19,13 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.api.apireports.PrintClarifications;
 import edu.csus.ecs.pc2.api.apireports.PrintMyClient;
 import edu.csus.ecs.pc2.api.apireports.PrintProblems;
-import edu.csus.ecs.pc2.api.apireports.PrintRuns;
+import edu.csus.ecs.pc2.api.apireports.PrintRun;
 import edu.csus.ecs.pc2.api.apireports.PrintStandings;
 import edu.csus.ecs.pc2.api.apireports.PrintTeams;
 import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
@@ -37,8 +39,7 @@ import edu.csus.ecs.pc2.ui.IntegerDocument;
 /**
  * API 'contest' Test Frame.
  * 
- * Shows output of 'get' and 'is' methods for API Contest and
- * ServerConnection classes.
+ * Shows output of 'get' and 'is' methods for API Contest and ServerConnection classes.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -60,7 +61,7 @@ public class ContestTestFrame extends JFrame {
 
     private JButton exitButton = null;
 
-    private JButton testRunButton = null;
+    private JButton getRunButton = null;
 
     private JButton loginButton = null;
 
@@ -71,8 +72,6 @@ public class ContestTestFrame extends JFrame {
     private ServerConnection serverConnection = new ServerConnection();
 
     private IContest contest = null;
-
-    private JButton listTeamsButton = null;
 
     private JButton logoffButton = null;
 
@@ -90,16 +89,12 @@ public class ContestTestFrame extends JFrame {
 
     private JButton printAllButton = null;
 
-    private JButton clearButton = null;
-
     private JButton oneRunTest = null;
-
-    private JButton showClarsButton = null;
 
     private JCheckBox clarListenerCheckBox = null;
 
     private ClarificationListener clarificationListener = null;
-    
+
     private ConfigurationUpdateListener configurationUpdateListener = null;
 
     private JButton runContestButton = null;
@@ -125,8 +120,16 @@ public class ContestTestFrame extends JFrame {
     private JLabel jLabel = null;
 
     private JPanel eastButtonPane = null;
-    
-    private APIAbstractTest [] reportsList = new APIPrintReports().getReportsList();
+
+    private APIAbstractTest[] reportsList = new APIPrintReports().getReportsList();
+
+    private JLabel jLabel1 = null;
+
+    private JComboBox siteComboBox = null;
+
+    private JLabel runsOnSiteLabel = null;
+
+    private JLabel runsOnSite = null;
 
     /**
      * This method initializes
@@ -142,7 +145,7 @@ public class ContestTestFrame extends JFrame {
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(609,552));
+        this.setSize(new java.awt.Dimension(609, 552));
         this.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
         this.setContentPane(getMainPain());
         this.setTitle("Contest Test Frame [NOT LOGGED IN]");
@@ -152,21 +155,21 @@ public class ContestTestFrame extends JFrame {
         loadReportList();
 
     }
-    
 
     /**
      * Comparer for APIAbstractTestComparator title.
+     * 
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
-    protected  class APIAbstractTestComparator implements Comparator<APIAbstractTest>, Serializable {
+    protected class APIAbstractTestComparator implements Comparator<APIAbstractTest>, Serializable {
 
         /**
          * 
          */
         private static final long serialVersionUID = 2262035579714795746L;
-        
-        public int compare(APIAbstractTest abstractTest1, APIAbstractTest abstractTest2){
+
+        public int compare(APIAbstractTest abstractTest1, APIAbstractTest abstractTest2) {
             return abstractTest1.getTitle().compareTo(abstractTest2.getTitle());
         }
     }
@@ -176,7 +179,7 @@ public class ContestTestFrame extends JFrame {
      * 
      */
     private void loadReportList() {
-        
+
         Arrays.sort(reportsList, new APIAbstractTestComparator());
 
         for (APIAbstractTest abstractTest : reportsList) {
@@ -239,26 +242,32 @@ public class ContestTestFrame extends JFrame {
                     + clarification.getSubmissionTime() + " Problem " + clarification.getProblem().getName());
         }
     }
-    
+
     /**
      * Listener for IConfigurationUpdateListener.
+     * 
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
-    
+
     // $HeadURL$
     protected class ConfigurationUpdateListener implements IConfigurationUpdateListener {
 
         public void configurationItemAdded(ContestEvent contestEvent) {
-            println("Config item added "+contestEvent.getEventType()+" "+getConfigInfo(contestEvent));
+            println("Config item added " + contestEvent.getEventType() + " " + getConfigInfo(contestEvent));
         }
 
         public void configurationItemUpdated(ContestEvent contestEvent) {
-            println("Config item updated "+contestEvent.getEventType()+" "+getConfigInfo(contestEvent));
+            println("Config item updated " + contestEvent.getEventType() + " " + getConfigInfo(contestEvent));
+
+            if (contestEvent.getEventType().equals(ContestEvent.EventType.SITE)) {
+                updateSiteComboBox();
+            }
+
         }
 
         public void configurationItemRemoved(ContestEvent contestEvent) {
-            println("Config item removed "+contestEvent.getEventType()+" "+getConfigInfo(contestEvent));
+            println("Config item removed " + contestEvent.getEventType() + " " + getConfigInfo(contestEvent));
         }
     }
 
@@ -307,25 +316,38 @@ public class ContestTestFrame extends JFrame {
      */
     private JPanel getCenterPane() {
         if (centerPane == null) {
+            runsOnSite = new JLabel();
+            runsOnSite.setBounds(new java.awt.Rectangle(163, 204, 157, 16));
+            runsOnSite.setText("Site");
+            runsOnSite.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+            runsOnSiteLabel = new JLabel();
+            runsOnSiteLabel.setBounds(new java.awt.Rectangle(28, 204, 112, 16));
+            runsOnSiteLabel.setText("Runs on Site N");
+            runsOnSiteLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+            jLabel1 = new JLabel();
+            jLabel1.setBounds(new java.awt.Rectangle(48, 175, 96, 16));
+            jLabel1.setText("Site");
+            jLabel1.setHorizontalAlignment(SwingConstants.RIGHT);
             jLabel = new JLabel();
-            jLabel.setBounds(new java.awt.Rectangle(28,237,138,16));
+            jLabel.setBounds(new java.awt.Rectangle(28, 239, 119, 16));
             jLabel.setText("Run/Clar Number");
             jLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             centerPane = new JPanel();
             centerPane.setLayout(null);
-            centerPane.setPreferredSize(new java.awt.Dimension(350,350));
-            centerPane.add(getTestRunButton(), null);
-            centerPane.add(getListTeamsButton(), null);
+            centerPane.setPreferredSize(new java.awt.Dimension(350, 350));
+            centerPane.add(getGetRunButton(), null);
             centerPane.add(getRunListenerCheckBox(), null);
             centerPane.add(getConfigListenerCheckBox(), null);
             centerPane.add(getStandingsButton(), null);
             centerPane.add(getPrintAllButton(), null);
-            centerPane.add(getJButton2(), null);
             centerPane.add(getOneRunTest(), null);
-            centerPane.add(getShowClarsButton(), null);
             centerPane.add(getClarListenerCheckBox(), null);
             centerPane.add(getNumberTextField(), null);
             centerPane.add(jLabel, null);
+            centerPane.add(jLabel1, null);
+            centerPane.add(getSiteComboBox(), null);
+            centerPane.add(runsOnSiteLabel, null);
+            centerPane.add(runsOnSite, null);
         }
         return centerPane;
     }
@@ -340,7 +362,7 @@ public class ContestTestFrame extends JFrame {
             FlowLayout flowLayout = new FlowLayout();
             flowLayout.setHgap(55);
             buttonPane = new JPanel();
-            buttonPane.setPreferredSize(new java.awt.Dimension(269,35));
+            buttonPane.setPreferredSize(new java.awt.Dimension(269, 35));
             buttonPane.setLayout(flowLayout);
             buttonPane.add(getExitButton(), null);
         }
@@ -357,7 +379,7 @@ public class ContestTestFrame extends JFrame {
             exitButton = new JButton();
             exitButton.setText("Exit");
             exitButton.setToolTipText("Exit this program");
-            exitButton.setPreferredSize(new java.awt.Dimension(90,25));
+            exitButton.setPreferredSize(new java.awt.Dimension(90, 25));
             exitButton.setMnemonic(java.awt.event.KeyEvent.VK_X);
             exitButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -373,24 +395,23 @@ public class ContestTestFrame extends JFrame {
      * 
      * @return javax.swing.JButton
      */
-    private JButton getTestRunButton() {
-        if (testRunButton == null) {
-            testRunButton = new JButton();
-            testRunButton.setBounds(new java.awt.Rectangle(129, 60, 94, 29));
-            testRunButton.setToolTipText("Print Run information list");
-            testRunButton.setText("Runs");
-            testRunButton.addActionListener(new java.awt.event.ActionListener() {
+    private JButton getGetRunButton() {
+        if (getRunButton == null) {
+            getRunButton = new JButton();
+            getRunButton.setBounds(new java.awt.Rectangle(240,233,94,29));
+            getRunButton.setToolTipText("Print Run information list");
+            getRunButton.setText("getRun");
+            getRunButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    printRunsTest();
+                    printOneRun();
                 }
             });
         }
-        return testRunButton;
+        return getRunButton;
     }
 
-
-    protected void printRunsTest() {
-        runReport(new PrintRuns());
+    protected void printOneRun() {
+        runReport(new PrintRun());
     }
 
     /**
@@ -402,7 +423,7 @@ public class ContestTestFrame extends JFrame {
         if (loginButton == null) {
             loginButton = new JButton();
             loginButton.setToolTipText("Login to contest");
-            loginButton.setBounds(new java.awt.Rectangle(318,8,70,26));
+            loginButton.setBounds(new java.awt.Rectangle(318, 8, 70, 26));
             loginButton.setMnemonic(java.awt.event.KeyEvent.VK_L);
             loginButton.setText("Login");
             loginButton.addActionListener(new java.awt.event.ActionListener() {
@@ -433,13 +454,15 @@ public class ContestTestFrame extends JFrame {
             setTitle("Contest " + contest.getMyClient().getLoginName() + " " + contest.getSiteName());
             getLoginButton().setEnabled(false);
             scrollyFrame.setVisible(true);
-            
+
             VersionInfo versionInfo = new VersionInfo();
+
+            println("Version " + versionInfo.getVersionNumber() + " build " + versionInfo.getBuildNumber());
+            runReport(new PrintMyClient());
+            println(contest.getRuns().length + " runs.");
+            println(contest.getClarifications().length + " clarifications");
             
-            println("Version "+versionInfo.getVersionNumber()+" build "+versionInfo.getBuildNumber());
-            runReport (new PrintMyClient());
-            println(contest.getRuns().length+" runs.");
-            println(contest.getClarifications().length+" clarifications");
+            updateSiteComboBox();
 
         } catch (LoginFailureException e) {
             contest = null;
@@ -476,7 +499,7 @@ public class ContestTestFrame extends JFrame {
         if (loginTextField == null) {
             loginTextField = new JTextField();
             loginTextField.setText("judge1");
-            loginTextField.setBounds(new java.awt.Rectangle(153,11,127,20));
+            loginTextField.setBounds(new java.awt.Rectangle(153, 11, 127, 20));
             loginTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyPressed(java.awt.event.KeyEvent e) {
                     if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
@@ -484,7 +507,7 @@ public class ContestTestFrame extends JFrame {
                     }
                 }
             });
-            
+
         }
         return loginTextField;
     }
@@ -497,7 +520,7 @@ public class ContestTestFrame extends JFrame {
     private JTextField getPasswordTextField() {
         if (passwordTextField == null) {
             passwordTextField = new JTextField();
-            passwordTextField.setBounds(new java.awt.Rectangle(153,36,127,20));
+            passwordTextField.setBounds(new java.awt.Rectangle(153, 36, 127, 20));
             passwordTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyPressed(java.awt.event.KeyEvent e) {
                     if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
@@ -509,27 +532,6 @@ public class ContestTestFrame extends JFrame {
         }
         return passwordTextField;
     }
-
-    /**
-     * This method initializes listTeamsButton
-     * 
-     * @return javax.swing.JButton
-     */
-    private JButton getListTeamsButton() {
-        if (listTeamsButton == null) {
-            listTeamsButton = new JButton();
-            listTeamsButton.setBounds(new java.awt.Rectangle(246, 14, 94, 29));
-            listTeamsButton.setToolTipText("Print teams info");
-            listTeamsButton.setText("Teams");
-            listTeamsButton.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    printTeamsTest();
-                }
-            });
-        }
-        return listTeamsButton;
-    }
-
 
     protected void printTeamsTest() {
         runReport(new PrintTeams());
@@ -549,7 +551,7 @@ public class ContestTestFrame extends JFrame {
         if (logoffButton == null) {
             logoffButton = new JButton();
             logoffButton.setToolTipText("Logoff of contest");
-            logoffButton.setBounds(new java.awt.Rectangle(419,8,70,26));
+            logoffButton.setBounds(new java.awt.Rectangle(419, 8, 70, 26));
             logoffButton.setMnemonic(java.awt.event.KeyEvent.VK_O);
             logoffButton.setText("Logoff");
             logoffButton.addActionListener(new java.awt.event.ActionListener() {
@@ -590,7 +592,7 @@ public class ContestTestFrame extends JFrame {
     private JCheckBox getRunListenerCheckBox() {
         if (runListenerCheckBox == null) {
             runListenerCheckBox = new JCheckBox();
-            runListenerCheckBox.setBounds(new java.awt.Rectangle(24,269,177,18));
+            runListenerCheckBox.setBounds(new java.awt.Rectangle(24, 269, 177, 18));
             runListenerCheckBox.setToolTipText("Listen for run events");
             runListenerCheckBox.setText("View Run Listener");
             runListenerCheckBox.addActionListener(new java.awt.event.ActionListener() {
@@ -638,7 +640,7 @@ public class ContestTestFrame extends JFrame {
     private JCheckBox getConfigListenerCheckBox() {
         if (configListenerCheckBox == null) {
             configListenerCheckBox = new JCheckBox();
-            configListenerCheckBox.setBounds(new java.awt.Rectangle(24,330,177,21));
+            configListenerCheckBox.setBounds(new java.awt.Rectangle(24, 330, 177, 21));
             configListenerCheckBox.setToolTipText("Listen for all configuration change events");
             configListenerCheckBox.setText("View Config Listener");
             configListenerCheckBox.addActionListener(new java.awt.event.ActionListener() {
@@ -656,7 +658,7 @@ public class ContestTestFrame extends JFrame {
             showMessage("Not logged in");
             return;
         }
-        
+
         if (listenerON) {
             // turn it on
             if (configurationUpdateListener == null) {
@@ -696,7 +698,6 @@ public class ContestTestFrame extends JFrame {
         runReport(new PrintStandings());
     }
 
-
     /**
      * This method initializes jButton1
      * 
@@ -705,7 +706,7 @@ public class ContestTestFrame extends JFrame {
     private JButton getPrintAllButton() {
         if (printAllButton == null) {
             printAllButton = new JButton();
-            printAllButton.setBounds(new java.awt.Rectangle(244, 106, 94, 29));
+            printAllButton.setBounds(new java.awt.Rectangle(245, 14, 94, 29));
             printAllButton.setToolTipText("Print all contest info");
             printAllButton.setMnemonic(java.awt.event.KeyEvent.VK_P);
             printAllButton.setText("Print ALL");
@@ -721,9 +722,10 @@ public class ContestTestFrame extends JFrame {
     protected void printAll() {
         runReport(new PrintAllReports());
     }
-    
+
     /**
      * Print all reports.
+     * 
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
@@ -731,18 +733,18 @@ public class ContestTestFrame extends JFrame {
 
         @Override
         public void printTest() {
-            
+
             if (contest == null) {
                 showMessage("Not logged in", "Can not display info");
                 return;
             }
 
             Arrays.sort(reportsList, new APIAbstractTestComparator());
-            
-            int submissionNumber = getIntegerValue (getNumberTextField().getText());
-            
+
+            int submissionNumber = getIntegerValue(getNumberTextField().getText());
+
             for (APIAbstractTest abstractTest : reportsList) {
-                println("-- Report "+abstractTest.getTitle());
+                println("-- Report " + abstractTest.getTitle());
                 abstractTest.setAPISettings(scrollyFrame, contest, serverConnection);
                 abstractTest.setNumber(submissionNumber);
                 abstractTest.printTest();
@@ -750,40 +752,19 @@ public class ContestTestFrame extends JFrame {
             println();
             println();
         }
-   
+
         @Override
         public String getTitle() {
             return "ALL Reports";
         }
     }
-    
+
     private int getIntegerValue(String s) {
         try {
             return Integer.parseInt(s);
         } catch (Exception e) {
             return 0;
         }
-    }
-
-
-    /**
-     * This method initializes jButton2
-     * 
-     * @return javax.swing.JButton
-     */
-    private JButton getJButton2() {
-        if (clearButton == null) {
-            clearButton = new JButton();
-            clearButton.setBounds(new java.awt.Rectangle(247,324,94,29));
-            clearButton.setToolTipText("Clear Message List");
-            clearButton.setText("Clear");
-            clearButton.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    scrollyFrame.removeAll();
-                }
-            });
-        }
-        return clearButton;
     }
 
     /**
@@ -794,7 +775,7 @@ public class ContestTestFrame extends JFrame {
     private JButton getOneRunTest() {
         if (oneRunTest == null) {
             oneRunTest = new JButton();
-            oneRunTest.setBounds(new java.awt.Rectangle(42,14,185,29));
+            oneRunTest.setBounds(new java.awt.Rectangle(42, 14, 185, 29));
             oneRunTest.setToolTipText("View all Run's Source");
             oneRunTest.setText("View All Runs Source");
             oneRunTest.addActionListener(new java.awt.event.ActionListener() {
@@ -847,26 +828,6 @@ public class ContestTestFrame extends JFrame {
 
     }
 
-    /**
-     * This method initializes showClarsButton
-     * 
-     * @return javax.swing.JButton
-     */
-    private JButton getShowClarsButton() {
-        if (showClarsButton == null) {
-            showClarsButton = new JButton();
-            showClarsButton.setBounds(new java.awt.Rectangle(24, 61, 82, 29));
-            showClarsButton.setToolTipText("Print clarification info list");
-            showClarsButton.setText("Clars");
-            showClarsButton.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    printClarTest();
-                }
-            });
-        }
-        return showClarsButton;
-    }
-
     protected void printClarTest() {
         runReport(new PrintClarifications());
     }
@@ -879,7 +840,7 @@ public class ContestTestFrame extends JFrame {
     private JCheckBox getClarListenerCheckBox() {
         if (clarListenerCheckBox == null) {
             clarListenerCheckBox = new JCheckBox();
-            clarListenerCheckBox.setBounds(new java.awt.Rectangle(24,298,200,21));
+            clarListenerCheckBox.setBounds(new java.awt.Rectangle(24, 298, 200, 21));
             clarListenerCheckBox.setToolTipText("Listen for Clarification events");
             clarListenerCheckBox.setText("View Clar Listener");
             clarListenerCheckBox.addActionListener(new java.awt.event.ActionListener() {
@@ -926,7 +887,7 @@ public class ContestTestFrame extends JFrame {
             runContestButton.setText("Run");
             runContestButton.setMnemonic(java.awt.event.KeyEvent.VK_R);
             runContestButton.setToolTipText("Run Selected API method report");
-            runContestButton.setPreferredSize(new java.awt.Dimension(100,25));
+            runContestButton.setPreferredSize(new java.awt.Dimension(100, 25));
             runContestButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     if (contest == null) {
@@ -938,8 +899,8 @@ public class ContestTestFrame extends JFrame {
                         showMessage("No Repport Selected");
                     } else {
                         println();
-                        for (Object object: getReportJList().getSelectedValues()){
-                            println("-- Report "+((APIAbstractTest)object).getTitle());
+                        for (Object object : getReportJList().getSelectedValues()) {
+                            println("-- Report " + ((APIAbstractTest) object).getTitle());
                             runReport(object);
                         }
                     }
@@ -964,6 +925,7 @@ public class ContestTestFrame extends JFrame {
 
     /**
      * Run the input report.
+     * 
      * @param source
      */
     protected void runReport(Object source) {
@@ -972,19 +934,31 @@ public class ContestTestFrame extends JFrame {
             return;
         }
 
-        int submissionNumber = getIntegerValue (getNumberTextField().getText());
+        int submissionNumber = getIntegerValue(getNumberTextField().getText());
         
+        int siteNumber = getSelectedSiteNumber();
+
         try {
             APIAbstractTest test = (APIAbstractTest) source;
             test.setAPISettings(scrollyFrame, contest, serverConnection);
             test.setNumber(submissionNumber);
+            test.setSiteNumber(siteNumber);
             test.printTest();
         } catch (Exception e) {
-            println("Exception during report "+e.getLocalizedMessage()+" "+e.getStackTrace()[0].getClassName());
+            println("Exception during report " + e.getLocalizedMessage() + " " + e.getStackTrace()[0].getClassName());
             e.printStackTrace();
         }
     }
-    
+
+    private int getSelectedSiteNumber() {
+        Object object = getSiteComboBox().getSelectedItem();
+        if (object == null){
+            return 0;
+        }
+        ISite site = ((ISiteWrapper) object).getSite();
+        int siteNumber = site.getNumber();
+        return siteNumber;
+    }
 
     /**
      * This method initializes reportJList
@@ -1013,16 +987,16 @@ public class ContestTestFrame extends JFrame {
     private JPanel getTopPane() {
         if (topPane == null) {
             passwordLabel = new JLabel();
-            passwordLabel.setBounds(new java.awt.Rectangle(74,38,58,16));
+            passwordLabel.setBounds(new java.awt.Rectangle(74, 38, 58, 16));
             passwordLabel.setText("Password");
             passwordLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             loginLabel = new JLabel();
-            loginLabel.setBounds(new java.awt.Rectangle(101,13,31,16));
+            loginLabel.setBounds(new java.awt.Rectangle(101, 13, 31, 16));
             loginLabel.setText("Login");
             loginLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             topPane = new JPanel();
             topPane.setLayout(null);
-            topPane.setPreferredSize(new java.awt.Dimension(65,65));
+            topPane.setPreferredSize(new java.awt.Dimension(65, 65));
             topPane.add(getPasswordTextField(), null);
             topPane.add(getLoginTextField(), null);
             topPane.add(loginLabel, null);
@@ -1078,7 +1052,8 @@ public class ContestTestFrame extends JFrame {
             numberTextField = new JTextField();
             numberTextField.setDocument(new IntegerDocument());
             numberTextField.setToolTipText("Enter a Run Number or Clar Number");
-            numberTextField.setBounds(new java.awt.Rectangle(178,236,73,22));
+            numberTextField.setText("1");
+            numberTextField.setBounds(new java.awt.Rectangle(162, 236, 59, 22));
         }
         return numberTextField;
     }
@@ -1095,10 +1070,93 @@ public class ContestTestFrame extends JFrame {
             flowLayout1.setVgap(2);
             eastButtonPane = new JPanel();
             eastButtonPane.setLayout(flowLayout1);
-            eastButtonPane.setPreferredSize(new java.awt.Dimension(110,30));
+            eastButtonPane.setPreferredSize(new java.awt.Dimension(110, 30));
             eastButtonPane.add(getRunContestButton(), null);
         }
         return eastButtonPane;
+    }
+
+    /**
+     * This method initializes siteComboBox
+     * 
+     * @return javax.swing.JComboBox
+     */
+    private JComboBox getSiteComboBox() {
+        if (siteComboBox == null) {
+            siteComboBox = new JComboBox();
+            siteComboBox.setBounds(new java.awt.Rectangle(162, 173, 159, 21));
+            siteComboBox.addItemListener(new java.awt.event.ItemListener() {
+                public void itemStateChanged(java.awt.event.ItemEvent e) {
+                    updateSiteRunTotals();
+                }
+            });
+        }
+        return siteComboBox;
+    }
+    
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    
+    // $HeadURL$
+    protected class ISiteWrapper {
+        private ISite site = null;
+
+        public ISite getSite() {
+            return site;
+        }
+        public ISiteWrapper(ISite site) {
+            this.site = site;
+        }
+         @Override
+        public String toString() {
+            return site.getName();
+        }
+        
+    }
+
+    protected void updateSiteRunTotals() {
+
+        Object object = getSiteComboBox().getSelectedItem();
+
+        if (object == null) {
+            runsOnSite.setText("(no site selected)");
+            runsOnSiteLabel.setText("Runs on site");
+            return;
+        }
+
+        ISite site = ((ISiteWrapper) object).getSite();
+        int siteNumber = site.getNumber();
+        runsOnSiteLabel.setText("Runs on Site " + siteNumber);
+
+        int count = 0;
+        int deleted = 0;
+        for (IRun run : contest.getRuns()) {
+            if (run.getSiteNumber() == siteNumber) {
+                count++;
+                if (run.isDeleted()) {
+                    deleted++;
+                }
+            }
+        }
+
+        String text = "";
+
+        if (count == 0) {
+            text = "No runs.";
+        } else if (count == 1) {
+            text = "1 run.";
+        } else {
+            text = count + " runs.";
+        }
+
+        if (deleted > 0) {
+            text = count + " deleted.";
+        }
+
+        runsOnSite.setText(text);
     }
 
     public static void main(String[] args) {
@@ -1125,6 +1183,34 @@ public class ContestTestFrame extends JFrame {
             line = "";
         }
         scrollyFrame.addLine(s);
+    }
+
+    private void updateSiteComboBox() {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                int selectedIndex = getSiteComboBox().getSelectedIndex();
+
+                getSiteComboBox().removeAllItems();
+
+                ISite[] sites = contest.getSites();
+                Arrays.sort(sites, new ISiteComparatorBySiteNumber());
+
+                int siteNumber = 0;
+
+                for (int i = 0; i < sites.length; i++) {
+                    if (sites[i].getNumber() == siteNumber) {
+                        if (selectedIndex == -1) {
+                            selectedIndex = i;
+                        }
+                    }
+                    getSiteComboBox().addItem(new ISiteWrapper(sites[i]));
+                }
+
+                if (selectedIndex != -1) {
+                    getSiteComboBox().setSelectedIndex(selectedIndex);
+                }
+            }
+        });
     }
 
 } // @jve:decl-index=0:visual-constraint="21,23"
