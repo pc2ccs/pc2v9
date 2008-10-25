@@ -25,6 +25,7 @@ import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.security.Permission;
@@ -102,7 +103,7 @@ public class AccountsPane extends JPanePlugin {
     }
 
     protected Object[] buildAccountRow(Account account) {
-        // Object[] cols = { "Site", "Type", "Account Id", "Display Name" };
+        // Object[] cols = { "Site", "Type", "Account Id", "Display Name", "Group" };
         try {
             int cols = accountListBox.getColumnCount();
             Object[] s = new String[cols];
@@ -113,11 +114,23 @@ public class AccountsPane extends JPanePlugin {
             s[2] = "" + clientId.getClientNumber();
 
             s[3] = getTeamDisplayName(account);
+            s[4] = getGroupName(account);
             return s;
         } catch (Exception exception) {
             StaticLog.getLog().log(Log.INFO, "Exception in buildAccountRow()", exception);
         }
         return null;
+    }
+
+    private String getGroupName(Account account) {
+        String groupName = "";
+        if (account.getGroupId() != null) {
+            Group group = getContest().getGroup(account.getGroupId());
+            if (group != null) {
+                groupName = group.getDisplayName();
+            }
+        }
+        return groupName;
     }
 
     private String getSiteTitle(String string) {
@@ -141,7 +154,7 @@ public class AccountsPane extends JPanePlugin {
         if (accountListBox == null) {
             accountListBox = new MCLB();
 
-            Object[] cols = { "Site", "Type", "Account Id", "Display Name" };
+            Object[] cols = { "Site", "Type", "Account Id", "Display Name" , "Group"};
             accountListBox.addColumns(cols);
 
             // Sorters
@@ -160,6 +173,9 @@ public class AccountsPane extends JPanePlugin {
 
             // Display Name
             accountListBox.setColumnSorter(3, sorter, 4);
+
+            // Group
+            accountListBox.setColumnSorter(4, sorter, 5);
 
             cols = null;
 
