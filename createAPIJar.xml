@@ -1,0 +1,154 @@
+<?xml version="1.0"?>
+<project name="v9VersionAndJarBuild" default="jar" basedir=".">
+	<!-- $Id$ -->
+	<!-- $HeadURL$ -->
+	<!-- 
+
+Purpose: Create of dist/pc2apiTest.jar - jar of all Test classes,
+and uses main.class of edu.csus.ecs.pc2.api.ContestTestFrame.
+
+Dependencies: define JAVA_HOME to point to java directory,
+$JAVA_HOME/bin/java.exe should exist.
+
+To Use this:
+  To run/use this file, insure JAVA_HOME is defined and
+  then Run As... Ant Build
+  
+dal
+  
+-->
+	<description>
+         Build of pc2apiTest.jar which runs edu.csus.ecs.pc2.api.ContestTestFrame
+    </description>
+	
+	<!-- Name of JAR -->
+	<property name="name" value="pc2apiTest" />
+	<property name="jar.name" value="${name}.jar" />
+	
+	<!-- Main Class (default to be run) in jar -->
+	<property name="main.class" value="edu.csus.ecs.pc2.api.ContestTestFrame"/>
+	
+	<!-- set global properties for this build -->
+	<property name="src.dir" location="src" />
+	<property name="test.dir" location="test" />
+	<property name="build.dir" location="build" />
+	<property name="build.prod.dir" location="${build.dir}/prod" />
+	<property name="build.test.dir" location="${build.dir}/test" />
+	<property name="test.xml.dir" location="${build.dir}/test-results" />
+	<property name="docs.dir" location="${build.dir}/docs" />
+	<property name="dist.dir" location="dist" />
+	<!-- this should change one the location of mclb.jar changes -->
+	<property name="vendor.lib.dir" location="${basedir}/vendor/lib" />
+	<property name="scripts.dir" location="${basedir}" />
+	<property name="samps.dir" location="${basedir}/samps" />
+
+	<!-- Compiler settings. -->
+	<property name="javacFailOnError" value="false" />
+	<property name="javacDebugInfo" value="on" />
+	<property name="javacVerbose" value="false" />
+	<property name="logExtension" value=".log" />
+	<property name="compilerArg" value="" />
+	<property name="javacSource" value="1.5" />
+	<property name="javacTarget" value="1.5" />
+	<path id="path_bootclasspath">
+		<fileset dir="${java.home}/lib">
+			<include name="*.jar" />
+		</fileset>
+		<fileset dir="${vendor.lib.dir}">
+			<include name="*.jar" />
+		</fileset>
+	</path>
+
+	<property name="bootclasspath" refid="path_bootclasspath" />
+	<property name="bundleJavacSource" value="${javacSource}" />
+	<property name="bundleJavacTarget" value="${javacTarget}" />
+	<property name="bundleBootClasspath" value="${bootclasspath}" />
+
+	<property name="jar.path" value="${dist.dir}/${jar.name}" />
+
+	<tstamp>
+		<format property="date" pattern="yyyyMMdd" timezone="UTC" />
+	</tstamp>
+	<tstamp>
+		<format property="time" pattern="HHmm" timezone="UTC" />
+	</tstamp>
+	<property name="timestamp" value="${date}${time}" />
+	<!-- version is used in the jar manifest & in package.xml -->
+	<property name="old_version" value="9_0_${timestamp}" />
+	<property name="version" value="9.DEBUG"/>
+	<property name="new_version" value="9"/>
+
+	<target name="properties">
+		<available classname="org.eclipse.jdt.core.JDTCompilerAdapter" property="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter" />
+	</target>
+
+	<target name="init" depends="properties">
+		<!-- Create the time stamp -->
+		<tstamp />
+		<!-- Create the build directory structure used by compile -->
+		<mkdir dir="${build.prod.dir}" />
+		<mkdir dir="${build.test.dir}" />
+		
+	</target>
+
+	<target name="compile" depends="init" description="compile the source ">
+		<!-- Compile the java code from ${src.dir} into ${build.dir} -->
+		<javac srcdir="${test.dir}" destdir="${build.prod.dir}" failonerror="${javacFailOnError}" verbose="${javacVerbose}" debug="${javacDebugInfo}" includeAntRuntime="no" bootclasspath="${bundleBootClasspath}" source="${bundleJavacSource}" target="${bundleJavacTarget}">
+			<compilerarg line="${compilerArg}" compiler="${build.compiler}" />
+			<!-- classpath refid="project.classpath" /> -->
+			<!-- <compilerarg value="" compiler="org.eclipse.jdt.core.JDTCompilerAdapter"/> -->
+			<compilerarg line="-log '${build.dir}/${name}.prod${logExtension}'" compiler="org.eclipse.jdt.core.JDTCompilerAdapter" />
+		</javac>
+	</target>
+
+
+	<target name="jar" depends="compile" description="creates a jar of our classes">
+		<mkdir dir="${dist.dir}" />
+		<tstamp>
+			<format property="millisecond" pattern="S" timezone="UTC" />
+		</tstamp>
+		<property name="build.number" value="${millisecond}" />
+
+		<!-- consider doing the manifest in a separate target
+             then the Version can be ommitted if not set -->
+		<jar jarfile="${jar.path}" basedir="${build.prod.dir}">
+			<manifest>
+                <attribute name="Specification-Version" value="${version}"/>
+                <attribute name="Implementation-Title" value="CSUS Programming Contest Control System"/>
+                <attribute name="Implementation-Version" value="${build.number}"/>
+                <attribute name="Built-On" value="${timestamp.english}"/>
+                <attribute name="Main-Class" value="${main.class}"/>
+
+			</manifest>
+		</jar>
+	</target>
+
+	<target name="clean" description="clean up">
+		<!-- Delete the ${build.dir} and ${dist.dir} directory trees -->
+		<delete dir="${build.dir}" />
+		<delete dir="${dist.dir}" />
+	</target>
+
+	<property name="pc2srcpath" value="${src.dir}/edu/csus/ecs/pc2"/>
+	<property name="extraApiSource" value="${pc2srcpath}/core/model/ClientId.java,${pc2srcpath}/core/model/ElementId.java"/>
+
+	<target name="javadocs_api" description="Creates API javadocs">
+		<mkdir dir="${docs.dir}/api" />
+		<javadoc sourcepath="${src.dir}" destdir="${docs.dir}/api" 
+			sourcefiles="${extraApiSource}"
+			defaultexcludes="yes" 
+			packagenames="edu.csus.ecs.pc2.api.*" 
+			nodeprecated="false" 
+			nodeprecatedlist="false" 
+			noindex="false" 
+			nonavbar="false" 
+			notree="false" 
+			doctitle="PC^2 Version 9 API Documentation" 
+			Use="yes" 
+			SplitIndex="yes" 
+			overview="api_overview.html"
+			linkoffline="http://java.sun.com/j2se/1.5.0/docs/api/ ${api.url}" />
+		</target>
+
+
+</project>
