@@ -1579,18 +1579,8 @@ public class PacketHandler {
             if (isServer()) {
 
                 ClientId toId = clientSettings.getClientId();
-                if (isJudge(toId)) {
-                    // judge settings update send to judges and admins with auto judge settings (too)
-                    try {
-                        // Only send to other servers if this client is at this site
-                        // otherwise just send to judges and admins
-                        sendToJudgesAndOthers(packet, isThisSite(toId));
-                    } catch (Exception e) {
-                        controller.getLog().log(Log.WARNING, "Exception logged ", e);
-                    }
-                }
-
-                if (contest.isLocalLoggedIn(clientSettings.getClientId())) {
+                // judges will get this with sendToJudgesAndOthers below
+                if (!isJudge(toId) && contest.isLocalLoggedIn(toId)) {
                     Packet updatePacket = PacketFactory.clonePacket(contest.getClientId(), toId, packet);
                     controller.sendToClient(updatePacket);
                 }
