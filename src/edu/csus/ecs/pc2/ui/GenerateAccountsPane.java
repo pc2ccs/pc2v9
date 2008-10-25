@@ -153,7 +153,7 @@ public class GenerateAccountsPane extends JPanePlugin {
                 int theSiteNumber = thisSiteNumber;
 
                 int index = getSiteSelectionComboBox().getSelectedIndex();
-                if (index > 0) {
+                if (index > -1) {
                     Site site = (Site) getSiteSelectionComboBox().getSelectedItem();
                     theSiteNumber = site.getSiteNumber();
                 }
