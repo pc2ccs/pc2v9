@@ -22,6 +22,7 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.VersionInfo;
+import edu.csus.ecs.pc2.api.apireports.PrintClarification;
 import edu.csus.ecs.pc2.api.apireports.PrintClarifications;
 import edu.csus.ecs.pc2.api.apireports.PrintMyClient;
 import edu.csus.ecs.pc2.api.apireports.PrintProblems;
@@ -127,9 +128,11 @@ public class ContestTestFrame extends JFrame {
 
     private JComboBox siteComboBox = null;
 
-    private JLabel runsOnSiteLabel = null;
-
     private JLabel runsOnSite = null;
+
+    private JButton getClarificationButton = null;
+
+    private JLabel clarificationsOnSite = null;
 
     /**
      * This method initializes
@@ -316,20 +319,20 @@ public class ContestTestFrame extends JFrame {
      */
     private JPanel getCenterPane() {
         if (centerPane == null) {
+            clarificationsOnSite = new JLabel();
+            clarificationsOnSite.setBounds(new java.awt.Rectangle(164,239,157,16));
+            clarificationsOnSite.setText("(clars on site count)");
+            clarificationsOnSite.setHorizontalAlignment(SwingConstants.LEFT);
             runsOnSite = new JLabel();
-            runsOnSite.setBounds(new java.awt.Rectangle(163, 204, 157, 16));
-            runsOnSite.setText("Site");
+            runsOnSite.setBounds(new java.awt.Rectangle(163,173,157,16));
+            runsOnSite.setText("(runs on site count)");
             runsOnSite.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-            runsOnSiteLabel = new JLabel();
-            runsOnSiteLabel.setBounds(new java.awt.Rectangle(28, 204, 112, 16));
-            runsOnSiteLabel.setText("Runs on Site N");
-            runsOnSiteLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             jLabel1 = new JLabel();
-            jLabel1.setBounds(new java.awt.Rectangle(48, 175, 96, 16));
+            jLabel1.setBounds(new java.awt.Rectangle(48,144,96,16));
             jLabel1.setText("Site");
             jLabel1.setHorizontalAlignment(SwingConstants.RIGHT);
             jLabel = new JLabel();
-            jLabel.setBounds(new java.awt.Rectangle(28, 239, 119, 16));
+            jLabel.setBounds(new java.awt.Rectangle(28,208,119,16));
             jLabel.setText("Run/Clar Number");
             jLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             centerPane = new JPanel();
@@ -346,8 +349,9 @@ public class ContestTestFrame extends JFrame {
             centerPane.add(jLabel, null);
             centerPane.add(jLabel1, null);
             centerPane.add(getSiteComboBox(), null);
-            centerPane.add(runsOnSiteLabel, null);
             centerPane.add(runsOnSite, null);
+            centerPane.add(getGetClarificationButton(), null);
+            centerPane.add(clarificationsOnSite, null);
         }
         return centerPane;
     }
@@ -398,20 +402,16 @@ public class ContestTestFrame extends JFrame {
     private JButton getGetRunButton() {
         if (getRunButton == null) {
             getRunButton = new JButton();
-            getRunButton.setBounds(new java.awt.Rectangle(240,233,94,29));
+            getRunButton.setBounds(new java.awt.Rectangle(240,202,94,26));
             getRunButton.setToolTipText("Print Run information list");
             getRunButton.setText("getRun");
             getRunButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    printOneRun();
+                    runReport(new PrintRun());
                 }
             });
         }
         return getRunButton;
-    }
-
-    protected void printOneRun() {
-        runReport(new PrintRun());
     }
 
     /**
@@ -592,7 +592,7 @@ public class ContestTestFrame extends JFrame {
     private JCheckBox getRunListenerCheckBox() {
         if (runListenerCheckBox == null) {
             runListenerCheckBox = new JCheckBox();
-            runListenerCheckBox.setBounds(new java.awt.Rectangle(24, 269, 177, 18));
+            runListenerCheckBox.setBounds(new java.awt.Rectangle(19,300,156,18));
             runListenerCheckBox.setToolTipText("Listen for run events");
             runListenerCheckBox.setText("View Run Listener");
             runListenerCheckBox.addActionListener(new java.awt.event.ActionListener() {
@@ -640,7 +640,7 @@ public class ContestTestFrame extends JFrame {
     private JCheckBox getConfigListenerCheckBox() {
         if (configListenerCheckBox == null) {
             configListenerCheckBox = new JCheckBox();
-            configListenerCheckBox.setBounds(new java.awt.Rectangle(24, 330, 177, 21));
+            configListenerCheckBox.setBounds(new java.awt.Rectangle(19,361,156,21));
             configListenerCheckBox.setToolTipText("Listen for all configuration change events");
             configListenerCheckBox.setText("View Config Listener");
             configListenerCheckBox.addActionListener(new java.awt.event.ActionListener() {
@@ -840,7 +840,7 @@ public class ContestTestFrame extends JFrame {
     private JCheckBox getClarListenerCheckBox() {
         if (clarListenerCheckBox == null) {
             clarListenerCheckBox = new JCheckBox();
-            clarListenerCheckBox.setBounds(new java.awt.Rectangle(24, 298, 200, 21));
+            clarListenerCheckBox.setBounds(new java.awt.Rectangle(19,329,156,21));
             clarListenerCheckBox.setToolTipText("Listen for Clarification events");
             clarListenerCheckBox.setText("View Clar Listener");
             clarListenerCheckBox.addActionListener(new java.awt.event.ActionListener() {
@@ -1053,7 +1053,7 @@ public class ContestTestFrame extends JFrame {
             numberTextField.setDocument(new IntegerDocument());
             numberTextField.setToolTipText("Enter a Run Number or Clar Number");
             numberTextField.setText("1");
-            numberTextField.setBounds(new java.awt.Rectangle(162, 236, 59, 22));
+            numberTextField.setBounds(new java.awt.Rectangle(162,205,59,22));
         }
         return numberTextField;
     }
@@ -1084,10 +1084,11 @@ public class ContestTestFrame extends JFrame {
     private JComboBox getSiteComboBox() {
         if (siteComboBox == null) {
             siteComboBox = new JComboBox();
-            siteComboBox.setBounds(new java.awt.Rectangle(162, 173, 159, 21));
+            siteComboBox.setBounds(new java.awt.Rectangle(162,142,159,21));
             siteComboBox.addItemListener(new java.awt.event.ItemListener() {
                 public void itemStateChanged(java.awt.event.ItemEvent e) {
                     updateSiteRunTotals();
+                    updateSiteClarificationsTotals();
                 }
             });
         }
@@ -1117,19 +1118,57 @@ public class ContestTestFrame extends JFrame {
         
     }
 
+    protected void updateSiteClarificationsTotals() {
+
+        Object object = getSiteComboBox().getSelectedItem();
+
+        if (object == null) {
+            clarificationsOnSite.setText("(no site selected)");
+            return;
+        }
+
+        ISite site = ((ISiteWrapper) object).getSite();
+        int siteNumber = site.getNumber();
+
+        int count = 0;
+        int deleted = 0;
+        for (IClarification clarification : contest.getClarifications()) {
+            if (clarification.getSiteNumber() == siteNumber) {
+                count++;
+                if (clarification.isDeleted()) {
+                    deleted++;
+                }
+            }
+        }
+
+        String text = "";
+
+        if (count == 0) {
+            text = "No clarifications.";
+        } else if (count == 1) {
+            text = "1 clarification.";
+        } else {
+            text = count + " clarifications.";
+        }
+
+        if (deleted > 0) {
+            text = count + " deleted.";
+        }
+
+        clarificationsOnSite.setText(text);
+    }
+    
     protected void updateSiteRunTotals() {
 
         Object object = getSiteComboBox().getSelectedItem();
 
         if (object == null) {
             runsOnSite.setText("(no site selected)");
-            runsOnSiteLabel.setText("Runs on site");
             return;
         }
 
         ISite site = ((ISiteWrapper) object).getSite();
         int siteNumber = site.getNumber();
-        runsOnSiteLabel.setText("Runs on Site " + siteNumber);
 
         int count = 0;
         int deleted = 0;
@@ -1157,6 +1196,26 @@ public class ContestTestFrame extends JFrame {
         }
 
         runsOnSite.setText(text);
+    }
+
+    /**
+     * This method initializes jButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getGetClarificationButton() {
+        if (getClarificationButton == null) {
+            getClarificationButton = new JButton();
+            getClarificationButton.setBounds(new java.awt.Rectangle(205,265,129,26));
+            getClarificationButton.setText("getClarification");
+            getClarificationButton.setToolTipText("Print Run information list");
+            getClarificationButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    runReport(new PrintClarification());
+                }
+            });
+        }
+        return getClarificationButton;
     }
 
     public static void main(String[] args) {

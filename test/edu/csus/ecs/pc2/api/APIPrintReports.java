@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.api;
 
+import edu.csus.ecs.pc2.api.apireports.PrintClarification;
 import edu.csus.ecs.pc2.api.apireports.PrintClarifications;
 import edu.csus.ecs.pc2.api.apireports.PrintClockInfo;
 import edu.csus.ecs.pc2.api.apireports.PrintContestRunning;
@@ -42,6 +43,7 @@ public class APIPrintReports {
             new  PrintClockInfo (),
             new  PrintJudgements (),
             new  PrintContestTitle (),
+            new PrintClarification(),
             new  PrintTeams (),
             new  PrintProblems (),
             new  PrintLanguages(),
