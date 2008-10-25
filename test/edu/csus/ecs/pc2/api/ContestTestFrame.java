@@ -19,19 +19,26 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
+import edu.csus.ecs.pc2.VersionInfo;
+import edu.csus.ecs.pc2.api.apireports.PrintClarifications;
+import edu.csus.ecs.pc2.api.apireports.PrintMyClient;
+import edu.csus.ecs.pc2.api.apireports.PrintProblems;
+import edu.csus.ecs.pc2.api.apireports.PrintRuns;
+import edu.csus.ecs.pc2.api.apireports.PrintStandings;
+import edu.csus.ecs.pc2.api.apireports.PrintTeams;
 import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
 import edu.csus.ecs.pc2.api.exceptions.NotLoggedInException;
 import edu.csus.ecs.pc2.api.listener.ContestEvent;
 import edu.csus.ecs.pc2.api.listener.IConfigurationUpdateListener;
 import edu.csus.ecs.pc2.api.listener.IRunEventListener;
-import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.IntegerDocument;
 
 /**
- * API Contest Test Frame.
+ * API 'contest' Test Frame.
  * 
- * Shows output of 'get' and 'is' methods for API.
+ * Shows output of 'get' and 'is' methods for API Contest and
+ * ServerConnection classes.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -103,29 +110,6 @@ public class ContestTestFrame extends JFrame {
 
     private DefaultListModel listModel = new DefaultListModel();
 
-    private APIAbstractTest[] reportsList = { 
-            new  PrintRuns (),
-            new PrintRun(),
-            new  PrintMyClient (),
-            new  PrintSites (),
-            new  PrintClockInfo (),
-            new  PrintJudgements (),
-            new  PrintContestTitle (),
-            new  PrintTeams (),
-            new  PrintProblems (),
-            new  PrintLanguages(),
-            new  PrintStandings (),
-            new  PrintClarifications (),
-            new  PrintContestRunning(),
-            new  PrintSiteName(),
-            new  PrintGroups(),
-            new  PrintLocalHostName(),
-            new PrintLocalPortNumber(),
-            new PrintMyClientSC(),
-            new PrintGetContestSC(),
-            new PrintLoggedInSC(),
-    };
-
     private JPanel topPane = null;
 
     private JLabel loginLabel = null;
@@ -141,6 +125,8 @@ public class ContestTestFrame extends JFrame {
     private JLabel jLabel = null;
 
     private JPanel eastButtonPane = null;
+    
+    private APIAbstractTest [] reportsList = new APIPrintReports().getReportsList();
 
     /**
      * This method initializes
@@ -402,228 +388,6 @@ public class ContestTestFrame extends JFrame {
         return testRunButton;
     }
 
-    /**
-     * Run.
-     * @author pc2@ecs.csus.edu
-     * @version $Id$
-     */
-    
-    // $HeadURL$
-    protected class PrintRun extends APIAbstractTest {
-
-        @Override
-        public void printTest() {
-
-            int runNumber = getNumber();
-            if (runNumber < 1) {
-                println("No run number " + runNumber + " submitted/exists");
-            } else {
-                int siteNum = getSiteNumber();
-                if (siteNum == 0) {
-                    siteNum = contest.getMyClient().getSiteNumber();
-                }
-                boolean foundRun = false;
-
-                for (IRun run : contest.getRuns()) {
-                    if (run.getNumber() == runNumber && run.getSiteNumber() == siteNum) {
-                        foundRun = true;
-                        print("   Site " + run.getSiteNumber());
-                        print(" Run " + run.getNumber());
-                        print(", " + run.getProblem().getName());
-                        print(", " + run.getLanguage().getName());
-                        print(", del=" + run.isDeleted());
-                        print(", judged=" + run.isJudged());
-                        print(", solved=" + run.isSolved());
-                        println();
-                        if (run.isJudged()) {
-                            for (IRunJudgement runJudgement : run.getRunJudgements()) {
-                                println("     " + run.getJudgementName());
-                                print("     ");
-                                if (runJudgement.isActive()) {
-                                    print("active");
-                                } else {
-                                    print("      ");
-                                }
-                                print(" " + runJudgement.getJudgement().getName());
-                                print(", sendToTeam=" + runJudgement.isSendToTeam());
-                                print(", computerJudged=" + runJudgement.isComputerJudgement());
-                                println();
-                            }
-
-                        } else {
-                            print("     ");
-                            println("Run not judged.");
-                        }
-                        break;
-                    }
-                } // for IRun
-                
-                if (! foundRun){
-                    println("No run number " + runNumber + " submitted/exists");
-                }
-            }
-        }
-
-        @Override
-        String getTitle() {
-            return "getRun";
-        }
-    }
-    /**
-     * Prints Runs (IRun and Judgement)
-     * @author pc2@ecs.csus.edu
-     * @version $Id$
-     */
-    protected class PrintRuns extends APIAbstractTest {
-
-        @Override
-        public void printTest() {
-
-            if (contest.getRuns().length == 0) {
-                println("No runs in system");
-                return;
-            }
-
-            IRun[] runs = contest.getRuns();
-            println("There are " + runs.length + " runs.");
-
-            for (IRun run : runs) {
-
-                print("Run " + run.getNumber() + " Site " + run.getSiteNumber());
-
-                print(" @ " + run.getSubmissionTime() + " by " + run.getTeam().getLoginName());
-                print(" problem: " + run.getProblem().getName());
-                print(" in " + run.getLanguage().getName());
-
-                if (run.isJudged()) {
-                    println("  Judgement: " + run.getJudgementName());
-                } else {
-                    println("  Judgement: not judged yet ");
-                }
-
-                println();
-            }
-        }
-
-        @Override
-        String getTitle() {
-            return "getRuns, IRun, etc.";
-        }
-    }
-
-    /**
-     * My Client.
-     * @author pc2@ecs.csus.edu
-     * @version $Id$
-     */
-    protected class PrintMyClient extends APIAbstractTest {
-
-        @Override
-        public void printTest() {
-
-            IClient client = contest.getMyClient();
-            print("This client");
-            print(", login=" + client.getLoginName());
-            print(", name=" + client.getDisplayName());
-            print(", type=" + client.getType());
-            print(", account#=" + client.getAccountNumber());
-            print(", site=" + client.getSiteNumber());
-            println();
-        }
-
-        @Override
-        String getTitle() {
-            return "getMyClient";
-        }
-    }
-
-    /**
-     * Sites.
-     * @author pc2@ecs.csus.edu
-     * @version $Id$
-     */
-    protected class PrintSites extends APIAbstractTest {
-
-        @Override
-        public void printTest() {
-            ISite[] sites = contest.getSites();
-            println("There are " + sites.length + " sites.");
-            for (ISite site : sites) {
-                println(" Site " + site.getNumber() + " name=" + site.getName());
-            }
-        }
-
-        @Override
-        String getTitle() {
-            return "getSites";
-        }
-    }
-
-    /**
-     * Contest Clock.
-     * @author pc2@ecs.csus.edu
-     * @version $Id$
-     */
-    protected class PrintClockInfo extends APIAbstractTest {
-
-        @Override
-        public void printTest() {
-            IContestClock clock = contest.getContestClock();
-            print("Clock:");
-            print(" length=" + clock.getContestLengthSecs()+ " ("+ContestTime.formatTime(clock.getContestLengthSecs())+")");
-            print(" remaining=" + clock.getRemainingSecs()+ " ("+ContestTime.formatTime(clock.getRemainingSecs())+")");
-            print(" elapsed=" + clock.getElapsedSecs() + " ("+ContestTime.formatTime(clock.getElapsedSecs())+")");
-            println();
-        }
-
-        @Override
-        String getTitle() {
-            return "getContestClock";
-        }
-    }
-
-    // getJudgements
-
-    /**
-     * Judgments.
-     * @author pc2@ecs.csus.edu
-     * @version $Id$
-     */
-    protected class PrintJudgements extends APIAbstractTest {
-
-        @Override
-        public void printTest() {
-            IJudgement[] judgements = contest.getJudgements();
-            println("There are " + judgements.length + " judgements.");
-            for (IJudgement judgement : judgements) {
-                println("judgement name = " + judgement.getName());
-            }
-            println();
-        }
-
-        @Override
-        String getTitle() {
-            return "getJudgements";
-        }
-    }
-
-    /**
-     * Contest Title.
-     * @author pc2@ecs.csus.edu
-     * @version $Id$
-     */
-    protected class PrintContestTitle extends APIAbstractTest {
-
-        @Override
-        public void printTest() {
-            println("Contest title: '" + contest.getContestTitle() + "'");
-        }
-
-        @Override
-        String getTitle() {
-            return "getContestTitle";
-        }
-    }
 
     protected void printRunsTest() {
         runReport(new PrintRuns());
@@ -669,13 +433,22 @@ public class ContestTestFrame extends JFrame {
             setTitle("Contest " + contest.getMyClient().getLoginName() + " " + contest.getSiteName());
             getLoginButton().setEnabled(false);
             scrollyFrame.setVisible(true);
+            
+            VersionInfo versionInfo = new VersionInfo();
+            
+            println("Version "+versionInfo.getVersionNumber()+" build "+versionInfo.getBuildNumber());
+            runReport (new PrintMyClient());
+            println(contest.getRuns().length+" runs.");
+            println(contest.getClarifications().length+" clarifications");
 
         } catch (LoginFailureException e) {
             contest = null;
             showMessage("Unable to login " + e.getMessage());
+            e.printStackTrace();
         } catch (Exception e) {
             contest = null;
             showMessage("Unable to login " + e.getMessage());
+            e.printStackTrace();
         }
         FrameUtilities.regularCursor(this);
 
@@ -757,83 +530,10 @@ public class ContestTestFrame extends JFrame {
         return listTeamsButton;
     }
 
-    /**
-     * Teams.
-     * @author pc2@ecs.csus.edu
-     * @version $Id$
-     */
-    protected class PrintTeams extends APIAbstractTest {
-
-        @Override
-        public void printTest() {
-            println("There are " + contest.getTeams().length + " team ");
-            for (ITeam team : contest.getTeams()) {
-                println(team.getLoginName() + " title: " + team.getLoginName() + " group: " + team.getGroup().getName());
-            }
-            println("");
-            println();
-        }
-
-        @Override
-        String getTitle() {
-            return "getTeams";
-        }
-    }
 
     protected void printTeamsTest() {
         runReport(new PrintTeams());
 
-    }
-
-    /**
-     * Problems.
-     * @author pc2@ecs.csus.edu
-     * @version $Id$
-     */
-    protected class PrintProblems extends APIAbstractTest {
-
-        @Override
-        public void printTest() {
-            println("There are " + contest.getProblems().length + " team ");
-            for (IProblem problem : contest.getProblems()) {
-                print("Problem name = " + problem.getName());
-
-                print(" data file = ");
-                if (problem.hasDataFile()) {
-                    print(problem.getJudgesDataFileName());
-                } else {
-                    print("<none>");
-                }
-
-                print(" answer file = ");
-                if (problem.hasAnswerFile()) {
-                    print(problem.getJudgesAnswerFileName());
-                } else {
-                    print("<none>");
-                }
-
-                print(" validator = ");
-                if (problem.hasExternalValidator()) {
-                    print(problem.getValidatorFileName());
-                } else {
-                    print("<none>");
-                }
-
-                if (problem.readsInputFromFile()) {
-                    print(" reads from FILE");
-                }
-                if (problem.readsInputFromStdIn()) {
-                    print(" reads from stdin");
-                }
-                println();
-            }
-            println();
-        }
-
-        @Override
-        String getTitle() {
-            return "getProblems";
-        }
     }
 
     protected void printProblemsTest() {
@@ -996,29 +696,6 @@ public class ContestTestFrame extends JFrame {
         runReport(new PrintStandings());
     }
 
-    /**
-     * Standings.
-     * @author pc2@ecs.csus.edu
-     * @version $Id$
-     */
-    protected class PrintStandings extends APIAbstractTest {
-
-        @Override
-        public void printTest() {
-
-            println("Standings - " + contest.getStandings().length + " teams to rank");
-            for (IStanding standing : contest.getStandings()) {
-                println("Rank " + standing.getRank() + " solved= " + standing.getNumProblemsSolved() + " pts= " + standing.getPenaltyPoints() + " " + standing.getClient().getLoginName());
-            }
-
-            println();
-        }
-
-        @Override
-        String getTitle() {
-            return "getStandings";
-        }
-    }
 
     /**
      * This method initializes jButton1
@@ -1060,6 +737,8 @@ public class ContestTestFrame extends JFrame {
                 return;
             }
 
+            Arrays.sort(reportsList, new APIAbstractTestComparator());
+            
             int submissionNumber = getIntegerValue (getNumberTextField().getText());
             
             for (APIAbstractTest abstractTest : reportsList) {
@@ -1073,7 +752,7 @@ public class ContestTestFrame extends JFrame {
         }
    
         @Override
-        String getTitle() {
+        public String getTitle() {
             return "ALL Reports";
         }
     }
@@ -1193,144 +872,6 @@ public class ContestTestFrame extends JFrame {
     }
 
     /**
-     * Clarifications.
-     * @author pc2@ecs.csus.edu
-     * @version $Id$
-     */
-    protected class PrintClarifications extends APIAbstractTest {
-
-        @Override
-        public void printTest() {
-            IClarification[] clarifications = contest.getClarifications();
-            println("There are " + clarifications.length + " clarifications ");
-
-            for (IClarification clarification : clarifications) {
-
-                print("Clar " + clarification.getNumber() + " Site " + clarification.getSiteNumber());
-
-                print(" @ " + clarification.getSubmissionTime() + " by " + clarification.getTeam().getLoginName());
-                print(" problem: " + clarification.getProblem().getName());
-                print(" " + trueFalseString(clarification.isAnswered(), "ANSWERED", "NOT ANSWERED"));
-                print(" " + trueFalseString(clarification.isDeleted(), "DELETED", ""));
-                println();
-                println("  Question: " + clarification.getQuestion());
-                if (clarification.isAnswered()) {
-                    println("    Answer: " + clarification.getAnswer());
-                }
-            }
-            println();
-        }
-
-        @Override
-        String getTitle() {
-            return "getClarifications";
-        }
-    }
-    
-    /**
-     * Groups.
-     * @author pc2@ecs.csus.edu
-     * @version $Id$
-     */
-    protected class PrintGroups extends APIAbstractTest {
-
-        @Override
-        public void printTest() {
-            IGroup [] groups = contest.getGroups();
-            println("There are " + groups.length + " groups");
-            for (IGroup group : contest.getGroups()){
-                println("Group = "+group.getName());
-            }
-        }
-
-        @Override
-        String getTitle() {
-            return "getGroups";
-        }
-    }
-    
-    /**
-     * Print Local Host name and port.
-     * @author pc2@ecs.csus.edu
-     * @version $Id$
-     */
-    protected class PrintLocalHostName extends APIAbstractTest {
-
-        @Override
-        public void printTest() {
-            println("Contacted: host=" + contest.getLocalContactedHostName() + " port=" + contest.getLocalContactedPortNumber());
-        }
-
-        @Override
-        String getTitle() {
-            return "getLocalContactedHostName";
-        }
-    }   
-    
-    /**
-     * Print Local Host name and port.
-     * @author pc2@ecs.csus.edu
-     * @version $Id$
-     */
-    protected class PrintLocalPortNumber extends APIAbstractTest {
-
-        @Override
-        public void printTest() {
-            println("Contacted: host=" + contest.getLocalContactedHostName() + " port=" + contest.getLocalContactedPortNumber());
-        }
-
-        @Override
-        String getTitle() {
-            return "getLocalContactedPortNumber";
-        }
-    }    
-    
-    /**
-     * Site Name. 
-     * @author pc2@ecs.csus.edu
-     * @version $Id$
-     */
-    protected class PrintSiteName extends APIAbstractTest {
-
-        @Override
-        public void printTest() {
-            println("Site Name = "+contest.getSiteName());
-        }
-
-        @Override
-        String getTitle() {
-            return "getSiteName";
-        }
-    }
-    
-    /**
-     * Contest Running.
-     * @author pc2@ecs.csus.edu
-     * @version $Id$
-     */
-    protected class PrintContestRunning extends APIAbstractTest {
-
-        @Override
-        public void printTest() {
-            println("Contest running ? "+contest.isContestClockRunning());
-        }
-
-        @Override
-        String getTitle() {
-            return "isContestClockRunning";
-        }
-    }
-
-
-    protected String trueFalseString(boolean value, String trueString, String falseString) {
-        if (value) {
-            return trueString;
-        } else {
-            return falseString;
-        }
-    }
-
-    /**
      * This method initializes clarListenerCheckBox
      * 
      * @return javax.swing.JCheckBox
@@ -1444,106 +985,6 @@ public class ContestTestFrame extends JFrame {
         }
     }
     
-    /**
-     * Languages.
-     * @author pc2@ecs.csus.edu
-     * @version $Id$
-     */
-    protected class PrintLanguages extends APIAbstractTest {
-
-        @Override
-        public void printTest() {
-            ILanguage [] languages = contest.getLanguages();
-            
-            println("There are " + languages.length + " languages");
-            for (ILanguage language : languages){
-                println("Language "+language.getName());
-            }
-        }
-
-        @Override
-        String getTitle() {
-            return "getLanguages";
-        }
-    }
-    
-    
-    /**
-     * My Client - ServerConnection
-     * @author pc2@ecs.csus.edu
-     * @version $Id$
-     */
-    protected class PrintMyClientSC extends APIAbstractTest {
-        @Override
-        public void printTest() {
-
-            IClient client;
-            try {
-                client = serverConnection.getMyClient();
-                print("This client");
-                print(", login=" + client.getLoginName());
-                print(", name=" + client.getDisplayName());
-                print(", type=" + client.getType());
-                print(", account#=" + client.getAccountNumber());
-                print(", site=" + client.getSiteNumber());
-            } catch (NotLoggedInException e) {
-                println("Exception during report "+e.getLocalizedMessage()+" "+e.getStackTrace()[0].getClassName());
-                e.printStackTrace();
-            }
-            println();
-        }
-
-        @Override
-        String getTitle() {
-            return "getMyClient (ServerConnection)";
-        }
-    }
-    
-    /**
-     * isLoggedIn - ServerConnection
-     * @author pc2@ecs.csus.edu
-     * @version $Id$
-     */
-    protected class PrintLoggedInSC extends APIAbstractTest {
-        @Override
-        public void printTest() {
-            print("This client, logged in = "+serverConnection.isLoggedIn());
-            println();
-        }
-
-        @Override
-        String getTitle() {
-            return "isLoggedIn (ServerConnection)";
-        }
-    }
-    
-    /**
-     * getContest.
-     * @author pc2@ecs.csus.edu
-     * @version $Id$
-     */
-    protected class PrintGetContestSC extends APIAbstractTest {
-        @Override
-        public void printTest() {
-            try {
-                IContest serverConnContest = serverConnection.getContest();
-                if (serverConnContest != null) {
-                    println("getContest from ServerConnection, contest title=" + serverConnContest.getContestTitle());
-                } else {
-                    println("getContest from ServerConnection returns null");
-                }
-            } catch (NotLoggedInException e) {
-                println("Exception during report " + e.getLocalizedMessage() + " " + e.getStackTrace()[0].getClassName());
-                e.printStackTrace();
-            }
-            println();
-        }
-
-        @Override
-        String getTitle() {
-            return "getContest (ServerConnection)";
-        }
-    }
 
     /**
      * This method initializes reportJList

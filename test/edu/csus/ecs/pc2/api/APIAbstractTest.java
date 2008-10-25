@@ -1,21 +1,21 @@
 package edu.csus.ecs.pc2.api;
 
 /**
- * 
+ * Class that supports test (print reports and other) classes.
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
 
 // $HeadURL$
 public abstract class APIAbstractTest {
-    
+
     /**
      * Run number
      */
     private int number = 0;
-    
+
     private int siteNumber = 0;
-    
+
     private String line = "";
 
     private ScrollyFrame scrollyFrame = null;
@@ -42,9 +42,9 @@ public abstract class APIAbstractTest {
      * 
      * @return
      */
-    abstract String getTitle();
+    public abstract String getTitle();
 
-    protected void println() {
+    public void println() {
         String s = "";
         if (line.length() > 0) {
             s = line + s;
@@ -53,12 +53,12 @@ public abstract class APIAbstractTest {
         scrollyFrame.addLine(s);
     }
 
-    protected void print(String s) {
+    public void print(String s) {
         line = line + s;
 
     }
 
-    protected void println(String s) {
+    public void println(String s) {
         if (line.length() > 0) {
             s = line + s;
             line = "";
@@ -69,7 +69,7 @@ public abstract class APIAbstractTest {
     public void setAPISettings(ScrollyFrame frame, IContest inContest, ServerConnection inServerConnection) {
         this.scrollyFrame = frame;
         this.contest = inContest;
-        this.serverConnection  = inServerConnection;
+        this.serverConnection = inServerConnection;
     }
 
     @Override
@@ -91,5 +91,13 @@ public abstract class APIAbstractTest {
 
     public void setSiteNumber(int siteNumber) {
         this.siteNumber = siteNumber;
+    }
+
+    public IContest getContest() {
+        return contest;
+    }
+
+    public ServerConnection getServerConnection() {
+        return serverConnection;
     }
 }
