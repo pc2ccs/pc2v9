@@ -284,7 +284,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             Judgement manualJudgement = (Judgement) getJudgementComboBox().getSelectedItem();
             Judgement autoJudgement = getContest().getJudgement(elementId);
             if (!manualJudgement.equals(autoJudgement)) {
-                String message = "You selected '" + manualJudgement + "'\n but the validator returned '" + autoJudgement + "'."
+                String message = "You selected '" + manualJudgement + "'\n but the validator returned '" + validatorJudgementLabel.getText() + "'."
                                     + "\nDid you intend to assign a different result than the validator?"
                                     + "\n(Click Yes to accept your selection; click No to cancel)" ;
                 int result = JOptionPane.showConfirmDialog(this, message);
@@ -1040,7 +1040,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             Judgement manualJudgement = (Judgement) getJudgementComboBox().getSelectedItem();
             Judgement autoJudgement = getContest().getJudgement(elementId);
             if (!manualJudgement.equals(autoJudgement)) {
-                String message = "You selected Accept Validator but have manually selected " + manualJudgement + ".  Did you intend to accept " + autoJudgement + "?";
+                String message = "You selected Accept Validator but have manually selected " + manualJudgement + ".  Did you intend to accept " + results + "?";
                 int result = JOptionPane.showConfirmDialog(this, message);
                 if (result != JOptionPane.YES_OPTION) {
                     enableUpdateButtons(true);
