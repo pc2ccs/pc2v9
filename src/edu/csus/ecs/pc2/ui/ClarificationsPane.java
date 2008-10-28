@@ -224,7 +224,11 @@ public class ClarificationsPane extends JPanePlugin {
 
             clarificationListBox.addListboxListener(new com.ibm.webrunner.j2mclb.event.ListboxListener() {
                 public void rowSelected(com.ibm.webrunner.j2mclb.event.ListboxEvent e) {
-                    showSelectedClarification();
+                    if (isAllowed(Permission.Type.ANSWER_CLARIFICATION) && e.getClickCount() >= 2) {
+                        requestSelectedClarification();
+                    } else {
+                        showSelectedClarification();
+                    }
                 }
 
                 public void rowDeselected(com.ibm.webrunner.j2mclb.event.ListboxEvent e) {
@@ -419,7 +423,7 @@ public class ClarificationsPane extends JPanePlugin {
         if (filter != null) {
 
             if (!filter.matches(clarification)) {
-                // if run does not match filter, be sure to remove it from grid
+                // if clar does not match filter, be sure to remove it from grid
                 // This applies when a run is New then BEING_ANSWERED and other conditions.
                 removeClarificationRow(clarification);
                 return;
@@ -925,7 +929,7 @@ public class ClarificationsPane extends JPanePlugin {
         int[] selectedIndexes = clarificationListBox.getSelectedIndexes();
 
         if (selectedIndexes.length < 1) {
-            showMessage("Please select a run ");
+            showMessage("Please select a clarification ");
             return;
         }
 
