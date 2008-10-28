@@ -17,7 +17,7 @@ public class ContestInformation implements Serializable{
      */
     private static final long serialVersionUID = -7333255582657988200L;
 
-    private String contestTitle;
+    private String contestTitle = "Programming Contest";
 
     private String contestURL;
     
