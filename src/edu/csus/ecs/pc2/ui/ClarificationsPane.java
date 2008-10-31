@@ -101,6 +101,13 @@ public class ClarificationsPane extends JPanePlugin {
     private JTextArea answerTextArea = null;
 
     private boolean showNewClarificationsOnly = false;
+    
+    /**
+     * Filter that does not change.
+     * 
+     * Used to do things like insure only New clarifications are shown.
+     */
+    private Filter requiredFilter = new Filter();
 
     private Filter filter =  new Filter();
 
@@ -429,6 +436,15 @@ public class ClarificationsPane extends JPanePlugin {
                 return;
             }
         }
+        
+        if (requiredFilter != null) {
+            if (!requiredFilter.matches(clarification)) {
+                // if run does not match requiredFilter, be sure to remove it from grid
+                // This applies when a run is New then BEING_JUDGED and other conditions.
+                removeClarificationRow(clarification);
+                return;
+            }
+        }
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -540,6 +556,12 @@ public class ClarificationsPane extends JPanePlugin {
         Clarification[] clarifications = getContest().getClarifications();
 
         for (Clarification clarification : clarifications) {
+
+            if (requiredFilter != null) {
+                if (!requiredFilter.matches(clarification)) {
+                    continue;
+                }
+            }
 
             if (filter != null) {
                 if (!filter.matches(clarification)) {
@@ -1087,10 +1109,14 @@ public class ClarificationsPane extends JPanePlugin {
         this.showNewClarificationsOnly = showNewClarificationsOnly;
 
         if (showNewClarificationsOnly) {
-            if (filter == null) {
-                filter = new Filter();
+            
+            if (requiredFilter == null) {
+                requiredFilter = new Filter();
             }
-            filter.addClarificationState(ClarificationStates.NEW);
+            requiredFilter.addClarificationState(ClarificationStates.NEW);
+            
+        } else {
+            requiredFilter = new Filter();
         }
         // do not show the answer area for new clars view
         getAnswerPane().setVisible(!showNewClarificationsOnly);
