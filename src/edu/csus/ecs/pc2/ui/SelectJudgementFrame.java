@@ -50,9 +50,10 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(600,767));
         this.setContentPane(getSelectJudgementPane());
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
+        this.setPreferredSize(new java.awt.Dimension(800,400));
+        this.setSize(new java.awt.Dimension(800,400));
         this.setTitle("Select Run Judgement");
 
         this.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -154,9 +155,9 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
     private SelectJudgementPaneNew getSelectJudgementPane() {
         if (selectJudgementPane == null) {
             selectJudgementPane = new SelectJudgementPaneNew();
-            selectJudgementPane.setPreferredSize(new java.awt.Dimension(600,400));
+            selectJudgementPane.setPreferredSize(new java.awt.Dimension(800,400));
         }
         return selectJudgementPane;
     }
 
-}  //  @jve:decl-index=0:visual-constraint="10,4"
+}  //  @jve:decl-index=0:visual-constraint="35,94"
