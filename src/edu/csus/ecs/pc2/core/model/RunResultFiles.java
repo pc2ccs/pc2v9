@@ -29,7 +29,7 @@ public class RunResultFiles implements Serializable {
     private ElementId judgementId = null;
 
     private ExecutionData executionData = null;
-
+    
     public RunResultFiles(Run run, ElementId problemId, JudgementRecord judgementRecord, ExecutionData executionData) {
         super();
         this.runId = run.getElementId();
@@ -250,6 +250,14 @@ public class RunResultFiles implements Serializable {
             return 0;
         } else {
             return executionData.getValidationReturnCode();
+        }
+    }
+
+    public String getValidationResults() {
+        if (executionData == null) {
+            return "";
+        } else {
+            return executionData.getValidationResults();
         }
     }
 }

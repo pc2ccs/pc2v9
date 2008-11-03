@@ -269,7 +269,11 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
      */
     private String getJudgement(RunResultFiles runResult) {
         try {
-            return getContest().getJudgement(runResult.getJudgementId()).toString();
+            String results = runResult.getValidationResults();
+            if (results == null || results.trim().length() == 0) {
+                results = getContest().getJudgement(runResult.getJudgementId()).toString();
+            }
+            return results;
         } catch (Exception e) {
             return "";
         }
