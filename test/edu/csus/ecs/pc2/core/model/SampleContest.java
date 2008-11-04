@@ -105,6 +105,9 @@ public class SampleContest {
             contest.addProblem(problem);
         }
         
+        Judgement judgementYes = new Judgement("Yes");
+        contest.addJudgement(judgementYes);
+        
         for (String judgementName : judgements){
             Judgement judgement = new Judgement(judgementName);
             contest.addJudgement(judgement);

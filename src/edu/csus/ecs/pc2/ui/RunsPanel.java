@@ -279,7 +279,7 @@ public class RunsPanel extends JPanePlugin {
      * @param run
      * @return a string that represents the state of the run
      */
-    private String getJudgementResultString(Run run) {
+    protected String getJudgementResultString(Run run) {
 
         String result = "";
 
@@ -287,9 +287,11 @@ public class RunsPanel extends JPanePlugin {
             
             if (run.isSolved()) {
                 result = "Yes";
-                if (!isTeam(getContest().getClientId())) {
-                    if (run.getStatus().equals(RunStates.MANUAL_REVIEW)) {
+                if (run.getStatus().equals(RunStates.MANUAL_REVIEW)) {
+                    if (!isTeam(getContest().getClientId())) {
                         result = RunStates.MANUAL_REVIEW + " (" + result + ")";
+                    } else {
+                        result = "PRELIMINARY (" + result + ")";
                     }
                 }
             } else {
@@ -307,7 +309,11 @@ public class RunsPanel extends JPanePlugin {
                     }
 
                     if (run.getStatus().equals(RunStates.MANUAL_REVIEW)) {
-                        result = RunStates.MANUAL_REVIEW + " (" + result + ")";
+                        if (!isTeam(getContest().getClientId())) {
+                            result = RunStates.MANUAL_REVIEW + " (" + result + ")";
+                        } else {
+                            result = "PRELIMINARY (" + result + ")";
+                        }
                     }
                     
                     if (isTeam(getContest().getClientId())) {
@@ -321,7 +327,6 @@ public class RunsPanel extends JPanePlugin {
                     }
                 }
             }
-       
 
         } else {
             if (showJudgesInfo) {
