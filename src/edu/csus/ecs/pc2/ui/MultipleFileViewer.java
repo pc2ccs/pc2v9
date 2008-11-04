@@ -290,7 +290,7 @@ public class MultipleFileViewer extends JFrame implements IFileViewer {
             setName("MultipleFileViewer");
             setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
             setState(0);
-            setSize(538, 263);
+            setSize(594, 546);
             setTitle("Information");
             setContentPane(getJFrameContentPane());
             initConnections();
@@ -729,4 +729,4 @@ public class MultipleFileViewer extends JFrame implements IFileViewer {
         return "Multi File Viewer";
     }
 
-}
+}  //  @jve:decl-index=0:visual-constraint="10,10"
