@@ -35,16 +35,16 @@ import edu.csus.ecs.pc2.ui.MultipleFileViewer;
  * To not overwrite the judge's data files, use {@link #setOverwriteJudgesDataFiles(boolean)} to false.
  * 
  * @see #execute()
+ * @version $Id$
  * @author pc2@ecs.csus.edu
  */
 
 // TODO this class contains a number of Utility methods like: baseName, replaceString... etc
 // should these routines be placed in a static way in a static class ?
 // TODO design decision how to handle MultipleFileViewer, display here, on TeamClient??
+
 // $HeadURL$
 public class Executable {
-
-    public static final String SVN_ID = "$Id$";
 
     private Run run = null;
 
@@ -119,7 +119,9 @@ public class Executable {
      * The directory where files are unpacked and the program is executed.
      */
     private String executeDirectoryName = null;
-
+    
+    private String executeDirectoryNameSuffix = "";
+    
     /**
      * Overwrite judge's data and answer files.
      */
@@ -215,6 +217,8 @@ public class Executable {
 
         try {
             executionData = new ExecutionData();
+            
+            executeDirectoryName = getExecuteDirectoryName();
 
             boolean dirThere = insureDir(executeDirectoryName);
             
@@ -1233,6 +1237,9 @@ public class Executable {
     public Process runProgram(String cmdline, String msg) {
         Process process = null;
         errorString = "";
+        
+        executeDirectoryName = getExecuteDirectoryName();
+        
         try {
             File runDir = new File(executeDirectoryName);
             if (runDir.isDirectory()) {
@@ -1372,10 +1379,12 @@ public class Executable {
      * 
      * The name is individual for each client.
      * 
+     * @see #getExecuteDirectoryNameSuffix()
+     * 
      * @return the name of the execute directory for this client.
      */
     public String getExecuteDirectoryName() {
-        return "executesite" + contest.getClientId().getSiteNumber() + contest.getClientId().getName();
+        return "executesite" + contest.getClientId().getSiteNumber() + contest.getClientId().getName() + getExecuteDirectoryNameSuffix();
     }
 
     /**
@@ -1437,5 +1446,24 @@ public class Executable {
      */
     public void setShowMessageToUser(boolean showMessageToUser) {
         this.showMessageToUser = showMessageToUser;
+    }
+
+    public String getExecuteDirectoryNameSuffix() {
+        return executeDirectoryNameSuffix;
+    }
+
+    // huh
+    
+    /**
+     * This suffix is added to the execute directory nanme.
+     * 
+     * This must be used before using {@link #runProgram(String, String)}.
+     * 
+     * @see #getExecuteDirectoryName()
+     * 
+     * @param executeDirectoryNameSuffix
+     */
+    public void setExecuteDirectoryNameSuffix(String executeDirectoryNameSuffix) {
+        this.executeDirectoryNameSuffix = executeDirectoryNameSuffix;
     }
 }

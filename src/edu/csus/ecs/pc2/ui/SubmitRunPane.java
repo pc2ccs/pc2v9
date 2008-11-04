@@ -40,11 +40,11 @@ import java.awt.FlowLayout;
  * A submit run pane.
  * 
  * @see edu.csus.ecs.pc2.Starter
+ * @version $Id$
  * @author pc2@ecs.csus.edu
  */
 
 // $HeadURL$
-// $Id$
 public class SubmitRunPane extends JPanePlugin {
 
     /**
@@ -558,6 +558,9 @@ public class SubmitRunPane extends JPanePlugin {
             RunFiles runFiles = new RunFiles(run, new SerializedFile(filename), additionalFiles);
 
             executable = new Executable(getContest(), getController(), run, runFiles);
+            if (! isTeam()){
+                executable.setExecuteDirectoryNameSuffix("SR");
+            }
             executable.setTestRunOnly(true);
 
             IFileViewer fileViewer;
