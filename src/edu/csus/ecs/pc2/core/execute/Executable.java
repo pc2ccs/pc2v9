@@ -576,7 +576,7 @@ public class Executable {
             }
             
             long startSecs = System.currentTimeMillis();
-            Process process = runProgram(cmdLine, msg);
+            Process process = runProgram(cmdLine, msg, false);
 
             if (process == null) {
                 executionTimer.stopTimer();
@@ -679,6 +679,12 @@ public class Executable {
         } catch (Exception ex) {
             log.log(Log.INFO, "Exception in validation  ", ex);
             throw new SecurityException(ex);
+        } finally {
+            
+            if ( executionData.isRunTimeLimitExceeded()){
+                executionData.setValidationResults("No - Time Limit Exceeded");
+                executionData.setValidationSuccess(true);
+            }
         }
 
         return executionData.isValidationSuccess();
@@ -854,8 +860,14 @@ public class Executable {
                 cmdline = f.getCanonicalPath();
             }
             
+            boolean autoStop = false;
+            if (! isTestRunOnly()){
+                // This autostops all executions except Test Run (team)
+                autoStop = true;
+            }
+            
             long startSecs = System.currentTimeMillis();
-            Process process = runProgram(cmdline, "Executing...");
+            Process process = runProgram(cmdline, "Executing...", autoStop);
             if (process == null) {
                 executionTimer.stopTimer();
                 stderrlog.close();
@@ -899,6 +911,7 @@ public class Executable {
 
             if (executionTimer != null) {
                 executionTimer.stopTimer();
+                executionData.setRunTimeLimitExceeded(executionTimer.isRunTimeLimitExceeded());
             }
 
             if (process != null) {
@@ -970,12 +983,12 @@ public class Executable {
 
             long startSecs = System.currentTimeMillis();
             
-            Process process = runProgram(cmdline, "Compiling...");
+            Process process = runProgram(cmdline, "Compiling...", false);
             if (process == null) {
                 executionTimer.stopTimer();
                 stderrlog.close();
                 stdoutlog.close();
-                // errorString will be set by runProgram
+                // errorString will be set by 
                 executionData.setCompileExeFileName("");
                 executionData.setCompileSuccess(false);
                 executionData.setCompileResultCode(1);
@@ -1255,9 +1268,10 @@ public class Executable {
      * 
      * @param cmdline
      * @param msg
+     * @param autoStopExecution 
      * @return the process started.
      */
-    public Process runProgram(String cmdline, String msg) {
+    public Process runProgram(String cmdline, String msg, boolean autoStopExecution) {
         Process process = null;
         errorString = "";
         
@@ -1270,6 +1284,7 @@ public class Executable {
                 String[] env = null;
 
                 if (executionTimer != null) {
+                    executionTimer.setDoAutoStop(autoStopExecution);
                     executionTimer.setTitle(msg);
                 }
 
@@ -1480,7 +1495,7 @@ public class Executable {
     /**
      * This suffix is added to the execute directory nanme.
      * 
-     * This must be used before using {@link #runProgram(String, String)}.
+     * This must be used before using {@link #(String, String)}.
      * 
      * @see #getExecuteDirectoryName()
      * 

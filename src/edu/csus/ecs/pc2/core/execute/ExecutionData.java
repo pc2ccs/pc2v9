@@ -42,7 +42,7 @@ public class ExecutionData implements Serializable {
     private int executeExitValue = 0;
     
     private boolean executeSucess;
-
+    
     private SerializedFile validationStdout;
 
     private SerializedFile validationStderr; // this is STDOUT of the validation
@@ -60,7 +60,11 @@ public class ExecutionData implements Serializable {
     private long validateTimeMS = 0;
     
     private Exception executionException = null;
+    
+    private boolean runTimeLimitExceeded = false;
 
+    private boolean failedToCompile = false;
+    
     /**
      * @return Returns the validationReturnCode.
      */
@@ -298,6 +302,30 @@ public class ExecutionData implements Serializable {
     
     public void setExecuteSucess(boolean executeSucess) {
         this.executeSucess = executeSucess;
+    }
+
+    /**
+     * Did team's submission fail to compile?.
+     * @return
+     */
+    public boolean isFailedToCompile() {
+        return failedToCompile;
+    }
+
+    public void setFailedToCompile(boolean failedToCompile) {
+        this.failedToCompile = failedToCompile;
+    }
+
+    /**
+     * During execution was there a time limit exceeded?.
+     * @return
+     */
+    public boolean isRunTimeLimitExceeded() {
+        return runTimeLimitExceeded;
+    }
+
+    public void setRunTimeLimitExceeded(boolean runTimeLimitExceeded) {
+        this.runTimeLimitExceeded = runTimeLimitExceeded;
     }
     
 }
