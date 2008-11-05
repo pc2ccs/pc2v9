@@ -1559,8 +1559,14 @@ public class RunsPanel extends JPanePlugin {
             return;
         }
         if (isAutoJudgingEnabled()) {
-            // RE-enable local auto judge flag
-            autoJudgingMonitor.startAutoJudging();
+            
+            // Keep this off the AWT thread.
+            new Thread(new Runnable() {
+                public void run() {
+//                  RE-enable local auto judge flag
+                    autoJudgingMonitor.startAutoJudging();
+                }
+            }).start();
         } else {
             showMessage("Administrator has turned off Auto Judging");
         }
