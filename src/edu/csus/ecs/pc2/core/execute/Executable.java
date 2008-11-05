@@ -864,7 +864,7 @@ public class Executable {
             stdoutCollector.start();
             stderrCollector.start();
 
-            if (problem.isReadInputDataFromSTDIN()) {
+            if (isValidDataFile(problem) && problem.isReadInputDataFromSTDIN()) {
                 OutputStream outs = process.getOutputStream();
                 PrintWriter pwOut = new PrintWriter(outs);
                 FileReader fileReader = new FileReader(inputDataFileName);
@@ -913,6 +913,15 @@ public class Executable {
 
         return passed;
     }
+
+    private boolean isValidDataFile(Problem inProblem) {
+        boolean result = false;
+        if (inProblem.getDataFileName() != null && inProblem.getDataFileName().trim().length() > 0) {
+            result = true;
+        }
+        return result;
+    }
+
 
     /**
      * Extract source file and run compile command line script.
