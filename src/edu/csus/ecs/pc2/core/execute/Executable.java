@@ -377,18 +377,6 @@ public class Executable {
                 long returnValue = ((long) executionData.getExecuteExitValue() << 0x20) >>> 0x20;
 
                 fileViewer.setInformationLabelText("<html><font size='+1' color='red'>Team program exit code = 0x" + Long.toHexString(returnValue).toUpperCase()+"</font>");
-                PrintWriter exitCodeFile = null;
-                try {
-                    exitCodeFile = new PrintWriter(new FileOutputStream(prefixExecuteDirname("EXITCODE.TXT"), false), true);
-                    exitCodeFile.write("0x"+Long.toHexString(returnValue).toUpperCase());
-                } catch (FileNotFoundException e) {
-                    StaticLog.log("Unable to open file EXITCODE.TXT", e);
-                    exitCodeFile = null;
-                } finally {
-                    if (exitCodeFile != null) {
-                        exitCodeFile.close();
-                    }
-                }
 
             } else {
                 fileViewer.setInformationLabelText("");
@@ -928,6 +916,22 @@ public class Executable {
             executionData.setExecuteProgramOutput(new SerializedFile(prefixExecuteDirname(EXECUTE_STDOUT_FILENAME)));
             executionData.setExecuteStderr(new SerializedFile(prefixExecuteDirname(EXECUTE_STDERR_FILENAME)));
 
+            if (executionData.getExecuteExitValue() != 0) {
+                long returnValue = ((long) executionData.getExecuteExitValue() << 0x20) >>> 0x20;
+
+                PrintWriter exitCodeFile = null;
+                try {
+                    exitCodeFile = new PrintWriter(new FileOutputStream(prefixExecuteDirname("EXITCODE.TXT"), false), true);
+                    exitCodeFile.write("0x"+Long.toHexString(returnValue).toUpperCase());
+                } catch (FileNotFoundException e) {
+                    StaticLog.log("Unable to open file EXITCODE.TXT", e);
+                    exitCodeFile = null;
+                } finally {
+                    if (exitCodeFile != null) {
+                        exitCodeFile.close();
+                    }
+                }
+            }
             passed = true;
         } catch (Exception e) {
             if (executionTimer != null) {
