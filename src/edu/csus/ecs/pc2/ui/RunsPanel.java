@@ -469,7 +469,7 @@ public class RunsPanel extends JPanePlugin {
                                     + "Judge's Response: " + responseFormat + Utilities.forHTML(response) + "</FONT><BR><BR><BR>";
 
                             if (theRun.getStatus().equals(RunStates.MANUAL_REVIEW)) {
-                                displayString += "NOTE: This is a Preliminary Judgement<BR><BR><BR>";
+                                displayString += "<FONT SIZE='+2'>NOTE: This is a <FONT COLOR='RED'>Preliminary</FONT> Judgement</FONT><BR><BR><BR>";
                             }
                             
                             if (judgeComment != null) {
