@@ -374,7 +374,7 @@ public class Executable {
             if (executionData.getExecuteExitValue() != 0) {
                 long returnValue = ((long) executionData.getExecuteExitValue() << 0x20) >>> 0x20;
 
-                fileViewer.setInformationLabelText("Team program exit code = 0x" + Long.toHexString(returnValue).toUpperCase());
+                fileViewer.setInformationLabelText("<html><font size='+1' color='red'>Team program exit code = 0x" + Long.toHexString(returnValue).toUpperCase()+"</font>");
 
             } else {
                 fileViewer.setInformationLabelText("");
