@@ -62,7 +62,7 @@
 	  STOP
 	END IF
 
-	PRINT *, 'THE SUM IS ',THESUM
+	PRINT *, 'The sum of the integers is ',THESUM
 
       CLOSE (UNIT = 5)
 

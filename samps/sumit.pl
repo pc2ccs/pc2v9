@@ -23,7 +23,7 @@
 		$sum += $num if $num > 0;
 
 	}
-	print "Sum of positive integers is $sum\n";
+	print "The sum of the integers is $sum\n";
 
 # eof
 

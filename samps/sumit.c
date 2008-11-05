@@ -29,7 +29,7 @@ int main (int argc, char **argv)
 			sum += i > 0 ? i : 0;
 		}
 		fclose (fp);
-		printf("The sum of the positive integers is %d \n",sum);
+		printf("The sum of the integers is %d \n",sum);
 	}
 	else
 	{

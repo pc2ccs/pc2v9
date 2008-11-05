@@ -31,7 +31,7 @@ begin
             sum := sum + i;
    end;
 
-   writeln('The sum of the positive integers is ',sum);
+   writeln('The sum of the integers is ',sum);
    end;
 
 end.
