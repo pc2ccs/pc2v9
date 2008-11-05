@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.core.execute;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -16,6 +17,7 @@ import javax.swing.JFileChooser;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -375,6 +377,18 @@ public class Executable {
                 long returnValue = ((long) executionData.getExecuteExitValue() << 0x20) >>> 0x20;
 
                 fileViewer.setInformationLabelText("<html><font size='+1' color='red'>Team program exit code = 0x" + Long.toHexString(returnValue).toUpperCase()+"</font>");
+                PrintWriter exitCodeFile = null;
+                try {
+                    exitCodeFile = new PrintWriter(new FileOutputStream(prefixExecuteDirname("EXITCODE.TXT"), false), true);
+                    exitCodeFile.write("0x"+Long.toHexString(returnValue).toUpperCase());
+                } catch (FileNotFoundException e) {
+                    StaticLog.log("Unable to open file EXITCODE.TXT", e);
+                    exitCodeFile = null;
+                } finally {
+                    if (exitCodeFile != null) {
+                        exitCodeFile.close();
+                    }
+                }
 
             } else {
                 fileViewer.setInformationLabelText("");
