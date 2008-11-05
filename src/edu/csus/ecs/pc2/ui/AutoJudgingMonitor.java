@@ -318,7 +318,8 @@ public class AutoJudgingMonitor implements UIPlugin {
 
                 ElementId elementId = contest.getJudgements()[1].getElementId();
                 judgementRecord = new JudgementRecord(elementId, contest.getClientId(), false, true, true);
-                judgementRecord.setValidatorResultString("Source failed to compile (compilation error)");
+                // TODO this needs to be flexible
+                judgementRecord.setValidatorResultString("No - Compilation Error");
 
             } else if (executionData.isValidationSuccess()) {
 
