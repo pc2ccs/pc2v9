@@ -12,6 +12,6 @@
 #
 #
 
-print "hello world!\n";
+print "Hello World.\n";
 
 # eof

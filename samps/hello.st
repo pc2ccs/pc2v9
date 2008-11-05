@@ -5,5 +5,5 @@
 	Source: smalltalk
 	$Id: hello.st 326 2006-10-25 02:53:57Z laned $ "
 
-'Hello world'.
+'Hello World.'.
 

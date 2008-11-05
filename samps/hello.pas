@@ -11,7 +11,7 @@
 
 begin
 
-    writeln('hello world');
+    writeln('Hello World.');
 
 end.
 

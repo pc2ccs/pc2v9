@@ -9,7 +9,7 @@
 *
 *23456789 
 * this works too!! :)
-*     PRINT *, 'Hello world! '
+*     PRINT *, 'Hello World.'
 *
       WRITE(*,*) 'Hello world! '
 *23456789 

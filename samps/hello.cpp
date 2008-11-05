@@ -12,7 +12,7 @@ using namespace std;
 
 main()
 {
-	cout << "hello world\n";
+	cout << "Hello World.\n";
 }
 
 // eof 
