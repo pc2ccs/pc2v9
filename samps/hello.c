@@ -1,8 +1,6 @@
-
-
 /*
  * File:    hello.c 
- * Purpose: prints hello world
+ * Purpose: prints: Hello World.
  * Author:  pc2@ecs.csus.edu or http://www.ecs.csus.edu/pc2
  *
  * $Id$
@@ -13,7 +11,9 @@
 
 main()
 {
-        printf("hello world \n");
+        printf("Hello World.\n");
+        
+        exit(0);
 }
 
 /* eof */
