@@ -44,7 +44,7 @@ public class AutoJudgeSettingsPane extends JPanePlugin {
 
     private JButton cancelButton = null;
 
-    private JLabel messageLabel = null;
+    private JLabel titleLabel = null;
 
     private JPanel centerPanel = null;
 
@@ -71,7 +71,7 @@ public class AutoJudgeSettingsPane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new java.awt.Dimension(517, 204));
+        this.setSize(new java.awt.Dimension(449,278));
 
         this.add(getCenterPanel(), java.awt.BorderLayout.CENTER);
         this.add(getMessagePane(), java.awt.BorderLayout.NORTH);
@@ -94,13 +94,15 @@ public class AutoJudgeSettingsPane extends JPanePlugin {
      */
     private JPanel getMessagePane() {
         if (messagePane == null) {
-            messageLabel = new JLabel();
-            messageLabel.setText("");
-            messageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+            titleLabel = new JLabel();
+            titleLabel.setText("Problems available to Auto Judge");
+            titleLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 16));
+            titleLabel.setPreferredSize(new java.awt.Dimension(255,36));
+            titleLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
             messagePane = new JPanel();
             messagePane.setLayout(new BorderLayout());
             messagePane.setPreferredSize(new java.awt.Dimension(25, 25));
-            messagePane.add(messageLabel, java.awt.BorderLayout.CENTER);
+            messagePane.add(titleLabel, java.awt.BorderLayout.CENTER);
         }
         return messagePane;
     }
@@ -113,7 +115,7 @@ public class AutoJudgeSettingsPane extends JPanePlugin {
     private JPanel getButtonPane() {
         if (buttonPane == null) {
             FlowLayout flowLayout = new FlowLayout();
-            flowLayout.setHgap(15);
+            flowLayout.setHgap(30);
             buttonPane = new JPanel();
             buttonPane.setLayout(flowLayout);
             buttonPane.add(getAddButton(), null);
@@ -174,11 +176,15 @@ public class AutoJudgeSettingsPane extends JPanePlugin {
 
         Filter filter = new Filter();
 
-        int[] selectedIndex = problemListMCLB.getSelectedIndexes();
+        int[] selectedIndex = getProblemListMCLB().getSelectedIndexes();
         for (int row : selectedIndex) {
-            Problem problem = (Problem) problemListMCLB.getRowKey(row);
+            Problem problem = (Problem) getProblemListMCLB().getRowKey(row);
             if (problem != null) {
-                filter.addProblem(problem);
+                if (problem.isComputerJudged()) {
+                    filter.addProblem(problem);
+                } else {
+                    throw new InvalidFieldValue("Problem '" + problem.getDisplayName()+"' can not be auto judged\nOnly computer judged problems can be auto judged.");
+                }
             }
         }
         
@@ -285,11 +291,13 @@ public class AutoJudgeSettingsPane extends JPanePlugin {
      */
     private JPanel getCenterPanel() {
         if (centerPanel == null) {
+            BorderLayout borderLayout = new BorderLayout();
+            borderLayout.setVgap(0);
             centerPanel = new JPanel();
-            centerPanel.setLayout(null);
+            centerPanel.setLayout(borderLayout);
             centerPanel.setName("advancedEdit");
-            centerPanel.add(getEnableAutoJudgingCheckBox(), null);
-            centerPanel.add(getProblemListMCLB(), null);
+            centerPanel.add(getEnableAutoJudgingCheckBox(), java.awt.BorderLayout.SOUTH);
+            centerPanel.add(getProblemListMCLB(), java.awt.BorderLayout.CENTER);
         }
         return centerPanel;
     }
@@ -394,17 +402,19 @@ public class AutoJudgeSettingsPane extends JPanePlugin {
         Filter filter = clientSettings2.getAutoJudgeFilter();
         if (filter == null){
             filter = new Filter();
-            filter.setUsingProblemFilter(true);
         }
             
         int rowNumber = 0;
         for (Problem problem : problems) {
-            Object[] row = buildProblemRow(problem);
-            problemListMCLB.addRow(row, problem);
-            if (filter.matchesProblem(problem.getElementId())){
-                problemListMCLB.selectRow(rowNumber);
+            if (canBeAutoJudged(problem)) {
+                Object[] row = buildProblemRow(problem);
+                getProblemListMCLB().addRow(row, problem);
+                if (filter.isFilteringProblems() && filter.matchesProblem(problem.getElementId())) {
+                    
+                    getProblemListMCLB().selectRow(rowNumber);
+                }
+                rowNumber++;
             }
-            rowNumber++;
         }
         
         if (clientSettings2 != null) {
@@ -417,14 +427,52 @@ public class AutoJudgeSettingsPane extends JPanePlugin {
             getUpdateButton().setVisible(false);
         }
 
+        getProblemListMCLB().autoSizeAllColumns();
         populatingGUI = false;
+    }
+    
+    /**
+     * Can this problem be auto judged?.
+     * @param problem
+     * @return
+     */
+    private boolean canBeAutoJudged(Problem problem) {
+        return problem.isComputerJudged() && problem.isValidatedProblem();
+    }
+
+    /**
+     * Get the judging type.
+     * 
+     * @param problem
+     * @return
+     */
+    public String getJudgingTypeName(Problem problem) {
+        String judgingTypeName = "Manual";
+        if (problem.isComputerJudged()) {
+            judgingTypeName = "Computer";
+            if (problem.isManualReview()) {
+                judgingTypeName = "Computer+Manual";
+                if (problem.isPrelimaryNotification()) {
+                    judgingTypeName = "Computer+Manual/Notify";
+                }
+            }
+        } else if (problem.isValidatedProblem()) {
+            judgingTypeName = "Manual w/Val.";
+        } else {
+            judgingTypeName = "Manual";
+        }
+        return judgingTypeName;
     }
 
     private Object[] buildProblemRow(Problem problem) {
-        int numberColumns = problemListMCLB.getColumnCount();
+        
+//        Object[] cols = { "Problem", "Judging Type" };
+
+        int numberColumns = getProblemListMCLB().getColumnCount();
         Object[] c = new String[numberColumns];
 
         c[0] = problem.getDisplayName();
+        c[1] = getJudgingTypeName(problem);
         return c;
     }
 
@@ -439,11 +487,7 @@ public class AutoJudgeSettingsPane extends JPanePlugin {
     }
 
     public void showMessage(final String message) {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                messageLabel.setText(message);
-            }
-        });
+        JOptionPane.showMessageDialog(this, message);
     }
 
     /**
@@ -454,8 +498,10 @@ public class AutoJudgeSettingsPane extends JPanePlugin {
     private JCheckBox getEnableAutoJudgingCheckBox() {
         if (enableAutoJudgingCheckBox == null) {
             enableAutoJudgingCheckBox = new JCheckBox();
-            enableAutoJudgingCheckBox.setBounds(new java.awt.Rectangle(22, 15, 181, 18));
             enableAutoJudgingCheckBox.setText("Enable Auto Judging");
+            enableAutoJudgingCheckBox.setPreferredSize(new java.awt.Dimension(140,30));
+            enableAutoJudgingCheckBox.setFont(new java.awt.Font("Dialog", java.awt.Font.PLAIN, 14));
+            enableAutoJudgingCheckBox.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
             enableAutoJudgingCheckBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableUpdateButton();
@@ -473,8 +519,6 @@ public class AutoJudgeSettingsPane extends JPanePlugin {
     private MCLB getProblemListMCLB() {
         if (problemListMCLB == null) {
             problemListMCLB = new MCLB();
-            problemListMCLB.setBounds(new java.awt.Rectangle(206, 14, 290, 111));
-
             problemListMCLB.setMultipleSelections(true);
             problemListMCLB.addListboxListener(new com.ibm.webrunner.j2mclb.event.ListboxListener() {
                 public void rowDeselected(com.ibm.webrunner.j2mclb.event.ListboxEvent e) {
@@ -486,7 +530,8 @@ public class AutoJudgeSettingsPane extends JPanePlugin {
                 }
 
             });
-            Object[] cols = { "Problem to Auto Judge" };
+            Object[] cols = { "Problem", "Judging Type" };
+
             problemListMCLB.addColumns(cols);
             problemListMCLB.autoSizeAllColumns();
 
