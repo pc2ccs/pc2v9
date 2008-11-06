@@ -165,8 +165,10 @@ public class ProblemsPane extends JPanePlugin {
         String inputMethod = "";
         if (problem.isReadInputDataFromSTDIN()) {
             inputMethod = "STDIN";
-        } else {
+        } else if (problem.getDataFileName() != null) {
             inputMethod = "File I/O";
+        } else {
+            inputMethod = "(none)";
         }
         c[i++] = inputMethod;
         String judgingType = "";
