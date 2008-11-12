@@ -557,8 +557,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             mfv.setInformationLabelText("");
         }
         executableFileViewer = mfv;
-        System.out.println("mfv component count="+mfv.getComponents().length);
-        enableOutputsButton(mfv.getComponents().length > 0);
+        enableOutputsButton(true);
     }
 
     private void addFilePane(MultipleFileViewer mfv, String title, SerializedFile inFile) {
@@ -872,7 +871,6 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         ExecutionData eData = executable.getExecutionData();
         if (eData != null && eData.isCompileSuccess()) {
             String results = "No - Compilation Error";
-            judgementRecord.setValidatorResultString(results);
             validatorAnswer.setText(results);
             showValidatorControls(true);
             ElementId elementId = getValidatorResultElementID(results);
