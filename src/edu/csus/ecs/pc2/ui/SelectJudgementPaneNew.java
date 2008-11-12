@@ -1084,7 +1084,12 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
         JudgeView.setAlreadyJudgingRun(false);
 
-        newRunResultFiles = new RunResultFiles(newRun, newRun.getProblemId(), judgementRecord, executable.getExecutionData());
+        ExecutionData executionData = null;
+        // this will be null if we are accepting the computer judgement
+        if (executable != null) {
+            executionData = executable.getExecutionData();
+        }
+        newRunResultFiles = new RunResultFiles(newRun, newRun.getProblemId(), judgementRecord, executionData);
 
         getController().submitRunJudgement(newRun, judgementRecord, newRunResultFiles);
 
