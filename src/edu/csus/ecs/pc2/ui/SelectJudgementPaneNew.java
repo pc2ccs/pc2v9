@@ -827,7 +827,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             }
         }
 
-        RunResultFiles rrf = new RunResultFiles(run, run.getProblemId(), judgementRecord, executable.getExecutionData());
+//        RunResultFiles rrf = new RunResultFiles(run, run.getProblemId(), judgementRecord, executable.getExecutionData());
         //getManualRunResultsPanel().populatePane(rrf, "Manual Results");
         //getManualRunResultsPanel().setVisible(true);
 
