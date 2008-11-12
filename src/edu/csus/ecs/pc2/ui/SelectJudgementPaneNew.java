@@ -1414,9 +1414,9 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     }
 
     /**
-     * This method initializes viewOutputsButton	
-     * 	
-     * @return javax.swing.JButton	
+     * This method initializes viewOutputsButton
+     *
+     * @return javax.swing.JButton
      */
     private JButton getViewOutputsButton() {
         if (viewOutputsButton == null) {
