@@ -872,7 +872,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             }
         }
         ExecutionData eData = executable.getExecutionData();
-        if (eData != null && eData.isCompileSuccess()) {
+        if (eData != null && !eData.isCompileSuccess()) {
             String results = "No - Compilation Error";
             validatorAnswer.setText(results);
             showValidatorControls(true);
