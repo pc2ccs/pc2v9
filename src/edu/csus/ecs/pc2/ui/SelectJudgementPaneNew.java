@@ -616,7 +616,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         getCancelButton().setEnabled(b);
         getAcceptValidatorJudgementButton().setEnabled(b);
         getViewOutputsButton().setEnabled(b);
-        getAcceptChosenSelectionButton().setEnabled(b);
+        getAcceptChosenSelectionButton().setEnabled(b && getJudgementComboBox().getSelectedIndex() != -1);
     }
 
     public void enableUpdateButtons(boolean editedText) {
