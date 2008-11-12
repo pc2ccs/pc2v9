@@ -935,7 +935,7 @@ public class ClarificationsPane extends JPanePlugin {
     private JButton getRequestButton() {
         if (requestButton == null) {
             requestButton = new JButton();
-            requestButton.setText("Request");
+            requestButton.setText("Answer");
             requestButton.setMnemonic(java.awt.event.KeyEvent.VK_A);
             requestButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
