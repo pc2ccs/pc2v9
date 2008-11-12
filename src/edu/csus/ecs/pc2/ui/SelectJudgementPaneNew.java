@@ -149,6 +149,8 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
     private JLabel selectJudgementCheckboxLabel = null;
 
+    private JButton viewOutputsButton = null;
+
     /**
      * This method initializes
      * 
@@ -226,6 +228,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             buttonPanel.setLayout(flowLayout);
             buttonPanel.add(getExtractButton(), null);
             buttonPanel.add(getViewSourceButton(), null);
+            buttonPanel.add(getViewOutputsButton(), null);
             buttonPanel.add(getViewDataFileButton(), null);
             buttonPanel.add(getViewAnswerFileButton(), null);
             buttonPanel.add(getDetailsButton(), null);
@@ -439,6 +442,8 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             public void run() {
                 populateGUI(run);
                 enableUpdateButtons(false);
+                executableFileViewer = null;
+                enableOutputsButton(false);
             }
         });
     }
@@ -492,6 +497,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                     for (int i = 0; i < runResultFiles.length; i++) {
                         if (runResultFiles[i].getJudgementId().equals(computerJudgement.getJudgementId())) {
                             matchingResult = runResultFiles[i];
+                            buildFileViewer(matchingResult);
                             break;
                         }
                     }
@@ -526,6 +532,39 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
         populatingGUI = false;
 
+    }
+
+    /**
+     * Populates executalbeFileViewer based on the input RunResultFiles.
+     * 
+     * @param files
+     */
+    private void buildFileViewer(RunResultFiles files) {
+        MultipleFileViewer mfv = new MultipleFileViewer(log, "Executable");
+        addFilePane(mfv, "Compiler stdout", files.getCompilerStdoutFile());
+        addFilePane(mfv, "Compiler stderr", files.getCompilerStderrFile());
+        addFilePane(mfv, "Program stdout", files.getExecuteStdoutFile());
+        addFilePane(mfv, "Program stderr", files.getExecuteStderrFile());
+        addFilePane(mfv, "Validator stdout", files.getValidatorStdoutFile());
+        addFilePane(mfv, "Validator stderr", files.getValidatorStderrFile());
+        long code = files.getExecutionResultCode();
+        if (code != 0) {
+            long returnValue = ((long) code << 0x20) >>> 0x20;
+
+            mfv.setInformationLabelText("<html><font size='+1' color='red'>Team program exit code = 0x" + Long.toHexString(returnValue).toUpperCase()+"</font>");
+
+        } else {
+            mfv.setInformationLabelText("");
+        }
+        executableFileViewer = mfv;
+        System.out.println("mfv component count="+mfv.getComponents().length);
+        enableOutputsButton(mfv.getComponents().length > 0);
+    }
+
+    private void addFilePane(MultipleFileViewer mfv, String title, SerializedFile inFile) {
+        if (inFile != null) {
+            mfv.addFilePane(title, inFile);
+        }
     }
 
     protected void regularCursor() {
@@ -601,6 +640,10 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         enableUpdateButtons(enableButton);
     }
 
+    private void enableOutputsButton(boolean b) {
+            getViewOutputsButton().setEnabled(b);
+    }
+    
     private boolean judgementChanged() {
         if (run.isJudged()) {
 
@@ -846,6 +889,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         if (!getContest().getProblem(run.getProblemId()).isHideOutputWindow()) {
             executableFileViewer.setVisible(true);
         }
+        enableOutputsButton(true);
     }
 
     public void setRunAndFiles(Run theRun, RunFiles runFiles2, RunResultFiles[] theRunResultFiles) {
@@ -1203,6 +1247,14 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         }
     }
 
+    protected void viewOutputs() {
+        if (executableFileViewer != null) {
+            executableFileViewer.setVisible(true);
+        } else {
+            JOptionPane.showMessageDialog(this, "No output yet!");
+        }
+    }
+
     /**
      * This method initializes shellButton
      * 
@@ -1339,8 +1391,30 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             detailsButton = new JButton();
             detailsButton.setText("Details...");
             detailsButton.setEnabled(false);
+            detailsButton.setVisible(false); // TODO re-enable this
         }
         return detailsButton;
+    }
+
+    /**
+     * This method initializes viewOutputsButton	
+     * 	
+     * @return javax.swing.JButton	
+     */
+    private JButton getViewOutputsButton() {
+        if (viewOutputsButton == null) {
+            viewOutputsButton = new JButton();
+            viewOutputsButton.setActionCommand("View Outputs");
+            viewOutputsButton.setEnabled(false);
+            viewOutputsButton.setToolTipText("Show compiler/execution/validator stdout/err where available");
+            viewOutputsButton.setText("View Outputs");
+            viewOutputsButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    viewOutputs();
+                }
+            });
+        }
+        return viewOutputsButton;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
