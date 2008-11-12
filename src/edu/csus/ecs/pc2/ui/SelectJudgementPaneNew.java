@@ -605,6 +605,20 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
     }
 
+    /**
+     * Can be used to disable select controls during execution.
+     * 
+     * @param b
+     */
+    public void setEnabledButtonStatus(boolean b) {
+        getExecuteButton().setEnabled(b && runFiles != null);
+        getJudgementComboBox().setEnabled(b && runFiles != null);
+        getCancelButton().setEnabled(b);
+        getAcceptValidatorJudgementButton().setEnabled(b);
+        getViewOutputsButton().setEnabled(b);
+        getAcceptChosenSelectionButton().setEnabled(b);
+    }
+
     public void enableUpdateButtons(boolean editedText) {
         if (editedText) {
             cancelButton.setText("Cancel");
@@ -840,6 +854,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         if (executableFileViewer != null) {
             executableFileViewer.dispose();
         }
+        setEnabledButtonStatus(false);
         executableFileViewer = executable.execute();
 
         // Show validator results, if there are any.
@@ -891,6 +906,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             executableFileViewer.setVisible(true);
         }
         enableOutputsButton(true);
+        setEnabledButtonStatus(true);
     }
 
     public void setRunAndFiles(Run theRun, RunFiles runFiles2, RunResultFiles[] theRunResultFiles) {
