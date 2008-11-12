@@ -142,7 +142,7 @@ public class AccountsPane extends JPanePlugin {
             return account.getDisplayName();
         }
 
-        return account.getDisplayName();
+        return "Invalid Account";
     }
 
     /**

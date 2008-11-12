@@ -351,7 +351,7 @@ public class RunPane extends JPanePlugin {
         } else {
             getUpdateButton().setVisible(false);
 
-            runInfoLabel.setText("Could not get run " + +run2.getNumber() + " (Site " + run2.getSiteNumber() + ")");
+            runInfoLabel.setText("Could not get run");
             deleteCheckBox.setSelected(false);
             statusLabel.setText("");
             elapsedTimeTextField.setText("");

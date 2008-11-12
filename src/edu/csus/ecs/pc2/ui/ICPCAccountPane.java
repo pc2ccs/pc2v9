@@ -117,7 +117,7 @@ public class ICPCAccountPane extends JPanePlugin {
             return account.getDisplayName();
         }
 
-        return account.getDisplayName();
+        return "Invalid Account";
     }
 
     private Object[] buildAccountRow(Account account, String newDisplayName) {

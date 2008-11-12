@@ -510,7 +510,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             
             getAcceptChosenSelectionButton().setVisible(false);
 
-            runInfoLabel.setText("Could not get run " + +theRun.getNumber() + " (Site " + theRun.getSiteNumber() + ")");
+            runInfoLabel.setText("Could not get run");
             statusLabel.setText("");
             elapsedTimeLabel.setText("");
             problemNameLabel.setText("");

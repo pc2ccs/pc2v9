@@ -318,7 +318,7 @@ public class AnswerClarificationPane extends JPanePlugin {
 
         } else {
             getOkButton().setVisible(false);
-            clarificationInfoLabel.setText("Could not get clarification " + +theClarification.getNumber() + " (Site " + theClarification.getSiteNumber() + ")");
+            clarificationInfoLabel.setText("Could not get clarification");
             problemNameLabel.setText("");
 
         }

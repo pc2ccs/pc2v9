@@ -440,7 +440,7 @@ public class SelectJudgementPane extends JPanePlugin {
         } else {
             getOkButton().setVisible(false);
 
-            runInfoLabel.setText("Could not get run " + +theRun.getNumber() + " (Site " + theRun.getSiteNumber() + ")");
+            runInfoLabel.setText("Could not get run");
             statusLabel.setText("");
             elapsedTimeLabel.setText("");
 
