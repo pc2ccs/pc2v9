@@ -541,29 +541,32 @@ public class SelectJudgementPaneNew extends JPanePlugin {
      */
     private void buildFileViewer(RunResultFiles files) {
         MultipleFileViewer mfv = new MultipleFileViewer(log, "Executable");
-        addFilePane(mfv, "Compiler stdout", files.getCompilerStdoutFile());
-        addFilePane(mfv, "Compiler stderr", files.getCompilerStderrFile());
-        addFilePane(mfv, "Program stdout", files.getExecuteStdoutFile());
-        addFilePane(mfv, "Program stderr", files.getExecuteStderrFile());
-        addFilePane(mfv, "Validator stdout", files.getValidatorStdoutFile());
-        addFilePane(mfv, "Validator stderr", files.getValidatorStderrFile());
+        boolean showOutput = false;
+        showOutput |= addFilePane(mfv, "Compiler stdout", files.getCompilerStdoutFile());
+        showOutput |= addFilePane(mfv, "Compiler stderr", files.getCompilerStderrFile());
+        showOutput |= addFilePane(mfv, "Program stdout", files.getExecuteStdoutFile());
+        showOutput |= addFilePane(mfv, "Program stderr", files.getExecuteStderrFile());
+        showOutput |= addFilePane(mfv, "Validator stdout", files.getValidatorStdoutFile());
+        showOutput |= addFilePane(mfv, "Validator stderr", files.getValidatorStderrFile());
         long code = files.getExecutionResultCode();
         if (code != 0) {
             long returnValue = ((long) code << 0x20) >>> 0x20;
 
             mfv.setInformationLabelText("<html><font size='+1' color='red'>Team program exit code = 0x" + Long.toHexString(returnValue).toUpperCase()+"</font>");
-
+            showOutput = true;
         } else {
             mfv.setInformationLabelText("");
         }
         executableFileViewer = mfv;
-        enableOutputsButton(true);
+        enableOutputsButton(showOutput);
     }
 
-    private void addFilePane(MultipleFileViewer mfv, String title, SerializedFile inFile) {
+    private boolean addFilePane(MultipleFileViewer mfv, String title, SerializedFile inFile) {
+        boolean success=false;
         if (inFile != null) {
-            mfv.addFilePane(title, inFile);
+            success = mfv.addFilePane(title, inFile);
         }
+        return(success);
     }
 
     protected void regularCursor() {
