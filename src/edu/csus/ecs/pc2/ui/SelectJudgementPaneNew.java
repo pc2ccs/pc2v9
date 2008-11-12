@@ -826,6 +826,18 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                 log.warning("execute indicated validator success but getValidationResults returns \"\" or null");
             }
         }
+        ExecutionData eData = executable.getExecutionData();
+        if (eData != null && eData.isCompileSuccess()) {
+            String results = "No - Compilation Error";
+            judgementRecord.setValidatorResultString(results);
+            validatorAnswer.setText(results);
+            showValidatorControls(true);
+            ElementId elementId = getValidatorResultElementID(results);
+            judgementRecord = new JudgementRecord(elementId, run.getSubmitter(), false, true);
+            judgementRecord.setValidatorResultString(results);
+
+            judgementRecord.setSendToTeam(getNotifyTeamCheckBox().isSelected());
+        }
 
 //        RunResultFiles rrf = new RunResultFiles(run, run.getProblemId(), judgementRecord, executable.getExecutionData());
         //getManualRunResultsPanel().populatePane(rrf, "Manual Results");
