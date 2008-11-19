@@ -725,7 +725,10 @@ public class SelectJudgementPane extends JPanePlugin {
         if (executable.isValidationSuccess()) {
             String results = executable.getValidationResults();
             if (results != null && results.trim().length() > 1) {
-                validatorJudgementLabel.setText(executable.getValidationResults());
+                if (results.equalsIgnoreCase("accepted")) {
+                    results = getContest().getJudgements()[0].getDisplayName();
+                }
+                validatorJudgementLabel.setText(results);
                 showValidatorControls(true);
             } else {
                 log.warning("execute indicated validator success but getValidationResults returns \"\" or null");
