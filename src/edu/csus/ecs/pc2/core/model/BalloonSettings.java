@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core.model;
 
+import java.util.Enumeration;
 import java.util.Hashtable;
 
 /**
@@ -408,7 +409,33 @@ public class BalloonSettings implements IElementObject {
     public Object clone() throws CloneNotSupportedException {
         BalloonSettings clone = new BalloonSettings("foo", getSiteNumber());
         clone.elementId = elementId;
-        clone.colorList = colorList;
+        clone.colorList = cloneColorList();
+        clone.setBalloonClient(getBalloonClient());
+        clone.setEmailBalloons(isEmailBalloons());
+        clone.setEmailContact(new String(emailContact));
+        clone.setIncludeNos(isIncludeNos());
+        clone.setLinesPerPage(getLinesPerPage());
+        clone.setMailServer(new String(mailServer));
+        clone.setPostscriptCapable(isPostscriptCapable());
+        clone.setPrintBalloons(isPrintBalloons());
+        clone.setPrintDevice(new String(printDevice));
+        return clone;
+    }
+    
+    private Hashtable<ElementId,String> cloneColorList() {
+        Hashtable<ElementId,String> newHash=new Hashtable<ElementId,String>();
+        Enumeration<ElementId> elementList=colorList.keys();
+        while (elementList.hasMoreElements()) {
+            ElementId key = elementList.nextElement();
+            newHash.put(key,colorList.get(key));
+        }
+        return newHash;
+    }
+    public BalloonSettings copy(Site newSite) {
+        // this is like the clone, but without the elementId foo
+        BalloonSettings clone = new BalloonSettings(newSite.getDisplayName(), newSite.getSiteNumber());
+        // TODO deep clone the colorList hashtable
+        clone.colorList = cloneColorList();
         clone.setBalloonClient(getBalloonClient());
         clone.setEmailBalloons(isEmailBalloons());
         clone.setEmailContact(new String(emailContact));
