@@ -837,10 +837,12 @@ public class ProblemPane extends JPanePlugin {
             if (inProblem.isValidatedProblem()) {
 
                 if (inProblem.isUsingPC2Validator()) {
+                    getValidatorCommandLineTextBox().setText(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
                     usePC2ValidatorRadioButton.setSelected(true);
                     pc2ValidatorOptionComboBox.setSelectedIndex(inProblem.getWhichPC2Validator());
                     ignoreCaseCheckBox.setSelected(inProblem.isIgnoreSpacesOnValidation());
                 } else {
+                    getValidatorCommandLineTextBox().setText(inProblem.getValidatorCommandLine());
                     useExternalValidatorRadioButton.setSelected(true);
                     externalValidatorLabel.setText(inProblem.getValidatorProgramName());
                     externalValidatorLabel.setToolTipText(inProblem.getValidatorProgramName());
@@ -853,10 +855,10 @@ public class ProblemPane extends JPanePlugin {
                 }
 
             } else {
+                getValidatorCommandLineTextBox().setText(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
                 useNOValidatatorRadioButton.setSelected(true);
             }
 
-            getValidatorCommandLineTextBox().setText(inProblem.getValidatorCommandLine());
             getShowValidatorToJudges().setSelected(inProblem.isShowValidationToJudges());
             getDoShowOutputWindowCheckBox().setSelected(!inProblem.isHideOutputWindow());
             getShowCompareCheckBox().setSelected(inProblem.isShowCompareWindow());
