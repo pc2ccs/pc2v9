@@ -661,6 +661,9 @@ public class Filter implements Serializable {
             if (filteringProblems) {
                 filterInfo += " problem(s) ";
             }
+            if (filteringJudgements) {
+                filterInfo += " judgement(s) ";
+            }
             if (filteringLanguages) {
                 filterInfo += " language(s) ";
             }
@@ -733,7 +736,7 @@ public class Filter implements Serializable {
      */
     public boolean isFilterOn() {
         if (filterEnabled) {
-            return filteringAccounts || filteringClarificationStates || filteringProblems || filteringLanguages || filteringElapsedTime || filteringRunStates || thisSiteOnly;
+            return filteringAccounts || filteringClarificationStates || filteringProblems || filteringJudgements || filteringLanguages || filteringElapsedTime || filteringRunStates || thisSiteOnly;
         } else {
             return false;
         }
