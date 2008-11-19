@@ -143,10 +143,6 @@ public class JudgeView extends JFrame implements UIPlugin {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
 
-                if (contestClockDisplay.getClientFrame() == null) {
-                    contestClockDisplay.setClientFrame(getThisFrame());
-                }
-
                 if (contestStarted) {
                     setTitle("PC^2 Judge " + contest.getTitle() + " [STARTED] Build " + new VersionInfo().getBuildNumber());
                     contestClockDisplay.fireClockStateChange(contest.getContestTime());
@@ -155,6 +151,9 @@ public class JudgeView extends JFrame implements UIPlugin {
                     clockLabel.setText("STOPPED");
                 }
 
+                if (contestClockDisplay.getClientFrame() == null) {
+                    contestClockDisplay.setClientFrame(getThisFrame());
+                }
             }
         });
 
