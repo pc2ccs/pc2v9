@@ -866,7 +866,10 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             String results = executable.getValidationResults();
             if (results != null && results.trim().length() > 1) {
                 
-                validatorAnswer.setText(executable.getValidationResults());
+                if (results.equalsIgnoreCase("accepted")) {
+                    results = getContest().getJudgements()[0].getDisplayName();
+                }
+                validatorAnswer.setText(results);
                 
                 showValidatorControls(true);
 
