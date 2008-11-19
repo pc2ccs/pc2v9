@@ -21,6 +21,7 @@ import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
+import edu.csus.ecs.pc2.core.model.RunEvent.Action;
 
 /**
  * Auto Judge Monitor.
@@ -221,7 +222,9 @@ public class AutoJudgingMonitor implements UIPlugin {
 
         public void runChanged(RunEvent event) {
 
-            if (runBeingAutoJudged != null && event.getRun().getElementId().equals(runBeingAutoJudged.getElementId())) {
+            // bug XXX added verification the run is directed to us
+            if (runBeingAutoJudged != null && event.getRun().getElementId().equals(runBeingAutoJudged.getElementId())
+                    && (event.getSentToClientId() != null && event.getSentToClientId().equals(contest.getClientId()))) {
                 // found the run we requested
 
                 if (fetchedRun == null) {
@@ -240,7 +243,22 @@ public class AutoJudgingMonitor implements UIPlugin {
                 } else {
                     log.info("Currently judging run " + fetchedRun);
                 }
-
+            } else {
+                if (event.getAction().equals(Action.RUN_NOT_AVIALABLE)) {
+                    // we are fetching a run 
+                    if (fetchedRun == null) {
+                        // XXX should we log this or let the attemptToFetchNextRun log it?
+                        // claim to have received it
+                        synchronized (listening) {
+                            try {
+                                answerReceived = true;
+                                listening.notify();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }                    
+                }
             }
         }
 
