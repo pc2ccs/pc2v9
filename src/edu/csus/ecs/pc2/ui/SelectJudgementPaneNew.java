@@ -444,6 +444,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                 enableUpdateButtons(false);
                 executableFileViewer = null;
                 enableOutputsButton(false);
+                showValidatorControls(false);
             }
         });
     }
