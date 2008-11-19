@@ -302,6 +302,7 @@ public class TeamStatusPane extends JPanePlugin {
             teamLabel.setToolTipText(toolTipText);
             centerPane.add(teamName, teamLabel);
         }
+        centerPane.repaint();
     }
 
     private Color getStatusColor(ClientId clientId, Run[] runs, Clarification[] clarifications) {
