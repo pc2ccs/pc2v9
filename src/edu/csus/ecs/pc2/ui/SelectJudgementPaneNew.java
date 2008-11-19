@@ -942,6 +942,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             judgementComboBox.setLocation(new java.awt.Point(225,101));
             judgementComboBox.setSize(new java.awt.Dimension(271,33));
             judgementComboBox.setPreferredSize(new java.awt.Dimension(150, 25));
+            judgementComboBox.setMaximumRowCount(15);
             judgementComboBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableUpdateButton();
