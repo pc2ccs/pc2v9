@@ -233,6 +233,7 @@ public class ProblemsPane extends JPanePlugin {
         if (addButton == null) {
             addButton = new JButton();
             addButton.setText("Add");
+            addButton.setToolTipText("Add new Problem definition");
             addButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     addProblem();
@@ -256,6 +257,7 @@ public class ProblemsPane extends JPanePlugin {
         if (editButton == null) {
             editButton = new JButton();
             editButton.setText("Edit");
+            editButton.setToolTipText("Edit existing Problem definition");
             editButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     editSelectedProblem();

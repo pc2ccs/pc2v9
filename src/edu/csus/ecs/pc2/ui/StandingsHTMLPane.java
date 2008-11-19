@@ -384,6 +384,7 @@ public class StandingsHTMLPane extends JPanePlugin {
         if (refreshButton == null) {
             refreshButton = new JButton();
             refreshButton.setText("Refresh");
+            refreshButton.setToolTipText("Refresh display");
             refreshButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     refreshStandings();

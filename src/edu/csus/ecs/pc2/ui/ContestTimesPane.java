@@ -431,6 +431,7 @@ public class ContestTimesPane extends JPanePlugin {
             refreshButton = new JButton();
             refreshButton.setText("Refresh");
             refreshButton.setToolTipText("Refresh All Clocks");
+            refreshButton.setToolTipText("Refresh Clocks on All sites");
             refreshButton.setMnemonic(java.awt.event.KeyEvent.VK_R);
             refreshButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -454,6 +455,7 @@ public class ContestTimesPane extends JPanePlugin {
         if (startClockButton == null) {
             startClockButton = new JButton();
             startClockButton.setText("Start");
+            startClockButton.setToolTipText("Start the contest clock on the selected site");
             startClockButton.setMnemonic(java.awt.event.KeyEvent.VK_S);
             startClockButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -491,6 +493,7 @@ public class ContestTimesPane extends JPanePlugin {
         if (stopClockButton == null) {
             stopClockButton = new JButton();
             stopClockButton.setText("Stop");
+            stopClockButton.setToolTipText("Stop the contest clock on the selected site");
             stopClockButton.setMnemonic(java.awt.event.KeyEvent.VK_T);
             stopClockButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -667,6 +670,7 @@ public class ContestTimesPane extends JPanePlugin {
         if (editButton == null) {
             editButton = new JButton();
             editButton.setText("Edit");
+            editButton.setToolTipText("Edit the contest time on the selected site");
             editButton.setMnemonic(java.awt.event.KeyEvent.VK_E);
             editButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {

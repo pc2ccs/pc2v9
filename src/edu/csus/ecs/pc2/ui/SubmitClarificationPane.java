@@ -139,6 +139,7 @@ public class SubmitClarificationPane extends JPanePlugin {
             submitClarificationButton = new JButton();
             submitClarificationButton.setBounds(new java.awt.Rectangle(20,219,158,34));
             submitClarificationButton.setText("Submit Clarification");
+            submitClarificationButton.setToolTipText("Click this button to submit your Clarification");
             submitClarificationButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     submitClarification();

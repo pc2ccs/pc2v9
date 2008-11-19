@@ -299,6 +299,7 @@ public class BalloonPane extends JPanePlugin {
         if (testButton == null) {
             testButton = new JButton();
             testButton.setText("Test");
+            testButton.setToolTipText("Run the selected tests");
             testButton.setPreferredSize(new java.awt.Dimension(150, 26));
             testButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {

@@ -134,6 +134,7 @@ public class ContestInformationPane extends JPanePlugin {
         if (updateButton == null) {
             updateButton = new JButton();
             updateButton.setText("Update");
+            updateButton.setToolTipText("Save settings");
             updateButton.setPreferredSize(new java.awt.Dimension(100, 26));
             updateButton.setMnemonic(java.awt.event.KeyEvent.VK_U);
             updateButton.addActionListener(new java.awt.event.ActionListener() {
@@ -442,6 +443,7 @@ public class ContestInformationPane extends JPanePlugin {
         if (cancelButton == null) {
             cancelButton = new JButton();
             cancelButton.setText("Cancel");
+            cancelButton.setToolTipText("Discard changes");
             cancelButton.setPreferredSize(new java.awt.Dimension(100, 26));
             cancelButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {

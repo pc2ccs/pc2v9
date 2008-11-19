@@ -283,6 +283,7 @@ public class LoginsPane extends JPanePlugin {
         if (logoffButton == null) {
             logoffButton = new JButton();
             logoffButton.setText("Logoff");
+            logoffButton.setToolTipText("Logoff the selected user");
             logoffButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     logoffSelectedClient();

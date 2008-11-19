@@ -463,6 +463,7 @@ public class TeamStatusPane extends JPanePlugin {
         if (clearButton == null) {
             clearButton = new JButton();
             clearButton.setText("Clear");
+            clearButton.setToolTipText("Clear display");
             clearButton.setMnemonic(java.awt.event.KeyEvent.VK_C);
             clearButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -548,6 +549,7 @@ public class TeamStatusPane extends JPanePlugin {
         if (reloadButton == null) {
             reloadButton = new JButton();
             reloadButton.setText("Reload");
+            reloadButton.setToolTipText("Reload display");
             reloadButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     populateGUI();

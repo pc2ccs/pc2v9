@@ -330,6 +330,7 @@ public class AutoJudgesPane extends JPanePlugin {
         if (editButton == null) {
             editButton = new JButton();
             editButton.setText("Edit");
+            editButton.setToolTipText("Edit selected judges Auto Judge settings");
             editButton.setEnabled(true);
             editButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {

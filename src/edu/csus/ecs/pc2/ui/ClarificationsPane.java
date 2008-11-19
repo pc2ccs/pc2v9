@@ -704,6 +704,7 @@ public class ClarificationsPane extends JPanePlugin {
         if (giveButton == null) {
             giveButton = new JButton();
             giveButton.setText("Give");
+            giveButton.setToolTipText("Give the selected Clarification back to Judges");
             giveButton.setMnemonic(java.awt.event.KeyEvent.VK_G);
             giveButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -724,6 +725,7 @@ public class ClarificationsPane extends JPanePlugin {
         if (takeButton == null) {
             takeButton = new JButton();
             takeButton.setText("Take");
+            takeButton.setToolTipText("Take the selected Clarification back from the Judges");
             takeButton.setMnemonic(java.awt.event.KeyEvent.VK_T);
             takeButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -744,6 +746,7 @@ public class ClarificationsPane extends JPanePlugin {
         if (editButton == null) {
             editButton = new JButton();
             editButton.setText("Edit");
+            editButton.setToolTipText("Edit the selected Clarification");
             editButton.setMnemonic(java.awt.event.KeyEvent.VK_E);
             editButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -764,6 +767,7 @@ public class ClarificationsPane extends JPanePlugin {
         if (generateClarificationButton == null) {
             generateClarificationButton = new JButton();
             generateClarificationButton.setText("Generate New Clar");
+            generateClarificationButton.setToolTipText("Generate a New Clarification");
             generateClarificationButton.setMnemonic(java.awt.event.KeyEvent.VK_N);
             generateClarificationButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -784,6 +788,7 @@ public class ClarificationsPane extends JPanePlugin {
         if (filterButton == null) {
             filterButton = new JButton();
             filterButton.setText("Filter");
+            filterButton.setToolTipText("Edit Filter");
             filterButton.setVisible(true);
             filterButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -936,6 +941,7 @@ public class ClarificationsPane extends JPanePlugin {
         if (requestButton == null) {
             requestButton = new JButton();
             requestButton.setText("Answer");
+            requestButton.setToolTipText("Answer the selected Clarification");
             requestButton.setMnemonic(java.awt.event.KeyEvent.VK_A);
             requestButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {

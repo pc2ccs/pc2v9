@@ -221,6 +221,7 @@ public class ConnectionsPane extends JPanePlugin {
         if (disconnectButton == null) {
             disconnectButton = new JButton();
             disconnectButton.setText("Disconnect");
+            disconnectButton.setToolTipText("Disconnect the selected connection");
             disconnectButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     logoffConnection();

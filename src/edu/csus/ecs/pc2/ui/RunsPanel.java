@@ -914,6 +914,7 @@ public class RunsPanel extends JPanePlugin {
         if (requestRunButton == null) {
             requestRunButton = new JButton();
             requestRunButton.setText("Request Run");
+            requestRunButton.setToolTipText("Request the selected Run for Judging");
             requestRunButton.setMnemonic(java.awt.event.KeyEvent.VK_R);
             requestRunButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -1013,6 +1014,7 @@ public class RunsPanel extends JPanePlugin {
         if (filterButton == null) {
             filterButton = new JButton();
             filterButton.setText("Filter");
+            filterButton.setToolTipText("Edit Filter");
             filterButton.setMnemonic(java.awt.event.KeyEvent.VK_F);
             filterButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -1047,6 +1049,7 @@ public class RunsPanel extends JPanePlugin {
         if (editRunButton == null) {
             editRunButton = new JButton();
             editRunButton.setText("Edit");
+            editRunButton.setToolTipText("Edit the selected Run");
             editRunButton.setMnemonic(java.awt.event.KeyEvent.VK_E);
             editRunButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -1203,6 +1206,7 @@ public class RunsPanel extends JPanePlugin {
         if (giveButton == null) {
             giveButton = new JButton();
             giveButton.setText("Give");
+            giveButton.setToolTipText("Give the selected Run back to Judges");
             giveButton.setMnemonic(java.awt.event.KeyEvent.VK_G);
             giveButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -1250,6 +1254,7 @@ public class RunsPanel extends JPanePlugin {
         if (takeButton == null) {
             takeButton = new JButton();
             takeButton.setText("Take");
+            takeButton.setToolTipText("Take the selected Run from the Judges");
             takeButton.setMnemonic(java.awt.event.KeyEvent.VK_T);
             takeButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -1270,6 +1275,7 @@ public class RunsPanel extends JPanePlugin {
         if (rejudgeRunButton == null) {
             rejudgeRunButton = new JButton();
             rejudgeRunButton.setText("Rejudge");
+            rejudgeRunButton.setToolTipText("Rejudge the selected Run");
             rejudgeRunButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     rejudgeSelectedRun();
@@ -1288,6 +1294,7 @@ public class RunsPanel extends JPanePlugin {
         if (viewJudgementsButton == null) {
             viewJudgementsButton = new JButton();
             viewJudgementsButton.setText("View Judgements");
+            viewJudgementsButton.setToolTipText("View Judgements for the selected Run");
             viewJudgementsButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     viewSelectedRunJudgements();
@@ -1524,6 +1531,7 @@ public class RunsPanel extends JPanePlugin {
         if (autoJudgeButton == null) {
             autoJudgeButton = new JButton();
             autoJudgeButton.setText("Auto Judge");
+            autoJudgeButton.setToolTipText("Enable Auto Judging");
             autoJudgeButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     // Turn auto judging on

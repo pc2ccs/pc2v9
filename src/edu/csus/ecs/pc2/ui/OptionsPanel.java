@@ -230,6 +230,7 @@ public class OptionsPanel extends JPanePlugin {
         if (showLogButton == null) {
             showLogButton = new JButton();
             showLogButton.setText("Show Log");
+            showLogButton.setText("Show PC^2 Log");
             showLogButton.setMnemonic(java.awt.event.KeyEvent.VK_L);
             showLogButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -249,6 +250,7 @@ public class OptionsPanel extends JPanePlugin {
         if (showBiffWindow == null) {
             showBiffWindow = new JButton();
             showBiffWindow.setText("Show Unjudged Submissions Count");
+            showBiffWindow.setToolTipText("Show Unjudged Submissions Count");
             showBiffWindow.setMnemonic(java.awt.event.KeyEvent.VK_U);
             showBiffWindow.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -272,6 +274,7 @@ public class OptionsPanel extends JPanePlugin {
         if (showSecurityAlertWindowButton == null) {
             showSecurityAlertWindowButton = new JButton();
             showSecurityAlertWindowButton.setText("Show Security Alert Log");
+            showSecurityAlertWindowButton.setToolTipText("Show Security Alert Log");
             showSecurityAlertWindowButton.setMnemonic(java.awt.event.KeyEvent.VK_S);
             showSecurityAlertWindowButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -322,6 +325,7 @@ public class OptionsPanel extends JPanePlugin {
         if (changePasswordButton == null) {
             changePasswordButton = new JButton();
             changePasswordButton.setText("Change Password");
+            changePasswordButton.setToolTipText("Click here to change your password");
             changePasswordButton.setMnemonic(java.awt.event.KeyEvent.VK_P);
             changePasswordButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {

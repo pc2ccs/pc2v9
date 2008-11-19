@@ -291,6 +291,7 @@ public class JudgeView extends JFrame implements UIPlugin {
         if (exitButton == null) {
             exitButton = new JButton();
             exitButton.setText("Exit");
+            exitButton.setToolTipText("Click here to Shutdown PC^2");
             exitButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     promptAndExit();

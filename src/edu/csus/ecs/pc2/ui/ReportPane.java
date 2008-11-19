@@ -264,6 +264,7 @@ public class ReportPane extends JPanePlugin {
         if (viewReportButton == null) {
             viewReportButton = new JButton();
             viewReportButton.setText("View Report");
+            viewReportButton.setToolTipText("View the selected Report");
             viewReportButton.setMnemonic(java.awt.event.KeyEvent.VK_V);
             viewReportButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -476,6 +477,7 @@ public class ReportPane extends JPanePlugin {
         if (editReportFilter == null) {
             editReportFilter = new JButton();
             editReportFilter.setText("Edit Filter");
+            editReportFilter.setToolTipText("Edit Filter");
             editReportFilter.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     showReportFilter();

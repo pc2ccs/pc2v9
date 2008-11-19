@@ -233,6 +233,7 @@ public class BalloonSettingsPane extends JPanePlugin {
         if (addButton == null) {
             addButton = new JButton();
             addButton.setText("Add");
+            addButton.setToolTipText("Add new notification settings for a site");
             addButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     addBalloonSettings();
@@ -279,6 +280,7 @@ public class BalloonSettingsPane extends JPanePlugin {
         if (editButton == null) {
             editButton = new JButton();
             editButton.setText("Edit");
+            editButton.setToolTipText("Edit existing site settings");
             editButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     editSelectedBalloonSettings();
@@ -377,6 +379,7 @@ public class BalloonSettingsPane extends JPanePlugin {
         if (copyButton == null) {
             copyButton = new JButton();
             copyButton.setText("Copy");
+            copyButton.setToolTipText("Copy settings from an existing site to a new site");
             copyButton.setActionCommand("Copy");
             copyButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {

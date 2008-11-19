@@ -620,6 +620,7 @@ public class RunPane extends JPanePlugin {
         if (extractButton == null) {
             extractButton = new JButton();
             extractButton.setText("Extract");
+            extractButton.setToolTipText("Extract Run contents");
             extractButton.setMnemonic(java.awt.event.KeyEvent.VK_T);
             extractButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {

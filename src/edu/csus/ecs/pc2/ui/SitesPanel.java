@@ -586,6 +586,7 @@ public class SitesPanel extends JPanePlugin {
         if (reconnectButton == null) {
             reconnectButton = new JButton();
             reconnectButton.setText("Reconnect");
+            reconnectButton.setToolTipText("Reconnect the selected site");
             reconnectButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     reconnectToSelectedSite();

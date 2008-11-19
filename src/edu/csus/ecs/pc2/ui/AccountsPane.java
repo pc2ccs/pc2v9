@@ -587,6 +587,7 @@ public class AccountsPane extends JPanePlugin {
         if (generateAccountsButton == null) {
             generateAccountsButton = new JButton();
             generateAccountsButton.setText("Generate");
+            generateAccountsButton.setToolTipText("Generate multiple new accounts");
             generateAccountsButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     generateAccountsFrame.setVisible(true);
