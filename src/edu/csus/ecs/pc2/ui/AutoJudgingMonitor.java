@@ -344,6 +344,10 @@ public class AutoJudgingMonitor implements UIPlugin {
 
                 // Or perhaps it is a yes? yes?
                 Judgement yesJudgement = contest.getJudgements()[0];
+                // bug 280 ICPC Validator Interface Standard calls for "accepted" in any case.
+                if (results.trim().equalsIgnoreCase("accepted")) {
+                    results = yesJudgement.getDisplayName();
+                }
                 if (yesJudgement.getDisplayName().equalsIgnoreCase(results)) {
                     elementId = yesJudgement.getElementId();
                     solved = true;
