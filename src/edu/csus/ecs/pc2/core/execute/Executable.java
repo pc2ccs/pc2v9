@@ -630,7 +630,8 @@ public class Executable {
                 Hashtable<String, String> results = parser.getResults();
 
                 if (done && results != null && results.containsKey("outcome")) {
-                    if (problem.isInternationalJudgementReadMethod() || (results.containsKey("security") && resultsFileName.equals(results.get("security")))) {
+                    // non-IJRM does not require security, but if it is IJRM it better have security.
+                    if (!problem.isInternationalJudgementReadMethod() || (results.containsKey("security") && resultsFileName.equals(results.get("security")))) {
                         // Found the string
                         executionData.setValidationResults(results.get("outcome"));
                         executionData.setValidationSuccess(true);
