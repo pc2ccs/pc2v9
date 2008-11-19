@@ -41,7 +41,7 @@ public class ICPCAccountFrame extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(549, 1200));
+        this.setSize(new java.awt.Dimension(800, 1200));
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setContentPane(getICPCAccountPane());
         this.setTitle("ICPC Accounts");
