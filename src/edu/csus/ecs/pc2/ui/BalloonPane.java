@@ -520,11 +520,15 @@ public class BalloonPane extends JPanePlugin {
                 String key = balloonHandler.getBalloonKey(run.getSubmitter(), run.getProblemId()); 
                 goodBalloons.put(key, Long.valueOf(0));
                 if (!balloonHandler.hasBalloonBeenSent(key)) { // no balloon has been sent
-                    if (sendBalloon(balloonHandler.buildBalloon("yes", run.getSubmitter(), run.getProblemId(), run))) {
-                        sentBalloonFor(key, run.getSubmitter(), run.getProblemId());
+                    if (run.isSendToTeams()) {
+                        if (sendBalloon(balloonHandler.buildBalloon("yes", run.getSubmitter(), run.getProblemId(), run))) {
+                            sentBalloonFor(key, run.getSubmitter(), run.getProblemId());
+                        } else {
+                            // TODO error sending balloon
+                            log.info("Problem sending balloon to " + run.getSubmitter().getTripletKey() + " for " + run.getProblemId());
+                        }
                     } else {
-                        // TODO error sending balloon
-                        log.info("Problem sending balloon to " + run.getSubmitter().getTripletKey() + " for " + run.getProblemId());
+                        log.info("Run not sent to team, not sending balloon to "+ run.getSubmitter().getTripletKey() + " for " + run.getProblemId());
                     }
                 }
             }
