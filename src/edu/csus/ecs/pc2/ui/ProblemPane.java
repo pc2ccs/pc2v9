@@ -856,10 +856,10 @@ public class ProblemPane extends JPanePlugin {
                 useNOValidatatorRadioButton.setSelected(true);
             }
 
-            getValidatorCommandLineTextBox().setText(problem.getValidatorCommandLine());
-            getShowValidatorToJudges().setSelected(problem.isShowValidationToJudges());
-            getDoShowOutputWindowCheckBox().setSelected(!problem.isHideOutputWindow());
-            getShowCompareCheckBox().setSelected(problem.isShowCompareWindow());
+            getValidatorCommandLineTextBox().setText(inProblem.getValidatorCommandLine());
+            getShowValidatorToJudges().setSelected(inProblem.isShowValidationToJudges());
+            getDoShowOutputWindowCheckBox().setSelected(!inProblem.isHideOutputWindow());
+            getShowCompareCheckBox().setSelected(inProblem.isShowCompareWindow());
             getShowCompareCheckBox().setEnabled(getDoShowOutputWindowCheckBox().isSelected());
             
             try {
