@@ -901,6 +901,7 @@ public class ProblemPane extends JPanePlugin {
             getShowValidatorToJudges().setSelected(true);
             getDoShowOutputWindowCheckBox().setSelected(true);
             getShowCompareCheckBox().setSelected(true);
+            getShowCompareCheckBox().setEnabled(getDoShowOutputWindowCheckBox().isSelected());
 
             populateJudging(null);
         }
