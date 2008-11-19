@@ -2,10 +2,12 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.util.Arrays;
 import java.util.Vector;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
@@ -13,6 +15,7 @@ import com.ibm.webrunner.j2mclb.util.HeapSorter;
 import com.ibm.webrunner.j2mclb.util.NumericStringComparator;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.BalloonSettings;
@@ -21,6 +24,7 @@ import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IBalloonSettingsListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.security.Permission.Type;
 
 /**
@@ -53,6 +57,8 @@ public class BalloonSettingsPane extends JPanePlugin {
     private Log log = null;
 
     private EditBalloonSettingsFrame editBalloonSettingsFrame = null;
+
+    private JButton copyButton = null;
 
     /**
      * This method initializes
@@ -96,6 +102,7 @@ public class BalloonSettingsPane extends JPanePlugin {
             balloonSettingsButtonPane.setLayout(flowLayout);
             balloonSettingsButtonPane.setPreferredSize(new java.awt.Dimension(35, 35));
             balloonSettingsButtonPane.add(getAddButton(), null);
+            balloonSettingsButtonPane.add(getCopyButton(), null);
             balloonSettingsButtonPane.add(getEditButton(), null);
         }
         return balloonSettingsButtonPane;
@@ -320,10 +327,13 @@ public class BalloonSettingsPane extends JPanePlugin {
     }
 
     private void showMessage(final String string) {
+        if (string.trim().length() == 0) {
+            return;
+        }
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                messageLabel.setText(string);
+                JOptionPane.showMessageDialog(getParentFrame(), string, "Warning", JOptionPane.WARNING_MESSAGE);
             }
         });
     }
@@ -356,6 +366,82 @@ public class BalloonSettingsPane extends JPanePlugin {
             // TODO remove balloon setting
             log.info("debug BalloonSettings REMOVED  " + event.getBalloonSettings());
         }
+    }
+
+    /**
+     * This method initializes copyButton
+     *
+     * @return javax.swing.JButton
+     */
+    private JButton getCopyButton() {
+        if (copyButton == null) {
+            copyButton = new JButton();
+            copyButton.setText("Copy");
+            copyButton.setActionCommand("Copy");
+            copyButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    copySelectedBalloonSettings();
+                }
+            });
+        }
+        return copyButton;
+    }
+
+    protected void copySelectedBalloonSettings() {
+        int rowCount = balloonSettingsListBox.getRowCount();
+        int siteCount = getContest().getSites().length;
+        if (rowCount == siteCount) {
+            showMessage("No available destination sites, please use edit instead.");
+            return;
+        }
+        int selectedIndex = balloonSettingsListBox.getSelectedIndex();
+        if (selectedIndex == -1) {
+            showMessage("Select a balloonSettings to copy");
+            return;
+        }
+
+        try {
+            // would be nice to select the new row, but this will do
+            balloonSettingsListBox.deselectAllRows();
+            ElementId elementId = (ElementId) balloonSettingsListBox.getKeys()[selectedIndex];
+            BalloonSettings sourceBalloonSettings = getContest().getBalloonSettings(elementId);
+            Site newSite = promptForSite(sourceBalloonSettings.getSiteNumber());
+            if (newSite == null) {
+                showMessage("Copy Aborted.");
+            } else {
+                BalloonSettings balloonSettingsToEdit = sourceBalloonSettings.copy(newSite);
+                getController().updateBalloonSettings(balloonSettingsToEdit);
+                editBalloonSettingsFrame.setBalloonSettings(balloonSettingsToEdit);
+                editBalloonSettingsFrame.setVisible(true);
+            }
+        } catch (Exception e) {
+            log.log(Log.WARNING, "Exception logged ", e);
+            showMessage("Unable to clone balloonSettings, check log");
+        }
+    }
+
+    private Site promptForSite(int siteNumber) {
+        Site[] sites = getContest().getSites();
+        Arrays.sort(sites, new SiteComparatorBySiteNumber());
+        Vector<Site> dest = new Vector<Site>();
+        for (Site site : sites) {
+            // do not allow them to copy balloonSettings to a site with settings already
+            if (getContest().getBalloonSettings(site.getSiteNumber()) != null) {
+                continue;
+            } else {
+                dest.add(site);
+            }
+        }
+        Site s = (Site)JOptionPane.showInputDialog(
+                this,
+                "Copying from site "+siteNumber+" to:\n",
+                "Copy Destination Dialog",
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                dest.toArray(new Site[dest.size()]),
+                null);
+
+        return s;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
