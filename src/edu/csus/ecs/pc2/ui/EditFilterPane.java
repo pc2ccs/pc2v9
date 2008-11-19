@@ -830,6 +830,7 @@ public class EditFilterPane extends JPanePlugin {
     private JTextField getToTimeTextField() {
         if (toTimeTextField == null) {
             toTimeTextField = new JTextField();
+            toTimeTextField.setDocument(new IntegerDocument());
             toTimeTextField.setPreferredSize(new java.awt.Dimension(60, 20));
         }
         return toTimeTextField;
