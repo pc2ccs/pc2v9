@@ -173,7 +173,7 @@ public class OldRunsReport implements IReport {
     }
 
     public String getReportTitle() {
-        return "Runs (Version 8)";
+        return "Runs (Version 8 content and format)";
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
