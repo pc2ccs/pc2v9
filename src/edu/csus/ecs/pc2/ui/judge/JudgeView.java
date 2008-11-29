@@ -25,6 +25,7 @@ import edu.csus.ecs.pc2.ui.LogWindow;
 import edu.csus.ecs.pc2.ui.OptionsPanel;
 import edu.csus.ecs.pc2.ui.RunsPanel;
 import edu.csus.ecs.pc2.ui.SubmissionBiffPane;
+import edu.csus.ecs.pc2.ui.SubmitClarificationPane;
 import edu.csus.ecs.pc2.ui.SubmitRunPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay.DisplayTimes;
@@ -197,6 +198,9 @@ public class JudgeView extends JFrame implements UIPlugin {
 
                 SubmitRunPane submitRunPane = new SubmitRunPane();
                 addUIPlugin(getMainTabbedPane(), "Test Run", submitRunPane);
+                
+                SubmitClarificationPane submitClarificationPane = new SubmitClarificationPane();
+                addUIPlugin(getMainTabbedPane(), "Generate Clarification", submitClarificationPane);
 
                 OptionsPanel optionsPanel = new OptionsPanel();
                 addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
