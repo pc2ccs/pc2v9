@@ -1,5 +1,8 @@
 package edu.csus.ecs.pc2.ui;
 
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
+
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -67,6 +70,8 @@ public class AutoJudgingMonitor implements UIPlugin {
     private boolean autoJudgeDisabledLocally = false;
 
     private boolean answerReceived = false;
+
+    private GregorianCalendar startTimeCalendar;
 
     // private edu.csus.ecs.pc2.ui.AutoJudgingMonitor.FetchRunListenerImplemenation fetchRunListenerImplemenation;
 
@@ -228,6 +233,9 @@ public class AutoJudgingMonitor implements UIPlugin {
                 // found the run we requested
 
                 if (fetchedRun == null) {
+                    // start the time to judge
+                    TimeZone tz = TimeZone.getTimeZone("GMT");
+                    startTimeCalendar = new GregorianCalendar(tz);
                     fetchedRunFiles = event.getRunFiles();
                     fetchedRun = event.getRun();
 
@@ -406,6 +414,13 @@ public class AutoJudgingMonitor implements UIPlugin {
             info("Sending judgement to server " + fetchedRun);
             autoJudgeStatusFrame.updateStatusLabel("Sending judgement to server");
 
+            TimeZone tz = TimeZone.getTimeZone("GMT");
+            GregorianCalendar cal = new GregorianCalendar(tz);
+
+            long milliDiff = cal.getTime().getTime() - startTimeCalendar.getTime().getTime();
+            long totalSeconds = milliDiff / 1000;
+            judgementRecord.setHowLongToJudgeInSeconds(totalSeconds);
+
             runResultFiles = new RunResultFiles(fetchedRun, fetchedRun.getProblemId(), judgementRecord, executable.getExecutionData());
 
             controller.submitRunJudgement(fetchedRun, judgementRecord, runResultFiles);
@@ -466,6 +481,7 @@ public class AutoJudgingMonitor implements UIPlugin {
         autoJudgeStatusFrame.updateStatusLabel("Fetching Run " + run.getNumber() + " (Site " + run.getSiteNumber() + ")");
         autoJudgeStatusFrame.updateMessage(getRunDescription(run));
 
+        startTimeCalendar = null;
         controller.checkOutRun(run, false, true);
 
         answerReceived = false;
