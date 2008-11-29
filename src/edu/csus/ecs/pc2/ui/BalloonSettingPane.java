@@ -265,7 +265,7 @@ public class BalloonSettingPane extends JPanePlugin {
         // XXX should this Exception  be in the above null check?
         if (getBalloonClientComboBox().getSelectedIndex() == 0) {
             // select user
-            new InvalidFieldValue("Invalid balloon user selected.");
+            new InvalidFieldValue("Invalid notification user selected.");
         } else {
             checkBalloonSettings.setBalloonClient((ClientId)getBalloonClientComboBox().getSelectedItem());
         }
@@ -361,7 +361,7 @@ public class BalloonSettingPane extends JPanePlugin {
         }
 
         if (getBalloonClientComboBox().getSelectedIndex() < 1) {
-            showMessage("You must specify a Balloon Client");
+            showMessage("You must specify a notification Client");
             return false;
         }
 
@@ -411,7 +411,7 @@ public class BalloonSettingPane extends JPanePlugin {
 
             // Something changed, are they sure ?
 
-            int result = FrameUtilities.yesNoCancelDialog(getParentFrame(), "BalloonSettings modified, save changes?", "Confirm Choice");
+            int result = FrameUtilities.yesNoCancelDialog(getParentFrame(), "Notification Settings modified, save changes?", "Confirm Choice");
 
             if (result == JOptionPane.YES_OPTION) {
                 if (getAddButton().isVisible()) {

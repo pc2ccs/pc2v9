@@ -267,7 +267,7 @@ public class BalloonSettingsPane extends JPanePlugin {
             editBalloonSettingsFrame.setBalloonSettings(null);
             editBalloonSettingsFrame.setVisible(true);
         } else {
-            FrameUtilities.showMessage(getParentFrame(), "ERROR", "No accounts have permission to send a balloon, have you created a scoreboard account?");
+            FrameUtilities.showMessage(getParentFrame(), "ERROR", "No accounts have permission to send a notification, have you created a scoreboard account?");
         }
     }
 
@@ -294,7 +294,7 @@ public class BalloonSettingsPane extends JPanePlugin {
 
         int selectedIndex = balloonSettingsListBox.getSelectedIndex();
         if (selectedIndex == -1) {
-            showMessage("Select a balloonSettings to edit");
+            showMessage("Select a notification setting to edit");
             return;
         }
 
@@ -306,7 +306,7 @@ public class BalloonSettingsPane extends JPanePlugin {
             editBalloonSettingsFrame.setVisible(true);
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception logged ", e);
-            showMessage("Unable to edit balloonSettings, check log");
+            showMessage("Unable to edit notification settings, check log");
         }
     }
 
@@ -419,7 +419,7 @@ public class BalloonSettingsPane extends JPanePlugin {
             }
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception logged ", e);
-            showMessage("Unable to clone balloonSettings, check log");
+            showMessage("Unable to clone notification settings, check log");
         }
     }
 

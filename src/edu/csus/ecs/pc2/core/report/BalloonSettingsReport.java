@@ -120,7 +120,7 @@ public class BalloonSettingsReport implements IReport {
     }
 
     public String getReportTitle() {
-        return "Balloon Settings";
+        return "Notification Settings";
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
@@ -130,7 +130,7 @@ public class BalloonSettingsReport implements IReport {
     }
 
     public String getPluginTitle() {
-        return "Balloon Settings Report";
+        return "Notification Settings Report";
     }
     
     public Filter getFilter() {
