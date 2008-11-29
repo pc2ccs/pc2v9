@@ -10,6 +10,7 @@ import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
@@ -21,6 +22,7 @@ import edu.csus.ecs.pc2.core.model.ProblemEvent;
 /**
  * Submit Clarification Pane.
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
@@ -197,9 +199,12 @@ public class SubmitClarificationPane extends JPanePlugin {
             showMessage("Please enter a question");
             return;
         }
-
-        // TODO replace with clarification confirmation 
-        int result = FrameUtilities.yesNoCancelDialog(getParentFrame(), "Submit Clarification?", "Submit Clarification Confirm");
+        
+        String confirmQuestion = "<HTML><FONT SIZE=+1>Do you wish to submit a clarification for<BR><BR>" + "Problem:  <FONT COLOR=BLUE>" + Utilities.forHTML(problem.toString()) + "</FONT><BR><BR>"
+        + "Question: <FONT COLOR=BLUE>" + Utilities.forHTML(question)
+        + "</FONT><BR><BR></FONT>";
+        
+        int result = FrameUtilities.yesNoCancelDialog(getParentFrame(), confirmQuestion, "Submit Clarification Confirm");
 
         if (result != JOptionPane.YES_OPTION) {
             return;
