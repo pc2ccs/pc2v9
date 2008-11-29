@@ -155,7 +155,7 @@ public class ViewJudgementsPane extends JPanePlugin implements UIPlugin {
         column[3] = yesNoString(judgementRecord.isActive());
         column[4] = "" + inRun.getElapsedMins();
         column[5] = "" + judgementRecord.getWhenJudgedTime();
-        column[6] = (judgementRecord.getHowLongToJudgeInSeconds() / 1000) + "s";
+        column[6] = judgementRecord.getHowLongToJudgeInSeconds() + "s";
 
         if (judgementRecord.getCommentForTeam() != null) {
             column[7] = judgementRecord.getCommentForTeam().getComment();
