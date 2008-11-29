@@ -5,6 +5,8 @@ import java.awt.Color;
 import java.awt.FlowLayout;
 import java.io.File;
 import java.io.IOException;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -150,6 +152,8 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     private JLabel selectJudgementCheckboxLabel = null;
 
     private JButton viewOutputsButton = null;
+
+    private GregorianCalendar startTimeCalendar;
 
     /**
      * This method initializes
@@ -348,7 +352,12 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
             judgementRecord = new JudgementRecord(judgement.getElementId(), getContest().getClientId(), solved, false);
             judgementRecord.setSendToTeam(getNotifyTeamCheckBox().isSelected());
+            TimeZone tz = TimeZone.getTimeZone("GMT");
+            GregorianCalendar cal = new GregorianCalendar(tz);
 
+            long milliDiff = cal.getTime().getTime() - startTimeCalendar.getTime().getTime();
+            long totalSeconds = milliDiff / 1000;
+            judgementRecord.setHowLongToJudgeInSeconds(totalSeconds);
         }
 
         JudgeView.setAlreadyJudgingRun(false);
@@ -434,7 +443,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         displayTeamName.setTeamDisplayMask(contestInformation.getTeamDisplayMode());
 
         this.run = run;
-
+        startTimeCalendar = null; // time does not start until we get the run checkout
         showMessage("Waiting for run...");
         FrameUtilities.waitCursor(this);
 
@@ -920,6 +929,10 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         showMessage("");
         log.info("Fetched run " + theRun + " to edit");
 
+        // start the time to judge
+        TimeZone tz = TimeZone.getTimeZone("GMT");
+        startTimeCalendar = new GregorianCalendar(tz);
+
         run = theRun;
         runFiles = runFiles2;
         runResultFiles = theRunResultFiles;
@@ -1159,6 +1172,12 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         judgementRecord.setValidatorResultString(results);
 
         judgementRecord.setSendToTeam(getNotifyTeamCheckBox().isSelected());
+        TimeZone tz = TimeZone.getTimeZone("GMT");
+        GregorianCalendar cal = new GregorianCalendar(tz);
+
+        long milliDiff = cal.getTime().getTime() - startTimeCalendar.getTime().getTime();
+        long totalSeconds = milliDiff / 1000;
+        judgementRecord.setHowLongToJudgeInSeconds(totalSeconds);
 
         JudgeView.setAlreadyJudgingRun(false);
 
