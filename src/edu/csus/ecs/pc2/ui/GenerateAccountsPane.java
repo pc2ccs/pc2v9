@@ -122,14 +122,16 @@ public class GenerateAccountsPane extends JPanePlugin {
                 Site[] sites = getContest().getSites();
                 Arrays.sort(sites, new SiteComparatorBySiteNumber());
                 for (int i = 0; i < sites.length; i++) {
+                    Site newSite;
                     if (sites[i].getSiteNumber() == getContest().getSiteNumber()) {
-                        Site newSite = new Site(sites[i].getDisplayName() + " (This Site)", getContest().getSiteNumber());
-                        sites[i] = newSite;
-                        if (selectedIndex == -1) {
+                        newSite = new Site(sites[i].getDisplayName() + " (Site "+sites[i].getSiteNumber()+", This Site)", getContest().getSiteNumber());
+                        if (selectedIndex == -1) {  // default to local site
                             selectedIndex = i;
                         }
+                    } else {
+                        newSite = new Site(sites[i].getDisplayName() + " (Site "+sites[i].getSiteNumber()+")", sites[i].getSiteNumber());
                     }
-                    getSiteSelectionComboBox().addItem(sites[i]);
+                    getSiteSelectionComboBox().addItem(newSite);
                 }
 
                 if (selectedIndex != -1) {
