@@ -29,7 +29,9 @@ import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IClientSettingsListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.IProblemListener;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.ProblemEvent;
 
 /**
  * A grid of auto judging settings.
@@ -92,7 +94,7 @@ public class AutoJudgesPane extends JPanePlugin {
         editAutoJudgeSettingFrame.setContestAndController(inContest, inController);
 
         getContest().addClientSettingsListener(new ClientSettingsListenerImplementation());
-        
+        getContest().addProblemListener(new ProblemListenerImplementation());
         getContest().addAccountListener(new AccountListenerImplementation());
 
         SwingUtilities.invokeLater(new Runnable() {
@@ -457,6 +459,32 @@ public class AutoJudgesPane extends JPanePlugin {
         }
         
     }
+    
+    /**
+     * Problem Listener for Auto Judges Pane.
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     * 
+     */
+    public class ProblemListenerImplementation implements IProblemListener {
+
+        public void problemAdded(ProblemEvent event) {
+            // ignore does not affect this pane
+        }
+
+        public void problemChanged(ProblemEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadAutoJudgeList();
+                }
+            });
+        }
+
+        public void problemRemoved(ProblemEvent event) {
+            // ignore does not affect this pane
+        }
+    }
+
 
 } // @jve:decl-index=0:visual-constraint="10,10"
 
