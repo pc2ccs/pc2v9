@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.ui;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -16,11 +17,10 @@ import edu.csus.ecs.pc2.ui.judge.JudgeView;
  * Judge can chose judgement and execute run.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
-// $Id$
-
 public class SelectJudgementFrame extends JFrame implements UIPlugin {
 
     /**
@@ -99,9 +99,10 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
     }
 
     /**
-     * 
+     * Run Listener for SelectJudgementFrame.
      * 
      * @author pc2@ecs.csus.edu
+     * @version $Id$
      */
 
     // $HeadURL$
@@ -121,14 +122,16 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
                     // RUN_NOT_AVIALABLE is undirected (sentToClient is null)
                     if (event.getAction().equals(Action.RUN_NOT_AVIALABLE)) {
                         getSelectJudgementPane().setRun(run);
-                        getSelectJudgementPane().showMessage("Run " + run.getNumber() + " is not available ");
+                        getSelectJudgementPane().regularCursor();
+                        JOptionPane.showMessageDialog(null, "Run " + run.getNumber() + " (Site " + run.getSiteNumber() + ") is not available.");
+
                         SwingUtilities.invokeLater(new Runnable() {
                             public void run() {
                                 getSelectJudgementPane().enableUpdateButtons(false);
                             }
                         });
-                        getSelectJudgementPane().regularCursor();
                         JudgeView.setAlreadyJudgingRun(false);
+                        setVisible(false);
                     } else {
                         if (event.getSentToClientId() != null && event.getSentToClientId().equals(contest.getClientId())) {
                             
