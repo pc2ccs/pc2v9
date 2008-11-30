@@ -37,6 +37,8 @@ public class SubmissionBiffPane extends JPanePlugin {
 
     private Filter newSubmissionFilter = new Filter();
 
+    private boolean showNoRunsTitle = false;
+
     /**
      * This method initializes
      * 
@@ -69,12 +71,16 @@ public class SubmissionBiffPane extends JPanePlugin {
             updateString = unjudgedRunsCount + " Run";
         } else if (unjudgedRunsCount > 1) {
             updateString = unjudgedRunsCount + " Runs";
-        }
+        } 
 
         if (unansweredClarificationsCount == 1) {
             updateString = updateString + "   " + unansweredClarificationsCount + " Clar";
         } else if (unansweredClarificationsCount > 1) {
             updateString = updateString + "   " + unansweredClarificationsCount + " Clars";
+        }
+        
+        if (updateString.trim().length() == 0 && showNoRunsTitle){
+            updateString = "-";
         }
 
         updateMessage(updateString);
@@ -195,6 +201,19 @@ public class SubmissionBiffPane extends JPanePlugin {
     
     public void setFontSize (int pointSize){
         runAndClarCountsLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, pointSize));
+    }
+
+    public boolean isShowNoRunsTitle() {
+        return showNoRunsTitle;
+    }
+    
+    /**
+     * If there are no runs and clars show No runs.
+     * 
+     * @param showNoRunsTitle if true show No Runs if not runs nor clars
+     */
+    public void setShowNoRunsTitle(boolean showNoRunsTitle) {
+        this.showNoRunsTitle = showNoRunsTitle;
     }
 
 }

@@ -124,9 +124,10 @@ public class OptionsPanel extends JPanePlugin {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 
+                submissionBiffFrame.setShowNoRunsTitle(true);
+                submissionBiffFrame.setFontSize(56);
                 submissionBiffFrame.setContestAndController(getContest(), getController());
                 FrameUtilities.setFramePosition(submissionBiffFrame, HorizontalPosition.RIGHT, VerticalPosition.TOP);
-                submissionBiffFrame.setFontSize(56);
                 
                 getContest().addSecurityMessageListener(new SecurityMessageListenerImplementation());
                 

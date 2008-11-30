@@ -61,8 +61,7 @@ public class SubmissionBiffFrame extends JFrame implements UIPlugin {
     }
 
     public String getPluginTitle() {
-        // TODO Auto-generated method stub
-        return null;
+        return "Submission Biff";
     }
 
     /**
@@ -80,6 +79,14 @@ public class SubmissionBiffFrame extends JFrame implements UIPlugin {
     public void setFontSize (int pointSize){
         getSubmissionBiffPane().setFontSize(pointSize);
     }
-
+    
+    /**
+     * If there are no runs and clars show No runs.
+     * 
+     * @param showNoRunsTitle if true show No Runs if not runs nor clars
+     */
+    public void setShowNoRunsTitle(boolean showNoRunsTitle) {
+        getSubmissionBiffPane().setShowNoRunsTitle(showNoRunsTitle);
+    }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
