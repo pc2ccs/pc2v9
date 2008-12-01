@@ -852,6 +852,11 @@ public class RunsPanel extends JPanePlugin {
                 if (isAllowed(Permission.Type.EXTRACT_RUNS)){
                     getRunsListBox().setMultipleSelections(true);
                 }
+                // this will do the checking and take us off the AWT thread as needed
+                // check this to prevent the admin has turned off aj message
+                if (isAutoJudgingEnabled()) {
+                    startAutoJudging();
+                }
             }
         });
     }
