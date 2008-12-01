@@ -351,16 +351,22 @@ public class Executable {
 
             outputFile = prefixExecuteDirname(EXECUTE_STDOUT_FILENAME);
             file = new File(outputFile);
+            boolean programGeneratedOutput = false;
             if (file.isFile() && file.length() > 0) {
                 fileViewer.addFilePane("Program output", outputFile);
+                programGeneratedOutput = true;
             }
 
             outputFile = prefixExecuteDirname(EXECUTE_STDERR_FILENAME);
             file = new File(outputFile);
             if (file.isFile() && file.length() > 0) {
                 fileViewer.addFilePane("Program stderr", outputFile);
+                programGeneratedOutput = true;
             }
 
+            if (!programGeneratedOutput) {
+                fileViewer.addTextPane("Program output", "PC2: execution of program did not generate any output");
+            }
             outputFile = prefixExecuteDirname(COMPILER_STDOUT_FILENAME);
             file = new File(outputFile);
             if (file.isFile() && file.length() > 0) {
