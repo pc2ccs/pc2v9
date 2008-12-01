@@ -8,9 +8,9 @@ package edu.csus.ecs.pc2.core;
 
 // $HeadURL$
 
-public class Constants {
+public final class Constants {
 
-    public Constants() {
+    private Constants() {
         super();
     }
     /** Used by Serialized file to specify type of file **/
