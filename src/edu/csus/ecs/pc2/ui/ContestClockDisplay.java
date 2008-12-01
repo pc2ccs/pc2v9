@@ -83,7 +83,6 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
 
     private IInternalController controller;
 
-    @SuppressWarnings("unused")
     private IInternalContest contest;
     
     /**

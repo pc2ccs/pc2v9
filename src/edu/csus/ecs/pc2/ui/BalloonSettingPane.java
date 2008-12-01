@@ -59,7 +59,6 @@ public class BalloonSettingPane extends JPanePlugin {
      */
     private BalloonSettings balloonSettings = null;
 
-    @SuppressWarnings("unused")
     private Log log = null;
 
     private boolean populatingGUI = true;

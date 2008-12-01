@@ -134,7 +134,6 @@ public class ExecuteTimer extends Thread implements
     /**
      * This terminates the process that this timer is working
      */
-    @SuppressWarnings("unused")
     public void btnTerminateActionPerformed(
             java.awt.event.ActionEvent actionEvent) {
 

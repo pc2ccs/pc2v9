@@ -599,7 +599,6 @@ public class MultipleFileViewer extends JFrame implements IFileViewer {
     /**
      * Comment
      */
-    @SuppressWarnings("unused")
     public void compareButtonActionPerformed(java.awt.event.ActionEvent actionEvent) {
         if (judgeOutputFileName == null && teamOutputFileName == null) {
             log.config("compareButtonActionPerformed:  judge and team files are null");

@@ -192,7 +192,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     private static ConnectionHandlerID remoteServerConnectionHandlerID = null;
 
-    @SuppressWarnings("unused")
     private ParseArguments parseArguments = new ParseArguments();
 
     private boolean contactingRemoteServer = true;

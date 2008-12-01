@@ -20,10 +20,8 @@ public class EditBalloonSettingsFrame extends JFrame implements UIPlugin {
      */
     private static final long serialVersionUID = -5032031472446676474L;
 
-    @SuppressWarnings("unused")
     private IInternalContest contest = null;
 
-    @SuppressWarnings("unused")
     private IInternalController controller = null;
 
     private BalloonSettingPane balloonSettingPane = null;

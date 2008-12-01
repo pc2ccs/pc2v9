@@ -39,7 +39,6 @@ public class LoginFrame extends JFrame implements UIPlugin {
      */
     private static final long serialVersionUID = -6389607881992853161L;
     
-    @SuppressWarnings("unused")
     private IInternalContest contest;
     
     private IInternalController controller;

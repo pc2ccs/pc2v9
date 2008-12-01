@@ -47,7 +47,6 @@ public class JudgeView extends JFrame implements UIPlugin {
 
     private IInternalContest contest;
 
-    @SuppressWarnings("unused")
     private IInternalController controller;
 
     private JTabbedPane mainTabbedPane = null;
