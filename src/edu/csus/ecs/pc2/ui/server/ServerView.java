@@ -51,8 +51,6 @@ public class ServerView extends JFrame implements UIPlugin {
 
     private IInternalContest model = null;
 
-    // TODO remove @SuppressWarnings for controller
-    @SuppressWarnings("unused")
     private IInternalController controller = null;
 
     /**
@@ -96,7 +94,7 @@ public class ServerView extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(518, 327));
+        this.setSize(new java.awt.Dimension(518, 400));
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setTitle("Server View");
         this.setContentPane(getMainViewPane());
