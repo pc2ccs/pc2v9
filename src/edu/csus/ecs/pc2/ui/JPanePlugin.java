@@ -16,6 +16,11 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 public abstract class JPanePlugin extends JPanel implements UIPlugin {
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 8555136838892968753L;
+
     private IInternalController controller;
 
     private IInternalContest contest;

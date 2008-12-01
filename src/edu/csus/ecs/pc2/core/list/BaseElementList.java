@@ -22,6 +22,10 @@ public abstract class BaseElementList implements Serializable {
     // No ID string, two reasons, causes compiler warnings, but 
     // more importantly this class is never instanciated.
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1669027887187605463L;
     private Hashtable<String, IElementObject> hash = new Hashtable<String, IElementObject>();
 
     /**
