@@ -94,10 +94,6 @@ public class PacketHandler {
             PacketFactory.dumpPacket(System.out, packet, "handlePacket");
         }
 
-        if (isServer() || isAdministrator()) {
-            PacketFactory.dumpPacket(System.err, packet, "handlePacket");
-        }
-
         ClientId fromId = packet.getSourceId();
 
         Run run;
@@ -2885,11 +2881,6 @@ public class PacketHandler {
      */
     private boolean isServer(ClientId id) {
         return id != null && id.getClientType().equals(ClientType.Type.SERVER);
-    }
-
-    private boolean isAdministrator() {
-        ClientId id = contest.getClientId();
-        return id != null && id.getClientType().equals(ClientType.Type.ADMINISTRATOR);
     }
 
     private boolean isJudge(ClientId id) {
