@@ -51,7 +51,6 @@ public class LogStreamHandler extends StreamHandler {
     
     public void setupStream() {
         setOutputStream(new OutputStream() {
-            @SuppressWarnings("unused")
             public void write(int b) {
             } // not called
 
