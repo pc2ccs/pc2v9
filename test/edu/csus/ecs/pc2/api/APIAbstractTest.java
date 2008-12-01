@@ -20,10 +20,8 @@ public abstract class APIAbstractTest {
 
     private ScrollyFrame scrollyFrame = null;
 
-    @SuppressWarnings("unused")
     private IContest contest = null;
 
-    @SuppressWarnings("unused")
     private ServerConnection serverConnection = null;
 
     public APIAbstractTest() {
