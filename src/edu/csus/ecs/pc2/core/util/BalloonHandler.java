@@ -165,7 +165,7 @@ public class BalloonHandler implements UIPlugin {
         return sentBalloons.get(balloonKey);
     }
 
-    public Enumeration getBalloonDeliveryInfoKeys() {
+    public Enumeration<String> getBalloonDeliveryInfoKeys() {
         return sentBalloons.keys();
     }
     

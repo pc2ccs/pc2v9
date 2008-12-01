@@ -101,7 +101,7 @@ public class Ini {
     public void dump(PrintStream ps) {
         ps.println("Dumping: " + getIniFileURL());
         // String dump=new String("Dumping IniFile");
-        Enumeration enumeration = nameValueHash.keys();
+        Enumeration<String> enumeration = nameValueHash.keys();
         Object key;
         while (enumeration.hasMoreElements()) {
             key = enumeration.nextElement();

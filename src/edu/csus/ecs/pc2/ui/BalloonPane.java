@@ -509,8 +509,8 @@ public class BalloonPane extends JPanePlugin {
             }
             runTreeMap.put(run, run);
         }
-        Collection runColl = runTreeMap.values();
-        Iterator runIterator = runColl.iterator();
+        Collection<Run> runColl = runTreeMap.values();
+        Iterator<Run> runIterator = runColl.iterator();
 
         Hashtable<String, Long> goodBalloons = new Hashtable<String,Long>();
         while (runIterator.hasNext()) {
@@ -536,9 +536,9 @@ public class BalloonPane extends JPanePlugin {
         }
         
         
-        Enumeration balloonEnum = balloonHandler.getBalloonDeliveryInfoKeys();
+        Enumeration<String> balloonEnum = balloonHandler.getBalloonDeliveryInfoKeys();
         while (balloonEnum.hasMoreElements()) {
-            String key = (String) balloonEnum.nextElement();
+            String key = balloonEnum.nextElement();
             if (!goodBalloons.containsKey(key)) {
                 // pull apart key into ClientId & ElementId
                 BalloonDeliveryInfo balloonDeliveryInfo = balloonHandler.getBalloonDeliveryInfo(key);

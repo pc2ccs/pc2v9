@@ -292,7 +292,7 @@ public class ZipPC2 {
     /**
      * Creates archive based on list of files created by buildFileList()
      */
-    public String createArchive(Vector listOFiles, boolean packStdFilesToo) {
+    public String createArchive(Vector<String> listOFiles, boolean packStdFilesToo) {
         byte[] b = new byte[1024];
 
         File file;
@@ -487,16 +487,16 @@ public class ZipPC2 {
      * @return java.lang.String[]
      */
     private String[] sortFileList() {
-        Enumeration enumeration = filesToInclude.elements();
+        Enumeration<String> enumeration = filesToInclude.elements();
         String[] sortArray = new String[filesToInclude.size()];
         int i = 0;
-        Object o = null;
+        String o = null;
         while (enumeration.hasMoreElements()) {
             o = enumeration.nextElement();
             if (o == null) {
                 continue;
             }
-            sortArray[i++] = (String) o;
+            sortArray[i++] = o;
         }
         if (sortArray == null) {
             return null;

@@ -102,7 +102,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
     AccountList getAccountList(IInternalContest theContest) {
         Vector<Account> accountVect = theContest.getAccounts(ClientType.Type.ALL);
         AccountList accountList = new AccountList();
-        Enumeration accountEnum = accountVect.elements();
+        Enumeration<Account> accountEnum = accountVect.elements();
         while(accountEnum.hasMoreElements()) {
             Account a = (Account)accountEnum.nextElement();
             accountList.add(a);
@@ -116,7 +116,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      * @param treeMap
      *            java.util.TreeMap
      */
-    private ProblemSummaryInfo calcProblemScoreData(TreeMap treeMap) throws IllegalContestState {
+    private ProblemSummaryInfo calcProblemScoreData(TreeMap<Run,Run> treeMap) throws IllegalContestState {
         ProblemSummaryInfo problemSummaryInfo = new ProblemSummaryInfo();
         int score = 0;
         int attempts = 0;
@@ -128,7 +128,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         if (treeMap.isEmpty()) {
             problemSummaryInfo = null; // ProblemScoreData must have ProblemId to be valid
         } else {
-            Collection coll = treeMap.values();
+            Collection<Run> coll = treeMap.values();
             Object[] o;
             Run run;
             o = coll.toArray();
@@ -398,7 +398,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         StandingsRecord[] srArray = new StandingsRecord[treeMap.size()];
         
         Collection<StandingsRecord> coll = treeMap.values();
-        Iterator iterator = coll.iterator();
+        Iterator<StandingsRecord> iterator = coll.iterator();
         
         problemBestTime = new int[problems.length + 1];
         problemLastTime = new int[problems.length + 1];
@@ -640,8 +640,8 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         RunComparatorByTeam runComparatorByTeam = new RunComparatorByTeam();
         TreeMap<Run, Run> problemTreeMap = new TreeMap<Run, Run>(runComparatorByTeam);
 
-        Collection runColl = runTreeMap.values();
-        Iterator runIterator = runColl.iterator();
+        Collection<Run> runColl = runTreeMap.values();
+        Iterator<Run> runIterator = runColl.iterator();
         // cannot be null for 1st run
         String lastUser = "";
         String lastProblem = "";

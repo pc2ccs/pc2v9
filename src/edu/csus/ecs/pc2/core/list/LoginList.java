@@ -111,7 +111,7 @@ public class LoginList implements Serializable {
     public Enumeration<ClientId> getClients(ClientType.Type type) {
         synchronized (clientHandlerHash) {
             Vector<ClientId> v = new Vector<ClientId>();
-            Enumeration enumeration = clientHandlerHash.keys();
+            Enumeration<ClientId> enumeration = clientHandlerHash.keys();
             while (enumeration.hasMoreElements()) {
                 ClientId clientId = (ClientId) enumeration.nextElement();
                 if (clientId.getClientType() == type) {
@@ -125,7 +125,7 @@ public class LoginList implements Serializable {
     public Enumeration<ConnectionHandlerID> getHandles(ClientType.Type type) {
         synchronized (clientHandlerHash) {
             Vector<ConnectionHandlerID> v = new Vector<ConnectionHandlerID>();
-            Enumeration enumeration = clientHandlerHash.keys();
+            Enumeration<ClientId> enumeration = clientHandlerHash.keys();
             while (enumeration.hasMoreElements()) {
                 ClientId clientId = (ClientId) enumeration.nextElement();
                 if (clientId.getClientType() == type) {
