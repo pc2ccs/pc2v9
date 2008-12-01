@@ -27,11 +27,6 @@ public class SecurityMessageHandler {
 
     private Vector<ISecurityMessageListener> securityMessageListenerList = new Vector<ISecurityMessageListener>();
 
-    private SecurityMessageHandler() {
-
-        // do not allow null contstructor.  dal
-    }
-
     public SecurityMessageHandler(ClientId clientId) {
         logName = stripChar(clientId.toString(), ' ') + ".security";
         log = new Log(logName);
