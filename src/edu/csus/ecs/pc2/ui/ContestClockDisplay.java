@@ -238,7 +238,7 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
 
     public void removeLabelFromAllUpdateLists(JLabel labelToUpdate) {
         try {
-            Enumeration enumeration = contestTimes.keys();
+            Enumeration<Integer> enumeration = contestTimes.keys();
 
             while (enumeration.hasMoreElements()) {
                 Integer element = (Integer) enumeration.nextElement();

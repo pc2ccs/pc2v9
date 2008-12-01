@@ -35,7 +35,6 @@ public class LanguageList extends ElementList {
      * 
      * @return list of {@link Language}.
      */
-    @SuppressWarnings("unchecked")
     public Language[] getList() {
         Language[] theList = new Language[size()];
 

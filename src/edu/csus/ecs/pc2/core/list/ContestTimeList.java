@@ -32,7 +32,6 @@ public class ContestTimeList extends BaseElementList {
         super.add(contestTime);
     }
 
-    @SuppressWarnings("unchecked")
     public ContestTime[] getList() {
         return (ContestTime[]) values().toArray(new ContestTime[size()]);
     }

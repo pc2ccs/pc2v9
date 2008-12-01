@@ -33,7 +33,6 @@ public class JudgementList extends ElementList {
      *
      * @return list of {@link Judgement}.
      */
-    @SuppressWarnings("unchecked")
     public Judgement[] getList() {
         Judgement[] theList = new Judgement[size()];
 

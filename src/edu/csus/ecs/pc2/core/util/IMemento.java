@@ -156,7 +156,7 @@ public interface IMemento {
      * 
      * @return a possibly empty list of names
      */
-    List getNames();
+    List<String> getNames();
 
     /**
      * Sets the value of the given key to the given floating point number.

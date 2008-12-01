@@ -554,7 +554,7 @@ public class EditFilterPane extends JPanePlugin {
             Filter teamsFilter = new Filter();
 
             teamsFilter.clearAccountList();
-            Enumeration enumeration = teamListModel.elements();
+            Enumeration<?> enumeration = teamListModel.elements();
             while (enumeration.hasMoreElements()) {
                 WrapperJCheckBox element = (WrapperJCheckBox) enumeration.nextElement();
                 if (element.isSelected()) {
@@ -612,7 +612,7 @@ public class EditFilterPane extends JPanePlugin {
         filter.setFilter(getFilterOnCheckBox().isSelected());
 
         filter.clearProblemList();
-        Enumeration enumeration = problemListModel.elements();
+        Enumeration<?> enumeration = problemListModel.elements();
         while (enumeration.hasMoreElements()) {
             WrapperJCheckBox element = (WrapperJCheckBox) enumeration.nextElement();
             if (element.isSelected()) {

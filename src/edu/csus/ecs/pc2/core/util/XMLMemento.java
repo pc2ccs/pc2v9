@@ -285,7 +285,7 @@ public final class XMLMemento implements IMemento {
         return attr.getValue();
     }
 
-    public List getNames() {
+    public List<String> getNames() {
         NamedNodeMap map = element.getAttributes();
         int size = map.getLength();
         List<String> list = new ArrayList<String>();

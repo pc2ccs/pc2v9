@@ -27,7 +27,6 @@ public class ProblemList extends ElementList {
     /**
      * Get an array of problems in random/hash order.
      */
-    @SuppressWarnings("unchecked")
     public Problem[] getList() {
         Problem[] theList = new Problem[size()];
 

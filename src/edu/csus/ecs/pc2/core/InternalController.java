@@ -1695,7 +1695,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         if (properties.containsKey(PacketFactory.PROBLEM_DATA_FILES)) {
             // clone before start mucking with it, or do we need a deep clone?
             Properties cloneProperties = new Properties();
-            for (Iterator iter = properties.keySet().iterator(); iter.hasNext();) {
+            for (Iterator<?> iter = properties.keySet().iterator(); iter.hasNext();) {
                 String element = (String) iter.next();
                 // skip PROBLEM_DATA_FILES, otherwise clone the element
                 if (!element.equals(PacketFactory.PROBLEM_DATA_FILES)) {

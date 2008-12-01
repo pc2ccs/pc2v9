@@ -79,9 +79,9 @@ public class XMLResultsParser implements IResultsParser {
         XMLResultsParser parser = new XMLResultsParser();
         parser.setLog(log);
         if (parser.parseValidatorResultsFile(argv[0])) {
-            Enumeration enumeration = parser.getResults().keys();
+            Enumeration<String> enumeration = parser.getResults().keys();
             while (enumeration.hasMoreElements()) {
-                String element = (String) enumeration.nextElement();
+                String element = enumeration.nextElement();
                 System.out.println("found attribute " + element + " value=" + parser.getResults().get(element));
 
             }

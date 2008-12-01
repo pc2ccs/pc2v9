@@ -34,7 +34,6 @@ public class GroupList extends ElementList {
      *
      * @return list of {@link Group}.
      */
-    @SuppressWarnings("unchecked")
     public Group[] getList() {
         Group[] theList = new Group[size()];
 

@@ -33,7 +33,7 @@ public class ICPCImportData {
             groupHash.put(inGroups[i].getElementId(), Integer.toString(inGroups[i].getGroupId()));
         }
         contestTitle = inContestTitle;
-        Enumeration accountsEnum = inAccounts.elements();
+        Enumeration<Account> accountsEnum = inAccounts.elements();
         accounts = new ICPCAccount[inAccounts.size()];
         int accountCount = 0;
         while (accountsEnum.hasMoreElements()) {

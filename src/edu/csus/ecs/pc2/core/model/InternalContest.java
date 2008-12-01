@@ -1245,7 +1245,7 @@ public class InternalContest implements IInternalContest {
         ClientId cID;
         
         Vector<ElementId> v = new Vector<ElementId>();
-        Enumeration runIDs = runCheckOutList.keys();
+        Enumeration<ElementId> runIDs = runCheckOutList.keys();
         
         while (runIDs.hasMoreElements()) {
             

@@ -59,7 +59,6 @@ public class BalloonSettingsList extends ElementList {
      * 
      * @return list of {@link BalloonSettings}.
      */
-    @SuppressWarnings("unchecked")
     public BalloonSettings[] getList() {
         BalloonSettings[] theList = new BalloonSettings[size()];
 

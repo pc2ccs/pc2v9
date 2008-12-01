@@ -35,7 +35,6 @@ public class ClientSettingsList extends BaseElementList {
      * 
      * @return list of {@link ClientSettings}.
      */
-    @SuppressWarnings("unchecked")
     public ClientSettings[] getList() {
         ClientSettings[] theList = new ClientSettings[size()];
 

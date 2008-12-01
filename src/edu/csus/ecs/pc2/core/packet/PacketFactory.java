@@ -340,7 +340,7 @@ public final class PacketFactory {
         Object obj = packet.getContent();
         if (obj instanceof Properties) {
             Properties prop = (Properties) obj;
-            Enumeration enumeration = prop.keys();
+            Enumeration<?> enumeration = prop.keys();
 
             while (enumeration.hasMoreElements()) {
                 String element = (String) enumeration.nextElement();
@@ -369,7 +369,7 @@ public final class PacketFactory {
         Object obj = packet.getContent();
         if (obj instanceof Properties) {
             Properties prop = (Properties) obj;
-            Enumeration enumeration = prop.keys();
+            Enumeration<?> enumeration = prop.keys();
 
             while (enumeration.hasMoreElements()) {
                 String element = (String) enumeration.nextElement();
@@ -395,7 +395,7 @@ public final class PacketFactory {
         Object obj = packet.getContent();
         if (obj instanceof Properties) {
             Properties prop = (Properties) obj;
-            Enumeration enumeration = prop.keys();
+            Enumeration<?> enumeration = prop.keys();
 
             while (enumeration.hasMoreElements()) {
                 String element = (String) enumeration.nextElement();

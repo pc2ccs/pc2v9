@@ -164,7 +164,7 @@ public class Site implements IElementObject {
                 return false;
             }
 
-            Enumeration enumeration = connectionInfo.keys();
+            Enumeration<?> enumeration = connectionInfo.keys();
 
             while (enumeration.hasMoreElements()) {
                 String element = (String) enumeration.nextElement();

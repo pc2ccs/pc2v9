@@ -102,7 +102,7 @@ public class ClientSettings implements IElementObject {
     public String [] getKeys () {
         
         Vector<String> v = new Vector<String>();
-        for (Enumeration e = properties.propertyNames() ; e.hasMoreElements() ;) {
+        for (Enumeration<?> e = properties.propertyNames() ; e.hasMoreElements() ;) {
             String key = (String)e.nextElement();
             v.addElement(key);
         }

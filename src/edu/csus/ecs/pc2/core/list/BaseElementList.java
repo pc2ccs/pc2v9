@@ -127,7 +127,7 @@ public abstract class BaseElementList implements Serializable {
      *
      * @return Enumeration of all elements in list.
      */
-    public Enumeration elements() {
+    public Enumeration<? extends IElementObject> elements() {
 
         return hash.elements();
 
@@ -148,7 +148,7 @@ public abstract class BaseElementList implements Serializable {
      *
      * @return Collection
      */
-    public Collection values() {
+    public Collection<? extends IElementObject> values() {
         return hash.values();
     }
 

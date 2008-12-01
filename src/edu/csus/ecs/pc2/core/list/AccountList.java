@@ -151,7 +151,7 @@ public class AccountList extends BaseElementList {
      * @return string of display name or short client id name {@link ClientId#getName()}
      */
     public String getTitle(ClientId id) {
-        Enumeration enumeration = elements();
+        Enumeration<? extends IElementObject> enumeration = elements();
         while (enumeration.hasMoreElements()) {
             Account account = (Account) enumeration.nextElement();
 
@@ -185,7 +185,7 @@ public class AccountList extends BaseElementList {
         Vector<Account> v = new Vector<Account>();
         
         if (type.equals(ClientType.Type.ALL)) {
-            Enumeration enumeration = elements();
+            Enumeration<? extends IElementObject> enumeration = elements();
             while (enumeration.hasMoreElements()) {
                 Account account = (Account) enumeration.nextElement();
                 v.addElement(account);
@@ -193,7 +193,7 @@ public class AccountList extends BaseElementList {
             return v;
         }
 
-        Enumeration enumeration = elements();
+        Enumeration<? extends IElementObject> enumeration = elements();
         while (enumeration.hasMoreElements()) {
             Account account = (Account) enumeration.nextElement();
 
@@ -209,7 +209,7 @@ public class AccountList extends BaseElementList {
     public Vector<Account> getAccounts(Type type, int siteNumber) {
         Vector<Account> v = new Vector<Account>();
 
-        Enumeration enumeration = elements();
+        Enumeration<? extends IElementObject> enumeration = elements();
         while (enumeration.hasMoreElements()) {
             Account account = (Account) enumeration.nextElement();
 
@@ -227,7 +227,7 @@ public class AccountList extends BaseElementList {
     public Vector<Account> getAccounts(int siteNumber) {
         Vector<Account> v = new Vector<Account>();
 
-        Enumeration enumeration = elements();
+        Enumeration<? extends IElementObject> enumeration = elements();
         while (enumeration.hasMoreElements()) {
             Account account = (Account) enumeration.nextElement();
 
@@ -310,7 +310,7 @@ public class AccountList extends BaseElementList {
      */
     public void addNewAccount(Account account) {
         int siteNumber = account.getSiteNumber();
-        Vector accounts = getAccounts(account.getClientId().getClientType(), siteNumber);
+        Vector<Account> accounts = getAccounts(account.getClientId().getClientType(), siteNumber);
         int nextClientNumber = accounts.size() + 1;
         ClientId id = new ClientId(siteNumber, account.getClientId().getClientType(), nextClientNumber);
         account.setClientId(id);
@@ -334,9 +334,8 @@ public class AccountList extends BaseElementList {
     /**
      * Get all accounts
      * 
-     * @return an array of acounts
+     * @return an array of accounts
      */
-    @SuppressWarnings("unchecked")
     public Account[] getList() {
         return (Account[]) values().toArray(new Account[size()]);
     }

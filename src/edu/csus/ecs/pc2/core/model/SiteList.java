@@ -31,7 +31,6 @@ public class SiteList extends ElementList {
      * 
      * @return list of {@link Site}.
      */
-    @SuppressWarnings("unchecked")
     public Site[] getList() {
         if (size() == 0) {
             return new Site[0];

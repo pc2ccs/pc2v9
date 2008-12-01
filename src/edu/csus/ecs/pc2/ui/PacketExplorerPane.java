@@ -298,7 +298,7 @@ public class PacketExplorerPane extends JPanePlugin {
                 if (content instanceof Properties) {
                     Properties props = (Properties) content;
                     String msg = "";
-                    Enumeration enumeration = props.keys();
+                    Enumeration<?> enumeration = props.keys();
 
                     while (enumeration.hasMoreElements()) {
                         String element = (String) enumeration.nextElement();
