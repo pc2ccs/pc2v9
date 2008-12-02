@@ -29,6 +29,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.Site;
+import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.util.IMemento;
 import edu.csus.ecs.pc2.core.util.XMLMemento;
@@ -83,6 +84,8 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
     private int[] problemAttempts = null;
 
     private Log log;
+    
+    private boolean countPreliminaryJudgements = false;
 
     public DefaultScoringAlgorithm() {
         super();
@@ -140,7 +143,8 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 }
                 attempts++;
                 problemId = run.getProblemId();
-                if (run.isSolved()) {
+                // added isValidJudgement to check and obey preliminary results
+                if (run.isSolved() && isValidJudgement(run)) {
                     if(!run.isJudged()) {
                         throw new IllegalRunState("Run isSolved but ! isJudged "+run);
                     }
@@ -153,7 +157,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                     break;
                 } else {
                     // we should really only do this if it's been judged
-                    if (run.isJudged()) {
+                    if (run.isJudged() && isValidJudgement(run)) {
                         score += getPenaltyPointsPerNo();
                     } else {
                         unJudgedRun = true;
@@ -239,6 +243,8 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         // TODO properties should be validated here
         props = properties;
 
+        countPreliminaryJudgements = theContest.getContestInformation().isPreliminaryJudgementsUsedByBoard();
+        
         XMLMemento mementoRoot = XMLMemento.createWriteRoot("contestStandings");
         IMemento summaryMememento = createSummaryMomento (theContest.getContestInformation(), mementoRoot);
         
@@ -565,6 +571,33 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         return median;
     }
 
+    /**
+     * This routine checks and obeys the preliminary judgement rules.
+     * 
+     * @param run
+     * @return true if run is judged and the state is valid
+     */
+    boolean isValidJudgement(Run run) {
+        boolean result=false;
+        if (run.getStatus().equals(RunStates.JUDGED)) {
+            // done it's good & simple
+            result = true;
+        } else {
+            // now the ugly stuff, handle being rejudged/preliminary judgements/...
+            if (run.isJudged()) {
+                // good... but why is the state not JUDGED
+                if (run.getStatus().equals(RunStates.MANUAL_REVIEW)) {
+                    if (countPreliminaryJudgements) {
+                        result = true;
+                    }
+                } else {
+                    result = true;
+                }
+            }
+        }
+        return result;
+    }
+    
     /**
      * Do these long parameters match the values in the StandingsRecord?
      * 

@@ -9,10 +9,14 @@ import edu.csus.ecs.pc2.core.model.Balloon;
 import edu.csus.ecs.pc2.core.model.BalloonDeliveryInfo;
 import edu.csus.ecs.pc2.core.model.BalloonSettings;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
+import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
 import edu.csus.ecs.pc2.core.model.ElementId;
+import edu.csus.ecs.pc2.core.model.IContestInformationListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
@@ -38,13 +42,55 @@ public class BalloonHandler implements UIPlugin {
      */
     private Hashtable<Integer, BalloonSettings> balloonSettingsHash = new Hashtable<Integer, BalloonSettings>();
 
+    private boolean sendNotificationsForPreliminary = false;
+    
     /**
      * 
      */
     private static final long serialVersionUID = -4763667166259158323L;
 
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     * 
+     */
+    class ContestInformationListenerImplementation implements IContestInformationListener {
+
+        public void contestInformationAdded(ContestInformationEvent event) {
+            ContestInformation ci = event.getContestInformation();
+            if (ci != null) {
+                boolean oldValue = sendNotificationsForPreliminary;
+                sendNotificationsForPreliminary = ci.isPreliminaryJudgementsTriggerNotifications();
+                // it changed from off to on
+                if (oldValue != sendNotificationsForPreliminary && sendNotificationsForPreliminary) {
+                    reloadBalloonSettings();
+                }
+            }
+        }
+
+        public void contestInformationChanged(ContestInformationEvent event) {
+            ContestInformation ci = event.getContestInformation();
+            if (ci != null) {
+                boolean oldValue = sendNotificationsForPreliminary;
+                sendNotificationsForPreliminary = ci.isPreliminaryJudgementsTriggerNotifications();
+                // it changed from off to on
+                System.err.println("old="+oldValue+", new="+sendNotificationsForPreliminary);
+                if (oldValue != sendNotificationsForPreliminary && sendNotificationsForPreliminary) {
+                    reloadBalloonSettings();
+                }
+            }
+        }
+
+        public void contestInformationRemoved(ContestInformationEvent event) {
+            // TODO Auto-generated method stub
+
+        }
+    }
+
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.contest = inContest;
+        sendNotificationsForPreliminary = inContest.getContestInformation().isPreliminaryJudgementsTriggerNotifications();
+        getContest().addContestInformationListener(new ContestInformationListenerImplementation());
     }
 
     public String getPluginTitle() {
@@ -175,13 +221,40 @@ public class BalloonHandler implements UIPlugin {
         for (int i = 0; i < runs.length; i++) {
             Run run = runs[i];
             if (run.getProblemId().equals(problemId)) {
-                if (!run.isDeleted() && run.isJudged() && run.isSolved()) {
+                if (!run.isDeleted() && run.isJudged() && run.isSolved() && isValidJudgement(run)) {
                     isSolved = true;
                     break;
                 }
             }
         }
         return isSolved;
+    }
+
+    /**
+     * This routine checks and obeys the preliminary judgement rules.
+     * 
+     * @param run
+     * @return true if run is judged and the state is valid
+     */
+    public boolean isValidJudgement(Run run) {
+        boolean result=false;
+        if (run.getStatus().equals(RunStates.JUDGED)) {
+            // done it's good & simple
+            result = true;
+        } else {
+            // now the ugly stuff, handle being rejudged/preliminary judgements/...
+            if (run.isJudged()) {
+                // good... but why is the state not JUDGED
+                if (run.getStatus().equals(RunStates.MANUAL_REVIEW)) {
+                    if (sendNotificationsForPreliminary) {
+                        result = true;
+                    }
+                } else {
+                    result = true;
+                }
+            }
+        }
+        return result;
     }
 
     /**
@@ -197,7 +270,7 @@ public class BalloonHandler implements UIPlugin {
         String balloonKey = getBalloonKey(run.getSubmitter(), run.getProblemId());
         if (! hasBalloonBeenSent(balloonKey)){
             
-            return (run.isJudged() && run.isSolved()) && (! run.isDeleted());
+            return (run.isJudged() && run.isSolved()) && (! run.isDeleted() && isValidJudgement(run));
             
         }
         return false;

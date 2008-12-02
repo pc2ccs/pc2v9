@@ -25,6 +25,9 @@ public class ContestInformation implements Serializable{
 
     private String judgesDefaultAnswer = "No response, read problem statement";
     
+    private boolean preliminaryJudgementsUsedByBoard = false;
+    private boolean preliminaryJudgementsTriggerNotifications = false;
+    
     /**
      * 
      * @author pc2@ecs.csus.edu
@@ -111,10 +114,47 @@ public class ContestInformation implements Serializable{
             if (!teamDisplayMode.equals(contestInformation.getTeamDisplayMode())) {
                 return false;
             }
+            if (preliminaryJudgementsTriggerNotifications != contestInformation.isPreliminaryJudgementsTriggerNotifications()) {
+                return false;
+            }
+            if (preliminaryJudgementsUsedByBoard != contestInformation.isPreliminaryJudgementsUsedByBoard()) {
+                return false;
+            }
             return true;
         } catch (Exception e) {
             // TODO log to static exception log
             return false;
         }
+    }
+
+    /**
+     * @param preliminaryJudgementsUsedByBoard the preliminaryJudgementsUsedByBoard to set
+     */
+    public void setPreliminaryJudgementsUsedByBoard(boolean preliminaryJudgementsUsedByBoard) {
+        this.preliminaryJudgementsUsedByBoard = preliminaryJudgementsUsedByBoard;
+    }
+
+    /**
+     * The Scoring Algorithm should use this to determine whether to count preliminary judgements
+     * as scoreable.
+     * 
+     * @return the preliminaryJudgementsUsedByBoard
+     */
+    public boolean isPreliminaryJudgementsUsedByBoard() {
+        return preliminaryJudgementsUsedByBoard;
+    }
+
+    /**
+     * @param preliminaryJudgementsTriggerNotifications the preliminaryJudgementsTriggerNotifications to set
+     */
+    public void setPreliminaryJudgementsTriggerNotifications(boolean preliminaryJudgementsTriggerNotifications) {
+        this.preliminaryJudgementsTriggerNotifications = preliminaryJudgementsTriggerNotifications;
+    }
+
+    /**
+     * @return the preliminaryJudgementsTriggerNotifications
+     */
+    public boolean isPreliminaryJudgementsTriggerNotifications() {
+        return preliminaryJudgementsTriggerNotifications;
     }
 }
