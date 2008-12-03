@@ -74,7 +74,6 @@ public class BalloonHandler implements UIPlugin {
                 boolean oldValue = sendNotificationsForPreliminary;
                 sendNotificationsForPreliminary = ci.isPreliminaryJudgementsTriggerNotifications();
                 // it changed from off to on
-                System.err.println("old="+oldValue+", new="+sendNotificationsForPreliminary);
                 if (oldValue != sendNotificationsForPreliminary && sendNotificationsForPreliminary) {
                     reloadBalloonSettings();
                 }
