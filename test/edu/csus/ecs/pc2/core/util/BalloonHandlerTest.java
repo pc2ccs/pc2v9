@@ -89,6 +89,11 @@ public class BalloonHandlerTest extends TestCase {
         
         assertFalse ("Failed updateDeliveryInfo and shouldRemoveBalloon ", balloonHandler.shouldRemoveBalloon(runs[0]));
         
+        try {
+            balloonHandler.buildBalloon("test", runs[0].getSubmitter(), runs[0].getProblemId(), null);
+        } catch(Exception e) {
+            assertTrue("Failed null run test (bug 329)", false);
+        }
     }
 
     private BalloonDeliveryInfo createBalloonDeliveryInfo(Run run) {
