@@ -513,23 +513,29 @@ public class BalloonPane extends JPanePlugin {
         Iterator<Run> runIterator = runColl.iterator();
 
         Hashtable<String, Long> goodBalloons = new Hashtable<String,Long>();
+        Hashtable<String, Long> okBalloons = new Hashtable<String,Long>();
         while (runIterator.hasNext()) {
             Object o = runIterator.next();
             Run run = (Run) o;
             if (!run.isDeleted() && run.isJudged() && run.isSolved()) {
-                // there should be a yes for this run
                 String key = balloonHandler.getBalloonKey(run.getSubmitter(), run.getProblemId()); 
-                goodBalloons.put(key, Long.valueOf(0));
-                if (!balloonHandler.hasBalloonBeenSent(key)) { // no balloon has been sent
-                    if (run.isSendToTeams()) {
-                        if (sendBalloon(balloonHandler.buildBalloon("yes", run.getSubmitter(), run.getProblemId(), run))) {
-                            sentBalloonFor(key, run.getSubmitter(), run.getProblemId());
+                if (balloonHandler.isValidJudgement(run)) {
+                    // there may be a yes for this run (preliminary
+                    okBalloons.put(key, Long.valueOf(0));
+                } else {
+                    // there should be a yes for this run
+                    goodBalloons.put(key, Long.valueOf(0));
+                    if (!balloonHandler.hasBalloonBeenSent(key)) { // no balloon has been sent
+                        if (run.isSendToTeams()) {
+                            if (sendBalloon(balloonHandler.buildBalloon("yes", run.getSubmitter(), run.getProblemId(), run))) {
+                                sentBalloonFor(key, run.getSubmitter(), run.getProblemId());
+                            } else {
+                                // TODO error sending balloon
+                                log.info("Problem sending balloon to " + run.getSubmitter().getTripletKey() + " for " + run.getProblemId());
+                            }
                         } else {
-                            // TODO error sending balloon
-                            log.info("Problem sending balloon to " + run.getSubmitter().getTripletKey() + " for " + run.getProblemId());
+                            log.info("Run not sent to team, not sending balloon to "+ run.getSubmitter().getTripletKey() + " for " + run.getProblemId());
                         }
-                    } else {
-                        log.info("Run not sent to team, not sending balloon to "+ run.getSubmitter().getTripletKey() + " for " + run.getProblemId());
                     }
                 }
             }
@@ -539,7 +545,8 @@ public class BalloonPane extends JPanePlugin {
         Enumeration<String> balloonEnum = balloonHandler.getBalloonDeliveryInfoKeys();
         while (balloonEnum.hasMoreElements()) {
             String key = balloonEnum.nextElement();
-            if (!goodBalloons.containsKey(key)) {
+            // it's not a good balloon and it's not an okay balloon, take it away
+            if (!goodBalloons.containsKey(key) && !okBalloons.containsKey(key)) {
                 // pull apart key into ClientId & ElementId
                 BalloonDeliveryInfo balloonDeliveryInfo = balloonHandler.getBalloonDeliveryInfo(key);
                 ClientId clientId = balloonDeliveryInfo.getClientId();
