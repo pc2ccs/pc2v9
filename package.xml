@@ -132,10 +132,7 @@
         <property name="gzip.name" value="${release}-${repo.version}.tar.gz"/>
         <property name="gzip.path" value="${dist.dir}/${gzip.name}"/>
 
-<!--
-    XXX javadoc 1.5. <= 14 fails under cruisecontrol, not sure why
         <antcall target="apizip"/>
--->
         <antcall target="zip"/> 
         <antcall target="gzip"/> 
     </target>
