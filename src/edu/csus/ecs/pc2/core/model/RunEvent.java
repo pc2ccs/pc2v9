@@ -62,6 +62,18 @@ public class RunEvent {
          * Run revoked.
          */
         RUN_REVOKED,
+        /**
+         * Run being compiled..
+         */
+        RUN_COMPILING,
+        /**
+         * Run being executed..
+         */
+        RUN_EXECUTING,
+        /**
+         * Run being validated..
+         */
+        RUN_VALIDATING,
     }
 
     private Action action;

@@ -30,29 +30,44 @@ public class RunListenerList {
             IRun run = new RunImplementation(runEvent.getRun(), contest, controller);
 
             switch (runEvent.getAction()) {
-            case ADDED:
-                listenerList.elementAt(i).runAdded(run);
-                break;
+                case ADDED:
+                    listenerList.elementAt(i).runAdded(run);
+                    break;
 
-            case DELETED:
-                listenerList.elementAt(i).runRemoved(run);
-                break;
+                case DELETED:
+                    listenerList.elementAt(i).runRemoved(run);
+                    break;
 
-            case CHANGED:
-                if (run.isJudged()) {
-                    listenerList.elementAt(i).runJudged(run);
-                } 
-                break;
-                
-            case CHECKEDOUT_REJUDGE_RUN:
-            case CHECKEDOUT_RUN:
-            case RUN_AVAILABLE:
-            case RUN_HELD:
-            case RUN_NOT_AVIALABLE:
-            case RUN_REVOKED:
-                break;
-            default:
-                break;
+                case CHANGED:
+                    if (run.isJudged()) {
+                        listenerList.elementAt(i).runJudged(run);
+                    }
+                    break;
+
+                case RUN_AVAILABLE:
+                    listenerList.elementAt(i).runJudgementCanceled(run);
+                    break;
+
+                case RUN_COMPILING:
+                    listenerList.elementAt(i).runCompling(run);
+                    break;
+
+                case RUN_EXECUTING:
+                    listenerList.elementAt(i).runExecuting(run);
+                    break;
+
+                case RUN_VALIDATING:
+                    listenerList.elementAt(i).runValidating(run);
+                    break;
+
+                case CHECKEDOUT_REJUDGE_RUN:
+                case CHECKEDOUT_RUN:
+                case RUN_HELD:
+                case RUN_NOT_AVIALABLE:
+                case RUN_REVOKED:
+                    break;
+                default:
+                    break;
             }
         }
     }
