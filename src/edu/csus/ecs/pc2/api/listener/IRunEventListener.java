@@ -5,14 +5,28 @@ import edu.csus.ecs.pc2.api.IRun;
 /**
  * This interface describes the set of methods that any Run Listener must implement.
  * <p>
- * These methods are invoked when a run has been added, removed (marked as deleted), judged,
- * or updated in the contest.  A client utilizing the PC<sup>2</sup> API can implement this
- * interface and add itself to the contest as a Listener, and therefore arrange to be notified when 
- * any runs are added to, modified, or removed from the contest.
- *
+ * These methods are invoked when a run has been added, removed (marked as deleted), judged, or updated in the contest. A client utilizing the PC<sup>2</sup> API can implement this interface and add
+ * itself to the contest as a Listener, and therefore arrange to be notified when any runs are added to, modified, or removed from the contest.
+ * <P>
+ * 
+ * Run Flow - short
+ * <ol>
+ * <li> {@link #runAdded(IRun)}
+ * <li> {@link #runJudged(IRun)} typically, but also can be: {@link #runJudgementCanceled(IRun)} or {@link #runRemoved(IRun)} or {@link #runUpdated(IRun)}.
+ * </ol>
+ * 
+ * Run Flow - long
+ * <ol>
+ * <li> {@link #runAdded(IRun)}
+ * <li> {@link #runCompling(IRun)}
+ * <li> {@link #runExecuting(IRun)}
+ * <li> {@link #runValidating(IRun)}
+ * <li> {@link #runJudged(IRun)} typically, but also can be: {@link #runJudgementCanceled(IRun)} or {@link #runRemoved(IRun)} or {@link #runUpdated(IRun)}.
+ * </ol>
+ * 
  * <p>
  * This documentation describes the current <I>draft</i> of the PC<sup>2</sup> API, which is subject to change.
- *
+ * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -66,5 +80,38 @@ public interface IRunEventListener {
      *            the {@link IRun} which has been changed
      */
     void runUpdated(IRun run);
+    
+    /**
+     * Invoked when an existing run is being compiled.
+     * 
+     * @param run
+     *            the {@link IRun} which is being compiled.
+     */
+    void runCompling(IRun run);
 
+    /**
+     * Invoked when an existing run is being executed.
+     * 
+     * @param run
+     *            the {@link IRun} which is being executed.
+     */
+    void runExecuting(IRun run);
+
+    /**
+     * Invoked when an existing run is being validated.
+     * 
+     * @param run
+     *            the {@link IRun} which is being validated.
+     */
+    void runValidating(IRun run);
+
+    /**
+     * Invoked if the run is re-queued for judgement.
+     * 
+     * This run will be queued to be judged.
+     * 
+     * @param run
+     *            the {@link IRun} which has been returned to the judging queue.
+     */
+    void runJudgementCanceled(IRun run);
 }

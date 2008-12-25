@@ -215,6 +215,22 @@ public class ContestTestFrame extends JFrame {
         public void runUpdated(IRun run) {
             println("Run updated Site " + run.getSiteNumber() + " Run " + run.getNumber() + " from " + run.getTeam().getLoginName() + " at " + run.getSubmissionTime());
         }
+
+        public void runCompling(IRun run) {
+            println("Run compiling Site " + run.getSiteNumber() + " Run " + run.getNumber() + " from " + run.getTeam().getLoginName() + " at " + run.getSubmissionTime());
+        }
+
+        public void runExecuting(IRun run) {
+            println("Run executing Site " + run.getSiteNumber() + " Run " + run.getNumber() + " from " + run.getTeam().getLoginName() + " at " + run.getSubmissionTime());
+        }
+
+        public void runValidating(IRun run) {
+            println("Run validating Site " + run.getSiteNumber() + " Run " + run.getNumber() + " from " + run.getTeam().getLoginName() + " at " + run.getSubmissionTime());
+        }
+
+        public void runJudgementCanceled(IRun run) {
+            println("Run (judgement) canceled Site " + run.getSiteNumber() + " Run " + run.getNumber() + " from " + run.getTeam().getLoginName() + " at " + run.getSubmissionTime());
+        }
     }
 
     /**
