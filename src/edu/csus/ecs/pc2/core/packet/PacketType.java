@@ -630,6 +630,12 @@ public final class PacketType implements Serializable {
          * Fetched run.
          */
         FETCHED_REQUESTED_RUN,
+        /**
+         * Run Execution Status.
+         * 
+         * @see RunExecutionStatus
+         */
+        RUN_EXECUTION_STATUS,
     }
 
     /**

@@ -36,6 +36,7 @@ import edu.csus.ecs.pc2.core.model.LoginEvent;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.RunExecutionStatus;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
@@ -2515,13 +2516,25 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     public void sendCompilingMessage(Run run) {
         // TODO Code sendCompilingMessage
+        if (contest.isSendAdditionalRunStatusMessages()){
+            Packet sendPacket = PacketFactory.createRunStatusPacket(contest.getClientId(), getServerClientId(), run, contest.getClientId(), RunExecutionStatus.COMPILING);
+            sendToLocalServer(sendPacket);
+        }
     }
 
     public void sendExecutingMessage(Run run) {
         // TODO Code sendExecutingMessage
+        if (contest.isSendAdditionalRunStatusMessages()){
+            Packet sendPacket = PacketFactory.createRunStatusPacket(contest.getClientId(), getServerClientId(), run, contest.getClientId(), RunExecutionStatus.EXECUTING);
+            sendToLocalServer(sendPacket);
+        }
     }
 
     public void sendValidatingMessage(Run run) {
         // TODO Code sendValidatingMessage
+        if (contest.isSendAdditionalRunStatusMessages()){
+            Packet sendPacket = PacketFactory.createRunStatusPacket(contest.getClientId(), getServerClientId(), run, contest.getClientId(), RunExecutionStatus.VALIDATING);
+            sendToLocalServer(sendPacket);
+        }
     }
 }

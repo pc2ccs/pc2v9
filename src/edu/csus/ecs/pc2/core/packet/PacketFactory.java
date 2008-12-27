@@ -29,6 +29,7 @@ import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.RunExecutionStatus;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.Site;
@@ -233,6 +234,8 @@ public final class PacketFactory {
     public static final String COMPUTER_JUDGE = "COMPUTER_JUDGE";
     
     public static final String FROM_HUMAN = "FROM_HUMAN";
+
+    private static final String RUN_STATUS = "RUN_STATUS";
 
     /**
      * Constructor is private as this is a utility class which should not be extended or invoked.
@@ -1789,5 +1792,13 @@ public final class PacketFactory {
         
         Packet packet = new Packet(Type.SECURITY_MESSAGE, source, destination, prop);
         return packet;
+    }
+
+    public static Packet createRunStatusPacket(ClientId source, ClientId destination, Run run, ClientId judgeClient, RunExecutionStatus status) {
+        Properties prop = new Properties();
+        prop.put(CLIENT_ID, judgeClient);
+        prop.put(RUN, run);
+        prop.put(RUN_STATUS, status);
+        return createPacket(PacketType.Type.RUN_EXECUTION_STATUS, source, destination, prop);
     }
 }
