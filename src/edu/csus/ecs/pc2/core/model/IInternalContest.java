@@ -716,4 +716,20 @@ public interface IInternalContest {
      */
     void resetData();
 
+    /**
+     * Send run compiling, executing and validating status.
+     * 
+     * @return
+     */
+    boolean isSendAdditionalRunStatusMessages() ;
+
+    /**
+     * Set whether send run status messages.
+     * 
+     * @see #sendAdditionalRunStatus()
+     * @param status
+     * @return
+     */
+    void setSendAdditionalRunStatusMessages(boolean sendAdditionalRunStatusMessages);
+
 }

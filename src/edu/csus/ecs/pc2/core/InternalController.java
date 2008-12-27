@@ -2512,4 +2512,16 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             sendToLocalServer(fetchRunPacket);
         }
     }
+
+    public void sendCompilingMessage(Run run) {
+        // TODO Code sendCompilingMessage
+    }
+
+    public void sendExecutingMessage(Run run) {
+        // TODO Code sendExecutingMessage
+    }
+
+    public void sendValidatingMessage(Run run) {
+        // TODO Code sendValidatingMessage
+    }
 }

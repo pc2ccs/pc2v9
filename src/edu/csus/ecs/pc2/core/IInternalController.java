@@ -382,4 +382,24 @@ public interface IInternalController {
      * @param run
      */
     void fetchRun(Run run);
+    
+    /**
+     * Send a compiling message to the Server.
+     * 
+     * @param run
+     */
+    void sendCompilingMessage(Run run);
+
+    /**
+     * Send a executing message to the Server.
+     * @param run
+     */
+    void sendExecutingMessage(Run run);
+
+    /**
+     * Send a validating message to the Server.
+     * @param run
+     */
+    void sendValidatingMessage(Run run);
+        
 }

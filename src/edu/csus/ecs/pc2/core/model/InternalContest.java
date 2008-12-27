@@ -190,6 +190,8 @@ public class InternalContest implements IInternalContest {
     private JudgementList judgementList = new JudgementList();
     
     private SecurityMessageHandler securityMessageHandler;
+    
+    private boolean sendAdditionalRunStatusMessages;
 
     private Site createFakeSite(int nextSiteNumber) {
         Site site = new Site("Site " + nextSiteNumber, nextSiteNumber);
@@ -1784,6 +1786,14 @@ public class InternalContest implements IInternalContest {
 
     public void resetData() {
         runFilesList.clearCache();
+    }
+
+    public boolean isSendAdditionalRunStatusMessages() {
+        return sendAdditionalRunStatusMessages;
+    }
+
+    public void setSendAdditionalRunStatusMessages(boolean sendAdditionalRunStatusMessages) {
+        this.sendAdditionalRunStatusMessages = sendAdditionalRunStatusMessages;
     }
 
 }

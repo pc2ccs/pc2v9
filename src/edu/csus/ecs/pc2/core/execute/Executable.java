@@ -218,6 +218,8 @@ public class Executable {
         fileViewer = new MultipleFileViewer(log);
 
         try {
+            controller.sendExecutingMessage(run);
+            
             executionData = new ExecutionData();
             
             executeDirectoryName = getExecuteDirectoryName();
@@ -452,6 +454,8 @@ public class Executable {
 
         executionData.setValidationReturnCode(-1);
         executionData.setValidationSuccess(false);
+        
+        controller.sendValidatingMessage(run);
 
         if (problemDataFiles.getValidatorFile() != null) {
             // Create Validation Program
@@ -969,6 +973,8 @@ public class Executable {
     private boolean compileProgram() {
 
         try {
+            
+            controller.sendCompilingMessage(run);
 
             String programName = replaceString(language.getExecutableIdentifierMask(), "{:basename}", removeExtension(runFiles.getMainFile().getName()));
 
