@@ -31,11 +31,11 @@ public class RunListenerList {
 
             switch (runEvent.getAction()) {
                 case ADDED:
-                    listenerList.elementAt(i).runAdded(run);
+                    listenerList.elementAt(i).runSubmitted(run);
                     break;
 
                 case DELETED:
-                    listenerList.elementAt(i).runRemoved(run);
+                    listenerList.elementAt(i).runDeleted(run);
                     break;
 
                 case CHANGED:
@@ -45,11 +45,11 @@ public class RunListenerList {
                     break;
 
                 case RUN_AVAILABLE:
-                    listenerList.elementAt(i).runJudgementCanceled(run);
+                    listenerList.elementAt(i).runJudgingCanceled(run);
                     break;
 
                 case RUN_COMPILING:
-                    listenerList.elementAt(i).runCompling(run);
+                    listenerList.elementAt(i).runCompiling(run);
                     break;
 
                 case RUN_EXECUTING:

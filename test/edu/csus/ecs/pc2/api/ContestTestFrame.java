@@ -200,24 +200,12 @@ public class ContestTestFrame extends JFrame {
     // $HeadURL$
     protected class RunListener implements IRunEventListener {
 
-        public void runAdded(IRun run) {
-            println("Run added Site " + run.getSiteNumber() + " Run " + run.getNumber() + " from " + run.getTeam().getLoginName() + " at " + run.getSubmissionTime());
-        }
-
-        public void runRemoved(IRun run) {
-            println("Run removed Site " + run.getSiteNumber() + " Run " + run.getNumber() + " from " + run.getTeam().getLoginName() + " at " + run.getSubmissionTime());
-        }
-
         public void runJudged(IRun run) {
             println("Run judged Site " + run.getSiteNumber() + " Run " + run.getNumber() + " from " + run.getTeam().getLoginName() + " at " + run.getSubmissionTime());
         }
 
         public void runUpdated(IRun run) {
             println("Run updated Site " + run.getSiteNumber() + " Run " + run.getNumber() + " from " + run.getTeam().getLoginName() + " at " + run.getSubmissionTime());
-        }
-
-        public void runCompling(IRun run) {
-            println("Run compiling Site " + run.getSiteNumber() + " Run " + run.getNumber() + " from " + run.getTeam().getLoginName() + " at " + run.getSubmissionTime());
         }
 
         public void runExecuting(IRun run) {
@@ -228,8 +216,20 @@ public class ContestTestFrame extends JFrame {
             println("Run validating Site " + run.getSiteNumber() + " Run " + run.getNumber() + " from " + run.getTeam().getLoginName() + " at " + run.getSubmissionTime());
         }
 
-        public void runJudgementCanceled(IRun run) {
-            println("Run (judgement) canceled Site " + run.getSiteNumber() + " Run " + run.getNumber() + " from " + run.getTeam().getLoginName() + " at " + run.getSubmissionTime());
+        public void runSubmitted(IRun run) {
+            println("Run submitted Site " + run.getSiteNumber() + " Run " + run.getNumber() + " from " + run.getTeam().getLoginName() + " at " + run.getSubmissionTime());
+        }
+
+        public void runDeleted(IRun run) {
+            println("Run deleted Site " + run.getSiteNumber() + " Run " + run.getNumber() + " from " + run.getTeam().getLoginName() + " at " + run.getSubmissionTime());
+        }
+
+        public void runCompiling(IRun run) {
+            println("Run compiling Site " + run.getSiteNumber() + " Run " + run.getNumber() + " from " + run.getTeam().getLoginName() + " at " + run.getSubmissionTime());
+        }
+
+        public void runJudgingCanceled(IRun run) {
+            println("Run judging canceled Site " + run.getSiteNumber() + " Run " + run.getNumber() + " from " + run.getTeam().getLoginName() + " at " + run.getSubmissionTime());
         }
     }
 
