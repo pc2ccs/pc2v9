@@ -9,19 +9,19 @@ import edu.csus.ecs.pc2.api.IRun;
  * itself to the contest as a Listener, and therefore arrange to be notified when any runs are added to, modified, or removed from the contest.
  * <P>
  * 
- * Run Flow - short
+ * Run Flow - if Admin selects "Additional Run Status" to ON 
  * <ol>
- * <li> {@link #runAdded(IRun)}
- * <li> {@link #runJudged(IRun)} typically, but also can be: {@link #runJudgementCanceled(IRun)} or {@link #runRemoved(IRun)} or {@link #runUpdated(IRun)}.
+ * <li> {@link #runSubmitted(IRun)}
+ * <li> {@link #runJudged(IRun)} typically, but also can be: {@link #runJudgingCanceled(IRun)} or {@link #runDeleted(IRun)} or {@link #runUpdated(IRun)}.
  * </ol>
  * 
- * Run Flow - long
+ * Run Flow - if Admin selects "Additional Run Status" to OFF
  * <ol>
- * <li> {@link #runAdded(IRun)}
- * <li> {@link #runCompling(IRun)}
+ * <li> {@link #runSubmitted(IRun)}
+ * <li> {@link #runCompiling(IRun)}
  * <li> {@link #runExecuting(IRun)}
  * <li> {@link #runValidating(IRun)}
- * <li> {@link #runJudged(IRun)} typically, but also can be: {@link #runJudgementCanceled(IRun)} or {@link #runRemoved(IRun)} or {@link #runUpdated(IRun)}.
+ * <li> {@link #runJudged(IRun)} typically, but also can be: {@link #runJudgingCanceled(IRun)} or {@link #runDeleted(IRun)} or {@link #runUpdated(IRun)}.
  * </ol>
  * 
  * <p>
@@ -45,15 +45,15 @@ public interface IRunEventListener {
      * @param run
      *            the {@link IRun} that has been added to the contest
      */
-    void runAdded(IRun run);
+    void runSubmitted(IRun run);
 
     /**
-     * Invoked when an existing run has been removed from the contest (marked as deleted by the Contest Administrator).
+     * Invoked when an existing run has been deleted from the contest (marked as deleted by the Contest Administrator).
      * 
      * @param run
      *            the deleted {@link IRun}
      */
-    void runRemoved(IRun run);
+    void runDeleted(IRun run);
 
     /**
      * Invoked when an existing run has been judged; that is, has had a Judgement applied to it.
@@ -87,7 +87,7 @@ public interface IRunEventListener {
      * @param run
      *            the {@link IRun} which is being compiled.
      */
-    void runCompling(IRun run);
+    void runCompiling(IRun run);
 
     /**
      * Invoked when an existing run is being executed.
@@ -108,10 +108,11 @@ public interface IRunEventListener {
     /**
      * Invoked if the run is re-queued for judgement.
      * 
-     * This run will be queued to be judged.
+     * If a judge has checked out a run then cancels (returns the run to
+     * the set of runs to be judged) then this method will be invoked.
      * 
      * @param run
      *            the {@link IRun} which has been returned to the judging queue.
      */
-    void runJudgementCanceled(IRun run);
+    void runJudgingCanceled(IRun run);
 }
