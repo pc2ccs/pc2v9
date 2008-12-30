@@ -15,7 +15,6 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
-import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
 import edu.csus.ecs.pc2.core.model.IContestInformationListener;
@@ -23,16 +22,16 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.ContestInformation.TeamDisplayMask;
 
 /**
- * InternalContest Information edit/update Pane.
+ * Contest Information edit/update Pane.
  * 
  * Update contest title.
  * 
  * @author pc2@ecs.csus.edu
- * 
+ * @version $Id$
  */
 
 // $HeadURL$
-// $Id$
+
 public class ContestInformationPane extends JPanePlugin {
 
     /**
@@ -216,13 +215,6 @@ public class ContestInformationPane extends JPanePlugin {
         contestInformation.setPreliminaryJudgementsTriggerNotifications(getJCheckBoxShowPreliminaryOnNotifications().isSelected());
         contestInformation.setPreliminaryJudgementsUsedByBoard(getJCheckBoxShowPreliminaryOnBoard().isSelected());
         contestInformation.setSendAdditionalRunStatusInformation(getAdditionalRunStatusCheckBox().isSelected());
-        
-        System.out.println();
-        System.out.println("getFromFields");
-        System.out.println("  Include Preliminary Judgements in Scoring Algorithm : "+Utilities.yesNoString(contestInformation.isPreliminaryJudgementsUsedByBoard()));
-        System.out.println("  Send Notifications for Preliminary Judgements       : "+Utilities.yesNoString(contestInformation.isPreliminaryJudgementsTriggerNotifications()));
-        System.out.println("  Send Additional Run Status Information              : "+Utilities.yesNoString(contestInformation.isSendAdditionalRunStatusInformation()));
-        
         return(contestInformation);
     }
     
@@ -246,13 +238,6 @@ public class ContestInformationPane extends JPanePlugin {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 ContestInformation contestInformation = getContest().getContestInformation();
-                
-                System.out.println("populateGUI");
-                System.out.println("  Include Preliminary Judgements in Scoring Algorithm : "+Utilities.yesNoString(contestInformation.isPreliminaryJudgementsUsedByBoard()));
-                System.out.println("  Send Notifications for Preliminary Judgements       : "+Utilities.yesNoString(contestInformation.isPreliminaryJudgementsTriggerNotifications()));
-                System.out.println("  Send Additional Run Status Information              : "+Utilities.yesNoString(contestInformation.isSendAdditionalRunStatusInformation()));
-
-                
                 getContestTitleTextField().setText(contestInformation.getContestTitle());
                 selectDisplayRadioButton();
                 getJudgesDefaultAnswerTextField().setText(contestInformation.getJudgesDefaultAnswer());
