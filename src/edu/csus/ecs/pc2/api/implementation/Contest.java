@@ -16,6 +16,7 @@ import edu.csus.ecs.pc2.api.ISite;
 import edu.csus.ecs.pc2.api.IStanding;
 import edu.csus.ecs.pc2.api.ITeam;
 import edu.csus.ecs.pc2.api.listener.IConfigurationUpdateListener;
+import edu.csus.ecs.pc2.api.listener.IConnectionEventListener;
 import edu.csus.ecs.pc2.api.listener.IRunEventListener;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -47,6 +48,8 @@ public class Contest implements IContest {
     private IInternalController controller = null;
     
     private RunListenerList runListenerList = new RunListenerList();
+    
+    private ConnectionEventListenerList connectionEventListenerList = new ConnectionEventListenerList();
     
     private ClarificationListenerList clarificationListenerList = new ClarificationListenerList();
     
@@ -145,6 +148,14 @@ public class Contest implements IContest {
     public void removeRunListener(IRunEventListener runEventListener) {
         runListenerList.removeRunListener(runEventListener);
     }
+    
+    public void addConnectionListener(IConnectionEventListener connectionEventListener) {
+        connectionEventListenerList.addConnectionListener(connectionEventListener);
+    }
+
+    public void removeConnectionListener(IConnectionEventListener connectionEventListener) {
+        connectionEventListenerList.removeConnectionListener(connectionEventListener);
+    }
 
     public void addContestConfigurationUpdateListener(IConfigurationUpdateListener contestUpdateConfigurationListener) {
         configurationListenerList.addContestUpdateConfigurationListener(contestUpdateConfigurationListener);
@@ -232,4 +243,6 @@ public class Contest implements IContest {
     public void addClarificationListener(IClarificationEventListener clarificationEventListener) {
         clarificationListenerList.addClarificationListener(clarificationEventListener);
     }
+
+ 
 }

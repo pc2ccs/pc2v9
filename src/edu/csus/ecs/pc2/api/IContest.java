@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.api;
 
 import edu.csus.ecs.pc2.api.listener.IConfigurationUpdateListener;
+import edu.csus.ecs.pc2.api.listener.IConnectionEventListener;
 import edu.csus.ecs.pc2.api.listener.IRunEventListener;
 
 /**
@@ -183,7 +184,9 @@ public interface IContest {
     IClarification [] getClarifications();
 
     /**
-     * Add a Run Event listener to the contest.  A run event listener (object of type {@link IRunEventListener}) will be
+     * Add a Run Event listener to the contest. 
+     * 
+     * A run event listener (object of type {@link IRunEventListener}) will be
      * invoked every time a run is added to the contest, modified (e.g. Judged), or marked as deleted from the contest.
      * Custom clients using the PC<sup>2</sup> API can therefore arrange to be notified when any of these conditions occurs.
      * 
@@ -200,6 +203,25 @@ public interface IContest {
      *            The {@link IRunEventListener} listener to be removed.
      */
     void removeRunListener(IRunEventListener runEventListener);
+
+
+    /**
+     * Add a Connection Event listener to the contest.
+     * 
+     * A connection event listener (object of type {@link IConnectionEventListener}) will be 
+     * invoked every time a connection to the server has been dropped, this client is no longer logged in.
+     * 
+     * @param connectionEventListener
+     */
+    void addConnectionListener(IConnectionEventListener connectionEventListener);
+
+    /**
+     * Remove the specified connection event listener from the contest.
+     * 
+     * @param connectionEventListener
+     *            The {@link IConnectionEventListener} listener to be removed.
+     */
+    void removeConnectionListener(IConnectionEventListener connectionEventListener);
 
     /**
      * Remove the specified clarification event listener from the contest.
