@@ -28,6 +28,8 @@ public class ContestInformation implements Serializable{
     private boolean preliminaryJudgementsUsedByBoard = false;
     private boolean preliminaryJudgementsTriggerNotifications = false;
     
+    private boolean sendAdditionalRunStatusInformation = false;
+    
     /**
      * 
      * @author pc2@ecs.csus.edu
@@ -120,6 +122,9 @@ public class ContestInformation implements Serializable{
             if (preliminaryJudgementsUsedByBoard != contestInformation.isPreliminaryJudgementsUsedByBoard()) {
                 return false;
             }
+            if (sendAdditionalRunStatusInformation != contestInformation.isSendAdditionalRunStatusInformation()) {
+                return false;
+            }
             return true;
         } catch (Exception e) {
             // TODO log to static exception log
@@ -156,5 +161,13 @@ public class ContestInformation implements Serializable{
      */
     public boolean isPreliminaryJudgementsTriggerNotifications() {
         return preliminaryJudgementsTriggerNotifications;
+    }
+
+    public boolean isSendAdditionalRunStatusInformation() {
+        return sendAdditionalRunStatusInformation;
+    }
+
+    public void setSendAdditionalRunStatusInformation(boolean sendAdditionalRunStatusInformation) {
+        this.sendAdditionalRunStatusInformation = sendAdditionalRunStatusInformation;
     }
 }

@@ -4,7 +4,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.VersionInfo;
@@ -12,6 +11,7 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.ClarificationComparator;
+import edu.csus.ecs.pc2.core.list.ClientSettingsComparator;
 import edu.csus.ecs.pc2.core.list.ContestTimeComparator;
 import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
@@ -34,7 +34,7 @@ import edu.csus.ecs.pc2.core.model.ContestInformation.TeamDisplayMask;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
 /**
- * Dumps lots of internal lists and such.
+ * Print/Report a number internal settings.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$ 
@@ -57,43 +57,6 @@ public class InternalDumpReport implements IReport {
     private Filter accountFilter = new Filter();
 
     private Filter filter;
-
-    /**
-     * Comparor for ClientSettings, by site, client type then client id.
-     * @author pc2@ecs.csus.edu
-     * @version $Id$
-     */
-    
-    // TOOD make this its own java file
-    private class ClientSettingsComparator implements Comparator<ClientSettings> {
-
-        /**
-         * 
-         */
-        private static final long serialVersionUID = 1402498954732267609L;
-
-        public static final String SVN_ID = "$Id$";
-
-        public int compare(ClientSettings clientSettings1, ClientSettings clientSettings2) {
-            int site1 = clientSettings1.getSiteNumber();
-            int site2 = clientSettings2.getSiteNumber();
-
-            if (site1 == site2) {
-                
-                ClientId clientId1 = clientSettings1.getClientId();
-                ClientId clientId2 = clientSettings2.getClientId();
-                
-                if (clientId1.getClientType().equals(clientId2.getClientType())){
-                    return clientId1.getClientNumber() - clientId2.getClientNumber();
-                } else {
-                    return clientId1.getClientType().compareTo(clientId2.getClientType());
-                }
-                
-            } else {
-                return site1 - site2;
-            }
-        }
-    }
 
     private void printClientSettings(PrintWriter printWriter) {
       
@@ -120,6 +83,13 @@ public class InternalDumpReport implements IReport {
         printWriter.println("-- Contest Information --");
         printWriter.println("  Title : '" + contestInformation.getContestTitle()+"'");
         printWriter.println("  URL   : '" + contestInformation.getContestURL()+"'");
+        
+        printWriter.println();
+        printWriter.println("  Include Preliminary Judgements in Scoring Algorithm : "+Utilities.yesNoString(contestInformation.isPreliminaryJudgementsUsedByBoard()));
+        printWriter.println("  Send Notifications for Preliminary Judgements       : "+Utilities.yesNoString(contestInformation.isPreliminaryJudgementsTriggerNotifications()));
+        printWriter.println("  Send Additional Run Status Information              : "+Utilities.yesNoString(contestInformation.isSendAdditionalRunStatusInformation()));
+        printWriter.println();
+        
         printWriter.println("  Judges' Default Answer: '" + contestInformation.getJudgesDefaultAnswer()+"'");
         
         if (contestInformation.getTeamDisplayMode() != null){

@@ -2,25 +2,25 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.Rectangle;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
-import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IContestInformationListener;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.ContestInformation.TeamDisplayMask;
-import java.awt.Dimension;
-import javax.swing.JCheckBox;
-import java.awt.Rectangle;
-import javax.swing.SwingConstants;
 
 /**
  * InternalContest Information edit/update Pane.
@@ -74,6 +74,8 @@ public class ContestInformationPane extends JPanePlugin {
 
     private JCheckBox jCheckBoxShowPreliminaryOnNotifications = null;
 
+    private JCheckBox additionalRunStatusCheckBox = null;
+
     /**
      * This method initializes
      * 
@@ -89,7 +91,7 @@ public class ContestInformationPane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new Dimension(533, 300));
+        this.setSize(new java.awt.Dimension(533,347));
         this.add(getCenterPane(), java.awt.BorderLayout.CENTER);
         this.add(getButtonPanel(), java.awt.BorderLayout.SOUTH);
     }
@@ -131,6 +133,7 @@ public class ContestInformationPane extends JPanePlugin {
             centerPane.add(getJudgesDefaultAnswerTextField(), null);
             centerPane.add(getJCheckBoxShowPreliminaryOnBoard(), null);
             centerPane.add(getJCheckBoxShowPreliminaryOnNotifications(), null);
+            centerPane.add(getAdditionalRunStatusCheckBox(), null);
         }
         return centerPane;
     }
@@ -212,6 +215,14 @@ public class ContestInformationPane extends JPanePlugin {
         contestInformation.setJudgesDefaultAnswer(getJudgesDefaultAnswerTextField().getText());
         contestInformation.setPreliminaryJudgementsTriggerNotifications(getJCheckBoxShowPreliminaryOnNotifications().isSelected());
         contestInformation.setPreliminaryJudgementsUsedByBoard(getJCheckBoxShowPreliminaryOnBoard().isSelected());
+        contestInformation.setSendAdditionalRunStatusInformation(getAdditionalRunStatusCheckBox().isSelected());
+        
+        System.out.println();
+        System.out.println("getFromFields");
+        System.out.println("  Include Preliminary Judgements in Scoring Algorithm : "+Utilities.yesNoString(contestInformation.isPreliminaryJudgementsUsedByBoard()));
+        System.out.println("  Send Notifications for Preliminary Judgements       : "+Utilities.yesNoString(contestInformation.isPreliminaryJudgementsTriggerNotifications()));
+        System.out.println("  Send Additional Run Status Information              : "+Utilities.yesNoString(contestInformation.isSendAdditionalRunStatusInformation()));
+        
         return(contestInformation);
     }
     
@@ -235,11 +246,19 @@ public class ContestInformationPane extends JPanePlugin {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 ContestInformation contestInformation = getContest().getContestInformation();
+                
+                System.out.println("populateGUI");
+                System.out.println("  Include Preliminary Judgements in Scoring Algorithm : "+Utilities.yesNoString(contestInformation.isPreliminaryJudgementsUsedByBoard()));
+                System.out.println("  Send Notifications for Preliminary Judgements       : "+Utilities.yesNoString(contestInformation.isPreliminaryJudgementsTriggerNotifications()));
+                System.out.println("  Send Additional Run Status Information              : "+Utilities.yesNoString(contestInformation.isSendAdditionalRunStatusInformation()));
+
+                
                 getContestTitleTextField().setText(contestInformation.getContestTitle());
                 selectDisplayRadioButton();
                 getJudgesDefaultAnswerTextField().setText(contestInformation.getJudgesDefaultAnswer());
                 getJCheckBoxShowPreliminaryOnBoard().setSelected(contestInformation.isPreliminaryJudgementsUsedByBoard());
                 getJCheckBoxShowPreliminaryOnNotifications().setSelected(contestInformation.isPreliminaryJudgementsTriggerNotifications());
+                getAdditionalRunStatusCheckBox().setSelected(contestInformation.isSendAdditionalRunStatusInformation());
                 setEnableButtons(false);
             }
         });
@@ -515,7 +534,7 @@ public class ContestInformationPane extends JPanePlugin {
             jCheckBoxShowPreliminaryOnBoard = new JCheckBox();
             jCheckBoxShowPreliminaryOnBoard.setBounds(new Rectangle(75, 208, 416, 21));
             jCheckBoxShowPreliminaryOnBoard.setHorizontalAlignment(SwingConstants.TRAILING);
-            jCheckBoxShowPreliminaryOnBoard.setText("Include Preliminary Judgements in Scoring Alorithm");
+            jCheckBoxShowPreliminaryOnBoard.setText("Include Preliminary Judgements in Scoring Algorithm");
             jCheckBoxShowPreliminaryOnBoard.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableUpdateButton();
@@ -534,7 +553,7 @@ public class ContestInformationPane extends JPanePlugin {
         if (jCheckBoxShowPreliminaryOnNotifications == null) {
             jCheckBoxShowPreliminaryOnNotifications = new JCheckBox();
             jCheckBoxShowPreliminaryOnNotifications.setBounds(new Rectangle(60, 238, 427, 21));
-            jCheckBoxShowPreliminaryOnNotifications.setHorizontalAlignment(SwingConstants.TRAILING);
+            jCheckBoxShowPreliminaryOnNotifications.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
             jCheckBoxShowPreliminaryOnNotifications.setText("Send Notifications for Preliminary Judgements");
             jCheckBoxShowPreliminaryOnNotifications.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -543,6 +562,27 @@ public class ContestInformationPane extends JPanePlugin {
             });
         }
         return jCheckBoxShowPreliminaryOnNotifications;
+    }
+
+    /**
+     * This method initializes additionalRunStatusCheckBox
+     * 
+     * @return javax.swing.JCheckBox
+     */
+    private JCheckBox getAdditionalRunStatusCheckBox() {
+        if (additionalRunStatusCheckBox == null) {
+            additionalRunStatusCheckBox = new JCheckBox();
+            additionalRunStatusCheckBox.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+            additionalRunStatusCheckBox.setSize(new java.awt.Dimension(427,21));
+            additionalRunStatusCheckBox.setLocation(new java.awt.Point(60,268));
+            additionalRunStatusCheckBox.setText("Send Additional Run Status Information");
+            additionalRunStatusCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableUpdateButton();
+                }
+            });
+        }
+        return additionalRunStatusCheckBox;
     }
 
     // private ButtonGroup getTeamReadsFrombuttonGroup() {
