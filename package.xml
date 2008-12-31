@@ -15,8 +15,6 @@
     <property name="version.path" value="${build.dir}/VERSION"/>
     <property name="pc2jzip.name" value="pc2j-${version}.zip"/>
     <property name="pc2jzip.path" value="${build.dir}/${pc2jzip.name}"/>
-    <property name="apizip.name" value="api-${version}.zip"/>
-    <property name="apizip.path" value="${dist.dir}/${apizip.name}"/>
 
     <target name="apizip" depends="javadocs-api" description="create zip of the API javadocs">
         <!-- in case we are run before jar -->
@@ -131,6 +129,8 @@
         <property name="zip.path" value="${dist.dir}/${zip.name}"/>
         <property name="gzip.name" value="${release}-${repo.version}.tar.gz"/>
         <property name="gzip.path" value="${dist.dir}/${gzip.name}"/>
+        <property name="apizip.name" value="api-doc-${version}-${repo.version}.zip"/>
+        <property name="apizip.path" value="${dist.dir}/${apizip.name}"/>
 
         <antcall target="apizip"/>
         <antcall target="zip"/> 
