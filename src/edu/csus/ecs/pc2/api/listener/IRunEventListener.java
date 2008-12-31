@@ -9,13 +9,13 @@ import edu.csus.ecs.pc2.api.IRun;
  * itself to the contest as a Listener, and therefore arrange to be notified when any runs are added to, modified, or removed from the contest.
  * <P>
  * 
- * Run Flow - if Admin selects "Additional Run Status" to ON 
+ * Run Flow - if Admin selects "Send Additional Run Status Information" to OFF 
  * <ol>
  * <li> {@link #runSubmitted(IRun)}
  * <li> {@link #runJudged(IRun)} typically, but also can be: {@link #runJudgingCanceled(IRun)} or {@link #runDeleted(IRun)} or {@link #runUpdated(IRun)}.
  * </ol>
  * 
- * Run Flow - if Admin selects "Additional Run Status" to OFF
+ * Run Flow - if Admin selects "Send Additional Run Status Information" to ON
  * <ol>
  * <li> {@link #runSubmitted(IRun)}
  * <li> {@link #runCompiling(IRun)}
