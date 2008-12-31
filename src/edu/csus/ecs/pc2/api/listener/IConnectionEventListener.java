@@ -12,9 +12,7 @@ public interface IConnectionEventListener {
 
     /**
      * Connection Dropped.
-     * 
-     * @param connectionEvent
      */
-    void connectionDropped(ConnectionEvent connectionEvent);
+    void connectionDropped();
 
 }

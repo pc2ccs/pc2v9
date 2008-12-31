@@ -66,6 +66,7 @@ public class Contest implements IContest {
         runListenerList.setContestAndController(contest, controller);
         clarificationListenerList.setContestAndController(contest, controller);
         configurationListenerList.setContest(contest);
+        connectionEventListenerList.setContestAndController(contest, controller, this);
     }
 
     public boolean isLoggedIn() {

@@ -9,7 +9,8 @@ import edu.csus.ecs.pc2.core.model.IConnectionListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
- * Connection Listener implementation. 
+ * Connection Listener implementation.
+ * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -20,32 +21,25 @@ public class ConnectionEventListenerList {
     private Vector<IConnectionEventListener> listenerList = new Vector<IConnectionEventListener>();
 
     private IInternalContest contest = null;
-    
+
+    @SuppressWarnings("unused")
     private IInternalController controller = null;
 
-    private void fireConnectionListener(ConnectionEvent runEvent) {
+    private Contest iContest = null;
+
+    private void fireConnectionListener(ConnectionEvent connectionEvent) {
+
         for (int i = 0; i < listenerList.size(); i++) {
 
-//            IIConnectionEventListener run = new ConnectionImplementation(runEvent.getConnection(), contest, controller);
-//          IConnectionEventListener connectionEventListener = new ConnectionImplementation(runEvent.getConnection(), contest, controller);
-
-            // TODO code
-            System.out.println(i); // debug
-            
-            
-//            switch (runEvent.getAction()) {
-//            case ADDED:
-//                listenerList.elementAt(i).connectionDropped(connectionEvent);
-//                break;
-//
-//            case DELETED:
-//                listenerList.elementAt(i).runRemoved(run);
-//                break;
-//
-//   
-//            default:
-//                break;
-//            }
+            switch (connectionEvent.getAction()) {
+                case DROPPED:
+                    listenerList.elementAt(i).connectionDropped();
+                    break;
+                case ESTABLISHED:
+                    break; // not used
+                default:
+                    break; // not used
+            }
         }
     }
 
@@ -57,9 +51,10 @@ public class ConnectionEventListenerList {
         return contest;
     }
 
-    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
+    public void setContestAndController(IInternalContest inContest, IInternalController inController, Contest contest2) {
         this.contest = inContest;
         this.controller = inController;
+        this.iContest  = contest2;
         contest.addConnectionListener(new Listener());
     }
 
@@ -77,13 +72,15 @@ public class ConnectionEventListenerList {
     class Listener implements IConnectionListener {
 
         public void connectionEstablished(ConnectionEvent connectionEvent) {
-            // TODO Auto-generated method stub
-            
+            /**
+             * Not used by API at this time.
+             */
         }
 
         public void connectionDropped(ConnectionEvent connectionEvent) {
-            // TODO Auto-generated method stub
-            
+            iContest.setLoggedIn(false);
+            fireConnectionListener(connectionEvent);
+
         }
     }
 }

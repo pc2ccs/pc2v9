@@ -33,6 +33,7 @@ import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
 import edu.csus.ecs.pc2.api.exceptions.NotLoggedInException;
 import edu.csus.ecs.pc2.api.listener.ContestEvent;
 import edu.csus.ecs.pc2.api.listener.IConfigurationUpdateListener;
+import edu.csus.ecs.pc2.api.listener.IConnectionEventListener;
 import edu.csus.ecs.pc2.api.listener.IRunEventListener;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.IntegerDocument;
@@ -81,6 +82,8 @@ public class ContestTestFrame extends JFrame {
     private JCheckBox configListenerCheckBox = null;
 
     private RunListener runListener = null;
+    
+    private ConnectionEventListener connectionEventListener = null;
 
     private ScrollyFrame scrollyFrame = new ScrollyFrame();
 
@@ -133,6 +136,8 @@ public class ContestTestFrame extends JFrame {
     private JButton getClarificationButton = null;
 
     private JLabel clarificationsOnSite = null;
+
+    private JCheckBox connectionListenerCheckBox = null;
 
     /**
      * This method initializes
@@ -196,7 +201,7 @@ public class ContestTestFrame extends JFrame {
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
-
+    
     // $HeadURL$
     protected class RunListener implements IRunEventListener {
 
@@ -230,6 +235,19 @@ public class ContestTestFrame extends JFrame {
 
         public void runJudgingCanceled(IRun run) {
             println("Run judging canceled Site " + run.getSiteNumber() + " Run " + run.getNumber() + " from " + run.getTeam().getLoginName() + " at " + run.getSubmissionTime());
+        }
+    }
+
+    /**
+     * Connection Listener for ContestTestFrame.
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    protected class ConnectionEventListener implements IConnectionEventListener {
+
+        public void connectionDropped() {
+            println("Connection Dropped, logged in "+serverConnection.isLoggedIn());
         }
     }
 
@@ -368,6 +386,7 @@ public class ContestTestFrame extends JFrame {
             centerPane.add(runsOnSite, null);
             centerPane.add(getGetClarificationButton(), null);
             centerPane.add(clarificationsOnSite, null);
+            centerPane.add(getConnectionListenerCheckBox(), null);
         }
         return centerPane;
     }
@@ -608,7 +627,7 @@ public class ContestTestFrame extends JFrame {
     private JCheckBox getRunListenerCheckBox() {
         if (runListenerCheckBox == null) {
             runListenerCheckBox = new JCheckBox();
-            runListenerCheckBox.setBounds(new java.awt.Rectangle(19,300,156,18));
+            runListenerCheckBox.setBounds(new java.awt.Rectangle(17,271,156,18));
             runListenerCheckBox.setToolTipText("Listen for run events");
             runListenerCheckBox.setText("View Run Listener");
             runListenerCheckBox.addActionListener(new java.awt.event.ActionListener() {
@@ -647,6 +666,34 @@ public class ContestTestFrame extends JFrame {
             }
         }
     }
+    
+    /**
+     * Turn run listener on and off
+     * 
+     * @param listenerON
+     *            true add listener, false no listener.
+     */
+    protected void connectionListenerChanged(boolean listenerON) {
+
+        if (contest == null) {
+            showMessage("Not logged in");
+            return;
+        }
+
+        if (listenerON) {
+            // turn it on
+            if (connectionEventListener == null) {
+                connectionEventListener = new ConnectionEventListener();
+            }
+            contest.addConnectionListener(connectionEventListener);
+            println("Connection Listener added");
+        } else {
+            if (connectionEventListener != null) {
+                contest.removeConnectionListener(connectionEventListener);
+                println("Connection Listener removed");
+            }
+        }
+    }
 
     /**
      * This method initializes configListenerCheckBox
@@ -656,7 +703,7 @@ public class ContestTestFrame extends JFrame {
     private JCheckBox getConfigListenerCheckBox() {
         if (configListenerCheckBox == null) {
             configListenerCheckBox = new JCheckBox();
-            configListenerCheckBox.setBounds(new java.awt.Rectangle(19,361,156,21));
+            configListenerCheckBox.setBounds(new java.awt.Rectangle(17,332,156,21));
             configListenerCheckBox.setToolTipText("Listen for all configuration change events");
             configListenerCheckBox.setText("View Config Listener");
             configListenerCheckBox.addActionListener(new java.awt.event.ActionListener() {
@@ -856,7 +903,7 @@ public class ContestTestFrame extends JFrame {
     private JCheckBox getClarListenerCheckBox() {
         if (clarListenerCheckBox == null) {
             clarListenerCheckBox = new JCheckBox();
-            clarListenerCheckBox.setBounds(new java.awt.Rectangle(19,329,156,21));
+            clarListenerCheckBox.setBounds(new java.awt.Rectangle(17,300,156,21));
             clarListenerCheckBox.setToolTipText("Listen for Clarification events");
             clarListenerCheckBox.setText("View Clar Listener");
             clarListenerCheckBox.addActionListener(new java.awt.event.ActionListener() {
@@ -1232,6 +1279,27 @@ public class ContestTestFrame extends JFrame {
             });
         }
         return getClarificationButton;
+    }
+
+    /**
+     * This method initializes jCheckBox
+     * 
+     * @return javax.swing.JCheckBox
+     */
+    private JCheckBox getConnectionListenerCheckBox() {
+        if (connectionListenerCheckBox == null) {
+            connectionListenerCheckBox = new JCheckBox();
+            connectionListenerCheckBox.setBounds(new java.awt.Rectangle(17,366,184,24));
+            connectionListenerCheckBox.setText("View Connection Listener");
+            connectionListenerCheckBox.setToolTipText("Listen for all connection change events");
+            connectionListenerCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    runListenerChanged(runListenerCheckBox.isSelected());
+                    connectionListenerChanged(configListenerCheckBox.isSelected());
+                }
+            });
+        }
+        return connectionListenerCheckBox;
     }
 
     public static void main(String[] args) {

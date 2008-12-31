@@ -79,6 +79,7 @@ public class ServerConnection {
         controller = new InternalController(internalContest);
 
         controller.setUsingMainUI(false);
+        controller.setClientAutoShutdown(false);
         try {
             controller.start(new String[0]);
             internalContest = controller.clientLogin(internalContest, login, password);

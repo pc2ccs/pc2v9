@@ -401,5 +401,8 @@ public interface IInternalController {
      * @param run
      */
     void sendValidatingMessage(Run run);
-        
+    
+    boolean isClientAutoShutdown();
+
+    void setClientAutoShutdown(boolean clientAutoShutdown);
 }

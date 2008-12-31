@@ -250,6 +250,13 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     private int securityLevel = SECURITY_HIGH_LEVEL;
 
     private String contestPassword = null;
+    
+    /**
+     * Flag indicating whether Roman Numeral shutdown is done.
+     * 
+     * If set to false, then will trigger/send the event 
+     */
+    private boolean clientAutoShutdown = true;
 
     public InternalController(IInternalContest contest) {
         super();
@@ -1594,20 +1601,27 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     public void connectionDropped() {
 
         // Connection dropped, countdown and halt client
+        
+        if (clientAutoShutdown){
 
-        CountDownMessage countDownMessage = new CountDownMessage("Shutting down PC^2 in ", 10);
-        if (contest.getClientId() != null) {
-            info("connectionDropped: shutting down " + contest.getClientId());
-            countDownMessage.setTitle("Shutting down PC^2 " + contest.getClientId().getClientType() + " " + contest.getTitle());
+            CountDownMessage countDownMessage = new CountDownMessage("Shutting down PC^2 in ", 10);
+            if (contest.getClientId() != null) {
+                info("connectionDropped: shutting down " + contest.getClientId());
+                countDownMessage.setTitle("Shutting down PC^2 " + contest.getClientId().getClientType() + " " + contest.getTitle());
+            } else {
+                info("connectionDropped: shutting down <non-logged in client>");
+                countDownMessage.setTitle("Shutting down PC^2 Client");
+            }
+            countDownMessage.setExitOnClose(true);
+            if (isUsingMainUI()) {
+                countDownMessage.setVisible(true);
+            }
+            
         } else {
-            info("connectionDropped: shutting down <non-logged in client>");
-            countDownMessage.setTitle("Shutting down PC^2 Client");
+            
+            // Tell API that connection was dropped
+            contest.connectionDropped(null);
         }
-        countDownMessage.setExitOnClose(true);
-        if (isUsingMainUI()) {
-            countDownMessage.setVisible(true);
-        }
-
     }
 
     public void info(String s) {
@@ -2536,5 +2550,13 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             Packet sendPacket = PacketFactory.createRunStatusPacket(contest.getClientId(), getServerClientId(), run, contest.getClientId(), RunExecutionStatus.VALIDATING);
             sendToLocalServer(sendPacket);
         }
+    }
+
+    public boolean isClientAutoShutdown() {
+        return clientAutoShutdown;
+    }
+
+    public void setClientAutoShutdown(boolean clientAutoShutdown) {
+        this.clientAutoShutdown = clientAutoShutdown;
     }
 }
