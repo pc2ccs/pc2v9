@@ -137,7 +137,7 @@ public class ContestAnalysisReport implements IReport {
 
         for (int i = 0; i < numSites; i++) {
             int siteNum = i + 1;
-            printWriter.format("%2d %-15s ", siteNum, contest.getSites()[i].getDisplayName());
+            printWriter.format("%2d %-15s ", siteNum, contest.getSite(siteNum).getDisplayName());
 
             printWriter.format("%4d runs (%2d unjudged, %2d deleted)", numRuns[i], numUnjudgedRuns[i], numRunsDeleted[i]);
             printWriter.format("%4d clars, %d to All (%2d unanswered, %2d deleted)", numClars[i], numClarsForAll[i], numClarsUnAnswered[i], numClarsDeleted[i]);
