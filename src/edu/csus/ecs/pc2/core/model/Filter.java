@@ -76,11 +76,23 @@ public class Filter implements Serializable {
      * collection of language ids
      */
     private Hashtable<ElementId, Date> languageIdHash = new Hashtable<ElementId, Date>();
+    
+    /**
+     * Collection of site ids.
+     */
+    private Hashtable<Integer, Date> siteIdHash = new Hashtable<Integer, Date>();
+    
 
     /**
      * filtering on language (language id)
      */
     private boolean filteringLanguages = false;
+    
+    /**
+     * filtering on site (site number)
+     */
+    private boolean filteringSites = false;
+
 
     /**
      * collection of judgement ids
@@ -106,17 +118,9 @@ public class Filter implements Serializable {
      */
     private boolean thisSiteOnly;
 
-    private int siteNumber = 0;
+    private int filterSiteNumber = 0;
 
     private boolean filterEnabled = true;
-
-    private boolean isThisSite(ISubmission submission) {
-        return siteNumber == submission.getSiteNumber() || siteNumber == 0;
-    }
-
-    private boolean isThisSite(ClientId clientId) {
-        return siteNumber == clientId.getSiteNumber() || siteNumber == 0;
-    }
 
     private ElementId getJudgementId(Run run) {
         JudgementRecord judgementRecord = run.getJudgementRecord();
@@ -134,7 +138,7 @@ public class Filter implements Serializable {
     public boolean matches(Run run) {
         if (filterEnabled){
             ElementId judgementElementId = getJudgementId(run);
-            return isThisSite(run) && matchesAccount(run.getSubmitter()) && matchesRunState(run.getStatus()) && matchesProblem(run.getProblemId()) && matchesLanguage(run.getLanguageId())
+            return matchesSites(run) && matchesAccount(run.getSubmitter()) && matchesRunState(run.getStatus()) && matchesProblem(run.getProblemId()) && matchesLanguage(run.getLanguageId())
              && matchesJudgement(judgementElementId) && matchesElapsedTimeSubmission(run);
         } else {
             return true;
@@ -149,7 +153,7 @@ public class Filter implements Serializable {
      */
     public boolean matches(Clarification clarification) {
         if (filterEnabled){
-            return isThisSite(clarification) && matchesAccount(clarification.getSubmitter()) && matchesClarificationState(clarification.getState()) 
+            return matchesSites(clarification) && matchesAccount(clarification.getSubmitter()) && matchesClarificationState(clarification.getState()) 
             && matchesProblem(clarification.getProblemId()) && matchesLanguage(clarification.getLanguageId()) && matchesElapsedTimeSubmission(clarification);
 
         } else {
@@ -165,10 +169,14 @@ public class Filter implements Serializable {
      */
     public boolean matches(ClientId clientId) {
         if (filterEnabled){
-            return isThisSite(clientId) && matchesAccount(clientId);
+            return matchesSites(clientId) && matchesAccount(clientId);
         } else {
             return true;
         }
+    }
+
+    public boolean matchesSites(ClientId clientId) {
+        return matchesSites(clientId.getSiteNumber());
     }
 
     public boolean isThisSiteOnly() {
@@ -179,16 +187,17 @@ public class Filter implements Serializable {
         this.thisSiteOnly = thisSiteOnly;
     }
 
-    public int isSiteNumber() {
-        return siteNumber;
-    }
+    // TODO unused code ?
+//    public int isSiteNumber() {
+//        return filterSiteNumber;
+//    }
 
     public void setSiteNumber(int siteNumber) {
-        this.siteNumber = siteNumber;
+        this.filterSiteNumber = siteNumber;
     }
 
     public int getSiteNumber() {
-        return siteNumber;
+        return filterSiteNumber;
     }
 
     public void setUsingJudgementFilter(boolean turnOn) {
@@ -312,7 +321,16 @@ public class Filter implements Serializable {
     public void setUsingLanguageFilter(boolean turnOn) {
         filteringLanguages = turnOn;
     }
+    
 
+    public void setUsingSitesFilter(boolean turnOn) {
+        filteringSites = turnOn;
+    }
+
+    public boolean isFilteringSites() {
+        return filteringSites;
+    }
+    
     /**
      * Is filtering using language list.
      * 
@@ -363,6 +381,49 @@ public class Filter implements Serializable {
         } else {
             return true;
         }
+    }
+
+    /**
+     * Add a site to match against.
+     * 
+     * @param site
+     */
+    public void addSite(Site site) {
+        addSite(site.getSiteNumber());
+    }
+
+    /**
+     * Add a site to match against.
+     * 
+     * Also turns filtering on for site list.
+     * 
+     * @param elementId
+     */
+    public void addSite(int siteNumber) {
+        siteIdHash.put(new Integer(siteNumber), new Date());
+        filteringSites = true;
+    }
+    
+    private boolean matchesSites (ISubmission submission) {
+        return matchesSites (submission.getSiteNumber());
+    }
+
+
+    private boolean matchesSites(int siteNumber) {
+        if (filteringSites) {
+            return siteIdHash.containsKey(new Integer(siteNumber));
+        } else {
+            return true;
+        }
+    }
+
+    /**
+     * Return true if site filter ON and matches a site in the filter list.
+     * 
+     * @param site
+     */
+    public boolean matchesSite(Site site) {
+        return matchesSites(site.getSiteNumber());
     }
 
     public boolean matchesAccount(Account account) {
@@ -432,6 +493,21 @@ public class Filter implements Serializable {
         filteringLanguages = false;
         languageIdHash = new Hashtable<ElementId, Date>();
     }
+    
+    /**
+     * Clear site and turn site filtering off.
+     *
+     */
+    public void clearSiteList() {
+        filteringSites = false;
+        siteIdHash = new Hashtable<Integer, Date>();
+    }
+
+    public void removeSite(Site site) {
+        if (siteIdHash.containsKey(site.getElementId())) {
+            siteIdHash.remove(site.getElementId());
+        }
+    }
 
     public void removeProblem(Problem problem) {
         if (problemIdHash.containsKey(problem.getElementId())) {
@@ -491,6 +567,25 @@ public class Filter implements Serializable {
         return elementIds;
     }
 
+    /**
+     * Get list of ElementIds for the sites in the filter list.
+     * 
+     * @return list of element ids.
+     */
+    public Integer[] getSiteIdList() {
+        Integer[] elementIds = new Integer[siteIdHash.size()];
+        Enumeration<Integer> enumeration = siteIdHash.keys();
+        int i = 0;
+        while (enumeration.hasMoreElements()) {
+            Integer element = (Integer) enumeration.nextElement();
+            elementIds[i] = element;
+            i++;
+        }
+        return elementIds;
+    }
+
+
+    
     /**
      * Get list of ClientIds for the accounts in the filter list.
      * 
@@ -655,8 +750,8 @@ public class Filter implements Serializable {
             
             String filterInfo = "Filter ON";
             
-            if (thisSiteOnly) {
-                filterInfo += " Site " + siteNumber;
+            if (thisSiteOnly || filteringSites) {
+                filterInfo += " Site(s) ";
             }
             if (filteringProblems) {
                 filterInfo += " problem(s) ";
