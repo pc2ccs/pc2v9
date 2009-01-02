@@ -10,6 +10,7 @@ import java.util.Vector;
 import javax.swing.DefaultListModel;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -17,6 +18,7 @@ import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
+import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
@@ -30,10 +32,10 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
-import javax.swing.JList;
 
 /**
  * Edit Filter GUI.
@@ -102,6 +104,8 @@ public class EditFilterPane extends JPanePlugin {
     
     private DefaultListModel clarificationStatesListModel = new DefaultListModel();
 
+    private DefaultListModel sitesListModel = new DefaultListModel();
+
     private JPanel timeRangePane = null;
 
     private JLabel fromTimeLabel = null;
@@ -123,6 +127,12 @@ public class EditFilterPane extends JPanePlugin {
     private JScrollPane clarificationStateScrollPane = null;
 
     private JList clarificationStatesListBox = null;
+
+    private JPanel sitesPane = null;  //  @jve:decl-index=0:visual-constraint="649,76"
+
+    private JScrollPane sitesScroll = null;
+
+    private JCheckBoxJList siteListBox = null;
 
     /**
      * JList names in EditFilterPane.
@@ -160,6 +170,10 @@ public class EditFilterPane extends JPanePlugin {
          * Elapsed Time (both From and To) 
          */
         TIME_RANGE,
+        /**
+         * Sites.
+         */
+        SITES,
     }
 
     public EditFilterPane() {
@@ -487,6 +501,17 @@ public class EditFilterPane extends JPanePlugin {
             }
             languageListModel.addElement(wrapperJCheckBox);
         }
+        
+        sitesListModel.removeAllElements();
+        Site [] sites = getContest().getSites();
+        Arrays.sort (sites, new SiteComparatorBySiteNumber());
+        for (Site site : sites) {
+            WrapperJCheckBox wrapperJCheckBox = new WrapperJCheckBox(site, site.getSiteNumber()+" "+site.getDisplayName());
+            if (filter.isFilteringSites()) {
+                wrapperJCheckBox.setSelected(filter.matchesSite(site));
+            }
+            sitesListModel.addElement(wrapperJCheckBox);
+        }
 
         judgementListModel.removeAllElements();
         for (Judgement judgement : getContest().getJudgements()) {
@@ -670,6 +695,16 @@ public class EditFilterPane extends JPanePlugin {
                 filter.addJudgement((Judgement) object);
             }
         }
+        
+        filter.clearSiteList();
+        enumeration = sitesListModel.elements();
+        while (enumeration.hasMoreElements()) {
+            WrapperJCheckBox element = (WrapperJCheckBox) enumeration.nextElement();
+            if (element.isSelected()) {
+                Object object = element.getContents();
+                filter.addSite((Site) object);
+            }
+        }
 
         filter.clearElapsedTime();
         if (getFromTimeTextField().getText().length() > 0){
@@ -781,6 +816,10 @@ public class EditFilterPane extends JPanePlugin {
                 break;
             case TIME_RANGE:
                 listsPanel.add(getClarificationStatesPane(), 0);
+                break;
+            case SITES:
+                listsPanel.add(getSitesPane(), 0);
+                break;
             default:
                 throw new InvalidParameterException("Invalid listNames: " + listName);
         }
@@ -918,6 +957,49 @@ public class EditFilterPane extends JPanePlugin {
 
     public void setFilteringClarifications(boolean filteringClarifications) {
         this.filteringClarifications = filteringClarifications;
+    }
+
+    /**
+     * This method initializes jPanel
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getSitesPane() {
+        if (sitesPane == null) {
+            sitesPane = new JPanel();
+            sitesPane.setLayout(new BorderLayout());
+            sitesPane.setName("sitesPane");
+            sitesPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Sites", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION,
+                    new java.awt.Font("Dialog", java.awt.Font.BOLD, 12), new java.awt.Color(51, 51, 51)));
+            sitesPane.setSize(new java.awt.Dimension(251, 151));
+            sitesPane.add(getSitesScroll(), java.awt.BorderLayout.CENTER);
+        }
+        return sitesPane;
+    }
+
+    /**
+     * This method initializes siteSCroll
+     * 
+     * @return javax.swing.JScrollPane
+     */
+    private JScrollPane getSitesScroll() {
+        if (sitesScroll == null) {
+            sitesScroll = new JScrollPane();
+            sitesScroll.setViewportView(getSiteListBox());
+        }
+        return sitesScroll;
+    }
+
+    /**
+     * This method initializes siteListBox
+     * 
+     * @return edu.csus.ecs.pc2.ui.JCheckBoxJList
+     */
+    private JCheckBoxJList getSiteListBox() {
+        if (siteListBox == null) {
+            siteListBox = new JCheckBoxJList(sitesListModel);
+        }
+        return siteListBox;
     }
 
 
