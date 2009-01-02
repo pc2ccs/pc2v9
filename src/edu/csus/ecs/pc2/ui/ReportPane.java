@@ -49,6 +49,7 @@ import edu.csus.ecs.pc2.core.report.RunsReport;
 import edu.csus.ecs.pc2.core.report.RunsReport5;
 import edu.csus.ecs.pc2.core.report.SolutionsByProblemReport;
 import edu.csus.ecs.pc2.core.report.StandingsReport;
+import edu.csus.ecs.pc2.ui.EditFilterPane.ListNames;
 
 /**
  * Report Pane, allows picking and viewing reports.
@@ -325,7 +326,15 @@ public class ReportPane extends JPanePlugin {
             }
 
             selectedReport.setContestAndController(getContest(), getController());
+            
+            // TODO insure that each report createReportFile sets the filter too
+            /**
+             * Using setFilter because createReportFile may not set the filter
+             */
+            
+            selectedReport.setFilter(filter);
             selectedReport.createReportFile(filename, filter);
+            
             viewFile(filename, selectedReport.getReportTitle());
 
         } catch (Exception e) {
@@ -571,6 +580,18 @@ public class ReportPane extends JPanePlugin {
     }
 
     protected void showReportFilter() {
+
+        // Added in reverse order (right to left)
+        getEditFilterFrame().addList(ListNames.LANGUAGES);
+        getEditFilterFrame().addList(ListNames.PROBLEMS);
+        getEditFilterFrame().addList(ListNames.ACCOUNTS);
+        getEditFilterFrame().addList(ListNames.RUN_STATES);
+        getEditFilterFrame().addList(ListNames.JUDGEMENTS);
+        getEditFilterFrame().addList(ListNames.SITES);
+
+        getEditFilterFrame().setFilter(filter);
+        getEditFilterFrame().validate();
+        
         getEditFilterFrame().setVisible(true);
     }
 
