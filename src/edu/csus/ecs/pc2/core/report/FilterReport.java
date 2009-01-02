@@ -102,7 +102,7 @@ public class FilterReport implements IReport {
         Integer[] integerIds = null;
 
         integerIds = inFilter.getSiteIdList();
-        printWriter.println("-- " + elementIds.length + " Sites filtered --");
+        printWriter.println("-- " + integerIds.length + " Sites filtered --");
         for (Integer integer : integerIds) {
             Site site = contest.getSite(integer.intValue());
             if (site == null) {
