@@ -16,6 +16,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 
@@ -56,6 +57,7 @@ public class FilterReport implements IReport {
         printWriter.println("              Filter: " + inFilter);
 
         printWriter.println("           Filter On: " + inFilter.isFilterOn());
+        printWriter.println("     Filter problems: " + inFilter.isFilteringSites());
         printWriter.println("     Filter problems: " + inFilter.isFilteringProblems());
         printWriter.println("      Filter clients: " + inFilter.isFilteringAccounts());
         printWriter.println("      Filter on time: " + inFilter.isFilteringElapsedTime());
@@ -96,6 +98,23 @@ public class FilterReport implements IReport {
         }
 
         printWriter.println();
+
+        Integer[] integerIds = null;
+
+        integerIds = inFilter.getSiteIdList();
+        printWriter.println("-- " + elementIds.length + " Sites filtered --");
+        for (Integer integer : integerIds) {
+            Site site = contest.getSite(integer.intValue());
+            if (site == null) {
+                printWriter.println("   Not displayed " + site);
+            } else {
+                printWriter.println("   " + site.getSiteNumber() + " " + site.getDisplayName());
+            }
+        }
+
+        printWriter.println();
+
+
 
         elementIds = inFilter.getLanguageIdList();
         printWriter.println("-- " + elementIds.length + " Languages filtered --");
