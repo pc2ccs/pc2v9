@@ -2,7 +2,10 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 
 import javax.swing.JButton;
@@ -14,9 +17,12 @@ import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.report.AccountPermissionReport;
 import edu.csus.ecs.pc2.core.report.AccountsReport;
 import edu.csus.ecs.pc2.core.report.AllReports;
@@ -67,7 +73,7 @@ public class ReportPane extends JPanePlugin {
 
     private JButton viewReportButton = null;
 
-    private JCheckBox thisSiteCheckBox = null;
+    private JCheckBox breakdownBySiteCheckbox = null;
 
     private JPanel reportChoicePane = null;
 
@@ -247,7 +253,7 @@ public class ReportPane extends JPanePlugin {
         if (mainPane == null) {
             mainPane = new JPanel();
             mainPane.setLayout(null);
-            mainPane.add(getThisSiteCheckBox(), null);
+            mainPane.add(getBreakdownBySiteCheckbox(), null);
             mainPane.add(getReportChoicePane(), null);
             mainPane.add(getThisClientFilterButton(), null);
             mainPane.add(getFilterPane(), null);
@@ -268,7 +274,11 @@ public class ReportPane extends JPanePlugin {
             viewReportButton.setMnemonic(java.awt.event.KeyEvent.VK_V);
             viewReportButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    generateSelectedReport();
+                    if (getBreakdownBySiteCheckbox().isSelected()){
+                        generateSelectedReportBySite();
+                    } else {
+                        generateSelectedReport();
+                    }
                 }
             });
         }
@@ -324,6 +334,77 @@ public class ReportPane extends JPanePlugin {
         }
 
     }
+    
+    /**
+     * Generate the selected report for each site defined in the contest.
+     *
+     */
+    protected void generateSelectedReportBySite() {
+
+        try {
+
+            String filename = getFileName();
+            File reportDirectoryFile = new File(getReportDirectory());
+            if (reportDirectoryFile.exists()) {
+                if (reportDirectoryFile.isDirectory()) {
+                    filename = reportDirectoryFile.getCanonicalPath() + File.separator + filename;
+                }
+            } else {
+                if (reportDirectoryFile.mkdirs()) {
+                    filename = reportDirectoryFile.getCanonicalPath() + File.separator + filename;
+                }
+            }
+            IReport selectedReport = null;
+
+            String selectedReportTitle = (String) getReportsComboBox().getSelectedItem();
+            for (IReport report : listOfReports) {
+                if (selectedReportTitle.equals(report.getReportTitle())) {
+                    selectedReport = report;
+                }
+            }
+            
+            PrintWriter printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
+            
+            printWriter.println();
+            printWriter.println(new VersionInfo().getSystemName());
+            printWriter.println("Date: " + Utilities.getL10nDateTime());
+            printWriter.println(new VersionInfo().getSystemVersionInfo());
+            printWriter.println();
+            printWriter.println("Report "+selectedReport.getReportTitle() + " Report ");
+            printWriter.println();
+
+            selectedReport.setContestAndController(getContest(), getController());
+            
+            Site[] sites = getContest().getSites();
+            Arrays.sort(sites, new SiteComparatorBySiteNumber());
+            for (Site site : sites) {
+                Filter reportFitler = new Filter();
+                try {
+                    reportFitler.addSite(site);
+                    selectedReport.setFilter(reportFitler);
+                    printWriter.println();
+                    printWriter.println("Report   "+selectedReport.getReportTitle() + " Report ");
+                    printWriter.println("For site "+site.getSiteNumber()+" "+site.getDisplayName());
+                    
+                    selectedReport.writeReport(printWriter);
+                    
+                } catch (Exception e) {
+                    printWriter.println("Exception in report: " + e.getMessage());
+                    e.printStackTrace(printWriter);
+                }
+            }
+            
+            printWriter.println();
+            printWriter.println("end report");
+            
+            viewFile(filename, selectedReport.getReportTitle());
+
+        } catch (Exception e) {
+            log.log(Log.WARNING, "Exception logged ", e);
+            showMessage("Unable to output report, check logs");
+        }
+
+    }
 
     /**
      * show message to user
@@ -345,31 +426,32 @@ public class ReportPane extends JPanePlugin {
      * 
      * @return javax.swing.JCheckBox
      */
-    private JCheckBox getThisSiteCheckBox() {
-        if (thisSiteCheckBox == null) {
-            thisSiteCheckBox = new JCheckBox();
-            thisSiteCheckBox.setBounds(new java.awt.Rectangle(21,80,187,21));
-            thisSiteCheckBox.setMnemonic(java.awt.event.KeyEvent.VK_F);
-            thisSiteCheckBox.setText("Filter for this site only");
-            thisSiteCheckBox.addActionListener(new java.awt.event.ActionListener() {
+    private JCheckBox getBreakdownBySiteCheckbox() {
+        if (breakdownBySiteCheckbox == null) {
+            breakdownBySiteCheckbox = new JCheckBox();
+            breakdownBySiteCheckbox.setBounds(new java.awt.Rectangle(21,80,187,21));
+            breakdownBySiteCheckbox.setMnemonic(java.awt.event.KeyEvent.VK_F);
+            breakdownBySiteCheckbox.setToolTipText("Break down by site");
+            breakdownBySiteCheckbox.setText("Breakdown by site");
+            breakdownBySiteCheckbox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     changeSiteFiltering();
                 }
             });
         }
-        return thisSiteCheckBox;
+        return breakdownBySiteCheckbox;
     }
 
     protected void changeSiteFiltering() {
-        if (getThisClientFilterButton().isSelected()){
-            filter.setFilterOn();
-            filter.setSiteNumber(getContest().getSiteNumber());
-            filter.setThisSiteOnly(true);
-        } else {
-            filter.setThisSiteOnly(false);
-        }
-        
-        refreshFilterLabel();
+//        if (getThisClientFilterButton().isSelected()){
+//            filter.setFilterOn();
+//            filter.setSiteNumber(getContest().getSiteNumber());
+//            filter.setThisSiteOnly(true);
+//        } else {
+//            filter.setThisSiteOnly(false);
+//        }
+//        
+//        refreshFilterLabel();
     }
 
     /**
@@ -412,6 +494,7 @@ public class ReportPane extends JPanePlugin {
             thisClientFilterButton.setBounds(new java.awt.Rectangle(21,114,192,21));
             thisClientFilterButton.setMnemonic(java.awt.event.KeyEvent.VK_C);
             thisClientFilterButton.setText("Filter for this client only");
+            thisClientFilterButton.setVisible(false);
             thisClientFilterButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     changeThisClientFiltering();
