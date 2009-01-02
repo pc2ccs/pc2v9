@@ -233,7 +233,7 @@ public class RunsByTeamReport implements IReport {
         printWriter.println("Date: " + Utilities.getL10nDateTime());
         printWriter.println(new VersionInfo().getSystemVersionInfo());
         printWriter.println();
-        printWriter.println(getReportTitle());
+        printWriter.println(getReportTitle() + " Report");
         
         if (reportFilter != null){
             String filterInfo = reportFilter.toString();

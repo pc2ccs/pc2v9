@@ -74,6 +74,8 @@ public class SiteListReport implements IReport {
         printWriter.println("# " + new VersionInfo().getSystemName());
         printWriter.println("# Date: " + Utilities.getL10nDateTime());
         printWriter.println("# " + new VersionInfo().getSystemVersionInfo());
+        printWriter.println();
+        printWriter.println("# "+ getReportTitle() + " Report");
     }
 
     private void printFooter(PrintWriter printWriter) {

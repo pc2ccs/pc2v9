@@ -131,6 +131,8 @@ public class OldRunsReport implements IReport {
         printWriter.println(new VersionInfo().getSystemName());
         printWriter.println("Date: " + new Date());
         printWriter.println(new VersionInfo().getSystemVersionInfo());
+        printWriter.println();
+        printWriter.println(getReportTitle() + " Report");
     }
 
     private void printFooter(PrintWriter printWriter) {

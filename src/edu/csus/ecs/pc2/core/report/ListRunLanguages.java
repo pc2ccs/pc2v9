@@ -20,6 +20,7 @@ import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Run;
 
 /**
+ * Submissions by Language Report.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -41,7 +42,7 @@ public class ListRunLanguages implements IReport {
 
     private Hashtable<ElementId, Integer> langLookup = new Hashtable<ElementId, Integer>();
 
-    private Filter filter;
+    private Filter filter = new Filter();
 
     /**
      * List clients in individual comma delimited form.
@@ -163,7 +164,7 @@ public class ListRunLanguages implements IReport {
         int theIndex;
 
         for (Run run : runs) {
-            if (!run.isDeleted()) {
+            if (!run.isDeleted() && filter.matches(run)) {
                 theIndex = langLookup.get(run.getLanguageId()).intValue();
                 if (run.isSolved()) {
                     numberSolved[theIndex]++;
@@ -179,22 +180,23 @@ public class ListRunLanguages implements IReport {
 
         for (Language language : languages) {
             theIndex = langLookup.get(language.getElementId()).intValue();
+            
+            if (filter.matchesLanguage(language)){
+                printWriter.println("Language " + language);
+                ClientId[] clientIds = summaryCounts.getClients(language.getElementId());
+                printWriter.print("      " + clientIds.length + " teams: ");
 
-            printWriter.println("Language " + language);
-            ClientId[] clientIds = summaryCounts.getClients(language.getElementId());
-            printWriter.print("      " + clientIds.length + " teams: ");
+                Arrays.sort(clientIds, new ClientIdComparator());
 
-            Arrays.sort(clientIds, new ClientIdComparator());
+                // printClientsShort(printWriter, clientIds);
+                printClients(printWriter, clientIds);
 
-            // printClientsShort(printWriter, clientIds);
-            printClients(printWriter, clientIds);
-
-            printWriter.println();
-            printWriter.println("      " + numberSolved[theIndex] + " submissions solved problems");
-            printWriter.println("      " + didNotSolve[theIndex] + " submissions did not solved problems");
-            printWriter.println("      " + numberAttempted[theIndex] + " total ");
-            printWriter.println();
-
+                printWriter.println();
+                printWriter.println("      " + numberSolved[theIndex] + " submissions solved problems");
+                printWriter.println("      " + didNotSolve[theIndex] + " submissions did not solved problems");
+                printWriter.println("      " + numberAttempted[theIndex] + " total ");
+                printWriter.println();
+            }
         }
 
         if (numDeleted > 0) {
