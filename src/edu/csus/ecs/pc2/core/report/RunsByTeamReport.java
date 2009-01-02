@@ -44,9 +44,7 @@ public class RunsByTeamReport implements IReport {
 
     private Log log;
 
-    private Filter reportFilter = new Filter();
-
-    private Filter filter;
+    private Filter filter = new Filter();
 
     public void writeReport(PrintWriter printWriter) {
 
@@ -54,15 +52,10 @@ public class RunsByTeamReport implements IReport {
         Run[] runs = contest.getRuns();
         Arrays.sort(runs, new RunComparatorByTeamProblem());
 
-        int count = 0;
-        for (Run run : runs) {
-            if (reportFilter.matches(run)) {
-                count++;
-            }
-        }
+        int count = filter.countRuns(runs);
 
-        if (reportFilter.isThisSiteOnly()) {
-            printWriter.print(" for site " + reportFilter.getSiteNumber());
+        if (filter.isThisSiteOnly()) {
+            printWriter.print(" for site " + filter.getSiteNumber());
         }
 
         ClientId currentTeam = null;
@@ -75,7 +68,7 @@ public class RunsByTeamReport implements IReport {
         printWriter.println();
         if (count > 0) {
             for (Run run : runs) {
-                if (reportFilter.matches(run)) {
+                if (filter.matches(run)) {
                     if (run.getSubmitter().equals(currentTeam)) {
                         // accumulate all team's runs into teamsRuns
                         teamsRuns.add(run);
@@ -138,8 +131,11 @@ public class RunsByTeamReport implements IReport {
         Vector <Run> listOfRuns = new Vector<Run>();
         
         for (int i = 0; i < runs.size(); i ++){
-            if (runs.elementAt(i).getProblemId().equals(problemElementId)){
-                listOfRuns.add(runs.elementAt(i));
+            Run run = runs.elementAt(i);
+            if (filter.matches(run)){
+                if (run.getProblemId().equals(problemElementId)){
+                    listOfRuns.add(runs.elementAt(i));
+                }
             }
         }
         
@@ -235,8 +231,8 @@ public class RunsByTeamReport implements IReport {
         printWriter.println();
         printWriter.println(getReportTitle() + " Report");
         
-        if (reportFilter != null){
-            String filterInfo = reportFilter.toString();
+        if (filter != null){
+            String filterInfo = filter.toString();
             if (! filterInfo.equals("")){
                 printWriter.println("Filter: " + filterInfo);
             }
