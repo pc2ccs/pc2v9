@@ -831,7 +831,9 @@ public class Filter implements Serializable {
      */
     public boolean isFilterOn() {
         if (filterEnabled) {
-            return filteringAccounts || filteringClarificationStates || filteringProblems || filteringJudgements || filteringLanguages || filteringElapsedTime || filteringRunStates || thisSiteOnly;
+            return filteringSites || filteringAccounts || filteringClarificationStates || filteringProblems 
+                || filteringJudgements || filteringLanguages || filteringElapsedTime || filteringRunStates
+                || thisSiteOnly;
         } else {
             return false;
         }
@@ -846,5 +848,20 @@ public class Filter implements Serializable {
         endElapsedTime = -1;
         filteringElapsedTime = false;
     }
-
+    
+    /**
+     * Count the runs that match this filter.
+     * 
+     * @param runs - list of runs
+     * @return number of runs that match this filter.
+     */
+    public int countRuns(Run [] runs){
+        int count = 0;
+        for (Run run : runs) {
+            if (matches(run)) {
+                count++;
+            }
+        }
+        return count;
+    }
 }
