@@ -10,15 +10,63 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 
 /**
- * A filter for runs, clients, etc.
+ * A filter for runs, clarifications by site, clients, problems, languages.
  * 
  * Provides a way to determine whether a run, clarification, etc. matches a list of problems, sites, etc. <br>
- * Use the add methods to add items (Problems, RunStates, etc) to match against. <br>
- * Use the match and matches methods to determine if the Run, Clarification, etc matches the filter. <br>
- * Use the setUsing methods to turn on and off filtering of Problems, RunStates, etc.
  * <P>
- * The set methods for various filtering criterias will cause that filter criteria to be used. If filter.setEndElapsedTime() is used then filter.isFilteringElapsedTime() will return true and any
- * subsequent use of filter will filter on the elapsed time.
+ * An example of filter to print count of matching the filter.
+ * 
+ * <pre>
+ * IInternalContest contest;
+ * 
+ * Problem problem = contest.getProblems()[0];
+ * 
+ * Run[] runs = contest.getRuns();
+ * 
+ * Filter filter = new Filter();
+ * filter.addProblem(problem);
+ * 
+ * System.out.println(&quot;Count of filtered runs : &quot; + filter.countRuns(runs));
+ * System.out.println(&quot;Count of all runs      : &quot; + runs.length);
+ * 
+ * </pre>
+ * 
+ * A newly constructed instance of Filter always returns true for all <code>matches</code> methods. In this way the filter matches, like {@link #matches(Run)}, method can be used/coded
+ * unconditionally and match all {@link edu.csus.ecs.pc2.core.model.Run}s, then when a criteria is added (via the Filter <code>add</code> methods) the runs will be filtered/matched appropriately.
+ * <P>
+ * 
+ * This example shows how to use the filter unconditionally, if there are no criteria in the filter then all Runs will be processed. If there are criteria only runs matching the filter will be
+ * processed.
+ * 
+ * <pre>
+ * for (Run run : runs) {
+ *     if (filter.matches(run)) {
+ *         // process run here
+ *     }
+ * }
+ * </pre>
+ * 
+ * Individual classes (no pun) of criteria can be turned on and off via the <code>setUsing<Class></code> methods, for example {@link #setUsingSitesFilter(boolean)}, if set to false, then all site
+ * criteria in the filter will be ignored.
+ * <P>
+
+ * Likewise the entire filter can be turned on or off using the {@link #setFilterOn()} or {@link #setFilterOff()} method.
+ * <P>
+ * There are <code>count</code> methods that can be used to determine how many items match the Filter criteria. To learn the number of matching accounts, one can use the
+ * {@link #countAccounts(Account[])} method, there other <code>count</code> methods {@link #countRuns(Run[])} to count {@link edu.csus.ecs.pc2.core.model.Run}s.
+ * <P>
+ * 
+ * Each criterial class, there are a number of methods to add, remove, clar and turn of the filter for that class.
+ * <li> {@link #addSite(Site)} - add a site to the filter and activates site filter 
+ * <li> {@link #addSite(int)} - add a site by site number to the filter and activates site filter
+ * <li> {@link #clearSiteList()} - clear all site filter and turn off site filter
+ * <li> {@link #removeSite(Site)} - remove a site from the filter
+ * <li> {@link #setUsingSitesFilter(boolean)}   to determine if site filter is on use {@link #isFilteringSites()}
+ * <P> 
+ * 
+ * Here is a list of methods that use the filter on a class:
+ * <li>{@link #countRuns(Run[])} - count runs matching this Filter instance.
+ * <li>{@link #matches(Run)} - return true if criteria matches the input {@link edu.csus.ecs.pc2.core.model.Run}
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -27,9 +75,7 @@ import edu.csus.ecs.pc2.core.model.Run.RunStates;
 // $HeadURL$
 public class Filter implements Serializable {
 
-    // TODO filter for site
     // TODO filter for permissions
-    // TODO filter for 
 
     /**
      * 
@@ -131,9 +177,10 @@ public class Filter implements Serializable {
     }
     
     /**
-     * Match criteria against a run.
+     * Returns true ("matching") if Run matches filter criteria.
      * 
      * @param run
+     * @return true if the Run maches the filter, false otherwise.
      */
     public boolean matches(Run run) {
         if (filterEnabled){
@@ -323,6 +370,18 @@ public class Filter implements Serializable {
     }
     
 
+    /**
+     * Turn the sites filter on or off.
+     * 
+     * This does not clear the sites filter information,
+     * the {@link #matches(Run)} and other <code>matches</code>
+     * methods will ignore the sites criteria.
+     * <P>
+     * The {@link #addSite(int)} and {@link #addSite(Site)} will
+     * effectively invoke a setUsingSitesFilter(true).
+     * 
+     * @param turnOn true means ignore site criteria
+     */
     public void setUsingSitesFilter(boolean turnOn) {
         filteringSites = turnOn;
     }
@@ -397,13 +456,18 @@ public class Filter implements Serializable {
      * 
      * Also turns filtering on for site list.
      * 
-     * @param elementId
+     * @param siteNumber
      */
     public void addSite(int siteNumber) {
         siteIdHash.put(new Integer(siteNumber), new Date());
         filteringSites = true;
     }
     
+    /**
+     * Returns true if submission matches sites filter.
+     * @param submission a run or clarification
+     * @return true if matches sites filter.
+     */
     private boolean matchesSites (ISubmission submission) {
         return matchesSites (submission.getSiteNumber());
     }
@@ -447,12 +511,22 @@ public class Filter implements Serializable {
         }
     }
 
+    /**
+     * Client Id matches both account filter and sites filter.
+     * 
+     * @param clientId
+     * @return true if matches filter criteria
+     */
     public boolean matchesAccount(ClientId clientId) {
         if (filteringAccounts) {
-//            System.out.println(new FilterFormatter().getClientsShortList(getAccountList()));
-            return clientIdHash.containsKey(clientId);
+            // System.out.println(new FilterFormatter().getClientsShortList(getAccountList()));
+            if (matchesSites(clientId)) {
+                return clientIdHash.containsKey(clientId);
+            } else {
+                return false;
+            }
         } else {
-            return true;
+            return matchesSites(clientId);
         }
     }
     
@@ -503,15 +577,25 @@ public class Filter implements Serializable {
         siteIdHash = new Hashtable<Integer, Date>();
     }
 
+    /**
+     * Remove the input site from the site filter.
+     * @param site
+     */
     public void removeSite(Site site) {
         if (siteIdHash.containsKey(site.getElementId())) {
             siteIdHash.remove(site.getElementId());
+            // TODO add setUsingSitesFilter(false); 
         }
     }
 
+    /**
+     * Remove problem from the problem filter.
+     * @param problem
+     */
     public void removeProblem(Problem problem) {
         if (problemIdHash.containsKey(problem.getElementId())) {
             problemIdHash.remove(problem.getElementId());
+            // TODO add setUsingProblemFilter(false); 
         }
     }
     
@@ -611,15 +695,27 @@ public class Filter implements Serializable {
         return filteringRunStates;
     }
     
+    /**
+     * Add an account to filter with.
+     * @param account
+     */
     public void addAccount(Account account) {
         addAccount(account.getClientId());
     }
 
+    /**
+     * Add an account to filter with.
+     * @param clientId
+     */
     public void addAccount(ClientId clientId) {
         filteringAccounts = true;
         clientIdHash.put(clientId, new Date());
     }
 
+    /**
+     * Add an account to filter with.
+     * @param accounts
+     */
     public void addAccounts(Account[] accounts) {
         for (Account account : accounts) {
             addAccount(account);
@@ -864,4 +960,51 @@ public class Filter implements Serializable {
         }
         return count;
     }
+
+    /**
+     * Count the clarifications that match this filter.
+     * @param clarifications
+     * @return number of clarifications matching this filter.
+     */
+    public int countClarifications(Clarification[] clarifications) {
+        int count = 0;
+        for (Clarification clarification : clarifications) {
+            if (matches(clarification)) {
+                count++;
+            }
+        }
+        return count;
+    }
+    
+    /**
+     * Count the accounts that match this filter.
+     * @param accounts
+     * @return number of accounts matching this filter.
+     */
+    public int countAccounts (Account [] accounts) {
+        int count = 0;
+        for (Account account : accounts) {
+            if (matchesAccount(account)) {
+                count++;
+            }
+        }
+        return count;
+    }
+    
+    /**
+     * Count the ClientIds that match this filter.
+     * @param clientIds
+     * @return number of ClientIds matching this filter.
+     */
+    public int countClientIds (ClientId [] clientIds) {
+        int count = 0;
+        for (ClientId clientId : clientIds) {
+            if (matchesAccount(clientId)){
+                count++;
+            }
+        }
+        return count;
+    }
+    
+    
 }

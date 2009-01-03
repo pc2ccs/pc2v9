@@ -56,7 +56,7 @@ public interface IReport extends UIPlugin {
 
     /**
      * Get filter for report.
-     * @return
+     * @return the filter for the report.
      */
     Filter getFilter();
     

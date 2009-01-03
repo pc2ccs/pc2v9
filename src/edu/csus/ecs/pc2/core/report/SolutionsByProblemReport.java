@@ -39,7 +39,7 @@ public class SolutionsByProblemReport implements IReport {
 
     private Hashtable<ElementId, Integer> problemLookup = new Hashtable<ElementId, Integer>();
 
-    private Filter filter;
+    private Filter filter = new Filter();
 
     public void writeReport(PrintWriter printWriter) {
 
@@ -48,13 +48,14 @@ public class SolutionsByProblemReport implements IReport {
         printWriter.println();
 
         Run[] runs = contest.getRuns();
-        printWriter.println("There are " + runs.length + " runs.");
+        
+        int count = filter.countRuns(runs);
+        
+        printWriter.println("There are " + count + " runs.");
         printWriter.println();
 
         if (problems == null || problems.length == 0) {
-
             printWriter.println("No problems defined, no summary");
-
             return;
         }
 
@@ -81,7 +82,7 @@ public class SolutionsByProblemReport implements IReport {
         int totalAttempts = 0;
 
         for (Run run : runs) {
-            if (!run.isDeleted()) {
+            if (!run.isDeleted() && filter.matches(run)) {
                 theIndex = problemLookup.get(run.getProblemId()).intValue();
                 if (run.isSolved()) {
                     numberSolved[theIndex]++;
@@ -89,7 +90,7 @@ public class SolutionsByProblemReport implements IReport {
                     didNotSolve[theIndex]++;
                 }
                 numberAttempted[theIndex]++;
-            } else {
+            } else if (run.isDeleted() && filter.matches(run)){
                 numDeleted++;
             }
         }
@@ -189,8 +190,8 @@ public class SolutionsByProblemReport implements IReport {
      * 
      * Left pads with blanks in form: ###.##
      * 
-     * @param num
-     * @param denom
+     * @param numerator
+     * @param denominator
      * @return string of percentage
      */
     protected String printPercent(long numerator, long denominator) {
