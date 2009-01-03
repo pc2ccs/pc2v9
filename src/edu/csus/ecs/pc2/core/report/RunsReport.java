@@ -216,18 +216,14 @@ public class RunsReport implements IReport {
         // Runs
         printWriter.println();
         Run[] runs = contest.getRuns();
+        
         Arrays.sort(runs, new RunComparator());
 
         if (filter.isFilterOn()){
             printWriter.println("Filter: "+filter.toString());
             printWriter.println();
 
-            int count = 0;
-            for (Run run : runs) {
-                if (filter.matches(run)) {
-                    count++;
-                }
-            }
+            int count = filter.countRuns(runs);
             
             if (count == 0) {
                 printWriter.println("-- No runs match of " + runs.length + " runs (filtered) --");

@@ -36,7 +36,7 @@ public class ClarificationsReport implements IReport {
 
     private Log log;
 
-    private Filter filter;
+    private Filter filter = new Filter();
 
     public void writeReport(PrintWriter printWriter) {
         
@@ -44,23 +44,40 @@ public class ClarificationsReport implements IReport {
         printWriter.println();
         Clarification[] clarifications = contest.getClarifications();
         Arrays.sort(clarifications, new ClarificationComparator());
-        printWriter.println("-- " + clarifications.length + " clarifications --");
+        
+        int count = filter.countClarifications(clarifications);
+        
+        if (filter.isFilterOn()){
+            
+            printWriter.println("Filter is: "+filter.toString());
+            printWriter.println();
+            printWriter.println("-- " + count + " clarifications (filtered) --");
+            
+        }else{
+            printWriter.println("-- " + clarifications.length + " clarifications --");
+            
+        }
+        
+        
         for (Clarification clarification : clarifications) {
             
-            printWriter.println();
-            printWriter.println("  Clarification "+clarification.getNumber()+" (Site "+clarification.getSiteNumber()+") "+clarification.getElementId());
-            printWriter.println("         Elapsed : "+clarification.getElapsedMins());
-            printWriter.print("           State   : "+clarification.getState());
-            if (clarification.getWhoJudgedItId() != null) {
-                printWriter.print(" by "+clarification.getWhoJudgedItId());
+            if (filter.matches(clarification)) {
+
+                printWriter.println();
+                printWriter.println("  Clarification " + clarification.getNumber() + " (Site " + clarification.getSiteNumber() + ") " + clarification.getElementId());
+                printWriter.println("         Elapsed : " + clarification.getElapsedMins());
+                printWriter.print("           State   : " + clarification.getState());
+                if (clarification.getWhoJudgedItId() != null) {
+                    printWriter.print(" by " + clarification.getWhoJudgedItId());
+                }
+                if (clarification.getWhoCheckedItOutId() != null) {
+                    printWriter.print(" checked out by " + clarification.getWhoCheckedItOutId());
+                }
+                printWriter.println();
+                printWriter.println("         To ALL? : " + clarification.isSendToAll());
+                printWriter.println("         Question: " + clarification.getQuestion());
+                printWriter.println("         Answer  : " + clarification.getAnswer());
             }
-            if (clarification.getWhoCheckedItOutId() != null) {
-                printWriter.print(" checked out by "+clarification.getWhoCheckedItOutId());
-            }
-            printWriter.println();
-            printWriter.println("         To ALL? : "+clarification.isSendToAll());
-            printWriter.println("         Question: "+clarification.getQuestion());
-            printWriter.println("         Answer  : "+clarification.getAnswer());
             
         }
     }

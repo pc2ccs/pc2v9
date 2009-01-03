@@ -46,7 +46,7 @@ public class ContestAnalysisReport implements IReport {
 
     private Log log;
 
-    private Filter filter;
+    private Filter filter = new Filter();
 
     public void writeReport(PrintWriter printWriter) throws IOException {
 
@@ -71,17 +71,22 @@ public class ContestAnalysisReport implements IReport {
         // ClientId lastClientId = null;
 
         for (Run run : runs) {
+            
+            if (filter.matches(run)){
+                /**
+                 * Note do not need to filter on site, because filtering on run filters on site too.
+                 */
 
-            ClientId clientId = run.getSubmitter();
+                ClientId clientId = run.getSubmitter();
 
-            if (!contest.getAccount(clientId).isAllowed(Type.DISPLAY_ON_SCOREBOARD)) {
+                if (!contest.getAccount(clientId).isAllowed(Type.DISPLAY_ON_SCOREBOARD)) {
 
-                printWriter.format("#%3d %3d %-10.10s ", run.getNumber(), run.getElapsedMins(), getJudgementName(run));
-                printWriter.print(clientId + " '" + contest.getAccount(clientId).getDisplayName() + "'");
-                printWriter.println();
+                    printWriter.format("#%3d %3d %-10.10s ", run.getNumber(), run.getElapsedMins(), getJudgementName(run));
+                    printWriter.print(clientId + " '" + contest.getAccount(clientId).getDisplayName() + "'");
+                    printWriter.println();
+                }
             }
         }
-
     }
 
     protected void printRunsClarsBySite(PrintWriter printWriter) {
@@ -99,33 +104,37 @@ public class ContestAnalysisReport implements IReport {
         int totalUnanswered = 0;
 
         for (Run run : contest.getRuns()) {
+            
+            if (filter.matches(run)){
+                int siteNum = run.getSiteNumber() - 1;
+                numRuns[siteNum]++;
+                if (run.isDeleted()) {
+                    numRunsDeleted[siteNum]++;
+                }
 
-            int siteNum = run.getSiteNumber() - 1;
-            numRuns[siteNum]++;
-            if (run.isDeleted()) {
-                numRunsDeleted[siteNum]++;
-            }
-
-            if (!run.isJudged()) {
-                numUnjudgedRuns[siteNum]++;
-                totalUnjudgedRuns++;
+                if (!run.isJudged()) {
+                    numUnjudgedRuns[siteNum]++;
+                    totalUnjudgedRuns++;
+                }
             }
         }
 
         for (Clarification clarification : contest.getClarifications()) {
-            int siteNum = clarification.getSiteNumber() - 1;
-            numClars[siteNum]++;
-            if (clarification.isSendToAll()) {
-                numClarsForAll[siteNum]++;
-            }
+            if (filter.matches(clarification)){
+                int siteNum = clarification.getSiteNumber() - 1;
+                numClars[siteNum]++;
+                if (clarification.isSendToAll()) {
+                    numClarsForAll[siteNum]++;
+                }
 
-            if (!clarification.isAnswered()) {
-                numClarsUnAnswered[siteNum]++;
-                totalUnanswered++;
-            }
+                if (!clarification.isAnswered()) {
+                    numClarsUnAnswered[siteNum]++;
+                    totalUnanswered++;
+                }
 
-            if (clarification.isDeleted()) {
-                numClarsDeleted[siteNum]++;
+                if (clarification.isDeleted()) {
+                    numClarsDeleted[siteNum]++;
+                }
             }
         }
 
@@ -136,19 +145,24 @@ public class ContestAnalysisReport implements IReport {
         int totalClarsToAll = 0;
 
         for (int i = 0; i < numSites; i++) {
+
             int siteNum = i + 1;
-            printWriter.format("%2d %-15s ", siteNum, contest.getSite(siteNum).getDisplayName());
 
-            printWriter.format("%4d runs (%2d unjudged, %2d deleted)", numRuns[i], numUnjudgedRuns[i], numRunsDeleted[i]);
-            printWriter.format("%4d clars, %d to All (%2d unanswered, %2d deleted)", numClars[i], numClarsForAll[i], numClarsUnAnswered[i], numClarsDeleted[i]);
+            if (filter.matchesSite(contest.getSite(siteNum))){
+                printWriter.format("%2d %-15s ", siteNum, contest.getSite(siteNum).getDisplayName());
 
-            totalRunsDeleted += numRunsDeleted[i];
-            totalClars += numClars[i];
-            totalRuns += numRuns[i];
-            totalClarsDeleted += numClarsDeleted[i];
-            totalClarsToAll += numClarsForAll[i];
+                printWriter.format("%4d runs (%2d unjudged, %2d deleted)", numRuns[i], numUnjudgedRuns[i], numRunsDeleted[i]);
+                printWriter.format("%4d clars, %d to All (%2d unanswered, %2d deleted)", numClars[i], numClarsForAll[i], numClarsUnAnswered[i], numClarsDeleted[i]);
 
-            printWriter.println();
+                totalRunsDeleted += numRunsDeleted[i];
+                totalClars += numClars[i];
+                totalRuns += numRuns[i];
+                totalClarsDeleted += numClarsDeleted[i];
+                totalClarsToAll += numClarsForAll[i];
+
+                printWriter.println();
+            }
+            
         }
 
         printWriter.format("   %-15s ", "Total");
@@ -186,48 +200,50 @@ public class ContestAnalysisReport implements IReport {
         int numNoAfterYes = 0;
 
         for (Run run : runs) {
+            
+            if (filter.matches(run)){
+                if (!run.isDeleted()) {
 
-            if (!run.isDeleted()) {
-
-                if (lastClientId == null) {
-                    lastProblemId = run.getProblemId();
-                    lastClientId = run.getSubmitter();
-                    if (run.isSolved()) {
-                        solvedRun = run;
-                    }
-                } else {
-
-                    if (lastClientId.equals(run.getSubmitter()) && run.getProblemId().equals(lastProblemId)) {
-                        // Same team problem
-                        if (solvedRun != null) {
-                            if (run.isSolved()) {
-                                numYesAfterYes++;
-                            } else {
-                                numNoAfterYes++;
-                            }
-                            // printWriter.println(" Found " + run + " after " + solvedRun);
-
-                            printWriter.print("Found   ");
-                            printWriter.format("#%3d %3d %-10.10s ", run.getNumber(), run.getElapsedMins(), getJudgementName(run));
-                            printWriter.print(lastClientId + " '" + contest.getAccount(lastClientId).getDisplayName() + "'");
-                            printWriter.println();
-
-                            printWriter.print("  After ");
-                            printWriter.format("#%3d %3d %-10.10s ", solvedRun.getNumber(), solvedRun.getElapsedMins(), getJudgementName(solvedRun));
-                            printWriter.print(contest.getProblem(run.getProblemId()));
-                            printWriter.println();
-
-                            printWriter.println();
+                    if (lastClientId == null) {
+                        lastProblemId = run.getProblemId();
+                        lastClientId = run.getSubmitter();
+                        if (run.isSolved()) {
+                            solvedRun = run;
                         }
-                    }
-
-                    if (run.isSolved()) {
-                        solvedRun = run;
                     } else {
-                        solvedRun = null;
+
+                        if (lastClientId.equals(run.getSubmitter()) && run.getProblemId().equals(lastProblemId)) {
+                            // Same team problem
+                            if (solvedRun != null) {
+                                if (run.isSolved()) {
+                                    numYesAfterYes++;
+                                } else {
+                                    numNoAfterYes++;
+                                }
+                                // printWriter.println(" Found " + run + " after " + solvedRun);
+
+                                printWriter.print("Found   ");
+                                printWriter.format("#%3d %3d %-10.10s ", run.getNumber(), run.getElapsedMins(), getJudgementName(run));
+                                printWriter.print(lastClientId + " '" + contest.getAccount(lastClientId).getDisplayName() + "'");
+                                printWriter.println();
+
+                                printWriter.print("  After ");
+                                printWriter.format("#%3d %3d %-10.10s ", solvedRun.getNumber(), solvedRun.getElapsedMins(), getJudgementName(solvedRun));
+                                printWriter.print(contest.getProblem(run.getProblemId()));
+                                printWriter.println();
+
+                                printWriter.println();
+                            }
+                        }
+
+                        if (run.isSolved()) {
+                            solvedRun = run;
+                        } else {
+                            solvedRun = null;
+                        }
+                        lastProblemId = run.getProblemId();
+                        lastClientId = run.getSubmitter();
                     }
-                    lastProblemId = run.getProblemId();
-                    lastClientId = run.getSubmitter();
                 }
             }
         }

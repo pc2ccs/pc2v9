@@ -136,7 +136,10 @@ public class ListRunLanguages implements IReport {
         printWriter.println();
 
         Run[] runs = contest.getRuns();
-        printWriter.println("There are " + runs.length + " runs.");
+        
+        int count = filter.countRuns(runs);
+        
+        printWriter.println("There are " + count + " runs.");
         printWriter.println();
 
         if (languages == null || languages.length == 0) {
@@ -173,7 +176,7 @@ public class ListRunLanguages implements IReport {
                     didNotSolve[theIndex]++;
                 }
                 numberAttempted[theIndex]++;
-            } else {
+            } else if (run.isDeleted() && filter.matches(run)) {
                 numDeleted++;
             }
         }

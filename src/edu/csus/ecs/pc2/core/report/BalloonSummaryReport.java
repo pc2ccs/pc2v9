@@ -42,7 +42,7 @@ public class BalloonSummaryReport implements IReport {
 
     private Log log;
 
-    private Filter filter;
+    private Filter filter = new Filter();
 
     private Problem[] solvedProblems(Run[] runs, ClientId clientId) {
 
@@ -51,7 +51,7 @@ public class BalloonSummaryReport implements IReport {
         Arrays.sort(runs, new RunComparatorByTeamProblem());
 
         for (Run run : runs) {
-            if (!run.isDeleted() && run.isSolved()) {
+            if (!run.isDeleted() && run.isSolved() && filter.matches(run)) {
                 if (run.getSubmitter().equals(clientId)) {
 
                     if (probs.size() == 0) {
@@ -61,13 +61,16 @@ public class BalloonSummaryReport implements IReport {
                         // Loop through to learn if problem already solved
                         boolean found = false;
                         for (int i = 0; i < probs.size(); i++) {
-                            if (probs.elementAt(i).getElementId().equals(run.getProblemId())) {
-                                found = true;
+                            Problem problem = probs.elementAt(i);
+                            
+                            if (filter.matchesProblem(problem)){
+                                if (problem.getElementId().equals(run.getProblemId())) {
+                                    found = true;
+                                }
                             }
                         }
                         if (!found) {
                             probs.addElement(contest.getProblem(run.getProblemId()));
-
                         }
                     }
                 }
@@ -93,37 +96,40 @@ public class BalloonSummaryReport implements IReport {
         int totalBalloons = 0;
 
         for (Account account : accounts) {
-
-            ClientId clientId = account.getClientId();
-            solvedProbs = solvedProblems(runs, clientId);
-
-            BalloonSettings balloonSettings = contest.getBalloonSettings(clientId.getSiteNumber());
-
-            if (solvedProbs.length > 0) {
-                printWriter.print("s" + clientId.getSiteNumber() + "t" + clientId.getClientNumber() + " ");
-                truncPrint(printWriter, account, 9);
-                printWriter.print(" has " + solvedProbs.length + ": ");
-
-                for (Problem problem : solvedProbs) {
-
-                    totalBalloons++;
-
-                    if ((balloonSettings != null) && (balloonSettings.getColor(problem.getElementId()) != null)) {
-                        printWriter.print(" " + balloonSettings.getColor(problem.getElementId()));
-                    } else {
-                        String name = problem.getDisplayName();
-                        int truncIndex = Math.min(name.toString().length(), 12);
-                        printWriter.format(" " + name.toString().substring(0, truncIndex));
+            
+            if (filter.matchesAccount(account)){
+                
+                ClientId clientId = account.getClientId();
+                solvedProbs = solvedProblems(runs, clientId);
+                
+                BalloonSettings balloonSettings = contest.getBalloonSettings(clientId.getSiteNumber());
+                
+                if (solvedProbs.length > 0) {
+                    printWriter.print("s" + clientId.getSiteNumber() + "t" + clientId.getClientNumber() + " ");
+                    truncPrint(printWriter, account, 9);
+                    printWriter.print(" has " + solvedProbs.length + ": ");
+                    
+                    for (Problem problem : solvedProbs) {
+                        
+                        totalBalloons++;
+                        
+                        if ((balloonSettings != null) && (balloonSettings.getColor(problem.getElementId()) != null)) {
+                            printWriter.print(" " + balloonSettings.getColor(problem.getElementId()));
+                        } else {
+                            String name = problem.getDisplayName();
+                            int truncIndex = Math.min(name.toString().length(), 12);
+                            printWriter.format(" " + name.toString().substring(0, truncIndex));
+                        }
+                        
                     }
-
+                    
+                    printWriter.println();
+                    
+                    // } else {
+                    // printWriter.print("s" + clientId.getSiteNumber() + "t" + clientId.getClientNumber());
+                    // printWriter.print(" " + solvedProbs.length + " balloons. ");
+                    // printWriter.println();
                 }
-
-                printWriter.println();
-
-                // } else {
-                // printWriter.print("s" + clientId.getSiteNumber() + "t" + clientId.getClientNumber());
-                // printWriter.print(" " + solvedProbs.length + " balloons. ");
-                // printWriter.println();
             }
         }
         printWriter.println();

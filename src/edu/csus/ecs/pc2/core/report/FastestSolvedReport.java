@@ -40,14 +40,17 @@ public class FastestSolvedReport implements IReport {
 
     private Log log;
 
-    private Filter filter;
+    private Filter filter = new Filter();
 
     public void writeReport(PrintWriter printWriter) {
 
         printWriter.println();
 
         Run[] runs = contest.getRuns();
-        printWriter.println("There are " + runs.length + " runs.");
+        
+        int count = filter.countRuns(runs);
+        
+        printWriter.println("There are " + count + " runs.");
         printWriter.println();
 
         Problem[] problems = contest.getProblems();
@@ -81,7 +84,7 @@ public class FastestSolvedReport implements IReport {
             
             long lastElapsed = -1;
             for (Run run : runList) {
-                if (!run.isDeleted() && run.isSolved()) {
+                if (!run.isDeleted() && run.isSolved() && filter.matches(run)) {
 
                     numberSolved++;
 
@@ -107,7 +110,7 @@ public class FastestSolvedReport implements IReport {
                         printWriter.println(teamName);
                     }
                 } else {
-                    if (run.isDeleted()) {
+                    if (run.isDeleted() && filter.matches(run)) {
                         numDeleted++;
                     }
                 }
