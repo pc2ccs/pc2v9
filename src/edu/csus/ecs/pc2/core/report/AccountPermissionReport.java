@@ -58,9 +58,6 @@ public class AccountPermissionReport implements IReport {
 
     public void writeReport(PrintWriter printWriter) {
 
-        printWriter.println();
-        printWriter.println("Accounts Permissions Report");
-
         Account[] accounts = getAllAccounts();
         Arrays.sort(accounts, new AccountComparator());
         
