@@ -7,7 +7,7 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.Run;
 
 /**
- * Run Comparator, Order by site, team, problem and elapsed.
+ * Run Comparator, Order by site, team, problem, elapsed then run Id.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -33,7 +33,11 @@ public class RunCompartorByTeamProblemElapsed implements Comparator<Run>, Serial
 
             if (team1.getClientNumber() == team2.getClientNumber()) {
                 if (run1.getProblemId().equals(run2.getProblemId())) {
-                    return (int) (run1.getElapsedMins() - run2.getElapsedMins());
+                    if (run1.getElapsedMins() == run2.getElapsedMins()) {
+                        return (run1.getNumber() - run2.getNumber());
+                    } else {
+                        return (int) (run1.getElapsedMins() - run2.getElapsedMins());
+                    }
                 } else {
                     return run1.getProblemId().toString().compareTo(run2.getProblemId().toString());
                 }
