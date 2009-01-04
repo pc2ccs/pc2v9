@@ -191,8 +191,6 @@ public class InternalContest implements IInternalContest {
     
     private SecurityMessageHandler securityMessageHandler;
     
-    private boolean sendAdditionalRunStatusMessages;
-
     private Site createFakeSite(int nextSiteNumber) {
         Site site = new Site("Site " + nextSiteNumber, nextSiteNumber);
         Properties props = new Properties();
@@ -1034,6 +1032,27 @@ public class InternalContest implements IInternalContest {
         runEvent.setWhoModifiedRun(whoUpdatedRun);
         fireRunListener(runEvent);
     }
+    
+    public void updateRunStatus(Run run, RunExecutionStatus status, ClientId whoUpdatedRun) {
+
+        RunEvent.Action action = null;
+        switch (status) {
+            case EXECUTING:
+                action = RunEvent.Action.RUN_EXECUTING;
+                break;
+            case VALIDATING:
+                action = RunEvent.Action.RUN_VALIDATING;
+                break;
+            case COMPILING:
+            default:
+                action = RunEvent.Action.RUN_COMPILING;
+                break;
+        }
+
+        RunEvent runEvent = new RunEvent(action, run, null, null);
+        runEvent.setWhoModifiedRun(whoUpdatedRun);
+        fireRunListener(runEvent);
+    }
 
     public void runNotAvailable(Run run) {
         RunEvent runEvent = new RunEvent(RunEvent.Action.RUN_NOT_AVIALABLE, run, null, null);
@@ -1789,11 +1808,7 @@ public class InternalContest implements IInternalContest {
     }
 
     public boolean isSendAdditionalRunStatusMessages() {
-        return sendAdditionalRunStatusMessages;
-    }
-
-    public void setSendAdditionalRunStatusMessages(boolean sendAdditionalRunStatusMessages) {
-        this.sendAdditionalRunStatusMessages = sendAdditionalRunStatusMessages;
+        return contestInformation.isSendAdditionalRunStatusInformation();
     }
 
 }

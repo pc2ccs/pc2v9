@@ -459,7 +459,23 @@ public interface IInternalContest {
      */
     Run[] getRuns();
 
+    /**
+     * Update run status.
+     * 
+     * @param run
+     * @param judgementRecord
+     * @param runResultFiles
+     * @param whoUpdatedRun
+     */
     void runUpdated(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles, ClientId whoUpdatedRun);
+    
+    /**
+     * Update Run compiling/executing/vaidating status.
+     * @param run
+     * @param status
+     * @param whoUpdatedRun
+     */
+    void updateRunStatus(Run run, RunExecutionStatus status, ClientId whoUpdatedRun);
 
     /**
      * Add a run not available, notify listeners.
@@ -722,14 +738,4 @@ public interface IInternalContest {
      * @return
      */
     boolean isSendAdditionalRunStatusMessages() ;
-
-    /**
-     * Set whether send run status messages.
-     * 
-     * @see #sendAdditionalRunStatus()
-     * @param status
-     * @return
-     */
-    void setSendAdditionalRunStatusMessages(boolean sendAdditionalRunStatusMessages);
-
 }

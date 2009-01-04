@@ -99,7 +99,7 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
  * <P>
  * 
  * 
- * @author pc2@ecs.csus.edu *
+ * @author pc2@ecs.csus.edu
  * @version $Id$
  */
 // $HeadURL$
@@ -2527,29 +2527,28 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             sendToLocalServer(fetchRunPacket);
         }
     }
+    
+    private void sendStatusMessge(Run run, RunExecutionStatus status){
+        
+        System.out.println("debug sendStatusMessge "+contest+" send msg "+contest.isSendAdditionalRunStatusMessages());
+
+        if (contest.isSendAdditionalRunStatusMessages()){
+                Packet sendPacket = PacketFactory.createRunStatusPacket(contest.getClientId(), getServerClientId(), run, contest.getClientId(), status);
+                System.out.println("debug sending "+sendPacket);
+                sendToLocalServer(sendPacket);
+        }
+    }
 
     public void sendCompilingMessage(Run run) {
-        // TODO Code sendCompilingMessage
-        if (contest.isSendAdditionalRunStatusMessages()){
-            Packet sendPacket = PacketFactory.createRunStatusPacket(contest.getClientId(), getServerClientId(), run, contest.getClientId(), RunExecutionStatus.COMPILING);
-            sendToLocalServer(sendPacket);
-        }
+        sendStatusMessge(run, RunExecutionStatus.COMPILING);
     }
 
     public void sendExecutingMessage(Run run) {
-        // TODO Code sendExecutingMessage
-        if (contest.isSendAdditionalRunStatusMessages()){
-            Packet sendPacket = PacketFactory.createRunStatusPacket(contest.getClientId(), getServerClientId(), run, contest.getClientId(), RunExecutionStatus.EXECUTING);
-            sendToLocalServer(sendPacket);
-        }
+        sendStatusMessge(run, RunExecutionStatus.EXECUTING);
     }
 
     public void sendValidatingMessage(Run run) {
-        // TODO Code sendValidatingMessage
-        if (contest.isSendAdditionalRunStatusMessages()){
-            Packet sendPacket = PacketFactory.createRunStatusPacket(contest.getClientId(), getServerClientId(), run, contest.getClientId(), RunExecutionStatus.VALIDATING);
-            sendToLocalServer(sendPacket);
-        }
+        sendStatusMessge(run, RunExecutionStatus.VALIDATING);
     }
 
     public boolean isClientAutoShutdown() {

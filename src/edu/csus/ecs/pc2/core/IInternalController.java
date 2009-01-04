@@ -117,6 +117,13 @@ public interface IInternalController {
     void sendToTeams(Packet packet);
 
     /**
+     * Send to all spectator/API clients
+     * @param packet
+     */
+    void sendToSpectators(Packet packet);
+
+    
+    /**
      * Start InternalController with command line arguments.
      * @param stringArray
      */

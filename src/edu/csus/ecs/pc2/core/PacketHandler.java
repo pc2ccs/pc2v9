@@ -33,6 +33,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.ProblemDataFilesList;
 import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.RunExecutionStatus;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.Site;
@@ -313,6 +314,13 @@ public class PacketHandler {
                 // from server to non-team client.
                 handleFetchedRun (packet, connectionHandlerID);
                 break;
+             
+            case RUN_EXECUTION_STATUS:
+                // from server to server
+                // from judge client to server
+                // from server to spectator clients
+                handleRunExecutionStatus (packet, connectionHandlerID);
+                break;
                 
             default:
                 Exception exception = new Exception("PacketHandler.handlePacket Unhandled packet " + packet);
@@ -321,6 +329,32 @@ public class PacketHandler {
         info("handlePacket end " + packet);
     }
 
+
+    private void handleRunExecutionStatus(Packet packet, ConnectionHandlerID connectionHandlerID) {
+
+        Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
+        ClientId judgeClientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+        RunExecutionStatus status = (RunExecutionStatus) PacketFactory.getObjectValue(packet, PacketFactory.RUN_STATUS);
+        
+        if (isServer()) {
+
+            if (!isThisSite(judgeClientId)) {
+                
+                // If this is not a run status from this site, then send to spectators/API only
+                
+                sendToSpectatorsAndSites(packet, false);
+                
+            } else {
+                // packet from this site, send to all spectators/API and to other servers.
+
+              Packet runExecuteStatusPacket = PacketFactory.clonePacket(contest.getClientId(), PacketFactory.ALL_SERVERS, packet);
+              sendToSpectatorsAndSites(runExecuteStatusPacket, true);
+            }
+        } else {
+            // Accept and process this packet (for the API)
+            contest.updateRunStatus(run, status, judgeClientId);
+        }
+    }
 
     private void requestFetchedRun(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
 
@@ -1636,6 +1670,26 @@ public class PacketHandler {
             controller.getLog().log(Log.WARNING, "Warning - tried to send packet to others (as non server) " + packet, ex);
         }
     }
+
+    /**
+     * Send to spectators and servers
+     * @param packet
+     * @param sendToServers
+     */
+    public void sendToSpectatorsAndSites(Packet packet, boolean sendToServers) {
+
+        if (isServer()) {
+            controller.sendToSpectators(packet);
+            if (sendToServers) {
+                controller.sendToServers(packet);
+            }
+        } else {
+            info("Warning - tried to send packet to others (as non server) " + packet);
+            Exception ex = new Exception("User " + packet.getSourceId() + " tried to send packet to judges and others");
+            controller.getLog().log(Log.WARNING, "Warning - tried to send packet to others (as non server) " + packet, ex);
+        }
+    }
+
 
     private boolean isSuperUser(ClientId id) {
         return id.getClientType().equals(ClientType.Type.ADMINISTRATOR);

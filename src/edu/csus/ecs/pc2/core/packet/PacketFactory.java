@@ -235,7 +235,7 @@ public final class PacketFactory {
     
     public static final String FROM_HUMAN = "FROM_HUMAN";
 
-    private static final String RUN_STATUS = "RUN_STATUS";
+    public static final String RUN_STATUS = "RUN_STATUS";
 
     /**
      * Constructor is private as this is a utility class which should not be extended or invoked.
