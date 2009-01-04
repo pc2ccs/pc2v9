@@ -37,6 +37,8 @@ public class ContestReport implements IReport {
     private IInternalController controller;
 
     private Log log;
+    
+    private Filter filter = new Filter();
 
     protected String getContestXML() throws IOException {
 
@@ -67,34 +69,39 @@ public class ContestReport implements IReport {
         }
 
         Run[] runs = contest.getRuns();
+        
 
         Arrays.sort(runs, new RunComparator());
         for (Run run : runs) {
 
-            String languageName = contest.getLanguage(run.getLanguageId()).toString();
-            String problemName = contest.getProblem(run.getProblemId()).toString();
+            if (filter.matches(run)) {
+                String languageName = contest.getLanguage(run.getLanguageId()).toString();
+                String problemName = contest.getProblem(run.getProblemId()).toString();
 
-            RunFiles runFiles = contest.getRunFiles(run);
+                IMemento runMemento = mementoRoot.createChild("Run");
+                runMemento.putInteger("site", run.getSiteNumber());
+                runMemento.putInteger("number", run.getNumber());
+                runMemento.putInteger("site", run.getSiteNumber());
+                runMemento.putLong("elapsed", run.getElapsedMins());
 
-            IMemento runMemento = mementoRoot.createChild("Run");
-            runMemento.putInteger("site", run.getSiteNumber());
-            runMemento.putInteger("number", run.getNumber());
-            runMemento.putInteger("site", run.getSiteNumber());
-            runMemento.putLong("elapsed", run.getElapsedMins());
+                runMemento.putString("languageName", languageName);
+                runMemento.putString("problemName", problemName);
 
-            runMemento.putString("languageName", languageName);
-            runMemento.putString("problemName", problemName);
 
-            if (runFiles != null) {
-                String filename = runFiles.getMainFile().getName();
-                if (filename != null) {
-                    runMemento.putString("filename", filename);
+                RunFiles runFiles = contest.getRunFiles(run);
+
+                if (runFiles != null) {
+                    String filename = runFiles.getMainFile().getName();
+                    if (filename != null) {
+                        runMemento.putString("filename", filename);
+                    }
                 }
             }
         }
 
+        System.out.println("There were "+filter.countRuns(runs)+" runs.");
+        
         return mementoRoot.saveToString();
-
     }
 
     public  void writeReport(PrintWriter printWriter) throws IOException {
@@ -112,7 +119,12 @@ public class ContestReport implements IReport {
         printWriter.println(getReportTitle() + " Report");
     }
 
-    public void createReportFile(String filename, Filter filter) throws IOException {
+    /**
+     * 
+     */
+    public void createReportFile(String filename, Filter inFilter) throws IOException {
+        
+        filter = inFilter;
 
         PrintWriter printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
 
@@ -142,9 +154,9 @@ public class ContestReport implements IReport {
         printWriter.println("end report");
     }
 
-    public String[] createReport(Filter arg0) {
-        // TODO Auto-generated method stub
-        return null;
+    public String[] createReport(Filter inFilter) {
+        filter = inFilter;
+        return new String[0];
     }
 
     public String createReportXML(Filter arg0) {
@@ -170,13 +182,11 @@ public class ContestReport implements IReport {
     }
 
      public Filter getFilter() {
-        // TODO Auto-generated method stub
-        return null;
+        return filter;
     }
 
     public void setFilter(Filter filter) {
-        // TODO Auto-generated method stub
-        
+        this.filter = filter;
     }
 
 }
