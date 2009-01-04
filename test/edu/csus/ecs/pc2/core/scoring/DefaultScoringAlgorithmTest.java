@@ -378,12 +378,6 @@ public class DefaultScoringAlgorithmTest extends TestCase {
                 "65,8,B,2,Yes",
         };
         
-        /**
-         * 
-         * 
-         * 
-         */
-        
         // Rank  TeamId Solved Penalty
         
         String [] rankData = {
@@ -395,6 +389,52 @@ public class DefaultScoringAlgorithmTest extends TestCase {
                 "2,team5,0,0",
                 "2,team6,0,0",
                 "2,team7,0,0",
+        };
+        
+        scoreboardTest (8, runsData, rankData);
+    }
+
+    /**
+     * Tests for cases where Yes is before No, and multiple yes at same elapsed time.
+     * 
+     * Both runs have same elapsed time, the tie breaker is runId.
+     * Also tests when one or more Yes are after first yes 
+     */
+    public void testNoBeforeYesSameElapsed(){
+        
+        // RunID    TeamID  Prob    Time    Result
+        
+        String [] runsData = {
+                "15,8,D,12,Yes",
+                "16,8,D,12,No",
+                
+                "24,4,B,15,Yes",
+                "25,4,B,15,No",
+                "26,4,B,15,No",
+                
+                "28,2,C,22,Yes",
+                "29,2,C,22,No",
+                "30,2,C,22,Yes",
+                "30,2,C,22,Yes",
+        };
+        
+        /**
+         * 
+         * 
+         * 
+         */
+        
+        // Rank  TeamId Solved Penalty
+        
+        String [] rankData = {
+                "1,team8,1,12",
+                "2,team4,1,15",
+                "3,team2,1,22",
+                "4,team1,0,0",
+                "4,team3,0,0",
+                "4,team5,0,0",
+                "4,team6,0,0",
+                "4,team7,0,0",
         };
         
         scoreboardTest (8, runsData, rankData);
