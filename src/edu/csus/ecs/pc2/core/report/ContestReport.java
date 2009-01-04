@@ -15,7 +15,6 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
-import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.util.IMemento;
 import edu.csus.ecs.pc2.core.util.XMLMemento;
 
@@ -87,15 +86,24 @@ public class ContestReport implements IReport {
                 runMemento.putString("languageName", languageName);
                 runMemento.putString("problemName", problemName);
 
+                // TODO add filename to XML
+                /**
+                 * This contest.getRunFiles is commented out because non-local runs cause
+                 * exceptions that are logged, if there are enough exceptions
+                 * it causes the Logging to lock up the JVM (or at least
+                 * make it spin) 
+                 * 
+                 * See Bug 339.
+                 */
 
-                RunFiles runFiles = contest.getRunFiles(run);
-
-                if (runFiles != null) {
-                    String filename = runFiles.getMainFile().getName();
-                    if (filename != null) {
-                        runMemento.putString("filename", filename);
-                    }
-                }
+//                RunFiles runFiles = contest.getRunFiles(run);
+//
+//                if (runFiles != null) {
+//                    String filename = runFiles.getMainFile().getName();
+//                    if (filename != null) {
+//                        runMemento.putString("filename", filename);
+//                    }
+//                }
             }
         }
 
