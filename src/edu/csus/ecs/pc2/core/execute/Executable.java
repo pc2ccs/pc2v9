@@ -218,7 +218,9 @@ public class Executable {
         fileViewer = new MultipleFileViewer(log);
 
         try {
-            controller.sendExecutingMessage(run);
+            if (isJudge()){
+                controller.sendExecutingMessage(run);
+            }
             
             executionData = new ExecutionData();
             
@@ -455,7 +457,9 @@ public class Executable {
         executionData.setValidationReturnCode(-1);
         executionData.setValidationSuccess(false);
         
-        controller.sendValidatingMessage(run);
+        if (isJudge()){
+            controller.sendValidatingMessage(run);
+        }
 
         if (problemDataFiles.getValidatorFile() != null) {
             // Create Validation Program
@@ -964,6 +968,10 @@ public class Executable {
         return result;
     }
 
+    private boolean isJudge() {
+        return contest.getClientId().getClientType().equals(ClientType.Type.JUDGE);
+    }
+    
 
     /**
      * Extract source file and run compile command line script.
@@ -974,7 +982,10 @@ public class Executable {
 
         try {
             
-            controller.sendCompilingMessage(run);
+            if (isJudge()){
+                System.out.println("debug compileProgram "+contest+" send msg "+contest.isSendAdditionalRunStatusMessages());
+                controller.sendCompilingMessage(run);
+            }
 
             String programName = replaceString(language.getExecutableIdentifierMask(), "{:basename}", removeExtension(runFiles.getMainFile().getName()));
 
