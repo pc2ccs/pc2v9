@@ -332,25 +332,28 @@ public class DefaultScoringAlgorithmTest extends TestCase {
     }
     
     /**
-     * Test based on data from boardtest.html.
+     * CASE (1): "When Solved, all runs before Yes".
+     * 
+     * Created from testing/boardtest.html
+     * 
      */
     public void testScoreboardCaseOne () {
         // RunID    TeamID  Prob    Time    Result
         
         String [] runsData = {
-                "1,1,A,1,No",   
-                "2,1,A,3,Yes", // With No on run 1, team 1 solved 1 23 penalty points.
-                "3,1,A,5,No",
-                "4,1,A,7,Yes",
-                "5,1,A,9,No",
-                "6,1,B,11,No",
-                "7,1,B,13,No",
-                "8,2,A,30,Yes",
-                "9,2,B,35,No",
-                "10,2,B,40,No",
-                "11,2,B,45,No",
-                "12,2,B,50,No",
-                "13,2,B,55,No"
+                "1,1,A,1,No",  // 20 (a No before first yes)
+                "2,1,A,3,Yes",  // 3 (first yes counts Minute points but never Run Penalty points)
+                "3,1,A,5,No",  // zero -- after Yes
+                "4,1,A,7,Yes",  // zero -- after Yes
+                "5,1,A,9,No",  // zero -- after Yes
+                "6,1,B,11,No",  // zero -- not solved
+                "7,1,B,13,No",  // zero -- not solved
+                "8,2,A,30,Yes",  // 30 (minute points; no Run points on first Yes)
+                "9,2,B,35,No",  // zero -- not solved
+                "10,2,B,40,No",  // zero -- not solved
+                "11,2,B,45,No",  // zero -- not solved
+                "12,2,B,50,No",  // zero -- not solved
+                "13,2,B,55,No",  // zero -- not solved
         };
         
         // Rank  TeamId Solved Penalty
@@ -440,11 +443,176 @@ public class DefaultScoringAlgorithmTest extends TestCase {
         scoreboardTest (8, runsData, rankData);
     }
     
+    /**
+     * CASE (2): "When Solved, all No Runs".
+     *
+     * Created from testing/boardtest.html
+     */
+    public void testScoreboardCaseTwo (){
+        
+        // RunID    TeamID  Prob    Time    Result
+        
+        String [] runsData = {
+                "1,1,A,1,No", // 20
+                "2,1,A,3,Yes", // 3 (Minute points for 1st Yes count)
+                "3,1,A,5,No", // 20 (a No on a solved problem)
+                "4,1,A,7,Yes", // zero (only "No's" count)
+                "5,1,A,9,No", // 20 (another No on the solved problem)
+                
+                "6,1,B,11,No", // zero (problem has not been solved)
+                "7,1,B,13,No", // zero (problem has not been solved)
+                
+                "8,2,A,30,Yes", // 30 (Minute points for 1st Yes)
+                
+                "9,2,B,35,No", // zero -- not solved
+                "10,2,B,40,No", // zero -- not solved
+                "11,2,B,45,No", // zero -- not solved
+                "12,2,B,50,No", // zero -- not solved
+                "13,2,B,55,No", // zero -- not solved
+        };
+        
+
+        // Rank  TeamId Solved Penalty
+        
+        String [] rankData = {
+                "1,team1,1,23",
+                "2,team2,1,30",
+        };
+        
+        // TODO when SA supports count all runs, replace rankData
+        
+        /**
+         * Case 2 tests when all no runs are counted, the current SA
+         * does not support this scoring method.  The commented
+         * rankData is the proper results
+         */
+
+//      Team 2 -- 30     <-- Team 2 is now winning with a lower score 
+//      Team 1 -- 63           (same database; different scoring method)
+        
+//        String [] rankData = {
+//                "1,team2,1,30",
+//                "2,team1,1,63",
+//        };
+        
+        
+        scoreboardTest (2, runsData, rankData);
+        
+    }
+    
+    /**
+     * CASE (3):  "When Solved, All Runs"
+     * 
+     * Created from testing/boardtest.html
+     */
+    public void testScoreboardCaseThree () {
+        
+        // RunID    TeamID  Prob    Time    Result
+        
+        String [] runsData = {
+
+                "1,1,A,1,No",   // 20
+                "2,1,A,3,Yes",   // 3 (first Yes counts only Min.Pts)
+                "3,1,A,5,No",   // 20
+                "4,1,A,7,Yes",   // 20 (all runs count!)
+                "5,1,A,9,No",   // 20
+
+                "6,1,B,11,No",   // zero (not solved)
+                "7,1,B,13,No",   // zero (not solved)
+
+                "8,2,A,30,Yes",   // 30
+
+                "9,2,B,35,No",   // zero -- not solved
+                "10,2,B,40,No",   // zero -- not solved
+                "11,2,B,45,No",   // zero -- not solved
+                "12,2,B,50,No",   // zero -- not solved
+                "13,2,B,55,No",   // zero -- not solved
+        };
+        
+        // Rank  TeamId Solved Penalty
+        
+        String [] rankData = {
+                "1,team1,1,23",
+                "2,team2,1,30"
+        };
+        
+        // TODO when SA supports count all runs, replace rankData
+        
+        /**
+         * Case 3 tests when all runs are counted, the current SA
+         * does not support this scoring method.  The commented
+         * rankData is the proper results
+         */
+        
+//        String [] rankData = {
+//                "1,team2,1,30"
+//                "2,team1,1,83",
+//        };
+        
+        scoreboardTest (2, runsData, rankData);
+    }
+    
+    /**
+     * CASE (4): "All Runs"
+     * 
+     * Created from testing/boardtest.html
+     */
+    public void testScoreboardCaseFour () {
+        
+        // RunID    TeamID  Prob    Time    Result
+        
+        String [] runsData = {
+
+                "1,1,A,1,No",  //20
+                "2,1,A,3,Yes",  //3 (first yes counts Minutes only)
+                "3,1,A,5,No",  //20
+                "4,1,A,7,Yes",  //20  
+                "5,1,A,9,No",  //20
+                
+                "6,1,B,11,No",  //20  (all runs count)
+                "7,1,B,13,No",  //20  (all runs count)
+                
+                "8,2,A,30,Yes",  //30
+                
+                "9,2,B,35,No",  //20 (all runs count)
+                "10,2,B,40,No",  //20 (all runs count)
+                "11,2,B,45,No",  //20 (all runs count)
+                "12,2,B,50,No",  //20 (all runs count)
+                "13,2,B,55,No",  //20 (all runs count)
+
+        };
+        
+        // Rank  TeamId Solved Penalty
+        
+        String [] rankData = {
+                "1,team1,1,23",
+                "2,team2,1,30"
+        };
+        
+        // TODO when SA supports count all runs, replace rankData
+        
+        /**
+         * Case 4 tests when all runs are counted, the current SA
+         * does not support this scoring method.  The commented
+         * rankData is the proper results
+         */
+        
+//        Team 1 -- 123   <-- Team 1 is winning again
+//        Team 2 -- 130
+        
+//        String [] rankData = {
+//                "1,team1,1,123",
+//                "2,team2,1,130"
+//        };
+        
+        scoreboardTest (2, runsData, rankData);
+    }
+
 
     /**
      * 
      */
-    public void testScoreboardCaseTwo (){
+    public void testScoreboard55 (){
 
         String [] runsData = {
                 "1,16,B,1,No",
