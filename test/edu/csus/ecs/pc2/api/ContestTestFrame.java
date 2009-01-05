@@ -533,7 +533,7 @@ public class ContestTestFrame extends JFrame {
     private JTextField getLoginTextField() {
         if (loginTextField == null) {
             loginTextField = new JTextField();
-            loginTextField.setText("judge1");
+            loginTextField.setText("spectator1");
             loginTextField.setBounds(new java.awt.Rectangle(153, 11, 127, 20));
             loginTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyPressed(java.awt.event.KeyEvent e) {
@@ -668,7 +668,7 @@ public class ContestTestFrame extends JFrame {
     }
     
     /**
-     * Turn run listener on and off
+     * Turn connection event listener on and off
      * 
      * @param listenerON
      *            true add listener, false no listener.
@@ -1294,8 +1294,7 @@ public class ContestTestFrame extends JFrame {
             connectionListenerCheckBox.setToolTipText("Listen for all connection change events");
             connectionListenerCheckBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    runListenerChanged(runListenerCheckBox.isSelected());
-                    connectionListenerChanged(configListenerCheckBox.isSelected());
+                    connectionListenerChanged(connectionListenerCheckBox.isSelected());
                 }
             });
         }
