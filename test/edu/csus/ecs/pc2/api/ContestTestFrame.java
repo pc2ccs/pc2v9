@@ -194,6 +194,18 @@ public class ContestTestFrame extends JFrame {
             listModel.addElement(abstractTest);
         }
     }
+    
+    protected void printAllJudgements (IRun run){
+        IRunJudgement [] judgements = run.getRunJudgements();
+        if (judgements.length == 0){
+            println("   No judgements for this run.");
+        }
+        for (IRunJudgement judgement : judgements){
+            println("   Judgement "+judgement.getJudgement().getName()+" compJudged="+judgement.isComputerJudgement()
+                    + " prelim="+judgement.isPreliminaryJudgement()+" toTeams="+judgement.isSendToTeam());
+        }
+    }
+
 
     /**
      * Run Listener for ContestTestFrame.
@@ -204,13 +216,16 @@ public class ContestTestFrame extends JFrame {
     
     // $HeadURL$
     protected class RunListener implements IRunEventListener {
+        
 
         public void runJudged(IRun run) {
             println("Run judged Site " + run.getSiteNumber() + " Run " + run.getNumber() + " from " + run.getTeam().getLoginName() + " at " + run.getSubmissionTime());
+            printAllJudgements(run);
         }
 
         public void runUpdated(IRun run) {
             println("Run updated Site " + run.getSiteNumber() + " Run " + run.getNumber() + " from " + run.getTeam().getLoginName() + " at " + run.getSubmissionTime());
+            printAllJudgements(run);
         }
 
         public void runExecuting(IRun run) {

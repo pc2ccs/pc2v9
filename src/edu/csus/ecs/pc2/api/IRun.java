@@ -58,7 +58,7 @@ public interface IRun {
     /**
      * Return List of judgements assigned by judges.
      * 
-     * @return
+     * @return list of IRunJudgements or zero length array of IRunJudgement.
      */
     IRunJudgement [] getRunJudgements();
 

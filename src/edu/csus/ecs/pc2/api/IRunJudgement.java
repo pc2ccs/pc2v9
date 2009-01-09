@@ -46,4 +46,20 @@ public interface IRunJudgement {
      */
     boolean isSendToTeam();
     
+    /**
+     * Is this a preliminary (non-final) judgement?.
+     * <P>
+     * Each contest problem a final judgement, some problems are defined to
+     * have preliminary judgements, for example computer (automated) judgement
+     * with a manual review.  In this case the computer judgement would
+     * return <code>true</code> and the manual judgement would return <code>false</code>.
+     * <P>
+     * In the case where a problem is defined a judging type of Computer Judging only
+     * (no Manual Review), this method would always return <code>false</code>.  In this
+     * example there would not be a case where this method would return <code>true</code. 
+     * 
+     * @return true if a preliminary judgement, false if this is the final judgement.
+     */
+    boolean isPreliminaryJudgement();
+    
 }

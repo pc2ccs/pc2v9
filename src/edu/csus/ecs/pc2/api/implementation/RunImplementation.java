@@ -305,7 +305,7 @@ public class RunImplementation implements IRun {
             RunJudgementImplemenation[] implemenations = new RunJudgementImplemenation[records.length];
 
             for (int i = 0; i < records.length; i++) {
-                implemenations[i] = new RunJudgementImplemenation(records[i], internalContest, controller);
+                implemenations[i] = new RunJudgementImplemenation(records[i], run, internalContest, controller);
             }
             return implemenations;
 

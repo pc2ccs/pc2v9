@@ -16,6 +16,7 @@ import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
+import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
@@ -200,11 +201,36 @@ public class RunsReport implements IReport {
                     printWriter.print("/Validator");
                 }
                 printWriter.print(" at " + judgementRecord.getWhenJudgedTime());
+                if (isPreliminaryJudgement(run, judgementRecord)) {
+                    printWriter.print(" (preliminary)");
+                }
                 printWriter.println();
             }
         }
         
         printWriter.println();
+    }
+    
+    private boolean isPreliminaryJudgement(Run run, JudgementRecord record) {
+
+        Problem problem = contest.getProblem(run.getProblemId());
+        if (problem.isManualReview() && problem.isComputerJudged()) {
+            /**
+             * Only preliminary possible is if is manual review AND computer judged.
+             */
+
+            JudgementRecord[] records = run.getAllJudgementRecords();
+            if (records != null) {
+                /**
+                 * If there are judgements, only the first (computer judged) will be a preliminary judged run.
+                 */
+                return records[0].getElementId().equals(record.getElementId());
+            }
+        }
+        // else - not possible at this time to be anything else but final judgement
+
+        return false;
+
     }
     
     private boolean isThisSite(int siteNumber) {
