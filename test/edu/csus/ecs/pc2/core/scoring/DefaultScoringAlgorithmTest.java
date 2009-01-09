@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.core.scoring;
 
 import java.io.StringReader;
+import java.util.Arrays;
 import java.util.Properties;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -14,6 +15,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -43,6 +45,8 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 public class DefaultScoringAlgorithmTest extends TestCase {
     
     private Log log = null;
+    
+    private boolean debugMode = false;
 
     protected void setUp() throws Exception {
         super.setUp();
@@ -97,6 +101,11 @@ public class DefaultScoringAlgorithmTest extends TestCase {
         checkForJudgeAndTeam(contest);
     }
     
+    /**
+     * Insure that there is one team and one judge in the contest model.
+     * 
+     * @param contest
+     */
     private void checkForJudgeAndTeam(IInternalContest contest) {
         Account account = contest.getAccounts(ClientType.Type.TEAM).firstElement();
         assertFalse("Team account not generated", account == null);
@@ -108,6 +117,12 @@ public class DefaultScoringAlgorithmTest extends TestCase {
 
     }
 
+    /**
+     * Initialize contest with teams, problems, languages, judgements.
+     * @param contest
+     * @param numTeams
+     * @param numProblems
+     */
     private void initData(IInternalContest contest, int numTeams, int numProblems) {
 
         // Add accounts
@@ -213,11 +228,11 @@ public class DefaultScoringAlgorithmTest extends TestCase {
     }
     
     /**
-     * Submit and judge a run.
+     * Create a judged run
      * 
      * @param contest
-     * @param judgementIndex
-     * @param solved
+     * @param judgementIndex - the judgement list index
+     * @param solved - was this run solved/Yes judgement
      */
     public void createJudgedRun (IInternalContest contest, int judgementIndex, boolean solved) {
         Run run = getARun(contest);
@@ -736,7 +751,89 @@ public class DefaultScoringAlgorithmTest extends TestCase {
         
         scoreboardTest (22, runsData, rankData);
     }
+  
+    /**
+     * Test a No before a Yes, both runs same elapsed time.
+     */
+    public void testNoYes (){
+
+        // RunID    TeamID  Prob    Time    Result
+        
+        String [] runsData = {
+                "5,2,A,12,No",
+                "6,2,A,12,Yes",
+        };
+        
+        // Rank  TeamId Solved Penalty
+        
+        String [] rankData = {
+                "1,team2,1,32",
+                "2,team1,0,0",
+        };
+        
+        scoreboardTest (2, runsData, rankData);
+    }
+
+    /**
+     * Test tie breaker down to last yes submission time. 
+     * 
+     */
+    public void testTieBreakerSubmissionTime(){
+
+        // Sort order:
+        // Primary Sort = number of solved problems (high to low)
+        // Secondary Sort = score (low to high)
+        // Tertiary Sort = earliest submittal of last submission (low to high)
+        // Forth Sort = teamName (low to high)
+        // Fifth Sort = clientId (low to high)
+        
+        // RunID    TeamID  Prob    Time    Result
+        
+        String [] runsData = {
+                "5,5,A,12,No",
+                "6,5,A,12,Yes", 
+                
+                "7,6,A,12,No",
+                "8,6,A,12,Yes",
+                
+                // Both solve 1 score 32  (no for 20, 12 min)
+
+                "15,5,B,21,No",
+                "16,5,B,22,Yes",  
+                
+                "25,6,B,21,No",
+                "26,6,B,22,Yes",  
+                
+                // Both solve 2 score 42  (no for 20 and 22 min)
+                // total 74 each
+        };
+        
+        // Rank  TeamId Solved Penalty
+        
+        String [] rankData = {
+                // must identical score, sort by team display name, identical ranks.
+                "1,team5,2,74",
+                "1,team6,2,74",
+                "3,team1,0,0",
+                "3,team2,0,0",
+                "3,team3,0,0",
+                "3,team4,0,0",
+        };
+        
+        scoreboardTest (6, runsData, rankData);
+    }
+
     
+    /**
+     * Test the SA given a list of runs and outcomes.
+     * 
+     * rankDataList array is array of string, thus: Rank  TeamDisplayName Solved Penalty,
+     * for example: "1,team5,2,74",
+     * 
+     * @param numTeams
+     * @param runsDataList
+     * @param rankDataList
+     */
     public void scoreboardTest(int numTeams, String[] runsDataList, String[] rankDataList) {
 
         InternalContest contest = new InternalContest();
@@ -753,7 +850,8 @@ public class DefaultScoringAlgorithmTest extends TestCase {
     }
     
     /**
-     * add run to list
+     * add run to list of runs in a contest.
+     * 
      * @param contest
      * @param runInfoLine
      */
@@ -794,7 +892,9 @@ public class DefaultScoringAlgorithmTest extends TestCase {
 
         contest.addRunJudgement(run, judgementRecord, null, judgeId);
 
-        System.out.println("Added run "+run);
+        if (debugMode){
+            System.out.println("Added run "+run);
+        }
         
     }
 
@@ -844,6 +944,17 @@ public class DefaultScoringAlgorithmTest extends TestCase {
     private void confirmRanks(InternalContest contest, String[] rankData) {
         
         Document document = null;
+
+        if (debugMode) {
+
+            Run[] runs = contest.getRuns();
+            Arrays.sort(runs, new RunComparator());
+            for (Run run : runs) {
+                System.out.println("Run " + run.getNumber() + " time=" + run.getElapsedMins() + " " + run.getSubmitter().getName() + " solved=" + run.isSolved());
+            }
+            System.out.flush();
+
+        }
         
         // Rank  Solved Penalty TeamId
         
@@ -876,11 +987,18 @@ public class DefaultScoringAlgorithmTest extends TestCase {
                 String [] standingsRow = fetchStanding (node);
 //              Object[] cols = { "Rank", "Name", "Solved", "Points" };
                 String [] cols = rankData[rankIndex].split(",");
+
+                if (debugMode) {
+                    System.out.println("SA rank="+standingsRow[0]+" solved="+standingsRow[2]+" points="+standingsRow[3]+" name="+standingsRow[1]);
+                    System.out.println("   rank="+cols[0]+" solved="+cols[2]+" points="+cols[3]+" name="+cols[1]);
+                    System.out.println();
+                    System.out.flush();
+                }
+                
                 compareRanking (rankIndex+1, standingsRow, cols);
                 rankIndex++;
             }
         }
-        
     }
 
     /**
