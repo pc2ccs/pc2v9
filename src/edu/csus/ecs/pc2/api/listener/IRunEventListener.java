@@ -9,13 +9,22 @@ import edu.csus.ecs.pc2.api.IRun;
  * itself to the contest as a Listener, and therefore arrange to be notified when any runs are added to, modified, or removed from the contest.
  * <P>
  * 
+ * <B>There is no guarantee that these events will appear in the order described below.</B>
+ * The system is a asynchronous system (Threads) and many factors can affect the
+ * order which these events occur.
+ * <P>
+ * 
  * Run Flow - if Admin selects "Send Additional Run Status Information" to OFF 
  * <ol>
  * <li> {@link #runSubmitted(IRun)}
  * <li> {@link #runJudged(IRun)} typically, but also can be: {@link #runJudgingCanceled(IRun)} or {@link #runDeleted(IRun)} or {@link #runUpdated(IRun)}.
  * </ol>
  * 
- * Run Flow - if Admin selects "Send Additional Run Status Information" to ON
+ * Run Flow - if Admin selects "Send Additional Run Status Information" to ON.
+ * <br>
+ * <B>Note that the events {@link #runCompiling(IRun)}, {@link #runExecuting(IRun)} and {@link #runValidating(IRun)} can
+ * appear in any order</B>
+ * 
  * <ol>
  * <li> {@link #runSubmitted(IRun)}
  * <li> {@link #runCompiling(IRun)}
@@ -59,7 +68,7 @@ public interface IRunEventListener {
      * Invoked when an existing run has been judged; that is, has had a Judgement applied to it.
      * 
      * Typically this happens when a judge assigns a Judgement, but it can also occur
-     * as a result of an &quot;automated judger&quot; (also known as a &quot;validator&quot;)
+     * as a result of an &quot;automated judgement&quot; (also known as a &quot;validator&quot;)
      * applying a judgement automatically.  
      * 
      * @param run
