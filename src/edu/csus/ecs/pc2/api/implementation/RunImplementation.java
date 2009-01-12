@@ -313,4 +313,19 @@ public class RunImplementation implements IRun {
             return new RunJudgementImplemenation[0];
         }
     }
+
+    public boolean isCompiling() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public boolean isExecuting() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public boolean isVaildating() {
+        // TODO Auto-generated method stub
+        return false;
+    }
 }

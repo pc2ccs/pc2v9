@@ -21,17 +21,20 @@ import edu.csus.ecs.pc2.api.IRun;
  * </ol>
  * 
  * Run Flow - if Admin selects "Send Additional Run Status Information" to ON.
- * <br>
- * <B>Note that the events {@link #runCompiling(IRun)}, {@link #runExecuting(IRun)} and {@link #runValidating(IRun)} can
- * appear in any order</B>
- * 
  * <ol>
  * <li> {@link #runSubmitted(IRun)}
  * <li> {@link #runCompiling(IRun)}
- * <li> {@link #runExecuting(IRun)}
+ * <li> {@link #runExecuting(IRun)} 
  * <li> {@link #runValidating(IRun)}
  * <li> {@link #runJudged(IRun)} typically, but also can be: {@link #runJudgingCanceled(IRun)} or {@link #runDeleted(IRun)} or {@link #runUpdated(IRun)}.
  * </ol>
+ * <br>
+ * <B>Note that the events {@link #runCompiling(IRun)}, {@link #runExecuting(IRun)} and {@link #runValidating(IRun)} can
+ * appear in any order</B>
+ * <br>
+ * <br>
+ * Note 2 - {@link #runExecuting(IRun)} and {@link #runValidating(IRun)} are optional, if the preceeding
+ * step fails or does not create output then these states may never be reached.
  * 
  * <p>
  * This documentation describes the current <I>draft</i> of the PC<sup>2</sup> API, which is subject to change.

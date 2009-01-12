@@ -4,6 +4,8 @@ package edu.csus.ecs.pc2.api;
  * This interface describes the PC<sup>2</sup> API view of a contest <I>Run</i>.
  * A <I>Run</i> is a submission by a Team of a program for judging.
  * 
+ * Information about run states is in {@link edu.csus.ecs.pc2.api.listener.IRunEventListener}
+ * 
  * <p>
  * This documentation describes the current <I>draft</i> of the PC<sup>2</sup> API, which is subject to change.
  *  
@@ -17,6 +19,9 @@ public interface IRun {
     /**
      * Return a boolean indicating whether or not the run been judged.
      * 
+     * If the run has been assigned preliminary judgement or final judgement 
+     * this method will return true.
+     * 
      * @return true if the run has been judged, false if not judged.
      */
     boolean isJudged();
@@ -28,6 +33,34 @@ public interface IRun {
      * @return true if the run was judged by the Judges as having correctly solved a problem, false otherwise.
      */
     boolean isSolved();
+    
+    /**
+     * Return a boolean indicating whether the run is being compiled.
+     * 
+     * <B>Note that the events {@link #isCompiling()}, {@link #isExecuting()} and {@link #isVaildating()} 
+     * can appear in any order</B>
+     * 
+     * @return true if a judge is compiling this run.
+     */
+    boolean isCompiling();
+    
+    /**
+     * Return a boolean indicating whether the run is being executed.
+     * 
+     * <B>Note that the events {@link #isCompiling()}, {@link #isExecuting()} and {@link #isVaildating()} 
+     * can appear in any order</B>
+     * @return true if a judge is executing this run.
+     */
+    boolean isExecuting();
+    
+    /**
+     * Return a boolean indicating whether the run is being validated.
+     *
+     * <B>Note that the events {@link #isCompiling()}, {@link #isExecuting()} and {@link #isVaildating()} 
+     * can appear in any order</B>
+     * @return true if a judge is validating this run.
+     */
+    boolean isVaildating();
 
     /**
      * Return a boolean indicating whether the run been marked as deleted by the Contest Administrator.
