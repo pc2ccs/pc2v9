@@ -147,7 +147,9 @@ public interface IContest {
     IJudgement[] getJudgements();
 
     /**
-     * Get a list of all the runs in the contest.  Returns an array of {@link IRun}s, where 
+     * Get a list of all the runs in the contest.  
+     * 
+     * Returns an array of {@link IRun}s, where 
      * each element of the array holds a single contest {@link IRun}.  In a multi-site contest
      * the returned array will contain the runs from all connected sites, not just the site for the
      * server to which this client is connected.   
@@ -178,8 +180,9 @@ public interface IContest {
     IRun[] getRuns();
     
     /**
+     * Get a list of all the clarifications in the contest.
      * 
-     * @return
+     * @return An unordered list of Clarifications for all sites  connected to the contest.
      */
     IClarification [] getClarifications();
 
@@ -344,17 +347,17 @@ public interface IContest {
     IStanding [] getStandings();
     
     /**
-     * Returns name 
-     * @return
+     * Returns name of the host (server) this application is using.
+     * 
+     * @return name of server host computer.
      */
-    // TODO java doc
-    String getLocalContactedHostName();
+    String getServerHostName();
     
     /**
+     * Returns the port number for the host (server) this application is using.
      * 
-     * @return
+     * @return port number for port. 
      */
-    // TODO java doc
-    int getLocalContactedPortNumber();
+    int getServerPort();
     
 }

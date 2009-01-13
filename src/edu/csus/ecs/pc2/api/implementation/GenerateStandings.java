@@ -68,11 +68,11 @@ public class GenerateStandings {
     }
 
     /**
-     * Parse output of DefaultScoringAlgorithm and return standings in order.
-     *  
+     * Return the contest standings.
+     * 
      * @param contest
      * @param log
-     * @return
+     * @return an array of the teams and their ranks and standing information.
      */
     public IStanding[] getStandings(IInternalContest contest, Log log) {
 

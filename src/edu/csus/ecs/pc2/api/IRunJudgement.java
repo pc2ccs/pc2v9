@@ -21,11 +21,11 @@ public interface IRunJudgement {
      * Is this the active/current judgement.
      * 
      * Only one judgement is active at a time, this is the
-     * judgement that currenently is displayed.
+     * judgement that currently is displayed.
      * 
      * @see #isSendToTeam()
      * 
-     * @return
+     * @return true if this judgement is the judgement to be displayed.
      */
     boolean isActive();
     

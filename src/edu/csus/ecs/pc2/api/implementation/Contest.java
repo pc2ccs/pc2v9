@@ -218,11 +218,11 @@ public class Contest implements IContest {
         return siteImplementations;
     }
 
-    public String getLocalContactedHostName() {
+    public String getServerHostName() {
         return controller.getHostContacted();
     }
 
-    public int getLocalContactedPortNumber() {
+    public int getServerPort() {
         return controller.getPortContacted();
     }
 

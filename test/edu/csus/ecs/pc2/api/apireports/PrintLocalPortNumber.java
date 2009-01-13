@@ -12,7 +12,7 @@ public class PrintLocalPortNumber extends APIAbstractTest {
 
     @Override
     public void printTest() {
-        println("Contacted: host=" + getContest().getLocalContactedHostName() + " port=" + getContest().getLocalContactedPortNumber());
+        println("Contacted: host=" + getContest().getServerHostName() + " port=" + getContest().getServerPort());
     }
 
     @Override
