@@ -17,12 +17,14 @@ import edu.csus.ecs.pc2.api.IRun;
  * Run Flow - if Admin selects "Send Additional Run Status Information" to OFF 
  * <ol>
  * <li> {@link #runSubmitted(IRun)}
+ * <li> {@link #runCheckedOut(IRun, boolean)}
  * <li> {@link #runJudged(IRun, boolean)} typically, but also can be: {@link #runJudgingCanceled(IRun, boolean)} or {@link #runDeleted(IRun)} or {@link #runUpdated(IRun, boolean)}.
  * </ol>
  * 
  * Run Flow - if Admin selects "Send Additional Run Status Information" to ON.
  * <ol>
  * <li> {@link #runSubmitted(IRun)}
+ * <li> {@link #runCheckedOut(IRun, boolean)}
  * <li> {@link #runCompiling(IRun, boolean)}
  * <li> {@link #runExecuting(IRun, boolean)} 
  * <li> {@link #runValidating(IRun, boolean)}

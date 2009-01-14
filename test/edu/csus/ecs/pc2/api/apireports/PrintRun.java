@@ -49,6 +49,7 @@ public class PrintRun extends APIAbstractTest {
                                 print("      ");
                             }
                             print(" " + runJudgement.getJudgement().getName());
+                            print(", solved=" + runJudgement.isSolved());
                             print(", sendToTeam=" + runJudgement.isSendToTeam());
                             print(", computerJudged=" + runJudgement.isComputerJudgement());
                             print(", preliminary=" + runJudgement.isPreliminaryJudgement());

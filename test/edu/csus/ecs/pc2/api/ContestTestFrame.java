@@ -201,7 +201,7 @@ public class ContestTestFrame extends JFrame {
             println("   No judgements for this run.");
         }
         for (IRunJudgement judgement : judgements){
-            println("   Judgement "+judgement.getJudgement().getName()+" compJudged="+judgement.isComputerJudgement()
+            println("   Judgement "+judgement.getJudgement().getName()+" compJudged="+judgement.isComputerJudgement()+" solved="+judgement.isSolved()
                     + " prelim="+judgement.isPreliminaryJudgement()+" toTeams="+judgement.isSendToTeam());
         }
     }
@@ -888,9 +888,10 @@ public class ContestTestFrame extends JFrame {
             print(" problem: " + run.getProblem().getName());
             print(" in " + run.getLanguage().getName());
 
-            // TODO dal need to do both preliminary and final conditions
             if (run.isFinalJudged()) {
-                println("  Judgement: " + run.getJudgementName());
+                println("  Final Judgement: " + run.getJudgementName());
+            } else if (run.isPreliminaryJudged()) {
+                println("  Preliminary Judgement: " + run.getJudgementName());
             } else {
                 println("  Judgement: not judged yet ");
             }

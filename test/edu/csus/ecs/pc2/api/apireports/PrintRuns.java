@@ -35,9 +35,10 @@ public class PrintRuns extends APIAbstractTest {
             print(" problem: " + run.getProblem().getName());
             print(" in " + run.getLanguage().getName());
 
-            // TODO dal do preliminary judge too
             if (run.isFinalJudged()) {
-                println("  Judgement: " + run.getJudgementName());
+                println("  Final Judgement: " + run.getJudgementName());
+            } else if (run.isPreliminaryJudged()) {
+                println("  Preliminary Judgement: " + run.getJudgementName());
             } else {
                 println("  Judgement: not judged yet ");
             }
