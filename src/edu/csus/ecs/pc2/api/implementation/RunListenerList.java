@@ -7,6 +7,7 @@ import edu.csus.ecs.pc2.api.listener.IRunEventListener;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IRunListener;
+import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 
 /**
@@ -28,6 +29,8 @@ public class RunListenerList {
         for (int i = 0; i < listenerList.size(); i++) {
 
             IRun run = new RunImplementation(runEvent.getRun(), contest, controller);
+            
+            boolean finalJudgementCycle = isFinalJudgementCycle(runEvent.getRun());
 
             switch (runEvent.getAction()) {
                 case ADDED:
@@ -39,29 +42,32 @@ public class RunListenerList {
                     break;
 
                 case CHANGED:
-                    if (run.isJudged()) {
-                        listenerList.elementAt(i).runJudged(run);
+                    if (run.isFinalJudged() || run.isPreliminaryJudged()) {
+                        listenerList.elementAt(i).runJudged(run, finalJudgementCycle);
                     }
                     break;
 
                 case RUN_AVAILABLE:
-                    listenerList.elementAt(i).runJudgingCanceled(run);
+                    listenerList.elementAt(i).runJudgingCanceled(run, finalJudgementCycle);
                     break;
 
                 case RUN_COMPILING:
-                    listenerList.elementAt(i).runCompiling(run);
+                    listenerList.elementAt(i).runCompiling(run, finalJudgementCycle);
                     break;
 
                 case RUN_EXECUTING:
-                    listenerList.elementAt(i).runExecuting(run);
+                    listenerList.elementAt(i).runExecuting(run, finalJudgementCycle);
                     break;
 
                 case RUN_VALIDATING:
-                    listenerList.elementAt(i).runValidating(run);
+                    listenerList.elementAt(i).runValidating(run, finalJudgementCycle);
+                    break;
+                    
+                case CHECKEDOUT_RUN:
+                    listenerList.elementAt(i).runCheckedOut(run, finalJudgementCycle);
                     break;
 
                 case CHECKEDOUT_REJUDGE_RUN:
-                case CHECKEDOUT_RUN:
                 case RUN_HELD:
                 case RUN_NOT_AVIALABLE:
                 case RUN_REVOKED:
@@ -71,6 +77,13 @@ public class RunListenerList {
             }
         }
     }
+
+    private boolean isFinalJudgementCycle(Run run) {
+        // TODO dal code this
+        return false;
+    }
+
+
 
     public void addRunListener(IRunEventListener runEventListener) {
         listenerList.add(runEventListener);

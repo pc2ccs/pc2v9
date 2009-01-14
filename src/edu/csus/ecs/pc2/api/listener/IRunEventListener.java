@@ -17,23 +17,23 @@ import edu.csus.ecs.pc2.api.IRun;
  * Run Flow - if Admin selects "Send Additional Run Status Information" to OFF 
  * <ol>
  * <li> {@link #runSubmitted(IRun)}
- * <li> {@link #runJudged(IRun)} typically, but also can be: {@link #runJudgingCanceled(IRun)} or {@link #runDeleted(IRun)} or {@link #runUpdated(IRun)}.
+ * <li> {@link #runJudged(IRun, boolean)} typically, but also can be: {@link #runJudgingCanceled(IRun, boolean)} or {@link #runDeleted(IRun)} or {@link #runUpdated(IRun, boolean)}.
  * </ol>
  * 
  * Run Flow - if Admin selects "Send Additional Run Status Information" to ON.
  * <ol>
  * <li> {@link #runSubmitted(IRun)}
- * <li> {@link #runCompiling(IRun)}
- * <li> {@link #runExecuting(IRun)} 
- * <li> {@link #runValidating(IRun)}
- * <li> {@link #runJudged(IRun)} typically, but also can be: {@link #runJudgingCanceled(IRun)} or {@link #runDeleted(IRun)} or {@link #runUpdated(IRun)}.
+ * <li> {@link #runCompiling(IRun, boolean)}
+ * <li> {@link #runExecuting(IRun, boolean)} 
+ * <li> {@link #runValidating(IRun, boolean)}
+ * <li> {@link #runJudged(IRun, boolean)} typically, but also can be: {@link #runJudgingCanceled(IRun, boolean)} or {@link #runDeleted(IRun)} or {@link #runUpdated(IRun, boolean)}.
  * </ol>
  * <br>
- * <B>Note that the events {@link #runCompiling(IRun)}, {@link #runExecuting(IRun)} and {@link #runValidating(IRun)} can
+ * <B>Note that the events {@link #runCompiling(IRun, boolean)}, {@link #runExecuting(IRun, boolean)} and {@link #runValidating(IRun, boolean)} can
  * appear in any order</B>
  * <br>
  * <br>
- * Note 2 - {@link #runExecuting(IRun)} and {@link #runValidating(IRun)} are optional, if the preceeding
+ * Note 2 - {@link #runExecuting(IRun, boolean)} and {@link #runValidating(IRun, boolean)} are optional, if the preceeding
  * step fails or does not create output then these states may never be reached.
  * 
  * <p>
@@ -66,6 +66,15 @@ public interface IRunEventListener {
      *            the deleted {@link IRun}
      */
     void runDeleted(IRun run);
+    
+    /**
+     * Invoked when a run has been checked by a judge.
+     *
+     * @see #runJudgingCanceled
+     * @param run
+     * @param isFinal true if this is a action for a final Judgement.
+     */
+    void runCheckedOut (IRun run, boolean isFinal);
 
     /**
      * Invoked when an existing run has been judged; that is, has had a Judgement applied to it.
@@ -76,8 +85,9 @@ public interface IRunEventListener {
      * 
      * @param run
      *            the judged {@link IRun}
+     * @param isFinal true if this is a action for a final Judgement.
      */
-    void runJudged(IRun run);
+    void runJudged(IRun run, boolean isFinal);
 
     /**
      * Invoked when an existing run has been updated (modified) in some way.
@@ -90,32 +100,36 @@ public interface IRunEventListener {
      * 
      * @param run
      *            the {@link IRun} which has been changed
+     * @param isFinal true if this is a action for a final Judgement.
      */
-    void runUpdated(IRun run);
+    void runUpdated(IRun run, boolean isFinal);
     
     /**
      * Invoked when an existing run is being compiled.
      * 
      * @param run
      *            the {@link IRun} which is being compiled.
+     * @param isFinal true if this is a action for a final Judgement.
      */
-    void runCompiling(IRun run);
+    void runCompiling(IRun run, boolean isFinal);
 
     /**
      * Invoked when an existing run is being executed.
      * 
      * @param run
      *            the {@link IRun} which is being executed.
+     * @param isFinal true if this is a action for a final Judgement.
      */
-    void runExecuting(IRun run);
+    void runExecuting(IRun run, boolean isFinal);
 
     /**
      * Invoked when an existing run is being validated.
      * 
      * @param run
      *            the {@link IRun} which is being validated.
+     * @param isFinal true if this is a action for a final Judgement.
      */
-    void runValidating(IRun run);
+    void runValidating(IRun run, boolean isFinal);
 
     /**
      * Invoked if the run is re-queued for judgement.
@@ -125,6 +139,7 @@ public interface IRunEventListener {
      * 
      * @param run
      *            the {@link IRun} which has been returned to the judging queue.
+     * @param isFinal true if this is a action for a final Judgement.
      */
-    void runJudgingCanceled(IRun run);
+    void runJudgingCanceled(IRun run, boolean isFinal);
 }

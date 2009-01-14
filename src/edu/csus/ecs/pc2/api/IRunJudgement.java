@@ -62,4 +62,13 @@ public interface IRunJudgement {
      */
     boolean isPreliminaryJudgement();
     
+    /**
+     * Return a boolean indicating whether the run been given a Yes (Correct) judgement.
+     * 
+     * Note that the value of this method is only meaningful if the Run has been judged.
+     * 
+     * @return true if the run was judged by the Judges as having correctly solved a problem, false otherwise.
+     */
+    boolean isSolved();
+    
 }

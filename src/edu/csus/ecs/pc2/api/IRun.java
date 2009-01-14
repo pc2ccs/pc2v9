@@ -19,12 +19,20 @@ public interface IRun {
     /**
      * Return a boolean indicating whether or not the run been judged.
      * 
-     * If the run has been assigned preliminary judgement or final judgement 
-     * this method will return true.
+     * Will return false if {@link #isPreliminaryJudged()} return true.
      * 
      * @return true if the run has been judged, false if not judged.
      */
-    boolean isJudged();
+    boolean isFinalJudged();
+    
+    /**
+     * Return a boolean indicating whether the run has only been preliminarily judged.
+     * 
+     * Will return false if {@link #isFinalJudged()} returns true.
+     * 
+     * @return true if run only has a preliminary judgement.
+     */
+    boolean isPreliminaryJudged();
 
     /**
      * Return a boolean indicating whether the run been given a Yes (Correct) judgement.
@@ -34,34 +42,6 @@ public interface IRun {
      */
     boolean isSolved();
     
-    /**
-     * Return a boolean indicating whether the run is being compiled.
-     * 
-     * <B>Note that the events {@link #isCompiling()}, {@link #isExecuting()} and {@link #isVaildating()} 
-     * can appear in any order</B>
-     * 
-     * @return true if a judge is compiling this run.
-     */
-    boolean isCompiling();
-    
-    /**
-     * Return a boolean indicating whether the run is being executed.
-     * 
-     * <B>Note that the events {@link #isCompiling()}, {@link #isExecuting()} and {@link #isVaildating()} 
-     * can appear in any order</B>
-     * @return true if a judge is executing this run.
-     */
-    boolean isExecuting();
-    
-    /**
-     * Return a boolean indicating whether the run is being validated.
-     *
-     * <B>Note that the events {@link #isCompiling()}, {@link #isExecuting()} and {@link #isVaildating()} 
-     * can appear in any order</B>
-     * @return true if a judge is validating this run.
-     */
-    boolean isVaildating();
-
     /**
      * Return a boolean indicating whether the run been marked as deleted by the Contest Administrator.
      * 

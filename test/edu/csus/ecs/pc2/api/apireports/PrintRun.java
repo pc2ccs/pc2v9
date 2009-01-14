@@ -35,10 +35,11 @@ public class PrintRun extends APIAbstractTest {
                     print(", " + run.getProblem().getName());
                     print(", " + run.getLanguage().getName());
                     print(", del=" + run.isDeleted());
-                    print(", judged=" + run.isJudged());
+                    print(", finalJudged=" + run.isFinalJudged());
+                    print(", preliminaryJudged=" + run.isPreliminaryJudged());
                     print(", solved=" + run.isSolved());
                     println();
-                    if (run.isJudged()) {
+                    if (run.isFinalJudged() || run.isPreliminaryJudged()) {
                         for (IRunJudgement runJudgement : run.getRunJudgements()) {
                             println("     " + run.getJudgementName());
                             print("     ");

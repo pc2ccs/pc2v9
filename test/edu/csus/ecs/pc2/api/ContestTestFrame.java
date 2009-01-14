@@ -217,22 +217,21 @@ public class ContestTestFrame extends JFrame {
     // $HeadURL$
     protected class RunListener implements IRunEventListener {
         
-
-        public void runJudged(IRun run) {
+        public void runJudged(IRun run, boolean isFinal) {
             println("Run judged Site " + run.getSiteNumber() + " Run " + run.getNumber() + " from " + run.getTeam().getLoginName() + " at " + run.getSubmissionTime());
             printAllJudgements(run);
         }
 
-        public void runUpdated(IRun run) {
+        public void runUpdated(IRun run, boolean isFinal) {
             println("Run updated Site " + run.getSiteNumber() + " Run " + run.getNumber() + " from " + run.getTeam().getLoginName() + " at " + run.getSubmissionTime());
             printAllJudgements(run);
         }
 
-        public void runExecuting(IRun run) {
+        public void runExecuting(IRun run, boolean isFinal) {
             println("Run executing Site " + run.getSiteNumber() + " Run " + run.getNumber() + " from " + run.getTeam().getLoginName() + " at " + run.getSubmissionTime());
         }
 
-        public void runValidating(IRun run) {
+        public void runValidating(IRun run, boolean isFinal) {
             println("Run validating Site " + run.getSiteNumber() + " Run " + run.getNumber() + " from " + run.getTeam().getLoginName() + " at " + run.getSubmissionTime());
         }
 
@@ -244,12 +243,17 @@ public class ContestTestFrame extends JFrame {
             println("Run deleted Site " + run.getSiteNumber() + " Run " + run.getNumber() + " from " + run.getTeam().getLoginName() + " at " + run.getSubmissionTime());
         }
 
-        public void runCompiling(IRun run) {
+        public void runCompiling(IRun run, boolean isFinal) {
             println("Run compiling Site " + run.getSiteNumber() + " Run " + run.getNumber() + " from " + run.getTeam().getLoginName() + " at " + run.getSubmissionTime());
         }
 
-        public void runJudgingCanceled(IRun run) {
+        public void runJudgingCanceled(IRun run, boolean isFinal) {
             println("Run judging canceled Site " + run.getSiteNumber() + " Run " + run.getNumber() + " from " + run.getTeam().getLoginName() + " at " + run.getSubmissionTime());
+        }
+
+        public void runCheckedOut(IRun run, boolean isFinal) {
+            println("Run checked out Site " + run.getSiteNumber() + " Run " + run.getNumber() + " from " + run.getTeam().getLoginName() + " at " + run.getSubmissionTime());
+            
         }
     }
 
@@ -884,7 +888,8 @@ public class ContestTestFrame extends JFrame {
             print(" problem: " + run.getProblem().getName());
             print(" in " + run.getLanguage().getName());
 
-            if (run.isJudged()) {
+            // TODO dal need to do both preliminary and final conditions
+            if (run.isFinalJudged()) {
                 println("  Judgement: " + run.getJudgementName());
             } else {
                 println("  Judgement: not judged yet ");

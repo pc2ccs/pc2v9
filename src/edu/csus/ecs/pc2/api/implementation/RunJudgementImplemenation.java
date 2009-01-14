@@ -34,7 +34,7 @@ public class RunJudgementImplemenation implements IRunJudgement {
      * 
      */
     private boolean preliminaryJudgement = false;
-
+    
     public RunJudgementImplemenation(JudgementRecord record, Run run, IInternalContest internalContest, IInternalController controller) {
         super();
         this.record = record;
@@ -64,9 +64,6 @@ public class RunJudgementImplemenation implements IRunJudgement {
                 /**
                  * If there are judgements, only the first (computer judged) will be a preliminary judged run.
                  */
-                System.out.println(" debug " + records[0].getElementId());
-                System.out.println(" debug " + record.getElementId());
-
                 preliminaryJudgement = records[0].getElementId().equals(record.getElementId());
             }
         }
@@ -93,5 +90,9 @@ public class RunJudgementImplemenation implements IRunJudgement {
 
     public boolean isPreliminaryJudgement() {
         return preliminaryJudgement;
+    }
+
+    public boolean isSolved() {
+        return record.isSolved();
     }
 }

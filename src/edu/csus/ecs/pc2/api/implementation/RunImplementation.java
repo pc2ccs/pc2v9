@@ -10,6 +10,7 @@ import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
+import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.RunFiles;
@@ -25,7 +26,7 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
 // $HeadURL$
 public class RunImplementation implements IRun {
 
-    private boolean judged;
+//    private boolean judged;
 
     private boolean solved;
 
@@ -65,6 +66,10 @@ public class RunImplementation implements IRun {
 
     private Run run = null;
 
+    private boolean preliminaryJudged = true;
+
+    private boolean finalJudged = false;
+
     /**
      * 
      * @param run
@@ -74,7 +79,6 @@ public class RunImplementation implements IRun {
 
         this.controller = controller;
         this.internalContest = internalContest;
-        judged = run.isJudged();
         solved = run.isSolved();
         deleted = run.isDeleted();
 
@@ -89,6 +93,10 @@ public class RunImplementation implements IRun {
                 judgementText = validatorJudgementName;
             }
             judgementTitle = judgementText;
+        }
+        
+        if (run.isJudged()){
+            setPreliminaryJudgement();
         }
 
         submitterTeam = new TeamImplementation(run.getSubmitter(), internalContest);
@@ -108,9 +116,35 @@ public class RunImplementation implements IRun {
         this.run = run;
 
     }
+    
+    /**
+     * Set/establish whether this judgement is a preliminary judgement or not.
+     * 
+     * Determine whether this judgement record is a preliminary or final judgement.
+     * 
+     */
+    private void setPreliminaryJudgement() {
 
-    public boolean isJudged() {
-        return judged;
+        Problem theProblem = internalContest.getProblem(run.getProblemId());
+        if (theProblem.isManualReview() && theProblem.isComputerJudged()) {
+            /**
+             * Only preliminary possible is if is manual review AND computer judged.
+             */
+
+            JudgementRecord[] records = run.getAllJudgementRecords();
+            if (records != null) {
+                /**
+                 * If there are judgements, only the first (computer judged) will be a preliminary judged run.
+                 */
+                JudgementRecord record = run.getJudgementRecord();
+                preliminaryJudged = records[0].getElementId().equals(record.getElementId());
+            }
+            finalJudged = ! preliminaryJudged;
+        } else if (run.getAllJudgementRecords().length > 0) {
+            // has judgements
+            finalJudged = true;
+        }
+        // else - the run is not judged.
     }
 
     public boolean isSolved() {
@@ -313,19 +347,13 @@ public class RunImplementation implements IRun {
             return new RunJudgementImplemenation[0];
         }
     }
+    
 
-    public boolean isCompiling() {
-        // TODO Auto-generated method stub
-        return false;
+    public boolean isFinalJudged() {
+        return finalJudged;
     }
 
-    public boolean isExecuting() {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    public boolean isVaildating() {
-        // TODO Auto-generated method stub
-        return false;
+    public boolean isPreliminaryJudged() {
+        return preliminaryJudged;
     }
 }
