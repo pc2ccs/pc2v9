@@ -66,7 +66,7 @@ public class RunImplementation implements IRun {
 
     private Run run = null;
 
-    private boolean preliminaryJudged = true;
+    private boolean preliminaryJudged = false;
 
     private boolean finalJudged = false;
 
@@ -95,6 +95,8 @@ public class RunImplementation implements IRun {
             judgementTitle = judgementText;
         }
         
+        this.run = run;
+        
         if (run.isJudged()){
             setPreliminaryJudgement();
         }
@@ -112,9 +114,6 @@ public class RunImplementation implements IRun {
         elapsedMins = run.getElapsedMins();
 
         elementId = run.getElementId();
-
-        this.run = run;
-
     }
     
     /**

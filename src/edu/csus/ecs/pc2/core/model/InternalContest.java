@@ -1151,6 +1151,9 @@ public class InternalContest implements IInternalContest {
         
         RunEvent runEvent = new RunEvent(RunEvent.Action.CHANGED, runList.get(run), runFiles, runResultFiles);
         runEvent.setWhoModifiedRun(whoChangedRun);
+        if (run.getStatus().equals(RunStates.BEING_JUDGED) || run.getStatus().equals(RunStates.BEING_RE_JUDGED) ){
+            runEvent.setDetailedAction(RunEvent.Action.CHECKEDOUT_RUN);
+        }
         
         if (checkOutRun) {
             runEvent.setSentToClientId(whoChangedRun);

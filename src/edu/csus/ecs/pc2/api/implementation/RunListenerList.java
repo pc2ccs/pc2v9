@@ -44,7 +44,18 @@ public class RunListenerList {
                     break;
 
                 case CHANGED:
-                    if (run.isFinalJudged() || run.isPreliminaryJudged()) {
+                    if (runEvent.getDetailedAction() != null) {
+                        switch (runEvent.getDetailedAction()) {
+                            case CHECKEDOUT_RUN:
+                            case CHECKEDOUT_REJUDGE_RUN:
+                                listenerList.elementAt(i).runCheckedOut(run, finalJudgementCycle);
+                                break;
+                            default:
+                                listenerList.elementAt(i).runUpdated(run, finalJudgementCycle);
+                                break;
+
+                        }
+                    } else {
                         listenerList.elementAt(i).runJudged(run, finalJudgementCycle);
                     }
                     break;

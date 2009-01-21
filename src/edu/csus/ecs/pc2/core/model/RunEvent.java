@@ -76,7 +76,16 @@ public class RunEvent {
         RUN_VALIDATING,
     }
 
+    /**
+     * Action to be taken.
+     */
     private Action action;
+    
+    /**
+     * If the action is CHANGED this is the specific action to be taken.
+     */
+    // TODO change code so that detailedAction is not required.
+    private Action detailedAction = null;
 
     private Run run;
 
@@ -154,6 +163,14 @@ public class RunEvent {
 
     public RunResultFiles[] getRunResultFiles() {
         return runResultFiles;
+    }
+
+    public Action getDetailedAction() {
+        return detailedAction;
+    }
+
+    public void setDetailedAction(Action detailedAction) {
+        this.detailedAction = detailedAction;
     }
 
 }
