@@ -291,7 +291,12 @@ public class RunsPanel extends JPanePlugin {
                     if (!isTeam(getContest().getClientId())) {
                         result = RunStates.MANUAL_REVIEW + " (" + result + ")";
                     } else {
-                        result = "PRELIMINARY (" + result + ")";
+                        // Only show to team
+                        if (showPreliminaryJudgementToTeam(run)) {
+                            result = "PRELIMINARY (" + result + ")";
+                        } else {
+                            result = RunStates.NEW.toString();
+                        }
                     }
                 }
             } else {
@@ -312,7 +317,13 @@ public class RunsPanel extends JPanePlugin {
                         if (!isTeam(getContest().getClientId())) {
                             result = RunStates.MANUAL_REVIEW + " (" + result + ")";
                         } else {
-                            result = "PRELIMINARY (" + result + ")";
+                            
+                            // Only show to team
+                            if (showPreliminaryJudgementToTeam(run)) {
+                                result = "PRELIMINARY (" + result + ")";
+                            } else {
+                                result = RunStates.NEW.toString();
+                            }
                         }
                     }
                     
@@ -340,6 +351,17 @@ public class RunsPanel extends JPanePlugin {
             result = "DEL " + result;
         }
         return result;
+    }
+
+    private boolean showPreliminaryJudgementToTeam(Run run) {
+        
+        try {
+            Problem problem = getContest().getProblem(run.getProblemId());
+            return problem.isPrelimaryNotification();
+        } catch (Exception e) {
+            log.log(Log.WARNING, "Exception trying to get Problem  ", e);
+            return false; 
+        }
     }
 
     private boolean isTeam(ClientId clientId) {
