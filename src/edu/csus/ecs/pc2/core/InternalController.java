@@ -677,7 +677,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
         if (connectionManager == null) {
             isStarted = false;
-            throw new Exception("unable to contact server (server started?), see log");
+            throw new Exception("Unable to contact server at "+getHostContacted()+":"+getPortContacted()+" (server not started?)");
         }
 
         ClientId clientId = loginShortcutExpansion(0, loginName);
