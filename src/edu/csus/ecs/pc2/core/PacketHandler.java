@@ -1889,10 +1889,7 @@ public class PacketHandler {
                     }
                     Packet judgementPacket = PacketFactory.createRunJudgement(contest.getClientId(), run.getSubmitter(), theRun, judgementRecord, rrf);
 
-                    if (judgementRecord.isSendToTeam()) {
-                        // Send to team who sent it, send to other server if needed.
-                        controller.sendToClient(judgementPacket);
-                    }
+                    controller.sendToClient(judgementPacket);
                 }
 
                 Packet judgementUpdatePacket = PacketFactory.createRunJudgmentUpdate(contest.getClientId(), PacketFactory.ALL_SERVERS, theRun, whoJudgedId);

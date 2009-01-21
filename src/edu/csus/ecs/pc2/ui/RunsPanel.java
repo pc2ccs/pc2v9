@@ -299,6 +299,11 @@ public class RunsPanel extends JPanePlugin {
                         }
                     }
                 }
+                
+                if (!run.getJudgementRecord().isSendToTeam()) {
+                    result = RunStates.NEW.toString();
+                }
+                
             } else {
                 result = "No";
 
@@ -461,6 +466,15 @@ public class RunsPanel extends JPanePlugin {
                 // check if there's a legit judgement
                 JudgementRecord judgementRecord = theRun.getJudgementRecord();
                 if (judgementRecord != null) {
+                    
+                    if (! judgementRecord.isSendToTeam()){
+                        
+                        /**
+                         * Do not show this judgement to the team, the judge indicated
+                         * that the team should not be notified.
+                         */
+                        return; // ------------------------------------------------------ RETURN
+                    }
 
                     // check if this is the scoreable judgement
                     boolean isActive = judgementRecord.isActive();
