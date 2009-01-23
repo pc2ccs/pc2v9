@@ -347,7 +347,6 @@ public class ProblemPane extends JPanePlugin {
 
         boolean enableButton = false;
 
-        showMessage("");
 
         if (problem != null) {
 
@@ -691,6 +690,15 @@ public class ProblemPane extends JPanePlugin {
                 return false;
             }
         }
+        
+        if (getComputerJudging().isSelected()){
+            
+            if (useNOValidatatorRadioButton.isSelected()){
+                showMessage("Computer Judging selected, must select a validator");
+                return false;
+            }
+            
+        }
 
         return true;
     }
@@ -785,7 +793,6 @@ public class ProblemPane extends JPanePlugin {
             public void run() {
                 populateGUI(problem);
                 enableUpdateButtons(false);
-                showMessage("");
             }
         });
     }
@@ -1323,8 +1330,7 @@ public class ProblemPane extends JPanePlugin {
     public void showMessage(final String message) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                messageLabel.setText(message);
-                messageLabel.setToolTipText(message);
+                JOptionPane.showMessageDialog(null, message);
             }
         });
     }
