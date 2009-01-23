@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.api;
 import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
 import edu.csus.ecs.pc2.api.exceptions.NotLoggedInException;
 import edu.csus.ecs.pc2.api.implementation.Contest;
+import edu.csus.ecs.pc2.api.listener.IConnectionEventListener;
 import edu.csus.ecs.pc2.core.InternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.InternalContest;
@@ -85,6 +86,8 @@ public class ServerConnection {
             internalContest = controller.clientLogin(internalContest, login, password);
 
             contest = new Contest(internalContest,  controller, controller.getLog());
+            
+            contest.addConnectionListener(new ConnectionEventListenerImplementation());
 
             return contest;
 
@@ -109,6 +112,7 @@ public class ServerConnection {
         try {
             controller.logoffUser(internalContest.getClientId());
             contest.setLoggedIn(false);
+            contest = null;
             return true;
         } catch (Exception e) {
             throw new NotLoggedInException(e);
@@ -153,4 +157,17 @@ public class ServerConnection {
             throw new NotLoggedInException("Not logged in");
         }
     }
+    
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    protected class ConnectionEventListenerImplementation implements IConnectionEventListener {
+
+        public void connectionDropped() {
+            contest = null;
+        }
+    }
+
 }

@@ -1457,7 +1457,9 @@ public class InternalContest implements IInternalContest {
     }
 
     public void connectionDropped(ConnectionHandlerID connectionHandlerID) {
-        localConnectionHandlerList.remove(connectionHandlerID);
+        if (connectionHandlerID != null){
+            localConnectionHandlerList.remove(connectionHandlerID);
+        }
         ConnectionEvent connectionEvent = new ConnectionEvent(ConnectionEvent.Action.DROPPED, connectionHandlerID);
         fireConnectionListener(connectionEvent);
     }
