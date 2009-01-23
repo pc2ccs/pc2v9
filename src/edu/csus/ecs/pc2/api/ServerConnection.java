@@ -101,7 +101,7 @@ public class ServerConnection {
      * Logoff/disconnect from the PC<sup>2</sup> server.
      * 
      * @return true if logged off, else false.
-     * @throws NotLoggedInException 
+     * @throws NotLoggedInException if attempt to logoff without being logged in
      */
     public boolean logoff() throws NotLoggedInException {
             
@@ -123,7 +123,7 @@ public class ServerConnection {
      * Returns a IContest, if not connected to a server throws a NotLoggedInException.
      * 
      * @return contest
-     * @throws NotLoggedInException
+     * @throws NotLoggedInException if attempt to invoke this method without being logged in
      */
     public Contest getContest() throws NotLoggedInException {
         if (contest != null) {
@@ -147,8 +147,7 @@ public class ServerConnection {
      * 
      * @see IContest#getMyClient()
      * @return Client class
-     * @throws NotLoggedInException
-     *             if not logged in throws this exception
+     * @throws NotLoggedInException if attempt to invoke this method without being logged in
      */
     public IClient getMyClient() throws NotLoggedInException {
         if (contest != null) {
@@ -159,6 +158,7 @@ public class ServerConnection {
     }
     
     /**
+     * A Connection Event used by ServerConnection.
      * 
      * @author pc2@ecs.csus.edu
      * @version $Id$
