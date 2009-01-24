@@ -37,15 +37,33 @@ import edu.csus.ecs.pc2.core.packet.PacketType.Type;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
 /**
- * Creates {@link Packet}.
+ * Creates {@link Packet}s.
  * 
  * Each packet can be created by using a method in this class. There is a "create" method for each {@link Type}. <br>
  * There are also some methods to extract fields/classes from packets.
  * <P>
  * Typically the contents of a packet is a {@link java.util.Properties}.
  * <P>
- * There a constants which are used to add and get various contest data classes to and
- * from the Properties in a Packet.
+ * Constants are present in this class that are used to extract individual contents from a packet. <br>
+ * Example of extracting individual contents from a packet {@link edu.csus.ecs.pc2.core.packet.Packet}.
+ * 
+ * <pre>
+ * Clarification clarification = (Clarification) PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION);
+ * 
+ * ClientId whoCheckedOut = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+ * </pre>
+ * 
+ * List of contents constants:
+ * {@link #ACCOUNT}, {@link #ACCOUNT_ARRAY}, {@link #BALLOON_SETTINGS}, {@link #BALLOON_SETTINGS_LIST}, {@link #CLARIFICATION}, {@link #CLARIFICATION_ANSWER}, {@link #CLARIFICATION_LIST},
+ * {@link #CLIENT_ID}, {@link #CLIENT_SETTINGS}, {@link #CLIENT_SETTINGS_LIST}, {@link #CLIENT_TYPE}, {@link #CONNECTION_HANDLE_ID}, {@link #CONNECTION_HANDLE_ID_LIST},
+ * {@link #CONTEST_INFORMATION}, {@link #CONTEST_LENGTH_TIME}, {@link #CONTEST_PASSWORD}, {@link #CONTEST_TIME}, {@link #CONTEST_TIME_LIST}, {@link #COUNT}, {@link #CREATE_ACCOUNT_ACTIVE},
+ * {@link #DEFAULT_CLARIFICATION_ANSWER}, {@link #ELAPSED_TIME}, {@link #EXCEPTION}, {@link #GENERAL_PROBLEM}, {@link #GROUP}, {@link #GROUP_LIST}, {@link #JUDGEMENT}, {@link #JUDGEMENT_LIST},
+ * {@link #JUDGEMENT_RECORD}, {@link #LANGUAGE}, {@link #LANGUAGE_DISPLAY_LIST}, {@link #LANGUAGE_LIST}, {@link #LOGGED_IN_USERS}, {@link #LOGIN}, {@link #MESSAGE}, {@link #NEW_PASSWORD},
+ * {@link #PACKET}, {@link #PASSWORD}, {@link #PASSWORD_CHANGED}, {@link #PROBLEM}, {@link #PROBLEM_DATA_FILES}, {@link #PROBLEM_DISPLAY_LIST}, {@link #PROBLEM_LIST}, {@link #REMAINING_TIME},
+ * {@link #RUN}, {@link #RUN_FILES}, {@link #RUN_LIST}, {@link #RUN_RESULTS_FILE}, {@link #RUN_STATUS}, {@link #SEND_SETTINGS}, {@link #SITE}, {@link #SITE_LIST}, {@link #SITE_NUMBER},
+ * {@link #START_COUNT}.
+ * 
+ * <br>
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -56,12 +74,21 @@ public final class PacketFactory {
 
     public static final String LOGIN = "LOGIN";
 
+    /**
+     * A single {@link Run}.
+     */
     public static final String RUN = "RUN";
 
     public static final String PASSWORD = "PASSWORD";
 
+    /**
+     * A single {@link JudgementRecord}.
+     */
     public static final String JUDGEMENT_RECORD = "JUDGEMENT_RECORD";
 
+    /**
+     * Array of {@link Run}.
+     */
     public static final String RUN_LIST = "RUN_LIST";
 
     public static final String RUN_FILES = "RUN_FILES";
@@ -75,6 +102,10 @@ public final class PacketFactory {
     public static final String GROUP = "GROUP";
 
     public static final String CLARIFICATION_ANSWER = "CLARIFICATION_ANSWER";
+
+    /**
+     * A single {@link ElementId} for a requested {@link Run}.
+     */
 
     public static final String REQUESTED_RUN_ELEMENT_ID = "REQUESTED_RUN_ELEMENT_ID";
 
@@ -104,20 +135,37 @@ public final class PacketFactory {
      */
     public static final String CONTEST_TIME = "CONTEST_TIME";
 
+    /**
+     * A single {@link Clarification}.
+     */
     public static final String CLARIFICATION = "CLARIFICATION";
 
+    /**
+     * A single {@link ElementId} for a requested {@link Clarification}.
+     */
     public static final String REQUESTED_CLARIFICATION_ELEMENT_ID = "REQUESTED_CLARIFICATION_ELEMENT_ID";
 
+    /**
+     * A single {@link Account}.
+     */
     public static final String ACCOUNT = "ACCOUNT";
 
+    /**
+     * Array of {@link Account}.
+     */
     public static final String ACCOUNT_ARRAY = "ACCOUNT_ARRAY";
 
+    /**
+     * A single ClientType.Type.
+     * 
+     * @see #createGenerateAccounts(ClientId, ClientId, int, ClientType.Type, int, int, boolean)
+     */
     public static final String CLIENT_TYPE = "CLIENT_TYPE";
 
     public static final String COUNT = "COUNT";
 
     /**
-     * Used as a start count for generating accounts.
+     * Used as a start count (id) for generating accounts.
      * 
      * If start count is 0, will add accounts after max account number. <br>
      * If start count is 100, will add accounts after max account number >= 100.
@@ -136,24 +184,40 @@ public final class PacketFactory {
 
     public static final String PROBLEM_DATA_FILES = "PROBLEM_DATA_FILES";
 
+    /**
+     * Array of {@link LanguageDisplayList}.
+     */
+
     public static final String LANGUAGE_DISPLAY_LIST = "LANGUAGE_DISPLAY_LIST";
 
+    /**
+     * Array of {@link ProblemDisplayList}.
+     */
     public static final String PROBLEM_DISPLAY_LIST = "PROBLEM_DISPLAY_LIST";
 
     public static final String DEFAULT_CLARIFICATION_ANSWER = "DEFAULT_CLARIFICATION_ANSWER";
 
     public static final String CONTEST_SETTINGS = "CONTEST_SETTINGS";
 
+    /**
+     * Array of {@link Site}.
+     */
     public static final String SITE_LIST = "SITE_LIST";
 
     public static final String MESSAGE_STRING = "MESSAGE_STRING";
     
     public static final String CONTEST_INFORMATION = "CONTEST_INFORMATION";
     
+    /**
+     * Array of {@link ClientSettings}.
+     */
     public static final String CLIENT_SETTINGS_LIST = "CLIENT_SETTINGS_LIST";
     
     public static final String CLIENT_SETTINGS = "CLIENT_SETTINGS";
     
+    /**
+     * Array of {@link BalloonSettings}.
+     */
     public static final String BALLOON_SETTINGS_LIST = "BALLOON_SETTINGS_LIST";
 
     public static final String PACKET = "PACKET";
@@ -461,9 +525,7 @@ public final class PacketFactory {
 
 
     /**
-     * Send checked out packet to judges.
-     * 
-     * 
+     * Send checked out packet to requesting judge.
      * 
      * @param source
      * @param destination
@@ -471,8 +533,8 @@ public final class PacketFactory {
      * @param runFiles
      *            run files or null (if run is not for destination client).
      * @param id
-     * @param runResultFiles 
-     * @return checked out packet.
+     * @param runResultFiles
+     * @return packet of checked out run for judge.
      */
     public static Packet createCheckedOutRun(ClientId source, ClientId destination, Run run, RunFiles runFiles, ClientId id, RunResultFiles[] runResultFiles) {
         Properties prop = new Properties();
@@ -487,9 +549,27 @@ public final class PacketFactory {
 
         Packet packet = new Packet(Type.RUN_CHECKOUT, source, destination, prop);
         return packet;
-
     }
 
+    /**
+     * Create packet that notifies judges and others that run has been checked out.
+     * 
+     * @param source
+     * @param destination
+     * @param run
+     * @param id
+     * @return packet that contains run and who checked out run
+     */
+    public static Packet createCheckedOutRunNotification(ClientId source, ClientId destination, Run run, ClientId id) {
+        Properties prop = new Properties();
+        prop.put(RUN, run);
+        prop.put(CLIENT_ID, id);
+
+        Packet packet = new Packet(Type.RUN_CHECKOUT_NOTIFICATION, source, destination, prop);
+        return packet;
+    }
+
+    
     /**
      * Create a packet of {@link PacketType.Type#RUN_NOTAVAILABLE}.
      * 
@@ -1033,7 +1113,7 @@ public final class PacketFactory {
      * @param destination
      * @param run
      * @param requesingId
-     * @return
+     * @return request a fetched (read-only) run from the server.
      */
     public static Packet createFetchRun(ClientId source, ClientId destination, Run run, ClientId requesingId) {
         Properties props = new Properties();
@@ -1054,7 +1134,7 @@ public final class PacketFactory {
      * @param runFiles
      * @param requesingId
      * @param runResultFiles
-     * @return
+     * @return packet containing fetched (non-checked out) run.
      */
     public static Packet createFetchedRun(ClientId source, ClientId destination, Run run, RunFiles runFiles, ClientId requesingId, RunResultFiles[] runResultFiles) {
         Properties props = new Properties();
@@ -1282,7 +1362,7 @@ public final class PacketFactory {
      * 
      * @param source
      * @param destination
-     * @param run2
+     * @param run
      * @param requesterId
      */
     public static Packet createRunRejudgeRequest(ClientId source, ClientId destination, Run run, ClientId requesterId) {

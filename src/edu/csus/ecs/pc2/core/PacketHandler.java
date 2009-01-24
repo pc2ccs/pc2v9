@@ -249,12 +249,14 @@ public class PacketHandler {
                 updateSetting(packet);
                 break;
             case RUN_CHECKOUT:
+                // Fall through
+            case RUN_CHECKOUT_NOTIFICATION:
                 // Run from server to clients
-                runCheckout(packet);
+                runCheckout(packet, packetType);
                 break;
             case RUN_REJUDGE_CHECKOUT:
                 // Run from server to clients
-                runCheckout(packet); // this works for rejudge as well.
+                runCheckout(packet, packetType); // this works for rejudge as well.
                 break;
             case CLARIFICATION_REQUEST:
                 requestClarification(packet, connectionHandlerID);
@@ -697,18 +699,34 @@ public class PacketHandler {
     }
 
     /**
+     * Process checkout run packets.
      * 
      * @param packet
+     * @param packetType either {@link Type.RUN_CHECKOUT} or {@link Type.RUN_CHECKOUT_NOTIFICATION}
      */
-    private void runCheckout(Packet packet) {
+    private void runCheckout(Packet packet, Type packetType) {
 
         // Run checkout OR run re-judge checkout
-
         Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
-        RunFiles runFiles = (RunFiles) PacketFactory.getObjectValue(packet, PacketFactory.RUN_FILES);
         ClientId whoCheckedOut = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-        RunResultFiles[] runResultFiles = (RunResultFiles[]) PacketFactory.getObjectValue(packet, PacketFactory.RUN_RESULTS_FILE);
-        contest.updateRun(run, runFiles, whoCheckedOut, runResultFiles);
+
+        switch (packetType) {
+            case RUN_REJUDGE_CHECKOUT:
+                // Fall through
+            case RUN_CHECKOUT:
+                RunFiles runFiles = (RunFiles) PacketFactory.getObjectValue(packet, PacketFactory.RUN_FILES);
+                RunResultFiles[] runResultFiles = (RunResultFiles[]) PacketFactory.getObjectValue(packet, PacketFactory.RUN_RESULTS_FILE);
+                contest.updateRun(run, runFiles, whoCheckedOut, runResultFiles);
+                break;
+
+            case RUN_CHECKOUT_NOTIFICATION:
+                contest.updateRun(run, whoCheckedOut);
+                break;
+            default:
+                controller.getLog().log(Log.WARNING, "Attempted to runCheckout with packet: " + packet);
+                break;
+
+        }
 
         if (isServer()) {
             sendToJudgesAndOthers(packet, false);
@@ -721,7 +739,6 @@ public class PacketHandler {
         RunFiles runFiles = (RunFiles) PacketFactory.getObjectValue(packet, PacketFactory.RUN_FILES);
         ClientId whoCheckedOut = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
         RunResultFiles[] runResultFiles = (RunResultFiles[]) PacketFactory.getObjectValue(packet, PacketFactory.RUN_RESULTS_FILE);
-        // huh
         contest.updateRun(run, runFiles, whoCheckedOut, runResultFiles);
     }
     
@@ -2050,9 +2067,9 @@ public class PacketHandler {
                         Packet checkOutPacket = PacketFactory.createCheckedOutRun(contest.getClientId(), whoRequestsRunId, theRun, runFiles, whoRequestsRunId, runResultFiles);
                         controller.sendToClient(checkOutPacket);
 
-                        // TODO change this packet type so it is not confused with the actual checked out run.
-
-                        sendToJudgesAndOthers(checkOutPacket, true);
+                        Packet checkOutNotificationPacket = PacketFactory.createCheckedOutRunNotification(contest.getClientId(), whoRequestsRunId, theRun, whoRequestsRunId);
+                        sendToJudgesAndOthers(checkOutNotificationPacket, true);
+                        
                     } catch (RunUnavailableException runUnavailableException) {
                         controller.getLog().info("runUnavailableException " + runUnavailableException.getMessage());
                         theRun = contest.getRun(run.getElementId());

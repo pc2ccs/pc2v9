@@ -636,6 +636,10 @@ public final class PacketType implements Serializable {
          * @see RunExecutionStatus
          */
         RUN_EXECUTION_STATUS,
+        /**
+         * A notification that a run has been checked out 
+         */
+        RUN_CHECKOUT_NOTIFICATION,
     }
 
     /**
