@@ -130,6 +130,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     private String judgementINIFileName = "reject.ini";
 
+    private static final String DEBUG_OPTION_STRING = "--debug";
+    
     private static final String SITE_OPTION_STRING = "--site";
 
     private static final String LOGIN_OPTION_STRING = "--login";
@@ -1831,7 +1833,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         } catch (IOException e1) {
             log.info("Could not determine working directory " + e1.getMessage());
         }
-
+        
         /**
          * Saved exception.
          * 
@@ -1842,6 +1844,22 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         String[] arguments = { "--login", "--id", "--password", "--loginUI", "--remoteServer", "--server", "--port", "--ini", "--nosave", CONTEST_PASSWORD_OPTION };
         parseArguments = new ParseArguments(stringArray, arguments);
 
+        if (parseArguments.isOptPresent(DEBUG_OPTION_STRING)) {
+            
+            Utilities.setDebugMode(true);
+            System.out.println(new VersionInfo().getSystemVersionInfo());
+            try {
+                System.out.println("Working directory is " + new File(".").getCanonicalPath());
+            } catch (IOException e1) {
+                System.out.println("Could not determine working directory " + e1.getMessage());
+                e1.printStackTrace(System.err);
+            }
+            
+            log.info("Debug mode ON");
+            System.out.println("Debug mode ON");
+            
+        }
+        
         if (parseArguments.isOptPresent("--help")) {
             System.out.println("Usage: Starter [--help] [--server] [--first] [--login <login>] [--password <pass>] [--site ##] [--ini filename] ");
             System.exit(0);
