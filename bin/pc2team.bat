@@ -19,7 +19,7 @@ if exist %PC2BIN%\pc2env.bat goto :continue
 echo.
 echo ERROR: Could not locate scripts.
 echo.
-echo Please set the varible PC2INSTALL to the location of
+echo Please set the variable PC2INSTALL to the location of
 echo   the VERSION file (ex: c:\pc2-9.0.0)
 echo.
 pause
