@@ -93,5 +93,12 @@ public class NotificationSetting implements IElementObject {
     public int versionNumber() {
         return elementId.getVersionNumber();
     }
-
+    
+    public boolean isSameAs (NotificationSetting notificationSettingIn){
+        return 
+        notificationSettingIn.getFinalNotificationYes().isSameAs(getFinalNotificationYes())
+        && notificationSettingIn.getFinalNotificationNo().isSameAs(getFinalNotificationNo()) 
+        && notificationSettingIn.getPreliminaryNotificationYes().isSameAs(getPreliminaryNotificationYes()) 
+        && notificationSettingIn.getPreliminaryNotificationNo().isSameAs(getPreliminaryNotificationNo());
+    }
 }

@@ -38,7 +38,7 @@ public class JudgementNotification implements Serializable  {
         this.notificationSent = notificationSent;
     }
 
-    private int cuttoffMinutes;
+    private int cuttoffMinutes = 0;
 
     private boolean notificationSent = true;
     
@@ -50,5 +50,10 @@ public class JudgementNotification implements Serializable  {
         super();
         this.notificationSent = notificationSent;
         this.cuttoffMinutes = cuttoffMinutes;
+    }
+    
+    public boolean isSameAs(JudgementNotification judgementNotificationIn) {
+        return (judgementNotificationIn.isNotificationSent() == isNotificationSent())
+        && (judgementNotificationIn.getCuttoffMinutes() == getCuttoffMinutes());
     }
 }
