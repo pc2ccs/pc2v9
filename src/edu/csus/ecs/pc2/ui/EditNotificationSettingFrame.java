@@ -3,7 +3,10 @@ package edu.csus.ecs.pc2.ui;
 import javax.swing.JFrame;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.NotificationSetting;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 
 /**
  * Edit Notification Settings Frame.
@@ -40,6 +43,7 @@ public class EditNotificationSettingFrame extends JFrame implements UIPlugin {
         this.setContentPane(getNotificationSettingPane());
         this.setTitle("Edit Notification Setting");
 
+        FrameUtilities.centerFrame(this);
     }
 
     /**
@@ -57,11 +61,26 @@ public class EditNotificationSettingFrame extends JFrame implements UIPlugin {
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
 
         getNotificationSettingPane().setContestAndController(inContest, inController);
-
+        getNotificationSettingPane().setParentFrame(this);
     }
 
     public String getPluginTitle() {
         return "Edit Notification Setting Frame";
+    }
+    
+    public static void main(String[] args) {
+        EditNotificationSettingFrame frame = new EditNotificationSettingFrame();
+        frame.setClientId (new ClientId(1,Type.TEAM,3));
+        frame.setVisible(true);
+    }
+
+    public void setClientId(ClientId id) {
+        getNotificationSettingPane().setClientId(id);
+    }
+
+    public void setNotificationSetting(NotificationSetting notificationToEdit) {
+        getNotificationSettingPane().setNotificationSetting(notificationToEdit);
+        
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
