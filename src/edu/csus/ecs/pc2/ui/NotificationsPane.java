@@ -17,6 +17,9 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientSettings;
+import edu.csus.ecs.pc2.core.model.ClientSettingsEvent;
+import edu.csus.ecs.pc2.core.model.IClientSettingsListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.JudgementNotification;
 import edu.csus.ecs.pc2.core.model.NotificationSetting;
@@ -41,8 +44,6 @@ public class NotificationsPane extends JPanePlugin {
     private JPanel languageButtonPane = null;
 
     private MCLB notificationListBox = null;
-
-    private JButton addButton = null;
 
     private JButton editButton = null;
 
@@ -95,7 +96,6 @@ public class NotificationsPane extends JPanePlugin {
             languageButtonPane = new JPanel();
             languageButtonPane.setLayout(flowLayout);
             languageButtonPane.setPreferredSize(new java.awt.Dimension(35, 35));
-            languageButtonPane.add(getAddButton(), null);
             languageButtonPane.add(getEditButton(), null);
         }
         return languageButtonPane;
@@ -154,22 +154,13 @@ public class NotificationsPane extends JPanePlugin {
         int numberColumns = notificationListBox.getColumnCount();
         Object[] c = new String[numberColumns];
 
-        c[0] = clientId.getName() + " Site " + clientId.getSiteNumber();
-
-         if (clientId.getSiteNumber() == 0) {
-            if (clientId.getClientNumber() == 0) {
-                if (clientId.getClientType().equals(Type.TEAM)) {
-                    c[0] = "All teams";
-                }
-            }
-        }
-
-        // TODO populate notification settings from clientSettings
-        NotificationSetting notificationSetting = null;
-
+        
+        c[0] = getClientTitle(clientId);
+        
         c[1] = "";
         c[2] = "";
 
+        NotificationSetting notificationSetting = getNotificationSettings(clientId);
         if (notificationSetting != null) {
             c[1] = getNotificationSettingsString(notificationSetting.getFinalNotificationYes(), notificationSetting.getFinalNotificationNo());
             c[2] = getNotificationSettingsString(notificationSetting.getPreliminaryNotificationYes(), notificationSetting.getPreliminaryNotificationNo());
@@ -178,15 +169,34 @@ public class NotificationsPane extends JPanePlugin {
         return c;
     }
 
+    public static String getClientTitle(ClientId clientId) {
+
+        if (clientId.getSiteNumber() == 0) {
+            if (clientId.getClientNumber() == 0) {
+                if (clientId.getClientType().equals(Type.TEAM)) {
+                    return "All teams";
+                }
+            }
+        }
+
+        return clientId.getName() + " Site " + clientId.getSiteNumber();
+    }
+
     protected String getNotificationSettingsString(JudgementNotification notificationYes, JudgementNotification notificationNo) {
 
         String s = "";
 
         if (notificationYes.isNotificationSent()) {
-            s = "Cutoff Yes at " + notificationYes.getCuttoffMinutes();
+            s = "Send Yes";
+            if (notificationYes.getCuttoffMinutes() > 0){
+                s += " cutoff "+notificationYes.getCuttoffMinutes()+" min";
+            }
         }
         if (notificationNo.isNotificationSent()) {
-            s = "Cutoff No at " + notificationNo.getCuttoffMinutes();
+            s += " Send No";
+            if (notificationNo.getCuttoffMinutes() > 0){
+                s += " cutoff "+notificationNo.getCuttoffMinutes()+" min";
+            }
         }
         
         return s;
@@ -218,7 +228,7 @@ public class NotificationsPane extends JPanePlugin {
     private void addNotificationRow(ClientId clientId) {
 
         Object[] objects = buildNotificationRow(clientId);
-        notificationListBox.addRow(objects, clientId.getTripletKey());
+        notificationListBox.addRow(objects, clientId);
         notificationListBox.autoSizeAllColumns();
     }
 
@@ -226,10 +236,7 @@ public class NotificationsPane extends JPanePlugin {
         super.setContestAndController(inContest, inController);
 
         editNotificationSettingFrame.setContestAndController(inContest, inController);
-
-        // TODO add ClientSetting listener
-        // getContest().addNotificationListener(new NotificationListenerImplementation());
-
+        getContest().addClientSettingsListener(new ClientSettingsListenerImplementation());
         log = getController().getLog();
 
         SwingUtilities.invokeLater(new Runnable() {
@@ -237,53 +244,6 @@ public class NotificationsPane extends JPanePlugin {
                 reloadListBox();
             }
         });
-    }
-
-    // TODO add listener for client Settings changes
-    // /**
-    // *
-    // *
-    // * @author pc2@ecs.csus.edu
-    // */
-    // public class NotificationListenerImplementation implements INotificationListener {
-    //
-    // public void languageAdded(NotificationEvent event) {
-    // updateNotificationRow(event.getNotification());
-    // }
-    //
-    // public void languageChanged(NotificationEvent event) {
-    // updateNotificationRow(event.getNotification());
-    // }
-    //
-    // public void languageRemoved(NotificationEvent event) {
-    // // TODO Auto-generated method stub
-    // }
-    //
-    // }
-
-    /**
-     * This method initializes addButton
-     * 
-     * @return javax.swing.JButton
-     */
-    private JButton getAddButton() {
-        if (addButton == null) {
-            addButton = new JButton();
-            addButton.setText("Add");
-            addButton.setToolTipText("Add a new Notification definition");
-            addButton.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    addNewNotification();
-                }
-            });
-        }
-        return addButton;
-    }
-
-    protected void addNewNotification() {
-        // TODO remove addNewNotification, there is no add
-        // editNotificationSettingFrame.setNotification(null);
-        editNotificationSettingFrame.setVisible(true);
     }
 
     /**
@@ -317,17 +277,27 @@ public class NotificationsPane extends JPanePlugin {
             ClientId clientId = (ClientId) notificationListBox.getKeys()[selectedIndex];
             NotificationSetting notificationToEdit = getNotificationSettings(clientId);
 
-            editNotificationSettingFrame.setNotificationSetting(notificationToEdit);
+            if (notificationToEdit == null){
+                editNotificationSettingFrame.setClientId(clientId);
+            } else {
+                editNotificationSettingFrame.setNotificationSetting(notificationToEdit);
+            }
+            
             editNotificationSettingFrame.setVisible(true);
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception logged ", e);
             showMessage("Unable to edit notification, check log");
+            e.printStackTrace();
         }
     }
 
     private NotificationSetting getNotificationSettings(ClientId clientId) {
-
-        // TODO get Notification from clientsettings
+        
+        ClientSettings clientSettings = getContest().getClientSettings(clientId);
+        if (clientSettings != null){
+            return clientSettings.getNotificationSetting();
+        }
+        
         return null;
     }
 
@@ -358,4 +328,38 @@ public class NotificationsPane extends JPanePlugin {
         JOptionPane.showMessageDialog(this, string);
 
     }
+    
+    /**
+     * Client Settings Listener for Notifcations pane. 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    
+    // $HeadURL$
+    public class ClientSettingsListenerImplementation implements IClientSettingsListener {
+
+        public void clientSettingsAdded(final ClientSettingsEvent event) {
+            clientSettingsChanged(event);
+        }
+
+        public void clientSettingsChanged(final ClientSettingsEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    updateNotificationRowIfRowExists(event.getClientSettings().getClientId());
+                }
+            });
+        }
+
+        protected void updateNotificationRowIfRowExists(ClientId clientId2) {
+            int rowNumber = notificationListBox.getIndexByKey(clientId2);
+            if (rowNumber != -1){
+                updateNotificationRow(clientId2);
+            }
+        }
+
+        public void clientSettingsRemoved(ClientSettingsEvent event) {
+            clientSettingsChanged(event);
+        }
+    }
+    
 } // @jve:decl-index=0:visual-constraint="10,10"

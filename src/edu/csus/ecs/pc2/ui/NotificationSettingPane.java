@@ -14,6 +14,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.JudgementNotification;
 import edu.csus.ecs.pc2.core.model.NotificationSetting;
 
@@ -100,7 +101,7 @@ public class NotificationSettingPane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new java.awt.Dimension(499, 205));
+        this.setSize(new java.awt.Dimension(526,225));
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
         this.add(getMainPane(), java.awt.BorderLayout.CENTER);
 
@@ -183,13 +184,50 @@ public class NotificationSettingPane extends JPanePlugin {
         return updateButton;
     }
     
+    /**
+     * Add a new Notification Settings.
+     * 
+     */
+    protected void addNotificationSetting() {
+
+        NotificationSetting newNotificationSetting = getNotificationSettingsFromFields();
+
+//        dumpNotification(System.out, "addNotificationSetting", newNotificationSetting);
+
+        ClientSettings clientSettings = getContest().getClientSettings(clientId);
+
+        if (clientSettings == null) {
+            clientSettings = new ClientSettings(clientId);
+            clientSettings.setNotificationSetting(newNotificationSetting);
+            getController().addNewClientSettings(clientSettings);
+        } else {
+            clientSettings.setNotificationSetting(newNotificationSetting);
+            getController().updateClientSettings(clientSettings);
+        }
+
+        cancelButton.setText("Close");
+        addButton.setEnabled(false);
+        updateButton.setEnabled(false);
+
+        if (getParentFrame() != null) {
+            getParentFrame().setVisible(false);
+        }
+    }
+
+    /**
+     * 
+     *
+     */
     protected void updateNotificationSetting() {
 
        NotificationSetting newNotificationSetting = getNotificationSettingsFromFields();
+       
+//        dumpNotification(System.out, "updateNotificationSetting", notificationSetting);
         
-        dumpNotification(System.out, notificationSetting);
+        ClientSettings clientSettings = getContest().getClientSettings(clientId);
+        clientSettings.setNotificationSetting(newNotificationSetting);
         
-//        getController().updateLanguage(newLanguage);
+        getController().updateClientSettings(clientSettings);
         
         cancelButton.setText("Close");
         addButton.setEnabled(false);
@@ -221,9 +259,18 @@ public class NotificationSettingPane extends JPanePlugin {
     public void setNotificationSetting(final NotificationSetting notificationSetting) {
 
         this.notificationSetting = notificationSetting;
+        this.clientId = null;
+        if (notificationSetting != null){
+            this.clientId = notificationSetting.getClientId();
+        }
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
+                getAddButton().setVisible(false);
+                getUpdateButton().setVisible(true);
+                getAddButton().setEnabled(false);
+                getUpdateButton().setEnabled(false);
+                
                 populateGUI(notificationSetting);
                 enableUpdateButtons(false);
             }
@@ -233,7 +280,11 @@ public class NotificationSettingPane extends JPanePlugin {
     private void populateGUI(NotificationSetting notificationSetting2) {
 
         populatingGUI = true;
-
+        
+        if (getParentFrame() != null){
+            getParentFrame().setTitle("Edit Notification Setting for " + NotificationsPane.getClientTitle(clientId));
+        }
+        
         if (notificationSetting2 != null) {
 
             JudgementNotification judgementNotification = notificationSetting2.getPreliminaryNotificationYes();
@@ -300,17 +351,17 @@ public class NotificationSettingPane extends JPanePlugin {
     private JPanel getPreliminaryPane() {
         if (preliminaryPane == null) {
             prelimNoMinLabel = new JLabel();
-            prelimNoMinLabel.setBounds(new java.awt.Rectangle(260, 52, 213, 22));
+            prelimNoMinLabel.setBounds(new java.awt.Rectangle(297,52,213,22));
             prelimNoMinLabel.setText("minutes before end of contest");
             prelimYesMinLabel = new JLabel();
-            prelimYesMinLabel.setBounds(new java.awt.Rectangle(260, 21, 213, 22));
+            prelimYesMinLabel.setBounds(new java.awt.Rectangle(297,21,213,22));
             prelimYesMinLabel.setText("minutes before end of contest");
             yesPrelimCutoffLabel = new JLabel();
-            yesPrelimCutoffLabel.setBounds(new java.awt.Rectangle(100, 52, 96, 22));
+            yesPrelimCutoffLabel.setBounds(new java.awt.Rectangle(139,52,96,22));
             yesPrelimCutoffLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
             yesPrelimCutoffLabel.setText("Cutoff Time");
             yesPrelimCuttoffLabel = new JLabel();
-            yesPrelimCuttoffLabel.setBounds(new java.awt.Rectangle(100, 21, 96, 22));
+            yesPrelimCuttoffLabel.setBounds(new java.awt.Rectangle(139,21,96,22));
             yesPrelimCuttoffLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
             yesPrelimCuttoffLabel.setText("Cutoff Time");
             preliminaryPane = new JPanel();
@@ -339,21 +390,21 @@ public class NotificationSettingPane extends JPanePlugin {
             finalNoMinLabel = new JLabel();
             finalNoMinLabel.setText("minutes before end of contest");
             finalNoMinLabel.setSize(new java.awt.Dimension(213, 22));
-            finalNoMinLabel.setLocation(new java.awt.Point(260, 52));
+            finalNoMinLabel.setLocation(new java.awt.Point(297,52));
             finalYesMinLabel = new JLabel();
             finalYesMinLabel.setText("minutes before end of contest");
             finalYesMinLabel.setSize(new java.awt.Dimension(213, 22));
-            finalYesMinLabel.setLocation(new java.awt.Point(260, 21));
+            finalYesMinLabel.setLocation(new java.awt.Point(297,22));
             noFinalCutoffLabel = new JLabel();
             noFinalCutoffLabel.setText("Cutoff Time");
             noFinalCutoffLabel.setSize(new java.awt.Dimension(96, 22));
             noFinalCutoffLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-            noFinalCutoffLabel.setLocation(new java.awt.Point(100, 52));
+            noFinalCutoffLabel.setLocation(new java.awt.Point(139,52));
             yesFinalCutoffLabel = new JLabel();
             yesFinalCutoffLabel.setText("Cutoff Time");
             yesFinalCutoffLabel.setSize(new java.awt.Dimension(96, 22));
             yesFinalCutoffLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-            yesFinalCutoffLabel.setLocation(new java.awt.Point(100, 21));
+            yesFinalCutoffLabel.setLocation(new java.awt.Point(139,22));
             finalPane = new JPanel();
             finalPane.setLayout(null);
             finalPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Final Judgements", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
@@ -378,8 +429,13 @@ public class NotificationSettingPane extends JPanePlugin {
     private JCheckBox getYesPrelimCheckBox() {
         if (yesPrelimCheckBox == null) {
             yesPrelimCheckBox = new JCheckBox();
-            yesPrelimCheckBox.setBounds(new java.awt.Rectangle(17, 21, 70, 22));
-            yesPrelimCheckBox.setText("Yes");
+            yesPrelimCheckBox.setBounds(new java.awt.Rectangle(17,21,117,22));
+            yesPrelimCheckBox.setText("Send Yes");
+            yesPrelimCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableUpdateButton();
+                }
+            });
         }
         return yesPrelimCheckBox;
     }
@@ -392,8 +448,14 @@ public class NotificationSettingPane extends JPanePlugin {
     private JCheckBox getNoPrelimCheckBox() {
         if (noPrelimCheckBox == null) {
             noPrelimCheckBox = new JCheckBox();
-            noPrelimCheckBox.setBounds(new java.awt.Rectangle(17, 52, 70, 22));
-            noPrelimCheckBox.setText("No");
+            noPrelimCheckBox.setText("Send No");
+            noPrelimCheckBox.setSize(new java.awt.Dimension(117,22));
+            noPrelimCheckBox.setLocation(new java.awt.Point(17,52));
+            noPrelimCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableUpdateButton();
+                }
+            });
         }
         return noPrelimCheckBox;
     }
@@ -406,8 +468,13 @@ public class NotificationSettingPane extends JPanePlugin {
     private JTextField getYesPrelimCuttoffMinutesTextField() {
         if (yesPrelimCuttoffMinutesTextField == null) {
             yesPrelimCuttoffMinutesTextField = new JTextField();
-            yesPrelimCuttoffMinutesTextField.setBounds(new java.awt.Rectangle(208, 22, 45, 21));
+            yesPrelimCuttoffMinutesTextField.setBounds(new java.awt.Rectangle(246,22,45,21));
             yesPrelimCuttoffMinutesTextField.setDocument(new IntegerDocument());
+            yesPrelimCuttoffMinutesTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
         }
         return yesPrelimCuttoffMinutesTextField;
     }
@@ -420,8 +487,14 @@ public class NotificationSettingPane extends JPanePlugin {
     private JTextField getNoPrelimCuttoffMinutesTextField() {
         if (noPrelimCuttoffMinutesTextField == null) {
             noPrelimCuttoffMinutesTextField = new JTextField();
-            noPrelimCuttoffMinutesTextField.setBounds(new java.awt.Rectangle(208, 52, 45, 23));
+            noPrelimCuttoffMinutesTextField.setBounds(new java.awt.Rectangle(246,52,45,23));
             noPrelimCuttoffMinutesTextField.setDocument(new IntegerDocument());
+            noPrelimCuttoffMinutesTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
+
 
         }
         return noPrelimCuttoffMinutesTextField;
@@ -435,9 +508,14 @@ public class NotificationSettingPane extends JPanePlugin {
     private JCheckBox getYesFinalCheckBox() {
         if (yesFinalCheckBox == null) {
             yesFinalCheckBox = new JCheckBox();
-            yesFinalCheckBox.setText("Yes");
+            yesFinalCheckBox.setText("Send Yes");
             yesFinalCheckBox.setLocation(new java.awt.Point(17, 22));
-            yesFinalCheckBox.setSize(new java.awt.Dimension(67, 21));
+            yesFinalCheckBox.setSize(new java.awt.Dimension(117,22));
+            yesFinalCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableUpdateButton();
+                }
+            });
         }
         return yesFinalCheckBox;
     }
@@ -450,9 +528,14 @@ public class NotificationSettingPane extends JPanePlugin {
     private JCheckBox getNoFinalCheckBox() {
         if (noFinalCheckBox == null) {
             noFinalCheckBox = new JCheckBox();
-            noFinalCheckBox.setText("No");
+            noFinalCheckBox.setText("Send No");
             noFinalCheckBox.setLocation(new java.awt.Point(17, 52));
-            noFinalCheckBox.setSize(new java.awt.Dimension(67, 21));
+            noFinalCheckBox.setSize(new java.awt.Dimension(117,22));
+            noFinalCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableUpdateButton();
+                }
+            });
         }
         return noFinalCheckBox;
     }
@@ -465,9 +548,15 @@ public class NotificationSettingPane extends JPanePlugin {
     private JTextField getYesFinalCuttoffMinutesTextField() {
         if (yesFinalCuttoffMinutesTextField == null) {
             yesFinalCuttoffMinutesTextField = new JTextField();
-            yesFinalCuttoffMinutesTextField.setLocation(new java.awt.Point(208, 22));
+            yesFinalCuttoffMinutesTextField.setLocation(new java.awt.Point(246,23));
             yesFinalCuttoffMinutesTextField.setSize(new java.awt.Dimension(45, 21));
             yesFinalCuttoffMinutesTextField.setDocument(new IntegerDocument());
+            yesFinalCuttoffMinutesTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
+
         }
         return yesFinalCuttoffMinutesTextField;
     }
@@ -480,10 +569,16 @@ public class NotificationSettingPane extends JPanePlugin {
     private JTextField getNoFinalCuttoffMinutesTextField() {
         if (noFinalCuttoffMinutesTextField == null) {
             noFinalCuttoffMinutesTextField = new JTextField();
-            noFinalCuttoffMinutesTextField.setLocation(new java.awt.Point(208, 52));
+            noFinalCuttoffMinutesTextField.setLocation(new java.awt.Point(246,53));
             noFinalCuttoffMinutesTextField.setPreferredSize(new java.awt.Dimension(4, 20));
             noFinalCuttoffMinutesTextField.setSize(new java.awt.Dimension(45, 21));
             noFinalCuttoffMinutesTextField.setDocument(new IntegerDocument());
+            noFinalCuttoffMinutesTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
+
 
         }
         return noFinalCuttoffMinutesTextField;
@@ -518,52 +613,32 @@ public class NotificationSettingPane extends JPanePlugin {
         }
     }
 
-    private void addNotificationSetting() {
-
-        NotificationSetting newNotificationSetting = getNotificationSettingsFromFields();
-        
-        dumpNotification(System.out, notificationSetting);
-
-        // Language newLanguage = getLanguageFromFields();
-
-        // TODO add addNotificationSetting (newNotificationSetting);
-        // getController().add(newLanguage);
-
-        // cancelButton.setText("Close");
-        // addButton.setEnabled(false);
-        // updateButton.setEnabled(false);
-
-        // if (getParentFrame() != null) {
-        // getParentFrame().setVisible(false);
-        // }
-    }
-
     private NotificationSetting getNotificationSettingsFromFields() {
 
-        if (notificationSetting == null) {
-            notificationSetting = new NotificationSetting(clientId);
-        }
+        NotificationSetting checkNotificationSetting =new NotificationSetting(clientId);
 
         JudgementNotification judgementNotification = null;
 
         judgementNotification = new JudgementNotification(getYesPrelimCheckBox().isSelected(), getIntegerValue(getYesPrelimCuttoffMinutesTextField().getText()));
-        notificationSetting.setPreliminaryNotificationYes(judgementNotification);
+        checkNotificationSetting.setPreliminaryNotificationYes(judgementNotification);
 
         judgementNotification = new JudgementNotification(getNoPrelimCheckBox().isSelected(), getIntegerValue(getNoPrelimCuttoffMinutesTextField().getText()));
-        notificationSetting.setPreliminaryNotificationNo(judgementNotification);
+        checkNotificationSetting.setPreliminaryNotificationNo(judgementNotification);
 
         judgementNotification = new JudgementNotification(getYesFinalCheckBox().isSelected(), getIntegerValue(getYesFinalCuttoffMinutesTextField().getText()));
-        notificationSetting.setFinalNotificationYes(judgementNotification);
+        checkNotificationSetting.setFinalNotificationYes(judgementNotification);
 
         judgementNotification = new JudgementNotification(getNoFinalCheckBox().isSelected(), getIntegerValue(getNoFinalCuttoffMinutesTextField().getText()));
-        notificationSetting.setFinalNotificationNo(judgementNotification);
+        checkNotificationSetting.setFinalNotificationNo(judgementNotification);
 
-        return notificationSetting;
+        return checkNotificationSetting;
     }
 
-    private void dumpNotification(PrintStream out, NotificationSetting notificationSetting2) {
+    @SuppressWarnings("unused")
+    private void dumpNotification(PrintStream out, String message, NotificationSetting notificationSetting2) {
 
         System.out.println();
+        System.out.println(message);
         JudgementNotification judgementNotification = null;
 
         judgementNotification = notificationSetting2.getPreliminaryNotificationYes();
@@ -594,7 +669,47 @@ public class NotificationSettingPane extends JPanePlugin {
     public void setClientId(ClientId clientId) {
         this.clientId = clientId;
         notificationSetting = null;
-        populateGUI(null);
+        
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                getAddButton().setVisible(true);
+                getUpdateButton().setVisible(false);
+                getAddButton().setEnabled(false);
+                getUpdateButton().setEnabled(false);
+                populateGUI(null);
+                enableUpdateButtons(false);
+            }
+        });
     }
+    
+    /**
+     * Enable or disable Update button based on comparison of run to fields.
+     * 
+     */
+    public void enableUpdateButton() {
+
+        if (populatingGUI) {
+            return;
+        }
+
+        boolean enableButton = false;
+
+        if (notificationSetting != null) {
+
+            NotificationSetting checkNotificationSetting = getNotificationSettingsFromFields();
+            enableButton = ! checkNotificationSetting.isSameAs(notificationSetting);
+            
+//            dumpNotification(System.out, "before", notificationSetting);
+//            dumpNotification(System.out, "after ", checkNotificationSetting);
+            
+            System.out.println("debug enableUpdateButton "+enableButton);
+
+        } else {
+            enableButton = true;
+        }
+
+        enableUpdateButtons(enableButton);
+    }
+
 
 } // @jve:decl-index=0:visual-constraint="10,10"
