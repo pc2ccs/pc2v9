@@ -16,9 +16,11 @@ import com.ibm.webrunner.j2mclb.util.NumericStringComparator;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ClientSettingsEvent;
+import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IClientSettingsListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.JudgementNotification;
@@ -236,8 +238,10 @@ public class NotificationsPane extends JPanePlugin {
         super.setContestAndController(inContest, inController);
 
         editNotificationSettingFrame.setContestAndController(inContest, inController);
-        getContest().addClientSettingsListener(new ClientSettingsListenerImplementation());
         log = getController().getLog();
+        
+        getContest().addClientSettingsListener(new ClientSettingsListenerImplementation());
+        getContest().addAccountListener(new AccountListenerImplementation());
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -361,5 +365,32 @@ public class NotificationsPane extends JPanePlugin {
             clientSettingsChanged(event);
         }
     }
+    
+    /**
+     * Account Listener for GenerateAccountsPanel.
+     * 
+     * @author pc2@ecs.csus.edu
+     */
+    public class AccountListenerImplementation implements IAccountListener {
+
+        public void accountAdded(AccountEvent accountEvent) {
+            reloadListBox();
+        }
+
+        public void accountModified(AccountEvent accountEvent) {
+            reloadListBox();
+        }
+
+        public void accountsAdded(AccountEvent accountEvent) {
+            reloadListBox();
+        }
+
+        public void accountsModified(AccountEvent accountEvent) {
+            reloadListBox();
+        }
+
+
+    }
+
     
 } // @jve:decl-index=0:visual-constraint="10,10"
