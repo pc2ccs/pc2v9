@@ -26,6 +26,8 @@ public class ClientSettings implements IElementObject {
 
     private Properties properties = new Properties();
     
+    private NotificationSetting notificationSetting = null;
+    
     /**
      * Is this client auto judging, auto judging enabled ?.
      */
@@ -122,5 +124,13 @@ public class ClientSettings implements IElementObject {
      */
     public void setBalloonList(Hashtable<String, BalloonDeliveryInfo> balloonList) {
         this.balloonList = balloonList;
+    }
+
+    public NotificationSetting getNotificationSetting() {
+        return notificationSetting;
+    }
+
+    public void setNotificationSetting(NotificationSetting notificationSetting) {
+        this.notificationSetting = notificationSetting;
     }
 }

@@ -19,6 +19,8 @@ import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.JudgementNotification;
+import edu.csus.ecs.pc2.core.model.NotificationSetting;
 import edu.csus.ecs.pc2.core.model.Problem;
 
 /**
@@ -128,7 +130,28 @@ public class ClientSettingsReport implements IReport {
             printWriter.println("    " + balloonKey + " " + color + " " + problem + " " + clientId);
 
         }
+        
+        NotificationSetting notificationSetting = clientSettings.getNotificationSetting();
+        
+        if (notificationSetting == null){
+            printWriter.println("    No notification delivery settings defined.");
+        } else {
+            
+            JudgementNotification judgementNotification = null;
 
+            judgementNotification = notificationSetting.getPreliminaryNotificationYes();
+            printWriter.println("          Prelim Yes send " + judgementNotification.isNotificationSent() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
+
+            judgementNotification = notificationSetting.getPreliminaryNotificationNo();
+            printWriter.println("          Prelim No  send " + judgementNotification.isNotificationSent() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
+
+            judgementNotification = notificationSetting.getFinalNotificationYes();
+            printWriter.println("          Final  Yes send " + judgementNotification.isNotificationSent() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
+
+            judgementNotification = notificationSetting.getFinalNotificationNo();
+            printWriter.println("          Final  No  send " + judgementNotification.isNotificationSent() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
+
+        }
     }
 
     private boolean isJudge(ClientId id) {

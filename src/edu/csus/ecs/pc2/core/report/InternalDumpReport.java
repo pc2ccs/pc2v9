@@ -26,7 +26,9 @@ import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
+import edu.csus.ecs.pc2.core.model.JudgementNotification;
 import edu.csus.ecs.pc2.core.model.Language;
+import edu.csus.ecs.pc2.core.model.NotificationSetting;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.Site;
@@ -54,9 +56,7 @@ public class InternalDumpReport implements IReport {
 
     private Log log;
 
-    private Filter accountFilter = new Filter();
-
-    private Filter filter;
+    private Filter filter = new Filter();
 
     private void printClientSettings(PrintWriter printWriter) {
       
@@ -74,6 +74,49 @@ public class InternalDumpReport implements IReport {
             }
         }
     }
+    
+    private void printNotificationSettings (PrintWriter printWriter){
+        ClientSettings [] clientSettingsArray = contest.getClientSettingsList();
+        
+        printWriter.println();
+        printWriter.println("-- Notification Settings --");
+        
+        Arrays.sort(clientSettingsArray, new ClientSettingsComparator());
+        
+        for (ClientSettings clientSettings : clientSettingsArray){
+            NotificationSetting notificationSetting = clientSettings.getNotificationSetting();
+            if (notificationSetting != null){
+                printWriter.println("    For: "+clientSettings.getClientId());
+                dumpNotification(printWriter, clientSettings.getNotificationSetting());
+            }
+        } 
+    }
+    
+
+    protected void dumpNotification(PrintWriter printWriter, NotificationSetting notificationSetting2) {
+
+        printWriter.println();
+
+        if (notificationSetting2 == null) {
+            printWriter.println("          No delivery notification settings defined.");
+
+        } else {
+            JudgementNotification judgementNotification = null;
+
+            judgementNotification = notificationSetting2.getPreliminaryNotificationYes();
+            printWriter.println("          Prelim Yes send " + judgementNotification.isNotificationSent() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
+
+            judgementNotification = notificationSetting2.getPreliminaryNotificationNo();
+            printWriter.println("          Prelim No  send " + judgementNotification.isNotificationSent() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
+
+            judgementNotification = notificationSetting2.getFinalNotificationYes();
+            printWriter.println("          Final  Yes send " + judgementNotification.isNotificationSent() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
+
+            judgementNotification = notificationSetting2.getFinalNotificationNo();
+            printWriter.println("          Final  No  send " + judgementNotification.isNotificationSent() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
+        }
+    }
+
     
     private void printContestInformation(PrintWriter printWriter) {
       
@@ -98,58 +141,110 @@ public class InternalDumpReport implements IReport {
             printWriter.println("  Judges see: "+TeamDisplayMask.LOGIN_NAME_ONLY);
         }
     }
+    
+    private void printAccounts(PrintWriter printWriter, Account [] accounts) {
+    
+        Arrays.sort(accounts, new AccountComparator());
+        
+        for (Account account : accounts) {
+            if (filter.matchesAccount(account)){
+                printWriter.print("   Site " + account.getSiteNumber());
+                printWriter.format(" %-15s", account.getClientId().getName());
+                printWriter.println(" id=" + account.getElementId());
+            }
+        }
+    }
 
     private void printAccounts(PrintWriter printWriter) {
 
         printWriter.println();
-        printWriter.println("-- Accounts --");
+        printWriter.println("-- Accounts -- " + getFilterText());
+
         for (ClientType.Type ctype : ClientType.Type.values()) {
 
-            Vector<Account> accounts;
+            Vector<Account> vector = contest.getAccounts(ctype);
+            Account[] accounts = (Account[]) vector.toArray(new Account[vector.size()]);
+            int accountCount = filter.countAccounts(accounts);
+            printWriter.print("Accounts " + ctype.toString() + " there are " + accountCount);
+            printWriter.println();
 
-            if (accountFilter.isThisSiteOnly()) {
-                accounts = contest.getAccounts(ctype, accountFilter.getSiteNumber());
-            } else {
-                accounts = contest.getAccounts(ctype);
-            }
+            printAccounts(printWriter, accounts);
 
-            if (accounts.size() > 0) {
-                printWriter.print("Accounts " + ctype.toString() + " there are " + accounts.size());
-                if (accountFilter.isThisSiteOnly()) {
-                    printWriter.print(" for site " + accountFilter.getSiteNumber());
-                }
-                printWriter.println();
-
-
-                for (int i = 0; i < accounts.size(); i++) {
-                    Account account = accounts.elementAt(i);
-                    printWriter.print("   Site " + account.getSiteNumber());
-                    printWriter.format(" %-15s", account.getClientId().getName());
-                    printWriter.println(" id=" + account.getElementId());
-                }
-            }
         }
 
-        Vector<Account> allAccounts = contest.getAccounts(ClientType.Type.ALL);
-        if (accountFilter.isThisSiteOnly()) {
-            contest.getAccounts(ClientType.Type.ALL, accountFilter.getSiteNumber());
-        } 
-
-        Account[] accountList = (Account[]) allAccounts.toArray(new Account[allAccounts.size()]);
-        Arrays.sort(accountList, new AccountComparator());
-
-        printWriter.println();
-        printWriter.println("-- " + accountList.length + " Accounts --");
-        for (int i = 0; i < accountList.length; i++) {
-            Account account = accountList[i];
-            printWriter.print("   Site " + account.getSiteNumber());
-            printWriter.format(" %-15s", account.getClientId().getName());
-            printWriter.println(" id=" + account.getElementId());
-        }
+        printAllAccounts(printWriter);
     }
     
 
+    private void printAllAccounts(PrintWriter printWriter) {
+        
+        Vector<Account> vector = contest.getAccounts(ClientType.Type.ALL);
+        printWriter.println();
+        
+        Account[] accounts = (Account[]) vector.toArray(new Account[vector.size()]);
+        int accountCount = filter.countAccounts(accounts);
+        printWriter.print("There are " + accountCount);
+        printWriter.println();
+        printAccounts(printWriter, accounts);
+
+    }
+
+    private String getFilterText() {
+        if (filter != null){
+            return " (filtered) ";
+        } else {
+            return "";
+        }
+    }
+
     public void writeReport(PrintWriter printWriter) {
+
+        printLocalContestTime(printWriter);
+              
+        printCurrentClientInfo(printWriter);
+        
+        printSites (printWriter);
+
+        printContestTimes(printWriter);
+                
+        printContestInformation(printWriter);
+        
+        printProblems(printWriter);
+        
+        printLanguages(printWriter);
+        
+        printJudgements (printWriter);
+
+        printAccounts(printWriter);
+
+        printRuns(printWriter);
+        
+        printClarifications(printWriter);
+
+        printLogins(printWriter);
+        
+        printConnections(printWriter);
+        
+        printClientSettings(printWriter);
+        
+        printNotificationSettings(printWriter);
+
+    }
+
+    private void printCurrentClientInfo(PrintWriter printWriter) {
+
+        printWriter.println();
+        Account account = contest.getAccount(contest.getClientId());
+        String name = contest.getClientId().getName();
+        if (account != null){
+            name = account.getDisplayName();
+        }
+        printWriter.println("* Client Id = "+contest.getClientId()+" "+name);
+
+        
+    }
+
+    private void printLocalContestTime(PrintWriter printWriter) {
 
         ContestTime localContestTime = contest.getContestTime();
 
@@ -169,29 +264,12 @@ public class InternalDumpReport implements IReport {
             printWriter.println("Contest Time is undefined (null)");
 
         }
-        
-        printWriter.println();
-        Account account = contest.getAccount(contest.getClientId());
-        String name = contest.getClientId().getName();
-        if (account != null){
-            name = account.getDisplayName();
-        }
-        printWriter.println("* Client Id = "+contest.getClientId()+" "+name);
 
-        // Sites
-        printWriter.println();
-        printWriter.println("-- " + contest.getSites().length + " sites --");
-        Site[] sites = contest.getSites();
-        Arrays.sort(sites, new SiteComparatorBySiteNumber());
-        for (Site site1 : sites) {
-            String hostName = site1.getConnectionInfo().getProperty(Site.IP_KEY);
-            String portStr = site1.getConnectionInfo().getProperty(Site.PORT_KEY);
-
-            printWriter.println("Site " + site1.getSiteNumber() + " " + hostName + ":" + portStr + " '" + site1.getDisplayName() + "' " 
-                    + " password='" + site1.getPassword() + "' id=" + site1.getElementId());
-        }
         
-        // InternalContest Times
+    }
+
+    private void printContestTimes(PrintWriter printWriter) {
+
         printWriter.println();
         ContestTime[] contestTimes = contest.getContestTimes();
         Arrays.sort(contestTimes, new ContestTimeComparator());
@@ -214,41 +292,37 @@ public class InternalDumpReport implements IReport {
             printWriter.println("         past end " + contestTime.isPastEndOfContest() + ", halt at end " + contestTime.isHaltContestAtTimeZero() + ", offset " + contestTime.getLocalClockOffset()
                     + ", id=" + contestTime.getElementId() + " site " + contestTime.getElementId().getSiteNumber());
         }
-        
-        // InternalContest Information 
-        printContestInformation(printWriter);
-        
-        // Problem
-        printWriter.println();
-        printWriter.println("-- " + contest.getProblems().length + " problems --");
-        for (Problem problem : contest.getProblems()) {
-            printWriter.println("  '" + problem + "' id=" + problem.getElementId());
 
+    }
+
+    private void printLanguages(PrintWriter printWriter) {
+        printWriter.println();
+        printWriter.println("-- " + contest.getLanguages().length + " languages --");
+        for (Language language : contest.getLanguages()) {
+            printWriter.println("  '" + language + "' id=" + language.getElementId());
         }
+
+    }
+
+    private void printProblems(PrintWriter printWriter) {
         
+        printWriter.println();
         if (contest.getGeneralProblem() == null){
             printWriter.println(" General Problem: (not defined) ");
         } else {
             printWriter.println(" General Problem: "+contest.getGeneralProblem().getElementId());
         }
 
-        // Language
         printWriter.println();
-        printWriter.println("-- " + contest.getLanguages().length + " languages --");
-        for (Language language : contest.getLanguages()) {
-            printWriter.println("  '" + language + "' id=" + language.getElementId());
+        printWriter.println("-- " + contest.getProblems().length + " problems --");
+        for (Problem problem : contest.getProblems()) {
+            printWriter.println("  '" + problem + "' id=" + problem.getElementId());
+
         }
-        
-        printJudgements (printWriter);
+    }
 
-        printAccounts(printWriter);
+    private void printLogins(PrintWriter printWriter) {
 
-        printRuns(printWriter);
-        
-        printClarifications(printWriter);
-
-
-        // Logins
         printWriter.println();
         printWriter.println("-- Logins -- ");
         for (ClientType.Type ctype : ClientType.Type.values()) {
@@ -265,9 +339,22 @@ public class InternalDumpReport implements IReport {
             }
         }
 
-        printConnections(printWriter);
         
-        printClientSettings(printWriter);
+    }
+
+    private void printSites(PrintWriter printWriter) {
+        
+        printWriter.println();
+        printWriter.println("-- " + contest.getSites().length + " sites --");
+        Site[] sites = contest.getSites();
+        Arrays.sort(sites, new SiteComparatorBySiteNumber());
+        for (Site site1 : sites) {
+            String hostName = site1.getConnectionInfo().getProperty(Site.IP_KEY);
+            String portStr = site1.getConnectionInfo().getProperty(Site.PORT_KEY);
+
+            printWriter.println("Site " + site1.getSiteNumber() + " " + hostName + ":" + portStr + " '" + site1.getDisplayName() + "' " + " password='" + site1.getPassword() + "' id="
+                    + site1.getElementId());
+        }
 
     }
 
@@ -314,7 +401,7 @@ public class InternalDumpReport implements IReport {
         if (inFilter == null){
             throw new IllegalArgumentException("filter must not be null");
         }
-        accountFilter = inFilter;
+        filter = inFilter;
 
         PrintWriter printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
 
@@ -367,21 +454,13 @@ public class InternalDumpReport implements IReport {
         Run[] runs = contest.getRuns();
         Arrays.sort(runs, new RunComparator());
 
-        int count = 0;
-        for (Run run : runs) {
-            if (accountFilter.matches(run)) {
-                count++;
-            }
-        }
+        int count = filter.countRuns(runs);
 
-        printWriter.print("-- " + count + " runs --");
-        if (accountFilter.isThisSiteOnly()) {
-            printWriter.print(" for site " + accountFilter.getSiteNumber());
-        }
+        printWriter.print("-- " + count + " runs --"+getFilterText());
         printWriter.println();
         if (count > 0) {
             for (Run run : runs) {
-                if (accountFilter.matches(run)) {
+                if (filter.matches(run)) {
                     printWriter.println("  " + run);
                 }
             }
@@ -394,19 +473,12 @@ public class InternalDumpReport implements IReport {
         Clarification[] clarifications = contest.getClarifications();
         Arrays.sort(clarifications, new ClarificationComparator());
 
-        int count = 0;
-        for (Clarification clarification : clarifications) {
-            if (accountFilter.matches(clarification)) {
-                count++;
-            }
-        }
-        printWriter.print("-- " + clarifications.length + " clarifications --");
-        if (accountFilter.isThisSiteOnly()) {
-            printWriter.print(" for site " + accountFilter.getSiteNumber());
-        }
+        int count = filter.countClarifications(clarifications);
+        
+        printWriter.print("-- " + count + " clarifications -- "+getFilterText());
         printWriter.println();
         for (Clarification clarification : clarifications) {
-            if (accountFilter.matches(clarification)) {
+            if (filter.matches(clarification)) {
                 printWriter.println("  " + clarification);
             }
         }
@@ -419,5 +491,21 @@ public class InternalDumpReport implements IReport {
     public void setFilter(Filter filter) {
         this.filter = filter;
     }
+    
+    /**
+     * Count the accounts that match this filter.
+     * @param accounts
+     * @return number of accounts matching this filter.
+     */
+    public int countClientSettings (ClientSettings [] clientSettings){
+        int count = 0;
+        for (ClientSettings clientSettings2 : clientSettings) {
+            if (filter.matches(clientSettings2.getClientId())) {
+                count++;
+            }
+        }
+        return count;
+    }
+    
 
 }
