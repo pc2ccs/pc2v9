@@ -6,8 +6,12 @@ import java.util.Vector;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+
+import com.ibm.webrunner.j2mclb.util.HeapSorter;
+import com.ibm.webrunner.j2mclb.util.NumericStringComparator;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -19,6 +23,8 @@ import edu.csus.ecs.pc2.core.model.NotificationSetting;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 
 /**
+ * Notifications - summary listing (grid).
+ * 
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -107,23 +113,18 @@ public class NotificationsPane extends JPanePlugin {
             Object[] cols = { "Client", "Final", "Preliminary" };
             notificationListBox.addColumns(cols);
 
-            /**
-             * No sorting at this time, the only way to know what order the languages are is to NOT sort them. Later we can add a sorter per NotificationDisplayList somehow.
-             */
+            // Sorters
+            HeapSorter sorter = new HeapSorter();
+            HeapSorter numericStringSorter = new HeapSorter();
+            numericStringSorter.setComparator(new NumericStringComparator());
 
-            // // Sorters
-            // HeapSorter sorter = new HeapSorter();
-            // // HeapSorter numericStringSorter = new HeapSorter();
-            // // numericStringSorter.setComparator(new NumericStringComparator());
-            //
-            // // Display Name
-            // notificationListBox.setColumnSorter(0, sorter, 1);
-            // // Compiler Command Line
-            // notificationListBox.setColumnSorter(1, sorter, 2);
-            // // Exe Name
-            // notificationListBox.setColumnSorter(2, sorter, 3);
-            // // Execute Command Line
-            // notificationListBox.setColumnSorter(3, sorter, 4);
+            // Client
+            notificationListBox.setColumnSorter(0, sorter, 1);
+            // Final
+            notificationListBox.setColumnSorter(1, sorter, 2);
+            // Preliminary
+            notificationListBox.setColumnSorter(2, sorter, 3);
+
             notificationListBox.autoSizeAllColumns();
 
         }
@@ -148,14 +149,20 @@ public class NotificationsPane extends JPanePlugin {
 
     protected Object[] buildNotificationRow(ClientId clientId) {
 
-        buildNotificationRow(clientId);
-
         // Object[] cols = { "Client", "Final", "Preliminary"};
 
         int numberColumns = notificationListBox.getColumnCount();
         Object[] c = new String[numberColumns];
 
-        c[0] = clientId.getName();
+        c[0] = clientId.getName() + " Site " + clientId.getSiteNumber();
+
+         if (clientId.getSiteNumber() == 0) {
+            if (clientId.getClientNumber() == 0) {
+                if (clientId.getClientType().equals(Type.TEAM)) {
+                    c[0] = "All teams";
+                }
+            }
+        }
 
         // TODO populate notification settings from clientSettings
         NotificationSetting notificationSetting = null;
@@ -181,7 +188,7 @@ public class NotificationsPane extends JPanePlugin {
         if (notificationNo.isNotificationSent()) {
             s = "Cutoff No at " + notificationNo.getCuttoffMinutes();
         }
-
+        
         return s;
     }
 
@@ -308,9 +315,9 @@ public class NotificationsPane extends JPanePlugin {
 
         try {
             ClientId clientId = (ClientId) notificationListBox.getKeys()[selectedIndex];
-            NotificationSetting notificationToEdit = getNotificationSettings (clientId);
+            NotificationSetting notificationToEdit = getNotificationSettings(clientId);
 
-            editNotificationSettingFrame.setNotificationSetting (notificationToEdit);
+            editNotificationSettingFrame.setNotificationSetting(notificationToEdit);
             editNotificationSettingFrame.setVisible(true);
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception logged ", e);
@@ -319,7 +326,7 @@ public class NotificationsPane extends JPanePlugin {
     }
 
     private NotificationSetting getNotificationSettings(ClientId clientId) {
-        
+
         // TODO get Notification from clientsettings
         return null;
     }
@@ -348,12 +355,7 @@ public class NotificationsPane extends JPanePlugin {
      * @param string
      */
     private void showMessage(final String string) {
-
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                messageLabel.setText(string);
-            }
-        });
+        JOptionPane.showMessageDialog(this, string);
 
     }
 } // @jve:decl-index=0:visual-constraint="10,10"

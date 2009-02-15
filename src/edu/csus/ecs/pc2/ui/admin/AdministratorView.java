@@ -36,6 +36,7 @@ import edu.csus.ecs.pc2.ui.JudgementsPanel;
 import edu.csus.ecs.pc2.ui.LanguagesPane;
 import edu.csus.ecs.pc2.ui.LogWindow;
 import edu.csus.ecs.pc2.ui.LoginsPane;
+import edu.csus.ecs.pc2.ui.NotificationsPane;
 import edu.csus.ecs.pc2.ui.OptionsPanel;
 import edu.csus.ecs.pc2.ui.ProblemsPane;
 import edu.csus.ecs.pc2.ui.ProfilesPane;
@@ -182,6 +183,9 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
                 BalloonSettingsPane balloonSettingsPane = new BalloonSettingsPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Notifications", balloonSettingsPane);
+
+                NotificationsPane notificationsPane = new NotificationsPane();
+                addUIPlugin(getConfigureContestTabbedPane(), "EOC Notifications", notificationsPane);
 
                 ProblemsPane problemsPane = new ProblemsPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Problems", problemsPane);

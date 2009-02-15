@@ -176,11 +176,28 @@ public class NotificationSettingPane extends JPanePlugin {
             updateButton.setText("Update");
             updateButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.out.println("actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+                    updateNotificationSetting();
                 }
             });
         }
         return updateButton;
+    }
+    
+    protected void updateNotificationSetting() {
+
+       NotificationSetting newNotificationSetting = getNotificationSettingsFromFields();
+        
+        dumpNotification(System.out, notificationSetting);
+        
+//        getController().updateLanguage(newLanguage);
+        
+        cancelButton.setText("Close");
+        addButton.setEnabled(false);
+        updateButton.setEnabled(false);
+        
+        if ( getParentFrame() != null){
+            getParentFrame().setVisible(false);
+        }
     }
 
     /**
@@ -194,7 +211,7 @@ public class NotificationSettingPane extends JPanePlugin {
             cancelButton.setText("Cancel");
             cancelButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.out.println("actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+                    handleCancelButton();
                 }
             });
         }
@@ -499,11 +516,6 @@ public class NotificationSettingPane extends JPanePlugin {
                 getParentFrame().setVisible(false);
             }
         }
-    }
-
-    private void updateNotificationSetting() {
-        // TODO Auto-generated method stub
-
     }
 
     private void addNotificationSetting() {
