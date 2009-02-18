@@ -721,7 +721,12 @@ public class PacketHandler {
                 break;
 
             case RUN_CHECKOUT_NOTIFICATION:
-                contest.updateRun(run, whoCheckedOut);
+                
+                // only process this notification if the run was checked out by someone else
+                if (!contest.getClientId().equals(whoCheckedOut)) {
+                    contest.updateRun(run, whoCheckedOut);
+                }
+                
                 break;
             default:
                 controller.getLog().log(Log.WARNING, "Attempted to runCheckout with packet: " + packet);
