@@ -721,14 +721,10 @@ public class RunsPanel extends JPanePlugin {
                     runListBox.autoSizeAllColumns();
                     runListBox.sort();
                 }
-                if (selectJudgementFrame != null) {
-                    // return focus to the other frame if it is around
-                    /*
-                     * XXX this is hack which causes the frame to flicker when coming from the listbox double click as it comes in front, goes behind, then comes back in front. But could not find
-                     * another way to keep focus on the selectJudgementFrame, otherwise it would be behind the RunsPanel
-                     */
-                    selectJudgementFrame.requestFocus();
-                }
+                
+//                if (selectJudgementFrame != null) {
+                        //TODO the selectJudgementFrame should be placed above all PC2 windows, not working when dblClicking in Windows OS
+//                }
             }
         });
     }
