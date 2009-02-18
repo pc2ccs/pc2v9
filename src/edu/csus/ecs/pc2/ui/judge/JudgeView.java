@@ -89,7 +89,7 @@ public class JudgeView extends JFrame implements UIPlugin {
         setTitle("PC^2 Judge - Not Logged In ");
         overRideLookAndFeel();
         FrameUtilities.centerFrame(this);
-        setVisible(true);
+
         this.addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent e) {
                 promptAndExit();
@@ -211,6 +211,13 @@ public class JudgeView extends JFrame implements UIPlugin {
                 SubmissionBiffPane submissionBiffPane = new SubmissionBiffPane();
                 getJudgeBiffPane().add(submissionBiffPane, java.awt.BorderLayout.CENTER);
                 submissionBiffPane.setContestAndController(contest, controller);
+                
+                setVisible(true);           
+                //TODO This needs to be resolved. The submitClarifcaitonPane is bleeding through the other tabs
+                getMainTabbedPane().setSelectedComponent(submitClarificationPane);
+                getMainTabbedPane().doLayout();
+                getMainTabbedPane().setSelectedComponent(newRunsPane);
+
             }
         });
 
