@@ -1301,7 +1301,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                     break;
                 }
             }
-            System.out.println("");
             return (matchedBytes == overridePassword.length);
 
         } catch (Exception ex99) {
