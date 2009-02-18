@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.core;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.exception.ClarificationUnavailableException;
@@ -2496,6 +2497,9 @@ public class PacketHandler {
                         }
                     }
                 } else {
+                    GregorianCalendar serverTransmitTime = (GregorianCalendar) PacketFactory.getObjectValue(packet, PacketFactory.SERVER_CLOCK_OFFSET);
+                    contestTime.calculateLocalClockOffset(serverTransmitTime);
+                    
                     if (contest.getContestTime(contestTime.getSiteNumber()) == null) {
                         contest.addContestTime(contestTime);
                     } else {

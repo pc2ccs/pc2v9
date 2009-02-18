@@ -4,7 +4,9 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.Enumeration;
+import java.util.GregorianCalendar;
 import java.util.Properties;
+import java.util.TimeZone;
 
 import edu.csus.ecs.pc2.core.exception.ContestSecurityException;
 import edu.csus.ecs.pc2.core.list.ClarificationList;
@@ -300,6 +302,8 @@ public final class PacketFactory {
     public static final String FROM_HUMAN = "FROM_HUMAN";
 
     public static final String RUN_STATUS = "RUN_STATUS";
+
+    public static final String SERVER_CLOCK_OFFSET = "SERVER_CLOCK_OFFSET";
 
     /**
      * Constructor is private as this is a utility class which should not be extended or invoked.
@@ -872,6 +876,9 @@ public final class PacketFactory {
     public static Packet createContestStarted(ClientId source, ClientId destination, int inSiteNumber, ClientId who) {
         Properties prop = new Properties();
         prop.put(PacketType.SITE_NUMBER, new Integer(inSiteNumber));
+        TimeZone timeZone = TimeZone.getTimeZone("GMT");
+        GregorianCalendar gregorianCalendar = new GregorianCalendar(timeZone);
+        prop.put(SERVER_CLOCK_OFFSET, gregorianCalendar);
         prop.put(CLIENT_ID, who);
         Packet packet = new Packet(Type.CLOCK_STARTED, source, destination, prop);
         return packet;
@@ -1016,6 +1023,11 @@ public final class PacketFactory {
             prop.put(BALLOON_SETTINGS_LIST, data.getBalloonSettingsArray());
             prop.put(GROUP_LIST, data.getGroups());
             prop.put(GENERAL_PROBLEM, data.getGeneralProblem());
+            
+            TimeZone timeZone = TimeZone.getTimeZone("GMT");
+            GregorianCalendar gregorianCalendar = new GregorianCalendar(timeZone);
+            prop.put(SERVER_CLOCK_OFFSET, gregorianCalendar);
+
             if (data.getContestSecurityPassword() != null){
                 prop.put(CONTEST_PASSWORD, data.getContestSecurityPassword());
             }

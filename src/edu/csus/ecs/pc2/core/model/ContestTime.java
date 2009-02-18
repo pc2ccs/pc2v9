@@ -241,7 +241,7 @@ public class ContestTime implements IElementObject {
 
             long milliDiff = cal.getTime().getTime() - resumeTime.getTime().getTime();
             long totalSeconds = milliDiff / 1000;
-            return totalSeconds - localClockOffset;
+            return totalSeconds;
         } else {
             return 0;
         }
@@ -293,8 +293,6 @@ public class ContestTime implements IElementObject {
             contestRunning = false;
         }
     }
-
-
 
     /**
      * @return Returns the resumeTime.
@@ -390,9 +388,13 @@ public class ContestTime implements IElementObject {
         TimeZone timeZone = TimeZone.getTimeZone("GMT");
         GregorianCalendar gregorianCalendar = new GregorianCalendar(timeZone);
 
-        long milliDiff = gregorianCalendar.getTime().getTime() - serverTransmitTime.getTime().getTime();
-
+        long milliDiff = gregorianCalendar.getTime().getTime() - localClock.getTime().getTime();
+        
         localClockOffset = milliDiff / 1000;
+        
+        if (resumeTime != null) {
+            resumeTime.setTimeInMillis(resumeTime.getTimeInMillis() + milliDiff);
+        }
     }
 
     public ElementId getElementId() {
