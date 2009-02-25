@@ -43,7 +43,6 @@ public class NotificationSettingPane extends JPanePlugin {
 
     private JButton cancelButton = null;
 
-    @SuppressWarnings("unused")
     private boolean populatingGUI = true;
 
     private NotificationSetting notificationSetting;
