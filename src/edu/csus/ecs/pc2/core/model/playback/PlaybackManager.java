@@ -324,8 +324,7 @@ public class PlaybackManager {
 
         switch (playbackEvent.getAction()) {
             case RUN_SUBMIT:
-                // SerializedFile file = playbackEvent.getFiles()[0];
-                SerializedFile file = new SerializedFile("/pc2/samps/Sumit.java");
+                SerializedFile file = playbackEvent.getFiles()[0];
                 SerializedFile[] files = new SerializedFile[1];
                 files[0] = file;
 
