@@ -34,6 +34,7 @@ import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
+import edu.csus.ecs.pc2.core.report.ExtractRuns;
 
 /**
  * Add/Edit Run Pane
@@ -107,6 +108,8 @@ public class RunPane extends JPanePlugin {
 
     private boolean populatingGUI = true;
 
+    private ExtractRuns extractRuns;
+
     /**
      * This method initializes
      * 
@@ -134,6 +137,7 @@ public class RunPane extends JPanePlugin {
         super.setContestAndController(inContest, inController);
         log = getController().getLog();
         addWindowCloserListener();
+        extractRuns = new ExtractRuns(inContest);
     }
     
     private void addWindowCloserListener() {
@@ -632,8 +636,17 @@ public class RunPane extends JPanePlugin {
     }
 
     protected void extractRun() {
-        showMessage("Would have extracted run");
-        // TODO code extract run
+        try {
+            boolean extracted = extractRuns.extractRun(getRun().getElementId());
+            if (extracted) {
+                JOptionPane.showMessageDialog(this, "Extracted 1 run to \"extract\" dir.");
+            } else {
+                JOptionPane.showMessageDialog(this, "Problem extracting run.");
+            }
+        } catch (IOException e) {
+            log.throwing("RunPane", "extractRun", e);
+            showMessage("Problem extracting run.");
+        }
     }
 
     protected void executeRun() {
