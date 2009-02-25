@@ -82,9 +82,20 @@ public class PlaybackManager {
          String[] lines = Utilities.loadFile(filename);
 
         int invalidLines = 0;
+        int lineNumber = 0;
 
         for (String s : lines) {
             try {
+                lineNumber ++;
+                
+                if (s.trim().length() == 0){
+                    continue;
+                }
+                
+                if (s.trim().startsWith("#")){
+                    continue;
+                }
+                
                 PlaybackEvent playbackEvent = createPlayBackEvent(contest, s, "[|]");
                 if (playbackEvent != null) {
                     events.add(playbackEvent);
@@ -95,8 +106,9 @@ public class PlaybackManager {
 
             } catch (Exception e) {
                 invalidLines++;
-                System.out.println("Line: " + s);
-                System.out.println("    : exception = " + e.getMessage());
+                System.out.println("Line "+lineNumber+" : " + s);
+                System.out.println("    Exception = " + e.getMessage());
+                e.printStackTrace();
             }
         }
 
@@ -157,9 +169,7 @@ public class PlaybackManager {
 
         Action action = Action.UNDEFINED;
         
-        
-
-        if (command.equals("submitrun") || command.equals("submit_run")) {
+        if (command.equalsIgnoreCase(Action.RUN_SUBMIT.toString())){
             action = PlaybackEvent.Action.RUN_SUBMIT;
             String problemName = getAndCheckValue(properties, PROBLEM_KEY, "problem name");
             String languageName = getAndCheckValue(properties, LANGUAGE_KEY, "language name");
@@ -176,7 +186,7 @@ public class PlaybackManager {
 
             Run run = new Run(clientId, language, problem);
             
-            SerializedFile [] files = new SerializedFile[0];
+            SerializedFile [] files = new SerializedFile[1];
             try {
                 SerializedFile file = new SerializedFile(mainfileName);
                 files[0] = file;
@@ -276,12 +286,20 @@ public class PlaybackManager {
         Properties properties = new Properties();
 
         int index;
+        
+        int fieldNumber = 0;
 
         for (String field : fields) {
+            
+            fieldNumber ++;
+            
+            if (field.trim().length() == 0){
+                continue;
+            }
 
             index = field.indexOf("=");
             if (index == -1) {
-                throw new PlaybackParseException("Missing = in name/value pair: " + field);
+                throw new PlaybackParseException("Missing = in name/value pair, field "+fieldNumber+ ": " + field);
             } else {
                 String key = field.substring(0, index).trim().toLowerCase();
                 String value = field.substring(index + 1);
@@ -314,10 +332,11 @@ public class PlaybackManager {
                 RunFiles runFiles = new RunFiles(playbackEvent.getRun(), file, new SerializedFile[0]);
                 Run theRun = playbackEvent.getRun();
 
+                long savedElapsed = theRun.getElapsedMins();
                 Run newRun = contest.acceptRun(theRun, runFiles);
 
-                if (theRun.getElapsedMins() > 0) {
-                    newRun.setElapsedMins(theRun.getElapsedMins());
+                if (savedElapsed > 0) {
+                    newRun.setElapsedMins(savedElapsed);
                 }
 
                 ClientId fromId = contest.getClientId();

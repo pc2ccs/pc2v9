@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagLayout;
 import java.awt.Rectangle;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import javax.swing.ButtonGroup;
@@ -401,8 +402,10 @@ public class PlaybackPane extends JPanePlugin {
 
     protected void selectAndloadEventFile() {
 
+        String filename = null;
+
         try {
-            String filename = getFileName();
+            filename = getFileName();
             if (filename != null) {
 
                 PlaybackEvent[] playbackEvents = playbackManager.loadPlayback(filename, getContest());
@@ -415,8 +418,12 @@ public class PlaybackPane extends JPanePlugin {
                         getEventsListBox().addRow(row, playbackEvent);
                     }
                     autoSizeColumns();
+                    JOptionPane.showMessageDialog(this, "Loaded " + playbackEvents.length + " events from " + filename);
+
                 }
             }
+        } catch (FileNotFoundException notFound) {
+            JOptionPane.showMessageDialog(this, "No such file: " + filename);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -54,7 +54,7 @@ public class PlaybackEvent implements IElementObject {
 
     private ClientId clientId;
 
-    private int eventTime;
+    private long eventTime;
 
     private EventStatus eventStatus = EventStatus.INVALID;
 
@@ -85,6 +85,7 @@ public class PlaybackEvent implements IElementObject {
         this.clientId = clientId;
         submitterId = run.getSubmitter();
         eventStatus = EventStatus.PENDING;
+        eventTime = run.getElapsedMins();
     }
 
     public long etElapsedMins() {
@@ -165,7 +166,7 @@ public class PlaybackEvent implements IElementObject {
      * 
      * @return
      */
-    public int getEventTime() {
+    public long getEventTime() {
         return eventTime;
     }
 
