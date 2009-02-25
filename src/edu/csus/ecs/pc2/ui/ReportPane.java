@@ -34,7 +34,7 @@ import edu.csus.ecs.pc2.core.report.ClientSettingsReport;
 import edu.csus.ecs.pc2.core.report.ContestAnalysisReport;
 import edu.csus.ecs.pc2.core.report.ContestReport;
 import edu.csus.ecs.pc2.core.report.EvaluationReport;
-import edu.csus.ecs.pc2.core.report.ExtractEventList;
+import edu.csus.ecs.pc2.core.report.ExtractPlaybackLoadFilesReport;
 import edu.csus.ecs.pc2.core.report.FastestSolvedReport;
 import edu.csus.ecs.pc2.core.report.GroupsReport;
 import edu.csus.ecs.pc2.core.report.IReport;
@@ -175,7 +175,7 @@ public class ReportPane extends JPanePlugin {
 
         listOfReports[repNo++] = new AccountPermissionReport();
         listOfReports[repNo++] = new BalloonDeliveryReport();
-        listOfReports[repNo++] = new ExtractEventList();
+        listOfReports[repNo++] = new ExtractPlaybackLoadFilesReport();
         listOfReports[repNo++] = new InternalDumpReport();
 
     }

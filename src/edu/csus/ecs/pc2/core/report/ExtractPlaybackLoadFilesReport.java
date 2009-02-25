@@ -22,14 +22,14 @@ import edu.csus.ecs.pc2.core.model.playback.PlaybackEvent;
 import edu.csus.ecs.pc2.core.model.playback.PlaybackManager;
 
 /**
- * Print all problems info.
+ * Create a Replay/Playback list and team source files.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
 
 // $HeadURL$
-public class ExtractEventList implements IReport {
+public class ExtractPlaybackLoadFilesReport implements IReport {
 
     /**
      * 
@@ -201,7 +201,7 @@ public class ExtractEventList implements IReport {
     }
 
     public String getReportTitle() {
-        return "Playback List";
+        return "Replay file";
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
@@ -211,7 +211,7 @@ public class ExtractEventList implements IReport {
     }
 
     public String getPluginTitle() {
-        return "Playback List Report";
+        return "Replay File Report";
     }
 
     public Filter getFilter() {
