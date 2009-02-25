@@ -7,6 +7,7 @@ import java.util.Properties;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
@@ -30,21 +31,21 @@ import edu.csus.ecs.pc2.core.packet.PacketFactory;
 // $HeadURL$
 public class PlaybackManager {
 
-    private static final String ACTION_KEY = "action";
+    public static final String ACTION_KEY = "action";
 
-    private static final String ID_KEY = "id";
+    public static final String ID_KEY = "id";
 
-    private static final String SITE_KEY = "site";
+    public static final String SITE_KEY = "site";
 
-    private static final String PROBLEM_KEY = "problem";
+    public static final String PROBLEM_KEY = "problem";
 
-    private static final String LANGUAGE_KEY = "language";
+    public static final String LANGUAGE_KEY = "language";
 
-    private static final String MAINFILE_KEY = "mainfile";
+    public static final String MAINFILE_KEY = "mainfile";
 
-    private static final String SUBMIT_CLIENT_KEY = "submitclient";
+    public static final String SUBMIT_CLIENT_KEY = "submitclient";
 
-    private static final String ELAPSED_KEY = "elapsed";
+    public static final String ELAPSED_KEY = "elapsed";
 
     private int sequenceNumber = 1;
 
@@ -55,7 +56,7 @@ public class PlaybackManager {
      * @return
      * @throws IOException
      */
-    public PlaybackEvent[] loadPlayback(String filename, IInternalContest internalContest) throws IOException {
+    public PlaybackEvent[] loadPlayback(String filename, IInternalContest contest) throws IOException {
 
         Vector<PlaybackEvent> events = new Vector<PlaybackEvent>();
 
@@ -63,41 +64,41 @@ public class PlaybackManager {
             throw new FileNotFoundException(filename);
         }
 
-        for (int i = 0; i < 13; i++) {
-
-            ClientId clientId = new ClientId(1, Type.TEAM, i + 1);
-
-            Language language = internalContest.getLanguages()[0];
-            Problem problem = internalContest.getProblems()[0];
-            // SerializedFile file = new SerializedFile(filename);
-            Run run = new Run(clientId, language, problem);
-            run.setElapsedMins(i + 45);
-
-            PlaybackEvent playbackEvent = new PlaybackEvent(Action.RUN_SUBMIT, clientId, run);
-
-            events.add(playbackEvent);
-        }
-
-//         String[] lines = Utilities.loadFile(filename);
+//        for (int i = 0; i < 13; i++) {
 //
-//        int invalidLines = 0;
+//            ClientId clientId = new ClientId(1, Type.TEAM, i + 1);
 //
-//        for (String s : lines) {
-//            try {
-//                playbackEvent = createPlayBackEvent(s);
-//                if (playbackEvent != null) {
-//                    events.add(playbackEvent);
-//                } else {
-//                    invalidLines++;
-//                    System.out.println("unable to parse line: " + s);
-//                }
+//            Language language = internalContest.getLanguages()[0];
+//            Problem problem = internalContest.getProblems()[0];
+//            // SerializedFile file = new SerializedFile(filename);
+//            Run run = new Run(clientId, language, problem);
+//            run.setElapsedMins(i + 45);
 //
-//            } catch (Exception e) {
-//                invalidLines++;
-//                System.out.println("Line: " + s);
-//                System.out.println("    : exception = " + e.getMessage());
-//            }
+//            PlaybackEvent playbackEvent = new PlaybackEvent(Action.RUN_SUBMIT, clientId, run);
+//
+//            events.add(playbackEvent);
 //        }
+
+         String[] lines = Utilities.loadFile(filename);
+
+        int invalidLines = 0;
+
+        for (String s : lines) {
+            try {
+                PlaybackEvent playbackEvent = createPlayBackEvent(contest, s, "[|]");
+                if (playbackEvent != null) {
+                    events.add(playbackEvent);
+                } else {
+                    invalidLines++;
+                    System.out.println("unable to parse line: " + s);
+                }
+
+            } catch (Exception e) {
+                invalidLines++;
+                System.out.println("Line: " + s);
+                System.out.println("    : exception = " + e.getMessage());
+            }
+        }
 
         return (PlaybackEvent[]) events.toArray(new PlaybackEvent[events.size()]);
     }
