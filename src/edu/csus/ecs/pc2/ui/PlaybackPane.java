@@ -22,6 +22,7 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.playback.PlaybackEvent;
 import edu.csus.ecs.pc2.core.model.playback.PlaybackManager;
 import edu.csus.ecs.pc2.core.model.playback.PlaybackEvent.Action;
+import java.awt.Font;
 
 /**
  * Pane for Contest Playback.
@@ -68,6 +69,10 @@ public class PlaybackPane extends JPanePlugin {
 
     private JButton loadButton = null;
 
+    private PlaybackManager playbackManager = new PlaybackManager(); // @jve:decl-index=0:
+
+    private JLabel currentEventLabel = null;
+
     /**
      * This method initializes
      * 
@@ -88,6 +93,8 @@ public class PlaybackPane extends JPanePlugin {
         this.add(getButtonPane(), BorderLayout.SOUTH);
         this.add(getTopPane(), BorderLayout.NORTH);
         this.add(getEventsListBox(), BorderLayout.CENTER);
+        
+        currentEventLabel.setText("At (start)");
 
         // getTeamReadsFrombuttonGroup().setSelected(getFileRadioButton().getModel(), true);
 
@@ -161,6 +168,7 @@ public class PlaybackPane extends JPanePlugin {
         ClientId clientId = new ClientId(2, Type.TEAM, 22);
         PlaybackEvent playbackEvent = new PlaybackEvent(Action.UNDEFINED, clientId);
 
+        playbackEvent.setSequenceId(eventsListBox.getRowCount());
         String[] row = buildPlayBackRow(playbackEvent);
 
         eventsListBox.addRow(row);
@@ -170,8 +178,8 @@ public class PlaybackPane extends JPanePlugin {
         }
 
     }
-    
-    private void autoSizeColumns(){
+
+    private void autoSizeColumns() {
 
         for (int i = 0; i < eventsListBox.getColumnCount(); i++) {
             eventsListBox.autoSizeColumn(i);
@@ -252,6 +260,11 @@ public class PlaybackPane extends JPanePlugin {
      */
     private JPanel getTopPane() {
         if (topPane == null) {
+            currentEventLabel = new JLabel();
+            currentEventLabel.setBounds(new Rectangle(297, 24, 115, 38));
+            currentEventLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            currentEventLabel.setFont(new Font("Dialog", Font.BOLD, 16));
+            currentEventLabel.setText("At ###");
             stopAtLabel = new JLabel();
             stopAtLabel.setBounds(new Rectangle(26, 46, 146, 24));
             stopAtLabel.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -268,6 +281,7 @@ public class PlaybackPane extends JPanePlugin {
             topPane.add(getStopEventNumberTextField(), null);
             topPane.add(getEveryMSEventPacing(), null);
             topPane.add(getStepButton(), null);
+            topPane.add(currentEventLabel, null);
         }
         return topPane;
     }
@@ -331,15 +345,40 @@ public class PlaybackPane extends JPanePlugin {
     private JButton getStepButton() {
         if (stepButton == null) {
             stepButton = new JButton();
-            stepButton.setBounds(new Rectangle(301, 39, 139, 38));
+            stepButton.setBounds(new Rectangle(187, 74, 115, 32));
             stepButton.setText("Run one event");
+
             stepButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    System.out.println("actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+                    executeNextStep();
                 }
+
             });
         }
         return stepButton;
+    }
+
+    protected void executeNextStep() {
+
+        if (eventsListBox.getRowCount() == 0){
+            JOptionPane.showMessageDialog(this, "No events defined");
+            return;
+        }
+        
+        int currentEventNumber = playbackManager.getSequenceNumber();
+        
+        if (currentEventNumber >= eventsListBox.getRowCount()){
+            JOptionPane.showMessageDialog(this, "All events executed");
+            return;
+        }
+        
+        PlaybackEvent playbackEvent = (PlaybackEvent) eventsListBox.getKeys()[currentEventNumber-1];
+        try {
+            playbackManager.executeEvent(playbackEvent, getContest(), getController());
+            currentEventLabel.setText("At "+playbackManager.getSequenceNumber());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -365,15 +404,15 @@ public class PlaybackPane extends JPanePlugin {
         try {
             String filename = getFileName();
             if (filename != null) {
-                PlaybackManager playbackManager = new PlaybackManager();
 
                 PlaybackEvent[] playbackEvents = playbackManager.loadPlayback(filename, getContest());
-                if (playbackEvents == null || playbackEvents.length == 0){
-                    JOptionPane.showMessageDialog(this, "No events found in "+filename);
+                if (playbackEvents == null || playbackEvents.length == 0) {
+                    JOptionPane.showMessageDialog(this, "No events found in " + filename);
                 } else {
-                    for (PlaybackEvent event : playbackEvents){
-                        String[] row = buildPlayBackRow(event);
-                        getEventsListBox().addRow(row);
+                    for (PlaybackEvent playbackEvent : playbackEvents) {
+                        playbackEvent.setSequenceId(eventsListBox.getRowCount());
+                        String[] row = buildPlayBackRow(playbackEvent);
+                        getEventsListBox().addRow(row, playbackEvent);
                     }
                     autoSizeColumns();
                 }
