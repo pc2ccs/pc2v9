@@ -34,6 +34,7 @@ import edu.csus.ecs.pc2.ui.JPanePlugin;
 import edu.csus.ecs.pc2.ui.LogWindow;
 import edu.csus.ecs.pc2.ui.LoginsPane;
 import edu.csus.ecs.pc2.ui.OptionsPanel;
+import edu.csus.ecs.pc2.ui.PlaybackPane;
 import edu.csus.ecs.pc2.ui.ReportPane;
 import edu.csus.ecs.pc2.ui.SitesPanel;
 import edu.csus.ecs.pc2.ui.UIPlugin;
@@ -359,6 +360,9 @@ public class ServerView extends JFrame implements UIPlugin {
 
         ReportPane reportPane = new ReportPane();
         addUIPlugin(getMainTabbedPane(), "Reports", reportPane);
+        
+        PlaybackPane playbackPane = new PlaybackPane();
+        addUIPlugin("Playback", playbackPane);
 
         OptionsPanel optionsPanel = new OptionsPanel();
         addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
