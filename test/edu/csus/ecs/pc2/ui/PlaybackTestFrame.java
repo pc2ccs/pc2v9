@@ -3,6 +3,9 @@ package edu.csus.ecs.pc2.ui;
 import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
 
+import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.SampleContest;
+
 /**
  * Test Frame for PlaybackPane.
  * 
@@ -71,13 +74,17 @@ public class PlaybackTestFrame extends JFrame {
     private PlaybackPane getPlaybackPane() {
         if (playbackPane == null) {
             playbackPane = new PlaybackPane();
-            playbackPane.addSampleEventRows();
+//            playbackPane.addSampleEventRows();
         }
         return playbackPane;
     }
 
     public static void main(String[] args) {
-        new PlaybackTestFrame().setVisible(true);
+        SampleContest sampleContest = new SampleContest();
+        IInternalContest contest = sampleContest.createContest(1, 1, 12, 12, true);
+        PlaybackTestFrame frame = new PlaybackTestFrame();
+        frame.getPlaybackPane().setContest(contest);
+        frame.setVisible(true);
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

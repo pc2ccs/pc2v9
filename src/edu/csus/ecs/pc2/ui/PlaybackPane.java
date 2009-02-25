@@ -3,21 +3,24 @@ package edu.csus.ecs.pc2.ui;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Font;
 import java.awt.GridBagLayout;
 import java.awt.Rectangle;
+import java.io.IOException;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
-import javax.swing.JRadioButton;
 
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.playback.PlaybackEvent;
+import edu.csus.ecs.pc2.core.model.playback.PlaybackManager;
 import edu.csus.ecs.pc2.core.model.playback.PlaybackEvent.Action;
 
 /**
@@ -49,8 +52,6 @@ public class PlaybackPane extends JPanePlugin {
 
     private JPanel topPane = null;
 
-    private JLabel eventStatusLabel = null;
-
     private JTextField timeWarpTextField = null;
 
     private JLabel msLabel = null;
@@ -59,15 +60,13 @@ public class PlaybackPane extends JPanePlugin {
 
     private JTextField stopEventNumberTextField = null;
 
-    private JTextField timeWarpSecsTextField = null;
-
-    private JLabel secondsLabel = null;
-
-    private JRadioButton eventEveryMinute = null;
-
     private JRadioButton everyMSEventPacing = null;
 
     private ButtonGroup timeWarpButtonGroup = null; // @jve:decl-index=0:
+
+    private JButton stepButton = null;
+
+    private JButton loadButton = null;
 
     /**
      * This method initializes
@@ -90,7 +89,6 @@ public class PlaybackPane extends JPanePlugin {
         this.add(getTopPane(), BorderLayout.NORTH);
         this.add(getEventsListBox(), BorderLayout.CENTER);
 
-        getTimeWarpButtonGroup().setSelected(getEventEveryMinute().getModel(), true);
         // getTeamReadsFrombuttonGroup().setSelected(getFileRadioButton().getModel(), true);
 
     }
@@ -127,6 +125,7 @@ public class PlaybackPane extends JPanePlugin {
             buttonPane.add(getStartButton(), null);
             buttonPane.add(getStopButton(), null);
             buttonPane.add(getResetButton(), null);
+            buttonPane.add(getLoadButton(), null);
         }
         return buttonPane;
     }
@@ -171,6 +170,14 @@ public class PlaybackPane extends JPanePlugin {
         }
 
     }
+    
+    private void autoSizeColumns(){
+
+        for (int i = 0; i < eventsListBox.getColumnCount(); i++) {
+            eventsListBox.autoSizeColumn(i);
+        }
+
+    }
 
     public void addSampleEventRows2() {
 
@@ -195,6 +202,7 @@ public class PlaybackPane extends JPanePlugin {
         if (startButton == null) {
             startButton = new JButton();
             startButton.setText("Start");
+            startButton.setToolTipText("Start running events");
         }
         return startButton;
     }
@@ -208,6 +216,7 @@ public class PlaybackPane extends JPanePlugin {
         if (stopButton == null) {
             stopButton = new JButton();
             stopButton.setText("Stop");
+            stopButton.setToolTipText("Stop running events");
         }
         return stopButton;
     }
@@ -221,8 +230,19 @@ public class PlaybackPane extends JPanePlugin {
         if (resetButton == null) {
             resetButton = new JButton();
             resetButton.setText("Reset");
+            resetButton.setEnabled(false);
+            resetButton.setToolTipText("Reset (erase) runs");
+            resetButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    deleteAllRuns();
+                }
+            });
         }
         return resetButton;
+    }
+
+    protected void deleteAllRuns() {
+        // TODO code deleteAllRuns
     }
 
     /**
@@ -232,33 +252,22 @@ public class PlaybackPane extends JPanePlugin {
      */
     private JPanel getTopPane() {
         if (topPane == null) {
-            secondsLabel = new JLabel();
-            secondsLabel.setBounds(new Rectangle(246, 18, 82, 24));
-            secondsLabel.setText("seconds");
             stopAtLabel = new JLabel();
-            stopAtLabel.setBounds(new Rectangle(40, 87, 146, 24));
+            stopAtLabel.setBounds(new Rectangle(26, 46, 146, 24));
             stopAtLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             stopAtLabel.setText("Stop at event");
             msLabel = new JLabel();
-            msLabel.setBounds(new Rectangle(246, 52, 32, 24));
+            msLabel.setBounds(new Rectangle(248, 13, 32, 24));
             msLabel.setText("ms");
-            eventStatusLabel = new JLabel();
-            eventStatusLabel.setBounds(new Rectangle(473, 44, 105, 28));
-            eventStatusLabel.setFont(new Font("Dialog", Font.BOLD, 14));
-            eventStatusLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-            eventStatusLabel.setText("At event 2");
             topPane = new JPanel();
             topPane.setLayout(null);
             topPane.setPreferredSize(new Dimension(120, 120));
-            topPane.add(eventStatusLabel, null);
             topPane.add(getTimeWarpTextField(), null);
             topPane.add(msLabel, null);
             topPane.add(stopAtLabel, null);
             topPane.add(getStopEventNumberTextField(), null);
-            topPane.add(getTimeWarpSecsTextField(), null);
-            topPane.add(secondsLabel, null);
-            topPane.add(getEventEveryMinute(), null);
             topPane.add(getEveryMSEventPacing(), null);
+            topPane.add(getStepButton(), null);
         }
         return topPane;
     }
@@ -271,7 +280,7 @@ public class PlaybackPane extends JPanePlugin {
     private JTextField getTimeWarpTextField() {
         if (timeWarpTextField == null) {
             timeWarpTextField = new JTextField();
-            timeWarpTextField.setBounds(new Rectangle(195, 52, 38, 24));
+            timeWarpTextField.setBounds(new Rectangle(190, 13, 38, 24));
             timeWarpTextField.setText("1000");
         }
         return timeWarpTextField;
@@ -285,39 +294,10 @@ public class PlaybackPane extends JPanePlugin {
     private JTextField getStopEventNumberTextField() {
         if (stopEventNumberTextField == null) {
             stopEventNumberTextField = new JTextField();
-            stopEventNumberTextField.setBounds(new Rectangle(197, 85, 38, 24));
+            stopEventNumberTextField.setBounds(new Rectangle(190, 44, 38, 24));
             stopEventNumberTextField.setText("99");
         }
         return stopEventNumberTextField;
-    }
-
-    /**
-     * This method initializes timeWarpSecsTextField
-     * 
-     * @return javax.swing.JTextField
-     */
-    private JTextField getTimeWarpSecsTextField() {
-        if (timeWarpSecsTextField == null) {
-            timeWarpSecsTextField = new JTextField();
-            timeWarpSecsTextField.setBounds(new Rectangle(195, 18, 38, 24));
-            timeWarpSecsTextField.setText("1000");
-        }
-        return timeWarpSecsTextField;
-    }
-
-    /**
-     * This method initializes eventEveryMinute
-     * 
-     * @return javax.swing.JRadioButton
-     */
-    private JRadioButton getEventEveryMinute() {
-        if (eventEveryMinute == null) {
-            eventEveryMinute = new JRadioButton();
-            eventEveryMinute.setBounds(new Rectangle(14, 23, 170, 21));
-            eventEveryMinute.setToolTipText("This paces each minute in the specified seconds");
-            eventEveryMinute.setText("Execute every minute in ");
-        }
-        return eventEveryMinute;
     }
 
     /**
@@ -328,7 +308,7 @@ public class PlaybackPane extends JPanePlugin {
     private JRadioButton getEveryMSEventPacing() {
         if (everyMSEventPacing == null) {
             everyMSEventPacing = new JRadioButton();
-            everyMSEventPacing.setBounds(new Rectangle(13, 54, 163, 24));
+            everyMSEventPacing.setBounds(new Rectangle(15, 13, 163, 24));
             everyMSEventPacing.setText("Execute each event");
         }
         return everyMSEventPacing;
@@ -337,10 +317,80 @@ public class PlaybackPane extends JPanePlugin {
     public ButtonGroup getTimeWarpButtonGroup() {
         if (timeWarpButtonGroup == null) {
             timeWarpButtonGroup = new ButtonGroup();
-            timeWarpButtonGroup.add(getEventEveryMinute());
+            // timeWarpButtonGroup.add(getEventEveryMinute());
             timeWarpButtonGroup.add(getEveryMSEventPacing());
         }
         return timeWarpButtonGroup;
+    }
+
+    /**
+     * This method initializes stepButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getStepButton() {
+        if (stepButton == null) {
+            stepButton = new JButton();
+            stepButton.setBounds(new Rectangle(301, 39, 139, 38));
+            stepButton.setText("Run one event");
+            stepButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    System.out.println("actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+                }
+            });
+        }
+        return stepButton;
+    }
+
+    /**
+     * This method initializes loadButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getLoadButton() {
+        if (loadButton == null) {
+            loadButton = new JButton();
+            loadButton.setText("Load");
+            loadButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    selectAndloadEventFile();
+                }
+            });
+        }
+        return loadButton;
+    }
+
+    protected void selectAndloadEventFile() {
+
+        try {
+            String filename = getFileName();
+            if (filename != null) {
+                PlaybackManager playbackManager = new PlaybackManager();
+
+                PlaybackEvent[] playbackEvents = playbackManager.loadPlayback(filename, getContest());
+                if (playbackEvents == null || playbackEvents.length == 0){
+                    JOptionPane.showMessageDialog(this, "No events found in "+filename);
+                } else {
+                    for (PlaybackEvent event : playbackEvents){
+                        String[] row = buildPlayBackRow(event);
+                        getEventsListBox().addRow(row);
+                    }
+                    autoSizeColumns();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String getFileName() throws IOException {
+        JFileChooser chooser = new JFileChooser();
+        int returnVal = chooser.showOpenDialog(this);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            return chooser.getSelectedFile().getCanonicalFile().toString();
+        }
+        chooser = null;
+        return null;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

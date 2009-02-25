@@ -5,6 +5,7 @@ import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IElementObject;
 import edu.csus.ecs.pc2.core.model.ISubmission;
 import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.SerializedFile;
 
 /**
  * A single playback event.
@@ -57,6 +58,16 @@ public class PlaybackEvent implements IElementObject {
 
     private EventStatus eventStatus = EventStatus.INVALID;
 
+    private SerializedFile[] files = new SerializedFile[0];
+
+    public SerializedFile[] getFiles() {
+        return files;
+    }
+
+    public void setFiles(SerializedFile[] files) {
+        this.files = files;
+    }
+
     /**
      * 
      */
@@ -73,6 +84,7 @@ public class PlaybackEvent implements IElementObject {
         this.submission = run;
         this.clientId = clientId;
         submitterId = run.getSubmitter();
+        eventStatus = EventStatus.PENDING;
     }
 
     public long etElapsedMins() {
