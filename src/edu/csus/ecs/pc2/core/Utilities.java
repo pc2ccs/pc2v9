@@ -350,4 +350,24 @@ public final class Utilities {
     public static void setDebugMode(boolean debugMode) {
         Utilities.debugMode = debugMode;
     }
+    
+    public static String basename(String path) {
+        int lastIndex = path.lastIndexOf(File.separator);
+        if (lastIndex == -1) {
+            return path;
+        } else {
+            return path.substring(lastIndex + 1);
+        }
+    }
+
+    public static String dirname(String path) {
+        int lastIndex = path.lastIndexOf(File.separator);
+        if (lastIndex == -1) {
+            return path;
+        } else if (lastIndex == 0){
+            return path;
+        } else {
+            return path.substring(0, lastIndex);
+        }
+    }
 }
