@@ -58,6 +58,7 @@ public class PlaybackEvent implements IElementObject {
 
     private EventStatus eventStatus = EventStatus.INVALID;
 
+
     private SerializedFile[] files = new SerializedFile[0];
 
     public SerializedFile[] getFiles() {
@@ -180,5 +181,9 @@ public class PlaybackEvent implements IElementObject {
 
     public EventStatus getEventStatus() {
         return eventStatus;
+    }
+
+    public void setEventStatus(EventStatus eventStatus) {
+        this.eventStatus = eventStatus;
     }
 }

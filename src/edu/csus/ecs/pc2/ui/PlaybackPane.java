@@ -324,6 +324,7 @@ public class PlaybackPane extends JPanePlugin {
         if (everyMSEventPacing == null) {
             everyMSEventPacing = new JRadioButton();
             everyMSEventPacing.setBounds(new Rectangle(15, 13, 163, 24));
+            everyMSEventPacing.setSelected(true);
             everyMSEventPacing.setText("Execute each event");
         }
         return everyMSEventPacing;
@@ -368,15 +369,20 @@ public class PlaybackPane extends JPanePlugin {
         
         int currentEventNumber = playbackManager.getSequenceNumber();
         
-        if (currentEventNumber >= eventsListBox.getRowCount()){
+        if (currentEventNumber > eventsListBox.getRowCount()){
             JOptionPane.showMessageDialog(this, "All events executed");
             return;
         }
         
-        PlaybackEvent playbackEvent = (PlaybackEvent) eventsListBox.getKeys()[currentEventNumber-1];
+        PlaybackEvent playbackEvent = (PlaybackEvent) eventsListBox.getKeys()[currentEventNumber - 1];
         try {
+            currentEventLabel.setText("At " + playbackManager.getSequenceNumber());
             playbackManager.executeEvent(playbackEvent, getContest(), getController());
-            currentEventLabel.setText("At "+playbackManager.getSequenceNumber());
+
+            String[] row = buildPlayBackRow(playbackEvent);
+
+            getEventsListBox().replaceRow(row, currentEventNumber - 1);
+            
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -413,7 +419,7 @@ public class PlaybackPane extends JPanePlugin {
                     JOptionPane.showMessageDialog(this, "No events found in " + filename);
                 } else {
                     for (PlaybackEvent playbackEvent : playbackEvents) {
-                        playbackEvent.setSequenceId(eventsListBox.getRowCount());
+                        playbackEvent.setSequenceId(eventsListBox.getRowCount()+1);
                         String[] row = buildPlayBackRow(playbackEvent);
                         getEventsListBox().addRow(row, playbackEvent);
                     }

@@ -380,6 +380,9 @@ public class PlaybackManager {
                     newRun.setElapsedMins(savedElapsed);
                 }
 
+                sequenceNumber++;
+                playbackEvent.setEventStatus(EventStatus.COMPLETED);
+                
                 ClientId fromId = contest.getClientId();
                 // Send to team
                 Packet confirmPacket = PacketFactory.createRunSubmissionConfirm(contest.getClientId(), fromId, newRun);
@@ -388,7 +391,6 @@ public class PlaybackManager {
                 // Send to clients and servers
                 sendToJudgesAndOthers(controller, confirmPacket, true);
 
-                sequenceNumber++;
 
                 break;
 
