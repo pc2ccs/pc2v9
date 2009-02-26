@@ -47,6 +47,8 @@ public class PlaybackManager {
 
     public static final String ELAPSED_KEY = "elapsed";
 
+    private static final String DELIMITER = "";
+
     private int sequenceNumber = 1;
 
     /**
@@ -80,10 +82,12 @@ public class PlaybackManager {
 //        }
 
          String[] lines = Utilities.loadFile(filename);
+         
+         String sourceDirectory = Utilities.dirname(filename);
 
         int invalidLines = 0;
         int lineNumber = 0;
-
+        
         for (String s : lines) {
             try {
                 lineNumber ++;
@@ -96,7 +100,7 @@ public class PlaybackManager {
                     continue;
                 }
                 
-                PlaybackEvent playbackEvent = createPlayBackEvent(contest, s, "[|]");
+                PlaybackEvent playbackEvent = createPlayBackEvent(contest, s, "[|]", sourceDirectory);
                 if (playbackEvent != null) {
                     events.add(playbackEvent);
                 } else {
@@ -111,7 +115,7 @@ public class PlaybackManager {
                 e.printStackTrace();
             }
         }
-
+        
         return (PlaybackEvent[]) events.toArray(new PlaybackEvent[events.size()]);
     }
 
@@ -148,12 +152,13 @@ public class PlaybackManager {
      * </pre>
      * 
      * @param contest
+     * @param sourceDir
      * @param s
      * @param delimit
      * @return
      * @throws PlaybackParseException
      */
-    protected PlaybackEvent createPlayBackEvent(IInternalContest contest, String s, String delimit) throws PlaybackParseException {
+    protected PlaybackEvent createPlayBackEvent(IInternalContest contest, String s, String delimit, String sourceDir) throws PlaybackParseException {
 
         String[] fields = s.split(delimit);
 
@@ -179,18 +184,26 @@ public class PlaybackManager {
             
             String elapsedTimeStr = getAndCheckValue(properties, ELAPSED_KEY, "elapsed time", false);
 
-
             Language language = findLanguage(contest, languageName);
             Problem problem = findProblem(contest, problemName);
             ClientId clientId = findClient(contest, siteId, submitClientName);
 
             Run run = new Run(clientId, language, problem);
-            
-            SerializedFile [] files = new SerializedFile[1];
+
+            SerializedFile[] files = new SerializedFile[1];
             try {
-                SerializedFile file = new SerializedFile(mainfileName);
+                SerializedFile file = new SerializedFile(sourceDir + File.separator + mainfileName);
+
+                if (file == null || file.getBuffer() == null) {
+                    throw new PlaybackParseException("Could not read/find " + mainfileName);
+                }
+                if (file.getBuffer().length == 0) {
+                    throw new PlaybackParseException("No bytes for file " + mainfileName);
+                }
                 files[0] = file;
+
             } catch (Exception e) {
+                e.printStackTrace();
                 throw new PlaybackParseException(e);
             }
             
@@ -319,8 +332,37 @@ public class PlaybackManager {
             controller.sendToServers(packet);
         }
     }
+    
+    private void writeValues(String key, long number) {
+        System.out.print(key + "=" + number + DELIMITER + " ");
+
+    }
+
+    private void writeValues(String key, String value) {
+        System.out.print(key + "=" + value + DELIMITER + " ");
+    }
+
+    private void dump(String message, PlaybackEvent playbackEvent) {
+
+        Run run = playbackEvent.getRun();
+
+        System.out.println(message);
+        writeValues(PlaybackManager.ACTION_KEY, playbackEvent.getAction().toString());
+        writeValues(PlaybackManager.ID_KEY, run.getNumber());
+        writeValues(PlaybackManager.ELAPSED_KEY, run.getElapsedMins());
+        writeValues(PlaybackManager.LANGUAGE_KEY, run.getLanguageId().toString());
+        writeValues(PlaybackManager.PROBLEM_KEY, run.getProblemId().toString());
+        writeValues(PlaybackManager.SITE_KEY, run.getSiteNumber());
+        writeValues(PlaybackManager.SUBMIT_CLIENT_KEY, run.getSubmitter().getName());
+        writeValues("File size", playbackEvent.getFiles()[0].getBuffer().length);
+        System.out.println();
+    }
 
     public void executeEvent(PlaybackEvent playbackEvent, IInternalContest contest, IInternalController controller) throws Exception {
+
+        if (Utilities.isDebugMode()){
+          dump("in executeEvent", playbackEvent);
+        }
 
         switch (playbackEvent.getAction()) {
             case RUN_SUBMIT:
