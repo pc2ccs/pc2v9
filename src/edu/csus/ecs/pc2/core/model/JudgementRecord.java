@@ -106,6 +106,9 @@ public class JudgementRecord implements Serializable {
     private boolean computerJudgement = false;
 
     private ElementId previousComputerJudgementId = null;
+    
+    private boolean preliminaryJudgement = false;
+
 
     /**
      * Create a Judgement Record.
@@ -125,7 +128,7 @@ public class JudgementRecord implements Serializable {
         this(judgementId, judgerClientId, solved, usedValidator);
         this.computerJudgement = computerJudgement; 
     }
-
+    
     /**
      * Is this "the" Judgement. ?
      * 
@@ -367,4 +370,17 @@ public class JudgementRecord implements Serializable {
         return previousComputerJudgementId;
     }
 
+
+    /**
+     * Is this judgement record a preliminary.
+     * 
+     * @return true if preliminary judgement, false if a final judgement.
+     */
+    public boolean isPreliminaryJudgement() {
+        return preliminaryJudgement;
+    }
+
+    public void setPreliminaryJudgement(boolean preliminaryJudgement) {
+        this.preliminaryJudgement = preliminaryJudgement;
+    }
 }

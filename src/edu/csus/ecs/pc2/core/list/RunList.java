@@ -200,6 +200,7 @@ public class RunList implements Serializable {
         if (theRun.getStatus().equals(RunStates.BEING_JUDGED)) {
             
             if ((manualReview) && (judgement.isComputerJudgement())){
+                judgement.setPreliminaryJudgement(true);
                 theRun.setStatus(RunStates.MANUAL_REVIEW);
             } else {
                 theRun.setStatus(RunStates.JUDGED);
@@ -207,8 +208,6 @@ public class RunList implements Serializable {
         } else {
             theRun.setStatus(RunStates.JUDGED);
         }
-            
-        
         
         theRun.addJudgement(judgement);
         writeToDisk();
