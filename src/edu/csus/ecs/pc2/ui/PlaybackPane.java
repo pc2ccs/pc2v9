@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.ui;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.GridBagLayout;
 import java.awt.Rectangle;
 import java.io.FileNotFoundException;
@@ -17,13 +18,14 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.playback.PlaybackEvent;
 import edu.csus.ecs.pc2.core.model.playback.PlaybackManager;
 import edu.csus.ecs.pc2.core.model.playback.PlaybackEvent.Action;
-import java.awt.Font;
+import java.awt.event.KeyEvent;
 
 /**
  * Pane for Contest Playback.
@@ -211,9 +213,80 @@ public class PlaybackPane extends JPanePlugin {
         if (startButton == null) {
             startButton = new JButton();
             startButton.setText("Start");
+            startButton.setMnemonic(KeyEvent.VK_S);
             startButton.setToolTipText("Start running events");
+            startButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    startRunningEvents();
+                }
+            });
         }
         return startButton;
+    }
+
+    protected void startRunningEvents() {
+
+        if (eventsListBox.getRowCount() == 0) {
+            JOptionPane.showMessageDialog(this, "No events defined");
+            return;
+        }
+
+        final int currentEventNumber = playbackManager.getSequenceNumber();
+
+        if (currentEventNumber > eventsListBox.getRowCount()) {
+            JOptionPane.showMessageDialog(this, "All events executed");
+            return;
+        }
+
+        int lastEventToRunTo = Integer.parseInt(getStopEventNumberTextField().getText());
+
+        if (currentEventNumber == lastEventToRunTo) {
+            JOptionPane.showMessageDialog(this, "Already before event " + lastEventToRunTo);
+            return;
+        }
+        if (currentEventNumber > lastEventToRunTo) {
+            JOptionPane.showMessageDialog(this, "Way after event " + lastEventToRunTo + " dude (at event " + (currentEventNumber - 1) + ")");
+            return;
+        }
+
+        final int waitTime = Integer.parseInt(getTimeWarpTextField().getText());
+
+        if (lastEventToRunTo > getEventsListBox().getRowCount()) {
+            lastEventToRunTo = getEventsListBox().getRowCount();
+        }
+
+        final int runToStep = lastEventToRunTo;
+
+        new Thread(new Runnable() {
+
+            public void run() {
+                for (int i = currentEventNumber; i < runToStep; i++) {
+
+                    PlaybackEvent playbackEvent = (PlaybackEvent) eventsListBox.getKeys()[i - 1];
+                    try {
+                        currentEventLabel.setText("At event " + playbackManager.getSequenceNumber());
+                        playbackManager.executeEvent(playbackEvent, getContest(), getController());
+
+                        final String[] row = buildPlayBackRow(playbackEvent);
+                        final int rowNumber = i;
+
+                        SwingUtilities.invokeLater(new Runnable() {
+                            public void run() {
+                                getEventsListBox().replaceRow(row, rowNumber - 1);
+                                autoSizeColumns();
+                            }
+                        });
+
+                        if (waitTime > 0) {
+                            Thread.sleep(waitTime);
+                        }
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }).start();
     }
 
     /**
@@ -225,6 +298,8 @@ public class PlaybackPane extends JPanePlugin {
         if (stopButton == null) {
             stopButton = new JButton();
             stopButton.setText("Stop");
+            stopButton.setEnabled(false);
+            stopButton.setMnemonic(KeyEvent.VK_UNDEFINED);
             stopButton.setToolTipText("Stop running events");
         }
         return stopButton;
@@ -269,7 +344,7 @@ public class PlaybackPane extends JPanePlugin {
             stopAtLabel = new JLabel();
             stopAtLabel.setBounds(new Rectangle(26, 46, 146, 24));
             stopAtLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-            stopAtLabel.setText("Stop at event");
+            stopAtLabel.setText("Stop before event");
             msLabel = new JLabel();
             msLabel.setBounds(new Rectangle(248, 13, 32, 24));
             msLabel.setText("ms");
@@ -348,6 +423,7 @@ public class PlaybackPane extends JPanePlugin {
         if (stepButton == null) {
             stepButton = new JButton();
             stepButton.setBounds(new Rectangle(187, 74, 115, 32));
+            stepButton.setMnemonic(KeyEvent.VK_R);
             stepButton.setText("Run one event");
 
             stepButton.addActionListener(new java.awt.event.ActionListener() {
@@ -376,12 +452,13 @@ public class PlaybackPane extends JPanePlugin {
         
         PlaybackEvent playbackEvent = (PlaybackEvent) eventsListBox.getKeys()[currentEventNumber - 1];
         try {
-            currentEventLabel.setText("At " + playbackManager.getSequenceNumber());
+            currentEventLabel.setText("At event " + playbackManager.getSequenceNumber());
             playbackManager.executeEvent(playbackEvent, getContest(), getController());
 
             String[] row = buildPlayBackRow(playbackEvent);
 
             getEventsListBox().replaceRow(row, currentEventNumber - 1);
+            autoSizeColumns();
             
         } catch (Exception e) {
             e.printStackTrace();
@@ -397,6 +474,7 @@ public class PlaybackPane extends JPanePlugin {
         if (loadButton == null) {
             loadButton = new JButton();
             loadButton.setText("Load");
+            loadButton.setMnemonic(KeyEvent.VK_L);
             loadButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     selectAndloadEventFile();
