@@ -139,34 +139,54 @@ public class ViewJudgementsPane extends JPanePlugin implements UIPlugin {
      * @return
      */
     private Object[] buildJudgmentRow(int rowNumber, Run inRun, JudgementRecord judgementRecord) {
-        // Object[] cols = { "##", "Judgement", "Judge", "Active", "Time", "TWJ", "TTJ", "Comment for team", "Comment for judge" };
+        // Object[] cols = { "##", "Judgement", "Judge", "Active", "Time", "Final", "TWJ", "TTJ", "Comment for team", "Comment for judge" };
 
         int numberColumns = judgementsListbox.getColumnCount();
         Object[] column = new Object[numberColumns];
 
-        column[0] = new Integer(rowNumber).toString();
-        column[1] = getJudgementName(judgementRecord);
-        column[2] = judgementRecord.getJudgerClientId().getName() + "/s"+judgementRecord.getJudgerClientId().getSiteNumber();
-        if (judgementRecord.isComputerJudgement()){
-            column[2] = judgementRecord.getJudgerClientId().getName() + "/Computer";
-        } else if (judgementRecord.isUsedValidator()){
-            column[2] = judgementRecord.getJudgerClientId().getName() + "/Val";
-        }
-        column[3] = yesNoString(judgementRecord.isActive());
-        column[4] = "" + inRun.getElapsedMins();
-        column[5] = "" + judgementRecord.getWhenJudgedTime();
-        column[6] = judgementRecord.getHowLongToJudgeInSeconds() + "s";
+        int col = 0;
 
+        column[col] = new Integer(rowNumber).toString();
+        column[++col] = getJudgementName(judgementRecord);
+
+        // Judge
+        column[++col] = judgementRecord.getJudgerClientId().getName() + "/s" + judgementRecord.getJudgerClientId().getSiteNumber();
+        if (judgementRecord.isComputerJudgement()) {
+            column[col] = judgementRecord.getJudgerClientId().getName() + "/Computer";
+        } else if (judgementRecord.isUsedValidator()) {
+            column[col] = judgementRecord.getJudgerClientId().getName() + "/Val";
+        }
+
+        // Active
+        column[++col] = yesNoString(judgementRecord.isActive());
+
+        // Time
+        column[++col] = "" + inRun.getElapsedMins();
+
+        // Prelim
+        col++;
+        try {
+            column[col] = yesNoString(! judgementRecord.isPreliminaryJudgement());
+        } catch (Exception e) {
+            // backward compatibility, isPreliminaryJudgement is in use after Feb 2009
+            column[col] = "-";
+        }
+
+        column[++col] = "" + judgementRecord.getWhenJudgedTime();
+        column[++col] = judgementRecord.getHowLongToJudgeInSeconds() + "s";
+
+        col++;
         if (judgementRecord.getCommentForTeam() != null) {
-            column[7] = judgementRecord.getCommentForTeam().getComment();
+            column[col] = judgementRecord.getCommentForTeam().getComment();
         } else {
-            column[7] = "(None)";
+            column[col] = "(None)";
         }
 
+        col++;
         if (judgementRecord.getCommentForJudge() != null) {
-            column[8] = judgementRecord.getCommentForJudge().getComment();
+            column[col] = judgementRecord.getCommentForJudge().getComment();
         } else {
-            column[8] = "(None)";
+            column[col] = "(None)";
         }
 
         return column;
@@ -263,7 +283,7 @@ public class ViewJudgementsPane extends JPanePlugin implements UIPlugin {
     private MCLB getJudgementsListbox() {
         if (judgementsListbox == null) {
             judgementsListbox = new MCLB();
-            Object[] cols = { "##", "Judgement", "Judge", "Active", "Time", "TWJ", "TTJ", "Comment for team", "Comment for judge" };
+            Object[] cols = { "##", "Judgement", "Judge", "Active", "Time", "Final", "TWJ", "TTJ", "Comment for team", "Comment for judge" };
             judgementsListbox.addColumns(cols);
             judgementsListbox.autoSizeAllColumns();
         }
