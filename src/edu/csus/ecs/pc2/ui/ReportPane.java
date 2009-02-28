@@ -288,10 +288,15 @@ public class ReportPane extends JPanePlugin {
         return viewReportButton;
     }
 
-    private String getFileName() {
+    private String getFileName(IReport selectedReport) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM.dd.SSS");
         // "yyMMdd HHmmss.SSS");
-        return "report." + simpleDateFormat.format(new Date()) + ".txt";
+        String reportName = selectedReport.getReportTitle();
+        
+        while (reportName.indexOf(' ') > -1){
+            reportName = reportName.replace(" ", "_");
+        }
+        return "report."+ reportName+ "." + simpleDateFormat.format(new Date()) + ".txt";
 
     }
 
@@ -307,7 +312,17 @@ public class ReportPane extends JPanePlugin {
 
         try {
 
-            String filename = getFileName();
+  
+            IReport selectedReport = null;
+
+            String selectedReportTitle = (String) getReportsComboBox().getSelectedItem();
+            for (IReport report : listOfReports) {
+                if (selectedReportTitle.equals(report.getReportTitle())) {
+                    selectedReport = report;
+                }
+            }
+            
+            String filename = getFileName(selectedReport);
             File reportDirectoryFile = new File(getReportDirectory());
             if (reportDirectoryFile.exists()) {
                 if (reportDirectoryFile.isDirectory()) {
@@ -316,14 +331,6 @@ public class ReportPane extends JPanePlugin {
             } else {
                 if (reportDirectoryFile.mkdirs()) {
                     filename = reportDirectoryFile.getCanonicalPath() + File.separator + filename;
-                }
-            }
-            IReport selectedReport = null;
-
-            String selectedReportTitle = (String) getReportsComboBox().getSelectedItem();
-            for (IReport report : listOfReports) {
-                if (selectedReportTitle.equals(report.getReportTitle())) {
-                    selectedReport = report;
                 }
             }
 
@@ -354,7 +361,16 @@ public class ReportPane extends JPanePlugin {
 
         try {
 
-            String filename = getFileName();
+            IReport selectedReport = null;
+
+            String selectedReportTitle = (String) getReportsComboBox().getSelectedItem();
+            for (IReport report : listOfReports) {
+                if (selectedReportTitle.equals(report.getReportTitle())) {
+                    selectedReport = report;
+                }
+            }
+
+            String filename = getFileName(selectedReport);
             File reportDirectoryFile = new File(getReportDirectory());
             if (reportDirectoryFile.exists()) {
                 if (reportDirectoryFile.isDirectory()) {
@@ -363,14 +379,6 @@ public class ReportPane extends JPanePlugin {
             } else {
                 if (reportDirectoryFile.mkdirs()) {
                     filename = reportDirectoryFile.getCanonicalPath() + File.separator + filename;
-                }
-            }
-            IReport selectedReport = null;
-
-            String selectedReportTitle = (String) getReportsComboBox().getSelectedItem();
-            for (IReport report : listOfReports) {
-                if (selectedReportTitle.equals(report.getReportTitle())) {
-                    selectedReport = report;
                 }
             }
             
