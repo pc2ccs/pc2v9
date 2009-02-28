@@ -10,7 +10,6 @@ import java.util.Vector;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
-import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Filter;
@@ -51,6 +50,8 @@ public class ExtractPlaybackLoadFilesReport implements IReport {
     private Filter filter;
     
     private String reportDirectory = "reports";
+    
+    private String universalFileSeparator = "/";
 
 
     private void writeRow(PrintWriter printWriter, Run run) throws Exception {
@@ -69,17 +70,17 @@ public class ExtractPlaybackLoadFilesReport implements IReport {
         SerializedFile mainfile = runFiles.getMainFile();
         String mainFileName = mainfile.getName();
         
-        String targetDirectory = extractDirectory + File.separator + "site" + run.getSiteNumber() + "run" + run.getNumber();
+        String targetDirectory = extractDirectory + universalFileSeparator + "site" + run.getSiteNumber() + "run" + run.getNumber();
         if (!new File(targetDirectory).isDirectory()) {
             new File(targetDirectory).mkdirs();
         }
         
-        String outputFileName = targetDirectory + File.separator + mainFileName; 
+        String outputFileName = targetDirectory + universalFileSeparator + mainFileName; 
         
         mainfile.writeFile(outputFileName);
 
         // remove report/ from targetdirectory to make it relative to the load list file (report file)
-        outputFileName = removeUpTo(targetDirectory, File.separator).substring(1) + File.separator + mainFileName;
+        outputFileName = removeUpTo(targetDirectory, File.separator).substring(1) + universalFileSeparator + mainFileName;
         
         writeValues(printWriter, PlaybackManager.MAINFILE_KEY, outputFileName);
         
@@ -103,7 +104,7 @@ public class ExtractPlaybackLoadFilesReport implements IReport {
 
         Arrays.sort(runs, new RunComparator());
 
-        printWriter.println("------------------------------------------------------------");
+        printWriter.println("# ------------------------------------------------------------");
         printWriter.println();
         printWriter.println("# "+getReportTitle()); 
         printWriter.println("# Created on "+new Date());
@@ -136,7 +137,7 @@ public class ExtractPlaybackLoadFilesReport implements IReport {
         
         printWriter.println();
         printWriter.println("# EOF "+getReportTitle()); 
-        printWriter.println("------------------------------------------------------------");
+        printWriter.println("# ------------------------------------------------------------");
 
     }
 
@@ -153,16 +154,16 @@ public class ExtractPlaybackLoadFilesReport implements IReport {
     }
 
     private void printHeader(PrintWriter printWriter) {
-        printWriter.println(new VersionInfo().getSystemName());
-        printWriter.println("Date: " + Utilities.getL10nDateTime());
-        printWriter.println(new VersionInfo().getSystemVersionInfo());
-        printWriter.println();
-        printWriter.println(getReportTitle() + " Report");
+//        printWriter.println(new VersionInfo().getSystemName());
+//        printWriter.println("Date: " + Utilities.getL10nDateTime());
+//        printWriter.println(new VersionInfo().getSystemVersionInfo());
+//        printWriter.println();
+        printWriter.println("# " +getReportTitle() + " Report");
     }
 
     private void printFooter(PrintWriter printWriter) {
         printWriter.println();
-        printWriter.println("end report");
+        printWriter.println("# end ");
     }
 
     public void createReportFile(String filename, Filter inFilter) throws IOException {
@@ -201,7 +202,7 @@ public class ExtractPlaybackLoadFilesReport implements IReport {
     }
 
     public String getReportTitle() {
-        return "Replay file";
+        return "Extract Replay Runs";
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
@@ -211,7 +212,7 @@ public class ExtractPlaybackLoadFilesReport implements IReport {
     }
 
     public String getPluginTitle() {
-        return "Replay File Report";
+        return "Extract Replay Runs";
     }
 
     public Filter getFilter() {
