@@ -2,7 +2,6 @@ package edu.csus.ecs.pc2.core.model.playback;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -56,9 +55,9 @@ public class PlaybackManager {
      * @param filename
      * @param internalContest
      * @return
-     * @throws IOException
+     * @throws Exception 
      */
-    public PlaybackEvent[] loadPlayback(String filename, IInternalContest contest) throws IOException {
+    public PlaybackEvent[] loadPlayback(String filename, IInternalContest contest) throws Exception {
 
         Vector<PlaybackEvent> events = new Vector<PlaybackEvent>();
 
@@ -87,6 +86,7 @@ public class PlaybackManager {
 
         int invalidLines = 0;
         int lineNumber = 0;
+        Exception savedException = null;
         
         for (String s : lines) {
             try {
@@ -100,20 +100,28 @@ public class PlaybackManager {
                     continue;
                 }
                 
-                PlaybackEvent playbackEvent = createPlayBackEvent(contest, s, "[|]", sourceDirectory);
+                PlaybackEvent playbackEvent = createPlayBackEvent(lineNumber, contest, s, "[|]", sourceDirectory);
                 if (playbackEvent != null) {
                     events.add(playbackEvent);
                 } else {
                     invalidLines++;
-                    System.out.println("unable to parse line: " + s);
+                    System.out.println("Line "+lineNumber+": unable to parse line: " + s);
                 }
 
             } catch (Exception e) {
                 invalidLines++;
+                if (invalidLines == 1){
+                    savedException = e;
+                }
                 System.out.println("Line "+lineNumber+" : " + s);
-                System.out.println("    Exception = " + e.getMessage());
+                System.out.println("Line "+lineNumber+" : Exception = " + e.getMessage());
                 e.printStackTrace();
             }
+        }
+        
+        if (savedException != null){
+            System.out.println("Errors on "+invalidLines+" lines, loading "+filename);
+            throw savedException;
         }
         
         return (PlaybackEvent[]) events.toArray(new PlaybackEvent[events.size()]);
@@ -150,6 +158,7 @@ public class PlaybackManager {
      * auxfiles=&lt;filename1&gt;[,&lt;filename2&gt;
      * eventClient=judge#|admin#
      * </pre>
+     * @param lineNumber 
      * 
      * @param contest
      * @param sourceDir
@@ -158,7 +167,7 @@ public class PlaybackManager {
      * @return
      * @throws PlaybackParseException
      */
-    protected PlaybackEvent createPlayBackEvent(IInternalContest contest, String s, String delimit, String sourceDir) throws PlaybackParseException {
+    protected PlaybackEvent createPlayBackEvent(int lineNumber, IInternalContest contest, String s, String delimit, String sourceDir) throws PlaybackParseException {
 
         String[] fields = s.split(delimit);
 
@@ -170,19 +179,19 @@ public class PlaybackManager {
 
         Properties properties = mapFieldsNameValuePairs(fields);
 
-        String command = getAndCheckValue(properties, ACTION_KEY, "action name/value");
+        String command = getAndCheckValue(properties, ACTION_KEY, "action name/value", lineNumber);
 
         Action action = Action.UNDEFINED;
         
         if (command.equalsIgnoreCase(Action.RUN_SUBMIT.toString())){
             action = PlaybackEvent.Action.RUN_SUBMIT;
-            String problemName = getAndCheckValue(properties, PROBLEM_KEY, "problem name");
-            String languageName = getAndCheckValue(properties, LANGUAGE_KEY, "language name");
-            String mainfileName = getAndCheckValue(properties, MAINFILE_KEY, "main file name");
-            String siteId = getAndCheckValue(properties, SITE_KEY, "site number");
-            String submitClientName = getAndCheckValue(properties, SUBMIT_CLIENT_KEY, "client id");
+            String problemName = getAndCheckValue(properties, PROBLEM_KEY, "Problem name", lineNumber);
+            String languageName = getAndCheckValue(properties, LANGUAGE_KEY, "Language name", lineNumber);
+            String mainfileName = getAndCheckValue(properties, MAINFILE_KEY, "Main filename", lineNumber);
+            String siteId = getAndCheckValue(properties, SITE_KEY, "Site number", lineNumber);
+            String submitClientName = getAndCheckValue(properties, SUBMIT_CLIENT_KEY, "Client id", lineNumber);
             
-            String elapsedTimeStr = getAndCheckValue(properties, ELAPSED_KEY, "elapsed time", false);
+            String elapsedTimeStr = getAndCheckValue(properties, ELAPSED_KEY, "Elapsed time", false, lineNumber);
 
             Language language = findLanguage(contest, languageName);
             Problem problem = findProblem(contest, problemName);
@@ -195,10 +204,10 @@ public class PlaybackManager {
                 SerializedFile file = new SerializedFile(sourceDir + File.separator + mainfileName);
 
                 if (file == null || file.getBuffer() == null) {
-                    throw new PlaybackParseException("Could not read/find " + mainfileName);
+                    throw new PlaybackParseException(lineNumber, "Could not read/find " + mainfileName);
                 }
                 if (file.getBuffer().length == 0) {
-                    throw new PlaybackParseException("No bytes for file " + mainfileName);
+                    throw new PlaybackParseException(lineNumber, "No bytes for file " + mainfileName);
                 }
                 files[0] = file;
 
@@ -207,11 +216,11 @@ public class PlaybackManager {
                 throw new PlaybackParseException(e);
             }
             
-            String idStr = getAndCheckValue(properties, ID_KEY, "run/clar number");
+            String idStr = getAndCheckValue(properties, ID_KEY, "run/clar number", lineNumber);
             int number = Integer.parseInt(idStr);
 
             if (number < 1) {
-                throw new PlaybackParseException("invalid run/clar number: " + idStr);
+                throw new PlaybackParseException(lineNumber, "invalid run/clar number: " + idStr);
             }
 
             run.setElapsedMins(getIntegerValue(elapsedTimeStr));
@@ -223,7 +232,7 @@ public class PlaybackManager {
 
             // TODO aux files, someday, maybe
         } else {
-            throw new PlaybackParseException("Unknown event: " + command);
+            throw new PlaybackParseException(lineNumber, "Unknown event: " + command);
         }
 
         return playbackEvent;
@@ -272,8 +281,8 @@ public class PlaybackManager {
         throw new PlaybackParseException("Could not find/match language: " + languageName);
     }
 
-    private String getAndCheckValue(Properties properties, String key, String message) throws PlaybackParseException {
-        return getAndCheckValue(properties, key, message, true);
+    private String getAndCheckValue(Properties properties, String key, String message, int lineNumber) throws PlaybackParseException {
+        return getAndCheckValue(properties, key, message, true, lineNumber);
     }
 
     /**
@@ -286,10 +295,10 @@ public class PlaybackManager {
      * @return
      * @throws PlaybackParseException 
      */
-    private String getAndCheckValue(Properties properties, String key, String message, boolean requiredOption) throws PlaybackParseException {
+    private String getAndCheckValue(Properties properties, String key, String message, boolean requiredOption, int lineNumber) throws PlaybackParseException {
         String value = properties.getProperty(key);
         if (value == null && requiredOption) {
-            throw new PlaybackParseException(message + " (For key " + key + ")");
+            throw new PlaybackParseException(lineNumber, message + " value missing (key = " + key + ")");
         }
         return value;
     }

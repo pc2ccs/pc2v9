@@ -34,4 +34,8 @@ public class PlaybackParseException extends Exception {
         // TODO Auto-generated constructor stub
     }
 
+    public PlaybackParseException(int lineNumber, String string) {
+        super("Line "+lineNumber+": "+string);
+    }
+
 }
