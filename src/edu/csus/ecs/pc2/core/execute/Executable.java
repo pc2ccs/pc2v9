@@ -218,10 +218,6 @@ public class Executable {
         fileViewer = new MultipleFileViewer(log);
 
         try {
-            if (isJudge()){
-                controller.sendExecutingMessage(run);
-            }
-            
             executionData = new ExecutionData();
             
             executeDirectoryName = getExecuteDirectoryName();
@@ -788,6 +784,10 @@ public class Executable {
         String inputDataFileName = null;
 
         try {
+            if (isJudge()){
+                controller.sendExecutingMessage(run);
+            }
+            
             executionTimer = new ExecuteTimer(log, problem.getTimeOutInSeconds(), executorId);
             executionTimer.startTimer();
 
