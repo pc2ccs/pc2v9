@@ -422,7 +422,7 @@ public class PlaybackPane extends JPanePlugin {
     private JButton getStepButton() {
         if (stepButton == null) {
             stepButton = new JButton();
-            stepButton.setBounds(new Rectangle(187, 74, 115, 32));
+            stepButton.setBounds(new Rectangle(187, 81, 141, 25));
             stepButton.setMnemonic(KeyEvent.VK_R);
             stepButton.setText("Run one event");
 
@@ -509,6 +509,7 @@ public class PlaybackPane extends JPanePlugin {
         } catch (FileNotFoundException notFound) {
             JOptionPane.showMessageDialog(this, "No such file: " + filename);
         } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Unable to load file: " + filename+ " "+e.getMessage());
             e.printStackTrace();
         }
     }
