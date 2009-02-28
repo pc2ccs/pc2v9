@@ -362,7 +362,7 @@ public class ServerView extends JFrame implements UIPlugin {
         addUIPlugin(getMainTabbedPane(), "Reports", reportPane);
         
         PlaybackPane playbackPane = new PlaybackPane();
-        addUIPlugin("Playback", playbackPane);
+        addUIPlugin("Replay", playbackPane);
 
         OptionsPanel optionsPanel = new OptionsPanel();
         addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
