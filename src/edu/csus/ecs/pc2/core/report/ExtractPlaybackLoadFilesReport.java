@@ -56,16 +56,6 @@ public class ExtractPlaybackLoadFilesReport implements IReport {
 
     private void writeRow(PrintWriter printWriter, Run run) throws Exception {
 
-        writeValues(printWriter, PlaybackManager.ACTION_KEY, PlaybackEvent.Action.RUN_SUBMIT.toString());
-        writeValues(printWriter, PlaybackManager.ID_KEY, run.getNumber());
-        writeValues(printWriter, PlaybackManager.ELAPSED_KEY, run.getElapsedMins());
-        writeValues(printWriter, PlaybackManager.LANGUAGE_KEY, contest.getLanguage(run.getLanguageId()).getDisplayName());
-        writeValues(printWriter, PlaybackManager.PROBLEM_KEY, contest.getProblem(run.getProblemId()).getDisplayName());
-        writeValues(printWriter, PlaybackManager.SITE_KEY, run.getSiteNumber());
-        writeValues(printWriter, PlaybackManager.SUBMIT_CLIENT_KEY, run.getSubmitter().getName());
-        
-        printWriter.flush();
-        
         RunFiles runFiles = contest.getRunFiles(run);
         SerializedFile mainfile = runFiles.getMainFile();
         String mainFileName = mainfile.getName();
@@ -82,8 +72,14 @@ public class ExtractPlaybackLoadFilesReport implements IReport {
         // remove report/ from targetdirectory to make it relative to the load list file (report file)
         outputFileName = removeUpTo(targetDirectory, File.separator).substring(1) + universalFileSeparator + mainFileName;
         
+        writeValues(printWriter, PlaybackManager.ACTION_KEY, PlaybackEvent.Action.RUN_SUBMIT.toString());
+        writeValues(printWriter, PlaybackManager.ID_KEY, run.getNumber());
+        writeValues(printWriter, PlaybackManager.ELAPSED_KEY, run.getElapsedMins());
+        writeValues(printWriter, PlaybackManager.LANGUAGE_KEY, contest.getLanguage(run.getLanguageId()).getDisplayName());
+        writeValues(printWriter, PlaybackManager.PROBLEM_KEY, contest.getProblem(run.getProblemId()).getDisplayName());
+        writeValues(printWriter, PlaybackManager.SITE_KEY, run.getSiteNumber());
+        writeValues(printWriter, PlaybackManager.SUBMIT_CLIENT_KEY, run.getSubmitter().getName());
         writeValues(printWriter, PlaybackManager.MAINFILE_KEY, outputFileName);
-        
         printWriter.println();
     }
 
@@ -116,12 +112,20 @@ public class ExtractPlaybackLoadFilesReport implements IReport {
 
         extractDirectory = removeUpTo(reportFilename, reportDirectory+File.separator) + ".files";
 
+        int nonExtractedRuns = 0;
+        
         for (Run run : runs) {
             try {
-                writeRow(printWriter, run);
+                if (isThisSite(run.getSiteNumber())){
+                    writeRow(printWriter, run);
+                } else {
+                    printWriter.println("# Remote run site "+run.getSiteNumber()+" not extracted "+run);
+                    failedRunExtract.add("Remote run: " + run);
+                    nonExtractedRuns++;
+                }
             } catch (Exception e) {
                 failedRunExtract.add("Failed run: " + run);
-                printWriter.println();
+                nonExtractedRuns++;
                 printWriter.println("# error extracting run " + run + " " + e.getMessage());
             }
         }
@@ -129,16 +133,24 @@ public class ExtractPlaybackLoadFilesReport implements IReport {
         String [] list = (String[]) failedRunExtract.toArray(new String[failedRunExtract.size()]);
         
         printWriter.println();
-        printWriter.println("# "+list.length+" errors extracting runs");
-        
-        for (String s : list){
-            printWriter.println("# "+s);
+        if (nonExtractedRuns > 0){
+            printWriter.println("# "+(nonExtractedRuns)+" extracting runs NOT extracted");
+            for (String s : list){
+                printWriter.println("# "+s);
+            }
+        } else {
+            printWriter.println("# All "+(list.length)+" runs extracted");
+            
         }
         
         printWriter.println();
         printWriter.println("# EOF "+getReportTitle()); 
         printWriter.println("# ------------------------------------------------------------");
 
+    }
+
+    private boolean isThisSite(int siteNumber) {
+        return siteNumber == contest.getSiteNumber();
     }
 
     protected String removeUpTo(String source, String targetString) {
