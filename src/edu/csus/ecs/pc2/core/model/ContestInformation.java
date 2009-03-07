@@ -2,6 +2,8 @@ package edu.csus.ecs.pc2.core.model;
 
 import java.io.Serializable;
 
+import edu.csus.ecs.pc2.core.list.JudgementNotificationsList;
+
 /**
  * InternalContest Wide Information.
  * 
@@ -30,6 +32,13 @@ public class ContestInformation implements Serializable{
     
     private boolean sendAdditionalRunStatusInformation = false;
     
+    /**
+     * This is a list of the judgement notification end of contest control settings.
+     * 
+     */
+    private JudgementNotificationsList judgementNotificationsList = new JudgementNotificationsList();
+    
+
     /**
      * 
      * @author pc2@ecs.csus.edu
@@ -170,4 +179,19 @@ public class ContestInformation implements Serializable{
     public void setSendAdditionalRunStatusInformation(boolean sendAdditionalRunStatusInformation) {
         this.sendAdditionalRunStatusInformation = sendAdditionalRunStatusInformation;
     }
+    
+    public JudgementNotificationsList getJudgementNotificationsList() {
+        return judgementNotificationsList;
+    }
+
+    public void setJudgementNotificationsList(JudgementNotificationsList judgementNotificationsList) {
+        this.judgementNotificationsList = judgementNotificationsList;
+    }
+    
+    public void updateJudgementNotification (NotificationSetting notificationSetting ){
+        judgementNotificationsList.update(notificationSetting);
+    }
+
+    
+    
 }

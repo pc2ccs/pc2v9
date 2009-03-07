@@ -22,6 +22,32 @@ public class JudgementNotification implements Serializable  {
      */
     private static final long serialVersionUID = 5468535083280239720L;
 
+    /**
+     * Minutes before end of contest to suppress notifications.
+     */
+    private int cuttoffMinutes = 0;
+
+    /**
+     * Should notifications be suppressed ?
+     */
+    private boolean notificationSuppressed = false;
+    
+    public JudgementNotification() {
+        
+    }
+
+    public JudgementNotification(boolean notificationSent, int cuttoffMinutes) {
+        super();
+        this.notificationSuppressed = notificationSent;
+        this.cuttoffMinutes = cuttoffMinutes;
+    }
+    
+    public boolean isSameAs(JudgementNotification judgementNotificationIn) {
+        return (judgementNotificationIn.isNotificationSupressed() == isNotificationSupressed())
+        && (judgementNotificationIn.getCuttoffMinutes() == getCuttoffMinutes());
+    }
+    
+
     public int getCuttoffMinutes() {
         return cuttoffMinutes;
     }
@@ -30,30 +56,12 @@ public class JudgementNotification implements Serializable  {
         this.cuttoffMinutes = cuttoffMinutes;
     }
 
-    public boolean isNotificationSent() {
-        return notificationSent;
+    public boolean isNotificationSupressed() {
+        return notificationSuppressed;
     }
 
-    public void setNotificationSent(boolean notificationSent) {
-        this.notificationSent = notificationSent;
+    public void setNotificationSupressed(boolean suppressNotification) {
+        this.notificationSuppressed = suppressNotification;
     }
 
-    private int cuttoffMinutes = 0;
-
-    private boolean notificationSent = true;
-    
-    public JudgementNotification() {
-        
-    }
-
-    public JudgementNotification(boolean notificationSent, int cuttoffMinutes) {
-        super();
-        this.notificationSent = notificationSent;
-        this.cuttoffMinutes = cuttoffMinutes;
-    }
-    
-    public boolean isSameAs(JudgementNotification judgementNotificationIn) {
-        return (judgementNotificationIn.isNotificationSent() == isNotificationSent())
-        && (judgementNotificationIn.getCuttoffMinutes() == getCuttoffMinutes());
-    }
 }
