@@ -11,8 +11,18 @@ import junit.framework.TestCase;
 // $HeadURL$
 public class NotificationSettingTest extends TestCase {
 
-//    public void test(){
-//        
+    public void test(){
+        
+        Problem problem = new Problem ("A");
+        problem.setSiteNumber(1);
+        
+
+      NotificationSetting notificationSetting1 = new NotificationSetting(problem.getElementId());
+      NotificationSetting notificationSetting2 = new NotificationSetting(problem.getElementId());
+      
+      assertTrue("identical", notificationSetting1.isSameAs(notificationSetting2));
+
+        
 //        ClientId clientId = new ClientId(0, Type.SCOREBOARD, 1);
 //        NotificationSetting notificationSetting1 = new NotificationSetting(clientId);
 //        NotificationSetting notificationSetting2 = new NotificationSetting(clientId);
@@ -21,7 +31,7 @@ public class NotificationSettingTest extends TestCase {
 //        
 //        JudgementNotification judgementNotification = new JudgementNotification(true, 30);
 //        
-//        judgementNotification = new JudgementNotification(true, 0);
+////        judgementNotification = new JudgementNotification(true, 0);
 //        notificationSetting2.setFinalNotificationYes(judgementNotification);
 //        assertTrue("should be identical", notificationSetting1.isSameAs(notificationSetting2));
 //
@@ -94,5 +104,5 @@ public class NotificationSettingTest extends TestCase {
 //
 //        notificationSetting2 = new NotificationSetting(clientId);
 //        assertTrue("identical", notificationSetting1.isSameAs(notificationSetting2));
-//    }
+    }
 }
