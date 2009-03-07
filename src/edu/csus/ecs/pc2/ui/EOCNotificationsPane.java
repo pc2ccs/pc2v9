@@ -12,8 +12,10 @@ import javax.swing.SwingUtilities;
 import com.ibm.webrunner.j2mclb.util.HeapSorter;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.list.JudgementNotificationsList;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
 import edu.csus.ecs.pc2.core.model.IContestInformationListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -25,7 +27,7 @@ import edu.csus.ecs.pc2.core.model.ProblemEvent;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 
 /**
- * End of Contest Notifications
+ * List pane for End of Contest Control (Notifications).
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -177,7 +179,7 @@ public class EOCNotificationsPane extends JPanePlugin {
         c[2] = "";
         c[3] = "";
 
-        NotificationSetting notificationSetting = getNotificationSettings(problem);
+        NotificationSetting notificationSetting = getNotificationSetting(problem);
         if (notificationSetting != null) {
             c[2] = getNotificationSettingsString(notificationSetting.getFinalNotificationYes(), notificationSetting.getFinalNotificationNo());
             c[3] = getNotificationSettingsString(notificationSetting.getPreliminaryNotificationYes(), notificationSetting.getPreliminaryNotificationNo());
@@ -277,6 +279,8 @@ public class EOCNotificationsPane extends JPanePlugin {
 
             // TODO select the Problem pan that they selected
 
+            editJudgementNotificationFrame.resetAllNotificationSettings();
+            
             editJudgementNotificationFrame.setVisible(true);
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception logged ", e);
@@ -285,10 +289,24 @@ public class EOCNotificationsPane extends JPanePlugin {
         }
     }
 
-    private NotificationSetting getNotificationSettings(Problem problem) {
+   
+    /**
+     * Get notification setting for problem.
+     * 
+     * @param problem
+     * @return
+     */
+    private NotificationSetting getNotificationSetting(Problem problem) {
 
-        // TODO code this
-        return null;
+        ContestInformation contestInformation = getContest().getContestInformation();
+
+        JudgementNotificationsList judgementNotificationsList = contestInformation.getJudgementNotificationsList();
+
+        if (judgementNotificationsList == null) {
+            return null;
+        } else {
+            return judgementNotificationsList.get(problem);
+        }
     }
 
     /**

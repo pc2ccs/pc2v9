@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Vector;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -39,6 +40,7 @@ import edu.csus.ecs.pc2.core.report.FastestSolvedReport;
 import edu.csus.ecs.pc2.core.report.GroupsReport;
 import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.core.report.InternalDumpReport;
+import edu.csus.ecs.pc2.core.report.JudgementNotificationsReport;
 import edu.csus.ecs.pc2.core.report.JudgementReport;
 import edu.csus.ecs.pc2.core.report.LanguagesReport;
 import edu.csus.ecs.pc2.core.report.ListRunLanguages;
@@ -141,43 +143,45 @@ public class ReportPane extends JPanePlugin {
         this.add(getMainPane(), java.awt.BorderLayout.CENTER);
 
         // populate list of reports
-        listOfReports = new IReport[26];
-        int repNo = 0;
-        listOfReports[repNo++] = new AccountsReport();
-        listOfReports[repNo++] = new BalloonSummaryReport();
+        Vector <IReport> reports = new Vector <IReport> ();
+        
+        reports.add(new AccountsReport());
+        reports.add(new BalloonSummaryReport());
 
-        listOfReports[repNo++] = new AllReports();
-        listOfReports[repNo++] = new ContestReport();
+        reports.add(new AllReports());
+        reports.add(new ContestReport());
 
-        listOfReports[repNo++] = new ContestAnalysisReport();
-        listOfReports[repNo++] = new SolutionsByProblemReport();
-        listOfReports[repNo++] = new ListRunLanguages();
-        listOfReports[repNo++] = new FastestSolvedReport();
+        reports.add(new ContestAnalysisReport());
+        reports.add(new SolutionsByProblemReport());
+        reports.add(new ListRunLanguages());
+        reports.add(new FastestSolvedReport());
 
-        listOfReports[repNo++] = new StandingsReport();
-        listOfReports[repNo++] = new LoginReport();
+        reports.add(new StandingsReport());
+        reports.add(new LoginReport());
 
-        listOfReports[repNo++] = new RunsReport();
-        listOfReports[repNo++] = new ClarificationsReport();
-        listOfReports[repNo++] = new ProblemsReport();
-        listOfReports[repNo++] = new LanguagesReport();
+        reports.add(new RunsReport());
+        reports.add(new ClarificationsReport());
+        reports.add(new ProblemsReport());
+        reports.add(new LanguagesReport());
 
-        listOfReports[repNo++] = new JudgementReport();
-        listOfReports[repNo++] = new RunsByTeamReport();
-        listOfReports[repNo++] = new BalloonSettingsReport();
-        listOfReports[repNo++] = new ClientSettingsReport();
-        listOfReports[repNo++] = new GroupsReport();
+        reports.add(new JudgementReport());
+        reports.add(new RunsByTeamReport());
+        reports.add(new BalloonSettingsReport());
+        reports.add(new ClientSettingsReport());
+        reports.add(new GroupsReport());
 
-        listOfReports[repNo++] = new EvaluationReport();
+        reports.add(new EvaluationReport());
 
-        listOfReports[repNo++] = new OldRunsReport();
-        listOfReports[repNo++] = new RunsReport5();
+        reports.add(new OldRunsReport());
+        reports.add(new RunsReport5());
 
-        listOfReports[repNo++] = new AccountPermissionReport();
-        listOfReports[repNo++] = new BalloonDeliveryReport();
-        listOfReports[repNo++] = new ExtractPlaybackLoadFilesReport();
-        listOfReports[repNo++] = new InternalDumpReport();
+        reports.add(new AccountPermissionReport());
+        reports.add(new BalloonDeliveryReport());
+        reports.add(new ExtractPlaybackLoadFilesReport());
+        reports.add(new JudgementNotificationsReport());
+        reports.add(new InternalDumpReport());
 
+        listOfReports = (IReport[]) reports.toArray(new IReport[reports.size()]);
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {

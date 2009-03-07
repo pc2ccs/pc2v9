@@ -118,10 +118,10 @@ public class NotificationPaneTestFrame extends JFrame {
         JudgementNotification judgementNotification;
 
         judgementNotification = getNotificationPane().getYesJudgementNotificationFromFields();
-        System.out.println("          Send Yes " + judgementNotification.isNotificationSent() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
+        System.out.println("          Send Yes " + judgementNotification.isNotificationSupressed() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
 
         judgementNotification = getNotificationPane().getNoJudgementNotificationFromFields();
-        System.out.println("          Send No  " + judgementNotification.isNotificationSent() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
+        System.out.println("          Send No  " + judgementNotification.isNotificationSupressed() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
         System.out.println();
     }
 

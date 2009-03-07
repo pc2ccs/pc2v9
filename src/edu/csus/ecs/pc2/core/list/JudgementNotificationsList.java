@@ -28,6 +28,10 @@ public class JudgementNotificationsList extends ElementList {
     public void add(NotificationSetting notificationSetting) {
         super.add(notificationSetting);
     }
+    
+    public NotificationSetting get(Problem problem) {
+        return (NotificationSetting) super.get(problem.getElementId());
+    }
 
     public NotificationSetting[] getList() {
         return (NotificationSetting[]) values().toArray(new NotificationSetting[size()]);
