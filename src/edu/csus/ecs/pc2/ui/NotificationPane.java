@@ -140,7 +140,7 @@ public class NotificationPane extends JPanel {
         JudgementNotification newJudgementNotification = new JudgementNotification();
 
         newJudgementNotification.setCuttoffMinutes(getIntegerValue(getStopNoMinTextField().getText()));
-        newJudgementNotification.setNotificationSent(getStopSendingNoCheckBox().isSelected());
+        newJudgementNotification.setNotificationSupressed(getStopSendingNoCheckBox().isSelected());
 
         return newJudgementNotification;
     }
@@ -154,7 +154,7 @@ public class NotificationPane extends JPanel {
         JudgementNotification newJudgementNotification = new JudgementNotification();
 
         newJudgementNotification.setCuttoffMinutes(getIntegerValue(getStopYesMinTextField().getText()));
-        newJudgementNotification.setNotificationSent(getStopSendingYesCheckBox().isSelected());
+        newJudgementNotification.setNotificationSupressed(getStopSendingYesCheckBox().isSelected());
 
         return newJudgementNotification;
     }
@@ -166,10 +166,10 @@ public class NotificationPane extends JPanel {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 getStopYesMinTextField().setText(Integer.toString(judgementNotificationYes.getCuttoffMinutes()));
-                getStopSendingYesCheckBox().setSelected(judgementNotificationYes.isNotificationSent());
+                getStopSendingYesCheckBox().setSelected(judgementNotificationYes.isNotificationSupressed());
 
                 getStopNoMinTextField().setText(Integer.toString(judgementNotificationNo.getCuttoffMinutes()));
-                getStopSendingNoCheckBox().setSelected(judgementNotificationNo.isNotificationSent());
+                getStopSendingNoCheckBox().setSelected(judgementNotificationNo.isNotificationSupressed());
             }
         });
     }

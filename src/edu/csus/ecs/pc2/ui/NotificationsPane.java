@@ -188,13 +188,13 @@ public class NotificationsPane extends JPanePlugin {
 
         String s = "";
 
-        if (notificationYes.isNotificationSent()) {
+        if (notificationYes.isNotificationSupressed()) {
             s = "Send Yes";
             if (notificationYes.getCuttoffMinutes() > 0){
                 s += " cutoff "+notificationYes.getCuttoffMinutes()+" min";
             }
         }
-        if (notificationNo.isNotificationSent()) {
+        if (notificationNo.isNotificationSupressed()) {
             s += " Send No";
             if (notificationNo.getCuttoffMinutes() > 0){
                 s += " cutoff "+notificationNo.getCuttoffMinutes()+" min";

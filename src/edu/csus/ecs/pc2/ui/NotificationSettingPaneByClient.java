@@ -287,19 +287,19 @@ public class NotificationSettingPaneByClient extends JPanePlugin {
         if (notificationSetting2 != null) {
 
             JudgementNotification judgementNotification = notificationSetting2.getPreliminaryNotificationYes();
-            getYesPrelimCheckBox().setSelected(judgementNotification.isNotificationSent());
+            getYesPrelimCheckBox().setSelected(judgementNotification.isNotificationSupressed());
             getYesPrelimCuttoffMinutesTextField().setText("" + judgementNotification.getCuttoffMinutes());
 
             judgementNotification = notificationSetting2.getPreliminaryNotificationNo();
-            getNoPrelimCheckBox().setSelected(judgementNotification.isNotificationSent());
+            getNoPrelimCheckBox().setSelected(judgementNotification.isNotificationSupressed());
             getNoPrelimCuttoffMinutesTextField().setText("" + judgementNotification.getCuttoffMinutes());
 
             judgementNotification = notificationSetting2.getFinalNotificationYes();
-            getYesFinalCheckBox().setSelected(judgementNotification.isNotificationSent());
+            getYesFinalCheckBox().setSelected(judgementNotification.isNotificationSupressed());
             getYesFinalCuttoffMinutesTextField().setText("" + judgementNotification.getCuttoffMinutes());
 
             judgementNotification = notificationSetting2.getFinalNotificationNo();
-            getNoFinalCheckBox().setSelected(judgementNotification.isNotificationSent());
+            getNoFinalCheckBox().setSelected(judgementNotification.isNotificationSupressed());
             getNoFinalCuttoffMinutesTextField().setText("" + judgementNotification.getCuttoffMinutes());
 
             getAddButton().setVisible(false);
@@ -309,16 +309,16 @@ public class NotificationSettingPaneByClient extends JPanePlugin {
 
             JudgementNotification judgementNotification = new JudgementNotification(false, 0);
 
-            getYesPrelimCheckBox().setSelected(judgementNotification.isNotificationSent());
+            getYesPrelimCheckBox().setSelected(judgementNotification.isNotificationSupressed());
             getYesPrelimCuttoffMinutesTextField().setText("" + judgementNotification.getCuttoffMinutes());
 
-            getNoPrelimCheckBox().setSelected(judgementNotification.isNotificationSent());
+            getNoPrelimCheckBox().setSelected(judgementNotification.isNotificationSupressed());
             getNoPrelimCuttoffMinutesTextField().setText("" + judgementNotification.getCuttoffMinutes());
 
-            getYesFinalCheckBox().setSelected(judgementNotification.isNotificationSent());
+            getYesFinalCheckBox().setSelected(judgementNotification.isNotificationSupressed());
             getYesFinalCuttoffMinutesTextField().setText("" + judgementNotification.getCuttoffMinutes());
 
-            getNoFinalCheckBox().setSelected(judgementNotification.isNotificationSent());
+            getNoFinalCheckBox().setSelected(judgementNotification.isNotificationSupressed());
             getNoFinalCuttoffMinutesTextField().setText("" + judgementNotification.getCuttoffMinutes());
 
             getAddButton().setVisible(true);
@@ -644,16 +644,16 @@ public class NotificationSettingPaneByClient extends JPanePlugin {
         JudgementNotification judgementNotification = null;
 
         judgementNotification = notificationSetting2.getPreliminaryNotificationYes();
-        System.out.println(" Prelim Yes send " + judgementNotification.isNotificationSent() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
+        System.out.println(" Prelim Yes send " + judgementNotification.isNotificationSupressed() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
 
         judgementNotification = notificationSetting2.getPreliminaryNotificationNo();
-        System.out.println(" Prelim No  send " + judgementNotification.isNotificationSent() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
+        System.out.println(" Prelim No  send " + judgementNotification.isNotificationSupressed() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
 
         judgementNotification = notificationSetting2.getFinalNotificationYes();
-        System.out.println(" Final  Yes send " + judgementNotification.isNotificationSent() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
+        System.out.println(" Final  Yes send " + judgementNotification.isNotificationSupressed() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
 
         judgementNotification = notificationSetting2.getFinalNotificationNo();
-        System.out.println(" Final  No  send " + judgementNotification.isNotificationSent() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
+        System.out.println(" Final  No  send " + judgementNotification.isNotificationSupressed() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
     }
 
 //    private int getIntegerValue(String text) {

@@ -5,15 +5,19 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 
+import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.NotificationSetting;
+import edu.csus.ecs.pc2.core.model.Problem;
 
 /**
  * A single set of notification settings.
@@ -42,6 +46,8 @@ public class EditJudgementNotificationPane extends JPanePlugin {
     
     private NotificationSetting notificationSetting = null;  //  @jve:decl-index=0:
 
+    private JLabel titleLabel = null;
+
 
     /**
      * This method initializes
@@ -63,7 +69,9 @@ public class EditJudgementNotificationPane extends JPanePlugin {
         this.add(getTopPane(), BorderLayout.NORTH);
         this.add(getCenterPanel(), BorderLayout.CENTER);
         
-        setNotificationSetting(notificationSetting);
+        if (notificationSetting != null){
+            setNotificationSetting(notificationSetting);
+        }
     }
 
     @Override
@@ -78,8 +86,13 @@ public class EditJudgementNotificationPane extends JPanePlugin {
      */
     private JPanel getTopPane() {
         if (topPane == null) {
+            titleLabel = new JLabel();
+            titleLabel.setText("");
+            titleLabel.setFont(new Font("Dialog", Font.BOLD, 14));
+            titleLabel.setHorizontalAlignment(SwingConstants.LEFT);
             topPane = new JPanel();
-            topPane.setLayout(new GridBagLayout());
+            topPane.setLayout(new BorderLayout());
+            topPane.add(titleLabel, BorderLayout.NORTH);
         }
         return topPane;
     }
@@ -130,6 +143,27 @@ public class EditJudgementNotificationPane extends JPanePlugin {
         return finalNotificationPane;
     }
     
+    
+    
+    @Override
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
+        super.setContestAndController(inContest, inController);
+        
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                updateTitle();
+            }
+        });
+    }
+
+    protected void updateTitle() {
+        
+        Problem problem = getContest().getProblem(notificationSetting.getElementId());
+        if (problem != null){
+            setTitle(problem.getDisplayName());
+        }
+    }
+
     /**
      * Get notification settings from fields (as entered).
      * 
@@ -181,15 +215,23 @@ public class EditJudgementNotificationPane extends JPanePlugin {
 
     protected void populateGUI(NotificationSetting notificationSetting2) {
         
-        getPreliminaryNotificationPane().setJudgementNotifications(notificationSetting2.getPreliminaryNotificationYes(),
-                notificationSetting2.getPreliminaryNotificationNo());
-        
-        getFinalNotificationPane().setJudgementNotifications(notificationSetting2.getFinalNotificationYes(),
-                notificationSetting2.getFinalNotificationNo());
-        
-        // TODO Auto-generated method stub
-        
+            getPreliminaryNotificationPane().setJudgementNotifications(notificationSetting2.getPreliminaryNotificationYes(),
+                    notificationSetting2.getPreliminaryNotificationNo());
+
+            getFinalNotificationPane().setJudgementNotifications(notificationSetting2.getFinalNotificationYes(),
+                    notificationSetting2.getFinalNotificationNo());
     }
 
+    /**
+     * Set title for this set of notification settings.
+     * @param title
+     */
+    public void setTitle(final String title){
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                titleLabel.setText(title);
+            }
+        });
+    }
     
 } // @jve:decl-index=0:visual-constraint="10,10"

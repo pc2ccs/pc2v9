@@ -18,6 +18,7 @@ import edu.csus.ecs.pc2.core.model.NotificationSetting;
 import edu.csus.ecs.pc2.core.model.Problem;
 
 /**
+ * Edit Notifications per Problem.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -153,16 +154,16 @@ public class EditJudgementNotificationFrame extends JFrame implements UIPlugin {
             JudgementNotification judgementNotification = null;
 
             judgementNotification = notificationSetting2.getPreliminaryNotificationYes();
-            System.out.println("          Prelim Yes send " + judgementNotification.isNotificationSent() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
+            System.out.println("          Prelim Yes send " + judgementNotification.isNotificationSupressed() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
 
             judgementNotification = notificationSetting2.getPreliminaryNotificationNo();
-            System.out.println("          Prelim No  send " + judgementNotification.isNotificationSent() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
+            System.out.println("          Prelim No  send " + judgementNotification.isNotificationSupressed() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
 
             judgementNotification = notificationSetting2.getFinalNotificationYes();
-            System.out.println("          Final  Yes send " + judgementNotification.isNotificationSent() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
+            System.out.println("          Final  Yes send " + judgementNotification.isNotificationSupressed() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
 
             judgementNotification = notificationSetting2.getFinalNotificationNo();
-            System.out.println("          Final  No  send " + judgementNotification.isNotificationSent() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
+            System.out.println("          Final  No  send " + judgementNotification.isNotificationSupressed() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
         }
     }
 
@@ -234,14 +235,14 @@ public class EditJudgementNotificationFrame extends JFrame implements UIPlugin {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 EditJudgementNotificationPane editJudgementNotificationPane = new EditJudgementNotificationPane(notificationSetting);
-
+                editJudgementNotificationPane.setContestAndController(contest, null);
                 String tabName = getTabName(problem);
-
                 editJudgementNotificationPane.setName(tabName);
                 getProblemTabbedPane().add(tabName, editJudgementNotificationPane);
             }
         });
     }
+    
 
     protected String getProblemLetter(Problem problem) {
         char let = 'A';
