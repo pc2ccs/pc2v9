@@ -265,11 +265,11 @@ public class EOCNotificationsPane extends JPanePlugin {
 
     protected void editSelectedNotification() {
 
-        int selectedIndex = eocNotificationMCLB.getSelectedIndex();
-        if (selectedIndex == -1) {
-            showMessage("Select a notification to edit");
-            return;
-        }
+//        int selectedIndex = eocNotificationMCLB.getSelectedIndex();
+//        if (selectedIndex == -1) {
+//            showMessage("Select a notification to edit");
+//            return;
+//        }
 
         try {
             // ClientId clientId = (ClientId) eocNotificationMCLB.getKeys()[selectedIndex];
@@ -356,10 +356,12 @@ public class EOCNotificationsPane extends JPanePlugin {
     }
 
     /**
-     * 
+     * EOC notification
      * @author pc2@ecs.csus.edu
-     * 
+     * @version $Id$
      */
+    
+    // $HeadURL$
     private class ProblemListenerImplementation implements IProblemListener {
 
         public void problemAdded(final ProblemEvent event) {
@@ -383,6 +385,4 @@ public class EOCNotificationsPane extends JPanePlugin {
         }
     }
 
-
-   
 } // @jve:decl-index=0:visual-constraint="10,10"

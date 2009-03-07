@@ -35,6 +35,8 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
  * @version $Id$
  */
 
+// TODO cleanup dead code that references ClientId
+
 // $HeadURL$
 public class NotificationsPane extends JPanePlugin {
 
@@ -278,9 +280,8 @@ public class NotificationsPane extends JPanePlugin {
         }
 
         try {
-            ClientId clientId = (ClientId) notificationListBox.getKeys()[selectedIndex];
-            NotificationSetting notificationToEdit = getNotificationSettings(clientId);
-
+//            ClientId clientId = (ClientId) notificationListBox.getKeys()[selectedIndex];
+//            NotificationSetting notificationToEdit = getNotificationSettings(clientId);
 //            if (notificationToEdit == null){
 //                editNotificationSettingFrame.setClientId(clientId);
 //            } else {
@@ -388,9 +389,6 @@ public class NotificationsPane extends JPanePlugin {
         public void accountsModified(AccountEvent accountEvent) {
             reloadListBox();
         }
-
-
     }
-
     
 } // @jve:decl-index=0:visual-constraint="10,10"

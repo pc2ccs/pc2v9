@@ -64,7 +64,9 @@ public class EditJudgementNotificationPane extends JPanePlugin {
      * 
      */
     private void initialize() {
-        this.setLayout(new BorderLayout());
+        BorderLayout borderLayout = new BorderLayout();
+        borderLayout.setHgap(5);
+        this.setLayout(borderLayout);
         this.setSize(new Dimension(441, 164));
         this.add(getTopPane(), BorderLayout.NORTH);
         this.add(getCenterPanel(), BorderLayout.CENTER);
@@ -89,7 +91,7 @@ public class EditJudgementNotificationPane extends JPanePlugin {
             titleLabel = new JLabel();
             titleLabel.setText("");
             titleLabel.setFont(new Font("Dialog", Font.BOLD, 14));
-            titleLabel.setHorizontalAlignment(SwingConstants.LEFT);
+            titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
             topPane = new JPanel();
             topPane.setLayout(new BorderLayout());
             topPane.add(titleLabel, BorderLayout.NORTH);

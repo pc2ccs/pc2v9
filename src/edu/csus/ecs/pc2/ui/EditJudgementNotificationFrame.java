@@ -13,9 +13,11 @@ import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.IProblemListener;
 import edu.csus.ecs.pc2.core.model.JudgementNotification;
 import edu.csus.ecs.pc2.core.model.NotificationSetting;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.ProblemEvent;
 
 /**
  * Edit Notifications per Problem.
@@ -78,6 +80,8 @@ public class EditJudgementNotificationFrame extends JFrame implements UIPlugin {
 
         this.contest = inContest;
         this.controller = inController;
+        
+        contest.addProblemListener(new ProblemListenerImplementation());
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -89,7 +93,7 @@ public class EditJudgementNotificationFrame extends JFrame implements UIPlugin {
 
     protected void populateUI() {
         for (Problem problem : contest.getProblems()) {
-            addProblem(problem);
+            addProblemTab(problem);
         }
     }
 
@@ -202,6 +206,11 @@ public class EditJudgementNotificationFrame extends JFrame implements UIPlugin {
         if (closeButton == null) {
             closeButton = new JButton();
             closeButton.setText("Close");
+            closeButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    System.out.println("actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+                }
+            });
         }
         return closeButton;
     }
@@ -228,7 +237,7 @@ public class EditJudgementNotificationFrame extends JFrame implements UIPlugin {
         return "Problem " + getProblemLetter(problem);
     }
 
-    public void addProblem(final Problem problem) {
+    public void addProblemTab (final Problem problem) {
 
         final NotificationSetting notificationSetting = new NotificationSetting(problem.getElementId());
 
@@ -241,6 +250,18 @@ public class EditJudgementNotificationFrame extends JFrame implements UIPlugin {
                 getProblemTabbedPane().add(tabName, editJudgementNotificationPane);
             }
         });
+    }
+
+    /**
+     * Update Problem title only.
+     * 
+     * @param problem
+     */
+    protected void updateProblemTab(Problem problem) {
+        EditJudgementNotificationPane pane = getPaneForProblem(problem);
+        if (pane != null) {
+            pane.setTitle(problem.getDisplayName());
+        }
     }
     
 
@@ -256,5 +277,37 @@ public class EditJudgementNotificationFrame extends JFrame implements UIPlugin {
         }
         return "" + let;
     }
+    
+    /**
+     * EOC notification
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    
+    // $HeadURL$
+    private class ProblemListenerImplementation implements IProblemListener {
+
+        public void problemAdded(final ProblemEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    addProblemTab(event.getProblem());
+                }
+            });
+        }
+
+        public void problemChanged(final ProblemEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    updateProblemTab (event.getProblem());
+                }
+            });
+        }
+
+        public void problemRemoved(ProblemEvent event) {
+            // TODO code remove problem tab logic.
+            ; 
+        }
+    }
+
 
 } // @jve:decl-index=0:visual-constraint="10,10"
