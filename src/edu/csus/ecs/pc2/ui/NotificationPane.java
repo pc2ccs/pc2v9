@@ -4,17 +4,18 @@ import java.awt.Dimension;
 import java.awt.Rectangle;
 
 import javax.swing.JCheckBox;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
-import edu.csus.ecs.pc2.core.model.NotificationSetting;
+import edu.csus.ecs.pc2.core.model.JudgementNotification;
 
 /**
- * A pane for a NotificationSetting.
+ * A pane for Yes and No for a JudgementNotification.
  * 
- * @see NotificationSetting
+ * @see JudgementNotification
+ * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -31,8 +32,6 @@ public class NotificationPane extends JPanel {
 
     private JLabel minFromEndYesLabel = null;
 
-//    private JLabel jLabel1 = null;
-
     private JLabel minFromEndNoLabel = null;
 
     private JTextField stopNoMinTextField = null;
@@ -40,16 +39,10 @@ public class NotificationPane extends JPanel {
     private JCheckBox stopSendingYesCheckBox = null;
 
     private JCheckBox stopSendingNoCheckBox = null;
-    
-    private NotificationSetting notificationSetting = null;
 
-    public NotificationSetting getNotificationSetting() {
-        return notificationSetting;
-    }
+    private JudgementNotification judgementNotificationYes = new JudgementNotification();
 
-    public void setNotificationSetting(NotificationSetting notificationSetting) {
-        this.notificationSetting = notificationSetting;
-    }
+    private JudgementNotification judgementNotificationNo = new JudgementNotification();
 
     /**
      * This method initializes
@@ -109,9 +102,9 @@ public class NotificationPane extends JPanel {
     }
 
     /**
-     * This method initializes stopSendingYesCheckBox	
-     * 	
-     * @return javax.swing.JCheckBox	
+     * This method initializes stopSendingYesCheckBox
+     * 
+     * @return javax.swing.JCheckBox
      */
     private JCheckBox getStopSendingYesCheckBox() {
         if (stopSendingYesCheckBox == null) {
@@ -124,9 +117,9 @@ public class NotificationPane extends JPanel {
     }
 
     /**
-     * This method initializes stopSendingNoCheckBox	
-     * 	
-     * @return javax.swing.JCheckBox	
+     * This method initializes stopSendingNoCheckBox
+     * 
+     * @return javax.swing.JCheckBox
      */
     private JCheckBox getStopSendingNoCheckBox() {
         if (stopSendingNoCheckBox == null) {
@@ -137,13 +130,62 @@ public class NotificationPane extends JPanel {
         return stopSendingNoCheckBox;
     }
 
-    // TODO put this main into a test.* package
-    public static void main(String[] args) {
-        JFrame frame = new JFrame();
-        frame.setContentPane(new NotificationPane());
-        frame.setSize(500, 500);
-        FrameUtilities.centerFrame(frame);
-        frame.setVisible(true);
+
+    /**
+     * Get the No Notification values.
+     * 
+     * @return
+     */
+    public JudgementNotification getNoJudgementNotificationFromFields() {
+        JudgementNotification newJudgementNotification = new JudgementNotification();
+
+        newJudgementNotification.setCuttoffMinutes(getIntegerValue(getStopNoMinTextField().getText()));
+        newJudgementNotification.setNotificationSent(getStopSendingNoCheckBox().isSelected());
+
+        return newJudgementNotification;
+    }
+    
+    /**
+     * Get the No Notification values.
+     * 
+     * @return
+     */
+    public JudgementNotification getYesJudgementNotificationFromFields() {
+        JudgementNotification newJudgementNotification = new JudgementNotification();
+
+        newJudgementNotification.setCuttoffMinutes(getIntegerValue(getStopYesMinTextField().getText()));
+        newJudgementNotification.setNotificationSent(getStopSendingYesCheckBox().isSelected());
+
+        return newJudgementNotification;
+    }
+
+    public void setJudgementNotifications(JudgementNotification yesJudgementNotification, JudgementNotification noJudgementNotification) {
+        judgementNotificationYes = yesJudgementNotification;
+        judgementNotificationNo = noJudgementNotification;
+
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                getStopYesMinTextField().setText(Integer.toString(judgementNotificationYes.getCuttoffMinutes()));
+                getStopSendingYesCheckBox().setSelected(judgementNotificationYes.isNotificationSent());
+
+                getStopNoMinTextField().setText(Integer.toString(judgementNotificationNo.getCuttoffMinutes()));
+                getStopSendingNoCheckBox().setSelected(judgementNotificationNo.isNotificationSent());
+            }
+        });
+    }
+
+    /**
+     * Return int for input string
+     * 
+     * @param s
+     * @return zero if error, otherwise returns value.
+     */
+    private static int getIntegerValue(String s) {
+        try {
+            return Integer.parseInt(s);
+        } catch (Exception e) {
+            return 0;
+        }
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

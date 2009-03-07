@@ -33,10 +33,10 @@ public class NotificationSetting implements IElementObject {
 
     private ElementId elementId;
 
-    public NotificationSetting(ElementId elementId) {
+    public NotificationSetting(ElementId inElementId) {
         super();
-        elementId = new ElementId("NotifSetting");
-        setSiteNumber(elementId.getSiteNumber());
+        this.elementId = new ElementId("NotifSetting");
+        setSiteNumber(inElementId.getSiteNumber());
     }
 
     public ElementId getElementId() {

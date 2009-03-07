@@ -97,11 +97,13 @@ public class SampleContest {
 
         for (String langName : languages) {
             Language language = new Language(langName);
+            contest.setSiteNumber(siteNumber);
             contest.addLanguage(language);
         }
 
         for (String probName : problems) {
             Problem problem = new Problem(probName);
+            problem.setSiteNumber(siteNumber);
             contest.addProblem(problem);
         }
         
