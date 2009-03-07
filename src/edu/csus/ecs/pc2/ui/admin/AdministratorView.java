@@ -28,6 +28,7 @@ import edu.csus.ecs.pc2.ui.ConnectionsPane;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay;
 import edu.csus.ecs.pc2.ui.ContestInformationPane;
 import edu.csus.ecs.pc2.ui.ContestTimesPane;
+import edu.csus.ecs.pc2.ui.EOCNotificationsPane;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.GroupsPane;
 import edu.csus.ecs.pc2.ui.ICPCPane;
@@ -36,7 +37,6 @@ import edu.csus.ecs.pc2.ui.JudgementsPanel;
 import edu.csus.ecs.pc2.ui.LanguagesPane;
 import edu.csus.ecs.pc2.ui.LogWindow;
 import edu.csus.ecs.pc2.ui.LoginsPane;
-import edu.csus.ecs.pc2.ui.NotificationsPane;
 import edu.csus.ecs.pc2.ui.OptionsPanel;
 import edu.csus.ecs.pc2.ui.ProblemsPane;
 import edu.csus.ecs.pc2.ui.ProfilesPane;
@@ -184,8 +184,8 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 BalloonSettingsPane balloonSettingsPane = new BalloonSettingsPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Notifications", balloonSettingsPane);
 
-                NotificationsPane notificationsPane = new NotificationsPane();
-                addUIPlugin(getConfigureContestTabbedPane(), "EOC Notifications", notificationsPane);
+                EOCNotificationsPane eocNotificationsPane = new EOCNotificationsPane();
+                addUIPlugin(getConfigureContestTabbedPane(), "End of Contest Control", eocNotificationsPane);
 
                 ProblemsPane problemsPane = new ProblemsPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Problems", problemsPane);
