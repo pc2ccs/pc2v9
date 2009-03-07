@@ -281,11 +281,11 @@ public class NotificationsPane extends JPanePlugin {
             ClientId clientId = (ClientId) notificationListBox.getKeys()[selectedIndex];
             NotificationSetting notificationToEdit = getNotificationSettings(clientId);
 
-            if (notificationToEdit == null){
-                editNotificationSettingFrame.setClientId(clientId);
-            } else {
-                editNotificationSettingFrame.setNotificationSetting(notificationToEdit);
-            }
+//            if (notificationToEdit == null){
+//                editNotificationSettingFrame.setClientId(clientId);
+//            } else {
+//                editNotificationSettingFrame.setNotificationSetting(notificationToEdit);
+//            }
             
             editNotificationSettingFrame.setVisible(true);
         } catch (Exception e) {

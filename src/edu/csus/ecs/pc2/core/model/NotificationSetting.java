@@ -26,12 +26,6 @@ public class NotificationSetting implements IElementObject {
 
     private JudgementNotification preliminaryNotificationNo = new JudgementNotification();
     
-    private ClientId clientId = null;
-    
-    public ClientId getClientId() {
-        return clientId;
-    }
-
     /**
      * 
      */
@@ -39,11 +33,10 @@ public class NotificationSetting implements IElementObject {
 
     private ElementId elementId;
 
-    public NotificationSetting(ClientId clientId) {
+    public NotificationSetting(ElementId elementId) {
         super();
-        this.clientId = clientId;
-        elementId = new ElementId("NotifSetting" + clientId.getTripletKey());
-        setSiteNumber(clientId.getSiteNumber());
+        elementId = new ElementId("NotifSetting");
+        setSiteNumber(elementId.getSiteNumber());
     }
 
     public ElementId getElementId() {

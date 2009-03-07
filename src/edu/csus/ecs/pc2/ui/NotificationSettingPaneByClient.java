@@ -26,7 +26,7 @@ import edu.csus.ecs.pc2.core.model.NotificationSetting;
  */
 
 // $HeadURL$
-public class NotificationSettingPane extends JPanePlugin {
+public class NotificationSettingPaneByClient extends JPanePlugin {
 
     /**
      * 
@@ -89,7 +89,7 @@ public class NotificationSettingPane extends JPanePlugin {
      * This method initializes
      * 
      */
-    public NotificationSettingPane() {
+    public NotificationSettingPaneByClient() {
         super();
         initialize();
     }
@@ -259,9 +259,9 @@ public class NotificationSettingPane extends JPanePlugin {
 
         this.notificationSetting = notificationSetting;
         this.clientId = null;
-        if (notificationSetting != null){
-            this.clientId = notificationSetting.getClientId();
-        }
+//        if (notificationSetting != null){
+//            this.clientId = notificationSetting.getClientId();
+//        }
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -614,23 +614,26 @@ public class NotificationSettingPane extends JPanePlugin {
 
     private NotificationSetting getNotificationSettingsFromFields() {
 
-        NotificationSetting checkNotificationSetting =new NotificationSetting(clientId);
-
-        JudgementNotification judgementNotification = null;
-
-        judgementNotification = new JudgementNotification(getYesPrelimCheckBox().isSelected(), getIntegerValue(getYesPrelimCuttoffMinutesTextField().getText()));
-        checkNotificationSetting.setPreliminaryNotificationYes(judgementNotification);
-
-        judgementNotification = new JudgementNotification(getNoPrelimCheckBox().isSelected(), getIntegerValue(getNoPrelimCuttoffMinutesTextField().getText()));
-        checkNotificationSetting.setPreliminaryNotificationNo(judgementNotification);
-
-        judgementNotification = new JudgementNotification(getYesFinalCheckBox().isSelected(), getIntegerValue(getYesFinalCuttoffMinutesTextField().getText()));
-        checkNotificationSetting.setFinalNotificationYes(judgementNotification);
-
-        judgementNotification = new JudgementNotification(getNoFinalCheckBox().isSelected(), getIntegerValue(getNoFinalCuttoffMinutesTextField().getText()));
-        checkNotificationSetting.setFinalNotificationNo(judgementNotification);
-
-        return checkNotificationSetting;
+//        NotificationSetting checkNotificationSetting =new NotificationSetting(clientId);
+//
+//        JudgementNotification judgementNotification = null;
+//
+//        judgementNotification = new JudgementNotification(getYesPrelimCheckBox().isSelected(), getIntegerValue(getYesPrelimCuttoffMinutesTextField().getText()));
+//        checkNotificationSetting.setPreliminaryNotificationYes(judgementNotification);
+//
+//        judgementNotification = new JudgementNotification(getNoPrelimCheckBox().isSelected(), getIntegerValue(getNoPrelimCuttoffMinutesTextField().getText()));
+//        checkNotificationSetting.setPreliminaryNotificationNo(judgementNotification);
+//
+//        judgementNotification = new JudgementNotification(getYesFinalCheckBox().isSelected(), getIntegerValue(getYesFinalCuttoffMinutesTextField().getText()));
+//        checkNotificationSetting.setFinalNotificationYes(judgementNotification);
+//
+//        judgementNotification = new JudgementNotification(getNoFinalCheckBox().isSelected(), getIntegerValue(getNoFinalCuttoffMinutesTextField().getText()));
+//        checkNotificationSetting.setFinalNotificationNo(judgementNotification);
+//
+//        return checkNotificationSetting;
+        
+        // TODO code this.
+        return null;
     }
 
     @SuppressWarnings("unused")
@@ -653,13 +656,13 @@ public class NotificationSettingPane extends JPanePlugin {
         System.out.println(" Final  No  send " + judgementNotification.isNotificationSent() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
     }
 
-    private int getIntegerValue(String text) {
-        try {
-            return Integer.parseInt(text);
-        } catch (Exception e) {
-            return 0;
-        }
-    }
+//    private int getIntegerValue(String text) {
+//        try {
+//            return Integer.parseInt(text);
+//        } catch (Exception e) {
+//            return 0;
+//        }
+//    }
 
     public ClientId getClientId() {
         return clientId;
