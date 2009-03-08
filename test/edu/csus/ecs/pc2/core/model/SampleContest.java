@@ -130,8 +130,6 @@ public class SampleContest {
             ClientId serverId = new ClientId(siteNumber, Type.SERVER, 0);
             contest.setClientId(serverId);
         }
-        
-        
 
         return contest;
     }
@@ -278,5 +276,9 @@ public class SampleContest {
             RunFiles runFiles = new RunFiles(run, filename);
             contest.acceptRun(run, runFiles);
         }
+    }
+
+    public Judgement getYesJudgement(IInternalContest contest) {
+        return contest.getJudgements()[0];
     }
 }
