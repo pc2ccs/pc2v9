@@ -67,13 +67,13 @@ public final class RunUtilities {
                 // prelim Yes
                 if (notificationSetting.getPreliminaryNotificationYes().isNotificationSupressed()){
                     
-                    return runRemainingTime < notificationSetting.getPreliminaryNotificationYes().getCuttoffMinutes();
+                    return runRemainingTime <= notificationSetting.getPreliminaryNotificationYes().getCuttoffMinutes();
                     
                 } // else - fall through
             } else {
                 if (notificationSetting.getPreliminaryNotificationNo().isNotificationSupressed()){
                     
-                    return runRemainingTime < notificationSetting.getPreliminaryNotificationNo().getCuttoffMinutes();
+                    return runRemainingTime <= notificationSetting.getPreliminaryNotificationNo().getCuttoffMinutes();
                     
                 } // else - fall through
             }
@@ -84,13 +84,13 @@ public final class RunUtilities {
                 // prelim Yes
                 if (notificationSetting.getFinalNotificationYes().isNotificationSupressed()){
                     
-                    return runRemainingTime < notificationSetting.getFinalNotificationYes().getCuttoffMinutes();
+                    return runRemainingTime <= notificationSetting.getFinalNotificationYes().getCuttoffMinutes();
                     
                 } // else - fall through
             } else {
                 if (notificationSetting.getFinalNotificationNo().isNotificationSupressed()){
                     
-                    return runRemainingTime < notificationSetting.getFinalNotificationNo().getCuttoffMinutes();
+                    return runRemainingTime <= notificationSetting.getFinalNotificationNo().getCuttoffMinutes();
                     
                 } // else - fall through
             }

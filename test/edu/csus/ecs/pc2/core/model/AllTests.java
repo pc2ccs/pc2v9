@@ -31,6 +31,7 @@ public final class AllTests {
         suite.addTestSuite(AccountListTest.class);
         suite.addTestSuite(DisplayTeamNameTest.class);
         suite.addTestSuite(ProblemTest.class);
+        suite.addTestSuite(RunUtilitiesTest.class);
         //$JUnit-END$
         return suite;
     }
