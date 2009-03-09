@@ -47,6 +47,7 @@ import edu.csus.ecs.pc2.core.report.ListRunLanguages;
 import edu.csus.ecs.pc2.core.report.LoginReport;
 import edu.csus.ecs.pc2.core.report.OldRunsReport;
 import edu.csus.ecs.pc2.core.report.ProblemsReport;
+import edu.csus.ecs.pc2.core.report.RunJudgementNotificationsReport;
 import edu.csus.ecs.pc2.core.report.RunsByTeamReport;
 import edu.csus.ecs.pc2.core.report.RunsReport;
 import edu.csus.ecs.pc2.core.report.RunsReport5;
@@ -178,7 +179,10 @@ public class ReportPane extends JPanePlugin {
         reports.add(new AccountPermissionReport());
         reports.add(new BalloonDeliveryReport());
         reports.add(new ExtractPlaybackLoadFilesReport());
+        
+        reports.add(new RunJudgementNotificationsReport());
         reports.add(new JudgementNotificationsReport());
+        
         reports.add(new InternalDumpReport());
 
         listOfReports = (IReport[]) reports.toArray(new IReport[reports.size()]);
