@@ -205,7 +205,7 @@ public class EditJudgementNotificationFrame extends JFrame implements UIPlugin {
                 if (pane != null) {
                     NotificationSetting notificationSetting = pane.getNotificationSettingFromFields();
                     judgementNotificationsList.update(notificationSetting);
-                    dumpNotification(problem.getDisplayName(), notificationSetting);
+//                    dumpNotification(problem.getDisplayName(), notificationSetting);
                 }
             }
 

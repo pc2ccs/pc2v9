@@ -144,10 +144,10 @@ public class EditFilterFrame extends JFrame implements UIPlugin {
 
     protected void updateFilter(Filter filter2) {
 
-        System.out.println("debug updateFilter " + filter2);
-        System.out.flush();
-
-        dumpFilter(filter2);
+//        System.out.println("debug updateFilter " + filter2);
+//        System.out.flush();
+//
+//        dumpFilter(filter2);
 
         if (refreshCallback != null) {
             refreshCallback.run();

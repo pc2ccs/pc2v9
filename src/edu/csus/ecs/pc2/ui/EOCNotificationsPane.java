@@ -206,13 +206,13 @@ public class EOCNotificationsPane extends JPanePlugin {
         String s = "";
 
         if (notificationYes.isNotificationSupressed()) {
-            s = "Send Yes";
+            s = "Yes";
             if (notificationYes.getCuttoffMinutes() > 0) {
                 s += " cutoff " + notificationYes.getCuttoffMinutes() + " min";
             }
         }
         if (notificationNo.isNotificationSupressed()) {
-            s += " Send No";
+            s += " No";
             if (notificationNo.getCuttoffMinutes() > 0) {
                 s += " cutoff " + notificationNo.getCuttoffMinutes() + " min";
             }
