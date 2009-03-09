@@ -74,16 +74,16 @@ public class JudgementNotificationsReport implements IReport {
             JudgementNotification judgementNotification = null;
 
             judgementNotification = notificationSetting.getPreliminaryNotificationYes();
-            printWriter.println("          Prelim Yes send " + judgementNotification.isNotificationSupressed() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
+            printWriter.println("          Prelim Yes suppress " + judgementNotification.isNotificationSupressed() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
 
             judgementNotification = notificationSetting.getPreliminaryNotificationNo();
-            printWriter.println("          Prelim No  send " + judgementNotification.isNotificationSupressed() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
+            printWriter.println("          Prelim No  suppress " + judgementNotification.isNotificationSupressed() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
 
             judgementNotification = notificationSetting.getFinalNotificationYes();
-            printWriter.println("          Final  Yes send " + judgementNotification.isNotificationSupressed() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
+            printWriter.println("          Final  Yes suppress " + judgementNotification.isNotificationSupressed() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
 
             judgementNotification = notificationSetting.getFinalNotificationNo();
-            printWriter.println("          Final  No  send " + judgementNotification.isNotificationSupressed() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
+            printWriter.println("          Final  No  suppress " + judgementNotification.isNotificationSupressed() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
         }
     }
 

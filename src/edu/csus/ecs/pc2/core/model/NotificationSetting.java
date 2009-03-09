@@ -35,6 +35,9 @@ public class NotificationSetting implements IElementObject {
 
     public NotificationSetting(ElementId inElementId) {
         super();
+        if (inElementId == null){
+            throw new IllegalArgumentException("elementId parameter is null");
+        }
         this.elementId = inElementId;
     }
 

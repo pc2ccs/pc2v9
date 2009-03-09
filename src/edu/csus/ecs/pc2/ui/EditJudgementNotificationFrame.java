@@ -171,16 +171,16 @@ public class EditJudgementNotificationFrame extends JFrame implements UIPlugin {
             JudgementNotification judgementNotification = null;
 
             judgementNotification = notificationSetting2.getPreliminaryNotificationYes();
-            System.out.println("          Prelim Yes send " + judgementNotification.isNotificationSupressed() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
+            System.out.println("          Prelim Yes suppress " + judgementNotification.isNotificationSupressed() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
 
             judgementNotification = notificationSetting2.getPreliminaryNotificationNo();
-            System.out.println("          Prelim No  send " + judgementNotification.isNotificationSupressed() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
+            System.out.println("          Prelim No  suppress " + judgementNotification.isNotificationSupressed() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
 
             judgementNotification = notificationSetting2.getFinalNotificationYes();
-            System.out.println("          Final  Yes send " + judgementNotification.isNotificationSupressed() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
+            System.out.println("          Final  Yes suppress " + judgementNotification.isNotificationSupressed() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
 
             judgementNotification = notificationSetting2.getFinalNotificationNo();
-            System.out.println("          Final  No  send " + judgementNotification.isNotificationSupressed() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
+            System.out.println("          Final  No  suppress " + judgementNotification.isNotificationSupressed() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
         }
     }
 
@@ -222,8 +222,7 @@ public class EditJudgementNotificationFrame extends JFrame implements UIPlugin {
 
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception updating/saving notifications", e);
-            
-            
+            JOptionPane.showMessageDialog(this, "Internal Exception, check log. "+e.getMessage());
             
             e.printStackTrace(); // TODO debug take this line out
         }
@@ -334,6 +333,9 @@ public class EditJudgementNotificationFrame extends JFrame implements UIPlugin {
             } else {
 
                 NotificationSetting notificationSetting = getNotificationSetting(problem);
+                if (notificationSetting == null){
+                    notificationSetting = new NotificationSetting(problem.getElementId());
+                }
                 pane.setNotificationSetting(notificationSetting);
             }
         }

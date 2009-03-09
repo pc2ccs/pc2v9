@@ -11,6 +11,7 @@ import edu.csus.ecs.pc2.core.exception.ContestSecurityException;
 import edu.csus.ecs.pc2.core.exception.RunUnavailableException;
 import edu.csus.ecs.pc2.core.exception.UnableToUncheckoutRunException;
 import edu.csus.ecs.pc2.core.list.ClientIdComparator;
+import edu.csus.ecs.pc2.core.list.JudgementNotificationsList;
 import edu.csus.ecs.pc2.core.log.EvaluationLog;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
@@ -37,6 +38,7 @@ import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunExecutionStatus;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
+import edu.csus.ecs.pc2.core.model.RunUtilities;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.packet.PacketFactory;
@@ -1069,11 +1071,15 @@ public class PacketHandler {
                 Run theRun = contest.getRun(run.getElementId());
                 Packet runUpdatedPacket = PacketFactory.createRunUpdateNotification(contest.getClientId(), PacketFactory.ALL_SERVERS, theRun, whoChangedRun);
                 sendToJudgesAndOthers(runUpdatedPacket, true);
+                
+                /**
+                 * Send Judgement Notification to Team or not.
+                 */
 
                 if (theRun.isJudged() && theRun.getJudgementRecord().isSendToTeam()) {
-                    // Send to team who sent it, send to other server if needed.
+                    
                     Packet notifyPacket = PacketFactory.clonePacket(contest.getClientId(), run.getSubmitter(), runUpdatedPacket);
-                    controller.sendToClient(notifyPacket);
+                    sendJudgementToTeam (notifyPacket, theRun);
                 }
 
             } else {
@@ -1891,7 +1897,8 @@ public class PacketHandler {
                                 rrf = null;
                             }
                             Packet judgementPacket = PacketFactory.createRunJudgement(contest.getClientId(), run.getSubmitter(), theRun, judgementRecord, rrf);
-                            controller.sendToClient(judgementPacket);
+                            
+                            sendJudgementToTeam (judgementPacket, theRun);
                         }
                     } else {
 
@@ -1901,7 +1908,7 @@ public class PacketHandler {
                             rrf = null;
                         }
                         Packet judgementPacket = PacketFactory.createRunJudgement(contest.getClientId(), run.getSubmitter(), theRun, judgementRecord, rrf);
-                        controller.sendToClient(judgementPacket);
+                        sendJudgementToTeam (judgementPacket, theRun);
                     }
                 } else {
 
@@ -1911,8 +1918,7 @@ public class PacketHandler {
                         rrf = null;
                     }
                     Packet judgementPacket = PacketFactory.createRunJudgement(contest.getClientId(), run.getSubmitter(), theRun, judgementRecord, rrf);
-
-                    controller.sendToClient(judgementPacket);
+                    sendJudgementToTeam (judgementPacket, theRun);
                 }
 
                 Packet judgementUpdatePacket = PacketFactory.createRunJudgmentUpdate(contest.getClientId(), PacketFactory.ALL_SERVERS, theRun, whoJudgedId);
@@ -1921,6 +1927,27 @@ public class PacketHandler {
 
         } else {
             contest.updateRun(run, judgementRecord.getJudgerClientId());
+        }
+    }
+
+    /**
+     * Send Judgement to team
+     * @param judgementPacket
+     * @param run
+     */
+    private void sendJudgementToTeam(Packet judgementPacket, Run run) {
+        
+        if (run.isJudged() && run.getJudgementRecord().isSendToTeam()) {
+            JudgementNotificationsList judgementNotificationsList = contest.getContestInformation().getJudgementNotificationsList();
+            
+            if (! RunUtilities.supppressJudgement(judgementNotificationsList, run, contest.getContestTime())){
+                // Send to team who sent it, send to other server if needed.
+                controller.sendToClient(judgementPacket);
+            } else {
+                controller.getLog().info("Notification not sent to "+run.getSubmitter()+" for run "+run);
+            }
+        } else {
+            controller.getLog().warning("Attempted to send back unjudged run to team "+run);
         }
     }
 
