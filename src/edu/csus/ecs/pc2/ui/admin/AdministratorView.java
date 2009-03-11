@@ -180,6 +180,9 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
                 LanguagesPane languagesPane = new LanguagesPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Languages", languagesPane);
+                
+                ReportPane reportPaneC = new ReportPane();
+                addUIPlugin(getConfigureContestTabbedPane(), "Reports", reportPaneC);
 
                 BalloonSettingsPane balloonSettingsPane = new BalloonSettingsPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Notifications", balloonSettingsPane);
