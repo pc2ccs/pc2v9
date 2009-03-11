@@ -16,12 +16,15 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.list.JudgementNotificationsList;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
+import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IProblemListener;
 import edu.csus.ecs.pc2.core.model.JudgementNotification;
 import edu.csus.ecs.pc2.core.model.NotificationSetting;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemEvent;
+import javax.swing.JLabel;
+import javax.swing.SwingConstants;
 
 /**
  * Edit Judgement Notifications for all problems.
@@ -56,9 +59,11 @@ public class EditJudgementNotificationFrame extends JFrame implements UIPlugin {
 
     private IInternalController controller;
 
-    private IInternalContest contest;
+    private IInternalContest contest;  //  @jve:decl-index=0:
 
     private Log log = null;
+
+    private JLabel remainingTimeLabel = null;
 
     /**
      * This method initializes
@@ -106,6 +111,8 @@ public class EditJudgementNotificationFrame extends JFrame implements UIPlugin {
         for (Problem problem : contest.getProblems()) {
             addProblemTab(problem);
         }
+        
+        updateRemainingTime();
     }
 
     /**
@@ -130,12 +137,27 @@ public class EditJudgementNotificationFrame extends JFrame implements UIPlugin {
      */
     private JPanel getButtonPane() {
         if (buttonPane == null) {
+            remainingTimeLabel = new JLabel();
+            remainingTimeLabel.setText("XXX min remaining in contest");
+            remainingTimeLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+            remainingTimeLabel.setPreferredSize(new Dimension(200, 20));
+            remainingTimeLabel.addMouseListener(new java.awt.event.MouseAdapter() {
+                public void mouseClicked(java.awt.event.MouseEvent e) {
+                    if (e.getClickCount() > 1) {
+                        updateRemainingTime();
+                    }
+                }
+            });
             FlowLayout flowLayout = new FlowLayout();
             flowLayout.setHgap(55);
+            flowLayout.setAlignment(FlowLayout.LEFT);
             buttonPane = new JPanel();
+            buttonPane.setPreferredSize(new Dimension(540, 36));
             buttonPane.setLayout(flowLayout);
+            buttonPane.add(remainingTimeLabel, null);
             buttonPane.add(getUpdateButton(), null);
             buttonPane.add(getCloseButton(), null);
+       
         }
         return buttonPane;
     }
@@ -235,6 +257,12 @@ public class EditJudgementNotificationFrame extends JFrame implements UIPlugin {
     private JTabbedPane getProblemTabbedPane() {
         if (problemTabbedPane == null) {
             problemTabbedPane = new JTabbedPane();
+            problemTabbedPane.addChangeListener(new javax.swing.event.ChangeListener() {
+                public void stateChanged(javax.swing.event.ChangeEvent e) {
+                   updateRemainingTime();
+                }
+            });
+       
         }
         return problemTabbedPane;
     }
@@ -258,6 +286,8 @@ public class EditJudgementNotificationFrame extends JFrame implements UIPlugin {
     }
 
     protected void handleCancelButton() {
+        
+        updateRemainingTime();
 
         if (getUpdateButton().isEnabled()) {
 
@@ -382,6 +412,13 @@ public class EditJudgementNotificationFrame extends JFrame implements UIPlugin {
             count++;
         }
         return "" + let;
+    }
+    
+    protected void updateRemainingTime() {
+        ContestTime contestTime = contest.getContestTime();
+        long minLeft = contestTime.getRemainingSecs() / 60;
+        remainingTimeLabel.setText(minLeft + " mins from end of contest");
+        remainingTimeLabel.setToolTipText(contestTime.getElapsedTimeStr() + " mins from end of contest");
     }
 
     /**
