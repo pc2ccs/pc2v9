@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.ui;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.Rectangle;
+import java.awt.event.KeyEvent;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -20,12 +21,11 @@ import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
 import edu.csus.ecs.pc2.core.model.IContestInformationListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.ContestInformation.TeamDisplayMask;
-import java.awt.event.KeyEvent;
 
 /**
  * Contest Information edit/update Pane.
  * 
- * Update contest title.
+ * Update contest information.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -75,6 +75,8 @@ public class ContestInformationPane extends JPanePlugin {
     private JCheckBox jCheckBoxShowPreliminaryOnNotifications = null;
 
     private JCheckBox additionalRunStatusCheckBox = null;
+    
+    private ContestInformation savedContestInformation = null;  //  @jve:decl-index=0:
 
     /**
      * This method initializes
@@ -185,6 +187,7 @@ public class ContestInformationPane extends JPanePlugin {
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
 
+        savedContestInformation = getContest().getContestInformation();
         populateGUI();
 
         getContest().addContestInformationListener(new ContestInformationListenerImplementation());
@@ -216,6 +219,11 @@ public class ContestInformationPane extends JPanePlugin {
         contestInformation.setPreliminaryJudgementsTriggerNotifications(getJCheckBoxShowPreliminaryOnNotifications().isSelected());
         contestInformation.setPreliminaryJudgementsUsedByBoard(getJCheckBoxShowPreliminaryOnBoard().isSelected());
         contestInformation.setSendAdditionalRunStatusInformation(getAdditionalRunStatusCheckBox().isSelected());
+        
+        if (savedContestInformation != null){
+            contestInformation.setJudgementNotificationsList(savedContestInformation.getJudgementNotificationsList());
+        }
+        
         return(contestInformation);
     }
     
@@ -265,11 +273,12 @@ public class ContestInformationPane extends JPanePlugin {
 
         public void contestInformationAdded(ContestInformationEvent event) {
             populateGUI();
-
+            savedContestInformation = event.getContestInformation();
         }
 
         public void contestInformationChanged(ContestInformationEvent event) {
             populateGUI();
+            savedContestInformation = event.getContestInformation();
 
         }
 
@@ -572,14 +581,14 @@ public class ContestInformationPane extends JPanePlugin {
         }
         return additionalRunStatusCheckBox;
     }
+    
+    public ContestInformation getContestInformation() {
+        return savedContestInformation;
+    }
 
-    // private ButtonGroup getTeamReadsFrombuttonGroup() {
-    // if (teamReadsFrombuttonGroup == null) {
-    // teamReadsFrombuttonGroup = new ButtonGroup();
-    // teamReadsFrombuttonGroup.add(getStdinRadioButton());
-    // teamReadsFrombuttonGroup.add(getFileRadioButton());
-    // }
-    // return teamReadsFrombuttonGroup;
-    // }
+    public void setContestInformation(ContestInformation contestInformation) {
+        this.savedContestInformation = contestInformation;
+    }
+
 
 } // @jve:decl-index=0:visual-constraint="10,10"
