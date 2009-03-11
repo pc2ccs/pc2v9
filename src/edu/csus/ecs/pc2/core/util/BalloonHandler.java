@@ -116,7 +116,10 @@ public class BalloonHandler implements UIPlugin {
             Run run = runs[i];
             Problem problem = getContest().getProblem(run.getProblemId());
             if (!run.isDeleted() && run.isJudged() && run.isSolved() && !v.contains(problem)) {
-                v.add(problem);
+                if (!run.getJudgementRecord().isPreliminaryJudgement() 
+                        || (run.getJudgementRecord().isPreliminaryJudgement() && sendNotificationsForPreliminary)) { 
+                                v.add(problem);
+                }
             }
         }
         // now put them in the right order
