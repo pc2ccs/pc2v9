@@ -81,12 +81,10 @@ public class EditJudgementNotificationFrame extends JFrame implements UIPlugin {
         FrameUtilities.centerFrame(this);
     }
 
-    @Override
     public String getPluginTitle() {
         return "Edit Judgement Notifications Frame";
     }
 
-    @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
 
         this.contest = inContest;
