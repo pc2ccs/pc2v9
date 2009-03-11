@@ -1,12 +1,15 @@
 package edu.csus.ecs.pc2.ui;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.awt.event.KeyEvent;
+import java.io.File;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -38,9 +41,9 @@ public class LoginFrame extends JFrame implements UIPlugin {
      * 
      */
     private static final long serialVersionUID = -6389607881992853161L;
-    
+
     private IInternalContest contest;
-    
+
     private IInternalController controller;
 
     private JPanel centerPane = null;
@@ -66,7 +69,21 @@ public class LoginFrame extends JFrame implements UIPlugin {
     private JLabel mainTitleBottomLabel = null;
 
     private LogWindow logWindow = null;
-    
+
+    private JPanel mainPanel;
+
+    private JPanel westPanel;
+
+    private JLabel logoCSUS = null;
+
+    private JPanel bottomPanel = null;
+
+    private JLabel logoICPC = null;
+
+    private JPanel northPanel = null;
+
+    private JLabel spacerLabel = null;
+
     /**
      * This method initializes
      * 
@@ -83,10 +100,14 @@ public class LoginFrame extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(429, 365));
+        this.setSize(new java.awt.Dimension(628,430));
+        this.setPreferredSize(new java.awt.Dimension(628,430));
+        this.setMinimumSize(new java.awt.Dimension(628,430));
+        this.setBackground(new java.awt.Color(253, 255, 255));
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setTitle("PC^2 Login");
-        this.setContentPane(getPasswordTitleLabel());
+        this.setContentPane(getMainPanel());
+
         this.addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent e) {
                 System.exit(0);
@@ -97,23 +118,51 @@ public class LoginFrame extends JFrame implements UIPlugin {
                 promptBeforeExit();
             }
         });
-        
+
         VersionInfo versionInfo = new VersionInfo();
-        versionTitleLabel.setText("PC^2 version "+versionInfo.getVersionNumber()+" "+versionInfo.getBuildNumber());
- 
+        versionTitleLabel.setText("PC^2 version " + versionInfo.getVersionNumber() + " " + versionInfo.getBuildNumber());
     }
-    
-    private void overRideLookAndFeel(){
-        // TODO eventually move this method to on location 
+
+    private void overRideLookAndFeel() {
+        // TODO eventually move this method to on location
         String value = IniFile.getValue("client.plaf");
-        if (value != null && value.equalsIgnoreCase("java")){
+        if (value != null && value.equalsIgnoreCase("java")) {
             FrameUtilities.setJavaLookAndFeel();
         }
-        if (value != null && value.equalsIgnoreCase("native")){
+        if (value != null && value.equalsIgnoreCase("native")) {
             FrameUtilities.setNativeLookAndFeel();
         }
     }
 
+    private JPanel getMainPanel() {
+        if (mainPanel == null) {
+            mainPanel = new JPanel();
+            mainPanel.setLayout(new BorderLayout());
+
+            mainPanel.add(getPasswordTitleLabel(), java.awt.BorderLayout.CENTER);
+            mainPanel.add(getWestPanel(), java.awt.BorderLayout.WEST);
+            mainPanel.add(getBottomPanel(), java.awt.BorderLayout.SOUTH);
+            mainPanel.add(getNorthPanel(), java.awt.BorderLayout.NORTH);
+        }
+
+        return mainPanel;
+    }
+
+    private JPanel getWestPanel() {
+        if (westPanel == null) {
+            FlowLayout flowLayout = new FlowLayout();
+            flowLayout.setVgap(30);
+            flowLayout.setHgap(5);
+            westPanel = new JPanel();
+            westPanel.setLayout(flowLayout);
+            westPanel.setMinimumSize(new java.awt.Dimension(130, 132));
+            westPanel.setPreferredSize(new java.awt.Dimension(140, 132));
+            westPanel.setBackground(java.awt.Color.white);
+            westPanel.add(getLogoCSUS(), null);
+        }
+
+        return westPanel;
+    }
 
     /**
      * This method initializes jPanel
@@ -122,103 +171,64 @@ public class LoginFrame extends JFrame implements UIPlugin {
      */
     private JPanel getPasswordTitleLabel() {
         if (centerPane == null) {
-            GridBagConstraints gridBagConstraints11 = new GridBagConstraints();
-            gridBagConstraints11.insets = new java.awt.Insets(1, 21, 3, 24);
-            gridBagConstraints11.gridx = 0;
-            gridBagConstraints11.gridy = 1;
-            gridBagConstraints11.ipadx = 167;
-            gridBagConstraints11.ipady = 6;
-            gridBagConstraints11.gridwidth = 2;
-            GridBagConstraints gridBagConstraints10 = new GridBagConstraints();
-            gridBagConstraints10.insets = new java.awt.Insets(4, 5, 2, 5);
-            gridBagConstraints10.gridx = 0;
-            gridBagConstraints10.gridy = 7;
-            gridBagConstraints10.ipadx = 411;
-            gridBagConstraints10.ipady = 26;
-            gridBagConstraints10.gridwidth = 2;
-            GridBagConstraints gridBagConstraints9 = new GridBagConstraints();
-            gridBagConstraints9.insets = new java.awt.Insets(14, 29, 3, 91);
-            gridBagConstraints9.gridy = 6;
-            gridBagConstraints9.ipadx = 18;
-            gridBagConstraints9.gridx = 1;
-            GridBagConstraints gridBagConstraints8 = new GridBagConstraints();
-            gridBagConstraints8.insets = new java.awt.Insets(14, 80, 3, 53);
-            gridBagConstraints8.gridy = 6;
-            gridBagConstraints8.ipadx = 30;
-            gridBagConstraints8.gridx = 0;
             GridBagConstraints gridBagConstraints7 = new GridBagConstraints();
-            gridBagConstraints7.insets = new java.awt.Insets(7, 80, 6, 28);
-            gridBagConstraints7.gridy = 4;
-            gridBagConstraints7.ipadx = 62;
+            gridBagConstraints7.insets = new java.awt.Insets(3,66,2,54);
             gridBagConstraints7.gridx = 0;
+            gridBagConstraints7.gridy = 5;
+            gridBagConstraints7.ipadx = 360;
+            gridBagConstraints7.ipady = 26;
+            gridBagConstraints7.gridwidth = 2;
+            GridBagConstraints gridBagConstraints6 = new GridBagConstraints();
+            gridBagConstraints6.insets = new java.awt.Insets(7,52,3,130);
+            gridBagConstraints6.gridy = 4;
+            gridBagConstraints6.ipadx = 40;
+            gridBagConstraints6.gridx = 1;
             GridBagConstraints gridBagConstraints5 = new GridBagConstraints();
-            gridBagConstraints5.insets = new java.awt.Insets(15, 21, 1, 24);
+            gridBagConstraints5.insets = new java.awt.Insets(7,32,3,76);
+            gridBagConstraints5.gridy = 4;
+            gridBagConstraints5.ipadx = 30;
             gridBagConstraints5.gridx = 0;
-            gridBagConstraints5.gridy = 0;
-            gridBagConstraints5.ipadx = 202;
-            gridBagConstraints5.ipady = 6;
-            gridBagConstraints5.gridwidth = 2;
+            GridBagConstraints gridBagConstraints4 = new GridBagConstraints();
+            gridBagConstraints4.insets = new java.awt.Insets(12,32,1,51);
+            gridBagConstraints4.gridy = 2;
+            gridBagConstraints4.ipadx = 62;
+            gridBagConstraints4.gridx = 0;
             GridBagConstraints gridBagConstraints3 = new GridBagConstraints();
-            gridBagConstraints3.insets = new java.awt.Insets(2, 5, 39, 11);
+            gridBagConstraints3.insets = new java.awt.Insets(2,99,11,75);
             gridBagConstraints3.gridx = 0;
-            gridBagConstraints3.gridy = 8;
-            gridBagConstraints3.ipadx = 257;
+            gridBagConstraints3.gridy = 6;
+            gridBagConstraints3.ipadx = 158;
+            gridBagConstraints3.ipady = 7;
             gridBagConstraints3.gridwidth = 2;
             GridBagConstraints gridBagConstraints2 = new GridBagConstraints();
-            gridBagConstraints2.insets = new java.awt.Insets(4, 80, 5, 28);
-            gridBagConstraints2.gridy = 2;
-            gridBagConstraints2.ipadx = 75;
+            gridBagConstraints2.insets = new java.awt.Insets(23,32,0,87);
+            gridBagConstraints2.gridy = 0;
+            gridBagConstraints2.ipadx = 39;
+            gridBagConstraints2.ipady = -1;
             gridBagConstraints2.gridx = 0;
             GridBagConstraints gridBagConstraints1 = new GridBagConstraints();
             gridBagConstraints1.fill = java.awt.GridBagConstraints.HORIZONTAL;
             gridBagConstraints1.gridwidth = 2;
             gridBagConstraints1.gridx = 0;
-            gridBagConstraints1.gridy = 3;
-            gridBagConstraints1.ipadx = 244;
+            gridBagConstraints1.gridy = 1;
+            gridBagConstraints1.ipadx = 362;
             gridBagConstraints1.weightx = 1.0;
-            gridBagConstraints1.insets = new java.awt.Insets(6, 80, 6, 93);
+            gridBagConstraints1.insets = new java.awt.Insets(1,32,12,82);
             GridBagConstraints gridBagConstraints = new GridBagConstraints();
             gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
             gridBagConstraints.gridwidth = 2;
             gridBagConstraints.gridx = 0;
-            gridBagConstraints.gridy = 5;
-            gridBagConstraints.ipadx = 246;
+            gridBagConstraints.gridy = 3;
+            gridBagConstraints.ipadx = 364;
             gridBagConstraints.weightx = 1.0;
-            gridBagConstraints.insets = new java.awt.Insets(7, 80, 13, 91);
-            mainTitleBottomLabel = new JLabel();
-            mainTitleBottomLabel.setHorizontalAlignment(SwingConstants.CENTER);
-            mainTitleBottomLabel.setHorizontalTextPosition(SwingConstants.CENTER);
-            mainTitleBottomLabel.setText("Contest Control System");
-            mainTitleBottomLabel.setFont(new Font("Dialog", Font.BOLD, 18));
+            gridBagConstraints.insets = new java.awt.Insets(1,32,7,80);
             messageLabel = new JLabel();
             messageLabel.setForeground(Color.red);
             messageLabel.setText("");
             messageLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 14));
             messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
-            GridBagConstraints gridBagConstraints6 = new GridBagConstraints();
-            gridBagConstraints6.insets = new Insets(0, 24, 5, 20);
-            gridBagConstraints6.gridx = 0;
-            gridBagConstraints6.gridy = 1;
-            gridBagConstraints6.ipadx = 168;
-            gridBagConstraints6.ipady = 9;
-            gridBagConstraints6.gridwidth = 2;
-            mainTitleTopLabel = new JLabel();
-            mainTitleTopLabel.setFont(new Font("Dialog", Font.BOLD, 18));
-            mainTitleTopLabel.setText("Contest Control System");
-            mainTitleTopLabel.setHorizontalAlignment(SwingConstants.CENTER);
             passwordTitleLabel = new JLabel();
             passwordTitleLabel.setText("Password");
-            GridBagConstraints gridBagConstraints4 = new GridBagConstraints();
-            gridBagConstraints4.insets = new Insets(20, 22, 0, 23);
-            gridBagConstraints4.gridx = 0;
-            gridBagConstraints4.gridy = 0;
-            gridBagConstraints4.ipadx = 202;
-            gridBagConstraints4.ipady = 6;
-            gridBagConstraints4.gridwidth = 2;
-            mainTitleTopLabel.setFont(new Font("Dialog", Font.BOLD, 18));
-            mainTitleTopLabel.setHorizontalTextPosition(SwingConstants.CENTER);
-            mainTitleTopLabel.setText("CSUS Programming");
-            mainTitleTopLabel.setHorizontalAlignment(SwingConstants.CENTER);
             versionTitleLabel = new JLabel();
             versionTitleLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             versionTitleLabel.setText("Version XX. XX YYYY vv 22");
@@ -227,17 +237,15 @@ public class LoginFrame extends JFrame implements UIPlugin {
             nameTitleLabel.setPreferredSize(new java.awt.Dimension(45, 16));
             centerPane = new JPanel();
             centerPane.setLayout(new GridBagLayout());
+            centerPane.setBackground(java.awt.Color.white);
             centerPane.add(getPasswordTextField(), gridBagConstraints);
             centerPane.add(getLoginTextField(), gridBagConstraints1);
             centerPane.add(nameTitleLabel, gridBagConstraints2);
             centerPane.add(versionTitleLabel, gridBagConstraints3);
-            centerPane.add(mainTitleTopLabel, gridBagConstraints5);
-            centerPane.add(passwordTitleLabel, gridBagConstraints7);
-            centerPane.add(getLoginButton(), gridBagConstraints8);
-            centerPane.add(getExitButton(), gridBagConstraints9);
-            centerPane.add(messageLabel, gridBagConstraints10);
-            centerPane.add(mainTitleBottomLabel, gridBagConstraints11);
-            centerPane.add(mainTitleBottomLabel, gridBagConstraints6);
+            centerPane.add(passwordTitleLabel, gridBagConstraints4);
+            centerPane.add(getLoginButton(), gridBagConstraints5);
+            centerPane.add(getExitButton(), gridBagConstraints6);
+            centerPane.add(messageLabel, gridBagConstraints7);
         }
         return centerPane;
     }
@@ -250,7 +258,7 @@ public class LoginFrame extends JFrame implements UIPlugin {
     private JPasswordField getPasswordTextField() {
         if (passwordTextField == null) {
             passwordTextField = new JPasswordField();
-            
+
             passwordTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyPressed(java.awt.event.KeyEvent e) {
                     if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
@@ -270,7 +278,7 @@ public class LoginFrame extends JFrame implements UIPlugin {
     private JTextField getLoginTextField() {
         if (loginTextField == null) {
             loginTextField = new JTextField();
-            
+
             loginTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyPressed(java.awt.event.KeyEvent e) {
                     if (e.getKeyCode() == KeyEvent.VK_ENTER) {
@@ -311,23 +319,23 @@ public class LoginFrame extends JFrame implements UIPlugin {
         if (getLoginName() == null || getLoginName().length() < 1) {
             setStatusMessage("Please enter a login");
         } else {
-            
-            if (getLoginName().toLowerCase().startsWith("log")){
+
+            if (getLoginName().toLowerCase().startsWith("log")) {
                 logWindow.setVisible(true);
                 return;
             }
-            
+
             try {
                 setStatusMessage("Logging in...");
                 FrameUtilities.waitCursor(this);
-                controller.login (getLoginName(), getPassword());
-                
+                controller.login(getLoginName(), getPassword());
+
             } catch (Exception e) {
                 // TODO: log handle exception
                 setStatusMessage(e.getMessage());
-                StaticLog.info("Login not successful: "+e.getMessage());
-                System.err.println("Login not successful: "+e.getMessage());
-                
+                StaticLog.info("Login not successful: " + e.getMessage());
+                System.err.println("Login not successful: " + e.getMessage());
+
             }
         }
     }
@@ -361,6 +369,83 @@ public class LoginFrame extends JFrame implements UIPlugin {
         }
     }
 
+    /**
+     * This method initializes logoCSUS
+     * 
+     * @return javax.swing.JLabel
+     */
+    private JLabel getLogoCSUS() {
+        if (logoCSUS == null) {
+            logoCSUS = new JLabel();
+
+            ImageIcon image = loadImageIconFromFile("images/csus_logo.png");
+            logoCSUS.setIcon(image);
+            logoCSUS.setBounds(new java.awt.Rectangle(-11, 48, 137, 127));
+        }
+        return logoCSUS;
+    }
+
+    private ImageIcon loadImageIconFromFile(String inFileName) {
+        File imgFile = new File(inFileName);
+        ImageIcon icon = null;
+        if (imgFile.exists()) {
+            icon = new ImageIcon(imgFile.getAbsolutePath());
+        } else {
+            // get it from the jar (hopefully)
+            icon = new ImageIcon(getClass().getResource("/"+inFileName));
+        }
+        
+        return icon;
+    }
+
+    /**
+     * This method initializes bottomPanel
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getBottomPanel() {
+        if (bottomPanel == null) {
+            logoICPC = new JLabel();
+
+            ImageIcon image = loadImageIconFromFile("images/icpc_banner.png");
+            logoICPC.setIcon(image);
+            bottomPanel = new JPanel();
+            bottomPanel.setBackground(java.awt.Color.white);
+            bottomPanel.add(logoICPC, null);
+        }
+        return bottomPanel;
+    }
+
+    /**
+     * This method initializes northPanel
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getNorthPanel() {
+        if (northPanel == null) {
+            spacerLabel = new JLabel();
+            spacerLabel.setText(" ");
+            northPanel = new JPanel();
+            northPanel.setLayout(new BorderLayout());
+            northPanel.setBackground(java.awt.Color.white);
+            mainTitleBottomLabel = new JLabel();
+            mainTitleBottomLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            mainTitleBottomLabel.setHorizontalTextPosition(SwingConstants.CENTER);
+            mainTitleBottomLabel.setText("Programming Contest Control System");
+            mainTitleBottomLabel.setBackground(java.awt.Color.white);
+            mainTitleBottomLabel.setFont(new java.awt.Font("Dialog", Font.BOLD, 26));
+            mainTitleTopLabel = new JLabel();
+            mainTitleTopLabel.setFont(new Font("Dialog", Font.BOLD, 22));
+            mainTitleTopLabel.setText("California State University, Sacramento");
+            mainTitleTopLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            northPanel.add(mainTitleTopLabel, java.awt.BorderLayout.CENTER);
+            northPanel.add(mainTitleBottomLabel, java.awt.BorderLayout.SOUTH);
+            northPanel.add(spacerLabel, java.awt.BorderLayout.NORTH);
+
+        }
+        return northPanel;
+    }
+
     public static void main(String[] args) {
         new LoginFrame().setVisible(true);
     }
@@ -376,7 +461,7 @@ public class LoginFrame extends JFrame implements UIPlugin {
         Runnable messageRunnable = new Runnable() {
             public void run() {
                 messageLabel.setText(messageString);
-       
+
             }
         };
         SwingUtilities.invokeLater(messageRunnable);
@@ -400,23 +485,23 @@ public class LoginFrame extends JFrame implements UIPlugin {
     private String getPassword() {
         return new String(passwordTextField.getPassword());
     }
-    
-    
+
     /**
-     * A login listener 
+     * A login listener
+     * 
      * @author pc2@ecs.csus.edu
-     *
+     * 
      */
     public class LoginListenerImplementation implements ILoginListener {
 
         public void loginAdded(LoginEvent event) {
             // TODO log this.
-//            System.err.println("Login " + event.getAction() + " " + event.getClientId());
+            // System.err.println("Login " + event.getAction() + " " + event.getClientId());
         }
 
         public void loginRemoved(LoginEvent event) {
             // TODO log this.
-//            System.err.println("Login " + event.getAction() + " " + event.getClientId());
+            // System.err.println("Login " + event.getAction() + " " + event.getClientId());
         }
 
         public void loginDenied(LoginEvent event) {
@@ -431,17 +516,17 @@ public class LoginFrame extends JFrame implements UIPlugin {
         // start populating the mclb
         logWindow = new LogWindow();
         logWindow.setContestAndController(contest, controller);
-        
+
         contest.addLoginListener(new LoginListenerImplementation());
-        
+
         setVisible(true);
     }
 
     public String getPluginTitle() {
         return "Login";
     }
-    
-    public void disableLoginButton(){
+
+    public void disableLoginButton() {
         getLoginButton().setEnabled(false);
     }
 

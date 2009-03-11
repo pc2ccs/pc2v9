@@ -109,6 +109,10 @@ dal
 		</tstamp>
 		<property name="build.number" value="${millisecond}" />
 
+		<!-- include the images in the jar -->
+		<copy file="images/csus_logo.png" todir="${build.prod.dir}/images"/>
+		<copy file="images/icpc_banner.png" todir="${build.prod.dir}/images"/>
+
 		<!-- consider doing the manifest in a separate target
              then the Version can be ommitted if not set -->
 		<jar jarfile="${jar.path}" basedir="${build.prod.dir}">
