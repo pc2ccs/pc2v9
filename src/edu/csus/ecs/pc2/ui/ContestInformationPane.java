@@ -20,6 +20,7 @@ import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
 import edu.csus.ecs.pc2.core.model.IContestInformationListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.ContestInformation.TeamDisplayMask;
+import java.awt.event.KeyEvent;
 
 /**
  * Contest Information edit/update Pane.
@@ -517,8 +518,9 @@ public class ContestInformationPane extends JPanePlugin {
     private JCheckBox getJCheckBoxShowPreliminaryOnBoard() {
         if (jCheckBoxShowPreliminaryOnBoard == null) {
             jCheckBoxShowPreliminaryOnBoard = new JCheckBox();
-            jCheckBoxShowPreliminaryOnBoard.setBounds(new Rectangle(75, 208, 416, 21));
-            jCheckBoxShowPreliminaryOnBoard.setHorizontalAlignment(SwingConstants.TRAILING);
+            jCheckBoxShowPreliminaryOnBoard.setBounds(new Rectangle(60, 208, 427, 21));
+            jCheckBoxShowPreliminaryOnBoard.setHorizontalAlignment(SwingConstants.LEFT);
+            jCheckBoxShowPreliminaryOnBoard.setMnemonic(KeyEvent.VK_UNDEFINED);
             jCheckBoxShowPreliminaryOnBoard.setText("Include Preliminary Judgements in Scoring Algorithm");
             jCheckBoxShowPreliminaryOnBoard.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -538,8 +540,9 @@ public class ContestInformationPane extends JPanePlugin {
         if (jCheckBoxShowPreliminaryOnNotifications == null) {
             jCheckBoxShowPreliminaryOnNotifications = new JCheckBox();
             jCheckBoxShowPreliminaryOnNotifications.setBounds(new Rectangle(60, 238, 427, 21));
-            jCheckBoxShowPreliminaryOnNotifications.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-            jCheckBoxShowPreliminaryOnNotifications.setText("Send Notifications for Preliminary Judgements");
+            jCheckBoxShowPreliminaryOnNotifications.setHorizontalAlignment(SwingConstants.LEFT);
+            jCheckBoxShowPreliminaryOnNotifications.setMnemonic(KeyEvent.VK_UNDEFINED);
+            jCheckBoxShowPreliminaryOnNotifications.setText("Send Balloon Notifications for Preliminary Judgements");
             jCheckBoxShowPreliminaryOnNotifications.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableUpdateButton();
@@ -557,7 +560,7 @@ public class ContestInformationPane extends JPanePlugin {
     private JCheckBox getAdditionalRunStatusCheckBox() {
         if (additionalRunStatusCheckBox == null) {
             additionalRunStatusCheckBox = new JCheckBox();
-            additionalRunStatusCheckBox.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+            additionalRunStatusCheckBox.setHorizontalAlignment(SwingConstants.LEFT);
             additionalRunStatusCheckBox.setSize(new java.awt.Dimension(427,21));
             additionalRunStatusCheckBox.setLocation(new java.awt.Point(60,268));
             additionalRunStatusCheckBox.setText("Send Additional Run Status Information");
