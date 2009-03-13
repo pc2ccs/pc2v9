@@ -1,6 +1,9 @@
 package edu.csus.ecs.pc2.api;
 
+import java.util.Arrays;
 import java.util.Date;
+
+import edu.csus.ecs.pc2.core.security.Permission;
 
 /**
  * API Test - print rows.
@@ -22,8 +25,11 @@ public class QuickTest {
             password = login;
         }
         
+//        Utilities.setDebugMode(true);
+        
         ServerConnection serverConnection = new ServerConnection();
         try {
+            
             IContest contest = serverConnection.login(login, password);
 
             IRun[] runs = contest.getRuns();
@@ -32,10 +38,14 @@ public class QuickTest {
                 info("No runs to view ");
             } else {
                 info(runs.length+" runs.");
+                
+                Arrays.sort(runs, new IRunComparator());
+                
+                info("(If you do not see 'fetched run' - client "+login+" may not have permission "+Permission.Type.ALLOWED_TO_FETCH_RUN+")");
                 for (IRun run : runs) {
-                    info(" Fetching files for run " + run.getNumber()+" deleted="+run.isDeleted());
+                    info("Fetching files for run " + run.getNumber()+" deleted="+run.isDeleted());
                     String[] names = run.getSourceCodeFileNames();
-                    info(" fetched run, submitted names");
+                    info("  fetched run, submitted names");
                     byte[][] contents = run.getSourceCodeFileContents();
                     for (int i = 0; i < names.length; i++) {
                         String name = names[i];

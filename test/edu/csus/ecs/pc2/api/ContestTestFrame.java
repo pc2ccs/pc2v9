@@ -37,6 +37,7 @@ import edu.csus.ecs.pc2.api.listener.IConnectionEventListener;
 import edu.csus.ecs.pc2.api.listener.IRunEventListener;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.IntegerDocument;
+import java.awt.Rectangle;
 
 /**
  * API 'contest' Test Frame.
@@ -138,6 +139,11 @@ public class ContestTestFrame extends JFrame {
     private JLabel clarificationsOnSite = null;
 
     private JCheckBox connectionListenerCheckBox = null;
+
+    private JButton viewRunGrid = null;
+    
+    private RunsFrame runsFrame = null;
+
 
     /**
      * This method initializes
@@ -406,6 +412,7 @@ public class ContestTestFrame extends JFrame {
             centerPane.add(getGetClarificationButton(), null);
             centerPane.add(clarificationsOnSite, null);
             centerPane.add(getConnectionListenerCheckBox(), null);
+            centerPane.add(getViewRunGrid(), null);
         }
         return centerPane;
     }
@@ -500,13 +507,14 @@ public class ContestTestFrame extends JFrame {
         }
 
         try {
-            info("Logging in at " + login);
+            info("Logging in as " + login);
             long startSecs = new Date().getTime();
             contest = serverConnection.login(login, password);
             long totalMs = new Date().getTime() - startSecs;
             info("Logged in at " + login + " took " + totalMs + "ms (" + (totalMs / 1000) + " seconds)");
             setTitle("Contest " + contest.getMyClient().getLoginName() + " " + contest.getSiteName());
             getLoginButton().setEnabled(false);
+            setTitle("Info for " + contest.getMyClient().getLoginName() + " " + contest.getSiteName());
             scrollyFrame.setVisible(true);
 
             VersionInfo versionInfo = new VersionInfo();
@@ -630,6 +638,7 @@ public class ContestTestFrame extends JFrame {
         }
 
         scrollyFrame.setVisible(false);
+        runsFrame.setVisible(false);
 
         serverConnection.logoff();
         contest = null;
@@ -1321,6 +1330,44 @@ public class ContestTestFrame extends JFrame {
         }
         return connectionListenerCheckBox;
     }
+
+    /**
+     * This method initializes viewRunGrid	
+     * 	
+     * @return javax.swing.JButton	
+     */
+    private JButton getViewRunGrid() {
+        if (viewRunGrid == null) {
+            viewRunGrid = new JButton();
+            viewRunGrid.setBounds(new Rectangle(42, 61, 185, 29));
+            viewRunGrid.setText("View Runs Grid");
+            viewRunGrid.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    showRunsGridFrame();
+                }
+            });
+        }
+        return viewRunGrid;
+    }
+
+    protected void showRunsGridFrame() {
+        
+        if (contest == null) {
+            showMessage("Not logged in", "Can not display runs grid");
+            return;
+        }
+        
+        getRunsFrame().setVisible(true);
+        
+    }
+    
+    public RunsFrame getRunsFrame() {
+        if (runsFrame == null){
+            runsFrame = new RunsFrame(contest);
+        }
+        return runsFrame;
+    }
+
 
     public static void main(String[] args) {
         new ContestTestFrame().setVisible(true);

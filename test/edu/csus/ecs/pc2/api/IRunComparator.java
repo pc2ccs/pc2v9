@@ -12,6 +12,8 @@ import java.util.Comparator;
 
 // $HeadURL$
 public class IRunComparator implements Comparator<IRun>, Serializable {
+    
+    // TODO Move from test.* into src.* API directory
 
     /**
      * 
