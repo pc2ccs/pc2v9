@@ -367,7 +367,8 @@ public class EditJudgementNotificationFrame extends JFrame implements UIPlugin {
                 pane.setNotificationSetting(notificationSetting);
             }
         }
-
+        
+        updateRemainingTime();
     }
 
     /**
@@ -418,7 +419,7 @@ public class EditJudgementNotificationFrame extends JFrame implements UIPlugin {
         ContestTime contestTime = contest.getContestTime();
         long minLeft = contestTime.getRemainingSecs() / 60;
         remainingTimeLabel.setText(minLeft + " mins from end of contest");
-        remainingTimeLabel.setToolTipText(contestTime.getElapsedTimeStr() + " mins from end of contest");
+        remainingTimeLabel.setToolTipText(contestTime.getElapsedTimeStr() + " elapsed minutes");
     }
 
     /**
