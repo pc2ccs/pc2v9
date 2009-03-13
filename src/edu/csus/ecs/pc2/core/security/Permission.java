@@ -6,12 +6,9 @@ import java.util.Hashtable;
 /**
  * User permissions.
  * 
- * Permission.Type is a enumeration of all the permissions that
- * a client can have.
- * 
  * @see PermissionList
+ * @version $Id$
  * @author pc2@ecs.csus.edu
- * 
  */
 
 // $HeadURL$
@@ -27,7 +24,7 @@ public class Permission implements Serializable {
      * 
      * @see PermissionList
      * @author pc2@ecs.csus.edu
-     * 
+     * @version $Id$
      */
     public enum Type {
         /**
@@ -213,11 +210,15 @@ public class Permission implements Serializable {
         /**
          * 
          */
-        VIEW_SECURITY_ALERTS, 
+        VIEW_SECURITY_ALERTS,
         /**
          * 
          */
         ALLOWED_TO_FETCH_RUN,
+        /**
+         * Use the End of Contest Control settings.
+         */
+        RESPECT_EOC_SUPPRESSION,
     };
 
     private Hashtable<Type, String> hash = new Hashtable<Type, String>();
@@ -282,12 +283,13 @@ public class Permission implements Serializable {
         
         hash.put(Type.EDIT_CONTEST_CLOCK, "Edit Contest Clock/Times");
         hash.put(Type.ALLOWED_TO_RECONNECT_SERVER, "Allowed to reconnect to server");
-        
+
         hash.put(Type.ALLOWED_TO_AUTO_JUDGE, "Allowed to auto judge");
 
         hash.put(Type.VIEW_SECURITY_ALERTS, "View Security Alerts Log/View");
-        
+
         hash.put(Type.ALLOWED_TO_FETCH_RUN, "Allowed to fetch run (not checkout)");
+        hash.put(Type.RESPECT_EOC_SUPPRESSION, "Apply End of Contest Controls");
     }
 
     /**

@@ -17,6 +17,7 @@ import com.ibm.webrunner.j2mclb.util.NumericStringComparator;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.PermissionGroup;
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.list.JudgementNotificationsList;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -43,6 +44,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemEvent;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunEvent;
+import edu.csus.ecs.pc2.core.model.RunUtilities;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.report.ExtractRuns;
@@ -146,6 +148,11 @@ public class RunsPanel extends JPanePlugin {
     private String filterFrameTitle = "Run filter";
     
     private ExtractRuns extractRuns = null;
+
+    private boolean teamClient = true;
+    
+    private JudgementNotificationsList judgementNotificationsList = null;
+    
 
     /**
      * This method initializes
@@ -343,6 +350,16 @@ public class RunsPanel extends JPanePlugin {
                     }
                 }
             }
+            
+            /**
+             * 
+             */
+            
+            if (teamClient || isAllowed(Permission.Type.RESPECT_EOC_SUPPRESSION)){
+                if (RunUtilities.supppressJudgement(judgementNotificationsList, run, getContest().getContestTime())){
+                    result = RunStates.NEW.toString();
+                }
+            }
 
         } else {
             if (showJudgesInfo) {
@@ -351,10 +368,12 @@ public class RunsPanel extends JPanePlugin {
                 result = RunStates.NEW.toString();
             }
         }
-
+        
         if (run.isDeleted()) {
             result = "DEL " + result;
         }
+        
+        
         return result;
     }
 
@@ -732,9 +751,11 @@ public class RunsPanel extends JPanePlugin {
     public void reloadRunList() {
 
         Run[] runs = getContest().getRuns();
+        
+        ContestInformation contestInformation = getContest().getContestInformation();
+        judgementNotificationsList = contestInformation.getJudgementNotificationsList();
 
         if (isJudge()) {
-            ContestInformation contestInformation = getContest().getContestInformation();
             displayTeamName.setTeamDisplayMask(contestInformation.getTeamDisplayMode());
         }
 
@@ -852,6 +873,11 @@ public class RunsPanel extends JPanePlugin {
 
         displayTeamName = new DisplayTeamName();
         displayTeamName.setContestAndController(inContest, inController);
+        
+        teamClient = isTeam(inContest.getClientId());
+        
+        ContestInformation contestInformation = getContest().getContestInformation();
+        judgementNotificationsList = contestInformation.getJudgementNotificationsList();
 
         initializePermissions();
         
