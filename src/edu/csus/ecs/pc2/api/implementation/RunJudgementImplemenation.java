@@ -6,11 +6,12 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
-import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 
 /**
  * Implementation for IRunJudgement.
+ * 
+ * A single judgement.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -26,52 +27,25 @@ public class RunJudgementImplemenation implements IRunJudgement {
     @SuppressWarnings("unused")
     private IInternalController controller = null;
     
-    /**
-     * Is a preliminary judgement, by default set false.
-     * 
-     * In the constructor it will be determined whether to set
-     * preliminary to true or not.
-     * 
-     */
-    private boolean preliminaryJudgement = false;
-    
     public RunJudgementImplemenation(JudgementRecord record, Run run, IInternalContest internalContest, IInternalController controller) {
         super();
         this.record = record;
         this.internalContest = internalContest;
         this.controller = controller;
-        
-        setPreliminaryJudgement (run);
-    }
-
-    /**
-     * Set/establish whether this judgement is a preliminary judgement or not.
-     * 
-     * Determine whether this judgement record is a preliminary or final judgement.
-     * 
-     * @param run
-     */
-    private void setPreliminaryJudgement(Run run) {
-
-        Problem problem = internalContest.getProblem(run.getProblemId());
-        if (problem.isManualReview() && problem.isComputerJudged()) {
-            /**
-             * Only preliminary possible is if is manual review AND computer judged.
-             */
-
-            JudgementRecord[] records = run.getAllJudgementRecords();
-            if (records != null) {
-                /**
-                 * If there are judgements, only the first (computer judged) will be a preliminary judged run.
-                 */
-                preliminaryJudgement = records[0].getElementId().equals(record.getElementId());
-            }
-        }
-        // else - not possible at this time to be anything else but final judgement
-
     }
 
     public IJudgement getJudgement() {
+
+        // TODO Handle when judgement text should be from validator results
+        
+//        String validatorJudgementName = judgementRecord.getValidatorResultString();
+//        if (judgementRecord.isUsedValidator() && validatorJudgementName != null) {
+//            if (validatorJudgementName.trim().length() == 0) {
+//                validatorJudgementName = "undetermined";
+//            }
+//            judgementText = validatorJudgementName;
+//        }
+        
         Judgement judgement = internalContest.getJudgement(record.getJudgementId());
         return new JudgementImplementation(judgement);
     }
@@ -89,7 +63,7 @@ public class RunJudgementImplemenation implements IRunJudgement {
     }
 
     public boolean isPreliminaryJudgement() {
-        return preliminaryJudgement;
+        return record.isPreliminaryJudgement();
     }
 
     public boolean isSolved() {

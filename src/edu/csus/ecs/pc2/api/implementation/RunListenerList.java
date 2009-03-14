@@ -8,7 +8,6 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
-import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 
@@ -94,22 +93,17 @@ public class RunListenerList {
     /**
      * Is this run in the final judgement cycle?.
      * 
-     * @param run - run to check
+     * @param run
+     *            - run to check
      * @return true if in the final judgement cycle, false if in the preliminary judging cycle.
      */
     private boolean isFinalJudgementCycle(Run run) {
-        
-        Problem theProblem = contest.getProblem(run.getProblemId());
-        if (theProblem.isManualReview() && theProblem.isComputerJudged()) {
-            /**
-             * Only preliminary possible is if is manual review AND computer judged.
-             */
-
-            JudgementRecord[] records = run.getAllJudgementRecords();
-            return records.length > 1;
-        } // else - there is no possibility of a preliminary run so in final judgement cycle
-        
-        return true;
+        JudgementRecord record = run.getJudgementRecord();
+        if (record != null) {
+            return !record.isPreliminaryJudgement();
+        } else {
+            return false;
+        }
     }
 
     public void addRunListener(IRunEventListener runEventListener) {

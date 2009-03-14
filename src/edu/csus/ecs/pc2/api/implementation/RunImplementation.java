@@ -1,20 +1,29 @@
 package edu.csus.ecs.pc2.api.implementation;
 
+import java.util.Vector;
+
 import edu.csus.ecs.pc2.api.ILanguage;
 import edu.csus.ecs.pc2.api.IProblem;
 import edu.csus.ecs.pc2.api.IRun;
 import edu.csus.ecs.pc2.api.IRunJudgement;
 import edu.csus.ecs.pc2.api.ITeam;
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.PermissionGroup;
+import edu.csus.ecs.pc2.core.list.JudgementNotificationsList;
+import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
+import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
-import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.RunFiles;
+import edu.csus.ecs.pc2.core.model.RunUtilities;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
+import edu.csus.ecs.pc2.core.security.Permission;
+import edu.csus.ecs.pc2.core.security.PermissionList;
 
 /**
  * Implementation for IRun.
@@ -25,8 +34,6 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
 
 // $HeadURL$
 public class RunImplementation implements IRun {
-
-//    private boolean judged;
 
     private boolean solved;
 
@@ -70,36 +77,13 @@ public class RunImplementation implements IRun {
 
     private boolean finalJudged = false;
 
-    /**
-     * 
-     * @param run
-     * @param internalContest
-     */
-    public RunImplementation(edu.csus.ecs.pc2.core.model.Run run, IInternalContest internalContest, IInternalController controller) {
+    public RunImplementation(Run run, IInternalContest internalContest, IInternalController controller) {
 
         this.controller = controller;
         this.internalContest = internalContest;
-        solved = run.isSolved();
-        deleted = run.isDeleted();
-
-        JudgementRecord judgementRecord = run.getJudgementRecord();
-        if (judgementRecord != null) {
-            String judgementText = internalContest.getJudgement(judgementRecord.getJudgementId()).toString();
-            String validatorJudgementName = judgementRecord.getValidatorResultString();
-            if (judgementRecord.isUsedValidator() && validatorJudgementName != null) {
-                if (validatorJudgementName.trim().length() == 0) {
-                    validatorJudgementName = "undetermined";
-                }
-                judgementText = validatorJudgementName;
-            }
-            judgementTitle = judgementText;
-        }
-        
         this.run = run;
         
-        if (run.isJudged()){
-            setPreliminaryJudgement();
-        }
+        deleted = run.isDeleted();
 
         submitterTeam = new TeamImplementation(run.getSubmitter(), internalContest);
 
@@ -114,38 +98,36 @@ public class RunImplementation implements IRun {
         elapsedMins = run.getElapsedMins();
 
         elementId = run.getElementId();
+        
+        IRunJudgement [] judgements = getRunJudgements();
+        
+        if (judgements.length > 0) {
+            IRunJudgement lastRunJudgement = judgements[judgements.length - 1];
+            solved = lastRunJudgement.isSolved();
+            preliminaryJudged = lastRunJudgement.isPreliminaryJudgement();
+            finalJudged = !preliminaryJudged;
+            judgementTitle = getJudgementTitle(run);
+        }
     }
     
-    /**
-     * Set/establish whether this judgement is a preliminary judgement or not.
-     * 
-     * Determine whether this judgement record is a preliminary or final judgement.
-     * 
-     */
-    private void setPreliminaryJudgement() {
+    private String getJudgementTitle(Run run2) {
 
-        Problem theProblem = internalContest.getProblem(run.getProblemId());
-        if (theProblem.isManualReview() && theProblem.isComputerJudged()) {
-            /**
-             * Only preliminary possible is if is manual review AND computer judged.
-             */
-
-            JudgementRecord[] records = run.getAllJudgementRecords();
-            if (records != null) {
-                /**
-                 * If there are judgements, only the first (computer judged) will be a preliminary judged run.
-                 */
-                JudgementRecord record = run.getJudgementRecord();
-                preliminaryJudged = records[0].getElementId().equals(record.getElementId());
+        JudgementRecord judgementRecord = run2.getJudgementRecord();
+        if (judgementRecord != null) {
+            String judgementText = internalContest.getJudgement(judgementRecord.getJudgementId()).toString();
+            String validatorJudgementName = judgementRecord.getValidatorResultString();
+            if (judgementRecord.isUsedValidator() && validatorJudgementName != null) {
+                if (validatorJudgementName.trim().length() == 0) {
+                    validatorJudgementName = "undetermined";
+                }
+                judgementText = validatorJudgementName;
             }
-            finalJudged = ! preliminaryJudged;
-        } else if (run.getAllJudgementRecords().length > 0) {
-            // has judgements
-            finalJudged = true;
+            return judgementText;
         }
-        // else - the run is not judged.
-    }
 
+        return "";
+    }
+ 
     public boolean isSolved() {
         return solved;
     }
@@ -331,22 +313,51 @@ public class RunImplementation implements IRun {
             // run not removed, ignored
         }
     }
+    
+    /**
+     * Is this client allowed to do the permission.
+     *  
+     * @param type
+     * @return true of allowed, false otherwise.
+     */
+    protected boolean isAllowed(Permission.Type type) {
+        PermissionList permissionList = new PermissionList();
+        
+        Account account = internalContest.getAccount(internalContest.getClientId());
+        if (account != null) {
+            permissionList.clearAndLoadPermissions(account.getPermissionList());
+        } else {
+            // Set default conditions
+            permissionList.clearAndLoadPermissions(new PermissionGroup().getPermissionList(internalContest.getClientId().getClientType()));
+        }
+        return permissionList.isAllowed(type);
+    }
 
     public IRunJudgement[] getRunJudgements() {
+        
+        Vector<RunJudgementImplemenation> vector = new Vector<RunJudgementImplemenation>();
         if (run != null && run.isJudged()) {
             JudgementRecord[] records = run.getAllJudgementRecords();
-            RunJudgementImplemenation[] implemenations = new RunJudgementImplemenation[records.length];
-
+            
+            ContestInformation contestInformation = internalContest.getContestInformation();
+            JudgementNotificationsList judgementNotificationsList = contestInformation.getJudgementNotificationsList();
+            ContestTime contestTime = internalContest.getContestTime();
+            
+            boolean respectEOCSetting = isAllowed(Permission.Type.RESPECT_EOC_SUPPRESSION);
+            
             for (int i = 0; i < records.length; i++) {
-                implemenations[i] = new RunJudgementImplemenation(records[i], run, internalContest, controller);
+                if (!respectEOCSetting) {
+                    vector.addElement(new RunJudgementImplemenation(records[i], run, internalContest, controller));
+                } else {
+                    if (!RunUtilities.supppressJudgement(judgementNotificationsList, run, contestTime)) {
+                        vector.addElement(new RunJudgementImplemenation(records[i], run, internalContest, controller));
+                    }
+                }
             }
-            return implemenations;
-
-        } else {
-            return new RunJudgementImplemenation[0];
         }
+        
+        return (RunJudgementImplemenation[]) vector.toArray(new RunJudgementImplemenation[vector.size()]);
     }
-    
 
     public boolean isFinalJudged() {
         return finalJudged;
