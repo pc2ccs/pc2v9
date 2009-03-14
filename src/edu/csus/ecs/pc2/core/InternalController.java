@@ -718,10 +718,24 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             info("Contacting server at " + remoteHostName + ":" + remoteHostPort + " as " + clientId);
             sendLoginRequest(connectionManager, clientId, loginName, password);
 
-            // Busy loop
+            /**
+             * Current time in MS
+             */
+            long curTimeMS = new Date().getTime();
+            
+            /**
+             * End time in MS
+             */
+            long endTimeMS = curTimeMS + 10000; // Wait for 10 seconds   
 
             while (temporaryClientUI.getContest() == null) {
                 Thread.sleep(500);
+                
+                curTimeMS = new Date().getTime();
+                if (curTimeMS > endTimeMS){
+                    info("Login failed - timed out, server at " + remoteHostName + ":" + remoteHostPort + " as " + clientId);
+                    throw new SecurityException("Login failed - timed out");
+                }
             }
 
             return temporaryClientUI.getContest();
