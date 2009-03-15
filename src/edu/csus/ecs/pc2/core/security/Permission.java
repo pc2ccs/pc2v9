@@ -3,6 +3,8 @@ package edu.csus.ecs.pc2.core.security;
 import java.io.Serializable;
 import java.util.Hashtable;
 
+import edu.csus.ecs.pc2.core.model.JudgementRecord;
+
 /**
  * User permissions.
  * 
@@ -219,6 +221,13 @@ public class Permission implements Serializable {
          * Use the End of Contest Control settings.
          */
         RESPECT_EOC_SUPPRESSION,
+        /**
+         * The board/API scoring respects the judge's send notify to team.
+         * 
+         *  The SA (Scoring Algorithm) needs to respect the 
+         *  {@link JudgementRecord#isSendToTeam()} setting.
+         */
+        RESPECT_NOTIFY_TEAM_SETTING,
     };
 
     private Hashtable<Type, String> hash = new Hashtable<Type, String>();
@@ -290,6 +299,8 @@ public class Permission implements Serializable {
 
         hash.put(Type.ALLOWED_TO_FETCH_RUN, "Allowed to fetch run (not checkout)");
         hash.put(Type.RESPECT_EOC_SUPPRESSION, "Apply End of Contest Controls");
+        
+        hash.put(Type.RESPECT_NOTIFY_TEAM_SETTING, "Apply Notify Team Setting to Board/SA");
     }
 
     /**
