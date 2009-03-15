@@ -8,6 +8,7 @@ import java.awt.GridBagConstraints;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
@@ -29,7 +30,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
  */
 
 // $HeadURL$
-public class EditJudgementNotificationPane extends JPanePlugin {
+public class EditJudgementNotificationPane extends JPanePlugin implements IEditChangeCallback {
 
     /**
      * 
@@ -48,14 +49,16 @@ public class EditJudgementNotificationPane extends JPanePlugin {
 
     private JLabel titleLabel = null;
 
+    private IEditChangeCallback callback = null;
 
     /**
      * This method initializes
      * 
      */
-    public EditJudgementNotificationPane(NotificationSetting inNotificationSetting) {
+    public EditJudgementNotificationPane(NotificationSetting inNotificationSetting, IEditChangeCallback ieCallback) {
         super();
         notificationSetting = inNotificationSetting;
+        callback = ieCallback;
         initialize();
     }
 
@@ -151,6 +154,9 @@ public class EditJudgementNotificationPane extends JPanePlugin {
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
         
+        getFinalNotificationPane().setCallback(this);
+        getPreliminaryNotificationPane().setCallback(this);
+        
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 updateTitle();
@@ -234,6 +240,10 @@ public class EditJudgementNotificationPane extends JPanePlugin {
                 titleLabel.setText(title);
             }
         });
+    }
+
+    public void itemChanged(JComponent component) {
+        callback.itemChanged(component);
     }
     
 } // @jve:decl-index=0:visual-constraint="10,10"

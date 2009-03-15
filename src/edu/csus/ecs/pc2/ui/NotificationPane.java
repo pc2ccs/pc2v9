@@ -21,7 +21,7 @@ import edu.csus.ecs.pc2.core.model.JudgementNotification;
  */
 
 // $HeadURL$
-public class NotificationPane extends JPanel {
+public class NotificationPane extends JPanel   {
 
     /**
      * 
@@ -43,6 +43,8 @@ public class NotificationPane extends JPanel {
     private JudgementNotification judgementNotificationYes = new JudgementNotification();
 
     private JudgementNotification judgementNotificationNo = new JudgementNotification();
+    
+    private IEditChangeCallback callback = null;
 
     /**
      * This method initializes
@@ -51,6 +53,10 @@ public class NotificationPane extends JPanel {
     public NotificationPane() {
         super();
         initialize();
+    }
+    
+    public void setCallback(IEditChangeCallback callback) {
+        this.callback = callback;
     }
 
     /**
@@ -84,6 +90,11 @@ public class NotificationPane extends JPanel {
         if (stopYesMinTextField == null) {
             stopYesMinTextField = new JTextField();
             stopYesMinTextField.setBounds(new Rectangle(257, 17, 39, 21));
+            stopYesMinTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    callback.itemChanged(stopYesMinTextField);
+                }
+            });
         }
         return stopYesMinTextField;
     }
@@ -97,6 +108,11 @@ public class NotificationPane extends JPanel {
         if (stopNoMinTextField == null) {
             stopNoMinTextField = new JTextField();
             stopNoMinTextField.setBounds(new Rectangle(257, 61, 39, 21));
+            stopNoMinTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    callback.itemChanged(stopNoMinTextField);
+                }
+            });
         }
         return stopNoMinTextField;
     }
@@ -112,6 +128,11 @@ public class NotificationPane extends JPanel {
             stopSendingYesCheckBox.setBounds(new Rectangle(10, 16, 237, 23));
             stopSendingYesCheckBox.setName("");
             stopSendingYesCheckBox.setText("Stop Sending Yes judgements at");
+            stopSendingYesCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    callback.itemChanged(stopSendingYesCheckBox);
+                }
+            });
         }
         return stopSendingYesCheckBox;
     }
@@ -126,6 +147,11 @@ public class NotificationPane extends JPanel {
             stopSendingNoCheckBox = new JCheckBox();
             stopSendingNoCheckBox.setBounds(new Rectangle(10, 62, 237, 18));
             stopSendingNoCheckBox.setText("Stop Sending No judgements at");
+            stopSendingNoCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    callback.itemChanged(stopSendingNoCheckBox);
+                }
+            });
         }
         return stopSendingNoCheckBox;
     }

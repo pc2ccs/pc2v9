@@ -6,10 +6,13 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -17,14 +20,13 @@ import edu.csus.ecs.pc2.core.list.JudgementNotificationsList;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IProblemListener;
 import edu.csus.ecs.pc2.core.model.JudgementNotification;
 import edu.csus.ecs.pc2.core.model.NotificationSetting;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemEvent;
-import javax.swing.JLabel;
-import javax.swing.SwingConstants;
 
 /**
  * Edit Judgement Notifications for all problems.
@@ -34,13 +36,7 @@ import javax.swing.SwingConstants;
  */
 
 // $HeadURL$
-public class EditJudgementNotificationFrame extends JFrame implements UIPlugin {
-
-    /**
-     * TODO The update button needs to be enabled appropriately.
-     * 
-     * At this point the update button is always enabled, the button should only be enabled when a field has changed.
-     */
+public class EditJudgementNotificationFrame extends JFrame implements UIPlugin, IEditChangeCallback {
 
     /**
      * 
@@ -203,6 +199,21 @@ public class EditJudgementNotificationFrame extends JFrame implements UIPlugin {
             System.out.println("          Final  No  suppress " + judgementNotification.isNotificationSupressed() + " cuttoff at " + judgementNotification.getCuttoffMinutes());
         }
     }
+    
+    protected JudgementNotificationsList getJudgementNotificationFromFields() {
+
+        JudgementNotificationsList newJudgementNotificationsList = new JudgementNotificationsList();
+
+        for (Problem problem : contest.getProblems()) {
+            EditJudgementNotificationPane pane = getPaneForProblem(problem);
+            if (pane != null) {
+                NotificationSetting notificationSetting = pane.getNotificationSettingFromFields();
+                newJudgementNotificationsList.update(notificationSetting);
+            }
+        }
+
+        return newJudgementNotificationsList;
+    }
 
     /**
      * Save the EOC settings.
@@ -213,31 +224,14 @@ public class EditJudgementNotificationFrame extends JFrame implements UIPlugin {
         try {
 
             ContestInformation contestInformation = contest.getContestInformation();
-
-            JudgementNotificationsList judgementNotificationsList = contestInformation.getJudgementNotificationsList();
-
-            if (judgementNotificationsList == null) {
-                judgementNotificationsList = new JudgementNotificationsList();
-            }
-
-            for (Problem problem : contest.getProblems()) {
-                EditJudgementNotificationPane pane = getPaneForProblem(problem);
-                if (pane != null) {
-                    NotificationSetting notificationSetting = pane.getNotificationSettingFromFields();
-                    judgementNotificationsList.update(notificationSetting);
-//                    dumpNotification(problem.getDisplayName(), notificationSetting);
-                }
-            }
+            
+            JudgementNotificationsList judgementNotificationsList = getJudgementNotificationFromFields();
 
             contestInformation.setJudgementNotificationsList(judgementNotificationsList);
 
             controller.updateContestInformation(contestInformation);
 
-            closeButton.setText("Close");
-
-            // TODO disable when update button code done
-            // updateButton.setEnabled(false);
-
+            updateButtonState(false);
             setVisible(false);
 
         } catch (Exception e) {
@@ -335,11 +329,13 @@ public class EditJudgementNotificationFrame extends JFrame implements UIPlugin {
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                EditJudgementNotificationPane editJudgementNotificationPane = new EditJudgementNotificationPane(notificationSetting);
+                EditJudgementNotificationPane editJudgementNotificationPane = new EditJudgementNotificationPane(notificationSetting, getThis());
                 editJudgementNotificationPane.setContestAndController(contest, null);
                 String tabName = getTabName(problem);
                 editJudgementNotificationPane.setName(tabName);
                 getProblemTabbedPane().add(tabName, editJudgementNotificationPane);
+                
+                itemChanged(null);
             }
         });
     }
@@ -368,6 +364,7 @@ public class EditJudgementNotificationFrame extends JFrame implements UIPlugin {
             }
         }
         
+        updateButtonState(false);
         updateRemainingTime();
     }
 
@@ -452,6 +449,53 @@ public class EditJudgementNotificationFrame extends JFrame implements UIPlugin {
             // TODO code remove problem tab logic.
             problemChanged(event); // fake statement ot satisfy check style
         }
+    }
+
+    public void itemChanged(JComponent component) {
+        
+        /**
+         * Item value has changed on sub pane component 
+         */
+        
+        ContestInformation contestInformation = contest.getContestInformation();
+        JudgementNotificationsList originalJudgementNotificationsList = contestInformation.getJudgementNotificationsList();
+        
+        boolean changed = false;
+        
+        if (originalJudgementNotificationsList != null){
+            JudgementNotificationsList judgementNotificationsList = getJudgementNotificationFromFields();
+            
+            if (judgementNotificationsList.getList().length != originalJudgementNotificationsList.getList().length){
+                changed = true;
+            } else {
+                for (NotificationSetting setting : judgementNotificationsList.getList()){
+                    ElementId elementId = setting.getElementId();
+                    NotificationSetting setting2 = (NotificationSetting) originalJudgementNotificationsList.get(elementId);
+                    if (setting2 == null){
+                        changed = true;
+                        break;
+                    }
+                    if (! setting.isSameAs(setting2)){
+                        changed = true;
+                    }
+                }
+            }
+        }
+        updateButtonState(changed);
+    }
+    
+    protected void updateButtonState(boolean changed) {
+        getUpdateButton().setEnabled(changed);
+
+        if (changed) {
+            getCloseButton().setText("Cancel");
+        } else {
+            getCloseButton().setText("Close");
+        }
+    }
+    
+    protected IEditChangeCallback getThis(){
+        return this;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
