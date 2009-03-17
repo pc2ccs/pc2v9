@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.core.model;
 
 import edu.csus.ecs.pc2.core.list.JudgementNotificationsList;
+import edu.csus.ecs.pc2.core.model.Run.RunStates;
 
 /**
  * Run Utilities.
@@ -14,6 +15,16 @@ public final class RunUtilities {
 
     private RunUtilities() {
 
+    }
+    
+    public static Run createNewRun (Run run, IInternalContest contest){
+        Run newRun = new Run(run.getSubmitter(), contest.getLanguage(run.getLanguageId()), contest.getProblem(run.getProblemId()));
+        newRun.setElementId(run.getElementId());
+        newRun.setElapsedMins(run.getElapsedMins());
+        newRun.setDeleted(run.isDeleted());
+        newRun.setNumber(run.getNumber());
+        newRun.setStatus(RunStates.NEW);
+        return newRun;
     }
 
     /**

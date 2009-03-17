@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.core.model;
 import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.list.JudgementNotificationsList;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.Run.RunStates;
 
 /**
  * Testing for RunUtilities.
@@ -150,6 +151,60 @@ public class RunUtilitiesTest extends TestCase {
         }
 
         // TODO test all combinations of final/prelim/no/yes and cuttoff time
+    }
+
+    /**
+     * Test the {@link RunUtilities#createNewRun(Run, IInternalContest)}
+     */
+    public void testCreateNewRun() {
+
+        SampleContest sampleContest = new SampleContest();
+
+        IInternalContest contest = sampleContest.createContest(3, 3, 33, 12, true);
+
+        ClientId firstJudgeId = contest.getAccounts(Type.JUDGE).firstElement().getClientId();
+
+        Run[] runs = sampleContest.createRandomRuns(contest, 12, true, true, false);
+
+        Judgement yesJudgement = sampleContest.getYesJudgement(contest);
+
+        Run run = runs[0];
+        run.setElapsedMins(40);
+
+        // prelim judgement
+        JudgementRecord record = new JudgementRecord(yesJudgement.getElementId(), firstJudgeId, true, true);
+        record.setPreliminaryJudgement(true);
+        run.addJudgement(record);
+        run.setStatus(RunStates.JUDGED);
+
+        // final judgement
+        record = new JudgementRecord(yesJudgement.getElementId(), firstJudgeId, true, false);
+        run.addJudgement(record);
+
+        Run run2 = RunUtilities.createNewRun(run, contest);
+
+        assertEquals(run.getSiteNumber(), run2.getSiteNumber());
+        assertEquals(run.getNumber(), run2.getNumber());
+        assertEquals(run.getElapsedMins(), run2.getElapsedMins());
+
+        assertEquals(run.getElementId(), run2.getElementId());
+
+        assertEquals(run.getProblemId(), run2.getProblemId());
+        assertEquals(run.getLanguageId(), run2.getLanguageId());
+        
+        assertFalse (run2.isJudged());
+        assertTrue (run.isJudged());
+
+        assertFalse (run2.isSendToTeams());
+        assertTrue (run.isSendToTeams());
+
+        assertEquals(RunStates.NEW, run2.getStatus());
+        assertNotSame(RunStates.NEW, run.getStatus());
+        
+        assertFalse (run.isSameAs(run2));
+
+        assertNull(run2.getJudgementRecord());
+        assertNotNull(run.getJudgementRecord());
     }
 
     /**
