@@ -13,6 +13,7 @@ import java.util.TreeMap;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.VersionInfo;
+import edu.csus.ecs.pc2.core.PermissionGroup;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.exception.IllegalRunState;
 import edu.csus.ecs.pc2.core.list.AccountList;
@@ -21,16 +22,21 @@ import edu.csus.ecs.pc2.core.list.RunComparatorByTeam;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.BalloonSettings;
+import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.RunUtilities;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.security.Permission;
+import edu.csus.ecs.pc2.core.security.PermissionList;
+import edu.csus.ecs.pc2.core.security.Permission.Type;
 import edu.csus.ecs.pc2.core.util.IMemento;
 import edu.csus.ecs.pc2.core.util.XMLMemento;
 
@@ -86,6 +92,18 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
     private Log log;
     
     private boolean countPreliminaryJudgements = false;
+
+    private PermissionList permissionList = new PermissionList();
+    
+    /**
+     * Respect Send to Team Permission.
+     * 
+     * true means if {@link JudgementRecord#isSendToTeam()} is true then process run as a NEW run.
+     * <br>
+     * false means process all records per usual. 
+     */
+    boolean respectSendToTeam = false;
+    
 
     public DefaultScoringAlgorithm() {
         super();
@@ -242,6 +260,13 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         
         // TODO properties should be validated here
         props = properties;
+        
+        /**
+         * Settings 
+         */
+        
+ 
+        respectSendToTeam = isAllowed (theContest, theContest.getClientId(), Permission.Type.RESPECT_NOTIFY_TEAM_SETTING);
 
         countPreliminaryJudgements = theContest.getContestInformation().isPreliminaryJudgementsUsedByBoard();
         
@@ -307,7 +332,22 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 }
                 if (!runs[i].isDeleted() && account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD) 
                         && problemHash.containsKey(runs[i].getProblemId().toString())) {
-                    runTreeMap.put(runs[i], runs[i]);
+                    
+                    Run runToAdd = runs[i];
+                    if ( respectSendToTeam && runToAdd.getAllJudgementRecords().length > 0 ){
+                        /**
+                         * There are judgements and we need to check the send to team (notify team) flag
+                         */
+                        if (! runToAdd.getJudgementRecord().isSendToTeam()){
+                            /**
+                             * If not send to team, then change run to a new run with status NEW
+                             */
+                            runToAdd = RunUtilities.createNewRun(runs[i], theContest);
+                        }
+                    }
+                        
+                    runTreeMap.put(runToAdd, runToAdd);
+                    
                 }
             }
             
@@ -339,6 +379,29 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         }
 //        System.out.println(xmlString);
         return xmlString;
+    }
+    
+    private void initializePermissions(IInternalContest theContest, ClientId clientId) {
+        Account account = theContest.getAccount(clientId);
+        if (account != null) {
+            permissionList.clearAndLoadPermissions(account.getPermissionList());
+        } else {
+            // Set default conditions
+            permissionList.clearAndLoadPermissions(new PermissionGroup().getPermissionList(clientId.getClientType()));
+        }
+    }
+
+    /**
+     * Is Client allowed to do permission type
+     * 
+     * @param theContest
+     * @param clientId
+     * @param respect_notify_team_setting
+     * @return true if permission/type.
+     */
+    private boolean isAllowed(IInternalContest theContest, ClientId clientId, Type type) {
+        initializePermissions(theContest, clientId);
+        return permissionList.isAllowed(type);
     }
 
     private void dumpBalloonSettings(BalloonSettings balloonSettings, Problem[] problems, IMemento memento) {
