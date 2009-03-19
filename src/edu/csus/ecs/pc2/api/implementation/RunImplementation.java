@@ -11,6 +11,7 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.PermissionGroup;
 import edu.csus.ecs.pc2.core.list.JudgementNotificationsList;
 import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
@@ -24,6 +25,7 @@ import edu.csus.ecs.pc2.core.model.RunUtilities;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
+import edu.csus.ecs.pc2.core.security.Permission.Type;
 
 /**
  * Implementation for IRun.
@@ -76,12 +78,38 @@ public class RunImplementation implements IRun {
     private boolean preliminaryJudged = false;
 
     private boolean finalJudged = false;
-
-    public RunImplementation(Run run, IInternalContest internalContest, IInternalController controller) {
+    
+    private PermissionList permissionList = new PermissionList();
+    
+    /**
+     * Respect Send to Team Permission.
+     * 
+     * true means if {@link JudgementRecord#isSendToTeam()} is true then process run as a NEW run.
+     * <br>
+     * false means process all records per usual. 
+     */
+    boolean respectSendToTeam = false;
+    
+    public RunImplementation(Run inRun, IInternalContest internalContest, IInternalController controller) {
 
         this.controller = controller;
         this.internalContest = internalContest;
-        this.run = run;
+        
+        respectSendToTeam = isAllowed (internalContest, internalContest.getClientId(), Permission.Type.RESPECT_NOTIFY_TEAM_SETTING);
+        
+        this.run = inRun;
+              
+        if ( respectSendToTeam && inRun.getAllJudgementRecords().length > 0 ){
+            /**
+             * There are judgements and we need to check the send to team (notify team) flag
+             */
+            if (! inRun.getJudgementRecord().isSendToTeam()){
+                /**
+                 * If not send to team, then change run to a new run with status NEW
+                 */
+                this.run = RunUtilities.createNewRun(inRun, internalContest);
+            }
+        }
         
         deleted = run.isDeleted();
 
@@ -108,6 +136,29 @@ public class RunImplementation implements IRun {
             finalJudged = !preliminaryJudged;
             judgementTitle = getJudgementTitle(run);
         }
+    }
+    
+    private void initializePermissions(IInternalContest theContest, ClientId clientId) {
+        Account account = theContest.getAccount(clientId);
+        if (account != null) {
+            permissionList.clearAndLoadPermissions(account.getPermissionList());
+        } else {
+            // Set default conditions
+            permissionList.clearAndLoadPermissions(new PermissionGroup().getPermissionList(clientId.getClientType()));
+        }
+    }
+
+    /**
+     * Is Client allowed to do permission type
+     * 
+     * @param theContest
+     * @param clientId
+     * @param respect_notify_team_setting
+     * @return true if permission/type.
+     */
+    private boolean isAllowed(IInternalContest theContest, ClientId clientId, Type type) {
+        initializePermissions(theContest, clientId);
+        return permissionList.isAllowed(type);
     }
     
     private String getJudgementTitle(Run run2) {
