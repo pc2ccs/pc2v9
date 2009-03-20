@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.core.scoring;
 import java.io.StringReader;
 import java.util.Arrays;
 import java.util.Properties;
+import java.util.Vector;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -62,9 +63,11 @@ public class DefaultScoringAlgorithmTest extends TestCase {
     public void testNoData() {
 
         InternalContest contest = new InternalContest();
+        
+        // Add scoreboard account and set the scoreboard account for this client (in contest)
+        contest.setClientId(createBoardAccount (contest));
 
         checkOutputXML(contest);
-
     }
 
     /**
@@ -81,6 +84,9 @@ public class DefaultScoringAlgorithmTest extends TestCase {
         contest.generateNewAccounts(ClientType.Type.TEAM.toString(), 1, true);
         
         contest.generateNewAccounts(ClientType.Type.JUDGE.toString(), 1, true);
+
+        // Add scoreboard account and set the scoreboard account for this client (in contest)
+        contest.setClientId(createBoardAccount (contest));
         
         // Add Problem
         Problem problem = new Problem("Problem One");
@@ -100,7 +106,18 @@ public class DefaultScoringAlgorithmTest extends TestCase {
         
         checkForJudgeAndTeam(contest);
     }
-    
+
+    /**
+     * Create and return a new scoreboard client.
+     * 
+     * @param contest
+     * @return a ClientId for newly created scoreboard account.
+     */
+    private ClientId createBoardAccount(IInternalContest contest) {
+        Vector<Account> scoreboards = contest.generateNewAccounts(ClientType.Type.SCOREBOARD.toString(), 1, true);
+        return scoreboards.firstElement().getClientId();
+    }
+
     /**
      * Insure that there is one team and one judge in the contest model.
      * 
@@ -128,6 +145,9 @@ public class DefaultScoringAlgorithmTest extends TestCase {
         // Add accounts
         contest.generateNewAccounts(ClientType.Type.TEAM.toString(), numTeams, true);
         contest.generateNewAccounts(ClientType.Type.JUDGE.toString(), 6, true);
+        
+        // Add scoreboard account and set the scoreboard account for this client (in contest)
+        contest.setClientId(createBoardAccount (contest));
         
         checkForJudgeAndTeam(contest);
         
@@ -200,6 +220,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
         RunFiles runFiles = new RunFiles(run, "samps/Sumit.java");
         
         contest.addRun(run, runFiles, null);
+        
         
         checkOutputXML(contest);
     }
@@ -411,6 +432,8 @@ public class DefaultScoringAlgorithmTest extends TestCase {
         
         scoreboardTest (8, runsData, rankData);
     }
+    
+    
 
     /**
      * Tests for cases where Yes is before No, and multiple yes at same elapsed time.
@@ -823,6 +846,59 @@ public class DefaultScoringAlgorithmTest extends TestCase {
         scoreboardTest (6, runsData, rankData);
     }
 
+    /**
+     * Test whether SA respects send to team 
+     */
+    public void testSendToTeams(){
+
+        // Sort order:
+        // Primary Sort = number of solved problems (high to low)
+        // Secondary Sort = score (low to high)
+        // Tertiary Sort = earliest submittal of last submission (low to high)
+        // Forth Sort = teamName (low to high)
+        // Fifth Sort = clientId (low to high)
+        
+        // RunID    TeamID  Prob    Time    Result
+        
+        String [] runsData = {
+                "5,5,A,12,No",
+                "6,5,A,12,Yes", 
+
+                // t5 solves A, 32 pts = 20 + 12
+                
+                "7,6,A,12,No,Yes",
+                "8,6,A,12,Yes,No",
+                
+                // t6 does not solve, 0 solve, 0 pts
+
+                "15,5,B,21,No",
+                "16,5,B,22,Yes,No",  
+                
+                // t5 does solve B, but not sent to team/used 0 pts 0 solved
+                
+                "25,6,B,21,No,No",
+                "26,6,B,22,Yes,Yes",
+                
+                // t6 solves B, 22 pts because No at 21 is NOT counted.
+        };
+        
+        // Rank  TeamId Solved Penalty
+        
+        String [] rankData = {
+                // rank, team, solved, pts
+                "1,team6,1,22",
+                "2,team5,1,32",
+                "3,team1,0,0",
+                "3,team2,0,0",
+                "3,team3,0,0",
+                "3,team4,0,0",
+        };
+        
+        scoreboardTest (6, runsData, rankData, true);
+    }
+
+    
+    
     
     /**
      * Test the SA given a list of runs and outcomes.
@@ -835,11 +911,23 @@ public class DefaultScoringAlgorithmTest extends TestCase {
      * @param rankDataList
      */
     public void scoreboardTest(int numTeams, String[] runsDataList, String[] rankDataList) {
+        scoreboardTest(numTeams, runsDataList, rankDataList, false);
+    }
+    
+    public void scoreboardTest(int numTeams, String[] runsDataList, String[] rankDataList, boolean respectSendTo) {
 
         InternalContest contest = new InternalContest();
 
         initData(contest, numTeams, 5);
-
+        
+        if (respectSendTo){
+            /**
+             * Set permission that will respect the {@link JudgementRecord#isSendToTeam()}
+             */
+            Account account = contest.getAccount(contest.getClientId());
+            account.addPermission(edu.csus.ecs.pc2.core.security.Permission.Type.RESPECT_NOTIFY_TEAM_SETTING);
+        }
+        
         for (String runInfoLine : runsDataList) {
             addTheRun(contest, runInfoLine);
         }
@@ -848,9 +936,25 @@ public class DefaultScoringAlgorithmTest extends TestCase {
 
         confirmRanks(contest, rankDataList);
     }
-    
+
     /**
      * add run to list of runs in a contest.
+     * 
+     * Files found in runInfoLine, comma delmited
+     * 
+     * <pre>
+     * 0 - run id, int
+     * 1 - team id, int
+     * 2 - problem letter, char
+     * 3 - elapsed, int
+     * 4 - solved, String &quot;Yes&quot; or No
+     * 5 - send to teams, Yes or No
+     * 
+     * Example:
+     * &quot;6,5,A,12,Yes&quot;
+     * &quot;6,5,A,12,Yes,Yes&quot;
+     * 
+     * </pre>
      * 
      * @param contest
      * @param runInfoLine
@@ -867,12 +971,20 @@ public class DefaultScoringAlgorithmTest extends TestCase {
         Judgement noJudgement = contest.getJudgements()[1];
         
         String[] data = runInfoLine.split(",");
+        
+        
+        // Line is: runId,teamId,problemLetter,elapsed,solved[,sendToTeamsYN]
 
         int runId = getIntegerValue(data[0]);
         int teamId = getIntegerValue(data[1]);
         String probLet = data[2];
         int elapsed = getIntegerValue(data[3]);
         boolean solved = data[4].equals("Yes");
+        
+        boolean sendToTeams = true;
+        if (data.length > 5){
+            sendToTeams = data[5].equals("Yes");
+        }
 
         int problemIndex = probLet.charAt(0) - 'A';
         Problem problem = problemList[problemIndex];
@@ -886,6 +998,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
             judgementId = yesJudgement.getElementId();
         }
         JudgementRecord judgementRecord = new JudgementRecord(judgementId, judgeId, solved, false);
+        judgementRecord.setSendToTeam(sendToTeams);
         contest.addRun(run);
         
         checkOutRun(contest, run, judgeId);
@@ -893,6 +1006,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
         contest.addRunJudgement(run, judgementRecord, null, judgeId);
 
         if (debugMode){
+            System.out.print("Send to teams "+run.getJudgementRecord().isSendToTeam()+" ");
             System.out.println("Added run "+run);
         }
         
@@ -1013,7 +1127,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
     private void compareRanking(int rankIndex, String[] standingsRow, String [] expectedRow) {
         
 //        Object[] cols = { "Rank", "Name", "Solved", "Points" };
-        
+     
         int idx = 0;
         assertEquals("Standings row "+rankIndex+" rank incorrect, ", expectedRow[idx], standingsRow[idx]);
 //        assertTrue ("Standings row "+rankIndex+" rank wrong expected "+expectedRow[idx]+" found "+standingsRow[idx], standingsRow[idx].equals(expectedRow[idx]));
