@@ -88,7 +88,7 @@ public class RunImplementation implements IRun {
      * <br>
      * false means process all records per usual. 
      */
-    boolean respectSendToTeam = false;
+    private boolean respectSendToTeam = false;
     
     public RunImplementation(Run inRun, IInternalContest internalContest, IInternalController controller) {
 
@@ -372,16 +372,16 @@ public class RunImplementation implements IRun {
      * @return true of allowed, false otherwise.
      */
     protected boolean isAllowed(Permission.Type type) {
-        PermissionList permissionList = new PermissionList();
+        PermissionList newPermissionList = new PermissionList();
         
         Account account = internalContest.getAccount(internalContest.getClientId());
         if (account != null) {
-            permissionList.clearAndLoadPermissions(account.getPermissionList());
+            newPermissionList.clearAndLoadPermissions(account.getPermissionList());
         } else {
             // Set default conditions
-            permissionList.clearAndLoadPermissions(new PermissionGroup().getPermissionList(internalContest.getClientId().getClientType()));
+            newPermissionList.clearAndLoadPermissions(new PermissionGroup().getPermissionList(internalContest.getClientId().getClientType()));
         }
-        return permissionList.isAllowed(type);
+        return newPermissionList.isAllowed(type);
     }
 
     public IRunJudgement[] getRunJudgements() {
