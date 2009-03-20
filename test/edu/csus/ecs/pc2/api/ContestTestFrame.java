@@ -83,7 +83,7 @@ public class ContestTestFrame extends JFrame {
     private JCheckBox configListenerCheckBox = null;
 
     private RunListener runListener = null;
-    
+
     private ConnectionEventListener connectionEventListener = null;
 
     private ScrollyFrame scrollyFrame = new ScrollyFrame();
@@ -141,9 +141,8 @@ public class ContestTestFrame extends JFrame {
     private JCheckBox connectionListenerCheckBox = null;
 
     private JButton viewRunGrid = null;
-    
-    private RunsFrame runsFrame = null;
 
+    private RunsFrame runsFrame = null;
 
     /**
      * This method initializes
@@ -200,18 +199,17 @@ public class ContestTestFrame extends JFrame {
             listModel.addElement(abstractTest);
         }
     }
-    
-    protected void printAllJudgements (IRun run){
-        IRunJudgement [] judgements = run.getRunJudgements();
-        if (judgements.length == 0){
+
+    protected void printAllJudgements(IRun run) {
+        IRunJudgement[] judgements = run.getRunJudgements();
+        if (judgements.length == 0) {
             println("   No judgements for this run.");
         }
-        for (IRunJudgement judgement : judgements){
-            println("   Judgement "+judgement.getJudgement().getName()+" compJudged="+judgement.isComputerJudgement()+" solved="+judgement.isSolved()
-                    + " prelim="+judgement.isPreliminaryJudgement()+" toTeams="+judgement.isSendToTeam());
+        for (IRunJudgement judgement : judgements) {
+            println("   Judgement " + judgement.getJudgement().getName() + " compJudged=" + judgement.isComputerJudgement() + " solved=" + judgement.isSolved() + " prelim="
+                    + judgement.isPreliminaryJudgement() + " toTeams=" + judgement.isSendToTeam());
         }
     }
-
 
     /**
      * Run Listener for ContestTestFrame.
@@ -219,10 +217,10 @@ public class ContestTestFrame extends JFrame {
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
-    
+
     // $HeadURL$
     protected class RunListener implements IRunEventListener {
-        
+
         public void runJudged(IRun run, boolean isFinal) {
             println("Run judged Site " + run.getSiteNumber() + " Run " + run.getNumber() + " from " + run.getTeam().getLoginName() + " at " + run.getSubmissionTime());
             printAllJudgements(run);
@@ -259,7 +257,7 @@ public class ContestTestFrame extends JFrame {
 
         public void runCheckedOut(IRun run, boolean isFinal) {
             println("Run checked out Site " + run.getSiteNumber() + " Run " + run.getNumber() + " from " + run.getTeam().getLoginName() + " at " + run.getSubmissionTime());
-            
+
         }
     }
 
@@ -272,7 +270,7 @@ public class ContestTestFrame extends JFrame {
     protected class ConnectionEventListener implements IConnectionEventListener {
 
         public void connectionDropped() {
-            println("Connection Dropped, logged in "+serverConnection.isLoggedIn());
+            println("Connection Dropped, logged in " + serverConnection.isLoggedIn());
         }
     }
 
@@ -379,19 +377,19 @@ public class ContestTestFrame extends JFrame {
     private JPanel getCenterPane() {
         if (centerPane == null) {
             clarificationsOnSite = new JLabel();
-            clarificationsOnSite.setBounds(new java.awt.Rectangle(164,239,157,16));
+            clarificationsOnSite.setBounds(new java.awt.Rectangle(164, 239, 157, 16));
             clarificationsOnSite.setText("(clars on site count)");
             clarificationsOnSite.setHorizontalAlignment(SwingConstants.LEFT);
             runsOnSite = new JLabel();
-            runsOnSite.setBounds(new java.awt.Rectangle(163,173,157,16));
+            runsOnSite.setBounds(new java.awt.Rectangle(163, 173, 157, 16));
             runsOnSite.setText("(runs on site count)");
             runsOnSite.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
             jLabel1 = new JLabel();
-            jLabel1.setBounds(new java.awt.Rectangle(48,144,96,16));
+            jLabel1.setBounds(new java.awt.Rectangle(48, 144, 96, 16));
             jLabel1.setText("Site");
             jLabel1.setHorizontalAlignment(SwingConstants.RIGHT);
             jLabel = new JLabel();
-            jLabel.setBounds(new java.awt.Rectangle(28,208,119,16));
+            jLabel.setBounds(new java.awt.Rectangle(28, 208, 119, 16));
             jLabel.setText("Run/Clar Number");
             jLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             centerPane = new JPanel();
@@ -463,7 +461,7 @@ public class ContestTestFrame extends JFrame {
     private JButton getGetRunButton() {
         if (getRunButton == null) {
             getRunButton = new JButton();
-            getRunButton.setBounds(new java.awt.Rectangle(240,202,94,26));
+            getRunButton.setBounds(new java.awt.Rectangle(240, 202, 94, 26));
             getRunButton.setToolTipText("Print Run information list");
             getRunButton.setText("getRun");
             getRunButton.addActionListener(new java.awt.event.ActionListener() {
@@ -523,7 +521,7 @@ public class ContestTestFrame extends JFrame {
             runReport(new PrintMyClient());
             println(contest.getRuns().length + " runs.");
             println(contest.getClarifications().length + " clarifications");
-            
+
             updateSiteComboBox();
 
         } catch (LoginFailureException e) {
@@ -655,7 +653,7 @@ public class ContestTestFrame extends JFrame {
     private JCheckBox getRunListenerCheckBox() {
         if (runListenerCheckBox == null) {
             runListenerCheckBox = new JCheckBox();
-            runListenerCheckBox.setBounds(new java.awt.Rectangle(17,271,156,18));
+            runListenerCheckBox.setBounds(new java.awt.Rectangle(17, 271, 156, 18));
             runListenerCheckBox.setToolTipText("Listen for run events");
             runListenerCheckBox.setText("View Run Listener");
             runListenerCheckBox.addActionListener(new java.awt.event.ActionListener() {
@@ -694,7 +692,7 @@ public class ContestTestFrame extends JFrame {
             }
         }
     }
-    
+
     /**
      * Turn connection event listener on and off
      * 
@@ -731,7 +729,7 @@ public class ContestTestFrame extends JFrame {
     private JCheckBox getConfigListenerCheckBox() {
         if (configListenerCheckBox == null) {
             configListenerCheckBox = new JCheckBox();
-            configListenerCheckBox.setBounds(new java.awt.Rectangle(17,332,156,21));
+            configListenerCheckBox.setBounds(new java.awt.Rectangle(17, 332, 156, 21));
             configListenerCheckBox.setToolTipText("Listen for all configuration change events");
             configListenerCheckBox.setText("View Config Listener");
             configListenerCheckBox.addActionListener(new java.awt.event.ActionListener() {
@@ -933,7 +931,7 @@ public class ContestTestFrame extends JFrame {
     private JCheckBox getClarListenerCheckBox() {
         if (clarListenerCheckBox == null) {
             clarListenerCheckBox = new JCheckBox();
-            clarListenerCheckBox.setBounds(new java.awt.Rectangle(17,300,156,21));
+            clarListenerCheckBox.setBounds(new java.awt.Rectangle(17, 300, 156, 21));
             clarListenerCheckBox.setToolTipText("Listen for Clarification events");
             clarListenerCheckBox.setText("View Clar Listener");
             clarListenerCheckBox.addActionListener(new java.awt.event.ActionListener() {
@@ -1028,7 +1026,7 @@ public class ContestTestFrame extends JFrame {
         }
 
         int submissionNumber = getIntegerValue(getNumberTextField().getText());
-        
+
         int siteNumber = getSelectedSiteNumber();
 
         try {
@@ -1045,7 +1043,7 @@ public class ContestTestFrame extends JFrame {
 
     private int getSelectedSiteNumber() {
         Object object = getSiteComboBox().getSelectedItem();
-        if (object == null){
+        if (object == null) {
             return 0;
         }
         ISite site = ((ISiteWrapper) object).getSite();
@@ -1146,7 +1144,7 @@ public class ContestTestFrame extends JFrame {
             numberTextField.setDocument(new IntegerDocument());
             numberTextField.setToolTipText("Enter a Run Number or Clar Number");
             numberTextField.setText("1");
-            numberTextField.setBounds(new java.awt.Rectangle(162,205,59,22));
+            numberTextField.setBounds(new java.awt.Rectangle(162, 205, 59, 22));
         }
         return numberTextField;
     }
@@ -1177,7 +1175,7 @@ public class ContestTestFrame extends JFrame {
     private JComboBox getSiteComboBox() {
         if (siteComboBox == null) {
             siteComboBox = new JComboBox();
-            siteComboBox.setBounds(new java.awt.Rectangle(162,142,159,21));
+            siteComboBox.setBounds(new java.awt.Rectangle(162, 142, 159, 21));
             siteComboBox.addItemListener(new java.awt.event.ItemListener() {
                 public void itemStateChanged(java.awt.event.ItemEvent e) {
                     updateSiteRunTotals();
@@ -1187,13 +1185,13 @@ public class ContestTestFrame extends JFrame {
         }
         return siteComboBox;
     }
-    
+
     /**
      * 
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
-    
+
     // $HeadURL$
     protected class ISiteWrapper {
         private ISite site = null;
@@ -1201,14 +1199,16 @@ public class ContestTestFrame extends JFrame {
         public ISite getSite() {
             return site;
         }
+
         public ISiteWrapper(ISite site) {
             this.site = site;
         }
-         @Override
+
+        @Override
         public String toString() {
             return site.getName();
         }
-        
+
     }
 
     protected void updateSiteClarificationsTotals() {
@@ -1250,7 +1250,7 @@ public class ContestTestFrame extends JFrame {
 
         clarificationsOnSite.setText(text);
     }
-    
+
     protected void updateSiteRunTotals() {
 
         Object object = getSiteComboBox().getSelectedItem();
@@ -1299,7 +1299,7 @@ public class ContestTestFrame extends JFrame {
     private JButton getGetClarificationButton() {
         if (getClarificationButton == null) {
             getClarificationButton = new JButton();
-            getClarificationButton.setBounds(new java.awt.Rectangle(205,265,129,26));
+            getClarificationButton.setBounds(new java.awt.Rectangle(205, 265, 129, 26));
             getClarificationButton.setText("getClarification");
             getClarificationButton.setToolTipText("Print Run information list");
             getClarificationButton.addActionListener(new java.awt.event.ActionListener() {
@@ -1319,7 +1319,7 @@ public class ContestTestFrame extends JFrame {
     private JCheckBox getConnectionListenerCheckBox() {
         if (connectionListenerCheckBox == null) {
             connectionListenerCheckBox = new JCheckBox();
-            connectionListenerCheckBox.setBounds(new java.awt.Rectangle(17,366,184,24));
+            connectionListenerCheckBox.setBounds(new java.awt.Rectangle(17, 366, 184, 24));
             connectionListenerCheckBox.setText("View Connection Listener");
             connectionListenerCheckBox.setToolTipText("Listen for all connection change events");
             connectionListenerCheckBox.addActionListener(new java.awt.event.ActionListener() {
@@ -1332,9 +1332,9 @@ public class ContestTestFrame extends JFrame {
     }
 
     /**
-     * This method initializes viewRunGrid	
-     * 	
-     * @return javax.swing.JButton	
+     * This method initializes viewRunGrid
+     * 
+     * @return javax.swing.JButton
      */
     private JButton getViewRunGrid() {
         if (viewRunGrid == null) {
@@ -1351,23 +1351,22 @@ public class ContestTestFrame extends JFrame {
     }
 
     protected void showRunsGridFrame() {
-        
+
         if (contest == null) {
             showMessage("Not logged in", "Can not display runs grid");
             return;
         }
-        
+
         getRunsFrame().setVisible(true);
-        
+
     }
-    
+
     public RunsFrame getRunsFrame() {
-        if (runsFrame == null){
+        if (runsFrame == null) {
             runsFrame = new RunsFrame(contest);
         }
         return runsFrame;
     }
-
 
     public static void main(String[] args) {
         new ContestTestFrame().setVisible(true);

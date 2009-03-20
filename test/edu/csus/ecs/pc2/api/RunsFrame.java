@@ -3,7 +3,6 @@ package edu.csus.ecs.pc2.api;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.HeadlessException;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -45,7 +44,7 @@ public class RunsFrame extends JFrame {
 
     private MCLB runsListBox = null;
 
-    public RunsFrame(IContest contest) throws HeadlessException {
+    public RunsFrame(IContest contest) {
         super();
         initialize();
         this.contest = contest;
