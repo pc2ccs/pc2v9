@@ -102,7 +102,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      * <br>
      * false means process all records per usual. 
      */
-    boolean respectSendToTeam = false;
+    private boolean respectSendToTeam = false;
     
 
     public DefaultScoringAlgorithm() {
