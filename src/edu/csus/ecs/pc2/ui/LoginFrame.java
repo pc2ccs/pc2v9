@@ -84,6 +84,8 @@ public class LoginFrame extends JFrame implements UIPlugin {
 
     private JLabel spacerLabel = null;
 
+    private boolean bAlreadyLoggingIn = false;
+
     /**
      * This method initializes
      * 
@@ -325,17 +327,22 @@ public class LoginFrame extends JFrame implements UIPlugin {
                 return;
             }
 
+            if (bAlreadyLoggingIn) {
+                return;
+            }
+            
+            bAlreadyLoggingIn = true;
+            
             try {
                 setStatusMessage("Logging in...");
                 FrameUtilities.waitCursor(this);
                 controller.login(getLoginName(), getPassword());
-
             } catch (Exception e) {
                 // TODO: log handle exception
                 setStatusMessage(e.getMessage());
                 StaticLog.info("Login not successful: " + e.getMessage());
                 System.err.println("Login not successful: " + e.getMessage());
-
+                bAlreadyLoggingIn = false;
             }
         }
     }
@@ -506,6 +513,7 @@ public class LoginFrame extends JFrame implements UIPlugin {
 
         public void loginDenied(LoginEvent event) {
             setStatusMessage(event.getMessage());
+            bAlreadyLoggingIn = false;
         }
     }
 
