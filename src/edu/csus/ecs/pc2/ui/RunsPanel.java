@@ -466,6 +466,8 @@ public class RunsPanel extends JPanePlugin {
         }
 
         /**
+         * Show the Run Judgement.
+         * 
          * Checks the run in the specified run event and (potentially) displays a results dialog. If the run has been judged, has a valid judgement record, and is the "active" judgement for scoring
          * purposes, displays a modal MessageDialog to the Team containing the judgement results. This method assumes the caller has already verified this is a TEAM client; failure to do that on the
          * caller's part will cause other clients to see the Run Response dialog...
@@ -480,7 +482,7 @@ public class RunsPanel extends JPanePlugin {
             String responseFormat = "";
 
             // check if the run has been judged
-            if (theRun.isJudged()) {
+            if (theRun.isJudged() && (! theRun.isDeleted())) {
 
                 // check if there's a legit judgement
                 JudgementRecord judgementRecord = theRun.getJudgementRecord();
@@ -544,7 +546,7 @@ public class RunsPanel extends JPanePlugin {
                         }
                     }
                 }
-            } else {
+            } else if (! theRun.isDeleted()) {
                 // not judged
                 try {
                     String displayString = "<HTML><FONT SIZE=+1>Confirmation of Run Receipt<BR><BR>" + "Problem: <FONT COLOR=BLUE>" + Utilities.forHTML(problemName) + "</FONT><BR><BR>"
