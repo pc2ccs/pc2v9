@@ -47,6 +47,10 @@ public class PermissionGroup {
         serverPermissionList.removePermission(Type.BALLOON_EMAIL);
         administratorPermissionList.removePermission(Type.BALLOON_PRINT);
         serverPermissionList.removePermission(Type.BALLOON_PRINT);
+        
+        administratorPermissionList.removePermission(Type.RESPECT_EOC_SUPPRESSION);
+        administratorPermissionList.removePermission(Type.RESPECT_NOTIFY_TEAM_SETTING);
+        
 
         /**
          * Team permissions
