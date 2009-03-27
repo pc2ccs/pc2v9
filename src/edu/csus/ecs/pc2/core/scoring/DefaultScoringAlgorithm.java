@@ -28,7 +28,6 @@ import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunUtilities;
@@ -98,7 +97,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
     /**
      * Respect Send to Team Permission.
      * 
-     * true means if {@link JudgementRecord#isSendToTeam()} is true then process run as a NEW run.
+     * true means if {@link edu.csus.ecs.pc2.core.model.JudgementRecord#isSendToTeam()} is true then process run as a NEW run.
      * <br>
      * false means process all records per usual. 
      */
