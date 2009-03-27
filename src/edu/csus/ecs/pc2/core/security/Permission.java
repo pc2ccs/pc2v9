@@ -3,8 +3,6 @@ package edu.csus.ecs.pc2.core.security;
 import java.io.Serializable;
 import java.util.Hashtable;
 
-import edu.csus.ecs.pc2.core.model.JudgementRecord;
-
 /**
  * User permissions.
  * 
@@ -225,7 +223,7 @@ public class Permission implements Serializable {
          * The board/API scoring respects the judge's send notify to team.
          * 
          *  The SA (Scoring Algorithm) needs to respect the 
-         *  {@link JudgementRecord#isSendToTeam()} setting.
+         *  {@link edu.csus.ecs.pc2.core.model.JudgementRecord#isSendToTeam()} setting.
          */
         RESPECT_NOTIFY_TEAM_SETTING,
     };
