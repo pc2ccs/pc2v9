@@ -934,13 +934,20 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         String toolTip = "";
         if (b) {
             // these only matter if being shown
+            Color color = Color.RED;
             boolean enableButton = true;
             String judgement = judgementRecord.getValidatorResultString();
             String oJudgement = getContest().getJudgement(judgementRecord.getJudgementId()).toString();
             if (!judgement.equals(oJudgement)) {
                 enableButton = false;
+                color = Color.BLACK;
                 toolTip = "NOTE: This response does not match any defined Judgements.";
+            } else {
+                if (judgementRecord.isSolved()) {
+                    color = Color.green;
+                } // else default to RED
             }
+            validatorAnswer.setForeground(color);
             getAcceptValidatorJudgementButton().setEnabled(enableButton);
         }
         validatorAnswer.setToolTipText(toolTip);
