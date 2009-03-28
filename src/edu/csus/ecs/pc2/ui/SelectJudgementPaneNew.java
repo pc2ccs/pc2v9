@@ -516,8 +516,15 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             
             //if there is a result matching the computer judgement (validator), show it 
             if (matchingResult != null) {
-                validatorAnswer.setText(getContest().getJudgement(matchingResult.getJudgementId()).toString());
-                showValidatorControls(true);
+                // RunResultsFiles.getValidationResults() returns null for the Undetermined case
+                String judgement = computerJudgement.getValidatorResultString();
+                String oJudgement = getContest().getJudgement(matchingResult.getJudgementId()).toString();
+                if (judgement == null || judgement.trim().equals("")) {
+                    judgement = oJudgement;
+                }
+                // TODO bug 394 color depending on yes or no or unknown judgement (black)
+                validatorAnswer.setText(judgement);
+                showValidatorControls(true, computerJudgement);
             } else {
                 showValidatorControls(false);
             }
@@ -876,12 +883,10 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             String results = executable.getValidationResults();
             if (results != null && results.trim().length() > 1) {
                 
-                if (results.equalsIgnoreCase("accepted")) {
+                if (results.equalsIgnoreCase("accepted") || results.equalsIgnoreCase("yes")) {
                     results = getContest().getJudgements()[0].getDisplayName();
                 }
                 validatorAnswer.setText(results);
-                
-                showValidatorControls(true);
 
                 boolean solved = false;
 
@@ -894,6 +899,8 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                 judgementRecord.setValidatorResultString(results);
 
                 judgementRecord.setSendToTeam(getNotifyTeamCheckBox().isSelected());
+
+                showValidatorControls(true, judgementRecord);
 
             } else {
                 log.warning("execute indicated validator success but getValidationResults returns \"\" or null");
@@ -920,6 +927,23 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         }
         enableOutputsButton(true);
         setEnabledButtonStatus(true);
+    }
+
+    private void showValidatorControls(boolean b, JudgementRecord judgementRecord) {
+        showValidatorControls(b);
+        String toolTip = "";
+        if (b) {
+            // these only matter if being shown
+            boolean enableButton = true;
+            String judgement = judgementRecord.getValidatorResultString();
+            String oJudgement = getContest().getJudgement(judgementRecord.getJudgementId()).toString();
+            if (!judgement.equals(oJudgement)) {
+                enableButton = false;
+                toolTip = "NOTE: This response does not match any defined Judgements.";
+            }
+            getAcceptValidatorJudgementButton().setEnabled(enableButton);
+        }
+        validatorAnswer.setToolTipText(toolTip);
     }
 
     public void setRunAndFiles(Run theRun, RunFiles runFiles2, RunResultFiles[] theRunResultFiles) {
