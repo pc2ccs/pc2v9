@@ -2561,11 +2561,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     
     private void sendStatusMessge(Run run, RunExecutionStatus status){
         
-        System.out.println("debug sendStatusMessge "+contest+" send msg "+contest.isSendAdditionalRunStatusMessages());
-
         if (contest.isSendAdditionalRunStatusMessages()){
                 Packet sendPacket = PacketFactory.createRunStatusPacket(contest.getClientId(), getServerClientId(), run, contest.getClientId(), status);
-                System.out.println("debug sending "+sendPacket);
                 sendToLocalServer(sendPacket);
         }
     }
