@@ -351,6 +351,8 @@ public class RunPane extends JPanePlugin {
             deleteCheckBox.setSelected(run2.isDeleted());
             statusLabel.setText(run.getStatus().toString());
             elapsedTimeTextField.setText(new Long(run.getElapsedMins()).toString());
+            
+            getNotifyTeamCheckBox().setSelected(notifyTeam());
 
         } else {
             getUpdateButton().setVisible(false);
@@ -360,6 +362,7 @@ public class RunPane extends JPanePlugin {
             statusLabel.setText("");
             elapsedTimeTextField.setText("");
 
+            getNotifyTeamCheckBox().setSelected(false);
         }
         populateComboBoxes();
         
@@ -472,6 +475,9 @@ public class RunPane extends JPanePlugin {
             enableButton |= (run.isDeleted() != getDeleteCheckBox().isSelected());
 
             enableButton |= judgementChanged();
+            
+            enableButton |= notifyTeamChanged();
+            
         }
 
         getUpdateButton().setEnabled(enableButton);
@@ -491,6 +497,30 @@ public class RunPane extends JPanePlugin {
         }
 
         return false;
+    }
+
+    /**
+     * For this run, send notification to team?
+     * @return 
+     */
+    private boolean notifyTeam(){
+        if (run.isJudged()) {
+
+            JudgementRecord judgementRecord = run.getJudgementRecord();
+            if (judgementRecord != null) {
+
+                return judgementRecord.isSendToTeam();
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Has the notify team status changed ?
+     * @return true if changed, false otherwise.
+     */
+    private boolean notifyTeamChanged() {
+        return notifyTeam() != getNotifyTeamCheckBox().isSelected();
     }
 
     /**
@@ -808,8 +838,13 @@ public class RunPane extends JPanePlugin {
         if (notifyTeamCheckBox == null) {
             notifyTeamCheckBox = new JCheckBox();
             notifyTeamCheckBox.setBounds(new java.awt.Rectangle(347, 197, 134, 19));
-            notifyTeamCheckBox.setSelected(true);
+            notifyTeamCheckBox.setSelected(false);
             notifyTeamCheckBox.setText("Notify Team");
+            notifyTeamCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableUpdateButton();
+                }
+            });
         }
         return notifyTeamCheckBox;
     }
