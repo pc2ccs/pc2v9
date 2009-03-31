@@ -307,7 +307,8 @@ public class RunsPanel extends JPanePlugin {
                     }
                 }
                 
-                if (!run.getJudgementRecord().isSendToTeam()) {
+                // only consider changing the state to new if we are a team
+                if (isTeam(getContest().getClientId()) && !run.getJudgementRecord().isSendToTeam()) {
                     result = RunStates.NEW.toString();
                 }
                 
