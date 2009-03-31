@@ -486,6 +486,10 @@ public class RunPane extends JPanePlugin {
 
     private boolean judgementChanged() {
         if (run.isJudged()) {
+            
+            if (notifyTeamChanged()){
+                return true;
+            }
 
             Judgement judgement = (Judgement) getJudgementComboBox().getSelectedItem();
             if (judgement != null) {
