@@ -72,6 +72,12 @@
                 <include name="sleep.exe"/>
             </zipfileset>
             <zipfileset dir="${data.dir}" filemode="755" prefix="${release}/samps/data"/>
+            <!-- bug 353: copy api and other docs to release -->
+            <zipfileset dir="${docs.api.dir}" filemode="755" prefix="${release}/doc/api"/>
+            <zipfileset dir="${basedir}/doc" filemode="755" prefix="${release}/doc">
+                <exclude name="src"/>
+                <exclude name="src/*"/>
+            </zipfileset>
 <!--
     XXX javadoc 1.5. <= 14 fails under cruisecontrol, not sure why
             <zipfileset dir="${docs.api.dir}" filemode="644" prefix="${release}/docs/api"/>
