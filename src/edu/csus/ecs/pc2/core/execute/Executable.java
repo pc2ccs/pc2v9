@@ -983,7 +983,6 @@ public class Executable {
         try {
             
             if (isJudge()){
-                System.out.println("debug compileProgram "+contest+" send msg "+contest.isSendAdditionalRunStatusMessages());
                 controller.sendCompilingMessage(run);
             }
 
