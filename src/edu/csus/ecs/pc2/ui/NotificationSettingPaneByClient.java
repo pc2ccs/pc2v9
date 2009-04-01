@@ -704,8 +704,6 @@ public class NotificationSettingPaneByClient extends JPanePlugin {
 //            dumpNotification(System.out, "before", notificationSetting);
 //            dumpNotification(System.out, "after ", checkNotificationSetting);
             
-            System.out.println("debug enableUpdateButton "+enableButton);
-
         } else {
             enableButton = true;
         }
