@@ -116,11 +116,8 @@ public class BalloonHandler implements UIPlugin {
         for (int i = 0; i < runs.length; i++) {
             Run run = runs[i];
             Problem problem = getContest().getProblem(run.getProblemId());
-            if (!run.isDeleted() && run.isJudged() && run.isSolved() && !v.contains(problem)) {
-                if (!run.getJudgementRecord().isPreliminaryJudgement() 
-                        || (run.getJudgementRecord().isPreliminaryJudgement() && sendNotificationsForPreliminary)) { 
-                                v.add(problem);
-                }
+            if (shouldSendBalloon(run) && !v.contains(problem)) {
+                v.add(problem);
             }
         }
         // now put them in the right order
