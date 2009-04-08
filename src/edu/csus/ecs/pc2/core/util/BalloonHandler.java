@@ -116,7 +116,7 @@ public class BalloonHandler implements UIPlugin {
         for (int i = 0; i < runs.length; i++) {
             Run run = runs[i];
             Problem problem = getContest().getProblem(run.getProblemId());
-            if (shouldSendBalloon(run) && !v.contains(problem)) {
+            if (isValidRun(run) && !v.contains(problem)) {
                 v.add(problem);
             }
         }
@@ -231,6 +231,25 @@ public class BalloonHandler implements UIPlugin {
     }
 
     /**
+     * Should a balloon be issued for this run?
+     * 
+     * @param run
+     * @return true if valid
+     */
+    public boolean isValidRun(Run run) {
+        if ((run.isJudged() && run.isSolved()) && (!run.isDeleted() && isValidJudgement(run))) {
+
+            if (!run.isSendToTeams()) {
+                if (getContest().isAllowed(Permission.Type.RESPECT_NOTIFY_TEAM_SETTING)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * This routine checks and obeys the preliminary judgement rules.
      * 
      * @param run
@@ -269,17 +288,7 @@ public class BalloonHandler implements UIPlugin {
     public boolean shouldSendBalloon(Run run) {
         String balloonKey = getBalloonKey(run.getSubmitter(), run.getProblemId());
         if (!hasBalloonBeenSent(balloonKey)) {
-
-            if ((run.isJudged() && run.isSolved()) && (!run.isDeleted() && isValidJudgement(run))) {
-
-                if (!run.isSendToTeams()) {
-                    if (getContest().isAllowed(Permission.Type.RESPECT_NOTIFY_TEAM_SETTING)) {
-                        return false;
-                    }
-                }
-                return true;
-            }
-
+            return isValidRun(run);
         }
         return false;
     }
