@@ -15,7 +15,6 @@ import java.util.Vector;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.PermissionGroup;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
-import edu.csus.ecs.pc2.core.exception.IllegalRunState;
 import edu.csus.ecs.pc2.core.list.AccountList;
 import edu.csus.ecs.pc2.core.list.BalloonSettingsComparatorbySite;
 import edu.csus.ecs.pc2.core.list.RunComparatorByTeam;
@@ -162,9 +161,6 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                 problemId = run.getProblemId();
                 // added isValidJudgement to check and obey preliminary results
                 if (run.isSolved() && isValidJudgement(run)) {
-                    if(!run.isJudged()) {
-                        throw new IllegalRunState("Run isSolved but ! isJudged "+run);
-                    }
                     // TODO: we might want some differing logic here if all
                     // yes's are counted
                     // and/or no's after yes's are counted
@@ -174,7 +170,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                     break;
                 } else {
                     // we should really only do this if it's been judged
-                    if (run.isJudged() && isValidJudgement(run)) {
+                    if (isValidJudgement(run)) {
                         score += getPenaltyPointsPerNo();
                     } else {
                         unJudgedRun = true;
@@ -646,9 +642,9 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
             result = true;
         } else {
             // now the ugly stuff, handle being rejudged/preliminary judgements/...
-            if (run.isJudged()) {
+            if (run.getJudgementRecord() != null) {
                 // good... but why is the state not JUDGED
-                if (run.getStatus().equals(RunStates.MANUAL_REVIEW)) {
+                if (run.getJudgementRecord().isPreliminaryJudgement()){
                     if (countPreliminaryJudgements) {
                         result = true;
                     }

@@ -32,6 +32,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.Run.RunStates;
 
 /**
  * Test Scoring Algorithm.
@@ -796,6 +797,65 @@ public class DefaultScoringAlgorithmTest extends TestCase {
         
         scoreboardTest (2, runsData, rankData);
     }
+    
+    
+    /**
+     * Have run that has a BEING_JUDGED state and should show same standing
+     * as the state were JUDGED.
+     * 
+     * Test for Bug 407 - The SA fails to reflect prelim judgements.
+     * 
+     * based on CASE (1): "When Solved, all runs before Yes".
+     * 
+     * Created from testing/boardtest.html
+     * 
+     */
+    public void testScoreboardForBeingJudgedState () {
+        // RunID    TeamID  Prob    Time    Result
+        
+        String [] runsData = {
+                "1,1,A,1,No",  // 20 (a No before first yes)
+                "2,1,A,3,Yes",  // 3 (first yes counts Minute points but never Run Penalty points)
+                "3,1,A,5,No",  // zero -- after Yes
+                "4,1,A,7,Yes",  // zero -- after Yes
+                "5,1,A,9,No",  // zero -- after Yes
+                "6,1,B,11,No",  // zero -- not solved
+                "7,1,B,13,No",  // zero -- not solved
+                "8,2,A,30,Yes",  // 30 (minute points; no Run points on first Yes)
+                "9,2,B,35,No",  // zero -- not solved
+                "10,2,B,40,No",  // zero -- not solved
+                "11,2,B,45,No",  // zero -- not solved
+                "12,2,B,50,No",  // zero -- not solved
+                "13,2,B,55,No",  // zero -- not solved
+        };
+        
+        // Rank  TeamId Solved Penalty
+        
+        String [] rankData = {
+                "1,team1,1,23",
+                "2,team2,1,30"
+        };
+        
+        InternalContest contest = new InternalContest();
+        
+        int numTeams = 2;
+
+        initData(contest, numTeams, 5);
+        
+        for (String runInfoLine : runsData) {
+            addTheRun(contest, runInfoLine);
+        }
+
+        Run [] runs = contest.getRuns();
+        
+        for (Run run : runs){
+            run.setStatus(RunStates.BEING_JUDGED);
+        }
+
+        checkOutputXML(contest);
+
+        confirmRanks(contest, rankData);
+    }
 
     /**
      * Test tie breaker down to last yes submission time. 
@@ -1011,6 +1071,10 @@ public class DefaultScoringAlgorithmTest extends TestCase {
         }
         
     }
+    
+    
+
+    
 
     /**
      * Fetch string from nodes.
