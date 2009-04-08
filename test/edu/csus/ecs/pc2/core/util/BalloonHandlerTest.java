@@ -6,6 +6,7 @@ import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.InternalController;
 import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.Balloon;
 import edu.csus.ecs.pc2.core.model.BalloonDeliveryInfo;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
@@ -186,6 +187,54 @@ public class BalloonHandlerTest extends TestCase {
             assertTrue("Failed null run test (bug 329)", false);
         }
 
+    }
+
+    public void testBalloonList() {
+
+        IInternalContest contest;
+        IInternalController controller;
+
+        SampleContest sampleContest = new SampleContest();
+
+        contest = sampleContest.createContest(1, 1, 20, 2, false);
+        controller = new InternalController(contest);
+        
+        Account account = contest.generateNewAccounts(ClientType.Type.SCOREBOARD.toString(), 1, true).firstElement();
+        contest.setClientId(account.getClientId());
+
+        BalloonHandler balloonHandler = new BalloonHandler();
+        balloonHandler.setContestAndController(contest, controller);
+        
+
+        Judgement solvedJudgement = contest.getJudgements()[0];
+        ClientId judgeId = contest.getAccounts(Type.JUDGE).firstElement().getClientId();
+
+        Run[] runs = new Run[contest.getProblems().length];
+        for (int j = 0; j < runs.length; j++) {
+            Run run = new Run(contest.getAccounts(ClientType.Type.TEAM).firstElement().getClientId(), contest.getLanguages()[0], contest.getProblems()[j]);
+            run.setElapsedMins(9 + j);
+            run.setNumber(j+1);
+            runs[j] = run;
+        }
+
+        for (Run run : runs) {
+            // Set them to all solved
+            JudgementRecord judgementRecord = new JudgementRecord(solvedJudgement.getElementId(), judgeId, true, false);
+            if (run.getNumber() == 3) {
+                // do NOT send balloon/notify for run 3
+                judgementRecord.setSendToTeam(false);
+            }
+            run.addJudgement(judgementRecord);
+            run.setStatus(RunStates.JUDGED);
+            contest.addRun(run);
+        }
+        Balloon balloon = balloonHandler.buildBalloon("Yes", runs[5].getSubmitter(), runs[5].getProblemId(), runs[5]);
+        assertEquals("Balloon list failed notify test", contest.getProblems().length,balloon.getProblems().length);
+
+        // now set the permission and check again, this time should not include 1 run
+        account.getPermissionList().addPermission(Permission.Type.RESPECT_NOTIFY_TEAM_SETTING);
+        balloon = balloonHandler.buildBalloon("Yes", runs[5].getSubmitter(), runs[5].getProblemId(), runs[5]);
+        assertEquals("Balloon list failed respect notify test", contest.getProblems().length-1,balloon.getProblems().length);
     }
 
     private BalloonDeliveryInfo createBalloonDeliveryInfo(Run run) {
