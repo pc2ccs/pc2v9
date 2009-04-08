@@ -34,6 +34,7 @@ import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.RunEvent.Action;
+import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.util.BalloonHandler;
 import edu.csus.ecs.pc2.core.util.BalloonWriter;
 
@@ -526,7 +527,7 @@ public class BalloonPane extends JPanePlugin {
                     // there should be a yes for this run
                     goodBalloons.put(key, Long.valueOf(0));
                     if (!balloonHandler.hasBalloonBeenSent(key)) { // no balloon has been sent
-                        if (run.isSendToTeams()) {
+                        if (shouldSendToTeam(run)) {
                             if (sendBalloon(balloonHandler.buildBalloon("yes", run.getSubmitter(), run.getProblemId(), run))) {
                                 sentBalloonFor(key, run.getSubmitter(), run.getProblemId());
                             } else {
@@ -562,6 +563,22 @@ public class BalloonPane extends JPanePlugin {
 
     }
   
+    /**
+     * Should this balloon be sent to the team?
+     * @param run
+     * @return
+     */
+    boolean shouldSendToTeam(Run run) {
+        
+        if (!run.isSendToTeams()) {
+            if (getContest().isAllowed(Permission.Type.RESPECT_NOTIFY_TEAM_SETTING)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     /**
      * Send a balloon notification.
      * @param balloon

@@ -17,6 +17,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
+import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
@@ -270,10 +271,18 @@ public class BalloonHandler implements UIPlugin {
      */
     public boolean shouldSendBalloon(Run run) {
         String balloonKey = getBalloonKey(run.getSubmitter(), run.getProblemId());
-        if (! hasBalloonBeenSent(balloonKey)){
-            
-            return (run.isJudged() && run.isSolved()) && (! run.isDeleted() && isValidJudgement(run));
-            
+        if (!hasBalloonBeenSent(balloonKey)) {
+
+            if ((run.isJudged() && run.isSolved()) && (!run.isDeleted() && isValidJudgement(run))) {
+
+                if (!run.isSendToTeams()) {
+                    if (getContest().isAllowed(Permission.Type.RESPECT_NOTIFY_TEAM_SETTING)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
         }
         return false;
     }
