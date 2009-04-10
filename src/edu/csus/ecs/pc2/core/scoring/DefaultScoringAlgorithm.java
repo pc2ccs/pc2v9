@@ -17,6 +17,7 @@ import edu.csus.ecs.pc2.core.PermissionGroup;
 import edu.csus.ecs.pc2.core.exception.IllegalContestState;
 import edu.csus.ecs.pc2.core.list.AccountList;
 import edu.csus.ecs.pc2.core.list.BalloonSettingsComparatorbySite;
+import edu.csus.ecs.pc2.core.list.JudgementNotificationsList;
 import edu.csus.ecs.pc2.core.list.RunComparatorByTeam;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -24,6 +25,7 @@ import edu.csus.ecs.pc2.core.model.BalloonSettings;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
+import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -101,6 +103,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      * false means process all records per usual. 
      */
     private boolean respectSendToTeam = false;
+    private boolean respectEOC = false;
     
 
     public DefaultScoringAlgorithm() {
@@ -262,6 +265,7 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         
  
         respectSendToTeam = isAllowed (theContest, theContest.getClientId(), Permission.Type.RESPECT_NOTIFY_TEAM_SETTING);
+        respectEOC = isAllowed (theContest, theContest.getClientId(), Permission.Type.RESPECT_EOC_SUPPRESSION);
 
         countPreliminaryJudgements = theContest.getContestInformation().isPreliminaryJudgementsUsedByBoard();
         
@@ -340,7 +344,15 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
                             runToAdd = RunUtilities.createNewRun(runs[i], theContest);
                         }
                     }
-                        
+                    // now check EOC settings
+                    JudgementNotificationsList judgementNotificationsList = theContest.getContestInformation().getJudgementNotificationsList();
+                    ContestTime contestTime = theContest.getContestTime();
+                    if (respectEOC && RunUtilities.supppressJudgement(judgementNotificationsList, runs[i], contestTime)) {
+                        /**
+                         * If we are suppose to suppress this judgement, then change the run to a NEW run.
+                         */
+                        runToAdd = RunUtilities.createNewRun(runs[i], theContest);
+                    }
                     runTreeMap.put(runToAdd, runToAdd);
                     
                 }

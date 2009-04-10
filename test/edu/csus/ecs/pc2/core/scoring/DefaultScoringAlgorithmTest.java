@@ -16,18 +16,22 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import edu.csus.ecs.pc2.core.list.JudgementNotificationsList;
 import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
+import edu.csus.ecs.pc2.core.model.JudgementNotification;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
+import edu.csus.ecs.pc2.core.model.NotificationSetting;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
@@ -314,7 +318,6 @@ public class DefaultScoringAlgorithmTest extends TestCase {
             DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
             documentBuilder.parse(new InputSource(new StringReader(xmlString)));
-
         } catch (Exception e) {
             assertTrue("Error in XML output " + e.getMessage(), true);
             e.printStackTrace();
@@ -958,6 +961,73 @@ public class DefaultScoringAlgorithmTest extends TestCase {
     }
 
     
+    /**
+     * Test whether SA respects send to team 
+     */
+    public void testZZZZEOCSettings(){
+
+        // Sort order:
+        // Primary Sort = number of solved problems (high to low)
+        // Secondary Sort = score (low to high)
+        // Tertiary Sort = earliest submittal of last submission (low to high)
+        // Forth Sort = teamName (low to high)
+        // Fifth Sort = clientId (low to high)
+        
+        // RunID    TeamID  Prob    Time    Result
+        
+        String [] runsData = {
+                "1,1,A,250,No",
+                "2,1,A,290,Yes", 
+
+                // t5 solves A, 310 pts = 20 + 290
+                // but with ECO settings, yes is not seen, so 0
+                
+        };
+        
+        // Rank  TeamId Solved Penalty
+        
+        String [] rankData = {
+                // rank, team, solved, pts
+                "1,team1,0,0",
+        };
+        // without EOC permission
+        String [] rankData2 = {
+                // rank, team, solved, pts
+                "1,team1,1,310",
+        };
+        
+        InternalContest contest = new InternalContest();
+
+        initData(contest, 1, 5);
+        ContestTime contestTime = new ContestTime(1);
+        contestTime.setElapsedMins(300);
+        contest.updateContestTime(contestTime);
+        JudgementNotificationsList judgementNotificationsList = new JudgementNotificationsList();
+        for (String runInfoLine : runsData) {
+            addTheRun(contest, runInfoLine);
+        }
+
+        Run[] runs = contest.getRuns();
+        NotificationSetting notificationSetting = new NotificationSetting(runs[0].getProblemId());
+        JudgementNotification judgementNotification = new JudgementNotification(true, 30);
+        notificationSetting.setFinalNotificationYes(judgementNotification);
+        JudgementNotification judgementNotificationNo = new JudgementNotification(false, 30);
+        notificationSetting.setFinalNotificationNo(judgementNotificationNo);
+        judgementNotificationsList.add(notificationSetting);
+        contest.getContestInformation().updateJudgementNotification(notificationSetting);
+
+        checkOutputXML(contest);
+
+        confirmRanks(contest, rankData2);
+
+        Account account = contest.getAccount(contest.getClientId());
+        account.addPermission(edu.csus.ecs.pc2.core.security.Permission.Type.RESPECT_EOC_SUPPRESSION);
+        contest.updateAccount(account);
+
+        checkOutputXML(contest);
+
+        confirmRanks(contest, rankData);
+    }
     
     
     /**
