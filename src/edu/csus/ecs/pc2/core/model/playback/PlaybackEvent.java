@@ -4,6 +4,7 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IElementObject;
 import edu.csus.ecs.pc2.core.model.ISubmission;
+import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 
@@ -58,8 +59,17 @@ public class PlaybackEvent implements IElementObject {
 
     private EventStatus eventStatus = EventStatus.INVALID;
 
-
     private SerializedFile[] files = new SerializedFile[0];
+
+    private JudgementRecord judgementRecord;
+
+    public JudgementRecord getJudgementRecord() {
+        return judgementRecord;
+    }
+
+    public void setJudgementRecord(JudgementRecord judgementRecord) {
+        this.judgementRecord = judgementRecord;
+    }
 
     public SerializedFile[] getFiles() {
         return files;
@@ -88,6 +98,12 @@ public class PlaybackEvent implements IElementObject {
         eventStatus = EventStatus.PENDING;
         eventTime = run.getElapsedMins();
     }
+    
+    public PlaybackEvent(Action action, ClientId clientId, Run run, JudgementRecord judgementRecord) {
+        this(action, clientId, run);
+        this.judgementRecord = judgementRecord;
+    }
+    
 
     public long etElapsedMins() {
         return submission.getElapsedMins();

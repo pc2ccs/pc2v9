@@ -14,6 +14,7 @@ import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
@@ -81,14 +82,41 @@ public class ExtractPlaybackLoadFilesReport implements IReport {
         writeValues(printWriter, PlaybackManager.SUBMIT_CLIENT_KEY, run.getSubmitter().getName());
         writeValues(printWriter, PlaybackManager.MAINFILE_KEY, outputFileName);
         printWriter.println();
+        
+        JudgementRecord [] records = run.getAllJudgementRecords();
+        
+        for (JudgementRecord judgementRecord : records){
+           writeJudgementRecord (printWriter, run, judgementRecord);   
+        }
+    }
+
+    private void writeJudgementRecord(PrintWriter printWriter, Run run, JudgementRecord judgementRecord) {
+        writeValues(printWriter, PlaybackManager.ACTION_KEY, PlaybackEvent.Action.RUN_JUDGEMENT.toString());
+        writeValues(printWriter, PlaybackManager.ID_KEY, run.getNumber());
+        writeValues(printWriter, PlaybackManager.SITE_KEY, run.getSiteNumber());
+        
+        writeValues(printWriter, PlaybackManager.IS_SOLVED, judgementRecord.isSolved());
+        writeValues(printWriter, PlaybackManager.IS_PRELIMINARY, judgementRecord.isPreliminaryJudgement());
+        writeValues(printWriter, PlaybackManager.JUDGE_CLIENT_KEY, judgementRecord.getJudgerClientId().getName());
+        writeValues(printWriter, PlaybackManager.JUDGE_CLIENT_SITE, judgementRecord.getJudgerClientId().getSiteNumber());
+        writeValues(printWriter, PlaybackManager.JUDGED_ELAPSED_TIME, judgementRecord.getWhenJudgedTime());
+        writeValues(printWriter, PlaybackManager.IS_COMPUTER_JUDGED, judgementRecord.isComputerJudgement());
+        
+        writeValues(printWriter, PlaybackManager.JUDGEMENT_TEXT, contest.getJudgement(judgementRecord.getJudgementId()).getDisplayName());
+        writeValues(printWriter, PlaybackManager.IS_SEND_TO_TEAMS, judgementRecord.isSendToTeam());
+        printWriter.println();
+        
     }
 
     private void writeValues(PrintWriter printWriter, String key, long number) {
         printWriter.print(key + "=" + number + DELIMITER + " ");
-
     }
 
     private void writeValues(PrintWriter printWriter, String key, String value) {
+        printWriter.print(key + "=" + value + DELIMITER + " ");
+    }
+
+    private void writeValues(PrintWriter printWriter, String key, boolean value) {
         printWriter.print(key + "=" + value + DELIMITER + " ");
     }
 
@@ -124,6 +152,7 @@ public class ExtractPlaybackLoadFilesReport implements IReport {
                     nonExtractedRuns++;
                 }
             } catch (Exception e) {
+                e.printStackTrace();
                 failedRunExtract.add("Failed run: " + run);
                 nonExtractedRuns++;
                 printWriter.println("# error extracting run " + run + " " + e.getMessage());

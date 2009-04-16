@@ -21,6 +21,9 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ElementId;
+import edu.csus.ecs.pc2.core.model.Judgement;
+import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.playback.PlaybackEvent;
 import edu.csus.ecs.pc2.core.model.playback.PlaybackManager;
@@ -144,7 +147,7 @@ public class PlaybackPane extends JPanePlugin {
         if (eventsListBox == null) {
             eventsListBox = new MCLB();
 
-            Object[] cols = { "Seq", "Who", "Event", "Id", "When", "State" };
+            Object[] cols = { "Seq", "Who", "Event", "Id", "When", "State", "Details" };
             eventsListBox.addColumns(cols);
             cols = null;
         }
@@ -152,16 +155,46 @@ public class PlaybackPane extends JPanePlugin {
     }
 
     public String[] buildPlayBackRow(PlaybackEvent playbackEvent) {
-        String[] strings = new String[6];
+        String[] strings = new String[7];
+        
+        if (playbackEvent.getAction().equals(PlaybackEvent.Action.RUN_SUBMIT)) {
 
-        // Object[] cols = { "Seq", "Who", "Event", "Id", "When", "State" };
+            // Object[] cols = { "Seq", "Who", "Event", "Id", "When", "State", "Details"};
 
-        strings[0] = "" + playbackEvent.getSequenceId();
-        strings[1] = playbackEvent.getClientId().getName();
-        strings[2] = playbackEvent.getAction().toString();
-        strings[3] = "" + playbackEvent.getId();
-        strings[4] = "" + playbackEvent.getEventTime();
-        strings[5] = "" + playbackEvent.getEventStatus();
+            strings[0] = "" + playbackEvent.getSequenceId();
+            strings[1] = playbackEvent.getClientId().getName();
+            strings[2] = playbackEvent.getAction().toString();
+            strings[3] = "" + playbackEvent.getId();
+            strings[4] = "" + playbackEvent.getEventTime();
+            strings[5] = "" + playbackEvent.getEventStatus();
+        } else if (playbackEvent.getAction().equals(PlaybackEvent.Action.RUN_JUDGEMENT)) {
+
+            // Object[] cols = { "Seq", "Who", "Event", "Id", "When", "State", "Details" };
+
+            strings[0] = "" + playbackEvent.getSequenceId();
+            strings[1] = playbackEvent.getClientId().getName();
+            strings[2] = playbackEvent.getAction().toString();
+            strings[3] = "" + playbackEvent.getId();
+            strings[4] = "" + playbackEvent.getEventTime();
+            strings[5] = "" + playbackEvent.getEventStatus();
+            JudgementRecord judgementRecord = playbackEvent.getJudgementRecord();
+            ElementId id =  judgementRecord.getJudgementId();
+            if (id != null){
+                Judgement judgement = getContest().getJudgement(id);
+                strings[6] = judgement.getDisplayName();
+            }
+            else {
+                strings[6] = "Undefined judgement: "+ id;
+
+            }
+        } else {
+            strings[0] = "" + playbackEvent.getSequenceId();
+            strings[1] = "";
+            strings[2] = PlaybackEvent.Action.UNDEFINED.toString();
+            strings[3] = "";
+            strings[4] = "";
+            strings[5] = ""; 
+        }
 
         return strings;
     }

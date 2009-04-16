@@ -7,14 +7,21 @@ import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.list.JudgementNotificationsList;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Judgement;
+import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.RunExecutionStatus;
 import edu.csus.ecs.pc2.core.model.RunFiles;
+import edu.csus.ecs.pc2.core.model.RunUtilities;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.model.playback.PlaybackEvent.Action;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.packet.PacketFactory;
@@ -47,6 +54,22 @@ public class PlaybackManager {
     public static final String ELAPSED_KEY = "elapsed";
 
     private static final String DELIMITER = "";
+
+    public static final String IS_SOLVED = "solved";
+
+    public static final String IS_PRELIMINARY = "preliminary";
+
+    public static final String JUDGED_ELAPSED_TIME = "judged_elapsed_time";
+
+    public static final String IS_COMPUTER_JUDGED = "computer_judged";
+
+    public static final String JUDGEMENT_TEXT = "judgement";
+
+    public static final String JUDGE_CLIENT_KEY = "judgeclient";
+
+    public static final String JUDGE_CLIENT_SITE = "judgeclientsite";
+
+    public static final String IS_SEND_TO_TEAMS = "senttoteams";
 
     private int sequenceNumber = 1;
 
@@ -100,7 +123,7 @@ public class PlaybackManager {
                     continue;
                 }
                 
-                PlaybackEvent playbackEvent = createPlayBackEvent(lineNumber, contest, s, "[|]", sourceDirectory);
+                PlaybackEvent playbackEvent = createPlayBackEvent(lineNumber, contest, s, "[|]", sourceDirectory, events);
                 if (playbackEvent != null) {
                     events.add(playbackEvent);
                 } else {
@@ -164,10 +187,11 @@ public class PlaybackManager {
      * @param sourceDir
      * @param s
      * @param delimit
+     * @param events 
      * @return
      * @throws PlaybackParseException
      */
-    protected PlaybackEvent createPlayBackEvent(int lineNumber, IInternalContest contest, String s, String delimit, String sourceDir) throws PlaybackParseException {
+    protected PlaybackEvent createPlayBackEvent(int lineNumber, IInternalContest contest, String s, String delimit, String sourceDir, Vector<PlaybackEvent> events) throws PlaybackParseException {
 
         String[] fields = s.split(delimit);
 
@@ -222,6 +246,12 @@ public class PlaybackManager {
             if (number < 1) {
                 throw new PlaybackParseException(lineNumber, "invalid run/clar number: " + idStr);
             }
+            
+            run.setSiteNumber(contest.getSiteNumber());
+            if (siteId != null){
+                int siteNumber = getIntegerValue(siteId);
+                run.setSiteNumber(siteNumber);
+            }
 
             run.setElapsedMins(getIntegerValue(elapsedTimeStr));
             run.setNumber(number);
@@ -231,6 +261,64 @@ public class PlaybackManager {
             playbackEvent.setFiles(files);
 
             // TODO aux files, someday, maybe
+            
+        } else if (command.equalsIgnoreCase(Action.RUN_JUDGEMENT.toString())) {
+            
+            action = PlaybackEvent.Action.RUN_JUDGEMENT;
+            String siteId = getAndCheckValue(properties, SITE_KEY, "Site number", lineNumber);
+            
+            String idStr = getAndCheckValue(properties, ID_KEY, "run/clar number", lineNumber);
+            int number = Integer.parseInt(idStr);
+
+            if (number < 1) {
+                throw new PlaybackParseException(lineNumber, "invalid run/clar number: " + idStr);
+            }
+            
+            String judgeSiteString = getAndCheckValue(properties, JUDGE_CLIENT_SITE, "run/clar number", lineNumber);
+            String judgeClientName = getAndCheckValue(properties, JUDGE_CLIENT_KEY, "Judge Client id", lineNumber);
+            
+            ClientId clientId = findClient(contest, judgeSiteString, judgeClientName);
+            
+            Run run = findRun (contest, siteId, number, events);
+            if (run == null){
+                throw new PlaybackParseException("Could not find submitted run for judgement run site "+siteId+" run number "+number);
+            }
+            
+//            writeValues(printWriter, PlaybackManager.SITE_KEY, run.getSiteNumber());
+//            
+//            writeValues(printWriter, PlaybackManager.JUDGED_ELAPSED_TIME, judgementRecord.getWhenJudgedTime());
+//            writeValues(printWriter, PlaybackManager.IS_SOLVED, judgementRecord.isSendToTeam());
+//            writeValues(printWriter, PlaybackManager.IS_SEND_TO_TEAMS, judgementRecord.isSendToTeam());
+            
+            ClientId judgeClientId = findClient(contest, siteId, judgeClientName);  
+            
+            String solvedString = getAndCheckValue(properties, IS_SOLVED, "Solved flag", false, lineNumber);
+            boolean solved = solvedString.equalsIgnoreCase("true");
+       
+            String judgementText = getAndCheckValue(properties, JUDGEMENT_TEXT, "Judgement", true, lineNumber);
+            ElementId judgementElementId = findJudgementId (contest, solved, judgementText);
+            if (judgementElementId == null){
+                throw new PlaybackParseException("Could not find judgement "+judgementText);
+            }
+            String computerJudgedString = getAndCheckValue(properties, IS_COMPUTER_JUDGED, "Conputer Judged flag", false, lineNumber);
+            boolean computerJudged = computerJudgedString.equalsIgnoreCase("true");
+            
+            String prelimJudgedString = getAndCheckValue(properties, IS_PRELIMINARY, "Preliminary Judged", false, lineNumber);
+            boolean preliminaryJudged = prelimJudgedString .equalsIgnoreCase("true");
+            
+            String sendToTeamString = getAndCheckValue(properties, IS_SEND_TO_TEAMS, "Send to teams", false, lineNumber);
+            boolean sendToTeam = sendToTeamString .equalsIgnoreCase("true");
+            
+            boolean usedValidator = false;
+            
+            JudgementRecord judgementRecord = new JudgementRecord(judgementElementId, judgeClientId, solved, usedValidator, computerJudged);
+            judgementRecord.setPreliminaryJudgement(preliminaryJudged);
+            judgementRecord.setSendToTeam(sendToTeam);
+            
+            playbackEvent= new PlaybackEvent(action, judgeClientId, run, judgementRecord);
+            playbackEvent.setClientId(clientId);
+
+            
         } else {
             throw new PlaybackParseException(lineNumber, "Unknown event: " + command);
         }
@@ -238,6 +326,51 @@ public class PlaybackManager {
         return playbackEvent;
     }
 
+    private ElementId findJudgementId(IInternalContest contest, boolean solved, String judgementText) {
+        
+        Judgement [] judgements = contest.getJudgements();
+        
+        if (solved){
+            return judgements[0].getElementId();
+        }
+        
+        for (Judgement judgement : judgements){
+            if (judgementText.trim().equalsIgnoreCase(judgement.getDisplayName().trim())){
+                return judgement.getElementId();
+            }
+        }
+        
+        return null;
+    }
+
+    /**
+     * Search events for run which matches site and number.
+     * 
+     * @param contest
+     * @param siteId
+     * @param number
+     * @param events
+     * @return
+     */
+    private Run findRun(IInternalContest contest, String siteIdString, int number, Vector<PlaybackEvent> events) {
+
+        if (events == null){
+            return null;
+        }
+        
+        int siteId = getIntegerValue(siteIdString);
+        
+        for (PlaybackEvent event : events){
+            if (event.getAction().equals(Action.RUN_SUBMIT)){
+                Run run = event.getRun();
+                if (run.getNumber() == number && (run.getSiteNumber() == siteId)){
+                    return run;
+                }
+            }
+        }
+        
+        return null;
+    }
 
     private ClientId findClient(IInternalContest contest, String siteId, String loginName) throws PlaybackParseException {
 
@@ -366,7 +499,7 @@ public class PlaybackManager {
         writeValues("File size", playbackEvent.getFiles()[0].getBuffer().length);
         System.out.println();
     }
-
+    
     public void executeEvent(PlaybackEvent playbackEvent, IInternalContest contest, IInternalController controller) throws Exception {
 
         if (Utilities.isDebugMode()){
@@ -400,7 +533,42 @@ public class PlaybackManager {
                 // Send to clients and servers
                 sendToJudgesAndOthers(controller, confirmPacket, true);
 
+                break;
+                
+            case RUN_JUDGEMENT:
+        
+               
+                Run run = playbackEvent.getRun();
+                
+                sendStatusMessge(contest, controller, run, RunExecutionStatus.COMPILING);
+                sendStatusMessge(contest, controller, run, RunExecutionStatus.EXECUTING);
+                sendStatusMessge(contest, controller, run, RunExecutionStatus.VALIDATING);
 
+                JudgementRecord judgement = playbackEvent.getJudgementRecord();
+                
+                Run runToUpdate = contest.getRun(run.getElementId());
+                runToUpdate.addJudgement(judgement);
+                ClientId whoChangedRun = judgement.getJudgerClientId();
+                runToUpdate.setStatus(RunStates.JUDGED);
+                contest.updateRun(runToUpdate, whoChangedRun);
+
+                Run updatedRun = contest.getRun(run.getElementId());
+                Packet runUpdatedPacket = PacketFactory.createRunUpdateNotification(contest.getClientId(), PacketFactory.ALL_SERVERS, updatedRun, whoChangedRun);
+                sendToJudgesAndOthers(controller, runUpdatedPacket, true);
+
+                /**
+                 * Send Judgement Notification to Team or not.
+                 */
+
+                if (updatedRun.isJudged() && updatedRun.getJudgementRecord().isSendToTeam()) {
+
+                    Packet notifyPacket = PacketFactory.clonePacket(contest.getClientId(), run.getSubmitter(), runUpdatedPacket);
+                    sendJudgementToTeam (controller, contest, notifyPacket, updatedRun);
+                }
+
+                sequenceNumber++;
+                playbackEvent.setEventStatus(EventStatus.COMPLETED);
+                
                 break;
 
             default:
@@ -408,6 +576,46 @@ public class PlaybackManager {
         }
 
     }
+    
+    
+    private void sendStatusMessge(IInternalContest contest, IInternalController controller, Run run, RunExecutionStatus status) {
+
+        if (contest.isSendAdditionalRunStatusMessages()) {
+            Packet sendPacket = PacketFactory.createRunStatusPacket(contest.getClientId(), contest.getClientId(), run, contest.getClientId(), status);
+            sendToSpectatorsAndSites(controller, sendPacket, true);
+        }
+    }
+
+    /**
+     * Send to spectators and servers
+     * @param controller 
+     * 
+     * @param packet
+     * @param sendToServers
+     */
+    public void sendToSpectatorsAndSites(IInternalController controller, Packet packet, boolean sendToServers) {
+        controller.sendToSpectators(packet);
+        if (sendToServers) {
+            controller.sendToServers(packet);
+        }
+    }
+    
+    private void sendJudgementToTeam(IInternalController controller, IInternalContest contest, Packet judgementPacket, Run run) {
+        
+        if (run.isJudged() && run.getJudgementRecord().isSendToTeam()) {
+            JudgementNotificationsList judgementNotificationsList = contest.getContestInformation().getJudgementNotificationsList();
+            
+            if (! RunUtilities.supppressJudgement(judgementNotificationsList, run, contest.getContestTime())){
+                // Send to team who sent it, send to other server if needed.
+                controller.sendToClient(judgementPacket);
+            } else {
+                controller.getLog().info("Notification not sent to "+run.getSubmitter()+" for run "+run);
+            }
+        } else {
+            controller.getLog().warning("Attempted to send back unjudged run to team "+run);
+        }
+    }
+
 
     public int getSequenceNumber() {
         return sequenceNumber;
