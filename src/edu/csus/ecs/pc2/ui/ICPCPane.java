@@ -16,12 +16,16 @@ import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.Group;
+import edu.csus.ecs.pc2.core.model.GroupEvent;
+import edu.csus.ecs.pc2.core.model.IGroupListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 import java.awt.FlowLayout;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Vector;
+import java.awt.event.KeyEvent;
+import java.awt.Dimension;
 
 /**
  * This Pane has 2 buttons, one for loading the ICPC tab files for PC^2 and a 2nd button
@@ -40,7 +44,7 @@ public class ICPCPane extends JPanePlugin {
 
     private JButton changeDisplayFormatButton = null;
 
-    private JButton importButton = null;
+    private JButton importAccountsButton = null;
 
     private ICPCAccountFrame icpcAccountFrame = null;
 
@@ -49,6 +53,30 @@ public class ICPCPane extends JPanePlugin {
     private String lastDir;
 
     private Log log;
+
+    private JButton importSitesButton = null;
+
+    /**
+     * 
+     * 
+     * @author pc2@ecs.csus.edu
+     */
+    public class GroupListenerImplementation implements IGroupListener {
+
+        public void groupAdded(GroupEvent event) {
+            getImportAccountsButton().setEnabled(getContest().getGroups() != null);
+        }
+
+        public void groupChanged(GroupEvent event) {
+            getImportAccountsButton().setEnabled(getContest().getGroups() != null);
+        }
+
+        public void groupRemoved(GroupEvent event) {
+            // TODO Auto-generated method stub
+        }
+
+    }
+
 
     /**
      * This method initializes
@@ -68,7 +96,8 @@ public class ICPCPane extends JPanePlugin {
         flowLayout.setHgap(50);
         this.setLayout(flowLayout);
         this.setSize(new java.awt.Dimension(448, 207));
-        this.add(getImportButton(), null);
+        this.add(getImportSitesButton(), null);
+        this.add(getImportAccountsButton(), null);
         this.add(getChangeDisplayFormatButton(), null);
 
     }
@@ -84,24 +113,26 @@ public class ICPCPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes importButton
+     * This method initializes importAccountsButton
      * 
      * @return javax.swing.JButton
      */
-    private JButton getImportButton() {
-        if (importButton == null) {
-            importButton = new JButton();
-            importButton.setText("Import");
-            importButton.setPreferredSize(new java.awt.Dimension(150, 26));
-            importButton.setToolTipText("Import PC^2 ICPC contest initialization data");
-            importButton.addActionListener(new java.awt.event.ActionListener() {
+    private JButton getImportAccountsButton() {
+        if (importAccountsButton == null) {
+            importAccountsButton = new JButton();
+            importAccountsButton.setText("Import Accounts");
+            importAccountsButton.setPreferredSize(new java.awt.Dimension(150, 26));
+            importAccountsButton.setMnemonic(KeyEvent.VK_A);
+            importAccountsButton.setEnabled(false);
+            importAccountsButton.setToolTipText("Import PC^2 ICPC contest initialization data (PC2_Team.tab)");
+            importAccountsButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     // load the accounts
-                    loadICPCFiles();
+                    loadPC2Team();
                 }
             });
         }
-        return importButton;
+        return importAccountsButton;
     }
 
     /**
@@ -116,10 +147,10 @@ public class ICPCPane extends JPanePlugin {
         return icpcAccountFrame;
     }
 
-    protected void loadICPCFiles() {
+    protected void loadPC2Site() {
         try {
             JFileChooser chooser = new JFileChooser(lastDir);
-            chooser.setDialogTitle("Select PC2_Team.tab");
+            chooser.setDialogTitle("Select PC2_Site.tab");
             chooser.setFileFilter(new TabFileFilter());
             int returnVal = chooser.showOpenDialog(this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -128,14 +159,13 @@ public class ICPCPane extends JPanePlugin {
                 if (newFile.exists()) {
                     if (newFile.isFile()) {
                         if (newFile.canRead()) {
-                            lastDir = chooser.getCurrentDirectory().toString();
                             // TODO move this off the swing thread, maybe into its own class
-                            importData = LoadICPCData.loadSites(lastDir, getContest().getSites());
+                            ICPCImportData importSiteData = LoadICPCData.loadSites(lastDir, getContest().getSites());
                             newFileProblem = false;
-                            Group[] importedGroups = importData.getGroups();
+                            Group[] importedGroups = importSiteData.getGroups();
                             Group[] modelGroups = getContest().getGroups();
                             // XXX this is a funky location, but we do not want to add a 3rd icpc load for it
-                            String contestTitle = importData.getContestTitle();
+                            String contestTitle = importSiteData.getContestTitle();
                             if (contestTitle != null && contestTitle.trim().length() > 0) {
                                 ContestInformation ci = getContest().getContestInformation();
                                 ci.setContestTitle(contestTitle);
@@ -169,17 +199,44 @@ public class ICPCPane extends JPanePlugin {
                                     }
                                 }
                             } // XXX odd, but is it an error if we have no groups?
+                        } // canRead
+                    } // isFile
+                } // exists
+                if (newFileProblem) {
+                    log.warning("Problem reading PC2_Contest.tab " + newFile.getCanonicalPath() + "");
+                    JOptionPane.showMessageDialog(getParentFrame(), "Could not open file " + newFile, "Warning", JOptionPane.WARNING_MESSAGE);
+                }
+            } // APPROVE_ACTION
+        } catch(Exception e) {
+            log.log(Log.WARNING, "loadPC2Site exception ", e);
+        }
+    }
+
+    protected void loadPC2Team() {
+        try {
+            JFileChooser chooser = new JFileChooser(lastDir);
+            chooser.setDialogTitle("Select PC2_Team.tab");
+            chooser.setFileFilter(new TabFileFilter());
+            int returnVal = chooser.showOpenDialog(this);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                File newFile = chooser.getSelectedFile().getCanonicalFile();
+                boolean newFileProblem = true;
+                if (newFile.exists()) {
+                    if (newFile.isFile()) {
+                        if (newFile.canRead()) {
+                            lastDir = chooser.getCurrentDirectory().toString();
 
                             Account[] accounts;
                             Vector<Account> accountVector = getContest().getAccounts(ClientType.Type.TEAM);
                             accounts = accountVector.toArray(new Account[accountVector.size()]);
                             importData = LoadICPCData.loadAccounts(lastDir, getContest().getGroups(), accounts);
+                            newFileProblem = false;
                             changeDisplayFormat();
                         }
                     }
                 }
                 if (newFileProblem) {
-                    log.warning("Problem reading PC2_Contest.tab " + newFile.getCanonicalPath() + "");
+                    log.warning("Problem reading _PC2_Team.tab " + newFile.getCanonicalPath() + "");
                     JOptionPane.showMessageDialog(getParentFrame(), "Could not open file " + newFile, "Warning", JOptionPane.WARNING_MESSAGE);
                 }
             }
@@ -211,7 +268,7 @@ public class ICPCPane extends JPanePlugin {
     protected void changeDisplayFormat() {
         if (importData == null) {
 //            importData = new ICPCImportData(getContest().getAccounts(Type.TEAM), getContest().getGroups(), getContest().getContestInformation().getContestTitle());
-            JOptionPane.showMessageDialog(this, "Please 'Import' icpc data first.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Please 'Import Accounts' icpc account data first.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
         if (importData.getAccounts() != null) {
@@ -247,14 +304,39 @@ public class ICPCPane extends JPanePlugin {
 
         log = getController().getLog();
         // getContest().addAccountListener(new AccountListenerImplementation());
+        getContest().addGroupListener(new GroupListenerImplementation());
 
         // initializePermissions();
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
+                // wait for groups before enabling accounts
+                getImportAccountsButton().setEnabled(getContest().getGroups() != null);
                 // updateGUIperPermissions();
             }
         });
+    }
+
+    /**
+     * This method initializes importSitesButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getImportSitesButton() {
+        if (importSitesButton == null) {
+            importSitesButton = new JButton();
+            importSitesButton.setPreferredSize(new Dimension(150, 26));
+            importSitesButton.setMnemonic(KeyEvent.VK_S);
+            importSitesButton.setText("Import Sites");
+            importSitesButton.setActionCommand("Import Sites");
+            importSitesButton.setToolTipText("Import PC^2 ICPC contest initialization data (PC2_Site.tab)");
+            importSitesButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    loadPC2Site();
+                }
+            });
+        }
+        return importSitesButton;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
