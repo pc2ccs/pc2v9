@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
@@ -11,7 +12,9 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.IJudgementListener;
 import edu.csus.ecs.pc2.core.model.Judgement;
+import edu.csus.ecs.pc2.core.model.JudgementEvent;
 
 /**
  * Show Judgements, allow add and edit.
@@ -38,6 +41,26 @@ public class JudgementsPanel extends JPanePlugin {
 
     private JLabel messageLabel = null;
 
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     * 
+     */
+    private class JudgementListenerImplementation implements IJudgementListener {
+
+        public void judgementAdded(JudgementEvent event) {
+            reloadJudgementList();
+        }
+
+        public void judgementChanged(JudgementEvent event) {
+            reloadJudgementList();
+        }
+
+        public void judgementRemoved(JudgementEvent event) {
+            reloadJudgementList();
+        }
+    }
+    
     /**
      * This method initializes
      * 
@@ -66,6 +89,7 @@ public class JudgementsPanel extends JPanePlugin {
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
+        getContest().addJudgementListener(new JudgementListenerImplementation());
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -130,8 +154,26 @@ public class JudgementsPanel extends JPanePlugin {
         if (addButton == null) {
             addButton = new JButton();
             addButton.setText("Add");
+            addButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    addJudgement();
+                }
+            });
         }
         return addButton;
+    }
+
+    protected void addJudgement() {
+        String input = JOptionPane.showInputDialog(this, "Enter new No judgement:");
+        if (input != null && input.trim().length() > 0) {
+            input = input.trim();
+            if (!input.toLowerCase().startsWith("no - ")) {
+                input = "No - " + input;
+            }
+            Judgement judgement = new Judgement(input.trim());
+            getController().addNewJudgement(judgement);
+        }
+        // sit back and wait for the list to be reloaded
     }
 
     /**
