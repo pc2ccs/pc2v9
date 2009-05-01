@@ -8,6 +8,12 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -392,17 +398,82 @@ public class LoginFrame extends JFrame implements UIPlugin {
         return logoCSUS;
     }
 
+    /*
+     * Given a inFileName attempts to find file in jar, otherwise falls back to file system.
+     * 
+     * Will return null if file is not found in either location.
+     */
     private ImageIcon loadImageIconFromFile(String inFileName) {
         File imgFile = new File(inFileName);
         ImageIcon icon = null;
-        if (imgFile.exists()) {
-            icon = new ImageIcon(imgFile.getAbsolutePath());
+        // attempt to locate in jar
+        URL iconURL = getClass().getResource("/"+inFileName);
+        if (iconURL == null) {
+            if (imgFile.exists()) {
+                try {
+                    iconURL = imgFile.toURL();
+                } catch (MalformedURLException e) {
+                    iconURL = null;
+                    StaticLog.log("LoginFrame.loadImageIconFromFile("+inFileName+")", e);
+                }
+            }
+        }
+        if (iconURL != null) {
+            if (verifyImage(inFileName, iconURL)) {
+                icon = new ImageIcon(iconURL);
+            } else {
+                StaticLog.warning(inFileName+"("+iconURL.toString()+") checksum failed");
+            }
+        }
+        return icon;
+    }
+
+    private boolean verifyImage(String inFileName, URL url) {
+        // TODO why is the checksum different from the jar?  compressed?
+        byte[] csusChecksum = { -78, -82, -33, 125, 3, 20, 3, -51, 53, -82, -66, -19, -96, 82, 39, -92, 16, 52, 17, 127};
+        byte[] icpcChecksum = { -9, -91, 66, 44, 57, 117, 47, 58, 103, -17, 31, 53, 10, 6, 100, 68, 0, 127, -103, -58};
+        byte[] csusJarChecksum = { 98, 105, -19, -31, -71, -121, 109, -34, 64, 83, -78, -31, 49, -57, 57, 8, 35, -79, 13, -49};
+        byte[] icpcJarChecksum = { 70, -55, 53, -41, 127, 102, 30, 95, -55, -13, 11, -11, -31, -103, -107, -31, 119, 25, -98, 14};
+        byte[] verifyChecksum;
+        
+        if (inFileName.equals("images/csus_logo.png")) {
+            if (url.toString().startsWith("jar")) {
+                verifyChecksum = csusJarChecksum;
+            } else {
+                verifyChecksum = csusChecksum;
+            }
         } else {
-            // get it from the jar (hopefully)
-            icon = new ImageIcon(getClass().getResource("/"+inFileName));
+            if (url.toString().startsWith("jar")) {
+                verifyChecksum = icpcJarChecksum;
+            } else {
+                verifyChecksum = icpcChecksum;
+            }
+        }
+        try {
+            int matchedBytes = 0;
+            InputStream is = url.openStream();
+            MessageDigest md = MessageDigest.getInstance("SHA");
+            md.reset();
+            byte[] b = new byte[1024];
+            while(is.read(b) > 0) {
+                md.update(b);
+            }
+            byte[] digested = md.digest();
+            for (int i = 0; i < digested.length; i++) {
+                if (digested[i] == verifyChecksum[i]) {
+                    matchedBytes++;
+                } else {
+                    break;
+                }
+            }
+            return(matchedBytes == verifyChecksum.length);
+        } catch (IOException e) {
+            StaticLog.log("verifyImage("+inFileName+")", e);
+        } catch (NoSuchAlgorithmException e) {
+            StaticLog.log("verifyImage("+inFileName+")", e);
         }
         
-        return icon;
+        return false;
     }
 
     /**
