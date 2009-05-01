@@ -19,6 +19,7 @@ import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Balloon;
 import edu.csus.ecs.pc2.core.model.BalloonSettings;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Problem;
 
 /**
@@ -123,7 +124,7 @@ public class BalloonWriter {
             message.append(NL);
             y -= 20;
             if (status.equalsIgnoreCase("yes")) {
-                message.append(print("Color: "+balloonSettings.getColor(balloon.getProblemId()),postscript,x,y));
+                message.append(print("Color: "+getColor(balloonSettings, balloon.getProblemId()),postscript,x,y));
                 message.append(NL);
                 y -= 20;
             }
@@ -190,7 +191,7 @@ public class BalloonWriter {
                 for (int j = 0; j < problems.length; j++) {
                     sw.write(NL);
                     y -= 16*2;
-                    sw.write(print("    " + balloonSettings.getColor(problems[j]) + " - " + problems[j].getDisplayName(), postscript, x, y));
+                    sw.write(print("    " + getColor(balloonSettings,problems[j]) + " - " + problems[j].getDisplayName(), postscript, x, y));
                     sw.write(NL);
                 }
                 message.append(sw.toString());
@@ -201,7 +202,7 @@ public class BalloonWriter {
                     for (int j = 0; j < problems.length; j++) {
                         sw.write(NL);
                         y -= 16*2;
-                        sw.write(print("    " + balloonSettings.getColor(problems[j]) + " - " + problems[j].getDisplayName(), postscript, x, y));
+                        sw.write(print("    " + getColor(balloonSettings, problems[j]) + " - " + problems[j].getDisplayName(), postscript, x, y));
                         sw.write(NL);
                         count++;
                     }
@@ -227,6 +228,26 @@ public class BalloonWriter {
             log.throwing(getClass().getName(), "buildBaloonMesageSummary for " + balloon.getRun() + " error collecting list of balloons", e);
         }
         return y;
+    }
+
+    
+    private String getColor(BalloonSettings balloonSettings, Problem problem) {
+        return getColor(balloonSettings,problem.getElementId());
+    }
+
+    /**
+     * Pretty print the "color".
+     * 
+     * @param balloonSettings
+     * @param problemId
+     * @return <undefined> or a configured color
+     */
+    String getColor(BalloonSettings balloonSettings, ElementId problemId) {
+        String color =  balloonSettings.getColor(problemId);
+        if (color == null || color.trim().equals("")) {
+            color = "<undefined>";
+        }
+        return color;
     }
 
     /**
