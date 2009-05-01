@@ -206,13 +206,14 @@ public class RunsPanel extends JPanePlugin {
             int idx = 0;
 
             if (usingFullColumns) {
-                // Object[] fullColumns = { "Site", "Team", "Run Id", "Time", "Status", "Problem", "Judge", "Language", "OS" };
+                // Object[] fullColumns = { "Site", "Team", "Run Id", "Time", "Status", "Suppressed", "Problem", "Judge", "Language", "OS" };
 
                 s[idx++] = getSiteTitle("" + run.getSubmitter().getSiteNumber());
                 s[idx++] = getTeamDisplayName(run);
                 s[idx++] = new Long(run.getNumber()).toString();
                 s[idx++] = new Long(run.getElapsedMins()).toString();
                 s[idx++] = getJudgementResultString(run);
+                s[idx++] = isJudgementSuppressed(run);
                 s[idx++] = getProblemTitle(run.getProblemId());
                 s[idx++] = getJudgesTitle(run, judgeId, showJudgesInfo, autoJudgedRun);
                 s[idx++] = getLanguageTitle(run.getLanguageId());
@@ -245,6 +246,34 @@ public class RunsPanel extends JPanePlugin {
             StaticLog.getLog().log(Log.INFO, "Exception in buildRunRow()", exception);
         }
         return null;
+    }
+
+    /**
+     * Was the active judgement suppressed on the team?
+     * @param run
+     * @return "" or "Yes" or "Yes (EOC)"
+     */
+    private String isJudgementSuppressed(Run run) {
+        String result = "";
+
+        // requires run to be judged
+        if (run.isJudged()) {
+            if (!run.getJudgementRecord().isSendToTeam()) {
+                result= "Yes";
+            } else {
+                if (RunUtilities.supppressJudgement(judgementNotificationsList, run, getContest().getContestTime())) {
+                    result = "Yes (EOC)";
+                } else {
+                    if (run.getJudgementRecord().isPreliminaryJudgement()) {
+                        Problem prob = getContest().getProblem(run.getProblemId());
+                        if (!prob.isPrelimaryNotification()) {
+                            result = "Yes";
+                        }
+                    }
+                }
+            }
+        }
+        return result;
     }
 
     private String getJudgesTitle(Run run, ClientId judgeId, boolean showJudgesInfo2, boolean autoJudgedRun) {
@@ -593,7 +622,7 @@ public class RunsPanel extends JPanePlugin {
         runListBox.removeAllRows();
         runListBox.removeAllColumns();
 
-        Object[] fullColumns = { "Site", "Team", "Run Id", "Time", "Status", "Problem", "Judge", "Language", "OS" };
+        Object[] fullColumns = { "Site", "Team", "Run Id", "Time", "Status", "Suppressed", "Problem", "Judge", "Language", "OS" };
         Object[] fullColumnsNoJudge = { "Site", "Team", "Run Id", "Time", "Status", "Problem", "Language", "OS" };
         Object[] teamColumns = { "Site", "Run Id", "Problem", "Time", "Status", "Language" };
 
