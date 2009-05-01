@@ -61,7 +61,7 @@ public class Validator {
     /**
      * Yes judgement.
      */
-    public static final String JUDGEMENT_YES = "Yes";
+    public static final String JUDGEMENT_YES = "accepted";
 
     /**
      * Presentation Error.
