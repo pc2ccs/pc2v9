@@ -182,8 +182,7 @@ public class PlaybackPane extends JPanePlugin {
             if (id != null){
                 Judgement judgement = getContest().getJudgement(id);
                 strings[6] = judgement.getDisplayName();
-            }
-            else {
+            } else {
                 strings[6] = "Undefined judgement: "+ id;
 
             }
