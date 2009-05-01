@@ -28,7 +28,6 @@ import edu.csus.ecs.pc2.ui.ConnectionsPane;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay;
 import edu.csus.ecs.pc2.ui.ContestInformationPane;
 import edu.csus.ecs.pc2.ui.ContestTimesPane;
-import edu.csus.ecs.pc2.ui.EOCNotificationsPane;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.GroupsPane;
 import edu.csus.ecs.pc2.ui.ICPCPane;
@@ -39,7 +38,6 @@ import edu.csus.ecs.pc2.ui.LogWindow;
 import edu.csus.ecs.pc2.ui.LoginsPane;
 import edu.csus.ecs.pc2.ui.OptionsPanel;
 import edu.csus.ecs.pc2.ui.ProblemsPane;
-import edu.csus.ecs.pc2.ui.ProfilesPane;
 import edu.csus.ecs.pc2.ui.ReportPane;
 import edu.csus.ecs.pc2.ui.RunsPanel;
 import edu.csus.ecs.pc2.ui.SitesPanel;
@@ -187,14 +185,15 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 BalloonSettingsPane balloonSettingsPane = new BalloonSettingsPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Notifications", balloonSettingsPane);
 
-                EOCNotificationsPane eocNotificationsPane = new EOCNotificationsPane();
-                addUIPlugin(getConfigureContestTabbedPane(), "End of Contest Control", eocNotificationsPane);
+                // XXX bug 417 hide for 9.1 release
+//                EOCNotificationsPane eocNotificationsPane = new EOCNotificationsPane();
+//                addUIPlugin(getConfigureContestTabbedPane(), "End of Contest Control", eocNotificationsPane);
 
                 ProblemsPane problemsPane = new ProblemsPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Problems", problemsPane);
 
-                ProfilesPane profilesPane = new ProfilesPane();
-                addUIPlugin(getConfigureContestTabbedPane(), "Profiles", profilesPane);
+//                ProfilesPane profilesPane = new ProfilesPane();
+//                addUIPlugin(getConfigureContestTabbedPane(), "Profiles", profilesPane);
 
                 ContestTimesPane contestTimesPane = new ContestTimesPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Times", contestTimesPane);
