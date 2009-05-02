@@ -76,7 +76,7 @@
         value="${date.english} ${time.english}" />
 
     <!-- version is used in the jar manifest & in package.xml -->
-    <property name="version" value="9.1.1"/>
+    <property name="version" value="9.1.2"/>
 
     <path id="project.classpath">
         <pathelement location="${build.prod.dir}"/>
@@ -200,7 +200,7 @@
     <target name="javadocs-api" description="Creates API javadocs">
         <mkdir dir="${docs.api.dir}" />
     	<javadoc access="protected" additionalparam="-link  http://java.sun.com/j2se/1.5.0/docs/api/" author="true" classpath="vendor/lib/mclb.jar" 
-    	destdir="${docs.api.dir}" doctitle="PC&amp;sup2;&#160;Version&#160;9&#160;API" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" overview="api_overview.html" packagenames="edu.csus.ecs.pc2.api,edu.csus.ecs.pc2.api.exceptions,edu.csus.ecs.pc2.api.listener" source="1.5" sourcepath="src" splitindex="true" use="true" version="true" useexternalfile="true"/>
+    	destdir="${docs.api.dir}" doctitle="PC&amp;sup2; Version 9 API" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" overview="api_overview.html" packagenames="edu.csus.ecs.pc2.api,edu.csus.ecs.pc2.api.exceptions,edu.csus.ecs.pc2.api.listener" source="1.5" sourcepath="src" splitindex="true" use="true" version="true" useexternalfile="true"/>
     </target>
     <target name="javadocs" description="Creates project javadocs">
         <mkdir dir="${docs.dir}/api-full" />
