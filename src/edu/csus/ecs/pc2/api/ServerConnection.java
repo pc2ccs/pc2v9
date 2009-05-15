@@ -44,12 +44,11 @@ public class ServerConnection {
      * {@link edu.csus.ecs.pc2.api.exceptions.LoginFailureException}, in which case the message contained in the exception can be used to determine the nature of the login failure.
      * <P>
      * Note that invoking {@link ServerConnection#login(String, String)} causes an attempt to establish a network connection to a PC<sup>2</sup> server using the connection information specified in
-     * the <code>pc2v9.ini</code> file in the current directory. The PC<sup>2</sup> server must <I>already be running</i> prior to invoking {@link ServerConnection#login(String, String)}, and
-     * the <code>pc2v9.ini</code> must specify legitmate server connection information; otherwise, {@link edu.csus.ecs.pc2.api.exceptions.LoginFailureException} is thrown. See the PC<sup>2</sup>
-     * Contest Administrator's Guide for information regarding specifying server connection information in <code>pc2v9.ini</code> files.
+     * the <code>pc2v9.ini</code> file in the current directory. The PC<sup>2</sup> server must <I>already be running</i> prior to invoking {@link ServerConnection#login(String, String)}, and the
+     * <code>pc2v9.ini</code> must specify legitmate server connection information; otherwise, {@link edu.csus.ecs.pc2.api.exceptions.LoginFailureException} is thrown. See the PC<sup>2</sup> Contest
+     * Administrator's Guide for information regarding specifying server connection information in <code>pc2v9.ini</code> files.
      * <P>
-     * The following code snippet shows typical usage for connecting to and logging in to a PC<sup>2</sup> server. 
-     * <A NAME="loginsample"></A>
+     * The following code snippet shows typical usage for connecting to and logging in to a PC<sup>2</sup> server. <A NAME="loginsample"></A>
      * 
      * <pre>
      * String login = &quot;team4&quot;;
@@ -57,10 +56,14 @@ public class ServerConnection {
      * try {
      *     ServerConnection serverConnection = new ServerConnection();
      *     IContest contest = serverConnection.login(login, password);
-     *     //... code here to invoke methods in &quot;contest&quot;;
+     *     // ... code here to invoke methods in &quot;contest&quot;;
      *     serverConnection.logoff();
      * } catch (LoginFailureException e) {
      *     System.out.println(&quot;Could not login because &quot; + e.getMessage());
+     * } catch (NotLoggedInException e) {
+     *     // TODO Auto-generated catch block
+     *     System.out.println(&quot;Unable to execute API method&quot;);
+     *     e.printStackTrace();
      * }
      * </pre>
      * 

@@ -18,7 +18,8 @@ public class APISampleCode {
     /**
      * Sample code for ServerConnection
      */
-    public void ServerConnectionSample() {
+    @SuppressWarnings("unused")
+    public void serverConnectionSample() {
 
         String login = "team4";
         String password = "team4";

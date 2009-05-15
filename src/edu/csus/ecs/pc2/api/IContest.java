@@ -19,23 +19,19 @@ import edu.csus.ecs.pc2.api.listener.IRunEventListener;
 public interface IContest {
 
     /**
-     * Gets all the teams in the contest. Returns an array of {@link ITeam} objects,
-     * where each {@link ITeam} element describes one Team account in the contest.
-     * Note that the returned array contains one entry for every Team account which is
-     * currently defined, whether or not that team is currently logged in to the contest
-     * via PC<sup>2</sup>.  Note also that in a multi-site contest the returned array contains an entry for every
-     * account <I>at every site</i>, not just for the site for the server to which the client is currently connected.
+     * Gets all the teams in the contest. Returns an array of {@link ITeam} objects, where each {@link ITeam} element describes one Team account in the contest. Note that the returned array contains
+     * one entry for every Team account which is currently defined, whether or not that team is currently logged in to the contest via PC<sup>2</sup>. Note also that in a multi-site contest the
+     * returned array contains an entry for every account <I>at every site</i>, not just for the site for the server to which the client is currently connected.
      * <P>
-     * <A NAME="printTeamsSample"></A>  
-     * The following code snippet shows typical usage for obtaining and printing a list of all teams currently 
-     * in the contest. It assumes variable <code>contest</code> represents a valid
-     * {@link IContest} obtained from a server to which this client is connected.
+     * <A NAME="printTeamsSample"></A> The following code snippet shows typical usage for obtaining and printing a list of all teams currently in the contest. It assumes variable <code>contest</code>
+     * represents a valid {@link IContest} obtained from a server to which this client is connected.
+     * 
      * <pre>
      * for (ITeam team : contest.getTeams()) {
-     *      String teamName = team.getDisplayName();
-     *      int siteNumber = team.getSiteNumber();
-     *      String groupName = team.getGroup().getName();
-     *      System.out.println(teamName + &quot; Site: &quot; + siteNumber + &quot; Group: &quot; + groupName));
+     *     String teamName = team.getDisplayName();
+     *     int siteNumber = team.getSiteNumber();
+     *     String groupName = team.getGroup().getName();
+     *     System.out.println(teamName + &quot; Site: &quot; + siteNumber + &quot; Group: &quot; + groupName);
      * }
      * </pre>
      * 
@@ -99,6 +95,7 @@ public interface IContest {
      * The following code snippet shows typical usage for obtaining and printing the names of all problems
      * currently defined in the contest. It assumes variable <code>contest</code> represents a valid
      * {@link IContest} obtained from a server to which this client is connected.
+     * 
      * <pre>
      * for (IProblem problem : contest.getProblems()) {
      *     System.out.println(problem.getName());
@@ -147,18 +144,15 @@ public interface IContest {
     IJudgement[] getJudgements();
 
     /**
-     * Get a list of all the runs in the contest.  
+     * Get a list of all the runs in the contest.
      * 
-     * Returns an array of {@link IRun}s, where 
-     * each element of the array holds a single contest {@link IRun}.  In a multi-site contest
-     * the returned array will contain the runs from all connected sites, not just the site for the
-     * server to which this client is connected.   
+     * Returns an array of {@link IRun}s, where each element of the array holds a single contest {@link IRun}. In a multi-site contest the returned array will contain the runs from all connected
+     * sites, not just the site for the server to which this client is connected.
      * 
      * <P>
-     * <A NAME="getRunsSample"></A>  
-     * The following code snippet shows typical usage for obtaining and printing a list of all runs currently 
-     * in the contest. It assumes variable <code>contest</code> represents a valid
-     * {@link IContest} obtained from a server to which this client is connected.
+     * <A NAME="getRunsSample"></A> The following code snippet shows typical usage for obtaining and printing a list of all runs currently in the contest. It assumes variable <code>contest</code>
+     * represents a valid {@link IContest} obtained from a server to which this client is connected.
+     * 
      * <pre>
      * for (IRun run : contest.getRuns()) {
      * 
@@ -167,7 +161,7 @@ public interface IContest {
      *     System.out.println(&quot;    For problem &quot; + run.getProblem().getName());
      *     System.out.println(&quot;    Written in &quot; + run.getLanguage().getName());
      * 
-     *     if (run.isJudged()) {
+     *     if (run.isFinalJudged()) {
      *         System.out.println(&quot;    Judgement: &quot; + run.getJudgementName());
      *     } else {
      *         System.out.println(&quot;    Judgement: not judged yet &quot;);
@@ -327,20 +321,23 @@ public interface IContest {
      * @return An {@link IStanding} for the specified team.
      */
     IStanding getStanding(ITeam team);
-    
-    
+
     /**
-     * Returns an array of {@link IStanding}s describing the current standing of every team in the contest as
-     * determined by the currently active plugin implementation of the PC<sup>2</sup> scoring algorithm.
+     * Returns an array of {@link IStanding}s describing the current standing of every team in the contest as determined by the currently active plugin implementation of the PC<sup>2</sup> scoring
+     * algorithm.
      * <P>
-     * Note that the determination of the data in an {@link IStanding} is up to the scoring algorithm, which 
-     * can be dynamically changed by the Contest Administrator during a contest.  Note also that scoring
-     * details such as how to rank teams that are tied is also a function of the scoring algorithm.
+     * Note that the determination of the data in an {@link IStanding} is up to the scoring algorithm, which can be dynamically changed by the Contest Administrator during a contest. Note also that
+     * scoring details such as how to rank teams that are tied is also a function of the scoring algorithm.
      * <P>
-     * In addition, note also that the order in which the {@link IStanding}s are contained in the returned array
-     * is a function of the scoring algorithm.  In particular, while the default PC<sup>2</sup> scoring 
-     * algorithm provides {@link IStanding}s in ranked order, scoring algorithm implementations are not
-     * required to do so.
+     * In addition, note also that the order in which the {@link IStanding}s are contained in the returned array is a function of the scoring algorithm. In particular, while the default PC<sup>2</sup>
+     * scoring algorithm provides {@link IStanding}s in ranked order, scoring algorithm implementations are not required to do so.
+     * 
+     * <pre>
+     * for (IStanding standingRank : contest.getStandings()) {
+     *     String displayName = standingRank.getClient().getDisplayName();
+     *     System.out.printf(&quot; %3d %-35s %2d %4d&quot;, standingRank.getRank(), displayName, standingRank.getNumProblemsSolved(), standingRank.getPenaltyPoints());
+     * }
+     * </pre>
      * 
      * @return An array of {@link IStanding}s, one element for each contest team.
      */
