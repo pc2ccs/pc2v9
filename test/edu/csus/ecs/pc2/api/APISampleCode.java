@@ -31,7 +31,6 @@ public class APISampleCode {
         } catch (LoginFailureException e) {
             System.out.println("Could not login because " + e.getMessage());
         } catch (NotLoggedInException e) {
-            // TODO Auto-generated catch block
             System.out.println("Unable to execute API method");
             e.printStackTrace();
         }

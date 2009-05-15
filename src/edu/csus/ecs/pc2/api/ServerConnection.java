@@ -61,7 +61,6 @@ public class ServerConnection {
      * } catch (LoginFailureException e) {
      *     System.out.println(&quot;Could not login because &quot; + e.getMessage());
      * } catch (NotLoggedInException e) {
-     *     // TODO Auto-generated catch block
      *     System.out.println(&quot;Unable to execute API method&quot;);
      *     e.printStackTrace();
      * }
