@@ -1,6 +1,8 @@
 package edu.csus.ecs.pc2.core.packet;
 
 import java.io.Serializable;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Date;
 
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -42,6 +44,10 @@ public class Packet implements Serializable {
     private static int packetCounter = 0;
     
     private int packetNumber = 0;
+    
+    private String hostAddress = "(unset)";
+
+    private String hostName = "(unset)";
 
     // TODO change this back to protected, soon.
     public Packet(PacketType.Type type, ClientId source, ClientId destination, Serializable content) {
@@ -51,6 +57,7 @@ public class Packet implements Serializable {
         this.type = type;
         packetCounter++;
         packetNumber = packetCounter;
+        setIP();
     }
 
     /**
@@ -67,6 +74,7 @@ public class Packet implements Serializable {
         this.type = type;
         packetCounter++;
         packetNumber = packetCounter;
+        setIP();
     }
 
     public Object getContent() {
@@ -112,4 +120,27 @@ public class Packet implements Serializable {
     public void setPacketNumber(int packetNumber) {
         this.packetNumber = packetNumber;
     }
+    
+    /**
+     * Set the host and 
+     */
+    private void setIP() {
+        try {
+            InetAddress inetAddress = InetAddress.getLocalHost();
+            hostAddress = inetAddress.getHostAddress();
+            hostName = inetAddress.getHostName();
+        } catch (UnknownHostException e) {
+            // TODO this exception should be logged to a log file
+        }
+    }
+
+    public String getHostAddress() {
+        return hostAddress;
+    }
+
+    public String getHostName() {
+        return hostName;
+    }
+
+
 }

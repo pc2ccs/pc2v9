@@ -460,8 +460,8 @@ public final class PacketFactory {
      * @param message 
      */
     public static void dumpPacket(PrintStream pw, Packet packet, String message) {
-        pw.println("Packet "  + packet.getType()+" (Seq #"+packet.getPacketNumber()+" ) "+message);
-        pw.println("  From: " + packet.getSourceId());
+        pw.println("Packet " + packet.getType() + " (Seq #" + packet.getPacketNumber() + " ) " + message);
+        pw.println("  From: " + packet.getSourceId() + " (" + packet.getHostName() + " @ " + packet.getHostAddress() + ")");
         pw.println("    To: " + packet.getDestinationId());
         Object obj = packet.getContent();
         if (obj instanceof Properties) {
