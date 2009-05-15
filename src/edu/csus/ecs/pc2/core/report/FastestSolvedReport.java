@@ -18,7 +18,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 
 /**
- * Fastest solved problem.
+ * Shows in descending time order which teams solved which problems fastest.
  * 
  * Shows rank, elapsed time and team name (Site N)
  * 
@@ -193,7 +193,7 @@ public class FastestSolvedReport implements IReport {
     }
 
     public String getReportTitle() {
-        return "Fastest Solved by Problem";
+        return "Fastest Solutions Per Problem";
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
@@ -203,7 +203,7 @@ public class FastestSolvedReport implements IReport {
     }
 
     public String getPluginTitle() {
-        return "Fastest Solved by Problem";
+        return "Fastest Solutions Per Problem Report";
     }
 
     public Filter getFilter() {
