@@ -10,7 +10,9 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.list.ClarificationComparator;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Clarification;
+import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 
@@ -22,7 +24,6 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
  */
 
 // $HeadURL$
-
 public class ClarificationsReport implements IReport {
 
     /**
@@ -39,32 +40,33 @@ public class ClarificationsReport implements IReport {
     private Filter filter = new Filter();
 
     public void writeReport(PrintWriter printWriter) {
-        
+
         // Clarifications
         printWriter.println();
         Clarification[] clarifications = contest.getClarifications();
         Arrays.sort(clarifications, new ClarificationComparator());
-        
+
         int count = filter.countClarifications(clarifications);
-        
-        if (filter.isFilterOn()){
-            
-            printWriter.println("Filter is: "+filter.toString());
+
+        if (filter.isFilterOn()) {
+
+            printWriter.println("Filter is: " + filter.toString());
             printWriter.println();
             printWriter.println("-- " + count + " clarifications (filtered) --");
-            
-        }else{
+
+        } else {
             printWriter.println("-- " + clarifications.length + " clarifications --");
-            
+
         }
-        
-        
+
         for (Clarification clarification : clarifications) {
-            
+
             if (filter.matches(clarification)) {
 
                 printWriter.println();
                 printWriter.println("  Clarification " + clarification.getNumber() + " (Site " + clarification.getSiteNumber() + ") " + clarification.getElementId());
+                printWriter.println("           From  : " + clarification.getSubmitter() + " \"" + getDisplayName(clarification.getSubmitter()) + "\"");
+                printWriter.println("         Problem : " + contest.getProblem(clarification.getProblemId()).toString());
                 printWriter.println("         Elapsed : " + clarification.getElapsedMins());
                 printWriter.print("           State   : " + clarification.getState());
                 if (clarification.getWhoJudgedItId() != null) {
@@ -77,8 +79,29 @@ public class ClarificationsReport implements IReport {
                 printWriter.println("         To ALL? : " + clarification.isSendToAll());
                 printWriter.println("         Question: " + clarification.getQuestion());
                 printWriter.println("         Answer  : " + clarification.getAnswer());
+                printWriter.println();
+                printWriter.println();
+                printWriter.println();
             }
-            
+
+        }
+    }
+
+    /**
+     * Get display name.
+     * 
+     * If account not defined will return Account.getName(). 
+     * 
+     * @param submitter
+     * @return a display name
+     */
+    private String getDisplayName(ClientId submitter) {
+
+        Account account = contest.getAccount(submitter);
+        if (account == null) {
+            return submitter.getName();
+        } else {
+            return account.getDisplayName();
         }
     }
 
@@ -105,7 +128,7 @@ public class ClarificationsReport implements IReport {
             try {
                 writeReport(printWriter);
             } catch (Exception e) {
-                printWriter.println("Exception in report: "+e.getMessage());
+                printWriter.println("Exception in report: " + e.getMessage());
                 e.printStackTrace(printWriter);
             }
 
