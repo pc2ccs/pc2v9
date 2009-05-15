@@ -76,7 +76,7 @@ public class OldRunsReport implements IReport {
             JudgementRecord judgementRecord = run.getJudgementRecord();
 
             jbyString = judgementRecord.getJudgerClientId().getName();
-            jtString = new Long(judgementRecord.getJudgedMinutes()).toString();
+            jtString = new Long(judgementRecord.getHowLongToJudgeInSeconds()).toString();
             
             ElementId elementId = judgementRecord.getJudgementId();
             jciString = "??";
