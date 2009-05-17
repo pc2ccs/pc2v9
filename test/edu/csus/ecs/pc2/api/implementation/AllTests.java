@@ -21,6 +21,8 @@ public final class AllTests {
         TestSuite suite = new TestSuite("Test for edu.csus.ecs.pc2.api.implementation");
         //$JUnit-BEGIN$
         suite.addTestSuite(RunImplementationTest.class);
+        suite.addTestSuite(TeamImplementationTest.class);
+        
         //$JUnit-END$
         return suite;
     }

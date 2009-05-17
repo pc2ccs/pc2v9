@@ -20,7 +20,7 @@ public class TeamImplementation extends ClientImplementation implements ITeam {
 
     private String shortName;
 
-    private IGroup group;
+    private IGroup group = null;
 
     public TeamImplementation(ClientId submitter, IInternalContest internalContest) {
         this(internalContest.getAccount(submitter), internalContest);
@@ -31,9 +31,7 @@ public class TeamImplementation extends ClientImplementation implements ITeam {
         
         displayName = account.getDisplayName();
         shortName = account.getClientId().getName();
-        if (account.getGroupId() == null) {
-            group = new GroupImplementation("");
-        } else {
+        if (account.getGroupId() != null) {
             group = new GroupImplementation(account.getGroupId(), internalContest);
         }
     }
