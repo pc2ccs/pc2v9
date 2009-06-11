@@ -1,20 +1,19 @@
 package edu.csus.ecs.pc2.core;
 
+import java.util.HashMap;
+
 import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.model.ElementId;
 
 /**
+ * Unit tests for ElementId.
  * 
  * @author pc2@ecs.csus.edu
- * 
+ * @version $Id$
  */
+
 // $HeadURL$
 public class ElementIdTest extends TestCase {
-
-    /**
-     * svn id.
-     */
-    public static final String SVN_ID = "$Id$";
 
     /*
      * Test method for 'edu.csus.ecs.pc2.core.ElementId.hashCode()'
@@ -43,6 +42,29 @@ public class ElementIdTest extends TestCase {
         ElementId element1 = new ElementId("test Case");
         ElementId element2 = new ElementId("test Case");
         assertFalse("equals match", element1.equals(element2));
+        
+        assertEquals("elements should be equal", element2, element2);
+        
+        ElementId element3 = element1;
+        assertEquals("elements should be equal", element1, element3);
+    }
+    
+    /**
+     * Test that each successive ElementId is relatively random
+     */
+    public void testConstructor(){
+        
+        int number = 5000;
+        
+        HashMap<ElementId, String> saveList = new HashMap<ElementId, String>(number);
+        
+        for (int i = 0; i < number; i++){
+            ElementId elementId = new ElementId("name");
+            assertNull ("ElementId generated duplicate id "+elementId, saveList.get(elementId));
+            saveList.put(elementId, "fungo");
+        }
+        
+//        System.err.println("testConstructor tested : "+number);
     }
 
 }

@@ -1,17 +1,21 @@
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.Serializable;
-import java.util.Random;
+import java.util.UUID;
 
 /**
  * A contest-wide unique identifier/key.
- * 
+ * <br>
  * This identifier is used as a unique key for most
- * of the data classes in PC&sup2;.
+ * of the data classes in PC&sup2;
  * <P>
- * 
- * @see Contest#getRunIds()
- * @see Contest#getProblemIds()
+ * Internally there are 3 components for each id: a name (String),
+ * a counter (long) and random value (UUID).   While the random
+ * value insures randomness, the counter (incremented with each
+ * instantiation) further insures randomness.  The counter is also
+ * used with {@link #equals(Object)} as the first comparison to 
+ * optimize the equals condition.  This optimization was done because
+ * of the huge number of equals comparisons done within the system.  
  *  
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -28,22 +32,10 @@ public class ElementId implements Serializable {
     private int siteNumber = 0;
 
     private int versionNumber = 1;
-
-    private static Random r;
+    
+    private UUID uuid = UUID.randomUUID();
 
     private static long counter = 0;
-
-    static {
-        // Seed random once per instance to help make it more random.
-
-        r = new Random();
-        r.setSeed(System.nanoTime());
-    }
-
-    /**
-     * A generated psuedo-random large number.
-     */
-    private long num = 0;
 
     private long savedCounter = 0;
 
@@ -59,7 +51,6 @@ public class ElementId implements Serializable {
      */
     public ElementId(String name) {
         super();
-        // TODO Auto-generated constructor stub
         this.name = name.toCharArray();
         initialize();
     }
@@ -69,8 +60,6 @@ public class ElementId implements Serializable {
             name = "genericElement".toCharArray();
         }
 
-        num = r.nextLong();
-
         synchronized (name) {
             savedCounter = counter++;
         }
@@ -78,7 +67,7 @@ public class ElementId implements Serializable {
     }
 
     public String toString() {
-        return new String(name) + "-" + num;
+        return new String(name) + "-" + uuid;
     }
 
     /**
@@ -91,8 +80,13 @@ public class ElementId implements Serializable {
 
         if (obj instanceof ElementId) {
             ElementId otherId = (ElementId) obj;
-            boolean eq = otherId.num == num
-                    && savedCounter == otherId.savedCounter;
+            
+            /**
+             * This is optimized by comparing the savedCounter (a long)
+             * first then the UUID.
+             */
+            boolean eq = savedCounter == otherId.savedCounter
+                    && otherId.uuid.equals(uuid);
             if (eq) {
                 eq = name == name;
             }
@@ -104,7 +98,8 @@ public class ElementId implements Serializable {
     }
 
     /**
-     * @return Returns the siteNumber.
+     * 
+     * @return Returns the site number where this element was created.
      */
     public int getSiteNumber() {
         return siteNumber;
