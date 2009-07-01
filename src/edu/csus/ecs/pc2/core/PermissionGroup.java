@@ -41,6 +41,9 @@ public class PermissionGroup {
             serverPermissionList.addPermission(type);
         }
         
+        /**
+         * Then remove certain permissions
+         */
         administratorPermissionList.removePermission(Type.DISPLAY_ON_SCOREBOARD);
         serverPermissionList.removePermission(Type.DISPLAY_ON_SCOREBOARD);
         administratorPermissionList.removePermission(Type.BALLOON_EMAIL);
@@ -50,6 +53,8 @@ public class PermissionGroup {
         
         administratorPermissionList.removePermission(Type.RESPECT_EOC_SUPPRESSION);
         administratorPermissionList.removePermission(Type.RESPECT_NOTIFY_TEAM_SETTING);
+        
+        serverPermissionList.removePermission(Type.RESET_CONTEST);
         
 
         /**

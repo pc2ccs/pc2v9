@@ -578,9 +578,9 @@ public final class PacketType implements Serializable {
          */
         START_ALL_CLOCKS,
         /**
-         * Reset this site's clars/runs/clock.
+         * Send from server to other server or clients. 
          */
-        RESET_CONTEST,
+        RESET_CLIENT,
         /**
          * Reset all site's clars/runs/clock.
          */

@@ -226,6 +226,10 @@ public class Permission implements Serializable {
          *  {@link edu.csus.ecs.pc2.core.model.JudgementRecord#isSendToTeam()} setting.
          */
         RESPECT_NOTIFY_TEAM_SETTING,
+        /**
+         * Reset Contest
+         */
+        RESET_CONTEST,
     };
 
     private Hashtable<Type, String> hash = new Hashtable<Type, String>();
@@ -299,6 +303,7 @@ public class Permission implements Serializable {
         hash.put(Type.RESPECT_EOC_SUPPRESSION, "Apply End of Contest Controls");
         
         hash.put(Type.RESPECT_NOTIFY_TEAM_SETTING, "Apply Notify Team Setting to Board/SA");
+        hash.put(Type.RESET_CONTEST, "Reset Contest");
     }
 
     /**

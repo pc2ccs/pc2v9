@@ -412,4 +412,11 @@ public interface IInternalController {
     boolean isClientAutoShutdown();
 
     void setClientAutoShutdown(boolean clientAutoShutdown);
+
+    /**
+     * Reset contest.
+     * 
+     * @param clientResettingContest
+     */
+    void resetContest(ClientId clientResettingContest, boolean eraseProblems, boolean eraseLanguages);
 }

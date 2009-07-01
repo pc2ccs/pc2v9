@@ -56,6 +56,10 @@ public class ProfilesPane extends JPanePlugin {
 
     private JButton cloneButton = null;
 
+    private JButton resetContestButton = null;
+    
+    private ResetContestFrame resetContestFrame = null;
+
     /**
      * This method initializes
      * 
@@ -82,6 +86,8 @@ public class ProfilesPane extends JPanePlugin {
         this.setSize(new java.awt.Dimension(729, 319));
         this.add(getCenterPane(), java.awt.BorderLayout.CENTER);
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
+        
+        FrameUtilities.centerFrame(this);
 
     }
 
@@ -110,7 +116,7 @@ public class ProfilesPane extends JPanePlugin {
     private JButton getSwitchButton() {
         if (switchButton == null) {
             switchButton = new JButton();
-            switchButton.setEnabled(true);
+            switchButton.setEnabled(false);
             switchButton.setMnemonic(java.awt.event.KeyEvent.VK_W);
             switchButton.setPreferredSize(new java.awt.Dimension(100, 26));
             switchButton.setLocation(new java.awt.Point(497, 85));
@@ -133,7 +139,7 @@ public class ProfilesPane extends JPanePlugin {
     private JButton getSetButton() {
         if (setButton == null) {
             setButton = new JButton();
-            setButton.setEnabled(true);
+            setButton.setEnabled(false);
             setButton.setMnemonic(java.awt.event.KeyEvent.VK_S);
             setButton.setLocation(new java.awt.Point(497, 38));
             setButton.setSize(new java.awt.Dimension(100, 26));
@@ -200,6 +206,7 @@ public class ProfilesPane extends JPanePlugin {
             buttonPane.setLayout(flowLayout);
             buttonPane.setPreferredSize(new java.awt.Dimension(35, 35));
             buttonPane.add(getNewButton(), null);
+            buttonPane.add(getResetContestButton(), null);
             buttonPane.add(getCloneButton(), null);
             buttonPane.add(getExportButton(), null);
         }
@@ -216,7 +223,7 @@ public class ProfilesPane extends JPanePlugin {
             newButton = new JButton();
             newButton.setText("New");
             newButton.setMnemonic(java.awt.event.KeyEvent.VK_N);
-            newButton.setEnabled(true);
+            newButton.setEnabled(false);
             newButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     newProfile();
@@ -236,7 +243,7 @@ public class ProfilesPane extends JPanePlugin {
             exportButton = new JButton();
             exportButton.setText("Export");
             exportButton.setMnemonic(java.awt.event.KeyEvent.VK_X);
-            exportButton.setEnabled(true);
+            exportButton.setEnabled(false);
             exportButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     exportProfile();
@@ -256,7 +263,7 @@ public class ProfilesPane extends JPanePlugin {
             cloneButton = new JButton();
             cloneButton.setText("Clone");
             cloneButton.setMnemonic(java.awt.event.KeyEvent.VK_C);
-            cloneButton.setEnabled(true);
+            cloneButton.setEnabled(false);
             cloneButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     cloneProfile();
@@ -322,6 +329,49 @@ public class ProfilesPane extends JPanePlugin {
             profileSaveFrame = new ProfileSaveFrame();
         }
         return profileSaveFrame;
+    }
+
+    /**
+     * This method initializes resetContestButton	
+     * 	
+     * @return javax.swing.JButton	
+     */
+    private JButton getResetContestButton() {
+        if (resetContestButton == null) {
+            resetContestButton = new JButton();
+            resetContestButton.setText("Reset");
+            resetContestButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    resetContest();
+                }
+            });
+        }
+        return resetContestButton;
+    }
+
+    protected void resetContest() {
+        
+        if (contestRunning()){
+            JOptionPane.showMessageDialog(this, "Contest Clock must be stopped", "Unable to reset", JOptionPane.ERROR_MESSAGE);
+        } else {
+            
+            showResetDialog();
+            
+        }
+    }
+
+    private void showResetDialog() {
+        
+        if (resetContestFrame == null){
+            resetContestFrame = new ResetContestFrame();
+            resetContestFrame.setContestAndController(getContest(), getController());
+        }
+        
+        resetContestFrame.setVisible(true);
+    }
+
+    private boolean contestRunning() {
+        return getContest().getContestTime().isContestRunning();
     }
 
 } // @jve:decl-index=0:visual-constraint="25,9"

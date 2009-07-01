@@ -327,6 +327,14 @@ public class PacketHandler {
                 handleRunExecutionStatus (packet, connectionHandlerID);
                 break;
                 
+            case RESET_ALL_CONTESTS:
+                resetAllSites(packet, connectionHandlerID);
+                break;
+                
+            case RESET_CLIENT:
+                resetClient(packet, connectionHandlerID);
+                break;
+                
             default:
                 Exception exception = new Exception("PacketHandler.handlePacket Unhandled packet " + packet);
                 controller.getLog().log(Log.WARNING, "Unhandled Packet ", exception);
@@ -334,6 +342,68 @@ public class PacketHandler {
         info("handlePacket end " + packet);
     }
 
+
+    /**
+     * Reset a client or server.
+     * 
+     * @param packet
+     * @param connectionHandlerID
+     * @throws ContestSecurityException
+     */
+    private void resetClient(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
+
+        ClientId sourceId = packet.getSourceId();
+        
+        if (isServer(sourceId)){
+            // Only servers are allowed to reset client or other server contest
+            
+            resetContest(packet);
+            
+        } else {
+            throw new ContestSecurityException(sourceId, connectionHandlerID, sourceId + " not allowed to " + Permission.Type.RESET_CONTEST);
+        }
+    }
+
+    /**
+     * Handles a reset all contest from admin.
+     * 
+     * Checks security that allows this client (Admin hopefully) to reset this
+     * site and then send reset to all other sites.
+     * 
+     * @param packet
+     * @param connectionHandlerID
+     * @throws ContestSecurityException
+     */
+    private void resetAllSites(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
+        
+        ClientId adminClientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+        
+        // check permission
+        securityCheck(Permission.Type.RESET_CONTEST, adminClientId, connectionHandlerID);
+        
+        // Reset this contests time to elapsed time zero
+        resetContest(packet);
+    }
+
+    private void resetContest(Packet packet) {
+        
+        if (isServer()){
+            
+            ClientId adminClientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+            
+            // TODO remove submissions
+            // TODO set elapsed to zero
+            
+            // send out to all clients
+            Packet resetPacket = PacketFactory.createResetContestPacket(contest.getClientId(), PacketFactory.ALL_SERVERS, adminClientId);
+            controller.sendToTeams(packet);
+
+            // send to all sites
+            sendToJudgesAndOthers(resetPacket, true);
+        } else {
+            // TODO huh
+        }
+    }
 
     private void handleRunExecutionStatus(Packet packet, ConnectionHandlerID connectionHandlerID) {
 

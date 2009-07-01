@@ -2586,4 +2586,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     public void setClientAutoShutdown(boolean clientAutoShutdown) {
         this.clientAutoShutdown = clientAutoShutdown;
     }
+
+    public void resetContest(ClientId clientResettingContest, boolean eraseProblems, boolean eraseLanguages) {
+        Packet sendPacket = PacketFactory.createResetAllSitesPacket(contest.getClientId(), getServerClientId(), clientResettingContest, eraseProblems, eraseLanguages);
+        sendToLocalServer(sendPacket);
+    }
 }

@@ -305,6 +305,10 @@ public final class PacketFactory {
 
     public static final String SERVER_CLOCK_OFFSET = "SERVER_CLOCK_OFFSET";
 
+    private static final Object DELETE_PROBLEM_DEFINITIONS =  "DELETE_PROBLEM_DEFINITIONS";
+
+    private static final Object DELETE_LANGUAGE_DEFINITIONS =  "DELETE_LANGUAGE_DEFINITIONS";
+
     /**
      * Constructor is private as this is a utility class which should not be extended or invoked.
      */
@@ -1574,21 +1578,22 @@ public final class PacketFactory {
         return packet;
     }
 
-    /**
-     * Create packet for {@link PacketType.Type#RESET_CONTEST}.
-     * 
-     * @param source
-     * @param destination
-     * @param siteNumber
-     * @param userLoginId
-     */
-    public static Packet createResetContest(ClientId source, ClientId destination, int siteNumber, ClientId userLoginId) {
-        Properties prop = new Properties();
-        prop.put(CLIENT_ID, userLoginId);
-        prop.put(SITE_NUMBER, new Integer(siteNumber));
-        Packet packet = new Packet(Type.RESET_CONTEST, source, destination, prop);
-        return packet;
-    }
+//    /**
+//     * Create packet for {@link PacketType.Type#RESET_CONTEST}.
+//     * 
+//     * @param source
+//     * @param destination
+//     * @param siteNumber
+//     * @param userLoginId
+//     */
+//    public static Packet createResetContest(ClientId source, ClientId destination, int siteNumber, ClientId userLoginId) {
+//        Properties prop = new Properties();
+//        prop.put(CLIENT_ID, userLoginId);
+//        prop.put(SITE_NUMBER, new Integer(siteNumber));
+//        Packet packet = new Packet(Type.RESET_CONTEST, source, destination, prop);
+//        return packet;
+//    }
+
 
     /**
      * Create packet for {@link PacketType.Type#RESET_ALL_CONTESTS}.
@@ -1893,4 +1898,20 @@ public final class PacketFactory {
         prop.put(RUN_STATUS, status);
         return createPacket(PacketType.Type.RUN_EXECUTION_STATUS, source, destination, prop);
     }
+
+    public static Packet createResetAllSitesPacket(ClientId source, ClientId destination, ClientId clientResettingContest, boolean eraseProblems, boolean eraseLanguages) {
+        Properties prop = new Properties();
+        prop.put(CLIENT_ID, clientResettingContest);
+        prop.put(DELETE_PROBLEM_DEFINITIONS, new Boolean(eraseProblems));
+        prop.put(DELETE_LANGUAGE_DEFINITIONS, new Boolean(eraseLanguages));
+        return createPacket(PacketType.Type.RESET_ALL_CONTESTS, source, destination, prop);
+      
+    }
+    
+    public static Packet createResetContestPacket(ClientId source, ClientId destination, ClientId clientResettingContest) {
+        Properties prop = new Properties();
+        prop.put(CLIENT_ID, clientResettingContest);
+        return createPacket(PacketType.Type.RESET_CLIENT, source, destination, prop);
+    }
+
 }
