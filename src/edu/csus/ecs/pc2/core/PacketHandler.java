@@ -100,7 +100,6 @@ public class PacketHandler {
 
         ClientId fromId = packet.getSourceId();
 
-        Run run;
         Clarification clarification;
 
         switch (packetType) {
@@ -109,11 +108,7 @@ public class PacketHandler {
                 handleMessagePacket(packet);
                 break;
             case RUN_SUBMISSION_CONFIRM:
-                run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
-                contest.addRun(run);
-                if (isServer()) {
-                    sendToJudgesAndOthers(packet, isThisSite(run));
-                }
+                handleRunSubmissionConfirmation(packet);
                 break;
             case RUN_SUBMISSION:
                 // RUN submitted by team to server
@@ -164,12 +159,7 @@ public class PacketHandler {
                 break;
             case RUN_NOTAVAILABLE:
                 // Run not available from server
-                run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
-                contest.runNotAvailable(run);
-
-                if (isServer()) {
-                    sendToJudgesAndOthers(packet, isThisSite(run));
-                }
+                handleRunAvailable (packet);
                 break;
             case FORCE_DISCONNECTION:
                 sendForceDisconnection(packet);
@@ -198,9 +188,7 @@ public class PacketHandler {
                 break;
             case RUN_UNCHECKOUT:
                 // Cancel run from requestor to server
-                run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
-                ClientId whoCanceledId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-                cancelRun(packet, run, whoCanceledId, connectionHandlerID);
+                handleRunUnCheckout(packet, connectionHandlerID);
                 break;
             case START_ALL_CLOCKS:
                 // Start All Clocks from admin to server
@@ -343,6 +331,29 @@ public class PacketHandler {
     }
 
 
+    private void handleRunUnCheckout(Packet packet, ConnectionHandlerID connectionHandlerID) {
+        Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
+        ClientId whoCanceledId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+        cancelRun(packet, run, whoCanceledId, connectionHandlerID);
+    }
+
+    private void handleRunAvailable(Packet packet) {
+        Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
+        contest.runNotAvailable(run);
+
+        if (isServer()) {
+            sendToJudgesAndOthers(packet, isThisSite(run));
+        }
+    }
+
+    private void handleRunSubmissionConfirmation(Packet packet) {
+        Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
+        contest.addRun(run);
+        if (isServer()) {
+            sendToJudgesAndOthers(packet, isThisSite(run));
+        }
+    }
+
     /**
      * Reset a client or server.
      * 
@@ -354,12 +365,19 @@ public class PacketHandler {
 
         ClientId sourceId = packet.getSourceId();
         
+        System.out.println("resetClient "+packet);
+        
         if (isServer(sourceId)){
             // Only servers are allowed to reset client or other server contest
             
             resetContest(packet);
+            System.out.println("resetClient after resetContest "+packet);
             
         } else {
+            /**
+             * Some non-server tried to send a reset to a client or server.
+             */
+            System.out.println("resetClient ContestSecurityException "+packet);
             throw new ContestSecurityException(sourceId, connectionHandlerID, sourceId + " not allowed to " + Permission.Type.RESET_CONTEST);
         }
     }
@@ -381,28 +399,70 @@ public class PacketHandler {
         // check permission
         securityCheck(Permission.Type.RESET_CONTEST, adminClientId, connectionHandlerID);
         
-        // Reset this contests time to elapsed time zero
+        // Reset and send to all local clients
         resetContest(packet);
+
+        // send to sites
+        Boolean eraseProblems = (Boolean) PacketFactory.getObjectValue(packet, PacketFactory.DELETE_PROBLEM_DEFINITIONS);
+        Boolean eraseLanguages = (Boolean) PacketFactory.getObjectValue(packet, PacketFactory.DELETE_LANGUAGE_DEFINITIONS);
+        Packet resetPacket = PacketFactory.createResetContestPacket(contest.getClientId(), PacketFactory.ALL_SERVERS, adminClientId, eraseProblems, eraseLanguages);
+        controller.sendToServers(resetPacket);
     }
 
     private void resetContest(Packet packet) {
         
-        if (isServer()){
-            
-            ClientId adminClientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-            
-            // TODO remove submissions
-            // TODO set elapsed to zero
-            
-            // send out to all clients
-            Packet resetPacket = PacketFactory.createResetContestPacket(contest.getClientId(), PacketFactory.ALL_SERVERS, adminClientId);
-            controller.sendToTeams(packet);
+        Boolean eraseProblems = (Boolean) PacketFactory.getObjectValue(packet, PacketFactory.DELETE_PROBLEM_DEFINITIONS);
+        Boolean eraseLanguages = (Boolean) PacketFactory.getObjectValue(packet, PacketFactory.DELETE_LANGUAGE_DEFINITIONS);
 
-            // send to all sites
-            sendToJudgesAndOthers(resetPacket, true);
+        if (isServer()) {
+
+            ClientId adminClientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+
+            /**
+             * This clears all submissions and more.
+             */
+            contest.resetData();
+
+            // set elapsed to zero
+            ContestTime contestTime = contest.getContestTime();
+            contestTime.setElapsedMins(0);
+            contest.updateContestTime(contestTime);
+
+            controller.getLog().log(Log.INFO, "debug22 resetContest: RESET " + contest.getClientId()); 
+            resetContestData(eraseProblems, eraseLanguages);
+
+            // send out to all clients
+            Packet resetPacket = PacketFactory.createResetContestPacket(contest.getClientId(), PacketFactory.ALL_SERVERS, adminClientId, eraseProblems, eraseLanguages);
+
+            // send to all clients on this site
+            controller.sendToTeams(resetPacket);
+            sendToJudgesAndOthers(resetPacket, false);
+            
         } else {
-            // TODO huh
+            controller.getLog().log(Log.INFO, "debug22 resetContest: Unpack " + packet);
+            resetContestData(eraseProblems, eraseLanguages);
         }
+    }
+
+    private void resetContestData(Boolean eraseProblems, Boolean eraseLanguages) { 
+
+        controller.getLog().log(Log.INFO, "debug22 resetContestData p"+contest.getProblems().length+" l"+contest.getLanguages().length+" "+contest.getContestTime().getRemainingMinStr());
+        contest.resetData();
+        controller.getLog().log(Log.INFO, "debug22 resetContestData r"+contest.getRuns().length+" c"+contest.getClarifications().length+" "+contest.getContestTime().getRemainingMinStr());
+        controller.getLog().log(Log.INFO, "debug22 resetContestData erase p"+eraseProblems+" l"+eraseLanguages);
+
+        if (eraseProblems != null && eraseProblems.booleanValue()) {
+            for (Problem problem : contest.getProblems()) {
+                contest.deleteProblem(problem);
+            }
+        }
+
+        if (eraseLanguages != null && eraseLanguages.booleanValue()) {
+            for (Language language : contest.getLanguages()) {
+                contest.deleteLanguage(language);
+            }
+        }
+        controller.getLog().log(Log.INFO, "debug22 resetContestData p"+contest.getProblems().length+" l"+contest.getLanguages().length+" "+contest.getContestTime().getRemainingMinStr());
     }
 
     private void handleRunExecutionStatus(Packet packet, ConnectionHandlerID connectionHandlerID) {

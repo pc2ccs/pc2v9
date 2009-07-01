@@ -29,10 +29,14 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 public interface IInternalContest {
 
     void addLanguage(Language language);
+    
+    void deleteLanguage (Language language);
 
     void addProblem(Problem problem);
 
     void addProblem(Problem problem, ProblemDataFiles problemDataFiles);
+    
+    void deleteProblem(Problem problem);
     
     void addContestTime(ContestTime contestTime);
 

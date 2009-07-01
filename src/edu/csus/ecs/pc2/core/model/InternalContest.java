@@ -483,6 +483,7 @@ public class InternalContest implements IInternalContest {
         ProblemEvent problemEvent = new ProblemEvent(ProblemEvent.Action.ADDED, problem);
         fireProblemListener(problemEvent);
     }
+    
 
     public void addJudgement(Judgement judgement) {
         judgementDisplayList.add(judgement);
@@ -1809,11 +1810,47 @@ public class InternalContest implements IInternalContest {
     }
 
     public void resetData() {
+
+        /**
+         * Clear list of runs.
+         */
+        runList.clear();
+        
+        /**
+         * Clear submitted files list 
+         */
         runFilesList.clearCache();
+        
+        /**
+         * no need to clear run results at this time
+         * 
+         * runResultFilesList.clear();
+         */
+        
+        /**
+         * Clear all clarifications
+         */
+        clarificationList.clear();
+        
     }
 
     public boolean isSendAdditionalRunStatusMessages() {
         return contestInformation.isSendAdditionalRunStatusInformation();
+    }
+
+    public void deleteProblem(Problem problem) {
+        problemDisplayList.removeElement(problem);
+        problemList.delete(problem);
+        problemDataFilesList.delete(problem);
+        ProblemEvent problemEvent = new ProblemEvent(ProblemEvent.Action.DELETED, problem);
+        fireProblemListener(problemEvent);
+    }
+
+    public void deleteLanguage(Language language) {
+        languageDisplayList.removeElement(language);
+        languageList.delete(language);
+        LanguageEvent languageEvent = new LanguageEvent(LanguageEvent.Action.DELETED, language);
+        fireLanguageListener(languageEvent);
     }
 
 }

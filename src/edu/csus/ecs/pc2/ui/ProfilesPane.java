@@ -57,7 +57,7 @@ public class ProfilesPane extends JPanePlugin {
     private JButton cloneButton = null;
 
     private JButton resetContestButton = null;
-    
+
     private ResetContestFrame resetContestFrame = null;
 
     /**
@@ -86,7 +86,7 @@ public class ProfilesPane extends JPanePlugin {
         this.setSize(new java.awt.Dimension(729, 319));
         this.add(getCenterPane(), java.awt.BorderLayout.CENTER);
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
-        
+
         FrameUtilities.centerFrame(this);
 
     }
@@ -332,9 +332,9 @@ public class ProfilesPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes resetContestButton	
-     * 	
-     * @return javax.swing.JButton	
+     * This method initializes resetContestButton
+     * 
+     * @return javax.swing.JButton
      */
     private JButton getResetContestButton() {
         if (resetContestButton == null) {
@@ -350,28 +350,28 @@ public class ProfilesPane extends JPanePlugin {
     }
 
     protected void resetContest() {
-        
-        if (contestRunning()){
+
+        if (contestRunning()) {
             JOptionPane.showMessageDialog(this, "Contest Clock must be stopped", "Unable to reset", JOptionPane.ERROR_MESSAGE);
         } else {
-            
+
             showResetDialog();
-            
+
         }
     }
 
     private void showResetDialog() {
-        
-        if (resetContestFrame == null){
+
+        if (resetContestFrame == null) {
             resetContestFrame = new ResetContestFrame();
             resetContestFrame.setContestAndController(getContest(), getController());
         }
-        
+
         resetContestFrame.setVisible(true);
     }
 
     private boolean contestRunning() {
         return getContest().getContestTime().isContestRunning();
     }
-
+    
 } // @jve:decl-index=0:visual-constraint="25,9"

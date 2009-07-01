@@ -74,6 +74,7 @@ public class ResetContestFrame extends JFrame implements UIPlugin {
         this.setContentPane(getMainPanel());
         this.setTitle("Reset Contest");
 
+        FrameUtilities.centerFrame(this);
     }
 
     /**
@@ -145,11 +146,13 @@ public class ResetContestFrame extends JFrame implements UIPlugin {
         String stopMessage = "Reset will erase all runs and clarifications, and will reset the contest time.\n" + "Are you sure you want to reset this site?";
 
         if (JOptionPane.YES_OPTION == JOptionPane.showConfirmDialog(this, stopMessage)) {
-            
+
             boolean resetProblemDefs = getRemoveProblemDefsCheckBox().isSelected();
             boolean resetLanguageDefs = getRemoveLanguageDefintions().isSelected();
-            
+
             controller.resetContest(contest.getClientId(), resetProblemDefs, resetLanguageDefs);
+
+            setVisible(false);
         }
     }
 
@@ -210,9 +213,9 @@ public class ResetContestFrame extends JFrame implements UIPlugin {
     }
 
     /**
-     * This method initializes mainPanel	
-     * 	
-     * @return javax.swing.JPanel	
+     * This method initializes mainPanel
+     * 
+     * @return javax.swing.JPanel
      */
     private JPanel getMainPanel() {
         if (mainPanel == null) {
@@ -223,5 +226,5 @@ public class ResetContestFrame extends JFrame implements UIPlugin {
         }
         return mainPanel;
     }
-    
+
 } // @jve:decl-index=0:visual-constraint="10,10"

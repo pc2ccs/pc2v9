@@ -305,9 +305,9 @@ public final class PacketFactory {
 
     public static final String SERVER_CLOCK_OFFSET = "SERVER_CLOCK_OFFSET";
 
-    private static final Object DELETE_PROBLEM_DEFINITIONS =  "DELETE_PROBLEM_DEFINITIONS";
+    public static final String DELETE_PROBLEM_DEFINITIONS =  "DELETE_PROBLEM_DEFINITIONS";
 
-    private static final Object DELETE_LANGUAGE_DEFINITIONS =  "DELETE_LANGUAGE_DEFINITIONS";
+    public static final String DELETE_LANGUAGE_DEFINITIONS =  "DELETE_LANGUAGE_DEFINITIONS";
 
     /**
      * Constructor is private as this is a utility class which should not be extended or invoked.
@@ -1908,9 +1908,11 @@ public final class PacketFactory {
       
     }
     
-    public static Packet createResetContestPacket(ClientId source, ClientId destination, ClientId clientResettingContest) {
+    public static Packet createResetContestPacket(ClientId source, ClientId destination, ClientId clientResettingContest, boolean eraseProblems, boolean eraseLanguages) {
         Properties prop = new Properties();
         prop.put(CLIENT_ID, clientResettingContest);
+        prop.put(DELETE_PROBLEM_DEFINITIONS, new Boolean(eraseProblems));
+        prop.put(DELETE_LANGUAGE_DEFINITIONS, new Boolean(eraseLanguages));
         return createPacket(PacketType.Type.RESET_CLIENT, source, destination, prop);
     }
 
