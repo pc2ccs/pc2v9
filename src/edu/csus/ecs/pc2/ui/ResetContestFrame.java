@@ -206,6 +206,10 @@ public class ResetContestFrame extends JFrame implements UIPlugin {
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.contest = inContest;
         this.controller = inController;
+        
+        getRemoveLanguageDefintions().setSelected(false);
+        getRemoveProblemDefsCheckBox().setSelected(false);
+        
     }
 
     public String getPluginTitle() {

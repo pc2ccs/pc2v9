@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.util.Arrays;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -10,7 +11,11 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import edu.csus.ecs.pc2.core.list.ContestTimeComparator;
+import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.Profile;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 
 /**
  * Profile administration pane.
@@ -351,13 +356,41 @@ public class ProfilesPane extends JPanePlugin {
 
     protected void resetContest() {
 
-        if (contestRunning()) {
-            JOptionPane.showMessageDialog(this, "Contest Clock must be stopped", "Unable to reset", JOptionPane.ERROR_MESSAGE);
+        String siteContestClockRunning = "";
+        
+        ContestTime [] contestTimes = getContest().getContestTimes();
+        Arrays.sort(contestTimes, new ContestTimeComparator());
+        
+        int numberSites = 0; // number of sites with contest clock running/started
+
+        for (ContestTime contestTime : contestTimes) {
+            if (contestTime.isContestRunning() && siteConnected(contestTime.getSiteNumber())) {
+                siteContestClockRunning = siteContestClockRunning + ", Site " + contestTime.getSiteNumber();
+                numberSites ++;
+            }
+        }
+
+        if (numberSites != 0) {
+            siteContestClockRunning = siteContestClockRunning.substring(2); // remove ", " off front of string to make
+            String sitePhrase = "a site";
+            if (numberSites > 1){
+                sitePhrase = numberSites + " sites";
+            }
+            JOptionPane.showMessageDialog(this, "Contest Clock not stopped at "+sitePhrase+" (" + siteContestClockRunning + ")\n All contest clocks must be stopped", "Unable to reset", JOptionPane.ERROR_MESSAGE);
         } else {
 
             showResetDialog();
 
         }
+    }
+
+    private boolean siteConnected(int siteNumber) {
+        ClientId serverId = new ClientId(siteNumber,Type.SERVER, 0);
+        return getContest().isLocalLoggedIn(serverId) || isThisSite (siteNumber);
+    }
+
+    private boolean isThisSite(int siteNumber) {
+        return getContest().getSiteNumber() == siteNumber;
     }
 
     private void showResetDialog() {
@@ -370,8 +403,4 @@ public class ProfilesPane extends JPanePlugin {
         resetContestFrame.setVisible(true);
     }
 
-    private boolean contestRunning() {
-        return getContest().getContestTime().isContestRunning();
-    }
-    
 } // @jve:decl-index=0:visual-constraint="25,9"
