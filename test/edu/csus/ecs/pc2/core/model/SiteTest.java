@@ -72,5 +72,28 @@ public class SiteTest extends TestCase {
         assertTrue("Port should be " + port, port == site2port);
         assertTrue("Host should be " + hostName, hostName.equals(site2host));
     }
+    
+    /**
+     * test the .format method
+     */
+    public void testFormat (){
+        
+        String name = "Site Four";
+        Site site4 = createSite(4, name, null, 0);
+
+        assertTrue("Name should be " + name, site4.getDisplayName().equals(name));
+         
+        String pattern = Site.NUMBER_PATTERN;
+        assertEquals("4", "" + site4.format(pattern));
+        
+        pattern = Site.NUMBER_PATTERN + " - " + Site.LONG_NAME_PATTERN;
+        assertEquals( "4 - Site Four", "" + site4.format(pattern));
+        
+        pattern = Site.SHORT_NAME_PATTERN;
+        assertEquals("Site 4", "" + site4.format(pattern));
+        
+        pattern = Site.LONG_NAME_PATTERN;
+        assertEquals("Site Four", "" + site4.format(pattern));
+    }
 
 }

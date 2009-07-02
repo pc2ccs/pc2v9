@@ -26,6 +26,10 @@ public class Site implements IElementObject {
      * Connection Info Property Key for IP (or hostname)
      */
     public static final String IP_KEY = "IP_KEY";
+    
+    public static final String NUMBER_PATTERN = "%#";
+    public static final String LONG_NAME_PATTERN = "%L";
+    public static final String SHORT_NAME_PATTERN = "%S";
 
     /**
      * Title for the Site.
@@ -179,7 +183,32 @@ public class Site implements IElementObject {
             return false;
         }
     }
+    
+    /**
+     * 
+     * @param pattern
+     * @return
+     */
+    public StringBuffer format(String pattern) {
 
+        StringBuffer buffer = new StringBuffer();
+
+        if (pattern.equals(NUMBER_PATTERN)) {
+            buffer.append(getSiteNumber());
+        } else if (pattern.equals(NUMBER_PATTERN + " - " + LONG_NAME_PATTERN)) {
+            buffer.append(getSiteNumber());
+            buffer.append(" - ");
+            buffer.append(getDisplayName());
+        } else if (pattern.equals(SHORT_NAME_PATTERN)) {
+            buffer.append("Site ");
+            buffer.append(getSiteNumber());
+        } else if (pattern.equals(LONG_NAME_PATTERN)) {
+            buffer.append(toString());
+        }
+
+        return buffer;
+    }
+        
     @Override
     public int hashCode() {
         // use elementId to be consistent with equals()

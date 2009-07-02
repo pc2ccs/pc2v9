@@ -15,6 +15,7 @@ import edu.csus.ecs.pc2.core.list.ContestTimeComparator;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.Profile;
+import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 
 /**
@@ -365,7 +366,8 @@ public class ProfilesPane extends JPanePlugin {
 
         for (ContestTime contestTime : contestTimes) {
             if (contestTime.isContestRunning() && siteConnected(contestTime.getSiteNumber())) {
-                siteContestClockRunning = siteContestClockRunning + ", Site " + contestTime.getSiteNumber();
+                Site site = getContest().getSite(contestTime.getSiteNumber());
+                siteContestClockRunning = siteContestClockRunning + ", "+site.format(Site.LONG_NAME_PATTERN);
                 numberSites ++;
             }
         }
@@ -376,7 +378,8 @@ public class ProfilesPane extends JPanePlugin {
             if (numberSites > 1){
                 sitePhrase = numberSites + " sites";
             }
-            JOptionPane.showMessageDialog(this, "Contest Clock not stopped at "+sitePhrase+" (" + siteContestClockRunning + ")\n All contest clocks must be stopped", "Unable to reset", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Contest Clock not stopped at " + sitePhrase + " (" + siteContestClockRunning + ")\n All contest clocks must be stopped", "Unable to reset",
+                    JOptionPane.ERROR_MESSAGE);
         } else {
 
             showResetDialog();
