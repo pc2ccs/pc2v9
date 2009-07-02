@@ -25,6 +25,7 @@ import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestLoginSuccessData;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
+import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.ISubmission;
@@ -407,6 +408,11 @@ public class PacketHandler {
         Boolean eraseLanguages = (Boolean) PacketFactory.getObjectValue(packet, PacketFactory.DELETE_LANGUAGE_DEFINITIONS);
         Packet resetPacket = PacketFactory.createResetContestPacket(contest.getClientId(), PacketFactory.ALL_SERVERS, adminClientId, eraseProblems, eraseLanguages);
         controller.sendToServers(resetPacket);
+        
+        // Send updated contest clock
+        
+        Packet newContestTimePacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), contest.getContestTime());
+        controller.sendToServers(newContestTimePacket);
     }
 
     private void resetContest(Packet packet) {
@@ -437,10 +443,31 @@ public class PacketHandler {
             // send to all clients on this site
             controller.sendToTeams(resetPacket);
             sendToJudgesAndOthers(resetPacket, false);
+
+            // Send contest clock update 
+            
+            Packet newContestTimePacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), contest.getContestTime());
+            controller.sendToTeams(newContestTimePacket);
+            sendToJudgesAndOthers(newContestTimePacket, false);
             
         } else {
             controller.getLog().log(Log.INFO, "debug22 resetContest: Unpack " + packet);
             resetContestData(eraseProblems, eraseLanguages);
+        }
+    }
+    
+    /**
+     * Clear all auto judge problems for this contest site/client.
+     * 
+     */
+    private void removeAllProblemsFromAutoJudging(){
+        Vector <Account> vectorAccounts = contest.getAccounts(ClientType.Type.JUDGE, contest.getSiteNumber());
+        Account [] accounts = (Account[]) vectorAccounts.toArray(new Account[vectorAccounts.size()]);
+        
+        for (Account account : accounts){
+            ClientSettings clientSettings = new ClientSettings(account.getClientId());
+            clientSettings.setAutoJudging(false);
+            clientSettings.setAutoJudgeFilter(new Filter());
         }
     }
 
@@ -455,6 +482,8 @@ public class PacketHandler {
             for (Problem problem : contest.getProblems()) {
                 contest.deleteProblem(problem);
             }
+            
+            removeAllProblemsFromAutoJudging();
         }
 
         if (eraseLanguages != null && eraseLanguages.booleanValue()) {
@@ -463,6 +492,17 @@ public class PacketHandler {
             }
         }
         controller.getLog().log(Log.INFO, "debug22 resetContestData p"+contest.getProblems().length+" l"+contest.getLanguages().length+" "+contest.getContestTime().getRemainingMinStr());
+    }
+    
+    /**
+     * Get a SERVER client id.
+     * 
+     * This is a generic send to all server and clients ClientId.
+     * 
+     * @return a generic all sites server client id
+     */
+    private ClientId getServerClientId() {
+        return new ClientId(contest.getSiteNumber(), ClientType.Type.SERVER, 0);
     }
 
     private void handleRunExecutionStatus(Packet packet, ConnectionHandlerID connectionHandlerID) {
