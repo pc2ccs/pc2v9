@@ -481,7 +481,11 @@ public class AutoJudgesPane extends JPanePlugin {
         }
 
         public void problemRemoved(ProblemEvent event) {
-            // ignore does not affect this pane
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadAutoJudgeList();
+                }
+            });
         }
     }
 

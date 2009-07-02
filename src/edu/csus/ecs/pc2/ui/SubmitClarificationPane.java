@@ -33,7 +33,7 @@ public class SubmitClarificationPane extends JPanePlugin {
      */
     private static final long serialVersionUID = 6395977089692171705L;
 
-    private Log log;
+    private Log log;  //  @jve:decl-index=0:
 
     private JPanel problemPane = null;
 
@@ -288,7 +288,11 @@ public class SubmitClarificationPane extends JPanePlugin {
         }
 
         public void problemRemoved(ProblemEvent event) {
-            log.info("debug Problem REMOVED  " + event.getProblem());
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadProblems();
+                }
+            });
         }
     }
 

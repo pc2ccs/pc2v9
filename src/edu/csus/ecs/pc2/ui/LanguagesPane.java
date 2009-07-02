@@ -210,9 +210,12 @@ public class LanguagesPane extends JPanePlugin {
         }
 
         public void languageRemoved(LanguageEvent event) {
-            // TODO Auto-generated method stub
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                }
+            });
         }
-
     }
 
     /**

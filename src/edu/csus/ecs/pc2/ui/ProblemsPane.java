@@ -338,7 +338,11 @@ public class ProblemsPane extends JPanePlugin {
         }
 
         public void problemRemoved(ProblemEvent event) {
-            log.info("debug Problem REMOVED  " + event.getProblem());
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                }
+            });
         }
     }
 
