@@ -83,7 +83,11 @@ public class ConfigurationIO {
         /**
          * 
          */
-        GROUPS
+        GROUPS,
+        /**
+         * 
+         */
+        PROFILE,
     }
 
     private String directoryName = "db";
@@ -208,6 +212,20 @@ public class ConfigurationIO {
                 }
                 
                 try {
+                    key = ConfigKeys.PROFILE;
+                    if (configuration.containsKey(key)) {
+                        Profile profile = (Profile) configuration.get(key.toString());
+                        contest.setProfile(profile);
+                        log.info("Loaded " + key.toString().toLowerCase());
+                    } else {
+                        Profile profile = createNewProfile();
+                        contest.setProfile(profile);
+                    }
+                } catch (Exception e) {
+                    log.log(Log.WARNING, "Exception while loading general problem ", e);
+                }
+                
+                try {
                     key = ConfigKeys.ACCOUNTS;
                     if (configuration.containsKey(key)) {
                         Account[] accounts = (Account[]) configuration.get(key.toString());
@@ -321,6 +339,13 @@ public class ConfigurationIO {
             return false;
         }
     }
+    
+    private Profile createNewProfile() {
+        Profile profile = new Profile("Contest");
+        profile.setDescription("(No description, yet)");
+        return profile;
+    }
+
 
     /**
      * Return all accounts for all sites.
@@ -363,6 +388,7 @@ public class ConfigurationIO {
         configuration.add(ConfigKeys.CONTEST_INFORMATION, contest.getContestInformation());
         configuration.add(ConfigKeys.CLIENT_SETTINGS_LIST, contest.getClientSettingsList());
         configuration.add(ConfigKeys.GROUPS, contest.getGroups());
+        configuration.add(ConfigKeys.PROFILE, contest.getProfile());
 
         configuration.writeToDisk(getFileName());
 

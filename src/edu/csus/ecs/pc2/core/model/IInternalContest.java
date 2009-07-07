@@ -742,4 +742,49 @@ public interface IInternalContest {
      * @return
      */
     boolean isSendAdditionalRunStatusMessages() ;
+    
+    /**
+     * Is this object from the current contest configuration ?.
+     * 
+     * Different Profiles have different contest identifiers, this
+     * method returns true if the contest info is from the same 
+     * configuration.
+     * 
+     * @param object
+     * @return
+     */
+    boolean contestIdMatches (String identifier);
+    
+    /**
+     * return a Contest Identifier.
+     * 
+     * The Contest Identifier is stored in the Profile, so
+     * the {@link #setProfile(Profile)} method is used to
+     * update the Profile.
+     * 
+     * 
+     * @return a unique identifier for this configuration/profile.
+     */
+    String getContestIdentifier();
+    
+    /**
+     * Set the contest identifier
+     * @param contestId
+     */
+    void setContestIdentifier(String contestId);
+    
+    
+    /**
+     * Set the Profile/configuration identifier for this contest instance.
+     * 
+     */
+    void setProfile (Profile profile);
+    
+    /**
+     * Get the Profile/configuration identifier for this contest instance.
+     * @return
+     */
+    Profile getProfile ();
+
+    
 }

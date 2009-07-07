@@ -191,6 +191,10 @@ public class InternalContest implements IInternalContest {
     
     private SecurityMessageHandler securityMessageHandler;
     
+    private Profile profile = null;
+
+    private String contestIdentifier = null;
+    
     private Site createFakeSite(int nextSiteNumber) {
         Site site = new Site("Site " + nextSiteNumber, nextSiteNumber);
         Properties props = new Properties();
@@ -260,6 +264,10 @@ public class InternalContest implements IInternalContest {
                 setGeneralProblem(new Problem("General"));
             }
         }
+        
+        Profile newProfile = new Profile("Contest");
+        newProfile.setDescription("(No description, yet)");
+        setProfile(newProfile);
 
         if (getContestTime(siteNum) == null){
             ContestTime contestTime = new ContestTime();
@@ -1853,4 +1861,31 @@ public class InternalContest implements IInternalContest {
         fireLanguageListener(languageEvent);
     }
 
+    public boolean contestIdMatches(String identifier) {
+        if (profile == null){
+            return false;
+        }
+        return profile.matchesIdentifier(identifier);
+    }
+
+    public String getContestIdentifier() {
+        if (profile != null){
+            return profile.getContestId();
+        } else {
+            return contestIdentifier;
+        }
+            
+    }
+
+    public Profile getProfile() {
+        return profile;
+    }
+
+    public void setProfile(Profile profile) {
+        this.profile = profile;
+    }
+
+    public void setContestIdentifier(String contestId) {
+        contestIdentifier = contestId;
+    }
 }

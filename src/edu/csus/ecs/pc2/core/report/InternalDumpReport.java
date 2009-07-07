@@ -30,6 +30,7 @@ import edu.csus.ecs.pc2.core.model.JudgementNotification;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.NotificationSetting;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.ContestInformation.TeamDisplayMask;
@@ -198,7 +199,9 @@ public class InternalDumpReport implements IReport {
     }
 
     public void writeReport(PrintWriter printWriter) {
-
+        
+        printProfile(printWriter);
+        
         printLocalContestTime(printWriter);
               
         printCurrentClientInfo(printWriter);
@@ -229,6 +232,22 @@ public class InternalDumpReport implements IReport {
         
         printNotificationSettings(printWriter);
 
+    }
+
+    private void printProfile(PrintWriter printWriter) {
+
+        printWriter.println();
+        printWriter.println("-- Profile --");
+
+        Profile profile = contest.getProfile();
+        if (profile != null) {
+            printWriter.println("    title    : " + profile.getName());
+            printWriter.println("  identifier : " + profile.getContestId());
+            printWriter.println("  description: " + profile.getDescription());
+            printWriter.println("      created: " + profile.getCreateDate());
+        }
+
+        printWriter.println();
     }
 
     private void printCurrentClientInfo(PrintWriter printWriter) {

@@ -30,6 +30,7 @@ import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
+import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunExecutionStatus;
 import edu.csus.ecs.pc2.core.model.RunFiles;
@@ -309,6 +310,13 @@ public final class PacketFactory {
 
     public static final String DELETE_LANGUAGE_DEFINITIONS =  "DELETE_LANGUAGE_DEFINITIONS";
 
+    public static final String CONTEST_IDENTIFIER =  "CONTEST_IDENTIFIER";
+    
+    public static final String PROFILE =  "PROFILE";
+    
+    public static final String PROFILE_LIST =  "PROFILE_LIST";
+    
+
     /**
      * Constructor is private as this is a utility class which should not be extended or invoked.
      */
@@ -438,8 +446,8 @@ public final class PacketFactory {
      */
     public static void dumpPacket(Log log, Packet packet, String message) {
 
-        log.info("Packet "  + packet.getType()+" (Seq #"+packet.getPacketNumber()+" ) "+message);
-        log.info("  From: " + packet.getSourceId());
+        log.info("Packet " + packet.getType() + " (Seq #" + packet.getPacketNumber() + " ) " + message);
+        log.info("  From: " + packet.getSourceId() + " (" + packet.getHostName() + " @ " + packet.getHostAddress() + ")" + " (Contest Id: " + packet.getContestIdentifier() + ")");
         log.info("    To: " + packet.getDestinationId());
         Object obj = packet.getContent();
         if (obj instanceof Properties) {
@@ -465,7 +473,7 @@ public final class PacketFactory {
      */
     public static void dumpPacket(PrintStream pw, Packet packet, String message) {
         pw.println("Packet " + packet.getType() + " (Seq #" + packet.getPacketNumber() + " ) " + message);
-        pw.println("  From: " + packet.getSourceId() + " (" + packet.getHostName() + " @ " + packet.getHostAddress() + ")");
+        pw.println("  From: " + packet.getSourceId() + " (" + packet.getHostName() + " @ " + packet.getHostAddress() + ")" + " (Contest Id: " + packet.getContestIdentifier() + ")");
         pw.println("    To: " + packet.getDestinationId());
         Object obj = packet.getContent();
         if (obj instanceof Properties) {
@@ -1027,6 +1035,8 @@ public final class PacketFactory {
             prop.put(BALLOON_SETTINGS_LIST, data.getBalloonSettingsArray());
             prop.put(GROUP_LIST, data.getGroups());
             prop.put(GENERAL_PROBLEM, data.getGeneralProblem());
+            prop.put(CONTEST_IDENTIFIER, data.getContestIdentifier());
+            prop.put(PROFILE, data.getProfile());
             
             TimeZone timeZone = TimeZone.getTimeZone("GMT");
             GregorianCalendar gregorianCalendar = new GregorianCalendar(timeZone);
@@ -1908,11 +1918,12 @@ public final class PacketFactory {
       
     }
     
-    public static Packet createResetContestPacket(ClientId source, ClientId destination, ClientId clientResettingContest, boolean eraseProblems, boolean eraseLanguages) {
+    public static Packet createResetContestPacket(ClientId source, ClientId destination, ClientId clientResettingContest, Profile newProfile, boolean eraseProblems, boolean eraseLanguages) {
         Properties prop = new Properties();
         prop.put(CLIENT_ID, clientResettingContest);
         prop.put(DELETE_PROBLEM_DEFINITIONS, new Boolean(eraseProblems));
         prop.put(DELETE_LANGUAGE_DEFINITIONS, new Boolean(eraseLanguages));
+        prop.put(PROFILE, newProfile);
         return createPacket(PacketType.Type.RESET_CLIENT, source, destination, prop);
     }
 

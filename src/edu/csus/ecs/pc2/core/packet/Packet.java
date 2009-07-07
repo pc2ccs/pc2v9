@@ -48,6 +48,8 @@ public class Packet implements Serializable {
     private String hostAddress = "(unset)";
 
     private String hostName = "(unset)";
+    
+    private String contestIdentifier;
 
     // TODO change this back to protected, soon.
     public Packet(PacketType.Type type, ClientId source, ClientId destination, Serializable content) {
@@ -142,5 +144,20 @@ public class Packet implements Serializable {
         return hostName;
     }
 
+    /**
+     * Get contest/Profile identifier.
+     * @return
+     */
+    public String getContestIdentifier() {
+        return contestIdentifier;
+    }
+
+    /**
+     * Set a contest/Profile identifier.
+     * @param contestIdentifier
+     */
+    public void setContestIdentifier(String contestIdentifier) {
+        this.contestIdentifier = contestIdentifier;
+    }
 
 }

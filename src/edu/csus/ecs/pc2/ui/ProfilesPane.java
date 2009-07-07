@@ -11,9 +11,11 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.list.ContestTimeComparator;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ContestTime;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
@@ -286,8 +288,7 @@ public class ProfilesPane extends JPanePlugin {
     }
 
     private String getProfileName() {
-        Profile profile = new Profile("Default");
-        return profile.getName();
+        return getContest().getProfile().getName();
     }
 
     protected void newProfile() {
@@ -404,6 +405,17 @@ public class ProfilesPane extends JPanePlugin {
         }
 
         resetContestFrame.setVisible(true);
+    }
+    
+    @Override
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
+        super.setContestAndController(inContest, inController);
+         
+        Profile profile = inContest.getProfile();
+        if (profile != null){
+            getProfileTextField().setText(profile.getName());
+            profileNameLabel.setToolTipText("Contest Profile Name "+profile.getContestId());
+        }
     }
 
 } // @jve:decl-index=0:visual-constraint="25,9"

@@ -35,6 +35,7 @@ import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.LoginEvent;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
+import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunExecutionStatus;
 import edu.csus.ecs.pc2.core.model.RunFiles;
@@ -274,6 +275,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     public void sendToLocalServer(Packet packet) {
         try {
             log.info("Sending packet to server " + packet);
+            if (contest.getProfile() != null){
+                packet.setContestIdentifier(contest.getContestIdentifier().toString());
+            }
             connectionManager.send(packet);
         } catch (TransportException e) {
             info("Unable to send to Server  " + packet);
@@ -285,6 +289,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     private void sendToClient(ConnectionHandlerID connectionHandlerID, Packet packet) {
         info("sendToClient (send) " + packet.getDestinationId() + " " + packet + " " + connectionHandlerID);
         try {
+            packet.setContestIdentifier(contest.getContestIdentifier().toString());
             connectionManager.send(packet, connectionHandlerID);
         } catch (TransportException e) {
             info("Unable to send to " + connectionHandlerID + " packet " + packet);
@@ -312,6 +317,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         if (connectionHandlerID != null) {
 
             try {
+                packet.setContestIdentifier(contest.getContestIdentifier().toString());
                 connectionManager.send(packet, connectionHandlerID);
             } catch (TransportException e) {
                 log.log(Log.SEVERE, "Exception sending packet to site " + siteNumber + " " + packet, e);
@@ -1423,6 +1429,14 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      */
     private void processPacket(Packet packet, ConnectionHandlerID connectionHandlerID) {
         try {
+            
+            if (!contest.contestIdMatches(packet.getContestIdentifier())) {
+                PacketFactory.dumpPacket(log, packet, "Packet Contest/Profile Identifer does not match contest's " + contest.getContestIdentifier());
+
+                // FIXME when this is fixed
+//                throw new ContestSecurityException(packet.getSourceId(), connectionHandlerID, "Packet " + packet.getSourceId() + " does not match contest id " + packet.getContestIdentifier()
+//                        + " should be " + contest.getContestIdentifier());
+            }
 
             packetHandler.handlePacket(packet, connectionHandlerID);
 
@@ -2430,11 +2444,18 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 contestTime = new ContestTime(siteNum);
                 contest.addContestTime(contestTime);
             }
-
+            if (contest.getProfile() == null){
+                contest.setProfile(createNewProfile());
+            }
         }
 
         return loadedConfiguration;
+    }
 
+    private Profile createNewProfile() {
+        Profile profile = new Profile("Contest");
+        profile.setDescription("(No description, yet)");
+        return profile;
     }
 
     public void writeConfigToDisk() {

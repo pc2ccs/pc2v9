@@ -36,6 +36,9 @@ public class ContestLoginSuccessData implements Serializable {
     private Site[] sites;
     private Problem generalProblem;
     private String contestSecurityPassword;
+    private String contestIdentifier;
+    private Profile profile;
+
     /**
      * @return Returns the accounts.
      */
@@ -215,5 +218,17 @@ public class ContestLoginSuccessData implements Serializable {
     }
     public String getContestSecurityPassword() {
         return contestSecurityPassword;
+    }
+    public String getContestIdentifier() {
+        return contestIdentifier;
+    }
+    public void setContestIdentifier(String contestIdentifier) {
+        this.contestIdentifier = contestIdentifier;
+    }
+    public Profile getProfile() {
+        return profile;
+    }
+    public void setProfile(Profile profile) {
+        this.profile = profile;
     }
 }

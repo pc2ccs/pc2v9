@@ -35,6 +35,7 @@ import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.ProblemDataFilesList;
+import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunExecutionStatus;
 import edu.csus.ecs.pc2.core.model.RunFiles;
@@ -370,8 +371,8 @@ public class PacketHandler {
         
         if (isServer(sourceId)){
             // Only servers are allowed to reset client or other server contest
-            
-            resetContest(packet);
+            Profile profile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE);
+            resetContest(packet, profile);
             System.out.println("resetClient after resetContest "+packet);
             
         } else {
@@ -400,13 +401,20 @@ public class PacketHandler {
         // check permission
         securityCheck(Permission.Type.RESET_CONTEST, adminClientId, connectionHandlerID);
         
+        // Create a new Profile with a new Contest Id
+        Profile profile = contest.getProfile();
+        Profile newProfile = new Profile(profile.getName());
+        newProfile.setDescription(profile.getDescription());
+        newProfile.setName (profile.getName());
+        contest.setProfile(newProfile);
+        
         // Reset and send to all local clients
-        resetContest(packet);
+        resetContest(packet, newProfile);
 
         // send to sites
         Boolean eraseProblems = (Boolean) PacketFactory.getObjectValue(packet, PacketFactory.DELETE_PROBLEM_DEFINITIONS);
         Boolean eraseLanguages = (Boolean) PacketFactory.getObjectValue(packet, PacketFactory.DELETE_LANGUAGE_DEFINITIONS);
-        Packet resetPacket = PacketFactory.createResetContestPacket(contest.getClientId(), PacketFactory.ALL_SERVERS, adminClientId, eraseProblems, eraseLanguages);
+        Packet resetPacket = PacketFactory.createResetContestPacket(contest.getClientId(), PacketFactory.ALL_SERVERS, adminClientId, newProfile, eraseProblems, eraseLanguages);
         controller.sendToServers(resetPacket);
         
         // Send updated contest clock
@@ -415,7 +423,7 @@ public class PacketHandler {
         controller.sendToServers(newContestTimePacket);
     }
 
-    private void resetContest(Packet packet) {
+    private void resetContest(Packet packet, Profile profile) {
         
         Boolean eraseProblems = (Boolean) PacketFactory.getObjectValue(packet, PacketFactory.DELETE_PROBLEM_DEFINITIONS);
         Boolean eraseLanguages = (Boolean) PacketFactory.getObjectValue(packet, PacketFactory.DELETE_LANGUAGE_DEFINITIONS);
@@ -423,7 +431,7 @@ public class PacketHandler {
         if (isServer()) {
 
             ClientId adminClientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-
+          
             /**
              * This clears all submissions and more.
              */
@@ -434,11 +442,14 @@ public class PacketHandler {
             contestTime.setElapsedMins(0);
             contest.updateContestTime(contestTime);
 
-            controller.getLog().log(Log.INFO, "debug22 resetContest: RESET " + contest.getClientId()); 
+            PacketFactory.dumpPacket(controller.getLog(), packet, "debug 22 - RESET");
             resetContestData(eraseProblems, eraseLanguages);
 
+            // Set Contest Profile
+            contest.setProfile(profile);
+            
             // send out to all clients
-            Packet resetPacket = PacketFactory.createResetContestPacket(contest.getClientId(), PacketFactory.ALL_SERVERS, adminClientId, eraseProblems, eraseLanguages);
+            Packet resetPacket = PacketFactory.createResetContestPacket(contest.getClientId(), PacketFactory.ALL_SERVERS, adminClientId, profile, eraseProblems, eraseLanguages);
 
             // send to all clients on this site
             controller.sendToTeams(resetPacket);
@@ -451,7 +462,11 @@ public class PacketHandler {
             sendToJudgesAndOthers(newContestTimePacket, false);
             
         } else {
-            controller.getLog().log(Log.INFO, "debug22 resetContest: Unpack " + packet);
+            PacketFactory.dumpPacket(controller.getLog(), packet, "debug 22 - resetContest");
+            
+            // Set Contest Profile
+            contest.setProfile(profile);
+            
             resetContestData(eraseProblems, eraseLanguages);
         }
     }
@@ -2655,6 +2670,8 @@ public class PacketHandler {
         }
 
         controller.setSiteNumber(clientId.getSiteNumber());
+        
+        setProfileIntoModel (packet);
 
         addSitesToModel(packet);
 
@@ -2787,6 +2804,25 @@ public class PacketHandler {
             controller.getLog().log(Log.WARNING, "Exception logged ", e);
         }
 
+    }
+
+    private void setProfileIntoModel(Packet packet) {
+        
+        try {
+            
+            String contestId =  (String) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_IDENTIFIER);
+            contest.setContestIdentifier(contestId);
+
+            Profile profile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE);
+            if (profile != null) {
+                contest.setProfile(profile);
+            }
+            
+        } catch (Exception e) {
+            // TODO: log handle exception
+            controller.getLog().log(Log.WARNING, "Exception logged ", e);
+        }
+        
     }
 
     private void addLanguagesToModel(Packet packet) {
@@ -3136,9 +3172,12 @@ public class PacketHandler {
         contestLoginSuccessData.setRuns(runs);
         contestLoginSuccessData.setSites(sites);
         contestLoginSuccessData.setGeneralProblem(contest.getGeneralProblem());
+        contestLoginSuccessData.setContestIdentifier(contest.getContestIdentifier().toString());
+        contestLoginSuccessData.setProfile(contest.getProfile());
 
         if (isServer(clientId)) {
             contestLoginSuccessData.setContestSecurityPassword(contestSecurityPassword);
+            contestLoginSuccessData.setProfile(contest.getProfile());
         }
 
         Packet loginSuccessPacket = PacketFactory.createLoginSuccess(contest.getClientId(), clientId, contest.getContestTime(), contest.getSiteNumber(), contest.getContestInformation(),
