@@ -230,5 +230,12 @@ public class ResetContestFrame extends JFrame implements UIPlugin {
         }
         return mainPanel;
     }
+    
+    @Override
+    public void setVisible(boolean b) {
+        super.setVisible(b);
+        getRemoveLanguageDefintions().setSelected(false);
+        getRemoveProblemDefsCheckBox().setSelected(false);
+    }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

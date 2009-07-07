@@ -10,13 +10,16 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.list.ContestTimeComparator;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.IProfileListener;
 import edu.csus.ecs.pc2.core.model.Profile;
+import edu.csus.ecs.pc2.core.model.ProfileEvent;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 
@@ -410,11 +413,47 @@ public class ProfilesPane extends JPanePlugin {
     @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
-         
-        Profile profile = inContest.getProfile();
+
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                Profile profile = getContest().getProfile();
+                updateProfileInformation (profile);
+            }
+        });
+        
+        inContest.addProfileListener(new ProfileListenerImplementation());
+    }
+    
+    private void updateProfileInformation(Profile profile) {
+        
         if (profile != null){
             getProfileTextField().setText(profile.getName());
             profileNameLabel.setToolTipText("Contest Profile Name "+profile.getContestId());
+        }
+    }
+
+    /**
+     * Profile Listener Implementation
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    protected class ProfileListenerImplementation implements IProfileListener {
+
+        public void profileAdded(ProfileEvent event) {
+            // TODO implement profileAdded
+        }
+
+        public void profileChanged(ProfileEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    Profile profile = getContest().getProfile();
+                    updateProfileInformation (profile);
+                }
+            });
+        }
+
+        public void profileRemoved(ProfileEvent event) {
+            // TODO implement profileRemoved
         }
     }
 
