@@ -280,6 +280,10 @@ public interface IInternalContest {
     
     void removeGroupListener(IGroupListener groupListener);
     
+    void addProfileListener(IProfileListener profileListener);
+    
+    void removeProfileListener(IProfileListener profileListener);
+    
     Run getRun(ElementId id);
 
     Vector<Account> getAccounts(Type type, int siteNumber);
@@ -785,6 +789,17 @@ public interface IInternalContest {
      * @return
      */
     Profile getProfile ();
+    
+    /**
+     * Get list of profiles.
+     * @return
+     */
+    Profile [] getProfiles();
+    
+    void addProfile(Profile profile);
 
+    void updateProfile(Profile profile);
+
+    void deleteProfile (Profile profile);
     
 }

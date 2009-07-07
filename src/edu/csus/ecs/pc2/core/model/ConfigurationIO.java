@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Hashtable;
 import java.util.Vector;
+import java.util.logging.Logger;
 
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -251,27 +252,7 @@ public class ConfigurationIO {
                     log.log(Log.WARNING, "Exception while loading judgements ", e);
                 }
                 
-                try {
-                    key = ConfigKeys.PROBLEM_DATA_FILES;
-                    if (configuration.containsKey(key)) {
-                        ProblemDataFiles[] problemDataFiles = (ProblemDataFiles[]) configuration.get(key.toString());
-                        int count = 0;
-
-                        for (ProblemDataFiles problemDataFiles2 : problemDataFiles) {
-                            Problem problem = contest.getProblem(problemDataFiles2.getProblemId());
-                            if (problem != null) {
-                                contest.updateProblem(problem, problemDataFiles2);
-                                count++;
-                            } else {
-                                log.warning("Could not find problem for problemDataFiles problem id=" + problemDataFiles2.getProblemId());
-                            }
-
-                            log.info("Loaded " + count + " of " + problemDataFiles.length + " " + key.toString().toLowerCase());
-                        }
-                    }
-                } catch (Exception e) {
-                    log.log(Log.WARNING, "Exception while loading problem data files ", e);
-                }
+                loadProblemDataFilesInfo(contest, configuration, log);
                 
                 try {
                     key = ConfigKeys.SITES;
@@ -340,6 +321,31 @@ public class ConfigurationIO {
         }
     }
     
+    private void loadProblemDataFilesInfo(IInternalContest contest, Configuration configuration, Logger log) {
+
+        try {
+            ConfigKeys key = ConfigKeys.PROBLEM_DATA_FILES;
+            if (configuration.containsKey(key)) {
+                ProblemDataFiles[] problemDataFiles = (ProblemDataFiles[]) configuration.get(key.toString());
+                int count = 0;
+
+                for (ProblemDataFiles problemDataFiles2 : problemDataFiles) {
+                    Problem problem = contest.getProblem(problemDataFiles2.getProblemId());
+                    if (problem != null) {
+                        contest.updateProblem(problem, problemDataFiles2);
+                        count++;
+                    } else {
+                        log.warning("Could not find problem for problemDataFiles problem id=" + problemDataFiles2.getProblemId());
+                    }
+
+                    log.info("Loaded " + count + " of " + problemDataFiles.length + " " + key.toString().toLowerCase());
+                }
+            }
+        } catch (Exception e) {
+            log.log(Log.WARNING, "Exception while loading problem data files ", e);
+        }
+    }
+
     private Profile createNewProfile() {
         Profile profile = new Profile("Contest");
         profile.setDescription("(No description, yet)");

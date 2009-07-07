@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core.model;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -10,13 +11,15 @@ import java.util.Date;
  */
 
 // $HeadURL$
-public class Profile extends ElementId {
+public class Profile implements IElementObject, Serializable {
 
     private String name;
 
     private String description = "";
 
     private Date createDate = new Date();
+    
+    private ElementId elementId = null;
 
     /**
      * 
@@ -29,13 +32,12 @@ public class Profile extends ElementId {
     private boolean active = true;
 
     public Profile(String name) {
-        super(name);
+        elementId = new ElementId(new String(name));
         this.name = name;
-        setSiteNumber(0);
     }
 
     public ElementId getElementId() {
-        return this;
+        return elementId;
     }
 
     public boolean isActive() {
@@ -72,5 +74,17 @@ public class Profile extends ElementId {
 
     public boolean matchesIdentifier(String identifier) {
         return toString().equals(identifier);
+    }
+
+    public int getSiteNumber() {
+        return elementId.getSiteNumber();
+    }
+
+    public void setSiteNumber(int siteNumber) {
+        setSiteNumber(elementId.getSiteNumber());
+    }
+
+    public int versionNumber() {
+        return elementId.getVersionNumber();
     }
 }

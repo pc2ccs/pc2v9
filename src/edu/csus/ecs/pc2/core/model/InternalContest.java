@@ -25,6 +25,7 @@ import edu.csus.ecs.pc2.core.list.LanguageList;
 import edu.csus.ecs.pc2.core.list.LoginList;
 import edu.csus.ecs.pc2.core.list.ProblemDisplayList;
 import edu.csus.ecs.pc2.core.list.ProblemList;
+import edu.csus.ecs.pc2.core.list.ProfilesList;
 import edu.csus.ecs.pc2.core.list.RunFilesList;
 import edu.csus.ecs.pc2.core.list.RunList;
 import edu.csus.ecs.pc2.core.list.RunResultsFileList;
@@ -41,7 +42,7 @@ import edu.csus.ecs.pc2.core.security.SecurityMessageHandler;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
 /**
- * Implementation of IInternalContest.
+ * Implementation of IInternalContest - the contest model.
  * 
  * This model is not responsible for logic, just storage. So, for example, {@link #cancelRunCheckOut(Run, ClientId)} will simply update the Run but will not check whether the run should be cancelled.
  * The InternalController should be used to check whether a Run should be cancelled. Other logic of this sort is in the InternalController, not the InternalContest.
@@ -51,7 +52,6 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
  */
 
 // $HeadURL$
-
 public class InternalContest implements IInternalContest {
 
     private ClientId localClientId = null;
@@ -63,6 +63,8 @@ public class InternalContest implements IInternalContest {
     private Vector<IProblemListener> problemListenerList = new Vector<IProblemListener>();
 
     private Vector<ILanguageListener> languageListenerList = new Vector<ILanguageListener>();
+    
+    private Vector<IProfileListener> profileListenerList = new Vector<IProfileListener>();
 
     private Vector<IChangePasswordListener> changePasswordListenerList = new Vector<IChangePasswordListener>();
 
@@ -114,7 +116,7 @@ public class InternalContest implements IInternalContest {
     /**
      * Logins on other sites.
      * 
-     * These are all the logins taht have been authenticated by a remote server.
+     * These are all the logins that have been authenticated by a remote server.
      */
     private LoginList remoteLoginList = new LoginList();
 
@@ -168,6 +170,11 @@ public class InternalContest implements IInternalContest {
      * List of all languages. Contains deleted problems too.
      */
     private LanguageList languageList = new LanguageList();
+    
+    /**
+     * List of all profiles.
+     */
+    private ProfilesList profileList = new ProfilesList();
 
     /**
      * List of all displayed languages, in order. Does not contain deleted languages.
@@ -918,7 +925,6 @@ public class InternalContest implements IInternalContest {
     
  
     public boolean isAllowed(Permission.Type type) {
-        // TODO wander throughout UI code and use this method.
         return isAllowed(getClientId(), type);
     }
 
@@ -1883,9 +1889,53 @@ public class InternalContest implements IInternalContest {
 
     public void setProfile(Profile profile) {
         this.profile = profile;
+        updateProfile(profile);
     }
 
     public void setContestIdentifier(String contestId) {
         contestIdentifier = contestId;
+    }
+
+    public void addProfile(Profile theProfile) {
+        profileList.add(theProfile);
+        ProfileEvent profileEvent = new ProfileEvent(ProfileEvent.Action.ADDED, theProfile);
+        fireProfileListener(profileEvent);
+    }
+
+    private void fireProfileListener(ProfileEvent profileEvent) {
+        for (int i = 0; i < profileListenerList.size(); i++) {
+
+            if (profileEvent.getAction() == ProfileEvent.Action.ADDED) {
+                profileListenerList.elementAt(i).profileAdded(profileEvent);
+            } else if (profileEvent.getAction() == ProfileEvent.Action.DELETED) {
+                profileListenerList.elementAt(i).profileRemoved(profileEvent);
+            } else {
+                profileListenerList.elementAt(i).profileChanged(profileEvent);
+            }
+        }
+    }
+
+    public void addProfileListener(IProfileListener profileListener) {
+        profileListenerList.add(profileListener);
+    }
+
+    public void deleteProfile(Profile theProfile) {
+        profileList.delete(theProfile);
+        ProfileEvent profileEvent = new ProfileEvent(ProfileEvent.Action.DELETED, theProfile);
+        fireProfileListener(profileEvent);
+    }
+
+    public Profile[] getProfiles() {
+        return profileList.getList();
+    }
+
+    public void removeProfileListener(IProfileListener profileListener) {
+        profileListenerList.remove(profileListener);
+    }
+
+    public void updateProfile(Profile theProfile) {
+        profileList.update(theProfile);
+        ProfileEvent profileEvent = new ProfileEvent(ProfileEvent.Action.CHANGED, theProfile);
+        fireProfileListener(profileEvent);
     }
 }
