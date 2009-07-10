@@ -429,26 +429,17 @@ public class LoginFrame extends JFrame implements UIPlugin {
     }
 
     private boolean verifyImage(String inFileName, URL url) {
-        // TODO why is the checksum different from the jar?  compressed?
+        // these are the real checksums
         byte[] csusChecksum = { -78, -82, -33, 125, 3, 20, 3, -51, 53, -82, -66, -19, -96, 82, 39, -92, 16, 52, 17, 127};
         byte[] icpcChecksum = { -9, -91, 66, 44, 57, 117, 47, 58, 103, -17, 31, 53, 10, 6, 100, 68, 0, 127, -103, -58};
-        byte[] csusJarChecksum = { 98, 105, -19, -31, -71, -121, 109, -34, 64, 83, -78, -31, 49, -57, 57, 8, 35, -79, 13, -49};
-        byte[] icpcJarChecksum = { 70, -55, 53, -41, 127, 102, 30, 95, -55, -13, 11, -11, -31, -103, -107, -31, 119, 25, -98, 14};
+        // these are the checkums from java jvm under microsoft
+        byte[] csusChecksum2 = { 98, 105, -19, -31, -71, -121, 109, -34, 64, 83, -78, -31, 49, -57, 57, 8, 35, -79, 13, -49};
+        byte[] icpcChecksum2 = { 70, -55, 53, -41, 127, 102, 30, 95, -55, -13, 11, -11, -31, -103, -107, -31, 119, 25, -98, 14};
+        // these are the ibm jre checksums
+        byte[] csusChecksum3 = {-46, -84, -66, 55, 82, -78, 124, 88, 68, -83, -128, -110, -19, -26, 92, -3, 76, -26, 21, 30};
+        byte[] icpcChecksum3 = {41, 72, 104, 75, 73, 55, 55, 93, 32, 35, -6, -12, -96, -23, -3, -17, -119, 26, 81, -2};
         byte[] verifyChecksum;
         
-        if (inFileName.equals("images/csus_logo.png")) {
-            if (url.toString().startsWith("jar")) {
-                verifyChecksum = csusJarChecksum;
-            } else {
-                verifyChecksum = csusChecksum;
-            }
-        } else {
-            if (url.toString().startsWith("jar")) {
-                verifyChecksum = icpcJarChecksum;
-            } else {
-                verifyChecksum = icpcChecksum;
-            }
-        }
         try {
             int matchedBytes = 0;
             InputStream is = url.openStream();
@@ -459,6 +450,31 @@ public class LoginFrame extends JFrame implements UIPlugin {
                 md.update(b);
             }
             byte[] digested = md.digest();
+            if (inFileName.equals("images/csus_logo.png")) {
+                switch (digested[0]) {
+                    case 98:
+                        verifyChecksum = csusChecksum2;
+                        break;
+                    case -46:
+                        verifyChecksum = csusChecksum3;
+                        break;
+                    default:
+                        verifyChecksum = csusChecksum;
+                        break;
+                } 
+            } else {
+                switch (digested[0]) {
+                    case 70:
+                        verifyChecksum = icpcChecksum2;
+                        break;
+                    case 41:
+                        verifyChecksum = icpcChecksum3;
+                        break;
+                    default:
+                        verifyChecksum = icpcChecksum;
+                        break;
+                } 
+            }
             for (int i = 0; i < digested.length; i++) {
                 if (digested[i] == verifyChecksum[i]) {
                     matchedBytes++;
