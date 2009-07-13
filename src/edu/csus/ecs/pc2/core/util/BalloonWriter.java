@@ -476,7 +476,7 @@ public class BalloonWriter {
                 if (contestTitle.trim().length() > 0) {
                     fromName.append(" - "+contestTitle.trim());
                 }
-                mess = "From: "+fromName.toString()+" <pc2@ecs.csus.edu>" + NL + "To: " + mailTo + NL;
+                mess = "From: "+fromName.toString()+" <nobody@ecs.csus.edu>" + NL + "To: " + mailTo + NL;
                 os.write(mess.getBytes());
                 message = message + "." + NL;
                 os.write(message.getBytes());
