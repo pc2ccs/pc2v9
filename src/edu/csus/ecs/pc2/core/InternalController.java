@@ -1923,6 +1923,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         // TODO code add INI_FILENAME_OPTION_STRING
         if (parseArguments.isOptPresent("--ini")) {
             String iniName = parseArguments.getOptValue("--ini");
+            Exception exception = null;
             try {
                 System.err.println("Loading INI from " + iniName);
                 ini.setIniURLorFile(iniName);
@@ -1930,12 +1931,22 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 if (!ini.containsKey("_source")) {
                     System.err.println("Unable to load INI from " + iniName);
                     getLog().log(Log.WARNING, "Unable to read ini URL " + iniName);
-                    savedTransportException = new TransportException("Unable to read ini file " + iniName);
+                    exception = new Exception("Unable to read ini file " + iniName);
                 }
             } catch (Exception e) {
                 System.err.println("Unable to load INI from " + iniName);
                 getLog().log(Log.WARNING, "Unable to read ini URL " + iniName, e);
-                savedTransportException = new TransportException("Unable to read ini file " + iniName);
+                exception = e;
+            }
+            
+            if (exception != null){
+                getLog().log(Log.SEVERE, "Can not start PC^2, "+iniName+" can not be read ("+exception.getMessage()+")");
+                System.out.flush();
+                System.err.flush();
+                System.err.println("Can not start PC^2, "+iniName+" can not be read ("+exception.getMessage()+")");
+                System.err.flush();
+                JOptionPane.showMessageDialog(null, "Can not start PC^2, " + iniName + " can not be read (" + exception.getMessage() + ")", "PC^2 Halted", JOptionPane.ERROR_MESSAGE); 
+                System.exit(22);
             }
         }
 
@@ -1958,13 +1969,26 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 savedTransportException = new TransportException("Invalid site after " + SITE_OPTION_STRING);
             }
         }
-
-        log.log(Log.DEBUG, "Site Number is set as " + contest.getSiteNumber() + " (0 means unset)");
-
+        
         if (IniFile.isFilePresent()) {
             // Only read and load .ini file if it is present.
             new IniFile();
+        } else {
+            
+            // TODO: Bug 435, check command line override
+            
+            String currentDirectory = Utilities.getCurrentDirectory();
+            getLog().log(Log.SEVERE, "Can not start PC^2, " + IniFile.getINIFilename() + " can not be read.");
+            System.out.flush();
+            System.err.flush();
+            System.err.println("Can not start PC^2, " + IniFile.getINIFilename() + " file not found in " + currentDirectory);
+            System.err.flush();
+            JOptionPane.showMessageDialog(null, "Can not start PC^2, " + IniFile.getINIFilename() + " file not found in " + currentDirectory,"PC^2 Halted", JOptionPane.ERROR_MESSAGE); 
+            System.exit(22);
         }
+        
+        log.log(Log.DEBUG, "Site Number is set as " + contest.getSiteNumber() + " (0 means unset)");
+
 
         // TODO code add NO_SAVE_OPTION_STRING
         if (parseArguments.isOptPresent("--nosave")) {
