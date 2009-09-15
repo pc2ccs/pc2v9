@@ -1868,7 +1868,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
          */
         TransportException savedTransportException = null;
 
-        String[] arguments = { "--login", "--id", "--password", "--loginUI", "--remoteServer", "--server", "--port", "--ini", "--nosave", CONTEST_PASSWORD_OPTION };
+        String[] arguments = { "--login", "--id", "--password", "--loginUI", "--remoteServer", "--server", "--port", "--skipini", "--ini", "--nosave", CONTEST_PASSWORD_OPTION };
         parseArguments = new ParseArguments(stringArray, arguments);
 
         if (parseArguments.isOptPresent(DEBUG_OPTION_STRING)) {
@@ -1888,7 +1888,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
         
         if (parseArguments.isOptPresent("--help")) {
-            System.out.println("Usage: Starter [--help] [--server] [--first] [--login <login>] [--password <pass>] [--site ##] [--ini filename] ");
+            System.out.println("Usage: Starter [--help] [--server] [--first] [--login <login>] [--password <pass>] [--site ##] [--skipini] [--ini filename] ");
             System.exit(0);
         }
 
@@ -1919,9 +1919,11 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         log.info("Starting ConnectionManager...");
         connectionManager = new ConnectionManager(log);
         log.info("Started ConnectionManager");
+        
+        boolean useIniFile = ! parseArguments.isOptPresent("--skipini"); 
 
         // TODO code add INI_FILENAME_OPTION_STRING
-        if (parseArguments.isOptPresent("--ini")) {
+        if (parseArguments.isOptPresent("--ini") && useIniFile) {
             String iniName = parseArguments.getOptValue("--ini");
             Exception exception = null;
             try {
@@ -1938,7 +1940,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 getLog().log(Log.WARNING, "Unable to read ini URL " + iniName, e);
                 exception = e;
             }
-            
+
             if (exception != null){
                 getLog().log(Log.SEVERE, "Can not start PC^2, "+iniName+" can not be read ("+exception.getMessage()+")");
                 System.out.flush();
@@ -1970,21 +1972,23 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             }
         }
         
-        if (IniFile.isFilePresent()) {
-            // Only read and load .ini file if it is present.
-            new IniFile();
-        } else {
-            
-            // TODO: Bug 435, check command line override
-            
-            String currentDirectory = Utilities.getCurrentDirectory();
-            getLog().log(Log.SEVERE, "Can not start PC^2, " + IniFile.getINIFilename() + " can not be read.");
-            System.out.flush();
-            System.err.flush();
-            System.err.println("Can not start PC^2, " + IniFile.getINIFilename() + " file not found in " + currentDirectory);
-            System.err.flush();
-            JOptionPane.showMessageDialog(null, "Can not start PC^2, " + IniFile.getINIFilename() + " file not found in " + currentDirectory,"PC^2 Halted", JOptionPane.ERROR_MESSAGE); 
-            System.exit(22);
+        if ( useIniFile ){
+            if (IniFile.isFilePresent()) {
+                // Only read and load .ini file if it is present.
+                new IniFile();
+            } else {
+
+                // TODO: Bug 435, check command line override
+
+                String currentDirectory = Utilities.getCurrentDirectory();
+                getLog().log(Log.SEVERE, "Can not start PC^2, " + IniFile.getINIFilename() + " can not be read.");
+                System.out.flush();
+                System.err.flush();
+                System.err.println("Can not start PC^2, " + IniFile.getINIFilename() + " file not found in " + currentDirectory);
+                System.err.flush();
+                JOptionPane.showMessageDialog(null, "Can not start PC^2, " + IniFile.getINIFilename() + " file not found in " + currentDirectory,"PC^2 Halted", JOptionPane.ERROR_MESSAGE); 
+                System.exit(22);
+            }
         }
         
         log.log(Log.DEBUG, "Site Number is set as " + contest.getSiteNumber() + " (0 means unset)");
@@ -2084,14 +2088,20 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 }
             }
         }
+        
+        
+        String contactInfo = getHostContacted()+":"+getPortContacted();
 
         if (savedTransportException != null && loginUI != null) {
             loginUI.disableLoginButton();
             loginUI.setStatusMessage("Unable to contact server, contact staff");
+            JOptionPane.showMessageDialog(null, "Unable to contact server at: "+contactInfo, "Error contacting server", JOptionPane.ERROR_MESSAGE);
         } else if (savedTransportException != null) {
             connectionManager = null;
+            System.err.println("Unable to contact server at "+contactInfo);
             log.log(Log.INFO, "Unable to contact server, contact staff", savedTransportException);
             log.log(Log.INFO, "internal debug, note connectionManager set to null");
+            JOptionPane.showMessageDialog(null, "Unable to contact server at: "+contactInfo, "Error contacting server", JOptionPane.ERROR_MESSAGE);
         }
     }
 
