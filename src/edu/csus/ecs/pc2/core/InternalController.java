@@ -577,8 +577,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             } else {
 
                 if (!serverModule) {
-                    SecurityException securityException = new SecurityException("Can not login as server, check logs");
-                    getLog().log(Log.WARNING, "Can not login as server, must start this module with --server command line option");
+                    SecurityException securityException = new SecurityException("Cannot login as server, check logs");
+                    getLog().log(Log.WARNING, "Cannot login as server, must start this module with --server command line option");
                     securityException.printStackTrace(System.err);
                     throw securityException;
                 }
@@ -599,8 +599,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
         } else {
             if (serverModule) {
-                SecurityException securityException = new SecurityException("Can not login as client, check logs");
-                getLog().log(Log.WARNING, "Can not login as client, must start this module without --server command line option");
+                SecurityException securityException = new SecurityException("Cannot login as client, check logs");
+                getLog().log(Log.WARNING, "Cannot login as client, must start this module without --server command line option");
                 throw securityException;
             }
 
@@ -712,7 +712,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
         // XXX this if does not make sense, should it be if serverModule?
         if (clientId.getClientType().equals(Type.SERVER)) {
-            throw new SecurityException("Can not use clientLogin to login a Server " + loginName);
+            throw new SecurityException("Cannot use clientLogin to login a Server " + loginName);
         } else {
 
             TemporaryClientUI temporaryClientUI = new TemporaryClientUI();
@@ -858,9 +858,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     /**
      * Loads reject.ini file contents into Judgements.
      * 
-     * If finds reject.ini file, reads file. Addes Yes judgement, then prepends "No - " onto each entry from the reject.ini file and returns true.
+     * If finds reject.ini file, reads file. Adds Yes judgement, then prepends "No - " onto each entry from the reject.ini file and returns true.
      * 
-     * Returns false if can not read reject.ini file or reject.ini file is empty (perhaps only containing comments).
+     * Returns false if cannot read reject.ini file or reject.ini file is empty (perhaps only containing comments).
      * 
      * @return true if loaded, false if could not read file.
      */
@@ -1942,12 +1942,12 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             }
 
             if (exception != null){
-                getLog().log(Log.SEVERE, "Can not start PC^2, "+iniName+" can not be read ("+exception.getMessage()+")");
+                getLog().log(Log.SEVERE, "Cannot start PC^2, "+iniName+" cannot be read ("+exception.getMessage()+")");
                 System.out.flush();
                 System.err.flush();
-                System.err.println("Can not start PC^2, "+iniName+" can not be read ("+exception.getMessage()+")");
+                System.err.println("Cannot start PC^2, "+iniName+" cannot be read ("+exception.getMessage()+")");
                 System.err.flush();
-                JOptionPane.showMessageDialog(null, "Can not start PC^2, " + iniName + " can not be read (" + exception.getMessage() + ")", "PC^2 Halted", JOptionPane.ERROR_MESSAGE); 
+                JOptionPane.showMessageDialog(null, "Cannot start PC^2, " + iniName + " cannot be read (" + exception.getMessage() + ")", "PC^2 Halted", JOptionPane.ERROR_MESSAGE); 
                 System.exit(22);
             }
         }
@@ -1972,21 +1972,19 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             }
         }
         
-        if ( useIniFile ){
+        if (useIniFile && (!parseArguments.isOptPresent("--ini"))) {
             if (IniFile.isFilePresent()) {
                 // Only read and load .ini file if it is present.
                 new IniFile();
             } else {
 
-                // TODO: Bug 435, check command line override
-
                 String currentDirectory = Utilities.getCurrentDirectory();
-                getLog().log(Log.SEVERE, "Can not start PC^2, " + IniFile.getINIFilename() + " can not be read.");
+                getLog().log(Log.SEVERE, "Cannot start PC^2, " + IniFile.getINIFilename() + " cannot be read.");
                 System.out.flush();
                 System.err.flush();
-                System.err.println("Can not start PC^2, " + IniFile.getINIFilename() + " file not found in " + currentDirectory);
+                System.err.println("Cannot start PC^2, " + IniFile.getINIFilename() + " file not found in " + currentDirectory);
                 System.err.flush();
-                JOptionPane.showMessageDialog(null, "Can not start PC^2, " + IniFile.getINIFilename() + " file not found in " + currentDirectory,"PC^2 Halted", JOptionPane.ERROR_MESSAGE); 
+                JOptionPane.showMessageDialog(null, "Cannot start PC^2, " + IniFile.getINIFilename() + " file not found in " + currentDirectory,"PC^2 Halted", JOptionPane.ERROR_MESSAGE); 
                 System.exit(22);
             }
         }
