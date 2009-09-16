@@ -149,7 +149,7 @@ public class SampleContest {
 
         if (isServer) {
             controller.setContactingRemoteServer(isRemote);
-            String[] argsSiteOne = { "--server" };
+            String[] argsSiteOne = { "--server", "--skipini" };
             int siteNumber = contest.getSiteNumber();
 
             // As of 2008-01-20 start sets site number to zero.

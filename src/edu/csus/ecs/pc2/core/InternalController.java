@@ -571,8 +571,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             } else {
 
                 if (!serverModule) {
-                    SecurityException securityException = new SecurityException("Can not login as server, check logs");
-                    getLog().log(Log.WARNING, "Can not login as server, must start this module with --server command line option");
+                    SecurityException securityException = new SecurityException("Cannot login as server, check logs");
+                    getLog().log(Log.WARNING, "Cannot login as server, must start this module with --server command line option");
                     securityException.printStackTrace(System.err);
                     throw securityException;
                 }
@@ -593,8 +593,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
         } else {
             if (serverModule) {
-                SecurityException securityException = new SecurityException("Can not login as client, check logs");
-                getLog().log(Log.WARNING, "Can not login as client, must start this module without --server command line option");
+                SecurityException securityException = new SecurityException("Cannot login as client, check logs");
+                getLog().log(Log.WARNING, "Cannot login as client, must start this module without --server command line option");
                 throw securityException;
             }
 
@@ -706,7 +706,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
         // XXX this if does not make sense, should it be if serverModule?
         if (clientId.getClientType().equals(Type.SERVER)) {
-            throw new SecurityException("Can not use clientLogin to login a Server " + loginName);
+            throw new SecurityException("Cannot use clientLogin to login a Server " + loginName);
         } else {
 
             TemporaryClientUI temporaryClientUI = new TemporaryClientUI();
@@ -852,9 +852,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     /**
      * Loads reject.ini file contents into Judgements.
      * 
-     * If finds reject.ini file, reads file. Addes Yes judgement, then prepends "No - " onto each entry from the reject.ini file and returns true.
+     * If finds reject.ini file, reads file. Adds Yes judgement, then prepends "No - " onto each entry from the reject.ini file and returns true.
      * 
-     * Returns false if can not read reject.ini file or reject.ini file is empty (perhaps only containing comments).
+     * Returns false if cannot read reject.ini file or reject.ini file is empty (perhaps only containing comments).
      * 
      * @return true if loaded, false if could not read file.
      */
@@ -1854,7 +1854,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
          */
         TransportException savedTransportException = null;
 
-        String[] arguments = { "--login", "--id", "--password", "--loginUI", "--remoteServer", "--server", "--port", "--ini", "--nosave", CONTEST_PASSWORD_OPTION };
+        String[] arguments = { "--login", "--id", "--password", "--loginUI", "--remoteServer", "--server", "--port", "--skipini", "--ini", "--nosave", CONTEST_PASSWORD_OPTION };
         parseArguments = new ParseArguments(stringArray, arguments);
 
         if (parseArguments.isOptPresent(DEBUG_OPTION_STRING)) {
@@ -1874,7 +1874,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
         
         if (parseArguments.isOptPresent("--help")) {
-            System.out.println("Usage: Starter [--help] [--server] [--first] [--login <login>] [--password <pass>] [--site ##] [--ini filename] ");
+            System.out.println("Usage: Starter [--help] [--server] [--first] [--login <login>] [--password <pass>] [--site ##] [--skipini] [--ini filename] ");
             System.exit(0);
         }
 
@@ -1905,10 +1905,13 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         log.info("Starting ConnectionManager...");
         connectionManager = new ConnectionManager(log);
         log.info("Started ConnectionManager");
+        
+        boolean useIniFile = ! parseArguments.isOptPresent("--skipini"); 
 
         // TODO code add INI_FILENAME_OPTION_STRING
-        if (parseArguments.isOptPresent("--ini")) {
+        if (parseArguments.isOptPresent("--ini") && useIniFile) {
             String iniName = parseArguments.getOptValue("--ini");
+            Exception exception = null;
             try {
                 System.err.println("Loading INI from " + iniName);
                 ini.setIniURLorFile(iniName);
@@ -1916,12 +1919,22 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 if (!ini.containsKey("_source")) {
                     System.err.println("Unable to load INI from " + iniName);
                     getLog().log(Log.WARNING, "Unable to read ini URL " + iniName);
-                    savedTransportException = new TransportException("Unable to read ini file " + iniName);
+                    exception = new Exception("Unable to read ini file " + iniName);
                 }
             } catch (Exception e) {
                 System.err.println("Unable to load INI from " + iniName);
                 getLog().log(Log.WARNING, "Unable to read ini URL " + iniName, e);
-                savedTransportException = new TransportException("Unable to read ini file " + iniName);
+                exception = e;
+            }
+
+            if (exception != null){
+                getLog().log(Log.SEVERE, "Cannot start PC^2, "+iniName+" cannot be read ("+exception.getMessage()+")");
+                System.out.flush();
+                System.err.flush();
+                System.err.println("Cannot start PC^2, "+iniName+" cannot be read ("+exception.getMessage()+")");
+                System.err.flush();
+                JOptionPane.showMessageDialog(null, "Cannot start PC^2, " + iniName + " cannot be read (" + exception.getMessage() + ")", "PC^2 Halted", JOptionPane.ERROR_MESSAGE); 
+                System.exit(22);
             }
         }
 
@@ -1944,13 +1957,26 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 savedTransportException = new TransportException("Invalid site after " + SITE_OPTION_STRING);
             }
         }
+        
+        if (useIniFile && (!parseArguments.isOptPresent("--ini"))) {
+            if (IniFile.isFilePresent()) {
+                // Only read and load .ini file if it is present.
+                new IniFile();
+            } else {
 
+                String currentDirectory = Utilities.getCurrentDirectory();
+                getLog().log(Log.SEVERE, "Cannot start PC^2, " + IniFile.getINIFilename() + " cannot be read.");
+                System.out.flush();
+                System.err.flush();
+                System.err.println("Cannot start PC^2, " + IniFile.getINIFilename() + " file not found in " + currentDirectory);
+                System.err.flush();
+                JOptionPane.showMessageDialog(null, "Cannot start PC^2, " + IniFile.getINIFilename() + " file not found in " + currentDirectory,"PC^2 Halted", JOptionPane.ERROR_MESSAGE); 
+                System.exit(22);
+            }
+        }
+        
         log.log(Log.DEBUG, "Site Number is set as " + contest.getSiteNumber() + " (0 means unset)");
 
-        if (IniFile.isFilePresent()) {
-            // Only read and load .ini file if it is present.
-            new IniFile();
-        }
 
         // TODO code add NO_SAVE_OPTION_STRING
         if (parseArguments.isOptPresent("--nosave")) {
@@ -2046,14 +2072,20 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 }
             }
         }
+        
+        
+        String contactInfo = getHostContacted()+":"+getPortContacted();
 
         if (savedTransportException != null && loginUI != null) {
             loginUI.disableLoginButton();
             loginUI.setStatusMessage("Unable to contact server, contact staff");
+            JOptionPane.showMessageDialog(null, "Unable to contact server at: "+contactInfo, "Error contacting server", JOptionPane.ERROR_MESSAGE);
         } else if (savedTransportException != null) {
             connectionManager = null;
+            System.err.println("Unable to contact server at "+contactInfo);
             log.log(Log.INFO, "Unable to contact server, contact staff", savedTransportException);
             log.log(Log.INFO, "internal debug, note connectionManager set to null");
+            JOptionPane.showMessageDialog(null, "Unable to contact server at: "+contactInfo, "Error contacting server", JOptionPane.ERROR_MESSAGE);
         }
     }
 
