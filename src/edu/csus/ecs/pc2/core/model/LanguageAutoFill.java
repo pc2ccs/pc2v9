@@ -78,7 +78,7 @@ public final class LanguageAutoFill {
             return dVals;
         } else if (key.equals(MSCTITLE)) {
             String[] dVals = { MSCTITLE, "cl.exe {:mainfile}",
-                    "{:basename}.exe", "." + fs + "{:basename}" };
+                    "{:basename}.exe", "." + fs + "{:basename}.exe" };
             return dVals;
         } else if (key.equals(GNUCPPTITLE)) {
             String[] dVals = { GNUCPPTITLE,
