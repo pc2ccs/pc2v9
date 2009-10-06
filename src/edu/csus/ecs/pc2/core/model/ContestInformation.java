@@ -33,6 +33,11 @@ public class ContestInformation implements Serializable{
     private boolean sendAdditionalRunStatusInformation = false;
     
     /**
+     * Max output file size.
+     */
+    private long maxFileSize = 512000;
+
+    /**
      * This is a list of the judgement notification end of contest control settings.
      * 
      */
@@ -134,6 +139,9 @@ public class ContestInformation implements Serializable{
             if (sendAdditionalRunStatusInformation != contestInformation.isSendAdditionalRunStatusInformation()) {
                 return false;
             }
+            if (maxFileSize != contestInformation.getMaxFileSize()){
+                return false;
+            }
             return true;
         } catch (Exception e) {
             // TODO log to static exception log
@@ -192,6 +200,18 @@ public class ContestInformation implements Serializable{
         judgementNotificationsList.update(notificationSetting);
     }
 
+    /**
+     * Maximum file size for output files.
+     * 
+     * @return file size in bytes
+     */
+    public long getMaxFileSize() {
+        return maxFileSize;
+    }
+
+    public void setMaxFileSize(long maxFileSize) {
+        this.maxFileSize = maxFileSize;
+    }
     
     
 }

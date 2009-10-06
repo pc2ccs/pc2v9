@@ -1084,9 +1084,12 @@ public class Executable {
         }
     }
 
+    /**
+     * Get max output file size.
+     * @return
+     */
     private long getMaxFileSize() {
-        // TODO code get this value from the setting on the admin
-        return 512000;
+        return contest.getContestInformation().getMaxFileSize();
     }
 
     /**

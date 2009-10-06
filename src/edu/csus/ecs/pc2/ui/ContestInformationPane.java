@@ -1,7 +1,9 @@
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 
@@ -78,6 +80,10 @@ public class ContestInformationPane extends JPanePlugin {
     
     private ContestInformation savedContestInformation = null;  //  @jve:decl-index=0:
 
+    private JLabel labelMaxFileSize = null;
+
+    private JTextField maxFieldSizeInKTextField = null;
+
     /**
      * This method initializes
      * 
@@ -93,7 +99,7 @@ public class ContestInformationPane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new java.awt.Dimension(533,347));
+        this.setSize(new Dimension(533, 407));
         this.add(getCenterPane(), java.awt.BorderLayout.CENTER);
         this.add(getButtonPanel(), java.awt.BorderLayout.SOUTH);
     }
@@ -122,6 +128,10 @@ public class ContestInformationPane extends JPanePlugin {
      */
     private JPanel getCenterPane() {
         if (centerPane == null) {
+            labelMaxFileSize = new JLabel();
+            labelMaxFileSize.setBounds(new Rectangle(21, 173, 175, 27));
+            labelMaxFileSize.setHorizontalAlignment(SwingConstants.RIGHT);
+            labelMaxFileSize.setText("Maiximum output size (in K)");
             contestTitleLabel = new JLabel();
             contestTitleLabel.setBounds(new java.awt.Rectangle(55, 21, 134, 27));
             contestTitleLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
@@ -136,6 +146,8 @@ public class ContestInformationPane extends JPanePlugin {
             centerPane.add(getJCheckBoxShowPreliminaryOnBoard(), null);
             centerPane.add(getJCheckBoxShowPreliminaryOnNotifications(), null);
             centerPane.add(getAdditionalRunStatusCheckBox(), null);
+            centerPane.add(labelMaxFileSize, null);
+            centerPane.add(getMaxFieldSizeInKTextField(), null);
         }
         return centerPane;
     }
@@ -220,6 +232,10 @@ public class ContestInformationPane extends JPanePlugin {
         contestInformation.setPreliminaryJudgementsUsedByBoard(getJCheckBoxShowPreliminaryOnBoard().isSelected());
         contestInformation.setSendAdditionalRunStatusInformation(getAdditionalRunStatusCheckBox().isSelected());
         
+        String maxFileSizeString = "0" + getMaxFieldSizeInKTextField().getText();
+        long maximumFileSize = Long.parseLong(maxFileSizeString);
+        contestInformation.setMaxFileSize(maximumFileSize * 1000);
+        
         if (savedContestInformation != null){
             contestInformation.setJudgementNotificationsList(savedContestInformation.getJudgementNotificationsList());
         }
@@ -253,6 +269,7 @@ public class ContestInformationPane extends JPanePlugin {
                 getJCheckBoxShowPreliminaryOnBoard().setSelected(contestInformation.isPreliminaryJudgementsUsedByBoard());
                 getJCheckBoxShowPreliminaryOnNotifications().setSelected(contestInformation.isPreliminaryJudgementsTriggerNotifications());
                 getAdditionalRunStatusCheckBox().setSelected(contestInformation.isSendAdditionalRunStatusInformation());
+                getMaxFieldSizeInKTextField().setText((contestInformation.getMaxFileSize()/1000)+"");
                 setEnableButtons(false);
             }
         });
@@ -491,8 +508,8 @@ public class ContestInformationPane extends JPanePlugin {
         if (judgesDefaultAnswerTextField == null) {
             judgesDefaultAnswerTextField = new JTextField();
             judgesDefaultAnswerTextField.setText("");
-            judgesDefaultAnswerTextField.setSize(new java.awt.Dimension(280, 27));
-            judgesDefaultAnswerTextField.setLocation(new java.awt.Point(209, 169));
+            judgesDefaultAnswerTextField.setSize(new Dimension(280, 29));
+            judgesDefaultAnswerTextField.setLocation(new Point(208, 214));
             judgesDefaultAnswerTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
@@ -512,7 +529,7 @@ public class ContestInformationPane extends JPanePlugin {
             judgesDefaultAnswerLabel = new JLabel();
             judgesDefaultAnswerLabel.setText("Judges' Default Answer");
             judgesDefaultAnswerLabel.setHorizontalTextPosition(javax.swing.SwingConstants.TRAILING);
-            judgesDefaultAnswerLabel.setLocation(new java.awt.Point(25, 165));
+            judgesDefaultAnswerLabel.setLocation(new Point(21, 215));
             judgesDefaultAnswerLabel.setSize(new java.awt.Dimension(175, 27));
             judgesDefaultAnswerLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         }
@@ -527,7 +544,7 @@ public class ContestInformationPane extends JPanePlugin {
     private JCheckBox getJCheckBoxShowPreliminaryOnBoard() {
         if (jCheckBoxShowPreliminaryOnBoard == null) {
             jCheckBoxShowPreliminaryOnBoard = new JCheckBox();
-            jCheckBoxShowPreliminaryOnBoard.setBounds(new Rectangle(60, 208, 427, 21));
+            jCheckBoxShowPreliminaryOnBoard.setBounds(new Rectangle(61, 280, 353, 21));
             jCheckBoxShowPreliminaryOnBoard.setHorizontalAlignment(SwingConstants.LEFT);
             jCheckBoxShowPreliminaryOnBoard.setMnemonic(KeyEvent.VK_UNDEFINED);
             jCheckBoxShowPreliminaryOnBoard.setText("Include Preliminary Judgements in Scoring Algorithm");
@@ -548,7 +565,7 @@ public class ContestInformationPane extends JPanePlugin {
     private JCheckBox getJCheckBoxShowPreliminaryOnNotifications() {
         if (jCheckBoxShowPreliminaryOnNotifications == null) {
             jCheckBoxShowPreliminaryOnNotifications = new JCheckBox();
-            jCheckBoxShowPreliminaryOnNotifications.setBounds(new Rectangle(60, 238, 427, 21));
+            jCheckBoxShowPreliminaryOnNotifications.setBounds(new Rectangle(61, 310, 353, 21));
             jCheckBoxShowPreliminaryOnNotifications.setHorizontalAlignment(SwingConstants.LEFT);
             jCheckBoxShowPreliminaryOnNotifications.setMnemonic(KeyEvent.VK_UNDEFINED);
             jCheckBoxShowPreliminaryOnNotifications.setText("Send Balloon Notifications for Preliminary Judgements");
@@ -570,8 +587,8 @@ public class ContestInformationPane extends JPanePlugin {
         if (additionalRunStatusCheckBox == null) {
             additionalRunStatusCheckBox = new JCheckBox();
             additionalRunStatusCheckBox.setHorizontalAlignment(SwingConstants.LEFT);
-            additionalRunStatusCheckBox.setSize(new java.awt.Dimension(427,21));
-            additionalRunStatusCheckBox.setLocation(new java.awt.Point(60,268));
+            additionalRunStatusCheckBox.setSize(new Dimension(353, 21));
+            additionalRunStatusCheckBox.setLocation(new Point(61, 340));
             additionalRunStatusCheckBox.setText("Send Additional Run Status Information");
             additionalRunStatusCheckBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -588,6 +605,25 @@ public class ContestInformationPane extends JPanePlugin {
 
     public void setContestInformation(ContestInformation contestInformation) {
         this.savedContestInformation = contestInformation;
+    }
+
+    /**
+     * This method initializes maxFieldSizeInKTextField	
+     * 	
+     * @return javax.swing.JTextField	
+     */
+    private JTextField getMaxFieldSizeInKTextField() {
+        if (maxFieldSizeInKTextField == null) {
+            maxFieldSizeInKTextField = new JTextField();
+            maxFieldSizeInKTextField.setDocument(new IntegerDocument());
+            maxFieldSizeInKTextField.setBounds(new Rectangle(208, 172, 122, 29));
+            maxFieldSizeInKTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
+        }
+        return maxFieldSizeInKTextField;
     }
 
 
