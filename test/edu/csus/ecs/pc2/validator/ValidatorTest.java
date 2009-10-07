@@ -28,12 +28,36 @@ public class ValidatorTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        
+        // Project path for JUnit with Cruise Control
+        String projectPath = "projects" + File.separator + "pc2v9";
+        
+        // Directory where test data is
+        String testDir = "testdata";
+        
+        File dir = new File(testDir);
+        if (!dir.exists()) {
+            
+            String testDirectoryName = projectPath + File.separator + testDir;
 
-        /**
-         * Create temporary output directory for all result files.
-         */
-        Utilities.insureDir(tempOutputDirectoryName);
+            // TODO, try to find this path in the environment
+            dir = new File(testDirectoryName);
+            
+            if (dir.exists()) {
+                testDataDirectoryName = testDirectoryName + File.separator + "validator";
+                tempOutputDirectoryName = testDataDirectoryName + File.separator + "output";
+                
+                // Create test output directory
+                Utilities.insureDir(tempOutputDirectoryName);
+            } else {
+                throw new Exception ("Could not find "+testDir+" under "+testDirectoryName);
+            }
+        } else {
+            // Create test output directory
+            Utilities.insureDir(tempOutputDirectoryName);
+        }
     }
+    
 
     /**
      * Return full path and filename to test data directory.
