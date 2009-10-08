@@ -23,8 +23,6 @@ import edu.csus.ecs.pc2.VersionInfo;
 // $HeadURL: http://pc2.ecs.csus.edu/repos/v9wip/trunk/src/edu/csus/ecs/pc2/validator/Validator.java$
 public class Validator {
 
-    public static final String SVN_ID = "$Id$";
-
     // System.out.println("Usage: java Validator <inputfile name> <outputfile
     // name> <answerfile name> <resultfile name> <-pc2> [options] icflag");
 
@@ -90,6 +88,13 @@ public class Validator {
     private String extraValidatorDifference = "";
 
     private boolean debugFlag = false;
+    
+    private boolean allowFatalExit = true;
+
+    /**
+     * prints more info, like EOF line counts.
+     */
+    private boolean verbose = false;
 
     /**
      * Used by render judgements.
@@ -106,12 +111,10 @@ public class Validator {
 
     private void usage() {
         VersionInfo vi = new VersionInfo();
-        System.out.println("Usage: java Validator <inputfile name> <outputfile name> <answerfile name> <resultfile name> <-pc2> [options] icflag");
-        System.out.println("\n WHERE OPTIONS INCLUDE: ");
-        System.out.println("<difftype> or <XML FILE for diff configration>");
-        System.out.println("icflag - ignore case flag during diff/compare (true or false)");
+        System.out.println("Usage: java Validator [options] <inputfile name> <outputfile name> <answerfile name> <resultfile name> <-pc2> [pc2_option] icflag");
         System.out.println();
-        System.out.println("diff types are: ");
+        System.out.println("Where: ");
+        System.out.println("pc2 options are: ");
         System.out.println("1 - diff");
         System.out.println("2 - ignore whitespace at start of file");
         System.out.println("3 - ignore leading whitespace on lines");
@@ -123,7 +126,14 @@ public class Validator {
         System.out.println("9   3 & 5");
         System.out.println("10  4 & 5");
         System.out.println();
-        System.out.println("If a input, output or answer file is not needed/used use - for the name, example:");
+        System.out.println("icflag - ignore case flag during diff/compare (true or false)");
+        System.out.println();
+        System.out.println("options: ");
+        System.out.println("  --help    this messge ");
+        System.out.println("  --verbose more info like EOF: line counts");
+        System.out.println("  --debug   a large amount of debugging output");
+        System.out.println();
+        System.out.println("If a input, output or answer file is not needed/used use - (dash) for the name, for example:");
         System.out.println("java Validator - sumit.dat sumit.ans result.xml -pc2 1 true");
         System.out.println();
         System.out.println(vi.getSystemVersionInfo());
@@ -138,9 +148,11 @@ public class Validator {
         validator.runValidator(args);
     }
 
+    /**
+     * Print usage message.
+     */
     void printUsage() {
         usage();
-        System.exit(4);
     }
 
     /**
@@ -218,25 +230,25 @@ public class Validator {
             return JUDGEMENT_NO_WRONG_ANSWER;
         }
 
-        if (answerLine == null) {
+        if (answerLine == null && verbose) {
             System.out.println("EOF: answer file " + lineNo + " lines.");
         }
 
-        if (outputLine == null) {
-            System.out.println("EOF: output file" + lineNo + " lines.");
+        if (outputLine == null && verbose) {
+            System.out.println("EOF: output file " + lineNo + " lines.");
         }
 
         return JUDGEMENT_YES;
 
     }
 
-    private String complexDiff(BufferedReader outputFile, BufferedReader answerFile, boolean ignoreBlankLines, boolean ignoreWhiteSpace) throws IOException {
+    private String complexDiff(BufferedReader outputFile, BufferedReader answerFile, boolean ignoreLeadingWhitespace, boolean ignoreBlankLines, boolean ignoreWhiteSpace) throws IOException {
         int lineNo = 1;
 
         String outputLine;
         String answerLine;
-
-        if (ignoreBlankLines) {
+        
+        if (ignoreLeadingWhitespace || ignoreBlankLines) {
             outputLine = readPastBlankLines(outputFile);
             answerLine = readPastBlankLines(answerFile);
         } else {
@@ -300,12 +312,12 @@ public class Validator {
             return JUDGEMENT_NO_WRONG_ANSWER;
         }
 
-        if (answerLine == null) {
+        if (answerLine == null && verbose) {
             System.out.println("EOF: answer file " + lineNo + " lines.");
         }
 
-        if (outputLine == null) {
-            System.out.println("EOF: output file" + lineNo + " lines.");
+        if (outputLine == null && verbose) {
+            System.out.println("EOF: output file " + lineNo + " lines.");
         }
 
         return JUDGEMENT_YES;
@@ -379,29 +391,14 @@ public class Validator {
             return simpleDiff(outputFile, answerFile);
         }
 
-        // Ignore Leading Whitespace
-
-        String outputLine = outputFile.readLine();
-        if (ignoreLeadingWhitespace && outputLine.length() == 0) {
-            while (outputLine != null && outputLine.length() == 0) {
-                outputLine = outputFile.readLine();
-            }
-        }
-
-        String answerLine = answerFile.readLine();
-        if (ignoreLeadingWhitespace && answerLine.length() == 0) {
-            while (answerLine != null && answerLine.length() == 0) {
-                answerLine = answerFile.readLine();
-            }
-        }
-
-        return complexDiff(outputFile, answerFile, ignoreEmptyLines, ignoreWhiteSpace);
-
+        return complexDiff(outputFile, answerFile, ignoreLeadingWhitespace, ignoreEmptyLines, ignoreWhiteSpace);
     }
 
     private void fatalError(String message, int exitCode) {
         System.err.println("Error: " + message);
-        System.exit(exitCode);
+        if (allowFatalExit){
+            System.exit(exitCode);
+        }
     }
 
     /**
@@ -412,7 +409,7 @@ public class Validator {
      * @param description
      * @throws FileNotFoundException
      */
-    void writeResultFile(String filename, String judgement, String description) throws FileNotFoundException {
+    protected void writeResultFile(String filename, String judgement, String description) throws FileNotFoundException {
 
         if (debugFlag) {
             System.out.println();
@@ -436,7 +433,7 @@ public class Validator {
      * @param line2
      * @return
      */
-    private String compareLine(String line1, String line2) {
+    protected String compareLine(String line1, String line2) {
         int len1 = line1.length();
         int len2 = line2.length();
 
@@ -503,21 +500,43 @@ public class Validator {
 
         if (args.length == 0) {
             printUsage();
+            if (allowFatalExit){
+                System.exit(0);
+            }
         }
         if (args[argNum].equals("--help")) {
             printUsage();
+            System.exit(4);
+        }
+        
+        int numberOfArgs = args.length;
+        
+        if (args[argNum].equals("--nofatal")) {
+            allowFatalExit = false;
+            argNum++;
+            numberOfArgs--;
+        }
+
+        if (args[argNum].equals("--verbose")) {
+            verbose = true;
+            argNum++;
+            numberOfArgs--;
         }
 
         if (args[argNum].equals("--debug")) {
             debugFlag = true;
             argNum++;
-            if (args.length != 6 && args.length != 8) {
-                fatalError("Too few paramaters, see usage", 6);
-            }
-        } else {
-            if (args.length != 5 && args.length != 7) {
-                fatalError("Too few paramaters, see usage", 6);
-            }
+            numberOfArgs--;
+        }
+
+        // in out ans res -pc2 opt icflag
+        // 1 2 3 4 5 6 7
+
+        // in out ans res icflag
+        // 1 2 3 4 5
+
+        if (numberOfArgs != 5 && numberOfArgs != 7) {
+            fatalError("Too few paramaters, see usage", 6);
         }
 
         inputFileName = args[argNum++];
@@ -602,5 +621,25 @@ public class Validator {
         }
 
         return commandLine;
+    }
+    
+    public boolean isAllowFatalExit() {
+        return allowFatalExit;
+    }
+
+    /**
+     * 
+     * @param allowFatalExit if false not exit on fatal error
+     */
+    public void setAllowFatalExit(boolean allowFatalExit) {
+        this.allowFatalExit = allowFatalExit;
+    }
+    
+    public boolean isVerbose() {
+        return verbose;
+    }
+
+    public void setVerbose(boolean verbose) {
+        this.verbose = verbose;
     }
 }
