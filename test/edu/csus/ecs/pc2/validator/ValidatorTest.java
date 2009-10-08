@@ -58,7 +58,6 @@ public class ValidatorTest extends TestCase {
         }
     }
     
-
     /**
      * Return full path and filename to test data directory.
      * 
@@ -105,35 +104,24 @@ public class ValidatorTest extends TestCase {
         // 10 4 & 5
 
         int[] pc2TestNumbers = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-        // int[] pc2TestNumbers = { 1, 6, 7, 8, 9, 10 };
-        // int[] pc2TestNumbers = { 1 };
 
         for (int i = 0; i < pc2TestNumbers.length; i++) {
             int pc2TestNumber = pc2TestNumbers[i];
 
-            validateOneLineIdentical(pc2TestNumber, Validator.JUDGEMENT_YES);
+            String outcome = Validator.JUDGEMENT_YES;
 
-            String outcome = Validator.JUDGEMENT_NO_WRONG_ANSWER;
+            validateOneLineIdentical(pc2TestNumber, outcome);
+            validateTwoEmptyFiles(pc2TestNumber, outcome);
+            validateFileSame(pc2TestNumber, outcome);
 
-            // TODO on bug fix for Validator remove pc2TestNumber == 1 condition
-            /**
-             * Validator
-             */
-            if (pc2TestNumber == 1) {
+            outcome = Validator.JUDGEMENT_NO_WRONG_ANSWER;
 
-                validateOneLineDifferent(pc2TestNumber, outcome);
-                validateOneLineEmpty(pc2TestNumber, outcome);
-                validateOneLineBlank(pc2TestNumber, outcome);
-                validateFileDiff1stChar(pc2TestNumber, outcome);
-            }
-
-            // TODO validate two empty files test, it fails
-            // validateTwoEmptyFiles(pc2TestNumber, outcome);
-
+            validateOneLineDifferent(pc2TestNumber, outcome);
+            validateOneLineEmpty(pc2TestNumber, outcome);
+            validateOneLineBlank(pc2TestNumber, outcome);
+            validateFileDiff1stChar(pc2TestNumber, outcome);
             validateFileDiffMissLine(pc2TestNumber, outcome);
-
-            validateFileSame(pc2TestNumber, Validator.JUDGEMENT_NO_WRONG_ANSWER);
-            validateFileDiff(pc2TestNumber, Validator.JUDGEMENT_NO_WRONG_ANSWER);
+            validateFileDiff(pc2TestNumber, outcome);
         }
     }
 
@@ -144,7 +132,7 @@ public class ValidatorTest extends TestCase {
 
         String outputFilename = getFullPathName("oneline1.txt");
 
-        runValidatorTest(outputFilename, outputFilename, Validator.JUDGEMENT_YES, pc2TestNumber);
+        runValidatorTest(outputFilename, outputFilename, expectedOutcome, pc2TestNumber);
     }
 
     /**
@@ -204,7 +192,7 @@ public class ValidatorTest extends TestCase {
 
         String answerFilename = getFullPathName("testfile.txt");
 
-        runValidatorTest(outputFilename, answerFilename, Validator.JUDGEMENT_YES, pc2TestNumber);
+        runValidatorTest(outputFilename, answerFilename, expectedOutcome, pc2TestNumber);
     }
 
     /**
