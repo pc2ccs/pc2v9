@@ -159,6 +159,9 @@ public class ICPCPane extends JPanePlugin {
                 if (newFile.exists()) {
                     if (newFile.isFile()) {
                         if (newFile.canRead()) {
+                            // update lastDir otherwise it is null
+                            lastDir = chooser.getCurrentDirectory().toString();
+                            
                             // TODO move this off the swing thread, maybe into its own class
                             ICPCImportData importSiteData = LoadICPCData.loadSites(lastDir, getContest().getSites());
                             newFileProblem = false;
