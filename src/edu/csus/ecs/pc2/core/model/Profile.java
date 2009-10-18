@@ -20,6 +20,8 @@ public class Profile implements IElementObject, Serializable {
     private Date createDate = new Date();
     
     private ElementId elementId = null;
+    
+    private String profilePath = null;
 
     /**
      * 
@@ -32,6 +34,9 @@ public class Profile implements IElementObject, Serializable {
     private boolean active = true;
 
     public Profile(String name) {
+        if (name == null){
+            throw new IllegalArgumentException("Profile name must not be null");
+        }
         elementId = new ElementId(new String(name));
         this.name = name;
     }
@@ -56,6 +61,10 @@ public class Profile implements IElementObject, Serializable {
         return toString();
     }
 
+    /**
+     * Name or Title for the Profile.
+     * @return
+     */
     public String getName() {
         return name;
     }
@@ -64,6 +73,10 @@ public class Profile implements IElementObject, Serializable {
         this.name = name;
     }
 
+    /**
+     * Description for the profile.
+     * @return
+     */
     public String getDescription() {
         return description;
     }
@@ -86,5 +99,45 @@ public class Profile implements IElementObject, Serializable {
 
     public int versionNumber() {
         return elementId.getVersionNumber();
+    }
+    
+    /**
+     * Profile files location.
+     * 
+     * @return
+     */
+    public String getProfilePath() {
+        return profilePath;
+    }
+
+    public void setProfilePath(String profilePath) {
+        this.profilePath = profilePath;
+    }
+    
+    /**
+     * @see Object#equals(java.lang.Object).
+     */
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+
+        if (obj instanceof ElementId) {
+            ElementId otherId = (ElementId) obj;
+            return otherId.equals(elementId);
+        } else if (obj instanceof Profile) {
+            Profile otherProfile = (Profile) obj;
+            return elementId.equals(otherProfile.getElementId());
+        } else
+            return false;
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.lang.Object#hashCode()
+     */
+    public int hashCode() {
+        return toString().hashCode();
     }
 }
