@@ -22,6 +22,7 @@ public class Profile implements IElementObject, Serializable {
     private ElementId elementId = null;
     
     private String profilePath = null;
+    
 
     /**
      * 
@@ -32,6 +33,13 @@ public class Profile implements IElementObject, Serializable {
      * Unique identifier for this instance of Site.
      */
     private boolean active = true;
+    
+    @SuppressWarnings("unused")
+    private Profile (){
+        /**
+         * Do not allow them to use null constructor
+         */
+    }
 
     public Profile(String name) {
         if (name == null){
@@ -59,6 +67,11 @@ public class Profile implements IElementObject, Serializable {
 
     public String getContestId() {
         return toString();
+    }
+    
+    @Override
+    public String toString() {
+        return elementId.toString();
     }
 
     /**
@@ -128,8 +141,9 @@ public class Profile implements IElementObject, Serializable {
         } else if (obj instanceof Profile) {
             Profile otherProfile = (Profile) obj;
             return elementId.equals(otherProfile.getElementId());
-        } else
+        } else {
             return false;
+        }
     }
 
     /*
