@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.KeyEvent;
+import java.security.InvalidParameterException;
 import java.util.Properties;
 import java.util.Set;
 
@@ -205,6 +206,10 @@ public class PropertiesEditPane extends JPanel {
      * @param properties
      */
     public void setProperties(final Properties properties) {
+        
+        if (properties == null){
+            throw new InvalidParameterException("Properties are null");
+        }
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {

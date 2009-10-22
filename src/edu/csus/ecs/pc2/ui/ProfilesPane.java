@@ -127,7 +127,7 @@ public class ProfilesPane extends JPanePlugin {
     private JButton getSwitchButton() {
         if (switchButton == null) {
             switchButton = new JButton();
-            switchButton.setEnabled(false);
+            switchButton.setEnabled(true);
             switchButton.setMnemonic(java.awt.event.KeyEvent.VK_W);
             switchButton.setPreferredSize(new java.awt.Dimension(100, 26));
             switchButton.setLocation(new java.awt.Point(497, 85));
@@ -234,7 +234,7 @@ public class ProfilesPane extends JPanePlugin {
             newButton = new JButton();
             newButton.setText("New");
             newButton.setMnemonic(java.awt.event.KeyEvent.VK_N);
-            newButton.setEnabled(false);
+            newButton.setEnabled(true);
             newButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     newProfile();
@@ -254,7 +254,7 @@ public class ProfilesPane extends JPanePlugin {
             exportButton = new JButton();
             exportButton.setText("Export");
             exportButton.setMnemonic(java.awt.event.KeyEvent.VK_X);
-            exportButton.setEnabled(false);
+            exportButton.setEnabled(true);
             exportButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     exportProfile();
@@ -274,7 +274,7 @@ public class ProfilesPane extends JPanePlugin {
             cloneButton = new JButton();
             cloneButton.setText("Clone");
             cloneButton.setMnemonic(java.awt.event.KeyEvent.VK_C);
-            cloneButton.setEnabled(false);
+            cloneButton.setEnabled(true);
             cloneButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     cloneProfile();

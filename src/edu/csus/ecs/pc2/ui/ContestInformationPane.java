@@ -6,7 +6,9 @@ import java.awt.FlowLayout;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
+import java.util.Arrays;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -36,7 +38,6 @@ import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
  */
 
 // $HeadURL$
-
 public class ContestInformationPane extends JPanePlugin {
 
     /**
@@ -79,16 +80,18 @@ public class ContestInformationPane extends JPanePlugin {
     private JCheckBox jCheckBoxShowPreliminaryOnNotifications = null;
 
     private JCheckBox additionalRunStatusCheckBox = null;
-    
-    private ContestInformation savedContestInformation = null;  //  @jve:decl-index=0:
+
+    private ContestInformation savedContestInformation = null; // @jve:decl-index=0:
 
     private JLabel labelMaxFileSize = null;
 
     private JTextField maxFieldSizeInKTextField = null;
 
     private JButton scoringPropertiesButton = null;
-    
-    private Properties scoringProperties = null;  //  @jve:decl-index=0:
+
+    private Properties savedScoringProperties = null; // @jve:decl-index=0:
+
+    private Properties changedScoringProperties = null;
 
     /**
      * This method initializes
@@ -208,7 +211,7 @@ public class ContestInformationPane extends JPanePlugin {
 
         savedContestInformation = getContest().getContestInformation();
         populateGUI();
-        
+
         setContestInformation(savedContestInformation);
 
         getContest().addContestInformationListener(new ContestInformationListenerImplementation());
@@ -240,22 +243,48 @@ public class ContestInformationPane extends JPanePlugin {
         contestInformation.setPreliminaryJudgementsTriggerNotifications(getJCheckBoxShowPreliminaryOnNotifications().isSelected());
         contestInformation.setPreliminaryJudgementsUsedByBoard(getJCheckBoxShowPreliminaryOnBoard().isSelected());
         contestInformation.setSendAdditionalRunStatusInformation(getAdditionalRunStatusCheckBox().isSelected());
-        
+
         String maxFileSizeString = "0" + getMaxFieldSizeInKTextField().getText();
         long maximumFileSize = Long.parseLong(maxFileSizeString);
         contestInformation.setMaxFileSize(maximumFileSize * 1000);
-        
-        if (savedContestInformation != null){
+
+        if (savedContestInformation != null) {
             contestInformation.setJudgementNotificationsList(savedContestInformation.getJudgementNotificationsList());
         }
-        
-        contestInformation.setScoringProperties(scoringProperties);
-        
-        return(contestInformation);
+
+        contestInformation.setScoringProperties(changedScoringProperties);
+
+        return (contestInformation);
     }
-    
+
+    protected void dumpProperties(String comment, Properties properties) {
+
+        System.out.println("  Properties " + comment + " " + properties);
+        if (properties == null) {
+            return;
+        }
+
+        Set<Object> set = properties.keySet();
+
+        String[] keys = (String[]) set.toArray(new String[set.size()]);
+
+        Arrays.sort(keys);
+
+        for (String key : keys) {
+            System.out.println("     " + key + "='" + properties.get(key) + "'");
+        }
+    }
+
     protected void enableUpdateButton() {
         ContestInformation newChoice = getFromFields();
+
+        dumpProperties("From fields", newChoice.getScoringProperties());
+        dumpProperties("From contest", getContest().getContestInformation().getScoringProperties());
+        dumpProperties("From changed", changedScoringProperties);
+        dumpProperties("From saved", savedScoringProperties);
+
+        System.out.println(" debug " + savedScoringProperties.equals(changedScoringProperties));
+
         if (getContest().getContestInformation().isSameAs(newChoice)) {
             setEnableButtons(false);
         } else {
@@ -268,7 +297,6 @@ public class ContestInformationPane extends JPanePlugin {
         getCancelButton().setEnabled(isEnabled);
     }
 
-
     private void populateGUI() {
 
         SwingUtilities.invokeLater(new Runnable() {
@@ -280,7 +308,8 @@ public class ContestInformationPane extends JPanePlugin {
                 getJCheckBoxShowPreliminaryOnBoard().setSelected(contestInformation.isPreliminaryJudgementsUsedByBoard());
                 getJCheckBoxShowPreliminaryOnNotifications().setSelected(contestInformation.isPreliminaryJudgementsTriggerNotifications());
                 getAdditionalRunStatusCheckBox().setSelected(contestInformation.isSendAdditionalRunStatusInformation());
-                getMaxFieldSizeInKTextField().setText((contestInformation.getMaxFileSize()/1000)+"");
+                getMaxFieldSizeInKTextField().setText((contestInformation.getMaxFileSize() / 1000) + "");
+                setContestInformation(contestInformation);
                 setEnableButtons(false);
             }
         });
@@ -326,7 +355,7 @@ public class ContestInformationPane extends JPanePlugin {
         if (teamDisplaySettingPane == null) {
             teamDisplaySettingPane = new JPanel();
             teamDisplaySettingPane.setLayout(new FlowLayout());
-            teamDisplaySettingPane.setBounds(new java.awt.Rectangle(111,59,381,101));
+            teamDisplaySettingPane.setBounds(new java.awt.Rectangle(111, 59, 381, 101));
             teamDisplaySettingPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Team Information Displayed to Judges", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
                     javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
             teamDisplaySettingPane.add(getDisplayNoneRadioButton(), null);
@@ -334,17 +363,17 @@ public class ContestInformationPane extends JPanePlugin {
             teamDisplaySettingPane.add(getDisplayNamesOnlyRadioButton(), null);
             teamDisplaySettingPane.add(getDisplayNameAndNumberRadioButton(), null);
             teamDisplaySettingPane.add(getDisplayAliasNameRadioButton(), null);
-            
+
         }
         return teamDisplaySettingPane;
     }
 
     private void selectDisplayRadioButton() {
-        
+
         ContestInformation contestInformation = getContest().getContestInformation();
-        if (contestInformation == null || contestInformation.getTeamDisplayMode() == null){
+        if (contestInformation == null || contestInformation.getTeamDisplayMode() == null) {
             getDisplayNameButtonGroup().setSelected(getDisplayNamesOnlyRadioButton().getModel(), true);
-            
+
         } else {
             switch (contestInformation.getTeamDisplayMode()) {
                 case DISPLAY_NAME_ONLY:
@@ -367,8 +396,8 @@ public class ContestInformationPane extends JPanePlugin {
             }
         }
         // TODO Auto-generated method stub
-        
-//        getDisplayNameButtonGroup().setSelected(getDisplayNoneButton(), false)
+
+        // getDisplayNameButtonGroup().setSelected(getDisplayNoneButton(), false)
 
     }
 
@@ -481,7 +510,7 @@ public class ContestInformationPane extends JPanePlugin {
         if (displayNameButtonGroup == null) {
             displayNameButtonGroup = new ButtonGroup();
             displayNameButtonGroup.add(getDisplayNoneRadioButton());
-            
+
             displayNameButtonGroup.add(getDisplayNamesOnlyRadioButton());
             displayNameButtonGroup.add(getDisplayNameAndNumberRadioButton());
             displayNameButtonGroup.add(getDisplayNumbersOnlyRadioButton());
@@ -609,23 +638,24 @@ public class ContestInformationPane extends JPanePlugin {
         }
         return additionalRunStatusCheckBox;
     }
-    
+
     public ContestInformation getContestInformation() {
         return savedContestInformation;
     }
 
     public void setContestInformation(ContestInformation contestInformation) {
         this.savedContestInformation = contestInformation;
-        scoringProperties = contestInformation.getScoringProperties();
-        if (scoringProperties == null){
-            scoringProperties = DefaultScoringAlgorithm.getDefaultProperties();
+        savedScoringProperties = contestInformation.getScoringProperties();
+        if (savedScoringProperties == null) {
+            savedScoringProperties = DefaultScoringAlgorithm.getDefaultProperties();
         }
+        changedScoringProperties = savedScoringProperties;
     }
 
     /**
-     * This method initializes maxFieldSizeInKTextField	
-     * 	
-     * @return javax.swing.JTextField	
+     * This method initializes maxFieldSizeInKTextField
+     * 
+     * @return javax.swing.JTextField
      */
     private JTextField getMaxFieldSizeInKTextField() {
         if (maxFieldSizeInKTextField == null) {
@@ -642,9 +672,9 @@ public class ContestInformationPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes scoringPropertiesButton	
-     * 	
-     * @return javax.swing.JButton	
+     * This method initializes scoringPropertiesButton
+     * 
+     * @return javax.swing.JButton
      */
     private JButton getScoringPropertiesButton() {
         if (scoringPropertiesButton == null) {
@@ -660,26 +690,32 @@ public class ContestInformationPane extends JPanePlugin {
         }
         return scoringPropertiesButton;
     }
-    
+
     protected void showContestPropertiesEditor() {
-        
+
         PropertiesEditFrame propertiesEditFrame = new PropertiesEditFrame();
         propertiesEditFrame.setTitle("Edit Scoring Properties");
-        propertiesEditFrame.setProperties(scoringProperties, new UpdateScoreProperties());
+        propertiesEditFrame.setProperties(changedScoringProperties, new UpdateScoreProperties());
         propertiesEditFrame.setVisible(true);
     }
-    
+
     /**
-     * Update the edited properties. 
+     * Update the edited properties.
+     * 
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
-    
+
     // $HeadURL$
-    protected class UpdateScoreProperties implements IPropertyUpdater{
+    protected class UpdateScoreProperties implements IPropertyUpdater {
 
         public void updateProperties(Properties properties) {
-            scoringProperties = properties;
+            changedScoringProperties = properties;
+            dumpProperties("From fields", getFromFields().getScoringProperties());
+            dumpProperties("From contest", getContest().getContestInformation().getScoringProperties());
+            dumpProperties("From changed", changedScoringProperties);
+            dumpProperties("From saved", savedScoringProperties);
+            enableUpdateButton();
         }
     }
 
