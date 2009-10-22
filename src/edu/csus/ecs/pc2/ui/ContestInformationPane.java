@@ -6,6 +6,7 @@ import java.awt.FlowLayout;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
+import java.util.Properties;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -23,6 +24,7 @@ import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
 import edu.csus.ecs.pc2.core.model.IContestInformationListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.ContestInformation.TeamDisplayMask;
+import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 
 /**
  * Contest Information edit/update Pane.
@@ -83,6 +85,10 @@ public class ContestInformationPane extends JPanePlugin {
     private JLabel labelMaxFileSize = null;
 
     private JTextField maxFieldSizeInKTextField = null;
+
+    private JButton scoringPropertiesButton = null;
+    
+    private Properties scoringProperties = null;  //  @jve:decl-index=0:
 
     /**
      * This method initializes
@@ -148,6 +154,7 @@ public class ContestInformationPane extends JPanePlugin {
             centerPane.add(getAdditionalRunStatusCheckBox(), null);
             centerPane.add(labelMaxFileSize, null);
             centerPane.add(getMaxFieldSizeInKTextField(), null);
+            centerPane.add(getScoringPropertiesButton(), null);
         }
         return centerPane;
     }
@@ -201,6 +208,8 @@ public class ContestInformationPane extends JPanePlugin {
 
         savedContestInformation = getContest().getContestInformation();
         populateGUI();
+        
+        setContestInformation(savedContestInformation);
 
         getContest().addContestInformationListener(new ContestInformationListenerImplementation());
 
@@ -239,6 +248,8 @@ public class ContestInformationPane extends JPanePlugin {
         if (savedContestInformation != null){
             contestInformation.setJudgementNotificationsList(savedContestInformation.getJudgementNotificationsList());
         }
+        
+        contestInformation.setScoringProperties(scoringProperties);
         
         return(contestInformation);
     }
@@ -605,6 +616,10 @@ public class ContestInformationPane extends JPanePlugin {
 
     public void setContestInformation(ContestInformation contestInformation) {
         this.savedContestInformation = contestInformation;
+        scoringProperties = contestInformation.getScoringProperties();
+        if (scoringProperties == null){
+            scoringProperties = DefaultScoringAlgorithm.getDefaultProperties();
+        }
     }
 
     /**
@@ -626,5 +641,46 @@ public class ContestInformationPane extends JPanePlugin {
         return maxFieldSizeInKTextField;
     }
 
+    /**
+     * This method initializes scoringPropertiesButton	
+     * 	
+     * @return javax.swing.JButton	
+     */
+    private JButton getScoringPropertiesButton() {
+        if (scoringPropertiesButton == null) {
+            scoringPropertiesButton = new JButton();
+            scoringPropertiesButton.setBounds(new Rectangle(345, 173, 172, 30));
+            scoringPropertiesButton.setToolTipText("Edit Scoring Properties");
+            scoringPropertiesButton.setText("Edit Scoring Properties");
+            scoringPropertiesButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    showContestPropertiesEditor();
+                }
+            });
+        }
+        return scoringPropertiesButton;
+    }
+    
+    protected void showContestPropertiesEditor() {
+        
+        PropertiesEditFrame propertiesEditFrame = new PropertiesEditFrame();
+        propertiesEditFrame.setTitle("Edit Scoring Properties");
+        propertiesEditFrame.setProperties(scoringProperties, new UpdateScoreProperties());
+        propertiesEditFrame.setVisible(true);
+    }
+    
+    /**
+     * Update the edited properties. 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    
+    // $HeadURL$
+    protected class UpdateScoreProperties implements IPropertyUpdater{
+
+        public void updateProperties(Properties properties) {
+            scoringProperties = properties;
+        }
+    }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

@@ -166,6 +166,9 @@ public class StandingsHTMLPane extends JPanePlugin {
     protected Properties getScoringProperties() {
 
         Properties properties = getContest().getContestInformation().getScoringProperties();
+        if (properties == null){
+            properties = new Properties();
+        }
         
         Properties defProperties = DefaultScoringAlgorithm.getDefaultProperties();
 

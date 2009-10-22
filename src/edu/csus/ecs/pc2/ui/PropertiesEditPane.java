@@ -8,6 +8,8 @@ import java.util.Properties;
 import java.util.Set;
 
 import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
@@ -15,6 +17,7 @@ import javax.swing.SwingUtilities;
 import com.ibm.webrunner.j2mclb.util.HeapSorter;
 
 /**
+ * Properties Edit Pane.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -37,6 +40,10 @@ public class PropertiesEditPane extends JPanel {
     private MCLB propertyListBox = null;
 
     private Properties originalProperties = new Properties(); // @jve:decl-index=0:
+
+    private JFrame parentFrame = null;
+
+    private IPropertyUpdater propertyUpdater = null;
 
     /**
      * This method initializes
@@ -87,8 +94,21 @@ public class PropertiesEditPane extends JPanel {
             updateButton = new JButton();
             updateButton.setText("Update");
             updateButton.setMnemonic(KeyEvent.VK_U);
+            updateButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    updateProperties(getProperties());
+                }
+            });
         }
         return updateButton;
+    }
+
+    protected void updateProperties(Properties properties) {
+        propertyUpdater.updateProperties(properties);
+        propertyListBox.removeAllRows();
+        if (getParentFrame() != null) {
+            getParentFrame().setVisible(false);
+        }
     }
 
     /**
@@ -101,8 +121,39 @@ public class PropertiesEditPane extends JPanel {
             closeButton = new JButton();
             closeButton.setText("Close");
             closeButton.setMnemonic(KeyEvent.VK_C);
+            closeButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    handleCancelButton();
+                }
+            });
         }
         return closeButton;
+    }
+
+    /**
+     * 
+     */
+    protected void handleCancelButton() {
+
+        if (propertiesChanged()) {
+
+            // Something changed, are they sure ?
+
+            int result = FrameUtilities.yesNoCancelDialog(getParentFrame(), "Properties modified, save changes?", "Confirm Choice");
+
+            if (result == JOptionPane.YES_OPTION) {
+                updateProperties(getProperties());
+            } else if (result == JOptionPane.NO_OPTION) {
+                if (getParentFrame() != null) {
+                    getParentFrame().setVisible(false);
+                }
+            }
+
+        } else {
+            if (getParentFrame() != null) {
+                getParentFrame().setVisible(false);
+            }
+        }
     }
 
     private MCLB getPropertyListBox() {
@@ -132,25 +183,20 @@ public class PropertiesEditPane extends JPanel {
     protected void enableButtons() {
         boolean changed = propertiesChanged();
         updateButton.setEnabled(changed);
-        if (changed){
+        if (changed) {
             closeButton.setText("Cancel");
-        }  else {
+        } else {
             closeButton.setText("Close");
         }
     }
 
-    protected boolean propertiesChanged(){
-        
-        Properties props = getProperties();
-
-        Set<Object> set = originalProperties.keySet();
-        String[] keys = (String[]) set.toArray(new String[set.size()]);
-        for (String key : keys) {
-            System.out.println(key + ": " + originalProperties.get(key));
-            System.out.println(key + "> " + props.get(key));
-        }
-        
-        return ! originalProperties.equals(getProperties());
+    /**
+     * Have the properties been edited (changed).
+     * 
+     * @return true if there have been changes.
+     */
+    public boolean propertiesChanged() {
+        return !originalProperties.equals(getProperties());
     }
 
     /**
@@ -184,6 +230,8 @@ public class PropertiesEditPane extends JPanel {
             objects[1] = createJTextField((String) originalProperties.get(key), false);
             propertyListBox.addRow(objects);
         }
+        
+        propertyListBox.autoSizeAllColumns();
 
         enableButtons();
     }
@@ -214,6 +262,37 @@ public class PropertiesEditPane extends JPanel {
             }
         });
         return textField;
+    }
+
+    public JFrame getParentFrame() {
+        return parentFrame;
+    }
+
+    public void setParentFrame(JFrame parentFrame) {
+        this.parentFrame = parentFrame;
+        addWindowCloserListener();
+    }
+
+    private void addWindowCloserListener() {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                if (getParentFrame() != null) {
+                    getParentFrame().addWindowListener(new java.awt.event.WindowAdapter() {
+                        public void windowClosing(java.awt.event.WindowEvent e) {
+                            handleCancelButton();
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    public IPropertyUpdater getPropertyUpdater() {
+        return propertyUpdater;
+    }
+
+    public void setPropertyUpdater(IPropertyUpdater propertyUpdater) {
+        this.propertyUpdater = propertyUpdater;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

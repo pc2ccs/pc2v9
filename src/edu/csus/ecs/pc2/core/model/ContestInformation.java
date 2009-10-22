@@ -145,6 +145,9 @@ public class ContestInformation implements Serializable{
             if (maxFileSize != contestInformation.getMaxFileSize()){
                 return false;
             }
+            if (! scoringProperties.equals(contestInformation.getScoringProperties())){
+                return false;
+            }
             return true;
         } catch (Exception e) {
             // TODO log to static exception log

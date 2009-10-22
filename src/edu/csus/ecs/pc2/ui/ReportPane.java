@@ -34,6 +34,7 @@ import edu.csus.ecs.pc2.core.report.ClarificationsReport;
 import edu.csus.ecs.pc2.core.report.ClientSettingsReport;
 import edu.csus.ecs.pc2.core.report.ContestAnalysisReport;
 import edu.csus.ecs.pc2.core.report.ContestReport;
+import edu.csus.ecs.pc2.core.report.ContestSettingsReport;
 import edu.csus.ecs.pc2.core.report.EvaluationReport;
 import edu.csus.ecs.pc2.core.report.ExtractPlaybackLoadFilesReport;
 import edu.csus.ecs.pc2.core.report.FastestSolvedReport;
@@ -150,6 +151,7 @@ public class ReportPane extends JPanePlugin {
         reports.add(new BalloonSummaryReport());
 
         reports.add(new AllReports());
+        reports.add(new ContestSettingsReport());
         reports.add(new ContestReport());
 
         reports.add(new ContestAnalysisReport());
