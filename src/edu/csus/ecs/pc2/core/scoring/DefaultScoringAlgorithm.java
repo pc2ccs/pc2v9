@@ -41,13 +41,14 @@ import edu.csus.ecs.pc2.core.util.IMemento;
 import edu.csus.ecs.pc2.core.util.XMLMemento;
 
 /**
- * Default Scoring Algorithm.
+ * Default Scoring Algorithm, implementation of the IScoringAlgorithm.
  * 
  * This class implements the standard (default) scoring algorithm, which ranks all teams according to number of problems solved, then according to "penalty points" computed by multiplying the number
  * of "NO" runs on solved problems by the PenaltyPoints value specified in the contest configuration, then finally according to earliest time of last solution (with ties at that level broken
  * alphabetically). This is the "standard" algorithm used in many ICPC Regional Contests.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 // $HeadURL$
 public class DefaultScoringAlgorithm implements IScoringAlgorithm {
@@ -55,8 +56,6 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      * 
      */
     private static final long serialVersionUID = -2471349413867745412L;
-
-    public static final String SVN_ID = "$Id$";
 
     private static final String POINTS_PER_NO = "Points per No";
 
@@ -69,8 +68,8 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      * 
      * key=name, value=default_value, type, min, max (colon delimited)
      */
-    private String[][] propList = { { POINTS_PER_NO, "20:Integer" }, { POINTS_PER_YES_MINUTE, "1:Integer" }, { BASE_POINTS_PER_YES, "0:Integer" } };
-
+    private static String[][] propList = { { POINTS_PER_NO, "20:Integer" }, { POINTS_PER_YES_MINUTE, "1:Integer" }, { BASE_POINTS_PER_YES, "0:Integer" } };
+    
     private Properties props = new Properties();
 
     private Object mutex = new Object();
@@ -227,13 +226,12 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         return (getPropIntValue(POINTS_PER_YES_MINUTE));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see edu.csus.ecs.pc2.core.scoring.ScoringAlgorithm#getProperties()
-     */
     public Properties getProperties() {
         return props;
+    }
+
+    public void setProperties(Properties properties) {
+        this.props = properties;
     }
 
     /*
@@ -245,12 +243,8 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
         if (theContest == null) {
             throw new InvalidParameterException("Invalid model (null)");
         }
-        if (properties == null) {
-            throw new InvalidParameterException("Invalid properties (null)");
-        }
-        if (properties.isEmpty()) {
-            // TODO is properties is empty, should we throw an exception?
-            // grab the default properties
+        
+        if (properties == null || properties.isEmpty()) {
             properties = getProperties();
         }
         
@@ -864,4 +858,21 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
 
         return memento;
     }
+    
+    /**
+     * 
+     * @return a list of name/value pairs for default scoring properties.
+     */
+    public static Properties getDefaultProperties() {
+        Properties properties = new Properties();
+        for (int i = 0; i < propList.length; i++) {
+            String key = propList[i][0];
+            String value = propList[i][1];
+            int colon = value.indexOf(":");
+            String defaultValue = value.substring(0, colon);
+            properties.put(key, defaultValue);
+        }
+        return properties;
+    }
+
 }

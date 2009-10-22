@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.Serializable;
+import java.util.Properties;
 
 import edu.csus.ecs.pc2.core.list.JudgementNotificationsList;
 
@@ -74,6 +75,8 @@ public class ContestInformation implements Serializable{
         ALIAS,
     }
     
+    private Properties scoringProperties = new Properties();
+
     public String getContestTitle() {
         return contestTitle;
     }
@@ -213,5 +216,19 @@ public class ContestInformation implements Serializable{
         this.maxFileSize = maxFileSize;
     }
     
+    /**
+     * Scoring Properties.
+     * 
+     * Minute penalties, etc.
+     * 
+     * @return
+     */
+    public Properties getScoringProperties() {
+        return scoringProperties;
+    }
+
+    public void setScoringProperties(Properties scoringProperties) {
+        this.scoringProperties = scoringProperties;
+    }
     
 }

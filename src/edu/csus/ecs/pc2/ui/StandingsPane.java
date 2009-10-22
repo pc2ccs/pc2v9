@@ -36,7 +36,8 @@ import edu.csus.ecs.pc2.core.model.RunEvent.Action;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
 
 /**
- * Standings Pane. 
+ * Standings Pane.
+ * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -54,7 +55,7 @@ public class StandingsPane extends JPanePlugin {
     private JPanel messagePane = null;
 
     private JLabel messageLabel = null;
-    
+
     private Log log;
 
     private String currentXMLString = "";
@@ -144,8 +145,9 @@ public class StandingsPane extends JPanePlugin {
 
         try {
             DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
+            Properties properties = getScoringProperties();
 
-            xmlString = defaultScoringAlgorithm.getStandings(getContest(), new Properties(), getController().getLog());
+            xmlString = defaultScoringAlgorithm.getStandings(getContest(), properties, getController().getLog());
             DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
             document = documentBuilder.parse(new InputSource(new StringReader(xmlString)));
@@ -156,6 +158,8 @@ public class StandingsPane extends JPanePlugin {
             return;  // ----------------------------- RETURN -------------------------------
             
         }
+        
+        
     
         try {
             // skip past nodes to find teamStanding node
@@ -370,6 +374,25 @@ public class StandingsPane extends JPanePlugin {
 
         }
 
+    }
+
+    protected Properties getScoringProperties() {
+
+        Properties properties = getContest().getContestInformation().getScoringProperties();
+        
+        Properties defProperties = DefaultScoringAlgorithm.getDefaultProperties();
+
+        /**
+         * Fill in with default properties if not using them.
+         */
+        String [] keys = (String[]) defProperties.keySet().toArray(new String[defProperties.keySet().size()]);
+        for (String key : keys) {
+            if (! properties.containsKey(key)){
+                properties.put(key, defProperties.get(key));
+            }
+        }
+        
+        return properties;
     }
 
     

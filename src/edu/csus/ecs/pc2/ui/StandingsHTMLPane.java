@@ -153,13 +153,33 @@ public class StandingsHTMLPane extends JPanePlugin {
 
         String xmlString;
         try {
-            xmlString = scoringAlgorithm.getStandings(getContest(), new Properties(), log);
+            Properties scoringProperties = getScoringProperties(); 
+            xmlString = scoringAlgorithm.getStandings(getContest(), scoringProperties, log);
             transformAndDisplay(xmlString, styleSheetFileName);
             showMessage("Last update " + new Date());
         } catch (IllegalContestState e) {
             log.log(Log.WARNING, "Exception refreshing a standings display", e);
             showMessage("Unable to update, check logs");
         }
+    }
+
+    protected Properties getScoringProperties() {
+
+        Properties properties = getContest().getContestInformation().getScoringProperties();
+        
+        Properties defProperties = DefaultScoringAlgorithm.getDefaultProperties();
+
+        /**
+         * Fill in with default properties if not using them.
+         */
+        String [] keys = (String[]) defProperties.keySet().toArray(new String[defProperties.keySet().size()]);
+        for (String key : keys) {
+            if (! properties.containsKey(key)){
+                properties.put(key, defProperties.get(key));
+            }
+        }
+        
+        return properties;
     }
 
     private void transformAndDisplay(String xmlString, String xsltFileName) {
