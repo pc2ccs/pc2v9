@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.core.scoring;
 
 import java.io.StringReader;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -53,6 +54,14 @@ public class DefaultScoringAlgorithmTest extends TestCase {
     private Log log = null;
     
     private boolean debugMode = false;
+    // alt1: 0 0 200
+    private Properties alt1 = populateProperties(0, 0, 200);
+    // alt2: 30 5 0
+    private Properties alt2 = populateProperties(30, 5, 0);
+    // alt3: 0 10 0
+    private Properties alt3 = populateProperties(0, 10, 0);
+    // alt4: 5 0 20
+    private Properties alt4 = populateProperties(5, 0, 20);
 
     protected void setUp() throws Exception {
         super.setUp();
@@ -60,6 +69,30 @@ public class DefaultScoringAlgorithmTest extends TestCase {
         log = new Log("DefaultScoringAlgorithmTest");
         StaticLog.setLog(log);
         
+    }
+
+    private Properties populateProperties(int perNo, int perMin, int baseYes) {
+        Properties props=DefaultScoringAlgorithm.getDefaultProperties();
+        Enumeration<Object> keys= props.keys();
+        while(keys.hasMoreElements()) {
+            String key = (String)keys.nextElement();
+            String value=props.getProperty(key);
+            switch (Integer.parseInt(value)) {
+                case 0:
+                    props.put(key, Integer.toString(baseYes));
+                    break;
+                case 20:
+                    props.put(key,Integer.toString(perNo));
+                    break;
+                case 1:
+                    props.put(key,Integer.toString(perMin));
+                    break;
+                default:
+                    assertTrue("Unknown property: "+key,true);
+                    break;
+            }
+        }
+        return props;
     }
 
     /**
@@ -960,7 +993,150 @@ public class DefaultScoringAlgorithmTest extends TestCase {
         scoreboardTest (6, runsData, rankData, true);
     }
 
+    public void testAltScoring() {
+        // RunID    TeamID  Prob    Time    Result
+        
+        String [] runsData = {
+                "1,1,A,1,No", // 20
+                "2,1,A,3,Yes", // 3 (Minute points for 1st Yes count)
+                "3,1,A,5,No", // 20 (a No on a solved problem)
+                "4,1,A,7,Yes", // zero (only "No's" count)
+                "5,1,A,9,No", // 20 (another No on the solved problem)
+                
+                "6,1,B,11,No", // zero (problem has not been solved)
+                "7,1,B,13,No", // zero (problem has not been solved)
+                
+                "8,2,A,30,Yes", // 30 (Minute points for 1st Yes)
+                
+                "9,2,B,35,No", // zero -- not solved
+                "10,2,B,40,No", // zero -- not solved
+                "11,2,B,45,No", // zero -- not solved
+                "12,2,B,50,No", // zero -- not solved
+                "13,2,B,55,No", // zero -- not solved
+        };
+        
+
+        // Rank  TeamId Solved Penalty
+        
+        // alt1: 0 0 200
+        
+        String[] alt1rankData = {
+                "1,team1,1,200",
+                "2,team2,1,200", // tie-breaker causes rank 2
+        };
+        
+        scoreboardTest (2, runsData, alt1rankData, alt1);
+        // alt2: 30 5 0
+        String[] alt2rankData = {
+                "1,team1,1,45",  // 1 no@30 each + 3 min * 5
+                "2,team2,1,150", // 5*30
+        };
+        
+        scoreboardTest (2, runsData, alt2rankData, alt2);
+        
+        // alt3: 0 10 0
+        String[] alt3rankData = {
+                "1,team1,1,30", // 3 min * 10
+                "2,team2,1,300", // 30 min * 10
+        };
+        
+        scoreboardTest (2, runsData, alt3rankData, alt3);
+        
+        // alt4: 5 0 20
+        String[] alt4rankData = {
+                "1,team2,1,20", // base yes
+                "2,team1,1,25", // base yes + 1 no
+        };
+        
+        scoreboardTest (2, runsData, alt4rankData, alt4);
+
+    }
+    private void scoreboardTest(int numTeams, String[] runsData, String[] rankData, Properties scoreProps) {
+        scoreboardTest (numTeams, runsData, rankData, false, scoreProps);
+        
+    }
     
+    private void scoreboardTest(int numTeams, String[] runsDataList, String[] rankDataList, boolean respectSendTo, Properties scoreProps) {
+        
+        InternalContest contest = new InternalContest();
+
+        initData(contest, numTeams, 5);
+        
+        if (respectSendTo){
+            /**
+             * Set permission that will respect the {@link JudgementRecord#isSendToTeam()}
+             */
+            Account account = contest.getAccount(contest.getClientId());
+            account.addPermission(edu.csus.ecs.pc2.core.security.Permission.Type.RESPECT_NOTIFY_TEAM_SETTING);
+        }
+        
+        for (String runInfoLine : runsDataList) {
+            addTheRun(contest, runInfoLine);
+        }
+
+        confirmRanks(contest, rankDataList, scoreProps);
+        
+    }
+
+    private void confirmRanks(InternalContest contest, String[] rankData, Properties scoreProps) {
+        Document document = null;
+
+        if (debugMode) {
+
+            Run[] runs = contest.getRuns();
+            Arrays.sort(runs, new RunComparator());
+            for (Run run : runs) {
+                System.out.println("Run " + run.getNumber() + " time=" + run.getElapsedMins() + " " + run.getSubmitter().getName() + " solved=" + run.isSolved());
+            }
+            System.out.flush();
+
+        }
+        
+        // Rank  Solved Penalty TeamId
+        
+        try {
+            DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
+            String xmlString = defaultScoringAlgorithm.getStandings(contest, scoreProps, log);
+            
+            // getStandings should always return a well-formed xml
+            assertFalse("getStandings returned null ", xmlString == null);
+            assertFalse("getStandings returned empty string ", xmlString.trim().length() == 0);
+
+            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+            document = documentBuilder.parse(new InputSource(new StringReader(xmlString)));
+
+        } catch (Exception e) {
+            assertTrue("Error in XML output " + e.getMessage(), true);
+            e.printStackTrace();
+        }
+        
+        // skip past nodes to find teamStanding node
+        NodeList list = document.getDocumentElement().getChildNodes();
+        
+        int rankIndex = 0;
+        
+        for(int i=0; i<list.getLength(); i++) {
+            Node node = (Node)list.item(i);
+            String name = node.getNodeName();
+            if (name.equals("teamStanding")){
+                String [] standingsRow = fetchStanding (node);
+//              Object[] cols = { "Rank", "Name", "Solved", "Points" };
+                String [] cols = rankData[rankIndex].split(",");
+
+                if (debugMode) {
+                    System.out.println("SA rank="+standingsRow[0]+" solved="+standingsRow[2]+" points="+standingsRow[3]+" name="+standingsRow[1]);
+                    System.out.println("   rank="+cols[0]+" solved="+cols[2]+" points="+cols[3]+" name="+cols[1]);
+                    System.out.println();
+                    System.out.flush();
+                }
+                
+                compareRanking (rankIndex+1, standingsRow, cols);
+                rankIndex++;
+            }
+        }
+    }
+
     /**
      * Test whether SA respects send to team 
      */
@@ -1190,63 +1366,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
      * @param rankData
      */
     private void confirmRanks(InternalContest contest, String[] rankData) {
-        
-        Document document = null;
-
-        if (debugMode) {
-
-            Run[] runs = contest.getRuns();
-            Arrays.sort(runs, new RunComparator());
-            for (Run run : runs) {
-                System.out.println("Run " + run.getNumber() + " time=" + run.getElapsedMins() + " " + run.getSubmitter().getName() + " solved=" + run.isSolved());
-            }
-            System.out.flush();
-
-        }
-        
-        // Rank  Solved Penalty TeamId
-        
-        try {
-            DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
-            String xmlString = defaultScoringAlgorithm.getStandings(contest, new Properties(), log);
-            
-            // getStandings should always return a well-formed xml
-            assertFalse("getStandings returned null ", xmlString == null);
-            assertFalse("getStandings returned empty string ", xmlString.trim().length() == 0);
-
-            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-            document = documentBuilder.parse(new InputSource(new StringReader(xmlString)));
-
-        } catch (Exception e) {
-            assertTrue("Error in XML output " + e.getMessage(), true);
-            e.printStackTrace();
-        }
-        
-        // skip past nodes to find teamStanding node
-        NodeList list = document.getDocumentElement().getChildNodes();
-        
-        int rankIndex = 0;
-        
-        for(int i=0; i<list.getLength(); i++) {
-            Node node = (Node)list.item(i);
-            String name = node.getNodeName();
-            if (name.equals("teamStanding")){
-                String [] standingsRow = fetchStanding (node);
-//              Object[] cols = { "Rank", "Name", "Solved", "Points" };
-                String [] cols = rankData[rankIndex].split(",");
-
-                if (debugMode) {
-                    System.out.println("SA rank="+standingsRow[0]+" solved="+standingsRow[2]+" points="+standingsRow[3]+" name="+standingsRow[1]);
-                    System.out.println("   rank="+cols[0]+" solved="+cols[2]+" points="+cols[3]+" name="+cols[1]);
-                    System.out.println();
-                    System.out.flush();
-                }
-                
-                compareRanking (rankIndex+1, standingsRow, cols);
-                rankIndex++;
-            }
-        }
+        confirmRanks(contest, rankData, new Properties());
     }
 
     /**
