@@ -12,8 +12,27 @@
 # Validator Command Line must be: {:infile} {:outfile} {:ansfile} {:resfile} 
 # 
 
+if [ -f EXITCODE.TXT ]; then
+cat >$4<<EOM
+<?xml version="1.0"?>
+<result outcome =  "No - Run-time Error" security = "$4">Team execution exited non-zero, this is a possible run-time error
+</result>
+EOM
+cat >>$2<<EOM
+
+EOM
+echo -n "PC2: Team program exit code = " >> $2
+cat EXITCODE.TXT >> $2
+else 
 java -cp /usr/pc2v9/lib/pc2.jar edu.csus.ecs.pc2.validator.Validator $* -pc2 1 true
 
-gvim -d $2 $3 > /dev/null
+# This may no be done in all contests, use as necessary.
+# result=$4
+# cat $result | sed 's/No - Wrong Answer/No - Incorrect Output/' > ${result}.new && mv ${result}.new $result
+fi
+
+if [ ! -f /root/computer ];  then
+   gvim -d $2 $3 > /dev/null
+fi
 
 # eof validiff
