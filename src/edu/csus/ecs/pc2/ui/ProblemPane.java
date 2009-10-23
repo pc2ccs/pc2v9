@@ -346,7 +346,7 @@ public class ProblemPane extends JPanePlugin {
         }
 
         boolean enableButton = false;
-
+        String updateToolTip = "";
 
         if (problem != null) {
 
@@ -354,21 +354,57 @@ public class ProblemPane extends JPanePlugin {
                 Problem changedProblem = getProblemFromFields(null);
                 if (!problem.isSameAs(changedProblem)) {
                     enableButton = true;
-                } else { // they might be the same, see if files needRefreshing
-                    ProblemDataFiles pdf = getContest().getProblemDataFile(problem);
-                    if (pdf != null) {
+                    updateToolTip = "Problem changed";
+                }
+                ProblemDataFiles pdf = getContest().getProblemDataFile(problem);
+                if (pdf != null) {
+                    int fileChanged = 0;
+                    String fileName=changedProblem.getDataFileName();
+                    if (fileName != null && fileName.length() > 0) {
                         if (!fileSameAs(pdf.getJudgesDataFile(), problem.getDataFileName())) {
                             enableButton = true;
+                            fileChanged++;
+                            if (updateToolTip.equals("")) {
+                                updateToolTip="Judges data";
+                            } else {
+                                updateToolTip=", Judges data";
+                            }
                         }
+                    }
+                    fileName=changedProblem.getAnswerFileName();
+                    if (fileName != null && fileName.length() > 0) {
                         if (!fileSameAs(pdf.getJudgesAnswerFile(), problem.getAnswerFileName())) {
                             enableButton = true;
+                            fileChanged++;
+                            if (updateToolTip.equals("")) {
+                                updateToolTip="Judges answer";
+                            } else {
+                                updateToolTip += ", Judges answer";
+                            } 
                         }
-                        if (!problem.isUsingPC2Validator() && !fileSameAs(pdf.getValidatorFile(), problem.getValidatorProgramName())) {
-                            enableButton = true;
-                        }
-                    } else {
-                        getController().getLog().log(Log.DEBUG, "No ProblemDataFiles for "+problem);
                     }
+                    fileName=changedProblem.getValidatorProgramName();
+                    if (!problem.isUsingPC2Validator() && fileName != null && fileName.length() > 0) { 
+                        if (!fileSameAs(pdf.getValidatorFile(), problem.getValidatorProgramName())) {
+                            enableButton = true;
+                            fileChanged++;
+                            if (updateToolTip.equals("")) {
+                                updateToolTip="Validator";
+                            } else {
+                                updateToolTip += ", Validator";
+                            }
+                        }
+                    }
+                    if (fileChanged > 0) {
+                        if(fileChanged == 1) {
+                            updateToolTip += " file changed";
+                        } else {
+                            updateToolTip += " files changed";
+                            
+                        }
+                    }
+                } else {
+                    getController().getLog().log(Log.DEBUG, "No ProblemDataFiles for "+problem);
                 }
 
             } catch (InvalidFieldValue e) {
@@ -384,6 +420,12 @@ public class ProblemPane extends JPanePlugin {
             }
         }
 
+        if (updateToolTip.equals("")) {
+            // otherwise we get a sliver of a tooltip
+            getUpdateButton().setToolTipText(null);
+        } else {
+            getUpdateButton().setToolTipText(updateToolTip);
+        }
         enableUpdateButtons(enableButton);
 
     }
