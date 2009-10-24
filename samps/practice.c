@@ -10,9 +10,11 @@
  * Returns 4 if there is an error, 0 on successful solution.
  *
  * $Id$
+ *
+ * $Header$
  */
 
-#define INFILE "practice.in"
+#define INFILE "practice.dat"
 
 int main (int argc, char **argv)
 {
@@ -55,4 +57,4 @@ int main (int argc, char **argv)
 	exit (4);
 }
 
-/* eof practice.c */
+/* eof practice.c $Id$ */
