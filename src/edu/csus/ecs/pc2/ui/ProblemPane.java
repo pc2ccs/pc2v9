@@ -361,7 +361,7 @@ public class ProblemPane extends JPanePlugin {
                     int fileChanged = 0;
                     String fileName=changedProblem.getDataFileName();
                     if (fileName != null && fileName.length() > 0) {
-                        if (!fileSameAs(pdf.getJudgesDataFile(), problem.getDataFileName())) {
+                        if (!fileSameAs(pdf.getJudgesDataFile(), changedProblem.getDataFileName())) {
                             enableButton = true;
                             fileChanged++;
                             if (updateToolTip.equals("")) {
@@ -373,7 +373,7 @@ public class ProblemPane extends JPanePlugin {
                     }
                     fileName=changedProblem.getAnswerFileName();
                     if (fileName != null && fileName.length() > 0) {
-                        if (!fileSameAs(pdf.getJudgesAnswerFile(), problem.getAnswerFileName())) {
+                        if (!fileSameAs(pdf.getJudgesAnswerFile(), changedProblem.getAnswerFileName())) {
                             enableButton = true;
                             fileChanged++;
                             if (updateToolTip.equals("")) {
@@ -385,7 +385,7 @@ public class ProblemPane extends JPanePlugin {
                     }
                     fileName=changedProblem.getValidatorProgramName();
                     if (!problem.isUsingPC2Validator() && fileName != null && fileName.length() > 0) { 
-                        if (!fileSameAs(pdf.getValidatorFile(), problem.getValidatorProgramName())) {
+                        if (!fileSameAs(pdf.getValidatorFile(), changedProblem.getValidatorProgramName())) {
                             enableButton = true;
                             fileChanged++;
                             if (updateToolTip.equals("")) {
@@ -438,6 +438,10 @@ public class ProblemPane extends JPanePlugin {
      */
     private boolean fileSameAs(SerializedFile file, String fileName) {
         if (fileName != null && !fileName.trim().equals("")) {
+            // files changed, treat that as the same
+            if (file != null && !fileName.equals(file.getName())) {
+                return true;
+            }
             return !needsFreshening(file, fileName);
         }
         // default to true
@@ -503,6 +507,8 @@ public class ProblemPane extends JPanePlugin {
                         throw new InvalidFieldValue("Unable to find/load " + fileName);
                     }
                     checkFileFormat(serializedFile);
+                } else {
+                    serializedFile = freshenIfNeeded(serializedFile, fileName);
                 }
                 newProblemDataFiles.setJudgesDataFile(serializedFile);
                 checkProblem.setDataFileName(serializedFile.getName());
@@ -539,6 +545,8 @@ public class ProblemPane extends JPanePlugin {
                         throw new InvalidFieldValue("Unable to find/load " + fileName);
                     }
                     checkFileFormat(serializedFile);
+                } else {
+                    serializedFile = freshenIfNeeded(serializedFile, fileName);
                 }
 
                 newProblemDataFiles.setJudgesAnswerFile(serializedFile);
@@ -683,31 +691,11 @@ public class ProblemPane extends JPanePlugin {
 
         try {
             newProblem = getProblemFromFields(problem);
+            // also updates newProblemDataFiles
         } catch (InvalidFieldValue e) {
             JOptionPane.showMessageDialog(this, e.getMessage());
             // showMessage(e.getMessage());
             return;
-        }
-        if (problem.isSameAs(newProblem)) {
-            // if everything else matches, update must be enabled due to file changes
-            ProblemDataFiles pdf = getContest().getProblemDataFile(problem);
-            if (pdf != null) {
-                try {
-                    // if any of these are valid, update as needed
-                    // getProblemFromFields will blank out the problem.getXXXFileName()
-                    if (!fileSameAs(pdf.getJudgesDataFile(), problem.getDataFileName())) {
-                        newProblemDataFiles.setJudgesDataFile(freshenIfNeeded(pdf.getJudgesDataFile(), problem.getDataFileName()));
-                    }
-                    if (!fileSameAs(pdf.getJudgesAnswerFile(), problem.getAnswerFileName())) {
-                        newProblemDataFiles.setJudgesAnswerFile(freshenIfNeeded(pdf.getJudgesAnswerFile(), problem.getAnswerFileName()));
-                    }
-                    if (!problem.isUsingPC2Validator() && !fileSameAs(pdf.getValidatorFile(), problem.getValidatorProgramName())) {
-                        newProblemDataFiles.setValidatorFile(freshenIfNeeded(pdf.getValidatorFile(), problem.getValidatorProgramName()));
-                    }
-                } catch(InvalidFieldValue e) {
-                    getController().getLog().throwing("updateProblem","Trouble checking pdf", e);
-                }
-            }
         }
 
         getController().updateProblem(newProblem, newProblemDataFiles);
@@ -1839,22 +1827,30 @@ public class ProblemPane extends JPanePlugin {
             throw new InvalidFieldValue("Unable to read file " + fileName + " choose file again (updating)");
         }
 
-        if (needsFreshening(serializedFile, fileName)) {
-
-            int result = JOptionPane.showConfirmDialog(this, "File (" + fileName + ") has changed; reload from disk?", "Freshen file " + serializedFile.getAbsolutePath() + "?", 
-                    JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-
-            if (result == JOptionPane.YES_OPTION) {
-                serializedFile = new SerializedFile(serializedFile.getAbsolutePath());
-                if (serializedFile == null) {
-                    throw new InvalidFieldValue("Unable to find/load " + fileName);
+        // only check freshening if it is still the same fileName
+        if (fileName != null && fileName.equals(serializedFile.getAbsolutePath())) {
+            // only do this if we are not populating the gui
+            if (!populatingGUI && needsFreshening(serializedFile, fileName)) {
+    
+                int result = JOptionPane.showConfirmDialog(this, "File (" + fileName + ") has changed; reload from disk?", "Freshen file " + serializedFile.getAbsolutePath() + "?", 
+                        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+    
+                if (result == JOptionPane.YES_OPTION) {
+                    serializedFile = new SerializedFile(serializedFile.getAbsolutePath());
+                    if (serializedFile == null) {
+                        throw new InvalidFieldValue("Unable to find/load " + fileName);
+                    }
+                    checkFileFormat(serializedFile);
+                    return serializedFile;
+                } else if (result == JOptionPane.CANCEL_OPTION) {
+                    throw new InvalidFieldValue("Update cancelled");
                 }
-                checkFileFormat(serializedFile);
-                return serializedFile;
-            } else if (result == JOptionPane.CANCEL_OPTION) {
-                throw new InvalidFieldValue("Update canceled");
+            } // else nothing to update
+        } else {
+            if (fileName != null) {
+                serializedFile = new SerializedFile(fileName);
             }
-        } // else nothing to update
+        }
 
         checkFileFormat(serializedFile);
         return serializedFile;
