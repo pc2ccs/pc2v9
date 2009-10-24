@@ -38,7 +38,7 @@ public class AllReports implements IReport {
         
         IReport[] listOfReports;
         
-        listOfReports = new IReport[13];
+        listOfReports = new IReport[14];
         int repNo = 0;
         
         listOfReports[repNo++] = new ContestAnalysisReport();
@@ -56,6 +56,8 @@ public class AllReports implements IReport {
         
         listOfReports[repNo++] = new ClarificationsReport();
         listOfReports[repNo++] = new OldRunsReport();
+        
+        listOfReports[repNo++] = new ProfileReport();
         
         listOfReports[repNo++] = new BalloonSummaryReport();
 
