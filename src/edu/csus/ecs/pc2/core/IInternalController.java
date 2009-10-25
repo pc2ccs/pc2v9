@@ -419,4 +419,11 @@ public interface IInternalController {
      * @param clientResettingContest
      */
     void resetContest(ClientId clientResettingContest, boolean eraseProblems, boolean eraseLanguages);
+
+    /**
+     * Update existing judgement.
+     * 
+     * @param newJudgement
+     */
+    void updateJudgement(Judgement newJudgement);
 }

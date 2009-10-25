@@ -1,9 +1,10 @@
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.event.KeyEvent;
 
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -11,19 +12,21 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IJudgementListener;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementEvent;
+import edu.csus.ecs.pc2.core.model.Run;
 
 /**
  * Show Judgements, allow add and edit.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
-// $Id$
 public class JudgementsPanel extends JPanePlugin {
 
     /**
@@ -39,13 +42,17 @@ public class JudgementsPanel extends JPanePlugin {
 
     private JPanel statusPanel = null;
 
-    private JLabel messageLabel = null;
+    private JButton editButton = null;
+
+    private EditJudgementFrame editJudgementFrame = null;
 
     /**
      * 
      * @author pc2@ecs.csus.edu
-     * 
+     * @version $Id$
      */
+
+    // $HeadURL$
     private class JudgementListenerImplementation implements IJudgementListener {
 
         public void judgementAdded(JudgementEvent event) {
@@ -60,7 +67,7 @@ public class JudgementsPanel extends JPanePlugin {
             reloadJudgementList();
         }
     }
-    
+
     /**
      * This method initializes
      * 
@@ -80,6 +87,7 @@ public class JudgementsPanel extends JPanePlugin {
         this.add(getButtonsPane(), java.awt.BorderLayout.SOUTH);
         this.add(getJudgementListBox(), java.awt.BorderLayout.CENTER);
 
+        editJudgementFrame = new EditJudgementFrame();
     }
 
     @Override
@@ -91,14 +99,14 @@ public class JudgementsPanel extends JPanePlugin {
         super.setContestAndController(inContest, inController);
         getContest().addJudgementListener(new JudgementListenerImplementation());
 
+        getEditJudgementFrame().setContestAndController(inContest, inController);
+
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 updateGUIperPermissions();
                 reloadJudgementList();
             }
         });
-        
-        showMessage("");
     }
 
     protected void updateGUIperPermissions() {
@@ -126,7 +134,7 @@ public class JudgementsPanel extends JPanePlugin {
             judgementListBox = new MCLB();
 
             judgementListBox.add(getStatusPanel(), java.awt.BorderLayout.NORTH);
-            Object[] cols = { "Judgement" };
+            Object[] cols = { "Judgement", "Deleted" };
             judgementListBox.addColumns(cols);
         }
         return judgementListBox;
@@ -139,8 +147,12 @@ public class JudgementsPanel extends JPanePlugin {
      */
     private JPanel getButtonsPane() {
         if (buttonsPane == null) {
+            FlowLayout flowLayout = new FlowLayout();
+            flowLayout.setHgap(45);
             buttonsPane = new JPanel();
+            buttonsPane.setLayout(flowLayout);
             buttonsPane.add(getAddButton(), null);
+            buttonsPane.add(getEditButton(), null);
         }
         return buttonsPane;
     }
@@ -154,6 +166,7 @@ public class JudgementsPanel extends JPanePlugin {
         if (addButton == null) {
             addButton = new JButton();
             addButton.setText("Add");
+            addButton.setMnemonic(KeyEvent.VK_A);
             addButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     addJudgement();
@@ -164,16 +177,9 @@ public class JudgementsPanel extends JPanePlugin {
     }
 
     protected void addJudgement() {
-        String input = JOptionPane.showInputDialog(this, "Enter new No judgement:");
-        if (input != null && input.trim().length() > 0) {
-            input = input.trim();
-            if (!input.toLowerCase().startsWith("no - ")) {
-                input = "No - " + input;
-            }
-            Judgement judgement = new Judgement(input.trim());
-            getController().addNewJudgement(judgement);
-        }
-        // sit back and wait for the list to be reloaded
+
+        editJudgementFrame.setJudgement(null);
+        editJudgementFrame.setVisible(true);
     }
 
     /**
@@ -183,26 +189,15 @@ public class JudgementsPanel extends JPanePlugin {
      */
     private JPanel getStatusPanel() {
         if (statusPanel == null) {
-            messageLabel = new JLabel();
-            messageLabel.setText("");
-            messageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
             statusPanel = new JPanel();
             statusPanel.setLayout(new BorderLayout());
             statusPanel.setPreferredSize(new java.awt.Dimension(20, 20));
-            statusPanel.add(messageLabel, java.awt.BorderLayout.CENTER);
         }
         return statusPanel;
     }
 
-    private void showMessage(final String string) {
-
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                messageLabel.setText(string);
-                messageLabel.setToolTipText(string);
-            }
-        });
-
+    private void showMessage(final String message) {
+        JOptionPane.showMessageDialog(this, message);
     }
 
     private void updateJudgementRow(final Judgement judgement) {
@@ -230,12 +225,92 @@ public class JudgementsPanel extends JPanePlugin {
             Object[] s = new String[cols];
 
             s[0] = judgement.toString();
+            s[1] = "";
+            if (!judgement.isActive()) {
+                s[1] = "deleted";
+            }
             return s;
         } catch (Exception exception) {
             StaticLog.getLog().log(Log.INFO, "Exception in buildRunRow()", exception);
         }
         return null;
 
+    }
+
+    /**
+     * This method initializes editButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getEditButton() {
+        if (editButton == null) {
+            editButton = new JButton();
+            editButton.setText("Edit");
+            editButton.setMnemonic(KeyEvent.VK_E);
+            editButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    editSelectedJudgement();
+                }
+            });
+        }
+        return editButton;
+    }
+
+    /**
+     * Number of runs that match this judgement.
+     * 
+     * @param judgement
+     * @return count of runs that match.
+     */
+    int numberOfRuns(Judgement judgement) {
+
+        int count = 0;
+        ElementId elementId = judgement.getElementId();
+
+        for (Run run : getContest().getRuns()) {
+            if (run.isDeleted()) {
+                continue;
+            }
+            if (run.isJudged()) {
+                if (run.getJudgementRecord().getJudgementId().equals(elementId)) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    protected void editSelectedJudgement() {
+
+        int selectedIndex = judgementListBox.getSelectedIndex();
+        if (selectedIndex == -1) {
+            showMessage("Select a judgement to edit");
+            return;
+        }
+
+        try {
+            ElementId elementId = (ElementId) judgementListBox.getKeys()[selectedIndex];
+            Judgement judgementToEdit = getContest().getJudgement(elementId);
+
+            int numberRuns = numberOfRuns(judgementToEdit);
+            if (numberRuns > 0) {
+                JOptionPane.showMessageDialog(this, "There are " + numberRuns + " runs which will be changed if this judgement is changed", "Runs may be changed", JOptionPane.WARNING_MESSAGE);
+            }
+
+            editJudgementFrame.setJudgement(judgementToEdit);
+            editJudgementFrame.setVisible(true);
+        } catch (Exception e) {
+            getController().getLog().log(Log.WARNING, "Exception logged ", e);
+            showMessage("Unable to edit judgement, check log");
+        }
+
+    }
+
+    protected EditJudgementFrame getEditJudgementFrame() {
+        if (editJudgementFrame == null) {
+            editJudgementFrame = new EditJudgementFrame();
+        }
+        return editJudgementFrame;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

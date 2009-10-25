@@ -43,8 +43,22 @@ public class JudgementReport implements IReport {
         Judgement [] judgements = contest.getJudgements();
         
         printWriter.println("-- " + judgements.length + " Judgements --");
+        printWriter.println("     Active Judgements");
         for (Judgement judgement : judgements) {
-            printWriter.println("  '" + judgement + "' id=" + judgement.getElementId());
+            if (! judgement.isActive()){
+                continue;
+            }
+            printWriter.print("  '" + judgement );
+            printWriter.println("' id=" + judgement.getElementId());
+        }
+        
+        printWriter.println("     Deleted Judgements");
+        for (Judgement judgement : judgements) {
+            if (judgement.isActive()){
+                continue;
+            }
+            printWriter.print("  '" + judgement );
+            printWriter.println("' id=" + judgement.getElementId());
         }
     }
 

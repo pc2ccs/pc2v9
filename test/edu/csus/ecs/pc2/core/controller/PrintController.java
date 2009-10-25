@@ -542,4 +542,11 @@ public class PrintController implements IInternalController {
         System.out.println("method writeConfigToDisk");
     }
 
+    public void updateJudgement(Judgement newJudgement) {
+
+        System.out.println("method addNewJudgement");
+        System.out.println("    judgement              : " + newJudgement);
+        
+    }
+
 }

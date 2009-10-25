@@ -1810,7 +1810,7 @@ public final class PacketFactory {
     public static Packet createUpdateSetting(ClientId source, ClientId destination, Judgement judgement) {
         Properties prop = new Properties();
         prop.put(JUDGEMENT, judgement);
-        return createPacket(PacketType.Type.RUN_JUDGEMENT_UPDATE, source, destination, prop);
+        return createPacket(PacketType.Type.UPDATE_SETTING, source, destination, prop);
     }
 
     public static Packet createAnsweredClarificationUpdate(ClientId source, ClientId destination, Clarification clarification, String answer, ClientId whoAnsweredIt) {

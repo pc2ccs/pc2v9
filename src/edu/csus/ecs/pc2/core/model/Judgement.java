@@ -10,6 +10,7 @@ import java.io.Serializable;
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
+
 // $HeadURL$
 public class Judgement implements IElementObject, Serializable {
 
@@ -25,7 +26,7 @@ public class Judgement implements IElementObject, Serializable {
      */
     private String displayName = null;
 
-    private boolean active = false;
+    private boolean active = true;
 
     public Judgement(String displayName) {
         super();
@@ -93,4 +94,19 @@ public class Judgement implements IElementObject, Serializable {
         elementId.setSiteNumber(siteNumber);
     }
 
+    public boolean isSameAs(Judgement judgement) {
+        try {
+            if (!getDisplayName().equals(judgement.getDisplayName())) {
+                return false;
+            }
+            if (isActive() != judgement.isActive()) {
+                return false;
+            }
+            return true;
+        } catch (Exception e) {
+            // TODO log to static Exception log
+            return false;
+        }
+    }
+    
 }

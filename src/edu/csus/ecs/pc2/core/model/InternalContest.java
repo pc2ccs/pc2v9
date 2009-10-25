@@ -1364,6 +1364,7 @@ public class InternalContest implements IInternalContest {
     }
 
     public void updateJudgement(Judgement judgement) {
+        judgementDisplayList.update(judgement);
         judgementList.update(judgement);
         JudgementEvent judgementEvent = new JudgementEvent(JudgementEvent.Action.CHANGED, judgement);
         fireJudgementListener(judgementEvent);

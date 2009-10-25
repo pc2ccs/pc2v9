@@ -3,11 +3,13 @@ package edu.csus.ecs.pc2.ui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.io.File;
 import java.io.IOException;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -16,6 +18,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.border.TitledBorder;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
@@ -30,7 +33,9 @@ import edu.csus.ecs.pc2.core.model.DisplayTeamName;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.IJudgementListener;
 import edu.csus.ecs.pc2.core.model.Judgement;
+import edu.csus.ecs.pc2.core.model.JudgementEvent;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
@@ -43,9 +48,6 @@ import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.ui.judge.JudgeView;
-import javax.swing.border.TitledBorder;
-import javax.swing.BorderFactory;
-import java.awt.Font;
 
 /**
  * Select a Judgement Pane.
@@ -193,7 +195,8 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         //getManualRunResultsPanel().setContestAndController(getContest(), getController());
 
         initializePermissions();
-
+        
+        getContest().addJudgementListener(new JudgementListenerImplementation());
     }
 
     public String getPluginTitle() {
@@ -545,7 +548,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
             showValidatorControls(false);
 
         }
-        populateComboBoxes();
+        reloadComboBoxes();
 
         populatingGUI = false;
 
@@ -590,7 +593,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         FrameUtilities.regularCursor(this);
     }
 
-    private void populateComboBoxes() {
+    private void reloadComboBoxes() {
 
         int selectedIndex = -1;
         int index = 0;
@@ -611,11 +614,14 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         }
 
         for (Judgement judgement : getContest().getJudgements()) {
-            getJudgementComboBox().addItem(judgement);
-            if (judgement.getElementId().equals(judgementId)) {
-                selectedIndex = index;
+            
+            if (judgement.isActive()){
+                getJudgementComboBox().addItem(judgement);
+                if (judgement.getElementId().equals(judgementId)) {
+                    selectedIndex = index;
+                }
+                index++;
             }
-            index++;
         }
 
         getJudgementComboBox().setSelectedIndex(selectedIndex);
@@ -1488,5 +1494,28 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         }
         return viewOutputsButton;
     }
+    
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+
+    // $HeadURL$
+    private class JudgementListenerImplementation implements IJudgementListener {
+
+        public void judgementAdded(JudgementEvent event) {
+            reloadComboBoxes();
+        }
+
+        public void judgementChanged(JudgementEvent event) {
+            reloadComboBoxes();
+        }
+
+        public void judgementRemoved(JudgementEvent event) {
+            reloadComboBoxes();
+        }
+    }
+
 
 } // @jve:decl-index=0:visual-constraint="10,10"
