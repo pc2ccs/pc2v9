@@ -14,6 +14,7 @@
     <property name="build.test.dir" location="${build.dir}/test" />
     <property name="testresults.dir" location="${build.dir}/test-results" />
     <property name="version.path" value="${build.dir}/VERSION"/>
+    <property name="spec.path" value="${build.dir}/pc2.spec"/>
     <property name="testresults.xml.dir" location="${testresults.dir}/xml" />
     <property name="testresults.html.dir" location="${testresults.dir}/html" />
     <property name="compilelogs.dir" location="${build.dir}" />
@@ -154,6 +155,11 @@
         <delete file="${version.path}"/>
         <echo message="CSUS Programming Contest Control System${line.separator}" file="${version.path}"/>
         <echo message="Version ${version} ${date} ${repo.version} (${timestamp.english})${line.separator}" file="${version.path}" append="true"/>
+        <delete file="${spec.path}"/>
+        <echo message="Version: ${version}${line.separator}Release: ${repo.version}${line.separator}" file="${spec.path}"/>
+        <concat destfile="${spec.path}" append="true">
+             <fileset file=".spec.base"/>
+        </concat>
     </target>
     <target name="jar" depends="test" description="creates a jar of our classes">
         <antcall target="version"/>

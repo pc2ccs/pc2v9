@@ -49,12 +49,14 @@
             <zipfileset dir="${basedir}" filemode="644" prefix="${release}">
                 <include name="README"/>
                 <include name="LICENSE"/>
-                <include name="${version.path}"/>
                 <include name="pc2v9.ini"/>
                 <include name="pc2.ico"/>
             </zipfileset>
             <zipfileset dir="${build.dir}" filemode="644" prefix="${release}">
                 <include name="VERSION"/>
+            </zipfileset>
+            <zipfileset dir="${build.dir}" filemode="644" prefix="${release}/samps">
+                <include name="pc2.spec"/>
             </zipfileset>
             <zipfileset dir="${data.dir}" filemode="644" prefix="${release}/data"/>
             <zipfileset dir="${scripts.dir}" filemode="755" prefix="${release}/bin"/>
@@ -66,10 +68,12 @@
             <zipfileset dir="${samps.dir}" filemode="644" prefix="${release}/samps">
                 <exclude name="compile*"/>
                 <exclude name="sleep.exe"/>
+                <exclude name="validiff*"/>
             </zipfileset>
             <zipfileset dir="${samps.dir}" filemode="755" prefix="${release}/samps">
                 <include name="compile*"/>
                 <include name="sleep.exe"/>
+                <include name="validiff*"/>
             </zipfileset>
             <zipfileset dir="${data.dir}" filemode="755" prefix="${release}/samps/data"/>
             <!-- bug 353: copy api and other docs to release -->
@@ -94,32 +98,15 @@
         <tar destfile="${gzip.path}" basedir="${build.unpack.dir}" compression="gzip" excludes="${release}/bin/**,${release}/samps/**">
             <tarfileset mode="755" dir="${build.unpack.dir}">
                 <include name="${release}/bin/**"/>
-                <include name="${release}/samps/**"/>
-                <!-- grr, there should be an easier way to do this -->
-                <exclude name="${release}/samps/*.c"/>
-                <exclude name="${release}/samps/*.cpp"/>
-                <exclude name="${release}/samps/*.dpr"/>
-                <exclude name="${release}/samps/*.f"/>
-                <exclude name="${release}/samps/*.java"/>
-                <exclude name="${release}/samps/*.pas"/>
-                <exclude name="${release}/samps/*.st"/>
-                <exclude name="${release}/samps/*.ans"/>
-                <exclude name="${release}/samps/*.dat"/>
-                <exclude name="${release}/samps/*.in"/>
-                <exclude name="${release}/samps/*.ini"/>
+                <include name="${release}/samps/compile*"/>
+                <include name="${release}/samps/sleep.exe"/>
+                <include name="${release}/samps/validiff*"/>
             </tarfileset>
             <tarfileset mode="644" dir="${build.unpack.dir}">
-                <include name="${release}/samps/*.c"/>
-                <include name="${release}/samps/*.cpp"/>
-                <include name="${release}/samps/*.dpr"/>
-                <include name="${release}/samps/*.f"/>
-                <include name="${release}/samps/*.java"/>
-                <include name="${release}/samps/*.pas"/>
-                <include name="${release}/samps/*.st"/>
-                <include name="${release}/samps/*.ans"/>
-                <include name="${release}/samps/*.dat"/>
-                <include name="${release}/samps/*.in"/>
-                <include name="${release}/samps/*.ini"/>
+                <include name="${release}/samps/**"/>
+                <exclude name="${release}/samps/compile*"/>
+                <exclude name="${release}/samps/sleep.exe"/>
+                <exclude name="${release}/samps/validiff*"/>
             </tarfileset>
         </tar>
         <checksum file="${gzip.path}" algorithm="MD5" fileext=".md5.txt"/>
