@@ -18,6 +18,7 @@ import javax.swing.event.ChangeListener;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IniFile;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.ui.AccountsPane;
@@ -37,6 +38,7 @@ import edu.csus.ecs.pc2.ui.LanguagesPane;
 import edu.csus.ecs.pc2.ui.LogWindow;
 import edu.csus.ecs.pc2.ui.LoginsPane;
 import edu.csus.ecs.pc2.ui.OptionsPanel;
+import edu.csus.ecs.pc2.ui.PacketExplorerPane;
 import edu.csus.ecs.pc2.ui.ProblemsPane;
 import edu.csus.ecs.pc2.ui.ProfilesPane;
 import edu.csus.ecs.pc2.ui.ReportPane;
@@ -162,6 +164,11 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 AccountsPane accountsPane = new AccountsPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Accounts", accountsPane);
 
+                if (Utilities.isDebugMode()){
+                    PacketExplorerPane explorerPane = new PacketExplorerPane();
+                    addUIPlugin(getConfigureContestTabbedPane(), "Packets", explorerPane);
+                }
+                
                 AutoJudgesPane autoJudgesPane = new AutoJudgesPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Auto Judge", autoJudgesPane);
 

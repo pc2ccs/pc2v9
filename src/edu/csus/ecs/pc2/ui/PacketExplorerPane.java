@@ -2,13 +2,13 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Properties;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
@@ -25,6 +25,8 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.packet.PacketFactory;
+import edu.csus.ecs.pc2.core.security.FileSecurity;
+import edu.csus.ecs.pc2.core.security.FileSecurityException;
 
 /**
  * Packet Explorer, stand alone app.
@@ -63,6 +65,8 @@ public class PacketExplorerPane extends JPanePlugin {
 
     @SuppressWarnings("unused")
     private IInternalController controller;
+    
+    private String contestPassword = null;
 
     public PacketExplorerPane() {
         super();
@@ -185,24 +189,20 @@ public class PacketExplorerPane extends JPanePlugin {
         return refreshButton;
     }
 
+    
     /**
      * @param file
      *            to read as a packet
      * @return Packet from file
+     * @throws Exception 
      */
-    protected Packet fetchPC2Packet(File file) {
-        try {
-            Object obj = Utilities.readObjectFromFile(file.getCanonicalPath());
-            if (obj instanceof Packet) {
-                return (Packet) obj;
-            }
-        } catch (IOException e) {
-            return null;
-        } catch (ClassNotFoundException e) {
-            return null;
+    protected Packet fetchPC2Packet(File file) throws Exception {
+        Object obj = Utilities.readObjectFromFile(file.getCanonicalPath());
+        if (obj instanceof Packet) {
+            return (Packet) obj;
+        } else { 
+            throw new Exception("Not a packet: "+file.getName()+" is "+obj.getClass().toString());
         }
-        return null;
-
     }
 
     /**
@@ -225,6 +225,18 @@ public class PacketExplorerPane extends JPanePlugin {
             return;
         }
         
+        if (contestPassword == null){
+            String password = JOptionPane.showInputDialog(this, "Enter Contest Password", "Password entry",JOptionPane.QUESTION_MESSAGE);
+            try {
+                new FileSecurity("db.1");
+                FileSecurity.verifyPassword(password.toCharArray());
+                contestPassword = password;
+            } catch (FileSecurityException e) {
+                JOptionPane.showMessageDialog(this, "Password did not match "+e.getMessage());
+                return;
+            }
+        }
+        
         showMessage("Reading files from "+dirname);
 
         String[] filenames = dir.list();
@@ -241,7 +253,14 @@ public class PacketExplorerPane extends JPanePlugin {
 
                     System.out.println(packetFilename);
 
-                    Packet packet = fetchPC2Packet(packfile);
+                    Packet packet = null;
+                    
+                    try {
+                        packet = fetchPC2Packet(packfile);
+                    } catch (Exception e) {
+                        System.out.println(packfile.getName()+" " +e.getMessage());
+                    }
+                    
                     if (packet != null) {
                         addPacketToList(packet);
                         packetsFound++;
@@ -375,8 +394,6 @@ public class PacketExplorerPane extends JPanePlugin {
         this.contest = inContest;
         this.controller = inController;
         setVisible (true);
-   
-
     }
     
     public String getPluginTitle() {
