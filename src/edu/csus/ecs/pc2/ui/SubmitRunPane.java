@@ -129,7 +129,9 @@ public class SubmitRunPane extends JPanePlugin {
         getProblemComboBox().addItem(problemN);
 
         for (Problem problem : getContest().getProblems()) {
-            getProblemComboBox().addItem(problem);
+            if (problem.isActive()){
+                getProblemComboBox().addItem(problem);
+            }
         }
     }
 

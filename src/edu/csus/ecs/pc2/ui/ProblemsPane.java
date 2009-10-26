@@ -159,7 +159,11 @@ public class ProblemsPane extends JPanePlugin {
         Object[] c = new String[numberColumns];
         int i = 0;
 
-        c[i++] = problem.getDisplayName();
+        String name = problem.getDisplayName();
+        if (! problem.isActive()){
+            name = "[DELETED] "+name;
+        }
+        c[i++] = name;
         c[i++] = problem.getDataFileName();
         c[i++] = problem.getAnswerFileName();
         String inputMethod = "";
