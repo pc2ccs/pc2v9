@@ -208,7 +208,7 @@ public class JudgementPane extends JPanePlugin {
             newJudgement.setDisplayName(name);
         }
 
-        dumpJudgement (newJudgement);
+//        dumpJudgement (newJudgement);
         
         getController().updateJudgement(newJudgement);
 
@@ -370,10 +370,10 @@ public class JudgementPane extends JPanePlugin {
     public void setJudgement(final Judgement judgement) {
 
         this.savedJudgement = judgement;
+        if (judgement == null){
+            setDeleteCheckBoxEnabled(true);
+        }
         
-        dumpJudgement (judgement);
-
-
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 populateGUI(judgement);
@@ -382,13 +382,17 @@ public class JudgementPane extends JPanePlugin {
         });
     }
 
-    private void dumpJudgement(Judgement judgement) {
-        
-        System.out.println(judgement.isActive()
-                + " " + judgement.getElementId()
-                + " " + judgement 
-                + " " + judgement.getDisplayName());
+    public void setDeleteCheckBoxEnabled(boolean enabled) {
+        getDeleteCheckBox().setEnabled(enabled);
     }
+
+//    private void dumpJudgement(Judgement judgement) {
+//        
+//        System.out.println(judgement.isActive()
+//                + " " + judgement.getElementId()
+//                + " " + judgement 
+//                + " " + judgement.getDisplayName());
+//    }
 
     private void populateGUI(Judgement judgement2) {
 
@@ -435,6 +439,7 @@ public class JudgementPane extends JPanePlugin {
             deleteCheckBox = new JCheckBox();
             deleteCheckBox.setBounds(new Rectangle(124, 61, 208, 21));
             deleteCheckBox.setText("Delete Judgement");
+            deleteCheckBox.setToolTipText("Delete or make this judgement inactive");
             deleteCheckBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableUpdateButton();

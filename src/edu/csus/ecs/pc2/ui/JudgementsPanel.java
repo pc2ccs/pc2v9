@@ -179,6 +179,7 @@ public class JudgementsPanel extends JPanePlugin {
     protected void addJudgement() {
 
         editJudgementFrame.setJudgement(null);
+        editJudgementFrame.setDeleteCheckBoxEnabled(true);
         editJudgementFrame.setVisible(true);
     }
 
@@ -291,6 +292,12 @@ public class JudgementsPanel extends JPanePlugin {
         try {
             ElementId elementId = (ElementId) judgementListBox.getKeys()[selectedIndex];
             Judgement judgementToEdit = getContest().getJudgement(elementId);
+            
+            if (isYesJudgement(judgementToEdit)){
+                editJudgementFrame.setDeleteCheckBoxEnabled(false);
+            } else {
+                editJudgementFrame.setDeleteCheckBoxEnabled(true);
+            }
 
             int numberRuns = numberOfRuns(judgementToEdit);
             if (numberRuns > 0) {
@@ -304,6 +311,10 @@ public class JudgementsPanel extends JPanePlugin {
             showMessage("Unable to edit judgement, check log");
         }
 
+    }
+
+    private boolean isYesJudgement(Judgement judgementToEdit) {
+        return getContest().getJudgements()[0].equals(judgementToEdit); 
     }
 
     protected EditJudgementFrame getEditJudgementFrame() {

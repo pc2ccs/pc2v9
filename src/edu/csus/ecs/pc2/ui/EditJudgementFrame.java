@@ -85,5 +85,9 @@ public class EditJudgementFrame extends JFrame implements UIPlugin {
         }
         return judgementPane;
     }
+    
+    public void setDeleteCheckBoxEnabled(boolean enabled) {
+        getJudgementPane().setDeleteCheckBoxEnabled(enabled);
+    }
 
 }  //  @jve:decl-index=0:visual-constraint="30,50"
