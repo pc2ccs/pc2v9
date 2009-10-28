@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.api.apireports;
 
 import edu.csus.ecs.pc2.api.APIAbstractTest;
+import edu.csus.ecs.pc2.api.IGroup;
 import edu.csus.ecs.pc2.api.ITeam;
 
 /**
@@ -15,7 +16,12 @@ public class PrintTeams extends APIAbstractTest {
     public void printTest() {
         println("There are " + getContest().getTeams().length + " team ");
         for (ITeam team : getContest().getTeams()) {
-            println(team.getLoginName() + " title: " + team.getLoginName() + " group: " + team.getGroup().getName());
+            IGroup group = team.getGroup();
+            String name = "(no group assigned)";
+            if (group != null) {
+                name = group.getName();
+            }
+            println(team.getLoginName() + " title: " + team.getLoginName() + " group: " + name);
         }
         println("");
         println();

@@ -558,18 +558,27 @@ public class ContestTestFrame extends JFrame {
     private JTextField getLoginTextField() {
         if (loginTextField == null) {
             loginTextField = new JTextField();
-            loginTextField.setText("spectator1");
+            loginTextField.setText("s1");
             loginTextField.setBounds(new java.awt.Rectangle(153, 11, 127, 20));
             loginTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyPressed(java.awt.event.KeyEvent e) {
                     if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
-                        attachToContest();
+                        updateLoginPasswordShortCut();
                     }
                 }
             });
 
         }
         return loginTextField;
+    }
+
+    protected void updateLoginPasswordShortCut() {
+        String name = loginShortcutName(loginTextField.getText());
+        if (! name.equals(loginTextField.getText())){
+            loginTextField.setText(name);
+            passwordTextField.setText(name);
+            passwordTextField.requestFocus();
+        }
     }
 
     /**
@@ -636,7 +645,9 @@ public class ContestTestFrame extends JFrame {
         }
 
         scrollyFrame.setVisible(false);
-        runsFrame.setVisible(false);
+        if (runsFrame != null){
+            runsFrame.setVisible(false);
+        }
 
         serverConnection.logoff();
         contest = null;
@@ -1420,6 +1431,40 @@ public class ContestTestFrame extends JFrame {
                 }
             }
         });
+    }
+    
+    public String loginShortcutName(String loginName) {
+        System.out.println("debug 22 "+loginName); // debug 22
+        
+        if (loginName.equals("t")) {
+            loginName = "team1";
+        }
+
+        if (loginName.equals("r") || loginName.equals("root")) {
+            loginName = "administrator1";
+        } else if (loginName.startsWith("b") && loginName.length() > 1) {
+            int number = getIntegerValue(loginName.substring(1));
+            loginName = "scoreboard" + number;
+        } else if (loginName.startsWith("a") && loginName.length() > 1) {
+            int number = getIntegerValue(loginName.substring(1));
+            loginName = "administrator" + number;
+        } else if (loginName.startsWith("j") && loginName.length() > 1) {
+            int number = getIntegerValue(loginName.substring(1));
+            loginName = "judge" + number;
+        } else if (loginName.startsWith("s") && loginName.length() > 1) {
+            int number = getIntegerValue(loginName.substring(1));
+            loginName = "spectator" + number;            
+        } else if (loginName.startsWith("t") && loginName.length() > 1) {
+            int number = getIntegerValue(loginName.substring(1));
+            loginName = "team" + number;
+        } else if (Character.isDigit(loginName.charAt(0))) {
+            int number = getIntegerValue(loginName);
+            loginName = "team" + number;
+        }
+        
+        System.out.println(" now is: "+loginName); // debug 22
+
+        return loginName;
     }
 
 } // @jve:decl-index=0:visual-constraint="21,23"
