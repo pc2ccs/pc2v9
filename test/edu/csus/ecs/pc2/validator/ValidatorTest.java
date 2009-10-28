@@ -89,6 +89,9 @@ public class ValidatorTest extends TestCase {
         return tempOutputDirectoryName + File.separator + randomFileName(prefix);
     }
 
+    /**
+     * Test all validator options. 
+     */
     public void testAll() {
 
         // -pc2 test options
@@ -124,6 +127,30 @@ public class ValidatorTest extends TestCase {
             validateFileDiff(pc2TestNumber, outcome);
         }
     }
+    
+    /**
+     * Test all validator options. 
+     */
+    public void testNegativeCases() {
+        int[] pc2TestNumbers = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+
+        for (int i = 0; i < pc2TestNumbers.length; i++) {
+            int pc2TestNumber = pc2TestNumbers[i];
+
+            String expectedOutcome = "Yes";
+
+            String outputFilename = getFullPathName("testfile.txt");
+            String answerFilename = getFullPathName("testfile.txt");
+            runNegativeValidatorTest(outputFilename, answerFilename, expectedOutcome, pc2TestNumber);
+
+            expectedOutcome = Validator.JUDGEMENT_YES;
+
+            outputFilename = getFullPathName("testfile.txt");
+            answerFilename = getFullPathName("testdatain.txt");
+            runNegativeValidatorTest(outputFilename, answerFilename, expectedOutcome, pc2TestNumber);
+        }
+    }
+
 
     /**
      * Test two identical files, one line per file.
@@ -272,6 +299,35 @@ public class ValidatorTest extends TestCase {
         assertEquals("Failed -pc2 " + pc2TestNumber, results, judgementString);
     }
 
+    /**
+     * Negative test, judgementString should NOT match validator results.
+     * 
+     * Test will fail if validator results match judgementString.
+     * 
+     * @param outputFileName
+     * @param answerFileName
+     * @param judgementString
+     * @param pc2TestNumber
+     */
+    protected void runNegativeValidatorTest(String outputFileName, String answerFileName, String judgementString, int pc2TestNumber) {
+
+        String inFilename = getFullPathName("testdatain.txt");
+
+        String resultFilename = randomOutputFileName("result");
+
+        String results = validatorResultXML(inFilename, outputFileName, answerFileName, resultFilename, pc2TestNumber, false);
+
+        if (isUnitDebug() && judgementString.equals(results)) {
+            System.err.println("Failed Negative test " + judgementString + " vs (validator) " + results);
+            System.err.println("  Out: " + outputFileName);
+            System.err.println("  Val: " + answerFileName);
+            System.err.println("  Out: " + resultFilename);
+            System.err.println("  Cmd: validator " + inFilename + " " + outputFileName + " " + answerFileName + " " + resultFilename + " -pc2 " + pc2TestNumber + " " + false);
+        }
+
+        assertNotSame("Failed negative test -pc2 " + pc2TestNumber, results, judgementString);
+    }
+    
     /**
      * Run Validator and return results.
      * 
