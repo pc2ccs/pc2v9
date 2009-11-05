@@ -32,6 +32,8 @@ import edu.csus.ecs.pc2.ui.StandingsPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 import javax.swing.JPanel;
 import java.awt.BorderLayout;
+import java.awt.Frame;
+
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import javax.swing.JButton;
@@ -385,9 +387,11 @@ public class ScoreboardView extends JFrame implements UIPlugin {
     }
 
     private void setFrameTitle(final boolean contestStarted) {
+        final Frame thisFrame = this;
+        
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                setFrameTitle(contest, contest.getTitle(), contestStarted);
+                FrameUtilities.setFrameTitle(thisFrame, contest.getTitle(), contestStarted, new VersionInfo());
                 if (contestStarted) {
                     timeLabel.setText("");
                 } else {
@@ -399,7 +403,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
     }
     
     
-    protected void setFrameTitle(IInternalContest contest, String moduleName, boolean clockStarted) {
+    protected void setFrameTitle2(IInternalContest contest, String moduleName, boolean clockStarted) {
 
         String clockStateString = "STOPPED";
         if (clockStarted) {

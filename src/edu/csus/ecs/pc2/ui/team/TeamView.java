@@ -16,8 +16,8 @@ import edu.csus.ecs.pc2.core.IniFile;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
-import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.ui.ClarificationsPane;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
@@ -128,11 +128,13 @@ public class TeamView extends JFrame implements UIPlugin {
     }
 
     private void updateFrameTitle(final boolean turnButtonsOn) {
+        
+        final JFrame thisFrame = this;
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
 
-                setFrameTitle(contest, contest.getTitle(), turnButtonsOn);
+                FrameUtilities.setFrameTitle(thisFrame, contest.getTitle(), turnButtonsOn, new VersionInfo());
 
                 if (contestClockDisplay.getClientFrame() == null){
                     contestClockDisplay.setClientFrame(getThisFrame());
@@ -152,24 +154,6 @@ public class TeamView extends JFrame implements UIPlugin {
         FrameUtilities.regularCursor(this);
     }
 
-    
-    protected void setFrameTitle(IInternalContest contest, String moduleName, boolean clockStarted) {
-
-        String clockStateString = "STOPPED";
-        if (clockStarted) {
-            clockStateString = "STARTED";
-        }
-        VersionInfo versionInfo = new VersionInfo();
-
-        String versionNumber = versionInfo.getVersionNumber();
-        String[] parts = versionNumber.split(" ");
-        if (parts.length == 2) {
-            versionNumber = parts[0];
-        }
-
-        setTitle("PC^2 " + moduleName + " [" + clockStateString + "] " + versionNumber + "-" + versionInfo.getBuildNumber());
-    }
-    
     /**
      * 
      * @author pc2@ecs.csus.edu

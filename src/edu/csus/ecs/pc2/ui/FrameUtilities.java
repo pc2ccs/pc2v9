@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.Rectangle;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -10,6 +11,8 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
+
+import edu.csus.ecs.pc2.VersionInfo;
 
 /**
  * Methods to center frame, change cursor, etc. <br>
@@ -251,6 +254,33 @@ public final class FrameUtilities {
         centerFrameOver(parentFrame, dialog);
         dialog.setVisible(true);
     }
-
     
+    /**
+     * Set a PC^2 Frame title.
+     * 
+     * Form:
+     * PC^2 moduleName [clockstate] ver#-build#
+     * <br>
+     * Example:  PC^2 Server (Site 1) [STOPPED] 9.1.4-1908 <br>
+     * PC^2 TEAM 1 (Site 1) [STARTED] 9.1.4-1908 <br>
+     * 
+     * @param frame
+     * @param moduleName
+     * @param versionInfo
+     */
+    public static void setFrameTitle(Frame frame, String moduleName, boolean clockStarted, VersionInfo versionInfo) {
+
+        String clockStateString = "STOPPED";
+        if (clockStarted) {
+            clockStateString = "STARTED";
+        }
+        String versionNumber = versionInfo.getVersionNumber();
+        String[] parts = versionNumber.split(" ");
+        if (parts.length == 2) {
+            versionNumber = parts[0];
+        }
+
+        frame.setTitle("PC^2 " + moduleName + " [" + clockStateString + "] " + versionNumber + "-" + versionInfo.getBuildNumber());
+    }
+
 }

@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.ui.server;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.Frame;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -313,31 +314,15 @@ public class ServerView extends JFrame implements UIPlugin {
     }
 
     void updateFrameTitle(final boolean turnButtonsOn) {
-
+        final Frame thisFrame = this;
+        
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                setFrameTitle(model, "Server", turnButtonsOn);
+                FrameUtilities.setFrameTitle(thisFrame, "Server", turnButtonsOn, new VersionInfo());
             }
         });
     }
     
-    protected void setFrameTitle(IInternalContest contest, String moduleName, boolean clockStarted) {
-
-        String clockStateString = "STOPPED";
-        if (clockStarted) {
-            clockStateString = "STARTED";
-        }
-        VersionInfo versionInfo = new VersionInfo();
-
-        String versionNumber = versionInfo.getVersionNumber();
-        String[] parts = versionNumber.split(" ");
-        if (parts.length == 2) {
-            versionNumber = parts[0];
-        }
-
-        setTitle("PC^2 "+moduleName+" (Site " + contest.getSiteNumber() + ") [" + clockStateString + "] " + versionNumber + "-" + versionInfo.getBuildNumber());
-    }
-
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.model = inContest;
         this.controller = inController;

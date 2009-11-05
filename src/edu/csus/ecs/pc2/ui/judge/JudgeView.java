@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.ui.judge;
 
 import java.awt.BorderLayout;
+import java.awt.Frame;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -140,10 +141,11 @@ public class JudgeView extends JFrame implements UIPlugin {
     }
 
     private void setFrameTitle(final boolean contestStarted) {
+        final Frame thisFrame = this;
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 
-                setFrameTitle(contest,contest.getTitle(), contestStarted);
+                FrameUtilities.setFrameTitle(thisFrame, contest.getTitle(), contestStarted, new VersionInfo());
                 if (contestStarted) {
                     contestClockDisplay.fireClockStateChange(contest.getContestTime());
                 } else {
@@ -224,25 +226,6 @@ public class JudgeView extends JFrame implements UIPlugin {
 
     }
     
-    protected void setFrameTitle(IInternalContest contest, String moduleName, boolean clockStarted) {
-
-        String clockStateString = "STOPPED";
-        if (clockStarted) {
-            clockStateString = "STARTED";
-        }
-        VersionInfo versionInfo = new VersionInfo();
-
-        String versionNumber = versionInfo.getVersionNumber();
-        String[] parts = versionNumber.split(" ");
-        if (parts.length == 2) {
-            versionNumber = parts[0];
-        }
-
-        setTitle("PC^2 "+moduleName+" [" + clockStateString + "] " + versionNumber + "-" + versionInfo.getBuildNumber());
-    }
-    
-
-
     public String getPluginTitle() {
         return "Judge Main GUI";
     }

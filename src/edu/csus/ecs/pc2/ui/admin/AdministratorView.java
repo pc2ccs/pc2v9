@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Frame;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -20,6 +21,9 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IniFile;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.ContestTime;
+import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
+import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.ui.AccountsPane;
 import edu.csus.ecs.pc2.ui.AutoJudgesPane;
@@ -141,6 +145,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.contest = inContest;
         this.controller = inController;
+        final Frame thisFrame = this;
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -249,27 +254,15 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 contestClockDisplay = new ContestClockDisplay(controller.getLog(), contest.getContestTime(), contest.getSiteNumber(), false, null);
                 contestClockDisplay.setContestAndController(contest, controller);
                 contestClockDisplay.addLabeltoUpdateList(clockLabel, DisplayTimes.REMAINING_TIME, contest.getSiteNumber());
+                
+                contest.addContestTimeListener(new ContestTimeListenerImplementation());
 
-                setFrameTitle(contest, contest.getTitle());
+                FrameUtilities.setFrameTitle(thisFrame, contest.getTitle(), contest.getContestTime().isContestRunning(), new VersionInfo());
                 setVisible(true);
             }
 
      });
     }
-    
-    protected void setFrameTitle(IInternalContest contest, String moduleName) {
-
-        VersionInfo versionInfo = new VersionInfo();
-
-        String versionNumber = versionInfo.getVersionNumber();
-        String[] parts = versionNumber.split(" ");
-        if (parts.length == 2) {
-            versionNumber = parts[0];
-        }
-
-        setTitle("PC^2 "+contest.getTitle()+" " + versionNumber + "-" + versionInfo.getBuildNumber());
-    }
-
     
     protected void initializeSecurityAlertWindow(IInternalContest inContest) {
         if (securityAlertLogWindow == null){
@@ -486,6 +479,54 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
     public static void main(String[] args) {
         AdministratorView administratorView = new AdministratorView();
         administratorView.setVisible(true);
+    }
+    
+    protected boolean isThisSite(int siteNumber) {
+        return contest.getSiteNumber() == siteNumber;
+    }
+    
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+
+    class ContestTimeListenerImplementation implements IContestTimeListener {
+
+        public void contestTimeAdded(ContestTimeEvent event) {
+            contestTimeChanged(event);
+        }
+
+        public void contestTimeRemoved(ContestTimeEvent event) {
+            contestTimeChanged(event);
+        }
+
+        public void contestTimeChanged(ContestTimeEvent event) {
+            ContestTime contestTime = event.getContestTime();
+            if (isThisSite(contestTime.getSiteNumber())) {
+                setFrameTitle(contestTime.isContestRunning());
+            }
+        }
+
+        public void contestStarted(ContestTimeEvent event) {
+            contestTimeChanged(event);
+        }
+
+        public void contestStopped(ContestTimeEvent event) {
+            contestTimeChanged(event);
+        }
+
+    }
+
+    public void setFrameTitle(final boolean contestRunning) {
+        final Frame thisFrame = this;
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                FrameUtilities.setFrameTitle(thisFrame, contest.getTitle(), contestRunning, new VersionInfo());
+            }
+        });
+
+        FrameUtilities.regularCursor(this);
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
