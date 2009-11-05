@@ -267,7 +267,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
             versionNumber = parts[0];
         }
 
-        setTitle("PC^2 "+contest.getTitle()+" (Site " + contest.getSiteNumber() + ") " + versionNumber + "-" + versionInfo.getBuildNumber());
+        setTitle("PC^2 "+contest.getTitle()+" " + versionNumber + "-" + versionInfo.getBuildNumber());
     }
 
     
