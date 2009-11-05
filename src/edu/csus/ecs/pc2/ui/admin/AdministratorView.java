@@ -250,12 +250,26 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 contestClockDisplay.setContestAndController(contest, controller);
                 contestClockDisplay.addLabeltoUpdateList(clockLabel, DisplayTimes.REMAINING_TIME, contest.getSiteNumber());
 
-                setTitle("PC^2 " + contest.getTitle() + " Build " + new VersionInfo().getBuildNumber());
+                setFrameTitle(contest, contest.getTitle());
                 setVisible(true);
             }
 
      });
     }
+    
+    protected void setFrameTitle(IInternalContest contest, String moduleName) {
+
+        VersionInfo versionInfo = new VersionInfo();
+
+        String versionNumber = versionInfo.getVersionNumber();
+        String[] parts = versionNumber.split(" ");
+        if (parts.length == 2) {
+            versionNumber = parts[0];
+        }
+
+        setTitle("PC^2 "+contest.getTitle()+" (Site " + contest.getSiteNumber() + ") " + versionNumber + "-" + versionInfo.getBuildNumber());
+    }
+
     
     protected void initializeSecurityAlertWindow(IInternalContest inContest) {
         if (securityAlertLogWindow == null){

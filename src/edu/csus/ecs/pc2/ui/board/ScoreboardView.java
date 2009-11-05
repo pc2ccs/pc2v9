@@ -387,16 +387,33 @@ public class ScoreboardView extends JFrame implements UIPlugin {
     private void setFrameTitle(final boolean contestStarted) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
+                setFrameTitle(contest, contest.getTitle(), contestStarted);
                 if (contestStarted) {
-                    setTitle("PC^2  " + contest.getTitle() + " [STARTED] Build " + new VersionInfo().getBuildNumber());
                     timeLabel.setText("");
                 } else {
-                    setTitle("PC^2 " + contest.getTitle() + " [STOPPED] Build " + new VersionInfo().getBuildNumber());
                     timeLabel.setText("STOPPED");
                 }
             }
         });
         FrameUtilities.regularCursor(this);
+    }
+    
+    
+    protected void setFrameTitle(IInternalContest contest, String moduleName, boolean clockStarted) {
+
+        String clockStateString = "STOPPED";
+        if (clockStarted) {
+            clockStateString = "STARTED";
+        }
+        VersionInfo versionInfo = new VersionInfo();
+
+        String versionNumber = versionInfo.getVersionNumber();
+        String[] parts = versionNumber.split(" ");
+        if (parts.length == 2) {
+            versionNumber = parts[0];
+        }
+
+        setTitle("PC^2 "+moduleName+" [" + clockStateString + "] " + versionNumber + "-" + versionInfo.getBuildNumber());
     }
     
     protected boolean isThisSite (int siteNumber){

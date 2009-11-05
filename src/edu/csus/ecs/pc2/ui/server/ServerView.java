@@ -316,13 +316,26 @@ public class ServerView extends JFrame implements UIPlugin {
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                if (turnButtonsOn) {
-                    setTitle("PC^2 Server (Site " + model.getSiteNumber() + ") [STARTED] Build " + new VersionInfo().getBuildNumber());
-                } else {
-                    setTitle("PC^2 Server (Site " + model.getSiteNumber() + ") [STOPPED] Build " + new VersionInfo().getBuildNumber());
-                }
+                setFrameTitle(model, "Server", turnButtonsOn);
             }
         });
+    }
+    
+    protected void setFrameTitle(IInternalContest contest, String moduleName, boolean clockStarted) {
+
+        String clockStateString = "STOPPED";
+        if (clockStarted) {
+            clockStateString = "STARTED";
+        }
+        VersionInfo versionInfo = new VersionInfo();
+
+        String versionNumber = versionInfo.getVersionNumber();
+        String[] parts = versionNumber.split(" ");
+        if (parts.length == 2) {
+            versionNumber = parts[0];
+        }
+
+        setTitle("PC^2 "+moduleName+" (Site " + contest.getSiteNumber() + ") [" + clockStateString + "] " + versionNumber + "-" + versionInfo.getBuildNumber());
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
