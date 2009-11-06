@@ -402,24 +402,6 @@ public class ScoreboardView extends JFrame implements UIPlugin {
         FrameUtilities.regularCursor(this);
     }
     
-    
-    protected void setFrameTitle2(IInternalContest contest, String moduleName, boolean clockStarted) {
-
-        String clockStateString = "STOPPED";
-        if (clockStarted) {
-            clockStateString = "STARTED";
-        }
-        VersionInfo versionInfo = new VersionInfo();
-
-        String versionNumber = versionInfo.getVersionNumber();
-        String[] parts = versionNumber.split(" ");
-        if (parts.length == 2) {
-            versionNumber = parts[0];
-        }
-
-        setTitle("PC^2 "+moduleName+" [" + clockStateString + "] " + versionNumber + "-" + versionInfo.getBuildNumber());
-    }
-    
     protected boolean isThisSite (int siteNumber){
         return contest.getSiteNumber() == siteNumber;
     }
