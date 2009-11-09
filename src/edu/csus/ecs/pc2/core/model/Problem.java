@@ -119,7 +119,7 @@ public class Problem implements IElementObject {
     // /**
     // * This is an optional program/script used by executionPrepCommand.
     // */
-    // private SerializedFile executeionPrepFile;
+    // private SerializedFile executionPrepFile;
 
     /**
      * PC2 option to ignore spaces on validation.
@@ -169,6 +169,42 @@ public class Problem implements IElementObject {
         this.displayName = displayName;
         elementId = new ElementId(displayName);
         setSiteNumber(0);
+    }
+
+    public Problem copy(String newDisplayName) {
+        Problem clone = new Problem(newDisplayName);
+        // inherited field
+        clone.setSiteNumber(getSiteNumber());
+        
+        // local fields
+        clone.setDisplayName(newDisplayName);
+        // TODO is number really used?
+        clone.setNumber(getNumber());
+        // TODO files need the corresponding ProblemDataFile populated...
+        clone.setDataFileName(new String(dataFileName));
+        clone.setAnswerFileName(new String(answerFileName));
+        clone.setActive(isActive());
+        clone.setReadInputDataFromSTDIN(isReadInputDataFromSTDIN());
+        clone.setTimeOutInSeconds(getTimeOutInSeconds());
+        clone.setValidatedProblem(isValidatedProblem());
+        clone.setUsingPC2Validator(isUsingPC2Validator());
+        clone.setWhichPC2Validator(getWhichPC2Validator());
+        clone.setValidatorCommandLine(new String(validatorCommandLine));
+        clone.setValidatorProgramName(new String(validatorProgramName));
+        clone.setInternationalJudgementReadMethod(isInternationalJudgementReadMethod());
+
+        // TODO Implement Commands to be executed before a problem is run
+        // private String executionPrepCommand = "";
+        // private SerializedFile executionPrepFile;
+        
+        clone.setIgnoreSpacesOnValidation(isIgnoreSpacesOnValidation());
+        clone.setShowValidationToJudges(isShowValidationToJudges());
+        clone.setHideOutputWindow(isHideOutputWindow());
+        clone.setShowCompareWindow(isShowCompareWindow());
+        clone.setComputerJudged(isComputerJudged());
+        clone.setManualReview(isManualReview());
+        clone.setPrelimaryNotification(isPrelimaryNotification());
+        return clone;
     }
 
     /**

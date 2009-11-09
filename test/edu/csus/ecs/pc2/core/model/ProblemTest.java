@@ -156,5 +156,13 @@ public class ProblemTest extends TestCase {
         p2.setDisplayName("Different Problem Name");
         checkString("setDisplayName", p1.getDisplayName(), p2.getDisplayName(), p1, p2);
     }
+    
+    public void testCopy() {
+        Problem p1 = getProblemAnew();
+        // if display name is different isSameAs will fail
+        Problem p2 = p1.copy(p1.getDisplayName());
+        assertTrue("copy failed to clone", p1.isSameAs(p2));
+        // TODO consider adding introspection to verify all fields were copied properly
+    }
 
 }
