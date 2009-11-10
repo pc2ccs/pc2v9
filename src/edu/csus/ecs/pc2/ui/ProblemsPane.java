@@ -5,6 +5,7 @@ import java.awt.FlowLayout;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
@@ -14,6 +15,7 @@ import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IProblemListener;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.ProblemEvent;
 
 /**
@@ -35,6 +37,8 @@ public class ProblemsPane extends JPanePlugin {
     private MCLB problemListBox = null;
 
     private JButton addButton = null;
+
+    private JButton copyButton = null;
 
     private JButton editButton = null;
 
@@ -88,6 +92,7 @@ public class ProblemsPane extends JPanePlugin {
             problemButtonPane.setLayout(flowLayout);
             problemButtonPane.setPreferredSize(new java.awt.Dimension(35, 35));
             problemButtonPane.add(getAddButton(), null);
+            problemButtonPane.add(getCopyButton(), null);
             problemButtonPane.add(getEditButton(), null);
         }
         return problemButtonPane;
@@ -197,6 +202,53 @@ public class ProblemsPane extends JPanePlugin {
         return c;
     }
 
+    protected void copySelectedProblem() {
+        int selectedIndex = problemListBox.getSelectedIndex();
+        if (selectedIndex == -1) {
+            showMessage("Select a problem to copy");
+            return;
+        }
+
+        try {
+            // would be nice to select the new row, but this will do
+            problemListBox.deselectAllRows();
+            ElementId elementId = (ElementId) problemListBox.getKeys()[selectedIndex];
+            Problem sourceProblem = getContest().getProblem(elementId);
+            String newProblemName = promptForProblemName(sourceProblem.getDisplayName());
+            if (newProblemName == null || newProblemName.trim().length() == 0) {
+                showMessage("Copy Aborted.");
+            } else {
+                Problem newProblem = sourceProblem.copy(newProblemName);
+                ProblemDataFiles pdf = getController().getProblemDataFiles(sourceProblem);
+                ProblemDataFiles newProblemDataFiles = null;
+                if (pdf != null) {
+                    newProblemDataFiles = pdf.copy(newProblem);
+                }
+                getController().updateProblem(newProblem, newProblemDataFiles);
+                // TODO we should stall until our contest is updated with this problem
+                //  otherwise the edit may come up without the ProblemDataFiles
+                editProblemFrame.setProblem(newProblem);
+                editProblemFrame.setVisible(true);
+            }
+        } catch (Exception e) {
+            log.log(Log.WARNING, "Exception logged ", e);
+            showMessage("Unable to clone problem, check log");
+        }
+    }
+ 
+    private String promptForProblemName(String problemName) {
+        String s = (String)JOptionPane.showInputDialog(
+                this,
+                "Copying from problem "+problemName+" to:\n",
+                "Copy Destination Dialog",
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                null,
+                null);
+
+        return s;
+    }
+
     private void reloadListBox() {
         problemListBox.removeAllRows();
         Problem[] problems = getContest().getProblems();
@@ -252,6 +304,26 @@ public class ProblemsPane extends JPanePlugin {
         editProblemFrame.setVisible(true);
     }
 
+    /**
+     * This method initializes copyButton
+     *
+     * @return javax.swing.JButton
+     */
+    private JButton getCopyButton() {
+        if (copyButton == null) {
+            copyButton = new JButton();
+            copyButton.setText("Copy");
+            copyButton.setToolTipText("Copy settings from an existing problem to a new problem");
+            copyButton.setActionCommand("Copy");
+            copyButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    copySelectedProblem();
+                }
+            });
+        }
+        return copyButton;
+    }
+    
     /**
      * This method initializes editButton
      * 

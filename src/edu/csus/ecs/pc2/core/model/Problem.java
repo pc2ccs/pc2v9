@@ -171,6 +171,14 @@ public class Problem implements IElementObject {
         setSiteNumber(0);
     }
 
+    private String cloneString(String s) {
+        String result = null;
+        if (s != null) {
+            result = new String(s);
+        }
+        return result;
+    }
+
     public Problem copy(String newDisplayName) {
         Problem clone = new Problem(newDisplayName);
         // inherited field
@@ -181,16 +189,16 @@ public class Problem implements IElementObject {
         // TODO is number really used?
         clone.setNumber(getNumber());
         // TODO files need the corresponding ProblemDataFile populated...
-        clone.setDataFileName(new String(dataFileName));
-        clone.setAnswerFileName(new String(answerFileName));
+        clone.setDataFileName(cloneString(dataFileName));
+        clone.setAnswerFileName(cloneString(answerFileName));
         clone.setActive(isActive());
         clone.setReadInputDataFromSTDIN(isReadInputDataFromSTDIN());
         clone.setTimeOutInSeconds(getTimeOutInSeconds());
         clone.setValidatedProblem(isValidatedProblem());
         clone.setUsingPC2Validator(isUsingPC2Validator());
         clone.setWhichPC2Validator(getWhichPC2Validator());
-        clone.setValidatorCommandLine(new String(validatorCommandLine));
-        clone.setValidatorProgramName(new String(validatorProgramName));
+        clone.setValidatorCommandLine(cloneString(validatorCommandLine));
+        clone.setValidatorProgramName(cloneString(validatorProgramName));
         clone.setInternationalJudgementReadMethod(isInternationalJudgementReadMethod());
 
         // TODO Implement Commands to be executed before a problem is run
