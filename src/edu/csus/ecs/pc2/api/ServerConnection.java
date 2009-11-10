@@ -89,7 +89,7 @@ public class ServerConnection {
 
             contest = new Contest(internalContest,  controller, controller.getLog());
             
-            contest.addConnectionListener(new ConnectionEventListenerImplementation());
+            contest.addConnectionListener(new ConnectionEventListener());
 
             return contest;
 
@@ -165,7 +165,7 @@ public class ServerConnection {
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
-    protected class ConnectionEventListenerImplementation implements IConnectionEventListener {
+    protected class ConnectionEventListener implements IConnectionEventListener {
 
         public void connectionDropped() {
             contest = null;
