@@ -3,7 +3,13 @@ package edu.csus.ecs.pc2.core.model;
 import java.io.File;
 
 import junit.framework.TestCase;
-
+/**
+ * Tests for ProblemDataFiles.
+ * 
+ * @author pc2@ecs.csus.edu
+ * @version $Id$
+ *
+ */
 public class ProblemDataFilesTest extends TestCase {
     private String loadDir = "testdata" + File.separator;
 
