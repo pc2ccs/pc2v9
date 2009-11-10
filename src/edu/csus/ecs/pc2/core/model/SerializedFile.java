@@ -129,6 +129,43 @@ public class SerializedFile implements Serializable {
         }
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#clone()
+     */
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        SerializedFile clone = new SerializedFile();
+        clone.setFile(getFile());
+        clone.buffer = cloneBuffer(buffer);
+        clone.setName(cloneString(name));
+        clone.absolutePath = cloneString(absolutePath);
+        clone.setSHA1sum(cloneString(getSHA1sum()));
+        clone.fileType = getFileType();
+        clone.newLineCount = newLineCount;
+        return clone;
+    }
+
+    private String cloneString(String s) {
+        String result = null;
+        if (s != null) {
+            result = new String(s);
+        }
+        return result;
+    }
+
+    private byte[] cloneBuffer(byte[] bufferToCopy) {
+        byte[] clone;
+        if (bufferToCopy != null) {
+            clone = new byte[bufferToCopy.length];
+            for (int i = 0; i < bufferToCopy.length; i++) {
+                clone[i]=bufferToCopy[i];
+            }
+        } else {
+            clone = null;
+        }
+        return clone;
+    }
+
     /**
      * Create file on disk.
      * 

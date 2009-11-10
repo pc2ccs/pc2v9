@@ -54,6 +54,47 @@ public class ProblemDataFiles implements IElementObject {
     private SerializedFile[] judgesAnswerFiles = new SerializedFile[0];
 
     /**
+     * This should be invoked with the new Problem and will attempt to copy
+     * the existing ProblemDataFiles into a new ProblemDataFiles.
+     * 
+     * @param problem
+     * @return a copy of this ProblemDataFiles
+     * @throws CloneNotSupportedException
+     */
+    public ProblemDataFiles copy(Problem problem) throws CloneNotSupportedException {
+        ProblemDataFiles clone = new ProblemDataFiles(problem);
+        // inherited field
+        clone.setSiteNumber(getSiteNumber());
+        
+        // local fields
+        clone.setValidatorFile(cloneSerializedFile(getValidatorFile()));
+        clone.setJudgesAnswerFiles(cloneSFArray(getJudgesAnswerFiles()));
+        clone.setJudgesDataFiles(cloneSFArray(getJudgesDataFiles()));
+        return clone;
+    }
+
+    private SerializedFile[] cloneSFArray(SerializedFile[] fileArray) throws CloneNotSupportedException {
+        SerializedFile[] clone;
+        if (fileArray != null) {
+            clone = new SerializedFile[fileArray.length];
+            for (int i = 0; i < fileArray.length; i++) {
+                clone[i] = cloneSerializedFile(fileArray[i]);
+            }
+        } else {
+            clone = null;
+        }
+        return clone;
+    }
+
+    private SerializedFile cloneSerializedFile(SerializedFile file) throws CloneNotSupportedException {
+        SerializedFile clone = null;
+        if (file != null) {
+            clone = (SerializedFile)file.clone();
+        }
+        return clone;
+    }
+
+    /**
      * Return array of answer files.
      * 
      * @return the judge answer files or a single zero length array.
