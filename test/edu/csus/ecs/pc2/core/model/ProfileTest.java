@@ -40,6 +40,7 @@ public class ProfileTest extends TestCase {
             assertFalse("Profile should fail with a null parameter constructor", true);
         } catch (IllegalArgumentException e) {
             // expected exception - valid
+            assertTrue("expected exception", true);
         } catch (Exception e) {
             assertFalse("Profile should fail with a IllegalArgumentException exception", true);
         }
