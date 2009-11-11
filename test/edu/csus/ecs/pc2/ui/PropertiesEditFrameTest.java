@@ -31,6 +31,11 @@ public class PropertiesEditFrameTest extends TestCase {
         properties.put("one", "value1");
         properties.put("two", "2");
         properties.put("zero", "cero");
+        /**
+         * 
+         * @author pc2@ecs.csus.edu
+         *
+         */
         class Updater implements IPropertyUpdater{
 
             public void updateProperties(Properties properties) {
