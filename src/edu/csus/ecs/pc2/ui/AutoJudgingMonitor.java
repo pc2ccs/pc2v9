@@ -254,16 +254,22 @@ public class AutoJudgingMonitor implements UIPlugin {
             } else {
                 if (event.getAction().equals(Action.RUN_NOT_AVIALABLE)) {
                     // we are fetching a run 
-                    if (fetchedRun == null) {
-                        // XXX should we log this or let the attemptToFetchNextRun log it?
-                        // claim to have received it
-                        synchronized (listening) {
-                            try {
-                                answerReceived = true;
-                                listening.notify();
-                            } catch (Exception e) {
-                                e.printStackTrace();
+                    if (runBeingAutoJudged != null && fetchedRun == null) { // but do not have it yet
+                        // and we received a not available for the run we were requesting
+                        if (event.getRun().getNumber() ==  runBeingAutoJudged.getNumber() 
+                                && event.getRun().getSiteNumber() == runBeingAutoJudged.getSiteNumber()) {
+                            // XXX should we log this?
+                            // claim to have received it, so fetchRun can exit
+                            synchronized (listening) {
+                                try {
+                                    answerReceived = true;
+                                    listening.notify();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
                             }
+                            // now cleanup
+                            cleanupLastAutoJudge();
                         }
                     }                    
                 }
