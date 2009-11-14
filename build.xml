@@ -189,6 +189,18 @@
         <!-- Delete the ${build.dir} and ${dist.dir} directory trees -->
         <delete dir="${build.dir}" />
         <delete dir="${dist.dir}" />
+        <!-- created by test ... core/security/FileSecurityTest -->
+        <delete dir="fileSecVPDir" />
+        <delete dir="fileSecVPDirGCD" />
+        <delete file="secure.sld" />
+        <!-- created by test ... validator/ValidatorTest -->
+        <delete dir="testdata/validator/output" />
+        <!-- created by multiple tests -->
+        <delete dir="db.1" />
+        <delete dir="logs" />
+        <delete dir="packets" />
+        <delete file="contest.key" />
+        <delete file="recovery.key" />
     </target>
 
     <target name="checkstyle" description="Generates a report of code convention violations." depends="compile">
