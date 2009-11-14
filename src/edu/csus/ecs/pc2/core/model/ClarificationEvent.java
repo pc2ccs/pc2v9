@@ -47,7 +47,7 @@ public class ClarificationEvent {
          * 
          * Usually triggered by a cancel clarification.
          */
-        CLARIFICATION_AVIALABLE,
+        CLARIFICATION_AVAILABLE,
         /**
          * Held Clarification
          */

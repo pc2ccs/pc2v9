@@ -252,7 +252,7 @@ public class AutoJudgingMonitor implements UIPlugin {
                     log.info("Currently judging run " + fetchedRun);
                 }
             } else {
-                if (event.getAction().equals(Action.RUN_NOT_AVIALABLE)) {
+                if (event.getAction().equals(Action.RUN_NOT_AVAILABLE)) {
                     // we are fetching a run 
                     if (runBeingAutoJudged != null && fetchedRun == null) { // but do not have it yet
                         // and we received a not available for the run we were requesting

@@ -116,7 +116,7 @@ public class EditRunFrame extends JFrame implements UIPlugin {
             if (run != null) {
                 if (event.getRun().getElementId().equals(run.getElementId())) {
 
-                    if (event.getAction().equals(Action.RUN_NOT_AVIALABLE)) {
+                    if (event.getAction().equals(Action.RUN_NOT_AVAILABLE)) {
                         getRunPane().showMessage("Run " + run.getNumber() + " not available ");
                     } else {
                         getRunPane().setRunAndFiles(event.getRun(), event.getRunFiles());

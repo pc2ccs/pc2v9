@@ -119,8 +119,8 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
             
             if (run != null) {
                 if (event.getRun().getElementId().equals(run.getElementId())) {
-                    // RUN_NOT_AVIALABLE is undirected (sentToClient is null)
-                    if (event.getAction().equals(Action.RUN_NOT_AVIALABLE)) {
+                    // RUN_NOT_AVAILABLE is undirected (sentToClient is null)
+                    if (event.getAction().equals(Action.RUN_NOT_AVAILABLE)) {
                         getSelectJudgementPane().setRun(run);
                         getSelectJudgementPane().regularCursor();
                         JOptionPane.showMessageDialog(null, "Run " + run.getNumber() + " (Site " + run.getSiteNumber() + ") is not available.");

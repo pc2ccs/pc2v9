@@ -57,7 +57,7 @@ public class RunEvent {
          * 
          * Send to a judge in response to a {@link #CHECKEDOUT_REJUDGE_RUN} or {@link #CHECKEDOUT_RUN}
          */
-        RUN_NOT_AVIALABLE,
+        RUN_NOT_AVAILABLE,
         /**
          * Run revoked.
          */

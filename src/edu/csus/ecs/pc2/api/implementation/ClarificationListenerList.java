@@ -49,7 +49,7 @@ public class ClarificationListenerList {
             case CHECKEDOUT_REANSWER_CLARIFICATION:
             case CHANGED:    
             case CHECKEDOUT_CLARIFICATION:
-            case CLARIFICATION_AVIALABLE:
+            case CLARIFICATION_AVAILABLE:
             case CLARIFICATION_REVOKED:
             case CLARIFICATION_HELD:
             case CLARIFICATION_NOT_AVAILABLE:

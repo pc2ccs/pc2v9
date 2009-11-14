@@ -81,7 +81,7 @@ public class RunListenerList {
 
                 case CHECKEDOUT_REJUDGE_RUN:
                 case RUN_HELD:
-                case RUN_NOT_AVIALABLE:
+                case RUN_NOT_AVAILABLE:
                 case RUN_REVOKED:
                     break;
                 default:

@@ -1070,7 +1070,7 @@ public class InternalContest implements IInternalContest {
     }
 
     public void runNotAvailable(Run run) {
-        RunEvent runEvent = new RunEvent(RunEvent.Action.RUN_NOT_AVIALABLE, run, null, null);
+        RunEvent runEvent = new RunEvent(RunEvent.Action.RUN_NOT_AVAILABLE, run, null, null);
         fireRunListener(runEvent);
     }
     
@@ -1545,7 +1545,7 @@ public class InternalContest implements IInternalContest {
             clarCheckOutList.remove(clarification.getElementId());
         }
         Clarification theClarification = clarificationList.get(clarification);
-        ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.CLARIFICATION_AVIALABLE, theClarification);
+        ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.CLARIFICATION_AVAILABLE, theClarification);
         fireClarificationListener(clarificationEvent);
     }
 
