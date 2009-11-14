@@ -112,11 +112,7 @@
         <checksum file="${gzip.path}" algorithm="MD5" fileext=".md5.txt"/>
         <checksum file="${gzip.path}" algorithm="SHA" fileext=".sha1.txt"/>
     </target>
-    <target name="archives" description="public in dist, private in build">
-        <!-- TODO replace this with svnkit -->
-        <exec executable="svnversion" outputproperty="repo.version">
-            <arg line="-n ."/>
-        </exec> 
+    <target name="archives" depends="init" description="public in dist, private in build">
 
         <property name="zip.name" value="${release}-${repo.version}.zip"/>
         <property name="zip.path" value="${dist.dir}/${zip.name}"/>
