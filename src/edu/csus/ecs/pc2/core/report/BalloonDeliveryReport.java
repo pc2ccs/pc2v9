@@ -3,25 +3,36 @@ package edu.csus.ecs.pc2.core.report;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.Hashtable;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.list.ClientIdComparator;
 import edu.csus.ecs.pc2.core.list.ClientSettingsComparator;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.BalloonDeliveryInfo;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
+import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Site;
 
 /**
- * Print Balloon Delivery Summary Report.
+ * Print Balloon Delivery Report.
  * 
- * This fetches the Balloon Delivery Info.
+ * This fetches the Balloon Delivery information sorts in the following order: site number, team number, problem
+ * <P>
+ * The report is control break on team and then problem. Each team info is printed, then indented for each balloon deliver is: problem letter - problem title at datestring (where datestring is
+ * HH:MM:SS TZ YYYY-MM-DD DOW, for example: 15:02:00 -0800 2009-11-07 Sat)
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -43,6 +54,50 @@ public class BalloonDeliveryReport implements IReport {
 
     private Filter filter = new Filter();
 
+    private ClientIdComparator comparator = new ClientIdComparator();
+    
+    private SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss Z yyyy-MM-dd E");
+
+    protected class BalloonKeyComparator implements Comparator<String>, Serializable {
+
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 3204840271423881062L;
+
+        /**
+         * 
+         * @param clientIDString
+         *            a string in form 1TEAM12 for Team 12 Site 1
+         * @return
+         */
+        public ClientId getClientId(String clientIDString) {
+
+            String clientTypeName = ClientType.Type.TEAM.toString();
+            int teamIndex = clientIDString.indexOf(clientTypeName);
+
+            if (teamIndex > 0) {
+                int siteNumber = Integer.parseInt(clientIDString.substring(0, teamIndex));
+                int teamNumber = Integer.parseInt(clientIDString.substring(teamIndex + clientTypeName.length()));
+                return new ClientId(siteNumber, ClientType.Type.TEAM, teamNumber);
+
+            } else {
+                return new ClientId(0, ClientType.Type.TEAM, 0);
+            }
+        }
+
+        public int compare(String key1, String key2) {
+
+            String[] fields1 = key1.split(" ");
+            String[] fields2 = key2.split(" ");
+
+            ClientId clientId1 = getClientId(fields1[0]);
+            ClientId clientId2 = getClientId(fields2[0]);
+
+            return comparator.compare(clientId1, clientId2);
+        }
+    }
+
     public void writeReport(PrintWriter printWriter) {
 
         printWriter.println();
@@ -62,7 +117,7 @@ public class BalloonDeliveryReport implements IReport {
         for (ClientSettings clientSettings : clientSettingsList) {
             Hashtable<String, BalloonDeliveryInfo> hashtable = clientSettings.getBalloonList();
             String[] keyList = (String[]) hashtable.keySet().toArray(new String[hashtable.keySet().size()]);
-            Arrays.sort(keyList);
+            Arrays.sort(keyList, new BalloonKeyComparator());
             for (String key : keyList) {
 
                 BalloonDeliveryInfo balloonDeliveryInfo = hashtable.get(key);
@@ -78,10 +133,22 @@ public class BalloonDeliveryReport implements IReport {
 
                     foundMatching++;
 
-                    if (lastClientId == null || lastClientId.equals(balloonDeliveryInfo.getClientId())) {
+                    if (lastClientId == null || (!lastClientId.equals(balloonDeliveryInfo.getClientId()))) {
                         printWriter.println();
                         lastClientId = balloonDeliveryInfo.getClientId();
-                        printWriter.println("     Client " + lastClientId.toString());
+                        Account account = contest.getAccount(lastClientId);
+                        String accountTitle = "";
+                        if (account != null) {
+                            accountTitle = " (" + account.getDisplayName();
+                            Site site = contest.getSite(lastClientId.getSiteNumber());
+                            if (site != null) {
+                                accountTitle += " at " + site.getDisplayName();
+                            }
+                            accountTitle += ")";
+
+                        }
+
+                        printWriter.println("     Client " + lastClientId.toString() + accountTitle);
                     }
 
                     try {
@@ -96,7 +163,7 @@ public class BalloonDeliveryReport implements IReport {
 
         printWriter.println();
         printWriter.println("There were " + balloonDeliveries + " delivered");
-        if (balloonDeliveries > 0){
+        if (balloonDeliveries > 0) {
             if (foundMatching > 0) {
                 printWriter.println("There were only " + foundMatching + " deliveries that matched the filter.");
             } else {
@@ -108,8 +175,8 @@ public class BalloonDeliveryReport implements IReport {
 
     private void printBalloonDeliveryInfo(PrintWriter printWriter, BalloonDeliveryInfo balloonDeliveryInfo) {
         Problem problem = contest.getProblem(balloonDeliveryInfo.getProblemId());
-        printWriter.println("            " + problem + " at " + balloonDeliveryInfo.getTimeSent());
-
+        Date date = new Date(balloonDeliveryInfo.getTimeSent());
+        printWriter.println("            " + problem + " at " + formatter.format(date));
     }
 
     private void printHeader(PrintWriter printWriter) {
