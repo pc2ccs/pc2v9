@@ -324,7 +324,8 @@ public class ReportPane extends JPanePlugin {
 
         try {
 
-  
+            FrameUtilities.waitCursor(this);
+            
             IReport selectedReport = null;
 
             String selectedReportTitle = (String) getReportsComboBox().getSelectedItem();
@@ -361,7 +362,9 @@ public class ReportPane extends JPanePlugin {
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception logged ", e);
             showMessage("Unable to output report, check logs");
-        }
+    } finally {
+        FrameUtilities.regularCursor(this);
+    }
 
     }
     
@@ -373,6 +376,8 @@ public class ReportPane extends JPanePlugin {
 
         try {
 
+            FrameUtilities.waitCursor(this);
+            
             IReport selectedReport = null;
 
             String selectedReportTitle = (String) getReportsComboBox().getSelectedItem();
@@ -433,6 +438,8 @@ public class ReportPane extends JPanePlugin {
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception logged ", e);
             showMessage("Unable to output report, check logs");
+        } finally {
+            FrameUtilities.regularCursor(this);
         }
 
     }
