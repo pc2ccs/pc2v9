@@ -21,7 +21,7 @@ import edu.csus.ecs.pc2.core.security.SecurityMessageEvent.Action;
 // $HeadURL$
 public class SecurityMessageHandler {
 
-    private Log log;
+    private Log log = null;
 
     private String logName = null;
 
@@ -29,7 +29,6 @@ public class SecurityMessageHandler {
 
     public SecurityMessageHandler(ClientId clientId) {
         logName = stripChar(clientId.toString(), ' ') + ".security";
-        log = new Log(logName);
     }
 
     public String getPluginTitle() {
@@ -72,9 +71,9 @@ public class SecurityMessageHandler {
         }
 
         if (exception != null) {
-            log.log(Log.SEVERE, "From: " + clientId + " " + eventName + " " + message, exception);
+            getLog().log(Log.SEVERE, "From: " + clientId + " " + eventName + " " + message, exception);
         } else {
-            log.log(Log.SEVERE, "From: " + clientId + " " + eventName + " " + message);
+            getLog().log(Log.SEVERE, "From: " + clientId + " " + eventName + " " + message);
         }
 
         SecurityMessageEvent securityMessageEvent = new SecurityMessageEvent(Action.NEW, clientId, message, eventName, exception);
@@ -95,10 +94,10 @@ public class SecurityMessageHandler {
         }
 
         if (exception != null) {
-            log.log(Log.SEVERE, "SecurityException From:  " + clientId + " " + eventName + " " + message, exception);
-            log.log(Log.SEVERE, "SecurityException Sec. Message: " + exception.getSecurityMessage() + " ConnHandId " + exception.getConnectionHandlerID());
+            getLog().log(Log.SEVERE, "SecurityException From:  " + clientId + " " + eventName + " " + message, exception);
+            getLog().log(Log.SEVERE, "SecurityException Sec. Message: " + exception.getSecurityMessage() + " ConnHandId " + exception.getConnectionHandlerID());
         } else {
-            log.log(Log.SEVERE, "From: " + clientId + " " + eventName + " " + message);
+            getLog().log(Log.SEVERE, "From: " + clientId + " " + eventName + " " + message);
         }
 
         SecurityMessageEvent securityMessageEvent = new SecurityMessageEvent(Action.NEW, clientId, message, eventName, exception);
@@ -106,6 +105,11 @@ public class SecurityMessageHandler {
     }
 
     public Log getLog() {
+        
+        if (log == null){
+            log = new Log(logName);
+        }
+
         return log;
     }
 
@@ -142,4 +146,15 @@ public class SecurityMessageHandler {
             }
         }
     }
+    
+
+    public String getLogName() {
+        return logName;
+    }
+
+    public void setLogName(String logName) {
+        this.logName = logName;
+        log = null;
+    }
+
 }
