@@ -17,6 +17,7 @@ import com.ibm.webrunner.j2mclb.util.HeapSorter;
 import com.ibm.webrunner.j2mclb.util.NumericStringComparator;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.IStorage;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -67,6 +68,8 @@ public class PacketExplorerPane extends JPanePlugin {
     private IInternalController controller;
     
     private String contestPassword = null;
+
+    private IStorage storage;
 
     public PacketExplorerPane() {
         super();
@@ -197,7 +200,7 @@ public class PacketExplorerPane extends JPanePlugin {
      * @throws Exception 
      */
     protected Packet fetchPC2Packet(File file) throws Exception {
-        Object obj = Utilities.readObjectFromFile(file.getCanonicalPath());
+        Object obj = storage.load(file.getCanonicalPath());
         if (obj instanceof Packet) {
             return (Packet) obj;
         } else { 
@@ -228,8 +231,8 @@ public class PacketExplorerPane extends JPanePlugin {
         if (contestPassword == null){
             String password = JOptionPane.showInputDialog(this, "Enter Contest Password", "Password entry",JOptionPane.QUESTION_MESSAGE);
             try {
-                new FileSecurity("db.1");
-                FileSecurity.verifyPassword(password.toCharArray());
+                FileSecurity fileSecurity = new FileSecurity("db.1");
+                fileSecurity.verifyPassword(password.toCharArray());
                 contestPassword = password;
             } catch (FileSecurityException e) {
                 JOptionPane.showMessageDialog(this, "Password did not match "+e.getMessage());

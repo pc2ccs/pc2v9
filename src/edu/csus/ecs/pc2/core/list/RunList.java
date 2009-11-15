@@ -6,12 +6,14 @@ import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
+import edu.csus.ecs.pc2.core.IStorage;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
+import edu.csus.ecs.pc2.core.security.FileSecurityException;
 
 /**
  * Maintains a list of {@link edu.csus.ecs.pc2.core.model.Run}s.
@@ -38,17 +40,14 @@ public class RunList implements Serializable {
     private Hashtable<String, Run> runHash = new Hashtable<String, Run>(200);
 
     /**
-     * Directory where files are written
-     */
-    private String dirname = "db";
-
-    /**
      * Save runHash to disk for every update/add.
      */
     private boolean saveToDisk = false;
 
     private int nextRunNumber = 1;
 
+    private IStorage storage;
+    
     public RunList() {
         saveToDisk = false;
     }
@@ -58,27 +57,9 @@ public class RunList implements Serializable {
      * 
      * @param dirname
      */
-    private RunList(String dirname) {
-        this.dirname = dirname;
-        Utilities.insureDir(dirname);
+    public RunList(IStorage storage) {
+        this.storage = storage;
         saveToDisk = true;
-    }
-
-    /**
-     * Create list and save list to disk on update/add.
-     * 
-     * @param siteNumber
-     *            site number for this set of runs.
-     * @param saveToDisk
-     *            boolean on update/add save to disk
-     */
-    public RunList(int siteNumber, boolean saveToDisk) {
-        this("db." + siteNumber);
-        this.saveToDisk = saveToDisk;
-    }
-
-    private String getDirectoryName() {
-        return dirname;
     }
 
     /**
@@ -86,8 +67,11 @@ public class RunList implements Serializable {
      * 
      * @param run
      * @return the run now with the run number.
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    public Run addNewRun(Run run) {
+    public Run addNewRun(Run run) throws IOException, ClassNotFoundException, FileSecurityException {
         run.setNumber(nextRunNumber++);
         add(run);
         return run;
@@ -96,8 +80,11 @@ public class RunList implements Serializable {
     /**
      * Add a run into the run list, no changes.
      * @param run
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    public void add (Run run) {
+    public void add (Run run) throws IOException, ClassNotFoundException, FileSecurityException {
         runHash.put(getRunKey(run), run);
         if (saveToDisk) {
             writeToDisk();
@@ -143,8 +130,11 @@ public class RunList implements Serializable {
      * 
      * @param run
      * @return true if deleted, false if not deleted or not found.
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    public boolean delete(Run run) {
+    public boolean delete(Run run) throws IOException, ClassNotFoundException, FileSecurityException {
 
         Run fetchedRun = get(getRunKey(run));
         if (fetchedRun != null) {
@@ -158,8 +148,11 @@ public class RunList implements Serializable {
 
     /**
      * Remove all items from list.
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    public void clear() {
+    public void clear() throws IOException, ClassNotFoundException, FileSecurityException {
         runHash = new Hashtable<String, Run>(200);
         writeToDisk();
 
@@ -170,8 +163,11 @@ public class RunList implements Serializable {
      * 
      * @param run
      * @param newState
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    public void updateRunStatus(Run run, RunStates newState) {
+    public void updateRunStatus(Run run, RunStates newState) throws IOException, ClassNotFoundException, FileSecurityException {
         Run theRun = runHash.get(getRunKey(run));
         theRun.getElementId().incrementVersionNumber();
         theRun.setStatus(newState);
@@ -182,8 +178,11 @@ public class RunList implements Serializable {
     /**
      * Replace run, increment version number.
      * @param run
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    public void updateRun(Run run) {
+    public void updateRun(Run run) throws IOException, ClassNotFoundException, FileSecurityException {
         run.getElementId().incrementVersionNumber();
         runHash.put(getRunKey(run), run);
         writeToDisk();
@@ -192,8 +191,11 @@ public class RunList implements Serializable {
     /**
      * Update run, increment version number add judgement.
      * @param run
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    public void updateRun(Run run, JudgementRecord judgement, boolean manualReview) {
+    public void updateRun(Run run, JudgementRecord judgement, boolean manualReview) throws IOException, ClassNotFoundException, FileSecurityException {
         Run theRun = runHash.get(getRunKey(run));
         theRun.getElementId().incrementVersionNumber();
 
@@ -218,29 +220,24 @@ public class RunList implements Serializable {
     }
 
     private String getFileName() {
-        return getDirectoryName() + File.separator + "runlist.dat";
+        return storage.getDirectoryName() + File.separator + "runlist.dat";
     }
 
     /**
      * Write the run data to disk.
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      * 
      * @throws IOException
      * 
      */
-    private boolean writeToDisk() {
+    private boolean writeToDisk() throws IOException, ClassNotFoundException, FileSecurityException {
         if (!isSaveToDisk()) {
             return false;
         }
-
-        try {
-            return Utilities.writeObjectToFile(getFileName(), runHash);
-        } catch (Exception e) {
-            // TODO: handle exception
-            System.err.println("Exception writing RunList to disk ");
-            e.printStackTrace();
-            return false;
-        }
-
+        
+        return storage.store(getFileName(), runHash);
     }
 
     /**
@@ -248,13 +245,14 @@ public class RunList implements Serializable {
      * 
      * @throws ClassNotFoundException
      * @throws IOException
+     * @throws FileSecurityException 
      * 
      */
     @SuppressWarnings("unchecked")
-    public void loadFromDisk(int siteNumber) throws IOException, ClassNotFoundException {
+    public void loadFromDisk(int siteNumber) throws IOException, ClassNotFoundException, FileSecurityException {
         String filename = getFileName();
         if (Utilities.isFileThere(filename)) {
-            runHash = (Hashtable<String, Run>) Utilities.readObjectFromFile(filename);
+            runHash = (Hashtable<String, Run>) storage.load(filename);
             nextRunNumber = lastRunNumber(siteNumber) + 1;
         } else {
             // TODO INFO ? No files loaded, log this ?

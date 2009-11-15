@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.core;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -89,8 +90,11 @@ public class PacketHandler {
      * 
      * @param packet
      * @param connectionHandlerID
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    public void handlePacket(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
+    public void handlePacket(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException, IOException, ClassNotFoundException, FileSecurityException {
 
         Type packetType = packet.getType();
 
@@ -333,7 +337,7 @@ public class PacketHandler {
     }
 
 
-    private void handleRunUnCheckout(Packet packet, ConnectionHandlerID connectionHandlerID) {
+    private void handleRunUnCheckout(Packet packet, ConnectionHandlerID connectionHandlerID) throws IOException, ClassNotFoundException, FileSecurityException {
         Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
         ClientId whoCanceledId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
         cancelRun(packet, run, whoCanceledId, connectionHandlerID);
@@ -348,7 +352,7 @@ public class PacketHandler {
         }
     }
 
-    private void handleRunSubmissionConfirmation(Packet packet) {
+    private void handleRunSubmissionConfirmation(Packet packet) throws IOException, ClassNotFoundException, FileSecurityException {
         Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
         contest.addRun(run);
         if (isServer()) {
@@ -546,7 +550,7 @@ public class PacketHandler {
         }
     }
 
-    private void requestFetchedRun(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
+    private void requestFetchedRun(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException, IOException, ClassNotFoundException, FileSecurityException {
 
         Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
         ClientId whoRequestsRunId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
@@ -593,7 +597,7 @@ public class PacketHandler {
         }
     }
 
-    private void runAvailable(Packet packet) {
+    private void runAvailable(Packet packet) throws IOException, ClassNotFoundException, FileSecurityException {
         Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
         contest.availableRun(run);
 
@@ -602,7 +606,7 @@ public class PacketHandler {
         }
     }
 
-    private void runSubmission(Packet packet, ClientId fromId) {
+    private void runSubmission(Packet packet, ClientId fromId) throws IOException, ClassNotFoundException, FileSecurityException {
         Run submittedRun = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
         RunFiles runFiles = (RunFiles) PacketFactory.getObjectValue(packet, PacketFactory.RUN_FILES);
         Run run = contest.acceptRun(submittedRun, runFiles);
@@ -633,7 +637,7 @@ public class PacketHandler {
         }
     }
 
-    private void runRequest(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
+    private void runRequest(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException, IOException, ClassNotFoundException, FileSecurityException {
         Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
         ClientId requestFromId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
         Boolean readOnly = (Boolean) PacketFactory.getObjectValue(packet, PacketFactory.READ_ONLY);
@@ -876,7 +880,7 @@ public class PacketHandler {
         }
     }
 
-    private void acceptRunJudgement(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
+    private void acceptRunJudgement(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException, IOException, ClassNotFoundException, FileSecurityException {
 
         Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
         JudgementRecord judgementRecord = (JudgementRecord) PacketFactory.getObjectValue(packet, PacketFactory.JUDGEMENT_RECORD);
@@ -891,8 +895,11 @@ public class PacketHandler {
      * 
      * @param packet
      * @param packetType either {@link Type.RUN_CHECKOUT} or {@link Type.RUN_CHECKOUT_NOTIFICATION}
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    private void runCheckout(Packet packet, Type packetType) {
+    private void runCheckout(Packet packet, Type packetType) throws IOException, ClassNotFoundException, FileSecurityException {
 
         // Run checkout OR run re-judge checkout
         Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
@@ -927,7 +934,7 @@ public class PacketHandler {
 
     }
 
-    private void handleFetchedRun (Packet packet, ConnectionHandlerID connectionHandlerID){
+    private void handleFetchedRun (Packet packet, ConnectionHandlerID connectionHandlerID) throws IOException, ClassNotFoundException, FileSecurityException{
         Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
         RunFiles runFiles = (RunFiles) PacketFactory.getObjectValue(packet, PacketFactory.RUN_FILES);
         ClientId whoCheckedOut = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
@@ -941,8 +948,11 @@ public class PacketHandler {
      * @param packet
      * @param connectionHandlerID
      * @throws ContestSecurityException
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    private void requestRejudgeRun(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
+    private void requestRejudgeRun(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException, IOException, ClassNotFoundException, FileSecurityException {
 
         Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
         ClientId whoRequestsRunId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
@@ -1026,7 +1036,7 @@ public class PacketHandler {
 
     }
 
-    private void loginSuccess(Packet packet, ConnectionHandlerID connectionHandlerID, ClientId fromId) {
+    private void loginSuccess(Packet packet, ConnectionHandlerID connectionHandlerID, ClientId fromId) throws IOException, ClassNotFoundException, FileSecurityException {
 
         if (!contest.isLoggedIn()) {
             // Got the first LOGIN_SUCCESS, first connection into server.
@@ -1039,17 +1049,17 @@ public class PacketHandler {
                     System.err.println("FATAL ERROR - Contest Security Password is null ");
                     System.exit(44);
                 }
-
-                new FileSecurity("db." + clientId.getSiteNumber());
+                
+                FileSecurity fileSecurity = new FileSecurity("db." + clientId.getSiteNumber());
 
                 try {
-                    FileSecurity.verifyPassword(uberSecretatPassworden.toCharArray());
+                    fileSecurity.verifyPassword(uberSecretatPassworden.toCharArray());
 
                 } catch (FileSecurityException fileSecurityException) {
                     if (fileSecurityException.getMessage().equals(FileSecurity.KEY_FILE_NOT_FOUND)) {
 
                         try {
-                            FileSecurity.saveSecretKey(uberSecretatPassworden.toCharArray());
+                            fileSecurity.saveSecretKey(uberSecretatPassworden.toCharArray());
                         } catch (Exception e) {
                             StaticLog.getLog().log(Log.SEVERE, "FATAL ERROR ", e);
                             System.err.println("FATAL ERROR " + e.getMessage() + " check logs");
@@ -1066,7 +1076,7 @@ public class PacketHandler {
                     System.exit(44);
                 }
 
-                controller.setContestPassword(uberSecretatPassworden);
+                contest.setContestPassword(uberSecretatPassworden);
             }
 
             info(" handlePacket original LOGIN_SUCCESS before ");
@@ -1136,7 +1146,7 @@ public class PacketHandler {
         info(message + ".");
     }
 
-    private void updateContestClock(Packet packet) {
+    private void updateContestClock(Packet packet) throws IOException, ClassNotFoundException, FileSecurityException {
 
         ClientId who = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
         Integer siteNumber = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
@@ -1159,8 +1169,6 @@ public class PacketHandler {
                 controller.sendToRemoteServer(siteNumber, packet);
             }
 
-            controller.writeConfigToDisk();
-
         } else {
             controller.sendToTeams(packet);
             if (isServer()) {
@@ -1169,7 +1177,7 @@ public class PacketHandler {
         }
 
         if (isServer()) {
-            controller.writeConfigToDisk();
+            contest.storeConfiguration(controller.getLog());
         }
     }
 
@@ -1216,8 +1224,11 @@ public class PacketHandler {
      * 
      * @param packet
      * @throws ContestSecurityException
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    private void updateRun(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
+    private void updateRun(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException, IOException, ClassNotFoundException, FileSecurityException {
 
         Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
         JudgementRecord judgementRecord = (JudgementRecord) PacketFactory.getObjectValue(packet, PacketFactory.JUDGEMENT_RECORD);
@@ -1372,8 +1383,11 @@ public class PacketHandler {
      * Send judgement to judges, servers, admins and boards.
      * 
      * @param packet
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    private void sendJudgementUpdate(Packet packet) {
+    private void sendJudgementUpdate(Packet packet) throws IOException, ClassNotFoundException, FileSecurityException {
 
         Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
         ClientId whoModifiedRun = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
@@ -1412,8 +1426,11 @@ public class PacketHandler {
      * Update from server to everyone else.
      * 
      * @param packet
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    private void sendRunUpdateNotification(Packet packet) {
+    private void sendRunUpdateNotification(Packet packet) throws IOException, ClassNotFoundException, FileSecurityException {
 
         Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
         ClientId whoModifiedRun = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
@@ -1430,8 +1447,11 @@ public class PacketHandler {
      * Generate local accounts for forward this request to another server.
      * 
      * @param packet
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    private void generateAccounts(Packet packet) {
+    private void generateAccounts(Packet packet) throws IOException, ClassNotFoundException, FileSecurityException {
 
         ClientType.Type type = (ClientType.Type) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_TYPE);
         Integer siteNumber = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
@@ -1447,7 +1467,7 @@ public class PacketHandler {
                 Vector<Account> accountVector = contest.generateNewAccounts(type.toString(), count.intValue(), startCount.intValue(), active);
                 Account[] accounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
 
-                controller.writeConfigToDisk();
+                contest.storeConfiguration(controller.getLog());
 
                 Packet newAccountsPacket = PacketFactory.createAddSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, accounts);
                 sendToJudgesAndOthers(newAccountsPacket, true);
@@ -1469,8 +1489,11 @@ public class PacketHandler {
      * @param contestTime
      * @param sourceServerId
      * @throws ContestSecurityException
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    private void startContest(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
+    private void startContest(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException, IOException, ClassNotFoundException, FileSecurityException {
 
         ClientId who = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
         Integer siteNumber = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
@@ -1502,7 +1525,7 @@ public class PacketHandler {
         }
 
         if (isServer()) {
-            controller.writeConfigToDisk();
+            contest.storeConfiguration(controller.getLog());
         }
     }
 
@@ -1511,8 +1534,11 @@ public class PacketHandler {
      * 
      * @param connectionHandlerID
      * @throws ContestSecurityException
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    private void stopContest(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
+    private void stopContest(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException, IOException, ClassNotFoundException, FileSecurityException {
         ClientId who = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
         Integer siteNumber = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
         if (packet.getType().equals(Type.STOP_ALL_CLOCKS)) {
@@ -1544,7 +1570,7 @@ public class PacketHandler {
         }
 
         if (isServer()) {
-            controller.writeConfigToDisk();
+            contest.storeConfiguration(controller.getLog());
         }
     }
 
@@ -1558,8 +1584,11 @@ public class PacketHandler {
      * Add a new setting from another server.
      * 
      * @param packet
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    private void addNewSetting(Packet packet) {
+    private void addNewSetting(Packet packet) throws IOException, ClassNotFoundException, FileSecurityException {
 
         boolean sendToTeams = false;
 
@@ -1692,7 +1721,7 @@ public class PacketHandler {
 
         if (isServer()) {
             
-            controller.writeConfigToDisk();
+            contest.storeConfiguration(controller.getLog());
             
             boolean sendToOtherServers = isThisSite(packet.getSourceId().getSiteNumber());
 
@@ -1712,8 +1741,11 @@ public class PacketHandler {
      * Handle a UPDATE_SETTING packet.
      * 
      * @param packet
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    private void updateSetting(Packet packet) {
+    private void updateSetting(Packet packet) throws IOException, ClassNotFoundException, FileSecurityException {
 
         boolean sendToTeams = false;
         
@@ -1833,7 +1865,7 @@ public class PacketHandler {
 
         if (isServer()) {
 
-            controller.writeConfigToDisk();
+            contest.storeConfiguration(controller.getLog());
             
             boolean sendToOtherServers = isThisSite(packet.getSourceId().getSiteNumber());
             
@@ -1909,7 +1941,7 @@ public class PacketHandler {
         return id.getClientType().equals(ClientType.Type.ADMINISTRATOR);
     }
 
-    public void cancelRun(Packet packet, Run run, ClientId whoCanceledRun, ConnectionHandlerID connectionHandlerID) {
+    public void cancelRun(Packet packet, Run run, ClientId whoCanceledRun, ConnectionHandlerID connectionHandlerID) throws IOException, ClassNotFoundException, FileSecurityException {
 
         if (isServer()) {
 
@@ -1957,8 +1989,11 @@ public class PacketHandler {
      * @param packet
      * @param connectionHandlerID
      * @throws ContestSecurityException
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    public void cancelClarificationCheckOut(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
+    public void cancelClarificationCheckOut(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException, IOException, ClassNotFoundException, FileSecurityException {
         Clarification clarification = (Clarification) PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION);
         ClientId whoCancelledIt = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
 
@@ -1991,7 +2026,7 @@ public class PacketHandler {
         }
     }
 
-    private void sendClarificationAvailable(Packet packet) {
+    private void sendClarificationAvailable(Packet packet) throws IOException, ClassNotFoundException, FileSecurityException {
         Clarification clarification = (Clarification) PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION);
         ClientId whoCancelledIt = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
 
@@ -2049,9 +2084,12 @@ public class PacketHandler {
      * @param whoJudgedId
      * @param connectionHandlerID
      * @throws ContestSecurityException
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
     protected void judgeRun(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles, 
-            ClientId whoJudgedId, ConnectionHandlerID connectionHandlerID, Packet packet) throws ContestSecurityException {
+            ClientId whoJudgedId, ConnectionHandlerID connectionHandlerID, Packet packet) throws ContestSecurityException, IOException, ClassNotFoundException, FileSecurityException {
 
         if (isServer()) {
 
@@ -2144,12 +2182,16 @@ public class PacketHandler {
      * @param run
      * @param whoRequestsRunId
      * @throws ContestSecurityException
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    private void requestRun(Packet packet, Run run, ClientId whoRequestsRunId, ConnectionHandlerID connectionHandlerID, boolean computerJudge) throws ContestSecurityException {
+    private void requestRun(Packet packet, Run run, ClientId whoRequestsRunId, ConnectionHandlerID connectionHandlerID, boolean computerJudge) throws ContestSecurityException, IOException,
+            ClassNotFoundException, FileSecurityException {
         checkoutRun(packet, run, whoRequestsRunId, false, computerJudge, connectionHandlerID);
     }
     
-    private void requestClarification(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
+    private void requestClarification(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException, IOException, ClassNotFoundException, FileSecurityException {
         ElementId clarificationId = (ElementId) PacketFactory.getObjectValue(packet, PacketFactory.REQUESTED_CLARIFICATION_ELEMENT_ID);
         ClientId requestFromId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
         // Boolean readOnly = (Boolean) PacketFactory.getObjectValue(packet, PacketFactory.READ_ONLY);
@@ -2225,8 +2267,12 @@ public class PacketHandler {
      *            get a read only copy (aka do not checkout/select run).
      * @param connectionHandlerID
      * @throws ContestSecurityException
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    private void checkoutRun(Packet packet, Run run, ClientId whoRequestsRunId, boolean readOnly, boolean computerJudge, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
+    private void checkoutRun(Packet packet, Run run, ClientId whoRequestsRunId, boolean readOnly, boolean computerJudge, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException,
+            IOException, ClassNotFoundException, FileSecurityException {
 
         if (isServer()) {
 
@@ -2654,8 +2700,11 @@ public class PacketHandler {
      * <ol>
      * 
      * @param packet
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    private void loadDataIntoModel(Packet packet, ConnectionHandlerID connectionHandlerID) {
+    private void loadDataIntoModel(Packet packet, ConnectionHandlerID connectionHandlerID) throws IOException, ClassNotFoundException, FileSecurityException {
 
         ClientId clientId = null;
 

@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core.util;
 
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.Vector;
 
@@ -18,6 +19,7 @@ import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
+import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.security.Permission;
 
 /**
@@ -42,7 +44,7 @@ public class BalloonHandlerTest extends TestCase {
         super.tearDown();
     }
 
-    public void testOne() {
+    public void testOne() throws IOException, ClassNotFoundException, FileSecurityException {
 
         IInternalContest contest;
         IInternalController controller;
@@ -111,8 +113,11 @@ public class BalloonHandlerTest extends TestCase {
 
     /**
      * Test whether BN respects the isSentToTeam flag.
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    public void testNotifyFlag() {
+    public void testNotifyFlag() throws IOException, ClassNotFoundException, FileSecurityException {
 
         IInternalContest contest;
         IInternalController controller;
@@ -206,7 +211,7 @@ public class BalloonHandlerTest extends TestCase {
 
     }
 
-    public void testBalloonList() {
+    public void testBalloonList() throws IOException, ClassNotFoundException, FileSecurityException {
 
         IInternalContest contest;
         IInternalController controller;

@@ -5,9 +5,11 @@ import java.io.IOException;
 import java.util.Date;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.IStorage;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.packet.Packet;
+import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
@@ -43,22 +45,16 @@ public class PacketArchiver implements UIPlugin {
     private IInternalController controller;
     
     private String lastArchiveFilename;
-
-    /**
-     * Default constructor.
-     */
-    public PacketArchiver() {
-        outputDirectoryName = getPC2BaseDirectory() + File.separator + outputDirectoryName;
-        Utilities.insureDir(outputDirectoryName);
-    }
+    
+    private IStorage storage;
 
     /**
      * 
      * @param outputDirectroryName
      */
-    public PacketArchiver(String outputDirectroryName) {
-        this.outputDirectoryName = outputDirectroryName;
+    public PacketArchiver(IStorage storage, String outputDirectroryName) {
         Utilities.insureDir(outputDirectroryName);
+        this.storage = storage;
     }
     
     public int packetsWritten (){
@@ -86,8 +82,10 @@ public class PacketArchiver implements UIPlugin {
      * @param packet
      * @return if the packet can be saved return true, otherwise false
      * @throws IOException 
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
      */
-    public boolean writeNextPacket(Packet packet) throws IOException {
+    public boolean writeNextPacket(Packet packet) throws IOException, ClassNotFoundException, FileSecurityException {
         lastArchiveFilename = outputDirectoryName + File.separator + "packet" + serialNumber + "." + nextPacketNumber + ".packet";
         boolean wasWritten = savePacket(lastArchiveFilename, packet);
         nextPacketNumber ++;
@@ -101,13 +99,14 @@ public class PacketArchiver implements UIPlugin {
      * @return the packet
      * @throws ClassNotFoundException 
      * @throws IOException 
+     * @throws FileSecurityException 
      */
-    public Packet loadPacket(String filename) throws IOException, ClassNotFoundException {
+    public Packet loadPacket(String filename) throws IOException, ClassNotFoundException, FileSecurityException {
         if (!Utilities.isFileThere(filename)) {
             return null;
         }
 
-        Object object = Utilities.readObjectFromFile(filename);
+        Object object = storage.load(filename);
         return (Packet) object;
     }
 
@@ -118,9 +117,11 @@ public class PacketArchiver implements UIPlugin {
      * @param packet
      * @return if the file could be written to disk return true, otherwise return false
      * @throws IOException
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
      */
-    public boolean savePacket(String filename, Packet packet) throws IOException {
-        return Utilities.writeObjectToFile(filename, packet);
+    public boolean savePacket(String filename, Packet packet) throws IOException, ClassNotFoundException, FileSecurityException {
+        return storage.store(filename, packet);
     }
 
     /**

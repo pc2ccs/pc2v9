@@ -22,7 +22,6 @@ import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ClientType;
-import edu.csus.ecs.pc2.core.model.ConfigurationIO;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
@@ -35,7 +34,6 @@ import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.LoginEvent;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
-import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunExecutionStatus;
 import edu.csus.ecs.pc2.core.model.RunFiles;
@@ -202,7 +200,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     private boolean usingMainUI = true;
 
-    private PacketArchiver packetArchiver = new PacketArchiver();
+    private PacketArchiver packetArchiver = null;
 
     // TODO change this to UIPlugin
     /*
@@ -222,8 +220,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      * Is this a server module.
      */
     private boolean serverModule = false;
-
-    private ConfigurationIO configurationIO = new ConfigurationIO(1);
 
     /**
      * Load and Save configuration to disk
@@ -252,8 +248,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      */
     private int securityLevel = SECURITY_HIGH_LEVEL;
 
-    private String contestPassword = null;
-    
     /**
      * Flag indicating whether Roman Numeral shutdown is done.
      * 
@@ -748,32 +742,35 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
     }
 
-    public void initializeServer() {
+    public void initializeServer() throws IOException, ClassNotFoundException, FileSecurityException {
 
         if (contest.getSites().length == 0) {
 
             if (contest.getSiteNumber() == 0) {
                 contest.setSiteNumber(1);
                 info("initializeServer STARTED this site as Site 1");
-                new FileSecurity("db.1");
+                
+                FileSecurity fileSecurity = new FileSecurity("db.1");
+                contest.setStorage (fileSecurity);
+                packetArchiver = new PacketArchiver(fileSecurity, "packets");
 
-                if (contestPassword == null) {
+                if (contest.getContestPassword() == null) {
                     String password = JOptionPane.showInputDialog(null, "Enter Contest Password");
                     if (password == null || password.trim().length() == 0) {
                         JOptionPane.showMessageDialog(null, "You must supply a password, exiting.");
                         System.exit(44);
                     }
-                    contestPassword = password;
+                    contest.setContestPassword(password);
                 }
 
                 try {
-                    FileSecurity.verifyPassword(contestPassword.toCharArray());
+                    fileSecurity.verifyPassword(contest.getContestPassword().toCharArray());
 
                 } catch (FileSecurityException fileSecurityException) {
                     if (fileSecurityException.getMessage().equals(FileSecurity.KEY_FILE_NOT_FOUND)) {
 
                         try {
-                            FileSecurity.saveSecretKey(contestPassword.toCharArray());
+                            fileSecurity.saveSecretKey(contest.getContestPassword().toCharArray());
                         } catch (Exception e) {
                             StaticLog.getLog().log(Log.SEVERE, "FATAL ERROR ", e);
                             System.err.println("FATAL ERROR " + e.getMessage() + " check logs");
@@ -794,7 +791,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 }
             }
         }
-
+        
         boolean loadedConfiguration = readConfigFromDisk(contest.getSiteNumber());
 
         if (!loadedConfiguration) {
@@ -818,7 +815,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             }
 
             info("initialized controller Site " + contest.getSiteNumber());
-            writeConfigToDisk();
+            contest.storeConfiguration(getLog());
         } else {
             if (saveCofigurationToDisk) {
                 contest.initializeSubmissions(contest.getSiteNumber());
@@ -899,7 +896,18 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     private ClientId authenticateFirstServer(int siteNum, String password) {
 
-        initializeServer();
+        try {
+            initializeServer();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (FileSecurityException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
         int newSiteNumber = getServerSiteNumber(siteNum, password);
 
@@ -1483,7 +1491,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      */
     private void sendLoginSuccess(ClientId clientId, ConnectionHandlerID connectionHandlerID) {
 
-        sendToClient(packetHandler.createLoginSuccessPacket(clientId, contestPassword));
+        sendToClient(packetHandler.createLoginSuccessPacket(clientId, contest.getContestPassword()));
     }
 
     public void connectionEstablished(ConnectionHandlerID connectionHandlerID) {
@@ -1497,8 +1505,11 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * Connection to client lost.
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    public void connectionDropped(ConnectionHandlerID connectionHandlerID) {
+    public void connectionDropped(ConnectionHandlerID connectionHandlerID)  {
 
         getLog().log(Log.INFO, "connection Dropped for " + connectionHandlerID, new Exception("connection Dropped for " + connectionHandlerID));
         ClientId clientId = contest.getLoginClientId(connectionHandlerID);
@@ -1521,12 +1532,23 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         // else nothing to do.
     }
 
-    protected void cancelAllClarsByThisJudge(ClientId judgeId) throws ContestSecurityException {
+    protected void cancelAllClarsByThisJudge(ClientId judgeId) throws ContestSecurityException{
         Clarification[] clars = contest.getClarifications();
         for (int i = 0; i < clars.length; i++) {
             if ((clars[i].getState() == ClarificationStates.BEING_ANSWERED) && (clars[i].getWhoCheckedItOutId().equals(judgeId))) {
                 Packet packet = PacketFactory.createUnCheckoutClarification(contest.getClientId(), getServerClientId(), clars[i]);
-                packetHandler.cancelClarificationCheckOut(packet, null);
+                try {
+                    packetHandler.cancelClarificationCheckOut(packet, null);
+                } catch (IOException e) {
+                    // TODO dal Auto-generated catch block
+                    e.printStackTrace();
+                } catch (ClassNotFoundException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (FileSecurityException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -1536,20 +1558,34 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      * 
      * @param judgeId
      * @throws ContestSecurityException
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
     protected void cancellAll(ClientId judgeId) throws ContestSecurityException {
         cancelAllRunsByThisJudge(judgeId);
         cancelAllClarsByThisJudge(judgeId);
     }
 
-    protected void cancelAllRunsByThisJudge(ClientId judgeId) {
+    protected void cancelAllRunsByThisJudge(ClientId judgeId)  {
         ElementId[] runIDs = contest.getRunIdsCheckedOutBy(judgeId);
         for (int i = 0; i < runIDs.length; i++) {
             Run run = contest.getRun(runIDs[i]);
             if (run.getStatus().equals(RunStates.BEING_JUDGED)) {
                 ClientId destinationId = new ClientId(run.getSiteNumber(), Type.SERVER, 0);
                 Packet packet = PacketFactory.createUnCheckoutRun(judgeId, destinationId, run, judgeId);
-                packetHandler.cancelRun(packet, run, judgeId, null);
+                try {
+                    packetHandler.cancelRun(packet, run, judgeId, null);
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (ClassNotFoundException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (FileSecurityException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -1899,7 +1935,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 System.err.println("No contest password found after " + CONTEST_PASSWORD_OPTION);
                 System.exit(44);
             }
-            setContestPassword(newContestPassword);
+            contest.setContestPassword(newContestPassword);
         }
 
         for (String arg : stringArray) {
@@ -2140,17 +2176,34 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     /**
      * Add a new site into contest, send update to other servers.
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
     public void addNewSite(Site site) {
         if (isServer()) {
             contest.addSite(site);
-            writeConfigToDisk();
-            Packet packet = PacketFactory.createAddSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, site);
-            sendToServers(packet);
+            try {
+                contest.storeConfiguration(getLog());
+                
+                Packet packet = PacketFactory.createAddSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, site);
+                sendToServers(packet);
 
-            sendToJudges(packet);
-            sendToAdministrators(packet);
-            sendToScoreboards(packet);
+                sendToJudges(packet);
+                sendToAdministrators(packet);
+                sendToScoreboards(packet);
+                
+            } catch (IOException e) {
+                // TODO dal Auto-generated catch block
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                // TODO dal Auto-generated catch block
+                e.printStackTrace();
+            } catch (FileSecurityException e) {
+                // TODO dal Auto-generated catch block
+                e.printStackTrace();
+            }
+ 
         } else {
             Packet packet = PacketFactory.createAddSetting(contest.getClientId(), getServerClientId(), site);
             sendToLocalServer(packet);
@@ -2244,17 +2297,31 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         this.uiPlugin = uiPlugin;
     }
 
-    public void updateSite(Site site) {
+    public void updateSite(Site site)  {
 
         if (isServer()) {
             contest.changeSite(site);
-            writeConfigToDisk();
-            Packet packet = PacketFactory.createUpdateSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, site);
-            sendToServers(packet);
+            try {
+                contest.storeConfiguration(getLog());
 
-            sendToJudges(packet);
-            sendToAdministrators(packet);
-            sendToScoreboards(packet);
+                Packet packet = PacketFactory.createUpdateSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, site);
+                sendToServers(packet);
+
+                sendToJudges(packet);
+                sendToAdministrators(packet);
+                sendToScoreboards(packet);
+                
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (FileSecurityException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
         } else {
             Packet packet = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), site);
             sendToLocalServer(packet);
@@ -2466,41 +2533,14 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     public boolean readConfigFromDisk(int siteNum) {
 
         boolean loadedConfiguration = false;
-
         if (saveCofigurationToDisk) {
-            loadedConfiguration = configurationIO.loadFromDisk(siteNum, contest, getLog());
-            contest.initializeSubmissions(siteNum);
-            // Initialize contest time if necessary
-            ContestTime contestTime = contest.getContestTime(siteNum);
-            if (contestTime == null) {
-                contestTime = new ContestTime(siteNum);
-                contest.addContestTime(contestTime);
-            }
-            if (contest.getProfile() == null){
-                contest.setProfile(createNewProfile());
-            }
+            loadedConfiguration = contest.readConfiguration(siteNum, getLog());
         }
-
         return loadedConfiguration;
     }
 
-    private Profile createNewProfile() {
-        Profile profile = new Profile("Contest");
-        profile.setDescription("(No description, yet)");
-        return profile;
-    }
+   
 
-    public void writeConfigToDisk() {
-
-        if (saveCofigurationToDisk) {
-            try {
-                configurationIO.saveToDisk(contest, getLog());
-            } catch (IOException e) {
-                System.err.println("Unable to write configuration to disk " + e.getMessage());
-                getLog().log(Log.SEVERE, "Error logging to disk ", e);
-            }
-        }
-    }
 
     public void addNewClientSettings(ClientSettings clientSettings) {
         Packet addClientSettingsPacket = PacketFactory.createAddSetting(contest.getClientId(), getServerClientId(), clientSettings);
@@ -2585,14 +2625,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         sendToLocalServer(securityMessagePacket);
     }
 
-    public String getContestPassword() {
-        return contestPassword;
-    }
-
-    public void setContestPassword(String contestPassword) {
-        this.contestPassword = contestPassword;
-    }
-
     public String getHostContacted() {
         return remoteHostName;
     }
@@ -2601,7 +2633,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         return remoteHostPort;
     }
 
-    public void fetchRun(Run run) {
+    public void fetchRun(Run run) throws IOException, ClassNotFoundException, FileSecurityException {
         
         RunFiles runFiles = contest.getRunFiles(run);
         if (runFiles != null){
@@ -2644,4 +2676,5 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         Packet sendPacket = PacketFactory.createResetAllSitesPacket(contest.getClientId(), getServerClientId(), clientResettingContest, eraseProblems, eraseLanguages);
         sendToLocalServer(sendPacket);
     }
+
 }

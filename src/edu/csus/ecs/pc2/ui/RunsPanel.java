@@ -48,6 +48,7 @@ import edu.csus.ecs.pc2.core.model.RunUtilities;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.report.ExtractRuns;
+import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.ui.EditFilterPane.ListNames;
@@ -1277,6 +1278,12 @@ public class RunsPanel extends JPanePlugin {
                 updateRunCount (extractCount, totalRows);
                 
             } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (FileSecurityException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }

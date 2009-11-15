@@ -1,5 +1,7 @@
 package edu.csus.ecs.pc2.core;
 
+import java.io.IOException;
+
 import edu.csus.ecs.pc2.core.exception.ContestSecurityException;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -21,6 +23,7 @@ import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.packet.Packet;
+import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
 /**
@@ -32,17 +35,13 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
  * 
  * public static void main(String[] args) {<br>
  * <br>
- * <blockquote>
- * IInternalContest contest = new InternalContest();<br>
+ * <blockquote> IInternalContest contest = new InternalContest();<br>
  * IInternalController controller = new InternalController (contest);<br>
- * String serverArgs = "--server";
- * controller.start(serverArgs);<br>
- * </blockquote>
- * } <br>
+ * String serverArgs = "--server"; controller.start(serverArgs);<br>
+ * </blockquote> } <br>
  * <P>
  * 
- * To start a client: 
- * <code>
+ * To start a client: <code>
  * public static void main(String[] args) {<br>
  * <blockquote>
  *      <br>
@@ -62,6 +61,7 @@ public interface IInternalController {
 
     /**
      * Submit a run to the server.
+     * 
      * @param problem
      * @param language
      * @param filename
@@ -75,69 +75,78 @@ public interface IInternalController {
 
     /**
      * Send to client (or server), if necessary forward to another server.
+     * 
      * @param confirmPacket
      */
     void sendToClient(Packet confirmPacket);
 
     /**
      * Send to all logged in servers.
+     * 
      * @param packet
      */
     void sendToServers(Packet packet);
-    
+
     /**
      * Send to a remote server.
+     * 
      * @param siteNumber
      * @param packet
      */
-    void sendToRemoteServer (int siteNumber, Packet packet);
+    void sendToRemoteServer(int siteNumber, Packet packet);
 
     /**
      * Send to all judges on local site.
+     * 
      * @param packet
      */
     void sendToJudges(Packet packet);
 
     /**
      * Send to all administrators on local site.
+     * 
      * @param packet
      */
     void sendToAdministrators(Packet packet);
 
     /**
      * Send to all scoreboard on local site.
+     * 
      * @param packet
      */
     void sendToScoreboards(Packet packet);
 
     /**
      * Send to all teams on local site.
+     * 
      * @param packet
      */
     void sendToTeams(Packet packet);
 
     /**
      * Send to all spectator/API clients
+     * 
      * @param packet
      */
     void sendToSpectators(Packet packet);
 
-    
     /**
      * Start InternalController with command line arguments.
+     * 
      * @param stringArray
      */
     void start(String[] stringArray);
 
     /**
      * Login to server, start MainUI.
+     * 
      * @param loginName
      * @param password
      */
     void login(String loginName, String password);
-    
+
     /**
-     * Login to server, wait for login 
+     * Login to server, wait for login
      * 
      * @param loginName
      * @param password
@@ -145,10 +154,10 @@ public interface IInternalController {
      * @throws Exception
      */
     IInternalContest clientLogin(IInternalContest internalContest, String loginName, String password) throws Exception;
-    
+
     /**
      * Logoff a client.
-     *
+     * 
      * Logs this client off, or sends request to log client off.
      * 
      * @param clientId
@@ -157,56 +166,66 @@ public interface IInternalController {
 
     /**
      * Start the UI for the input client.
+     * 
      * @param clientId
      */
     void startMainUI(ClientId clientId);
-    
+
     /**
      * Request a run from the server.
-     * @param run - the run to retrieve
-     * @param readOnly - do not check out run just fetch the run.
-     * @param computerJudge - is this a computer judger
+     * 
+     * @param run
+     *            - the run to retrieve
+     * @param readOnly
+     *            - do not check out run just fetch the run.
+     * @param computerJudge
+     *            - is this a computer judger
      */
-    void checkOutRun (Run run, boolean readOnly, boolean computerJudge);
-    
+    void checkOutRun(Run run, boolean readOnly, boolean computerJudge);
+
     /**
      * Request to checkout a judged run, to rejudge the run.
+     * 
      * @param theRun
      */
     void checkOutRejudgeRun(Run theRun);
-    
+
     /**
      * Submit judgement from run to judge.
+     * 
      * @param run
      * @param judgementRecord
      */
-    void submitRunJudgement (Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles);
-    
+    void submitRunJudgement(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles);
+
     /**
      * Cancel selected run.
+     * 
      * @param run
      */
-    void cancelRun (Run run);
-    
-    void addNewSite (Site site);
-    
+    void cancelRun(Run run);
+
+    void addNewSite(Site site);
+
     void addNewProblem(Problem problem, ProblemDataFiles problemDataFiles);
 
     void addProblem(Problem problem);
 
     /**
      * Add a new Judgement.
+     * 
      * @param judgement
      */
     void addNewJudgement(Judgement judgement);
-    
+
     /**
      * Replace judgement list with new judgement list.
+     * 
      * @param judgementList
      */
-    void setJudgementList (Judgement [] judgementList);
+    void setJudgementList(Judgement[] judgementList);
 
-    void removeJudgement (Judgement judgement);
+    void removeJudgement(Judgement judgement);
 
     void updateRun(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles);
 
@@ -215,23 +234,27 @@ public interface IInternalController {
     void updateSite(Site newSite);
 
     void updateProblem(Problem problem);
-    
+
     void updateProblem(Problem problem, ProblemDataFiles problemDataFiles);
-    
-    ProblemDataFiles getProblemDataFiles (Problem problem);
+
+    ProblemDataFiles getProblemDataFiles(Problem problem);
 
     /**
      * Get contest log.
+     * 
      * @return
      */
     Log getLog();
-    
+
     /**
      * Send message to server that needs attention/resolution.
      * 
-     * @param event optional event
-     * @param message message about the event/circumstances.
-     * @param contestSecurityException optional exception
+     * @param event
+     *            optional event
+     * @param message
+     *            message about the event/circumstances.
+     * @param contestSecurityException
+     *            optional exception
      */
     void sendSecurityMessage(String event, String message, ContestSecurityException contestSecurityException);
 
@@ -239,15 +262,17 @@ public interface IInternalController {
      * Generate new accounts on a server.
      * 
      * @param clientTypeName
-     * @param siteNumber site number to generate accounts.
+     * @param siteNumber
+     *            site number to generate accounts.
      * @param count
      * @param startNumber
      * @param active
      */
     void generateNewAccounts(String clientTypeName, int siteNumber, int count, int startNumber, boolean active);
-    
+
     /**
      * Generate new accounts for current site.
+     * 
      * @param clientTypeName
      * @param count
      * @param startNumber
@@ -257,30 +282,34 @@ public interface IInternalController {
 
     /**
      * Submit a clarification.
+     * 
      * @param problem
      * @param question
      */
     void submitClarification(Problem problem, String question);
-    
+
     /**
      * Request clarification to answer.
+     * 
      * @param clarification
      * @param readOnly
      */
-    void checkOutClarification (Clarification clarification, boolean readOnly);
-    
+    void checkOutClarification(Clarification clarification, boolean readOnly);
+
     /**
      * Cancel requested clarification.
+     * 
      * @param clarification
      */
-    void cancelClarification (Clarification clarification);
-    
+    void cancelClarification(Clarification clarification);
+
     /**
      * Answer a clarification.
+     * 
      * @param clarification
      */
-    void submitClarificationAnswer (Clarification clarification);
-    
+    void submitClarificationAnswer(Clarification clarification);
+
     /**
      * Force connection off.
      * 
@@ -289,56 +318,58 @@ public interface IInternalController {
      * @param connectionHandlerID
      */
     void forceConnectionDrop(ConnectionHandlerID connectionHandlerID);
-    
-    void updateClientSettings (ClientSettings clientSettings);
-    
-    void updateContestInformation (ContestInformation contestInformation);
-    
-    void removeLogin (ClientId clientId);
+
+    void updateClientSettings(ClientSettings clientSettings);
+
+    void updateContestInformation(ContestInformation contestInformation);
+
+    void removeLogin(ClientId clientId);
 
     void requestChangePassword(String oldPassword, String newPassword);
-    
+
     /**
      * Remove connection from connection list.
      */
     void removeConnection(ConnectionHandlerID connectionHandlerID);
-    
+
     void shutdownTransport();
-    
-    void startContest (int inSiteNumber);
-    
-    void stopContest (int inSiteNumber);
-    
+
+    void startContest(int inSiteNumber);
+
+    void stopContest(int inSiteNumber);
+
     void startAllContestTimes();
-    
+
     void stopAllContestTimes();
 
     void addNewLanguage(Language language);
-    
+
     void updateLanguage(Language language);
 
     void addNewGroup(Group group);
-    
+
     void updateGroup(Group group);
 
-    void addNewAccount (Account account);
-    
-    void addNewAccounts (Account [] account);
-    
-    void updateAccount (Account account);
-    
-    void updateAccounts (Account [] account);
-    
-    void writeConfigToDisk ();
+    void addNewAccount(Account account);
+
+    void addNewAccounts(Account[] account);
+
+    void updateAccount(Account account);
+
+    void updateAccounts(Account[] account);
 
     void addNewBalloonSettings(BalloonSettings newBalloonSettings);
 
     void updateBalloonSettings(BalloonSettings newBalloonSettings);
 
     /**
-     * Load contest settings from disk and initialize InternalContest. 
+     * Load contest settings from disk and initialize InternalContest.
+     * 
+     * @throws FileSecurityException
+     * @throws ClassNotFoundException
+     * @throws IOException
      */
-    void initializeServer();
+    void initializeServer() throws IOException, ClassNotFoundException, FileSecurityException;
 
     void addNewClientSettings(ClientSettings newClientSettings);
 
@@ -347,22 +378,14 @@ public interface IInternalController {
     /**
      * Get Security Level.
      * 
-     * @return curent security level
+     * @return current security level
      */
     int getSecurityLevel();
-    
+
     void setSecurityLevel(int securityLevel);
 
-    /**
-     * 
-     * @return contest password
-     */
-    String getContestPassword();
-
-    void setContestPassword(String contestPassword);
-    
     void sendToLocalServer(Packet packet);
-    
+
     /**
      * Get name of host contacted.
      * 
@@ -371,11 +394,12 @@ public interface IInternalController {
      * @return name of host server
      */
     String getHostContacted();
-    
+
     /**
      * Get port number of host contacted.
      * 
      * On server, gets port where listening.
+     * 
      * @return
      */
     int getPortContacted();
@@ -383,13 +407,15 @@ public interface IInternalController {
     /**
      * Gets a run from the server.
      * 
-     * Does not checkout run, simply requests the run info.
-     * Security note: only a non-team client can request runs.
+     * Does not checkout run, simply requests the run info. Security note: only a non-team client can request runs.
      * 
      * @param run
+     * @throws FileSecurityException
+     * @throws ClassNotFoundException
+     * @throws IOException
      */
-    void fetchRun(Run run);
-    
+    void fetchRun(Run run) throws IOException, ClassNotFoundException, FileSecurityException;
+
     /**
      * Send a compiling message to the Server.
      * 
@@ -399,16 +425,18 @@ public interface IInternalController {
 
     /**
      * Send a executing message to the Server.
+     * 
      * @param run
      */
     void sendExecutingMessage(Run run);
 
     /**
      * Send a validating message to the Server.
+     * 
      * @param run
      */
     void sendValidatingMessage(Run run);
-    
+
     boolean isClientAutoShutdown();
 
     void setClientAutoShutdown(boolean clientAutoShutdown);

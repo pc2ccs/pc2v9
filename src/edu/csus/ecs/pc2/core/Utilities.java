@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.io.Serializable;
 import java.text.CharacterIterator;
 import java.text.DateFormat;
 import java.text.StringCharacterIterator;
@@ -14,8 +13,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.Vector;
-
-import edu.csus.ecs.pc2.core.security.FileSecurity;
 
 /**
  * Various common routines.
@@ -65,15 +62,15 @@ public final class Utilities {
      * @throws ClassNotFoundException
      * @throws IOException
      */
-    public static Object readObjectFromFile(String filename)
-            throws IOException, ClassNotFoundException {
-        
-        try {
-            return FileSecurity.readSealedFile(filename);
-        } catch (Exception e) {
-            throw new IOException(e.getMessage());
-        }
-    }
+//    public static Object readObjectFromFile(String filename)
+//            throws IOException, ClassNotFoundException {
+//        
+//        try {
+//            return FileSecurity.readSealedFile(filename);
+//        } catch (Exception e) {
+//            throw new IOException(e.getMessage());
+//        }
+//    }
 
     /**
      *
@@ -82,15 +79,15 @@ public final class Utilities {
      * @return true, otherwise throws an exception
      * @throws IOException
      */
-    public static boolean writeObjectToFile(String filename,
-            Serializable serializable) throws IOException {
-        try {
-            FileSecurity.writeSealedFile(filename, serializable);
-        } catch (Exception e) {
-            throw new IOException(e.getMessage());
-        }
-        return true;
-    }
+//    public static boolean writeObjectToFile(String filename,
+//            Serializable serializable) throws IOException {
+//        try {
+//            FileSecurity.writeSealedFile(filename, serializable);
+//        } catch (Exception e) {
+//            throw new IOException(e.getMessage());
+//        }
+//        return true;
+//    }
 
     /**
      *

@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core.controller;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 
@@ -26,6 +27,7 @@ import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.SiteTest;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.security.FileSecurityException;
 
 /**
  * Single run through the system test.
@@ -231,7 +233,7 @@ public class RunFlowTest extends TestCase {
 //        controllerOne.setContestTime(contestTime);
     }
     
-    public void testOneRun() {
+    public void testOneRun() throws IOException, ClassNotFoundException, FileSecurityException {
         Account account = contestOne.getAccounts(Type.TEAM).firstElement();
         ClientId teamId = account.getClientId();
 

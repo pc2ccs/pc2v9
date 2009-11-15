@@ -1,12 +1,14 @@
 package edu.csus.ecs.pc2.core.list;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 
-import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.IStorage;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
+import edu.csus.ecs.pc2.core.security.FileSecurityException;
 
 /**
  * Access to submitted files (@link edu.csus.ecs.pc2.core.model.RunFiles}
@@ -55,10 +57,7 @@ public class RunFilesList implements Serializable {
      */
     private HashMap<String, RunFiles> runFilesHash = new HashMap<String, RunFiles>();
 
-    /**
-     * Directory where files are written
-     */
-    private String dirname = "db";
+    private IStorage storage;
 
     /**
      * Create run files list which are cached in memory.
@@ -78,19 +77,9 @@ public class RunFilesList implements Serializable {
      * 
      * @param dirname
      */
-    public RunFilesList(String dirname) {
-        this.dirname = dirname;
-        Utilities.insureDir(dirname);
+    public RunFilesList(IStorage storage) {
+        this.storage = storage;
         writeToDisk = true;
-    }
-
-    /**
-     * Create list of runfiles, write and read files off disk.
-     * 
-     * @param dirname
-     */
-    public RunFilesList(int siteNumber) {
-        this("db." + siteNumber);
     }
 
     /**
@@ -113,7 +102,7 @@ public class RunFilesList implements Serializable {
      * @return directory where RunFiles are stored.
      */
     public String getDirectoryName() {
-        return dirname;
+        return storage.getDirectoryName();
     }
 
     private String getFileName(int siteNumber, int runNumber) {
@@ -128,18 +117,11 @@ public class RunFilesList implements Serializable {
         return "s" + siteNumber + "r" + runNumber;
     }
 
-    public RunFiles add(Run run, RunFiles runFiles) {
+    public RunFiles add(Run run, RunFiles runFiles) throws IOException, ClassNotFoundException, FileSecurityException {
         if (writeToDisk) {
             String filename = getFileName(run);
-            try {
-                Utilities.writeObjectToFile(filename, runFiles);
-                return runFiles;
-            } catch (Exception e) {
-                // TODO log could not write object to file.
-                System.err.println("Unable to write file " + filename);
-                e.printStackTrace();
-                return null;
-            }
+            storage.store(filename, runFiles);
+            return runFiles;
         } else if (cacheRunFiles) {
 
             // Add to cache
@@ -154,22 +136,12 @@ public class RunFilesList implements Serializable {
         }
     }
 
-    private RunFiles getRunFiles(int siteNumber, int runNumber) {
-
-        // TODO need to throw an exception instead of capturing exception and printing
-        // to stdout
+    private RunFiles getRunFiles(int siteNumber, int runNumber) throws IOException, ClassNotFoundException, FileSecurityException {
 
         if (writeToDisk) {
             String filename = getFileName(siteNumber, runNumber);
-            try {
-                Object obj = Utilities.readObjectFromFile(filename);
-                return (RunFiles) obj;
-            } catch (Exception e) {
-                // TODO log info - could not read RunFiles from disk.
-                System.err.println("Unable to read object from file " + filename);
-                e.printStackTrace();
-                return null;
-            }
+            Object obj = storage.load(filename);
+            return (RunFiles) obj;
         } else if (cacheRunFiles) {
 
             String key = getRunKey(siteNumber, runNumber);
@@ -189,8 +161,11 @@ public class RunFilesList implements Serializable {
      * @param run
      *            Run
      * @return RunFiles null if none found, else returns the RunFiles for the input run
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    public RunFiles getRunFiles(Run run) {
+    public RunFiles getRunFiles(Run run) throws IOException, ClassNotFoundException, FileSecurityException {
 
         if (writeToDisk) {
             return getRunFiles(run.getSiteNumber(), run.getNumber());

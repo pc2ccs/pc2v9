@@ -8,8 +8,9 @@ import java.util.Hashtable;
 import java.util.Vector;
 import java.util.logging.Logger;
 
-import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.IStorage;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.security.FileSecurityException;
 
 /**
  * Routines to safe and load configuration/InternalContest.
@@ -91,28 +92,19 @@ public class ConfigurationIO {
         PROFILE,
     }
 
-    private String directoryName = "db";
+    private IStorage storage = null;
 
     /**
      * 
      * @param dirname
      */
-    private ConfigurationIO(String dirname) {
-        this.directoryName = dirname;
-        Utilities.insureDir(dirname);
-    }
-
-    public String getDirectoryName() {
-        return directoryName;
-    }
-
-    public ConfigurationIO(int siteNumber) {
-        this("db." + siteNumber);
+    public ConfigurationIO(IStorage storage) {
+        this.storage = storage;
     }
 
     public boolean loadFromDisk(int siteNumber, IInternalContest contest, Log log) {
 
-        Configuration configuration = new Configuration();
+        Configuration configuration = new Configuration(storage);
         
         try {
 
@@ -373,9 +365,9 @@ public class ConfigurationIO {
         return accounts;
     }
 
-    public void saveToDisk(IInternalContest contest, Log log) throws IOException {
+    public boolean store(IInternalContest contest, Log log) throws IOException, ClassNotFoundException, FileSecurityException {
 
-        Configuration configuration = new Configuration();
+        Configuration configuration = new Configuration(storage);
         
         configuration.add(ConfigKeys.SITE_NUMBER, new Integer(contest.getSiteNumber()));
         configuration.add(ConfigKeys.ACCOUNTS, getAllAccounts(contest));
@@ -399,6 +391,8 @@ public class ConfigurationIO {
         configuration.writeToDisk(getFileName());
 
         configuration = null;
+        
+        return true;
     }
 
     /**
@@ -410,6 +404,12 @@ public class ConfigurationIO {
     private class Configuration {
 
         private Hashtable<String, Object> configItemHash = new Hashtable<String, Object>();
+        
+        private IStorage storage;
+
+        public Configuration(IStorage storage) {
+            this.storage = storage;
+        }
 
         public boolean add(ConfigKeys key, Serializable object) {
             if (object == null) {
@@ -432,14 +432,16 @@ public class ConfigurationIO {
          * Write the run data to disk.
          * 
          * @throws IOException
+         * @throws FileSecurityException 
+         * @throws ClassNotFoundException 
          */
-        public boolean writeToDisk(String fileName) throws IOException {
-            return Utilities.writeObjectToFile(getFileName(), configItemHash);
+        public boolean writeToDisk(String fileName) throws IOException, ClassNotFoundException, FileSecurityException {
+            return storage.store(getFileName(), configItemHash);
         }
 
         @SuppressWarnings("unchecked")
-        public boolean loadFromDisk(String filename) throws IOException, ClassNotFoundException {
-            Object readObject = Utilities.readObjectFromFile(filename);
+        public boolean loadFromDisk(String filename) throws IOException, ClassNotFoundException, FileSecurityException {
+            Object readObject = storage.load(filename);
             if (readObject instanceof Hashtable) {
                 configItemHash = (Hashtable) readObject;
                 return true;
@@ -449,7 +451,7 @@ public class ConfigurationIO {
     }
 
     public String getFileName() {
-        return getDirectoryName() + File.separator + "settings.dat";
+        return storage.getDirectoryName() + File.separator + "settings.dat";
     }
 
 }

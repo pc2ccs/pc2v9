@@ -1,11 +1,13 @@
 package edu.csus.ecs.pc2.core.model;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
 
+import edu.csus.ecs.pc2.core.IStorage;
 import edu.csus.ecs.pc2.core.exception.ClarificationUnavailableException;
 import edu.csus.ecs.pc2.core.exception.ContestSecurityException;
 import edu.csus.ecs.pc2.core.exception.RunUnavailableException;
@@ -36,6 +38,7 @@ import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.PasswordChangeEvent.Action;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
+import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.security.ISecurityMessageListener;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.SecurityMessageHandler;
@@ -201,7 +204,13 @@ public class InternalContest implements IInternalContest {
     private Profile profile = null;
 
     private String contestIdentifier = null;
+
+    private ConfigurationIO configurationIO = null;
     
+    private IStorage storage = null;
+
+    private String contestPassword;
+
     private Site createFakeSite(int nextSiteNumber) {
         Site site = new Site("Site " + nextSiteNumber, nextSiteNumber);
         Properties props = new Properties();
@@ -214,11 +223,12 @@ public class InternalContest implements IInternalContest {
     }
 
     public void initializeSubmissions(int siteNum) {
-        
-        runList = new RunList(siteNum, true);
-        runFilesList = new RunFilesList(siteNum);
-        runResultFilesList = new RunResultsFileList(siteNum);
-        clarificationList = new ClarificationList(siteNum, true);
+
+        runList = new RunList(storage);
+        runFilesList = new RunFilesList(storage);
+        runResultFilesList = new RunResultsFileList(storage);
+        clarificationList = new ClarificationList(storage);
+        configurationIO = new ConfigurationIO(storage);
 
         try {
             runList.loadFromDisk(siteNum);
@@ -237,9 +247,9 @@ public class InternalContest implements IInternalContest {
                     status = RunStates.JUDGED;
                 }
                 if (!runs[i].getStatus().equals(status)) {
-                    StaticLog.info("Changing Run "+runs[i].getElementId()+" from "+runs[i].getStatus()+"to NEW");
+                    StaticLog.info("Changing Run " + runs[i].getElementId() + " from " + runs[i].getStatus() + "to NEW");
                     runList.updateRunStatus(runs[i], status);
-                    
+
                 }
             }
         } catch (Exception e) {
@@ -250,7 +260,7 @@ public class InternalContest implements IInternalContest {
             Clarification[] clarList = clarificationList.getList();
             for (int i = 0; i < clarList.length; i++) {
                 if (clarList[i].getState().equals(ClarificationStates.BEING_ANSWERED)) {
-                    StaticLog.info("Changing Clarification "+clarList[i].getElementId()+" from BEING_ANSWERED by "+ clarList[i].getWhoCheckedItOutId()+ "to NEW");
+                    StaticLog.info("Changing Clarification " + clarList[i].getElementId() + " from BEING_ANSWERED by " + clarList[i].getWhoCheckedItOutId() + "to NEW");
                     clarificationList.updateClarification(clarList[i], ClarificationStates.NEW, null);
                 }
             }
@@ -540,8 +550,11 @@ public class InternalContest implements IInternalContest {
 
     /**
      * Accept Run, add new run into server.
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    public Run acceptRun(Run run, RunFiles runFiles) {
+    public Run acceptRun(Run run, RunFiles runFiles) throws IOException, ClassNotFoundException, FileSecurityException {
         run.setElapsedMins(getContestTime().getElapsedMins());
         run.setSiteNumber(getSiteNumber());
         Run newRun = runList.addNewRun(run); // this set the run number.
@@ -556,40 +569,91 @@ public class InternalContest implements IInternalContest {
      * Accept Clarification, add clar into this server.
      * 
      * @param clarification
-     * @return the accepted Clarifcation
+     * @return the accepted Clarification
      */
     public Clarification acceptClarification(Clarification clarification) {
         clarification.setElapsedMins(getContestTime().getElapsedMins());
         clarification.setSiteNumber(getSiteNumber());
-        Clarification newClarification = clarificationList.addNewClarification(clarification);
-        addClarification(clarification);
-        return newClarification;
+        Clarification newClarification;
+        try {
+            newClarification = clarificationList.addNewClarification(clarification);
+            addClarification(clarification);
+            return newClarification;
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (FileSecurityException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
+        return null;
     }
 
     public void answerClarification(Clarification clarification, String answer, ClientId whoAnsweredIt, boolean sendToAll) {
 
         if (clarificationList.get(clarification) != null) {
-            Clarification answerClarification = clarificationList.updateClarification(clarification, ClarificationStates.ANSWERED, whoAnsweredIt, answer, sendToAll);
-            ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.ANSWERED_CLARIFICATION, answerClarification);
-            clarificationEvent.setWhoModifiedClarification(whoAnsweredIt);
-            fireClarificationListener(clarificationEvent);
+            Clarification answerClarification;
+            try {
+                answerClarification = clarificationList.updateClarification(clarification, ClarificationStates.ANSWERED, whoAnsweredIt, answer, sendToAll);
+                ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.ANSWERED_CLARIFICATION, answerClarification);
+                clarificationEvent.setWhoModifiedClarification(whoAnsweredIt);
+                fireClarificationListener(clarificationEvent);
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (FileSecurityException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        
         } else {
-            clarificationList.add(clarification);
-            Clarification updatedClarification = clarificationList.get(clarification);
-            ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.ANSWERED_CLARIFICATION, updatedClarification);
-            clarificationEvent.setWhoModifiedClarification(whoAnsweredIt);
-            fireClarificationListener(clarificationEvent);
+            try {
+                clarificationList.add(clarification);
+                Clarification updatedClarification = clarificationList.get(clarification);
+                ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.ANSWERED_CLARIFICATION, updatedClarification);
+                clarificationEvent.setWhoModifiedClarification(whoAnsweredIt);
+                fireClarificationListener(clarificationEvent);
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (FileSecurityException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+       
         }
     }
 
     public void updateClarification(Clarification clarification, ClientId whoChangedIt) {
-        clarificationList.updateClarification(clarification);
-        ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.CHANGED, clarificationList.get(clarification));
-        if (whoChangedIt != null){
-            clarificationEvent.setWhoModifiedClarification(whoChangedIt);
+        try {
+            clarificationList.updateClarification(clarification);
+            ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.CHANGED, clarificationList.get(clarification));
+            if (whoChangedIt != null){
+                clarificationEvent.setWhoModifiedClarification(whoChangedIt);
+            }
+            clarificationEvent.setSentToClientId(whoChangedIt);
+            fireClarificationListener(clarificationEvent);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (FileSecurityException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
-        clarificationEvent.setSentToClientId(whoChangedIt);
-        fireClarificationListener(clarificationEvent);
+   
     }
 
     public void clarificationNotAvailable(Clarification clar) {
@@ -601,14 +665,17 @@ public class InternalContest implements IInternalContest {
      * Add a run to run list, notify listeners.
      * 
      * @param run
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    public void addRun(Run run) {
+    public void addRun(Run run) throws IOException, ClassNotFoundException, FileSecurityException {
         runList.add(run);
         RunEvent runEvent = new RunEvent(RunEvent.Action.ADDED, run, null, null);
         fireRunListener(runEvent);
     }
 
-    public void addRun(Run run, RunFiles runFiles, ClientId whoCheckedOutRunId) {
+    public void addRun(Run run, RunFiles runFiles, ClientId whoCheckedOutRunId) throws IOException, ClassNotFoundException, FileSecurityException {
         runList.add(run);
         runFilesList.add(run, runFiles);
         RunEvent runEvent = new RunEvent(RunEvent.Action.CHECKEDOUT_RUN, run, runFiles, null);
@@ -616,7 +683,7 @@ public class InternalContest implements IInternalContest {
         fireRunListener(runEvent);
     }
 
-    public void availableRun(Run run) {
+    public void availableRun(Run run) throws IOException, ClassNotFoundException, FileSecurityException {
         runList.add(run);
         RunEvent runEvent = new RunEvent(RunEvent.Action.RUN_AVAILABLE, run, null, null);
         fireRunListener(runEvent);
@@ -1036,7 +1103,7 @@ public class InternalContest implements IInternalContest {
         return runList.getList();
     }
 
-    public void runUpdated(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles, ClientId whoUpdatedRun) {
+    public void runUpdated(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles, ClientId whoUpdatedRun) throws IOException, ClassNotFoundException, FileSecurityException {
         // TODO handle run RunResultsFiles
 
         boolean manualReview = getProblem(run.getProblemId()).isManualReview();
@@ -1074,7 +1141,7 @@ public class InternalContest implements IInternalContest {
         fireRunListener(runEvent);
     }
     
-    public Run checkoutRun(Run run, ClientId whoChangedRun, boolean reCheckoutRun, boolean computerJudge) throws RunUnavailableException {
+    public Run checkoutRun(Run run, ClientId whoChangedRun, boolean reCheckoutRun, boolean computerJudge) throws RunUnavailableException, IOException, ClassNotFoundException, FileSecurityException {
         
         synchronized (runCheckOutList) {
             ClientId clientId = runCheckOutList.get(run.getElementId());
@@ -1114,11 +1181,11 @@ public class InternalContest implements IInternalContest {
 
     }
     
-    public void updateRun(Run run, ClientId whoChangedRun) {
+    public void updateRun(Run run, ClientId whoChangedRun) throws IOException, ClassNotFoundException, FileSecurityException {
         updateRun (run, null, whoChangedRun, null);
     }
 
-    public void updateRun(Run run, RunFiles runFiles, ClientId whoChangedRun, RunResultFiles[] runResultFiles) {
+    public void updateRun(Run run, RunFiles runFiles, ClientId whoChangedRun, RunResultFiles[] runResultFiles) throws IOException, ClassNotFoundException, FileSecurityException {
 
         /**
          * Should this run be un-checked out (removed from the checked out list) ? 
@@ -1176,11 +1243,11 @@ public class InternalContest implements IInternalContest {
         fireRunListener(runEvent);
     }
     
-    public RunFiles getRunFiles(Run run) {
+    public RunFiles getRunFiles(Run run) throws IOException, ClassNotFoundException, FileSecurityException {
         return runFilesList.getRunFiles(run);
     }
 
-    public void addRunJudgement(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles, ClientId whoJudgedItId) {
+    public void addRunJudgement(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles, ClientId whoJudgedItId) throws IOException, ClassNotFoundException, FileSecurityException {
 
         Run theRun = runList.get(run);
         ClientId whoCheckedOut = runCheckOutList.get(run.getElementId());
@@ -1223,7 +1290,7 @@ public class InternalContest implements IInternalContest {
 
     }
 
-    public void cancelRunCheckOut(Run run, ClientId fromId) throws UnableToUncheckoutRunException {
+    public void cancelRunCheckOut(Run run, ClientId fromId) throws UnableToUncheckoutRunException, IOException, ClassNotFoundException, FileSecurityException {
         
         // TODO Security check, code needed to insure that only
         // certain accounts can cancel a checkout
@@ -1437,26 +1504,26 @@ public class InternalContest implements IInternalContest {
         }
     }
 
-    public void addClarification(Clarification clarification) {
+    public void addClarification(Clarification clarification) throws IOException, ClassNotFoundException, FileSecurityException {
         clarificationList.add(clarification);
         ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.ADDED, clarification);
         fireClarificationListener(clarificationEvent);
     }
 
-    public void addClarification(Clarification clarification, ClientId whoCheckedOutId) {
+    public void addClarification(Clarification clarification, ClientId whoCheckedOutId) throws IOException, ClassNotFoundException, FileSecurityException {
         clarificationList.add(clarification);
         ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.CHECKEDOUT_CLARIFICATION, clarification);
         clarificationEvent.setSentToClientId(whoCheckedOutId);
         fireClarificationListener(clarificationEvent);
     }
 
-    public void removeClarification(Clarification clarification) {
+    public void removeClarification(Clarification clarification) throws IOException, ClassNotFoundException, FileSecurityException {
         clarificationList.delete(clarification);
         ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.DELETED, clarification);
         fireClarificationListener(clarificationEvent);
     }
 
-    public void changeClarification(Clarification clarification) {
+    public void changeClarification(Clarification clarification) throws IOException, ClassNotFoundException, FileSecurityException {
         clarificationList.updateClarification(clarification);
         ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.CHANGED, clarification);
         fireClarificationListener(clarificationEvent);
@@ -1538,7 +1605,7 @@ public class InternalContest implements IInternalContest {
         return problemDataFilesList.getList();
     }
 
-    public void cancelClarificationCheckOut(Clarification clarification, ClientId whoCancelledIt) {
+    public void cancelClarificationCheckOut(Clarification clarification, ClientId whoCancelledIt) throws IOException, ClassNotFoundException, FileSecurityException {
         // TODO verify the canceller has permissions to cancel this clar
         clarificationList.updateClarification(clarification, ClarificationStates.NEW, whoCancelledIt);
         synchronized (clarCheckOutList) {
@@ -1763,7 +1830,7 @@ public class InternalContest implements IInternalContest {
     /* (non-Javadoc)
      * @see edu.csus.ecs.pc2.core.model.IInternalContest#checkoutClarification(edu.csus.ecs.pc2.core.model.Clarification, edu.csus.ecs.pc2.core.model.ClientId)
      */
-    public Clarification checkoutClarification(Clarification clar, ClientId whoChangedClar) throws ClarificationUnavailableException {
+    public Clarification checkoutClarification(Clarification clar, ClientId whoChangedClar) throws ClarificationUnavailableException, IOException, ClassNotFoundException, FileSecurityException {
         synchronized (clarCheckOutList) {
             ClientId clientId = clarCheckOutList.get(clar.getElementId());
 
@@ -1819,7 +1886,7 @@ public class InternalContest implements IInternalContest {
         securityMessageHandler.addSecurityMessageListener(securityMessageListener);
     }
 
-    public RunResultFiles[] getRunResultFiles(Run run) {
+    public RunResultFiles[] getRunResultFiles(Run run) throws IOException, ClassNotFoundException, FileSecurityException {
         
         return runResultFilesList.getRunResultFiles(run);
     }
@@ -1829,7 +1896,18 @@ public class InternalContest implements IInternalContest {
         /**
          * Clear list of runs.
          */
-        runList.clear();
+        try {
+            runList.clear();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (FileSecurityException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         
         /**
          * Clear submitted files list 
@@ -1845,7 +1923,18 @@ public class InternalContest implements IInternalContest {
         /**
          * Clear all clarifications
          */
-        clarificationList.clear();
+        try {
+            clarificationList.clear();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (FileSecurityException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         
     }
 
@@ -1939,4 +2028,44 @@ public class InternalContest implements IInternalContest {
         ProfileEvent profileEvent = new ProfileEvent(ProfileEvent.Action.CHANGED, theProfile);
         fireProfileListener(profileEvent);
     }
+    
+    public boolean storeConfiguration(Log log) throws IOException, ClassNotFoundException, FileSecurityException {
+        return configurationIO.store(this, log);
+    }
+
+    public boolean readConfiguration(int siteNum, Log log) {
+        
+        boolean loadedConfiguration = configurationIO.loadFromDisk(siteNum, this, log);
+        initializeSubmissions(siteNum);
+        // Initialize contest time if necessary
+        ContestTime contestTime = getContestTime(siteNum);
+        if (contestTime == null) {
+            contestTime = new ContestTime(siteNum);
+            addContestTime(contestTime);
+        }
+        if (getProfile() == null){
+            setProfile(createNewProfile());
+        }
+        return loadedConfiguration;
+    }
+
+    private Profile createNewProfile() {
+        Profile newProfile = new Profile("Contest");
+        newProfile.setDescription("(No description, yet)");
+        return newProfile;
+    }
+
+    public void setStorage(IStorage storage) {
+        this.storage = storage;
+        configurationIO = new ConfigurationIO(storage);
+    }
+
+    public String getContestPassword() {
+        return contestPassword;
+    }
+
+    public void setContestPassword(String contestPassword) {
+        this.contestPassword = contestPassword;
+    }
+
 }

@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.api.implementation;
 
+import java.io.IOException;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.api.ILanguage;
@@ -23,6 +24,7 @@ import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunUtilities;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
+import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.core.security.Permission.Type;
@@ -294,17 +296,29 @@ public class RunImplementation implements IRun {
             fetchRunListenerImplemenation = new FetchRunListenerImplemenation();
             internalContest.addRunListener(fetchRunListenerImplemenation);
         }
-        controller.fetchRun(run);
-        synchronized (listening) {
-            while (!answerReceived) {
-                try {
-                    listening.wait();
-                } catch (InterruptedException e) {
-                    // ok, just loop again
-                    listening.booleanValue(); // terrible kludge because empty block not allowed.
+        try {
+            controller.fetchRun(run);
+            synchronized (listening) {
+                while (!answerReceived) {
+                    try {
+                        listening.wait();
+                    } catch (InterruptedException e) {
+                        // ok, just loop again
+                        listening.booleanValue(); // terrible kludge because empty block not allowed.
+                    }
                 }
             }
+        } catch (IOException e1) {
+            // TODO dal Auto-generated catch block
+            e1.printStackTrace();
+        } catch (ClassNotFoundException e1) {
+            // TODO dal Auto-generated catch block
+            e1.printStackTrace();
+        } catch (FileSecurityException e1) {
+            // TODO dal Auto-generated catch block
+            e1.printStackTrace();
         }
+    
     }
 
     @Override

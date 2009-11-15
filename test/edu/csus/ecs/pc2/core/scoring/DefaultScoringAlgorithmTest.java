@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core.scoring;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -38,6 +39,7 @@ import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
+import edu.csus.ecs.pc2.core.security.FileSecurityException;
 
 /**
  * Test Scoring Algorithm.
@@ -248,8 +250,11 @@ public class DefaultScoringAlgorithmTest extends TestCase {
 
     /**
      * Verify XML created for a single unjudged run.
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    public void testOneRunUnjudged() {
+    public void testOneRunUnjudged() throws IOException, ClassNotFoundException, FileSecurityException {
 
         InternalContest contest = new InternalContest();
         
@@ -265,8 +270,11 @@ public class DefaultScoringAlgorithmTest extends TestCase {
 
     /**
      * Verify XML created for a single unjudged run.
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    public void testMixedjudged() {
+    public void testMixedjudged() throws IOException, ClassNotFoundException, FileSecurityException {
 
         InternalContest contest = new InternalContest();
         
@@ -292,8 +300,11 @@ public class DefaultScoringAlgorithmTest extends TestCase {
      * @param contest
      * @param judgementIndex - the judgement list index
      * @param solved - was this run solved/Yes judgement
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    public void createJudgedRun (IInternalContest contest, int judgementIndex, boolean solved) {
+    public void createJudgedRun (IInternalContest contest, int judgementIndex, boolean solved) throws IOException, ClassNotFoundException, FileSecurityException {
         Run run = getARun(contest);
         RunFiles runFiles = new RunFiles(run, "samps/Sumit.java");
         
@@ -316,8 +327,11 @@ public class DefaultScoringAlgorithmTest extends TestCase {
      * @param contest
      * @param judgementIndex
      * @param solved
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    public void createJudgedRun (IInternalContest contest, int judgementIndex, boolean solved, int elapsedMinutes){
+    public void createJudgedRun (IInternalContest contest, int judgementIndex, boolean solved, int elapsedMinutes) throws IOException, ClassNotFoundException, FileSecurityException{
         Run run = getARun(contest, elapsedMinutes);
         RunFiles runFiles = new RunFiles(run, "samps/Sumit.java");
         
@@ -359,8 +373,11 @@ public class DefaultScoringAlgorithmTest extends TestCase {
 
     /**
      * Verify XML created for a single judged run.
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    public void testOneRunJudged() {
+    public void testOneRunJudged() throws IOException, ClassNotFoundException, FileSecurityException {
 
         InternalContest contest = new InternalContest();
         
@@ -373,8 +390,11 @@ public class DefaultScoringAlgorithmTest extends TestCase {
     
     /**
      * Verify XML created for 5 judged runs, one solved, four no's.
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    public void testFiveRunsJudged() {
+    public void testFiveRunsJudged() throws IOException, ClassNotFoundException, FileSecurityException {
 
         InternalContest contest = new InternalContest();
         
@@ -1220,7 +1240,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
         scoreboardTest(numTeams, runsDataList, rankDataList, false);
     }
     
-    public void scoreboardTest(int numTeams, String[] runsDataList, String[] rankDataList, boolean respectSendTo) {
+    public void scoreboardTest(int numTeams, String[] runsDataList, String[] rankDataList, boolean respectSendTo)  {
 
         InternalContest contest = new InternalContest();
 
@@ -1264,6 +1284,9 @@ public class DefaultScoringAlgorithmTest extends TestCase {
      * 
      * @param contest
      * @param runInfoLine
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
     private void addTheRun(InternalContest contest, String runInfoLine) {
 
@@ -1305,11 +1328,24 @@ public class DefaultScoringAlgorithmTest extends TestCase {
         }
         JudgementRecord judgementRecord = new JudgementRecord(judgementId, judgeId, solved, false);
         judgementRecord.setSendToTeam(sendToTeams);
-        contest.addRun(run);
-        
-        checkOutRun(contest, run, judgeId);
 
-        contest.addRunJudgement(run, judgementRecord, null, judgeId);
+        try {
+            contest.addRun(run);
+
+            checkOutRun(contest, run, judgeId);
+
+            contest.addRunJudgement(run, judgementRecord, null, judgeId);
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+            assertFalse("Unable to add run from run: "+run, false);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            assertFalse("Unable to add run from run: "+run, false);
+        } catch (FileSecurityException e) {
+            e.printStackTrace();
+            assertFalse("Unable to add run from run: "+run, false);
+        }
 
         if (debugMode){
             System.out.print("Send to teams "+run.getJudgementRecord().isSendToTeam()+" ");

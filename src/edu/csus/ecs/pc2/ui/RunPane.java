@@ -35,6 +35,7 @@ import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.report.ExtractRuns;
+import edu.csus.ecs.pc2.core.security.FileSecurityException;
 
 /**
  * Add/Edit Run Pane
@@ -680,6 +681,12 @@ public class RunPane extends JPanePlugin {
         } catch (IOException e) {
             log.throwing("RunPane", "extractRun", e);
             showMessage("Problem extracting run.");
+        } catch (ClassNotFoundException e) {
+            JOptionPane.showMessageDialog(this, "Problem extracting run. "+e.getMessage());
+            e.printStackTrace();
+        } catch (FileSecurityException e) {
+            JOptionPane.showMessageDialog(this, "Problem extracting run. "+e.getMessage());
+            e.printStackTrace();
         }
     }
 

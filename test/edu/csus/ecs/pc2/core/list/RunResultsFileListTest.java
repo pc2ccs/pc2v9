@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.core.list;
 
 import java.io.File;
+import java.io.IOException;
 
 import edu.csus.ecs.pc2.core.execute.ExecutionData;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -12,6 +13,7 @@ import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import junit.framework.TestCase;
 
 /**
@@ -32,7 +34,7 @@ public class RunResultsFileListTest extends TestCase {
 
     protected void setUp() throws Exception {
         super.setUp();
-        runResultsFileList = new RunResultsFileList(siteNumber);
+        runResultsFileList = new RunResultsFileList();
     }
 
     protected void tearDown() throws Exception {
@@ -42,7 +44,7 @@ public class RunResultsFileListTest extends TestCase {
     /*
      * Test method for 'edu.csus.ecs.pc2.core.list.RunResultsFileList.RunResultsFileList(int)'
      */
-    public void testRunResultsFileList() {
+    public void testRunResultsFileList() throws IOException, ClassNotFoundException, FileSecurityException {
         
         SampleContest sampleContest = new SampleContest();
         IInternalContest contest = sampleContest.createContest(siteNumber, siteNumber, 22, 5, false);
@@ -50,7 +52,7 @@ public class RunResultsFileListTest extends TestCase {
         ClientId clientId = contest.getAccounts(Type.TEAM).firstElement().getClientId();
         ClientId judgeId = contest.getAccounts(Type.JUDGE).firstElement().getClientId();
         
-        RunList runList = new RunList(siteNumber, true);
+        RunList runList = new RunList();
         
         Problem problem = contest.getProblems()[0];
         

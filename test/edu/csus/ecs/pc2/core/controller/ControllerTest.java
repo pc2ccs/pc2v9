@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.core.controller;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 
 import junit.framework.TestCase;
@@ -18,6 +19,7 @@ import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.packet.PacketFactory;
+import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
@@ -113,7 +115,7 @@ public class ControllerTest extends TestCase {
         return runs;
     }
 
-    public void testRequestRunPermission() {
+    public void testRequestRunPermission() throws IOException, ClassNotFoundException, FileSecurityException {
 
         int level = InternalController.SECURITY_HIGH_LEVEL;
         controller.setSecurityLevel(level);

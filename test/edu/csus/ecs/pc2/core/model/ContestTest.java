@@ -1,7 +1,10 @@
 package edu.csus.ecs.pc2.core.model;
 
+import java.io.IOException;
+
 import edu.csus.ecs.pc2.core.exception.RunUnavailableException;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import junit.framework.TestCase;
 
 /**
@@ -38,7 +41,7 @@ public class ContestTest extends TestCase {
         return run;
     }
     
-    public void testCheckOut (){
+    public void testCheckOut () throws IOException, ClassNotFoundException, FileSecurityException{
         
         SampleContest sampleContest = new SampleContest();
         

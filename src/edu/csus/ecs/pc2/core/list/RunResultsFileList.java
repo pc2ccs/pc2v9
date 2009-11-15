@@ -1,12 +1,14 @@
 package edu.csus.ecs.pc2.core.list;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 
-import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.IStorage;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
+import edu.csus.ecs.pc2.core.security.FileSecurityException;
 
 /**
  * Access to statistics about a run judgement (@link edu.csus.ecs.pc2.core.RunResultFiles}.
@@ -45,27 +47,17 @@ public class RunResultsFileList implements Serializable {
     /**
      * Directory where files are written
      */
-    private String dirname = "db";
-
+    private IStorage storage;
     
     public RunResultsFileList() {
-        
+        writeToDisk = false;
     }
     
-    private RunResultsFileList(String dirname) {
-        this.dirname = dirname;
-        Utilities.insureDir(dirname);
+    public RunResultsFileList(IStorage storage) {
+        this.storage = storage;
         writeToDisk = true;
     }
 
-    public RunResultsFileList(int siteNumber) {
-        this("db." + siteNumber);
-    }
-    
-    private String getDirectoryName() {
-        return dirname;
-    }
-    
     protected String stripChar (String s, char ch){
         int idx = s.indexOf(ch);
         while (idx > -1) {
@@ -84,7 +76,7 @@ public class RunResultsFileList implements Serializable {
     }
 
     private String getFileName(int siteNumber, int runNumber, JudgementRecord judgementRecord) {
-        return getDirectoryName() + File.separator + "s" + siteNumber + "r"
+        return storage.getDirectoryName() + File.separator + "s" + siteNumber + "r"
                 + runNumber + "." + stripChars(judgementRecord.getElementId().toString()) + ".files";
     }
 
@@ -92,16 +84,12 @@ public class RunResultsFileList implements Serializable {
         return getFileName(run.getSiteNumber(), run.getNumber(), judgementRecord);
     }
 
-    public RunResultFiles add(Run run, JudgementRecord judgementRecord, RunResultFiles runFiles) {
+    public RunResultFiles add(Run run, JudgementRecord judgementRecord, RunResultFiles runFiles) throws IOException, ClassNotFoundException, FileSecurityException {
         if (writeToDisk) {
             String filename = getFileName(run, judgementRecord);
-            try {
-                Utilities.writeObjectToFile(filename, runFiles);
+            if ( storage.store(filename, runFiles) ){
                 return runFiles;
-            } catch (Exception e) {
-                // TODO log could not write object to file.
-                System.err.println("Unable to write file " + filename);
-                e.printStackTrace();
+            } else {
                 return null;
             }
         } else {
@@ -110,18 +98,11 @@ public class RunResultsFileList implements Serializable {
         }
     }
 
-    private RunResultFiles getRunResultFiles(int siteNumber, int runNumber, JudgementRecord judgementRecord) {
+    private RunResultFiles getRunResultFiles(int siteNumber, int runNumber, JudgementRecord judgementRecord) throws IOException, ClassNotFoundException, FileSecurityException {
         if (writeToDisk) {
             String filename = getFileName(siteNumber, runNumber, judgementRecord);
-            try {
-                Object obj = Utilities.readObjectFromFile(filename);
-                return (RunResultFiles) obj;
-            } catch (Exception e) {
-                // TODO log info - could not read RunResultFiles from disk.
-                System.err.println("Unable to read object from file " + filename);
-                e.printStackTrace();
-                return null;
-            }
+            Object obj = storage.load(filename);
+            return (RunResultFiles) obj;
         } else {
             return null;
         }
@@ -132,8 +113,11 @@ public class RunResultsFileList implements Serializable {
      * @param run
      *            Run
      * @return RunResultFiles files and statistics 
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    public RunResultFiles getRunResultFiles(Run run, JudgementRecord judgementRecord) {
+    public RunResultFiles getRunResultFiles(Run run, JudgementRecord judgementRecord) throws IOException, ClassNotFoundException, FileSecurityException {
 
         if (writeToDisk) {
             return getRunResultFiles(run.getSiteNumber(), run.getNumber(), judgementRecord);
@@ -151,8 +135,11 @@ public class RunResultsFileList implements Serializable {
      * 
      * @param run
      * @return
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    public RunResultFiles[] getRunResultFiles(Run run) {
+    public RunResultFiles[] getRunResultFiles(Run run) throws IOException, ClassNotFoundException, FileSecurityException {
         
         JudgementRecord[] judgementRecord = run.getAllJudgementRecords();
         RunResultFiles[] runResultFiles = new RunResultFiles[judgementRecord.length];

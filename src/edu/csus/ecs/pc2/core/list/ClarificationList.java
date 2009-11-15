@@ -6,11 +6,13 @@ import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
+import edu.csus.ecs.pc2.core.IStorage;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
+import edu.csus.ecs.pc2.core.security.FileSecurityException;
 
 /**
  * Maintains a list of {@link edu.csus.ecs.pc2.core.model.Clarification}s.
@@ -30,11 +32,6 @@ public class ClarificationList implements Serializable {
     private Hashtable<String, Clarification> clarHash = new Hashtable<String, Clarification>();
 
     /**
-     * Directory where files are written
-     */
-    private String directoryName = "db";
-
-    /**
      * Save runHash to disk for every update/add.
      */
     private boolean saveToDisk = false;
@@ -44,32 +41,26 @@ public class ClarificationList implements Serializable {
      */
     private int nextClarificationNumber = 1;
 
+    private IStorage storage = null;
+
     public ClarificationList() {
         saveToDisk = false;
     }
 
-    /**
-     * Create list and save list to disk on update/add.
-     * 
-     * @param directoryName directory name for clarification file.
-     */
-    private ClarificationList(String directoryName) {
-        this.directoryName = directoryName;
-        Utilities.insureDir(directoryName);
+    public ClarificationList(IStorage storage) {
+        this.storage = storage;
         saveToDisk = true;
-    }
-
-    public ClarificationList(int siteNumber, boolean saveToDisk) {
-        this("db." + siteNumber);
-        this.saveToDisk = saveToDisk;
     }
 
     /**
      * Add clarification and assign number.
      * 
      * @param clarification
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    public Clarification addNewClarification (Clarification clarification) {
+    public Clarification addNewClarification (Clarification clarification) throws IOException, ClassNotFoundException, FileSecurityException {
         clarification.setNumber(nextClarificationNumber++);
         add(clarification);
         return clarification;
@@ -78,8 +69,11 @@ public class ClarificationList implements Serializable {
     /**
      * Add clarification to list.
      * @param clarification
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    public void add (Clarification clarification) {
+    public void add (Clarification clarification) throws IOException, ClassNotFoundException, FileSecurityException {
         clarHash.put(getClarificationKey(clarification), clarification);
         if (saveToDisk) {
             writeToDisk();
@@ -120,8 +114,11 @@ public class ClarificationList implements Serializable {
      * 
      * @param clarification
      * @return true if clar deleted, false if not deleted or not found.
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    public boolean delete(Clarification clarification) {
+    public boolean delete(Clarification clarification) throws IOException, ClassNotFoundException, FileSecurityException {
         Clarification fetchedClarification = get(clarification);
         if (fetchedClarification != null) {
             fetchedClarification.setDeleted(true);
@@ -133,8 +130,11 @@ public class ClarificationList implements Serializable {
 
     /**
      * Remove all items from list.
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    public void clear() {
+    public void clear() throws IOException, ClassNotFoundException, FileSecurityException {
         clarHash = new Hashtable<String, Clarification>();
         writeToDisk();
     }
@@ -143,8 +143,11 @@ public class ClarificationList implements Serializable {
      * Add an array of clarifications.
      * 
      * @param clarList
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    public void add(Clarification[] clarList) {
+    public void add(Clarification[] clarList) throws IOException, ClassNotFoundException, FileSecurityException {
         for (Clarification clarification : clarList) {
             add(clarification);
         }
@@ -168,14 +171,17 @@ public class ClarificationList implements Serializable {
      * Update (unconditionally add) clarificaiton.
      * 
      * @param clarification
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    public void updateClarification(Clarification clarification) {
+    public void updateClarification(Clarification clarification) throws IOException, ClassNotFoundException, FileSecurityException {
         clarification.getElementId().incrementVersionNumber();
         clarHash.put(getClarificationKey(clarification), clarification);
         writeToDisk();
     }
 
-    public void updateClarification(Clarification clarification, ClarificationStates newState, ClientId sourceId) {
+    public void updateClarification(Clarification clarification, ClarificationStates newState, ClientId sourceId) throws IOException, ClassNotFoundException, FileSecurityException {
         Clarification fetchedClarification = get(clarification);
 
         if (fetchedClarification != null) {
@@ -188,7 +194,7 @@ public class ClarificationList implements Serializable {
     }
 
     public Clarification updateClarification(Clarification clarification, ClarificationStates newState, ClientId sourceId, String answer,
-            boolean sendToAll) {
+            boolean sendToAll) throws IOException, ClassNotFoundException, FileSecurityException {
         Clarification fetchedClarification = get(clarification);
         if (fetchedClarification != null) {
             fetchedClarification.getElementId().incrementVersionNumber();
@@ -208,7 +214,7 @@ public class ClarificationList implements Serializable {
     }
 
     private String getFileName() {
-        return getDirectoryName() + File.separator + "clarlist.dat";
+        return storage.getDirectoryName() + File.separator + "clarlist.dat";
     }
 
     /**
@@ -216,38 +222,24 @@ public class ClarificationList implements Serializable {
      * 
      * @throws ClassNotFoundException
      * @throws IOException
+     * @throws FileSecurityException 
      * 
      */
     @SuppressWarnings("unchecked")
-    public void loadFromDisk(int siteNumber) throws IOException, ClassNotFoundException {
+    public void loadFromDisk(int siteNumber) throws IOException, ClassNotFoundException, FileSecurityException {
         String filename = getFileName();
         if (Utilities.isFileThere(filename)) {
-            clarHash = (Hashtable<String, Clarification>) Utilities.readObjectFromFile(filename);
+            clarHash = (Hashtable<String, Clarification>) storage.load(filename);
             nextClarificationNumber = lastClarificationNumber(siteNumber) + 1;
         }
     }
 
-    /**
-     * @return Returns the directoryName.
-     */
-    public String getDirectoryName() {
-        return directoryName;
-    }
-
-    private boolean writeToDisk() {
+    private boolean writeToDisk() throws IOException, ClassNotFoundException, FileSecurityException {
         if (!isSaveToDisk()) {
             return false;
         }
 
-        try {
-            return Utilities.writeObjectToFile(getFileName(), clarHash);
-        } catch (Exception e) {
-            // TODO: handle exception
-            System.err.println("Exception writing RunList to disk ");
-            e.printStackTrace();
-            return false;
-        }
-
+        return storage.store(getFileName(), clarHash);
     }
 
     /**

@@ -1,9 +1,12 @@
 package edu.csus.ecs.pc2.core.list;
 
+import java.io.IOException;
+
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SampleContest;
+import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import junit.framework.TestCase;
 
 /**
@@ -16,7 +19,7 @@ import junit.framework.TestCase;
 // $HeadURL$
 public class RunFilesListTest extends TestCase {
 
-    public void testSingleFile() {
+    public void testSingleFile() throws IOException, ClassNotFoundException, FileSecurityException {
 
         RunFilesList filesList = new RunFilesList();
 
@@ -64,7 +67,7 @@ public class RunFilesListTest extends TestCase {
 
     }
 
-    public void testCache() {
+    public void testCache() throws IOException, ClassNotFoundException, FileSecurityException {
         
         RunFilesList filesList = new RunFilesList();
         

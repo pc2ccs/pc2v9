@@ -54,9 +54,9 @@ public final class ExtractRunsTest {
 
         IInternalContest contest = sampleContest.createContest(siteNumber, 3, 10, 10, true);
 
-        new FileSecurity("db." + siteNumber);
         try {
-            FileSecurity.saveSecretKey(new String("foo").toCharArray());
+            FileSecurity fileSecurity = new FileSecurity("db." + siteNumber);
+            fileSecurity.saveSecretKey(new String("foo").toCharArray());
             // FileSecurity.verifyPassword(new String("foo").toCharArray());
         } catch (FileSecurityException e1) {
             e1.printStackTrace();
@@ -79,7 +79,18 @@ public final class ExtractRunsTest {
         Run[] allRuns = sampleContest.createRandomRuns(contest, 12, true, true, true);
         for (Run run : allRuns) {
             RunFiles runFiles = new RunFiles(run, sFile, new SerializedFile[0]);
-            contest.addRun(run, runFiles, null);
+            try {
+                contest.addRun(run, runFiles, null);
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (FileSecurityException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
 
         System.out.println("Contest with " + contest.getRuns().length + " runs");
@@ -105,6 +116,12 @@ public final class ExtractRunsTest {
                 extractRuns.extractRun(run.getElementId());
                 System.out.println("Extracted " + run.getNumber());
             } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (FileSecurityException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }

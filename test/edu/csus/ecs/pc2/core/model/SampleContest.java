@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.Random;
@@ -11,6 +12,8 @@ import edu.csus.ecs.pc2.core.InternalController;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
+import edu.csus.ecs.pc2.core.report.IReport;
+import edu.csus.ecs.pc2.core.security.FileSecurityException;
 
 /**
  * Create Sample InternalContest and InternalController.
@@ -273,7 +276,18 @@ public class SampleContest {
         Run run = new Run(clientId, language, problem);
         run.setElapsedMins(elapsed);
         run.setNumber(++numRuns);
-        contest.addRun(run);
+        try {
+            contest.addRun(run);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (FileSecurityException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         return run;
     }
 
@@ -284,8 +298,11 @@ public class SampleContest {
      * @param clientId
      * @param problem
      * @return
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    public Run createRun(IInternalContest contest, ClientId clientId, Problem problem) {
+    public Run createRun(IInternalContest contest, ClientId clientId, Problem problem) throws IOException, ClassNotFoundException, FileSecurityException {
         int numRuns = contest.getRuns().length;
         Run run = new Run(clientId, contest.getLanguages()[0], problem);
         run.setElapsedMins(9 + numRuns);
@@ -305,8 +322,11 @@ public class SampleContest {
      * @param run
      * @param cloneJudgements
      * @return
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    public Run copyRun (IInternalContest contest, Run run, boolean cloneJudgements){
+    public Run copyRun (IInternalContest contest, Run run, boolean cloneJudgements) throws IOException, ClassNotFoundException, FileSecurityException{
         Run newRun = new Run(run.getSubmitter(), contest.getLanguage(run.getLanguageId()), contest.getProblem(run.getProblemId()));
         newRun.setElapsedMins(run.getElapsedMins());
         newRun.setDeleted(run.isDeleted());
@@ -345,8 +365,11 @@ public class SampleContest {
      * 
      * @param contest
      * @param runInfoLine
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    public Run addARun(InternalContest contest, String runInfoLine) {
+    public Run addARun(InternalContest contest, String runInfoLine) throws IOException, ClassNotFoundException, FileSecurityException {
 
         // get last judge
         Account[] accounts = (Account[]) contest.getAccounts(Type.JUDGE).toArray(new Account[contest.getAccounts(Type.JUDGE).size()]);
@@ -436,8 +459,11 @@ public class SampleContest {
      * @param runs
      * @param filename
      *            name of file to submit
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    public void addRuns(IInternalContest contest, Run[] runs, String filename) {
+    public void addRuns(IInternalContest contest, Run[] runs, String filename) throws IOException, ClassNotFoundException, FileSecurityException {
 
         if (!new File(filename).exists()) {
             throw new IllegalArgumentException("filename is null");
@@ -447,6 +473,33 @@ public class SampleContest {
             RunFiles runFiles = new RunFiles(run, filename);
             contest.acceptRun(run, runFiles);
         }
+    }
+    
+  
+    
+    /**
+     * 
+     * @param filename
+     * @param selectedReport
+     * @param filter
+     * @param inContest
+     * @param inController
+     */
+    public void printReport (String filename, IReport selectedReport, Filter filter, IInternalContest inContest, IInternalController inController){
+        
+        if (filter == null){
+            filter = new Filter();
+        }
+
+        try {
+            selectedReport.setContestAndController(inContest, inController);
+            selectedReport.setFilter(filter);
+            selectedReport.createReportFile(filename, filter);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     public Judgement getYesJudgement(IInternalContest contest) {

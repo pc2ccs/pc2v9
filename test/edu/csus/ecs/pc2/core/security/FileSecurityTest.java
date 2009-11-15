@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.core.security;
 
 import java.io.File;
+import java.io.IOException;
 
 import junit.framework.TestCase;
 
@@ -16,43 +17,39 @@ public class FileSecurityTest extends TestCase {
 
     private String passwordString = "ThisPassword";
 
-    private String testDir = ".";
-    
     static {
         insureDirectoriesRemoved();
     }
-    
-    public FileSecurityTest(){
+
+    public FileSecurityTest() {
         super();
     }
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        new FileSecurity( testDir);
     }
-    
+
     private static void insureDirectoriesRemoved() {
-        
+
         boolean ableToRemoveDirectories = true;
-        
+
         String[] dirNames = { "fileSecVPDir", "fileSecVPDirGCD", "getSecretK", "getSecretKTwo" };
-        for (String name : dirNames){
-            ableToRemoveDirectories = ableToRemoveDirectories && insureDirRemoved (name);
-//            System.err.println("debug removing directory "+ableToRemoveDirectories+" "+name);
+        for (String name : dirNames) {
+            ableToRemoveDirectories = ableToRemoveDirectories && insureDirRemoved(name);
+            // System.err.println("debug removing directory "+ableToRemoveDirectories+" "+name);
         }
-        
-        if (! ableToRemoveDirectories){
+
+        if (!ableToRemoveDirectories) {
             System.err.println("Warning could not clear all directories created by previous test");
-            for (String name : dirNames){
-                if (new File(name).exists()){
-                    System.err.println("Dir "+name+" still exists");
+            for (String name : dirNames) {
+                if (new File(name).exists()) {
+                    System.err.println("Dir " + name + " still exists");
                 }
             }
         }
-        
-    }
 
+    }
 
     /**
      * Removes all files and subdirectories.
@@ -83,11 +80,15 @@ public class FileSecurityTest extends TestCase {
         }
         return (result);
     }
-    
+
     public void testSaveWriteRead() {
+        
+        String testDir = ".";
+        
+        FileSecurity fileSecurity = new FileSecurity(testDir);
 
         try {
-            FileSecurity.saveSecretKey(passwordString.toCharArray());
+            fileSecurity.saveSecretKey(passwordString.toCharArray());
         } catch (FileSecurityException e) {
             // 
             e.printStackTrace();
@@ -96,17 +97,25 @@ public class FileSecurityTest extends TestCase {
         String cryptedFileName = testDir + File.separator + "secure.sld";
 
         try {
-            FileSecurity.writeSealedFile(cryptedFileName, "SECRETINFORMATION");
+            fileSecurity.store(cryptedFileName, "SECRETINFORMATION");
         } catch (FileSecurityException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
 
         try {
-            String st = (String) FileSecurity.readSealedFile(cryptedFileName);
+            String st = (String) fileSecurity.load(cryptedFileName);
             assertEquals("SECRETINFORMATION", st);
         } catch (FileSecurityException e) {
             e.printStackTrace();
             assert (false);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
         }
     }
 
@@ -114,7 +123,7 @@ public class FileSecurityTest extends TestCase {
 
         String dirname = "fileSecVPDir";
 
-        new FileSecurity( dirname);
+        FileSecurity fileSecurity = new FileSecurity(dirname);
 
         String cryptedFileName = dirname + File.separator + "secure.fil";
 
@@ -122,9 +131,9 @@ public class FileSecurityTest extends TestCase {
 
         try {
 
-            FileSecurity.saveSecretKey(password.toCharArray());
+            fileSecurity.saveSecretKey(password.toCharArray());
 
-            FileSecurity.verifyPassword(password.toCharArray());
+            fileSecurity.verifyPassword(password.toCharArray());
         } catch (FileSecurityException exception) {
             failTest("Exception writeSealedFile " + cryptedFileName, exception);
             // System.out.println("debug Exception "+exception.getMessage());
@@ -138,7 +147,7 @@ public class FileSecurityTest extends TestCase {
 
         String dirname = "/baddirname";
 
-        new FileSecurity(dirname);
+        FileSecurity fileSecurity = new FileSecurity(dirname);
 
         String cryptedFileName = dirname + File.separator + "secure.fil";
 
@@ -147,7 +156,7 @@ public class FileSecurityTest extends TestCase {
         // Negative Test
 
         try {
-            FileSecurity.verifyPassword(password.toCharArray());
+            fileSecurity.verifyPassword(password.toCharArray());
         } catch (FileSecurityException exception) {
             assert (true);
             // System.out.println("debug Exception "+exception.getMessage());
@@ -162,12 +171,12 @@ public class FileSecurityTest extends TestCase {
 
         String badDirName = "/baddirname"; // save to bad directory
 
-        new FileSecurity(badDirName);
+        FileSecurity fileSecurity = new FileSecurity(badDirName);
 
         String cryptedFileName = badDirName + File.separator + "secure.fil";
 
         try {
-            FileSecurity.writeSealedFile(cryptedFileName, "SECRETINFORMATION");
+            fileSecurity.writeSealedFile(cryptedFileName, "SECRETINFORMATION");
         } catch (FileSecurityException exception) {
             assert (true); // bad dir does exist - this is what should happen
         } catch (Exception e) {
@@ -180,7 +189,7 @@ public class FileSecurityTest extends TestCase {
      * Test method for 'edu.csus.ecs.pc2.core.security.FileSecurity.getContestDirectory()'
      */
     public void testGetContestDirectory() {
-        String dirname = "fileSecVPDirGCD"+File.separator;
+        String dirname = "fileSecVPDirGCD" + File.separator;
 
         FileSecurity security = new FileSecurity(dirname);
         assertEquals("getContestDirectory", dirname, security.getContestDirectory());
@@ -209,11 +218,11 @@ public class FileSecurityTest extends TestCase {
         String dirname = "fileSecVPDir";
 
         try {
-            FileSecurity security = new FileSecurity( dirname);
+            FileSecurity security = new FileSecurity(dirname);
 
             String password = "miwok";
 
-            FileSecurity.saveSecretKey(password.toCharArray());
+            security.saveSecretKey(password.toCharArray());
 
             String readPassword = security.getPassword();
 
@@ -222,20 +231,6 @@ public class FileSecurityTest extends TestCase {
         } catch (Exception e) {
             failTest("Unexpected exception in getPassword  ", e);
         }
-
-    }
-
-    /*
-     * Test method for 'edu.csus.ecs.pc2.core.security.FileSecurity.writeSealedFile(String, Serializable)'
-     */
-    public void testWriteSealedFile() {
-
-    }
-
-    /*
-     * Test method for 'edu.csus.ecs.pc2.core.security.FileSecurity.readSealedFile(String)'
-     */
-    public void testReadSealedFile() {
 
     }
 
