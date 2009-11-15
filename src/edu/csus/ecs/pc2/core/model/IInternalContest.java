@@ -873,7 +873,19 @@ public interface IInternalContest {
 
     boolean storeConfiguration(Log log) throws IOException, ClassNotFoundException, FileSecurityException;
 
+    /**
+     * Set the storage reader/writer.
+     * 
+     * @param storage
+     */
     void setStorage(IStorage storage);
+    
+    /**
+     * Get the Storage
+     * 
+     * @return
+     */
+    IStorage getStorage();
 
     boolean readConfiguration(int siteNumber, Log log);
 

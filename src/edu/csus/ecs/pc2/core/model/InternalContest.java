@@ -2068,4 +2068,8 @@ public class InternalContest implements IInternalContest {
         this.contestPassword = contestPassword;
     }
 
+    public IStorage getStorage() {
+        return storage;
+    }
+
 }

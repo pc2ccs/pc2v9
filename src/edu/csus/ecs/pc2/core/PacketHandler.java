@@ -1076,6 +1076,7 @@ public class PacketHandler {
                     System.exit(44);
                 }
 
+                contest.setStorage(fileSecurity);
                 contest.setContestPassword(uberSecretatPassworden);
             }
 
