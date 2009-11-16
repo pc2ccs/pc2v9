@@ -14,16 +14,11 @@ Summary - <xsl:value-of select="/contestStandings/standingsHeader/@title"/>
         </HEAD>
         <BODY>
             <TABLE border="0">
-                <tr><th><strong><u>Rank</u></strong></th>
-<th><strong><u>Name</u></strong></th>
-<th><strong><u>Solved</u></strong></th>
-<th><strong><u>Time</u></strong></th>
-                <xsl:call-template name="problemTitle"/>
-<th>Total att/solv</th></tr>
-<tr><td></td><td></td><td></td><td></td>
-                <xsl:call-template name="problemColor"/>
-</tr>
+                <xsl:call-template name="rankRow"/>
+                <xsl:call-template name="colorRow"/>
                 <xsl:call-template name="teamStanding"/>
+                <xsl:call-template name="rankRow"/>
+                <xsl:call-template name="colorRow"/>
                 <xsl:call-template name="summary"/>
             </TABLE>
 <p>
@@ -88,5 +83,18 @@ Last updated
             <xsl:for-each select="/contestStandings/standingsHeader/colorList/colors[@siteNum = 1]/problem">
                 <td><center><xsl:choose><xsl:when test="@color"> <xsl:value-of select="@color"/></xsl:when><xsl:otherwise>Color<xsl:value-of select="@id"/></xsl:otherwise></xsl:choose></center></td>
             </xsl:for-each>
+        </xsl:template>
+        <xsl:template name="rankRow">
+                <tr><th><strong><u>Rank</u></strong></th>
+<th><strong><u>Name</u></strong></th>
+<th><strong><u>Solved</u></strong></th>
+<th><strong><u>Time</u></strong></th>
+                <xsl:call-template name="problemTitle"/>
+<th>Total att/solv</th></tr>
+        </xsl:template>
+        <xsl:template name="colorRow">
+<tr><td></td><td></td><td></td><td></td>
+                <xsl:call-template name="problemColor"/>
+</tr>
         </xsl:template>
 </xsl:stylesheet>
