@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.core.controller;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.IStorage;
 import edu.csus.ecs.pc2.core.exception.ContestSecurityException;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -549,4 +550,8 @@ public class PrintController implements IInternalController {
         
     }
 
+    public void initializeStorage(IStorage storage) {
+        System.out.println("method initializeStorage");
+        System.out.println("    storage                : " + storage);
+    }
 }

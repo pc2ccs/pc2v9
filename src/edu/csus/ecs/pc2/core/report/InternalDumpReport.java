@@ -141,6 +141,13 @@ public class InternalDumpReport implements IReport {
         } else {
             printWriter.println("  Judges see: "+TeamDisplayMask.LOGIN_NAME_ONLY);
         }
+        
+        printWriter.println();
+        printWriter.println("Storage  (dir)  : "+contest.getStorage().getDirectoryName());
+        printWriter.println("        (class) : "+contest.getStorage().getClass().getName());
+        printWriter.println();
+
+        
     }
     
     private void printAccounts(PrintWriter printWriter, Account [] accounts) {
