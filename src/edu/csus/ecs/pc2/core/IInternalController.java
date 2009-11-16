@@ -370,6 +370,8 @@ public interface IInternalController {
      * @throws IOException
      */
     void initializeServer() throws IOException, ClassNotFoundException, FileSecurityException;
+    
+    void initializeStorage (IStorage storage);
 
     void addNewClientSettings(ClientSettings newClientSettings);
 

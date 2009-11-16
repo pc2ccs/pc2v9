@@ -741,6 +741,12 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             return temporaryClientUI.getContest();
         }
     }
+    
+    public void initializeStorage (IStorage storage) {
+        contest.setStorage (storage);
+        packetArchiver = new PacketArchiver(storage, "packets");
+        
+    }
 
     public void initializeServer() throws IOException, ClassNotFoundException, FileSecurityException {
 
@@ -750,9 +756,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 contest.setSiteNumber(1);
                 info("initializeServer STARTED this site as Site 1");
                 
-                FileSecurity fileSecurity = new FileSecurity("db.1");
-                contest.setStorage (fileSecurity);
-                packetArchiver = new PacketArchiver(fileSecurity, "packets");
+                String baseDirectoryName = "db."+contest.getSiteNumber();
+                FileSecurity fileSecurity = new FileSecurity(baseDirectoryName);
+                
+                initializeStorage(fileSecurity);
 
                 if (contest.getContestPassword() == null) {
                     String password = JOptionPane.showInputDialog(null, "Enter Contest Password");
@@ -1232,8 +1239,14 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         contest.addLocalLogin(clientId, connectionHandlerID);
     }
 
-    private void securityCheck(Packet packet, ConnectionHandlerID connectionHandlerID) {
+    private void securityCheck(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
+        
+        if (! contest.isLocalLoggedIn(packet.getSourceId())){
+            log.info("Security Violation for packet " + packet);
+            log.info("User " + packet.getSourceId() + " not local login ");
+            System.out.println("User " + packet.getSourceId() + " not local login "+packet);
         // TODO code throw an exception if the security fails.
+        }
 
         ConnectionHandlerID connectionHandlerIDAuthen = contest.getConnectionHandleID(packet.getSourceId());
         if (!connectionHandlerID.equals(connectionHandlerIDAuthen)) {
@@ -1245,21 +1258,24 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             log.info("Security Violation for packet " + packet);
             log.info("User " + packet.getSourceId() + " expected " + connectionHandlerIDAuthen);
             log.info("User " + packet.getSourceId() + " found    " + connectionHandlerID);
+            
+            throw new ContestSecurityException(packet.getSourceId(), connectionHandlerID, connectionHandlerID.toString()+" should be "+connectionHandlerIDAuthen);
+            
         }
-
+        
         ClientId fromId = packet.getSourceId();
-
+        
         if (!isThisSite(fromId.getSiteNumber())) {
             // Not from this site, should only come from a server.
-
+            
             if (!isServer(fromId)) {
-
+                
                 info("Security Violation expecting only server from site " + fromId.getSiteNumber() + " for packet " + packet);
                 log.info("Security Violation expecting only server from site " + fromId.getSiteNumber() + " for packet " + packet);
             }
         }
     }
-
+    
     private void handleServerLoginFailure(Packet packet) {
         // TODO rewrite handle this failure better
 
@@ -1283,7 +1299,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         contest.loginDenied(packet.getDestinationId(), null, message);
 
     }
-
+    
     /**
      * Looks up site number based on password.
      * 

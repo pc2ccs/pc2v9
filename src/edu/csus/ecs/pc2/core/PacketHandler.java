@@ -1051,6 +1051,7 @@ public class PacketHandler {
                 }
                 
                 FileSecurity fileSecurity = new FileSecurity("db." + clientId.getSiteNumber());
+                controller.initializeStorage(fileSecurity);
 
                 try {
                     fileSecurity.verifyPassword(uberSecretatPassworden.toCharArray());
