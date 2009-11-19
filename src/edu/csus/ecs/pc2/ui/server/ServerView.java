@@ -318,7 +318,7 @@ public class ServerView extends JFrame implements UIPlugin {
         
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                FrameUtilities.setFrameTitle(thisFrame, "Server", turnButtonsOn, new VersionInfo());
+                FrameUtilities.setFrameTitle(thisFrame, "Server (Site "+model.getSiteNumber()+")", turnButtonsOn, new VersionInfo());
             }
         });
     }
