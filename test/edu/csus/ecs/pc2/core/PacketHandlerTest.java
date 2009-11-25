@@ -6,6 +6,7 @@ import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.exception.ContestSecurityException;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
@@ -26,8 +27,6 @@ public class PacketHandlerTest extends TestCase {
     private IInternalContest contest;
 
     private IInternalController controller;
-
-    private PacketHandler packetHandler;
 
     protected void setUp() throws Exception {
         super.setUp();
@@ -71,11 +70,16 @@ public class PacketHandlerTest extends TestCase {
         ClientId serverId = new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
 
         Run run = contest.getRuns()[1];
+        
+        Profile profile = new Profile("testSecuritySet Profile");
+        contest.setProfile(profile);
 
         Packet packet = PacketFactory.createRunRequest(teamId, serverId, run, teamId, false, false);
+        packet.setContestIdentifier(contest.getContestIdentifier());
         try {
 
             ConnectionHandlerID connectionHandlerID = new ConnectionHandlerID("Client " + teamId.toString());
+            PacketHandler packetHandler = new PacketHandler(controller, contest);
             packetHandler.handlePacket(packet, connectionHandlerID);
 
             failTest("Expected packet to be NOT be allowed for: " + packet);
@@ -94,9 +98,12 @@ public class PacketHandlerTest extends TestCase {
         controller.setSecurityLevel(InternalController.SECURITY_NONE_LEVEL);
 
         packet = PacketFactory.createRunRequest(teamId, serverId, run, teamId, false, false);
+        packet.setContestIdentifier(contest.getContestIdentifier());
         try {
 
             ConnectionHandlerID connectionHandlerID = new ConnectionHandlerID("Client " + teamId.toString());
+            PacketHandler packetHandler = new PacketHandler(controller, contest);
+
             packetHandler.handlePacket(packet, connectionHandlerID);
 
             // success
