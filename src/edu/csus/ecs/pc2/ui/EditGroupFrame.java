@@ -5,6 +5,7 @@ import javax.swing.JFrame;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Group;
+import java.awt.Dimension;
 
 /**
  * 
@@ -42,7 +43,7 @@ public class EditGroupFrame extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(549, 278));
+        this.setSize(new Dimension(549, 242));
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setContentPane(getGroupPane());
         this.setTitle("New Group");
@@ -60,11 +61,17 @@ public class EditGroupFrame extends JFrame implements UIPlugin {
 
     }
 
-    public void setGroup(Group group) {
+    public void setGroup() {
+        setTitle("Add New Group");
+        getGroupPane().setGroup(null);
+    }
+
+    
+    public void setGroup(Group group, int groupId) {
         if (group == null) {
             setTitle("Add New Group");
         } else {
-            setTitle("Edit Group " + group.getDisplayName());
+            setTitle("Edit Group " +groupId + " - " + group.getDisplayName());
         }
         getGroupPane().setGroup(group);
     }

@@ -9,8 +9,8 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Filter;
-import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Group;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
  * Print All Group Information.
@@ -43,8 +43,10 @@ public class GroupsReport implements IReport {
         Group [] groups = contest.getGroups();
         
         printWriter.println("-- " + groups.length + " Groups --");
+        
+        int groupNumber = 1;
         for (Group group : groups) {
-            printWriter.println("  '" + group + "' id=" + group.getElementId());
+            printWriter.println("  '" + group + "' id=" + groupNumber+ "  element id "+group.getElementId());
             String site = "<NONE>";
             if (group.getSite() != null) {
                 site = contest.getSite(group.getSite().getSiteNumber()).toString();
@@ -52,6 +54,7 @@ public class GroupsReport implements IReport {
             printWriter.println("    Site                  : " + site);
             printWriter.println("    External Id           : " + group.getGroupId());
             printWriter.println("    Display On Scoreboard : " + group.isDisplayOnScoreboard());
+            groupNumber ++;
         }
     }
 

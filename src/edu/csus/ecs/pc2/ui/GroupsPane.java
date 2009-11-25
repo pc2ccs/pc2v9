@@ -105,7 +105,7 @@ public class GroupsPane extends JPanePlugin {
         if (groupListBox == null) {
             groupListBox = new MCLB();
 
-            Object[] cols = { "Display Name", "PC^2 Site", "Id" , "On Scoreboard"};
+            Object[] cols = { "Id", "Display Name", "PC^2 Site", "External Id" , "On Scoreboard"};
             groupListBox.addColumns(cols);
             
             groupListBox.autoSizeAllColumns();
@@ -116,35 +116,38 @@ public class GroupsPane extends JPanePlugin {
     public void updateGroupRow(final Group group) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                Object[] objects = buildGroupRow(group);
                 int rowNumber = groupListBox.getIndexByKey(group.getElementId());
                 if (rowNumber == -1) {
+                    rowNumber = groupListBox.getRowCount() + 1;
+                    Object[] objects = buildGroupRow(group, rowNumber);
                     groupListBox.addRow(objects, group.getElementId());
                 } else {
+                    Object[] objects = buildGroupRow(group, rowNumber);
                     groupListBox.replaceRow(objects, rowNumber);
                 }
                 groupListBox.autoSizeAllColumns();
-//                groupListBox.sort();
+                // groupListBox.sort();
                 getEditButton().setEnabled(groupListBox.getRowCount() > 0);
             }
         });
     }
 
-    protected Object[] buildGroupRow(Group group) {
+    protected Object[] buildGroupRow(Group group, int rowNumber) {
 
-        // Object[] cols = { "Display Name", "PC^2 Site", "Id", "On Scoreboard" };
+//        Object[] cols = { "Id", "Display Name", "PC^2 Site", "External Id" , "On Scoreboard"};
 
         int numberColumns = groupListBox.getColumnCount();
         Object[] c = new String[numberColumns];
 
-        c[0] = group.toString();
+        c[0] = "" + rowNumber; 
+        c[1] = group.toString();
         if (group.getSite() == null) {
-            c[1] = "<NONE SELECTED>";
+            c[2] = "<NONE SELECTED>";
         } else {
-            c[1] = getContest().getSite(group.getSite().getSiteNumber()).toString();
+            c[2] = getContest().getSite(group.getSite().getSiteNumber()).toString();
         }
-        c[2] = Integer.valueOf(group.getGroupId()).toString();
-        c[3] = Boolean.toString(group.isDisplayOnScoreboard());
+        c[3] = Integer.valueOf(group.getGroupId()).toString();
+        c[4] = Boolean.toString(group.isDisplayOnScoreboard());
         return c;
     }
 
@@ -152,14 +155,16 @@ public class GroupsPane extends JPanePlugin {
         groupListBox.removeAllRows();
         Group[] groups = getContest().getGroups();
 
+        int rowNumber = 1;
         for (Group group : groups) {
-            addGroupRow(group);
+            addGroupRow(group, rowNumber);
+            rowNumber ++;
         }
         getEditButton().setEnabled(groupListBox.getRowCount() > 0);
     }
 
-    private void addGroupRow(Group group) {
-        Object[] objects = buildGroupRow(group);
+    private void addGroupRow(Group group, int rowNumber) {
+        Object[] objects = buildGroupRow(group, rowNumber);
         groupListBox.addRow(objects, group.getElementId());
         groupListBox.autoSizeAllColumns();
     }
@@ -221,7 +226,7 @@ public class GroupsPane extends JPanePlugin {
     }
 
     protected void addNewGroup() {
-        editGroupFrame.setGroup(null);
+        editGroupFrame.setGroup();
         editGroupFrame.setVisible(true);
     }
 
@@ -256,7 +261,7 @@ public class GroupsPane extends JPanePlugin {
             ElementId elementId = (ElementId) groupListBox.getKeys()[selectedIndex];
             Group groupToEdit = getContest().getGroup(elementId);
 
-            editGroupFrame.setGroup(groupToEdit);
+            editGroupFrame.setGroup(groupToEdit, selectedIndex + 1);
             editGroupFrame.setVisible(true);
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception logged ", e);
