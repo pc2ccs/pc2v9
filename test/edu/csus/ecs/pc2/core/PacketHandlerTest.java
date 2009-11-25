@@ -35,7 +35,7 @@ public class PacketHandlerTest extends TestCase {
         contest = sampleContest.createContest(2, 4, 12, 6, true);
         controller = sampleContest.createController(contest, true, false);
 
-        String loadFile = "samps" + File.separator + "Sumit.java";
+        String loadFile = "samps" + File.separator + "src" + File.separator + "Sumit.java";
         File dir = new File(loadFile);
         if (!dir.exists()) {
             // TODO, try to find this path in the environment
@@ -51,7 +51,6 @@ public class PacketHandlerTest extends TestCase {
         Run[] runs = sampleContest.createRandomRuns(contest, 22, true, true, true);
         sampleContest.addRuns(contest, runs, loadFile);
 
-        packetHandler = new PacketHandler(controller, contest);
 
     }
 
