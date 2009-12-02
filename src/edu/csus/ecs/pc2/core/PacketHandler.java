@@ -165,7 +165,7 @@ public class PacketHandler {
                 break;
             case RUN_NOTAVAILABLE:
                 // Run not available from server
-                handleRunAvailable (packet);
+                handleRunNotAvailable(packet);
                 break;
             case FORCE_DISCONNECTION:
                 sendForceDisconnection(packet);
@@ -337,19 +337,27 @@ public class PacketHandler {
     }
 
 
-    private void handleRunUnCheckout(Packet packet, ConnectionHandlerID connectionHandlerID) throws IOException, ClassNotFoundException, FileSecurityException {
-        Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
-        ClientId whoCanceledId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-        cancelRun(packet, run, whoCanceledId, connectionHandlerID);
-    }
+    /**
+     * 
+     * @param packet
+     */
+    private void handleRunNotAvailable(Packet packet) {
 
-    private void handleRunAvailable(Packet packet) {
         Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
         contest.runNotAvailable(run);
 
         if (isServer()) {
-            sendToJudgesAndOthers(packet, isThisSite(run));
+            ClientId clientId = packet.getDestinationId();
+            if (isThisSite(clientId)) {
+                controller.sendToClient(packet);
+            }
         }
+    }
+    
+    private void handleRunUnCheckout(Packet packet, ConnectionHandlerID connectionHandlerID) throws IOException, ClassNotFoundException, FileSecurityException {
+        Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
+        ClientId whoCanceledId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+        cancelRun(packet, run, whoCanceledId, connectionHandlerID);
     }
 
     private void handleRunSubmissionConfirmation(Packet packet) throws IOException, ClassNotFoundException, FileSecurityException {
