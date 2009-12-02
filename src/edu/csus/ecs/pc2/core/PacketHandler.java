@@ -164,13 +164,9 @@ public class PacketHandler {
                 break;
             case RUN_NOTAVAILABLE:
                 // Run not available from server
-                run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
-                contest.runNotAvailable(run);
-
-                if (isServer()) {
-                    sendToJudgesAndOthers(packet, isThisSite(run));
-                }
+                handleRunNotAvailable (packet);
                 break;
+                
             case FORCE_DISCONNECTION:
                 sendForceDisconnection(packet);
                 break;
@@ -334,6 +330,23 @@ public class PacketHandler {
         info("handlePacket end " + packet);
     }
 
+
+    /**
+     * 
+     * @param packet
+     */
+    private void handleRunNotAvailable(Packet packet) {
+
+        Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
+        contest.runNotAvailable(run);
+
+        if (isServer()) {
+            ClientId clientId = packet.getDestinationId();
+            if (isThisSite(clientId)) {
+                controller.sendToClient(packet);
+            }
+        }
+    }
 
     private void handleRunExecutionStatus(Packet packet, ConnectionHandlerID connectionHandlerID) {
 
