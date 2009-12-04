@@ -4,6 +4,9 @@ import javax.swing.JFrame;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Profile;
+
+import java.awt.Dimension;
 
 /**
  * 
@@ -35,9 +38,11 @@ public class ProfileSaveFrame extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(562, 293));
+        this.setSize(new Dimension(562, 361));
         this.setTitle("Export Profile Settings");
         this.setContentPane(getProfileSavePane());
+        
+        FrameUtilities.centerFrame(this);
 
     }
 
@@ -63,8 +68,7 @@ public class ProfileSaveFrame extends JFrame implements UIPlugin {
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
-        // TODO Auto-generated method stub
-
+        getProfileSavePane().setContestAndController(inContest, inController);
     }
 
     public String getPluginTitle() {
@@ -73,6 +77,15 @@ public class ProfileSaveFrame extends JFrame implements UIPlugin {
 
     public void setSaveButtonName(String name) {
         getProfileSavePane().setSaveButtonName(name);
+    }
+
+    public void populateGUI(Profile profile) {
+        getProfileSavePane().populateGUI(profile);
+    }
+
+    public void populateGUI() {
+        getProfileSavePane().populateGUI();
+        
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

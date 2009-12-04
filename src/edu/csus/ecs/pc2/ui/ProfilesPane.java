@@ -127,7 +127,7 @@ public class ProfilesPane extends JPanePlugin {
     private JButton getSwitchButton() {
         if (switchButton == null) {
             switchButton = new JButton();
-            switchButton.setEnabled(true);
+            switchButton.setEnabled(false);
             switchButton.setMnemonic(java.awt.event.KeyEvent.VK_W);
             switchButton.setPreferredSize(new java.awt.Dimension(100, 26));
             switchButton.setLocation(new java.awt.Point(497, 85));
@@ -254,7 +254,7 @@ public class ProfilesPane extends JPanePlugin {
             exportButton = new JButton();
             exportButton.setText("Export");
             exportButton.setMnemonic(java.awt.event.KeyEvent.VK_X);
-            exportButton.setEnabled(true);
+            exportButton.setEnabled(false);
             exportButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     exportProfile();
@@ -286,6 +286,7 @@ public class ProfilesPane extends JPanePlugin {
 
     protected void cloneProfile() {
         getProfileSaveFrame().setTitle("Clone settings for " + getProfileName());
+        getProfileSaveFrame().populateGUI(getContest().getProfile());
         getProfileSaveFrame().setSaveButtonName(ProfileSavePane.CLONE_BUTTON_NAME);
         getProfileSaveFrame().setVisible(true);
     }
@@ -295,13 +296,15 @@ public class ProfilesPane extends JPanePlugin {
     }
 
     protected void newProfile() {
-        // TODO code newProfile
-
-        showMessage("New Profile, almost coded");
+        getProfileSaveFrame().setTitle("New Profile ");
+        getProfileSaveFrame().populateGUI();
+        getProfileSaveFrame().setSaveButtonName(ProfileSavePane.NEW_BUTTON_NAME);
+        getProfileSaveFrame().setVisible(true);
     }
 
     protected void exportProfile() {
         getProfileSaveFrame().setTitle("Export settings " + getProfileName());
+        getProfileSaveFrame().populateGUI(getContest().getProfile());
         getProfileSaveFrame().setSaveButtonName(ProfileSavePane.EXPORT_BUTTON_NAME);
         getProfileSaveFrame().setVisible(true);
     }
@@ -314,7 +317,14 @@ public class ProfilesPane extends JPanePlugin {
             return;
         }
 
-        showMessage("Switch Profile, almost coded");
+        ProfileWrapper wrapper = (ProfileWrapper) getProfileComboBox().getSelectedItem();
+
+        if (wrapper.getProfile().equals(getContest().getProfile())) {
+            showMessage("Currently using profile '" + wrapper + "' (no need to switch)");
+            return;
+        }
+
+        showMessage("Switch Profile to: " + wrapper);
     }
 
     protected void renameProfile() {
@@ -362,24 +372,24 @@ public class ProfilesPane extends JPanePlugin {
     protected void resetContest() {
 
         String siteContestClockRunning = "";
-        
-        ContestTime [] contestTimes = getContest().getContestTimes();
+
+        ContestTime[] contestTimes = getContest().getContestTimes();
         Arrays.sort(contestTimes, new ContestTimeComparator());
-        
+
         int numberSites = 0; // number of sites with contest clock running/started
 
         for (ContestTime contestTime : contestTimes) {
             if (contestTime.isContestRunning() && siteConnected(contestTime.getSiteNumber())) {
                 Site site = getContest().getSite(contestTime.getSiteNumber());
-                siteContestClockRunning = siteContestClockRunning + ", "+site.format(Site.LONG_NAME_PATTERN);
-                numberSites ++;
+                siteContestClockRunning = siteContestClockRunning + ", " + site.format(Site.LONG_NAME_PATTERN);
+                numberSites++;
             }
         }
 
         if (numberSites != 0) {
             siteContestClockRunning = siteContestClockRunning.substring(2); // remove ", " off front of string to make
             String sitePhrase = "a site";
-            if (numberSites > 1){
+            if (numberSites > 1) {
                 sitePhrase = numberSites + " sites";
             }
             JOptionPane.showMessageDialog(this, "Contest Clock not stopped at " + sitePhrase + " (" + siteContestClockRunning + ")\n All contest clocks must be stopped", "Unable to reset",
@@ -392,8 +402,8 @@ public class ProfilesPane extends JPanePlugin {
     }
 
     private boolean siteConnected(int siteNumber) {
-        ClientId serverId = new ClientId(siteNumber,Type.SERVER, 0);
-        return getContest().isLocalLoggedIn(serverId) || isThisSite (siteNumber);
+        ClientId serverId = new ClientId(siteNumber, Type.SERVER, 0);
+        return getContest().isLocalLoggedIn(serverId) || isThisSite(siteNumber);
     }
 
     private boolean isThisSite(int siteNumber) {
@@ -409,31 +419,76 @@ public class ProfilesPane extends JPanePlugin {
 
         resetContestFrame.setVisible(true);
     }
-    
+
     @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
 
+        getProfileSaveFrame().setContestAndController(inContest, inController);
+
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 Profile profile = getContest().getProfile();
-                updateProfileInformation (profile);
+                updateProfileInformation(profile);
+                refreshProfilesList();
             }
+
         });
-        
+
         inContest.addProfileListener(new ProfileListenerImplementation());
     }
-    
+
+    class ProfileWrapper {
+        private Profile profile;
+
+        public Profile getProfile() {
+            return profile;
+        }
+
+        public ProfileWrapper(Profile profile) {
+            this.profile = profile;
+        }
+
+        @Override
+        public String toString() {
+            return profile.getName();
+        }
+    }
+
+    protected void refreshProfilesList() {
+
+        // TODO remove this debugging code
+//        Profile profile1 = new Profile("Contest ONE");
+//        getContest().addProfile(profile1);
+//        profile1 = new Profile("Contest TWO");
+//        getContest().addProfile(profile1);
+//        profile1 = new Profile("Contest THREE");
+//        getContest().addProfile(profile1);
+
+        Profile[] profiles = getContest().getProfiles();
+
+        getSwitchButton().setEnabled(false);
+        if (profiles.length > 1) {
+
+            for (Profile profile : profiles) {
+                getProfileComboBox().addItem(new ProfileWrapper(profile));
+            }
+            getSwitchButton().setEnabled(true);
+        }
+
+    }
+
     private void updateProfileInformation(Profile profile) {
-        
-        if (profile != null){
+
+        if (profile != null) {
             getProfileTextField().setText(profile.getName());
-            profileNameLabel.setToolTipText("Contest Profile Name "+profile.getContestId());
+            profileNameLabel.setToolTipText("Contest Profile Name " + profile.getContestId());
         }
     }
 
     /**
      * Profile Listener Implementation
+     * 
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
@@ -447,7 +502,7 @@ public class ProfilesPane extends JPanePlugin {
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
                     Profile profile = getContest().getProfile();
-                    updateProfileInformation (profile);
+                    updateProfileInformation(profile);
                 }
             });
         }
