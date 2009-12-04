@@ -1238,14 +1238,18 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
         contest.addLocalLogin(clientId, connectionHandlerID);
     }
+    
+    boolean isLoggedIn (ClientId clientId){
+        return contest.isRemoteLoggedIn(clientId) || contest.isLocalLoggedIn(clientId);
+    }
 
     private void securityCheck(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
         
-        if (! contest.isLocalLoggedIn(packet.getSourceId())){
+        if (!isLoggedIn(packet.getSourceId())) {
             log.info("Security Violation for packet " + packet);
-            log.info("User " + packet.getSourceId() + " not local login ");
-            System.out.println("User " + packet.getSourceId() + " not local login "+packet);
-        // TODO code throw an exception if the security fails.
+            log.info("User " + packet.getSourceId() + " not logged in ");
+            System.out.println("User " + packet.getSourceId() + " not logged in " + packet);
+            // TODO code throw an exception if the security fails.
         }
 
         ConnectionHandlerID connectionHandlerIDAuthen = contest.getConnectionHandleID(packet.getSourceId());
