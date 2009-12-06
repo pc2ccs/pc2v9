@@ -5,6 +5,11 @@ package edu.csus.ecs.pc2.core.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 /**
@@ -59,6 +64,18 @@ public final class JUnitUtilities {
         System.out.println("java.class.path : " + cp);
         System.out.println("java.library.path : " + System.getProperty("java.library.path"));
         System.out.println("CLASSPATH : " + System.getenv("CLASSPATH"));
+        Properties props = System.getProperties();
+        Enumeration<Object> keys = props.keys();
+        while (keys.hasMoreElements()) {
+            String key = (String) keys.nextElement();
+            System.out.println(key+": "+props.get(key));
+        }
+        Map<String,String> maps = System.getenv();
+        Set<String> set = maps.keySet();
+        for (Iterator<String> iterator = set.iterator(); iterator.hasNext();) {
+            String string = (String) iterator.next();
+            System.out.println(string+" : "+maps.get(string));
+        }
         StringTokenizer st = new StringTokenizer(cp, File.pathSeparator);
         while (st.hasMoreTokens()) {
             String token = st.nextToken();
