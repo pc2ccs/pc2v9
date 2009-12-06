@@ -85,8 +85,11 @@ public final class JUnitUtilities {
     private static String search(String fileOrDir, String...dirs) {
         for (String dir : dirs) {
             File location = new File(dir+File.separator+fileOrDir);
+            System.out.println("Looking in "+dir+" for "+fileOrDir);
             if (location != null && location.exists()) {
                 try {
+                    System.out.print("found in "+dir+" eg ");
+                    System.out.println(new File(dir).getCanonicalPath());
                     return(new File(dir).getCanonicalPath());
                 } catch (IOException e) {
                     System.out.println("failed to resolve "+location.toString());
