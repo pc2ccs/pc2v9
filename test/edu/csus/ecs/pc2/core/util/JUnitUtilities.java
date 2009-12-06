@@ -56,9 +56,12 @@ public final class JUnitUtilities {
     private static String searchCLASSPATH(String fileOrDir) {
         String location = null;
         String cp = System.getProperty("java.class.path");
+        System.out.println("java.class.path : " + cp);
+        System.out.println("CLASSPATH : " + System.getProperty("CLASSPATH"));
         StringTokenizer st = new StringTokenizer(cp, File.pathSeparator);
         while (st.hasMoreTokens()) {
             String token = st.nextToken();
+            System.out.println("token="+token);
             File dir = new File(token);
             if (dir.exists()) {
                 if (dir.isFile() && dir.toString().endsWith("pc2.jar")) {
