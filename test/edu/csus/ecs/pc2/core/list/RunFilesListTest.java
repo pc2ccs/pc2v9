@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core.list;
 
+import java.io.File;
 import java.io.IOException;
 
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -7,6 +8,7 @@ import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
+import edu.csus.ecs.pc2.core.util.JUnitUtilities;
 import junit.framework.TestCase;
 
 /**
@@ -18,6 +20,29 @@ import junit.framework.TestCase;
 
 // $HeadURL$
 public class RunFilesListTest extends TestCase {
+
+    private File loadData;
+    private String testDir;
+
+    protected void setUp() throws Exception {
+        testDir = "testdata";
+        String projectPath = JUnitUtilities.locate(testDir);
+        if (projectPath == null) {
+            throw new Exception("Unable to locate "+testDir);
+        }
+        testDir=projectPath+File.separator+testDir+File.separator;
+        String loadFile = testDir + "Sumit.java";
+        loadData = new File(loadFile);
+        if (!loadData.exists()) {
+            System.err.println("Could not find " + loadFile);
+            throw new Exception("Could not find "+ loadFile+" in "+testDir);
+        }
+       super.setUp();
+    }
+
+    protected void tearDown() throws Exception {
+        super.tearDown();
+    }
 
     public void testSingleFile() throws IOException, ClassNotFoundException, FileSecurityException {
 
@@ -32,7 +57,8 @@ public class RunFilesListTest extends TestCase {
         Run theRun = runs[0];
         Run secondRun = runs[1];
 
-        RunFiles runFiles = new RunFiles(theRun, "samps/Sumit.java");
+
+        RunFiles runFiles = new RunFiles(theRun, loadData.getAbsolutePath());
         filesList.add(theRun, runFiles);
 
         RunFiles runFiles2 = filesList.getRunFiles(theRun);
@@ -43,7 +69,7 @@ public class RunFilesListTest extends TestCase {
         assertNull(runFiles2);
 
         // Add first
-        runFiles = new RunFiles(theRun, "samps/Sumit.java");
+        runFiles = new RunFiles(theRun, loadData.getAbsolutePath());
         filesList.add(theRun, runFiles);
 
         /**
@@ -82,7 +108,7 @@ public class RunFilesListTest extends TestCase {
         Run theRun = runs[0];
         Run secondRun = runs[1];
 
-        RunFiles runFiles = new RunFiles(theRun, "samps/Sumit.java");
+        RunFiles runFiles = new RunFiles(theRun, loadData.getAbsolutePath());
         filesList.add(theRun, runFiles);
 
         RunFiles runFiles2 = filesList.getRunFiles(theRun);
@@ -94,12 +120,12 @@ public class RunFilesListTest extends TestCase {
 
         // Add first run files
         String filename1 = "Sumit.java"; 
-        runFiles = new RunFiles(theRun, "samps/"+filename1);
+        runFiles = new RunFiles(theRun, testDir+filename1);
         filesList.add(theRun, runFiles);
 
         // Add second run files
         String filename2 = "hello.java";
-        RunFiles secondRunFiles = new RunFiles(secondRun, "samps/"+filename2);
+        RunFiles secondRunFiles = new RunFiles(secondRun, testDir+filename2);
         filesList.add(secondRun, secondRunFiles);
 
         runFiles2 = filesList.getRunFiles(theRun);

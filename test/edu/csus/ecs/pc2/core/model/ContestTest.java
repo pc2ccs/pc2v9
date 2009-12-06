@@ -1,10 +1,12 @@
 package edu.csus.ecs.pc2.core.model;
 
+import java.io.File;
 import java.io.IOException;
 
 import edu.csus.ecs.pc2.core.exception.RunUnavailableException;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
+import edu.csus.ecs.pc2.core.util.JUnitUtilities;
 import junit.framework.TestCase;
 
 /**
@@ -61,7 +63,20 @@ public class ContestTest extends TestCase {
         ClientId id = account.getClientId();
 
         Run submittedRun = createRun (contest, id);
-        RunFiles runFiles = new RunFiles(submittedRun, "samps/Sumit.java");
+        // Directory where test data is
+        String testDir = "testdata";
+        String projectPath=JUnitUtilities.locate(testDir);
+        if (projectPath == null) {
+            throw new IOException("Unable to locate "+testDir);
+        }
+
+        String loadFile = projectPath + File.separator+ testDir + File.separator + "Sumit.java";
+        File dir = new File(loadFile);
+        if (!dir.exists()) {
+            System.err.println("could not find " + loadFile);
+            throw new IOException("Unable to locate "+loadFile);
+        }
+        RunFiles runFiles = new RunFiles(submittedRun, dir.getAbsolutePath());
         
         contest.acceptRun(submittedRun, runFiles);
         

@@ -3,6 +3,8 @@ package edu.csus.ecs.pc2.core;
 import java.io.File;
 import java.net.MalformedURLException;
 
+import edu.csus.ecs.pc2.core.util.JUnitUtilities;
+
 import junit.framework.TestCase;
 
 /**
@@ -12,15 +14,16 @@ import junit.framework.TestCase;
 public class IniTest extends TestCase {
     private String loadFile = "pc2v9.ini";
     protected void setUp() throws Exception {
-        File dir = new File(loadFile);
-        if (!dir.exists()) {
-            // TODO, try to find this path in the environment
-            dir = new File("projects" + File.separator + "pc2v9" + File.separator + loadFile);
-            if (dir.exists()) {
-                loadFile = dir.toString();
-            } else {
-                System.err.println("could not find " + loadFile);
-            }
+        String projectPath=JUnitUtilities.locate(loadFile);
+        if (projectPath == null) {
+            throw new Exception("Unable to locate "+loadFile);
+        }
+        File dir = new File(projectPath + File.separator + loadFile);
+        if (dir.exists()) {
+            loadFile = dir.toString();
+        } else {
+            System.err.println("could not find " + loadFile);
+            throw new Exception("Unable to locate "+loadFile);
         }
     }
 

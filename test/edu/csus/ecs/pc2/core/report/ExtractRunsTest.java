@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core.report;
 
+import java.io.File;
 import java.io.IOException;
 
 import edu.csus.ecs.pc2.core.log.Log;
@@ -17,6 +18,7 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.security.FileSecurity;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
+import edu.csus.ecs.pc2.core.util.JUnitUtilities;
 
 /**
  * Extract Runs test.
@@ -74,7 +76,20 @@ public final class ExtractRunsTest {
         contestTime.startContestClock();
         contest.updateContestTime(contestTime);
 
-        SerializedFile sFile = new SerializedFile("samps/Sumit.java");
+        // Directory where test data is
+        String testDir = "testdata";
+        String projectPath=JUnitUtilities.locate(testDir);
+        if (projectPath == null) {
+            projectPath = "."; //$NON-NLS-1$
+            System.err.println("ExtractRunsTest: Unable to locate "+testDir);
+        }
+
+        String loadFile = projectPath + File.separator+ testDir + File.separator + "Sumit.java";
+        File dir = new File(loadFile);
+        if (!dir.exists()) {
+            System.err.println("could not find " + loadFile);
+        }
+        SerializedFile sFile = new SerializedFile(dir.getAbsolutePath());
 
         Run[] allRuns = sampleContest.createRandomRuns(contest, 12, true, true, true);
         for (Run run : allRuns) {

@@ -8,6 +8,7 @@ import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.IResultsParser;
 import edu.csus.ecs.pc2.core.execute.XMLResultsParser;
+import edu.csus.ecs.pc2.core.util.JUnitUtilities;
 
 /**
  * JUnit test cases for Validator.
@@ -29,32 +30,24 @@ public class ValidatorTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         
-        // Project path for JUnit with Cruise Control
-        String projectPath = "projects" + File.separator + "pc2v9";
-        
         // Directory where test data is
         String testDir = "testdata";
-        
-        File dir = new File(testDir);
-        if (!dir.exists()) {
-            
-            String testDirectoryName = projectPath + File.separator + testDir;
+        String projectPath=JUnitUtilities.locate(testDir);
+        if (projectPath == null) {
+            throw new Exception("Unable to locate "+testDir);
+        }
+        String testDirectoryName = projectPath + File.separator + testDir;
 
-            // TODO, try to find this path in the environment
-            dir = new File(testDirectoryName);
+        File dir = new File(testDirectoryName);
+        
+        if (dir.exists()) {
+            testDataDirectoryName = testDirectoryName + File.separator + "validator";
+            tempOutputDirectoryName = testDataDirectoryName + File.separator + "output";
             
-            if (dir.exists()) {
-                testDataDirectoryName = testDirectoryName + File.separator + "validator";
-                tempOutputDirectoryName = testDataDirectoryName + File.separator + "output";
-                
-                // Create test output directory
-                Utilities.insureDir(tempOutputDirectoryName);
-            } else {
-                throw new Exception ("Could not find "+testDir+" under "+testDirectoryName);
-            }
-        } else {
             // Create test output directory
             Utilities.insureDir(tempOutputDirectoryName);
+        } else {
+            throw new Exception ("Could not find "+testDir+" under "+testDirectoryName);
         }
     }
     

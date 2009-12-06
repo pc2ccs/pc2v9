@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core.scoring;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Arrays;
@@ -40,6 +41,7 @@ import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
+import edu.csus.ecs.pc2.core.util.JUnitUtilities;
 
 /**
  * Test Scoring Algorithm.
@@ -65,11 +67,26 @@ public class DefaultScoringAlgorithmTest extends TestCase {
     // alt4: 5 0 20
     private Properties alt4 = populateProperties(5, 0, 20);
 
+    private File loadData;
+
     protected void setUp() throws Exception {
         super.setUp();
     
         log = new Log("DefaultScoringAlgorithmTest");
         StaticLog.setLog(log);
+        // Directory where test data is
+        String testDir = "testdata";
+        String projectPath=JUnitUtilities.locate(testDir);
+        if (projectPath == null) {
+            throw new Exception("Unable to locate "+testDir);
+        }
+
+        String loadFile = projectPath + File.separator+ testDir + File.separator + "Sumit.java";
+        loadData = new File(loadFile);
+        if (!loadData.exists()) {
+            System.err.println("could not find " + loadFile);
+            throw new Exception("Unable to locate "+loadFile);
+        }
         
     }
 
@@ -260,7 +277,14 @@ public class DefaultScoringAlgorithmTest extends TestCase {
         
         initContestData(contest);
         Run run = getARun(contest);
-        RunFiles runFiles = new RunFiles(run, "samps/Sumit.java");
+        // Directory where test data is
+        String testDir = "testdata";
+        String projectPath=JUnitUtilities.locate(testDir);
+        if (projectPath == null) {
+            throw new IOException("Unable to locate "+testDir);
+        }
+
+        RunFiles runFiles = new RunFiles(run, loadData.getAbsolutePath());
         
         contest.addRun(run, runFiles, null);
         
@@ -280,7 +304,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
         
         initContestData(contest);
         Run run = getARun(contest, 5);
-        RunFiles runFiles = new RunFiles(run, "samps/Sumit.java");
+        RunFiles runFiles = new RunFiles(run, loadData.getAbsolutePath());
         
         contest.addRun(run, runFiles, null);
 
@@ -306,7 +330,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
      */
     public void createJudgedRun (IInternalContest contest, int judgementIndex, boolean solved) throws IOException, ClassNotFoundException, FileSecurityException {
         Run run = getARun(contest);
-        RunFiles runFiles = new RunFiles(run, "samps/Sumit.java");
+        RunFiles runFiles = new RunFiles(run, loadData.getAbsolutePath());
         
         contest.addRun(run, runFiles, null);
         
@@ -333,7 +357,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
      */
     public void createJudgedRun (IInternalContest contest, int judgementIndex, boolean solved, int elapsedMinutes) throws IOException, ClassNotFoundException, FileSecurityException{
         Run run = getARun(contest, elapsedMinutes);
-        RunFiles runFiles = new RunFiles(run, "samps/Sumit.java");
+        RunFiles runFiles = new RunFiles(run, loadData.getAbsolutePath());
         
         contest.addRun(run, runFiles, null);
         

@@ -2,6 +2,8 @@ package edu.csus.ecs.pc2.core.model;
 
 import java.io.File;
 
+import edu.csus.ecs.pc2.core.util.JUnitUtilities;
+
 import junit.framework.TestCase;
 /**
  * Tests for ProblemDataFiles.
@@ -14,16 +16,16 @@ public class ProblemDataFilesTest extends TestCase {
     private String loadDir = "testdata" + File.separator;
 
     protected void setUp() throws Exception {
-        File dir = new File(loadDir);
-        if (!dir.exists()) {
-            // TODO, try to find this path in the environment
-            // but for now, figure we are running in cruisecontrol
-            dir = new File("projects" + File.separator + "pc2v9" + File.separator + loadDir);
-            if (dir.exists()) {
-                loadDir = dir.toString() + File.separator;
-            } else {
-                System.err.println("could not find " + loadDir);
-            }
+        String projectPath=JUnitUtilities.locate(loadDir);
+        if (projectPath == null) {
+            throw new Exception("Unable to locate "+loadDir);
+        }
+        File dir = new File(projectPath + File.separator + loadDir);
+        if (dir.exists()) {
+            loadDir = dir.toString() + File.separator;
+        } else {
+            System.err.println("could not find " + loadDir);
+            throw new Exception("Unable to locate "+loadDir);
         }
         super.setUp();
     }

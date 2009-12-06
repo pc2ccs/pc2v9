@@ -9,6 +9,7 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.Site;
+import edu.csus.ecs.pc2.core.util.JUnitUtilities;
 
 import junit.framework.TestCase;
 
@@ -30,15 +31,16 @@ public class LoadICPCDataTest extends TestCase {
         super(arg0);
     }
     protected void setUp() throws Exception {
-        File dir = new File(loadDir);
-        if (!dir.exists()) {
-            // TODO, try to find this path in the environment
-            dir = new File("projects" + File.separator +"pc2v9" + File.separator + loadDir);
-            if (dir.exists()) {
-                loadDir=dir.toString() + File.separator;
-            } else {
-                System.err.println("could not find " + loadDir);
-            }
+        String projectPath=JUnitUtilities.locate(loadDir);
+        if (projectPath == null) {
+            throw new Exception("Unable to locate "+loadDir);
+        }
+        File dir = new File(projectPath + File.separator + loadDir);
+        if (dir.exists()) {
+            loadDir = dir.toString() + File.separator;
+        } else {
+            System.err.println("could not find " + loadDir);
+            throw new Exception("Unable to locate "+loadDir);
         }
         sites[0] = new Site("SOUTH", 2);
         sites[1] = new Site("NORTH", 1);

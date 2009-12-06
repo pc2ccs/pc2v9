@@ -23,6 +23,7 @@ import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
+import edu.csus.ecs.pc2.core.util.JUnitUtilities;
 
 /**
  * Test for InternalController.
@@ -46,16 +47,18 @@ public class ControllerTest extends TestCase {
         contest = sampleContest.createContest(2, 4, 12, 6, true);
         controller = sampleContest.createController(contest, true, false);
 
-        String loadFile = "samps" + File.separator + "src" + File.separator + "Sumit.java";
+        // Directory where test data is
+        String testDir = "testdata";
+        String projectPath=JUnitUtilities.locate(testDir);
+        if (projectPath == null) {
+            throw new Exception("Unable to locate "+testDir);
+        }
+
+        String loadFile = projectPath + File.separator+ testDir + File.separator + "Sumit.java";
         File dir = new File(loadFile);
         if (!dir.exists()) {
-            // TODO, try to find this path in the environment
-            dir = new File("projects" + File.separator + "pc2v9" + File.separator + loadFile);
-            if (!dir.exists()) {
-                System.err.println("could not find " + loadFile);
-            } else {
-                loadFile = dir.getAbsolutePath();
-            }
+            System.err.println("could not find " + loadFile);
+            throw new Exception("Unable to locate "+loadFile);
         }
 
         // Add 22 random runs
