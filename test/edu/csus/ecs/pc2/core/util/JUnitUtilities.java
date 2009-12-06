@@ -5,11 +5,6 @@ package edu.csus.ecs.pc2.core.util;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
 import java.util.StringTokenizer;
 
 /**
@@ -56,30 +51,23 @@ public final class JUnitUtilities {
                 }
             }
         }
+        // XXX grrr, there is nothing in System.getProperties() or System.getenv()
+        // that tells us where we are :(  as of 20091206
+        // XXX this is cruise control specific, and really should be changed
+        //    when a branch is copied off
+        String newBase = search(fileOrDir, "projects"+File.separator+"pc2v9"); //$NON-NLS-1$ //$NON-NLS-2$
+        if (newBase != null) {
+            baseDir=newBase;
+            return newBase;
+        }
         return null;
     }
     private static String searchCLASSPATH(String fileOrDir) {
         String location = null;
         String cp = System.getProperty("java.class.path");
-        System.out.println("java.class.path : " + cp);
-        System.out.println("java.library.path : " + System.getProperty("java.library.path"));
-        System.out.println("CLASSPATH : " + System.getenv("CLASSPATH"));
-        Properties props = System.getProperties();
-        Enumeration<Object> keys = props.keys();
-        while (keys.hasMoreElements()) {
-            String key = (String) keys.nextElement();
-            System.out.println(key+": "+props.get(key));
-        }
-        Map<String,String> maps = System.getenv();
-        Set<String> set = maps.keySet();
-        for (Iterator<String> iterator = set.iterator(); iterator.hasNext();) {
-            String string = (String) iterator.next();
-            System.out.println(string+" : "+maps.get(string));
-        }
         StringTokenizer st = new StringTokenizer(cp, File.pathSeparator);
         while (st.hasMoreTokens()) {
             String token = st.nextToken();
-            System.out.println("token="+token);
             File dir = new File(token);
             if (dir.exists()) {
                 if (dir.isFile() && dir.toString().endsWith("pc2.jar")) {
@@ -106,11 +94,8 @@ public final class JUnitUtilities {
     private static String search(String fileOrDir, String...dirs) {
         for (String dir : dirs) {
             File location = new File(dir+File.separator+fileOrDir);
-            System.out.println("Looking in "+dir+" for "+fileOrDir);
             if (location != null && location.exists()) {
                 try {
-                    System.out.print("found in "+dir+" eg ");
-                    System.out.println(new File(dir).getCanonicalPath());
                     return(new File(dir).getCanonicalPath());
                 } catch (IOException e) {
                     System.out.println("failed to resolve "+location.toString());
