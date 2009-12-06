@@ -57,6 +57,7 @@ public final class JUnitUtilities {
         String location = null;
         String cp = System.getProperty("java.class.path");
         System.out.println("java.class.path : " + cp);
+        System.out.println("java.library.path : " + System.getProperty("java.library.path"));
         System.out.println("CLASSPATH : " + System.getenv("CLASSPATH"));
         StringTokenizer st = new StringTokenizer(cp, File.pathSeparator);
         while (st.hasMoreTokens()) {
