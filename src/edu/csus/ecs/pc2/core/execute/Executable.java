@@ -15,6 +15,7 @@ import java.util.StringTokenizer;
 
 import javax.swing.JFileChooser;
 
+import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -1267,6 +1268,10 @@ public class Executable {
                 }
                 newString = replaceString(newString, "{:exitvalue}", Integer.toString(executionData.getExecuteExitValue()));
                 newString = replaceString(newString, "{:executetime}", Long.toString(executionData.getExecuteTimeMS()));
+            }
+            String pc2home = new VersionInfo().locateHome();
+            if (pc2home != null && pc2home.length() > 0) {
+                newString = replaceString(newString, "{:pc2home}", pc2home);
             }
         } catch (Exception e) {
             // TODO LOG
