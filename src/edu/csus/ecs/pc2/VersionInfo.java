@@ -336,6 +336,12 @@ public class VersionInfo {
                             .getCanonicalPath();
                     break;
                 }
+                // running under eclipse
+                if (dir.exists() && dir.isDirectory() 
+                        && dir.toString().endsWith(".classes")) {
+                    pc2home = new File(dir.toString() + File.separator + "..")
+                            .getCanonicalPath();
+                }
             }
         } catch (IOException e) {
             System.err.println("Trouble locating pc2home: " + e.getMessage());
