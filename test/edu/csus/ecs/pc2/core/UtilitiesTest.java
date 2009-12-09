@@ -95,4 +95,13 @@ public class UtilitiesTest extends TestCase {
             return string;
         }
     
+        public void testConvertLetter() {
+            int[] testCases = {1, 2, 5, 26, 27, 28, 30, 51, 52, 53, 702};
+            String[] expectedAnswers = {"A", "B", "E", "Z", "AA", "AB", "AD", "AY", "AZ", "BA", "ZZ"};
+            for (int i = 0; i < testCases.length; i++) {
+                String result=Utilities.convertNumber(testCases[i]);
+                assertEquals("testCase"+i+"("+testCases[i]+")", expectedAnswers[i],result);
+            }
+
+        }
 }

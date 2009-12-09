@@ -16,6 +16,7 @@ import java.util.StringTokenizer;
 import javax.swing.JFileChooser;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -1208,10 +1209,32 @@ public class Executable {
             // what should we do?
 
             if (inRun.getLanguageId() != null) {
-                newString = replaceString(newString, "{:language}", inRun.getLanguageId().toString());
+                Language[] langs=contest.getLanguages();
+                int index = 0;
+                for (int i = 0; i < langs.length; i++) {
+                    if (langs[i] != null && langs[i].getElementId().equals(inRun.getLanguageId())) {
+                        index=i+1;
+                        break;
+                    }
+                }
+                if (index > 0) {
+                    newString = replaceString(newString, "{:language}", index);
+                    newString = replaceString(newString, "{:languageletter}", Utilities.convertNumber(index));
+                }
             }
             if (inRun.getProblemId() != null) {
-                newString = replaceString(newString, "{:problem}", inRun.getProblemId().toString());
+                Problem[] problems=contest.getProblems();
+                int index = 0;
+                for (int i = 0; i < problems.length; i++) {
+                    if (problems[i] != null && problems[i].getElementId().equals(inRun.getProblemId())) {
+                        index=i+1;
+                        break;
+                    }
+                }
+                if (index > 0) {
+                    newString = replaceString(newString, "{:problem}", index);
+                    newString = replaceString(newString, "{:problemletter}", Utilities.convertNumber(index));
+                }
             }
             if (inRun.getSubmitter() != null) {
                 newString = replaceString(newString, "{:teamid}", inRun.getSubmitter().getClientNumber());
@@ -1252,6 +1275,7 @@ public class Executable {
 
         return newString;
     }
+
 
     /**
      * Return string minus last extension. <br>

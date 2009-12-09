@@ -24,6 +24,11 @@ import java.util.Vector;
 public final class Utilities {
     
     private static boolean debugMode = false;
+    /**
+     * LETTERS is a lookup always 1-26
+     * String.substring starts at 0, so letters begin at 1
+     */
+    private static final String LETTERS = " ABCDEFGHIJKLMNOPQRSTUVWXYZ"; 
 
     /**
      * Constructor is private as this is a utility class which
@@ -355,6 +360,33 @@ public final class Utilities {
         } else {
             return path.substring(lastIndex + 1);
         }
+    }
+
+    /**
+     * Converts index > 0 to an uppercase letter, eg 1 => 'A'
+     *
+     * @param index > 0 and index < 703 (A..ZZ)
+     * @return letter corresponding to number (base 26)
+     */
+    public static String convertNumber(int index) {
+        String letter = String.valueOf(index);
+        if (index > 26) {
+            int i2=index;
+            int count = 0;
+            while(index > 26) {
+                index = index - 26;
+                count++;
+            }
+            int mod=i2 -(count * 26);
+            letter = convertBase26Number(count)+convertBase26Number(mod);
+        } else {
+            letter = convertBase26Number(index);
+        }
+        return letter;
+    }
+
+    private static String convertBase26Number(int index) {
+        return LETTERS.substring(index, index+1);
     }
 
     public static String dirname(String path) {
