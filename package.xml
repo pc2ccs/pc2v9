@@ -66,14 +66,20 @@
                 <include name="mclb.jar"/>
             </zipfileset>
             <zipfileset dir="${samps.dir}" filemode="644" prefix="${release}/samps">
-                <exclude name="compile*"/>
+                <exclude name="**/compile*"/>
+                <exclude name="**/loopprint*"/>
                 <exclude name="sleep.exe"/>
-                <exclude name="validiff*"/>
+                <exclude name="**/validiff*"/>
+                <exclude name="**/rotate*"/>
+                <exclude name="**/distribute_score"/>
             </zipfileset>
             <zipfileset dir="${samps.dir}" filemode="755" prefix="${release}/samps">
-                <include name="compile*"/>
+                <include name="**/compile*"/>
+                <include name="**/loopprint*"/>
                 <include name="sleep.exe"/>
-                <include name="validiff*"/>
+                <include name="**/validiff*"/>
+                <include name="**/rotate*"/>
+                <include name="**/distribute_score"/>
             </zipfileset>
             <zipfileset dir="${data.dir}" filemode="755" prefix="${release}/samps/data"/>
             <!-- bug 353: copy api and other docs to release -->
@@ -98,15 +104,17 @@
         <tar destfile="${gzip.path}" basedir="${build.unpack.dir}" compression="gzip" excludes="${release}/bin/**,${release}/samps/**">
             <tarfileset mode="755" dir="${build.unpack.dir}">
                 <include name="${release}/bin/**"/>
-                <include name="${release}/samps/compile*"/>
+                <include name="${release}/samps/scripts/**"/>
                 <include name="${release}/samps/sleep.exe"/>
-                <include name="${release}/samps/validiff*"/>
+                <include name="${release}/samps/**/distribute_score**"/>
+                <include name="${release}/samps/**/rotate**"/>
             </tarfileset>
             <tarfileset mode="644" dir="${build.unpack.dir}">
                 <include name="${release}/samps/**"/>
-                <exclude name="${release}/samps/compile*"/>
+                <exclude name="${release}/samps/scripts/***"/>
                 <exclude name="${release}/samps/sleep.exe"/>
-                <exclude name="${release}/samps/validiff*"/>
+                <exclude name="${release}/samps/**/distribute_score**"/>
+                <exclude name="${release}/samps/**/rotate**"/>
             </tarfileset>
         </tar>
         <checksum file="${gzip.path}" algorithm="MD5" fileext=".md5.txt"/>
