@@ -224,10 +224,8 @@ public class ProblemsPane extends JPanePlugin {
                 if (pdf != null) {
                     newProblemDataFiles = pdf.copy(newProblem);
                 }
-                getController().addNewProblem(newProblem, newProblemDataFiles);
-                // TODO we should stall until our contest is updated with this problem
-                //  otherwise the edit may come up without the ProblemDataFiles
-                editProblemFrame.setProblem(newProblem);
+                // just bring up the ui, let the user add/cancel the copied problem
+                editProblemFrame.setProblem(newProblem, newProblemDataFiles);
                 editProblemFrame.setVisible(true);
             }
         } catch (Exception e) {

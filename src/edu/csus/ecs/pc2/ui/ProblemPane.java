@@ -861,6 +861,25 @@ public class ProblemPane extends JPanePlugin {
         return problem;
     }
 
+    public void setProblem(final Problem inProblem, final ProblemDataFiles problemDataFiles) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                populatingGUI = true;
+                setForm(inProblem,problemDataFiles);
+                getAddButton().setVisible(true);
+                getUpdateButton().setVisible(false);
+                enableUpdateButtons(true);
+
+                enableValidatorComponents();
+                enableRequiresInputDataComponents(problemRequiresDataCheckBox.isSelected());
+                enableProvideAnswerFileComponents(judgesHaveAnswerFiles.isSelected());
+
+                // select the general tab
+                getMainTabbedPane().setSelectedIndex(0);
+                populatingGUI = false;
+            }
+        });
+    }
     public void setProblem(final Problem problem) {
 
         this.problem = problem;
@@ -889,70 +908,7 @@ public class ProblemPane extends JPanePlugin {
             getAddButton().setVisible(false);
             getUpdateButton().setVisible(true);
 
-            problemNameTextField.setText(inProblem.getDisplayName());
-            timeOutSecondTextField.setText(inProblem.getTimeOutInSeconds() + "");
-            inputDataFileLabel.setText(inProblem.getDataFileName());
-
-            SerializedFile sFile = getController().getProblemDataFiles(inProblem).getJudgesDataFile();
-            if (sFile != null) {
-                inputDataFileLabel.setToolTipText(sFile.getAbsolutePath());
-            } else {
-                inputDataFileLabel.setToolTipText("");
-            }
-
-            answerFileNameLabel.setText(inProblem.getAnswerFileName());
-            sFile = getController().getProblemDataFiles(inProblem).getJudgesAnswerFile();
-            if (sFile != null) {
-                answerFileNameLabel.setToolTipText(sFile.getAbsolutePath());
-            } else {
-                answerFileNameLabel.setToolTipText("");
-            }
-
-            judgesHaveAnswerFiles.setSelected(inProblem.getAnswerFileName() != null);
-            problemRequiresDataCheckBox.setSelected(inProblem.getDataFileName() != null);
-
-            if (inProblem.isReadInputDataFromSTDIN()) {
-                fileRadioButton.setSelected(false);
-                stdinRadioButton.setSelected(true);
-            } else {
-                fileRadioButton.setSelected(true);
-                stdinRadioButton.setSelected(false);
-            }
-
-            getPc2ValidatorComboBox().setSelectedIndex(0);
-            getIgnoreCaseCheckBox().setSelected(true);
-            externalValidatorLabel.setText("");
-            externalValidatorLabel.setToolTipText("");
-
-            if (inProblem.isValidatedProblem()) {
-
-                if (inProblem.isUsingPC2Validator()) {
-                    getValidatorCommandLineTextBox().setText(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
-                    usePC2ValidatorRadioButton.setSelected(true);
-                    pc2ValidatorOptionComboBox.setSelectedIndex(inProblem.getWhichPC2Validator());
-                    ignoreCaseCheckBox.setSelected(inProblem.isIgnoreSpacesOnValidation());
-                } else {
-                    getValidatorCommandLineTextBox().setText(inProblem.getValidatorCommandLine());
-                    useExternalValidatorRadioButton.setSelected(true);
-                    externalValidatorLabel.setText(inProblem.getValidatorProgramName());
-                    externalValidatorLabel.setToolTipText(inProblem.getValidatorProgramName());
-                    sFile = getController().getProblemDataFiles(inProblem).getValidatorFile();
-                    if (sFile != null) {
-                        externalValidatorLabel.setToolTipText(sFile.getAbsolutePath());
-                    } else {
-                        externalValidatorLabel.setToolTipText("");
-                    }
-                }
-
-            } else {
-                getValidatorCommandLineTextBox().setText(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
-                useNOValidatatorRadioButton.setSelected(true);
-            }
-
-            getShowValidatorToJudges().setSelected(inProblem.isShowValidationToJudges());
-            getDoShowOutputWindowCheckBox().setSelected(!inProblem.isHideOutputWindow());
-            getShowCompareCheckBox().setSelected(inProblem.isShowCompareWindow());
-            getShowCompareCheckBox().setEnabled(getDoShowOutputWindowCheckBox().isSelected());
+            setForm(inProblem, getController().getProblemDataFiles(inProblem));
             
             try {
                 @SuppressWarnings("unused")
@@ -961,41 +917,8 @@ public class ProblemPane extends JPanePlugin {
                 e.printStackTrace();
             }
 
-            populateJudging(inProblem);
-
         } else {
-
-            getAddButton().setVisible(true);
-            getUpdateButton().setVisible(false);
-            addButton.setEnabled(true);
-            updateButton.setEnabled(false);
-
-            problemNameTextField.setText("");
-            timeOutSecondTextField.setText("120");
-            judgesHaveAnswerFiles.setSelected(false);
-            problemRequiresDataCheckBox.setSelected(false);
-
-            inputDataFileLabel.setText("");
-            inputDataFileLabel.setToolTipText("");
-            answerFileNameLabel.setText("");
-            answerFileNameLabel.setToolTipText("");
-
-            fileRadioButton.setSelected(false);
-            stdinRadioButton.setSelected(false);
-            useNOValidatatorRadioButton.setSelected(true);
-            pc2ValidatorOptionComboBox.setSelectedIndex(0);
-            ignoreCaseCheckBox.setSelected(false);
-
-            externalValidatorLabel.setText("");
-            externalValidatorLabel.setToolTipText("");
-
-            getValidatorCommandLineTextBox().setText(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
-            getShowValidatorToJudges().setSelected(true);
-            getDoShowOutputWindowCheckBox().setSelected(true);
-            getShowCompareCheckBox().setSelected(true);
-            getShowCompareCheckBox().setEnabled(getDoShowOutputWindowCheckBox().isSelected());
-
-            populateJudging(null);
+            clearForm();
         }
 
         enableValidatorComponents();
@@ -1007,6 +930,80 @@ public class ProblemPane extends JPanePlugin {
         // select the general tab
         getMainTabbedPane().setSelectedIndex(0);
         populatingGUI = false;
+    }
+
+    /**
+     * This populates the form, no error checking is performed.
+     * populatingGUI should be set to true before calling this.
+     * @param inProblem
+     * @param problemDataFiles
+     */
+    private void setForm(Problem inProblem, ProblemDataFiles problemDataFiles) {
+        problemNameTextField.setText(inProblem.getDisplayName());
+        timeOutSecondTextField.setText(inProblem.getTimeOutInSeconds() + "");
+        inputDataFileLabel.setText(inProblem.getDataFileName());
+
+        SerializedFile sFile = problemDataFiles.getJudgesDataFile();
+        if (sFile != null) {
+            inputDataFileLabel.setToolTipText(sFile.getAbsolutePath());
+        } else {
+            inputDataFileLabel.setToolTipText("");
+        }
+
+        answerFileNameLabel.setText(inProblem.getAnswerFileName());
+        sFile = problemDataFiles.getJudgesAnswerFile();
+        if (sFile != null) {
+            answerFileNameLabel.setToolTipText(sFile.getAbsolutePath());
+        } else {
+            answerFileNameLabel.setToolTipText("");
+        }
+
+        judgesHaveAnswerFiles.setSelected(inProblem.getAnswerFileName() != null);
+        problemRequiresDataCheckBox.setSelected(inProblem.getDataFileName() != null);
+
+        if (inProblem.isReadInputDataFromSTDIN()) {
+            fileRadioButton.setSelected(false);
+            stdinRadioButton.setSelected(true);
+        } else {
+            fileRadioButton.setSelected(true);
+            stdinRadioButton.setSelected(false);
+        }
+
+        getPc2ValidatorComboBox().setSelectedIndex(0);
+        getIgnoreCaseCheckBox().setSelected(true);
+        externalValidatorLabel.setText("");
+        externalValidatorLabel.setToolTipText("");
+
+        if (inProblem.isValidatedProblem()) {
+
+            if (inProblem.isUsingPC2Validator()) {
+                getValidatorCommandLineTextBox().setText(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
+                usePC2ValidatorRadioButton.setSelected(true);
+                pc2ValidatorOptionComboBox.setSelectedIndex(inProblem.getWhichPC2Validator());
+                ignoreCaseCheckBox.setSelected(inProblem.isIgnoreSpacesOnValidation());
+            } else {
+                getValidatorCommandLineTextBox().setText(inProblem.getValidatorCommandLine());
+                useExternalValidatorRadioButton.setSelected(true);
+                externalValidatorLabel.setText(inProblem.getValidatorProgramName());
+                externalValidatorLabel.setToolTipText(inProblem.getValidatorProgramName());
+                sFile = problemDataFiles.getValidatorFile();
+                if (sFile != null) {
+                    externalValidatorLabel.setToolTipText(sFile.getAbsolutePath());
+                } else {
+                    externalValidatorLabel.setToolTipText("");
+                }
+            }
+
+        } else {
+            getValidatorCommandLineTextBox().setText(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
+            useNOValidatatorRadioButton.setSelected(true);
+        }
+
+        getShowValidatorToJudges().setSelected(inProblem.isShowValidationToJudges());
+        getDoShowOutputWindowCheckBox().setSelected(!inProblem.isHideOutputWindow());
+        getShowCompareCheckBox().setSelected(inProblem.isShowCompareWindow());
+        getShowCompareCheckBox().setEnabled(getDoShowOutputWindowCheckBox().isSelected());
+        populateJudging(inProblem);
     }
 
     /*
@@ -1951,6 +1948,43 @@ public class ProblemPane extends JPanePlugin {
 
         }
         return false;
+    }
+
+    /**
+     * This resets the form, eg for a new problem.
+     */
+    void clearForm() {
+        getAddButton().setVisible(true);
+        getUpdateButton().setVisible(false);
+        addButton.setEnabled(true);
+        updateButton.setEnabled(false);
+
+        problemNameTextField.setText("");
+        timeOutSecondTextField.setText("120");
+        judgesHaveAnswerFiles.setSelected(false);
+        problemRequiresDataCheckBox.setSelected(false);
+
+        inputDataFileLabel.setText("");
+        inputDataFileLabel.setToolTipText("");
+        answerFileNameLabel.setText("");
+        answerFileNameLabel.setToolTipText("");
+
+        fileRadioButton.setSelected(false);
+        stdinRadioButton.setSelected(false);
+        useNOValidatatorRadioButton.setSelected(true);
+        pc2ValidatorOptionComboBox.setSelectedIndex(0);
+        ignoreCaseCheckBox.setSelected(false);
+
+        externalValidatorLabel.setText("");
+        externalValidatorLabel.setToolTipText("");
+
+        getValidatorCommandLineTextBox().setText(DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND);
+        getShowValidatorToJudges().setSelected(true);
+        getDoShowOutputWindowCheckBox().setSelected(true);
+        getShowCompareCheckBox().setSelected(true);
+        getShowCompareCheckBox().setEnabled(getDoShowOutputWindowCheckBox().isSelected());
+
+        populateJudging(null);
     }
 
     /**

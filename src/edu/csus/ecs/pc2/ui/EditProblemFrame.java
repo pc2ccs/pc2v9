@@ -5,6 +5,7 @@ import javax.swing.JFrame;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 
 /**
  * Edit Problem.
@@ -67,6 +68,18 @@ public class EditProblemFrame extends JFrame implements UIPlugin {
             setTitle("Edit Problem " + problem.getDisplayName());
         }
         getProblemPane().setProblem(problem);
+    }
+
+    /**
+     * This is called on a copy, as the fields are still in flux, this is always
+     * an "Add New Problem".
+     * 
+     * @param problem
+     * @param problemDataFiles
+     */
+    public void setProblem(Problem problem, ProblemDataFiles problemDataFiles) {
+        setTitle("Add New Problem");
+        getProblemPane().setProblem(problem, problemDataFiles);
     }
 
     public String getPluginTitle() {
