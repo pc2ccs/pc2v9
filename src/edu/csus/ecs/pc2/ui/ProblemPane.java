@@ -1009,6 +1009,9 @@ public class ProblemPane extends JPanePlugin {
         getDoShowOutputWindowCheckBox().setSelected(!inProblem.isHideOutputWindow());
         getShowCompareCheckBox().setSelected(inProblem.isShowCompareWindow());
         getShowCompareCheckBox().setEnabled(getDoShowOutputWindowCheckBox().isSelected());
+        
+        getDeleteProblemCheckBox().setSelected(! inProblem.isActive());
+
         populateJudging(inProblem);
     }
 
@@ -1990,6 +1993,8 @@ public class ProblemPane extends JPanePlugin {
         getDoShowOutputWindowCheckBox().setSelected(true);
         getShowCompareCheckBox().setSelected(true);
         getShowCompareCheckBox().setEnabled(getDoShowOutputWindowCheckBox().isSelected());
+        
+        getDeleteProblemCheckBox().setSelected(false);
 
         populateJudging(null);
     }
