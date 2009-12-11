@@ -497,7 +497,7 @@ public class ProfilesPane extends JPanePlugin {
     protected class ProfileListenerImplementation implements IProfileListener {
 
         public void profileAdded(ProfileEvent event) {
-            profileChanged(event);
+            refreshProfilesList();
         }
 
         public void profileChanged(ProfileEvent event) {
@@ -510,7 +510,7 @@ public class ProfilesPane extends JPanePlugin {
         }
 
         public void profileRemoved(ProfileEvent event) {
-            profileChanged(event);
+            refreshProfilesList();
         }
     }
 

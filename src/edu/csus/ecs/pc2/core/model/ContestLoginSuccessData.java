@@ -1,6 +1,3 @@
-/**
- * 
- */
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.Serializable;
@@ -8,13 +5,13 @@ import java.io.Serializable;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
 /**
- * Used to pass arrays from PacketHandler to PacketFactory.
+ * Contest Data sent to clients from server.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
 
-// $HeadURL
+// $HeadURL$
 public class ContestLoginSuccessData implements Serializable {
     /**
      * 
@@ -38,6 +35,7 @@ public class ContestLoginSuccessData implements Serializable {
     private String contestSecurityPassword;
     private String contestIdentifier;
     private Profile profile;
+    private Profile [] profiles;
 
     /**
      * @return Returns the accounts.
@@ -230,5 +228,12 @@ public class ContestLoginSuccessData implements Serializable {
     }
     public void setProfile(Profile profile) {
         this.profile = profile;
+    }
+
+    public Profile[] getProfiles() {
+        return profiles;
+    }
+    public void setProfiles(Profile[] profiles) {
+        this.profiles = profiles;
     }
 }

@@ -1037,35 +1037,18 @@ public final class PacketFactory {
     public static Packet createLoginSuccess(ClientId source, ClientId destination, ContestTime contestTime, int siteNumber, ContestInformation information, ContestLoginSuccessData data) {
         try {
             Properties prop = new Properties();
+            
             prop.put(SITE_NUMBER, new Integer(siteNumber));
             prop.put(CONTEST_TIME, contestTime);
-            prop.put(CONTEST_TIME_LIST, data.getContestTimes());
             prop.put(CLIENT_ID, destination);
-            prop.put(PROBLEM_LIST, data.getProblems());
-            prop.put(LANGUAGE_LIST, data.getLanguages());
-            prop.put(JUDGEMENT_LIST, data.getJudgements());
-            prop.put(SITE_LIST, data.getSites());
-            prop.put(RUN_LIST, data.getRuns());
-            prop.put(CLARIFICATION_LIST, data.getClarifications());
-            prop.put(LOGGED_IN_USERS, data.getLoggedInUsers());
-            prop.put(CONNECTION_HANDLE_ID_LIST, data.getConnectionHandlerIDs());
-            prop.put(ACCOUNT_ARRAY, data.getAccounts());
-            prop.put(PROBLEM_DATA_FILES, data.getProblemDataFiles());
             prop.put(CONTEST_INFORMATION, information);
-            prop.put(CLIENT_SETTINGS_LIST, data.getClientSettings());
-            prop.put(BALLOON_SETTINGS_LIST, data.getBalloonSettingsArray());
-            prop.put(GROUP_LIST, data.getGroups());
-            prop.put(GENERAL_PROBLEM, data.getGeneralProblem());
-            prop.put(CONTEST_IDENTIFIER, data.getContestIdentifier());
-            prop.put(PROFILE, data.getProfile());
+            
+            addContestData(prop, data);
             
             TimeZone timeZone = TimeZone.getTimeZone("GMT");
             GregorianCalendar gregorianCalendar = new GregorianCalendar(timeZone);
             prop.put(SERVER_CLOCK_OFFSET, gregorianCalendar);
 
-            if (data.getContestSecurityPassword() != null){
-                prop.put(CONTEST_PASSWORD, data.getContestSecurityPassword());
-            }
 
             Packet packet = new Packet(Type.LOGIN_SUCCESS, source, destination, prop);
             return packet;
@@ -1077,6 +1060,34 @@ public final class PacketFactory {
         }
     }
     
+    private static void addContestData(Properties prop, ContestLoginSuccessData data) {
+        // TODO Auto-generated method stub
+
+        prop.put(CONTEST_TIME_LIST, data.getContestTimes());
+        prop.put(PROBLEM_LIST, data.getProblems());
+        prop.put(LANGUAGE_LIST, data.getLanguages());
+        prop.put(JUDGEMENT_LIST, data.getJudgements());
+        prop.put(SITE_LIST, data.getSites());
+        prop.put(RUN_LIST, data.getRuns());
+        prop.put(CLARIFICATION_LIST, data.getClarifications());
+        prop.put(LOGGED_IN_USERS, data.getLoggedInUsers());
+        prop.put(CONNECTION_HANDLE_ID_LIST, data.getConnectionHandlerIDs());
+        prop.put(ACCOUNT_ARRAY, data.getAccounts());
+        prop.put(PROBLEM_DATA_FILES, data.getProblemDataFiles());
+        prop.put(CLIENT_SETTINGS_LIST, data.getClientSettings());
+        prop.put(BALLOON_SETTINGS_LIST, data.getBalloonSettingsArray());
+        prop.put(GROUP_LIST, data.getGroups());
+        prop.put(GENERAL_PROBLEM, data.getGeneralProblem());
+        prop.put(CONTEST_IDENTIFIER, data.getContestIdentifier());
+        prop.put(PROFILE, data.getProfile());
+        prop.put(PROFILE_LIST, data.getProfiles());
+
+        if (data.getContestSecurityPassword() != null) {
+            prop.put(CONTEST_PASSWORD, data.getContestSecurityPassword());
+        }
+
+    }
+
     /**
      * A contest settings packet.
      * 

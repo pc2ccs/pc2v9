@@ -1721,6 +1721,11 @@ public class PacketHandler {
             sendToTeams = true;
         }
         
+        Profile profile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE);
+        if (profile != null) {
+            contest.addProfile(profile);
+        }
+        
         Packet updatePacket = null;
 
         Account oneAccount = (Account) PacketFactory.getObjectValue(packet, PacketFactory.ACCOUNT);
@@ -1878,6 +1883,11 @@ public class PacketHandler {
         if (balloonSettings != null) {
             contest.updateBalloonSettings(balloonSettings);
             sendToTeams = true;
+        }
+        
+        Profile profile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE);
+        if (profile != null) {
+            contest.updateProfile(profile);
         }
 
         Account oneAccount = (Account) PacketFactory.getObjectValue(packet, PacketFactory.ACCOUNT);
@@ -2891,6 +2901,8 @@ public class PacketHandler {
         addLoginsToModel(packet);
 
         addBalloonSettingsToModel(packet);
+        
+        addProfilesToModel(packet);
 
         try {
             Problem generalProblem = (Problem) PacketFactory.getObjectValue(packet, PacketFactory.GENERAL_PROBLEM);
@@ -3026,6 +3038,26 @@ public class PacketHandler {
             }
         } catch (Exception e) {
             // TODO: log handle exception
+            e.printStackTrace();
+            controller.getLog().log(Log.WARNING, "Exception logged ", e);
+        }
+    }
+    
+    
+    /**
+     * Add Balloon Settings to model.
+     * 
+     * @param packet
+     */
+    private void addProfilesToModel(Packet packet) {
+        try {
+            Profile [] profiles = (Profile [])PacketFactory.getObjectValue(packet, PacketFactory.PROFILE_LIST);
+            if (profiles != null) {
+                for (Profile profile : profiles) {
+                    contest.updateProfile(profile);
+                }
+            }
+        } catch (Exception e) {
             e.printStackTrace();
             controller.getLog().log(Log.WARNING, "Exception logged ", e);
         }
@@ -3305,10 +3337,10 @@ public class PacketHandler {
         contestLoginSuccessData.setGeneralProblem(contest.getGeneralProblem());
         contestLoginSuccessData.setContestIdentifier(contest.getContestIdentifier().toString());
         contestLoginSuccessData.setProfile(contest.getProfile());
+        contestLoginSuccessData.setProfiles(contest.getProfiles());
 
         if (isServer(clientId)) {
             contestLoginSuccessData.setContestSecurityPassword(contestSecurityPassword);
-            contestLoginSuccessData.setProfile(contest.getProfile());
         }
 
         Packet loginSuccessPacket = PacketFactory.createLoginSuccess(contest.getClientId(), clientId, contest.getContestTime(), contest.getSiteNumber(), contest.getContestInformation(),
