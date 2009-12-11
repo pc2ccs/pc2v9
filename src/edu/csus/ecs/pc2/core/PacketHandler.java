@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.UUID;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.exception.ClarificationUnavailableException;
@@ -50,6 +51,7 @@ import edu.csus.ecs.pc2.core.security.FileSecurity;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
+import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
 
 /**
  * Process all incoming packets.
@@ -289,13 +291,7 @@ public class PacketHandler {
                 break;
             case SERVER_SETTINGS:
                 // This is settings from a recently logged in server
-                loadSettingsFromRemoteServer(packet, connectionHandlerID);
-                info(" handlePacket SERVER_SETTINGS - from another site -- all settings loaded " + packet);
-
-                if (isServer()) {
-                    sendToJudgesAndOthers(packet, false);
-                }
-
+                handleServerSettings(packet, connectionHandlerID);
                 break;
             case RECONNECT_SITE_REQUEST:
                 reconnectSite(packet);
@@ -329,6 +325,18 @@ public class PacketHandler {
                 resetClient(packet, connectionHandlerID);
                 break;
                 
+            case CLONE_PROFILE:
+                handleCloneProfile (packet, connectionHandlerID);
+                break;
+                
+            case SWITCH_PROFILE:
+                handleSwitchProfile (packet, connectionHandlerID);
+                break;
+                
+            case UPDATE_CLIENT_PROFILE:
+                handleUpdateClientProfile(packet, connectionHandlerID);
+                break;
+                
             default:
                 Exception exception = new Exception("PacketHandler.handlePacket Unhandled packet " + packet);
                 controller.getLog().log(Log.WARNING, "Unhandled Packet ", exception);
@@ -336,6 +344,70 @@ public class PacketHandler {
         info("handlePacket end " + packet);
     }
 
+
+    private void handleSwitchProfile(Packet packet, ConnectionHandlerID connectionHandlerID) {
+        // TODO code handleSwitchProfile
+        
+        System.err.println ("TODO "+packet);
+        
+    }
+
+    private void handleUpdateClientProfile(Packet packet, ConnectionHandlerID connectionHandlerID) throws IOException, ClassNotFoundException, FileSecurityException {
+        // TODO code handleUpdateClientProfile
+        
+        System.err.println ("TODO "+packet);
+        Profile inProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE);
+        Profile updatedProfile = contest.updateProfile(inProfile);
+        Packet addPacket = PacketFactory.createUpdateSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, updatedProfile);
+        sendToJudgesAndOthers(addPacket, true);
+        contest.storeConfiguration(controller.getLog());
+        
+    }
+
+    private void handleCloneProfile(Packet packet, ConnectionHandlerID connectionHandlerID) throws IOException, ClassNotFoundException, FileSecurityException {
+        // TODO code (finish) handleCloneProfile
+        
+        System.err.println ("TODO "+packet);
+        
+//        prop.put(CLIENT_ID, source);
+//        ClientId adminClientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+        
+//        prop.put(PROFILE, profile2);
+//        Profile currentProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE);
+        
+//        prop.put(PROFILE_CLONE_SETTINGS, settings);
+        ProfileCloneSettings settings =  (ProfileCloneSettings) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE_CLONE_SETTINGS);
+        
+//        prop.put(SWITCH_PROFILE, new Boolean (switchNow));
+//        boolean switchProfileNow = ((Boolean) PacketFactory.getObjectValue(packet, PacketFactory.SWITCH_PROFILE)).booleanValue();
+        
+        Profile newProfile = new Profile(settings.getName());
+        newProfile.setDescription(settings.getTitle());
+        newProfile.setProfilePath(createProfilePath(newProfile));
+        newProfile.setSiteNumber(contest.getProfile().getSiteNumber());
+        
+        Profile addedProfile = contest.addProfile(newProfile);
+        
+        Packet addPacket = PacketFactory.createAddSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, addedProfile);
+        
+        contest.storeConfiguration(controller.getLog());
+        
+        sendToJudgesAndOthers(addPacket, true);
+    }
+
+    private String createProfilePath(Profile newProfile) {
+        // profiles/P2ef182be-b8ed-42c0-88ca-19dfef3419c3/archive
+        return "profiles/P" + UUID.randomUUID().toString();
+    }
+
+    private void handleServerSettings(Packet packet, ConnectionHandlerID connectionHandlerID) {
+        loadSettingsFromRemoteServer(packet, connectionHandlerID);
+        info(" handlePacket SERVER_SETTINGS - from another site -- all settings loaded " + packet);
+
+        if (isServer()) {
+            sendToJudgesAndOthers(packet, false);
+        }
+    }
 
     /**
      * 

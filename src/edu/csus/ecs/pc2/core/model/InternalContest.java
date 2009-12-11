@@ -1990,10 +1990,11 @@ public class InternalContest implements IInternalContest {
         contestIdentifier = contestId;
     }
 
-    public void addProfile(Profile theProfile) {
+    public Profile addProfile(Profile theProfile) {
         profileList.add(theProfile);
         ProfileEvent profileEvent = new ProfileEvent(ProfileEvent.Action.ADDED, theProfile);
         fireProfileListener(profileEvent);
+        return profile;
     }
 
     private void fireProfileListener(ProfileEvent profileEvent) {
@@ -2027,10 +2028,11 @@ public class InternalContest implements IInternalContest {
         profileListenerList.remove(profileListener);
     }
 
-    public void updateProfile(Profile theProfile) {
+    public Profile updateProfile(Profile theProfile) {
         profileList.update(theProfile);
         ProfileEvent profileEvent = new ProfileEvent(ProfileEvent.Action.CHANGED, theProfile);
         fireProfileListener(profileEvent);
+        return theProfile;
     }
     
     public boolean storeConfiguration(Log log) throws IOException, ClassNotFoundException, FileSecurityException {

@@ -640,6 +640,18 @@ public final class PacketType implements Serializable {
          * A notification that a run has been checked out 
          */
         RUN_CHECKOUT_NOTIFICATION,
+        /**
+         * Switch to a new profile
+         */
+        SWITCH_PROFILE, 
+        /**
+         * Clone a profile.
+         */
+        CLONE_PROFILE,
+        /**
+         * Causes client to reset/change profile (409 packet)
+         */
+        UPDATE_CLIENT_PROFILE,
     }
 
     /**

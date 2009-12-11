@@ -14,14 +14,14 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Profile;
 
 /**
- * Print list of the current profile.
+ * Print list of profiles.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
 
 // $HeadURL$
-public class ProfileReport implements IReport {
+public class ProfilesReport implements IReport {
 
     /**
      * 
@@ -35,16 +35,32 @@ public class ProfileReport implements IReport {
     private Log log;
 
     private Filter filter = new Filter();
-
-    public void writeReport(PrintWriter printWriter) {
-
+    
+    private void writeActiveProfile(PrintWriter printWriter) {
+        
         Profile profile = contest.getProfile();
 
-        printWriter.println();
         printWriter.println("Profile name: " + profile.getName());
-        printWriter.println("  contest id = " + profile.getContestId());
-        printWriter.println("  descripton = " + profile.getDescription());
+        printWriter.println(" element id : " + profile.getElementId());
+    }
 
+    public void writeReport(PrintWriter printWriter) {
+        
+        printWriter.println("-- Current Profile");
+        writeActiveProfile(printWriter);
+        
+        Profile [] profiles = contest.getProfiles();
+        
+        printWriter.println();
+        printWriter.println("-- " + profiles.length + " profiles --");
+        
+        for (Profile profile : profiles){
+
+            printWriter.println();
+            printWriter.println("Profile name: " + profile.getName());
+            printWriter.println("  contest id = " + profile.getContestId());
+            printWriter.println("  descripton = " + profile.getDescription());
+        }
     }
 
     private void printHeader(PrintWriter printWriter) {
@@ -103,7 +119,7 @@ public class ProfileReport implements IReport {
     }
 
     public String getReportTitle() {
-        return "Profile";
+        return "Profiles";
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
@@ -113,7 +129,7 @@ public class ProfileReport implements IReport {
     }
 
     public String getPluginTitle() {
-        return "Profile Report";
+        return "Profiles Report";
     }
 
     public Filter getFilter() {

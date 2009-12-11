@@ -48,7 +48,7 @@ import edu.csus.ecs.pc2.core.report.ListRunLanguages;
 import edu.csus.ecs.pc2.core.report.LoginReport;
 import edu.csus.ecs.pc2.core.report.OldRunsReport;
 import edu.csus.ecs.pc2.core.report.ProblemsReport;
-import edu.csus.ecs.pc2.core.report.ProfileReport;
+import edu.csus.ecs.pc2.core.report.ProfilesReport;
 import edu.csus.ecs.pc2.core.report.RunJudgementNotificationsReport;
 import edu.csus.ecs.pc2.core.report.RunsByTeamReport;
 import edu.csus.ecs.pc2.core.report.RunsReport;
@@ -162,7 +162,7 @@ public class ReportPane extends JPanePlugin {
 
         reports.add(new StandingsReport());
         reports.add(new LoginReport());
-        reports.add(new ProfileReport());
+        reports.add(new ProfilesReport());
 
         reports.add(new RunsReport());
         reports.add(new ClarificationsReport());

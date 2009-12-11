@@ -87,9 +87,13 @@ public class ConfigurationIO {
          */
         GROUPS,
         /**
-         * 
+         * Current Profile
          */
         PROFILE,
+        /**
+         * Profiles 
+         */
+        PROFILES
     }
 
     private IStorage storage = null;
@@ -295,7 +299,20 @@ public class ConfigurationIO {
                         log.info("Loaded " + groups.length + " " + key.toString().toLowerCase());
                     }
                 } catch (Exception e) {
-                    log.log(Log.WARNING, "Exception while loading judgements ", e);
+                    log.log(Log.WARNING, "Exception while loading groups ", e);
+                }
+                
+                try {
+                    key = ConfigKeys.PROFILES;
+                    if (configuration.containsKey(key)) {
+                        Profile[] profiles = (Profile[]) configuration.get(key.toString());
+                        for (Profile profile : profiles) {
+                            contest.addProfile(profile);
+                        }
+                        log.info("Loaded " + profiles.length + " " + key.toString().toLowerCase());
+                    }
+                } catch (Exception e) {
+                    log.log(Log.WARNING, "Exception while loading profiles ", e);
                 }
 
                 return true;
@@ -386,6 +403,7 @@ public class ConfigurationIO {
         configuration.add(ConfigKeys.CONTEST_INFORMATION, contest.getContestInformation());
         configuration.add(ConfigKeys.CLIENT_SETTINGS_LIST, contest.getClientSettingsList());
         configuration.add(ConfigKeys.GROUPS, contest.getGroups());
+        configuration.add(ConfigKeys.PROFILES, contest.getProfiles());
         configuration.add(ConfigKeys.PROFILE, contest.getProfile());
 
         configuration.writeToDisk(getFileName());

@@ -108,7 +108,7 @@ public class Profile implements IElementObject, Serializable {
     }
 
     public void setSiteNumber(int siteNumber) {
-        setSiteNumber(elementId.getSiteNumber());
+        elementId.setSiteNumber(siteNumber);
     }
 
     public int versionNumber() {

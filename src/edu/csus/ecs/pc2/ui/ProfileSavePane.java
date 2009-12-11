@@ -15,6 +15,7 @@ import javax.swing.SwingConstants;
 
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.Profile;
+import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
 
 /**
  * Save/export profile settings.
@@ -145,9 +146,10 @@ public class ProfileSavePane extends JPanePlugin {
     }
 
     private void createNewProfile() {
-        showMessage("Would have created new  profile");
-        // TODO Create New Profile 
-//      closeWindow();
+        ProfileCloneSettings settings = getSettingsFromFields();
+        getController().cloneProfile(getContest().getProfile(), settings, false);
+        closeWindow();
+
     }
 
     private void exportProfile() {
@@ -157,9 +159,27 @@ public class ProfileSavePane extends JPanePlugin {
     }
 
     private void cloneProfile() {
-        showMessage("Would have cloned profile");
-        // TODO Clone Profile 
-//        closeWindow();
+        ProfileCloneSettings settings = getSettingsFromFields();
+        getController().cloneProfile(getContest().getProfile(), settings, false);
+        closeWindow();
+    }
+
+    private ProfileCloneSettings getSettingsFromFields() {
+        
+        String name = getProfileNameTextField().getText();
+
+        String title = getContestTitleTextField().getText();
+        
+        char [] password = getContestPasswordTextField().getPassword();
+        
+        ProfileCloneSettings settings = new ProfileCloneSettings(name, title, password);
+        
+        settings.setRemoveAllLanguages(getRemoveAllLanguageCheckBox().isSelected());
+        settings.setRemoveAllProblms(getRemoveAllProblemsCheckBox().isSelected());
+        settings.setRemoveAllsubmissions(getRemoveAllSubmissionsCheckBox().isSelected());
+        settings.setResetContestTimes(getResetContestTimeCheckBox().isSelected());
+
+        return settings;
     }
 
     private void showMessage(String string) {

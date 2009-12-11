@@ -34,6 +34,7 @@ import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.LoginEvent;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
+import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunExecutionStatus;
 import edu.csus.ecs.pc2.core.model.RunFiles;
@@ -55,6 +56,7 @@ import edu.csus.ecs.pc2.core.transport.ITransportManager;
 import edu.csus.ecs.pc2.core.transport.ITwoToOne;
 import edu.csus.ecs.pc2.core.transport.TransportException;
 import edu.csus.ecs.pc2.core.transport.connection.ConnectionManager;
+import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
 import edu.csus.ecs.pc2.ui.CountDownMessage;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.LoadUIClass;
@@ -2694,6 +2696,16 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     public void resetContest(ClientId clientResettingContest, boolean eraseProblems, boolean eraseLanguages) {
         Packet sendPacket = PacketFactory.createResetAllSitesPacket(contest.getClientId(), getServerClientId(), clientResettingContest, eraseProblems, eraseLanguages);
+        sendToLocalServer(sendPacket);
+    }
+
+    public void cloneProfile(Profile profile, ProfileCloneSettings settings, boolean switchNow) {
+        Packet sendPacket = PacketFactory.createCloneProfilePacket(contest.getClientId(), getServerClientId(), profile, settings, switchNow);
+        sendToLocalServer(sendPacket);
+    }
+
+    public void switchProfile(Profile currentProfile, Profile switchToProfile) {
+        Packet sendPacket = PacketFactory.createSwitchProfilePacket(contest.getClientId(), getServerClientId(), currentProfile, switchToProfile);
         sendToLocalServer(sendPacket);
     }
 

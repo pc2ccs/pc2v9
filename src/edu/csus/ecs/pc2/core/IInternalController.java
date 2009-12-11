@@ -18,6 +18,7 @@ import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
+import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
@@ -25,6 +26,7 @@ import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
+import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
 
 /**
  * Represents functions provided by modules comprising the contest engine.
@@ -236,6 +238,23 @@ public interface IInternalController {
     void updateProblem(Problem problem);
 
     void updateProblem(Problem problem, ProblemDataFiles problemDataFiles);
+    
+    /**
+     * Send packet to local server to switch profile.
+     * 
+     * @param currentProfile profile to switch from
+     * @param switchToProfile profile to switch to
+     */
+    void switchProfile (Profile currentProfile, Profile switchToProfile);
+
+    /**
+     * Clone profile (and potentially switch to the new profile).
+     * 
+     * @param profile current profile
+     * @param settings set of changes to clone
+     * @param switchNow true means switch to new profile now
+     */
+    void cloneProfile (Profile profile, ProfileCloneSettings settings, boolean switchNow);
 
     ProblemDataFiles getProblemDataFiles(Problem problem);
 

@@ -38,6 +38,7 @@ import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.packet.PacketType.Type;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
+import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
 
 /**
  * Creates {@link Packet}s.
@@ -315,6 +316,12 @@ public final class PacketFactory {
     public static final String PROFILE =  "PROFILE";
     
     public static final String PROFILE_LIST =  "PROFILE_LIST";
+
+    public static final String PROFILE_CLONE_SETTINGS =  "PROFILE_CLONE_SETTINGS";
+
+    public static final String SWITCH_PROFILE =  "SWITCH_PROFILE";
+
+    public static final String NEW_PROFILE =  "NEW_PROFILE";
     
 
     /**
@@ -753,6 +760,13 @@ public final class PacketFactory {
         return packet;
     }
     
+    public static Packet createUpdateSetting(ClientId source, ClientId destination, Profile profile) {
+        Properties prop = new Properties();
+        prop.put(PROFILE, profile);
+        Packet packet = new Packet(Type.UPDATE_SETTING, source, destination, prop);
+        return packet;
+    }
+    
     public static Packet createUpdateSetting(ClientId source, ClientId destination, BalloonSettings balloonSettings) {
         Properties prop = new Properties();
         prop.put(BALLOON_SETTINGS, balloonSettings);
@@ -803,6 +817,13 @@ public final class PacketFactory {
      public static Packet createAddSetting(ClientId source, ClientId destination, Group group) {
          Properties prop = new Properties();
          prop.put(GROUP, group);
+         Packet packet = new Packet(Type.ADD_SETTING, source, destination, prop);
+         return packet;
+     }
+
+     public static Packet createAddSetting(ClientId source, ClientId destination, Profile profile) {
+         Properties prop = new Properties();
+         prop.put(PROFILE, profile);
          Packet packet = new Packet(Type.ADD_SETTING, source, destination, prop);
          return packet;
      }
@@ -1925,6 +1946,71 @@ public final class PacketFactory {
         prop.put(DELETE_LANGUAGE_DEFINITIONS, new Boolean(eraseLanguages));
         prop.put(PROFILE, newProfile);
         return createPacket(PacketType.Type.RESET_CLIENT, source, destination, prop);
+    }
+
+    public static Packet createCloneProfilePacket(ClientId source, ClientId destination, Profile profile2, ProfileCloneSettings settings, boolean switchNow) {
+        Properties prop = new Properties();
+        prop.put(CLIENT_ID, source);
+        prop.put(PROFILE, profile2);
+        prop.put(PROFILE_CLONE_SETTINGS, settings);
+        prop.put(SWITCH_PROFILE, new Boolean (switchNow));
+        return createPacket(PacketType.Type.CLONE_PROFILE, source, destination, prop);
+    }
+
+    public static Packet createSwitchProfilePacket(ClientId source, ClientId destination, Profile currentProfile, Profile switchToProfile) {
+        Properties prop = new Properties();
+        prop.put(CLIENT_ID, source);
+        prop.put(PROFILE, currentProfile);
+        prop.put(NEW_PROFILE, switchToProfile);
+        return createPacket(PacketType.Type.SWITCH_PROFILE, source, destination, prop);
+    }
+    
+    // TODO fold contestTime and ContestInformation into  ContestLoginSuccessData
+
+    public static Packet createUpdateProfileClientPacket(ClientId source, ClientId destination, Profile currentProfile, Profile switchToProfile, ContestTime contestTime, int siteNumber,
+            ContestInformation information, ContestLoginSuccessData data) {
+        try {
+            Properties prop = new Properties();
+            prop.put(PROFILE, currentProfile);
+            prop.put(NEW_PROFILE, switchToProfile);
+            prop.put(SITE_NUMBER, new Integer(siteNumber));
+            prop.put(CONTEST_TIME, contestTime);
+            prop.put(CONTEST_TIME_LIST, data.getContestTimes());
+            prop.put(CLIENT_ID, destination);
+            prop.put(PROBLEM_LIST, data.getProblems());
+            prop.put(LANGUAGE_LIST, data.getLanguages());
+            prop.put(JUDGEMENT_LIST, data.getJudgements());
+            prop.put(SITE_LIST, data.getSites());
+            prop.put(RUN_LIST, data.getRuns());
+            prop.put(CLARIFICATION_LIST, data.getClarifications());
+            prop.put(LOGGED_IN_USERS, data.getLoggedInUsers());
+            prop.put(CONNECTION_HANDLE_ID_LIST, data.getConnectionHandlerIDs());
+            prop.put(ACCOUNT_ARRAY, data.getAccounts());
+            prop.put(PROBLEM_DATA_FILES, data.getProblemDataFiles());
+            prop.put(CONTEST_INFORMATION, information);
+            prop.put(CLIENT_SETTINGS_LIST, data.getClientSettings());
+            prop.put(BALLOON_SETTINGS_LIST, data.getBalloonSettingsArray());
+            prop.put(GROUP_LIST, data.getGroups());
+            prop.put(GENERAL_PROBLEM, data.getGeneralProblem());
+            prop.put(CONTEST_IDENTIFIER, data.getContestIdentifier());
+            prop.put(PROFILE, data.getProfile());
+
+            TimeZone timeZone = TimeZone.getTimeZone("GMT");
+            GregorianCalendar gregorianCalendar = new GregorianCalendar(timeZone);
+            prop.put(SERVER_CLOCK_OFFSET, gregorianCalendar);
+
+            if (data.getContestSecurityPassword() != null) {
+                prop.put(CONTEST_PASSWORD, data.getContestSecurityPassword());
+            }
+
+            Packet packet = new Packet(Type.UPDATE_CLIENT_PROFILE, source, destination, prop);
+            return packet;
+        } catch (Exception e) {
+            System.err.println("Exception creating UPDATE_CLIENT_PROFILE");
+            e.printStackTrace(System.err);
+            StaticLog.log("Exception in createUpdateProfileClientPacket ", e);
+            throw new SecurityException(e.getMessage());
+        }
     }
 
 }

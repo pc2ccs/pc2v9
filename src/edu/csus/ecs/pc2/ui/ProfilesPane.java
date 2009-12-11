@@ -466,6 +466,8 @@ public class ProfilesPane extends JPanePlugin {
 //        getContest().addProfile(profile1);
 
         Profile[] profiles = getContest().getProfiles();
+        
+        getProfileComboBox().removeAllItems();
 
         getSwitchButton().setEnabled(false);
         if (profiles.length > 1) {
@@ -495,7 +497,7 @@ public class ProfilesPane extends JPanePlugin {
     protected class ProfileListenerImplementation implements IProfileListener {
 
         public void profileAdded(ProfileEvent event) {
-            // TODO implement profileAdded
+            profileChanged(event);
         }
 
         public void profileChanged(ProfileEvent event) {
@@ -508,7 +510,7 @@ public class ProfilesPane extends JPanePlugin {
         }
 
         public void profileRemoved(ProfileEvent event) {
-            // TODO implement profileRemoved
+            profileChanged(event);
         }
     }
 

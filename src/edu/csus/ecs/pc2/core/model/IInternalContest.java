@@ -865,9 +865,9 @@ public interface IInternalContest {
      */
     Profile[] getProfiles();
 
-    void addProfile(Profile profile);
+    Profile addProfile(Profile profile);
 
-    void updateProfile(Profile profile);
+    Profile updateProfile(Profile profile);
 
     void deleteProfile(Profile profile);
 

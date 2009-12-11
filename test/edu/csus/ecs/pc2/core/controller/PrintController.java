@@ -18,12 +18,14 @@ import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
+import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
+import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
 
 /**
  * A stub controller that prints arguments and methods as called.
@@ -554,4 +556,23 @@ public class PrintController implements IInternalController {
         System.out.println("method initializeStorage");
         System.out.println("    storage                : " + storage);
     }
+
+    public void cloneProfile(Profile profile, ProfileCloneSettings settings, boolean switchNow) {
+        System.out.println("method cloneProfile");
+        System.out.println("    profile                : " + profile);
+        System.out.println("    settings               : " + settings);
+        System.out.println("    switchNow              : " + switchNow);
+    }
+
+    public void switchProfile(Profile profile) {
+        System.out.println("method switchProfile");
+        System.out.println("    profile                : " + profile);
+    }
+
+    public void switchProfile(Profile currentProfile, Profile switchToProfile) {
+        System.out.println("method switchProfile");
+        System.out.println("    profile                : " + currentProfile);
+        System.out.println("    new profile            : " + switchToProfile);
+    }
+    
 }

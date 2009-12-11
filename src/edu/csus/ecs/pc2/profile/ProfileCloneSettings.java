@@ -1,5 +1,7 @@
 package edu.csus.ecs.pc2.profile;
 
+import java.io.Serializable;
+
 /**
  * A collection of settings to clone a Profile.
  * 
@@ -8,13 +10,20 @@ package edu.csus.ecs.pc2.profile;
  */
 
 // $HeadURL$
-public class ProfileCloneSettings {
+public class ProfileCloneSettings implements Serializable {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 3414081250056286867L;
 
     private String name = "";
 
     private String title = "";
 
     private char[] contestPassword = null;
+
+    private char[] newContestPassword = null;
 
     private boolean removeAllLanguages = false;
 
@@ -85,5 +94,13 @@ public class ProfileCloneSettings {
 
     public void setResetContestTimes(boolean resetContestTimes) {
         this.resetContestTimes = resetContestTimes;
+    }
+
+    public char[] getNewContestPassword() {
+        return newContestPassword;
+    }
+
+    public void setNewContestPassword(char[] newContestPassword) {
+        this.newContestPassword = newContestPassword;
     }
 }
