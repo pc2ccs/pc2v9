@@ -58,6 +58,12 @@ public class BalloonDeliveryReport implements IReport {
     
     private SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss Z yyyy-MM-dd E");
 
+    /**
+     * Comparator to sort the balloonKeys.
+     * 
+     * @author pc2@ecs.csus.edu
+     *
+     */
     protected class BalloonKeyComparator implements Comparator<String>, Serializable {
 
         /**
