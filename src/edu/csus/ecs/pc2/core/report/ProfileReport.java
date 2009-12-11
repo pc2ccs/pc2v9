@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.core.report;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.GregorianCalendar;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -54,7 +55,13 @@ public class ProfileReport implements IReport {
         printWriter.println(getReportTitle() + " Report");
         
         printWriter.println();
-        printWriter.println("Contest date/time: "+ contest.getContestTime().getResumeTime().getTime());
+        GregorianCalendar resumeTime = contest.getContestTime().getResumeTime();
+        if (resumeTime == null) {
+            printWriter.println("Contest date/time: never started");
+        } else {
+            printWriter.println("Contest date/time: " + resumeTime.getTime());
+
+        }
     }
 
     private void printFooter(PrintWriter printWriter) {
@@ -67,18 +74,19 @@ public class ProfileReport implements IReport {
         PrintWriter printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
 
         try {
-            printHeader(printWriter);
-
             try {
+                printHeader(printWriter);
+                
                 writeReport(printWriter);
+                
+                printFooter(printWriter);
+
+                printWriter.close();
             } catch (Exception e) {
                 printWriter.println("Exception in report: " + e.getMessage());
                 e.printStackTrace(printWriter);
             }
 
-            printFooter(printWriter);
-
-            printWriter.close();
             printWriter = null;
 
         } catch (Exception e) {

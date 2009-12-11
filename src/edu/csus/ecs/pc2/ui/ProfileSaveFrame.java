@@ -38,7 +38,7 @@ public class ProfileSaveFrame extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new Dimension(562, 361));
+        this.setSize(new Dimension(527, 452));
         this.setTitle("Export Profile Settings");
         this.setContentPane(getProfileSavePane());
         

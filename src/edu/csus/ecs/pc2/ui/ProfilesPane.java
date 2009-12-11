@@ -189,7 +189,7 @@ public class ProfilesPane extends JPanePlugin {
             notificationOfNonImplementationLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
             notificationOfNonImplementationLabel.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
             notificationOfNonImplementationLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 14));
-            notificationOfNonImplementationLabel.setText("<html><center>This pane will allow switching automatically between<br>Practice and Real contest configurations (work-in-progress)</html>");
+            notificationOfNonImplementationLabel.setText("");
             centerPane = new JPanel();
             centerPane.setLayout(null);
             centerPane.add(profileNameLabel, null);

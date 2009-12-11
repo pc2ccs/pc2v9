@@ -18,11 +18,10 @@ public class Profile implements IElementObject, Serializable {
     private String description = "";
 
     private Date createDate = new Date();
-    
+
     private ElementId elementId = null;
-    
+
     private String profilePath = null;
-    
 
     /**
      * 
@@ -33,16 +32,16 @@ public class Profile implements IElementObject, Serializable {
      * Unique identifier for this instance of Site.
      */
     private boolean active = true;
-    
+
     @SuppressWarnings("unused")
-    private Profile (){
+    private Profile() {
         /**
          * Do not allow them to use null constructor
          */
     }
 
     public Profile(String name) {
-        if (name == null){
+        if (name == null) {
             throw new IllegalArgumentException("Profile name must not be null");
         }
         elementId = new ElementId(new String(name));
@@ -68,7 +67,7 @@ public class Profile implements IElementObject, Serializable {
     public String getContestId() {
         return toString();
     }
-    
+
     @Override
     public String toString() {
         return elementId.toString();
@@ -76,6 +75,7 @@ public class Profile implements IElementObject, Serializable {
 
     /**
      * Name or Title for the Profile.
+     * 
      * @return
      */
     public String getName() {
@@ -88,6 +88,7 @@ public class Profile implements IElementObject, Serializable {
 
     /**
      * Description for the profile.
+     * 
      * @return
      */
     public String getDescription() {
@@ -113,7 +114,7 @@ public class Profile implements IElementObject, Serializable {
     public int versionNumber() {
         return elementId.getVersionNumber();
     }
-    
+
     /**
      * Profile files location.
      * 
@@ -126,7 +127,7 @@ public class Profile implements IElementObject, Serializable {
     public void setProfilePath(String profilePath) {
         this.profilePath = profilePath;
     }
-    
+
     /**
      * @see Object#equals(java.lang.Object).
      */
@@ -148,10 +149,49 @@ public class Profile implements IElementObject, Serializable {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see java.lang.Object#hashCode()
      */
     public int hashCode() {
         return toString().hashCode();
+    }
+
+    private boolean stringSame(String s1, String s2) {
+        if (s1 == null && s2 == null) {
+            return true;
+        }
+
+        if (s1 == null && s2 != null) {
+            return false;
+        }
+
+        return s1.equals(s2);
+
+    }
+
+    public boolean isSameAs(Profile profile) {
+
+        try {
+            if (profile == null) {
+                return false;
+            }
+
+            if (!stringSame(name, profile.getName())) {
+                return false;
+            }
+
+            if (!stringSame(description, profile.getDescription())) {
+                return false;
+            }
+
+            if (!stringSame(profilePath, profile.getProfilePath())) {
+                return false;
+            }
+
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }

@@ -1280,7 +1280,7 @@ public class InternalContest implements IInternalContest {
         runResultFilesList.add(theRun, judgementRecord, runResultFiles);
         
         if (whoCheckedOut != null) {
-            info("Found checked out by " + whoCheckedOut + " judgement updated by " + judgementRecord.getJudgerClientId());
+//            info("Found checked out by " + whoCheckedOut + " judgement updated by " + judgementRecord.getJudgerClientId());
             runCheckOutList.remove(run.getElementId());
         }
         theRun = runList.get(run);
@@ -1979,7 +1979,11 @@ public class InternalContest implements IInternalContest {
 
     public void setProfile(Profile profile) {
         this.profile = profile;
-        updateProfile(profile);
+        if (profileList.size() == 0){
+            addProfile(profile);
+        } else {
+            updateProfile(profile);
+        }
     }
 
     public void setContestIdentifier(String contestId) {
