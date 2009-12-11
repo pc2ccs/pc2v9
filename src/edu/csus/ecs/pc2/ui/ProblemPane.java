@@ -25,6 +25,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
+import java.awt.Rectangle;
 
 /**
  * Add/Edit Problem Pane.
@@ -164,6 +165,8 @@ public class ProblemPane extends JPanePlugin {
     private JCheckBox manualReview = null;
 
     private JCheckBox prelimaryNotification = null;
+
+    private JCheckBox deleteProblemCheckBox = null;
 
     /**
      * This method initializes
@@ -476,6 +479,9 @@ public class ProblemPane extends JPanePlugin {
 
         int secs = getIntegerValue(timeOutSecondTextField.getText());
         checkProblem.setTimeOutInSeconds(secs);
+
+        boolean deleted = getDeleteProblemCheckBox().isSelected();
+        checkProblem.setActive(!deleted);
 
         if (problemRequiresDataCheckBox.isSelected()) {
 
@@ -1110,6 +1116,7 @@ public class ProblemPane extends JPanePlugin {
             generalPane.add(timeoutLabel, null);
             generalPane.add(getShowCompareCheckBox(), null);
             generalPane.add(getDoShowOutputWindowCheckBox(), null);
+            generalPane.add(getDeleteProblemCheckBox(), null);
         }
         return generalPane;
     }
@@ -2074,6 +2081,25 @@ public class ProblemPane extends JPanePlugin {
 
         }
         return prelimaryNotification;
+    }
+
+    /**
+     * This method initializes deleteProblemCheckBox
+     * 
+     * @return javax.swing.JCheckBox
+     */
+    private JCheckBox getDeleteProblemCheckBox() {
+        if (deleteProblemCheckBox == null) {
+            deleteProblemCheckBox = new JCheckBox();
+            deleteProblemCheckBox.setBounds(new Rectangle(324, 372, 182, 21));
+            deleteProblemCheckBox.setText("Delete Problem");
+            deleteProblemCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableUpdateButton();
+                }
+            });
+        }
+        return deleteProblemCheckBox;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
