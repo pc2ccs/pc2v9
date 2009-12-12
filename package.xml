@@ -130,7 +130,7 @@
         <property name="apizip.path" value="${dist.dir}/${apizip.name}"/>
 
         <antcall target="apizip"/>
-        <antcall target="zip"/> 
+        <!-- bug 490 gzip depends on zip do not call explicitly -->
         <antcall target="gzip"/> 
     </target>
 </project>
