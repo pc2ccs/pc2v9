@@ -146,7 +146,9 @@ public class SubmitRunPane extends JPanePlugin {
         getLanguageComboBox().addItem(languageN);
 
         for (Language language : getContest().getLanguages()) {
-            getLanguageComboBox().addItem(language);
+            if (language.isActive()){
+                getLanguageComboBox().addItem(language);
+            }
         }
     }
 
@@ -282,7 +284,7 @@ public class SubmitRunPane extends JPanePlugin {
                 public void run() {
                     int selectedIndex = getLanguageComboBox().getSelectedIndex();
                     reloadLanguages();
-                    if (selectedIndex > -1) {
+                    if (selectedIndex > -1 && selectedIndex < getLanguageComboBox().getItemCount()) {
                         getLanguageComboBox().setSelectedIndex(selectedIndex);
                     }
                 }

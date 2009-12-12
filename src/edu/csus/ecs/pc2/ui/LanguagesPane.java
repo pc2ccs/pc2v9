@@ -157,6 +157,9 @@ public class LanguagesPane extends JPanePlugin {
         Object[] c = new String[numberColumns];
 
         c[0] = language.toString();
+        if (! language.isActive()){
+            c[0] = "[DELETED] "+language.toString();
+        }
         c[1] = language.getCompileCommandLine();
         c[2] = language.getExecutableIdentifierMask();
         c[3] = language.getProgramExecuteCommandLine();

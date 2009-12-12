@@ -4,8 +4,10 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Rectangle;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -34,8 +36,6 @@ public class LanguagePane extends JPanePlugin {
      */
     private static final long serialVersionUID = 6229906311932197623L;
 
-    private JPanel messagePane = null;
-
     private JPanel buttonPane = null;
 
     private JButton addButton = null;
@@ -43,8 +43,6 @@ public class LanguagePane extends JPanePlugin {
     private JButton updateButton = null;
 
     private JButton cancelButton = null;
-
-    private JLabel messageLabel = null;
 
     private JPanel jPanel = null;
 
@@ -71,12 +69,14 @@ public class LanguagePane extends JPanePlugin {
     private JLabel jLabel5 = null;
 
     private JComboBox autoPopulateLanguageComboBox = null;
-    
+
     private static final String NO_CHANGE_TITLE = "No Change";
-    
+
     private Language language = null;
-    
+
     private boolean populatingGUI = true;
+
+    private JCheckBox deleteLanguageCheckbox = null;
 
     /**
      * This method initializes
@@ -93,19 +93,18 @@ public class LanguagePane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new java.awt.Dimension(517, 239));
+        this.setSize(new Dimension(517, 251));
 
         this.add(getJPanel(), java.awt.BorderLayout.CENTER);
-        this.add(getMessagePane(), java.awt.BorderLayout.NORTH);
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
-        
+
         loadComboBox();
     }
 
     private void loadComboBox() {
-  
+
         getAutoPopulateLanguageComboBox().addItem(NO_CHANGE_TITLE);
-        for (String languageName : LanguageAutoFill.getLanguageList()){
+        for (String languageName : LanguageAutoFill.getLanguageList()) {
             getAutoPopulateLanguageComboBox().addItem(languageName);
         }
     }
@@ -114,7 +113,7 @@ public class LanguagePane extends JPanePlugin {
         super.setContestAndController(inContest, inController);
         addWindowCloserListener();
     }
-    
+
     private void addWindowCloserListener() {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -124,32 +123,13 @@ public class LanguagePane extends JPanePlugin {
                             handleCancelButton();
                         }
                     });
-                } 
+                }
             }
         });
     }
 
-
     public String getPluginTitle() {
         return "Edit Language Pane";
-    }
-
-    /**
-     * This method initializes messagePane
-     * 
-     * @return javax.swing.JPanel
-     */
-    private JPanel getMessagePane() {
-        if (messagePane == null) {
-            messageLabel = new JLabel();
-            messageLabel.setText("");
-            messageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-            messagePane = new JPanel();
-            messagePane.setLayout(new BorderLayout());
-            messagePane.setPreferredSize(new java.awt.Dimension(25, 25));
-            messagePane.add(messageLabel, java.awt.BorderLayout.CENTER);
-        }
-        return messagePane;
     }
 
     /**
@@ -190,16 +170,16 @@ public class LanguagePane extends JPanePlugin {
     }
 
     protected void addLanguage() {
-        
+
         Language newLanguage = getLanguageFromFields();
-        
+
         getController().addNewLanguage(newLanguage);
-        
+
         cancelButton.setText("Close");
         addButton.setEnabled(false);
         updateButton.setEnabled(false);
-        
-        if ( getParentFrame() != null){
+
+        if (getParentFrame() != null) {
             getParentFrame().setVisible(false);
         }
     }
@@ -210,11 +190,13 @@ public class LanguagePane extends JPanePlugin {
         } else {
             language.setDisplayName(displayNameTextField.getText());
         }
-        
+
         language.setCompileCommandLine(compileCommandLineTextField.getText());
         language.setExecutableIdentifierMask(getExecutableFilenameTextField().getText());
         language.setProgramExecuteCommandLine(programExecutionCommandLineTextField.getText());
-        
+
+        language.setActive(!getDeleteLanguageCheckbox().isSelected());
+
         return language;
     }
 
@@ -239,16 +221,16 @@ public class LanguagePane extends JPanePlugin {
     }
 
     protected void updateLanguage() {
-        
+
         Language newLanguage = getLanguageFromFields();
-        
+
         getController().updateLanguage(newLanguage);
-        
+
         cancelButton.setText("Close");
         addButton.setEnabled(false);
         updateButton.setEnabled(false);
-        
-        if ( getParentFrame() != null){
+
+        if (getParentFrame() != null) {
             getParentFrame().setVisible(false);
         }
     }
@@ -274,10 +256,10 @@ public class LanguagePane extends JPanePlugin {
 
     protected void handleCancelButton() {
 
-        if (getAddButton().isEnabled() || getUpdateButton().isEnabled()){
+        if (getAddButton().isEnabled() || getUpdateButton().isEnabled()) {
 
             // Something changed, are they sure ?
-            
+
             int result = FrameUtilities.yesNoCancelDialog(getParentFrame(), "Language modified, save changes?", "Confirm Choice");
 
             if (result == JOptionPane.YES_OPTION) {
@@ -286,16 +268,16 @@ public class LanguagePane extends JPanePlugin {
                 } else {
                     updateLanguage();
                 }
-                if ( getParentFrame() != null){
+                if (getParentFrame() != null) {
                     getParentFrame().setVisible(false);
                 }
             } else if (result == JOptionPane.NO_OPTION) {
-                if ( getParentFrame() != null){
+                if (getParentFrame() != null) {
                     getParentFrame().setVisible(false);
                 }
             }
         } else {
-            if ( getParentFrame() != null){
+            if (getParentFrame() != null) {
                 getParentFrame().setVisible(false);
             }
         }
@@ -363,6 +345,7 @@ public class LanguagePane extends JPanePlugin {
             jPanel.add(getProgramExecutionCommandLineTextField(), getProgramExecutionCommandLineTextField().getName());
             jPanel.add(jLabel5, jLabel5.getName());
             jPanel.add(getAutoPopulateLanguageComboBox(), getAutoPopulateLanguageComboBox().getName());
+            jPanel.add(getDeleteLanguageCheckbox(), null);
         }
         return jPanel;
     }
@@ -486,31 +469,27 @@ public class LanguagePane extends JPanePlugin {
     }
 
     protected void autoFillFields() {
-        
+
         String languageToFill = (String) getAutoPopulateLanguageComboBox().getSelectedItem();
-        
-        if (NO_CHANGE_TITLE.equals(languageToFill)){
+
+        if (NO_CHANGE_TITLE.equals(languageToFill)) {
             return;
         }
-        
+
         /**
-         * From LanguageAutoFill
-         * <li>Title for Language
-         * <li>Compiler Command Line
-         * <li>Executable Identifier Mask
-         * <li>Execute command line
+         * From LanguageAutoFill <li>Title for Language <li>Compiler Command Line <li>Executable Identifier Mask <li>Execute command line
          */
-        
-        String [] values = LanguageAutoFill.getAutoFillValues(languageToFill);
-        
+
+        String[] values = LanguageAutoFill.getAutoFillValues(languageToFill);
+
         displayNameTextField.setText(values[0]);
         compileCommandLineTextField.setText(values[1]);
         executableFilenameTextField.setText(values[2]);
         programExecutionCommandLineTextField.setText(values[3]);
-        
+
         enableUpdateButtons(true);
     }
-    
+
     /**
      * Enable or disable Update button based on comparison of run to fields.
      * 
@@ -525,13 +504,17 @@ public class LanguagePane extends JPanePlugin {
 
         if (language != null) {
 
-            enableButton |= (!displayNameTextField.getText().equals(language.getDisplayName()));
-            enableButton |= (!compileCommandLineTextField.getText().equals(language.getCompileCommandLine()));
-            enableButton |= (!executableFilenameTextField.getText().equals(language.getExecutableIdentifierMask()));
-            enableButton |= (!programExecutionCommandLineTextField.getText().equals(language.getProgramExecuteCommandLine()));
+            Language newLanguage = getLanguageFromFields();
+
+            enableButton |= language.isSameAs(newLanguage);
+
+            // enableButton |= (!displayNameTextField.getText().equals(language.getDisplayName()));
+            // enableButton |= (!compileCommandLineTextField.getText().equals(language.getCompileCommandLine()));
+            // enableButton |= (!executableFilenameTextField.getText().equals(language.getExecutableIdentifierMask()));
+            // enableButton |= (!programExecutionCommandLineTextField.getText().equals(language.getProgramExecuteCommandLine()));
 
         } else {
-            if (getAddButton().isVisible()){
+            if (getAddButton().isVisible()) {
                 enableButton = true;
             }
         }
@@ -539,15 +522,14 @@ public class LanguagePane extends JPanePlugin {
         enableUpdateButtons(enableButton);
     }
 
-
     public Language getLanguage() {
         return language;
     }
 
     public void setLanguage(final Language language) {
-        
+
         this.language = language;
-        
+
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 populateGUI(language);
@@ -557,7 +539,7 @@ public class LanguagePane extends JPanePlugin {
     }
 
     private void populateGUI(Language language2) {
-        
+
         populatingGUI = true;
 
         if (language2 != null) {
@@ -567,39 +549,58 @@ public class LanguagePane extends JPanePlugin {
             programExecutionCommandLineTextField.setText(language2.getProgramExecuteCommandLine());
 
             getAutoPopulateLanguageComboBox().setSelectedIndex(0);
-            
+            getDeleteLanguageCheckbox().setSelected(!language2.isActive());
+
             getAddButton().setVisible(false);
             getUpdateButton().setVisible(true);
-            
+
         } else {
             displayNameTextField.setText("");
             compileCommandLineTextField.setText("");
             executableFilenameTextField.setText("");
             programExecutionCommandLineTextField.setText("");
+            getDeleteLanguageCheckbox().setSelected(false);
 
             getAutoPopulateLanguageComboBox().setSelectedIndex(0);
 
             getAddButton().setVisible(true);
             getUpdateButton().setVisible(false);
         }
-        
+
         populatingGUI = false;
     }
-    
-
 
     protected void enableUpdateButtons(boolean editedText) {
-        if (editedText){
+        if (editedText) {
             cancelButton.setText("Cancel");
-        }else{
+        } else {
             cancelButton.setText("Close");
         }
-        // only enable the visible one, we are either editting or adding not both
+        // only enable the visible one, we are either editing or adding not both
         if (getUpdateButton().isVisible()) {
             getUpdateButton().setEnabled(editedText);
         } else {
             getAddButton().setEnabled(editedText);
         }
+    }
+
+    /**
+     * This method initializes deleteLanguageCheckbox
+     * 
+     * @return javax.swing.JCheckBox
+     */
+    private JCheckBox getDeleteLanguageCheckbox() {
+        if (deleteLanguageCheckbox == null) {
+            deleteLanguageCheckbox = new JCheckBox();
+            deleteLanguageCheckbox.setBounds(new Rectangle(276, 179, 224, 21));
+            deleteLanguageCheckbox.setText("Delete Language");
+            deleteLanguageCheckbox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    enableUpdateButton();
+                }
+            });
+        }
+        return deleteLanguageCheckbox;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

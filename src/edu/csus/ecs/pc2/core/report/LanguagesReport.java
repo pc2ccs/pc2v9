@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.core.report;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.GregorianCalendar;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -33,10 +34,27 @@ public class LanguagesReport implements IReport {
 
     private Log log;
 
-    private Filter filter;
+    private Filter filter = new Filter();
+    
+    private void writeContestTime(PrintWriter printWriter) {
+        printWriter.println();
+        GregorianCalendar resumeTime = contest.getContestTime().getResumeTime();
+        if (resumeTime == null) {
+            printWriter.println("Contest date/time: never started");
+        } else {
+            printWriter.println("Contest date/time: " + resumeTime.getTime());
+
+        }
+    }
 
     private void writeRow(PrintWriter printWriter, Language language) {
-        printWriter.println("  Language  '" + language + "' v" + language.getElementId().getVersionNumber() + " id=" + language.getElementId());
+        
+        String deletedText = "";
+        if (!language.isActive()) {
+            deletedText = " [DELETED] ";
+        }
+
+        printWriter.println("  Language  '" + language + deletedText + "' v" + language.getElementId().getVersionNumber() + " id=" + language.getElementId());
         printWriter.println("    site number         : " + language.getSiteNumber());
         printWriter.println("    compiler command    : " + language.getCompileCommandLine());
         printWriter.println("    executable mask     : " + language.getExecutableIdentifierMask());
@@ -59,6 +77,9 @@ public class LanguagesReport implements IReport {
         printWriter.println(new VersionInfo().getSystemVersionInfo());
         printWriter.println();
         printWriter.println(getReportTitle() + " Report");
+        
+        writeContestTime(printWriter);
+        printWriter.println();
     }
 
     private void printFooter(PrintWriter printWriter) {
@@ -71,16 +92,19 @@ public class LanguagesReport implements IReport {
         PrintWriter printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
 
         try {
-            printHeader(printWriter);
 
             try {
+                printHeader(printWriter);
+                
                 writeReport(printWriter);
+                
+                printFooter(printWriter);
+                
             } catch (Exception e) {
                 printWriter.println("Exception in report: " + e.getMessage());
                 e.printStackTrace(printWriter);
             }
 
-            printFooter(printWriter);
 
             printWriter.close();
             printWriter = null;
