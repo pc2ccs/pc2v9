@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.KeyEvent;
 import java.security.InvalidParameterException;
+import java.util.Arrays;
 import java.util.Properties;
 import java.util.Set;
 
@@ -228,6 +229,7 @@ public class PropertiesEditPane extends JPanel {
 
         String[] keys = (String[]) set.toArray(new String[set.size()]);
 
+        Arrays.sort(keys);
         for (String key : keys) {
 
             Object[] objects = new Object[2];
