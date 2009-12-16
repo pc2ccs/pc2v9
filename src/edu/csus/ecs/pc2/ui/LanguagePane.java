@@ -482,7 +482,7 @@ public class LanguagePane extends JPanePlugin {
 
         String[] values = LanguageAutoFill.getAutoFillValues(languageToFill);
 
-        displayNameTextField.setText(values[0]);
+        displayNameTextField.setText(values[4]);
         compileCommandLineTextField.setText(values[1]);
         executableFilenameTextField.setText(values[2]);
         programExecutionCommandLineTextField.setText(values[3]);
