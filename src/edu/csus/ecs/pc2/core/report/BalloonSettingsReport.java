@@ -4,6 +4,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.Properties;
+import java.util.Set;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -61,6 +63,16 @@ public class BalloonSettingsReport implements IReport {
                 printWriter.println("      SMTP  server       : " + balloonSetting.getMailServer());
                 printWriter.println("      Lines Per Page     : " + balloonSetting.getLinesPerPage());
                 printWriter.println("      send No judgements : " + balloonSetting.isIncludeNos());
+                Properties mailProperties = balloonSetting.getMailProperties();
+                Set<Object> set = mailProperties.keySet();
+                String[] keys = (String[]) set.toArray(new String[set.size()]);
+
+                Arrays.sort(keys);
+                printWriter.println("      Mail Properties :");
+                for (String key : keys) {
+                    String value = (String) mailProperties.get(key);
+                    printWriter.printf("            %-25s : %s\n", key, value);
+                }
                 printWriter.println();
 
                 int counter = 1;

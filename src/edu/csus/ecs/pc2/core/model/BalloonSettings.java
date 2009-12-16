@@ -42,6 +42,8 @@ public class BalloonSettings implements IElementObject {
     public static final String MAIL_USER = "mail.user";
     public static final String MAIL_PASSWORD = "mail.user.password";
 
+    public static final Object MAIL_FROM = "mail.from";
+
     private ElementId elementId;
 
     /**
@@ -177,7 +179,7 @@ public class BalloonSettings implements IElementObject {
         defaultProperties.put("mail.smtp.starttls.enable",Boolean.toString(false));
         defaultProperties.put("mail.smtps.auth", Boolean.toString(false));
         defaultProperties.put("mail.smtps.port", Integer.toString(DEFAULT_PORT_SMTPS));
-        defaultProperties.put("mail.from", DEFAULT_MAIL_FROM);
+        defaultProperties.put(MAIL_FROM, DEFAULT_MAIL_FROM);
         return defaultProperties;
     }
     /*

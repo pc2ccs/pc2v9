@@ -10,11 +10,17 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
+import javax.mail.Address;
 import javax.mail.Message;
+import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Transport;
+import javax.mail.event.TransportEvent;
+import javax.mail.event.TransportListener;
+import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
+import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Balloon;
 import edu.csus.ecs.pc2.core.model.BalloonSettings;
@@ -394,6 +400,13 @@ public class BalloonWriter {
             String user = (String) props.get(BalloonSettings.MAIL_USER);
             String passwd = (String) props.get(BalloonSettings.MAIL_PASSWORD);
             String method = (String) props.get(BalloonSettings.MAIL_PROTOCOL);
+            String from = (String) props.get(BalloonSettings.MAIL_FROM);
+            StringBuffer fromName = new StringBuffer("Balloons");
+            if (contestTitle.trim().length() > 0) {
+                fromName.append(" - "+contestTitle.trim());
+            }
+            InternetAddress fromAddress = new InternetAddress(from, fromName.toString());
+
             // -1 means the default port
             int port = -1;
             try {
@@ -404,15 +417,18 @@ public class BalloonWriter {
                 port = -1;
                 props.put(BalloonSettings.MAIL_PROTOCOL, "");
             }
+            
             Session session = Session.getInstance(props, null);
             // XXX TODO, how to handle unknown keys (ala InstallCert)
             Transport tr = session.getTransport(method);
+            tr.addTransportListener(new BalloonTransportListener());
             tr.connect(host, port, user, passwd);
             MimeMessage msg = new MimeMessage(session);
-            msg.setFrom();
+            msg.setFrom(fromAddress);
             msg.setRecipients(Message.RecipientType.TO, mailTo);
             msg.setSubject(subject);
             msg.setSentDate(new Date());
+            msg.addHeader("X-PC2-Version", new VersionInfo().getVersionNumber());
             msg.setText(message);
             msg.saveChanges();
             tr.sendMessage(msg, msg.getAllRecipients());
@@ -471,5 +487,72 @@ public class BalloonWriter {
             log.exiting(getClass().getName(), "sendBalloontoLocalFile", success);
         }
         return success;
+    }
+    
+    String printAddressArray(Address[] addresses) {
+        String result="";
+        if (addresses != null) {
+            for (int i = 0; i < addresses.length; i++) {
+                if (i > 0) {
+                    result = result+",";
+                }
+                result = result+addresses[i].toString();
+            }
+        }
+        return result;
+    }
+    
+    String printSubject(Message message, String method) {
+        String subject="unknown";
+        if (message != null) {
+            try {
+                subject = message.getSubject();
+            } catch (MessagingException e) {
+                log.throwing("BalloonTransportListener", method, e);
+            }
+        }
+        return subject;
+    }
+    
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     * 
+     */
+    public class BalloonTransportListener implements TransportListener {
+
+        public void messageDelivered(TransportEvent arg0) {
+            String subject=printSubject(arg0.getMessage(), "messageDelivered");
+            String sent = printAddressArray(arg0.getValidSentAddresses());
+            log.info("Balloon "+subject+" delivered to "+sent);
+        }
+
+        public void messageNotDelivered(TransportEvent arg0) {
+            String subject=printSubject(arg0.getMessage(), "messageNotDelivered");
+            String unSent = printAddressArray(arg0.getValidUnsentAddresses());
+            String invalid = printAddressArray(arg0.getInvalidAddresses());
+            logErrors(subject,unSent, invalid);
+        }
+
+        public void messagePartiallyDelivered(TransportEvent arg0) {
+            String subject=printSubject(arg0.getMessage(), "messagePartiallyDelivered");
+            String sent = printAddressArray(arg0.getValidSentAddresses());
+            String unSent = printAddressArray(arg0.getValidUnsentAddresses());
+            String invalid = printAddressArray(arg0.getInvalidAddresses());
+            if (sent.length() > 0) {
+                log.info("Balloon "+subject+" partially delivered to "+sent);
+            }
+            logErrors(subject,unSent, invalid);
+        }
+
+        private void logErrors(String subject, String unSent, String invalid) {
+            if (unSent.length() > 0) {
+                log.warning("Balloon "+subject+" trouble with "+invalid+" also NOT delivered to "+unSent);
+            } else {
+                // invalid only
+                log.warning("Balloon "+subject+" trouble with "+invalid);
+            }
+
+        }
     }
 }
