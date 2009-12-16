@@ -5,5 +5,8 @@
 	<classpathentry excluding="**/package.html" kind="src" path="test"/>
 	<classpathentry kind="lib" path="vendor/lib/junit-4.1.jar"/>
 	<classpathentry kind="lib" path="vendor/lib/mclb.jar"/>
+	<classpathentry kind="lib" path="vendor/lib/activation.jar"/>
+	<classpathentry kind="lib" path="vendor/lib/mailapi.jar"/>
+	<classpathentry kind="lib" path="vendor/lib/smtp.jar"/>
 	<classpathentry kind="output" path=".classes"/>
 </classpath>

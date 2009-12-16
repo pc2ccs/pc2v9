@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.ui;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.util.Arrays;
+import java.util.Properties;
 import java.util.Vector;
 
 import javax.swing.JButton;
@@ -27,6 +28,8 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.security.Permission.Type;
+import java.awt.Rectangle;
+import java.awt.Font;
 
 /**
  * Add/Edit BalloonSettings Pane.
@@ -95,6 +98,11 @@ public class BalloonSettingPane extends JPanePlugin {
 
     private JComboBox balloonClientComboBox = null;
 
+    private JButton advancedMailButton = null;
+
+    private Properties savedMailProperties = null;
+    private Properties changedMailProperties = null;
+
     /**
      * This method initializes
      * 
@@ -121,6 +129,7 @@ public class BalloonSettingPane extends JPanePlugin {
         super.setContestAndController(inContest, inController);
 
         contest = inContest;
+        setMailProperties(null);
         log = getController().getLog();
         addWindowCloserListener();
     }
@@ -297,6 +306,7 @@ public class BalloonSettingPane extends JPanePlugin {
             
         }
 
+        checkBalloonSettings.setMailProperties(changedMailProperties);
         return checkBalloonSettings;
     }
 
@@ -441,14 +451,27 @@ public class BalloonSettingPane extends JPanePlugin {
     public void setBalloonSettings(final BalloonSettings inBalloonSettings) {
 
         this.balloonSettings = inBalloonSettings;
-
+        savedMailProperties = null;
+        
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 populateGUI(balloonSettings);
+                setMailProperties(balloonSettings);
                 enableUpdateButtons(false);
                 showMessage("");
             }
+
         });
+    }
+
+    private void setMailProperties(BalloonSettings settings) {
+        if (settings != null) {
+            savedMailProperties = settings.getMailProperties();
+        }
+        if (savedMailProperties == null) {
+            savedMailProperties = BalloonSettings.getDefaultMailProperties();
+        }
+        changedMailProperties = savedMailProperties;
     }
 
     /**
@@ -616,7 +639,7 @@ public class BalloonSettingPane extends JPanePlugin {
             siteLabel.setBounds(new java.awt.Rectangle(25, 22, 48, 16));
             siteLabel.setText("Site");
             printDeviceLabel = new JLabel();
-            printDeviceLabel.setBounds(new java.awt.Rectangle(53, 177, 112, 21));
+            printDeviceLabel.setBounds(new Rectangle(52, 218, 112, 21));
             printDeviceLabel.setText("Print Device");
             jLabel = new JLabel();
             jLabel.setBounds(new java.awt.Rectangle(53, 115, 112, 21));
@@ -640,6 +663,7 @@ public class BalloonSettingPane extends JPanePlugin {
             centerPane.add(getSiteComboBox(), null);
             centerPane.add(balloonClientLabel, null);
             centerPane.add(getBalloonClientComboBox(), null);
+            centerPane.add(getAdvancedMailButton(), null);
         }
         return centerPane;
     }
@@ -724,7 +748,7 @@ public class BalloonSettingPane extends JPanePlugin {
     private JCheckBox getPrintNotificationsCheckBox() {
         if (printNotificationsCheckBox == null) {
             printNotificationsCheckBox = new JCheckBox();
-            printNotificationsCheckBox.setBounds(new java.awt.Rectangle(25, 147, 162, 24));
+            printNotificationsCheckBox.setBounds(new Rectangle(24, 188, 162, 24));
             printNotificationsCheckBox.setText("Print Notifications");
             printNotificationsCheckBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -765,6 +789,7 @@ public class BalloonSettingPane extends JPanePlugin {
             emailServerTextBox.setBounds(new java.awt.Rectangle(183, 115, 179, 21));
             emailServerTextBox.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
+                    changedMailProperties.put(BalloonSettings.MAIL_HOST, getEmailServerTextBox().getText());
                     enableButtons();
                 }
             });
@@ -780,7 +805,7 @@ public class BalloonSettingPane extends JPanePlugin {
     private JCheckBox getPostScriptEnabledCheckBox() {
         if (postScriptEnabledCheckBox == null) {
             postScriptEnabledCheckBox = new JCheckBox();
-            postScriptEnabledCheckBox.setBounds(new java.awt.Rectangle(52, 205, 212, 24));
+            postScriptEnabledCheckBox.setBounds(new Rectangle(51, 246, 212, 24));
             postScriptEnabledCheckBox.setText("PostScript enabled printer");
             postScriptEnabledCheckBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -799,7 +824,7 @@ public class BalloonSettingPane extends JPanePlugin {
     private JTextField getPrintDeviceTextBox() {
         if (printDeviceTextBox == null) {
             printDeviceTextBox = new JTextField();
-            printDeviceTextBox.setBounds(new java.awt.Rectangle(183, 177, 179, 21));
+            printDeviceTextBox.setBounds(new Rectangle(182, 218, 179, 21));
             printDeviceTextBox.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableButtons();
@@ -852,7 +877,7 @@ public class BalloonSettingPane extends JPanePlugin {
     private JComboBox getBalloonClientComboBox() {
         if (balloonClientComboBox == null) {
             balloonClientComboBox = new JComboBox();
-            balloonClientComboBox.setBounds(new java.awt.Rectangle(143, 240, 204, 25));
+            balloonClientComboBox.setBounds(new Rectangle(142, 281, 204, 25));
             balloonClientComboBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     // message is usually only updated on Update/Add, clear it till then
@@ -862,6 +887,52 @@ public class BalloonSettingPane extends JPanePlugin {
             });
         }
         return balloonClientComboBox;
+    }
+
+    /**
+     * This method initializes AdvancedMailButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getAdvancedMailButton() {
+        if (advancedMailButton == null) {
+            advancedMailButton = new JButton();
+            advancedMailButton.setBounds(new Rectangle(63, 152, 263, 25));
+            advancedMailButton.setToolTipText("Advanced Mail Server Settings");
+            advancedMailButton.setFont(new Font("Dialog", Font.BOLD, 12));
+            advancedMailButton.setText("EMail Server Advanced Settings");
+            advancedMailButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    showMailPropertiesEditor();
+                }
+            });
+        }
+        return advancedMailButton;
+    }
+
+    protected void showMailPropertiesEditor() {
+        PropertiesEditFrame propertiesEditFrame = new PropertiesEditFrame();
+        propertiesEditFrame.setTitle("Edit Advanced Mail Properties");
+        propertiesEditFrame.setProperties(changedMailProperties, new UpdateMailProperties());
+        propertiesEditFrame.setSize(350, 315);
+        propertiesEditFrame.setVisible(true);
+        
+    }
+    /**
+     * Update the edited properties.
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+
+    // $HeadURL$
+    protected class UpdateMailProperties implements IPropertyUpdater {
+
+        public void updateProperties(Properties properties) {
+            changedMailProperties = properties;
+            getEmailServerTextBox().setText(properties.getProperty(BalloonSettings.MAIL_HOST));
+            enableButtons();
+        }
     }
 
 } // @jve:decl-index=0:visual-constraint="28,22"

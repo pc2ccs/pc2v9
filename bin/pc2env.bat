@@ -25,6 +25,7 @@ pause
 
 :checkmclb
 if x%mclbdir% == x goto nomclb
+set pc2_classpath=%libdir%\pc2.jar;%mclbdir%\mclb.jar;%mclbdir%\activation.jar;%mclbdir%\mailapi.jar;%mclbdir%\smtp.jar
 goto end
 
 :nomclb

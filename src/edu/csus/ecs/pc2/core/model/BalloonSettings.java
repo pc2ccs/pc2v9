@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.core.model;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Properties;
 
 /**
  * Balloon and Balloon Distribution Settings (per Site).
@@ -13,9 +14,33 @@ import java.util.Hashtable;
 // $HeadURL$
 public class BalloonSettings implements IElementObject {
 
+    public static final String MAIL_PROTOCOL = "mail.transport.protocol";
+
+    /**
+     * Key for the default host name of the mail server.
+     */
+    public static final String MAIL_HOST = "mail.host";
+
+    /**
+     * Value of the return email address of the current user.
+     */
+    private static final String DEFAULT_MAIL_FROM = "nobody@ecs.csus.edu";
+
     private Hashtable<ElementId, String> colorList = new Hashtable<ElementId, String>();
 
     private static final long serialVersionUID = 4208771943370594478L;
+
+    /**
+     * Default IANA assigned port for SMTP over SSL (TLS).
+     */
+    private static final int DEFAULT_PORT_SMTPS = 465;
+    /**
+     * Default IANA assigned port for mail.
+     */
+    private static final int DEFAULT_PORT_SMTP = 25;
+
+    public static final String MAIL_USER = "mail.user";
+    public static final String MAIL_PASSWORD = "mail.user.password";
 
     private ElementId elementId;
 
@@ -65,11 +90,14 @@ public class BalloonSettings implements IElementObject {
      * Which client is responsible for this BalloonSettings.
      */
     private ClientId balloonClient = null;
+
+    private Properties mailProperties = null;
     
     public BalloonSettings(String displayName, int siteNumber) {
         super();
         elementId = new ElementId(displayName);
         setSiteNumber(siteNumber);
+        mailProperties = getDefaultMailProperties();
     }
 
     /**
@@ -137,11 +165,50 @@ public class BalloonSettings implements IElementObject {
         this.includeNos = includeNos;
     }
 
+    public static Properties getDefaultMailProperties() {
+        Properties defaultProperties = new Properties();
+        defaultProperties.put("mail.debug", Boolean.toString(false));
+        defaultProperties.put(MAIL_HOST, "");
+        defaultProperties.put(MAIL_USER, "");
+        defaultProperties.put(MAIL_PASSWORD, "");
+        defaultProperties.put(MAIL_PROTOCOL, "smtp");
+        defaultProperties.put("mail.smtp.auth", Boolean.toString(false));
+        defaultProperties.put("mail.smtp.port", Integer.toString(DEFAULT_PORT_SMTP));
+        defaultProperties.put("mail.smtp.starttls.enable",Boolean.toString(false));
+        defaultProperties.put("mail.smtps.auth", Boolean.toString(false));
+        defaultProperties.put("mail.smtps.port", Integer.toString(DEFAULT_PORT_SMTPS));
+        defaultProperties.put("mail.from", DEFAULT_MAIL_FROM);
+        return defaultProperties;
+    }
+    /*
+     * for use with JavaMail API
+     */
+    public Properties getMailProperties() {
+/* XXX these should be set via the ui now
+        mailProperties = new Properties();
+        mailProperties.put("mail.from", "pc2@ecs.csus.edu");
+        // consider not adding this if getMailServer() is not set
+        mailProperties.put("mail.host", getMailServer());
+        // hardcode auth for now
+        mailProperties.put("mail.smtps.auth", "true");
+        mailProperties.put("mail.smtp.auth", "true");
+        mailProperties.put("mail.debug", "true");
+        mailProperties.put("mail.smtp.starttls.enable","true");
+        // for use with digest-md5, the default gaia.ecs.csus.edu not working
+//        mailProperties.put("mail.smtp.sasl.realm","ecs.csus.edu");
+        // in the future might have other stuff including mail.user
+         */
+        if (mailProperties == null) {
+            mailProperties = getDefaultMailProperties();
+        }
+        return mailProperties;
+    }
+    
     /**
      * @return Returns the mailServer.
      */
     public String getMailServer() {
-        return mailServer;
+        return (String)getMailProperties().get(MAIL_HOST);
     }
 
     /**
@@ -149,7 +216,7 @@ public class BalloonSettings implements IElementObject {
      *            The mailServer to set.
      */
     public void setMailServer(String mailServer) {
-        this.mailServer = mailServer;
+        getMailProperties().put(MAIL_HOST, mailServer);
     }
 
     /**
@@ -323,7 +390,7 @@ public class BalloonSettings implements IElementObject {
             if (getLinesPerPage() != balloonSettings.getLinesPerPage()) {
                 return false;
             }
-            if (! stringSame(getMailServer(),balloonSettings.getMailServer())) {
+            if (! mailProperties.equals(balloonSettings.getMailProperties())) {
                 return false;
             }
             if (balloonClient == null) {
@@ -419,6 +486,13 @@ public class BalloonSettings implements IElementObject {
         clone.setPostscriptCapable(isPostscriptCapable());
         clone.setPrintBalloons(isPrintBalloons());
         clone.setPrintDevice(new String(printDevice));
+        
+        Properties newMailProperties = new Properties();
+        String[] keys = mailProperties.keySet().toArray(new String[mailProperties.size()]);
+        for (String key : keys) {
+            newMailProperties.put(key, new String((String)mailProperties.get(key)));
+        }
+        clone.setMailProperties(newMailProperties);
         return clone;
     }
     
@@ -445,6 +519,20 @@ public class BalloonSettings implements IElementObject {
         clone.setPostscriptCapable(isPostscriptCapable());
         clone.setPrintBalloons(isPrintBalloons());
         clone.setPrintDevice(new String(printDevice));
+        Properties newMailProperties = new Properties();
+        String[] keys = mailProperties.keySet().toArray(new String[mailProperties.size()]);
+        for (String key : keys) {
+            newMailProperties.put(key, new String((String)mailProperties.get(key)));
+        }
+        clone.setMailProperties(newMailProperties);
         return clone;
+    }
+
+    /**
+     * @param mailProperties the mailProperties to set
+     */
+    public void setMailProperties(Properties newMailProperties) {
+        this.mailProperties = newMailProperties;
+        setMailServer((String)newMailProperties.get(MAIL_HOST));
     }
 }
