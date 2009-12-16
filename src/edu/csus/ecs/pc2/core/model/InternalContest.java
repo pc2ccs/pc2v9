@@ -281,10 +281,12 @@ public class InternalContest implements IInternalContest {
                 setGeneralProblem(new Problem("General"));
             }
         }
-        
-        Profile newProfile = new Profile("Contest");
-        newProfile.setDescription("(No description, yet)");
-        setProfile(newProfile);
+
+        if (profileList.size() == 0) {
+            Profile newProfile = new Profile("Contest");
+            newProfile.setDescription("(No description, yet)");
+            setProfile(newProfile);
+        }
 
         if (getContestTime(siteNum) == null){
             ContestTime contestTime = new ContestTime();
@@ -1994,7 +1996,7 @@ public class InternalContest implements IInternalContest {
         profileList.add(theProfile);
         ProfileEvent profileEvent = new ProfileEvent(ProfileEvent.Action.ADDED, theProfile);
         fireProfileListener(profileEvent);
-        return profile;
+        return theProfile;
     }
 
     private void fireProfileListener(ProfileEvent profileEvent) {
