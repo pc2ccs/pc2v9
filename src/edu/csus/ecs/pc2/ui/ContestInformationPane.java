@@ -278,13 +278,6 @@ public class ContestInformationPane extends JPanePlugin {
     protected void enableUpdateButton() {
         ContestInformation newChoice = getFromFields();
 
-        dumpProperties("From fields", newChoice.getScoringProperties());
-        dumpProperties("From contest", getContest().getContestInformation().getScoringProperties());
-        dumpProperties("From changed", changedScoringProperties);
-        dumpProperties("From saved", savedScoringProperties);
-
-        System.out.println(" debug " + savedScoringProperties.equals(changedScoringProperties));
-
         if (getContest().getContestInformation().isSameAs(newChoice)) {
             setEnableButtons(false);
         } else {
@@ -711,10 +704,6 @@ public class ContestInformationPane extends JPanePlugin {
 
         public void updateProperties(Properties properties) {
             changedScoringProperties = properties;
-            dumpProperties("From fields", getFromFields().getScoringProperties());
-            dumpProperties("From contest", getContest().getContestInformation().getScoringProperties());
-            dumpProperties("From changed", changedScoringProperties);
-            dumpProperties("From saved", savedScoringProperties);
             enableUpdateButton();
         }
     }
