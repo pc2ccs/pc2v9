@@ -2709,4 +2709,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         sendToLocalServer(sendPacket);
     }
 
+    public void updateProfile(Profile profile) {
+        Packet updateProfilePackert = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), profile);
+        sendToLocalServer(updateProfilePackert);
+    }
 }

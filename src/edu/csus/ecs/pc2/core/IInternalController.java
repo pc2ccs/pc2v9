@@ -475,4 +475,11 @@ public interface IInternalController {
      * @param newJudgement
      */
     void updateJudgement(Judgement newJudgement);
+
+    /**
+     * Update current Profile information.
+     * 
+     * @param profile
+     */
+    void updateProfile(Profile profile);
 }

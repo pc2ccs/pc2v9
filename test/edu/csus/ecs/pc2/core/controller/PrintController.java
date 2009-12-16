@@ -574,5 +574,9 @@ public class PrintController implements IInternalController {
         System.out.println("    profile                : " + currentProfile);
         System.out.println("    new profile            : " + switchToProfile);
     }
-    
+
+    public void updateProfile(Profile profile) {
+        System.out.println("method updateProfile");
+        System.out.println("    profile                : " + profile);
+    }
 }
