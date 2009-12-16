@@ -140,7 +140,7 @@ public class ContestInformationPane extends JPanePlugin {
             labelMaxFileSize = new JLabel();
             labelMaxFileSize.setBounds(new Rectangle(21, 173, 175, 27));
             labelMaxFileSize.setHorizontalAlignment(SwingConstants.RIGHT);
-            labelMaxFileSize.setText("Maiximum output size (in K)");
+            labelMaxFileSize.setText("Maximum output size (in K)");
             contestTitleLabel = new JLabel();
             contestTitleLabel.setBounds(new java.awt.Rectangle(55, 21, 134, 27));
             contestTitleLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
