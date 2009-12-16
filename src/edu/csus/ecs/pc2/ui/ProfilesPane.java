@@ -19,6 +19,7 @@ import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IProfileListener;
 import edu.csus.ecs.pc2.core.model.Profile;
+import edu.csus.ecs.pc2.core.model.ProfileComparatorByName;
 import edu.csus.ecs.pc2.core.model.ProfileEvent;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
@@ -470,6 +471,11 @@ public class ProfilesPane extends JPanePlugin {
         inContest.addProfileListener(new ProfileListenerImplementation());
     }
 
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     *
+     */
     class ProfileWrapper {
         private Profile profile;
 
@@ -489,21 +495,13 @@ public class ProfilesPane extends JPanePlugin {
 
     protected void refreshProfilesList() {
 
-        // TODO remove this debugging code
-//        Profile profile1 = new Profile("Contest ONE");
-//        getContest().addProfile(profile1);
-//        profile1 = new Profile("Contest TWO");
-//        getContest().addProfile(profile1);
-//        profile1 = new Profile("Contest THREE");
-//        getContest().addProfile(profile1);
-
         Profile[] profiles = getContest().getProfiles();
         
         getProfileComboBox().removeAllItems();
 
         getSwitchButton().setEnabled(false);
-        if (profiles.length > 1) {
-
+        if (profiles.length > 0) {
+            Arrays.sort(profiles, new ProfileComparatorByName());
             for (Profile profile : profiles) {
                 getProfileComboBox().addItem(new ProfileWrapper(profile));
             }
@@ -534,7 +532,11 @@ public class ProfilesPane extends JPanePlugin {
     protected class ProfileListenerImplementation implements IProfileListener {
 
         public void profileAdded(ProfileEvent event) {
-            refreshProfilesList();
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    refreshProfilesList();
+                }
+            });
         }
 
         public void profileChanged(ProfileEvent event) {
@@ -547,7 +549,11 @@ public class ProfilesPane extends JPanePlugin {
         }
 
         public void profileRemoved(ProfileEvent event) {
-            refreshProfilesList();
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    refreshProfilesList();
+                }
+            });
         }
     }
 
