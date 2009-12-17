@@ -20,16 +20,30 @@ public class ProfileCloneSettings implements Serializable {
     private String name = "";
 
     private String title = "";
+    
+    private String description = "";
 
     private char[] contestPassword = null;
 
     private char[] newContestPassword = null;
 
-    private boolean removeAllLanguages = false;
+    private boolean copyAccounts = false;
 
-    private boolean removeAllProblms = true;
+    private boolean copyContestSettings = false;
 
-    private boolean removeAllsubmissions = true;
+    private boolean copyGroups = false;
+
+    private boolean copyJudgements = false;
+
+    private boolean copyLanguages = false;
+
+    private boolean copyNotifications = false;
+
+    private boolean copyProblems = false;
+
+    private boolean copyRuns = false;
+
+    private boolean copyClarifications = false;
 
     private boolean resetContestTimes = true;
 
@@ -64,30 +78,6 @@ public class ProfileCloneSettings implements Serializable {
         this.contestPassword = contestPassword;
     }
 
-    public boolean isRemoveAllLanguages() {
-        return removeAllLanguages;
-    }
-
-    public void setRemoveAllLanguages(boolean removeAllLanguages) {
-        this.removeAllLanguages = removeAllLanguages;
-    }
-
-    public boolean isRemoveAllProblms() {
-        return removeAllProblms;
-    }
-
-    public void setRemoveAllProblms(boolean removeAllProblms) {
-        this.removeAllProblms = removeAllProblms;
-    }
-
-    public boolean isRemoveAllsubmissions() {
-        return removeAllsubmissions;
-    }
-
-    public void setRemoveAllsubmissions(boolean removeAllsubmissions) {
-        this.removeAllsubmissions = removeAllsubmissions;
-    }
-
     public boolean isResetContestTimes() {
         return resetContestTimes;
     }
@@ -102,5 +92,89 @@ public class ProfileCloneSettings implements Serializable {
 
     public void setNewContestPassword(char[] newContestPassword) {
         this.newContestPassword = newContestPassword;
+    }
+
+    public boolean isCopyAccounts() {
+        return copyAccounts;
+    }
+
+    public void setCopyAccounts(boolean copyAccounts) {
+        this.copyAccounts = copyAccounts;
+    }
+
+    public boolean isCopyContestSettings() {
+        return copyContestSettings;
+    }
+
+    public void setCopyContestSettings(boolean copyContestSettings) {
+        this.copyContestSettings = copyContestSettings;
+    }
+
+    public boolean isCopyGroups() {
+        return copyGroups;
+    }
+
+    public void setCopyGroups(boolean copyGroups) {
+        this.copyGroups = copyGroups;
+    }
+
+    public boolean isCopyJudgements() {
+        return copyJudgements;
+    }
+
+    public void setCopyJudgements(boolean copyJudgements) {
+        this.copyJudgements = copyJudgements;
+    }
+
+    public boolean isCopyLanguages() {
+        return copyLanguages;
+    }
+
+    public void setCopyLanguages(boolean copyLanguages) {
+        this.copyLanguages = copyLanguages;
+    }
+
+    public boolean isCopyNotifications() {
+        return copyNotifications;
+    }
+
+    public void setCopyNotifications(boolean copyNotifications) {
+        this.copyNotifications = copyNotifications;
+    }
+
+    public boolean isCopyProblems() {
+        return copyProblems;
+    }
+
+    public void setCopyProblems(boolean copyProblems) {
+        this.copyProblems = copyProblems;
+    }
+
+    public boolean isCopyRuns() {
+        return copyRuns;
+    }
+
+    public void setCopyRuns(boolean copyRuns) {
+        this.copyRuns = copyRuns;
+    }
+
+    public boolean isCopyClarifications() {
+        return copyClarifications;
+    }
+
+    public void setCopyClarifications(boolean copyClarifications) {
+        this.copyClarifications = copyClarifications;
+    }
+
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

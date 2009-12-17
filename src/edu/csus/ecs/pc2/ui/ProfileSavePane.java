@@ -228,19 +228,56 @@ public class ProfileSavePane extends JPanePlugin {
     private ProfileCloneSettings getProfileCloneSettingsFromFields() throws InvalidFieldValue {
 
         String name = getProfileNameTextField().getText();
+        
+        checkField (name,"Enter a profile name" );
+        
+        String description = getProfileDescriptionTextField().getText();
+        
+        checkField (name,"Enter a profile description");
 
         String title = getContestTitleTextField().getText();
-
+        
         char[] password = getContestPasswordTextField().getPassword();
+        char[] confirmPassword = getContestPasswordConfirmTextField().getPassword();
+        
+        if (password.length != confirmPassword.length){
+            throw new InvalidFieldValue("Contest password does not match");
+        }
+        
+        if (! (new String(password).equals(new String(confirmPassword)))){
+            throw new InvalidFieldValue("Contest password does not match.");
+        }
 
         ProfileCloneSettings settings = new ProfileCloneSettings(name, title, password);
+        
+        settings.setDescription(description);
+        
+        settings.setCopyAccounts(getCopyAccountsCheckBox().isSelected());
+        settings.setCopyClarifications(getCopyClarificationsCheckBox().isSelected());
+        settings.setCopyContestSettings(getCopyContestSettingsCheckBox().isSelected());
+        settings.setCopyGroups(getCopyGroupsCheckBox().isSelected());
+        settings.setCopyJudgements(getCopyJudgementsCheckbox().isSelected());
+        settings.setCopyLanguages(getCopyLanguagesCheckBox().isSelected());
+        settings.setCopyNotifications(getCopyNotificationsCheckBox().isSelected());
+        settings.setCopyProblems(getCopyProblemsCheckBox().isSelected());
+        settings.setCopyRuns(getCopyRunsCheckBox().isSelected());
 
-        settings.setRemoveAllLanguages(getCopyLanguagesCheckBox().isSelected());
-        settings.setRemoveAllProblms(getCopyProblemsCheckBox().isSelected());
-        settings.setRemoveAllsubmissions(getCopyRunsCheckBox().isSelected());
         settings.setResetContestTimes(getResetContestTimeCheckBox().isSelected());
 
         return settings;
+    }
+
+    /**
+     * Check for empty or blank string throw exception if empty string. 
+     * 
+     * @param string
+     * @param comment
+     * @throws InvalidFieldValue if string is null or empty 
+     */
+    private void checkField(String string, String comment)  throws InvalidFieldValue {
+        if (string == null || string.trim().length() == 0){
+            throw new InvalidFieldValue(comment);
+        }
     }
 
     private void showMessage(String string) {
