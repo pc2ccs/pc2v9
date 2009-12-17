@@ -158,7 +158,7 @@ public class LanguagesPane extends JPanePlugin {
 
         c[0] = language.toString();
         if (! language.isActive()){
-            c[0] = "[DELETED] "+language.toString();
+            c[0] = "[HIDDEN] "+language.toString();
         }
         c[1] = language.getCompileCommandLine();
         c[2] = language.getExecutableIdentifierMask();

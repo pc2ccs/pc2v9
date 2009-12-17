@@ -51,7 +51,7 @@ public class LanguagesReport implements IReport {
         
         String deletedText = "";
         if (!language.isActive()) {
-            deletedText = " [DELETED] ";
+            deletedText = " [HIDDEN] ";
         }
 
         printWriter.println("  Language  '" + language + deletedText + "' v" + language.getElementId().getVersionNumber() + " id=" + language.getElementId());

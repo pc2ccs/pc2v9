@@ -593,7 +593,7 @@ public class LanguagePane extends JPanePlugin {
         if (deleteLanguageCheckbox == null) {
             deleteLanguageCheckbox = new JCheckBox();
             deleteLanguageCheckbox.setBounds(new Rectangle(276, 179, 224, 21));
-            deleteLanguageCheckbox.setText("Delete Language");
+            deleteLanguageCheckbox.setText("Hide Language");
             deleteLanguageCheckbox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableUpdateButton();
