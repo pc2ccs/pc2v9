@@ -313,8 +313,7 @@ public class ProfilesPane extends JPanePlugin {
     }
 
     protected void cloneProfile() {
-        getProfileSaveFrame().setTitle("Clone settings for " + getProfileName());
-        getProfileSaveFrame().populateGUI(getContest().getProfile());
+        getProfileSaveFrame().setTitle("Clone/Copy existing profile: " + getProfileName());
         getProfileSaveFrame().setSaveButtonName(ProfileSavePane.CLONE_BUTTON_NAME);
         getProfileSaveFrame().setVisible(true);
     }
@@ -324,15 +323,13 @@ public class ProfilesPane extends JPanePlugin {
     }
 
     protected void newProfile() {
-        getProfileSaveFrame().setTitle("New Profile ");
-        getProfileSaveFrame().populateGUI();
+        getProfileSaveFrame().setTitle("Create new profile");
         getProfileSaveFrame().setSaveButtonName(ProfileSavePane.NEW_BUTTON_NAME);
         getProfileSaveFrame().setVisible(true);
     }
 
     protected void exportProfile() {
         getProfileSaveFrame().setTitle("Export settings " + getProfileName());
-        getProfileSaveFrame().populateGUI(getContest().getProfile());
         getProfileSaveFrame().setSaveButtonName(ProfileSavePane.EXPORT_BUTTON_NAME);
         getProfileSaveFrame().setVisible(true);
     }

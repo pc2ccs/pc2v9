@@ -1,14 +1,14 @@
 package edu.csus.ecs.pc2.ui;
 
+import java.awt.Dimension;
+
 import javax.swing.JFrame;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.model.Profile;
-
-import java.awt.Dimension;
 
 /**
+ * Frame for Profile Save.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -75,17 +75,13 @@ public class ProfileSaveFrame extends JFrame implements UIPlugin {
         return "ProfileSaveFrame";
     }
 
+    /**
+     * This sets the save button name and populates the GUI.
+     * 
+     * @param name
+     */
     public void setSaveButtonName(String name) {
         getProfileSavePane().setSaveButtonName(name);
-    }
-
-    public void populateGUI(Profile profile) {
-        getProfileSavePane().populateGUI(profile);
-    }
-
-    public void populateGUI() {
-        getProfileSavePane().populateGUI();
-        
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
