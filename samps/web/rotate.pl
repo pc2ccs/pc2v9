@@ -6,7 +6,7 @@
 # Author:  pc2@ecs.csus.edu
 # Revised: Wed Jun 11 00:08:38 PDT 2003
 # 
-# $Id: rotate.pl 326 2006-10-25 02:53:57Z laned $
+# $Id$
 # 
 
 #
