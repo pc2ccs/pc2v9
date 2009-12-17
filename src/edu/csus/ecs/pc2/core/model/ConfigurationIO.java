@@ -357,7 +357,7 @@ public class ConfigurationIO {
 
     private Profile createNewProfile() {
         Profile profile = new Profile("Contest");
-        profile.setDescription("(No description, yet)");
+        profile.setDescription("Real Contest");
         return profile;
     }
 

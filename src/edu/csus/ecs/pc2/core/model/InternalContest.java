@@ -284,7 +284,7 @@ public class InternalContest implements IInternalContest {
 
         if (profileList.size() == 0) {
             Profile newProfile = new Profile("Contest");
-            newProfile.setDescription("(No description, yet)");
+            profile.setDescription("Real Contest");
             setProfile(newProfile);
         }
 
@@ -2059,7 +2059,7 @@ public class InternalContest implements IInternalContest {
 
     private Profile createNewProfile() {
         Profile newProfile = new Profile("Contest");
-        newProfile.setDescription("(No description, yet)");
+        profile.setDescription("Real Contest");
         return newProfile;
     }
 

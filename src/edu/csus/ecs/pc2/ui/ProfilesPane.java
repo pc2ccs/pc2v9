@@ -79,9 +79,8 @@ public class ProfilesPane extends JPanePlugin {
     private JPanel topPanel = null;
 
     private MCLB profilesListBox = null;
-    
-    private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
 
+    private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
 
     /**
      * This method initializes
@@ -105,7 +104,7 @@ public class ProfilesPane extends JPanePlugin {
             public void mouseClicked(java.awt.event.MouseEvent e) {
                 if (e.getClickCount() > 1 && e.isControlDown() && e.isShiftDown()) {
                     Profile profile = getContest().getProfile();
-                    String message = "Contest Id "+profile.getContestId();
+                    String message = "Contest Id " + profile.getContestId();
                     JOptionPane.showMessageDialog(null, message);
                 }
             }
@@ -310,7 +309,7 @@ public class ProfilesPane extends JPanePlugin {
         // TODO code switchSelectedProfile
 
         int selectedIndex = getProfilesListBox().getSelectedIndex();
-        if(selectedIndex == -1){
+        if (selectedIndex == -1) {
             showMessage("No profile selected");
             return;
         }
@@ -327,13 +326,13 @@ public class ProfilesPane extends JPanePlugin {
     }
 
     private Profile getProfile(ElementId elementId) {
-        
-        for (Profile profile : getContest().getProfiles()){
-            if (profile.getElementId().equals(elementId)){
+
+        for (Profile profile : getContest().getProfiles()) {
+            if (profile.getElementId().equals(elementId)) {
                 return profile;
             }
         }
-        
+
         return null;
     }
 
@@ -346,9 +345,9 @@ public class ProfilesPane extends JPanePlugin {
         }
 
         String newProfileName = getProfileTextField().getText().trim();
-        
-        String description = getProfileDescriptionTextField().getText().trim()+"";
-        
+
+        String description = getProfileDescriptionTextField().getText().trim() + "";
+
         Profile profile = getContest().getProfile();
         profile.setName(newProfileName);
         profile.setDescription(description);
@@ -443,7 +442,7 @@ public class ProfilesPane extends JPanePlugin {
 
         Profile profile = getContest().getProfile();
         updateProfileInformation(profile);
-        
+
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 refreshProfilesList();
@@ -454,18 +453,16 @@ public class ProfilesPane extends JPanePlugin {
         inContest.addProfileListener(new ProfileListenerImplementation());
     }
 
- 
-
     protected void refreshProfilesList() {
-        
+
         try {
             Profile[] profiles = getContest().getProfiles();
-            
+
             getProfilesListBox().removeAllRows();
 
             getSwitchButton().setEnabled(false);
             if (profiles.length > 0) {
-                
+
                 for (Profile profile : profiles) {
                     Object[] objects = buildProfileRow(profile);
                     getProfilesListBox().addRow(objects, profile.getElementId());
@@ -473,31 +470,31 @@ public class ProfilesPane extends JPanePlugin {
                 getProfilesListBox().autoSizeAllColumns();
                 getSwitchButton().setEnabled(true);
             }
-            
+
             updateProfileInformation(getContest().getProfile());
-            
+
             enableSetButton();
 
         } catch (Exception e) {
-            getController().getLog().log(Log.DEBUG,"Exception refreshing profile list", e);
-            e.printStackTrace(); // TODO remove this debugging 
+            getController().getLog().log(Log.DEBUG, "Exception refreshing profile list", e);
+            e.printStackTrace(); // TODO remove this debugging
         }
     }
 
     private Object[] buildProfileRow(Profile profile) {
-        
+
         // Object[] cols = { "Name", "Description", "Create Date" }
 
         int numberColumns = profilesListBox.getColumnCount();
         Object[] c = new String[numberColumns];
 
         c[0] = profile.getName();
-        if (profile.equals(getContest().getProfile())){
+        if (profile.equals(getContest().getProfile())) {
             c[0] = "(Current) " + profile.getName();
         }
         c[1] = profile.getDescription();
         c[2] = formatter.format(profile.getCreateDate());
-        
+
         return c;
     }
 
@@ -560,21 +557,21 @@ public class ProfilesPane extends JPanePlugin {
     }
 
     protected void enableSetButton() {
-        
+
         Profile profile = getContest().getProfile();
-        
+
         String name = getProfileTextField().getText();
         String description = getProfileDescriptionTextField().getText();
-        
+
         boolean enable = (!profile.getName().equals(name)) || (!profile.getDescription().equals(description));
-        
+
         getSetButton().setEnabled(enable);
     }
 
     /**
-     * This method initializes topPanel	
-     * 	
-     * @return javax.swing.JPanel	
+     * This method initializes topPanel
+     * 
+     * @return javax.swing.JPanel
      */
     private JPanel getTopPanel() {
         if (topPanel == null) {
@@ -591,29 +588,29 @@ public class ProfilesPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes profilesListBox	
-     * 	
-     * @return edu.csus.ecs.pc2.ui.MCLB	
+     * This method initializes profilesListBox
+     * 
+     * @return edu.csus.ecs.pc2.ui.MCLB
      */
     private MCLB getProfilesListBox() {
         if (profilesListBox == null) {
             profilesListBox = new MCLB();
-            
-             Object[] cols = { "Name", "Description", "Create Date" };
-             profilesListBox.addColumns(cols);
-             
-             HeapSorter sorter = new HeapSorter();
 
-             int idx = 0;
+            Object[] cols = { "Name", "Description", "Create Date" };
+            profilesListBox.addColumns(cols);
 
-             profilesListBox.setColumnSorter(idx++, sorter, 1); // Name
-             profilesListBox.setColumnSorter(idx++, sorter, 2); // Description
-             profilesListBox.setColumnSorter(idx++, sorter, 3); // Create Date
-             
+            HeapSorter sorter = new HeapSorter();
+
+            int idx = 0;
+
+            profilesListBox.setColumnSorter(idx++, sorter, 1); // Name
+            profilesListBox.setColumnSorter(idx++, sorter, 2); // Description
+            profilesListBox.setColumnSorter(idx++, sorter, 3); // Create Date
+
         }
         return profilesListBox;
     }
-    
+
     public void updateProfileRow(final Profile profile) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
