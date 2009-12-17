@@ -8,9 +8,9 @@
     <!-- this sometimes varies at the end of the contest -->
     <xsl:variable name="topX" select="'12'" />
     <!--
-	NOTICE: this is like the Standings, but there are no
-           Honorable Mention or SuperRegion Champions during
-           the contest.
+	NOTICE: this is like the summary.xsl, but with finals-style
+           rankings.
+           Also has links to groupN.html (see wf.groupN.xsl).
       -->
     <!--
         What this XSL does:
