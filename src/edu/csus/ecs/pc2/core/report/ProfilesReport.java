@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.core.report;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.GregorianCalendar;
 
 import edu.csus.ecs.pc2.VersionInfo;
@@ -12,6 +13,7 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Profile;
+import edu.csus.ecs.pc2.core.model.ProfileComparatorByName;
 
 /**
  * Print list of profiles.
@@ -36,30 +38,33 @@ public class ProfilesReport implements IReport {
 
     private Filter filter = new Filter();
     
-    private void writeActiveProfile(PrintWriter printWriter) {
-        
-        Profile profile = contest.getProfile();
+    private void writeProfile(PrintWriter printWriter, Profile profile) {
+        printWriter.println("Profile name  : " + profile.getName());
+        printWriter.println("  description : " + profile.getDescription());
+        printWriter.println("  create date : " + profile.getCreateDate().toString());
+        printWriter.println("   element id : " + profile.getElementId());
+    }
 
-        printWriter.println("Profile name: " + profile.getName());
-        printWriter.println(" element id : " + profile.getElementId());
+    private void writeActiveProfile(PrintWriter printWriter) {
+
+        Profile profile = contest.getProfile();
+        writeProfile(printWriter, profile);
     }
 
     public void writeReport(PrintWriter printWriter) {
-        
+
         printWriter.println("-- Current Profile");
         writeActiveProfile(printWriter);
-        
-        Profile [] profiles = contest.getProfiles();
-        
+
+        Profile[] profiles = contest.getProfiles();
+        Arrays.sort(profiles, new ProfileComparatorByName());
+
         printWriter.println();
         printWriter.println("-- " + profiles.length + " profiles --");
-        
-        for (Profile profile : profiles){
 
+        for (Profile profile : profiles) {
             printWriter.println();
-            printWriter.println("Profile name: " + profile.getName());
-            printWriter.println("  contest id = " + profile.getContestId());
-            printWriter.println("  descripton = " + profile.getDescription());
+            writeProfile(printWriter, profile);
         }
     }
 

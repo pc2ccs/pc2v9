@@ -1,31 +1,34 @@
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Rectangle;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+
+import com.ibm.webrunner.j2mclb.util.HeapSorter;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.list.ContestTimeComparator;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ContestTime;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IProfileListener;
 import edu.csus.ecs.pc2.core.model.Profile;
-import edu.csus.ecs.pc2.core.model.ProfileComparatorByName;
 import edu.csus.ecs.pc2.core.model.ProfileEvent;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
-import java.awt.Rectangle;
-import java.awt.Point;
-import javax.swing.SwingConstants;
 
 /**
  * Profile administration pane.
@@ -49,10 +52,6 @@ public class ProfilesPane extends JPanePlugin {
 
     private JLabel profileNameLabel = null;
 
-    private JLabel profileLabel = null;
-
-    private JComboBox profileComboBox = null;
-
     private JButton switchButton = null;
 
     private JButton setButton = null;
@@ -67,8 +66,6 @@ public class ProfilesPane extends JPanePlugin {
 
     private JButton exportButton = null;
 
-    private JLabel notificationOfNonImplementationLabel = null;
-
     private JButton cloneButton = null;
 
     private JButton resetContestButton = null;
@@ -78,6 +75,13 @@ public class ProfilesPane extends JPanePlugin {
     private JTextField profileDescriptionTextField = null;
 
     private JLabel profileDescriptionLabel = null;
+
+    private JPanel topPanel = null;
+
+    private MCLB profilesListBox = null;
+    
+    private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
+
 
     /**
      * This method initializes
@@ -93,13 +97,9 @@ public class ProfilesPane extends JPanePlugin {
      * 
      */
     private void initialize() {
-        profileLabel = new JLabel();
-        profileLabel.setBounds(new Rectangle(14, 121, 134, 23));
-        profileLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        profileLabel.setText("Profiles");
         profileNameLabel = new JLabel();
-        profileNameLabel.setBounds(new Rectangle(14, 28, 134, 23));
         profileNameLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        profileNameLabel.setBounds(new Rectangle(51, 29, 134, 23));
         profileNameLabel.setText("Profile Name");
         profileNameLabel.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent e) {
@@ -115,25 +115,13 @@ public class ProfilesPane extends JPanePlugin {
         this.add(getCenterPane(), java.awt.BorderLayout.CENTER);
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
 
+        this.add(getTopPanel(), BorderLayout.NORTH);
         FrameUtilities.centerFrame(this);
 
     }
 
     public String getPluginTitle() {
         return "Profiles Pane";
-    }
-
-    /**
-     * This method initializes profileComboBox
-     * 
-     * @return javax.swing.JComboBox
-     */
-    private JComboBox getProfileComboBox() {
-        if (profileComboBox == null) {
-            profileComboBox = new JComboBox();
-            profileComboBox.setBounds(new Rectangle(165, 118, 303, 28));
-        }
-        return profileComboBox;
     }
 
     /**
@@ -144,11 +132,10 @@ public class ProfilesPane extends JPanePlugin {
     private JButton getSwitchButton() {
         if (switchButton == null) {
             switchButton = new JButton();
-            switchButton.setEnabled(false);
+            switchButton.setEnabled(true);
             switchButton.setMnemonic(java.awt.event.KeyEvent.VK_W);
             switchButton.setPreferredSize(new java.awt.Dimension(100, 26));
-            switchButton.setLocation(new Point(492, 120));
-            switchButton.setSize(new java.awt.Dimension(100, 28));
+            switchButton.setSelected(false);
             switchButton.setText("Switch");
             switchButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -169,8 +156,7 @@ public class ProfilesPane extends JPanePlugin {
             setButton = new JButton();
             setButton.setEnabled(false);
             setButton.setMnemonic(java.awt.event.KeyEvent.VK_S);
-            setButton.setLocation(new Point(494, 28));
-            setButton.setSize(new java.awt.Dimension(100, 26));
+            setButton.setBounds(new Rectangle(556, 54, 100, 26));
             setButton.setText("Set");
             setButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -189,7 +175,7 @@ public class ProfilesPane extends JPanePlugin {
     private JTextField getProfileTextField() {
         if (profileTextField == null) {
             profileTextField = new JTextField();
-            profileTextField.setBounds(new Rectangle(165, 24, 303, 30));
+            profileTextField.setBounds(new Rectangle(202, 25, 303, 30));
             profileTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableSetButton();
@@ -207,27 +193,12 @@ public class ProfilesPane extends JPanePlugin {
     private JPanel getCenterPane() {
         if (centerPane == null) {
             profileDescriptionLabel = new JLabel();
-            profileDescriptionLabel.setBounds(new Rectangle(14, 77, 134, 23));
             profileDescriptionLabel.setText("Description");
+            profileDescriptionLabel.setBounds(new Rectangle(51, 78, 134, 23));
             profileDescriptionLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-            notificationOfNonImplementationLabel = new JLabel();
-            notificationOfNonImplementationLabel.setBounds(new Rectangle(0, 163, 733, 82));
-            notificationOfNonImplementationLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-            notificationOfNonImplementationLabel.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
-            notificationOfNonImplementationLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 14));
-            notificationOfNonImplementationLabel.setText("");
             centerPane = new JPanel();
-            centerPane.setLayout(null);
-            centerPane.add(profileNameLabel, null);
-            centerPane.add(profileLabel, null);
-            centerPane.add(getProfileComboBox(), null);
-            centerPane.add(getSwitchButton(), null);
-            centerPane.add(getSetButton(), null);
-            centerPane.add(getProfileTextField(), null);
-
-            centerPane.add(notificationOfNonImplementationLabel, null);
-            centerPane.add(getProfileDescriptionTextField(), null);
-            centerPane.add(profileDescriptionLabel, null);
+            centerPane.setLayout(new BorderLayout());
+            centerPane.add(getProfilesListBox(), BorderLayout.CENTER);
         }
         return centerPane;
     }
@@ -247,6 +218,7 @@ public class ProfilesPane extends JPanePlugin {
             buttonPane.add(getNewButton(), null);
             buttonPane.add(getResetContestButton(), null);
             buttonPane.add(getCloneButton(), null);
+            buttonPane.add(getSwitchButton(), null);
             buttonPane.add(getExportButton(), null);
         }
         return buttonPane;
@@ -337,19 +309,32 @@ public class ProfilesPane extends JPanePlugin {
     protected void switchSelectedProfile() {
         // TODO code switchSelectedProfile
 
-        if (getProfileComboBox().getSelectedIndex() < 0) {
+        int selectedIndex = getProfilesListBox().getSelectedIndex();
+        if(selectedIndex == -1){
             showMessage("No profile selected");
             return;
         }
 
-        ProfileWrapper wrapper = (ProfileWrapper) getProfileComboBox().getSelectedItem();
+        ElementId elementId = (ElementId) getProfilesListBox().getKeys()[selectedIndex];
+        Profile selectedProfile = getProfile(elementId);
 
-        if (wrapper.getProfile().equals(getContest().getProfile())) {
-            showMessage("Currently using profile '" + wrapper + "' (no need to switch)");
+        if (selectedProfile.equals(getContest().getProfile())) {
+            showMessage("Currently using profile '" + selectedProfile.getName() + "' (no need to switch)");
             return;
         }
 
-        showMessage("Switch Profile to: " + wrapper);
+        showMessage("TODO Switch Profile to: " + selectedProfile.getName());
+    }
+
+    private Profile getProfile(ElementId elementId) {
+        
+        for (Profile profile : getContest().getProfiles()){
+            if (profile.getElementId().equals(elementId)){
+                return profile;
+            }
+        }
+        
+        return null;
     }
 
     protected void renameProfile() {
@@ -456,10 +441,11 @@ public class ProfilesPane extends JPanePlugin {
 
         getProfileSaveFrame().setContestAndController(inContest, inController);
 
+        Profile profile = getContest().getProfile();
+        updateProfileInformation(profile);
+        
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                Profile profile = getContest().getProfile();
-                updateProfileInformation(profile);
                 refreshProfilesList();
             }
 
@@ -468,55 +454,63 @@ public class ProfilesPane extends JPanePlugin {
         inContest.addProfileListener(new ProfileListenerImplementation());
     }
 
-    /**
-     * 
-     * @author pc2@ecs.csus.edu
-     *
-     */
-    class ProfileWrapper {
-        private Profile profile;
-
-        public Profile getProfile() {
-            return profile;
-        }
-
-        public ProfileWrapper(Profile profile) {
-            this.profile = profile;
-        }
-
-        @Override
-        public String toString() {
-            return profile.getName();
-        }
-    }
+ 
 
     protected void refreshProfilesList() {
-
-        Profile[] profiles = getContest().getProfiles();
         
-        getProfileComboBox().removeAllItems();
+        try {
+            Profile[] profiles = getContest().getProfiles();
+            
+            getProfilesListBox().removeAllRows();
 
-        getSwitchButton().setEnabled(false);
-        if (profiles.length > 0) {
-            Arrays.sort(profiles, new ProfileComparatorByName());
-            for (Profile profile : profiles) {
-                getProfileComboBox().addItem(new ProfileWrapper(profile));
+            getSwitchButton().setEnabled(false);
+            if (profiles.length > 0) {
+                
+                for (Profile profile : profiles) {
+                    Object[] objects = buildProfileRow(profile);
+                    getProfilesListBox().addRow(objects, profile.getElementId());
+                }
+                getProfilesListBox().autoSizeAllColumns();
+                getSwitchButton().setEnabled(true);
             }
-            getSwitchButton().setEnabled(true);
-        }
-        
-        updateProfileInformation(getContest().getProfile());
-        
-        enableSetButton();
+            
+            updateProfileInformation(getContest().getProfile());
+            
+            enableSetButton();
 
+        } catch (Exception e) {
+            getController().getLog().log(Log.DEBUG,"Exception refreshing profile list", e);
+            e.printStackTrace(); // TODO remove this debugging 
+        }
     }
 
-    private void updateProfileInformation(Profile profile) {
+    private Object[] buildProfileRow(Profile profile) {
+        
+        // Object[] cols = { "Name", "Description", "Create Date" }
+
+        int numberColumns = profilesListBox.getColumnCount();
+        Object[] c = new String[numberColumns];
+
+        c[0] = profile.getName();
+        if (profile.equals(getContest().getProfile())){
+            c[0] = "(Current) " + profile.getName();
+        }
+        c[1] = profile.getDescription();
+        c[2] = formatter.format(profile.getCreateDate());
+        
+        return c;
+    }
+
+    private void updateProfileInformation(final Profile profile) {
 
         if (profile != null) {
-            getProfileTextField().setText(profile.getName());
-            profileNameLabel.setToolTipText("Contest Profile Name " + profile.getContestId());
-            getProfileDescriptionTextField().setText(profile.getDescription());
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    getProfileTextField().setText(profile.getName());
+                    profileNameLabel.setToolTipText("Contest Profile Name " + profile.getContestId());
+                    getProfileDescriptionTextField().setText(profile.getDescription());
+                }
+            });
         }
     }
 
@@ -529,20 +523,13 @@ public class ProfilesPane extends JPanePlugin {
     protected class ProfileListenerImplementation implements IProfileListener {
 
         public void profileAdded(ProfileEvent event) {
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    refreshProfilesList();
-                }
-            });
+            updateProfileRow(event.getProfile());
         }
 
         public void profileChanged(ProfileEvent event) {
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    Profile profile = getContest().getProfile();
-                    updateProfileInformation(profile);
-                }
-            });
+            updateProfileRow(event.getProfile());
+            Profile profile = getContest().getProfile();
+            updateProfileInformation(profile);
         }
 
         public void profileRemoved(ProfileEvent event) {
@@ -562,7 +549,7 @@ public class ProfilesPane extends JPanePlugin {
     private JTextField getProfileDescriptionTextField() {
         if (profileDescriptionTextField == null) {
             profileDescriptionTextField = new JTextField();
-            profileDescriptionTextField.setBounds(new Rectangle(165, 74, 303, 29));
+            profileDescriptionTextField.setBounds(new Rectangle(202, 75, 303, 29));
             profileDescriptionTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableSetButton();
@@ -582,6 +569,65 @@ public class ProfilesPane extends JPanePlugin {
         boolean enable = (!profile.getName().equals(name)) || (!profile.getDescription().equals(description));
         
         getSetButton().setEnabled(enable);
+    }
+
+    /**
+     * This method initializes topPanel	
+     * 	
+     * @return javax.swing.JPanel	
+     */
+    private JPanel getTopPanel() {
+        if (topPanel == null) {
+            topPanel = new JPanel();
+            topPanel.setLayout(null);
+            topPanel.setPreferredSize(new Dimension(120, 120));
+            topPanel.add(profileNameLabel, null);
+            topPanel.add(profileDescriptionLabel, null);
+            topPanel.add(getProfileTextField(), null);
+            topPanel.add(getProfileDescriptionTextField(), null);
+            topPanel.add(getSetButton(), null);
+        }
+        return topPanel;
+    }
+
+    /**
+     * This method initializes profilesListBox	
+     * 	
+     * @return edu.csus.ecs.pc2.ui.MCLB	
+     */
+    private MCLB getProfilesListBox() {
+        if (profilesListBox == null) {
+            profilesListBox = new MCLB();
+            
+             Object[] cols = { "Name", "Description", "Create Date" };
+             profilesListBox.addColumns(cols);
+             
+             HeapSorter sorter = new HeapSorter();
+
+             int idx = 0;
+
+             profilesListBox.setColumnSorter(idx++, sorter, 1); // Name
+             profilesListBox.setColumnSorter(idx++, sorter, 2); // Description
+             profilesListBox.setColumnSorter(idx++, sorter, 3); // Create Date
+             
+        }
+        return profilesListBox;
+    }
+    
+    public void updateProfileRow(final Profile profile) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                Object[] objects = buildProfileRow(profile);
+                int rowNumber = profilesListBox.getIndexByKey(profile.getElementId());
+                if (rowNumber == -1) {
+                    profilesListBox.addRow(objects, profile.getElementId());
+                } else {
+                    profilesListBox.replaceRow(objects, rowNumber);
+                }
+                profilesListBox.autoSizeAllColumns();
+                profilesListBox.sort();
+            }
+        });
     }
 
 } // @jve:decl-index=0:visual-constraint="25,9"
