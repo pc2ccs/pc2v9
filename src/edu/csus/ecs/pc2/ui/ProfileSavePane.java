@@ -161,7 +161,7 @@ public class ProfileSavePane extends JPanePlugin {
         getProfileNameTextField().setText("");
         getProfileDescriptionTextField().setText("");
         getContestTitleTextField().setText("");
-        getContestPasswordConfirmTextField().setText("");
+        getContestPasswordTextField().setText("");
         getContestPasswordConfirmTextField().setText("");
 
         setCheckBoxesSelected(false);
@@ -233,13 +233,17 @@ public class ProfileSavePane extends JPanePlugin {
         
         String description = getProfileDescriptionTextField().getText();
         
-        checkField (name,"Enter a profile description");
+        checkField (description, "Enter a profile description");
 
         String title = getContestTitleTextField().getText();
         
         char[] password = getContestPasswordTextField().getPassword();
         char[] confirmPassword = getContestPasswordConfirmTextField().getPassword();
-        
+
+        if (password.length == 0) {
+            throw new InvalidFieldValue("Contest password must be set");
+        }
+
         if (password.length != confirmPassword.length){
             throw new InvalidFieldValue("Contest password does not match");
         }
