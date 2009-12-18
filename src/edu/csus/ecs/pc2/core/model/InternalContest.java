@@ -287,9 +287,7 @@ public class InternalContest implements IInternalContest {
         }
 
         if (profileList.size() == 0) {
-            Profile newProfile = new Profile("Contest");
-            profile.setDescription("Real Contest");
-            setProfile(newProfile);
+            setProfile(createNewProfile());
         }
 
         if (getContestTime(siteNum) == null){
@@ -2063,7 +2061,7 @@ public class InternalContest implements IInternalContest {
 
     private Profile createNewProfile() {
         Profile newProfile = new Profile("Contest");
-        profile.setDescription("Real Contest");
+        newProfile.setDescription("Default Contest");
         return newProfile;
     }
 
