@@ -438,8 +438,8 @@ public class JudgementPane extends JPanePlugin {
         if (deleteCheckBox == null) {
             deleteCheckBox = new JCheckBox();
             deleteCheckBox.setBounds(new Rectangle(124, 61, 208, 21));
-            deleteCheckBox.setText("Delete Judgement");
-            deleteCheckBox.setToolTipText("Delete or make this judgement inactive");
+            deleteCheckBox.setText("Hide Judgement");
+            deleteCheckBox.setToolTipText("Hide this judgement from judges");
             deleteCheckBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableUpdateButton();

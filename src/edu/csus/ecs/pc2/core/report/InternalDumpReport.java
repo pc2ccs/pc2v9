@@ -4,10 +4,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.Properties;
+import java.util.Set;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.IStorage;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.ClarificationComparator;
@@ -31,6 +34,7 @@ import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.NotificationSetting;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Profile;
+import edu.csus.ecs.pc2.core.model.ProfileComparatorByName;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.ContestInformation.TeamDisplayMask;
@@ -80,17 +84,17 @@ public class InternalDumpReport implements IReport {
         ClientSettings [] clientSettingsArray = contest.getClientSettingsList();
         
         printWriter.println();
-        printWriter.println("-- Notification Settings --");
-        
+        printWriter.println("-- " + clientSettingsArray.length + " Notification Settings --");
+
         Arrays.sort(clientSettingsArray, new ClientSettingsComparator());
-        
-        for (ClientSettings clientSettings : clientSettingsArray){
+
+        for (ClientSettings clientSettings : clientSettingsArray) {
             NotificationSetting notificationSetting = clientSettings.getNotificationSetting();
-            if (notificationSetting != null){
-                printWriter.println("    For: "+clientSettings.getClientId());
+            if (notificationSetting != null) {
+                printWriter.println("    For: " + clientSettings.getClientId());
                 dumpNotification(printWriter, clientSettings.getNotificationSetting());
             }
-        } 
+        }
     }
     
 
@@ -118,38 +122,64 @@ public class InternalDumpReport implements IReport {
         }
     }
 
-    
-    private void printContestInformation(PrintWriter printWriter) {
-      
-        ContestInformation contestInformation = contest.getContestInformation();
-        
-        printWriter.println();
-        printWriter.println("-- Contest Information --");
-        printWriter.println("  Title : '" + contestInformation.getContestTitle()+"'");
-        printWriter.println("  URL   : '" + contestInformation.getContestURL()+"'");
-        
-        printWriter.println();
-        printWriter.println("  Include Preliminary Judgements in Scoring Algorithm : "+Utilities.yesNoString(contestInformation.isPreliminaryJudgementsUsedByBoard()));
-        printWriter.println("  Send Notifications for Preliminary Judgements       : "+Utilities.yesNoString(contestInformation.isPreliminaryJudgementsTriggerNotifications()));
-        printWriter.println("  Send Additional Run Status Information              : "+Utilities.yesNoString(contestInformation.isSendAdditionalRunStatusInformation()));
-        printWriter.println();
-        
-        printWriter.println("  Judges' Default Answer: '" + contestInformation.getJudgesDefaultAnswer()+"'");
-        
-        if (contestInformation.getTeamDisplayMode() != null){
-            printWriter.println("  Judges see: "+contestInformation.getTeamDisplayMode());
-        } else {
-            printWriter.println("  Judges see: "+TeamDisplayMask.LOGIN_NAME_ONLY);
-        }
-        
-        printWriter.println();
-        printWriter.println("Storage  (dir)  : "+contest.getStorage().getDirectoryName());
-        printWriter.println("        (class) : "+contest.getStorage().getClass().getName());
-        printWriter.println();
+    public void dumpProperties(PrintWriter printWriter, String comment, Properties properties) {
 
-        
+        printWriter.println("  Properties " + comment + " " + properties);
+        if (properties == null) {
+            return;
+        }
+
+        Set<Object> set = properties.keySet();
+
+        String[] keys = (String[]) set.toArray(new String[set.size()]);
+
+        Arrays.sort(keys);
+
+        for (String key : keys) {
+            printWriter.println("     " + key + "='" + properties.get(key) + "'");
+        }
     }
     
+    private void printContestInformation(PrintWriter printWriter) {
+
+        ContestInformation contestInformation = contest.getContestInformation();
+
+        printWriter.println();
+        printWriter.println("-- Contest Information --");
+        printWriter.println("  Title : '" + contestInformation.getContestTitle() + "'");
+        printWriter.println("  URL   : '" + contestInformation.getContestURL() + "'");
+
+        printWriter.println();
+        printWriter.println("  Include Preliminary Judgements in Scoring Algorithm : " + Utilities.yesNoString(contestInformation.isPreliminaryJudgementsUsedByBoard()));
+        printWriter.println("  Send Notifications for Preliminary Judgements       : " + Utilities.yesNoString(contestInformation.isPreliminaryJudgementsTriggerNotifications()));
+        printWriter.println("  Send Additional Run Status Information              : " + Utilities.yesNoString(contestInformation.isSendAdditionalRunStatusInformation()));
+        printWriter.println();
+
+        printWriter.println("  Judges' Default Answer: '" + contestInformation.getJudgesDefaultAnswer() + "'");
+        printWriter.println("  Max output file size " + contestInformation.getMaxFileSize());
+
+        if (contestInformation.getTeamDisplayMode() != null) {
+            printWriter.println("  Judges see: " + contestInformation.getTeamDisplayMode());
+        } else {
+            printWriter.println("  Judges see: " + TeamDisplayMask.LOGIN_NAME_ONLY);
+        }
+
+        dumpProperties(printWriter, "Scoring Properties", contestInformation.getScoringProperties());
+
+        printWriter.println();
+        IStorage storage = contest.getStorage();
+        if (storage == null){
+            printWriter.println("Storage - no storage defined");
+            printWriter.println();
+        } else {
+            printWriter.println("Storage  (dir)  : " + contest.getStorage().getDirectoryName());
+            printWriter.println("        (class) : " + contest.getStorage().getClass().getName());
+            printWriter.println();
+        }
+    }
+    
+   
+
     private void printAccounts(PrintWriter printWriter, Account [] accounts) {
     
         Arrays.sort(accounts, new AccountComparator());
@@ -206,59 +236,183 @@ public class InternalDumpReport implements IReport {
     }
 
     public void writeReport(PrintWriter printWriter) {
-        
-        printProfile(printWriter);
-        
-        printLocalContestTime(printWriter);
-              
-        printCurrentClientInfo(printWriter);
-        
-        printSites (printWriter);
 
-        printContestTimes(printWriter);
-                
-        printContestInformation(printWriter);
-        
-        printProblems(printWriter);
-        
-        printLanguages(printWriter);
-        
-        printJudgements (printWriter);
+        int exceptionCount = 0;
 
-        printAccounts(printWriter);
+        try {
+            printProfile(printWriter);
+        } catch (Exception e) {
+            printWriter.println("Exception in report: " + e.getMessage());
+            e.printStackTrace(printWriter);
+            exceptionCount++;
+        }
 
-        printRuns(printWriter);
-        
-        printClarifications(printWriter);
+        try {
+            printLocalContestTime(printWriter);
+        } catch (Exception e) {
+            printWriter.println("Exception in report: " + e.getMessage());
+            e.printStackTrace(printWriter);
+            exceptionCount++;
+        }
 
-        printLogins(printWriter);
-        
-        printConnections(printWriter);
-        
-        printClientSettings(printWriter);
-        
-        printNotificationSettings(printWriter);
+        try {
+            printCurrentClientInfo(printWriter);
+        } catch (Exception e) {
+            printWriter.println("Exception in report: " + e.getMessage());
+            e.printStackTrace(printWriter);
+            exceptionCount++;
+        }
 
+        try {
+            printSites(printWriter);
+        } catch (Exception e) {
+            printWriter.println("Exception in report: " + e.getMessage());
+            e.printStackTrace(printWriter);
+            exceptionCount++;
+        }
+
+        try {
+            printContestTimes(printWriter);
+        } catch (Exception e) {
+            printWriter.println("Exception in report: " + e.getMessage());
+            e.printStackTrace(printWriter);
+            exceptionCount++;
+        }
+
+        try {
+            printContestInformation(printWriter);
+        } catch (Exception e) {
+            printWriter.println("Exception in report: " + e.getMessage());
+            e.printStackTrace(printWriter);
+            exceptionCount++;
+        }
+
+        try {
+            printProblems(printWriter);
+        } catch (Exception e) {
+            printWriter.println("Exception in report: " + e.getMessage());
+            e.printStackTrace(printWriter);
+            exceptionCount++;
+        }
+
+        try {
+            printLanguages(printWriter);
+        } catch (Exception e) {
+            printWriter.println("Exception in report: " + e.getMessage());
+            e.printStackTrace(printWriter);
+            exceptionCount++;
+        }
+
+        try {
+            printJudgements(printWriter);
+        } catch (Exception e) {
+            printWriter.println("Exception in report: " + e.getMessage());
+            e.printStackTrace(printWriter);
+            exceptionCount++;
+        }
+
+        try {
+            printAccounts(printWriter);
+        } catch (Exception e) {
+            printWriter.println("Exception in report: " + e.getMessage());
+            e.printStackTrace(printWriter);
+            exceptionCount++;
+        }
+
+        try {
+            printRuns(printWriter);
+        } catch (Exception e) {
+            printWriter.println("Exception in report: " + e.getMessage());
+            e.printStackTrace(printWriter);
+            exceptionCount++;
+        }
+
+        try {
+            printClarifications(printWriter);
+        } catch (Exception e) {
+            printWriter.println("Exception in report: " + e.getMessage());
+            e.printStackTrace(printWriter);
+            exceptionCount++;
+        }
+
+        try {
+            printLogins(printWriter);
+        } catch (Exception e) {
+            printWriter.println("Exception in report: " + e.getMessage());
+            e.printStackTrace(printWriter);
+            exceptionCount++;
+        }
+
+        try {
+            printConnections(printWriter);
+        } catch (Exception e) {
+            printWriter.println("Exception in report: " + e.getMessage());
+            e.printStackTrace(printWriter);
+            exceptionCount++;
+        }
+
+        try {
+            printClientSettings(printWriter);
+        } catch (Exception e) {
+            printWriter.println("Exception in report: " + e.getMessage());
+            e.printStackTrace(printWriter);
+            exceptionCount++;
+        }
+
+        try {
+            printNotificationSettings(printWriter);
+        } catch (Exception e) {
+            printWriter.println("Exception in report: " + e.getMessage());
+            e.printStackTrace(printWriter);
+            exceptionCount++;
+        }
+
+        if (exceptionCount > 0) {
+            printWriter.println();
+            printWriter.println(" There were " + exceptionCount + " exceptions.");
+        }
     }
 
+    private void writeProfile(PrintWriter printWriter, Profile profile) {
+        printWriter.println("Profile name  : " + profile.getName());
+        printWriter.println("  description : " + profile.getDescription());
+        printWriter.println("  create date : " + profile.getCreateDate().toString());
+        printWriter.println("   element id : " + profile.getElementId());
+    }
+
+    private void writeActiveProfile(PrintWriter printWriter) {
+
+        Profile profile = contest.getProfile();
+        writeProfile(printWriter, profile);
+    }
+    
     private void printProfile(PrintWriter printWriter) {
 
         printWriter.println();
-        printWriter.println("-- Profile --");
+        printWriter.println("-- Current Profile --");
+        
+        writeActiveProfile(printWriter);
+        printWriter.println();
+        
+        Profile [] profiles = contest.getProfiles();
+        Arrays.sort(profiles, new ProfileComparatorByName());
+        
+        printWriter.println("-- " + profiles.length + " Profiles --");
 
-        Profile profile = contest.getProfile();
-        if (profile != null) {
+        for (Profile profile : profiles){
+            printWriter.println();
             printWriter.println("    title    : " + profile.getName());
             printWriter.println("  identifier : " + profile.getContestId());
             printWriter.println("  description: " + profile.getDescription());
             printWriter.println("      created: " + profile.getCreateDate());
         }
-
         printWriter.println();
     }
 
     private void printCurrentClientInfo(PrintWriter printWriter) {
 
+        printWriter.println();
+        printWriter.println("-- Client Info --");
         printWriter.println();
         Account account = contest.getAccount(contest.getClientId());
         String name = contest.getClientId().getName();
@@ -266,14 +420,14 @@ public class InternalDumpReport implements IReport {
             name = account.getDisplayName();
         }
         printWriter.println("* Client Id = "+contest.getClientId()+" "+name);
-
-        
     }
 
     private void printLocalContestTime(PrintWriter printWriter) {
 
         ContestTime localContestTime = contest.getContestTime();
 
+        printWriter.println();
+        printWriter.println("-- Local Contest Time --");
         printWriter.println();
         if (localContestTime != null) {
             if (localContestTime.isContestRunning()) {
@@ -371,7 +525,7 @@ public class InternalDumpReport implements IReport {
     private void printSites(PrintWriter printWriter) {
         
         printWriter.println();
-        printWriter.println("-- " + contest.getSites().length + " sites --");
+        printWriter.println("-- " + contest.getSites().length + " Sites --");
         Site[] sites = contest.getSites();
         Arrays.sort(sites, new SiteComparatorBySiteNumber());
         for (Site site1 : sites) {
@@ -386,14 +540,32 @@ public class InternalDumpReport implements IReport {
 
     private void printJudgements(PrintWriter printWriter) {
         
-        // Judgements
+        // Active Judgements
         printWriter.println();
         Judgement [] judgements = contest.getJudgements();
         
         printWriter.println("-- " + judgements.length + " Judgements --");
+        printWriter.println("     Active Judgements");
         for (Judgement judgement : judgements) {
-            printWriter.println("  '" + judgement + "' id=" + judgement.getElementId());
+            if (! judgement.isActive()){
+                continue;
+            }
+            printWriter.print("  '" + judgement );
+            printWriter.println("' id=" + judgement.getElementId());
         }
+        
+        // All Judgements
+        printWriter.println("     All Judgements");
+        for (Judgement judgement : judgements) {
+            String hiddenText = "";
+            if (!judgement.isActive()){
+                hiddenText = "[HIDDEN] ";
+            }
+            printWriter.print("  '" + judgement );
+            printWriter.println("' "+hiddenText+"id=" + judgement.getElementId());
+        }
+
+
     }
 
     public void printConnections(PrintWriter printWriter) {
@@ -401,10 +573,17 @@ public class InternalDumpReport implements IReport {
         // Connections
         printWriter.println();
         ConnectionHandlerID[] connectionHandlerIDs = contest.getConnectionHandleIDs();
+
+        // TODO sort ConnectionHandlerIds
         // Arrays.sort(connectionHandlerIDs, new ConnectionHanlderIDComparator());
         printWriter.println("-- " + connectionHandlerIDs.length + " Connections --");
         for (ConnectionHandlerID connectionHandlerID : connectionHandlerIDs) {
-            printWriter.println("  " + connectionHandlerID);
+            ClientId clientId = contest.getLoginClientId(connectionHandlerID);
+            printWriter.print("  ");
+            if (clientId != null) {
+                printWriter.print(" [" + clientId.getTripletKey() + "] ");
+            }
+            printWriter.println(connectionHandlerID);
         }
     }
 

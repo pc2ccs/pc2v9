@@ -38,7 +38,7 @@ public class JudgementReport implements IReport {
 
     public void writeReport(PrintWriter printWriter) {
         
-        // Judgements
+        // Active Judgements
         printWriter.println();
         Judgement [] judgements = contest.getJudgements();
         
@@ -52,13 +52,14 @@ public class JudgementReport implements IReport {
             printWriter.println("' id=" + judgement.getElementId());
         }
         
-        printWriter.println("     Deleted Judgements");
+        printWriter.println("     All Judgements");
         for (Judgement judgement : judgements) {
-            if (judgement.isActive()){
-                continue;
+            String hiddenText = "";
+            if (!judgement.isActive()){
+                hiddenText = "[HIDDEN] ";
             }
             printWriter.print("  '" + judgement );
-            printWriter.println("' id=" + judgement.getElementId());
+            printWriter.println("' "+hiddenText+"id=" + judgement.getElementId());
         }
     }
 
