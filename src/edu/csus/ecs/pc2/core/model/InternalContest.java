@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core.model;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Enumeration;
@@ -10,6 +11,7 @@ import java.util.Vector;
 import edu.csus.ecs.pc2.core.IStorage;
 import edu.csus.ecs.pc2.core.exception.ClarificationUnavailableException;
 import edu.csus.ecs.pc2.core.exception.ContestSecurityException;
+import edu.csus.ecs.pc2.core.exception.ProfileCloneException;
 import edu.csus.ecs.pc2.core.exception.RunUnavailableException;
 import edu.csus.ecs.pc2.core.exception.UnableToUncheckoutRunException;
 import edu.csus.ecs.pc2.core.list.AccountList;
@@ -38,11 +40,13 @@ import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.PasswordChangeEvent.Action;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
+import edu.csus.ecs.pc2.core.security.FileSecurity;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.security.ISecurityMessageListener;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.SecurityMessageHandler;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
+import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
 
 /**
  * Implementation of IInternalContest - the contest model.
@@ -2078,6 +2082,152 @@ public class InternalContest implements IInternalContest {
 
     public IStorage getStorage() {
         return storage;
+    }
+
+    public IInternalContest clone(IInternalContest contest, Profile newProfile, String profileBasePath, ProfileCloneSettings settings) throws ProfileCloneException {
+
+        // TODO check for existing profile 
+        
+        String profilePath = newProfile.getProfilePath();
+        
+        try {
+            new File(profilePath).mkdirs();
+        } catch (Exception e) {
+            throw new ProfileCloneException("Unable to create profile dir "+profilePath, e);
+        }
+        
+        if (! new File(profilePath).isDirectory()){
+            throw new ProfileCloneException("Unable to use profile dir "+profilePath);
+        }
+        
+        FileSecurity fileSecurity = new FileSecurity(profilePath);
+        
+        try {
+            fileSecurity.saveSecretKey(settings.getContestPassword());
+        } catch (Exception e) {
+            StaticLog.getLog().log(Log.SEVERE, "FATAL ERROR Cloning Contest data ", e);
+            System.err.println("FATAL ERROR Cloning Contest data " + e.getMessage() + " check logs");
+            System.exit(44);
+        }
+        
+        contest.setStorage(fileSecurity);
+        
+        contest.initializeStartupData(contest.getSiteNumber());
+        
+        newProfile.setName(settings.getName());
+        
+        newProfile.setDescription(settings.getDescription());
+        
+        contest.setProfile(newProfile); // This also sets the contest identifier
+
+        contest.setContestPassword(new String(settings.getContestPassword()));
+        
+        contest.setClientId(getClientId());
+        
+        contest.setGeneralProblem(getGeneralProblem());
+
+        if (settings.isCopyAccounts()){
+            contest.addAccounts(getAccounts());
+            
+            if (settings.isCopyGroups()){
+                for (Account account : contest.getAccounts()){
+                    account.setGroupId(null);
+                }
+            }
+        }
+
+        if (settings.isCopyContestSettings()){
+            /**
+             * Clone a bunch of settings.
+             */
+            cloneContestSettings (contest, settings);
+        }
+
+        if (settings.isCopyJudgements()){
+            contest.setJudgementList(getJudgements());
+        }
+
+        if (settings.isCopyLanguages()){
+            for (Language language: getLanguages()){
+                contest.addLanguage(language);
+            }
+        }
+
+        if (settings.isCopyProblems()){
+            for (Problem problem: getProblems()){
+                ProblemDataFiles problemDataFiles = contest.getProblemDataFile(problem);
+                contest.addProblem(problem, problemDataFiles);
+            }
+        }
+
+        // TODO copyRuns 
+        
+        // run list
+        // run files list
+        
+        // TODO copyClarifications
+        
+        // clarifications list 
+        
+        if (settings.isCopyGroups()){
+            for (Group group : getGroups()){
+                contest.addGroup(group);
+            }
+        }
+
+        // Contest clocks
+        
+        for (ContestTime contestTime : getContestTimes()){
+            contest.addContestTime(contestTime);
+        }
+
+        if (settings.isResetContestTimes()){
+            
+            for (ContestTime contestTime : contest.getContestTimes()){
+                contestTime.resetClock();
+            }
+        }
+        
+        ContestInformation newContestInformation = contest.getContestInformation();
+
+        newContestInformation.setContestTitle(settings.getTitle());
+        contest.updateContestInformation(newContestInformation);
+        
+        Log tempLog = new Log("profileClone");
+        try {
+            contest.storeConfiguration(tempLog);
+        } catch (IOException e) {
+            tempLog.log(Log.SEVERE, "Exception storing new config for "+newProfile.getName(), e);
+            throw new ProfileCloneException("Exception storing new config for "+newProfile.getName(),e);
+        } catch (ClassNotFoundException e) {
+            tempLog.log(Log.SEVERE, "Exception storing new config for "+newProfile.getName(), e);
+            throw new ProfileCloneException("Exception storing new config for "+newProfile.getName(),e);
+        } catch (FileSecurityException e) {
+            tempLog.log(Log.SEVERE, "Exception storing new config for "+newProfile.getName(), e);
+            throw new ProfileCloneException("Exception storing new config for "+newProfile.getName(),e);
+        }
+        tempLog = null;
+        
+        // TODO save profile info to profile.properties
+        
+        return contest;
+    }
+
+    public Account[] getAccounts() {
+        return accountList.getList();
+    }
+
+    private void cloneContestSettings(IInternalContest contest, ProfileCloneSettings settings) {
+
+        if (!settings.isCopyProblems()) {
+            for (ClientSettings clientSettings : contest.getClientSettingsList()) {
+                clientSettings.setBalloonList(new Hashtable<String, BalloonDeliveryInfo>());
+                clientSettings.setAutoJudgeFilter(new Filter());
+            }
+        }
+
+        // TODO BalloonSettingsList
+
     }
 
 }

@@ -413,4 +413,12 @@ public class ContestTime implements IElementObject {
         this.siteNumber = siteNumber;
 
     }
+
+    public void resetClock() {
+        resumeTime = null;
+        serverTransmitTime = null;
+        localClockOffset = 0;
+        elapsedSecs = 0;
+        contestRunning = false;
+    }
 }

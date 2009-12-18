@@ -1,7 +1,9 @@
 package edu.csus.ecs.pc2.core.model;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * Profile information.
@@ -126,6 +128,20 @@ public class Profile implements IElementObject, Serializable {
 
     public void setProfilePath(String profilePath) {
         this.profilePath = profilePath;
+    }
+    
+    private String createProfilePath(String basepath,Profile newProfile) {
+        // profiles/P2ef182be-b8ed-42c0-88ca-19dfef3419c3/archive
+        if (basepath == null){
+            basepath = "";
+        } else if (basepath.substring(basepath.length()-1).equals(File.separator)){
+            basepath += File.separator;
+        }
+        return basepath + "profiles/P" + UUID.randomUUID().toString();
+    }
+
+    public String createProfilePath(String basepath) {
+        return createProfilePath(basepath, this);
     }
 
     /**

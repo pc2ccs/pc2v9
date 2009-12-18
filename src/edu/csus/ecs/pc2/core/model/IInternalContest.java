@@ -1,13 +1,13 @@
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.IOException;
-
 import java.util.Date;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.IStorage;
 import edu.csus.ecs.pc2.core.exception.ClarificationUnavailableException;
 import edu.csus.ecs.pc2.core.exception.ContestSecurityException;
+import edu.csus.ecs.pc2.core.exception.ProfileCloneException;
 import edu.csus.ecs.pc2.core.exception.RunUnavailableException;
 import edu.csus.ecs.pc2.core.exception.UnableToUncheckoutRunException;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -16,19 +16,15 @@ import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.security.ISecurityMessageListener;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
+import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
 
 /** Specifies methods used to manipulate contest data.
  * 
- * @see edu.csus.ecs.pc2.Starter
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
-//$Id$
-/**
- * @author boudreat
- * 
- */
 public interface IInternalContest {
 
     /**
@@ -307,6 +303,8 @@ public interface IInternalContest {
     void removeProfileListener(IProfileListener profileListener);
 
     Run getRun(ElementId id);
+    
+    Account[] getAccounts();
 
     Vector<Account> getAccounts(Type type, int siteNumber);
 
@@ -888,5 +886,15 @@ public interface IInternalContest {
     IStorage getStorage();
 
     boolean readConfiguration(int siteNumber, Log log);
+    
+    /**
+     * Clone a contest settings/submissions based on settings.
+     * 
+     * @param contest
+     * @param newProfile
+     * @param settings
+     * @return the input contest
+     */
+    IInternalContest clone(IInternalContest contest, Profile newProfile, String profileBasePath, ProfileCloneSettings settings) throws ProfileCloneException;
 
 }
