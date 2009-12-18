@@ -473,8 +473,6 @@ public class ProfilesPane extends JPanePlugin {
 
             updateProfileInformation(getContest().getProfile());
 
-            enableSetButton();
-
         } catch (Exception e) {
             getController().getLog().log(Log.DEBUG, "Exception refreshing profile list", e);
             e.printStackTrace(); // TODO remove this debugging
@@ -506,6 +504,7 @@ public class ProfilesPane extends JPanePlugin {
                     getProfileTextField().setText(profile.getName());
                     profileNameLabel.setToolTipText("Contest Profile Name " + profile.getContestId());
                     getProfileDescriptionTextField().setText(profile.getDescription());
+                    enableSetButton();
                 }
             });
         }
