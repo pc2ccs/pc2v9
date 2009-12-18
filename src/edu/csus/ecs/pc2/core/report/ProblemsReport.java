@@ -53,7 +53,7 @@ public class ProblemsReport implements IReport {
         
         String deletedText = "";
         if (!problem.isActive()) {
-            deletedText = " [DELETED] ";
+            deletedText = " [HIDDEN] ";
         }
         
         printWriter.println("  Problem '" + problem + deletedText + "' ver="+ problem.getElementId().getVersionNumber()+" id=" + problem.getElementId());

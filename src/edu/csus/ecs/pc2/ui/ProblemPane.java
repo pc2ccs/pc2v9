@@ -2097,7 +2097,7 @@ public class ProblemPane extends JPanePlugin {
         if (deleteProblemCheckBox == null) {
             deleteProblemCheckBox = new JCheckBox();
             deleteProblemCheckBox.setBounds(new Rectangle(324, 372, 182, 21));
-            deleteProblemCheckBox.setText("Delete Problem");
+            deleteProblemCheckBox.setText("Hide Problem");
             deleteProblemCheckBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableUpdateButton();

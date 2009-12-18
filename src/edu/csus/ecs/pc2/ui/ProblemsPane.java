@@ -166,7 +166,7 @@ public class ProblemsPane extends JPanePlugin {
 
         String name = problem.getDisplayName();
         if (! problem.isActive()){
-            name = "[DELETED] "+name;
+            name = "[HIDDEN] "+name;
         }
         c[i++] = name;
         c[i++] = problem.getDataFileName();
