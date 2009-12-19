@@ -103,6 +103,8 @@ public class BalloonSettingPane extends JPanePlugin {
     private Properties savedMailProperties = null;
     private Properties changedMailProperties = null;
 
+    private PropertiesEditFrame propertiesEditFrame;
+
     /**
      * This method initializes
      * 
@@ -219,6 +221,7 @@ public class BalloonSettingPane extends JPanePlugin {
         addButton.setEnabled(false);
         updateButton.setEnabled(false);
 
+        dismissPropertiesEditFrame();
         if (getParentFrame() != null) {
             getParentFrame().setVisible(false);
         }
@@ -352,6 +355,7 @@ public class BalloonSettingPane extends JPanePlugin {
         addButton.setEnabled(false);
         updateButton.setEnabled(false);
 
+        dismissPropertiesEditFrame();
         if (getParentFrame() != null) {
             getParentFrame().setVisible(false);
         }
@@ -428,16 +432,20 @@ public class BalloonSettingPane extends JPanePlugin {
                 } else {
                     updateBalloonSettings();
                 }
+                // these should be done in add/Update, but just in case
+                dismissPropertiesEditFrame();
                 if (getParentFrame() != null) {
                     getParentFrame().setVisible(false);
                 }
             } else if (result == JOptionPane.NO_OPTION) {
+                dismissPropertiesEditFrame();
                 if (getParentFrame() != null) {
                     getParentFrame().setVisible(false);
                 }
             }
 
         } else {
+            dismissPropertiesEditFrame();
             if (getParentFrame() != null) {
                 getParentFrame().setVisible(false);
             }
@@ -687,6 +695,16 @@ public class BalloonSettingPane extends JPanePlugin {
         return sendEmailNotificationsCheckBox;
     }
 
+    /**
+     * hides the properties edit frame, and sets it to null.
+     */
+    private void dismissPropertiesEditFrame() {
+        if (propertiesEditFrame != null) {
+            propertiesEditFrame.setVisible(false);
+            propertiesEditFrame = null;
+        }
+    }
+
     protected void enableButtons() {
 
         if (populatingGUI) {
@@ -911,7 +929,9 @@ public class BalloonSettingPane extends JPanePlugin {
     }
 
     protected void showMailPropertiesEditor() {
-        PropertiesEditFrame propertiesEditFrame = new PropertiesEditFrame();
+        if (propertiesEditFrame == null) { 
+            propertiesEditFrame = new PropertiesEditFrame();
+        }
         propertiesEditFrame.setTitle("Edit Advanced Mail Properties");
         propertiesEditFrame.setProperties(changedMailProperties, new UpdateMailProperties());
         propertiesEditFrame.setSize(350, 315);
