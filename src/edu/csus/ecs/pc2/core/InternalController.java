@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.core;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.management.ManagementFactory;
 import java.security.MessageDigest;
 import java.util.Date;
 import java.util.Iterator;
@@ -530,18 +531,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
         ClientId clientId = loginShortcutExpansion(0, id);
 
-        log = new Log(stripChar(clientId.toString(), ' '));
+        startLog(stripChar(clientId.toString(), ' '), id, clientId.getName());
         connectionManager.setLog(log);
-        StaticLog.setLog(log);
-
-        info("");
-        info(new VersionInfo().getSystemVersionInfo());
-        info("Login: " + id + " (aka " + clientId.getName() + ")");
-        try {
-            log.info("Working directory is " + new File(".").getCanonicalPath());
-        } catch (IOException e1) {
-            log.info("Could not determine working directory " + e1.getMessage());
-        }
 
         if (password.length() < 1) {
             password = clientId.getName(); // Joe password.
@@ -686,18 +677,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
         ClientId clientId = loginShortcutExpansion(0, loginName);
 
-        log = new Log(stripChar(clientId.toString(), ' '));
+        startLog(stripChar(clientId.toString(), ' '), loginName, clientId.getName());
         connectionManager.setLog(log);
-        StaticLog.setLog(log);
-
-        info("");
-        info(new VersionInfo().getSystemVersionInfo());
-        info("Login: " + loginName + " (aka " + clientId.getName() + ")");
-        try {
-            log.info("Working directory is " + new File(".").getCanonicalPath());
-        } catch (IOException e1) {
-            log.info("Could not determine working directory " + e1.getMessage());
-        }
 
         if (password.length() < 1) {
             password = clientId.getName(); // Joe password.
@@ -1909,15 +1890,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      */
     public void start(String[] stringArray) {
 
-        log = new Log("pc2.startup");
-        StaticLog.setLog(log);
-        info("");
-        info(new VersionInfo().getSystemVersionInfo());
-        try {
-            log.info("Working directory is " + new File(".").getCanonicalPath());
-        } catch (IOException e1) {
-            log.info("Could not determine working directory " + e1.getMessage());
-        }
+        startLog("pc2.startup", null, null);
         
         /**
          * Saved exception.
@@ -2164,6 +2137,31 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     private ClientId getServerClientId() {
         // TODO s/new ClientId(contest.getSiteNumber(), Type.SERVER, 0);/getServerClientId()/
         return new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
+    }
+
+    /*
+     * This new a new Log(logFileName), sets up the StaticLog, and prints
+     * basic info to the log.  If loginName is not null a Login: line is printed.
+     */
+    private void startLog(String logFileName, String loginName, String clientName) {
+        log = new Log(logFileName);
+        StaticLog.setLog(log);
+
+        info("");
+        info(new VersionInfo().getSystemVersionInfo());
+        if (loginName != null) {
+            info("Login: " + loginName + " (aka " + clientName + ")");
+        }
+        try {
+            log.info("Working directory is " + new File(".").getCanonicalPath());
+        } catch (IOException e1) {
+            log.info("Could not determine working directory " + e1.getMessage());
+        }
+        try {
+            log.info("Process id is "+ManagementFactory.getRuntimeMXBean().getName());
+        } catch (Exception e) {
+            log.info("Could not determine process id " + e.getMessage());
+        }
     }
 
     public void checkOutRun(Run run, boolean readOnly, boolean computerJudge) {
