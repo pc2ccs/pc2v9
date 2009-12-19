@@ -1,0 +1,30 @@
+The scoreboard module looks 1st for xsl in ./data/xsl, if that directory
+does not exist, it falls back to the data/xsl directory under the 
+pc2 installation directory.
+
+index.xsl
+  Sample index as used at the ACM-ICPC Pacific Northwest Contest.
+  Includes links to group?.html files
+group1.xsl
+groupN.xsl
+  Sample per-group(region/site) files.  group1.xsl is for the
+   1st group defined in PC^2.  Copy and replace the N with the
+   additional groups (eg the 2nd group is 2 and would be in group2.xsl)
+
+or
+wf.index.xsl
+   Like the summary.html, but with the ACM-ICPC World Finals ranking
+   system.  Includes links to the group?.html files
+wf.groupN.xsl
+   Like the above groupN.xsl, except with ACM-ICPC World Finals
+   ranking system.
+wf.standings.xsl
+   The end of the contest final standings with Honorable Mention and
+   SuperRegion champions.
+
+If wf.index.xsl is placed in the data/xsl directory, an html called
+wf.index.html will be created by the scoreboard module.  Typically
+if you are going to use the world finals ranking system you would
+call this index.xsl/group.xsl (eg remove the "wf." part).
+
+# $Id$
