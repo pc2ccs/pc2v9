@@ -11,14 +11,17 @@ import java.util.Vector;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.filechooser.FileFilter;
 
 import com.ibm.webrunner.j2mclb.util.HeapSorter;
 import com.ibm.webrunner.j2mclb.util.NumericStringComparator;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.imports.ExportAccounts;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -40,6 +43,15 @@ import edu.csus.ecs.pc2.core.security.PermissionList;
 
 // $HeadURL$$
 public class AccountsPane extends JPanePlugin {
+
+    /**
+     * These descriptions are used by the export accounts
+     */
+    private static final String XML_DESCRIPTION = "XML document (*.xml)";
+
+    private static final String CSV_DESCRIPTION = "CSV (comma delimited) (*.csv)";
+
+    private static final String TEXT_DESCRIPTION = "Text (tab delimited) (*.txt,*.tab)";
 
     /**
      * 
@@ -75,6 +87,8 @@ public class AccountsPane extends JPanePlugin {
     private ReviewAccountLoadFrame reviewAccountLoadFrame;
 
     private JButton generateAccountsButton = null;
+
+    private JButton saveButton = null;
 
     /**
      * This method initializes
@@ -364,6 +378,7 @@ public class AccountsPane extends JPanePlugin {
             buttonPane.add(getEditButton(), null);
             buttonPane.add(getFilterButton(), null);
             buttonPane.add(getLoadButton(), null);
+            buttonPane.add(getSaveButton(), null);
         }
         return buttonPane;
     }
@@ -595,6 +610,123 @@ public class AccountsPane extends JPanePlugin {
             });
         }
         return generateAccountsButton;
+    }
+
+    /**
+     * This method initializes saveButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getSaveButton() {
+        if (saveButton == null) {
+            saveButton = new JButton();
+            saveButton.setToolTipText("Save Account Information to file");
+            saveButton.setText("Save");
+            saveButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    saveAccountsToDisk();
+                }
+            });
+        }
+        return saveButton;
+    }
+
+    protected void saveAccountsToDisk() {
+        JFileChooser chooser = new JFileChooser(lastDir);
+        FileFilter filterTAB = new FileNameExtensionFilter(TEXT_DESCRIPTION, "txt", "tab");
+        chooser.addChoosableFileFilter(filterTAB);
+        FileFilter filterCSV = new FileNameExtensionFilter(CSV_DESCRIPTION, "csv");
+        chooser.addChoosableFileFilter(filterCSV);
+        FileFilter filterXML = new FileNameExtensionFilter(XML_DESCRIPTION, "xml");
+        chooser.addChoosableFileFilter(filterXML);
+        chooser.setAcceptAllFileFilterUsed(false);
+        // always default to Text (tab delimited), otherwise default to last filter (XML)
+        chooser.setFileFilter(filterTAB);
+        /*
+         *  TODO consider making this a class field.
+         *  When we are able to read other formats, we might want to save
+         *  the selected file filter.
+         */
+        FileFilter selectedFilter = null;
+        
+        while (true) {
+            showMessage("");
+            int returnVal = chooser.showSaveDialog(this);
+            String msg = "";
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                lastDir = chooser.getCurrentDirectory().toString();
+                try {
+                    File selectedFile = chooser.getSelectedFile().getCanonicalFile();
+                    chooser.setCurrentDirectory(new File(lastDir));
+                    selectedFilter = chooser.getFileFilter();
+                    chooser.setFileFilter(selectedFilter);
+                    Vector<Account> v = getContest().getAccounts(ClientType.Type.ALL);
+                    Account[] a = new Account[v.size()];
+                    v.copyInto(a);
+                    int indexOfDot = selectedFile.getName().lastIndexOf('.');
+                    String ext = "";
+                    if (indexOfDot > 0) {
+                        ext = selectedFile.getName().substring(indexOfDot + 1);
+                        // tab delimited can end with 2 choices
+                        if (ext.equalsIgnoreCase(".tab")) { //$NON-NLS-1$
+                            // the format is called "TXT"
+                            ext = "txt"; //$NON-NLS-1$
+                        }
+                    }
+                    String ext2 = ".na";
+                    String description = selectedFilter.getDescription();
+                    if (description.equals(TEXT_DESCRIPTION)) {
+                        ext2 = "txt"; //$NON-NLS-1$
+                    } else {
+                        if (description.equals(CSV_DESCRIPTION)) {
+                            ext2 = "csv"; //$NON-NLS-1$
+                        } else {
+                            if (description.equals(XML_DESCRIPTION)) {
+                                ext2 = "xml"; //$NON-NLS-1$
+                            }
+                        }
+                    }
+                    if (!ext.equals(ext2)) {
+                        int indexOfParen = description.lastIndexOf('('); // the (.foo) stuff
+                        String descShort = description.substring(0, indexOfParen - 1);
+                        msg = "You selected the file type '" + descShort + "' but the file you selected ends with " + ext + "\n\nContinue to save as a " + descShort + "?";
+                        int confirmValue = JOptionPane.showConfirmDialog(this, msg);
+                        if (confirmValue == JOptionPane.NO_OPTION) {
+                            // no this is not correct, pop up the save dialog again
+                            continue;
+                        }
+                        if (confirmValue == JOptionPane.CANCEL_OPTION) {
+                            // cancel, get me out of here
+                            break;
+                        }
+                        // yes fails out
+                    }
+                    if (selectedFile.exists()) {
+                        msg = "The file "+selectedFile.getName()+" already exists. Do You want to replace "
+                                + "the existing file?";
+                        int confirmValue = JOptionPane.showConfirmDialog(this, msg, "File already exists", JOptionPane.YES_NO_OPTION);
+                        if (confirmValue == JOptionPane.NO_OPTION) {
+                            // TODO or should we break?
+                            continue;
+                        }
+                    }
+                    ExportAccounts.Formats format = ExportAccounts.Formats.valueOf(ext2.toUpperCase());
+                    if (!ExportAccounts.saveAccounts(format, a, getContest().getGroups(), selectedFile)) {
+                        Exception saveException = ExportAccounts.getException();
+                        // record this as an erro in ExportAccounts, not AccountsPane
+                        log.throwing("ExportAccounts", "saveAccounts()", saveException);
+                        showMessage("Error saving file "+saveException.getMessage()+", check log for details");
+                    }
+                    break;
+                } catch (Exception e) {
+                    log.throwing("AcountsPane", "saveAccountsToDisk()", e);
+                    showMessage("Error: "+e.getMessage()+", check log for details");
+                }
+            } else {
+                // select dialog canceled
+                break;
+            }
+        }
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
