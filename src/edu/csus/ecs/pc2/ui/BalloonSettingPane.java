@@ -28,8 +28,11 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.security.Permission.Type;
+
+import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.Font;
+import java.awt.Dimension;
 
 /**
  * Add/Edit BalloonSettings Pane.
@@ -104,6 +107,8 @@ public class BalloonSettingPane extends JPanePlugin {
     private Properties changedMailProperties = null;
 
     private PropertiesEditFrame propertiesEditFrame;
+
+    private JPanel westPanel = null;
 
     /**
      * This method initializes
@@ -612,8 +617,11 @@ public class BalloonSettingPane extends JPanePlugin {
             editField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableButtons();
+                    getColorListBox().autoSizeAllColumns();
                 }
             });
+            // try to keep the 1st letter of the border (hard to read)
+            editField.setMargin(new Insets(0,1,0,0));
             row[1] = editField;
             getColorListBox().addRow(row);
 
@@ -641,37 +649,23 @@ public class BalloonSettingPane extends JPanePlugin {
         if (centerPane == null) {
             balloonClientLabel = new JLabel();
             balloonClientLabel.setText("Balloon Client");
-            balloonClientLabel.setSize(new java.awt.Dimension(100,16));
-            balloonClientLabel.setLocation(new java.awt.Point(29,246));
+            balloonClientLabel.setBounds(new Rectangle(11, 280, 100, 16));
             siteLabel = new JLabel();
-            siteLabel.setBounds(new java.awt.Rectangle(25, 22, 48, 16));
             siteLabel.setText("Site");
+            siteLabel.setBounds(new Rectangle(14, 21, 48, 16));
             printDeviceLabel = new JLabel();
-            printDeviceLabel.setBounds(new Rectangle(52, 218, 112, 21));
             printDeviceLabel.setText("Print Device");
+            printDeviceLabel.setBounds(new Rectangle(41, 217, 112, 21));
             jLabel = new JLabel();
-            jLabel.setBounds(new java.awt.Rectangle(53, 115, 112, 21));
             jLabel.setText("EMail Server");
+            jLabel.setBounds(new Rectangle(42, 114, 112, 21));
             mailContactLabel = new JLabel();
-            mailContactLabel.setBounds(new java.awt.Rectangle(52, 80, 112, 21));
             mailContactLabel.setText("EMail Contact");
+            mailContactLabel.setBounds(new Rectangle(41, 79, 112, 21));
             centerPane = new JPanel();
-            centerPane.setLayout(null);
-            centerPane.add(getSendEmailNotificationsCheckBox(), null);
-            centerPane.add(getPrintNotificationsCheckBox(), null);
-            centerPane.add(mailContactLabel, null);
-            centerPane.add(jLabel, null);
-            centerPane.add(getEmailContactTextBox(), null);
-            centerPane.add(getEmailServerTextBox(), null);
-            centerPane.add(getPostScriptEnabledCheckBox(), null);
-            centerPane.add(getPrintDeviceTextBox(), null);
-            centerPane.add(printDeviceLabel, null);
-            centerPane.add(siteLabel, null);
-            centerPane.add(getColorListBox(), null);
-            centerPane.add(getSiteComboBox(), null);
-            centerPane.add(balloonClientLabel, null);
-            centerPane.add(getBalloonClientComboBox(), null);
-            centerPane.add(getAdvancedMailButton(), null);
+            centerPane.setLayout(new BorderLayout());
+            centerPane.add(getWestPanel(), BorderLayout.WEST);
+            centerPane.add(getColorListBox(), BorderLayout.CENTER);
         }
         return centerPane;
     }
@@ -684,8 +678,8 @@ public class BalloonSettingPane extends JPanePlugin {
     private JCheckBox getSendEmailNotificationsCheckBox() {
         if (sendEmailNotificationsCheckBox == null) {
             sendEmailNotificationsCheckBox = new JCheckBox();
-            sendEmailNotificationsCheckBox.setBounds(new java.awt.Rectangle(25, 48, 185, 21));
             sendEmailNotificationsCheckBox.setText("Send Email Notifications");
+            sendEmailNotificationsCheckBox.setBounds(new Rectangle(14, 47, 185, 21));
             sendEmailNotificationsCheckBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableButtons();
@@ -766,8 +760,8 @@ public class BalloonSettingPane extends JPanePlugin {
     private JCheckBox getPrintNotificationsCheckBox() {
         if (printNotificationsCheckBox == null) {
             printNotificationsCheckBox = new JCheckBox();
-            printNotificationsCheckBox.setBounds(new Rectangle(24, 188, 162, 24));
             printNotificationsCheckBox.setText("Print Notifications");
+            printNotificationsCheckBox.setBounds(new Rectangle(13, 187, 162, 24));
             printNotificationsCheckBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableButtons();
@@ -785,7 +779,7 @@ public class BalloonSettingPane extends JPanePlugin {
     private JTextField getEmailContactTextBox() {
         if (emailContactTextBox == null) {
             emailContactTextBox = new JTextField();
-            emailContactTextBox.setBounds(new java.awt.Rectangle(183, 80, 179, 21));
+            emailContactTextBox.setBounds(new Rectangle(172, 79, 179, 21));
             emailContactTextBox.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableButtons();
@@ -804,7 +798,7 @@ public class BalloonSettingPane extends JPanePlugin {
     private JTextField getEmailServerTextBox() {
         if (emailServerTextBox == null) {
             emailServerTextBox = new JTextField();
-            emailServerTextBox.setBounds(new java.awt.Rectangle(183, 115, 179, 21));
+            emailServerTextBox.setBounds(new Rectangle(172, 114, 179, 21));
             emailServerTextBox.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     changedMailProperties.put(BalloonSettings.MAIL_HOST, getEmailServerTextBox().getText());
@@ -823,8 +817,8 @@ public class BalloonSettingPane extends JPanePlugin {
     private JCheckBox getPostScriptEnabledCheckBox() {
         if (postScriptEnabledCheckBox == null) {
             postScriptEnabledCheckBox = new JCheckBox();
-            postScriptEnabledCheckBox.setBounds(new Rectangle(51, 246, 212, 24));
             postScriptEnabledCheckBox.setText("PostScript enabled printer");
+            postScriptEnabledCheckBox.setBounds(new Rectangle(39, 243, 212, 24));
             postScriptEnabledCheckBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableButtons();
@@ -842,7 +836,7 @@ public class BalloonSettingPane extends JPanePlugin {
     private JTextField getPrintDeviceTextBox() {
         if (printDeviceTextBox == null) {
             printDeviceTextBox = new JTextField();
-            printDeviceTextBox.setBounds(new Rectangle(182, 218, 179, 21));
+            printDeviceTextBox.setBounds(new Rectangle(171, 217, 179, 21));
             printDeviceTextBox.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableButtons();
@@ -860,7 +854,6 @@ public class BalloonSettingPane extends JPanePlugin {
     private MCLB getColorListBox() {
         if (colorListBox == null) {
             colorListBox = new MCLB();
-            colorListBox.setBounds(new java.awt.Rectangle(379, 15, 208, 210));
             String[] cols = { "Problem", "Color" };
             colorListBox.addColumns(cols);
             colorListBox.autoSizeAllColumns();
@@ -877,7 +870,7 @@ public class BalloonSettingPane extends JPanePlugin {
     private JComboBox getSiteComboBox() {
         if (siteComboBox == null) {
             siteComboBox = new JComboBox();
-            siteComboBox.setBounds(new java.awt.Rectangle(96, 18, 254, 25));
+            siteComboBox.setBounds(new Rectangle(85, 17, 254, 25));
             siteComboBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     enableButtons();
@@ -895,7 +888,7 @@ public class BalloonSettingPane extends JPanePlugin {
     private JComboBox getBalloonClientComboBox() {
         if (balloonClientComboBox == null) {
             balloonClientComboBox = new JComboBox();
-            balloonClientComboBox.setBounds(new Rectangle(142, 281, 204, 25));
+            balloonClientComboBox.setBounds(new Rectangle(131, 280, 204, 25));
             balloonClientComboBox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     // message is usually only updated on Update/Add, clear it till then
@@ -915,9 +908,9 @@ public class BalloonSettingPane extends JPanePlugin {
     private JButton getAdvancedMailButton() {
         if (advancedMailButton == null) {
             advancedMailButton = new JButton();
-            advancedMailButton.setBounds(new Rectangle(63, 152, 263, 25));
             advancedMailButton.setToolTipText("Advanced Mail Server Settings");
             advancedMailButton.setFont(new Font("Dialog", Font.BOLD, 12));
+            advancedMailButton.setBounds(new Rectangle(52, 151, 263, 25));
             advancedMailButton.setText("EMail Server Advanced Settings");
             advancedMailButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -953,6 +946,33 @@ public class BalloonSettingPane extends JPanePlugin {
             getEmailServerTextBox().setText(properties.getProperty(BalloonSettings.MAIL_HOST));
             enableButtons();
         }
+    }
+    /**
+     * This method initializes westPanel
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getWestPanel() {
+        if (westPanel == null) {
+            westPanel = new JPanel();
+            westPanel.setLayout(null);
+            westPanel.setPreferredSize(new Dimension(370, 341));
+            westPanel.add(siteLabel, null);
+            westPanel.add(getSiteComboBox(), null);
+            westPanel.add(getSendEmailNotificationsCheckBox(), null);
+            westPanel.add(mailContactLabel, null);
+            westPanel.add(getEmailContactTextBox(), null);
+            westPanel.add(jLabel, null);
+            westPanel.add(getEmailServerTextBox(), null);
+            westPanel.add(getAdvancedMailButton(), null);
+            westPanel.add(getPrintNotificationsCheckBox(), null);
+            westPanel.add(printDeviceLabel, null);
+            westPanel.add(getPrintDeviceTextBox(), null);
+            westPanel.add(getPostScriptEnabledCheckBox(), null);
+            westPanel.add(balloonClientLabel, null);
+            westPanel.add(getBalloonClientComboBox(), null);
+        }
+        return westPanel;
     }
 
 } // @jve:decl-index=0:visual-constraint="28,22"
