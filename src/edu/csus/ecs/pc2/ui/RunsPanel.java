@@ -1034,12 +1034,19 @@ public class RunsPanel extends JPanePlugin {
             return;
         }
 
-        if (JudgeView.isAlreadyJudgingRun()) {
-            JOptionPane.showMessageDialog(this, "Already judging run");
-            return;
-        }
+        /*
+         *  we may be competing with the AJ, ensure we have the lock before
+         *  checking & setting the alreadyJudgingRun boolean.
+         */
+        Boolean alreadyJudgingRun = JudgeView.getAlreadyJudgingRun();
+        synchronized (alreadyJudgingRun) {
+            if (JudgeView.isAlreadyJudgingRun()) {
+                JOptionPane.showMessageDialog(this, "Already judging run");
+                return;
+            }
 
-        JudgeView.setAlreadyJudgingRun(true);
+            JudgeView.setAlreadyJudgingRun(true);
+        }
 
         try {
             ElementId elementId = (ElementId) runListBox.getKeys()[selectedIndexes[0]];
@@ -1083,14 +1090,19 @@ public class RunsPanel extends JPanePlugin {
                 return;
             }
 
-            if (JudgeView.isAlreadyJudgingRun()) {
-                JOptionPane.showMessageDialog(this, "Already judging run");
-                return;
+            /*
+             *  we may be competing with the AJ, ensure we have the lock before
+             *  checking & setting the alreadyJudgingRun boolean.
+             */
+            Boolean alreadyJudgingRun = JudgeView.getAlreadyJudgingRun();
+            synchronized (alreadyJudgingRun) {
+                if (JudgeView.isAlreadyJudgingRun()) {
+                    JOptionPane.showMessageDialog(this, "Already judging run");
+                    return;
+                }
+
+                JudgeView.setAlreadyJudgingRun(true);
             }
-
-            // huh
-
-            JudgeView.setAlreadyJudgingRun(true);
 
             selectJudgementFrame.setRun(runToEdit, true);
             selectJudgementFrame.setVisible(true);

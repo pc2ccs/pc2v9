@@ -25,6 +25,7 @@ import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.model.RunEvent.Action;
+import edu.csus.ecs.pc2.ui.judge.JudgeView;
 
 /**
  * Auto Judge Monitor.
@@ -291,6 +292,9 @@ public class AutoJudgingMonitor implements UIPlugin {
         fetchedRunFiles = null;
         autoJudgeStatusFrame.updateStatusLabel("Waiting for runs");
         autoJudgeStatusFrame.updateMessage("(Still waiting)");
+        // we must release this before we get to the next attemptToFetchNewRun()
+        JudgeView.setAlreadyJudgingRun(false);
+        // and this is what allows us to get into that next attemptToFetchNewRun()
         setCurrentlyAutoJudging(false);
 
         attemptToFetchNextRun();
@@ -462,6 +466,21 @@ public class AutoJudgingMonitor implements UIPlugin {
             return;
         }
 
+        // need to wait for JudgeView (eg human) too
+        // WARNING: must release the JudgeView.alreadyJudgingRun, prior to getting into this
+        Boolean alreadyJudgingRun = JudgeView.getAlreadyJudgingRun(); 
+        synchronized (alreadyJudgingRun) {
+            autoJudgeStatusFrame.updateMessage("(Waiting2)");
+            while(JudgeView.isAlreadyJudgingRun()) {
+                try {
+                    alreadyJudgingRun.wait();
+                } catch (InterruptedException e) {
+                    log.throwing("AutoJudgingMonitor", "attempttoFetchNextRun()", e);
+                }
+            }
+            JudgeView.setAlreadyJudgingRun(true);
+            autoJudgeStatusFrame.updateMessage("(Waiting)");
+        }
         if (isRunToBeAutoJudged(nextRun)) {
 
             runBeingAutoJudged = nextRun;
@@ -472,11 +491,13 @@ public class AutoJudgingMonitor implements UIPlugin {
                 executeAndAutoJudgeRun();
             } else {
                 info("Unable to fetch run " + nextRun);
+                JudgeView.setAlreadyJudgingRun(false);
             }
 
         } else {
             autoJudgeStatusFrame.updateStatusLabel("Waiting for runs");
             autoJudgeStatusFrame.updateMessage("(Still waiting)");
+            JudgeView.setAlreadyJudgingRun(false);
         }
     }
 

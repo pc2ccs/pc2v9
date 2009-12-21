@@ -72,7 +72,7 @@ public class JudgeView extends JFrame implements UIPlugin {
 
     private ContestClockDisplay contestClockDisplay = null;
 
-    private static boolean alreadyJudgingRun = false;
+    private static Boolean alreadyJudgingRun = Boolean.FALSE;
 
     private JPanel clockPane = null;
 
@@ -393,11 +393,25 @@ public class JudgeView extends JFrame implements UIPlugin {
     }
 
     public static boolean isAlreadyJudgingRun() {
-        return alreadyJudgingRun;
+        return alreadyJudgingRun.booleanValue();
     }
 
     public static void setAlreadyJudgingRun(boolean alreadyJudgingRun) {
-        JudgeView.alreadyJudgingRun = alreadyJudgingRun;
+        JudgeView.alreadyJudgingRun = Boolean.valueOf(alreadyJudgingRun);
+        // if anybody was waiting for us to not be judging, wake 1 of them now
+        if (!alreadyJudgingRun) {
+            /**
+             * notify is called outside of a synchronized block: 
+             * Exception in thread "AWT-EventQueue-0" java.lang.IllegalMonitorStateException: current thread not owner
+             */
+            synchronized (JudgeView.getAlreadyJudgingRun()) {
+                JudgeView.alreadyJudgingRun.notify();
+            }
+        }
+    }
+
+    public static Boolean getAlreadyJudgingRun() {
+        return JudgeView.alreadyJudgingRun;
     }
 
     /**
