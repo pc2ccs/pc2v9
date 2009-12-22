@@ -33,6 +33,9 @@ import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.core.security.Permission.Type;
+import java.awt.Dimension;
+import java.awt.Rectangle;
+import java.awt.Point;
 
 /**
  * Add/Edit Account Pane
@@ -117,6 +120,10 @@ public class AccountPane extends JPanePlugin {
 
     private JLabel siteLabel = null;
 
+    private JLabel aliasLabel = null;
+
+    private JTextField aliasTextField = null;
+
     /**
      * This method initializes
      * 
@@ -132,7 +139,7 @@ public class AccountPane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new java.awt.Dimension(536, 400));
+        this.setSize(new Dimension(536, 450));
 
         this.add(getMessagePane(), java.awt.BorderLayout.NORTH);
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
@@ -397,6 +404,7 @@ public class AccountPane extends JPanePlugin {
             loadSiteComboBox (getContest().getSiteNumber());
             getSiteSelectionComboBox().setEnabled(true);
 
+            getAliasTextField().setText("");
         } else {
 
             getAccountTextField().setText(account2.getClientId().getName());
@@ -405,6 +413,7 @@ public class AccountPane extends JPanePlugin {
             getPasswordConfirmField().setText(account2.getPassword());
 
             populateGroupComboBox(account2.getGroupId());
+            getAliasTextField().setText(account2.getAliasName());
 
             populatePermissions(account2);
 
@@ -589,6 +598,9 @@ public class AccountPane extends JPanePlugin {
      */
     private JPanel getPermissionPane() {
         if (accountDetailPane == null) {
+            aliasLabel = new JLabel();
+            aliasLabel.setBounds(new Rectangle(15, 326, 133, 16));
+            aliasLabel.setText("Alias");
             siteLabel = new JLabel();
             siteLabel.setBounds(new java.awt.Rectangle(155, 221, 128, 16));
             siteLabel.setText("Site");
@@ -633,6 +645,8 @@ public class AccountPane extends JPanePlugin {
             accountDetailPane.add(getAccountTextField(), null);
             accountDetailPane.add(getSiteSelectionComboBox(), null);
             accountDetailPane.add(siteLabel, null);
+            accountDetailPane.add(aliasLabel, null);
+            accountDetailPane.add(getAliasTextField(), null);
         }
         return accountDetailPane;
     }
@@ -721,7 +735,7 @@ public class AccountPane extends JPanePlugin {
     private JTextField getPasswordTextField() {
         if (passwordTextField == null) {
             passwordTextField = new JTextField();
-            passwordTextField.setBounds(new java.awt.Rectangle(14, 140, 272, 22));
+            passwordTextField.setBounds(new Rectangle(14, 140, 272, 22));
             passwordTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
@@ -739,7 +753,7 @@ public class AccountPane extends JPanePlugin {
     private JTextField getPasswordConfirmField() {
         if (passwordConfirmField == null) {
             passwordConfirmField = new JTextField();
-            passwordConfirmField.setBounds(new java.awt.Rectangle(14, 191, 272, 22));
+            passwordConfirmField.setBounds(new Rectangle(14, 191, 272, 22));
             passwordConfirmField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
@@ -855,6 +869,7 @@ public class AccountPane extends JPanePlugin {
 
         checkAccount.setPassword(getPasswordConfirmField().getText());
 
+        checkAccount.setAliasName(getAliasTextField().getText());
         return checkAccount;
     }
 
@@ -919,6 +934,25 @@ public class AccountPane extends JPanePlugin {
             siteSelectionComboBox.setBounds(new java.awt.Rectangle(157, 243, 124, 25));
         }
         return siteSelectionComboBox;
+    }
+
+    /**
+     * This method initializes aliasTextField
+     * 
+     * @return javax.swing.JTextField
+     */
+    private JTextField getAliasTextField() {
+        if (aliasTextField == null) {
+            aliasTextField = new JTextField();
+            aliasTextField.setLocation(new Point(14, 351));
+            aliasTextField.setSize(new Dimension(272, 22));
+            aliasTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyReleased(java.awt.event.KeyEvent e) {
+                    enableUpdateButton();
+                }
+            });
+        }
+        return aliasTextField;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
