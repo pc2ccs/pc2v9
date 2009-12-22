@@ -107,6 +107,8 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
 // $HeadURL$
 public class InternalController implements IInternalController, ITwoToOne, IBtoA {
 
+    private static final String INI_FILENAME_OPTION_STRING = "--ini";
+
     /**
      * InternalContest data.
      */
@@ -1899,8 +1901,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
          */
         TransportException savedTransportException = null;
 
-        String[] arguments = { "--login", "--id", "--password", "--loginUI", "--remoteServer", "--server", "--port", "--skipini", "--ini", "--nosave", CONTEST_PASSWORD_OPTION };
-        parseArguments = new ParseArguments(stringArray, arguments);
+        String[] requireArguementArgs = { "--login", "--id", "--password", "--loginUI", "--remoteServer", "--port", INI_FILENAME_OPTION_STRING, CONTEST_PASSWORD_OPTION };
+        parseArguments = new ParseArguments(stringArray, requireArguementArgs);
 
         if (parseArguments.isOptPresent(DEBUG_OPTION_STRING)) {
             
@@ -1920,7 +1922,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         
         if (parseArguments.isOptPresent("--help")) {
             // -F is the ParseArguements internal option to pre-load command line options from a file
-            System.out.println("Usage: Starter [--help] [--server] [--first] [--login <login>] [--password <pass>] [--site ##] [--skipini] [--ini filename] [-F filename]");
+            System.out.println("Usage: Starter [--help] [--server] [--first] [--login <login>] [--password <pass>] [--site ##] [--skipini] ["+INI_FILENAME_OPTION_STRING+" filename] [-F filename]");
             System.exit(0);
         }
 
@@ -1954,9 +1956,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         
         boolean useIniFile = ! parseArguments.isOptPresent("--skipini"); 
 
-        // TODO code add INI_FILENAME_OPTION_STRING
-        if (parseArguments.isOptPresent("--ini") && useIniFile) {
-            String iniName = parseArguments.getOptValue("--ini");
+        if (parseArguments.isOptPresent(INI_FILENAME_OPTION_STRING) && useIniFile) {
+            String iniName = parseArguments.getOptValue(INI_FILENAME_OPTION_STRING);
             Exception exception = null;
             try {
                 System.err.println("Loading INI from " + iniName);
@@ -2004,7 +2005,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             }
         }
         
-        if (useIniFile && (!parseArguments.isOptPresent("--ini"))) {
+        if (useIniFile && (!parseArguments.isOptPresent(INI_FILENAME_OPTION_STRING))) {
             if (IniFile.isFilePresent()) {
                 // Only read and load .ini file if it is present.
                 new IniFile();
