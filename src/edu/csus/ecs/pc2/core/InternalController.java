@@ -1919,7 +1919,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
         
         if (parseArguments.isOptPresent("--help")) {
-            System.out.println("Usage: Starter [--help] [--server] [--first] [--login <login>] [--password <pass>] [--site ##] [--skipini] [--ini filename] ");
+            // -F is the ParseArguements internal option to pre-load command line options from a file
+            System.out.println("Usage: Starter [--help] [--server] [--first] [--login <login>] [--password <pass>] [--site ##] [--skipini] [--ini filename] [-F filename]");
             System.exit(0);
         }
 
