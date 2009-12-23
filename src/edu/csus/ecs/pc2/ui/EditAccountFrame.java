@@ -5,6 +5,7 @@ import javax.swing.JFrame;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import java.awt.Dimension;
 
 /**
  * 
@@ -42,8 +43,8 @@ public class EditAccountFrame extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(550,450));
-        this.setPreferredSize(new java.awt.Dimension(399,320));
+        this.setSize(new Dimension(550, 485));
+        this.setPreferredSize(new Dimension(550, 485));
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setContentPane(getAccountPane());
         this.setTitle("New Account");

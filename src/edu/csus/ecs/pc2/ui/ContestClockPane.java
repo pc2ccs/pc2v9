@@ -218,7 +218,7 @@ public class ContestClockPane extends JPanePlugin {
             contestClockDisplay.addLabeltoUpdateList(clockLabel, DisplayTimes.REMAINING_TIME, siteNumber);
             currentSiteNumber = siteNumber;
 
-        } else if (currentSiteNumber != siteNumber) {
+        } else if (currentSiteNumber != currentSiteNumber) {
             // changed from old site to new site
 
             contestClockDisplay.removeLabelFromUpdateList(clockLabel, currentSiteNumber);
