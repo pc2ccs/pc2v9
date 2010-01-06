@@ -57,7 +57,7 @@ public class AllReports implements IReport {
         listOfReports[repNo++] = new ClarificationsReport();
         listOfReports[repNo++] = new OldRunsReport();
         
-        listOfReports[repNo++] = new ProfileReport();
+        listOfReports[repNo++] = new ProfilesReport();
         
         listOfReports[repNo++] = new BalloonSummaryReport();
 

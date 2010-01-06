@@ -49,6 +49,7 @@ public class ProfilesReport implements IReport {
 
         Profile profile = contest.getProfile();
         writeProfile(printWriter, profile);
+        printWriter.println("    Contest ID: "+contest.getContestIdentifier());
     }
 
     public void writeReport(PrintWriter printWriter) {

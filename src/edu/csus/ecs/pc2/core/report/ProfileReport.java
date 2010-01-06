@@ -18,6 +18,7 @@ import edu.csus.ecs.pc2.core.model.Profile;
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
+ * @deprecated Use ProfilesReport 
  */
 
 // $HeadURL$
