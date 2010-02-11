@@ -15,6 +15,7 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IniFile;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
@@ -32,6 +33,7 @@ import edu.csus.ecs.pc2.ui.ConnectionsPane;
 import edu.csus.ecs.pc2.ui.ContestTimesPane;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
+import edu.csus.ecs.pc2.ui.LoadContestPane;
 import edu.csus.ecs.pc2.ui.LogWindow;
 import edu.csus.ecs.pc2.ui.LoginsPane;
 import edu.csus.ecs.pc2.ui.OptionsPanel;
@@ -44,6 +46,7 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
  * GUI for Server.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
@@ -366,6 +369,16 @@ public class ServerView extends JFrame implements UIPlugin {
         addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
         optionsPanel.setLogWindow(logWindow);
         optionsPanel.setSecurityLogWindow(securityAlertLogWindow);
+        
+        try {
+            if (Utilities.isDebugMode()){
+            LoadContestPane loadContestPane = new LoadContestPane();
+            addUIPlugin(getMainTabbedPane(), "Load v8", loadContestPane);
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
     
