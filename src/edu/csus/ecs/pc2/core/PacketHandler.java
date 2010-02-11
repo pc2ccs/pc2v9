@@ -52,6 +52,7 @@ import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
+import edu.csus.ecs.pc2.profile.ProfileManager;
 
 /**
  * Process all incoming packets.
@@ -344,12 +345,24 @@ public class PacketHandler {
         info("handlePacket end " + packet);
     }
 
-
+    /**
+     * Handle switch packet.
+     * 
+     * 
+     * @param packet
+     * @param connectionHandlerID
+     */
+    // TODO code handleSwitchProfile
     private void handleSwitchProfile(Packet packet, ConnectionHandlerID connectionHandlerID) {
-        // TODO code handleSwitchProfile
+     
+//        Profile inProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE);
+        Profile newProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.NEW_PROFILE);
+
+        contest = ProfileManager.switchProfile(contest, newProfile);
         
-        System.err.println ("TODO "+packet);
+        // TODO dal set contest
         
+//        controller.setContest(contest);
     }
 
     private void handleUpdateClientProfile(Packet packet, ConnectionHandlerID connectionHandlerID) throws IOException, ClassNotFoundException, FileSecurityException {
@@ -3339,6 +3352,10 @@ public class PacketHandler {
         contestLoginSuccessData.setProfile(contest.getProfile());
         contestLoginSuccessData.setProfiles(contest.getProfiles());
 
+        contestLoginSuccessData.setContestTime(contest.getContestTime());
+        contestLoginSuccessData.setSiteNumber(contest.getSiteNumber());
+        contestLoginSuccessData.setContestInformation(contest.getContestInformation());
+        
         if (isServer(clientId)) {
             contestLoginSuccessData.setContestSecurityPassword(contestSecurityPassword);
         }

@@ -1049,7 +1049,6 @@ public final class PacketFactory {
             GregorianCalendar gregorianCalendar = new GregorianCalendar(timeZone);
             prop.put(SERVER_CLOCK_OFFSET, gregorianCalendar);
 
-
             Packet packet = new Packet(Type.LOGIN_SUCCESS, source, destination, prop);
             return packet;
         } catch (Exception e) {
@@ -1060,9 +1059,13 @@ public final class PacketFactory {
         }
     }
     
+    /**
+     * 
+     * @param prop
+     * @param data
+     */
     private static void addContestData(Properties prop, ContestLoginSuccessData data) {
-        // TODO Auto-generated method stub
-
+        
         prop.put(CONTEST_TIME_LIST, data.getContestTimes());
         prop.put(PROBLEM_LIST, data.getProblems());
         prop.put(LANGUAGE_LIST, data.getLanguages());
@@ -1081,11 +1084,13 @@ public final class PacketFactory {
         prop.put(CONTEST_IDENTIFIER, data.getContestIdentifier());
         prop.put(PROFILE, data.getProfile());
         prop.put(PROFILE_LIST, data.getProfiles());
-
+        prop.put(SITE_NUMBER, new Integer(data.getSiteNumber()));
+        prop.put(CONTEST_TIME, data.getContestTime());
+        prop.put(CONTEST_INFORMATION, data.getContestInformation());
+        
         if (data.getContestSecurityPassword() != null) {
             prop.put(CONTEST_PASSWORD, data.getContestSecurityPassword());
         }
-
     }
 
     /**
@@ -1978,14 +1983,13 @@ public final class PacketFactory {
     
     // TODO fold contestTime and ContestInformation into  ContestLoginSuccessData
 
-    public static Packet createUpdateProfileClientPacket(ClientId source, ClientId destination, Profile currentProfile, Profile switchToProfile, ContestTime contestTime, int siteNumber,
-            ContestInformation information, ContestLoginSuccessData data) {
+    public static Packet createUpdateProfileClientPacket(ClientId source, ClientId destination, Profile currentProfile, Profile switchToProfile, ContestLoginSuccessData data) {
         try {
             Properties prop = new Properties();
             prop.put(PROFILE, currentProfile);
             prop.put(NEW_PROFILE, switchToProfile);
-            prop.put(SITE_NUMBER, new Integer(siteNumber));
-            prop.put(CONTEST_TIME, contestTime);
+            prop.put(SITE_NUMBER, new Integer(data.getSiteNumber()));
+            prop.put(CONTEST_TIME, data.getContestTime());
             prop.put(CONTEST_TIME_LIST, data.getContestTimes());
             prop.put(CLIENT_ID, destination);
             prop.put(PROBLEM_LIST, data.getProblems());
@@ -1998,13 +2002,15 @@ public final class PacketFactory {
             prop.put(CONNECTION_HANDLE_ID_LIST, data.getConnectionHandlerIDs());
             prop.put(ACCOUNT_ARRAY, data.getAccounts());
             prop.put(PROBLEM_DATA_FILES, data.getProblemDataFiles());
-            prop.put(CONTEST_INFORMATION, information);
+            prop.put(CONTEST_INFORMATION, data.getContestInformation());
             prop.put(CLIENT_SETTINGS_LIST, data.getClientSettings());
             prop.put(BALLOON_SETTINGS_LIST, data.getBalloonSettingsArray());
             prop.put(GROUP_LIST, data.getGroups());
             prop.put(GENERAL_PROBLEM, data.getGeneralProblem());
             prop.put(CONTEST_IDENTIFIER, data.getContestIdentifier());
             prop.put(PROFILE, data.getProfile());
+            
+            // huh
 
             TimeZone timeZone = TimeZone.getTimeZone("GMT");
             GregorianCalendar gregorianCalendar = new GregorianCalendar(timeZone);

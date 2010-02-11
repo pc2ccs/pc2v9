@@ -6,12 +6,14 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.Vector;
 
 import edu.csus.ecs.pc2.VersionInfo;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Profile;
 
 /**
- * Profiles Manager
+ * Profiles Manager.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -26,6 +28,8 @@ public class ProfileManager {
      * Filename for index of profiles.
      */
     public static final String PROFILE_INDEX_FILENAME = "profiles.properties";
+
+    private String delimiter = ",";
 
     public Profile[] load(String filename) throws IOException, ProfileLoadException {
 
@@ -69,7 +73,7 @@ public class ProfileManager {
     }
 
     /**
-     * Create a profile form an input line.
+     * Create a profile form an input line/String.
      * 
      * <prof_id>="<title>","<description>","<profile path>",<client_type>[=first]
      * 
@@ -83,7 +87,11 @@ public class ProfileManager {
             return null;
         }
 
-        String[] fields = profileLine.split(",");
+        String[] fields = profileLine.split(delimiter);
+
+        if (fields.length < 3) {
+            throw new IllegalArgumentException("Too few fields for line: " + profileLine);
+        }
 
         // 0 "<title>",
         // 1 "<description>",
@@ -114,6 +122,12 @@ public class ProfileManager {
         return profile;
     }
 
+    /**
+     * Strip all double quotes from start and end of string.
+     * 
+     * @param string
+     * @return
+     */
     protected String stripQuote(String string) {
 
         if (string == null) {
@@ -135,11 +149,39 @@ public class ProfileManager {
         return buffer.toString();
     }
 
+    /**
+     * Return a list of Profiles.
+     * 
+     * @param properties
+     * @return
+     * @throws ProfileLoadException
+     */
     private Profile[] toProfiles(Properties properties) throws ProfileLoadException {
 
-        return null;
+        Vector<Profile> list = new Vector<Profile>();
+
+        String[] keys = (String[]) properties.keySet().toArray(new String[properties.keySet().size()]);
+        for (String key : keys) {
+            String profileLine = properties.getProperty(key);
+            String[] fields = profileLine.split(delimiter);
+            if (fields.length > 2) {
+                Profile profile = toProfile(profileLine);
+                list.add(profile);
+            }
+        }
+
+        return (Profile[]) list.toArray(new Profile[list.size()]);
     }
 
+    /**
+     * Store list of profiles.
+     * 
+     * @param filename
+     * @param profiles
+     * @param defaultProfile
+     * @return
+     * @throws IOException
+     */
     public boolean store(String filename, Profile[] profiles, Profile defaultProfile) throws IOException {
         Properties properties = new Properties();
 
@@ -147,18 +189,38 @@ public class ProfileManager {
 
         for (Profile profile : profiles) {
             // <prof_id>="<title>","<description>","<profile path>",<client_type>[=first]
-            String line = quoteString(profile.getName()) + "," + quoteString(profile.getDescription()) + "," + quoteString(profile.getProfilePath()) + ",";
+            String line = quoteString(profile.getName()) + delimiter + quoteString(profile.getDescription()) + delimiter + quoteString(profile.getProfilePath()) + delimiter;
             properties.put(profile.getElementId().toString(), line);
         }
 
         properties.put(DEFAULT_PROFILE_KEY, defaultProfile.getElementId().toString());
 
-        properties.store(new FileOutputStream(filename), "Created by PC^2 Version " + versionInfo.getVersionNumber() + " " + versionInfo.getBuildNumber() + " $Id$ ");
+        properties.store(new FileOutputStream(filename), "Created by PC^2 Version " + versionInfo.getVersionNumber() + " " + versionInfo.getBuildNumber()
+                + " $Id$ ");
 
         return true;
     }
 
     private String quoteString(String name) {
         return "\"" + name + "\"";
+    }
+
+    /**
+     * Load and switch to new contest.
+     * 
+     * @param contest
+     * @param inProfile
+     * @param newProfile
+     * @return
+     */
+    public static IInternalContest switchProfile(IInternalContest contest, Profile profile) {
+
+        // TODO dal set storage
+        
+        // TODO dal load configuration/contest 
+        
+        // TODO dal load all submission data runs/clars etc.
+        
+        return null;
     }
 }

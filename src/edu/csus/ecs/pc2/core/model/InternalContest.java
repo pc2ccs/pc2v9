@@ -2123,6 +2123,12 @@ public class InternalContest implements IInternalContest {
         contest.setClientId(getClientId());
         
         contest.setGeneralProblem(getGeneralProblem());
+        
+        // Sites
+        
+        for (Site site : getSites()){
+            contest.updateSite(site);
+        }
 
         if (settings.isCopyAccounts()){
             contest.addAccounts(getAccounts());
@@ -2176,7 +2182,7 @@ public class InternalContest implements IInternalContest {
         // Contest clocks
         
         for (ContestTime contestTime : getContestTimes()){
-            contest.addContestTime(contestTime);
+            contest.updateContestTime(contestTime);
         }
 
         if (settings.isResetContestTimes()){

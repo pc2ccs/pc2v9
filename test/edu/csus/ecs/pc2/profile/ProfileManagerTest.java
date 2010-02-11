@@ -25,23 +25,40 @@ public class ProfileManagerTest extends TestCase {
 
         String title = "Sample";
         String description = "description 11";
-        Profile profile = new Profile(title);
-        profile.setDescription(description);
-        profile.setProfilePath("/tmp/foo2");
+        Profile profile1 = new Profile(title);
+        profile1.setDescription(description);
+        profile1.setProfilePath("/tmp/foo2");
 
         ProfileManager manager = new ProfileManager();
 
         String filename = "test" + ProfileManager.PROFILE_INDEX_FILENAME;
 
-        Profile[] profiles = { profile };
+        Profile profile4 = new Profile("Profile IV");
+        profile4.setDescription(profile4.getName());
+        profile4.setProfilePath("/tmp/fooIV");
 
-        manager.store(filename, profiles, profile);
+        Profile profile3 = new Profile("Profile III");
+        profile3.setDescription(profile3.getName());
+        profile3.setProfilePath("/tmp/foo3");
+
+        Profile[] profiles = { profile1, profile4, profile3 };
+
+        manager.store(filename, profiles, profile1);
 
         Profile profile2 = manager.defaultProfile(filename);
 
-        assertEquals(profile.getName(), profile2.getName());
+        assertEquals(profile1.getName(), profile2.getName());
 
-        assertTrue("Failed defaultProfile", profile.isSameAs(profile2));
+        assertTrue("Failed defaultProfile", profile2.isSameAs(profile2));
+
+        assertFalse("Failed defaultProfile", profile1.isSameAs(profile3));
+
+        Profile[] list = manager.load(filename);
+
+        for (Profile profile : list) {
+            System.out.println("Profile " + profile.getName());
+        }
+
     }
 
 }

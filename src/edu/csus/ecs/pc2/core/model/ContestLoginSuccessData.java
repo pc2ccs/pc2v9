@@ -36,6 +36,9 @@ public class ContestLoginSuccessData implements Serializable {
     private String contestIdentifier;
     private Profile profile;
     private Profile [] profiles;
+    private ContestTime contestTime;
+    private int siteNumber;
+    private ContestInformation information; 
 
     /**
      * @return Returns the accounts.
@@ -235,5 +238,23 @@ public class ContestLoginSuccessData implements Serializable {
     }
     public void setProfiles(Profile[] profiles) {
         this.profiles = profiles;
+    }
+    public ContestTime getContestTime() {
+        return contestTime;
+    }
+    public void setContestTime(ContestTime contestTime) {
+        this.contestTime = contestTime;
+    }
+    public int getSiteNumber() {
+        return siteNumber;
+    }
+    public void setSiteNumber(int siteNumber) {
+        this.siteNumber = siteNumber;
+    }
+    public ContestInformation getContestInformation() {
+        return information;
+    }
+    public void setContestInformation(ContestInformation information2) {
+        this.information = information2;
     }
 }

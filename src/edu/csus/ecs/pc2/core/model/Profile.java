@@ -47,6 +47,7 @@ public class Profile implements IElementObject, Serializable {
             throw new IllegalArgumentException("Profile name must not be null");
         }
         elementId = new ElementId(new String(name));
+        setProfilePath(createProfilePath(""));
         this.name = name;
     }
 
@@ -129,12 +130,12 @@ public class Profile implements IElementObject, Serializable {
     public void setProfilePath(String profilePath) {
         this.profilePath = profilePath;
     }
-    
-    private String createProfilePath(String basepath,Profile newProfile) {
+
+    private String createProfilePath(String basepath, Profile newProfile) {
         // profiles/P2ef182be-b8ed-42c0-88ca-19dfef3419c3/archive
-        if (basepath == null){
+        if (basepath == null || basepath.trim().length() == 0) {
             basepath = "";
-        } else if (basepath.substring(basepath.length()-1).equals(File.separator)){
+        } else if (basepath.substring(basepath.length() - 1).equals(File.separator)) {
             basepath += File.separator;
         }
         return basepath + "profiles/P" + UUID.randomUUID().toString();
