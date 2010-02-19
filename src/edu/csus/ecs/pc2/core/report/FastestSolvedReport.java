@@ -144,7 +144,7 @@ public class FastestSolvedReport implements IReport {
         return (Run[]) runVector.toArray(new Run[runVector.size()]);
     }
 
-    private void printHeader(PrintWriter printWriter) {
+    public void printHeader(PrintWriter printWriter) {
         printWriter.println(new VersionInfo().getSystemName());
         printWriter.println("Date: " + Utilities.getL10nDateTime());
         printWriter.println(new VersionInfo().getSystemVersionInfo());
@@ -177,7 +177,7 @@ public class FastestSolvedReport implements IReport {
         }
     }
 
-    private void printFooter(PrintWriter printWriter) {
+    public void printFooter(PrintWriter printWriter) {
         printWriter.println();
         printWriter.println("end report");
     }

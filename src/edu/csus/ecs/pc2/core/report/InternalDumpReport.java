@@ -587,7 +587,7 @@ public class InternalDumpReport implements IReport {
         }
     }
 
-    private void printHeader(PrintWriter printWriter) {
+    public void printHeader(PrintWriter printWriter) {
         VersionInfo versionInfo = new VersionInfo();
         printWriter.println(versionInfo.getSystemName());
         printWriter.println("Date: " + Utilities.getL10nDateTime());
@@ -596,7 +596,7 @@ public class InternalDumpReport implements IReport {
 
     }
 
-    private void printFooter(PrintWriter printWriter) {
+    public void printFooter(PrintWriter printWriter) {
         printWriter.println();
         printWriter.println("end report");
     }

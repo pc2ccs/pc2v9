@@ -65,4 +65,16 @@ public interface IReport extends UIPlugin {
      * @param filter
      */
     void setFilter(Filter filter);
+    
+    /**
+     * Print header for report.
+     * @param printWriter
+     */
+    void printHeader(PrintWriter printWriter);
+    
+    /**
+     * Print footer for report.
+     * @param printWriter
+     */
+    void printFooter(PrintWriter printWriter);
 }

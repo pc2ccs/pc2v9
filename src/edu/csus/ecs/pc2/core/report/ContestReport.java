@@ -250,7 +250,7 @@ public class ContestReport implements IReport {
         printWriter.println(xmlString);
     }
 
-    private void printHeader(PrintWriter printWriter) {
+    public void printHeader(PrintWriter printWriter) {
         printWriter.println(new VersionInfo().getSystemName());
         printWriter.println("Date: " + Utilities.getL10nDateTime());
         printWriter.println(new VersionInfo().getSystemVersionInfo());
@@ -288,7 +288,7 @@ public class ContestReport implements IReport {
         }
     }
 
-    private void printFooter(PrintWriter printWriter) {
+    public void printFooter(PrintWriter printWriter) {
         printWriter.println();
         printWriter.println("end report");
     }
