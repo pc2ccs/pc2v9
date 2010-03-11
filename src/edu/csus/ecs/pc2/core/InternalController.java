@@ -149,10 +149,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     private static final String PASSWORD_OPTION_STRING = "--password";
 
-    // TODO code implement --loginUI
-    @SuppressWarnings("unused")
-    private static final String LOGIN_UI_OPTION_STRING = "--loginUI";
-
     /**
      * The port that the server will listen on.
      * 
@@ -216,8 +212,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     // TODO change this to UIPlugin
     /*
-     * Difficulty with changing LoginFrame to UIPlugin, there is no way to setVisible(false) a UIPlugin or make the GUI cursor change for a UIPlugin. dal.
-     * 
+     * Note: Difficulty with changing LoginFrame to UIPlugin, there is no way to setVisible(false) a UIPlugin or make the GUI cursor change for a UIPlugin. dal.
      */
     private LoginFrame loginUI;
 
@@ -752,15 +747,20 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 FileSecurity fileSecurity = new FileSecurity(baseDirectoryName);
                 
                 initializeStorage(fileSecurity);
-
+                
                 if (contest.getContestPassword() == null) {
-                    String password = JOptionPane.showInputDialog(null, "Enter Contest Password");
-                    if (password == null || password.trim().length() == 0) {
-                        JOptionPane.showMessageDialog(null, "You must supply a password, exiting.");
-                        System.exit(44);
+                    if (usingGUI){
+                        String password = JOptionPane.showInputDialog(null, "Enter Contest Password");
+                        if (password == null || password.trim().length() == 0) {
+                            fatalError ("You must supply a password, exiting.");
+                        }
+                        contest.setContestPassword(password);
+                    } else {
+
+                        fatalError ("The contest password must be specified on the command line");
                     }
-                    contest.setContestPassword(password);
                 }
+
 
                 try {
                     fileSecurity.verifyPassword(contest.getContestPassword().toCharArray());
@@ -772,21 +772,15 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                             fileSecurity.saveSecretKey(contest.getContestPassword().toCharArray());
                         } catch (Exception e) {
                             StaticLog.getLog().log(Log.SEVERE, "FATAL ERROR ", e);
-                            System.err.println("FATAL ERROR " + e.getMessage() + " check logs");
-                            JOptionPane.showMessageDialog(null, "Invalid password");
-                            System.exit(44);
+                            fatalError("FATAL ERROR " + e.getMessage() + " check logs", e);
                         }
                     } else {
                         StaticLog.getLog().log(Log.SEVERE, "FATAL ERROR ", fileSecurityException);
-                        System.err.println("FATAL ERROR " + fileSecurityException.getMessage() + " check logs");
-                        JOptionPane.showMessageDialog(null, "Invalid password");
-                        System.exit(44);
+                        fatalError("FATAL ERROR " + fileSecurityException.getMessage() + " check logs");
                     }
                 } catch (Exception e) {
                     StaticLog.getLog().log(Log.SEVERE, "FATAL ERROR ", e);
-                    System.err.println("FATAL ERROR " + e.getMessage() + " check logs");
-                    JOptionPane.showMessageDialog(null, "Exception while validating contest password " + e.getMessage());
-                    System.exit(44);
+                    fatalError("Exception while validating contest password " + e.getMessage()+" check logs",e );
                 }
             }
         }
@@ -834,6 +828,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             getLog().log(Log.WARNING, "Exception logged ", e);
         }
     }
+
+  
 
     protected void loadJudgements() {
 
@@ -1681,17 +1677,26 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         
         if (clientAutoShutdown){
 
-            CountDownMessage countDownMessage = new CountDownMessage("Shutting down PC^2 in ", 10);
-            if (contest.getClientId() != null) {
-                info("connectionDropped: shutting down " + contest.getClientId());
-                countDownMessage.setTitle("Shutting down PC^2 " + contest.getClientId().getClientType() + " " + contest.getTitle());
+            if (usingGUI){
+                CountDownMessage countDownMessage = new CountDownMessage("Shutting down PC^2 in ", 10);
+                if (contest.getClientId() != null) {
+                    info("connectionDropped: shutting down " + contest.getClientId());
+                    countDownMessage.setTitle("Shutting down PC^2 " + contest.getClientId().getClientType() + " " + contest.getTitle());
+                } else {
+                    info("connectionDropped: shutting down <non-logged in client>");
+                    countDownMessage.setTitle("Shutting down PC^2 Client");
+                }
+                countDownMessage.setExitOnClose(true);
+                if (isUsingMainUI()) {
+                    countDownMessage.setVisible(true);
+                }
+                
             } else {
-                info("connectionDropped: shutting down <non-logged in client>");
-                countDownMessage.setTitle("Shutting down PC^2 Client");
-            }
-            countDownMessage.setExitOnClose(true);
-            if (isUsingMainUI()) {
-                countDownMessage.setVisible(true);
+                if (contest.getClientId() != null) {
+                    fatalError("Shutting down PC^2 " + contest.getClientId().getClientType() + " " + contest.getTitle());
+                } else {
+                    fatalError("connectionDropped: shutting down <non-logged in client>");
+                }
             }
             
         } else {
@@ -1863,7 +1868,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
                         String uiClassName = LoadUIClass.getUIClassName(clientId);
                         if (uiClassName == null) {
-                            info("Unable to find UI class for " + clientId.getClientType().toString().toLowerCase());
+                            String clientName =  clientId.getClientType().toString().toLowerCase();
+                            info("Unable to find UI for client "+clientName+" in properties file "+LoadUIClass.UI_PROPERTIES_FILENAME);
+                            fatalError("Unable to determine UI class for " + clientName);
                         } else {
                             info("Attempting to load UI class " + uiClassName);
                             uiPlugin = LoadUIClass.loadUIClass(uiClassName);
@@ -1997,13 +2004,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             }
 
             if (exception != null){
-                getLog().log(Log.SEVERE, "Cannot start PC^2, "+iniName+" cannot be read ("+exception.getMessage()+")");
-                System.out.flush();
-                System.err.flush();
-                System.err.println("Cannot start PC^2, "+iniName+" cannot be read ("+exception.getMessage()+")");
-                System.err.flush();
-                JOptionPane.showMessageDialog(null, "Cannot start PC^2, " + iniName + " cannot be read (" + exception.getMessage() + ")", "PC^2 Halted", JOptionPane.ERROR_MESSAGE); 
-                System.exit(22);
+                fatalError("Cannot start PC^2, "+iniName+" cannot be read ("+exception.getMessage()+")", exception);
             }
         }
 
@@ -2032,15 +2033,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 // Only read and load .ini file if it is present.
                 new IniFile();
             } else {
-
                 String currentDirectory = Utilities.getCurrentDirectory();
-                getLog().log(Log.SEVERE, "Cannot start PC^2, " + IniFile.getINIFilename() + " cannot be read.");
-                System.out.flush();
-                System.err.flush();
-                System.err.println("Cannot start PC^2, " + IniFile.getINIFilename() + " file not found in " + currentDirectory);
-                System.err.flush();
-                JOptionPane.showMessageDialog(null, "Cannot start PC^2, " + IniFile.getINIFilename() + " file not found in " + currentDirectory,"PC^2 Halted", JOptionPane.ERROR_MESSAGE); 
-                System.exit(22);
+                fatalError("Cannot start PC^2, " + IniFile.getINIFilename() + " file not found in " + currentDirectory);
             }
         }
         
@@ -2094,16 +2088,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
         if (!parseArguments.isOptPresent(LOGIN_OPTION_STRING)) {
 
-            // TODO: code handle alternate Login UI.
-
-            // if ( parseArguments.isOptPresent(LOGIN_UI_OPTION_STRING)) {
-            // String loginUIName = parseArguments.getOptValue(LOGIN_UI_OPTION_STRING);
-            // // TODO: load Login UI
-            // // loginUI = LoadUIClass.loadUIClass(loginUIName);
-            // } else {
-            //              
-            // }
-            if (isUsingMainUI()) {
+            if (usingGUI && isUsingMainUI()) {
                 loginUI = new LoginFrame();
                 loginUI.setContestAndController(contest, this);
             }
@@ -2145,16 +2130,13 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         
         String contactInfo = getHostContacted()+":"+getPortContacted();
 
-        if (savedTransportException != null && loginUI != null) {
+        if (usingGUI && (savedTransportException != null && loginUI != null)) {
             loginUI.disableLoginButton();
             loginUI.setStatusMessage("Unable to contact server, contact staff");
             JOptionPane.showMessageDialog(null, "Unable to contact server at: "+contactInfo, "Error contacting server", JOptionPane.ERROR_MESSAGE);
         } else if (savedTransportException != null) {
             connectionManager = null;
-            System.err.println("Unable to contact server at "+contactInfo);
-            log.log(Log.INFO, "Unable to contact server, contact staff", savedTransportException);
-            log.log(Log.INFO, "internal debug, note connectionManager set to null");
-            JOptionPane.showMessageDialog(null, "Unable to contact server at: "+contactInfo, "Error contacting server", JOptionPane.ERROR_MESSAGE);
+            fatalError("Unable to contact server at: " + contactInfo + ", contact staff", savedTransportException);
         }
     }
 
@@ -2744,11 +2726,15 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      */
     protected void fatalError (String message, Exception ex){
         if (log != null){
-            log.log(Log.SEVERE, message, ex);
+            if (ex != null){
+                log.log(Log.SEVERE, message, ex);
+            } else {
+                log.log(Log.SEVERE, message);
+            }
         }
 
         if (usingGUI){
-            JOptionPane.showMessageDialog(null, message +" check logs");
+            JOptionPane.showMessageDialog(null, message +" check logs" , "PC^2 Halted", JOptionPane.ERROR_MESSAGE);
         } else {
             System.err.println(message);
             if (ex != null){
@@ -2757,5 +2743,14 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
         
         System.exit(4);
+    }
+    
+    /**
+     * 
+     * @see #fatalError(String, Exception)
+     * @param message
+     */
+    private void fatalError(String message) {
+        fatalError(message, null);
     }
 }
