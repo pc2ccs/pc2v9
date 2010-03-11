@@ -108,6 +108,8 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
 public class InternalController implements IInternalController, ITwoToOne, IBtoA {
 
     private static final String INI_FILENAME_OPTION_STRING = "--ini";
+    
+    private static final String FILE_OPTION_STRING = "-F";
 
     /**
      * InternalContest data.
@@ -127,6 +129,11 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      * The main UI, started by the controller.
      */
     private UIPlugin uiPlugin = null;
+    
+    /**
+     * Is this started using a GUI ? 
+     */
+    private boolean usingGUI = true;
 
     private Log log;
 
@@ -497,7 +504,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             }
         }
 
-        throw new SecurityException("No such account " + loginName);
+        throw new SecurityException("No such account \"" + loginName+"\"");
 
     }
 
@@ -528,7 +535,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     public void login(String id, String password) {
 
         if (!isStarted) {
-            // TODO review this message
+            // TODO get rid of this by not allowing this condition dal
             throw new SecurityException("Invalid sequence, must call start(String[]) method before login(String, String).");
         }
         ClientId clientId = loginShortcutExpansion(0, id);
@@ -1901,8 +1908,22 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
          */
         TransportException savedTransportException = null;
 
-        String[] requireArguementArgs = { "--login", "--id", "--password", "--loginUI", "--remoteServer", "--port", INI_FILENAME_OPTION_STRING, CONTEST_PASSWORD_OPTION };
+        String[] requireArguementArgs = { "--login", "--id", "--password", "--loginUI", "--remoteServer", "--port", INI_FILENAME_OPTION_STRING, CONTEST_PASSWORD_OPTION, FILE_OPTION_STRING };
         parseArguments = new ParseArguments(stringArray, requireArguementArgs);
+        
+        if (parseArguments.isOptPresent(FILE_OPTION_STRING)){
+            String propertiesFileName = parseArguments.getOptValue(FILE_OPTION_STRING);
+            
+            if (! (new File(propertiesFileName).exists())){
+                fatalError(propertiesFileName+" does not exist (pwd: "+Utilities.getCurrentDirectory()+")", null);
+            }
+            
+            try {
+                parseArguments.overRideOptions(propertiesFileName);
+            } catch (IOException e) {
+                fatalError("Unable to read file "+propertiesFileName, e);
+            }
+        }
 
         if (parseArguments.isOptPresent(DEBUG_OPTION_STRING)) {
             
@@ -2713,5 +2734,28 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     public void updateProfile(Profile profile) {
         Packet updateProfilePackert = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), profile);
         sendToLocalServer(updateProfilePackert);
+    }
+    
+    /**
+     * Fatal error - log error and show user message before exiting.
+     * 
+     * @param message
+     * @param ex
+     */
+    protected void fatalError (String message, Exception ex){
+        if (log != null){
+            log.log(Log.SEVERE, message, ex);
+        }
+
+        if (usingGUI){
+            JOptionPane.showMessageDialog(null, message +" check logs");
+        } else {
+            System.err.println(message);
+            if (ex != null){
+                ex.printStackTrace(System.err);
+            }
+        }
+        
+        System.exit(4);
     }
 }

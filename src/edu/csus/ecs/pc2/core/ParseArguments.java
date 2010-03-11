@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.core;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -55,7 +56,7 @@ public class ParseArguments {
     /**
      * "FILE_OPTION file" instructs ParseArguements to pre-load values from file
      */
-    private static final String FILE_OPTION = "-F";
+
 
     private Hashtable<String, String> argHash = new Hashtable<String, String>();
 
@@ -311,9 +312,6 @@ public class ParseArguments {
         if (curOpt != null) {
             argHash.put(curOpt, NULL_VALUE);
         }
-        if (isOptPresent(FILE_OPTION)) {
-            handleFileOption(getOptValue(FILE_OPTION));
-        }
     }
 
     /**
@@ -376,10 +374,6 @@ public class ParseArguments {
      */
     private boolean hasArgOpt(String arg) {
         // System.err.println("hasArgOpt - "+arg);
-        // FILE_OPTION is internal to ParseArguements, always requires option
-        if (arg.equals(FILE_OPTION)) {
-            return true;
-        }
 
         if (requireArgOpts == null) {
             return false;
@@ -397,29 +391,27 @@ public class ParseArguments {
     }
 
     /**
-     * This reads Properties from fileName and merges the
-     * keys/values into argHash.
+     * Reads properties from file as if they were from the command line.
      * 
      * @param fileName
+     * @throws IOException 
      */
-    private void handleFileOption(String fileName) {
-        try {
-            Properties fileProps = new Properties();
-            InputStream inStream = new BufferedInputStream(new FileInputStream(fileName));
-            fileProps.load(inStream);
-            inStream.close();
-            Set<Object> s = fileProps.keySet();
-            for (Object key : s) {
-                String argKey = (String)key;
-                // only overwrite it not already present
-                if (!isOptPresent(argKey)) {
-                    argHash.put(argKey, fileProps.getProperty(argKey));
-                }
+    public void overRideOptions (String fileName) throws IOException {
+        Properties fileProps = new Properties();
+        InputStream inStream = new BufferedInputStream(new FileInputStream(fileName));
+        fileProps.load(inStream);
+        inStream.close();
+        Set<Object> s = fileProps.keySet();
+        for (Object key : s) {
+            String argKey = (String) key;
+            /**
+             * only overwrite it not already present, so if they specify
+             * a command line argument it has higher precedence than these
+             * in the property file  
+             */
+            if (!isOptPresent(argKey)) {
+                argHash.put(argKey, fileProps.getProperty(argKey));
             }
-        } catch (Exception e) {
-            // TODO should we pass Log into this class?
-            System.out.println("Error reading "+fileName+": "+e.getMessage());
-            e.printStackTrace();
         }
     }
 
