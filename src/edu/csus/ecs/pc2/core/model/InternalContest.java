@@ -215,6 +215,8 @@ public class InternalContest implements IInternalContest {
 
     private String contestPassword;
 
+    private ProfileCloneSettings profileCloneSettings = null;
+
     private Site createFakeSite(int nextSiteNumber) {
         Site site = new Site("Site " + nextSiteNumber, nextSiteNumber);
         Properties props = new Properties();
@@ -2234,4 +2236,12 @@ public class InternalContest implements IInternalContest {
 
     }
 
+    public ProfileCloneSettings getProfileCloneSettings() {
+        return profileCloneSettings;
+    }
+
+    public ProfileCloneSettings setProfileCloneSettings(ProfileCloneSettings inProfileCloneSettings) {
+        this.profileCloneSettings = inProfileCloneSettings;
+        return profileCloneSettings;
+    }
 }

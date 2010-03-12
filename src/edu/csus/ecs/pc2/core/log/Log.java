@@ -8,7 +8,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Based on the Java Logging API
+ * Based on the Java Logging API.
  * <p>
  * Sample Usage:
  * </p>
@@ -26,7 +26,7 @@ import java.util.logging.Logger;
  * </p>
  *
  * @author pc2@ecs.csus.edu
- *
+ * @version $Id$
  */
 
 // $HeadURL: http://pc2.ecs.csus.edu/repos/v9wip/trunk/src/edu/csus/ecs/pc2/core/log/Log.java$
@@ -112,25 +112,20 @@ public class Log extends Logger {
     private LogStreamHandler streamHandler = null;
     
     /**
-     * Start log to ?? // TODO what does this do? .
-     *
-     * @see Logger
-     * @param name
-     * @param resourceBundleName
-     */
-    public Log(String name, String resourceBundleName) {
-        super(name, resourceBundleName);
-        // default to pass thru all levels, the FileHandlers will FilterByLevel
-
-        this.setLevel(Level.ALL);
-    }
-    
-    /**
      * Start a log in the logs/ directory with logFileName
      * @param logFileName name to log messages to.
      */
     public Log (String logFileName){
         this ("edu.ecs.csus.pc2", null, LOG_DIRECTORY_NAME, logFileName);
+    }
+    
+    /**
+     * Create/Start log in directoryName with logFileName.
+     * @param directoryName
+     * @param logFileName
+     */
+    public Log (String directoryName, String logFileName){
+        this ("edu.ecs.csus.pc2", null, directoryName, logFileName);
     }
 
     /**

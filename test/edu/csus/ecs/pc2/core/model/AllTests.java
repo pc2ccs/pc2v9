@@ -30,6 +30,7 @@ public final class AllTests {
         suite.addTestSuite(DisplayTeamNameTest.class);
         suite.addTestSuite(AccountTest.class);
         suite.addTestSuite(BalloonSettingsTest.class);
+        suite.addTestSuite(ConfigurationIOTest.class);
         suite.addTestSuite(ProfileTest.class);
         suite.addTestSuite(ContestInformationTest.class);
         suite.addTestSuite(FilterTest.class);

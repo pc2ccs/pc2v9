@@ -11,9 +11,10 @@ import java.util.logging.Logger;
 import edu.csus.ecs.pc2.core.IStorage;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
+import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
 
 /**
- * Routines to safe and load configuration/InternalContest.
+ * Routines to save and load Contest settings.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -93,7 +94,11 @@ public class ConfigurationIO {
         /**
          * Profiles 
          */
-        PROFILES
+        PROFILES,
+        /**
+         * Clone/generation settings for this profile
+         */
+        PROFILE_CLONE_SETTINGS,
     }
 
     private IStorage storage = null;
@@ -173,54 +178,6 @@ public class ConfigurationIO {
                 }
                 
 
-                try {
-                    key = ConfigKeys.BALLOON_SETTINGS_LIST;
-                    if (configuration.containsKey(key)) {
-                        BalloonSettings [] balloonSettings = (BalloonSettings []) configuration.get(key.toString());
-                        for (BalloonSettings balloonSetting : balloonSettings){
-                            contest.addBalloonSettings(balloonSetting);
-                        }
-                        log.info("Loaded " + balloonSettings.length + " " + key.toString().toLowerCase());
-                    } 
-                } catch (Exception e) {
-                    log.log(Log.WARNING, "Exception while loading contest information/title ", e);
-                } 
-
-                try {
-                    key = ConfigKeys.CONTEST_TIME;
-                    if (configuration.containsKey(key)) {
-                        ContestTime contestTime = (ContestTime) configuration.get(key.toString());
-                        contest.addContestTime(contestTime);
-                        log.info("Loaded " + key.toString().toLowerCase());
-                    }
-                } catch (Exception e) {
-                    log.log(Log.WARNING, "Exception while loading contest time ", e);
-                }
-
-                try {
-                    key = ConfigKeys.GENERAL_PROBLEM;
-                    if (configuration.containsKey(key)) {
-                        Problem genProblem = (Problem)  configuration.get(key.toString());
-                        contest.setGeneralProblem(genProblem);
-                        log.info("Loaded " + key.toString().toLowerCase());
-                    }
-                } catch (Exception e) {
-                    log.log(Log.WARNING, "Exception while loading general problem ", e);
-                }
-                
-                try {
-                    key = ConfigKeys.PROFILE;
-                    if (configuration.containsKey(key)) {
-                        Profile profile = (Profile) configuration.get(key.toString());
-                        contest.setProfile(profile);
-                        log.info("Loaded " + key.toString().toLowerCase());
-                    } else {
-                        Profile profile = createNewProfile();
-                        contest.setProfile(profile);
-                    }
-                } catch (Exception e) {
-                    log.log(Log.WARNING, "Exception while loading general problem ", e);
-                }
                 
                 try {
                     key = ConfigKeys.ACCOUNTS;
@@ -250,70 +207,7 @@ public class ConfigurationIO {
                 
                 loadProblemDataFilesInfo(contest, configuration, log);
                 
-                try {
-                    key = ConfigKeys.SITES;
-                    if (configuration.containsKey(key)) {
-                        Site[] sites = (Site[]) configuration.get(key.toString());
-                        for (Site site : sites) {
-                            contest.addSite(site);
-                        }
-                        log.info("Loaded " + sites.length + " " + key.toString().toLowerCase());
-                    } 
-                } catch (Exception e) {
-                    log.log(Log.WARNING, "Exception while loading sites ", e);
-                }   
-                
-                try {
-                    key = ConfigKeys.CONTEST_INFORMATION;
-                    if (configuration.containsKey(key)) {
-                        ContestInformation contestInformation = (ContestInformation) configuration.get(key.toString());
-                        contest.addContestInformation(contestInformation);
-                        log.info("Loaded Contest Information " + contestInformation.getContestTitle());
-                    } 
-                } catch (Exception e) {
-                    log.log(Log.WARNING, "Exception while loading contest information/title ", e);
-                } 
-                
-
-                
-                try {
-                    key = ConfigKeys.CLIENT_SETTINGS_LIST;
-                    if (configuration.containsKey(key)) {
-                        ClientSettings [] clientSettingsList =  (ClientSettings[]) configuration.get(key.toString());
-                        for (ClientSettings clientSettings : clientSettingsList) {
-                            contest.addClientSettings(clientSettings);
-                        }
-                        log.info("Loaded " + clientSettingsList.length + " " + key.toString().toLowerCase());
-                    } 
-                } catch (Exception e) {
-                    log.log(Log.WARNING, "Exception while updating client settings ", e);
-                }   
-
-                try {
-                    key = ConfigKeys.GROUPS;
-                    if (configuration.containsKey(key)) {
-                        Group[] groups = (Group[]) configuration.get(key.toString());
-                        for (Group group : groups) {
-                            contest.addGroup(group);
-                        }
-                        log.info("Loaded " + groups.length + " " + key.toString().toLowerCase());
-                    }
-                } catch (Exception e) {
-                    log.log(Log.WARNING, "Exception while loading groups ", e);
-                }
-                
-                try {
-                    key = ConfigKeys.PROFILES;
-                    if (configuration.containsKey(key)) {
-                        Profile[] profiles = (Profile[]) configuration.get(key.toString());
-                        for (Profile profile : profiles) {
-                            contest.addProfile(profile);
-                        }
-                        log.info("Loaded " + profiles.length + " " + key.toString().toLowerCase());
-                    }
-                } catch (Exception e) {
-                    log.log(Log.WARNING, "Exception while loading profiles ", e);
-                }
+                loadSomeSettings(configuration, contest, log);
 
                 return true;
                 
@@ -330,6 +224,136 @@ public class ConfigurationIO {
         }
     }
     
+    private void loadSomeSettings(Configuration configuration, IInternalContest contest, Logger log) {
+        
+        ConfigKeys key;
+        
+
+        try {
+            key = ConfigKeys.BALLOON_SETTINGS_LIST;
+            if (configuration.containsKey(key)) {
+                BalloonSettings [] balloonSettings = (BalloonSettings []) configuration.get(key.toString());
+                for (BalloonSettings balloonSetting : balloonSettings){
+                    contest.addBalloonSettings(balloonSetting);
+                }
+                log.info("Loaded " + balloonSettings.length + " " + key.toString().toLowerCase());
+            } 
+        } catch (Exception e) {
+            log.log(Log.WARNING, "Exception while loading balloon settings ", e);
+        } 
+
+        try {
+            key = ConfigKeys.CONTEST_TIME;
+            if (configuration.containsKey(key)) {
+                ContestTime contestTime = (ContestTime) configuration.get(key.toString());
+                contest.addContestTime(contestTime);
+                log.info("Loaded " + key.toString().toLowerCase());
+            }
+        } catch (Exception e) {
+            log.log(Log.WARNING, "Exception while loading contest time ", e);
+        }
+
+        try {
+            key = ConfigKeys.GENERAL_PROBLEM;
+            if (configuration.containsKey(key)) {
+                Problem genProblem = (Problem)  configuration.get(key.toString());
+                contest.setGeneralProblem(genProblem);
+                log.info("Loaded " + key.toString().toLowerCase());
+            }
+        } catch (Exception e) {
+            log.log(Log.WARNING, "Exception while loading general problem ", e);
+        }
+        
+        try {
+            key = ConfigKeys.PROFILE;
+            if (configuration.containsKey(key)) {
+                Profile profile = (Profile) configuration.get(key.toString());
+                contest.setProfile(profile);
+                log.info("Loaded " + key.toString().toLowerCase());
+            } else {
+                Profile profile = createNewProfile();
+                contest.setProfile(profile);
+            }
+        } catch (Exception e) {
+            log.log(Log.WARNING, "Exception while loading current profile ", e);
+        }
+        
+        try {
+            key = ConfigKeys.PROFILE_CLONE_SETTINGS;
+            if (configuration.containsKey(key)) {
+                ProfileCloneSettings profileCloneSettings = (ProfileCloneSettings) configuration.get(key.toString());
+                contest.setProfileCloneSettings(profileCloneSettings);
+                log.info("Loaded " + key.toString().toLowerCase());
+            }
+        } catch (Exception e) {
+            log.log(Log.WARNING, "Exception while loading profile clone settings ", e);
+        }
+        
+        try {
+            key = ConfigKeys.SITES;
+            if (configuration.containsKey(key)) {
+                Site[] sites = (Site[]) configuration.get(key.toString());
+                for (Site site : sites) {
+                    contest.addSite(site);
+                }
+                log.info("Loaded " + sites.length + " " + key.toString().toLowerCase());
+            } 
+        } catch (Exception e) {
+            log.log(Log.WARNING, "Exception while loading sites ", e);
+        }   
+        
+        try {
+            key = ConfigKeys.CONTEST_INFORMATION;
+            if (configuration.containsKey(key)) {
+                ContestInformation contestInformation = (ContestInformation) configuration.get(key.toString());
+                contest.addContestInformation(contestInformation);
+                log.info("Loaded Contest Information " + contestInformation.getContestTitle());
+            } 
+        } catch (Exception e) {
+            log.log(Log.WARNING, "Exception while loading contest information/title ", e);
+        } 
+        
+        try {
+            key = ConfigKeys.CLIENT_SETTINGS_LIST;
+            if (configuration.containsKey(key)) {
+                ClientSettings [] clientSettingsList =  (ClientSettings[]) configuration.get(key.toString());
+                for (ClientSettings clientSettings : clientSettingsList) {
+                    contest.addClientSettings(clientSettings);
+                }
+                log.info("Loaded " + clientSettingsList.length + " " + key.toString().toLowerCase());
+            } 
+        } catch (Exception e) {
+            log.log(Log.WARNING, "Exception while updating client settings ", e);
+        }   
+
+        try {
+            key = ConfigKeys.GROUPS;
+            if (configuration.containsKey(key)) {
+                Group[] groups = (Group[]) configuration.get(key.toString());
+                for (Group group : groups) {
+                    contest.addGroup(group);
+                }
+                log.info("Loaded " + groups.length + " " + key.toString().toLowerCase());
+            }
+        } catch (Exception e) {
+            log.log(Log.WARNING, "Exception while loading groups ", e);
+        }
+        
+        try {
+            key = ConfigKeys.PROFILES;
+            if (configuration.containsKey(key)) {
+                Profile[] profiles = (Profile[]) configuration.get(key.toString());
+                for (Profile profile : profiles) {
+                    contest.addProfile(profile);
+                }
+                log.info("Loaded " + profiles.length + " " + key.toString().toLowerCase());
+            }
+        } catch (Exception e) {
+            log.log(Log.WARNING, "Exception while loading profiles ", e);
+        }
+        
+    }
+
     private void loadProblemDataFilesInfo(IInternalContest contest, Configuration configuration, Logger log) {
 
         try {
@@ -405,6 +429,10 @@ public class ConfigurationIO {
         configuration.add(ConfigKeys.GROUPS, contest.getGroups());
         configuration.add(ConfigKeys.PROFILES, contest.getProfiles());
         configuration.add(ConfigKeys.PROFILE, contest.getProfile());
+        
+        if (contest.getProfileCloneSettings() != null){
+            configuration.add(ConfigKeys.PROFILE_CLONE_SETTINGS, contest.getProfileCloneSettings());
+        }
 
         configuration.writeToDisk(getFileName());
 
@@ -471,5 +499,4 @@ public class ConfigurationIO {
     public String getFileName() {
         return storage.getDirectoryName() + File.separator + "settings.dat";
     }
-
 }

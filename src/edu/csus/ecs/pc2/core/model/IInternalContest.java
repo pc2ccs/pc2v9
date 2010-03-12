@@ -897,4 +897,19 @@ public interface IInternalContest {
      */
     IInternalContest clone(IInternalContest contest, Profile newProfile, String profileBasePath, ProfileCloneSettings settings) throws ProfileCloneException;
 
+    /**
+     * Get settings used to clone/create this profile.
+     * 
+     * @return settings used to create/generate this profile or null
+     */
+    ProfileCloneSettings getProfileCloneSettings();
+    
+    /**
+     * Store the profile clone settings that created the current Profile.
+     * @param profileCloneSettings
+     * @return
+     */
+    ProfileCloneSettings setProfileCloneSettings(ProfileCloneSettings profileCloneSettings);
+
+    
 }
