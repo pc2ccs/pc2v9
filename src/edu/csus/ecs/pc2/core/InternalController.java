@@ -556,15 +556,17 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             if (isContactingRemoteServer()) {
 
                 // remoteHostName and remoteHostPort set using huh
+                
+                String contactInfo = remoteHostName+":"+remoteHostPort;
 
                 info("Contacting " + remoteHostName + ":" + remoteHostPort);
                 try {
                     remoteServerConnectionHandlerID = connectionManager.connectToServer(remoteHostName, remoteHostPort);
                 } catch (TransportException e) {
-                    info("** ERROR ** Unable to contact server at " + remoteHostName + ":" + remoteHostPort);
-                    info("Server at " + remoteHostName + ":" + remoteHostPort + " not started or contacting wrong host or port ?");
+                    info("** ERROR ** Unable to contact server at " + contactInfo);
+                    info("Server at " + contactInfo + " not started or contacting wrong host or port ?");
                     info("Transport Exception ", e);
-                    throw new SecurityException("Unable to contact server, check logs");
+                    throw new SecurityException("Unable to contact server at "+contactInfo+" (server not started?)");
                 }
 
                 info("Contacted using connection id " + remoteServerConnectionHandlerID);
@@ -759,10 +761,11 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                         contest.setContestPassword(password);
                     } else {
 
-                        fatalError ("The contest password must be specified on the command line");
+                        if (! isContactingRemoteServer()) {
+                            fatalError ("The contest password must be specified on the command line");
+                        }
                     }
                 }
-
 
                 try {
                     fileSecurity.verifyPassword(contest.getContestPassword().toCharArray());
@@ -774,15 +777,15 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                             fileSecurity.saveSecretKey(contest.getContestPassword().toCharArray());
                         } catch (Exception e) {
                             StaticLog.getLog().log(Log.SEVERE, "FATAL ERROR ", e);
-                            fatalError("FATAL ERROR " + e.getMessage() + " check logs", e);
+                            fatalError("Unable to save contest password, " + e.getMessage() + " check logs");
                         }
                     } else {
                         StaticLog.getLog().log(Log.SEVERE, "FATAL ERROR ", fileSecurityException);
-                        fatalError("FATAL ERROR " + fileSecurityException.getMessage() + " check logs");
+                        fatalError("Invalid contest password");
                     }
                 } catch (Exception e) {
-                    StaticLog.getLog().log(Log.SEVERE, "FATAL ERROR ", e);
-                    fatalError("Exception while validating contest password " + e.getMessage()+" check logs",e );
+                    StaticLog.getLog().log(Log.SEVERE, "FATAL ERROR 3 ", e);
+                    fatalError("Exception while verifying contest password " + e.getMessage() + " check logs", e);
                 }
             }
         }
@@ -1282,6 +1285,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
         String message = PacketFactory.getStringValue(packet, PacketFactory.MESSAGE_STRING);
 
+        if (! usingGUI){
+            fatalError("Login Failed: " + message);
+        }
+
         // TODO Handle this better via new login code.
         info("Login Failed: " + message);
         info("Login Failure");
@@ -1291,7 +1298,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             FrameUtilities.regularCursor(loginUI);
         }
         contest.loginDenied(packet.getDestinationId(), null, message);
-
     }
     
     /**
@@ -1312,9 +1318,11 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 return site.getSiteNumber();
             }
         }
-
-        if (contest.getSites().length > 1 || contest.isLoggedIn()) {
-            throw new SecurityException("No such site or invalid site password");
+        
+        if (siteNum > contest.getSites().length){
+            throw new SecurityException("No such site (Site "+siteNum+")");
+        } else if (contest.getSites().length > 1){
+            throw new SecurityException("Invalid password for site "+siteNum);
         } else {
             throw new SecurityException("Does not match first site password");
         }
@@ -1375,6 +1383,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             // Server login
 
             int newSiteNumber = getServerSiteNumber(clientId.getSiteNumber(), password);
+            
+            if (newSiteNumber == contest.getSiteNumber()){
+                throw new SecurityException("Site "+newSiteNumber+" is already logged in (attempt from secondary site to login as same site a primary site)");
+            }
 
             if (newSiteNumber == clientId.getSiteNumber()) {
                 // matching password, ok.
@@ -1896,11 +1908,16 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
         } catch (Exception e) {
             // TODO separate the showing main Frame and listening to port exception messages
+            
             info("Error showing frame or listening to port ", e);
             if (loginUI != null) {
                 FrameUtilities.regularCursor(loginUI);
             }
             contest.loginDenied(clientId, null, e.getMessage() + " (port " + port + ")");
+            
+            if (! usingGUI){
+                fatalError(e.getMessage()+" (port="+port+")");
+            }
         }
     }
 
@@ -1921,84 +1938,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         String[] requireArguementArgs = { "--login", "--id", "--password", MAIN_UI_OPTION, "--remoteServer", "--port", INI_FILENAME_OPTION_STRING, CONTEST_PASSWORD_OPTION, FILE_OPTION_STRING };
         parseArguments = new ParseArguments(stringArray, requireArguementArgs);
         
-        if (parseArguments.isOptPresent("--help")) {
-            // -F is the ParseArguements internal option to pre-load command line options from a file
-            System.out.println("Usage: Starter [--help] [--server] [--first] [--login <login>] [--password <pass>] [--site ##] [--skipini] ["+INI_FILENAME_OPTION_STRING+" filename] [" 
-                    +  CONTEST_PASSWORD_OPTION + " <pass>] [-F filename] ["+NO_GUI_STRING+"] ["+MAIN_UI_OPTION+" classname]");
-            System.exit(0);
-        }
-        
-        if (parseArguments.isOptPresent(FILE_OPTION_STRING)){
-            String propertiesFileName = parseArguments.getOptValue(FILE_OPTION_STRING);
-            
-            if (! (new File(propertiesFileName).exists())){
-                fatalError(propertiesFileName+" does not exist (pwd: "+Utilities.getCurrentDirectory()+")", null);
-            }
-            
-            try {
-                parseArguments.overRideOptions(propertiesFileName);
-            } catch (IOException e) {
-                fatalError("Unable to read file "+propertiesFileName, e);
-            }
-        }
-        
-        if (parseArguments.isOptPresent(NO_GUI_STRING)) {
-            
-            usingGUI = false;
-            
-            // Insure that they have specified required
-            // do not check contestPassword here
-            
-            String loginName = parseArguments.getOptValue(LOGIN_OPTION_STRING);
-            
-            ClientId client = loginShortcutExpansion(0, loginName);
-            if (! isServer(client)) {
-                fatalError("Only PC^2 server can use --nogui (--login is "+loginName+")");
-            }
-            
-            if (loginName == null){
-                fatalError("Must specify "+LOGIN_OPTION_STRING+" when using "+NO_GUI_STRING);
-            }
-            
-            if (overRideUIName == null){
-                overRideUIName = "edu.csus.ecs.pc2.ui.server.ServerModule";
-            }
-        }
-
-        if (parseArguments.isOptPresent(DEBUG_OPTION_STRING)) {
-            
-            Utilities.setDebugMode(true);
-
-            log.info("Debug mode ON");
-            System.out.println("Debug mode ON");
-            
-            System.out.println("debug: "+new VersionInfo().getSystemName()+" Build "+new VersionInfo().getBuildNumber());
-            
-            try {
-                System.out.println("debug: Working directory is " + new File(".").getCanonicalPath());
-            } catch (IOException e1) {
-                System.out.println("debug: Could not determine working directory " + e1.getMessage());
-                e1.printStackTrace(System.err);
-            }
-        }
-        
-        if (parseArguments.isOptPresent(CONTEST_PASSWORD_OPTION)) {
-
-            String newContestPassword = parseArguments.getOptValue(CONTEST_PASSWORD_OPTION);
-            if (newContestPassword == null) {
-                fatalError("No contest password found after " + CONTEST_PASSWORD_OPTION);
-            }
-            contest.setContestPassword(newContestPassword);
-        }
-        
-        if (parseArguments.isOptPresent(MAIN_UI_OPTION)) {
-            String overrideClassName = parseArguments.getOptValue(MAIN_UI_OPTION);
-            if (overrideClassName == null) {
-                fatalError("No UI name after " + MAIN_UI_OPTION);
-            }
-            overRideUIName = overrideClassName;
-        }
-        
+        handleCommandLineOptions();
 
         for (String arg : stringArray) {
             if (arg.equals("--first")) {
@@ -2154,13 +2094,14 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
             } catch (Exception e) {
                 log.log(Log.INFO, "Exception logged ", e);
-                if (loginUI != null) {
+                if (usingGUI) {
                     loginUI.setStatusMessage(e.getMessage());
+                } else {
+                    fatalError(e.getMessage());
                 }
             }
         }
-        
-        
+
         String contactInfo = getHostContacted()+":"+getPortContacted();
 
         if (usingGUI && (savedTransportException != null && loginUI != null)) {
@@ -2171,6 +2112,95 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             connectionManager = null;
             fatalError("Unable to contact server at: " + contactInfo + ", contact staff", savedTransportException);
         }
+    }
+
+    private void handleCommandLineOptions() {
+        // TODO Auto-generated method stub
+        if (parseArguments.isOptPresent("--help")) {
+            // -F is the ParseArguements internal option to pre-load command line options from a file
+            System.out.println("Usage: Starter [--help] [--server] [--first] [--login <login>] [--password <pass>] [--site ##] [--skipini] ["+INI_FILENAME_OPTION_STRING+" filename] [" 
+                    +  CONTEST_PASSWORD_OPTION + " <pass>] [-F filename] ["+NO_GUI_STRING+"] ["+MAIN_UI_OPTION+" classname]");
+            System.exit(0);
+        }
+        
+        if (parseArguments.isOptPresent(FILE_OPTION_STRING)){
+            String propertiesFileName = parseArguments.getOptValue(FILE_OPTION_STRING);
+            
+            if (! (new File(propertiesFileName).exists())){
+                fatalError(propertiesFileName+" does not exist (pwd: "+Utilities.getCurrentDirectory()+")", null);
+            }
+            
+            try {
+                parseArguments.overRideOptions(propertiesFileName);
+            } catch (IOException e) {
+                fatalError("Unable to read file "+propertiesFileName, e);
+            }
+        }
+        
+        if (parseArguments.isOptPresent(NO_GUI_STRING)) {
+            
+            usingGUI = false;
+            
+            // Insure that they have specified required
+            // do not check contestPassword here
+            
+            String loginName = parseArguments.getOptValue(LOGIN_OPTION_STRING);
+            
+            if (loginName == null){
+                fatalError("Must specify "+LOGIN_OPTION_STRING+" when using "+NO_GUI_STRING);
+            }
+            
+            ClientId client = null;
+             
+            try {
+                client = loginShortcutExpansion(0, loginName);
+            } catch (SecurityException e) {
+                fatalError (e.getLocalizedMessage());
+            }
+            
+            if (! isServer(client)) {
+                fatalError("--nogui can only be used with a server login, login '"+loginName+"' is not a server login.");
+            }
+            
+            if (overRideUIName == null){
+                overRideUIName = "edu.csus.ecs.pc2.ui.server.ServerModule";
+            }
+        }
+
+        if (parseArguments.isOptPresent(DEBUG_OPTION_STRING)) {
+            
+            Utilities.setDebugMode(true);
+
+            log.info("Debug mode ON");
+            System.out.println("Debug mode ON");
+            
+            System.out.println("debug: "+new VersionInfo().getSystemName()+" Build "+new VersionInfo().getBuildNumber());
+            
+            try {
+                System.out.println("debug: Working directory is " + new File(".").getCanonicalPath());
+            } catch (IOException e1) {
+                System.out.println("debug: Could not determine working directory " + e1.getMessage());
+                e1.printStackTrace(System.err);
+            }
+        }
+        
+        if (parseArguments.isOptPresent(CONTEST_PASSWORD_OPTION)) {
+
+            String newContestPassword = parseArguments.getOptValue(CONTEST_PASSWORD_OPTION);
+            if (newContestPassword == null) {
+                fatalError("No contest password found after " + CONTEST_PASSWORD_OPTION);
+            }
+            contest.setContestPassword(newContestPassword);
+        }
+        
+        if (parseArguments.isOptPresent(MAIN_UI_OPTION)) {
+            String overrideClassName = parseArguments.getOptValue(MAIN_UI_OPTION);
+            if (overrideClassName == null) {
+                fatalError("No UI name after " + MAIN_UI_OPTION);
+            }
+            overRideUIName = overrideClassName;
+        }
+  
     }
 
     private ClientId getServerClientId() {
