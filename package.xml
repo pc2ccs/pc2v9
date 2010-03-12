@@ -63,7 +63,10 @@
             <zipfileset dir="${dist.dir}" filemode="644" includes="${jar.name}" 
                                                  prefix="${release}/lib"/>
             <zipfileset dir="${vendor.lib.dir}" filemode="644" prefix="${release}/lib">
+                <include name="activation.jar"/>
+                <include name="mailapi.jar"/>
                 <include name="mclb.jar"/>
+                <include name="smtp.jar"/>
             </zipfileset>
             <zipfileset dir="${samps.dir}" filemode="644" prefix="${release}/samps">
                 <exclude name="**/compile*"/>

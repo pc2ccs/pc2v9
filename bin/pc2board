@@ -16,6 +16,6 @@ else
 fi
 
 # TODO add support for a truststore and add -Djavax.net.ssl.trustStore=jssecacerts
-java $PC2XOPS -Xms64M -Xmx768M -cp %pc2_classpath% edu.csus.ecs.pc2.Starter $*
+java $PC2XOPS -Xms64M -Xmx768M -cp $pc2_classpath edu.csus.ecs.pc2.Starter $*
 
 # eof pc2board $Id$ 
