@@ -111,6 +111,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     
     private static final String FILE_OPTION_STRING = "-F";
 
+    private static final String NO_GUI_STRING = "--nogui";
+
     /**
      * InternalContest data.
      */
@@ -250,6 +252,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     private static final String CONTEST_PASSWORD_OPTION = "--contestpassword";
 
+    private static final String MAIN_UI_OPTION = "--ui";
+
     /**
      * Security Level for Server.
      */
@@ -261,6 +265,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      * If set to false, then will trigger/send the event 
      */
     private boolean clientAutoShutdown = true;
+    
+    private String overRideUIName = null;
 
     public InternalController(IInternalContest contest) {
         super();
@@ -570,7 +576,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 if (!serverModule) {
                     SecurityException securityException = new SecurityException("Cannot login as server, check logs");
                     getLog().log(Log.WARNING, "Cannot login as server, must start this module with --server command line option");
-                    securityException.printStackTrace(System.err);
                     throw securityException;
                 }
 
@@ -579,12 +584,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                     connectionManager.accecptConnections(port);
                     info("Started Server Transport listening on " + port);
                 } catch (Exception e) {
-                    info("Exception logged ", e);
-                    SecurityException securityException = new SecurityException("Port " + port + " in use, server already running?");
-                    securityException.printStackTrace(System.err);
-                    throw securityException;
+                    fatalError ("Port " + port + " in use, server already running?", e);
                 }
-                info("Primary Server has started.");
+                info("Primary Server has .");
                 startMainUI(clientId);
             }
 
@@ -691,7 +693,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             }
         }
 
-        // XXX this if does not make sense, should it be if serverModule?
+        // XXX this if does not make sense, should it be if serverModule? (huh? dal)
         if (clientId.getClientType().equals(Type.SERVER)) {
             throw new SecurityException("Cannot use clientLogin to login a Server " + loginName);
         } else {
@@ -1864,12 +1866,16 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             try {
                 if (isUsingMainUI()) {
                     if (uiPlugin == null) {
-                        // NO UI to display, so let's find one to display
 
-                        String uiClassName = LoadUIClass.getUIClassName(clientId);
+                        String uiClassName = overRideUIName;
+
+                        if (overRideUIName == null) {
+                            uiClassName = LoadUIClass.getUIClassName(clientId);
+                        }
+
                         if (uiClassName == null) {
-                            String clientName =  clientId.getClientType().toString().toLowerCase();
-                            info("Unable to find UI for client "+clientName+" in properties file "+LoadUIClass.UI_PROPERTIES_FILENAME);
+                            String clientName = clientId.getClientType().toString().toLowerCase();
+                            info("Unable to find UI for client " + clientName + " in properties file " + LoadUIClass.UI_PROPERTIES_FILENAME);
                             fatalError("Unable to determine UI class for " + clientName);
                         } else {
                             info("Attempting to load UI class " + uiClassName);
@@ -1885,10 +1891,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                     }
                 }
             } catch (Exception e) {
-                // TODO: log handle exception
-                System.err.println("Error loading UI, check log, (class not found?)  " + e.getMessage());
-                info("Exception loading UI for (class not found?) " + clientId.getName(), e);
-                throw new Exception("Unable to start main UI, contact staff");
+                fatalError ("Error loading UI, check log, (class not found?)  " + e.getMessage(), e);
             }
 
         } catch (Exception e) {
@@ -1915,8 +1918,15 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
          */
         TransportException savedTransportException = null;
 
-        String[] requireArguementArgs = { "--login", "--id", "--password", "--loginUI", "--remoteServer", "--port", INI_FILENAME_OPTION_STRING, CONTEST_PASSWORD_OPTION, FILE_OPTION_STRING };
+        String[] requireArguementArgs = { "--login", "--id", "--password", MAIN_UI_OPTION, "--remoteServer", "--port", INI_FILENAME_OPTION_STRING, CONTEST_PASSWORD_OPTION, FILE_OPTION_STRING };
         parseArguments = new ParseArguments(stringArray, requireArguementArgs);
+        
+        if (parseArguments.isOptPresent("--help")) {
+            // -F is the ParseArguements internal option to pre-load command line options from a file
+            System.out.println("Usage: Starter [--help] [--server] [--first] [--login <login>] [--password <pass>] [--site ##] [--skipini] ["+INI_FILENAME_OPTION_STRING+" filename] [" 
+                    +  CONTEST_PASSWORD_OPTION + " <pass>] [-F filename] ["+NO_GUI_STRING+"] ["+MAIN_UI_OPTION+" classname]");
+            System.exit(0);
+        }
         
         if (parseArguments.isOptPresent(FILE_OPTION_STRING)){
             String propertiesFileName = parseArguments.getOptValue(FILE_OPTION_STRING);
@@ -1931,47 +1941,70 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 fatalError("Unable to read file "+propertiesFileName, e);
             }
         }
+        
+        if (parseArguments.isOptPresent(NO_GUI_STRING)) {
+            
+            usingGUI = false;
+            
+            // Insure that they have specified required
+            // do not check contestPassword here
+            
+            String loginName = parseArguments.getOptValue(LOGIN_OPTION_STRING);
+            
+            ClientId client = loginShortcutExpansion(0, loginName);
+            if (! isServer(client)) {
+                fatalError("Only PC^2 server can use --nogui (--login is "+loginName+")");
+            }
+            
+            if (loginName == null){
+                fatalError("Must specify "+LOGIN_OPTION_STRING+" when using "+NO_GUI_STRING);
+            }
+            
+            if (overRideUIName == null){
+                overRideUIName = "edu.csus.ecs.pc2.ui.server.ServerModule";
+            }
+        }
 
         if (parseArguments.isOptPresent(DEBUG_OPTION_STRING)) {
             
             Utilities.setDebugMode(true);
-            System.out.println(new VersionInfo().getSystemVersionInfo());
-            try {
-                System.out.println("Working directory is " + new File(".").getCanonicalPath());
-            } catch (IOException e1) {
-                System.out.println("Could not determine working directory " + e1.getMessage());
-                e1.printStackTrace(System.err);
-            }
-            
+
             log.info("Debug mode ON");
             System.out.println("Debug mode ON");
             
+            System.out.println("debug: "+new VersionInfo().getSystemName()+" Build "+new VersionInfo().getBuildNumber());
+            
+            try {
+                System.out.println("debug: Working directory is " + new File(".").getCanonicalPath());
+            } catch (IOException e1) {
+                System.out.println("debug: Could not determine working directory " + e1.getMessage());
+                e1.printStackTrace(System.err);
+            }
         }
         
-        if (parseArguments.isOptPresent("--help")) {
-            // -F is the ParseArguements internal option to pre-load command line options from a file
-            System.out.println("Usage: Starter [--help] [--server] [--first] [--login <login>] [--password <pass>] [--site ##] [--skipini] ["+INI_FILENAME_OPTION_STRING+" filename] [" 
-                    +  CONTEST_PASSWORD_OPTION + " <pass>] [-F filename]");
-            System.exit(0);
-        }
-
         if (parseArguments.isOptPresent(CONTEST_PASSWORD_OPTION)) {
 
             String newContestPassword = parseArguments.getOptValue(CONTEST_PASSWORD_OPTION);
             if (newContestPassword == null) {
-                System.err.println("No contest password found after " + CONTEST_PASSWORD_OPTION);
-                System.exit(44);
+                fatalError("No contest password found after " + CONTEST_PASSWORD_OPTION);
             }
             contest.setContestPassword(newContestPassword);
         }
+        
+        if (parseArguments.isOptPresent(MAIN_UI_OPTION)) {
+            String overrideClassName = parseArguments.getOptValue(MAIN_UI_OPTION);
+            if (overrideClassName == null) {
+                fatalError("No UI name after " + MAIN_UI_OPTION);
+            }
+            overRideUIName = overrideClassName;
+        }
+        
 
         for (String arg : stringArray) {
             if (arg.equals("--first")) {
                 setContactingRemoteServer(false);
             }
         }
-
-        // TODO parse arguments logic
 
         /**
          * if (args DOES NOT contains login/pwd) { String s; if (args contains LoginUI ) { s = args login UI } else { s = pc2 LoginFrame } UIPlugin l = classloader (s); l.setModelAndListener (contest,
@@ -2107,8 +2140,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             if (parseArguments.isOptPresent(PASSWORD_OPTION_STRING)) {
                 password = parseArguments.getOptValue(PASSWORD_OPTION_STRING);
             }
-
-            if (isUsingMainUI()) {
+            
+            if (usingGUI){
                 loginUI = new LoginFrame();
                 loginUI.setContestAndController(contest, this); // this displays the login
             }
@@ -2731,6 +2764,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             } else {
                 log.log(Log.SEVERE, message);
             }
+            log.log(Log.INFO, "PC^2 halted");
         }
 
         if (usingGUI){
@@ -2740,6 +2774,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             if (ex != null){
                 ex.printStackTrace(System.err);
             }
+            System.err.println("PC^2 Halted");
         }
         
         System.exit(4);
