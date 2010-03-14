@@ -145,8 +145,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     private static final String DEBUG_OPTION_STRING = "--debug";
     
-    private static final String SITE_OPTION_STRING = "--site";
-
     private static final String LOGIN_OPTION_STRING = "--login";
 
     private static final String PASSWORD_OPTION_STRING = "--password";
@@ -581,6 +579,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                     throw securityException;
                 }
 
+                contest.setSiteNumber(clientId.getSiteNumber());
+                log.log(Log.DEBUG, "Site Number is set as " + contest.getSiteNumber() + " (0 means unset)");
+
                 clientId = authenticateFirstServer(clientId.getSiteNumber(), password);
                 try {
                     connectionManager.accecptConnections(port);
@@ -745,48 +746,48 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
             if (contest.getSiteNumber() == 0) {
                 contest.setSiteNumber(1);
-                info("initializeServer STARTED this site as Site 1");
-                
-                String baseDirectoryName = "db."+contest.getSiteNumber();
-                FileSecurity fileSecurity = new FileSecurity(baseDirectoryName);
-                
-                initializeStorage(fileSecurity);
-                
-                if (contest.getContestPassword() == null) {
-                    if (usingGUI){
-                        String password = JOptionPane.showInputDialog(null, "Enter Contest Password");
-                        if (password == null || password.trim().length() == 0) {
-                            fatalError ("You must supply a password, exiting.");
-                        }
-                        contest.setContestPassword(password);
-                    } else {
+            }
+            info("initializeServer STARTED this site as Site "+contest.getSiteNumber());
+            
+            String baseDirectoryName = "db."+contest.getSiteNumber();
+            FileSecurity fileSecurity = new FileSecurity(baseDirectoryName);
+            
+            initializeStorage(fileSecurity);
+            
+            if (contest.getContestPassword() == null) {
+                if (usingGUI){
+                    String password = JOptionPane.showInputDialog(null, "Enter Contest Password");
+                    if (password == null || password.trim().length() == 0) {
+                        fatalError ("You must supply a password, exiting.");
+                    }
+                    contest.setContestPassword(password);
+                } else {
 
-                        if (! isContactingRemoteServer()) {
-                            fatalError ("The contest password must be specified on the command line");
-                        }
+                    if (! isContactingRemoteServer()) {
+                        fatalError ("The contest password must be specified on the command line");
                     }
                 }
+            }
 
-                try {
-                    fileSecurity.verifyPassword(contest.getContestPassword().toCharArray());
+            try {
+                fileSecurity.verifyPassword(contest.getContestPassword().toCharArray());
 
-                } catch (FileSecurityException fileSecurityException) {
-                    if (fileSecurityException.getMessage().equals(FileSecurity.KEY_FILE_NOT_FOUND)) {
+            } catch (FileSecurityException fileSecurityException) {
+                if (fileSecurityException.getMessage().equals(FileSecurity.KEY_FILE_NOT_FOUND)) {
 
-                        try {
-                            fileSecurity.saveSecretKey(contest.getContestPassword().toCharArray());
-                        } catch (Exception e) {
-                            StaticLog.getLog().log(Log.SEVERE, "FATAL ERROR ", e);
-                            fatalError("Unable to save contest password, " + e.getMessage() + " check logs");
-                        }
-                    } else {
-                        StaticLog.getLog().log(Log.SEVERE, "FATAL ERROR ", fileSecurityException);
-                        fatalError("Invalid contest password");
+                    try {
+                        fileSecurity.saveSecretKey(contest.getContestPassword().toCharArray());
+                    } catch (Exception e) {
+                        StaticLog.getLog().log(Log.SEVERE, "FATAL ERROR ", e);
+                        fatalError("Unable to save contest password, " + e.getMessage() + " check logs");
                     }
-                } catch (Exception e) {
-                    StaticLog.getLog().log(Log.SEVERE, "FATAL ERROR 3 ", e);
-                    fatalError("Exception while verifying contest password " + e.getMessage() + " check logs", e);
+                } else {
+                    StaticLog.getLog().log(Log.SEVERE, "FATAL ERROR ", fileSecurityException);
+                    fatalError("Invalid contest password");
                 }
+            } catch (Exception e) {
+                StaticLog.getLog().log(Log.SEVERE, "FATAL ERROR 3 ", e);
+                fatalError("Exception while verifying contest password " + e.getMessage() + " check logs", e);
             }
         }
         
@@ -1982,24 +1983,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
 
         contest.setSiteNumber(0);
-
-        if (parseArguments.isOptPresent(SITE_OPTION_STRING)) {
-
-            String siteNumberParam = parseArguments.getOptValue(SITE_OPTION_STRING);
-
-            if (siteNumberParam == null || siteNumberParam.trim().length() == 0) {
-                savedTransportException = new TransportException("No site found after " + SITE_OPTION_STRING);
-            }
-
-            try {
-                int siteNumber = Integer.parseInt(siteNumberParam);
-                contest.setSiteNumber(siteNumber);
-
-            } catch (Exception e) {
-                getLog().log(Log.WARNING, "Expecting a number after " + SITE_OPTION_STRING + " found " + siteNumberParam, e);
-                savedTransportException = new TransportException("Invalid site after " + SITE_OPTION_STRING);
-            }
-        }
         
         if (useIniFile && (!parseArguments.isOptPresent(INI_FILENAME_OPTION_STRING))) {
             if (IniFile.isFilePresent()) {
@@ -2011,9 +1994,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             }
         }
         
-        log.log(Log.DEBUG, "Site Number is set as " + contest.getSiteNumber() + " (0 means unset)");
-
-
         // TODO code add NO_SAVE_OPTION_STRING
         if (parseArguments.isOptPresent("--nosave")) {
             saveCofigurationToDisk = false;
@@ -2118,7 +2098,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         // TODO Auto-generated method stub
         if (parseArguments.isOptPresent("--help")) {
             // -F is the ParseArguements internal option to pre-load command line options from a file
-            System.out.println("Usage: Starter [--help] [--server] [--first] [--login <login>] [--password <pass>] [--site ##] [--skipini] ["+INI_FILENAME_OPTION_STRING+" filename] [" 
+            System.out.println("Usage: Starter [--help] [--server] [--first] [--login <login>] [--password <pass>] [--skipini] ["+INI_FILENAME_OPTION_STRING+" filename] [" 
                     +  CONTEST_PASSWORD_OPTION + " <pass>] [-F filename] ["+NO_GUI_STRING+"] ["+MAIN_UI_OPTION+" classname]");
             System.exit(0);
         }
