@@ -8,6 +8,7 @@ import java.util.Hashtable;
  * List of user permissions
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$

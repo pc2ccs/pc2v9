@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.ui;
 /**
  * File Viewer. 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$

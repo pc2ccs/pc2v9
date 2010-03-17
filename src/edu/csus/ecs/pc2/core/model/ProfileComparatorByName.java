@@ -9,8 +9,10 @@ import java.util.Comparator;
  * Sorts Profile by (1) name then (2) description then (3) createDate.
  * 
  * @author pc2@ecs.csus.edu
- *
+ * @version $Id$
  */
+
+// $HeadURL$
 public class ProfileComparatorByName implements Comparator<Profile> {
 
     /* (non-Javadoc)

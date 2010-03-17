@@ -8,10 +8,10 @@ import edu.csus.ecs.pc2.core.log.Log;
  * Transport methods needed by a server module.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
-
 public interface IServerTransport {
 
     /**
