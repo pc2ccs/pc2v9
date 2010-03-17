@@ -32,6 +32,7 @@ import javax.swing.JButton;
  * Optional columns are: displayname, group, permdisplay, & permlogin
  * perm* are booleans, but ignored if empty
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$

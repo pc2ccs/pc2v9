@@ -42,14 +42,22 @@ import org.xml.sax.InputSource;
 
 /**
  * A Memento is a class independent container for persistence info. It is a reflection of 3 storage requirements.
- * 
- * 1) We need the ability to persist an object and restore it. 2) The class for an object may be absent. If so we would like to skip the object and keep reading. 3) The class for an object may change.
+ * <P>
+ * 1) We need the ability to persist an object and restore it. 
+ * <br>
+ * 2) The class for an object may be absent. If so we would like to skip the object and keep reading. 
+ * <br>
+ * 3) The class for an object may change.
  * If so the new class should be able to read the old persistence info.
- * 
+ * <P>
  * We could ask the objects to serialize themselves into an ObjectOutputStream, DataOutputStream, or Hashtable. However all of these approaches fail to meet the second requirement.
  * 
  * Memento supports binary persistance with a version ID.
+ * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
+
+// $HeadURL$
 public final class XMLMemento implements IMemento {
     private Document factory;
 

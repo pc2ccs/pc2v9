@@ -3,9 +3,14 @@ package edu.csus.ecs.pc2.core.util;
 import java.util.Vector;
 
 /**
+ * CSV Parser.
+ * 
+ * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
+
+// $HeadURL$
 public final class CommaSeparatedValueParser {
     private static final char COMMA_CHAR = 44;
     private static final String COMMA_STRING = String.valueOf(COMMA_CHAR);

@@ -4,9 +4,13 @@
 package edu.csus.ecs.pc2.core.model;
 
 /**
- * @author PC2
- *
+ * Group or Region information for Account.
+ * 
+ * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
+
+// $HeadURL$
 public class Group implements IElementObject {
     /**
      * 

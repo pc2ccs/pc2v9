@@ -20,9 +20,11 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
 /**
  * This class is a JPanel (extension of JPanePlugin) designed to display the contents of a {@link RunResult} -- that is, the result of one execution of a submitted run from a team.
  * 
- * @author John
- * 
+ * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
+
+// $HeadURL$
 public class RunResultsPane extends JPanePlugin implements Serializable {
 
     /**

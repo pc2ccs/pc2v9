@@ -18,7 +18,7 @@ import edu.csus.ecs.pc2.core.model.InternalDump;
  * Info Pane, internal developer test and info pane.
  * 
  * @author pc2@ecs.csus.edu
- *
+ * @version $Id$
  */
 
 // $HeadURL$

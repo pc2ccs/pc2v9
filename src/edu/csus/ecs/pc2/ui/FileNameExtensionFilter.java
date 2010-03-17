@@ -1,6 +1,3 @@
-/**
- * 
- */
 package edu.csus.ecs.pc2.ui;
 
 import java.io.File;
@@ -14,6 +11,8 @@ import javax.swing.filechooser.FileFilter;
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
+
+// $HeadURL$
 public class FileNameExtensionFilter extends FileFilter {
 
     private String description = "";

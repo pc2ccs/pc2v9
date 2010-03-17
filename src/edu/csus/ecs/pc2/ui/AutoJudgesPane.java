@@ -39,6 +39,8 @@ import edu.csus.ecs.pc2.core.model.ProblemEvent;
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
+
+// $HeadURL$
 public class AutoJudgesPane extends JPanePlugin {
 
     /**

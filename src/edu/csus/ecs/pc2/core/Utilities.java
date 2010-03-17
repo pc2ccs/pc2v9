@@ -21,6 +21,7 @@ import java.util.Vector;
  * @version $Id$
  */
 
+// $HeadURL$
 public final class Utilities {
     
     private static boolean debugMode = false;
