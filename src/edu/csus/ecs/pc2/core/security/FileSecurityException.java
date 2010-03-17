@@ -3,7 +3,7 @@ package edu.csus.ecs.pc2.core.security;
 /**
  * 
  * @author pc2@ecs.csus.edu
- *
+ * @version $Id: FileSecurity.java 1953 2009-11-15 01:26:06Z laned $
  */
 
 public class FileSecurityException extends Exception {

@@ -8,6 +8,7 @@ import edu.csus.ecs.pc2.core.log.Log;
  * Public interface Transport Manager for a client.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$

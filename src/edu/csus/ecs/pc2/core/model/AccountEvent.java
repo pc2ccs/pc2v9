@@ -4,7 +4,7 @@ package edu.csus.ecs.pc2.core.model;
  * An Account Change Event.
  * 
  * @author pc2@ecs.csus
- * 
+ * @version $Id$
  */
 
 // $HeadURL$

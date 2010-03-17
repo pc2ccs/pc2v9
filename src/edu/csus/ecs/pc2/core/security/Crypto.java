@@ -22,6 +22,7 @@ import java.security.PublicKey;
  * Encryption/Decryption Class for secure data transmission
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$

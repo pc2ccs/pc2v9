@@ -25,7 +25,7 @@ import edu.csus.ecs.pc2.core.model.LanguageAutoFill;
  * Add/Edit Language Pane
  * 
  * @author pc2@ecs.csus.edu
- * 
+ * @version $Id$
  */
 
 // $HeadURL$
