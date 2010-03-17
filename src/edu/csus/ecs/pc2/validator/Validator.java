@@ -18,6 +18,7 @@ import edu.csus.ecs.pc2.VersionInfo;
  * Compares team output with judge's answer file and outputs a XML file with a judgement and other information.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL: http://pc2.ecs.csus.edu/repos/v9wip/trunk/src/edu/csus/ecs/pc2/validator/Validator.java$

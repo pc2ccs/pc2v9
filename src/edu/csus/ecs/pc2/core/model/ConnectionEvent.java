@@ -9,7 +9,7 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
  * disconnects from the server.
  * 
  * @author pc2@ecs.csus.edu
- *
+ * @version $Id$
  */
 
 // $HeadURL$

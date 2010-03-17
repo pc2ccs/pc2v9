@@ -5,9 +5,13 @@ package edu.csus.ecs.pc2.core.exception;
 
 
 /**
+ * Exceptoni for parsing tab delimited lines.
+ * 
  * @author pc2@ecs.csus.edu
- *
+ * @version $Id$
  */
+
+// $HeadURL$
 public class IllegalTSVFormatException extends Exception {
 
     /**

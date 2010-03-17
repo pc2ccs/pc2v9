@@ -7,8 +7,10 @@ package edu.csus.ecs.pc2.core.exception;
  * Signals that a contest is in an illegal state.
  * 
  * @author pc2@ecs.csus.edu
- *
+ * @version $Id$
  */
+
+// $HeadURL$
 public class IllegalContestState extends Exception {
 
     /**

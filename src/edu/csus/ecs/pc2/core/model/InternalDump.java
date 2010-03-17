@@ -27,6 +27,7 @@ import edu.csus.ecs.pc2.ui.MultipleFileViewer;
  * Internal Dump of  information.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$

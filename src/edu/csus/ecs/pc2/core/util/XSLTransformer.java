@@ -18,8 +18,11 @@ import javax.xml.transform.stream.StreamSource;
 
 /**
  * Transforms xml and xsl input to generate the output.
+ * 
+ * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
-// $HeadURL$
+//$HeadURL$
 public class XSLTransformer {
 
     /**

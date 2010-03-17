@@ -33,7 +33,11 @@ import java.util.List;
  * <p>
  * This interface is not intended to be implemented by clients.
  * </p>
+ * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
+
+// $HeadURL$
 public interface IMemento {
     /**
      * Special reserved key used to store the memento id (value <code>"org.eclipse.ui.id"</code>).

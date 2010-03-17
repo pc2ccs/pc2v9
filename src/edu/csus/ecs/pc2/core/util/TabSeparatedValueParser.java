@@ -3,11 +3,17 @@ package edu.csus.ecs.pc2.core.util;
 import java.util.Vector;
 
 /**
+ * Tab delimited parser.
+ * 
  * @author pc2@ecs.csus.edu
- *
+ * @version $Id$
  */
+
+// $HeadURL$
 public final class TabSeparatedValueParser {
+
     private static final char TAB_CHAR = 9;
+
     private static final String TAB_STRING = String.valueOf(TAB_CHAR);
 
     /**
@@ -16,7 +22,8 @@ public final class TabSeparatedValueParser {
      * @return java.lang.String[]
      * @param line
      *            java.lang.String
-     * @throws Exception if there was a problem parsing the line
+     * @throws Exception
+     *             if there was a problem parsing the line
      */
     public static String[] parseLine(String line) throws Exception {
         String[] array = new String[1];
@@ -75,7 +82,7 @@ public final class TabSeparatedValueParser {
         array = new String[field];
         if (field != v.size()) {
             // TODO review this Exception
-            new Exception("Incorrect number of fields (found " +  field +", but expected " + v.size() + ")");
+            new Exception("Incorrect number of fields (found " + field + ", but expected " + v.size() + ")");
         }
         Object o;
         for (i = 0; i < v.size(); i++) {

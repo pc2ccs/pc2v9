@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.api.listener;
 import edu.csus.ecs.pc2.api.IClient;
 
 /**
+ * Event for when clients connect or disconnect.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
