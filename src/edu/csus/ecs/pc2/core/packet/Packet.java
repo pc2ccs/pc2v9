@@ -5,6 +5,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
 
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ClientId;
 
 /**
@@ -132,7 +133,7 @@ public class Packet implements Serializable {
             hostAddress = inetAddress.getHostAddress();
             hostName = inetAddress.getHostName();
         } catch (UnknownHostException e) {
-            // TODO this exception should be logged to a log file
+            StaticLog.log("Problem setting IP", e);
         }
     }
 

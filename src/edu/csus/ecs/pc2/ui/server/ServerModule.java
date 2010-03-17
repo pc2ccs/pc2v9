@@ -162,6 +162,14 @@ public class ServerModule implements UIPlugin {
         }
     }
 
+    /**
+     * Contest Listener.
+     *  
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    
+    // $HeadURL$
     public class ContestTimeListenerImplementation implements IContestTimeListener {
 
         private void logClockInfo(String string, ContestTime contestTime) {
