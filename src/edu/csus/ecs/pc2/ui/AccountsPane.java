@@ -117,7 +117,8 @@ public class AccountsPane extends JPanePlugin {
     }
 
     protected Object[] buildAccountRow(Account account) {
-        // Object[] cols = { "Site", "Type", "Account Id", "Display Name", "Group" };
+//        Object[] cols = { "Site", "Type", "Account Id", "Display Name" , "Group", "Alias"};
+
         try {
             int cols = accountListBox.getColumnCount();
             Object[] s = new String[cols];
@@ -129,6 +130,7 @@ public class AccountsPane extends JPanePlugin {
 
             s[3] = getTeamDisplayName(account);
             s[4] = getGroupName(account);
+            s[5] = getTeamAlias(account);
             return s;
         } catch (Exception exception) {
             StaticLog.getLog().log(Log.INFO, "Exception in buildAccountRow()", exception);
@@ -158,6 +160,18 @@ public class AccountsPane extends JPanePlugin {
 
         return "Invalid Account";
     }
+    
+
+    private String getTeamAlias(Account account) {
+        if (account != null) {
+            String alias = account.getAliasName();
+            if (alias != null) {
+                return alias;
+            }
+        }
+
+        return "";
+    }
 
     /**
      * This method initializes accountListBox
@@ -168,7 +182,7 @@ public class AccountsPane extends JPanePlugin {
         if (accountListBox == null) {
             accountListBox = new MCLB();
 
-            Object[] cols = { "Site", "Type", "Account Id", "Display Name" , "Group"};
+            Object[] cols = { "Site", "Type", "Account Id", "Display Name" , "Group", "Alias"};
             accountListBox.addColumns(cols);
 
             // Sorters
@@ -190,6 +204,9 @@ public class AccountsPane extends JPanePlugin {
 
             // Group
             accountListBox.setColumnSorter(4, sorter, 5);
+
+            // Alias
+            accountListBox.setColumnSorter(5, sorter, 6);
 
             cols = null;
 
