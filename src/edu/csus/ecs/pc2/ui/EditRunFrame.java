@@ -10,13 +10,14 @@ import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.RunEvent.Action;
 
 /**
- * 
+ * Edit Run GUI Frame.
+
  * @author pc2@ecs.csus.edu
- * 
+ * @version $Id$
  */
 
 // $HeadURL$
-// $Id$
+
 
 public class EditRunFrame extends JFrame implements UIPlugin {
 
@@ -109,6 +110,10 @@ public class EditRunFrame extends JFrame implements UIPlugin {
     public class RunListenerImplementation implements IRunListener {
 
         public void runAdded(RunEvent event) {
+            // ignore
+        }
+        
+        public void refreshRuns(RunEvent event) {
             // ignore
         }
 

@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.Date;
 
+import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -46,10 +47,24 @@ public class EvaluationLog implements UIPlugin {
             logOpened = false;
             evalLog = new PrintWriter(new FileOutputStream(logFileName, true), true);
             logOpened = true;
+            writeLogHeader();
             setContestAndController(contest, controller);
         } catch (FileNotFoundException e) {
             StaticLog.log("Unable to open file" + logFileName, e);
             evalLog = null;
+        }
+    }
+
+    /**
+     * Write Log header
+     */
+    private void writeLogHeader() {
+        if (logOpened) {
+            evalLog.println();
+            VersionInfo versionInfo = new VersionInfo();
+            evalLog.println("# Evaluations Log " + versionInfo.getSystemVersionInfo());
+        } else {
+            StaticLog.warning("Evaluation log not opened for write on reset ");
         }
     }
 
@@ -121,7 +136,7 @@ public class EvaluationLog implements UIPlugin {
     }
 
     /**
-     * Run Listenter for Evaluations Log.
+     * Run Listener for Evaluations Log.
      * 
      * This listener will write out when runs are judged and deleted.
      * 
@@ -133,6 +148,11 @@ public class EvaluationLog implements UIPlugin {
 
         public void runAdded(RunEvent event) {
             runChanged(event);
+        }
+        
+        public void refreshRuns(RunEvent event) {
+            // Write log header to indicate refresh was done
+            writeLogHeader();
         }
 
         public void runChanged(RunEvent event) {

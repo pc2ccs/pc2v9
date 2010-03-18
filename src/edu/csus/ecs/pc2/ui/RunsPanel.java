@@ -7,9 +7,10 @@ import java.io.IOException;
 import java.util.Vector;
 
 import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import javax.swing.JOptionPane;
 
 import com.ibm.webrunner.j2mclb.util.HeapSorter;
 import com.ibm.webrunner.j2mclb.util.NumericStringComparator;
@@ -31,8 +32,8 @@ import edu.csus.ecs.pc2.core.model.DisplayTeamName;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
-import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IContestInformationListener;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.ILanguageListener;
 import edu.csus.ecs.pc2.core.model.IProblemListener;
 import edu.csus.ecs.pc2.core.model.IRunListener;
@@ -54,10 +55,8 @@ import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.ui.EditFilterPane.ListNames;
 import edu.csus.ecs.pc2.ui.judge.JudgeView;
 
-import javax.swing.JLabel;
-
 /**
- * View runs.
+ * View runs panel.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -467,9 +466,9 @@ public class RunsPanel extends JPanePlugin {
     }
 
     /**
-     * 
-     * 
+     * Run Listener
      * @author pc2@ecs.csus.edu
+     * @version $Id$
      */
 
     // $HeadURL$
@@ -481,6 +480,10 @@ public class RunsPanel extends JPanePlugin {
             if (getContest().getClientId().getClientType() == ClientType.Type.TEAM) {
                 showResponseToTeam(event);
             }
+        }
+        
+        public void refreshRuns(RunEvent event) {
+            clearAllRuns();
         }
 
         public void runChanged(RunEvent event) {
@@ -616,6 +619,16 @@ public class RunsPanel extends JPanePlugin {
             });
         }
         return runListBox;
+    }
+
+    public void clearAllRuns() {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                runListBox.removeAllRows();
+                System.out.println("debug 22 clearAllRuns");
+            }
+        });
+        
     }
 
     private void resetRunsListBoxColumns() {
@@ -1446,8 +1459,10 @@ public class RunsPanel extends JPanePlugin {
     }
 
     /**
+     * Account Listener.
      * 
      * @author pc2@ecs.csus.edu
+     * @version $Id$
      */
     public class AccountListenerImplementation implements IAccountListener {
 
@@ -1484,7 +1499,7 @@ public class RunsPanel extends JPanePlugin {
         }
 
         public void accountsAdded(AccountEvent accountEvent) {
-            // ignore, this does not affect me
+            // ignore, this does not affect this class
 
         }
 
@@ -1514,8 +1529,10 @@ public class RunsPanel extends JPanePlugin {
     }
 
     /**
+     * Problem Listener.
      * 
      * @author pc2@ecs.csus.edu
+     * @version $Id$
      */
     public class ProblemListenerImplementation implements IProblemListener {
 
@@ -1537,8 +1554,10 @@ public class RunsPanel extends JPanePlugin {
     }
 
     /**
+     * Language Listener.
      * 
      * @author pc2@ecs.csus.edu
+     * @version $Id$
      */
     public class LanguageListenerImplementation implements ILanguageListener {
 
@@ -1560,6 +1579,7 @@ public class RunsPanel extends JPanePlugin {
     }
 
     /**
+     * Contest Information Listener.
      * 
      * @author pc2@ecs.csus.edu
      * @version $Id$

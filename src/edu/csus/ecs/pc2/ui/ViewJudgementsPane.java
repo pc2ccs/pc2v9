@@ -19,6 +19,7 @@ import edu.csus.ecs.pc2.core.model.Site;
  * Shows all run judgements for the input run.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
@@ -312,6 +313,10 @@ public class ViewJudgementsPane extends JPanePlugin implements UIPlugin {
             if (run != null && event.getRun().getElementId().equals(run.getElementId())) {
                 setRun(event.getRun());
             }
+        }
+        
+        public void refreshRuns(RunEvent event) {
+            // FIXME - close this frame, remove from screen 
         }
 
         public void runChanged(RunEvent event) {

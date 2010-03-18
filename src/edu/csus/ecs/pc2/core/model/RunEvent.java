@@ -74,6 +74,10 @@ public class RunEvent {
          * Run being validated..
          */
         RUN_VALIDATING,
+        /**
+         * Delete all runs 
+         */
+        DELETE_ALL,
     }
 
     /**

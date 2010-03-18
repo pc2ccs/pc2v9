@@ -93,6 +93,11 @@ public class ServerModule implements UIPlugin {
             // TODO Auto-generated method stub
 
         }
+        
+        public void refreshRuns(RunEvent event) {
+            // TODO Auto-generated method stub
+            
+        }
 
         public void runChanged(RunEvent event) {
             // TODO Auto-generated method stub

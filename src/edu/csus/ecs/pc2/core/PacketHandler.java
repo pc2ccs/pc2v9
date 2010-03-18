@@ -357,12 +357,18 @@ public class PacketHandler {
      
 //        Profile inProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE);
         Profile newProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.NEW_PROFILE);
+        
+        // TODO insure new profile exists
+        // if profile does exist - change
+        // if profile does not exist - 
 
         contest = ProfileManager.switchProfile(contest, newProfile);
         
         // TODO dal set contest
         
 //        controller.setContest(contest);
+        
+        // set contest/controller to reset all variables
     }
 
     private void handleUpdateClientProfile(Packet packet, ConnectionHandlerID connectionHandlerID) throws IOException, ClassNotFoundException, FileSecurityException {
@@ -539,7 +545,7 @@ public class PacketHandler {
             contestTime.setElapsedMins(0);
             contest.updateContestTime(contestTime);
 
-            PacketFactory.dumpPacket(controller.getLog(), packet, "debug 22 - RESET");
+            PacketFactory.dumpPacket(controller.getLog(), packet, "debug 22 - RESET"); // debug
             resetContestData(eraseProblems, eraseLanguages);
 
             // Set Contest Profile
@@ -548,18 +554,17 @@ public class PacketHandler {
             // send out to all clients
             Packet resetPacket = PacketFactory.createResetContestPacket(contest.getClientId(), PacketFactory.ALL_SERVERS, adminClientId, profile, eraseProblems, eraseLanguages);
 
-            // send to all clients on this site
+            // send reset to all 
             controller.sendToTeams(resetPacket);
-            sendToJudgesAndOthers(resetPacket, false);
+            sendToJudgesAndOthers(resetPacket, isThisSite(packet.getSourceId()));
 
-            // Send contest clock update 
-            
+            // Send contest clock update to all 
             Packet newContestTimePacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), contest.getContestTime());
             controller.sendToTeams(newContestTimePacket);
-            sendToJudgesAndOthers(newContestTimePacket, false);
+            sendToJudgesAndOthers(newContestTimePacket, isThisSite(packet.getSourceId()));
             
         } else {
-            PacketFactory.dumpPacket(controller.getLog(), packet, "debug 22 - resetContest");
+            PacketFactory.dumpPacket(controller.getLog(), packet, "debug 22 - resetContest"); // TODO debug remove this
             
             // Set Contest Profile
             contest.setProfile(profile);
@@ -585,10 +590,7 @@ public class PacketHandler {
 
     private void resetContestData(Boolean eraseProblems, Boolean eraseLanguages) { 
 
-        controller.getLog().log(Log.INFO, "debug22 resetContestData p"+contest.getProblems().length+" l"+contest.getLanguages().length+" "+contest.getContestTime().getRemainingMinStr());
         contest.resetData();
-        controller.getLog().log(Log.INFO, "debug22 resetContestData r"+contest.getRuns().length+" c"+contest.getClarifications().length+" "+contest.getContestTime().getRemainingMinStr());
-        controller.getLog().log(Log.INFO, "debug22 resetContestData erase p"+eraseProblems+" l"+eraseLanguages);
 
         if (eraseProblems != null && eraseProblems.booleanValue()) {
             for (Problem problem : contest.getProblems()) {

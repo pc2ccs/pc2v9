@@ -144,5 +144,10 @@ public class RunListenerList {
         public void runRemoved(RunEvent event) {
             fireRunListener(event);
         }
+
+        public void refreshRuns(RunEvent event) {
+            fireRunListener(event);
+            
+        }
     }
 }

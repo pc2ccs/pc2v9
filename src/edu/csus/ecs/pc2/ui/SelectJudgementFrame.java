@@ -112,6 +112,10 @@ public class SelectJudgementFrame extends JFrame implements UIPlugin {
 //            System.out.println("sjf: : "+event.getAction()+" "+event.getSentToClientId()+" "+event.getRun());
             // ignore
         }
+        
+        public void refreshRuns(RunEvent event) {
+            // ignore
+        }
 
         public void runChanged(RunEvent event) {
             

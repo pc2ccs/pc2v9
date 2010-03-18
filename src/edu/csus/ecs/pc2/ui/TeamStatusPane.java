@@ -372,6 +372,10 @@ public class TeamStatusPane extends JPanePlugin {
             populateGUI();
         }
 
+        public void refreshRuns(RunEvent event) {
+            populateGUI();
+        }
+        
         public void runChanged(RunEvent event) {
             populateGUI();
         }

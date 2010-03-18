@@ -357,6 +357,11 @@ public class RunImplementation implements IRun {
         public void runAdded(RunEvent event) {
             runChanged(event);
         }
+        
+        public void refreshRuns(RunEvent event) {
+            // TODO cancel run fetch
+            
+        }
 
         public void runChanged(RunEvent event) {
 
@@ -375,7 +380,7 @@ public class RunImplementation implements IRun {
         }
 
         public void runRemoved(RunEvent event) {
-            // run not removed, ignored
+            // TODO cancel run fetch 
         }
     }
     

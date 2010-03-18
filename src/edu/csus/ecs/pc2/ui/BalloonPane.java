@@ -72,6 +72,10 @@ public class BalloonPane extends JPanePlugin {
             }
             
         }
+        
+        public void refreshBalloonSettings(BalloonSettingsEvent event) {
+            // FIXME  refresh balloon settings.
+        }
 
         public void balloonSettingsChanged(BalloonSettingsEvent event) {
             // we do not know exactly what changed, so just make sure we
@@ -98,6 +102,10 @@ public class BalloonPane extends JPanePlugin {
 
         public void runAdded(RunEvent event) {
             // ignore
+        }
+        
+        public void refreshRuns(RunEvent event) {
+            // FIXME - reset all settings
         }
 
         public void runChanged(RunEvent event) {

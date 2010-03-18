@@ -34,4 +34,10 @@ public interface IRunListener {
      * @param event
      */
     void runRemoved(RunEvent event);
+    
+    /**
+     * More than one run has changed, refresh entire list.
+     * @param event
+     */
+    void refreshRuns (RunEvent event);
 }

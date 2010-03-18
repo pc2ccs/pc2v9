@@ -80,6 +80,20 @@ public class ProfileCloneSettingsReport implements IReport {
         printWriter.println("   Copy Problems       " + settings.isCopyProblems());
         printWriter.println("   Copy Runs           " + settings.isCopyRuns());
         printWriter.println("   Copy Clarifications " + settings.isCopyClarifications());
+        
+        printWriter.println();
+        
+        /**
+         * Print all profiles too
+         */
+        
+        printWriter.println();
+        
+        ProfilesReport profilesReport = new ProfilesReport();
+        profilesReport.setContestAndController(contest, controller);
+        profilesReport.writeReport(printWriter);
+        profilesReport = null;
+        
     }
 
     public void printHeader(PrintWriter printWriter) {

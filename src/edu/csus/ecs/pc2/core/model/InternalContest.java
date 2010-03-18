@@ -347,6 +347,8 @@ public class InternalContest implements IInternalContest {
                 runListenerList.elementAt(i).runAdded(runEvent);
             } else if (runEvent.getAction() == RunEvent.Action.DELETED) {
                 runListenerList.elementAt(i).runRemoved(runEvent);
+            } else if (runEvent.getAction() == RunEvent.Action.DELETE_ALL) {
+                runListenerList.elementAt(i).refreshRuns(runEvent);
             } else {
                 runListenerList.elementAt(i).runChanged(runEvent);
             }
@@ -1920,11 +1922,10 @@ public class InternalContest implements IInternalContest {
          */
         runFilesList.clearCache();
         
-        /**
-         * no need to clear run results at this time
-         * 
-         * runResultFilesList.clear();
-         */
+        // FIXME  runResultFilesList.clear();
+
+        // FIXME clear all checked out runs 
+        // FIXME clear all checked out clars 
         
         /**
          * Clear all clarifications
@@ -1990,6 +1991,9 @@ public class InternalContest implements IInternalContest {
         } else {
             updateProfile(profile);
         }
+        
+        setContestIdentifier(profile.getContestId());
+        
     }
 
     public void setContestIdentifier(String contestId) {

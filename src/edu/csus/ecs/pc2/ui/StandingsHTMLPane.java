@@ -318,6 +318,10 @@ public class StandingsHTMLPane extends JPanePlugin {
         public void runAdded(RunEvent event) {
             // ignore
         }
+        
+        public void refreshRuns(RunEvent event) {
+            refreshStandings();            
+        }
 
         public void runChanged(RunEvent event) {
             if (event.getAction().equals(Action.CHANGED)) {

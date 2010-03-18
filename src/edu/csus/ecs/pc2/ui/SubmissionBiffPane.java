@@ -166,6 +166,10 @@ public class SubmissionBiffPane extends JPanePlugin {
         public void runAdded(RunEvent event) {
             updateRunCount(event);
         }
+        
+        public void refreshRuns(RunEvent event) {
+            updateRunCount(event);
+        }
 
         public void runChanged(RunEvent event) {
             updateRunCount(event);

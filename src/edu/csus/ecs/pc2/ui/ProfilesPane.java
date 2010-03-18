@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Rectangle;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 
@@ -20,6 +21,7 @@ import com.ibm.webrunner.j2mclb.util.HeapSorter;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.list.ContestTimeComparator;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
@@ -29,6 +31,8 @@ import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.model.ProfileEvent;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.report.IReport;
+import edu.csus.ecs.pc2.core.report.ProfileCloneSettingsReport;
 
 /**
  * Profile administration pane.
@@ -81,6 +85,8 @@ public class ProfilesPane extends JPanePlugin {
     private MCLB profilesListBox = null;
 
     private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
+
+    private JButton reportButton = null;
 
     /**
      * This method initializes
@@ -219,6 +225,7 @@ public class ProfilesPane extends JPanePlugin {
             buttonPane.add(getCloneButton(), null);
             buttonPane.add(getSwitchButton(), null);
             buttonPane.add(getExportButton(), null);
+            buttonPane.add(getReportButton(), null);
         }
         return buttonPane;
     }
@@ -337,7 +344,6 @@ public class ProfilesPane extends JPanePlugin {
     }
 
     protected void renameProfile() {
-        // TODO code renameProfile
 
         if (getProfileTextField() == null || getProfileTextField().getText().trim().length() < 1) {
             showMessage("No profile name specified");
@@ -475,7 +481,6 @@ public class ProfilesPane extends JPanePlugin {
 
         } catch (Exception e) {
             getController().getLog().log(Log.DEBUG, "Exception refreshing profile list", e);
-            e.printStackTrace(); // TODO remove this debugging
         }
     }
 
@@ -624,6 +629,35 @@ public class ProfilesPane extends JPanePlugin {
                 profilesListBox.sort();
             }
         });
+    }
+
+    /**
+     * This method initializes reportButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getReportButton() {
+        if (reportButton == null) {
+            reportButton = new JButton();
+            reportButton.setText("Report");
+            reportButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    createReport(new ProfileCloneSettingsReport());
+                }
+            });
+        }
+        return reportButton;
+    }
+
+    protected void createReport(IReport report) {
+        report.setContestAndController(getContest(), getController());
+
+        try {
+            createAndViewReportFile(report, getController().getLog());
+        } catch (IOException e) {
+            StaticLog.log("Exception creating report", e);
+            JOptionPane.showMessageDialog(this, "Exception in report " + e.getLocalizedMessage());
+        }
     }
 
 } // @jve:decl-index=0:visual-constraint="25,9"

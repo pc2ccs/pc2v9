@@ -317,6 +317,10 @@ public class StandingsPane extends JPanePlugin {
             // TODO Auto-generated method stub
             // ignore
         }
+        
+        public void refreshRuns(RunEvent event) {
+            refreshStandings();
+        }
 
         public void runChanged(RunEvent event) {
             // TODO Auto-generated method stub

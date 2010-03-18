@@ -15,12 +15,10 @@ import edu.csus.ecs.pc2.core.model.RunEvent;
 /**
  * View Judgement Frame.
  * @author pc2@ecs.csus.edu
- * 
+ * @version  $Id$
  */
 
 // $HeadURL$
-// $Id$
-
 public class ViewJudgementsFrame extends JFrame implements UIPlugin {
     
     /**
@@ -104,6 +102,11 @@ public class ViewJudgementsFrame extends JFrame implements UIPlugin {
 
         public void runAdded(RunEvent event) {
             // ignore
+        }
+        
+        public void refreshRuns(RunEvent event) {
+            // ignore
+            
         }
 
         public void runChanged(RunEvent event) {

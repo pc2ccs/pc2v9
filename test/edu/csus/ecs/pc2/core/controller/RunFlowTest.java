@@ -37,6 +37,7 @@ import edu.csus.ecs.pc2.core.security.FileSecurityException;
  * judgement to team.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
@@ -137,6 +138,10 @@ public class RunFlowTest extends TestCase {
                 checkOutRun (event.getRun(), false, false);
             }
 
+            public void refreshRuns(RunEvent event) {
+                // ignore for this test.
+            }
+            
             public void runChanged(RunEvent event) {
                 System.err.println("Judge - " + event.getRun());
 
@@ -175,6 +180,10 @@ public class RunFlowTest extends TestCase {
             public void runAdded(RunEvent event) {
                 System.err.println("Team Run " + event.getAction() + " " + event.getRun());
 
+            }
+            
+            public void refreshRuns(RunEvent event) {
+                System.err.println("Team Run " + event.getAction() + " " + event.getRun());
             }
 
             public void runChanged(RunEvent event) {

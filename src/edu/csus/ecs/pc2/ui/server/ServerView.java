@@ -150,10 +150,15 @@ public class ServerView extends JFrame implements UIPlugin {
             logDebugMessage("Run Event " + event.getRun() + " ADDED ");
         }
 
+        public void refreshRuns(RunEvent event) {
+            logDebugMessage("Run Event " + event.getRun() + " REFRESH/RESET RUNS ");
+            
+        }
+        
         public void runChanged(RunEvent event) {
             logDebugMessage("Run Event " + event.getRun() + " CHANGED ");
         }
-
+        
         public void runRemoved(RunEvent event) {
             logDebugMessage("Run Event " + event.getRun() + " REMOVED ");
         }

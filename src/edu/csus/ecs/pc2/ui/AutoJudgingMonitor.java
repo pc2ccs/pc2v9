@@ -225,6 +225,10 @@ public class AutoJudgingMonitor implements UIPlugin {
                 attemptToFetchNextRun(event.getRun());
             }
         }
+        
+        public void refreshRuns(RunEvent event) {
+            // FIXME handle refreshRuns
+        }
 
         public void runChanged(RunEvent event) {
 
