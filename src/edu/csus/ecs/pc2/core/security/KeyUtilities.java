@@ -75,7 +75,7 @@ public final class KeyUtilities {
             Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
             byte[] buf = new byte[100];
             int bufl;
-            // init the Cipher object for Encryption…
+            // init the Cipher object for Encryption
             cipher.init(Cipher.ENCRYPT_MODE, key);
 
             // start FileIO
