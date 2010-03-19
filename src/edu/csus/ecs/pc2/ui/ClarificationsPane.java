@@ -636,6 +636,16 @@ public class ClarificationsPane extends JPanePlugin {
             }
 
         }
+        
+        public void refreshClarfications(ClarificationEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    updateGUIperPermissions();
+                    resetClarsListBoxColumns();
+                    reloadListBox();
+                }
+            });
+        }
 
         public void clarificationChanged(ClarificationEvent event) {
             updateClarificationRow(event.getClarification(), event.getWhoModifiedClarification());

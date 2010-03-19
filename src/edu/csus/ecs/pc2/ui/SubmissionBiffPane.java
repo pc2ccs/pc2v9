@@ -192,6 +192,10 @@ public class SubmissionBiffPane extends JPanePlugin {
         public void clarificationAdded(ClarificationEvent event) {
             updateClarificationCounts(event);
         }
+        
+        public void refreshClarfications(ClarificationEvent event) {
+            updateClarificationCounts(event);
+        }
 
         public void clarificationChanged(ClarificationEvent event) {
             updateClarificationCounts(event);

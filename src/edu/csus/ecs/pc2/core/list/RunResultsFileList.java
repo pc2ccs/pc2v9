@@ -1,10 +1,12 @@
 package edu.csus.ecs.pc2.core.list;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.io.Serializable;
 
 import edu.csus.ecs.pc2.core.IStorage;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
@@ -21,7 +23,6 @@ import edu.csus.ecs.pc2.core.security.FileSecurityException;
  */
 
 // $HeadURL$
-
 public class RunResultsFileList implements Serializable {
 
     /**
@@ -41,6 +42,11 @@ public class RunResultsFileList implements Serializable {
      * 
      */
     private boolean writeToDisk = false;
+    
+    /**
+     * Run Results files end in .files.
+     */
+    private static final String EXTENSION = ".files";
     
     private RunResultFiles singleRunResultFiles = null;
 
@@ -77,7 +83,7 @@ public class RunResultsFileList implements Serializable {
 
     private String getFileName(int siteNumber, int runNumber, JudgementRecord judgementRecord) {
         return storage.getDirectoryName() + File.separator + "s" + siteNumber + "r"
-                + runNumber + "." + stripChars(judgementRecord.getElementId().toString()) + ".files";
+                + runNumber + "." + stripChars(judgementRecord.getElementId().toString()) + EXTENSION;
     }
 
     public String getFileName(Run run, JudgementRecord judgementRecord) {
@@ -131,7 +137,7 @@ public class RunResultsFileList implements Serializable {
     }
 
     /**
-     * returns a run result files
+     * returns a run result files.
      * 
      * @param run
      * @return
@@ -149,5 +155,38 @@ public class RunResultsFileList implements Serializable {
         }
         
         return runResultFiles;
+    }
+
+    /**
+     * Removes all run results files from disk.
+     * 
+     */
+    public void clear() {
+        if (writeToDisk) {
+
+            File dir = new File(storage.getDirectoryName());
+            if (dir.isDirectory()) {
+                FileFilter filter = new FileFilter() {
+                    public boolean accept(File pathname) {
+                        return pathname.getName().toLowerCase().endsWith(EXTENSION);
+                    }
+                };
+                File[] entries = dir.listFiles(filter);
+                
+                for (File file : entries){
+                    try {
+                        file.delete();
+                        file = null;
+                    } catch (Exception e) {
+                        StaticLog.log("Failed to remove "+file.getName(), e);
+                    }
+                }
+                dir = null;
+                entries = null;
+            }
+
+        } else {
+            singleRunResultFiles = null;
+        }
     }
 }

@@ -154,6 +154,7 @@ public class RunList implements Serializable {
      */
     public void clear() throws IOException, ClassNotFoundException, FileSecurityException {
         runHash = new Hashtable<String, Run>(200);
+        nextRunNumber = 1;
         writeToDisk();
 
     }

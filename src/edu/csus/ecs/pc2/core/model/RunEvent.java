@@ -75,9 +75,9 @@ public class RunEvent {
          */
         RUN_VALIDATING,
         /**
-         * Delete all runs 
+         * (Force) refresh of all run lists. 
          */
-        DELETE_ALL,
+        REFRESH_ALL,
     }
 
     /**

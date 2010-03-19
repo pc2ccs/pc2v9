@@ -395,6 +395,10 @@ public class TeamStatusPane extends JPanePlugin {
         public void clarificationAdded(ClarificationEvent event) {
             populateGUI();
         }
+        
+        public void refreshClarfications(ClarificationEvent event) {
+            populateGUI();
+        }
 
         public void clarificationChanged(ClarificationEvent event) {
             populateGUI();

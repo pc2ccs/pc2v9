@@ -347,7 +347,7 @@ public class InternalContest implements IInternalContest {
                 runListenerList.elementAt(i).runAdded(runEvent);
             } else if (runEvent.getAction() == RunEvent.Action.DELETED) {
                 runListenerList.elementAt(i).runRemoved(runEvent);
-            } else if (runEvent.getAction() == RunEvent.Action.DELETE_ALL) {
+            } else if (runEvent.getAction() == RunEvent.Action.REFRESH_ALL) {
                 runListenerList.elementAt(i).refreshRuns(runEvent);
             } else {
                 runListenerList.elementAt(i).runChanged(runEvent);
@@ -1504,6 +1504,8 @@ public class InternalContest implements IInternalContest {
 
             if (clarificationEvent.getAction() == ClarificationEvent.Action.ADDED) {
                 clarificationListenerList.elementAt(i).clarificationAdded(clarificationEvent);
+            } else if (clarificationEvent.getAction() == ClarificationEvent.Action.REFRESH_ALL) {
+                clarificationListenerList.elementAt(i).refreshClarfications(clarificationEvent);
             } else if (clarificationEvent.getAction() == ClarificationEvent.Action.DELETED) {
                 clarificationListenerList.elementAt(i).clarificationRemoved(clarificationEvent);
             } else {
@@ -1900,6 +1902,11 @@ public class InternalContest implements IInternalContest {
     }
 
     public void resetData() {
+        
+        synchronized (runCheckOutList){
+            // FIXME clear all checked out runs 
+            runCheckOutList = new Hashtable<ElementId, ClientId>();
+        }
 
         /**
          * Clear list of runs.
@@ -1917,15 +1924,21 @@ public class InternalContest implements IInternalContest {
             e.printStackTrace();
         }
         
+        
         /**
          * Clear submitted files list 
          */
         runFilesList.clearCache();
         
-        // FIXME  runResultFilesList.clear();
+        runResultFilesList.clear();
 
-        // FIXME clear all checked out runs 
-        // FIXME clear all checked out clars 
+        RunEvent runEvent = new RunEvent(RunEvent.Action.REFRESH_ALL, null, null, null);
+        fireRunListener(runEvent);
+
+        // FIXME clear all checked out clars
+        synchronized (clarCheckOutList) {
+            clarCheckOutList = new Hashtable<ElementId, ClientId>();
+        }
         
         /**
          * Clear all clarifications
@@ -1943,6 +1956,8 @@ public class InternalContest implements IInternalContest {
             e.printStackTrace();
         }
         
+        ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.REFRESH_ALL, null);
+        fireClarificationListener(clarificationEvent);
     }
 
     public boolean isSendAdditionalRunStatusMessages() {

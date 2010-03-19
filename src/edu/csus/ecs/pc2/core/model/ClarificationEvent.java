@@ -62,6 +62,10 @@ public class ClarificationEvent {
          * Clarification revoked
          */
         CLARIFICATION_REVOKED,
+        /**
+         * (Force) refresh of all clarification lists.
+         */
+        REFRESH_ALL,
     }
 
     private Action action;

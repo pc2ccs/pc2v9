@@ -39,7 +39,6 @@ public class ClarificationListenerList {
                 listenerList.elementAt(i).clarificationRemoved(clarification);
                 break;
                 
-
                 // TODO better handle the clarification states interface to the API.
 //                listenerList.elementAt(i).clarificationUpdated(clarification);
                 
@@ -53,6 +52,7 @@ public class ClarificationListenerList {
             case CLARIFICATION_REVOKED:
             case CLARIFICATION_HELD:
             case CLARIFICATION_NOT_AVAILABLE:
+            case REFRESH_ALL:  // TODO  handle remove all clars in API
                 
                 break;
             default:
@@ -89,6 +89,10 @@ public class ClarificationListenerList {
     class Listener implements IClarificationListener {
 
         public void clarificationAdded(ClarificationEvent event) {
+            fireClarificationListener(event);
+        }
+
+        public void refreshClarfications(ClarificationEvent event) {
             fireClarificationListener(event);
         }
 

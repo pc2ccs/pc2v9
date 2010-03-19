@@ -100,6 +100,11 @@ public class AnswerClarificationFrame extends JFrame implements UIPlugin {
         public void clarificationAdded(ClarificationEvent event) {
             // ignore
         }
+        
+        public void refreshClarfications(ClarificationEvent event) {
+            // ignore
+            // TODO dispose of this frame, uncheck out clars
+        }
 
         public void clarificationChanged(ClarificationEvent event) {
             if (clarification != null) {

@@ -1,12 +1,10 @@
 package edu.csus.ecs.pc2.core.model;
 
-
-
 /**
  * Listeners for Clarifications.
  * 
  * @author pc2@ecs.csus.edu
- *@version $Id$
+ * @version $Id$
  */
 
 // $HeadURL$
@@ -36,6 +34,13 @@ public interface IClarificationListener {
      * @param event
      */
     void clarificationRemoved(ClarificationEvent event);
+    
+    /**
+     * all clarifications removed, need to refresh.
+     * 
+     * @param event
+     */
+    void refreshClarfications (ClarificationEvent event);
 
 
 }

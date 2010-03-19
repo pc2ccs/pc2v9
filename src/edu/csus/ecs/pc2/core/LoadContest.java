@@ -6,6 +6,7 @@ import java.io.RandomAccessFile;
 import java.util.Date;
 import java.util.Properties;
 
+import edu.csus.ecs.pc2.core.execute.ExecutionData;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
@@ -18,6 +19,8 @@ import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.LanguageAutoFill;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.RunFiles;
+import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
@@ -38,6 +41,42 @@ import edu.csus.ecs.pc2.core.security.FileSecurityException;
 
 // $HeadURL$
 public class LoadContest {
+
+    // TODO when getFileNameForRun works remove sumitFilename
+    private String sumitFilename = "Sumit.java";
+
+    public LoadContest() {
+
+        locateSumitFile();
+    }
+    
+    /**
+     * Locate Sumit.java somewhere....
+     * 
+     */
+    private void locateSumitFile() {
+        // TODO when getFileNameForRun works remove locateSumitFile
+
+        if (new File(sumitFilename).isFile()) {
+            return; // found in current directory
+        }
+
+        String[] dirnames = { "samps", //
+                "testdata" + File.separator + "src", //
+                File.separator + "pc2" + File.separator + "samps", File.separator + "pc2" + File.separator + "testdata" + File.separator + "src", //
+                File.separator + "usr" + File.separator + "pc2" + File.separator + "testdata" + File.separator + "src", //
+        };
+
+        for (String dirname : dirnames) {
+            String fullname = dirname + File.separator + sumitFilename;
+            if (new File(fullname).isFile()) {
+                sumitFilename = fullname;
+                return; // found
+            }
+        }
+        
+        
+    }
 
     /**
      * Creates IInternalContestontest from Runs Version 8 content and format report.
@@ -146,6 +185,7 @@ public class LoadContest {
      * 
      * @param contest
      * @param fields
+     * @param saveFiles 
      * @throws FileSecurityException
      * @throws ClassNotFoundException
      * @throws IOException
@@ -177,6 +217,8 @@ public class LoadContest {
         // Add Judgement
 
         boolean solved = false;
+        
+        RunResultFiles[] runResultFiles = null;
 
         String judgingComplete = stripString(fields[11], "jc ");
         if (judgingComplete.trim().equals("true")) {
@@ -211,11 +253,12 @@ public class LoadContest {
             } else {
                 judgeAccount = createAccount(contest, siteNumber, judgeNumber, judgeAccountName, Type.JUDGE);
             }
-
+            
             JudgementRecord judgementRecord = new JudgementRecord(judgement.getElementId(), judgeAccount.getClientId(), solved,
-                    false, false);
-            run.addJudgement(judgementRecord);
+                                false, false);
             run.setStatus(RunStates.JUDGED);
+            runResultFiles = new RunResultFiles[1];
+            runResultFiles[0] = new RunResultFiles(run, run.getProblemId(), judgementRecord, new ExecutionData());
         }
 
         int maxRunNumber = getMaxRun(contest, siteNumber);
@@ -227,11 +270,21 @@ public class LoadContest {
 
         run.setElapsedMins(elapsedMinutes);
         contest.addRun(run);
+        
+        RunFiles runFiles = new RunFiles(run, getFileNameForRun(run));
+        contest.updateRun(run, runFiles, null, runResultFiles);
+        
+//        contest.updateRun(run, runFiles, whoChangedRun, runResultFiles)
 
         // System.out.println(" debug run "+run.getNumber()+" "+problem+" "+language);
         // System.out.println(" debug run "+run);
 
         return run;
+    }
+
+    private String getFileNameForRun(Run run) {
+        // TODO actually find the main file name for this input run.
+        return sumitFilename;
     }
 
     private Site createNewSite(int siteNumber, String siteName, String hostName, int portNumber) {
