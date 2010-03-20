@@ -11,9 +11,16 @@ import java.util.Vector;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Profile;
+import edu.csus.ecs.pc2.core.security.FileSecurity;
+import edu.csus.ecs.pc2.core.security.FileSecurityException;
 
 /**
  * Profiles Manager.
+ * 
+ * Provides ways to:
+ * <li>load/store text profile information
+ * <li>a way to determine whether to prompt user for contest password
+ * <li>a ways to save/get the default (current) profile
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -31,6 +38,16 @@ public class ProfileManager {
 
     private String delimiter = ",";
 
+    /**
+     * Create Profile from data in filename.
+     * 
+     * 
+     * 
+     * @param filename
+     * @return
+     * @throws IOException
+     * @throws ProfileLoadException
+     */
     public Profile[] load(String filename) throws IOException, ProfileLoadException {
 
         if (new File(filename).exists()) {
@@ -40,6 +57,38 @@ public class ProfileManager {
         } else {
             throw new FileNotFoundException(filename);
         }
+    }
+
+    /**
+     * Determines whether the input profile can be read using contest password.
+     * 
+     * @param profile
+     * @return true if profile
+     */
+    public boolean isProfileAvailable(Profile profile, char[] contestPassword) {
+
+        if (profile == null) {
+            throw new IllegalArgumentException("profile can not be null");
+        }
+
+        String profilePath = profile.getProfilePath();
+
+        if (new File(profilePath).isDirectory()) {
+
+            FileSecurity fileSecurity = new FileSecurity(profilePath);
+            if (fileSecurity == null){
+                System.out.println("debug22 It is null");
+            }
+            
+            try {
+                return fileSecurity.verifyPassword(contestPassword);
+            } catch (FileSecurityException e) {
+                // Clearly not a valid password or location ;)
+                return false;
+            }
+        }
+
+        return false;
     }
 
     public Profile defaultProfile(String filename) throws IOException, ProfileLoadException {
@@ -172,6 +221,18 @@ public class ProfileManager {
 
         return (Profile[]) list.toArray(new Profile[list.size()]);
     }
+    
+    /**
+     * Store the profiles at the default location.
+     * 
+     * @param profiles
+     * @param defaultProfile
+     * @return
+     * @throws IOException
+     */
+    public boolean store( Profile[] profiles, Profile defaultProfile) throws IOException {
+        return this.store(PROFILE_INDEX_FILENAME, profiles, defaultProfile);
+    }
 
     /**
      * Store list of profiles.
@@ -213,14 +274,16 @@ public class ProfileManager {
      * @param newProfile
      * @return
      */
-    public static IInternalContest switchProfile(IInternalContest contest, Profile profile) {
-
+    public static IInternalContest switchProfile(IInternalContest contest, Profile profile, char [] contestPassword) {
+        
+        // TODO determine whether 
+        
         // TODO dal set storage
-        
-        // TODO dal load configuration/contest 
-        
+
+        // TODO dal load configuration/contest
+
         // TODO dal load all submission data runs/clars etc.
-        
+
         return null;
     }
 }

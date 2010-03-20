@@ -348,7 +348,6 @@ public class PacketHandler {
     /**
      * Handle switch packet.
      * 
-     * 
      * @param packet
      * @param connectionHandlerID
      */
@@ -357,12 +356,18 @@ public class PacketHandler {
      
 //        Profile inProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE);
         Profile newProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.NEW_PROFILE);
+        String contestPassword = (String) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_PASSWORD);
+        
+        if (contestPassword == null){
+            // Use existing contest password if no contest password specified.
+            contestPassword = contest.getContestPassword();
+        }
         
         // TODO insure new profile exists
         // if profile does exist - change
         // if profile does not exist - 
 
-        contest = ProfileManager.switchProfile(contest, newProfile);
+        contest = ProfileManager.switchProfile(contest, newProfile, contestPassword.toCharArray());
         
         // TODO dal set contest
         
