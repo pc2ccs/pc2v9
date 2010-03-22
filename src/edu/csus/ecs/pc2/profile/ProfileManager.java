@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -57,6 +58,10 @@ public class ProfileManager {
         } else {
             throw new FileNotFoundException(filename);
         }
+    }
+    
+    public Profile[] load() throws IOException, ProfileLoadException {
+        return load(PROFILE_INDEX_FILENAME);
     }
 
     /**
@@ -285,5 +290,31 @@ public class ProfileManager {
         // TODO dal load all submission data runs/clars etc.
 
         return null;
+    }
+
+    /**
+     * Merges profiles (merges profiles into currentProfiles).
+     * 
+     * @param currentProfiles
+     * @param profiles
+     * @return
+     */
+    public Profile[] mergeProfiles(Profile[] currentProfiles, Profile[] profiles) {
+
+        Hashtable<String, Profile> table = new Hashtable<String, Profile>();
+
+        if (currentProfiles != null) {
+            for (Profile profile : currentProfiles) {
+                table.put(profile.getProfilePath(), profile);
+            }
+        }
+
+        if (profiles != null) {
+            for (Profile profile : profiles) {
+                table.put(profile.getProfilePath(), profile);
+            }
+        }
+
+        return (Profile[]) table.values().toArray(new Profile[table.values().size()]);
     }
 }

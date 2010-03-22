@@ -10,6 +10,7 @@ import junit.framework.TestSuite;
  * @version $Id$
  */
 
+// $HeadURL$
 public final class AllTests {
 
     private AllTests() {
