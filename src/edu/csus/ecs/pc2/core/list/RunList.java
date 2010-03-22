@@ -8,6 +8,7 @@ import java.util.Hashtable;
 
 import edu.csus.ecs.pc2.core.IStorage;
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
@@ -22,6 +23,7 @@ import edu.csus.ecs.pc2.core.security.FileSecurityException;
  * 
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
@@ -301,4 +303,23 @@ public class RunList implements Serializable {
         this.saveToDisk = saveToDisk;
     }
 
+
+    public void clone(IStorage storage2) {
+        try {
+            if (saveToDisk) {
+                storage2.store(getFileName(), runHash);
+            }
+        } catch (Exception e) {
+            logException("Unable to copy run info files " + getFileName() + " to " + storage2.getDirectoryName(), e);
+        }
+    }
+
+    private void logException(String string, Exception e) {
+        if (StaticLog.getLog() == null) {
+            StaticLog.getLog().log(Log.WARNING, string, e);
+        } else {
+            System.err.println(string + " " +e.getMessage());
+            e.printStackTrace(System.err);
+        }
+    }
 }

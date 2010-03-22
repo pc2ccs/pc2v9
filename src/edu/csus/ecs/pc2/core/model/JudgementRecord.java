@@ -27,12 +27,22 @@ public class JudgementRecord implements Serializable {
      * Will match Judgement.getElementId();
      */
     private ElementId judgementId = null;
+
+    /**
+     * A string that identifies this type.
+     * 
+     * This string also is used in naming files on disk.
+     * 
+     */
+    public static final String JUDGEMENT_RECORD_ID = "JudgementRecord";
     
     /**
      * A Unique contest-wide identifier this JudgementRecord instance.
      * 
      */
-    private ElementId elementId = new ElementId ("JudgementRecord");
+    
+    
+    private ElementId elementId = new ElementId (JUDGEMENT_RECORD_ID);
 
     /**
      * Who entered this judgement.

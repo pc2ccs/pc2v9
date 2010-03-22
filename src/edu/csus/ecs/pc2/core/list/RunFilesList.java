@@ -1,11 +1,15 @@
 package edu.csus.ecs.pc2.core.list;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 
 import edu.csus.ecs.pc2.core.IStorage;
+import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.log.StaticLog;
+import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
@@ -34,8 +38,6 @@ public class RunFilesList implements Serializable {
      * 
      */
     private static final long serialVersionUID = -15984887352160586L;
-
-    public static final String SVN_ID = "$Id$";
 
     /**
      * Write runs files to disk.
@@ -225,6 +227,49 @@ public class RunFilesList implements Serializable {
      */
     public boolean isWriteToDisk() {
         return writeToDisk;
+    }
+
+
+    public void clone(IStorage storage2) {
+
+        if (writeToDisk) {
+
+            File dir = new File(storage.getDirectoryName());
+            if (dir.isDirectory()) {
+                FileFilter filter = new FileFilter() {
+                    public boolean accept(File pathname) {
+                        return pathname.getName().toLowerCase().endsWith(RunResultsFileList.EXTENSION);
+                    }
+                };
+                File[] entries = dir.listFiles(filter);
+
+                for (File file : entries) {
+
+                    try {
+                        // Only clone files with JUDGEMENT_RECORD_ID
+
+                        if (file.getCanonicalFile().toString().indexOf(JudgementRecord.JUDGEMENT_RECORD_ID) == -1) {
+
+                            Serializable serializable = storage.load(file.getCanonicalPath());
+                            storage2.store(file.getName(), serializable);
+                        }
+                    } catch (Exception e) {
+                        logException("Unable to copy file " + file.getName() + " to " + storage2.getDirectoryName(), e);
+                    }
+                }
+                dir = null;
+                entries = null;
+            }
+        } 
+    }
+
+    private void logException(String string, Exception e) {
+        if (StaticLog.getLog() == null) {
+            StaticLog.getLog().log(Log.WARNING, string, e);
+        } else {
+            System.err.println(string + " " +e.getMessage());
+            e.printStackTrace(System.err);
+        }
     }
 
 }
