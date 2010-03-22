@@ -190,7 +190,9 @@ public class FileSecurity implements IStorage {
         try {
             tmpKeyPair = (KeyPair) decryptObject(objectFromDisk, secretKey);
         } catch (Exception e) {
-            StaticLog.getLog().log(Log.INFO, "verify password - failed to decrypt object", e);
+            if (StaticLog.getLog() != null){
+                StaticLog.getLog().log(Log.INFO, "verify password - failed to decrypt object", e);
+            }
             throw new FileSecurityException(FAILED_TO_DECRYPT);
         }
 
