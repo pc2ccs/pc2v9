@@ -1,14 +1,15 @@
 package edu.csus.ecs.pc2.core.list;
 
+import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
-import junit.framework.TestCase;
 
 /**
  * Test for loginlist 
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  * 
  */
 
@@ -18,6 +19,8 @@ public class LoginListTest extends TestCase {
     private LoginList loginList = new LoginList();
 
     private int siteNumber = 120;
+
+    private boolean debugMode = false;
 
     public void testSimple() {
         ConnectionHandlerID connectionHandlerID = new ConnectionHandlerID("id1");
@@ -41,8 +44,10 @@ public class LoginListTest extends TestCase {
 
         ConnectionHandlerID connectionHandlerID2 = loginList.getConnectionHandleID(clientId);
 
-        System.err.println("debug " + connectionHandlerID);
-        System.err.println("debug " + connectionHandlerID2);
+        if (debugMode){
+            System.err.println("debug " + connectionHandlerID);
+            System.err.println("debug " + connectionHandlerID2);
+        }
 
         assertTrue("Failed getConnectionHandleID lookup ", connectionHandlerID.equals(connectionHandlerID2));
 
@@ -51,9 +56,10 @@ public class LoginListTest extends TestCase {
 
         clientId2 = loginList.getClientId(connectionHandlerID2);
 
+        if (debugMode){
         System.err.println("debug " + clientId);
         System.err.println("debug " + clientId2);
-
+        }
         assertTrue("Failed getClientId lookup ", clientId.equals(clientId2));
 
         connectionHandlerID2 = loginList.getConnectionHandleID(clientId55);
@@ -64,23 +70,28 @@ public class LoginListTest extends TestCase {
         ClientId clientId3 = loginList.getClientId(nextConnectionHandlerID);
 
         assertFalse("Failed getClientId 2 lookup ", clientId55.equals(clientId2));
+        if (debugMode){
 
         System.err.println();
         System.err.println("debug " + clientId2);
         System.err.println("debug " + clientId3);
         System.err.println("debug " + clientId55);
         System.err.println();
-
+        }
         assertTrue("Failed getClientId 2A lookup ", clientId55.equals(clientId3));
 
         connectionHandlerID2 = new ConnectionHandlerID("id3");
 
         loginList.add(clientId, connectionHandlerID2);
         ClientId clientId4 = loginList.getClientId(connectionHandlerID2);
+        
+        if (debugMode){
         System.err.println();
         System.err.println("debug " + clientId);
         System.err.println("debug " + clientId4);
         System.err.println();
+        }
+        
         assertTrue("Failed getClientId 2B lookup ", clientId.equals(clientId4));
 
     }

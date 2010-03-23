@@ -25,7 +25,6 @@ import edu.csus.ecs.pc2.core.security.FileSecurityException;
 
 // $HeadURL$
 public class ClarificationList implements Serializable {
-    public static final String SVN_ID = "$Id$";
 
     /**
      * 
@@ -43,6 +42,7 @@ public class ClarificationList implements Serializable {
      * Next clarification Number for this site.
      */
     private int nextClarificationNumber = 1;
+
 
     private IStorage storage = null;
 
@@ -139,6 +139,7 @@ public class ClarificationList implements Serializable {
      */
     public void clear() throws IOException, ClassNotFoundException, FileSecurityException {
         clarHash = new Hashtable<String, Clarification>();
+        nextClarificationNumber = 1;
         writeToDisk();
     }
 
@@ -296,4 +297,9 @@ public class ClarificationList implements Serializable {
         }
     }
 
+    public int getNextClarificationNumber() {
+        return nextClarificationNumber;
+    }
+
+    
 }

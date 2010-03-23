@@ -82,7 +82,12 @@ public class RunResultsFileList implements Serializable {
     }
 
     private String getFileName(int siteNumber, int runNumber, JudgementRecord judgementRecord) {
-        return storage.getDirectoryName() + File.separator + "s" + siteNumber + "r" + runNumber + "." + stripChars(judgementRecord.getElementId().toString()) + EXTENSION;
+        String name = "s" + siteNumber + "r" + runNumber + "." + stripChars(judgementRecord.getElementId().toString()) + EXTENSION;
+        if (storage != null) {
+            return storage.getDirectoryName() + File.separator + name;
+        } else {
+            return name;
+        }
     }
 
     public String getFileName(Run run, JudgementRecord judgementRecord) {
@@ -128,7 +133,7 @@ public class RunResultsFileList implements Serializable {
         if (writeToDisk) {
             return getRunResultFiles(run.getSiteNumber(), run.getNumber(), judgementRecord);
         } else {
-            if (singleRunResultFiles.getJudgementId().equals(judgementRecord.getElementId())) {
+            if (singleRunResultFiles.getJudgementId().equals(judgementRecord.getJudgementId())) {
                 return singleRunResultFiles;
             } else {
                 return null;

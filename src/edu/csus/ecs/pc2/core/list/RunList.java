@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.core.list;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Enumeration;
@@ -258,10 +259,9 @@ public class RunList implements Serializable {
             runHash = (Hashtable<String, Run>) storage.load(filename);
             nextRunNumber = lastRunNumber(siteNumber) + 1;
         } else {
-            // TODO INFO ? No files loaded, log this ?
-            StaticLog.info("loadFromDisk:  INFO ? No files loaded, log this ?");
+            FileNotFoundException exception = new FileNotFoundException("Unable to load run info from disk for site " + siteNumber);
+            logException("Unable to read file", exception);
         }
-
     }
 
     /**
@@ -313,13 +313,17 @@ public class RunList implements Serializable {
             logException("Unable to copy run info files " + getFileName() + " to " + storage2.getDirectoryName(), e);
         }
     }
-
+    
     private void logException(String string, Exception e) {
         if (StaticLog.getLog() == null) {
             StaticLog.getLog().log(Log.WARNING, string, e);
         } else {
-            System.err.println(string + " " +e.getMessage());
+            System.err.println(string + " " + e.getMessage());
             e.printStackTrace(System.err);
         }
+    }
+    
+    public int getNextRunNumber() {
+        return nextRunNumber;
     }
 }
