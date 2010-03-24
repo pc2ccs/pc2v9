@@ -10,6 +10,7 @@ import java.util.Properties;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.VersionInfo;
+import edu.csus.ecs.pc2.core.exception.ProfileException;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.security.FileSecurity;
@@ -69,8 +70,9 @@ public class ProfileManager {
      * 
      * @param profile
      * @return true if profile
+     * @throws ProfileException 
      */
-    public boolean isProfileAvailable(Profile profile, char[] contestPassword) {
+    public boolean isProfileAvailable(Profile profile, char[] contestPassword) throws ProfileException {
 
         if (profile == null) {
             throw new IllegalArgumentException("profile can not be null");
@@ -82,18 +84,17 @@ public class ProfileManager {
 
             FileSecurity fileSecurity = new FileSecurity(profilePath);
             if (fileSecurity == null){
-                System.out.println("debug22 It is null");
+                throw new ProfileException("Unable to intialize FileSecurity for path "+profilePath);
             }
             
             try {
                 return fileSecurity.verifyPassword(contestPassword);
             } catch (FileSecurityException e) {
-                // Clearly not a valid password or location ;)
-                return false;
+                throw new ProfileException(e);
             }
+        } else {
+            throw new ProfileException("Profile directory does not exist: "+profilePath);
         }
-
-        return false;
     }
 
     public Profile defaultProfile(String filename) throws IOException, ProfileLoadException {

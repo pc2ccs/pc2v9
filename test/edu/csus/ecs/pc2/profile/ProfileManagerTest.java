@@ -3,6 +3,8 @@ package edu.csus.ecs.pc2.profile;
 import java.io.File;
 
 import junit.framework.TestCase;
+import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.security.FileSecurity;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
@@ -21,6 +23,7 @@ public class ProfileManagerTest extends TestCase {
 
     protected void setUp() throws Exception {
         super.setUp();
+        StaticLog.setLog(new Log("PMT.log"));
     }
 
     protected void tearDown() throws Exception {
@@ -28,26 +31,35 @@ public class ProfileManagerTest extends TestCase {
     }
 
     public void testWriteRead() throws Exception {
+        
+        String baseDir = "profiles";
+        new File(baseDir).mkdirs();
 
         String title = "Sample";
         String description = "description 11";
         Profile profile1 = new Profile(title);
         profile1.setDescription(description);
-        profile1.setProfilePath("/tmp/foo2");
 
         ProfileManager manager = new ProfileManager();
 
-        String filename = "test" + ProfileManager.PROFILE_INDEX_FILENAME;
+        String filename = "testwr" + ProfileManager.PROFILE_INDEX_FILENAME;
+        if (new File(filename).isFile()){
+            new File(filename).delete();
+        }
 
         Profile profile4 = new Profile("Profile IV");
         profile4.setDescription(profile4.getName());
-        profile4.setProfilePath("/tmp/fooIV");
 
         Profile profile3 = new Profile("Profile III");
         profile3.setDescription(profile3.getName());
-        profile3.setProfilePath("/tmp/foo3");
 
         Profile[] profiles = { profile1, profile4, profile3 };
+        
+        String password = "contest";
+        
+        createProfileFilesAndDirs(profile1, password);
+        createProfileFilesAndDirs(profile3, password);
+        createProfileFilesAndDirs(profile4, password);
 
         manager.store(filename, profiles, profile1);
 
@@ -63,55 +75,64 @@ public class ProfileManagerTest extends TestCase {
 
         if (debugFlag) {
             for (Profile profile : list) {
-                System.out.println("Profile " + profile.getName());
+                System.out.println("Profile: " + profile.getName() + " " + profile.getProfilePath());
             }
         }
 
         // Test profiles which do not have files/dirs
         for (Profile profile : list) {
 
-            assertFalse("Profile not available " + profile.toString(), manager.isProfileAvailable(profile, "contest".toCharArray()));
-
+            if (debugFlag) {
+                System.out.println("Profile> " + profile.getName() + " " + profile.getProfilePath());
+            }
+            
+            boolean available = manager.isProfileAvailable(profile, password.toCharArray());
+            assertTrue("Profile not available " + profile.getName()+" at "+profile.getProfilePath(),available);
         }
     }
 
-    public void testProfileAvailable() throws Exception {
-
-        String title = "Sample";
-        String description = "description 11";
-        Profile profile1 = new Profile(title);
-        profile1.setDescription(description);
-        profile1.setProfilePath("/tmp/foo2");
-
-        ProfileManager manager = new ProfileManager();
-
-        String filename = "test" + ProfileManager.PROFILE_INDEX_FILENAME;
-
-        Profile profile4 = new Profile("Profile IV");
-        profile4.setDescription(profile4.getName());
-        profile4.setProfilePath("/tmp/fooIV");
-
-        Profile profile3 = new Profile("Profile III");
-        profile3.setDescription(profile3.getName());
-        profile3.setProfilePath("/tmp/foo3");
-
-        Profile[] profiles = { profile1, profile4, profile3 };
-
-        manager.store(filename, profiles, profile1);
-
-        String password = "contest2";
-
-        createEncryptedDataFiles(profile1.getProfilePath(), password.toCharArray());
-        createEncryptedDataFiles(profile3.getProfilePath(), password.toCharArray());
-
-        // no encrypted password files
-        assertFalse(manager.isProfileAvailable(profile4, password.toCharArray()));
-
-        // encrypted password files
-        assertTrue(manager.isProfileAvailable(profile1, password.toCharArray()));
-        assertTrue(manager.isProfileAvailable(profile3, password.toCharArray()));
-
-    }
+//    public void testProfileAvailable() throws Exception {
+//
+//        String title = "Sample";
+//        String description = "description 11";
+//        Profile profile1 = new Profile(title);
+//        profile1.setDescription(description);
+//
+//        ProfileManager manager = new ProfileManager();
+//
+//        String filename = "testpa" + ProfileManager.PROFILE_INDEX_FILENAME;
+//        if (new File(filename).isFile()){
+//            new File(filename).delete();
+//        }
+//
+//
+//        Profile profile4 = new Profile("Profile IV");
+//        profile4.setDescription(profile4.getName());
+//
+//        Profile profile3 = new Profile("Profile III");
+//        profile3.setDescription(profile3.getName());
+//
+//        Profile[] profiles = { profile1, profile4, profile3 };
+//        
+//        String password = "contest2";
+//        
+//        createProfileFilesAndDirs(profile1, password);
+//        createProfileFilesAndDirs(profile3, password);
+//        createProfileFilesAndDirs(profile4, password);
+//
+//        manager.store(filename, profiles, profile1);
+//
+//        createEncryptedDataFiles(profile1.getProfilePath(), password.toCharArray());
+//        createEncryptedDataFiles(profile3.getProfilePath(), password.toCharArray());
+//
+//        // no encrypted password files
+//        assertFalse(manager.isProfileAvailable(profile4, password.toCharArray()));
+//
+//        // encrypted password files
+//        assertTrue(manager.isProfileAvailable(profile1, password.toCharArray()));
+//        assertTrue(manager.isProfileAvailable(profile3, password.toCharArray()));
+//
+//    }
 
     /**
      * Create encrypted files in directory.
@@ -139,12 +160,11 @@ public class ProfileManagerTest extends TestCase {
 
         String profilePropertiesFileName = "storeOne.properties";
 
-        String password = "contest22";
+        String password = "contest";
 
         // Create profiles directory
 
         String baseDir = "profiles";
-
         new File(baseDir).mkdirs();
 
         String title = "Profile One";
@@ -232,6 +252,13 @@ public class ProfileManagerTest extends TestCase {
      * @throws FileSecurityException
      */
     private void createProfileFilesAndDirs(Profile profile, String password) throws FileSecurityException {
+        
+//        System.out.println("debug22 createProfileFilesAndDirs " + profile.getProfilePath());
+        
+        if (new File(profile.getProfilePath()).isDirectory()){
+            new Exception("Directory already exists: "+profile.getProfilePath());
+        }
+        
         new File(profile.getProfilePath()).mkdirs();
         createEncryptedDataFiles(profile.getProfilePath(), password.toCharArray());
     }
@@ -257,15 +284,12 @@ public class ProfileManagerTest extends TestCase {
         String description = "description 11";
         Profile profile1 = new Profile(title);
         profile1.setDescription(description);
-        profile1.setProfilePath("/tmp/foo2");
 
         Profile profile3 = new Profile("Profile III");
         profile3.setDescription(profile3.getName());
-        profile3.setProfilePath("/tmp/foo3");
 
         Profile profile4 = new Profile("Profile IV");
         profile4.setDescription(profile4.getName());
-        profile4.setProfilePath("/tmp/fooIV");
 
         Profile[] threeProfiles = { profile1, profile4, profile3 };
 
@@ -283,7 +307,6 @@ public class ProfileManagerTest extends TestCase {
 
         Profile profile2 = new Profile("Profile 2");
         profile2.setDescription(profile2.getName());
-        profile2.setProfilePath("/tmp/fooTwo");
 
         Profile[] list2 = { profile2, profile1 };
 

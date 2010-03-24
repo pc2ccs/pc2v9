@@ -10,6 +10,8 @@ import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.exception.ClarificationUnavailableException;
 import edu.csus.ecs.pc2.core.exception.ContestSecurityException;
+import edu.csus.ecs.pc2.core.exception.ProfileCloneException;
+import edu.csus.ecs.pc2.core.exception.ProfileException;
 import edu.csus.ecs.pc2.core.exception.RunUnavailableException;
 import edu.csus.ecs.pc2.core.exception.UnableToUncheckoutRunException;
 import edu.csus.ecs.pc2.core.list.ClientIdComparator;
@@ -31,6 +33,7 @@ import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.ISubmission;
+import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
@@ -96,8 +99,10 @@ public class PacketHandler {
      * @throws FileSecurityException 
      * @throws ClassNotFoundException 
      * @throws IOException 
+     * @throws ProfileCloneException 
      */
-    public void handlePacket(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException, IOException, ClassNotFoundException, FileSecurityException {
+    public void handlePacket(Packet packet, ConnectionHandlerID connectionHandlerID) throws Exception {
+//        , IOException, ClassNotFoundException, FileSecurityException, ProfileCloneException 
 
         Type packetType = packet.getType();
 
@@ -350,9 +355,11 @@ public class PacketHandler {
      * 
      * @param packet
      * @param connectionHandlerID
+     * @throws ProfileException 
+     * @throws FileSecurityException 
      */
     // TODO code handleSwitchProfile
-    private void handleSwitchProfile(Packet packet, ConnectionHandlerID connectionHandlerID) {
+    private void handleSwitchProfile(Packet packet, ConnectionHandlerID connectionHandlerID) throws ProfileException, FileSecurityException {
      
 //        Profile inProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE);
         Profile newProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.NEW_PROFILE);
@@ -366,8 +373,17 @@ public class PacketHandler {
         // TODO insure new profile exists
         // if profile does exist - change
         // if profile does not exist - 
+        
+        ProfileManager manager = new ProfileManager();
+        
+        if ( manager.isProfileAvailable(newProfile, contestPassword.toCharArray()) ) {
+            
+            contest = ProfileManager.switchProfile(contest, newProfile, contestPassword.toCharArray());
+            
+        } else {
+            throw new FileSecurityException("Can not switch profiles, invalid contest password");
+        }
 
-        contest = ProfileManager.switchProfile(contest, newProfile, contestPassword.toCharArray());
         
         // TODO dal set contest
         
@@ -376,23 +392,36 @@ public class PacketHandler {
         // set contest/controller to reset all variables
     }
 
+    /**
+     * Update Client Profile handle new contest profile/settings. 
+     * 
+     * @param packet
+     * @param connectionHandlerID
+     * @throws IOException
+     * @throws ClassNotFoundException
+     * @throws FileSecurityException
+     */
     private void handleUpdateClientProfile(Packet packet, ConnectionHandlerID connectionHandlerID) throws IOException, ClassNotFoundException, FileSecurityException {
-        // TODO code handleUpdateClientProfile
-        
-        System.err.println ("TODO "+packet);
-        Profile inProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE);
-        Profile updatedProfile = contest.updateProfile(inProfile);
-        Packet addPacket = PacketFactory.createUpdateSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, updatedProfile);
-        sendToJudgesAndOthers(addPacket, true);
-        contest.storeConfiguration(controller.getLog());
-        
+
+        if (isServer()){
+            
+            Profile inProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE);
+            Profile updatedProfile = contest.updateProfile(inProfile);
+            Packet addPacket = PacketFactory.createUpdateSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, updatedProfile);
+            sendToJudgesAndOthers(addPacket, true);
+            
+        } else {
+            
+            // This is a update/new profile so all data is reset then re-added from this packet
+            
+            contest.resetData();
+            loadDataIntoModel(packet, connectionHandlerID);
+        }
     }
 
-    private void handleCloneProfile(Packet packet, ConnectionHandlerID connectionHandlerID) throws IOException, ClassNotFoundException, FileSecurityException {
-        // TODO code (finish) handleCloneProfile
+    private void handleCloneProfile(Packet packet, ConnectionHandlerID connectionHandlerID) throws IOException, ClassNotFoundException, FileSecurityException, ProfileCloneException {
         
-        System.err.println ("TODO "+packet);
-        
+        // FIXME code security check only Admins can change profiles
 //        prop.put(CLIENT_ID, source);
 //        ClientId adminClientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
         
@@ -401,9 +430,10 @@ public class PacketHandler {
         
 //        prop.put(PROFILE_CLONE_SETTINGS, settings);
         ProfileCloneSettings settings =  (ProfileCloneSettings) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE_CLONE_SETTINGS);
-        
+    
+        // FIXME uncomment switchProfileNow
 //        prop.put(SWITCH_PROFILE, new Boolean (switchNow));
-//        boolean switchProfileNow = ((Boolean) PacketFactory.getObjectValue(packet, PacketFactory.SWITCH_PROFILE)).booleanValue();
+        boolean switchProfileNow = ((Boolean) PacketFactory.getObjectValue(packet, PacketFactory.SWITCH_PROFILE)).booleanValue();
         
         Profile newProfile = new Profile(settings.getName());
         newProfile.setDescription(settings.getTitle());
@@ -412,11 +442,23 @@ public class PacketHandler {
         
         Profile addedProfile = contest.addProfile(newProfile);
         
-        Packet addPacket = PacketFactory.createAddSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, addedProfile);
+        InternalContest newContest = new InternalContest();
+        
+        /**
+         * This clones the existing contest based on the settings,
+         * including copying and saving all settings on disk.
+         */
+        contest.clone(newContest, newProfile, "", settings);
         
         contest.storeConfiguration(controller.getLog());
         
-        sendToJudgesAndOthers(addPacket, true);
+        if (switchProfileNow ){
+            // FIXME if switchProfileNow MUST somehow switch profile.
+            System.err.println("Would have switched profile now to "+newProfile.getName());
+        } else {
+            Packet addPacket = PacketFactory.createAddSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, addedProfile);
+            sendToJudgesAndOthers(addPacket, true);
+        }
     }
 
     private String createProfilePath(Profile newProfile) {
@@ -3403,12 +3445,8 @@ public class PacketHandler {
         // System.err.flush();
     }
 
-    public void info(String s, Exception exception) {
-        // System.err.flush();
+    public void logException(String s, Exception exception) {
         controller.getLog().log(Log.INFO, s, exception);
-        // System.err.println(Thread.currentThread().getName() + " " + s);
-        // System.err.flush();
-        // exception.printStackTrace(System.err);
     }
 
 }

@@ -259,8 +259,7 @@ public class RunList implements Serializable {
             runHash = (Hashtable<String, Run>) storage.load(filename);
             nextRunNumber = lastRunNumber(siteNumber) + 1;
         } else {
-            FileNotFoundException exception = new FileNotFoundException("Unable to load run info from disk for site " + siteNumber);
-            logException("Unable to read file", exception);
+            throw new FileNotFoundException("Unable to load run info from disk for site " + siteNumber);
         }
     }
 

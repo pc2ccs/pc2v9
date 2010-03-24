@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.core.model;
 import java.io.File;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Properties;
 import java.util.UUID;
 
 /**
@@ -24,7 +25,9 @@ public class Profile implements IElementObject, Serializable {
     private ElementId elementId = null;
 
     private String profilePath = null;
-
+    
+    private Properties properties = new Properties();
+    
     /**
      * 
      */
@@ -138,7 +141,7 @@ public class Profile implements IElementObject, Serializable {
         } else if (basepath.substring(basepath.length() - 1).equals(File.separator)) {
             basepath += File.separator;
         }
-        return basepath + "profiles/P" + UUID.randomUUID().toString();
+        return basepath + "profiles " + File.separator + "P" + UUID.randomUUID().toString();
     }
 
     public String createProfilePath(String basepath) {
@@ -211,4 +214,13 @@ public class Profile implements IElementObject, Serializable {
             return false;
         }
     }
+
+    public String getProperty(String key) {
+        return properties.getProperty(key);
+    }
+
+    public void setProperty(String key, String value) {
+        properties.setProperty(key, value);
+    }
+    
 }
