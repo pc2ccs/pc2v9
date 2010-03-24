@@ -31,9 +31,6 @@ public class ProfileManagerTest extends TestCase {
     }
 
     public void testWriteRead() throws Exception {
-        
-        String baseDir = "profiles";
-        new File(baseDir).mkdirs();
 
         String title = "Sample";
         String description = "description 11";
@@ -91,63 +88,40 @@ public class ProfileManagerTest extends TestCase {
         }
     }
 
-//    public void testProfileAvailable() throws Exception {
-//
-//        String title = "Sample";
-//        String description = "description 11";
-//        Profile profile1 = new Profile(title);
-//        profile1.setDescription(description);
-//
-//        ProfileManager manager = new ProfileManager();
-//
-//        String filename = "testpa" + ProfileManager.PROFILE_INDEX_FILENAME;
-//        if (new File(filename).isFile()){
-//            new File(filename).delete();
-//        }
-//
-//
-//        Profile profile4 = new Profile("Profile IV");
-//        profile4.setDescription(profile4.getName());
-//
-//        Profile profile3 = new Profile("Profile III");
-//        profile3.setDescription(profile3.getName());
-//
-//        Profile[] profiles = { profile1, profile4, profile3 };
-//        
-//        String password = "contest2";
-//        
-//        createProfileFilesAndDirs(profile1, password);
-//        createProfileFilesAndDirs(profile3, password);
-//        createProfileFilesAndDirs(profile4, password);
-//
-//        manager.store(filename, profiles, profile1);
-//
-//        createEncryptedDataFiles(profile1.getProfilePath(), password.toCharArray());
-//        createEncryptedDataFiles(profile3.getProfilePath(), password.toCharArray());
-//
-//        // no encrypted password files
-//        assertFalse(manager.isProfileAvailable(profile4, password.toCharArray()));
-//
-//        // encrypted password files
-//        assertTrue(manager.isProfileAvailable(profile1, password.toCharArray()));
-//        assertTrue(manager.isProfileAvailable(profile3, password.toCharArray()));
-//
-//    }
+    public void testProfileAvailable() throws Exception {
 
-    /**
-     * Create encrypted files in directory.
-     * 
-     * This creates the files which store the contest password. Creating these files and using the correct contest password is required for {@link ProfileManager#isProfileAvailable(Profile, char[])}
-     * to return true.
-     * 
-     * @param profilePath
-     * @param password
-     * @throws FileSecurityException
-     */
-    private void createEncryptedDataFiles(String profilePath, char[] password) throws FileSecurityException {
+        String title = "Sample";
+        String description = "description 11";
+        Profile profile1 = new Profile(title);
+        profile1.setDescription(description);
 
-        FileSecurity fileSecurity = new FileSecurity(profilePath);
-        fileSecurity.saveSecretKey(password);
+        ProfileManager manager = new ProfileManager();
+
+        String filename = "testpa" + ProfileManager.PROFILE_INDEX_FILENAME;
+        if (new File(filename).isFile()) {
+            new File(filename).delete();
+        }
+
+        Profile profile4 = new Profile("Profile IV");
+        profile4.setDescription(profile4.getName());
+
+        Profile profile3 = new Profile("Profile III");
+        profile3.setDescription(profile3.getName());
+
+        Profile[] profiles = { profile1, profile4, profile3 };
+
+        String password = "contest2";
+
+        createProfileFilesAndDirs(profile1, password);
+        createProfileFilesAndDirs(profile3, password);
+        createProfileFilesAndDirs(profile4, password);
+
+        manager.store(filename, profiles, profile1);
+
+        // encrypted password files
+        assertTrue(manager.isProfileAvailable(profile1, password.toCharArray()));
+        assertTrue(manager.isProfileAvailable(profile3, password.toCharArray()));
+        assertTrue(manager.isProfileAvailable(profile4, password.toCharArray()));
 
     }
 
@@ -253,14 +227,16 @@ public class ProfileManagerTest extends TestCase {
      */
     private void createProfileFilesAndDirs(Profile profile, String password) throws FileSecurityException {
         
-//        System.out.println("debug22 createProfileFilesAndDirs " + profile.getProfilePath());
+        String profileDirectory = profile.getProfilePath();
         
-        if (new File(profile.getProfilePath()).isDirectory()){
-            new Exception("Directory already exists: "+profile.getProfilePath());
+        if (new File(profileDirectory).isDirectory()){
+            new Exception("Directory already exists: "+profileDirectory);
         }
         
-        new File(profile.getProfilePath()).mkdirs();
-        createEncryptedDataFiles(profile.getProfilePath(), password.toCharArray());
+        new File(profileDirectory).mkdirs();
+        
+        FileSecurity fileSecurity = new FileSecurity(profileDirectory);
+        fileSecurity.saveSecretKey(password.toCharArray());
     }
 
     /**

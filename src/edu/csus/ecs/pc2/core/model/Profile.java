@@ -141,7 +141,7 @@ public class Profile implements IElementObject, Serializable {
         } else if (basepath.substring(basepath.length() - 1).equals(File.separator)) {
             basepath += File.separator;
         }
-        return basepath + "profiles " + File.separator + "P" + UUID.randomUUID().toString();
+        return basepath + "profiles" + File.separator + "P" + UUID.randomUUID().toString();
     }
 
     public String createProfilePath(String basepath) {

@@ -1,11 +1,14 @@
 package edu.csus.ecs.pc2.core.model;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Vector;
 
 import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
+import edu.csus.ecs.pc2.core.security.FileSecurity;
+import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
 
 /**
@@ -87,6 +90,27 @@ public class InternalContestTest extends TestCase {
         compareContests("identical", contest1, contest2);
     }
 
+    /**
+     * Create profile directory and security/encryption information.
+     * 
+     * @param profile
+     * @param password
+     * @throws FileSecurityException
+     */
+    private void createProfileFilesAndDirs(Profile profile, String password) throws FileSecurityException {
+
+        String profileDirectory = profile.getProfilePath();
+        
+        if (new File(profileDirectory).isDirectory()){
+            new Exception("Directory already exists: "+profileDirectory);
+        }
+        
+        new File(profileDirectory).mkdirs();
+        
+        FileSecurity fileSecurity = new FileSecurity(profileDirectory);
+        fileSecurity.saveSecretKey(password.toCharArray());
+    }
+    
     public void testCloneComplex() throws Exception {
 
         SampleContest sampleContest = new SampleContest();
@@ -94,6 +118,8 @@ public class InternalContestTest extends TestCase {
         IInternalContest contest1 = sampleContest.createContest(1, 2, 22, 2, true);
         
         InternalContest contest2 = new InternalContest();
+        Profile profile1 = new Profile("Profile One");
+        contest1.setProfile(profile1);
 
         Profile profile = new Profile("Profile A");
         String profileBasePath = "";
@@ -102,6 +128,9 @@ public class InternalContestTest extends TestCase {
         
         settings.setCopyAccounts(true);
         settings.setCopyContestSettings(false);
+        
+        createProfileFilesAndDirs(profile, password);
+        
         
         IInternalContest contest3 = contest1.clone(contest2, profile, profileBasePath, settings);
         
