@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Vector;
 
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IStorage;
 import edu.csus.ecs.pc2.core.exception.ClarificationUnavailableException;
 import edu.csus.ecs.pc2.core.exception.ContestSecurityException;
@@ -804,7 +805,10 @@ public interface IInternalContest {
     void passwordChanged(boolean success, ClientId clientId, String message);
 
     /**
-     * Clear data caches.
+     * Clear data caches and fires REFRESH_ALL events.
+     * 
+     * Clears caches for clars and runs , removes all checked out status'.
+     * Resets next run Id and next Clarification id.
      * 
      */
     void resetData();
@@ -890,10 +894,17 @@ public interface IInternalContest {
     /**
      * Clone a contest settings/submissions based on settings.
      * 
+     * Does not switch profiles - just makes a copy of it based on the
+     * current profile and the ProfileCloneSettings.
+     * <P>
+     * To switch profiles see/use {@link IInternalController#cloneProfile(Profile, ProfileCloneSettings, boolean)};
+     * 
      * @param contest
      * @param newProfile
+     * @param profileBasePath
      * @param settings
-     * @return the input contest
+     * @return
+     * @throws ProfileCloneException
      */
     IInternalContest clone(IInternalContest contest, Profile newProfile, String profileBasePath, ProfileCloneSettings settings) throws ProfileCloneException;
 
@@ -911,5 +922,22 @@ public interface IInternalContest {
      */
     ProfileCloneSettings setProfileCloneSettings(ProfileCloneSettings profileCloneSettings);
 
+    /**
+     * clone/import Clarifications from input contest.
+     * 
+     * @param inputContest
+     * @param newProfile
+     * @throws ProfileCloneException
+     */
+    void cloneClarifications(IInternalContest inputContest, Profile newProfile) throws ProfileCloneException;
+
+    /**
+     * clone/import Run and Run Files from input contest.
+     * 
+     * @param inputContest
+     * @param newProfile
+     * @throws ProfileCloneException
+     */
+    void cloneRunsAndRunFiles(IInternalContest inputContest, Profile newProfile) throws ProfileCloneException;
     
 }

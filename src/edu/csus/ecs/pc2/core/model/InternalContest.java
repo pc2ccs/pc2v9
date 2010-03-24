@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Enumeration;
@@ -47,6 +48,7 @@ import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.SecurityMessageHandler;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
+import edu.csus.ecs.pc2.profile.ProfileManager;
 
 /**
  * Implementation of IInternalContest - the contest model.
@@ -235,9 +237,33 @@ public class InternalContest implements IInternalContest {
         runResultFilesList = new RunResultsFileList(storage);
         clarificationList = new ClarificationList(storage);
         configurationIO = new ConfigurationIO(storage);
+        
+        resetRunStatus(siteNum);
+
+        try {
+            clarificationList.loadFromDisk(siteNum);
+            Clarification[] clarList = clarificationList.getList();
+            for (int i = 0; i < clarList.length; i++) {
+                if (clarList[i].getState().equals(ClarificationStates.BEING_ANSWERED)) {
+                    StaticLog.info("Changing Clarification " + clarList[i].getElementId() + " from BEING_ANSWERED by " + clarList[i].getWhoCheckedItOutId() + "to NEW");
+                    clarificationList.updateClarification(clarList[i], ClarificationStates.NEW, null);
+                }
+            }
+        } catch (Exception e) {
+            logException("Trouble loading clarifications from disk ", e);
+        }
+
+    }
+
+    /**
+     * For each run reset to a non-checked out state. 
+     * @param siteNum
+     */
+    private void resetRunStatus(int siteNum) {
 
         try {
             runList.loadFromDisk(siteNum);
+
             Run[] runs = runList.getList();
             for (int i = 0; i < runs.length; i++) {
                 RunStates status = runs[i].getStatus();
@@ -254,26 +280,19 @@ public class InternalContest implements IInternalContest {
                 }
                 if (!runs[i].getStatus().equals(status)) {
                     StaticLog.info("Changing Run " + runs[i].getElementId() + " from " + runs[i].getStatus() + "to NEW");
+
                     runList.updateRunStatus(runs[i], status);
-
                 }
             }
-        } catch (Exception e) {
-            StaticLog.log("Trouble loading runs from disk ", e);
+        } catch (FileNotFoundException e){
+            StaticLog.getLog().log(Log.INFO, "startup: no runs found on disk.");
+        } catch (IOException e) {
+            logException(e);
+        } catch (ClassNotFoundException e) {
+            logException(e);
+        } catch (FileSecurityException e) {
+            logException(e);
         }
-        try {
-            clarificationList.loadFromDisk(siteNum);
-            Clarification[] clarList = clarificationList.getList();
-            for (int i = 0; i < clarList.length; i++) {
-                if (clarList[i].getState().equals(ClarificationStates.BEING_ANSWERED)) {
-                    StaticLog.info("Changing Clarification " + clarList[i].getElementId() + " from BEING_ANSWERED by " + clarList[i].getWhoCheckedItOutId() + "to NEW");
-                    clarificationList.updateClarification(clarList[i], ClarificationStates.NEW, null);
-                }
-            }
-        } catch (Exception e) {
-            StaticLog.log("Trouble loading clarifications from disk ", e);
-        }
-
     }
 
     public void initializeStartupData(int siteNum) {
@@ -306,7 +325,6 @@ public class InternalContest implements IInternalContest {
             generateNewAccounts(ClientType.Type.ADMINISTRATOR.toString(), 1, true);
         }
     }
-
 
     public void addRunListener(IRunListener runListener) {
         runListenerList.addElement(runListener);
@@ -588,14 +606,11 @@ public class InternalContest implements IInternalContest {
             addClarification(clarification);
             return newClarification;
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logException(e);
         } catch (ClassNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logException(e);
         } catch (FileSecurityException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logException(e);
         }
         
         return null;
@@ -611,14 +626,11 @@ public class InternalContest implements IInternalContest {
                 clarificationEvent.setWhoModifiedClarification(whoAnsweredIt);
                 fireClarificationListener(clarificationEvent);
             } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                logException(e);
             } catch (ClassNotFoundException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                logException(e);
             } catch (FileSecurityException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                logException(e);
             }
         
         } else {
@@ -629,16 +641,12 @@ public class InternalContest implements IInternalContest {
                 clarificationEvent.setWhoModifiedClarification(whoAnsweredIt);
                 fireClarificationListener(clarificationEvent);
             } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                logException(e);
             } catch (ClassNotFoundException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                logException(e);
             } catch (FileSecurityException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                logException(e);
             }
-       
         }
     }
 
@@ -652,16 +660,12 @@ public class InternalContest implements IInternalContest {
             clarificationEvent.setSentToClientId(whoChangedIt);
             fireClarificationListener(clarificationEvent);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logException(e);
         } catch (ClassNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logException(e);
         } catch (FileSecurityException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logException(e);
         }
-   
     }
 
     public void clarificationNotAvailable(Clarification clar) {
@@ -796,8 +800,7 @@ public class InternalContest implements IInternalContest {
         try {
             securityMessageHandler = new SecurityMessageHandler(clientId);
         } catch (Exception e) {
-            // TODO handle this better sometime 
-            e.printStackTrace(System.err);
+            logException("Trouble establishing SecurityMessageHandler", e);
         }
         
         if (isAllowed(localClientId, Permission.Type.ALLOWED_TO_FETCH_RUN)){
@@ -1103,10 +1106,6 @@ public class InternalContest implements IInternalContest {
         return (ClientId[]) v.toArray(new ClientId[v.size()]);
     }
 
-    public static void info(String s) {
-        System.err.println(Thread.currentThread().getName() + " " + s);
-    }
-
     public Run[] getRuns() {
         return runList.getList();
     }
@@ -1265,19 +1264,15 @@ public class InternalContest implements IInternalContest {
             // No one did this ?
 
             Exception ex = new Exception("addRunJudgement - not in checkedout list, whoCheckedOut is null ");
-            StaticLog.log("Odd that. ", ex);
-            info("Exception in log" + ex.getMessage());
+            logException("Odd that. ", ex);
 
         } else if (!whoChangedItId.equals(whoCheckedOut)) {
             // The judge who submitted this judgement is different than who actually judged it ?
 
-            if (whoChangedItId.getClientType().equals(Type.ADMINISTRATOR)) {
-                info("Admin updating run " + run);
-
-            } else {
+            if (! whoChangedItId.getClientType().equals(Type.ADMINISTRATOR)) {
                 Exception ex = new Exception("addRunJudgement - who checked out and who it is differ ");
-                info("Exception in log" + ex.getMessage());
-            }
+                logException(ex);
+            } // else - ok, admin changed it.
 
         } // else - ok
 
@@ -1288,7 +1283,6 @@ public class InternalContest implements IInternalContest {
         runResultFilesList.add(theRun, judgementRecord, runResultFiles);
         
         if (whoCheckedOut != null) {
-//            info("Found checked out by " + whoCheckedOut + " judgement updated by " + judgementRecord.getJudgerClientId());
             runCheckOutList.remove(run.getElementId());
         }
         theRun = runList.get(run);
@@ -1904,7 +1898,7 @@ public class InternalContest implements IInternalContest {
     public void resetData() {
         
         synchronized (runCheckOutList){
-            // FIXME clear all checked out runs 
+            // FIXME on all client Run listeners (elsewhere) need to uncheckout too 
             runCheckOutList = new Hashtable<ElementId, ClientId>();
         }
 
@@ -1914,16 +1908,12 @@ public class InternalContest implements IInternalContest {
         try {
             runList.clear();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logException(e);
         } catch (ClassNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logException(e);
         } catch (FileSecurityException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logException(e);
         }
-        
         
         /**
          * Clear submitted files list 
@@ -1935,8 +1925,8 @@ public class InternalContest implements IInternalContest {
         RunEvent runEvent = new RunEvent(RunEvent.Action.REFRESH_ALL, null, null, null);
         fireRunListener(runEvent);
 
-        // FIXME clear all checked out clars
         synchronized (clarCheckOutList) {
+            // FIXME on all client Clar listeners (elsewhere) need to uncheckout too 
             clarCheckOutList = new Hashtable<ElementId, ClientId>();
         }
         
@@ -1946,14 +1936,11 @@ public class InternalContest implements IInternalContest {
         try {
             clarificationList.clear();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logException(e);
         } catch (ClassNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logException(e);
         } catch (FileSecurityException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logException(e);
         }
         
         ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.REFRESH_ALL, null);
@@ -2105,137 +2092,203 @@ public class InternalContest implements IInternalContest {
 
     public IInternalContest clone(IInternalContest contest, Profile newProfile, String profileBasePath, ProfileCloneSettings settings) throws ProfileCloneException {
 
-        // TODO check for existing profile 
-        
+        // TODO check for existing profile
+
         String profilePath = newProfile.getProfilePath();
-        
+
         try {
             new File(profilePath).mkdirs();
         } catch (Exception e) {
-            throw new ProfileCloneException("Unable to create profile dir "+profilePath, e);
+            throw new ProfileCloneException("Unable to create profile dir " + profilePath, e);
         }
-        
-        if (! new File(profilePath).isDirectory()){
-            throw new ProfileCloneException("Unable to use profile dir "+profilePath);
+
+        if (!new File(profilePath).isDirectory()) {
+            throw new ProfileCloneException("Unable to use profile dir " + profilePath);
         }
-        
+
         FileSecurity fileSecurity = new FileSecurity(profilePath);
-        
+
         try {
             fileSecurity.saveSecretKey(settings.getContestPassword());
         } catch (Exception e) {
-            StaticLog.getLog().log(Log.SEVERE, "FATAL ERROR Cloning Contest data ", e);
-            System.err.println("FATAL ERROR Cloning Contest data " + e.getMessage() + " check logs");
-            System.exit(44);
+            throw new ProfileCloneException(e);
         }
-        
-        contest.setStorage(fileSecurity);
-        
-        contest.initializeStartupData(contest.getSiteNumber());
-        
-        newProfile.setName(settings.getName());
-        
-        newProfile.setDescription(settings.getDescription());
-        
-        contest.setProfile(newProfile); // This also sets the contest identifier
 
-        contest.setContestPassword(new String(settings.getContestPassword()));
-        
+        contest.setStorage(fileSecurity);
+
+        // Save settings that created this new contest/profile so we can
+        // send them to other servers/clients as needed.
+        contest.setProfileCloneSettings(settings);
+
         contest.setClientId(getClientId());
-        
-        contest.setGeneralProblem(getGeneralProblem());
-        
-        // Sites
-        
-        for (Site site : getSites()){
+        contest.setSiteNumber(getClientId().getSiteNumber());
+
+        for (Site site : getSites()) {
             contest.updateSite(site);
         }
 
-        if (settings.isCopyAccounts()){
+        if (contest.getAccounts(Type.SERVER) == null) {
+            contest.generateNewAccounts(Type.SERVER.toString(), 1, true);
+        }
+
+        if (contest.getAccounts(Type.ADMINISTRATOR) != null) {
+            contest.generateNewAccounts(ClientType.Type.ADMINISTRATOR.toString(), 1, true);
+        }
+
+        newProfile.setName(settings.getName());
+
+        newProfile.setDescription(settings.getDescription());
+
+        contest.setProfile(newProfile); // This also sets the contest identifier
+
+        contest.setContestPassword(new String(settings.getContestPassword()));
+
+        contest.setGeneralProblem(getGeneralProblem());
+
+        for (ContestTime contestTime : getContestTimes()) {
+            ContestTime contestTime2 = clone(contestTime);
+            if (settings.isResetContestTimes()) {
+                contestTime2.setElapsedMins(0);
+            }
+            contest.updateContestTime(contestTime2);
+        }
+
+        if (settings.isCopyAccounts()) {
+
+            if (settings.isCopyGroups()) {
+                for (Group group : getGroups()) {
+                    contest.addGroup(group);
+                }
+            }
+
             contest.addAccounts(getAccounts());
-            
-            if (settings.isCopyGroups()){
-                for (Account account : contest.getAccounts()){
+
+            if (settings.isCopyGroups()) {
+                for (Account account : contest.getAccounts()) {
                     account.setGroupId(null);
                 }
             }
         }
 
-        if (settings.isCopyContestSettings()){
+        if (settings.isCopyContestSettings()) {
             /**
-             * Clone a bunch of settings.
+             * Clone: ClientSettings BalloonSettings
              */
-            cloneContestSettings (contest, settings);
+            cloneContestSettings(contest, settings);
         }
 
-        if (settings.isCopyJudgements()){
+        if (settings.isCopyJudgements()) {
             contest.setJudgementList(getJudgements());
         }
 
-        if (settings.isCopyLanguages()){
-            for (Language language: getLanguages()){
+        if (settings.isCopyLanguages()) {
+            for (Language language : getLanguages()) {
                 contest.addLanguage(language);
             }
         }
 
-        if (settings.isCopyProblems()){
-            for (Problem problem: getProblems()){
+        if (settings.isCopyProblems()) {
+            for (Problem problem : getProblems()) {
                 ProblemDataFiles problemDataFiles = contest.getProblemDataFile(problem);
                 contest.addProblem(problem, problemDataFiles);
             }
         }
 
-        // TODO copyRuns 
-        
-        // run list
-        // run files list
-        
-        // TODO copyClarifications
-        
-        // clarifications list 
-        
-        if (settings.isCopyGroups()){
-            for (Group group : getGroups()){
-                contest.addGroup(group);
+        if (settings.isCopyRuns()) {
+
+            /**
+             * Check if cloned problems and languages, if not throw exception.
+             */
+
+            if (settings.isCopyProblems() && settings.isCopyLanguages() && settings.isCopyAccounts()) {
+                cloneRunsAndRunFiles(contest, newProfile);
+            } else {
+                if (!settings.isCopyAccounts()) {
+                    throw new ProfileCloneException("Can not copy runs if accounts not copied too");
+                } else if (!settings.isCopyProblems()) {
+                    throw new ProfileCloneException("Can not copy runs if problems not copied too");
+                } else { // must be no copy languages
+                    throw new ProfileCloneException("Can not copy runs if languages not copied too");
+                }
             }
         }
 
-        // Contest clocks
-        
-        for (ContestTime contestTime : getContestTimes()){
-            contest.updateContestTime(contestTime);
-        }
+        if (settings.isCopyClarifications()) {
+            if (settings.isCopyProblems() && settings.isCopyAccounts()) {
 
-        if (settings.isResetContestTimes()){
-            
-            for (ContestTime contestTime : contest.getContestTimes()){
-                contestTime.resetClock();
+                cloneClarifications(contest, newProfile);
+            } else {
+                if (!settings.isCopyProblems()) {
+                    throw new ProfileCloneException("Can not copy clarifications if problems not copied too");
+                } else { // must be no copy accounts
+                    throw new ProfileCloneException("Can not copy runs if accounts not copied too");
+                }
             }
         }
-        
+
         ContestInformation newContestInformation = contest.getContestInformation();
 
         newContestInformation.setContestTitle(settings.getTitle());
         contest.updateContestInformation(newContestInformation);
-        
+
         Log tempLog = new Log("profileClone");
         try {
+
+            // Store new configuration -- SAVE IT.
+
             contest.storeConfiguration(tempLog);
+
         } catch (IOException e) {
-            tempLog.log(Log.SEVERE, "Exception storing new config for "+newProfile.getName(), e);
-            throw new ProfileCloneException("Exception storing new config for "+newProfile.getName(),e);
+            tempLog.log(Log.SEVERE, "Exception storing new config for " + newProfile.getName(), e);
+            throw new ProfileCloneException("Exception storing new config for " + newProfile.getName(), e);
         } catch (ClassNotFoundException e) {
-            tempLog.log(Log.SEVERE, "Exception storing new config for "+newProfile.getName(), e);
-            throw new ProfileCloneException("Exception storing new config for "+newProfile.getName(),e);
+            tempLog.log(Log.SEVERE, "Exception storing new config for " + newProfile.getName(), e);
+            throw new ProfileCloneException("Exception storing new config for " + newProfile.getName(), e);
         } catch (FileSecurityException e) {
-            tempLog.log(Log.SEVERE, "Exception storing new config for "+newProfile.getName(), e);
-            throw new ProfileCloneException("Exception storing new config for "+newProfile.getName(),e);
+            tempLog.log(Log.SEVERE, "Exception storing new config for " + newProfile.getName(), e);
+            throw new ProfileCloneException("Exception storing new config for " + newProfile.getName(), e);
         }
         tempLog = null;
-        
-        // TODO save profile info to profile.properties
-        
+
+        /**
+         * Updated profiles in .properties/text file.
+         * 
+         */
+
+        ProfileManager profileManager = new ProfileManager();
+
+        Profile[] currentProfiles = null;
+
+        try {
+            currentProfiles = profileManager.load();
+        } catch (Exception e) {
+            logException(e);
+        }
+
+        Profile[] mergedProfiles = profileManager.mergeProfiles(currentProfiles, getProfiles());
+
+        try {
+            // Store profiles to properties file.
+
+            profileManager.store(mergedProfiles, getProfile());
+        } catch (IOException e) {
+            ProfileCloneException exception = new ProfileCloneException("Unable to store profiles in " + ProfileManager.PROFILE_INDEX_FILENAME);
+            exception.setStackTrace(e.getStackTrace());
+            throw exception;
+        }
+
         return contest;
+    }
+
+
+    private ContestTime clone(ContestTime contestTime) {
+        ContestTime time = new ContestTime(contestTime.getSiteNumber());
+        
+        time.setContestLengthSecs(contestTime.getContestLengthSecs());
+        time.setElapsedSecs(time.getElapsedSecs());
+        time.setHaltContestAtTimeZero(contestTime.isHaltContestAtTimeZero());
+        
+        return time;    
     }
 
     public Account[] getAccounts() {
@@ -2244,14 +2297,24 @@ public class InternalContest implements IInternalContest {
 
     private void cloneContestSettings(IInternalContest contest, ProfileCloneSettings settings) {
 
-        if (!settings.isCopyProblems()) {
-            for (ClientSettings clientSettings : contest.getClientSettingsList()) {
+        for (ClientSettings clientSettings : contest.getClientSettingsList()) {
+            if (settings.isCopyProblems()){
+                contest.addClientSettings(clientSettings);
+                // FIXME set auto judge filter 
+                // FIXME set balloon list
+            } else { // clear client problem settings
                 clientSettings.setBalloonList(new Hashtable<String, BalloonDeliveryInfo>());
                 clientSettings.setAutoJudgeFilter(new Filter());
             }
         }
-
-        // TODO BalloonSettingsList
+        
+        for (BalloonSettings balloonSettings : getBalloonSettings()){
+            contest.addBalloonSettings(balloonSettings);
+        }
+        
+        // FIXME ClientSettings: properties
+        // FIXME ClientSettings: notificationSetting
+        // FIXME ClientSettings: balloonList
 
     }
 
@@ -2263,4 +2326,37 @@ public class InternalContest implements IInternalContest {
         this.profileCloneSettings = inProfileCloneSettings;
         return profileCloneSettings;
     }
+
+    public void cloneClarifications(IInternalContest targetContest, Profile newProfile) throws ProfileCloneException {
+        clarificationList.clone(targetContest.getStorage());
+    }
+
+    public void cloneRunsAndRunFiles(IInternalContest targetContest, Profile newProfile) throws ProfileCloneException {
+
+        runList.clone(targetContest.getStorage());
+
+        runFilesList.clone(targetContest.getStorage());
+
+        runResultFilesList.clone(targetContest.getStorage());
+    }
+    
+    private void logException(String message, Exception e) {
+
+        if (StaticLog.getLog() != null) {
+            StaticLog.getLog().log(Log.WARNING, message, e);
+        } else {
+            System.err.println(message);
+            e.printStackTrace(System.err);
+        }
+    }
+    
+    private void logException(Exception e) {
+
+        if (StaticLog.getLog() != null) {
+            StaticLog.getLog().log(Log.WARNING, "Exception", e);
+        } else {
+            e.printStackTrace(System.err);
+        }
+    }
+
 }
