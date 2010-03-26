@@ -8,9 +8,13 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ElementId;
 
 /**
- * @author PC2
- *
+ * ICPC Account information.
+ * 
+ * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
+
+// $HeadURL$
 public class ICPCAccount {
 
     private int accountNumber = 0;

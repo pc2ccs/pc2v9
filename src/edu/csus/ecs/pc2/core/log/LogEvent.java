@@ -13,6 +13,7 @@ import edu.csus.ecs.pc2.core.packet.Packet;
  * @version $Id$
  */
 
+// $HeadURL$
 public class LogEvent implements Serializable {
 
     /**

@@ -1,6 +1,3 @@
-/**
- * 
- */
 package edu.csus.ecs.pc2.core.imports;
 
 import java.io.BufferedReader;
@@ -18,9 +15,12 @@ import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.util.TabSeparatedValueParser;
 
 /**
- * @author pc2@ecs.csus.edu
  * 
+ * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
+
+// $HeadURL$
 public class LoadAccounts {
     private HashMap<ClientId, Account> accountMap = new HashMap<ClientId, Account>();
     private HashMap<String,Group> groups = new HashMap<String,Group>();
