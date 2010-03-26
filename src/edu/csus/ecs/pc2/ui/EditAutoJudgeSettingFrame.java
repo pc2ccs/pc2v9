@@ -16,6 +16,8 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
+
+//$HeadURL$
 public class EditAutoJudgeSettingFrame extends JFrame implements UIPlugin {
 
     /**

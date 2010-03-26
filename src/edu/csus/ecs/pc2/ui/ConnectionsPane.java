@@ -24,9 +24,10 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
  * View Connections.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
-// $HeadURL${date}
+// $HeadURL$
 public class ConnectionsPane extends JPanePlugin {
 
     /**

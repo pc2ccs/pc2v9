@@ -12,9 +12,11 @@ import edu.csus.ecs.pc2.core.model.IContestInformationListener;
 import edu.csus.ecs.pc2.core.model.ClarificationEvent.Action;
 
 /**
+ * Answer Clar Frame.
+ * 
  * 
  * @author pc2@ecs.csus.edu
- * 
+ * @version $Id$
  */
 
 // $HeadURL$

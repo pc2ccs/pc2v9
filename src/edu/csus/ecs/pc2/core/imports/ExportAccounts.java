@@ -26,8 +26,10 @@ import edu.csus.ecs.pc2.core.util.XMLMemento;
  * Provide a class that will save the accounts in various formats.
  * 
  * @author pc2@ecs.csus.edu
- * 
+ * @version $Id$
  */
+
+// $HeadURL$
 public final class ExportAccounts {
     /**
      * used by writeCSV and writeTXT and build

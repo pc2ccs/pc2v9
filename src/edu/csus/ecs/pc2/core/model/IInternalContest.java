@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Vector;
 
-import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IStorage;
 import edu.csus.ecs.pc2.core.exception.ClarificationUnavailableException;
 import edu.csus.ecs.pc2.core.exception.ContestSecurityException;

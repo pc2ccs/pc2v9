@@ -32,6 +32,7 @@ import edu.csus.ecs.pc2.core.security.PermissionList;
  * Add/Edit Clarification Pane
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
@@ -659,5 +660,4 @@ public class AnswerClarificationPane extends JPanePlugin {
         getDefaultAnswerButton().setToolTipText(defaultAnswer);
     }
     
-
 } // @jve:decl-index=0:visual-constraint="10,10"

@@ -13,6 +13,7 @@ package edu.csus.ecs.pc2.api;
  * @version $Id$
  */
 
+// $HeadURL$
 public interface IClient {
 
     /**
