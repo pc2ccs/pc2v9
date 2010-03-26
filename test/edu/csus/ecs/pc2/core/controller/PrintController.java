@@ -28,7 +28,7 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
 
 /**
- * A stub controller that prints arguments and methods as called.
+ * A reference controller that can be used for debugging.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -578,5 +578,10 @@ public class PrintController implements IInternalController {
     public void updateProfile(Profile profile) {
         System.out.println("method updateProfile");
         System.out.println("    profile                : " + profile);
+    }
+
+    public void setContest(IInternalContest newContest) {
+        System.out.println("method setContest");
+        System.out.println("    contest                : " + newContest);
     }
 }

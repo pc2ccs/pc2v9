@@ -482,4 +482,6 @@ public interface IInternalController {
      * @param profile
      */
     void updateProfile(Profile profile);
+
+    void setContest(IInternalContest newContest);
 }

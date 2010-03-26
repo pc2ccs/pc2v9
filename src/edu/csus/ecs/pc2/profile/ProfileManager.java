@@ -10,8 +10,8 @@ import java.util.Properties;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.VersionInfo;
+import edu.csus.ecs.pc2.core.IStorage;
 import edu.csus.ecs.pc2.core.exception.ProfileException;
-import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.security.FileSecurity;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
@@ -70,9 +70,13 @@ public class ProfileManager {
      * 
      * @param profile
      * @return true if profile
-     * @throws ProfileException 
+     * @throws ProfileException
      */
     public boolean isProfileAvailable(Profile profile, char[] contestPassword) throws ProfileException {
+        return getProfileStorage(profile, contestPassword) != null;
+    }
+
+    public IStorage getProfileStorage(Profile profile, char[] contestPassword) throws ProfileException {
 
         if (profile == null) {
             throw new IllegalArgumentException("profile can not be null");
@@ -83,17 +87,22 @@ public class ProfileManager {
         if (new File(profilePath).isDirectory()) {
 
             FileSecurity fileSecurity = new FileSecurity(profilePath);
-            if (fileSecurity == null){
-                throw new ProfileException("Unable to intialize FileSecurity for path "+profilePath);
+            if (fileSecurity == null) {
+                throw new ProfileException("Unable to intialize FileSecurity for path " + profilePath);
             }
-            
+
             try {
-                return fileSecurity.verifyPassword(contestPassword);
+                boolean validPassword = fileSecurity.verifyPassword(contestPassword);
+                if (validPassword) {
+                    return fileSecurity;
+                } else {
+                    throw new ProfileException("Profile contest password is not correct");
+                }
             } catch (FileSecurityException e) {
                 throw new ProfileException(e);
             }
         } else {
-            throw new ProfileException("Profile directory does not exist: "+profilePath);
+            throw new ProfileException("Profile directory does not exist: " + profilePath);
         }
     }
 
@@ -270,27 +279,6 @@ public class ProfileManager {
 
     private String quoteString(String name) {
         return "\"" + name + "\"";
-    }
-
-    /**
-     * Load and switch to new contest.
-     * 
-     * @param contest
-     * @param inProfile
-     * @param newProfile
-     * @return
-     */
-    public static IInternalContest switchProfile(IInternalContest contest, Profile profile, char [] contestPassword) {
-        
-        // TODO determine whether 
-        
-        // TODO dal set storage
-
-        // TODO dal load configuration/contest
-
-        // TODO dal load all submission data runs/clars etc.
-
-        return null;
     }
 
     /**

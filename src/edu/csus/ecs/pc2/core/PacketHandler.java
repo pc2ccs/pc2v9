@@ -25,6 +25,7 @@ import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ConfigurationIO;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestLoginSuccessData;
 import edu.csus.ecs.pc2.core.model.ContestTime;
@@ -358,10 +359,12 @@ public class PacketHandler {
      * @throws ProfileException 
      * @throws FileSecurityException 
      */
-    // TODO code handleSwitchProfile
+    // FIXME code handleSwitchProfile
     private void handleSwitchProfile(Packet packet, ConnectionHandlerID connectionHandlerID) throws ProfileException, FileSecurityException {
      
+        // inProfile the original profile
 //        Profile inProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE);
+        
         Profile newProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.NEW_PROFILE);
         String contestPassword = (String) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_PASSWORD);
         
@@ -370,7 +373,7 @@ public class PacketHandler {
             contestPassword = contest.getContestPassword();
         }
         
-        // TODO insure new profile exists
+        // FIXME insure new profile exists
         // if profile does exist - change
         // if profile does not exist - 
         
@@ -378,18 +381,39 @@ public class PacketHandler {
         
         if ( manager.isProfileAvailable(newProfile, contestPassword.toCharArray()) ) {
             
-            contest = ProfileManager.switchProfile(contest, newProfile, contestPassword.toCharArray());
+            IInternalContest newContest = switchProfile(contest, newProfile, contestPassword.toCharArray());
             
         } else {
-            throw new FileSecurityException("Can not switch profiles, invalid contest password");
+            throw new ProfileException("Can not switch profiles, invalid contest password");
         }
+    }
 
+    private IInternalContest switchProfile(IInternalContest inContest, Profile newProfile, char[] contestPassword) throws ProfileException {
+
+        ProfileManager manager = new ProfileManager();
+        IStorage storage = manager.getProfileStorage(newProfile, contestPassword);
+
+        ConfigurationIO configurationIO = new ConfigurationIO(storage);
+
+        InternalContest newContest = new InternalContest();
+
+        configurationIO.loadFromDisk(contest.getSiteNumber(), newContest, controller.getLog());
+
+        /**
+         * Add all listeners from existing contest into newly coined contest.
+         */
+        newContest.addAllListeners((InternalContest) contest);
+
+        /**
+         * Remove listeners so that they are no longer referenced
+         */
+        contest.removeAllListeners(); // remove all listeners
+
+        controller.setContest(newContest); // replace existing contest
         
-        // TODO dal set contest
-        
-//        controller.setContest(contest);
-        
-        // set contest/controller to reset all variables
+        contest.fireAllRefreshEvents();
+
+        return newContest;
     }
 
     /**
@@ -592,7 +616,6 @@ public class PacketHandler {
             contestTime.setElapsedMins(0);
             contest.updateContestTime(contestTime);
 
-            PacketFactory.dumpPacket(controller.getLog(), packet, "debug 22 - RESET"); // debug
             resetContestData(eraseProblems, eraseLanguages);
 
             // Set Contest Profile
@@ -652,7 +675,6 @@ public class PacketHandler {
                 contest.deleteLanguage(language);
             }
         }
-        controller.getLog().log(Log.INFO, "debug22 resetContestData p"+contest.getProblems().length+" l"+contest.getLanguages().length+" "+contest.getContestTime().getRemainingMinStr());
     }
     
     /**

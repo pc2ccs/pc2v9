@@ -2798,4 +2798,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     private void fatalError(String message) {
         fatalError(message, null);
     }
+
+    public void setContest(IInternalContest newContest) {
+        this.contest = newContest;
+    }
 }

@@ -1610,7 +1610,7 @@ public class InternalContest implements IInternalContest {
     }
 
     public void cancelClarificationCheckOut(Clarification clarification, ClientId whoCancelledIt) throws IOException, ClassNotFoundException, FileSecurityException {
-        // TODO verify the canceller has permissions to cancel this clar
+        // TODO verify the canceler has permissions to cancel this clar
         clarificationList.updateClarification(clarification, ClarificationStates.NEW, whoCancelledIt);
         synchronized (clarCheckOutList) {
             clarCheckOutList.remove(clarification.getElementId());
@@ -1922,9 +1922,6 @@ public class InternalContest implements IInternalContest {
         
         runResultFilesList.clear();
 
-        RunEvent runEvent = new RunEvent(RunEvent.Action.REFRESH_ALL, null, null, null);
-        fireRunListener(runEvent);
-
         synchronized (clarCheckOutList) {
             // FIXME on all client Clar listeners (elsewhere) need to uncheckout too 
             clarCheckOutList = new Hashtable<ElementId, ClientId>();
@@ -1943,8 +1940,8 @@ public class InternalContest implements IInternalContest {
             logException(e);
         }
         
-        ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.REFRESH_ALL, null);
-        fireClarificationListener(clarificationEvent);
+        fireAllRefreshEvents();
+        
     }
 
     public boolean isSendAdditionalRunStatusMessages() {
@@ -2359,4 +2356,106 @@ public class InternalContest implements IInternalContest {
         }
     }
 
+    public void addAllListeners(InternalContest contest) {
+        contest.accountListenerList.addAll(accountListenerList);
+        contest.balloonSettingsListenerList.addAll(balloonSettingsListenerList);
+        contest.changePasswordListenerList.addAll(changePasswordListenerList);
+        contest.clarificationListenerList.addAll(clarificationListenerList);
+        contest.clientSettingsListenerList.addAll(clientSettingsListenerList);
+        contest.connectionListenerList.addAll(connectionListenerList);
+        contest.contestInformationListenerList.addAll(contestInformationListenerList);
+        contest.contestTimeListenerList.addAll(contestTimeListenerList);
+        contest.groupListenerList.addAll(groupListenerList);
+        contest.judgementListenerList.addAll(judgementListenerList);
+        contest.languageListenerList.addAll(languageListenerList);
+        contest.loginListenerList.addAll(loginListenerList);
+        contest.problemListenerList.addAll(problemListenerList);
+        contest.profileListenerList.addAll(profileListenerList);
+        contest.runListenerList.addAll(runListenerList);
+        contest.siteListenerList.addAll(siteListenerList);
+    }
+
+    public void removeAllListeners() {
+        accountListenerList.removeAllElements();
+        balloonSettingsListenerList.removeAllElements();
+        changePasswordListenerList.removeAllElements();
+        clarificationListenerList.removeAllElements();
+        clientSettingsListenerList.removeAllElements();
+        connectionListenerList.removeAllElements();
+        contestInformationListenerList.removeAllElements();
+        contestTimeListenerList.removeAllElements();
+        groupListenerList.removeAllElements();
+        judgementListenerList.removeAllElements();
+        languageListenerList.removeAllElements();
+        loginListenerList.removeAllElements();
+        problemListenerList.removeAllElements();
+        profileListenerList.removeAllElements();
+        runListenerList.removeAllElements();
+        siteListenerList.removeAllElements();
+    }
+
+    public void fireAllRefreshEvents() {
+
+        RunEvent runEvent = new RunEvent(RunEvent.Action.REFRESH_ALL, null, null, null);
+        fireRunListener(runEvent);
+
+        // FIXME add REFRESH_ALL event
+        ContestTimeEvent contestTimeEvent = null;
+        fireContestTimeListener(contestTimeEvent);
+
+        // FIXME add REFRESH_ALL event
+        ProblemEvent problemEvent = null;
+        fireProblemListener(problemEvent);
+
+        // FIXME add REFRESH_ALL event
+        LanguageEvent languageEvent = null;
+        fireLanguageListener(languageEvent);
+
+        // FIXME add REFRESH_ALL event
+        LoginEvent loginEvent = null;
+        fireLoginListener(loginEvent);
+
+        // FIXME add REFRESH_ALL event
+        JudgementEvent judgementEvent = null;
+        fireJudgementListener(judgementEvent);
+
+        // FIXME add REFRESH_ALL event
+        SiteEvent siteEvent = null;
+        fireSiteListener(siteEvent);
+
+        // FIXME add REFRESH_ALL event
+        ConnectionEvent connectionEvent = null;
+        fireConnectionListener(connectionEvent);
+
+        // FIXME add REFRESH_ALL event
+        BalloonSettingsEvent balloonSettingsEvent = null;
+        fireBalloonSettingsListener(balloonSettingsEvent);
+
+        // FIXME add REFRESH_ALL event
+        AccountEvent accountEvent = null;
+        fireAccountListener(accountEvent);
+
+        // FIXME add REFRESH_ALL event
+        PasswordChangeEvent passwordChangeEvent = null;
+        firePasswordChangeListener(passwordChangeEvent);
+
+        ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.REFRESH_ALL, null);
+        fireClarificationListener(clarificationEvent);
+
+        // FIXME add REFRESH_ALL event
+        ClientSettingsEvent clientSettingsEvent = null;
+        fireClientSettingsListener(clientSettingsEvent);
+
+        // FIXME add REFRESH_ALL event
+        ContestInformationEvent contestInformationEvent = null;
+        fireContestInformationListener(contestInformationEvent);
+
+        // FIXME add REFRESH_ALL event
+        GroupEvent groupEvent = null;
+        fireGroupListener(groupEvent);
+
+        // FIXME add REFRESH_ALL event
+        ProfileEvent profileEvent = null;
+        fireProfileListener(profileEvent);
+    }
 }
