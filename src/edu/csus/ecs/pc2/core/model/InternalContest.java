@@ -2356,25 +2356,6 @@ public class InternalContest implements IInternalContest {
         }
     }
 
-    public void addAllListeners(InternalContest contest) {
-        contest.accountListenerList.addAll(accountListenerList);
-        contest.balloonSettingsListenerList.addAll(balloonSettingsListenerList);
-        contest.changePasswordListenerList.addAll(changePasswordListenerList);
-        contest.clarificationListenerList.addAll(clarificationListenerList);
-        contest.clientSettingsListenerList.addAll(clientSettingsListenerList);
-        contest.connectionListenerList.addAll(connectionListenerList);
-        contest.contestInformationListenerList.addAll(contestInformationListenerList);
-        contest.contestTimeListenerList.addAll(contestTimeListenerList);
-        contest.groupListenerList.addAll(groupListenerList);
-        contest.judgementListenerList.addAll(judgementListenerList);
-        contest.languageListenerList.addAll(languageListenerList);
-        contest.loginListenerList.addAll(loginListenerList);
-        contest.problemListenerList.addAll(problemListenerList);
-        contest.profileListenerList.addAll(profileListenerList);
-        contest.runListenerList.addAll(runListenerList);
-        contest.siteListenerList.addAll(siteListenerList);
-    }
-
     public void removeAllListeners() {
         accountListenerList.removeAllElements();
         balloonSettingsListenerList.removeAllElements();

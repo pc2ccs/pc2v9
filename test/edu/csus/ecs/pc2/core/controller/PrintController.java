@@ -26,6 +26,7 @@ import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
+import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
  * A reference controller that can be used for debugging.
@@ -170,13 +171,6 @@ public class PrintController implements IInternalController {
         System.out.println("    count                  : " + count);
         System.out.println("    startNumber            : " + startNumber);
         System.out.println("    active                 : " + active);
-    }
-
-    public String getContestPassword() {
-
-        System.out.println("method getContestPassword");
-
-        return null;
     }
 
     public String getHostContacted() {
@@ -366,12 +360,6 @@ public class PrintController implements IInternalController {
         System.out.println("    clientAutoShutdown     : " + clientAutoShutdown);
     }
 
-    public void setContestPassword(String contestPassword) {
-
-        System.out.println("method setContestPassword");
-        System.out.println("    contestPassword        : " + contestPassword);
-    }
-
     public void setContestTime(ContestTime contestTime) {
 
         System.out.println("method setContestTime");
@@ -540,11 +528,6 @@ public class PrintController implements IInternalController {
         System.out.println("    newSite                : " + newSite);
     }
 
-    public void writeConfigToDisk() {
-
-        System.out.println("method writeConfigToDisk");
-    }
-
     public void updateJudgement(Judgement newJudgement) {
 
         System.out.println("method addNewJudgement");
@@ -564,11 +547,6 @@ public class PrintController implements IInternalController {
         System.out.println("    switchNow              : " + switchNow);
     }
 
-    public void switchProfile(Profile profile) {
-        System.out.println("method switchProfile");
-        System.out.println("    profile                : " + profile);
-    }
-
     public void switchProfile(Profile currentProfile, Profile switchToProfile) {
         System.out.println("method switchProfile");
         System.out.println("    profile                : " + currentProfile);
@@ -583,5 +561,21 @@ public class PrintController implements IInternalController {
     public void setContest(IInternalContest newContest) {
         System.out.println("method setContest");
         System.out.println("    contest                : " + newContest);
+    }
+
+    public UIPlugin[] getPluginList() {
+        System.out.println("method getPluginList");
+        return null;
+    }
+
+    public void register(UIPlugin plugin) {
+        System.out.println("method register "+plugin.getPluginTitle());
+    }
+
+    public void updateContestController(IInternalContest inContest, IInternalController inController) {
+        System.out.println("method updateContestController");
+        System.out.println("    contest                : " + inContest);
+        System.out.println("    controller             : " + inController);
+        
     }
 }

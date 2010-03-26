@@ -941,13 +941,6 @@ public interface IInternalContest {
     void cloneRunsAndRunFiles(IInternalContest inputContest, Profile newProfile) throws ProfileCloneException;
 
     /**
-     * Add all listeners into newContest.
-     * 
-     * @param contest
-     */
-    void addAllListeners(InternalContest newContest);
-
-    /**
      * Remove all listener instances from contest.
      */
     void removeAllListeners();

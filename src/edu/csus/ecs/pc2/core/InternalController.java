@@ -63,6 +63,7 @@ import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.LoadUIClass;
 import edu.csus.ecs.pc2.ui.LoginFrame;
 import edu.csus.ecs.pc2.ui.UIPlugin;
+import edu.csus.ecs.pc2.ui.UIPluginList;
 
 /**
  * Implementation of InternalContest InternalController.
@@ -265,6 +266,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     private boolean clientAutoShutdown = true;
     
     private String overRideUIName = null;
+    
+    private UIPluginList pluginList = new UIPluginList();
 
     public InternalController(IInternalContest contest) {
         super();
@@ -2801,5 +2804,36 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     public void setContest(IInternalContest newContest) {
         this.contest = newContest;
+    }
+
+    public void register(UIPlugin plugin) {
+        pluginList.register(uiPlugin);
+    }
+    
+    public UIPlugin[] getPluginList() {
+        return pluginList.getList();
+    }
+
+    public void updateContestController(IInternalContest inContest, IInternalController inController) {
+
+        for (UIPlugin plugin : getPluginList()) {
+
+            try {
+                if (plugin != null) {
+                    plugin.setContestAndController(inContest, inController);
+                }
+            } catch (Exception e) {
+                logException(e);
+            }
+        }
+    }
+
+    private void logException(Exception e) {
+
+        if (StaticLog.getLog() != null) {
+            StaticLog.getLog().log(Log.WARNING, "Exception", e);
+        } else {
+            e.printStackTrace(System.err);
+        }
     }
 }

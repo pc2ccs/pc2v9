@@ -278,6 +278,7 @@ public class TeamView extends JFrame implements UIPlugin {
     }
 
     protected void addUIPlugin(JTabbedPane tabbedPane, String tabTitle, JPanePlugin plugin) {
+        teamController.register (plugin);
         plugin.setParentFrame(this);
         plugin.setContestAndController(contest, teamController);
         tabbedPane.add(plugin, tabTitle);

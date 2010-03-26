@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.UUID;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.exception.ClarificationUnavailableException;
@@ -381,7 +380,8 @@ public class PacketHandler {
         
         if ( manager.isProfileAvailable(newProfile, contestPassword.toCharArray()) ) {
             
-            IInternalContest newContest = switchProfile(contest, newProfile, contestPassword.toCharArray());
+//            IInternalContest newContest = switchProfile(contest, newProfile, contestPassword.toCharArray());
+            switchProfile(contest, newProfile, contestPassword.toCharArray());
             
         } else {
             throw new ProfileException("Can not switch profiles, invalid contest password");
@@ -400,16 +400,13 @@ public class PacketHandler {
         configurationIO.loadFromDisk(contest.getSiteNumber(), newContest, controller.getLog());
 
         /**
-         * Add all listeners from existing contest into newly coined contest.
-         */
-        newContest.addAllListeners((InternalContest) contest);
-
-        /**
          * Remove listeners so that they are no longer referenced
          */
         contest.removeAllListeners(); // remove all listeners
 
         controller.setContest(newContest); // replace existing contest
+
+        controller.updateContestController (newContest, controller);
         
         contest.fireAllRefreshEvents();
 
@@ -446,22 +443,19 @@ public class PacketHandler {
     private void handleCloneProfile(Packet packet, ConnectionHandlerID connectionHandlerID) throws IOException, ClassNotFoundException, FileSecurityException, ProfileCloneException {
         
         // FIXME code security check only Admins can change profiles
+        
 //        prop.put(CLIENT_ID, source);
 //        ClientId adminClientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
         
 //        prop.put(PROFILE, profile2);
 //        Profile currentProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE);
         
-//        prop.put(PROFILE_CLONE_SETTINGS, settings);
         ProfileCloneSettings settings =  (ProfileCloneSettings) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE_CLONE_SETTINGS);
     
-        // FIXME uncomment switchProfileNow
-//        prop.put(SWITCH_PROFILE, new Boolean (switchNow));
         boolean switchProfileNow = ((Boolean) PacketFactory.getObjectValue(packet, PacketFactory.SWITCH_PROFILE)).booleanValue();
         
         Profile newProfile = new Profile(settings.getName());
         newProfile.setDescription(settings.getTitle());
-        newProfile.setProfilePath(createProfilePath(newProfile));
         newProfile.setSiteNumber(contest.getProfile().getSiteNumber());
         
         Profile addedProfile = contest.addProfile(newProfile);
@@ -483,11 +477,6 @@ public class PacketHandler {
             Packet addPacket = PacketFactory.createAddSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, addedProfile);
             sendToJudgesAndOthers(addPacket, true);
         }
-    }
-
-    private String createProfilePath(Profile newProfile) {
-        // profiles/P2ef182be-b8ed-42c0-88ca-19dfef3419c3/archive
-        return "profiles/P" + UUID.randomUUID().toString();
     }
 
     private void handleServerSettings(Packet packet, ConnectionHandlerID connectionHandlerID) {
@@ -2890,8 +2879,7 @@ public class PacketHandler {
                 contest.setClientId(clientId);
             }
         } catch (Exception e) {
-            // TODO: log handle exception
-            controller.getLog().log(Log.WARNING, "Exception logged ", e);
+            logException("Exception logged ", e);
         }
 
         controller.setSiteNumber(clientId.getSiteNumber());
@@ -3470,5 +3458,4 @@ public class PacketHandler {
     public void logException(String s, Exception exception) {
         controller.getLog().log(Log.INFO, s, exception);
     }
-
 }

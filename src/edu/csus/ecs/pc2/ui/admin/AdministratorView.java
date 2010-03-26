@@ -374,6 +374,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
         }
 
         try {
+            controller.register (plugin);
             plugin.setParentFrame(this);
             plugin.setContestAndController(contest, controller);
             tabbedPane.add(plugin, tabTitle);

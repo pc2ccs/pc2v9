@@ -30,6 +30,7 @@ import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.Site;
+import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
  * API IContest implementation.  
@@ -39,7 +40,12 @@ import edu.csus.ecs.pc2.core.model.Site;
  */
 
 // $HeadURL$
-public class Contest implements IContest {
+public class Contest implements IContest, UIPlugin {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 292457136351847397L;
 
     private boolean loggedIn = true;
 
@@ -60,13 +66,8 @@ public class Contest implements IContest {
     private Log log = null;
 
     public Contest(IInternalContest contest, IInternalController controller, Log log) {
-        this.contest = contest;
-        this.controller = controller;
         this.log = log;
-        runListenerList.setContestAndController(contest, controller);
-        clarificationListenerList.setContestAndController(contest, controller);
-        configurationListenerList.setContest(contest);
-        connectionEventListenerList.setContestAndController(contest, controller, this);
+        setContestAndController(contest, controller);
     }
 
     public boolean isLoggedIn() {
@@ -245,5 +246,16 @@ public class Contest implements IContest {
         clarificationListenerList.addClarificationListener(clarificationEventListener);
     }
 
- 
+    public String getPluginTitle() {
+        return "API Contest class";
+    }
+
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
+        this.contest = inContest;
+        this.controller = inController;
+        runListenerList.setContestAndController(contest, controller);
+        clarificationListenerList.setContestAndController(contest, controller);
+        configurationListenerList.setContest(contest);
+        connectionEventListenerList.setContestAndController(contest, controller, this);
+    }
 }

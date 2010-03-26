@@ -27,6 +27,7 @@ import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
+import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
  * Represents functions provided by modules comprising the contest engine.
@@ -484,4 +485,27 @@ public interface IInternalController {
     void updateProfile(Profile profile);
 
     void setContest(IInternalContest newContest);
+
+    /**
+     * Register a plugin.
+     * 
+     * @param plugin
+     */
+    void register(UIPlugin plugin);
+    
+    /**
+     * Get list of plugins.
+     * 
+     * @return
+     */
+    UIPlugin[] getPluginList();
+
+    /**
+     * Update/replace contest and controller for all registered UI Plugins.
+     * 
+     * @param contest
+     * @param packetHandler
+     */
+    void updateContestController(IInternalContest inContest, IInternalController inController);
+
 }

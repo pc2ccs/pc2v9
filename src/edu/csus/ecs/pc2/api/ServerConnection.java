@@ -37,7 +37,7 @@ public class ServerConnection {
     public ServerConnection() {
         super();
     }
-
+    
     /**
      * Login to the PC<sup>2</sup> server represented by this ServerConnection using the specified login account name and password. If the login is successful, the method returns an
      * {@link edu.csus.ecs.pc2.api.IContest} object which can then be used to obtain information about the contest being controlled by the server. If the login fails the method throws
@@ -88,9 +88,9 @@ public class ServerConnection {
             internalContest = controller.clientLogin(internalContest, login, password);
 
             contest = new Contest(internalContest,  controller, controller.getLog());
-            
             contest.addConnectionListener(new ConnectionEventListener());
-
+            controller.register(contest);
+            
             return contest;
 
         } catch (Exception e) {
