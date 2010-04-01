@@ -21,6 +21,7 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IniFile;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
@@ -43,6 +44,7 @@ import edu.csus.ecs.pc2.ui.LogWindow;
 import edu.csus.ecs.pc2.ui.LoginsPane;
 import edu.csus.ecs.pc2.ui.OptionsPanel;
 import edu.csus.ecs.pc2.ui.PacketExplorerPane;
+import edu.csus.ecs.pc2.ui.PluginLoadPane;
 import edu.csus.ecs.pc2.ui.ProblemsPane;
 import edu.csus.ecs.pc2.ui.ProfilesPane;
 import edu.csus.ecs.pc2.ui.ReportPane;
@@ -247,6 +249,16 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 addUIPlugin(getRunContestTabbedPane(), "Options", optionsPanel);
                 optionsPanel.setLogWindow(logWindow);
                 optionsPanel.setSecurityLogWindow(securityAlertLogWindow);
+                
+                if (Utilities.isDebugMode()){
+                    try {
+                        PluginLoadPane pane = new PluginLoadPane();
+                        pane.setParentTabbedPane(getRunContestTabbedPane());
+                        addUIPlugin(getRunContestTabbedPane(), "Plugin Load", pane);
+                    } catch (Exception e) {
+                        logException(e);
+                    }
+                }
 
                 //ContestClockPane contestClockPane = new ContestClockPane();
                 //addUIPlugin(getConfigureContestTabbedPane(), "Big Clock", contestClockPane);
@@ -261,9 +273,20 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 setVisible(true);
             }
 
+
      });
     }
     
+    private void logException(Exception e) {
+
+        if (StaticLog.getLog() != null) {
+            StaticLog.getLog().log(Log.WARNING, "Exception", e);
+            e.printStackTrace(System.err);
+        } else {
+            e.printStackTrace(System.err);
+        }
+    }
+
     protected void initializeSecurityAlertWindow(IInternalContest inContest) {
         if (securityAlertLogWindow == null){
             securityAlertLogWindow = new LogWindow(inContest.getSecurityAlertLog());

@@ -17,6 +17,7 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IniFile;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
@@ -38,6 +39,7 @@ import edu.csus.ecs.pc2.ui.LogWindow;
 import edu.csus.ecs.pc2.ui.LoginsPane;
 import edu.csus.ecs.pc2.ui.OptionsPanel;
 import edu.csus.ecs.pc2.ui.PlaybackPane;
+import edu.csus.ecs.pc2.ui.PluginLoadPane;
 import edu.csus.ecs.pc2.ui.ReportPane;
 import edu.csus.ecs.pc2.ui.SitesPanel;
 import edu.csus.ecs.pc2.ui.UIPlugin;
@@ -377,16 +379,29 @@ public class ServerView extends JFrame implements UIPlugin {
         
         try {
             if (Utilities.isDebugMode()){
-            LoadContestPane loadContestPane = new LoadContestPane();
-            addUIPlugin(getMainTabbedPane(), "Load v8", loadContestPane);
+                LoadContestPane loadContestPane = new LoadContestPane();
+                addUIPlugin(getMainTabbedPane(), "Load v8", loadContestPane);
+                
+                PluginLoadPane pane = new PluginLoadPane();
+                pane.setParentTabbedPane(getMainTabbedPane());
+                addUIPlugin(getMainTabbedPane(), "Plugin Load", pane);
             }
             
         } catch (Exception e) {
-            e.printStackTrace();
+            logException(e);
         }
-
     }
-    
+
+    private void logException(Exception e) {
+
+        if (StaticLog.getLog() != null) {
+            StaticLog.getLog().log(Log.WARNING, "Exception", e);
+            e.printStackTrace(System.err);
+        } else {
+            e.printStackTrace(System.err);
+        }
+    }
+
     protected void initializeSecurityAlertWindow(IInternalContest inContest) {
         if (securityAlertLogWindow == null){
             securityAlertLogWindow = new LogWindow(inContest.getSecurityAlertLog());
