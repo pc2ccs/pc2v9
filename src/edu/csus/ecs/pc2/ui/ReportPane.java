@@ -61,15 +61,16 @@ import edu.csus.ecs.pc2.core.report.RunsReport5;
 import edu.csus.ecs.pc2.core.report.SolutionsByProblemReport;
 import edu.csus.ecs.pc2.core.report.StandingsReport;
 import edu.csus.ecs.pc2.ui.EditFilterPane.ListNames;
+import java.awt.Rectangle;
 
 /**
  * Report Pane, allows picking and viewing reports.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
-// $Id$
 public class ReportPane extends JPanePlugin {
 
     /**
@@ -115,6 +116,8 @@ public class ReportPane extends JPanePlugin {
     private Filter filter = new Filter();
     
     private EditFilterFrame editFilterFrame = null;
+
+    private JCheckBox xmlOutputCheckbox = null;
 
     public String getReportDirectory() {
         return reportDirectory;
@@ -208,6 +211,8 @@ public class ReportPane extends JPanePlugin {
         
         getEditFilterFrame().setContestAndController(inContest, inController);
         refreshGUI();
+        
+       
     }
 
     protected void refreshGUI() {
@@ -215,6 +220,7 @@ public class ReportPane extends JPanePlugin {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 refreshReportComboBox();
+                showXMLCheckbox();
             }
         });
     }
@@ -281,6 +287,7 @@ public class ReportPane extends JPanePlugin {
             mainPane.add(getReportChoicePane(), null);
             mainPane.add(getThisClientFilterButton(), null);
             mainPane.add(getFilterPane(), null);
+            mainPane.add(getXmlOutputCheckbox(), null);
         }
         return mainPane;
     }
@@ -394,6 +401,8 @@ public class ReportPane extends JPanePlugin {
 
             FrameUtilities.waitCursor(this);
             
+            showXMLCheckbox();
+            
             IReport selectedReport = null;
 
             String selectedReportTitle = (String) getReportsComboBox().getSelectedItem();
@@ -423,7 +432,11 @@ public class ReportPane extends JPanePlugin {
              */
             
             selectedReport.setFilter(filter);
-            createReportFile(selectedReport, filename, filter);
+            if (getXmlOutputCheckbox().isSelected()){
+                createXMLFile(selectedReport, filename, filter);
+            } else {
+                createReportFile(selectedReport, filename, filter);
+            }
             
             viewFile(filename, selectedReport.getReportTitle());
 
@@ -436,6 +449,40 @@ public class ReportPane extends JPanePlugin {
 
     }
     
+    private void createXMLFile(IReport report, String filename, Filter inFilter) {
+        
+        PrintWriter printWriter = null;
+
+        filter = inFilter;
+
+        try {
+
+            printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
+
+            try {
+                
+                String xmlString = report.createReportXML(inFilter);
+                printWriter.println(xmlString);
+                
+            } catch (Exception e) {
+                printWriter.println("Exception in report: " + e.getMessage());
+                e.printStackTrace(printWriter);
+            }
+
+            printWriter.close();
+            printWriter = null;
+
+        } catch (Exception e) {
+            log.log(Log.INFO, "Exception creating report", e);
+            printWriter.println("Exception creating report " + e.getMessage());
+        }
+        
+    }
+
+    private void showXMLCheckbox() {
+        getXmlOutputCheckbox().setVisible(Utilities.isDebugMode());
+    }
+
     /**
      * Generate the selected report for each site defined in the contest.
      *
@@ -706,6 +753,20 @@ public class ReportPane extends JPanePlugin {
 
     private void refreshFilterLabel() {
         filterLabel.setText(filter.toString());
+    }
+
+    /**
+     * This method initializes xmlOutputCheckbox
+     * 
+     * @return javax.swing.JCheckBox
+     */
+    private JCheckBox getXmlOutputCheckbox() {
+        if (xmlOutputCheckbox == null) {
+            xmlOutputCheckbox = new JCheckBox();
+            xmlOutputCheckbox.setBounds(new Rectangle(21, 118, 187, 21));
+            xmlOutputCheckbox.setText("XML Output");
+        }
+        return xmlOutputCheckbox;
     }
     
 } // @jve:decl-index=0:visual-constraint="10,10"
