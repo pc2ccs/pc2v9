@@ -36,7 +36,7 @@ public interface IReport extends UIPlugin {
      * @param filter
      * @return report in XML as a string
      */
-    String createReportXML (Filter filter); 
+    String createReportXML (Filter filter) throws IOException;
     
     /**
      * Write report (no header or footer).
