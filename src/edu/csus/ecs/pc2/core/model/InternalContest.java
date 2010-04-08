@@ -307,8 +307,9 @@ public class InternalContest implements IInternalContest {
             }
         }
 
+		// FIXME can this createNewProfile be removed?
         if (profileList.size() == 0) {
-            setProfile(createNewProfile());
+            setProfile(ProfileManager.createNewProfile());
         }
 
         if (getContestTime(siteNum) == null){
@@ -2059,15 +2060,9 @@ public class InternalContest implements IInternalContest {
             addContestTime(contestTime);
         }
         if (getProfile() == null){
-            setProfile(createNewProfile());
+            setProfile(ProfileManager.createNewProfile());
         }
         return loadedConfiguration;
-    }
-
-    private Profile createNewProfile() {
-        Profile newProfile = new Profile("Contest");
-        newProfile.setDescription("Default Contest");
-        return newProfile;
     }
 
     public void setStorage(IStorage storage) {

@@ -58,6 +58,7 @@ import edu.csus.ecs.pc2.core.transport.ITwoToOne;
 import edu.csus.ecs.pc2.core.transport.TransportException;
 import edu.csus.ecs.pc2.core.transport.connection.ConnectionManager;
 import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
+import edu.csus.ecs.pc2.profile.ProfileManager;
 import edu.csus.ecs.pc2.ui.CountDownMessage;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.LoadUIClass;
@@ -109,7 +110,13 @@ import edu.csus.ecs.pc2.ui.UIPluginList;
 public class InternalController implements IInternalController, ITwoToOne, IBtoA {
 
     private static final String INI_FILENAME_OPTION_STRING = "--ini";
-    
+
+    /**
+     * Override profile option.
+     * 
+     */
+    private static final String PROFILE_OPTION_STRING = "--profile";
+
     private static final String FILE_OPTION_STRING = "-F";
 
     private static final String NO_GUI_STRING = "--nogui";
@@ -268,7 +275,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     private String overRideUIName = null;
     
     private UIPluginList pluginList = new UIPluginList();
-
+    
     public InternalController(IInternalContest contest) {
         super();
         this.contest = contest;
@@ -541,8 +548,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             throw new SecurityException("Invalid sequence, must call start(String[]) method before login(String, String).");
         }
         ClientId clientId = loginShortcutExpansion(0, id);
-
-        startLog(stripChar(clientId.toString(), ' '), id, clientId.getName());
+        
+        startLog(null, stripChar(clientId.toString(), ' '), id, clientId.getName());
         connectionManager.setLog(log);
 
         if (password.length() < 1) {
@@ -689,7 +696,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
         ClientId clientId = loginShortcutExpansion(0, loginName);
 
-        startLog(stripChar(clientId.toString(), ' '), loginName, clientId.getName());
+        startLog(null, stripChar(clientId.toString(), ' '), loginName, clientId.getName());
         connectionManager.setLog(log);
 
         if (password.length() < 1) {
@@ -752,7 +759,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             }
             info("initializeServer STARTED this site as Site "+contest.getSiteNumber());
             
+            // FIXME fetch profile directory from the profile
+            
             String baseDirectoryName = "db."+contest.getSiteNumber();
+            baseDirectoryName = contest.getProfile().getProfilePath() + File.separator + baseDirectoryName;
             FileSecurity fileSecurity = new FileSecurity(baseDirectoryName);
             
             initializeStorage(fileSecurity);
@@ -1467,7 +1477,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             if (!contest.contestIdMatches(packet.getContestIdentifier())) {
                 PacketFactory.dumpPacket(log, packet, "Packet Contest/Profile Identifer does not match contest's " + contest.getContestIdentifier());
 
-                // FIXME when this is fixed
+                // FIXME throw an security exception when contest Id works/is present
+                
 //                throw new ContestSecurityException(packet.getSourceId(), connectionHandlerID, "Packet " + packet.getSourceId() + " does not match contest id " + packet.getContestIdentifier()
 //                        + " should be " + contest.getContestIdentifier());
             }
@@ -1929,8 +1940,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      * Start the UI.
      */
     public void start(String[] stringArray) {
-
-        startLog("pc2.startup", null, null);
         
         /**
          * Saved exception.
@@ -1939,8 +1948,21 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
          */
         TransportException savedTransportException = null;
 
-        String[] requireArguementArgs = { "--login", "--id", "--password", MAIN_UI_OPTION, "--remoteServer", "--port", INI_FILENAME_OPTION_STRING, CONTEST_PASSWORD_OPTION, FILE_OPTION_STRING };
+        String[] requireArguementArgs = { "--login", "--id", "--password", MAIN_UI_OPTION, "--remoteServer", "--port", PROFILE_OPTION_STRING, INI_FILENAME_OPTION_STRING, CONTEST_PASSWORD_OPTION,
+                FILE_OPTION_STRING };
         parseArguments = new ParseArguments(stringArray, requireArguementArgs);
+        
+        if (parseArguments.isOptPresent("--server")) {
+            insureDefaultProfile();
+            Profile profile = getDefaultProfile();
+            String profilePath = profile.getProfilePath();
+            startLog(profilePath, "pc2.startup", null, null);
+            contest.setProfile(profile);
+            
+        } else {
+            startLog(null, "pc2.startup", null, null);
+            
+        }
         
         handleCommandLineOptions();
 
@@ -1984,7 +2006,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 fatalError("Cannot start PC^2, "+iniName+" cannot be read ("+exception.getMessage()+")", exception);
             }
         }
-
+        
         contest.setSiteNumber(0);
         
         if (useIniFile && (!parseArguments.isOptPresent(INI_FILENAME_OPTION_STRING))) {
@@ -2001,15 +2023,17 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         if (parseArguments.isOptPresent("--nosave")) {
             saveCofigurationToDisk = false;
         }
-
+        
+        
         if (parseArguments.isOptPresent("--server")) {
+            
             info("Starting Server Transport...");
             connectionManager.startServerTransport(this);
             serverModule = true;
 
             contactingRemoteServer = false;
             setServerRemoteHostAndPort(parseArguments.getOptValue("--remoteServer"));
-
+            
             try {
                 setServerPort(parseArguments.getOptValue("--port"));
             } catch (NumberFormatException numException) {
@@ -2094,6 +2118,41 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         } else if (savedTransportException != null) {
             connectionManager = null;
             fatalError("Unable to contact server at: " + contactInfo + ", contact staff", savedTransportException);
+        }
+    }
+    
+    private void insureDefaultProfile () {
+        
+        ProfileManager manager = new ProfileManager();
+        
+        if (! manager.hasDefaultProfile() ){
+            Profile profile = ProfileManager.createNewProfile();
+            new File(profile.getProfilePath()).mkdirs();
+            try {
+                manager.storeDefaultProfile(profile);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    
+    private Profile getDefaultProfile() {
+
+        try {
+            ProfileManager manager = new ProfileManager();
+            if (manager.hasDefaultProfile()){
+                return manager.getDefaultProfile();
+            } else  {
+                // Create new profile and save
+                Profile newProfile = ProfileManager.createNewProfile();
+                manager.storeDefaultProfile(newProfile);
+                return newProfile;
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+            fatalError("Unable to start pc2 unable to create new Profile");
+            return null;  // known unreachable code, but compiler complains.
         }
     }
 
@@ -2195,8 +2254,13 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      * This new a new Log(logFileName), sets up the StaticLog, and prints
      * basic info to the log.  If loginName is not null a Login: line is printed.
      */
-    private void startLog(String logFileName, String loginName, String clientName) {
-        log = new Log(logFileName);
+    private void startLog(String directoryName, String logFileName, String loginName, String clientName) {
+        
+        if (directoryName == null){
+            directoryName = "logs";
+            Utilities.insureDir(directoryName);
+        }
+        log = new Log(directoryName, logFileName);
         StaticLog.setLog(log);
 
         info("");
@@ -2763,16 +2827,16 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         Packet updateProfilePackert = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), profile);
         sendToLocalServer(updateProfilePackert);
     }
-    
+
     /**
      * Fatal error - log error and show user message before exiting.
      * 
      * @param message
      * @param ex
      */
-    protected void fatalError (String message, Exception ex){
-        if (log != null){
-            if (ex != null){
+    protected void fatalError(String message, Exception ex) {
+        if (log != null) {
+            if (ex != null) {
                 log.log(Log.SEVERE, message, ex);
             } else {
                 log.log(Log.SEVERE, message);
@@ -2780,16 +2844,21 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             log.log(Log.INFO, "PC^2 halted");
         }
 
-        if (usingGUI){
-            JOptionPane.showMessageDialog(null, message +" check logs" , "PC^2 Halted", JOptionPane.ERROR_MESSAGE);
+        if (usingGUI) {
+            JOptionPane.showMessageDialog(null, message + " check logs", "PC^2 Halted", JOptionPane.ERROR_MESSAGE);
+            if (Utilities.isDebugMode()) {
+                if (ex != null) {
+                    ex.printStackTrace(System.err);
+                }
+            }
         } else {
             System.err.println(message);
-            if (ex != null){
+            if (ex != null) {
                 ex.printStackTrace(System.err);
             }
             System.err.println("PC^2 Halted");
         }
-        
+
         System.exit(4);
     }
     

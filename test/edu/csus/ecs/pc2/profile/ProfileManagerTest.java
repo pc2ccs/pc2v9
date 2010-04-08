@@ -60,7 +60,7 @@ public class ProfileManagerTest extends TestCase {
 
         manager.store(filename, profiles, profile1);
 
-        Profile profile2 = manager.defaultProfile(filename);
+        Profile profile2 = manager.getDefaultProfile(filename);
 
         assertEquals(profile1.getName(), profile2.getName());
 

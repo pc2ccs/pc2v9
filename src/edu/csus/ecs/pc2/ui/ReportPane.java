@@ -23,6 +23,8 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -101,7 +103,7 @@ public class ReportPane extends JPanePlugin {
 
     private Log log;
 
-    private String reportDirectory = "reports";
+    private String reportDirectory = "reports";  //  @jve:decl-index=0:
 
     private JCheckBox thisClientFilterButton = null;
 
@@ -212,7 +214,18 @@ public class ReportPane extends JPanePlugin {
         getEditFilterFrame().setContestAndController(inContest, inController);
         refreshGUI();
         
-       
+        if (isServer()) {
+            String reportDir = getReportDirectory();
+            setReportDirectory(inContest.getProfile().getProfilePath() + File.separator + reportDir);
+        }
+    }
+    
+    private boolean isServer() {
+        return getContest().getClientId() != null && isServer(getContest().getClientId());
+    }
+    
+    private boolean isServer(ClientId clientId) {
+        return clientId.getClientType().equals(ClientType.Type.SERVER);
     }
 
     protected void refreshGUI() {

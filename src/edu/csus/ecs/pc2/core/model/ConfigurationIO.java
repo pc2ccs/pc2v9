@@ -12,6 +12,7 @@ import edu.csus.ecs.pc2.core.IStorage;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
+import edu.csus.ecs.pc2.profile.ProfileManager;
 
 /**
  * Routines to save and load Contest settings.
@@ -271,7 +272,7 @@ public class ConfigurationIO {
                 contest.setProfile(profile);
                 log.info("Loaded " + key.toString().toLowerCase());
             } else {
-                Profile profile = createNewProfile();
+                Profile profile = ProfileManager.createNewProfile();
                 contest.setProfile(profile);
             }
         } catch (Exception e) {
@@ -379,11 +380,6 @@ public class ConfigurationIO {
         }
     }
 
-    private Profile createNewProfile() {
-        Profile profile = new Profile("Contest");
-        profile.setDescription("Real Contest");
-        return profile;
-    }
 
 
     /**

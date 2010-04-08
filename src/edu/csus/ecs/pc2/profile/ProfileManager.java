@@ -75,7 +75,7 @@ public class ProfileManager {
     public boolean isProfileAvailable(Profile profile, char[] contestPassword) throws ProfileException {
         return getProfileStorage(profile, contestPassword) != null;
     }
-
+    
     public IStorage getProfileStorage(Profile profile, char[] contestPassword) throws ProfileException {
 
         if (profile == null) {
@@ -105,8 +105,28 @@ public class ProfileManager {
             throw new ProfileException("Profile directory does not exist: " + profilePath);
         }
     }
-
-    public Profile defaultProfile(String filename) throws IOException, ProfileLoadException {
+    
+    /**
+     * Is there a default profile defined ?
+     * @return
+     */
+    public boolean hasDefaultProfile (){
+        if (new File(PROFILE_INDEX_FILENAME).exists()) {
+            try {
+                return getDefaultProfile() != null;
+            } catch (Exception e) {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+    
+    public Profile getDefaultProfile() throws IOException, ProfileLoadException {
+        return getDefaultProfile(PROFILE_INDEX_FILENAME);
+    }
+    
+    public Profile getDefaultProfile(String filename) throws IOException, ProfileLoadException {
         if (new File(filename).exists()) {
 
             Profile profile = null;
@@ -248,6 +268,20 @@ public class ProfileManager {
     public boolean store( Profile[] profiles, Profile defaultProfile) throws IOException {
         return this.store(PROFILE_INDEX_FILENAME, profiles, defaultProfile);
     }
+    
+    public boolean storeDefaultProfile(Profile defaultProfile) throws IOException {
+        Profile[] profiles = null;
+
+        try {
+            profiles = load();
+        } catch (Exception e) {
+            profiles = new Profile[1];
+            profiles[0] = defaultProfile;
+        }
+
+        return this.store(PROFILE_INDEX_FILENAME, profiles, defaultProfile);
+    }
+
 
     /**
      * Store list of profiles.
@@ -267,6 +301,12 @@ public class ProfileManager {
             // <prof_id>="<title>","<description>","<profile path>",<client_type>[=first]
             String line = quoteString(profile.getName()) + delimiter + quoteString(profile.getDescription()) + delimiter + quoteString(profile.getProfilePath()) + delimiter;
             properties.put(profile.getElementId().toString(), line);
+        }
+        
+        // Add default profile into list if it isn't already there.
+        if (! properties.containsKey(defaultProfile.getElementId().toString())){
+            String line = quoteString(defaultProfile.getName()) + delimiter + quoteString(defaultProfile.getDescription()) + delimiter + quoteString(defaultProfile.getProfilePath()) + delimiter;
+            properties.put(defaultProfile.getElementId().toString(), line);
         }
 
         properties.put(DEFAULT_PROFILE_KEY, defaultProfile.getElementId().toString());
@@ -306,4 +346,11 @@ public class ProfileManager {
 
         return (Profile[]) table.values().toArray(new Profile[table.values().size()]);
     }
+    
+    public static Profile createNewProfile() {
+        Profile profile = new Profile("Contest");
+        profile.setDescription("Real Contest");
+        return profile;
+    }
+
 }
