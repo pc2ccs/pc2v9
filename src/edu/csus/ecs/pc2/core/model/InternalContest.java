@@ -2028,6 +2028,8 @@ public class InternalContest implements IInternalContest {
                 profileListenerList.elementAt(i).profileAdded(profileEvent);
             } else if (profileEvent.getAction() == ProfileEvent.Action.DELETED) {
                 profileListenerList.elementAt(i).profileRemoved(profileEvent);
+            } else if (profileEvent.getAction() == ProfileEvent.Action.REFRESH_ALL) {
+                profileListenerList.elementAt(i).profileRefreshAll(profileEvent);
             } else {
                 profileListenerList.elementAt(i).profileChanged(profileEvent);
             }
@@ -2434,12 +2436,10 @@ public class InternalContest implements IInternalContest {
         ContestInformationEvent contestInformationEvent = null;
         fireContestInformationListener(contestInformationEvent);
 
-        // FIXME add REFRESH_ALL event
         GroupEvent groupEvent = new GroupEvent(GroupEvent.Action.REFRESH_ALL, null);
         fireGroupListener(groupEvent);
 
-        // FIXME add REFRESH_ALL event
-        ProfileEvent profileEvent = null;
+        ProfileEvent profileEvent = new ProfileEvent(ProfileEvent.Action.REFRESH_ALL, null);
         fireProfileListener(profileEvent);
     }
 }

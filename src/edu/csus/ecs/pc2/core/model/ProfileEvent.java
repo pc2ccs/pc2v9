@@ -28,6 +28,10 @@ public class ProfileEvent {
          * Modified Profile.
          */
         CHANGED,
+        /**
+         * Reload/refresh profile.
+         */
+        REFRESH_ALL,
     }
 
     private Action action;

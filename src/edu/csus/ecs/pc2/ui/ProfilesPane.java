@@ -540,6 +540,14 @@ public class ProfilesPane extends JPanePlugin {
                 }
             });
         }
+
+        public void profileRefreshAll(ProfileEvent profileEvent) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    refreshProfilesList();
+                }
+            });
+        }
     }
 
     /**

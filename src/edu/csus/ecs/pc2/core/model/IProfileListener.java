@@ -24,8 +24,14 @@ public interface IProfileListener {
     void profileChanged(ProfileEvent event);
 
     /**
-     * Run has been removed.
+     * Profile has been removed.
      * @param event
      */
     void profileRemoved(ProfileEvent event);
+
+    /**
+     * Reload/refresh Profiles.
+     * @param profileEvent
+     */
+    void profileRefreshAll(ProfileEvent profileEvent);
 }
