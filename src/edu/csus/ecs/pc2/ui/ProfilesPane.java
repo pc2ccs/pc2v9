@@ -25,6 +25,7 @@ import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
+import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IProfileListener;
 import edu.csus.ecs.pc2.core.model.Profile;
@@ -661,7 +662,7 @@ public class ProfilesPane extends JPanePlugin {
         report.setContestAndController(getContest(), getController());
 
         try {
-            createAndViewReportFile(report, getController().getLog());
+            createAndViewReportFile(report, new Filter(), getController().getLog());
         } catch (IOException e) {
             StaticLog.log("Exception creating report", e);
             JOptionPane.showMessageDialog(this, "Exception in report " + e.getLocalizedMessage());

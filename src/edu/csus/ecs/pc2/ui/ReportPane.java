@@ -329,7 +329,7 @@ public class ReportPane extends JPanePlugin {
         return viewReportButton;
     }
 
-    private String getFileName(IReport selectedReport) {
+    public String getFileName(IReport selectedReport) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM.dd.SSS");
         // "yyMMdd HHmmss.SSS");
         String reportName = selectedReport.getReportTitle();
@@ -434,7 +434,7 @@ public class ReportPane extends JPanePlugin {
             } else {
                 if (reportDirectoryFile.mkdirs()) {
                     filename = reportDirectoryFile.getCanonicalPath() + File.separator + filename;
-                }
+                 }
             }
 
             selectedReport.setContestAndController(getContest(), getController());

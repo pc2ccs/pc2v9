@@ -2,8 +2,6 @@ package edu.csus.ecs.pc2.ui;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -76,28 +74,6 @@ public abstract class JPanePlugin extends JPanel implements UIPlugin {
      * @param selectedReport
      * @return
      */
-    private String getFileName(IReport selectedReport) {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM.dd.SSS");
-        // "yyMMdd HHmmss.SSS");
-        String reportName = selectedReport.getReportTitle();
-
-        while (reportName.indexOf(' ') > -1) {
-            reportName = reportName.replace(" ", "_");
-        }
-        return "report." + reportName + "." + simpleDateFormat.format(new Date()) + ".txt";
-
-    }
-
-    /**
-     * Create and view via GUI the report file.
-     * 
-     * @param report
-     * @param log
-     * @throws IOException
-     */
-    public void createAndViewReportFile(IReport report, Log log) throws IOException {
-        createAndViewReportFile(report, null, null, log);
-    }
 
     /**
      * Create and view via GUI the report file.
@@ -108,16 +84,25 @@ public abstract class JPanePlugin extends JPanel implements UIPlugin {
      * @param log
      * @throws IOException
      */
-    public void createAndViewReportFile(IReport report, String filename, Filter inFilter, Log log) throws IOException {
+    public void createAndViewReportFile(IReport report, Filter filter, Log log) throws IOException {
 
         ReportPane reportPane = new ReportPane();
         reportPane.setContestAndController(contest, controller);
 
-        reportPane.createReportFile(report, filename, inFilter);
-
-        if (filename == null) {
-            filename = contest.getStorage().getDirectoryName() + File.separator + getFileName(report);
+        String filename = reportPane.getFileName(report);
+        
+        File reportDirectoryFile = new File(reportPane.getReportDirectory());
+        if (reportDirectoryFile.exists()) {
+            if (reportDirectoryFile.isDirectory()) {
+                filename = reportDirectoryFile.getCanonicalPath() + File.separator + filename;
+            }
+        } else {
+            if (reportDirectoryFile.mkdirs()) {
+                filename = reportDirectoryFile.getCanonicalPath() + File.separator + filename;
+            }
         }
+
+        reportPane.createReportFile(report, filename, filter);
 
         String title = report.getReportTitle();
 
