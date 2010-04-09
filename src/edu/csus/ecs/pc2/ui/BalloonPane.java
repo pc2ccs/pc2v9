@@ -91,6 +91,25 @@ public class BalloonPane extends JPanePlugin {
             loadBalloonSettings();
         }
 
+        public void balloonSettingsRefreshAll(BalloonSettingsEvent balloonSettingsEvent) {
+            
+            balloonHandler.setBalloonDeliveryList(getContest().getClientSettings().getBalloonList());
+            Site[] sites = getContest().getSites();
+            
+            // TODO put this on a separate thread?
+            // TODO #2 recompute after or before listeners, seems there is a timing window either way...
+            
+            for (int i = 0; i < sites.length; i++) {
+                recomputeBalloons(sites[i].getSiteNumber());
+            }
+            
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                }
+            });
+        }
+
     }
     
     /**

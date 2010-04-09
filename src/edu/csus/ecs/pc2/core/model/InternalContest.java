@@ -496,6 +496,8 @@ public class InternalContest implements IInternalContest {
                 balloonSettingsListenerList.elementAt(i).balloonSettingsAdded(balloonSettingsEvent);
             } else if (balloonSettingsEvent.getAction() == BalloonSettingsEvent.Action.DELETED) {
                 balloonSettingsListenerList.elementAt(i).balloonSettingsRemoved(balloonSettingsEvent);
+            } else if (balloonSettingsEvent.getAction() == BalloonSettingsEvent.Action.REFRESH_ALL) {
+                balloonSettingsListenerList.elementAt(i).balloonSettingsRefreshAll(balloonSettingsEvent);
             } else {
                 balloonSettingsListenerList.elementAt(i).balloonSettingsChanged(balloonSettingsEvent);
             }
@@ -2418,8 +2420,7 @@ public class InternalContest implements IInternalContest {
         ConnectionEvent connectionEvent = null;
         fireConnectionListener(connectionEvent);
 
-        // FIXME add REFRESH_ALL event
-        BalloonSettingsEvent balloonSettingsEvent = null;
+        BalloonSettingsEvent balloonSettingsEvent = new BalloonSettingsEvent(BalloonSettingsEvent.Action.REFRESH_ALL, null);
         fireBalloonSettingsListener(balloonSettingsEvent);
 
         AccountEvent accountEvent = new AccountEvent(AccountEvent.Action.REFRESH_ALL, getAccounts());

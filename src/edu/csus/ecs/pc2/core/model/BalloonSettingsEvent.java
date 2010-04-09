@@ -30,7 +30,11 @@ public class BalloonSettingsEvent {
         /**
          * BalloonSettings modified.
          */
-        CHANGED,
+        CHANGED, 
+        /**
+         * refresh BalloonSettings.
+         */
+        REFRESH_ALL,
 
     }
 

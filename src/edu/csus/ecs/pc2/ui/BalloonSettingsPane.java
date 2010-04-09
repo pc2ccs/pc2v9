@@ -368,6 +368,15 @@ public class BalloonSettingsPane extends JPanePlugin {
             // TODO remove balloon setting
             log.info("debug BalloonSettings REMOVED  " + event.getBalloonSettings());
         }
+
+        public void balloonSettingsRefreshAll(BalloonSettingsEvent balloonSettingsEvent) {
+
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                }
+            }); 
+        }
     }
 
     /**

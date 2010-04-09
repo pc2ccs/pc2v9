@@ -1,6 +1,5 @@
 package edu.csus.ecs.pc2.core.model;
 
-
 /**
  * Listener for all Balloon Settings Events.
  * 
@@ -24,8 +23,14 @@ public interface IBalloonSettingsListener {
     void balloonSettingsChanged(BalloonSettingsEvent event);
 
     /**
-     * Run has been removed.
+     * BalloonSettings has been removed.
      * @param event
      */
     void balloonSettingsRemoved(BalloonSettingsEvent event);
+
+    /**
+     * refresh BalloonSettings.
+     * @param balloonSettingsEvent
+     */
+    void balloonSettingsRefreshAll(BalloonSettingsEvent balloonSettingsEvent);
 }

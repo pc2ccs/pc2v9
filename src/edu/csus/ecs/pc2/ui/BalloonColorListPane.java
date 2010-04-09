@@ -255,6 +255,14 @@ public class BalloonColorListPane extends JPanePlugin {
                 }
             });
         }
+
+        public void balloonSettingsRefreshAll(BalloonSettingsEvent balloonSettingsEvent) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                }
+            });
+        }
     }
 
     /**

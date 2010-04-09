@@ -363,7 +363,10 @@ public class StandingsPane extends JPanePlugin {
         public void balloonSettingsRemoved(BalloonSettingsEvent event) {
             refreshStandings();
         }
-        
+
+        public void balloonSettingsRefreshAll(BalloonSettingsEvent balloonSettingsEvent) {
+            refreshStandings();
+        }
     }
 
     /**
