@@ -449,6 +449,15 @@ public class EditJudgementNotificationFrame extends JFrame implements UIPlugin, 
             // TODO code remove problem tab logic.
             problemChanged(event); // fake statement ot satisfy check style
         }
+
+        public void problemRefreshAll(ProblemEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    // FIXME must remove all previously added Problems
+                    populateUI();
+                }
+            }); 
+        }
     }
 
     public void itemChanged(JComponent component) {

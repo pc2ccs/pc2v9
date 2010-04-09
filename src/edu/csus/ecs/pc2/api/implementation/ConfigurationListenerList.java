@@ -75,6 +75,11 @@ public class ConfigurationListenerList {
         public void problemRemoved(ProblemEvent event) {
             fireProblemListener(event);
         }
+
+        public void problemRefreshAll(ProblemEvent event) {
+            // FIXME API code
+            
+        }
     }
 
     private void fireProblemListener(ProblemEvent problemEvent) {
@@ -90,6 +95,7 @@ public class ConfigurationListenerList {
                 case DELETED:
                     listenerList.elementAt(i).configurationItemRemoved(contestEvent);
                     break;
+                case REFRESH_ALL: // FIXME API code
                 case CHANGED:
                 default:
                     listenerList.elementAt(i).configurationItemUpdated(contestEvent);

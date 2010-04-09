@@ -311,6 +311,10 @@ public class StandingsHTMLPane extends JPanePlugin {
             refreshStandings();
         }
 
+        public void problemRefreshAll(ProblemEvent event) {
+            refreshStandings();
+        }
+
     }
 
     /**

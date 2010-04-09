@@ -401,6 +401,14 @@ public class EOCNotificationsPane extends JPanePlugin {
         public void problemRemoved(ProblemEvent event) {
             log.info("debug Problem REMOVED  " + event.getProblem());
         }
+
+        public void problemRefreshAll(ProblemEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                }
+            });
+        }
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

@@ -1554,6 +1554,14 @@ public class RunsPanel extends JPanePlugin {
         public void problemRemoved(ProblemEvent event) {
             // ignore does not affect this pane
         }
+
+        public void problemRefreshAll(ProblemEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadRunList();
+                }
+            }); 
+        }
     }
 
     /**

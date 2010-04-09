@@ -30,6 +30,10 @@ public class ProblemEvent {
          * Problem modified.
          */
         CHANGED,
+        /**
+         * Reload/Refresh all problems.
+         */
+        REFRESH_ALL,
 
     }
 

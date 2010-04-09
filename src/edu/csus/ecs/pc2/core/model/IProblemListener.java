@@ -24,8 +24,14 @@ public interface IProblemListener {
     void problemChanged(ProblemEvent event);
 
     /**
-     * Run has been removed.
+     * Problem has been removed.
      * @param event
      */
     void problemRemoved(ProblemEvent event);
+
+    /**
+     * Refresh all Problems.
+     * @param problemEvent
+     */
+    void problemRefreshAll(ProblemEvent event);
 }

@@ -402,6 +402,8 @@ public class InternalContest implements IInternalContest {
                 problemListenerList.elementAt(i).problemAdded(problemEvent);
             } else if (problemEvent.getAction() == ProblemEvent.Action.DELETED) {
                 problemListenerList.elementAt(i).problemRemoved(problemEvent);
+            } else if (problemEvent.getAction() == ProblemEvent.Action.REFRESH_ALL) {
+                problemListenerList.elementAt(i).problemRefreshAll(problemEvent);
             } else {
                 problemListenerList.elementAt(i).problemChanged(problemEvent);
             }
@@ -2385,7 +2387,7 @@ public class InternalContest implements IInternalContest {
         fireContestTimeListener(contestTimeEvent);
 
         // FIXME add REFRESH_ALL event
-        ProblemEvent problemEvent = null;
+        ProblemEvent problemEvent = new ProblemEvent(ProblemEvent.Action.REFRESH_ALL, null);
         fireProblemListener(problemEvent);
 
         // FIXME add REFRESH_ALL event

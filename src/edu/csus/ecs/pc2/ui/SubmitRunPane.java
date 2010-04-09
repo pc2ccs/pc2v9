@@ -268,6 +268,14 @@ public class SubmitRunPane extends JPanePlugin {
                 }
             });
         }
+
+        public void problemRefreshAll(ProblemEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadProblems();
+                }
+            });
+        }
     }
 
     /**

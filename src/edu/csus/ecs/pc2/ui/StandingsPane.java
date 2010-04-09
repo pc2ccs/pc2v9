@@ -291,9 +291,12 @@ public class StandingsPane extends JPanePlugin {
     }
 
     /**
+     * Problem Listener for Standings Pane.
      * @author pc2@ecs.csus.edu
-     *
+     * @version $Id$
      */
+    
+    // $HeadURL$
     public class ProblemListenerImplementation implements IProblemListener {
 
         public void problemAdded(ProblemEvent event) {
@@ -305,6 +308,10 @@ public class StandingsPane extends JPanePlugin {
         }
 
         public void problemRemoved(ProblemEvent event) {
+            refreshStandings();
+        }
+
+        public void problemRefreshAll(ProblemEvent event) {
             refreshStandings();
         }
         
