@@ -1798,6 +1798,8 @@ public class InternalContest implements IInternalContest {
                 groupListenerList.elementAt(i).groupAdded(groupEvent);
             } else if (groupEvent.getAction() == GroupEvent.Action.DELETED) {
                 groupListenerList.elementAt(i).groupRemoved(groupEvent);
+            } else if (groupEvent.getAction() == GroupEvent.Action.REFRESH_ALL) {
+                groupListenerList.elementAt(i).groupRefreshAll(groupEvent);
             } else {
                 groupListenerList.elementAt(i).groupChanged(groupEvent);
             }
@@ -2433,7 +2435,7 @@ public class InternalContest implements IInternalContest {
         fireContestInformationListener(contestInformationEvent);
 
         // FIXME add REFRESH_ALL event
-        GroupEvent groupEvent = null;
+        GroupEvent groupEvent = new GroupEvent(GroupEvent.Action.REFRESH_ALL, null);
         fireGroupListener(groupEvent);
 
         // FIXME add REFRESH_ALL event

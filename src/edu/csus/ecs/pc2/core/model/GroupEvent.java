@@ -31,6 +31,10 @@ public class GroupEvent {
          * Modify a group.
          */
         CHANGED,
+        /**
+         * Reload/Refresh all groups.
+         */
+        REFRESH_ALL,
 
     }
 

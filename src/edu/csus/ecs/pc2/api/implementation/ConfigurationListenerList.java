@@ -168,6 +168,10 @@ public class ConfigurationListenerList {
         public void groupRemoved(GroupEvent event) {
             fireGroupListener(event);
         }
+
+        public void groupRefreshAll(GroupEvent groupEvent) {
+            // FIXME API code
+        }
     }
 
     private void fireGroupListener(GroupEvent groupEvent) {

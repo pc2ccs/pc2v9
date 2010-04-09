@@ -28,4 +28,11 @@ public interface IGroupListener {
      * @param event
      */
     void groupRemoved(GroupEvent event);
+
+    /**
+     * Refresh/reload all Groups.
+     * 
+     * @param groupEvent
+     */
+    void groupRefreshAll(GroupEvent groupEvent);
 }

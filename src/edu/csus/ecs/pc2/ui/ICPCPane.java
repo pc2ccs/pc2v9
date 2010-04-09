@@ -1,6 +1,3 @@
-/**
- * 
- */
 package edu.csus.ecs.pc2.ui;
 
 import javax.swing.JButton;
@@ -57,10 +54,12 @@ public class ICPCPane extends JPanePlugin {
     private JButton importSitesButton = null;
 
     /**
-     * 
-     * 
+     * Group Listener for ICPC Pane.
      * @author pc2@ecs.csus.edu
+     * @version $Id$
      */
+    
+    // $HeadURL$
     public class GroupListenerImplementation implements IGroupListener {
 
         public void groupAdded(GroupEvent event) {
@@ -75,6 +74,9 @@ public class ICPCPane extends JPanePlugin {
             // TODO Auto-generated method stub
         }
 
+        public void groupRefreshAll(GroupEvent groupEvent) {
+            getImportAccountsButton().setEnabled(getContest().getGroups() != null);
+        }
     }
 
 

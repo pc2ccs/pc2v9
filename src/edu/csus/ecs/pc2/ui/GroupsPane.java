@@ -204,6 +204,13 @@ public class GroupsPane extends JPanePlugin {
             // TODO Auto-generated method stub
         }
 
+        public void groupRefreshAll(GroupEvent groupEvent) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                }
+            });
+        }
     }
 
     /**
