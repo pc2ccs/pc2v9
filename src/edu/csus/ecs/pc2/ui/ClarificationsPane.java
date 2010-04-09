@@ -944,6 +944,16 @@ public class ClarificationsPane extends JPanePlugin {
                 }
             });
         }
+
+        public void accountsRefreshAll(AccountEvent accountEvent) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    updateGUIperPermissions();
+                    resetClarsListBoxColumns();
+                    reloadListBox();
+                }
+            });
+        }
     }
 
     /**

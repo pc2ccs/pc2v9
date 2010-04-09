@@ -459,6 +459,18 @@ public class AutoJudgesPane extends JPanePlugin {
                 }
             });
         }
+
+        public void accountsRefreshAll(AccountEvent accountEvent) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    updateGUIperPermissions();
+                    reloadAutoJudgeList();
+                }
+            });
+
+            showMessage("");
+            
+        }
         
     }
     

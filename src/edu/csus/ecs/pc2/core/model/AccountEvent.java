@@ -42,6 +42,10 @@ public class AccountEvent {
          * Move then 1 account was updated
          */
         CHANGED_ACCOUNTS,
+        /**
+         * Refresh all account information.
+         */
+        REFRESH_ALL,
 
     };
 

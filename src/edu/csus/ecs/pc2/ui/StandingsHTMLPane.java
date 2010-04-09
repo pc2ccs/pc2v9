@@ -288,6 +288,10 @@ public class StandingsHTMLPane extends JPanePlugin {
             refreshStandings();
         }
 
+        public void accountsRefreshAll(AccountEvent accountEvent) {
+            refreshStandings();
+        }
+
     }
 
     /**

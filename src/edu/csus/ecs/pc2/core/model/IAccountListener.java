@@ -36,4 +36,11 @@ public interface IAccountListener {
      * @param accountEvent
      */
     void accountsModified(AccountEvent accountEvent);
+
+    /**
+     * Reload all accounts.
+     * 
+     * @param accountEvent
+     */
+    void accountsRefreshAll(AccountEvent accountEvent);
 }

@@ -873,6 +873,7 @@ public class SelectJudgementPane extends JPanePlugin {
         public void accountModified(AccountEvent accountEvent) {
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
+                    initializePermissions();
                     updateGUIperPermissions();
                 }
             });
@@ -884,12 +885,22 @@ public class SelectJudgementPane extends JPanePlugin {
         }
 
         public void accountsModified(AccountEvent accountEvent) {
-            // TODO is this not dependant on us being modified???
+            // TODO is this not dependent on us being modified???
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
+                    initializePermissions();
                     updateGUIperPermissions();
                 }
             });
+        }
+
+        public void accountsRefreshAll(AccountEvent accountEvent) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    initializePermissions();
+                    updateGUIperPermissions();
+                }
+            });  
         }
     }
 

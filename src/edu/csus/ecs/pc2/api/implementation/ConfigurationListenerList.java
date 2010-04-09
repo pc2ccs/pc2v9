@@ -297,6 +297,10 @@ public class ConfigurationListenerList {
         public void accountsModified(AccountEvent event) {
             fireAccountListener(event);
         }
+
+        public void accountsRefreshAll(AccountEvent event) {
+            // FIXME API refresh all
+        }
     }
 
     private void fireAccountListener(AccountEvent accountEvent) {

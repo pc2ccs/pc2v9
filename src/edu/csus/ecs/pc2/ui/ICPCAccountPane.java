@@ -79,7 +79,10 @@ public class ICPCAccountPane extends JPanePlugin {
         public void accountsModified(AccountEvent accountEvent) {
             changeDisplayName(displayChoice);
         }
-        
+
+        public void accountsRefreshAll(AccountEvent accountEvent) {
+            changeDisplayName(displayChoice);
+        }
     }
 
     /**

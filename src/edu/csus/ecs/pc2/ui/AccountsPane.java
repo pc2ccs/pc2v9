@@ -376,6 +376,19 @@ public class AccountsPane extends JPanePlugin {
             }
             sortRunsListBox();
         }
+
+        public void accountsRefreshAll(AccountEvent accountEvent) {
+
+            initializePermissions();
+
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadAccountList();
+                    updateGUIperPermissions();
+                }
+            });
+            
+        }
     }
 
     /**

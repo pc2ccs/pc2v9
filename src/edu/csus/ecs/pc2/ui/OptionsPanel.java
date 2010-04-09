@@ -417,6 +417,10 @@ public class OptionsPanel extends JPanePlugin {
                 }
             }
         }
+
+        public void accountsRefreshAll(AccountEvent accountEvent) {
+            accountsModified(accountEvent);
+        }
     }
     
 } // @jve:decl-index=0:visual-constraint="10,10"

@@ -488,6 +488,13 @@ public class GenerateAccountsPane extends JPanePlugin {
             });
         }
 
+        public void accountsRefreshAll(AccountEvent accountEvent) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    updateGenerateTitles();
+                }
+            });
+        }
     }
 
     /**

@@ -1526,6 +1526,9 @@ public class RunsPanel extends JPanePlugin {
             });
         }
 
+        public void accountsRefreshAll(AccountEvent accountEvent) {
+            accountsModified(accountEvent);
+        }
     }
 
     /**

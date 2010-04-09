@@ -613,6 +613,10 @@ public class ContestTimesPane extends JPanePlugin {
             }
         }
 
+        public void accountsRefreshAll(AccountEvent accountEvent) {
+            accountsModified(accountEvent);
+        }
+
     }
 
     /**

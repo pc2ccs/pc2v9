@@ -389,6 +389,10 @@ public class NotificationsPane extends JPanePlugin {
         public void accountsModified(AccountEvent accountEvent) {
             reloadListBox();
         }
+
+        public void accountsRefreshAll(AccountEvent accountEvent) {
+            reloadListBox();
+        }
     }
     
 } // @jve:decl-index=0:visual-constraint="10,10"

@@ -203,21 +203,25 @@ public class ServerView extends JFrame implements UIPlugin {
     public class AccountListenerImplementation implements IAccountListener {
 
         public void accountAdded(AccountEvent accountEvent) {
-            logDebugMessage("Account Event Event " + accountEvent.getAction() + " " + accountText(accountEvent.getAccount()));
+            logDebugMessage("Account Event " + accountEvent.getAction() + " " + accountText(accountEvent.getAccount()));
 
         }
 
         public void accountModified(AccountEvent accountEvent) {
-            logDebugMessage("Account Event Event " + accountEvent.getAction() + " " + accountText(accountEvent.getAccount()));
+            logDebugMessage("Account Event " + accountEvent.getAction() + " " + accountText(accountEvent.getAccount()));
 
         }
 
         public void accountsAdded(AccountEvent accountEvent) {
-            logDebugMessage("Account Event Event " + accountEvent.getAction() + " " + accountEvent.getAccounts().length + " accounts");
+            logDebugMessage("Account Event " + accountEvent.getAction() + " " + accountEvent.getAccounts().length + " accounts");
         }
 
         public void accountsModified(AccountEvent accountEvent) {
-            logDebugMessage("Account Event Event " + accountEvent.getAction() + " " + accountEvent.getAccounts().length + " accounts");
+            logDebugMessage("Account Event " + accountEvent.getAction() + " " + accountEvent.getAccounts().length + " accounts");
+        }
+
+        public void accountsRefreshAll(AccountEvent accountEvent) {
+            logDebugMessage("Account Event " + accountEvent.getAction() + " " + accountEvent.getAccounts().length + " accounts");
         }
     }
 

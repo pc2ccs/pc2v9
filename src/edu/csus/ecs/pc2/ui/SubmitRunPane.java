@@ -861,6 +861,10 @@ public class SubmitRunPane extends JPanePlugin {
                 }
             }
         }
+
+        public void accountsRefreshAll(AccountEvent accountEvent) {
+            accountsModified (accountEvent);
+        }
     }
 
     /**

@@ -307,7 +307,7 @@ public class InternalContest implements IInternalContest {
             }
         }
 
-		// FIXME can this createNewProfile be removed?
+        // FIXME can this createNewProfile be removed?
         if (profileList.size() == 0) {
             setProfile(ProfileManager.createNewProfile());
         }
@@ -769,6 +769,8 @@ public class InternalContest implements IInternalContest {
                 accountListenerList.elementAt(i).accountsAdded(accountEvent);
             } else if(accountEvent.getAction() == AccountEvent.Action.CHANGED_ACCOUNTS) {
                 accountListenerList.elementAt(i).accountsModified(accountEvent);
+            } else if(accountEvent.getAction() == AccountEvent.Action.REFRESH_ALL) {
+                accountListenerList.elementAt(i).accountsRefreshAll(accountEvent);
             } else {
                 accountListenerList.elementAt(i).accountModified(accountEvent);
             }
@@ -2408,8 +2410,7 @@ public class InternalContest implements IInternalContest {
         BalloonSettingsEvent balloonSettingsEvent = null;
         fireBalloonSettingsListener(balloonSettingsEvent);
 
-        // FIXME add REFRESH_ALL event
-        AccountEvent accountEvent = null;
+        AccountEvent accountEvent = new AccountEvent(AccountEvent.Action.REFRESH_ALL, getAccounts());
         fireAccountListener(accountEvent);
 
         // FIXME add REFRESH_ALL event
