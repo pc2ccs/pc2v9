@@ -24,4 +24,10 @@ public interface IClientSettingsListener {
     void clientSettingsChanged(ClientSettingsEvent event);
 
     void clientSettingsRemoved(ClientSettingsEvent event);
+
+    /**
+     * refresh ClientSettings. 
+     * @param clientSettingsEvent
+     */
+    void clientSettingsRefreshAll(ClientSettingsEvent clientSettingsEvent);
 }

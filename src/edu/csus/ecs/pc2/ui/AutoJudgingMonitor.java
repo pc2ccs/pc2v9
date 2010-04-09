@@ -548,6 +548,15 @@ public class AutoJudgingMonitor implements UIPlugin {
             // TODO Auto-generated method stub
         }
 
+        public void clientSettingsRefreshAll(ClientSettingsEvent clientSettingsEvent) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    autoJudgeStatusFrame.setTitle("Auto Judge Status " + contest.getClientId().getName());
+                    updateClientSettings(contest.getClientSettings());
+                }
+            }); 
+        }
+
     }
 
     /**

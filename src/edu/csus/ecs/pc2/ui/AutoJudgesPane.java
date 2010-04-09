@@ -399,6 +399,15 @@ public class AutoJudgesPane extends JPanePlugin {
         public void clientSettingsRemoved(ClientSettingsEvent event) {
             clientSettingsChanged(event);
         }
+
+        public void clientSettingsRefreshAll(ClientSettingsEvent clientSettingsEvent) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    updateGUIperPermissions();
+                    reloadAutoJudgeList();
+                }
+            });
+        }
     }
     
     /**

@@ -26,9 +26,13 @@ public class ClientSettingsEvent {
          */
         CHANGED, 
         /**
-         * 
+         * ClientSettings deleted.
          */
-        DELETED,
+        DELETED, 
+        /**
+         * Reload/refresh ClientSettings.
+         */
+        REFRESH_ALL,
 
     }
 

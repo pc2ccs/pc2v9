@@ -1640,6 +1640,8 @@ public class InternalContest implements IInternalContest {
                 clientSettingsListenerList.elementAt(i).clientSettingsAdded(clientSettingsEvent);
             } else if (clientSettingsEvent.getAction() == ClientSettingsEvent.Action.DELETED) {
                 clientSettingsListenerList.elementAt(i).clientSettingsRemoved(clientSettingsEvent);
+            } else if (clientSettingsEvent.getAction() == ClientSettingsEvent.Action.REFRESH_ALL) {
+                clientSettingsListenerList.elementAt(i).clientSettingsRefreshAll(clientSettingsEvent);
             } else {
                 clientSettingsListenerList.elementAt(i).clientSettingsChanged(clientSettingsEvent);
             }
@@ -2430,8 +2432,7 @@ public class InternalContest implements IInternalContest {
         ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.REFRESH_ALL, null);
         fireClarificationListener(clarificationEvent);
 
-        // FIXME add REFRESH_ALL event
-        ClientSettingsEvent clientSettingsEvent = null;
+        ClientSettingsEvent clientSettingsEvent = new ClientSettingsEvent(ClientSettingsEvent.Action.REFRESH_ALL, null, null);
         fireClientSettingsListener(clientSettingsEvent);
 
         ContestInformationEvent contestInformationEvent = new ContestInformationEvent (ContestInformationEvent.Action.REFRESH_ALL, null);
