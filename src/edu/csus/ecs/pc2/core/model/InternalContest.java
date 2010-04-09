@@ -415,6 +415,8 @@ public class InternalContest implements IInternalContest {
                 languageListenerList.elementAt(i).languageAdded(languageEvent);
             } else if (languageEvent.getAction() == LanguageEvent.Action.DELETED) {
                 languageListenerList.elementAt(i).languageRemoved(languageEvent);
+            } else if (languageEvent.getAction() == LanguageEvent.Action.REFRESH_ALL) {
+                languageListenerList.elementAt(i).languageRefreshAll(languageEvent);
             } else {
                 languageListenerList.elementAt(i).languageChanged(languageEvent);
             }
@@ -2387,7 +2389,7 @@ public class InternalContest implements IInternalContest {
         fireProblemListener(problemEvent);
 
         // FIXME add REFRESH_ALL event
-        LanguageEvent languageEvent = null;
+        LanguageEvent languageEvent = new LanguageEvent(LanguageEvent.Action.REFRESH_ALL, null);
         fireLanguageListener(languageEvent);
 
         // FIXME add REFRESH_ALL event

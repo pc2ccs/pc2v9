@@ -219,6 +219,14 @@ public class LanguagesPane extends JPanePlugin {
                 }
             });
         }
+
+        public void languageRefreshAll(LanguageEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                }
+            });
+        }
     }
 
     /**

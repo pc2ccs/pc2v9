@@ -271,10 +271,13 @@ public class SubmitRunPane extends JPanePlugin {
     }
 
     /**
+     * Language Listener for SubmtitRunPane.
      * 
      * @author pc2@ecs.csus.edu
-     * 
+     * @version $Id$
      */
+    
+    // $HeadURL$
     private class LanguageListenerImplementation implements ILanguageListener {
 
         public void languageAdded(final LanguageEvent event) {
@@ -298,6 +301,14 @@ public class SubmitRunPane extends JPanePlugin {
         }
 
         public void languageRemoved(LanguageEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadLanguages();
+                }
+            });
+        }
+
+        public void languageRefreshAll(LanguageEvent event) {
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
                     reloadLanguages();

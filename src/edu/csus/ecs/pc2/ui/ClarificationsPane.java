@@ -152,6 +152,10 @@ public class ClarificationsPane extends JPanePlugin {
             // ignore, does not affect this pane
         }
 
+        public void languageRefreshAll(LanguageEvent event) {
+            languageChanged(event);
+        }
+
     }
 
     /**

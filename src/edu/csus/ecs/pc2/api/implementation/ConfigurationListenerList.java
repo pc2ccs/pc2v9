@@ -116,6 +116,10 @@ public class ConfigurationListenerList {
         public void languageRemoved(LanguageEvent event) {
             fireLanguageListener(event);
         }
+
+        public void languageRefreshAll(LanguageEvent event) {
+            // FIXME API code
+        }
     }
 
     private void fireLanguageListener(LanguageEvent languageEvent) {
@@ -131,6 +135,7 @@ public class ConfigurationListenerList {
                 case DELETED:
                     listenerList.elementAt(i).configurationItemRemoved(contestEvent);
                     break;
+                case REFRESH_ALL: // FIXME API code
                 case CHANGED:
                 default:
                     listenerList.elementAt(i).configurationItemUpdated(contestEvent);

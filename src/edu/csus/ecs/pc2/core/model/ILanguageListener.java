@@ -24,8 +24,15 @@ public interface ILanguageListener {
     void languageChanged(LanguageEvent event);
 
     /**
-     * Run has been removed.
+     * Language has been removed.
      * @param event
      */
     void languageRemoved(LanguageEvent event);
+    
+    /**
+     * Languages need to be reloaded/refreshed
+     * @param event
+     */
+    void languageRefreshAll(LanguageEvent event);
+    
 }

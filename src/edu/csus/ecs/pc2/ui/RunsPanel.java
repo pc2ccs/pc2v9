@@ -1579,6 +1579,14 @@ public class RunsPanel extends JPanePlugin {
         public void languageRemoved(LanguageEvent event) {
             // ignore does not affect this pane
         }
+
+        public void languageRefreshAll(LanguageEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadRunList();
+                }
+            });
+        }
     }
 
     /**

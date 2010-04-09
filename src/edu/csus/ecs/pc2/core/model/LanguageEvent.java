@@ -30,6 +30,10 @@ public class LanguageEvent {
          * Modified Language.
          */
         CHANGED,
+        /**
+         * Refresh all languages
+         */
+        REFRESH_ALL,
 
     }
 
