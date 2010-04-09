@@ -344,9 +344,13 @@ public class StandingsHTMLPane extends JPanePlugin {
     }
 
     /**
+     * Contest Information Listener for StandingsHTMLPane.
      * 
      * @author pc2@ecs.csus.edu
+     * @version $Id$
      */
+    
+    // $HeadURL$
     class ContestInformationListenerImplementation implements IContestInformationListener {
 
         public void contestInformationAdded(ContestInformationEvent event) {
@@ -359,6 +363,10 @@ public class StandingsHTMLPane extends JPanePlugin {
 
         public void contestInformationRemoved(ContestInformationEvent event) {
             // ignored
+        }
+
+        public void contestInformationRefreshAll(ContestInformationEvent contestInformationEvent) {
+            refreshStandings();
         }
 
     }

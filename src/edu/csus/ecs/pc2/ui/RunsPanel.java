@@ -1630,6 +1630,14 @@ public class RunsPanel extends JPanePlugin {
             });
         }
 
+        public void contestInformationRefreshAll(ContestInformationEvent contestInformationEvent) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadRunList();
+                }
+            });
+        }
+
     }
 
     private void showMessage(final String string) {

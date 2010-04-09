@@ -136,8 +136,10 @@ public class AnswerClarificationFrame extends JFrame implements UIPlugin {
      * Note the Pane is responsible for updating it UI.
      * 
      * @author pc2@ecs.csus.edu
-     *
+     * @version $Id$
      */
+    
+    // $HeadURL$
     public class ContestInformationListenerImplementation implements IContestInformationListener {
 
         public void contestInformationAdded(ContestInformationEvent event) {
@@ -156,6 +158,11 @@ public class AnswerClarificationFrame extends JFrame implements UIPlugin {
         public void contestInformationRemoved(ContestInformationEvent event) {
             // TODO Auto-generated method stub
             
+        }
+
+        public void contestInformationRefreshAll(ContestInformationEvent contestInformationEvent) {
+            String answer = contest.getContestInformation().getJudgesDefaultAnswer();
+            getAnswerClarificationPane().setDefaultAnswerText(answer);
         }
         
     }

@@ -30,6 +30,10 @@ public class ContestInformationEvent {
          * Modified ContestInformation.
          */
         CHANGED,
+        /**
+         * Reload/Refresh all Contest Information.
+         */
+        REFRESH_ALL,
 
     }
 

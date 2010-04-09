@@ -4,6 +4,8 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import javax.swing.SwingUtilities;
+
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.Balloon;
 import edu.csus.ecs.pc2.core.model.BalloonDeliveryInfo;
@@ -51,10 +53,13 @@ public class BalloonHandler implements UIPlugin {
     private static final long serialVersionUID = -4763667166259158323L;
 
     /**
+     * Contest Information Listener for BalloonHandler.
      * 
      * @author pc2@ecs.csus.edu
-     * 
+     * @version $Id$
      */
+    
+    // $HeadURL$
     class ContestInformationListenerImplementation implements IContestInformationListener {
 
         public void contestInformationAdded(ContestInformationEvent event) {
@@ -84,6 +89,15 @@ public class BalloonHandler implements UIPlugin {
         public void contestInformationRemoved(ContestInformationEvent event) {
             // TODO Auto-generated method stub
 
+        }
+
+        public void contestInformationRefreshAll(ContestInformationEvent contestInformationEvent) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadBalloonSettings();
+                }
+            });
+            
         }
     }
 

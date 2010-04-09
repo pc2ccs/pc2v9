@@ -602,9 +602,12 @@ public class ClarificationsPane extends JPanePlugin {
     }
 
     /**
+     * Contest Information Listener for Clarifications Pane.
      * @author pc2@ecs.csus.edu
-     * 
+     * @version $Id$
      */
+    
+    // $HeadURL$
     public class ContestInformationListenerImplementation implements IContestInformationListener {
 
         public void contestInformationAdded(ContestInformationEvent event) {
@@ -626,6 +629,14 @@ public class ClarificationsPane extends JPanePlugin {
         public void contestInformationRemoved(ContestInformationEvent event) {
             // TODO Auto-generated method stub
 
+        }
+
+        public void contestInformationRefreshAll(ContestInformationEvent contestInformationEvent) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                }
+            });
         }
 
     }

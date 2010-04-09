@@ -1,14 +1,13 @@
 package edu.csus.ecs.pc2.core.model;
 
-
 /**
  * Listener for all ContestInformation Events.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
-// $Id$
 public interface IContestInformationListener {
 
     /**
@@ -24,8 +23,14 @@ public interface IContestInformationListener {
     void contestInformationChanged(ContestInformationEvent event);
 
     /**
-     * Run has been removed.
+     * ContestInformation has been removed.
      * @param event
      */
     void contestInformationRemoved(ContestInformationEvent event);
+
+    /**
+     * Refresh all contest information.
+     * @param contestInformationEvent
+     */
+    void contestInformationRefreshAll(ContestInformationEvent contestInformationEvent);
 }

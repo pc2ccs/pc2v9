@@ -907,6 +907,10 @@ public class EditFilterPane extends JPanePlugin {
             populateTeamNamesWithDisplayMask();
         }
 
+        public void contestInformationRefreshAll(ContestInformationEvent contestInformationEvent) {
+            populateTeamNamesWithDisplayMask();
+        }
+
     }
 
     /**

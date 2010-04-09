@@ -338,7 +338,7 @@ public class EOCNotificationsPane extends JPanePlugin {
     }
 
     /**
-     * Contest Info listener for Judgement Notifications.
+     * Contest Information Listener for Judgement Notifications.
      * 
      * @author pc2@ecs.csus.edu
      * @version $Id$
@@ -364,6 +364,14 @@ public class EOCNotificationsPane extends JPanePlugin {
         }
 
         public void contestInformationRemoved(ContestInformationEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                }
+            });
+        }
+
+        public void contestInformationRefreshAll(ContestInformationEvent contestInformationEvent) {
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
                     reloadListBox();

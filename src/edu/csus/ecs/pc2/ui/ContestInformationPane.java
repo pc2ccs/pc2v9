@@ -337,6 +337,12 @@ public class ContestInformationPane extends JPanePlugin {
 
         }
 
+        public void contestInformationRefreshAll(ContestInformationEvent contestInformationEvent) {
+            populateGUI();
+            savedContestInformation = getContest().getContestInformation();
+            
+        }
+
     }
 
     /**

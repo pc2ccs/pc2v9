@@ -369,24 +369,30 @@ public class ConfigurationListenerList {
 
 
     /**
-       * 
-       * @author pc2@ecs.csus.edu
-       * @version $Id$
-       */
-      class ContestInformationListener implements IContestInformationListener {
+     * Contest Information Listener for API Configuration Listener.
+     *  
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    class ContestInformationListener implements IContestInformationListener {
 
-          public void contestInformationAdded(ContestInformationEvent event) {
-              fireContestInformationListener(event);
-          }
+        public void contestInformationAdded(ContestInformationEvent event) {
+            fireContestInformationListener(event);
+        }
 
-          public void contestInformationChanged(ContestInformationEvent event) {
-              fireContestInformationListener(event);
-          }
+        public void contestInformationChanged(ContestInformationEvent event) {
+            fireContestInformationListener(event);
+        }
 
-          public void contestInformationRemoved(ContestInformationEvent event) {
-              fireContestInformationListener(event);
-          }
-      }
+        public void contestInformationRemoved(ContestInformationEvent event) {
+            fireContestInformationListener(event);
+        }
+
+        public void contestInformationRefreshAll(ContestInformationEvent contestInformationEvent) {
+            // FIXME API code
+
+        }
+    }
 
       private void fireContestInformationListener(ContestInformationEvent contestInformationEvent) {
           for (int i = 0; i < listenerList.size(); i++) {
