@@ -419,6 +419,14 @@ public class ContestTimesPane extends JPanePlugin {
             updateContestTimeRow(event.getContestTime());
         }
 
+        public void refreshAll(ContestTimeEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                    updateGUIperPermissions();
+                }
+            });
+        }
     }
 
     /**

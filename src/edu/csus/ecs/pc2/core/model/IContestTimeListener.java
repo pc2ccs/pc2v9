@@ -20,4 +20,6 @@ public interface IContestTimeListener {
 
     void contestStopped(ContestTimeEvent event);
 
+    void refreshAll(ContestTimeEvent event);
+
 }

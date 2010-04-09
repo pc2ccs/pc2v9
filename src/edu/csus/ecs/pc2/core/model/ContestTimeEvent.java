@@ -42,6 +42,10 @@ public class ContestTimeEvent {
          * Clock has been stopped
          */
         CLOCK_STOPPED,
+        /**
+         * Refresh ALL contest times.
+         */
+        REFRESH_ALL,
 
     }
 

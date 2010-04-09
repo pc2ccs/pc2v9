@@ -284,7 +284,12 @@ public class ServerView extends JFrame implements UIPlugin {
                 updateFrameTitle(event.getContestTime().isContestRunning());
             }
         }
-        
+
+        public void refreshAll(ContestTimeEvent event) {
+            if (model.getSiteNumber() == event.getSiteNumber()) {
+                updateFrameTitle(event.getContestTime().isContestRunning());
+            }
+        }
     }
     /**
      * This method initializes mainViewPane

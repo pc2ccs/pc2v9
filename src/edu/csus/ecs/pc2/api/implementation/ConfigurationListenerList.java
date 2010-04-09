@@ -207,6 +207,9 @@ public class ConfigurationListenerList {
             fireContestTimeListener(event);
         }
 
+        public void refreshAll(ContestTimeEvent event) {
+            // FIXME API handle refresh all
+        }
     }
 
     private void fireContestTimeListener(ContestTimeEvent contestTimeEvent) {

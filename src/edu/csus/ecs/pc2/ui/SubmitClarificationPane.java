@@ -260,6 +260,14 @@ public class SubmitClarificationPane extends JPanePlugin {
                 setButtonsActive(event.getContestTime().isContestRunning());
             }
         }
+
+        public void refreshAll(ContestTimeEvent event) {
+            log.info("debug ContestTime site " + event.getSiteNumber() + " STOPPED " + event.getContestTime().getElapsedTimeStr());
+            if (isThisSite(event.getSiteNumber())) {
+                setButtonsActive(event.getContestTime().isContestRunning());
+            }
+            
+        }
     }
     
     /**

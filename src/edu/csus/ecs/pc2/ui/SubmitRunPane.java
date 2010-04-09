@@ -226,6 +226,12 @@ public class SubmitRunPane extends JPanePlugin {
                 setButtonsActive(event.getContestTime().isContestRunning());
             }
         }
+
+        public void refreshAll(ContestTimeEvent event) {
+            if (isThisSite(event.getSiteNumber())) {
+                setButtonsActive(event.getContestTime().isContestRunning());
+            }
+        }
     }
 
     /**

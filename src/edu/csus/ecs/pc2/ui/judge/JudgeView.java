@@ -361,6 +361,10 @@ public class JudgeView extends JFrame implements UIPlugin {
             contestTimeChanged(event);
         }
 
+        public void refreshAll(ContestTimeEvent event) {
+            contestTimeChanged(event);
+        }
+
     }
 
     /**

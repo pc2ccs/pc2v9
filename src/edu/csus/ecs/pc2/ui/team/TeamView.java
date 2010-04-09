@@ -188,6 +188,12 @@ public class TeamView extends JFrame implements UIPlugin {
                 updateFrameTitle(event.getContestTime().isContestRunning());
             }
         }
+
+        public void refreshAll(ContestTimeEvent event) {
+            if (isThisSite(event.getSiteNumber())) {
+                updateFrameTitle(event.getContestTime().isContestRunning());
+            }
+        }
     }
 
     /**

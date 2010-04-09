@@ -437,6 +437,10 @@ public class ScoreboardView extends JFrame implements UIPlugin {
         public void contestStopped(ContestTimeEvent event) {
             contestTimeChanged(event);
         }
+
+        public void refreshAll(ContestTimeEvent event) {
+            contestTimeChanged(event);
+        }
         
     }
     

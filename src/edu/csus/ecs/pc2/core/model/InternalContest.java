@@ -387,6 +387,8 @@ public class InternalContest implements IInternalContest {
                 contestTimeListenerList.elementAt(i).contestStopped(contestTimeEvent);
             } else if (contestTimeEvent.getAction() == ContestTimeEvent.Action.CHANGED) {
                 contestTimeListenerList.elementAt(i).contestTimeChanged(contestTimeEvent);
+            } else if (contestTimeEvent.getAction() == ContestTimeEvent.Action.REFRESH_ALL) {
+                contestTimeListenerList.elementAt(i).refreshAll(contestTimeEvent);
             } else {
                 contestTimeListenerList.elementAt(i).contestTimeChanged(contestTimeEvent);
             }
@@ -2375,8 +2377,7 @@ public class InternalContest implements IInternalContest {
         RunEvent runEvent = new RunEvent(RunEvent.Action.REFRESH_ALL, null, null, null);
         fireRunListener(runEvent);
 
-        // FIXME add REFRESH_ALL event
-        ContestTimeEvent contestTimeEvent = null;
+        ContestTimeEvent contestTimeEvent = new ContestTimeEvent(ContestTimeEvent.Action.REFRESH_ALL, getContestTime(), getSiteNumber());
         fireContestTimeListener(contestTimeEvent);
 
         // FIXME add REFRESH_ALL event

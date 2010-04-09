@@ -482,6 +482,10 @@ public class ContestClockDisplay implements ActionListener, UIPlugin {
             fireClockStateChange(event.getContestTime(), event.getContestTime().getSiteNumber());
             
         }
+
+        public void refreshAll(ContestTimeEvent event) {
+            fireClockStateChange(event.getContestTime(), event.getContestTime().getSiteNumber());
+        }
         
     }
 

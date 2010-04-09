@@ -203,6 +203,10 @@ public class ServerModule implements UIPlugin {
             // TODO Auto-generated method stub
 
         }
+
+        public void refreshAll(ContestTimeEvent event) {
+            logClockInfo(event.getAction().toString(), event.getContestTime());
+        }
     }
 
     protected void infoLog(String string) {

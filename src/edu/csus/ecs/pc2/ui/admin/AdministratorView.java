@@ -540,6 +540,10 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
             contestTimeChanged(event);
         }
 
+        public void refreshAll(ContestTimeEvent event) {
+            contestTimeChanged(event);
+        }
+
     }
 
     public void setFrameTitle(final boolean contestRunning) {
