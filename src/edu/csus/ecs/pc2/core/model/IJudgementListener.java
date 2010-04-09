@@ -28,4 +28,10 @@ public interface IJudgementListener {
      * @param event
      */
     void judgementRemoved(JudgementEvent event);
+
+    /**
+     * Refresh all judgements.
+     * @param judgementEvent
+     */
+    void judgementRefreshAll(JudgementEvent judgementEvent);
 }

@@ -262,6 +262,10 @@ public class ConfigurationListenerList {
         public void judgementRemoved(JudgementEvent event) {
             fireJudgementListener(event);
         }
+
+        public void judgementRefreshAll(JudgementEvent judgementEvent) {
+            // FIXME API code
+        }
     }
 
     private void fireJudgementListener(JudgementEvent judgementEvent) {

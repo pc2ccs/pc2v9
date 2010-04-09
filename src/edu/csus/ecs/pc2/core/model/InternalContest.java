@@ -447,6 +447,8 @@ public class InternalContest implements IInternalContest {
                 judgementListenerList.elementAt(i).judgementAdded(judgementEvent);
             } else if (judgementEvent.getAction() == JudgementEvent.Action.DELETED) {
                 judgementListenerList.elementAt(i).judgementRemoved(judgementEvent);
+            } else if (judgementEvent.getAction() == JudgementEvent.Action.REFRESH_ALL) {
+                judgementListenerList.elementAt(i).judgementRefreshAll(judgementEvent);
             } else {
                 judgementListenerList.elementAt(i).judgementChanged(judgementEvent);
             }
@@ -2386,11 +2388,9 @@ public class InternalContest implements IInternalContest {
         ContestTimeEvent contestTimeEvent = new ContestTimeEvent(ContestTimeEvent.Action.REFRESH_ALL, getContestTime(), getSiteNumber());
         fireContestTimeListener(contestTimeEvent);
 
-        // FIXME add REFRESH_ALL event
         ProblemEvent problemEvent = new ProblemEvent(ProblemEvent.Action.REFRESH_ALL, null);
         fireProblemListener(problemEvent);
 
-        // FIXME add REFRESH_ALL event
         LanguageEvent languageEvent = new LanguageEvent(LanguageEvent.Action.REFRESH_ALL, null);
         fireLanguageListener(languageEvent);
 
@@ -2398,8 +2398,7 @@ public class InternalContest implements IInternalContest {
         LoginEvent loginEvent = null;
         fireLoginListener(loginEvent);
 
-        // FIXME add REFRESH_ALL event
-        JudgementEvent judgementEvent = null;
+        JudgementEvent judgementEvent = new JudgementEvent(JudgementEvent.Action.REFRESH_ALL, null);
         fireJudgementListener(judgementEvent);
 
         // FIXME add REFRESH_ALL event

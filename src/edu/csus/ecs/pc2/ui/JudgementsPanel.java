@@ -66,6 +66,10 @@ public class JudgementsPanel extends JPanePlugin {
         public void judgementRemoved(JudgementEvent event) {
             reloadJudgementList();
         }
+
+        public void judgementRefreshAll(JudgementEvent judgementEvent) {
+            reloadJudgementList(); 
+        }
     }
 
     /**

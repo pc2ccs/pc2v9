@@ -122,6 +122,11 @@ public class RunFlowTest extends TestCase {
 
             }
 
+            public void judgementRefreshAll(JudgementEvent judgementEvent) {
+                // TODO Auto-generated method stub
+                
+            }
+
         }
 
         /**

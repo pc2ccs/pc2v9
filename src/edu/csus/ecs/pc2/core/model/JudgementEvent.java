@@ -30,6 +30,10 @@ public class JudgementEvent {
          * Modify a judgement.
          */
         CHANGED,
+        /**
+         * Reload/refresh judgements.
+         */
+        REFRESH_ALL,
 
     }
 

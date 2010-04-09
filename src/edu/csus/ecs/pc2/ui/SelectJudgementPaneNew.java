@@ -53,10 +53,10 @@ import edu.csus.ecs.pc2.ui.judge.JudgeView;
  * Select a Judgement Pane.
  * 
  * @author pc2@ecs.csus.edu
- * @version $Id: SelectJudgementPane.java 1364 2008-03-12 04:40:20Z boudreat $
+ * @version $Id$
  */
 
-// $HeadURL: http://pc2.ecs.csus.edu/repos/pc2v9/trunk/src/edu/csus/ecs/pc2/ui/SelectJudgementPane.java $
+// $HeadURL$
 public class SelectJudgementPaneNew extends JPanePlugin {
 
     /**
@@ -1524,6 +1524,10 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         }
 
         public void judgementRemoved(JudgementEvent event) {
+            reloadComboBoxes();
+        }
+
+        public void judgementRefreshAll(JudgementEvent judgementEvent) {
             reloadComboBoxes();
         }
     }
