@@ -39,8 +39,11 @@ public class SiteEvent {
         /**
          * A site modified.
          */
-        CHANGED,
-
+        CHANGED, 
+        /**
+         * Reload/Refresh sites.
+         */
+        REFRESH_ALL,
     }
 
     private Action action = Action.ADDED;

@@ -21,9 +21,10 @@ public interface ISiteListener {
      * @param event
      */
     void siteRemoved(SiteEvent event);
-    
+
     /**
-     * 
+     * Site changed.
+     * @param event
      */
     void siteChanged (SiteEvent event);
 
@@ -38,4 +39,11 @@ public interface ISiteListener {
      * @param event
      */
     void siteLoggedOff(SiteEvent event);
+
+    /**
+     * Reload/refresh sites.
+     * 
+     * @param siteEvent
+     */
+    void sitesRefreshAll(SiteEvent siteEvent);
 }

@@ -356,6 +356,15 @@ public class ContestTimesPane extends JPanePlugin {
             updateSiteInfo(siteNumber);
         }
 
+        public void sitesRefreshAll(SiteEvent siteEvent) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                    updateGUIperPermissions();
+                }
+            });
+        }
+
     }
     
     /**

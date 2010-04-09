@@ -252,6 +252,10 @@ public class ServerView extends JFrame implements UIPlugin {
         public void siteChanged(SiteEvent event) {
             logDebugMessage("Site Event " + event.getAction() + " " + event.getSite());
         }
+
+        public void sitesRefreshAll(SiteEvent event) {
+            logDebugMessage("Site Event " + event.getAction());
+        }
     }
 
     /**

@@ -468,6 +468,8 @@ public class InternalContest implements IInternalContest {
                 siteListenerList.elementAt(i).siteLoggedOn(siteEvent);
             } else if (siteEvent.getAction() == SiteEvent.Action.LOGOFF) {
                 siteListenerList.elementAt(i).siteLoggedOff(siteEvent);
+            } else if (siteEvent.getAction() == SiteEvent.Action.REFRESH_ALL) {
+                siteListenerList.elementAt(i).sitesRefreshAll(siteEvent);
             } else {
                 siteListenerList.elementAt(i).siteAdded(siteEvent);
             }
@@ -2401,8 +2403,7 @@ public class InternalContest implements IInternalContest {
         JudgementEvent judgementEvent = new JudgementEvent(JudgementEvent.Action.REFRESH_ALL, null);
         fireJudgementListener(judgementEvent);
 
-        // FIXME add REFRESH_ALL event
-        SiteEvent siteEvent = null;
+        SiteEvent siteEvent = new SiteEvent(SiteEvent.Action.REFRESH_ALL, null);
         fireSiteListener(siteEvent);
 
         // FIXME add REFRESH_ALL event

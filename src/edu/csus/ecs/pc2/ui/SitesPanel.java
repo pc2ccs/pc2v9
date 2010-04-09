@@ -524,6 +524,14 @@ public class SitesPanel extends JPanePlugin {
             StaticLog.unclassified("Site " + event.getAction() + " " + event.getSite());
             updateSiteList(event.getSite());
         }
+
+        public void sitesRefreshAll(SiteEvent siteEvent) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                }
+            });
+        }
     }
 
     /**

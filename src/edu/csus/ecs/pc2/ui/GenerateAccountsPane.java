@@ -525,6 +525,15 @@ public class GenerateAccountsPane extends JPanePlugin {
             updateSiteComboBox();
         }
 
+        public void sitesRefreshAll(SiteEvent siteEvent) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    updateGenerateTitles();
+                    updateSiteComboBox();
+                }
+            });
+        }
+
     }
 
     /**

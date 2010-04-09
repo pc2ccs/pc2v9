@@ -163,7 +163,11 @@ public class ServerModule implements UIPlugin {
         }
 
         public void siteRemoved(SiteEvent event) {
-            // TODO Auto-generated method stub
+            logSiteInfo(event.getAction().toString(), event.getSite());
+        }
+
+        public void sitesRefreshAll(SiteEvent event) {
+            infoLog("Site: none " +  event.getAction().toString());
         }
     }
 

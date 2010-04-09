@@ -465,6 +465,11 @@ public class ConfigurationListenerList {
             // TODO Auto-generated method stub
             
         }
+
+        public void sitesRefreshAll(SiteEvent siteEvent) {
+            // FIXME API code
+            
+        }
       }
       
     public void setContest(IInternalContest contest) {

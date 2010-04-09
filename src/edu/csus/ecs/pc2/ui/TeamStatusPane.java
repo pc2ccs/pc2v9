@@ -359,7 +359,10 @@ public class TeamStatusPane extends JPanePlugin {
             // nada
             
         }
-        
+
+        public void sitesRefreshAll(SiteEvent siteEvent) {
+            populateGUI();
+        }
     }
 
     /**
