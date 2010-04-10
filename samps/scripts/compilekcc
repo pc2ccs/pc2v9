@@ -1,11 +1,17 @@
 #!/bin/csh
-
+#
+# File:    compilekcc
+# Purpose: Used to compile/use Kylix with PC^2
+# Author:  pc2@ecs.csus.edu
+#
+# Dependencies:  kcc
+#
 # $HeadURL$
-
+#
 
 set mainfile=$1
 
 #echo bc++ -A $mainfile
 bc++ -A $mainfile
 
-# eof 
+# eof $Id$ 

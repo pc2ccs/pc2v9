@@ -1,6 +1,11 @@
 #!/bin/csh
-
+#
+# File:    compilegcc
+# Purpose: Used to compile C and C++ with PC^2
+# Author:  pc2@ecs.csus.edu
+#
 # $HeadURL$
+#
 
 set e=
 set mainfile=$1
@@ -12,3 +17,5 @@ if ("x$ext" == "xcpp") then
 else 
   $e gcc -lm -o $basename $mainfile
 endif
+
+# eof $Id$

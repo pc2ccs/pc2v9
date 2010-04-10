@@ -35,4 +35,4 @@ if [ ! -f /root/computer ];  then
    gvim -d $2 $3 > /dev/null
 fi
 
-# eof validiff
+# eof validiff $Id$
