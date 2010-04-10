@@ -2003,6 +2003,10 @@ public class InternalContest implements IInternalContest {
     public Profile getProfile() {
         return profile;
     }
+ 
+    public Profile getProfile(ElementId id) {
+        return (Profile) profileList.get(id);
+    }
 
     public void setProfile(Profile profile) {
         this.profile = profile;

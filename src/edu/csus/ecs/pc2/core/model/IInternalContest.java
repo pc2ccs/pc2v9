@@ -858,6 +858,13 @@ public interface IInternalContest {
      * @return
      */
     Profile getProfile();
+    
+    /**
+     * Get saved Profile/configuration.
+     * @param id
+     * @return profile or null if not found
+     */
+    Profile getProfile(ElementId id);
 
     /**
      * Get list of profiles.

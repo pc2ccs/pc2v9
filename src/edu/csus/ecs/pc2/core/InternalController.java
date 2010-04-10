@@ -836,7 +836,12 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             }
             info("Loaded configuration from disk");
         }
-
+        
+        // Remove temporary startupProfile
+        if ( contest.getProfile(startupProfile.getElementId()) != null){
+            contest.deleteProfile(startupProfile);
+        }
+        
         try {
             if (evaluationLog == null) {
                 String logDirectory = getBaseProfileDirectoryName(Log.LOG_DIRECTORY_NAME);
@@ -1962,8 +1967,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             Profile profile = getDefaultProfile();
             String profilePath = profile.getProfilePath();
             startLog(profilePath, "pc2.startup", null, null);
-            contest.setProfile(profile);
-            
         } else {
             startLog(null, "pc2.startup", null, null);
         }
