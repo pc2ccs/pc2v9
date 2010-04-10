@@ -53,6 +53,7 @@ public class PacketArchiver implements UIPlugin {
      * @param outputDirectroryName
      */
     public PacketArchiver(IStorage storage, String outputDirectroryName) {
+        this.outputDirectoryName = outputDirectroryName;
         Utilities.insureDir(outputDirectroryName);
         this.storage = storage;
     }

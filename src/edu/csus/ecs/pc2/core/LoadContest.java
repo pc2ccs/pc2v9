@@ -27,6 +27,8 @@ import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.core.report.LanguagesReport;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
+import edu.csus.ecs.pc2.core.security.Permission;
+import edu.csus.ecs.pc2.core.security.PermissionList;
 
 /**
  * Load/Create contest data based on Runs Version 8 content and format report.
@@ -44,6 +46,8 @@ public class LoadContest {
 
     // TODO when getFileNameForRun works remove sumitFilename
     private String sumitFilename = "Sumit.java";
+    
+    private PermissionGroup permissionGroup = new PermissionGroup();
 
     public LoadContest() {
 
@@ -257,6 +261,7 @@ public class LoadContest {
             JudgementRecord judgementRecord = new JudgementRecord(judgement.getElementId(), judgeAccount.getClientId(), solved,
                                 false, false);
             run.setStatus(RunStates.JUDGED);
+            run.addJudgement(judgementRecord);
             runResultFiles = new RunResultFiles[1];
             runResultFiles[0] = new RunResultFiles(run, run.getProblemId(), judgementRecord, new ExecutionData());
         }
@@ -386,6 +391,13 @@ public class LoadContest {
             String password = clientType.toString().toLowerCase() + accountNumber;
             account = new Account(clientId, password, clientId.getSiteNumber());
             account.setDisplayName(displayName);
+            PermissionList permissionList = permissionGroup.getPermissionList (account.getClientId().getClientType());
+            if (permissionList != null){
+                account.clearListAndLoadPermissions(permissionList);
+            } else {
+                account.addPermission(Permission.Type.LOGIN);
+                account.addPermission(Permission.Type.DISPLAY_ON_SCOREBOARD);
+            }
             contest.addAccount(account);
         }
         return account;

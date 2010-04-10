@@ -276,6 +276,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     
     private UIPluginList pluginList = new UIPluginList();
     
+    private Profile startupProfile = null;
+    
     public InternalController(IInternalContest contest) {
         super();
         this.contest = contest;
@@ -549,7 +551,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
         ClientId clientId = loginShortcutExpansion(0, id);
         
-        startLog(null, stripChar(clientId.toString(), ' '), id, clientId.getName());
+        startLog(getBaseProfileDirectoryName(Log.LOG_DIRECTORY_NAME), stripChar(clientId.toString(), ' '), id, clientId.getName());
         connectionManager.setLog(log);
 
         if (password.length() < 1) {
@@ -593,6 +595,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 log.log(Log.DEBUG, "Site Number is set as " + contest.getSiteNumber() + " (0 means unset)");
 
                 clientId = authenticateFirstServer(clientId.getSiteNumber(), password);
+                
                 try {
                     connectionManager.accecptConnections(port);
                     info("Started Server Transport listening on " + port);
@@ -746,7 +749,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     
     public void initializeStorage (IStorage storage) {
         contest.setStorage (storage);
-        packetArchiver = new PacketArchiver(storage, "packets");
+        packetArchiver = new PacketArchiver(storage, getBaseProfileDirectoryName("packets"));
         
     }
 
@@ -760,9 +763,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             info("initializeServer STARTED this site as Site "+contest.getSiteNumber());
             
             // FIXME fetch profile directory from the profile
-            
-            String baseDirectoryName = "db."+contest.getSiteNumber();
-            baseDirectoryName = contest.getProfile().getProfilePath() + File.separator + baseDirectoryName;
+
+            String baseDirectoryName = getBaseProfileDirectoryName("db." + contest.getSiteNumber());
             FileSecurity fileSecurity = new FileSecurity(baseDirectoryName);
             
             initializeStorage(fileSecurity);
@@ -837,11 +839,12 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
         try {
             if (evaluationLog == null) {
-                Utilities.insureDir(Log.LOG_DIRECTORY_NAME);
+                String logDirectory = getBaseProfileDirectoryName(Log.LOG_DIRECTORY_NAME);
+                Utilities.insureDir(logDirectory);
                 // this not only opens the log but registers this class to handle all run events.
-                evaluationLog = new EvaluationLog(Log.LOG_DIRECTORY_NAME + File.separator + "evals.log", contest, this);
+                evaluationLog = new EvaluationLog(logDirectory + File.separator + "evals.log", contest, this);
                 evaluationLog.getEvalLog().println("# Log opened " + new Date());
-                info("evals.log is opened");
+                info("evals.log is opened at " + logDirectory);
             }
         } catch (Exception e) {
             getLog().log(Log.WARNING, "Exception logged ", e);
@@ -1870,6 +1873,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         try {
 
             contest.setClientId(clientId);
+            
+            startLog(getBaseProfileDirectoryName(Log.LOG_DIRECTORY_NAME), stripChar(clientId.toString(), ' '), clientId.getName(), clientId.getName());
 
             boolean isServer = clientId.getClientType().equals(ClientType.Type.SERVER);
 
@@ -1961,7 +1966,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             
         } else {
             startLog(null, "pc2.startup", null, null);
-            
         }
         
         handleCommandLineOptions();
@@ -2121,18 +2125,23 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
     }
     
-    private void insureDefaultProfile () {
-        
+    private void insureDefaultProfile() {
+
         ProfileManager manager = new ProfileManager();
-        
-        if (! manager.hasDefaultProfile() ){
+
+        if (!manager.hasDefaultProfile()) {
             Profile profile = ProfileManager.createNewProfile();
             new File(profile.getProfilePath()).mkdirs();
             try {
                 manager.storeDefaultProfile(profile);
+                startupProfile = profile;
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        } else {
+            Profile profile = getDefaultProfile();
+            new File(profile.getProfilePath()).mkdirs();
+            startupProfile = profile;
         }
     }
     
@@ -2249,17 +2258,42 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         // TODO s/new ClientId(contest.getSiteNumber(), Type.SERVER, 0);/getServerClientId()/
         return new ClientId(contest.getSiteNumber(), Type.SERVER, 0);
     }
+    
+    /**
+     * Return working directory.
+     * 
+     * File.separator has already been appended as needed.
+     * 
+     * @param dirname
+     * @return profile directory if server, else return "";
+     */
+    private String getBaseProfileDirectoryName(String dirname) {
+        
+        if (startupProfile != null) {
+            return startupProfile.getProfilePath() + File.separator + dirname;
+        } else {
+            return dirname;
+        }
+    }
 
-    /*
+    /**
+     * Start new Log for client/server.
+     * 
      * This new a new Log(logFileName), sets up the StaticLog, and prints
      * basic info to the log.  If loginName is not null a Login: line is printed.
+     * 
+     * @param directoryName if null will use the profile/* directory.
+     * @param logFileName
+     * @param loginName
+     * @param clientName
      */
     private void startLog(String directoryName, String logFileName, String loginName, String clientName) {
         
         if (directoryName == null){
-            directoryName = "logs";
+            directoryName = getBaseProfileDirectoryName(Log.LOG_DIRECTORY_NAME);
             Utilities.insureDir(directoryName);
         }
+        
         log = new Log(directoryName, logFileName);
         StaticLog.setLog(log);
 
