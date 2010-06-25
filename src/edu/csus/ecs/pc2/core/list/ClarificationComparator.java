@@ -8,6 +8,7 @@ import edu.csus.ecs.pc2.core.model.Clarification;
 /**
  * Clarification Comparator, Order the clarifications by site # and clarification #.
  *
+ * @version $Id$
  * @author pc2@ecs.csus.edu
  */
 

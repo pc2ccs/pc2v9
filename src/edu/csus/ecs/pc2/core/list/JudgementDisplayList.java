@@ -7,6 +7,7 @@ import edu.csus.ecs.pc2.core.model.Judgement;
  * 
  * Contains a list of Judgement classes, in order, to display for the users.
  *
+ * @version $Id$
  * @author pc2@ecs.csus.edu
  */
 

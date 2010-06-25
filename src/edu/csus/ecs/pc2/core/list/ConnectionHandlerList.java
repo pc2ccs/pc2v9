@@ -8,6 +8,7 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 /**
  * Maintains a list of {@link edu.csus.ecs.pc2.core.transport.ConnectionHandlerID}s.
  * 
+ * @version $Id$
  * @author pc2@ecs.csus.edu
  */
 

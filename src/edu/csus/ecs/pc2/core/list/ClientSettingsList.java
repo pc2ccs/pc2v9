@@ -7,6 +7,7 @@ import edu.csus.ecs.pc2.core.model.IElementObject;
 /**
  * Maintain a list of {@link edu.csus.ecs.pc2.core.model.ClientSettings}s.
  * 
+ * @version $Id$
  * @author pc2@ecs.csus.edu
  */
 
@@ -17,8 +18,6 @@ public class ClientSettingsList extends BaseElementList {
      * 
      */
     private static final long serialVersionUID = -7236148308850761761L;
-
-    public static final String SVN_ID = "$Id$";
 
     /**
      * 

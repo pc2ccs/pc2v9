@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.core.model;
 /**
  * A ClientSettings and a event state {@link edu.csus.ecs.pc2.core.model.ClientSettingsEvent.Action}.
  * 
+ * @version $Id$
  * @author pc2@ecs.csus.edu
  */
 

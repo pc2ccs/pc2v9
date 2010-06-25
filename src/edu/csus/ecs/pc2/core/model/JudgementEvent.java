@@ -3,13 +3,12 @@ package edu.csus.ecs.pc2.core.model;
 /**
  * A judgement and a event state {@link edu.csus.ecs.pc2.core.model.JudgementEvent.Action}.
  * 
+ * @version $Id$
  * @author pc2@ecs.csus.edu
  */
 
 // $HeadURL$
 public class JudgementEvent {
-
-    public static final String SVN_ID = "$Id$";
 
     /**
      * Run Event States(s).

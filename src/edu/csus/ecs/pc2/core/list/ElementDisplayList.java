@@ -10,6 +10,7 @@ import edu.csus.ecs.pc2.core.model.IElementObject;
  *
  * This list should contain only active elements which are to be displayed.
  *
+ * @version $Id$
  * @author pc2@ecs.csus.edu
  *
  *

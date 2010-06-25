@@ -5,6 +5,7 @@ import java.io.Serializable;
 /**
  * A request to clientId to a contest server.
  * 
+ * @version $Id$
  * @author pc2@ecs.csus
  */
 

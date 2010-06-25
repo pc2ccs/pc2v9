@@ -8,6 +8,7 @@ import java.io.Serializable;
  * This is a parent class to submissions like, {@link edu.csus.ecs.pc2.core.model.Run} and
  * {@link edu.csus.ecs.pc2.core.model.Clarification}.
  * 
+ * @version $Id$
  * @author pc2@ecs.csus.edu
  */
 

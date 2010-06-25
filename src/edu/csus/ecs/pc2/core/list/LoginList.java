@@ -25,6 +25,7 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
  * and {@link edu.csus.ecs.pc2.core.transport.ConnectionHandlerID} to {@link edu.csus.ecs.pc2.core.model.ClientId} and
  * {@link edu.csus.ecs.pc2.core.model.ClientId} to {@link java.util.Date}
  * 
+ * @version $Id$
  * @author pc2@ecs.csus.edu
  */
 

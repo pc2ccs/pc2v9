@@ -8,8 +8,8 @@ import edu.csus.ecs.pc2.core.model.BalloonSettings;
 /**
  * BalloonSettings Comparator sort by site number.
  * 
- * @author pc2@ecs.csus.edu
  * @version $Id$
+ * @author pc2@ecs.csus.edu
  */
 
 // $HeadURL$

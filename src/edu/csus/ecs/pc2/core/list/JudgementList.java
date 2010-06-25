@@ -5,6 +5,7 @@ import edu.csus.ecs.pc2.core.model.Judgement;
 /**
  * Maintain a list of {@link edu.csus.ecs.pc2.core.model.Judgement}s.
  * 
+ * @version $Id$
  * @author pc2@ecs.csus.edu
  */
 

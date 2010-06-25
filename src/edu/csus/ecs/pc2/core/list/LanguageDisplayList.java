@@ -7,6 +7,7 @@ import edu.csus.ecs.pc2.core.model.Language;
  * 
  * Contains a list of Language, in order, to display for the users.
  *
+ * @version $Id$
  * @see edu.csus.ecs.pc2.core.list.LanguageList
  * @author pc2@ecs.csus.edu
  */

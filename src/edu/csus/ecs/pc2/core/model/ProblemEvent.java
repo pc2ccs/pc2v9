@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.core.model;
 /**
  * A problem and a event state {@link edu.csus.ecs.pc2.core.model.ProblemEvent.Action}.
  * 
+ * @version $Id$
  * @author pc2@ecs.csus.edu
  */
 

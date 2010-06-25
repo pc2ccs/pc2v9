@@ -16,6 +16,7 @@ import edu.csus.ecs.pc2.core.log.StaticLog;
  * 
  * simplified SerializedFile.
  * 
+ * @version $Id$
  * @author pc2@ecs.csus.edu
  */
 // $HeadURL$

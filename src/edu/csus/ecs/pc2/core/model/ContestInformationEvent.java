@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.core.model;
 /**
  * A contestInformation and a event state {@link edu.csus.ecs.pc2.core.model.ContestInformationEvent.Action}.
  * 
+ * @version $Id$
  * @author pc2@ecs.csus.edu
  */
 

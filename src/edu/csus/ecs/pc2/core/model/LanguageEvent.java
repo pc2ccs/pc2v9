@@ -3,13 +3,13 @@ package edu.csus.ecs.pc2.core.model;
 /**
  * A language and a event state {@link edu.csus.ecs.pc2.core.model.LanguageEvent.Action}.
  * 
+ * @version $Id$
  * @author pc2@ecs.csus.edu
  */
 
 //$HeadURL$
 public class LanguageEvent {
 
-    public static final String SVN_ID = "$Id$";
 
     /**
      * Run Event States(s).

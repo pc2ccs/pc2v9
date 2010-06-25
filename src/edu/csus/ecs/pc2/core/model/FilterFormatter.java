@@ -6,7 +6,8 @@ import edu.csus.ecs.pc2.core.list.ClientIdComparator;
 import edu.csus.ecs.pc2.core.list.ProblemComparator;
 
 /**
- * 
+ * Filter Formatters.
+ *
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */

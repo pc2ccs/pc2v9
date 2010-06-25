@@ -6,6 +6,7 @@ package edu.csus.ecs.pc2.core.model;
  * List of language (titles) {@link #getLanguageList()}, to
  * get individual values {@link #getAutoFillValues(String)}.
  *
+ * @version $Id$
  * @author pc2@ecs.csus.edu
  */
 

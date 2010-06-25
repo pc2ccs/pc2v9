@@ -3,6 +3,8 @@ package edu.csus.ecs.pc2.core.model;
 
 /**
  * Clarification Event
+ *
+ * @version $Id$
  * @author pc2@ecs.csus.edu
  */
 

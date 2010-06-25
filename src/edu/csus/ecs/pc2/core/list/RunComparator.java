@@ -8,11 +8,11 @@ import edu.csus.ecs.pc2.core.model.Run;
 /**
  * Run Comparator, Order the runs by site # and run #.
  *
+ * @version $Id$
  * @author pc2@ecs.csus.edu
  */
 
 // $HeadURL$
-// $Id$
 
 public class RunComparator implements Comparator<Run>, Serializable {
 

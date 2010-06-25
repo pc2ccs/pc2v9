@@ -7,6 +7,7 @@ import java.io.Serializable;
  * 
  * A comment either to a team or judge from a judge. Typically used for commenting on Runs.
  * 
+ * @version $Id$
  * @author pc2@ecs.csus.edu
  * 
  */
@@ -18,8 +19,6 @@ public class JudgeComment implements Serializable {
      * 
      */
     private static final long serialVersionUID = 5621859886959743359L;
-
-    public static final String SVN_ID = "$Id$";
 
     /**
      * Judge who made the comment.

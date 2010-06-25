@@ -8,8 +8,8 @@ import edu.csus.ecs.pc2.core.model.Site;
 /**
  * Order the sites by site name.
  *
+ * @version $Id$
  * @author pc2@ecs.csus.edu
- *
  */
 
 // $HeadURL$

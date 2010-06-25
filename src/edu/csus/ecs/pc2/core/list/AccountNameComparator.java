@@ -15,6 +15,8 @@ import java.util.Comparator;
  * The logic is: find identical strings except the trailing number(s). 
  * Find the last non-digit character and extract the number after
  * that character.  The compare the numbers extracted from each string.
+ *
+ * @version $Id$
  * @author pc2@ecs.csus.edu
  */
 

@@ -8,6 +8,7 @@ import edu.csus.ecs.pc2.core.model.ContestTime;
 /**
  * ContestTime Comparator, Order the contestTimes by site #.
  * 
+ * @version $Id$
  * @author pc2@ecs.csus.edu
  */
 

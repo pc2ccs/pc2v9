@@ -6,6 +6,7 @@ package edu.csus.ecs.pc2.core.model;
  * To format into HH:MM:SS use {@link #format(long)} <br>
  * To format into HH hours MM mins, MM mins, or SS seconds use {@link #formatTimeLong(long)}.
  * 
+ * @version $Id$
  * @author pc2@ecs.csus.edu
  */
 

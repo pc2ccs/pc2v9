@@ -1,7 +1,8 @@
 package edu.csus.ecs.pc2.core;
 
 /**
- * 
+ * Constants for pc2.
+
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */

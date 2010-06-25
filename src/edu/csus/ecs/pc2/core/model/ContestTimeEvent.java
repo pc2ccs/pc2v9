@@ -6,8 +6,8 @@ package edu.csus.ecs.pc2.core.model;
  * 
  * The InternalContest has started, stopped or changed.
  * 
+ * @version $Id$
  * @author pc2@ecs.csus.edu
- * 
  */
 
 // $HeadURL$
