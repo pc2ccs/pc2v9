@@ -7,6 +7,7 @@ import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.profile.ProfileManager;
 
 /**
+ * JUnit for testing ProfileList.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -73,7 +74,7 @@ public class ProfilesListTest extends TestCase {
             assertNotNull(contest.getProfile(profile.getElementId()));
         }
 
-        
+        assertNull (contest.getProfile(profile5.getElementId()));
         
     }
 }

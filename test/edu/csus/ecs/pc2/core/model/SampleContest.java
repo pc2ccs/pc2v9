@@ -65,6 +65,13 @@ public class SampleContest {
 
         return site;
     }
+    
+    public IInternalContest createContest(int siteNumber, int numSites, int numTeams, int numJudges, boolean initAsServer) {
+
+        String contestPassword = "Password 101";
+        Profile profile = new Profile("Automatic Profile");
+        return createContest(siteNumber, numSites, numTeams, numJudges, initAsServer, profile, contestPassword);
+    }
 
     /**
      * Create an instance of contest with languages, problems, teams and judges.
@@ -78,7 +85,7 @@ public class SampleContest {
      * @param setAsServer
      * @return
      */
-    public IInternalContest createContest(int siteNumber, int numSites, int numTeams, int numJudges, boolean initAsServer) {
+    public IInternalContest createContest(int siteNumber, int numSites, int numTeams, int numJudges, boolean initAsServer, Profile profile, String contestPassword) {
 
         String[] languages = { "Java", "C++", "C", "APL" };
         String[] problems = { "Sumit", "Quadrangles", "Routing", "Faulty Towers", "London Bridge", "Finnigans Bluff" };
@@ -96,7 +103,7 @@ public class SampleContest {
 
         for (String langName : languages) {
             Language language = new Language(langName);
-            contest.setSiteNumber(siteNumber);
+            language.setSiteNumber(siteNumber);
             contest.addLanguage(language);
         }
 
@@ -129,7 +136,9 @@ public class SampleContest {
             ClientId serverId = new ClientId(siteNumber, Type.SERVER, 0);
             contest.setClientId(serverId);
         }
-
+        
+        contest.setProfile(profile);
+        contest.setContestPassword(contestPassword);
         return contest;
     }
 

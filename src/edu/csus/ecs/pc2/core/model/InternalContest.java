@@ -2181,7 +2181,7 @@ public class InternalContest implements IInternalContest {
 
             contest.addAccounts(getAccounts());
 
-            if (settings.isCopyGroups()) {
+            if (! settings.isCopyGroups()) {
                 for (Account account : contest.getAccounts()) {
                     account.setGroupId(null);
                 }

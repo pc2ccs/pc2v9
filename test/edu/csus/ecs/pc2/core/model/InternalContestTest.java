@@ -12,6 +12,7 @@ import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
 
 /**
+ * JUnit for InternalContest.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -19,6 +20,8 @@ import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
 
 // $HeadURL$
 public class InternalContestTest extends TestCase {
+    
+    private boolean debugMode = false;
 
     private static final String CONFIG_ACCOUNTS = "ACCOUNTS";
 
@@ -61,6 +64,15 @@ public class InternalContestTest extends TestCase {
     private static final String CONFIG_CONTEST_PASSWORD = "CONTEST_PASSWORD";
 
     private static final String CONFIG_CLIENTID = "CLIENTID";
+    
+
+    public boolean isDebugMode() {
+        return debugMode;
+    }
+
+    public void setDebugMode(boolean debugMode) {
+        this.debugMode = debugMode;
+    }
 
     protected void setUp() throws Exception {
         super.setUp();
@@ -71,7 +83,7 @@ public class InternalContestTest extends TestCase {
     }
 
     /**
-     * Sinmle clone test.
+     * Simple clone test.
      * 
      * @throws Exception
      */
@@ -80,16 +92,34 @@ public class InternalContestTest extends TestCase {
         InternalContest contest1 = new InternalContest();
         InternalContest contest2 = new InternalContest();
 
-        compareContests("testClone identical", contest1, contest2);
+        contestsEqual("testClone identical", contest1, contest2, true);
 
         Group group = new Group("Group 1 Title");
         contest1.addGroup(group);
         group = new Group("Group 1 Title");
         contest2.addGroup(group);
 
-        compareContests("identical", contest1, contest2);
+        contestsEqual("testClone identical", contest1, contest2, false);
     }
 
+    public void testCloneComplex() throws Exception {
+
+        SampleContest sampleContest = new SampleContest();
+
+        IInternalContest contest3 = sampleContest.createContest(3, 3, 20, 12, true);
+
+        Profile profile4 = new Profile("Profile 4");
+        ProfileCloneSettings cloneSettings = new ProfileCloneSettings("clone4", "new title", contest3.getContestPassword().toCharArray());
+        
+        IInternalContest contest4 = contest3.clone(contest3, profile4, "contest4", cloneSettings);
+
+        /**
+         * Should compare well
+         */
+        contestsEqual("testCloneComplex", contest3, contest4, true);
+
+    }
+    
     /**
      * Create profile directory and security/encryption information.
      * 
@@ -97,6 +127,7 @@ public class InternalContestTest extends TestCase {
      * @param password
      * @throws FileSecurityException
      */
+    @SuppressWarnings("unused")
     private void createProfileFilesAndDirs(Profile profile, String password) throws FileSecurityException {
 
         String profileDirectory = profile.getProfilePath();
@@ -111,30 +142,41 @@ public class InternalContestTest extends TestCase {
         fileSecurity.saveSecretKey(password.toCharArray());
     }
     
-    public void testCloneComplex() throws Exception {
+    /**
+     * Test cloning of a clone.
+     * 
+     * Positive test.
+     *  
+     * @throws Exception
+     */
+    public void testDoubleClone() throws Exception {
 
         SampleContest sampleContest = new SampleContest();
 
-        IInternalContest contest1 = sampleContest.createContest(1, 2, 22, 2, true);
-        
-        InternalContest contest2 = new InternalContest();
+        String password = "foo";
+
+        IInternalContest contest1 = sampleContest.createContest(3, 2, 22, 2, true);
+
         Profile profile1 = new Profile("Profile One");
         contest1.setProfile(profile1);
 
-        Profile profile = new Profile("Profile A");
-        String profileBasePath = "";
-        String password = "foo";
         ProfileCloneSettings settings = new ProfileCloneSettings("name", "title", password.toCharArray());
-        
         settings.setCopyAccounts(true);
-        settings.setCopyContestSettings(false);
-        
-        createProfileFilesAndDirs(profile, password);
-        
-        
-        IInternalContest contest3 = contest1.clone(contest2, profile, profileBasePath, settings);
-        
-        compareContests("testClone identical", contest1, contest3);
+        settings.setCopyContestSettings(true);
+
+        String profileBasePath = "";
+
+        Profile profile2 = new Profile("Profile Two");
+
+        IInternalContest contest2 = contest1.clone(contest1, profile2, profileBasePath, settings);
+
+        Profile profile3 = new Profile("Profile Three");
+        // createProfileFilesAndDirs(profile, password);
+
+        IInternalContest contest3 = contest2.clone(contest2, profile3, profileBasePath, settings);
+
+        contestsEqual("testCloneComplete", contest1, contest3, true);
+
     }
 
     /**
@@ -308,17 +350,36 @@ public class InternalContestTest extends TestCase {
             vector.add(contestConfigArea + ": " + comment + " (" + string1 + " vs " + string2 + ")");
         }
     }
-
-    private String[] compareContests(String comment, IInternalContest contest1, IInternalContest contest2) {
+    
+    /**
+     * Compare InternContests.
+     * 
+     * Fails assert if contest are not equal and expectingSame is true. 
+     * 
+     * @param comment
+     * @param contest1
+     * @param contest2
+     * @param expectingSame set to true if fail if contest are equal
+     */
+    private void contestsEqual(String comment, IInternalContest contest1, IInternalContest contest2, boolean expectingSame) {
         String[] differences = rawCompareContests(contest1, contest2);
-
         if (differences.length > 0) {
-            System.out.println("There were differences in: " + comment);
-            for (String line : differences) {
-                System.err.println(line);
+            
+            if (expectingSame){
+                System.out.println("There were differences in: '" + comment + "' use debugMode to see details.");
+//                new Exception("There were differences in: '" + comment + "'").printStackTrace();
+            }
+            
+            if (debugMode){
+                for (String line : differences) {
+                    System.err.println(line);
+                }
             }
         }
-        return differences;
+
+        if (expectingSame){
+            assertTrue("Contests NOT the same " + comment, differences.length == 0);
+        }
     }
 
 }
