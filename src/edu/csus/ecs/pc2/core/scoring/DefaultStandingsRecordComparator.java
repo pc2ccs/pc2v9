@@ -11,14 +11,11 @@ import edu.csus.ecs.pc2.core.model.Account;
  * Sorts StandingsRecord according to the ACM-ICPC World Finals Rules (as of 2006).
  *
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
 public class DefaultStandingsRecordComparator implements Serializable, Comparator<StandingsRecord> {
-    /**
-     * 
-     */
-    public static final String SVN_ID = "$Id$";
 
     /**
      *

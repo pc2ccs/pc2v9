@@ -4,10 +4,10 @@ import java.io.Serializable;
 import edu.csus.ecs.pc2.core.model.ElementId;
 
 /**
+ * Problem (Scoring) Summary Info.
  * 
  * @author pc2@ecs.csus.edu
- * 
- * 
+ * @version $Id$
  */
 
 // $HeadURL$
@@ -17,8 +17,6 @@ public class ProblemSummaryInfo implements Serializable {
      * 
      */
     private static final long serialVersionUID = -4157597862536104668L;
-
-    public static final String SVN_ID = "$Id$";
 
     private long solutionTime = 0;
 

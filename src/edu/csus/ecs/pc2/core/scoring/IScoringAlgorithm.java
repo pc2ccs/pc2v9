@@ -10,11 +10,10 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
  * Interface that every Scoring Algorithm must implement.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 // $HeadURL$
 public interface IScoringAlgorithm {
-
-    String SVN_ID = "$Id$";
 
     /**
      * Returns an XML description of the current contest standings.

@@ -15,13 +15,12 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
  * that starts a Login Frame. 
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
 public final class Starter  {
 
-    public static final String SVN_ID = "$Id$";
-    
     private Starter(){
         // constructor per checkstyle suggestion.
     }

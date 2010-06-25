@@ -9,6 +9,7 @@ import edu.csus.ecs.pc2.core.model.Problem;
  *
  * @see edu.csus.ecs.pc2.core.list.ProblemList
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
@@ -18,8 +19,6 @@ public class ProblemDisplayList extends ElementDisplayList {
      *
      */
     private static final long serialVersionUID = -6256102346010208716L;
-
-    public static final String SVN_ID = "$Id$";
 
     public void addElement(Problem problem) {
         super.addElement(problem);

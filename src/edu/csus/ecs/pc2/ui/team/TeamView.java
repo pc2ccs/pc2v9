@@ -35,12 +35,11 @@ import edu.csus.ecs.pc2.ui.ContestClockDisplay.DisplayTimes;
  * 
  * @see edu.csus.ecs.pc2.Starter
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
 public class TeamView extends JFrame implements UIPlugin {
-
-    public static final String SVN_ID = "$Id$";
 
     private IInternalContest contest = null;
 

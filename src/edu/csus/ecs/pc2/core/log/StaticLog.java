@@ -9,12 +9,11 @@ package edu.csus.ecs.pc2.core.log;
  * available use this class. 
  *
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
 public final class StaticLog {
-
-    public static final String SVN_ID = "$Id$";
 
     /**
      * The log to be written to.

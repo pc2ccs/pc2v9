@@ -12,12 +12,11 @@ import java.util.logging.LogRecord;
  * <code>YYMMDD HHMMSS <level> <method_name> message </code>
  *
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
 public class LogFormatter extends Formatter {
-
-    public static final String SVN_ID = "$Id$";
 
     /**
      * Format for Date.

@@ -3,15 +3,14 @@ package edu.csus.ecs.pc2.core.scoring;
 import edu.csus.ecs.pc2.core.model.ClientId;
 
 /**
- *
+ * A single record for a team of standings info.
  *
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
 public class StandingsRecord {
-
-    public static final String SVN_ID = "$Id$";
 
     /**
      * Rank Number.

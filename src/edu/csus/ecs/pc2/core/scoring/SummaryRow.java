@@ -7,6 +7,7 @@ import java.util.Hashtable;
  * A single team row of problem info.
  *
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  *
  *
  */
@@ -18,11 +19,6 @@ public class SummaryRow implements Serializable {
      *
      */
     private static final long serialVersionUID = -1270412961987362937L;
-
-    /**
-     * The svn id.
-     */
-    public static final String SVN_ID = "$Id$";
 
     /**
      * storage of problemsummaryinfo for a given problem.
