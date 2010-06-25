@@ -9,6 +9,7 @@ import edu.csus.ecs.pc2.core.model.ElementId;
 /**
  * A unique identifier for each connection.
  * 
+ * @version $Id$
  * @author pc2@ecs.csus.edu
  */
 

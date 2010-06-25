@@ -20,11 +20,10 @@ import edu.csus.ecs.pc2.core.model.LanguageEvent;
  * View Languages pane.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
-// $Id$
-
 public class LanguagesPane extends JPanePlugin {
 
     /**

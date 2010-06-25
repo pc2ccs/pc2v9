@@ -27,10 +27,10 @@ import javax.swing.JLabel;
  * View Logins.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$ 
  */
 
 // $HeadURL${date}
-// $Id$
 public class LoginsPane extends JPanePlugin {
 
     /**

@@ -10,6 +10,7 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
  * Contains data for compilation, execution and validation.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
@@ -20,8 +21,6 @@ public class ExecutionData implements Serializable {
      * 
      */
     private static final long serialVersionUID = 3095803815304273632L;
-
-    public static final String SVN_ID = "$Id$";
 
     // Compile call results
     private SerializedFile compileStdout;

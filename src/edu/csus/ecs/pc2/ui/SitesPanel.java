@@ -28,11 +28,10 @@ import java.awt.Dimension;
  * View, Add and change site's settings.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL${date}
-// $Id$
-
 public class SitesPanel extends JPanePlugin {
 
     /**

@@ -21,10 +21,10 @@ import edu.csus.ecs.pc2.core.model.GroupEvent;
  * View Groups pane.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
-// $Id$
 
 public class GroupsPane extends JPanePlugin {
 

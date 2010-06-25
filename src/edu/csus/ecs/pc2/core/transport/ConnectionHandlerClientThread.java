@@ -20,6 +20,7 @@ import edu.csus.ecs.pc2.core.transport.TransportManager.tmTypes;
  * uses this connection handler.
  * 
  * @see edu.csus.ecs.pc2.core.transport.ConnectionHandler
+ * @version $Id$
  * @author pc2@ecs.csus.edu
  */
 

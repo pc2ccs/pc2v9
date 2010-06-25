@@ -5,6 +5,7 @@ import java.util.Hashtable;
 /**
  * Maintains a list of ConnectionHandlerThread's.
  * 
+ * @version $Id$
  * @author pc2@ecs.csus.edu
  */
 

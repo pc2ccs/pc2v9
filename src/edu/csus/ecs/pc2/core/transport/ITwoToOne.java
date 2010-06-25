@@ -10,6 +10,7 @@ import java.io.Serializable;
  * Information goes from transport to pc2 client/server module.
  * 
  * 
+ * @version $Id$
  * @author pc2@ecs.csus.edu
  * 
  */

@@ -7,6 +7,13 @@ import javax.swing.JFrame;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 
+/**
+ * Properties Frame.
+ * @author pc2@ecs.csus.edu
+ * @version $Id$
+ */
+
+// $HeadURL$
 public class PropertiesFrame extends JFrame implements UIPlugin {
 
     /**

@@ -9,6 +9,7 @@ import java.io.Serializable;
  * <P>
  * Information goes up from the transport to the server module.
  * 
+ * @version $Id$
  * @author pc2@ecs.csus.edu
  * 
  */

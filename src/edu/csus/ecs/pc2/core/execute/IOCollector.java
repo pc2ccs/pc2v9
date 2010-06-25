@@ -9,12 +9,11 @@ import edu.csus.ecs.pc2.core.log.Log;
  * Collects Input and Output for a process.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
 public class IOCollector extends Thread {
-
-    public static final String SVN_ID = "$Id$";
 
     private BufferedReader bufReader;
 

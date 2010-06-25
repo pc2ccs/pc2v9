@@ -10,10 +10,10 @@ import java.awt.Toolkit;
  * 
  * @see javax.swing.JTextField#setDocument(Document)
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 // $HeadURL$
 public class IntegerDocument extends PlainDocument {
-    public static final String SVN_ID = "$Id$";
 
     /**
      * 

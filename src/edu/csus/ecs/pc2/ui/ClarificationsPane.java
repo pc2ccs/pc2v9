@@ -52,6 +52,7 @@ import edu.csus.ecs.pc2.ui.EditFilterPane.ListNames;
 /**
  * Shows clarifications in a list box.
  * 
+ * @version $Id$
  * @author pc2@ecs.csus.edu
  */
 

@@ -33,6 +33,7 @@ import edu.csus.ecs.pc2.core.security.FileSecurityException;
  * Packet Explorer, stand alone app.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
@@ -42,8 +43,6 @@ public class PacketExplorerPane extends JPanePlugin {
      * 
      */
     private static final long serialVersionUID = -5943773283797591796L;
-
-    public static final String SVN_ID = "$Id$";
 
     private JPanel centerPane = null;
 

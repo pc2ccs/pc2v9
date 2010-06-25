@@ -16,6 +16,7 @@ import edu.csus.ecs.pc2.core.RomanNumeral;
 /**
  * Countdown and halt timer.
  *
+ * @version $Id$
  * @author pc2@ecs.csus.edu
  *
  *

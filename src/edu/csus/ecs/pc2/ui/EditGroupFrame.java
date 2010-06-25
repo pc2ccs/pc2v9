@@ -10,6 +10,7 @@ import java.awt.Dimension;
 /**
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  * 
  */
 

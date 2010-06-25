@@ -20,6 +20,7 @@ import edu.csus.ecs.pc2.core.transport.TransportException.Type;
  * <li>close down a ConnectionHandler and sockets.
  * </ol>
  * 
+ * @version $Id$
  * @author pc2@ecs.csus.edu
  */
 

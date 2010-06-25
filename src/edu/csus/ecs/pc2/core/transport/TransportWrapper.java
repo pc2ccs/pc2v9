@@ -7,6 +7,7 @@ import java.util.Hashtable;
  * Transport Wrapper package used to transmit an encapsulated object.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  * 
  */
 

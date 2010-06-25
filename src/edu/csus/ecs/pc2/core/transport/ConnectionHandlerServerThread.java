@@ -16,6 +16,7 @@ import edu.csus.ecs.pc2.core.log.Log;
  * Provide a method to listen to incoming sockets for transmissions and
  * send to other clients.
  * 
+ * @version $Id$
  * @see edu.csus.ecs.pc2.core.transport.ConnectionHandler
  * @author pc2@ecs.csus.edu
  */

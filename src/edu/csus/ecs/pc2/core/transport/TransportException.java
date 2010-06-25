@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.core.transport;
 /**
  * Transport Manager Exception Class. Used for all exceptions going up to the application
  * 
+ * @version $Id$
  * @author pc2@ecs.csus.edu
  * 
  */
