@@ -105,12 +105,15 @@ public class PacketHandler {
 //        , IOException, ClassNotFoundException, FileSecurityException, ProfileCloneException 
 
         Type packetType = packet.getType();
+        
+        controller.incomingPacket(packet);
 
         info("handlePacket start " + packet);
         PacketFactory.dumpPacket(controller.getLog(), packet, "handlePacket");
         if (Utilities.isDebugMode()) {
             PacketFactory.dumpPacket(System.out, packet, "handlePacket");
         }
+        
 
         ClientId fromId = packet.getSourceId();
 

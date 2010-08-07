@@ -8,6 +8,7 @@ import java.security.MessageDigest;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Properties;
+import java.util.Vector;
 
 import javax.swing.JOptionPane;
 
@@ -29,10 +30,12 @@ import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.ILoginListener;
+import edu.csus.ecs.pc2.core.model.IPacketListener;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.LoginEvent;
+import edu.csus.ecs.pc2.core.model.PacketEvent;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Profile;
@@ -44,6 +47,7 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.PacketEvent.Action;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.packet.PacketFactory;
@@ -131,9 +135,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      */
     private ITransportManager connectionManager;
 
-    /**
-     * InternalController.
-     */
+    private Vector<IPacketListener> packetListenerList = new Vector<IPacketListener>();
 
     /**
      * The main UI, started by the controller.
@@ -312,6 +314,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             info("Unable to send to " + connectionHandlerID + " packet " + packet);
             e.printStackTrace();
         }
+
+        outgoingPacket(packet);
+
     }
 
     /**
@@ -762,8 +767,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             }
             info("initializeServer STARTED this site as Site "+contest.getSiteNumber());
             
-            // FIXME fetch profile directory from the profile
-
             String baseDirectoryName = getBaseProfileDirectoryName("db." + contest.getSiteNumber());
             FileSecurity fileSecurity = new FileSecurity(baseDirectoryName);
             
@@ -2919,6 +2922,18 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     public UIPlugin[] getPluginList() {
         return pluginList.getList();
     }
+    
+    private void firePacketListener(PacketEvent packetEvent) {
+        for (int i = 0; i < packetListenerList.size(); i++) {
+
+            if (packetEvent.getAction() == PacketEvent.Action.RECEIVED) {
+                packetListenerList.elementAt(i).packetReceived(packetEvent);
+            } else {
+                // packetEvent.getAction() == PacketEvent.Action.SENT
+                packetListenerList.elementAt(i).packetSent(packetEvent);
+            }
+        }
+    }
 
     public void updateContestController(IInternalContest inContest, IInternalController inController) {
 
@@ -2941,5 +2956,23 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         } else {
             e.printStackTrace(System.err);
         }
+    }
+
+    public void addPacketListener(IPacketListener packetListener) {
+        packetListenerList.addElement(packetListener);
+    }
+    
+    public void removePacketListener(IPacketListener packetListener) {
+        packetListenerList.removeElement(packetListener);
+    }
+
+    public void incomingPacket(Packet packet) {
+        PacketEvent event = new PacketEvent(Action.RECEIVED, packet);
+        firePacketListener(event);
+    }
+
+    public void outgoingPacket(Packet packet) {
+        PacketEvent event = new PacketEvent(Action.SENT, packet);
+        firePacketListener(event);
     }
 }

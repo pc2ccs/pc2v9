@@ -13,6 +13,7 @@ import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.IPacketListener;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
@@ -577,5 +578,23 @@ public class PrintController implements IInternalController {
         System.out.println("    contest                : " + inContest);
         System.out.println("    controller             : " + inController);
         
+    }
+
+    public void addPacketListener(IPacketListener packetListener) {
+        System.out.println("method addPacketListener");
+    }
+
+    public void incomingPacket(Packet packet) {
+        System.out.println("method incomingPacket");
+        System.out.println("    packet                : " + packet);
+    }
+
+    public void outgoingPacket(Packet packet) {
+        System.out.println("method outgoingPacket");
+        System.out.println("    packet                : " + packet);
+    }
+
+    public void removePacketListener(IPacketListener packetListener) {
+        System.out.println("method removePacketListener");
     }
 }

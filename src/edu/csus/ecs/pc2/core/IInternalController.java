@@ -13,6 +13,7 @@ import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.IPacketListener;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
@@ -507,5 +508,13 @@ public interface IInternalController {
      * @param packetHandler
      */
     void updateContestController(IInternalContest inContest, IInternalController inController);
+
+    void addPacketListener(IPacketListener packetListener);
+
+    void removePacketListener(IPacketListener packetListener);
+    
+    void incomingPacket (Packet packet);
+    
+    void outgoingPacket (Packet packet);
 
 }
