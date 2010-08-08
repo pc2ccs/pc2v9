@@ -38,6 +38,7 @@ import edu.csus.ecs.pc2.ui.LoadContestPane;
 import edu.csus.ecs.pc2.ui.LogWindow;
 import edu.csus.ecs.pc2.ui.LoginsPane;
 import edu.csus.ecs.pc2.ui.OptionsPanel;
+import edu.csus.ecs.pc2.ui.PacketMonitorPane;
 import edu.csus.ecs.pc2.ui.PlaybackPane;
 import edu.csus.ecs.pc2.ui.PluginLoadPane;
 import edu.csus.ecs.pc2.ui.ReportPane;
@@ -403,6 +404,9 @@ public class ServerView extends JFrame implements UIPlugin {
         } catch (Exception e) {
             logException(e);
         }
+        
+        PacketMonitorPane packetMonitorPane = new PacketMonitorPane();
+        addUIPlugin(getMainTabbedPane(), "Packets", packetMonitorPane);
     }
 
     private void logException(Exception e) {

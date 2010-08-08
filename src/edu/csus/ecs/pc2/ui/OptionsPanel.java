@@ -43,10 +43,12 @@ public class OptionsPanel extends JPanePlugin {
     private static final long serialVersionUID = -7331492559860531233L;
 
     private LogWindow logWindow;
-    
+
     private LogWindow securityLogWindow = null;
 
     private ReportFrame reportFrame;
+
+    private PacketMonitorFrame packetMonitorFrame = null;
 
     private JPanel contentPane = null;
 
@@ -92,17 +94,27 @@ public class OptionsPanel extends JPanePlugin {
         FrameUtilities.setFramePosition(reportFrame, HorizontalPosition.RIGHT, VerticalPosition.CENTER);
         reportFrame.setVisible(true);
     }
-    
- 
-    
-    private boolean isAllowed (Permission.Type type){
+
+    void showPacketMonitorFrame() {
+
+        if (packetMonitorFrame == null) {
+            packetMonitorFrame = new PacketMonitorFrame();
+            packetMonitorFrame.setContestAndController(getContest(), getController());
+
+        }
+
+        FrameUtilities.setFramePosition(packetMonitorFrame, HorizontalPosition.CENTER, VerticalPosition.CENTER);
+        packetMonitorFrame.setVisible(true);
+    }
+
+    private boolean isAllowed(Permission.Type type) {
         return permissionList.isAllowed(type);
     }
     
     
     private void initializePermissions() {
         Account account = getContest().getAccount(getContest().getClientId());
-        if (account != null){
+        if (account != null) {
             permissionList.clearAndLoadPermissions(account.getPermissionList());
         }
     }
@@ -185,16 +197,16 @@ public class OptionsPanel extends JPanePlugin {
 
     /**
      * Displays or hides security log window.
+     * 
      * @param showLogWindow
      */
     protected void showSecurityLog(boolean showLogWindow) {
-        try {          
+        try {
             securityLogWindow.setVisible(showLogWindow);
         } catch (Exception e) {
             getLog().log(Log.WARNING, "Exception showing security log window", e);
         }
     }
-    
 
     /**
      * Initialize contentPane
@@ -215,6 +227,8 @@ public class OptionsPanel extends JPanePlugin {
                 public void mouseClicked(java.awt.event.MouseEvent e) {
                     if (e.getClickCount() > 1 && e.isControlDown() && e.isShiftDown()) {
                         showReportFrame();
+                    } else if (e.getClickCount() > 1 && e.isControlDown()) {
+                        showPacketMonitorFrame();
                     }
                 }
             });
@@ -285,29 +299,30 @@ public class OptionsPanel extends JPanePlugin {
         }
         return showSecurityAlertWindowButton;
     }
-    
-    protected boolean isAllowedToViewSecurityWindow(){
-        
+
+    protected boolean isAllowedToViewSecurityWindow() {
+
         return isAllowed(Permission.Type.VIEW_SECURITY_ALERTS) || isServer();
     }
 
     private boolean isServer() {
-        return getContest().getClientId().getClientType().equals(Type.SERVER); 
+        return getContest().getClientId().getClientType().equals(Type.SERVER);
     }
 
     /**
-     * Listen for security alerts. 
+     * Listen for security alerts.
+     * 
      * @author pc2@ecs.csus.edu
      * @version $Id$
      */
-    
+
     // $HeadURL$
-    protected class SecurityMessageListenerImplementation implements ISecurityMessageListener{
+    protected class SecurityMessageListenerImplementation implements ISecurityMessageListener {
         /**
          * Show message window if alert appears.
          */
         public void newMessage(SecurityMessageEvent event) {
-            if (isAllowedToViewSecurityWindow()){
+            if (isAllowedToViewSecurityWindow()) {
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
                         showSecurityLog(true);
@@ -336,16 +351,17 @@ public class OptionsPanel extends JPanePlugin {
         }
         return changePasswordButton;
     }
+
     protected void showChangePassword() {
         if (isAllowed(Permission.Type.CHANGE_PASSWORD)) {
-            if (changePasswordFrame == null){
+            if (changePasswordFrame == null) {
                 changePasswordFrame = new ChangePasswordFrame();
                 changePasswordFrame.setContestAndController(getContest(), getController());
             }
             changePasswordFrame.setVisible(true);
         }
     }
-    
+
     protected void showPasswordMessage(final String message) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -369,7 +385,7 @@ public class OptionsPanel extends JPanePlugin {
             showPasswordMessage(event.getMessage());
         }
     }
-    
+
     /**
      * Account Listener for OptionsPanel.
      *  
@@ -422,5 +438,5 @@ public class OptionsPanel extends JPanePlugin {
             accountsModified(accountEvent);
         }
     }
-    
+
 } // @jve:decl-index=0:visual-constraint="10,10"
