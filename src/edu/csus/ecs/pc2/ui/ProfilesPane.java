@@ -314,8 +314,6 @@ public class ProfilesPane extends JPanePlugin {
     }
 
     protected void switchSelectedProfile() {
-        // TODO code switchSelectedProfile
-
         int selectedIndex = getProfilesListBox().getSelectedIndex();
         if (selectedIndex == -1) {
             showMessage("No profile selected");
@@ -329,8 +327,13 @@ public class ProfilesPane extends JPanePlugin {
             showMessage("Currently using profile '" + selectedProfile.getName() + "' (no need to switch)");
             return;
         }
+        
+        int result = FrameUtilities.yesNoCancelDialog(null, "Are you sure you want to switch to profile "+selectedProfile.getName()+" ?", "Switch Profile");
 
-        showMessage("TODO Switch Profile to: " + selectedProfile.getName());
+        if (result == JOptionPane.YES_OPTION) {
+            getController().switchProfile(getContest().getProfile(), selectedProfile);
+        }
+        
     }
 
     private Profile getProfile(ElementId elementId) {

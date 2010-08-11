@@ -107,6 +107,7 @@ public class PacketMonitorPane extends JPanePlugin {
             detailsButton.setText("Details");
             detailsButton.setMnemonic(KeyEvent.VK_D);
             detailsButton.setToolTipText("Show Details about Selected Packet");
+            detailsButton.setVisible(false);
             detailsButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     printDetails();
@@ -156,6 +157,7 @@ public class PacketMonitorPane extends JPanePlugin {
             reportButton = new JButton();
             reportButton.setText("Report");
             reportButton.setMnemonic(KeyEvent.VK_R);
+            reportButton.setVisible(false);
             reportButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     printReport();
@@ -217,7 +219,7 @@ public class PacketMonitorPane extends JPanePlugin {
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                Object row[] = createRow(packet);
+                Object [] row = createRow(packet);
                 packetListBox.insertRow(row, 0);
                 packetListBox.autoSizeAllColumns();
             }
@@ -270,7 +272,7 @@ public class PacketMonitorPane extends JPanePlugin {
         objArray[2] = new Long(elapsed).toString();
         objArray[3] = getClientName(packet.getSourceId());
         objArray[4] = getClientName(packet.getDestinationId());
-        objArray[5] = getContentsDescription(packet);;
+        objArray[5] = getContentsDescription(packet);
         
         return objArray;
     }
@@ -323,6 +325,7 @@ public class PacketMonitorPane extends JPanePlugin {
         if (clearButton == null) {
             clearButton = new JButton();
             clearButton.setText("Clear");
+            clearButton.setToolTipText("Remove all packets in list");
             clearButton.setMnemonic(KeyEvent.VK_C);
             clearButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {

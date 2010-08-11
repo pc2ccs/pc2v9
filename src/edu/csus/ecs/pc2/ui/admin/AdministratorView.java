@@ -44,6 +44,7 @@ import edu.csus.ecs.pc2.ui.LogWindow;
 import edu.csus.ecs.pc2.ui.LoginsPane;
 import edu.csus.ecs.pc2.ui.OptionsPanel;
 import edu.csus.ecs.pc2.ui.PacketExplorerPane;
+import edu.csus.ecs.pc2.ui.PacketMonitorPane;
 import edu.csus.ecs.pc2.ui.PluginLoadPane;
 import edu.csus.ecs.pc2.ui.ProblemsPane;
 import edu.csus.ecs.pc2.ui.ProfilesPane;
@@ -251,6 +252,14 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 optionsPanel.setSecurityLogWindow(securityAlertLogWindow);
                 
                 if (Utilities.isDebugMode()){
+                    
+                    try {
+                        PacketMonitorPane pane = new PacketMonitorPane();
+                        addUIPlugin(getRunContestTabbedPane(), "Packets", pane);
+                    } catch (Exception e) {
+                        logException(e);
+                    }
+                    
                     try {
                         PluginLoadPane pane = new PluginLoadPane();
                         pane.setParentTabbedPane(getRunContestTabbedPane());
@@ -258,6 +267,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                     } catch (Exception e) {
                         logException(e);
                     }
+                    
                 }
 
                 //ContestClockPane contestClockPane = new ContestClockPane();

@@ -8,6 +8,7 @@ import edu.csus.ecs.pc2.core.model.IPacketListener;
 import edu.csus.ecs.pc2.core.model.PacketEvent;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.SampleContest;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.packet.PacketFactory;
 
@@ -30,6 +31,18 @@ public class PacketMonitorFrameTest extends TestCase {
     }
 
     public static void main(String[] args) {
+
+        executeOne();
+        
+    }
+
+    /**
+     * Test for PacketMonitorFrame and addPacketListener.
+     * 
+     * Creates frame, generates packets and 
+     * 
+     */
+    public static void executeOne () {
 
         SampleContest sampleContest = new SampleContest();
 
@@ -54,9 +67,20 @@ public class PacketMonitorFrameTest extends TestCase {
 
         Run[] runs = sampleContest.createRandomRuns(inContest, 4, true, true, true);
 
+        int runid = 1;
+        
         for (Run run : runs) {
             ClientId source = run.getSubmitter();
             Packet packet = PacketFactory.createRunSubmissionConfirm(source, inContest.getClientId(), run);
+            inController.outgoingPacket(packet);
+            run.setNumber(runid);
+            runid ++;
+        }
+        
+        ClientId serverId = new ClientId(inContest.getSiteNumber(), Type.SERVER, 0);
+        
+        for (Run run : runs) {
+            Packet packet = PacketFactory.createRunAvailable(inContest.getClientId(), serverId, run);
             inController.outgoingPacket(packet);
         }
     }

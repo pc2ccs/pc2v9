@@ -38,7 +38,7 @@ public class PacketMonitorFrame extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new Dimension(492, 280));
+        this.setSize(new Dimension(729, 280));
         this.setContentPane(getPacketMonitorPane());
         this.setTitle("Packet Monitor");
 

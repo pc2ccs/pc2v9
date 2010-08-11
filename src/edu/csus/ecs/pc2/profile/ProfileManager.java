@@ -76,10 +76,20 @@ public class ProfileManager {
         return getProfileStorage(profile, contestPassword) != null;
     }
     
+    /**
+     * Returns storage location for input profile.
+     * 
+     * Can be used to check whether contest password is valid.
+     * 
+     * @param profile
+     * @param contestPassword
+     * @return
+     * @throws ProfileException
+     */
     public IStorage getProfileStorage(Profile profile, char[] contestPassword) throws ProfileException {
 
         if (profile == null) {
-            throw new IllegalArgumentException("profile can not be null");
+            throw new IllegalArgumentException("Profile can not be null");
         }
 
         String profilePath = profile.getProfilePath();

@@ -1985,32 +1985,20 @@ public final class PacketFactory {
 
     public static Packet createUpdateProfileClientPacket(ClientId source, ClientId destination, Profile currentProfile, Profile switchToProfile, ContestLoginSuccessData data) {
         try {
+            
             Properties prop = new Properties();
+            
             prop.put(PROFILE, currentProfile);
             prop.put(NEW_PROFILE, switchToProfile);
-            prop.put(SITE_NUMBER, new Integer(data.getSiteNumber()));
-            prop.put(CONTEST_TIME, data.getContestTime());
-            prop.put(CONTEST_TIME_LIST, data.getContestTimes());
-            prop.put(CLIENT_ID, destination);
-            prop.put(PROBLEM_LIST, data.getProblems());
-            prop.put(LANGUAGE_LIST, data.getLanguages());
-            prop.put(JUDGEMENT_LIST, data.getJudgements());
-            prop.put(SITE_LIST, data.getSites());
-            prop.put(RUN_LIST, data.getRuns());
-            prop.put(CLARIFICATION_LIST, data.getClarifications());
-            prop.put(LOGGED_IN_USERS, data.getLoggedInUsers());
-            prop.put(CONNECTION_HANDLE_ID_LIST, data.getConnectionHandlerIDs());
-            prop.put(ACCOUNT_ARRAY, data.getAccounts());
-            prop.put(PROBLEM_DATA_FILES, data.getProblemDataFiles());
-            prop.put(CONTEST_INFORMATION, data.getContestInformation());
-            prop.put(CLIENT_SETTINGS_LIST, data.getClientSettings());
-            prop.put(BALLOON_SETTINGS_LIST, data.getBalloonSettingsArray());
-            prop.put(GROUP_LIST, data.getGroups());
-            prop.put(GENERAL_PROBLEM, data.getGeneralProblem());
-            prop.put(CONTEST_IDENTIFIER, data.getContestIdentifier());
-            prop.put(PROFILE, data.getProfile());
             
-            // huh
+            prop.put(CLIENT_ID, destination);
+            prop.put(PROFILE_LIST, data.getProfiles()); 
+
+            if (data.getContestSecurityPassword() != null) {
+                prop.put(CONTEST_PASSWORD, data.getContestSecurityPassword());
+            }
+            
+            addContestData(prop, data);
 
             TimeZone timeZone = TimeZone.getTimeZone("GMT");
             GregorianCalendar gregorianCalendar = new GregorianCalendar(timeZone);
@@ -2022,6 +2010,7 @@ public final class PacketFactory {
 
             Packet packet = new Packet(Type.UPDATE_CLIENT_PROFILE, source, destination, prop);
             return packet;
+            
         } catch (Exception e) {
             System.err.println("Exception creating UPDATE_CLIENT_PROFILE");
             e.printStackTrace(System.err);

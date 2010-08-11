@@ -641,15 +641,29 @@ public final class PacketType implements Serializable {
          */
         RUN_CHECKOUT_NOTIFICATION,
         /**
-         * Switch to a new profile
+         * Switch to a new profile.
+         * <br>
+         * contains: old profile, new profile. <br>
+         * Sent from Admin to Server. <br>  
+         * Profile flow is:
+         * <ol>
+         * <li>{@link #SWITCH_PROFILE} from Admin
+         * <li>{@link #UPDATE_CLIENT_PROFILE} or {@link #UPDATE_SERVER_PROFILE}
+         * </ol>
+         * 
          */
         SWITCH_PROFILE, 
         /**
-         * Clone a profile.
+         * Create/clone a new profile, possibly switch profile too.
+         * 
          */
         CLONE_PROFILE,
         /**
-         * Causes client to reset/change profile (409 packet)
+         * Update/change a server profile.
+         */
+        UPDATE_SERVER_PROFILE,
+        /**
+         * Causes client to reset/change profile (409 packet).
          */
         UPDATE_CLIENT_PROFILE,
     }
