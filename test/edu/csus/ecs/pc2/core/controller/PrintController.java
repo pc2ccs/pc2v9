@@ -548,10 +548,11 @@ public class PrintController implements IInternalController {
         System.out.println("    switchNow              : " + switchNow);
     }
 
-    public void switchProfile(Profile currentProfile, Profile switchToProfile) {
+    public void switchProfile(Profile currentProfile, Profile switchToProfile, String contestPassword) {
         System.out.println("method switchProfile");
         System.out.println("    profile                : " + currentProfile);
         System.out.println("    new profile            : " + switchToProfile);
+        System.out.println("    contestPassword        : " + contestPassword);
     }
 
     public void updateProfile(Profile profile) {

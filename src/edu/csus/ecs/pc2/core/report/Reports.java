@@ -15,7 +15,6 @@ import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ConfigurationIO;
 import edu.csus.ecs.pc2.core.model.Filter;
-import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.security.FileSecurity;
@@ -192,20 +191,7 @@ public final class Reports {
 
     }
 
-    protected class InternalControllerLog extends InternalController {
-
-        public InternalControllerLog(IInternalContest contest, Log log) {
-            super(contest);
-            setLog(log);
-        }
-
-        private void setLog(Log log) {
-            super.log = log;
-
-        }
-    }
-
-    /**
+     /**
      * Print a report.
      * 
      * @param arg
@@ -242,11 +228,13 @@ public final class Reports {
 
             ConfigurationIO configurationIO = new ConfigurationIO(storage);
 
-            int siteNumber = 1;
+            if (getSiteNumber() == 0){
+                setSiteNumber(1);
+            }
             InternalContest contest = new InternalContest();
             Log log = new Log("pc2reports.log");
 
-            if (!configurationIO.loadFromDisk(siteNumber, contest, log)) {
+            if (!configurationIO.loadFromDisk(getSiteNumber(), contest, log)) {
                 System.err.println("Unable to read contest data from disk");
                 return;
             }
@@ -256,7 +244,8 @@ public final class Reports {
             if (report == null) {
                 System.out.println("Unable to match/find report " + arg);
             } else {
-                InternalControllerLog controller = new InternalControllerLog(contest, log);
+                InternalController controller = new InternalController(contest);
+                controller.setLog(log);
                 String filename = getReportFileName(report);
                 report.setContestAndController(contest, controller);
                 report.createReportFile(filename, new Filter());

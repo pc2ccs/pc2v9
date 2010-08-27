@@ -1973,11 +1973,12 @@ public final class PacketFactory {
         return createPacket(PacketType.Type.CLONE_PROFILE, source, destination, prop);
     }
 
-    public static Packet createSwitchProfilePacket(ClientId source, ClientId destination, Profile currentProfile, Profile switchToProfile) {
+    public static Packet createSwitchProfilePacket(ClientId source, ClientId destination, Profile currentProfile, Profile switchToProfile, String contestPassword) {
         Properties prop = new Properties();
         prop.put(CLIENT_ID, source);
         prop.put(PROFILE, currentProfile);
         prop.put(NEW_PROFILE, switchToProfile);
+        prop.put(CONTEST_PASSWORD, contestPassword);
         return createPacket(PacketType.Type.SWITCH_PROFILE, source, destination, prop);
     }
     

@@ -277,8 +277,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     private String overRideUIName = null;
     
     private UIPluginList pluginList = new UIPluginList();
-    
-    private Profile startupProfile = null;
+
+    private Profile theProfile = null;
     
     public InternalController(IInternalContest contest) {
         super();
@@ -298,6 +298,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 packet.setContestIdentifier(contest.getContestIdentifier().toString());
             }
             connectionManager.send(packet);
+            
+            outgoingPacket(packet);
+            
         } catch (TransportException e) {
             info("Unable to send to Server  " + packet);
             e.printStackTrace();
@@ -767,9 +770,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             }
             info("initializeServer STARTED this site as Site "+contest.getSiteNumber());
             
+            insureProfileDirectory(theProfile);
+
             String baseDirectoryName = getBaseProfileDirectoryName("db." + contest.getSiteNumber());
             FileSecurity fileSecurity = new FileSecurity(baseDirectoryName);
-            
             initializeStorage(fileSecurity);
             
             if (contest.getContestPassword() == null) {
@@ -840,11 +844,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             info("Loaded configuration from disk");
         }
         
-        // Remove temporary startupProfile
-        if ( contest.getProfile(startupProfile.getElementId()) != null){
-            contest.deleteProfile(startupProfile);
-        }
-        
         try {
             if (evaluationLog == null) {
                 String logDirectory = getBaseProfileDirectoryName(Log.LOG_DIRECTORY_NAME);
@@ -859,7 +858,14 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
     }
 
-  
+    private void insureProfileDirectory(Profile profile) {
+        
+        String profileDirectory = profile.getProfilePath();
+        
+        if (! new File(profileDirectory).isDirectory()){
+            new File(profileDirectory).mkdirs();
+        }
+    }
 
     protected void loadJudgements() {
 
@@ -1205,7 +1211,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                         // TODO code security kluge admin
                         // TODO KLUDGE HUGE KLUDGE - this block allows any admin to update stuff.
 
-                        securityCheck(packet, connectionHandlerID);
+                        
+//                        securityCheck(packet, connectionHandlerID);
 
                         processPacket(packet, connectionHandlerID);
 
@@ -1529,6 +1536,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     private void sendLoginFailure(ClientId destinationId, ConnectionHandlerID connectionHandlerID, String message) {
         Packet packet = PacketFactory.createLoginDenied(contest.getClientId(), destinationId, message);
         sendToClient(connectionHandlerID, packet);
+        
+        outgoingPacket(packet);
     }
 
     /**
@@ -1774,6 +1783,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     }
 
     public void sendToServers(Packet packet) {
+        
+        outgoingPacket(packet);
+
         ClientId[] clientIds = contest.getLocalLoggedInClients(ClientType.Type.SERVER);
         for (ClientId clientId : clientIds) {
             ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(clientId);
@@ -1812,20 +1824,29 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     public void sendToJudges(Packet packet) {
         sendPacketToClients(packet, ClientType.Type.JUDGE);
         sendPacketToClients(packet, ClientType.Type.SPECTATOR);
+        outgoingPacket(packet);
+
     }
 
     public void sendToSpectators(Packet packet) {
         sendPacketToClients(packet, ClientType.Type.SPECTATOR);
+        outgoingPacket(packet);
+
     }
     public void sendToAdministrators(Packet packet) {
         sendPacketToClients(packet, ClientType.Type.ADMINISTRATOR);
+        outgoingPacket(packet);
+
     }
 
     public void sendToScoreboards(Packet packet) {
         sendPacketToClients(packet, ClientType.Type.SCOREBOARD);
+        outgoingPacket(packet);
+
     }
 
     public void sendToTeams(Packet packet) {
+        
         Properties properties = (Properties) packet.getContent();
         // does the packet includes problemDataFiles
         boolean abort = true;
@@ -1848,6 +1869,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
         if (!abort) {
             sendPacketToClients(packet, ClientType.Type.TEAM);
+            outgoingPacket(packet);
         }
     }
 
@@ -1966,9 +1988,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         parseArguments = new ParseArguments(stringArray, requireArguementArgs);
         
         if (parseArguments.isOptPresent("--server")) {
-            insureDefaultProfile();
-            Profile profile = getDefaultProfile();
-            String profilePath = profile.getProfilePath();
+            theProfile = getCurrentProfile();
+            String profilePath = theProfile.getProfilePath();
+            insureProfileDirectory(theProfile);
             startLog(profilePath, "pc2.startup", null, null);
         } else {
             startLog(null, "pc2.startup", null, null);
@@ -2131,27 +2153,54 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
     }
     
-    private void insureDefaultProfile() {
+    /**
+     * Load profiles from disk into contest.
+     * 
+     * @param inContest contest to add profiles to.
+     */
+    private void loadProfiles(IInternalContest inContest) {
 
         ProfileManager manager = new ProfileManager();
 
-        if (!manager.hasDefaultProfile()) {
-            Profile profile = ProfileManager.createNewProfile();
-            new File(profile.getProfilePath()).mkdirs();
+        if (manager.hasDefaultProfile()) {
             try {
-                manager.storeDefaultProfile(profile);
-                startupProfile = profile;
-            } catch (IOException e) {
-                e.printStackTrace();
+                Profile[] profiles = manager.load();
+
+                for (Profile profile : profiles) {
+
+                    if (!exists(profile)) {
+                        // Only add if profile is not in current list.
+                        inContest.updateProfile(profile);
+                    }
+                }
+            } catch (Exception e) {
+                logException(e);
             }
-        } else {
-            Profile profile = getDefaultProfile();
-            new File(profile.getProfilePath()).mkdirs();
-            startupProfile = profile;
         }
     }
-    
-    private Profile getDefaultProfile() {
+
+    /**
+     * Is Profile already in contest ?.
+     * @param aProfile
+     * @return
+     */
+    private boolean exists(Profile aProfile) {
+        
+        for (Profile profile: contest.getProfiles()){
+            if (aProfile.getName().equals(profile.getName())){
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    /**
+     * Get current profile, create one if needed.
+     * 
+     * @return
+     */
+    private Profile getCurrentProfile() {
 
         try {
             ProfileManager manager = new ProfileManager();
@@ -2170,6 +2219,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             return null;  // known unreachable code, but compiler complains.
         }
     }
+
 
     private void handleCommandLineOptions() {
         // TODO Auto-generated method stub
@@ -2275,8 +2325,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      */
     private String getBaseProfileDirectoryName(String dirname) {
         
-        if (startupProfile != null) {
-            return startupProfile.getProfilePath() + File.separator + dirname;
+        if (theProfile != null) {
+            return theProfile.getProfilePath() + File.separator + dirname;
         } else {
             return dirname;
         }
@@ -2858,8 +2908,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         sendToLocalServer(sendPacket);
     }
 
-    public void switchProfile(Profile currentProfile, Profile switchToProfile) {
-        Packet sendPacket = PacketFactory.createSwitchProfilePacket(contest.getClientId(), getServerClientId(), currentProfile, switchToProfile);
+    public void switchProfile(Profile currentProfile, Profile switchToProfile, String contestPassword) {
+        Packet sendPacket = PacketFactory.createSwitchProfilePacket(contest.getClientId(), getServerClientId(), currentProfile, switchToProfile, contestPassword);
         sendToLocalServer(sendPacket);
     }
 
@@ -2947,6 +2997,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 logException(e);
             }
         }
+        
+        loadProfiles(inContest);
     }
 
     private void logException(Exception e) {
@@ -2974,5 +3026,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     public void outgoingPacket(Packet packet) {
         PacketEvent event = new PacketEvent(Action.SENT, packet);
         firePacketListener(event);
+    }
+    
+    public void setLog(Log log) {
+        this.log = log;
     }
 }

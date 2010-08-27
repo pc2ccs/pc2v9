@@ -320,6 +320,11 @@ public class ProfilesPane extends JPanePlugin {
             return;
         }
 
+        if (getContest().getContestTime().isContestRunning()){
+            showMessage("Contest Clock/Time must be stopped");
+            return;
+        }
+
         ElementId elementId = (ElementId) getProfilesListBox().getKeys()[selectedIndex];
         Profile selectedProfile = getProfile(elementId);
 
@@ -331,7 +336,8 @@ public class ProfilesPane extends JPanePlugin {
         int result = FrameUtilities.yesNoCancelDialog(null, "Are you sure you want to switch to profile "+selectedProfile.getName()+" ?", "Switch Profile");
 
         if (result == JOptionPane.YES_OPTION) {
-            getController().switchProfile(getContest().getProfile(), selectedProfile);
+            // FIXME - on switch must prompt for password
+            getController().switchProfile(getContest().getProfile(), selectedProfile, getContest().getContestPassword());
         }
         
     }

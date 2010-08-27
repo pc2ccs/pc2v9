@@ -247,7 +247,7 @@ public interface IInternalController {
      * @param currentProfile profile to switch from
      * @param switchToProfile profile to switch to
      */
-    void switchProfile (Profile currentProfile, Profile switchToProfile);
+    void switchProfile (Profile currentProfile, Profile switchToProfile, String contestPassword);
 
     /**
      * Clone profile (and potentially switch to the new profile).
@@ -516,5 +516,4 @@ public interface IInternalController {
     void incomingPacket (Packet packet);
     
     void outgoingPacket (Packet packet);
-
 }
