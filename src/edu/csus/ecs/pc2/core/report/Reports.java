@@ -19,6 +19,7 @@ import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.security.FileSecurity;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
+import edu.csus.ecs.pc2.profile.ProfileLoadException;
 import edu.csus.ecs.pc2.profile.ProfileManager;
 
 /**
@@ -124,6 +125,7 @@ public final class Reports {
                 "--list - list names of reports (and the report numbers)", // 
                 "--dir name - alternate base directory name, by default uses profile dir name", // 
                 "--site ## - specify the site number", // 
+                "--listp - list all profile names", // 
                 "", // 
                 "reportName - name of report to print (or report number)",//
                 "##         - number of report to print (numbers found using --list)", //
@@ -205,9 +207,25 @@ public final class Reports {
             if (getDirectory() == null) {
 
                 ProfileManager manager = new ProfileManager();
-                Profile profile = manager.getDefaultProfile();
+                Profile profile = null;
                 
-                System.err.println("default profile is: "+profile.getName()+" "+profile.getProfilePath());
+                if (getProfileName() == null){
+                    profile = manager.getDefaultProfile();
+                    System.err.println("Using default profile is: "+profile.getName()+" "+profile.getProfilePath());
+                } else {
+                    Profile [] profiles = manager.load();
+                    for (Profile checkProfile : profiles){
+                        if (checkProfile.getContestId().equals(getProfileName())){
+                            profile = checkProfile;
+                        }
+                    }
+                    if (profile == null){
+                        System.err.println("No profile named "+getProfileName()+" in "+ProfileManager.PROFILE_INDEX_FILENAME);
+                        return;
+                    }
+                }
+                
+                System.err.println("Using profile "+profile.getName()+" "+profile.getProfilePath());
             
 
                 dirName = profile.getProfilePath();
@@ -337,6 +355,11 @@ public final class Reports {
             System.exit(0);
         }
 
+        if (arguments.isOptPresent("--listp")) {
+            listProfiles();
+            System.exit(0);
+        }
+
         if (arguments.getArgCount() == 0) {
             System.err.println("No reports specified, none printed");
             System.exit(2);
@@ -355,7 +378,7 @@ public final class Reports {
             System.err.println("Contest Password (--contestPassword) is required");
             System.exit(2);
         }
-
+        
         Reports reports = new Reports(profileName, password.toCharArray());
 
         reports.setSiteNumber(number);
@@ -365,5 +388,32 @@ public final class Reports {
             reports.printReport(arg);
         }
 
+    }
+
+    private static void listProfiles() {
+
+        try {
+            
+            if (! new File (ProfileManager.PROFILE_INDEX_FILENAME).exists()){
+                System.err.println("No profiles exist (Profile properties files does not exist: "+ProfileManager.PROFILE_INDEX_FILENAME+" )"); 
+                    return;
+            }
+            Profile [] list = new ProfileManager().load();
+
+            for (Profile profile : list){
+                System.out.println("Id: " + profile.getContestId()+" description: "+profile.getDescription());
+            }
+
+            Profile profile = new ProfileManager().getDefaultProfile();
+            System.out.println("Default name : "+ profile.getName()+"\n  Description: "+profile.getDescription()+"\n  Path       : "+profile.getProfilePath());
+            
+        } catch (IOException e) {
+            e.printStackTrace(System.err);
+        } catch (ProfileLoadException e) {
+            e.printStackTrace(System.err);
+        }
+        
+        
+        
     }
 }
