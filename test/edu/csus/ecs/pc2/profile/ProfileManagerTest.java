@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.profile;
 
 import java.io.File;
+import java.io.IOException;
 
 import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -87,7 +88,58 @@ public class ProfileManagerTest extends TestCase {
             assertTrue("Profile not available " + profile.getName()+" at "+profile.getProfilePath(),available);
         }
     }
+    
+    public void testDefaultProfile() throws Exception {
 
+        String title = "Sample";
+        String description = "description 12";
+        Profile profile1 = new Profile(title);
+        profile1.setDescription(description);
+
+        ProfileManager manager = new ProfileManager();
+
+        String filename2 = ProfileManager.PROFILE_INDEX_FILENAME;
+        if (new File(filename2).isFile()) {
+            new File(filename2).delete();
+        }
+
+        String password = "foo";
+
+        Profile[] profiles = createProfiles("sample", password, 6);
+
+        manager.store(profiles, profile1);
+
+        manager = new ProfileManager();
+        Profile defProf = manager.getDefaultProfile();
+
+        compareProfiles(profile1, defProf);
+    }
+
+
+    public void testDefaultProfile2() throws Exception {
+
+        String title = "Sample";
+        String description = "description 11";
+        Profile profile1 = new Profile(title);
+        profile1.setDescription(description);
+
+        ProfileManager manager = new ProfileManager();
+
+        String filename = "testdp" + ProfileManager.PROFILE_INDEX_FILENAME;
+        if (new File(filename).isFile()) {
+            new File(filename).delete();
+        }
+        
+        Profile [] profiles = { profile1 };
+        
+        manager.store(filename, profiles, profile1);
+        
+        manager = new ProfileManager();
+        Profile defProf = manager.getDefaultProfile (filename);
+        
+        compareProfiles (profile1, defProf);
+    }
+    
     public void testProfileAvailable() throws Exception {
 
         String title = "Sample";
@@ -123,6 +175,36 @@ public class ProfileManagerTest extends TestCase {
         assertTrue(manager.isProfileAvailable(profile3, password.toCharArray()));
         assertTrue(manager.isProfileAvailable(profile4, password.toCharArray()));
 
+    }
+    
+    private Profile createProfile(String name, String password) throws FileSecurityException {
+        Profile profile3 = new Profile(name);
+        profile3.setDescription(profile3.getName());
+
+        try {
+            createProfileFilesAndDirs(profile3, password);
+            return profile3;
+        } catch (FileSecurityException e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+    
+    private Profile[] createProfiles(String prefix, String password, int count) {
+
+        Profile[] profiles = new Profile[count];
+
+        for (int i = 0; i < count; i++) {
+            try {
+                String name = prefix + " " + (i + 1);
+                Profile profile = createProfile(name, password);
+                profile.setDescription("Desc: " + profile.getName());
+                profiles[i] = profile;
+            } catch (FileSecurityException e) {
+                e.printStackTrace();
+            }
+        }
+        return profiles;
     }
 
     /**
@@ -315,5 +397,30 @@ public class ProfileManagerTest extends TestCase {
             }
         }
         return null;
+    }
+    
+    public static void main(String[] args) {
+        
+        ProfileManager manager = new ProfileManager();
+        
+        try {
+            
+            Profile profile = manager.getDefaultProfile();
+            
+            System.out.println();
+            System.out.println("Profile name: " + profile.getName());
+            System.out.println("  contest id = " + profile.getContestId());
+            System.out.println("  element id = " + profile.getElementId());
+            System.out.println("  descripton = " + profile.getDescription());
+            System.out.println("  path       = " + profile.getProfilePath());
+            
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (ProfileLoadException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
     }
 }

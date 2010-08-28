@@ -336,8 +336,8 @@ public class ProfilesPane extends JPanePlugin {
         int result = FrameUtilities.yesNoCancelDialog(null, "Are you sure you want to switch to profile "+selectedProfile.getName()+" ?", "Switch Profile");
 
         if (result == JOptionPane.YES_OPTION) {
-            // FIXME - on switch must prompt for password
-            getController().switchProfile(getContest().getProfile(), selectedProfile, getContest().getContestPassword());
+            // FIXME - on switch must prompt for password - defaulting to foo
+            getController().switchProfile(getContest().getProfile(), selectedProfile, "foo");
         }
         
     }

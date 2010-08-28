@@ -39,7 +39,7 @@ public class ProfileManager {
     public static final String PROFILE_INDEX_FILENAME = "profiles.properties";
 
     private String delimiter = ",";
-
+    
     /**
      * Create Profile from data in filename.
      * 
@@ -96,6 +96,11 @@ public class ProfileManager {
 
         if (new File(profilePath).isDirectory()) {
 
+            String dbDirectory = profilePath + File.separator + "db." + profile.getSiteNumber();
+            if (new File(dbDirectory).isDirectory()) {
+                profilePath = dbDirectory;
+            }
+
             FileSecurity fileSecurity = new FileSecurity(profilePath);
             if (fileSecurity == null) {
                 throw new ProfileException("Unable to intialize FileSecurity for path " + profilePath);
@@ -144,10 +149,10 @@ public class ProfileManager {
             Properties properties = new Properties();
             properties.load(new FileInputStream(filename));
 
-            String profileId = properties.getProperty(DEFAULT_PROFILE_KEY);
-            if (profileId != null) {
-                String profileLine = properties.getProperty(profileId);
-                return toProfile(profileLine);
+            String key = properties.getProperty(DEFAULT_PROFILE_KEY);
+            if (key != null) {
+                String profileLine = properties.getProperty(key);
+                return toProfile(key, profileLine);
             }
 
             return profile;
@@ -172,10 +177,11 @@ public class ProfileManager {
      * <prof_id>="<title>","<description>","<profile path>",<client_type>[=first]
      * 
      * @param profileLine
+     * @param profileLine 
      * @return
      * @throws ProfileLoadException
      */
-    private Profile toProfile(String profileLine) throws ProfileLoadException {
+    private Profile toProfile(String key, String profileLine) throws ProfileLoadException {
 
         if (profileLine == null) {
             return null;
@@ -212,6 +218,7 @@ public class ProfileManager {
         }
 
         profile.setProfilePath(path);
+        profile.setContestId(key);
 
         return profile;
     }
@@ -259,7 +266,7 @@ public class ProfileManager {
             String profileLine = properties.getProperty(key);
             String[] fields = profileLine.split(delimiter);
             if (fields.length > 2) {
-                Profile profile = toProfile(profileLine);
+                Profile profile = toProfile(key, profileLine);
                 list.add(profile);
             }
         }

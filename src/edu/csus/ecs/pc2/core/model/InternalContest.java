@@ -307,11 +307,6 @@ public class InternalContest implements IInternalContest {
             }
         }
 
-        // FIXME can this createNewProfile be removed?
-        if (profileList.size() == 0) {
-            setProfile(ProfileManager.createNewProfile());
-        }
-
         if (getContestTime(siteNum) == null){
             ContestTime contestTime = new ContestTime();
             contestTime.setSiteNumber(siteNum);
@@ -2085,9 +2080,6 @@ public class InternalContest implements IInternalContest {
             contestTime = new ContestTime(siteNum);
             addContestTime(contestTime);
         }
-        if (getProfile() == null){
-            setProfile(ProfileManager.createNewProfile());
-        }
         return loadedConfiguration;
     }
 
@@ -2123,8 +2115,10 @@ public class InternalContest implements IInternalContest {
         if (!new File(profilePath).isDirectory()) {
             throw new ProfileCloneException("Unable to use profile dir " + profilePath);
         }
+        
+        String databaseDirectoryName = profilePath + File.separator + "db." + contest.getSiteNumber();
 
-        FileSecurity fileSecurity = new FileSecurity(profilePath);
+        FileSecurity fileSecurity = new FileSecurity(databaseDirectoryName);
 
         try {
             fileSecurity.saveSecretKey(settings.getContestPassword());
@@ -2158,6 +2152,12 @@ public class InternalContest implements IInternalContest {
         newProfile.setDescription(settings.getDescription());
 
         contest.setProfile(newProfile); // This also sets the contest identifier
+        
+        for (Profile profile2 : getProfiles()){
+            if (! profile2.equals(newProfile)){
+                contest.addProfile(profile2);
+            }
+        }
 
         contest.setContestPassword(new String(settings.getContestPassword()));
 
@@ -2248,14 +2248,14 @@ public class InternalContest implements IInternalContest {
 
         newContestInformation.setContestTitle(settings.getTitle());
         contest.updateContestInformation(newContestInformation);
-
+        
         Log tempLog = new Log("profileClone");
         try {
 
             // Store new configuration -- SAVE IT.
 
             contest.storeConfiguration(tempLog);
-
+            
         } catch (IOException e) {
             tempLog.log(Log.SEVERE, "Exception storing new config for " + newProfile.getName(), e);
             throw new ProfileCloneException("Exception storing new config for " + newProfile.getName(), e);

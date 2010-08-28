@@ -769,8 +769,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 contest.setSiteNumber(1);
             }
             info("initializeServer STARTED this site as Site "+contest.getSiteNumber());
-            
-            insureProfileDirectory(theProfile);
 
             String baseDirectoryName = getBaseProfileDirectoryName("db." + contest.getSiteNumber());
             FileSecurity fileSecurity = new FileSecurity(baseDirectoryName);
@@ -834,6 +832,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             if (contest.getGeneralProblem() == null) {
                 contest.setGeneralProblem(new Problem("General"));
             }
+            
+            contest.setProfile(theProfile);
 
             info("initialized controller Site " + contest.getSiteNumber());
             contest.storeConfiguration(getLog());
@@ -843,6 +843,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             }
             info("Loaded configuration from disk");
         }
+        
+        theProfile = contest.getProfile();
         
         try {
             if (evaluationLog == null) {
@@ -1273,7 +1275,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         if (!isLoggedIn(packet.getSourceId())) {
             log.info("Security Violation for packet " + packet);
             log.info("User " + packet.getSourceId() + " not logged in ");
-            System.out.println("User " + packet.getSourceId() + " not logged in " + packet);
             // TODO code throw an exception if the security fails.
         }
 
@@ -1521,6 +1522,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             sendToServers(violationPacket);
 
         } catch (Exception e) {
+            System.err.println("Exception in processPacket");
+            e.printStackTrace(System.err);
             info("Exception in processPacket, check logs ", e);
         }
 
@@ -2201,15 +2204,21 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      * @return
      */
     private Profile getCurrentProfile() {
+        
+        // TODO handle startup for when not starting with site 1 profile.setSiteNumber 
 
         try {
             ProfileManager manager = new ProfileManager();
             if (manager.hasDefaultProfile()){
-                return manager.getDefaultProfile();
+                Profile defaultProfile = manager.getDefaultProfile();
+                defaultProfile.setSiteNumber(1);
+                return defaultProfile;
             } else  {
                 // Create new profile and save
                 Profile newProfile = ProfileManager.createNewProfile();
+                newProfile.setSiteNumber(1);
                 manager.storeDefaultProfile(newProfile);
+                System.err.println("debug 22 -- created and stored new profile "+newProfile);
                 return newProfile;
             }
             

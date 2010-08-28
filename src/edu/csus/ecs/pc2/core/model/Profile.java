@@ -26,6 +26,8 @@ public class Profile implements IElementObject, Serializable {
 
     private String profilePath = null;
     
+    private String contestId = null;
+
     private Properties properties = new Properties();
     
     /**
@@ -52,6 +54,8 @@ public class Profile implements IElementObject, Serializable {
         elementId = new ElementId(new String(name));
         setProfilePath(createProfilePath(""));
         this.name = name;
+        
+        setContestId(toString());
     }
 
     public ElementId getElementId() {
@@ -71,7 +75,11 @@ public class Profile implements IElementObject, Serializable {
     }
 
     public String getContestId() {
-        return toString();
+        return contestId;
+    }
+    
+    public void setContestId(String contestId) {
+        this.contestId = contestId;
     }
 
     @Override

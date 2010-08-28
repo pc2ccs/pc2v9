@@ -111,7 +111,7 @@ public class PacketHandler {
         info("handlePacket start " + packet);
         PacketFactory.dumpPacket(controller.getLog(), packet, "handlePacket");
         if (Utilities.isDebugMode()) {
-            PacketFactory.dumpPacket(System.out, packet, "handlePacket");
+            PacketFactory.dumpPacket(System.out, packet, "debug handlePacket");
         }
         
 
@@ -533,19 +533,14 @@ public class PacketHandler {
 
         ClientId sourceId = packet.getSourceId();
         
-        System.out.println("resetClient "+packet);
-        
         if (isServer(sourceId)){
             // Only servers are allowed to reset client or other server contest
             Profile profile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE);
             resetContest(packet, profile);
-            System.out.println("resetClient after resetContest "+packet);
-            
         } else {
             /**
              * Some non-server tried to send a reset to a client or server.
              */
-            System.out.println("resetClient ContestSecurityException "+packet);
             throw new ContestSecurityException(sourceId, connectionHandlerID, sourceId + " not allowed to " + Permission.Type.RESET_CONTEST);
         }
     }
@@ -1964,6 +1959,9 @@ public class PacketHandler {
         Profile profile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE);
         if (profile != null) {
             contest.updateProfile(profile);
+            if (contest.getProfile().equals(profile)){
+                contest.setProfile(profile);
+            }
         }
 
         Account oneAccount = (Account) PacketFactory.getObjectValue(packet, PacketFactory.ACCOUNT);

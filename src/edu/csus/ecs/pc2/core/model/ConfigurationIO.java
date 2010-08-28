@@ -209,7 +209,7 @@ public class ConfigurationIO {
                 loadProblemDataFilesInfo(contest, configuration, log);
                 
                 loadSomeSettings(configuration, contest, log);
-
+                
                 return true;
                 
             } else {
@@ -247,7 +247,7 @@ public class ConfigurationIO {
             key = ConfigKeys.CONTEST_TIME;
             if (configuration.containsKey(key)) {
                 ContestTime contestTime = (ContestTime) configuration.get(key.toString());
-                contest.addContestTime(contestTime);
+                contest.updateContestTime(contestTime);
                 log.info("Loaded " + key.toString().toLowerCase());
             }
         } catch (Exception e) {
@@ -263,6 +263,19 @@ public class ConfigurationIO {
             }
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception while loading general problem ", e);
+        }
+        
+        try {
+            key = ConfigKeys.PROFILES;
+            if (configuration.containsKey(key)) {
+                Profile[] profiles = (Profile[]) configuration.get(key.toString());
+                for (Profile profile : profiles) {
+                    contest.addProfile(profile);
+                }
+                log.info("Loaded " + profiles.length + " " + key.toString().toLowerCase());
+            }
+        } catch (Exception e) {
+            log.log(Log.WARNING, "Exception while loading profiles ", e);
         }
         
         try {
@@ -338,19 +351,6 @@ public class ConfigurationIO {
             }
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception while loading groups ", e);
-        }
-        
-        try {
-            key = ConfigKeys.PROFILES;
-            if (configuration.containsKey(key)) {
-                Profile[] profiles = (Profile[]) configuration.get(key.toString());
-                for (Profile profile : profiles) {
-                    contest.addProfile(profile);
-                }
-                log.info("Loaded " + profiles.length + " " + key.toString().toLowerCase());
-            }
-        } catch (Exception e) {
-            log.log(Log.WARNING, "Exception while loading profiles ", e);
         }
         
     }

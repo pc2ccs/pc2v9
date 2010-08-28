@@ -7,6 +7,7 @@ import java.util.Vector;
 import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.security.FileSecurity;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
@@ -21,7 +22,7 @@ import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
 // $HeadURL$
 public class InternalContestTest extends TestCase {
     
-    private boolean debugMode = false;
+    private boolean debugMode = true;
 
     private static final String CONFIG_ACCOUNTS = "ACCOUNTS";
 
@@ -65,6 +66,7 @@ public class InternalContestTest extends TestCase {
 
     private static final String CONFIG_CLIENTID = "CLIENTID";
     
+    private SampleContest sampleContest = new SampleContest();
 
     public boolean isDebugMode() {
         return debugMode;
@@ -91,6 +93,14 @@ public class InternalContestTest extends TestCase {
 
         InternalContest contest1 = new InternalContest();
         InternalContest contest2 = new InternalContest();
+        
+        int siteNumber = 4;
+        ClientId serverId = new ClientId(siteNumber, Type.SERVER, 0);
+        contest1.setClientId(serverId);
+        contest1.setSiteNumber(siteNumber);
+        
+        contest2.setClientId(contest1.getClientId());
+        contest2.setSiteNumber(siteNumber);
 
         contestsEqual("testClone identical", contest1, contest2, true);
 
@@ -101,14 +111,18 @@ public class InternalContestTest extends TestCase {
 
         contestsEqual("testClone identical", contest1, contest2, false);
     }
+    
+    protected Profile createProfile (String name){
+        Profile profile = new Profile(name);
+        profile.setDescription("Contest "+name);
+        return profile;
+    }
 
     public void testCloneComplex() throws Exception {
 
-        SampleContest sampleContest = new SampleContest();
-
         IInternalContest contest3 = sampleContest.createContest(3, 3, 20, 12, true);
 
-        Profile profile4 = new Profile("Profile 4");
+        Profile profile4 = createProfile("Profile 4");
         ProfileCloneSettings cloneSettings = new ProfileCloneSettings("clone4", "new title", contest3.getContestPassword().toCharArray());
         
         IInternalContest contest4 = contest3.clone(contest3, profile4, "contest4", cloneSettings);
@@ -151,13 +165,11 @@ public class InternalContestTest extends TestCase {
      */
     public void testDoubleClone() throws Exception {
 
-        SampleContest sampleContest = new SampleContest();
-
         String password = "foo";
 
         IInternalContest contest1 = sampleContest.createContest(3, 2, 22, 2, true);
 
-        Profile profile1 = new Profile("Profile One");
+        Profile profile1 = createProfile("Profile One");
         contest1.setProfile(profile1);
 
         ProfileCloneSettings settings = new ProfileCloneSettings("name", "title", password.toCharArray());
@@ -166,17 +178,16 @@ public class InternalContestTest extends TestCase {
 
         String profileBasePath = "";
 
-        Profile profile2 = new Profile("Profile Two");
+        Profile profile2 = createProfile("Profile Two");
 
         IInternalContest contest2 = contest1.clone(contest1, profile2, profileBasePath, settings);
 
-        Profile profile3 = new Profile("Profile Three");
+        Profile profile3 = createProfile("Profile Three");
         // createProfileFilesAndDirs(profile, password);
 
         IInternalContest contest3 = contest2.clone(contest2, profile3, profileBasePath, settings);
 
         contestsEqual("testCloneComplete", contest1, contest3, true);
-
     }
 
     /**
@@ -235,9 +246,12 @@ public class InternalContestTest extends TestCase {
         failures.addElement(CONFIG_CONTEST_INFORMATION + ": no_match");
         failures.addElement(CONFIG_CONTESTIDENTIFIER + ": no_match");
         failures.addElement(CONFIG_CONTEST_PASSWORD + ": no_match");
-        failures.addElement(CONFIG_CLIENTID + ": no_match");
 
         failures = new Vector<String>();
+        
+        if (! contest1.getClientId().equals(contest2.getClientId())) {
+            failures.addElement(CONFIG_CLIENTID + ": " + contest1.getClientId() + " vs " + contest2.getClientId());
+        }
 
         if (contest1.getSiteNumber() != contest2.getSiteNumber()) {
             failures.addElement(CONFIG_SITE_NUMBER + ": " + contest1.getSiteNumber() + " vs " + contest2.getSiteNumber());
