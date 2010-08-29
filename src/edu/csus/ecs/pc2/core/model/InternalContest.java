@@ -961,6 +961,7 @@ public class InternalContest implements IInternalContest {
     }
 
     public boolean isConnectedToRemoteSite(ConnectionHandlerID connectionHandlerID) {
+        // TODO enh - the remoteConnectionHandlerList is never populated?!? used ?!?
         return remoteConnectionHandlerList.get(connectionHandlerID) != null;
     }
 
@@ -2448,5 +2449,41 @@ public class InternalContest implements IInternalContest {
 
         ProfileEvent profileEvent = new ProfileEvent(ProfileEvent.Action.REFRESH_ALL, null);
         fireProfileListener(profileEvent);
+    }
+
+    public void cloneAllLoginAndConnections(InternalContest newContest) {
+        
+        /**
+         * Local Logins
+         */
+
+        for (ClientId clientId : localLoginList.getClientIdList()) {
+            newContest.addLocalLogin(clientId, localLoginList.getConnectionHandleID(clientId));
+        }
+
+        /**
+         * Remote Logins
+         */
+
+        for (ClientId clientId : remoteLoginList.getClientIdList()) {
+            newContest.addRemoteLogin(clientId, localLoginList.getConnectionHandleID(clientId));
+        }
+
+        /**
+         * Local connection handlers
+         */
+
+        for (ConnectionHandlerID connectionHandlerID : localConnectionHandlerList.getList()) {
+            newContest.connectionEstablished(connectionHandlerID, localConnectionHandlerList.get(connectionHandlerID));
+        }
+
+        /**
+         * Connections
+         */
+
+        for (ConnectionHandlerID connectionHandlerID : remoteConnectionHandlerList.getList()) {
+            newContest.connectionEstablished(connectionHandlerID, remoteConnectionHandlerList.get(connectionHandlerID));
+        }
+        
     }
 }

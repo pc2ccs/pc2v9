@@ -363,35 +363,51 @@ public class PacketHandler {
      */
     // FIXME code handleSwitchProfile
     private void handleSwitchProfile(Packet packet, ConnectionHandlerID connectionHandlerID) throws ProfileException, FileSecurityException {
-     
+
         // inProfile the original profile
-//        Profile inProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE);
-        
-        Profile newProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.NEW_PROFILE);
-        String contestPassword = (String) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_PASSWORD);
-        
-        if (contestPassword == null){
-            // Use existing contest password if no contest password specified.
-            contestPassword = contest.getContestPassword();
-        }
-        
-        // FIXME insure new profile exists
-        // if profile does exist - change
-        // if profile does not exist - 
-        
-        ProfileManager manager = new ProfileManager();
-        
-        if ( manager.isProfileAvailable(newProfile, contestPassword.toCharArray()) ) {
-            
-//            IInternalContest newContest = switchProfile(contest, newProfile, contestPassword.toCharArray());
-            switchProfile(contest, newProfile, contestPassword.toCharArray());
-            
-        } else {
-            throw new ProfileException("Can not switch profiles, invalid contest password");
+        // Profile inProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE);
+
+        try {
+
+            Profile newProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.NEW_PROFILE);
+            String contestPassword = (String) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_PASSWORD);
+
+            if (contestPassword == null) {
+                // Use existing contest password if no contest password specified.
+                contestPassword = contest.getContestPassword();
+            }
+
+            ProfileManager manager = new ProfileManager();
+
+            if (manager.isProfileAvailable(newProfile, contestPassword.toCharArray())) {
+
+                IInternalContest newContest = switchProfile(contest, newProfile, contestPassword.toCharArray());
+                contest = newContest;
+                
+            } else {
+                throw new ProfileException("Can not switch profiles, invalid contest password");
+            }
+
+        } catch (Exception e) {
+
+            // TODO: handle exception
+            e.printStackTrace(System.err);
+            logException("Failure in switch profile", e);
         }
     }
 
-    private IInternalContest switchProfile(IInternalContest inContest, Profile newProfile, char[] contestPassword) throws ProfileException {
+    /**
+     * Switch to new profile.
+     * 
+     * Load new profile from disk, replace instances of old contest with new contests including all data.
+     * 
+     * @param currentContest contest switch from 
+     * @param newProfile profile to switch to
+     * @param contestPassword contest password for newProfile
+     * @return
+     * @throws ProfileException
+     */
+    private IInternalContest switchProfile(IInternalContest currentContest, Profile newProfile, char[] contestPassword) throws ProfileException {
 
         ProfileManager manager = new ProfileManager();
         IStorage storage = manager.getProfileStorage(newProfile, contestPassword);
@@ -399,6 +415,7 @@ public class PacketHandler {
         ConfigurationIO configurationIO = new ConfigurationIO(storage);
 
         InternalContest newContest = new InternalContest();
+        newContest.setSiteNumber(contest.getSiteNumber());
 
         configurationIO.loadFromDisk(contest.getSiteNumber(), newContest, controller.getLog());
 
@@ -406,14 +423,41 @@ public class PacketHandler {
          * Remove listeners so that they are no longer referenced
          */
         contest.removeAllListeners(); // remove all listeners
-
+        
+        contest.cloneAllLoginAndConnections (newContest);
+        
         controller.setContest(newContest); // replace existing contest
 
-        controller.updateContestController (newContest, controller);
-        
+        controller.updateContestController(newContest, controller);
+
         contest.fireAllRefreshEvents();
+        
+        sendOutChangeProfileToAll(newContest, currentContest.getProfile(), newProfile, new String(contestPassword));
 
         return newContest;
+    }
+
+    /**
+     * Create and send current profile to all clients
+     */
+    private void sendOutChangeProfileToAll(IInternalContest newContest, Profile currentProfile, Profile switchToProfile, String contestPassword) {
+
+        ContestLoginSuccessData data = createContestLoginSuccessData(contest, getServerClientId(), contestPassword);
+        Packet packet = PacketFactory.createUpdateProfileClientPacket(getServerClientId(), PacketFactory.ALL_SERVERS, currentProfile, switchToProfile, data);
+
+        controller.sendToServers(packet);
+
+        data = createContestLoginSuccessData(contest, getServerClientId(), null);
+        packet = PacketFactory.createUpdateProfileClientPacket(getServerClientId(), PacketFactory.ALL_SERVERS, currentProfile, switchToProfile, data);
+
+        sendToJudgesAndOthers(packet, false);
+
+        ClientId[] teams = contest.getLocalLoggedInClients(ClientType.Type.TEAM);
+        for (ClientId clientId : teams) {
+            data = createContestLoginSuccessData(contest, clientId, null);
+            packet = PacketFactory.createUpdateProfileClientPacket(getServerClientId(), clientId, currentProfile, switchToProfile, data);
+            controller.sendToClient(packet);
+        }
     }
 
     /**
@@ -3344,6 +3388,78 @@ public class PacketHandler {
         return PacketFactory.createContestSettingsPacket(contest.getClientId(), clientId, createLoginSuccessPacket(clientId, null));
     }
 
+    public ContestLoginSuccessData createContestLoginSuccessData(IInternalContest inContest, ClientId clientId, String contestSecurityPassword) {
+
+        Run[] runs = null;
+        Clarification[] clarifications = null;
+        ProblemDataFiles[] problemDataFiles = new ProblemDataFiles[0];
+        ClientSettings[] clientSettings = null;
+        Account[] accounts = null;
+        Site[] sites = null;
+
+        if (inContest.getClientSettings(clientId) == null) {
+            ClientSettings clientSettings2 = new ClientSettings(clientId);
+            clientSettings2.put("LoginDate", new Date().toString());
+            inContest.addClientSettings(clientSettings2);
+        }
+
+        /**
+         * This is where client specific settings are created before sending them to client.
+         */
+
+        if (clientId.getClientType().equals(ClientType.Type.TEAM)) {
+            runs = inContest.getRuns(clientId);
+            clarifications = inContest.getClarifications(clientId);
+            clientSettings = new ClientSettings[1];
+            clientSettings[0] = inContest.getClientSettings(clientId);
+            accounts = new Account[1];
+            accounts[0] = inContest.getAccount(clientId);
+            // re-build the site list without passwords, all they really need is the number & name
+            Site[] realSites = inContest.getSites();
+            sites = new Site[realSites.length];
+            for (int i = 0; i < realSites.length; i++) {
+                sites[i] = new Site(realSites[i].getDisplayName(), realSites[i].getSiteNumber());
+            }
+        } else {
+            runs = inContest.getRuns();
+            clarifications = inContest.getClarifications();
+            problemDataFiles = inContest.getProblemDataFiles();
+            clientSettings = inContest.getClientSettingsList();
+            accounts = getAllAccounts();
+            sites = inContest.getSites();
+        }
+
+        ContestLoginSuccessData contestLoginSuccessData = new ContestLoginSuccessData();
+        contestLoginSuccessData.setAccounts(accounts);
+        contestLoginSuccessData.setBalloonSettingsArray(inContest.getBalloonSettings());
+        contestLoginSuccessData.setClarifications(clarifications);
+        contestLoginSuccessData.setClientSettings(clientSettings);
+        contestLoginSuccessData.setConnectionHandlerIDs(inContest.getConnectionHandleIDs());
+        contestLoginSuccessData.setContestTimes(inContest.getContestTimes());
+        contestLoginSuccessData.setGroups(inContest.getGroups());
+        contestLoginSuccessData.setJudgements(inContest.getJudgements());
+        contestLoginSuccessData.setLanguages(inContest.getLanguages());
+        contestLoginSuccessData.setLoggedInUsers(getAllLoggedInUsers());
+        contestLoginSuccessData.setProblemDataFiles(problemDataFiles);
+        contestLoginSuccessData.setProblems(inContest.getProblems());
+        contestLoginSuccessData.setRuns(runs);
+        contestLoginSuccessData.setSites(sites);
+        contestLoginSuccessData.setGeneralProblem(inContest.getGeneralProblem());
+        contestLoginSuccessData.setContestIdentifier(inContest.getContestIdentifier().toString());
+        contestLoginSuccessData.setProfile(inContest.getProfile());
+        contestLoginSuccessData.setProfiles(inContest.getProfiles());
+
+        contestLoginSuccessData.setContestTime(inContest.getContestTime());
+        contestLoginSuccessData.setSiteNumber(inContest.getSiteNumber());
+        contestLoginSuccessData.setContestInformation(inContest.getContestInformation());
+
+        if (isServer(clientId)) {
+            contestLoginSuccessData.setContestSecurityPassword(contestSecurityPassword);
+        }
+
+        return contestLoginSuccessData;
+    }
+
     /**
      * Create a login success packet.
      * 
@@ -3353,75 +3469,9 @@ public class PacketHandler {
      */
     public Packet createLoginSuccessPacket(ClientId clientId, String contestSecurityPassword) {
 
-        Run[] runs = null;
-        Clarification[] clarifications = null;
-        ProblemDataFiles[] problemDataFiles = new ProblemDataFiles[0];
-        ClientSettings[] clientSettings = null;
-        Account[] accounts = null;
-        Site[] sites = null;
+        ContestLoginSuccessData data = createContestLoginSuccessData(contest, clientId, contestSecurityPassword);
 
-        if (contest.getClientSettings(clientId) == null) {
-            ClientSettings clientSettings2 = new ClientSettings(clientId);
-            clientSettings2.put("LoginDate", new Date().toString());
-            contest.addClientSettings(clientSettings2);
-        }
-
-        /**
-         * This is where client specific settings are created before sending them to client.
-         */
-
-        if (clientId.getClientType().equals(ClientType.Type.TEAM)) {
-            runs = contest.getRuns(clientId);
-            clarifications = contest.getClarifications(clientId);
-            clientSettings = new ClientSettings[1];
-            clientSettings[0] = contest.getClientSettings(clientId);
-            accounts = new Account[1];
-            accounts[0] = contest.getAccount(clientId);
-            // re-build the site list without passwords, all they really need is the number & name
-            Site[] realSites = contest.getSites();
-            sites = new Site[realSites.length];
-            for (int i = 0; i < realSites.length; i++) {
-                sites[i] = new Site(realSites[i].getDisplayName(), realSites[i].getSiteNumber());
-            }
-        } else {
-            runs = contest.getRuns();
-            clarifications = contest.getClarifications();
-            problemDataFiles = contest.getProblemDataFiles();
-            clientSettings = contest.getClientSettingsList();
-            accounts = getAllAccounts();
-            sites = contest.getSites();
-        }
-
-        ContestLoginSuccessData contestLoginSuccessData = new ContestLoginSuccessData();
-        contestLoginSuccessData.setAccounts(accounts);
-        contestLoginSuccessData.setBalloonSettingsArray(contest.getBalloonSettings());
-        contestLoginSuccessData.setClarifications(clarifications);
-        contestLoginSuccessData.setClientSettings(clientSettings);
-        contestLoginSuccessData.setConnectionHandlerIDs(contest.getConnectionHandleIDs());
-        contestLoginSuccessData.setContestTimes(contest.getContestTimes());
-        contestLoginSuccessData.setGroups(contest.getGroups());
-        contestLoginSuccessData.setJudgements(contest.getJudgements());
-        contestLoginSuccessData.setLanguages(contest.getLanguages());
-        contestLoginSuccessData.setLoggedInUsers(getAllLoggedInUsers());
-        contestLoginSuccessData.setProblemDataFiles(problemDataFiles);
-        contestLoginSuccessData.setProblems(contest.getProblems());
-        contestLoginSuccessData.setRuns(runs);
-        contestLoginSuccessData.setSites(sites);
-        contestLoginSuccessData.setGeneralProblem(contest.getGeneralProblem());
-        contestLoginSuccessData.setContestIdentifier(contest.getContestIdentifier().toString());
-        contestLoginSuccessData.setProfile(contest.getProfile());
-        contestLoginSuccessData.setProfiles(contest.getProfiles());
-
-        contestLoginSuccessData.setContestTime(contest.getContestTime());
-        contestLoginSuccessData.setSiteNumber(contest.getSiteNumber());
-        contestLoginSuccessData.setContestInformation(contest.getContestInformation());
-        
-        if (isServer(clientId)) {
-            contestLoginSuccessData.setContestSecurityPassword(contestSecurityPassword);
-        }
-
-        Packet loginSuccessPacket = PacketFactory.createLoginSuccess(contest.getClientId(), clientId, contest.getContestTime(), contest.getSiteNumber(), contest.getContestInformation(),
-                contestLoginSuccessData);
+        Packet loginSuccessPacket = PacketFactory.createLoginSuccess(contest.getClientId(), clientId, contest.getContestTime(), contest.getSiteNumber(), contest.getContestInformation(), data);
 
         return loginSuccessPacket;
     }

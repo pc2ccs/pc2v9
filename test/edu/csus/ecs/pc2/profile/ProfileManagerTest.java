@@ -33,7 +33,7 @@ public class ProfileManagerTest extends TestCase {
 
     public void testWriteRead() throws Exception {
 
-        String title = "Sample";
+        String title = "PMTest";
         String description = "description 11";
         Profile profile1 = new Profile(title);
         profile1.setDescription(description);
@@ -91,7 +91,7 @@ public class ProfileManagerTest extends TestCase {
     
     public void testDefaultProfile() throws Exception {
 
-        String title = "Sample";
+        String title = "PMTest";
         String description = "description 12";
         Profile profile1 = new Profile(title);
         profile1.setDescription(description);
@@ -105,7 +105,7 @@ public class ProfileManagerTest extends TestCase {
 
         String password = "foo";
 
-        Profile[] profiles = createProfiles("sample", password, 6);
+        Profile[] profiles = createProfiles("PMTest sample", password, 6);
 
         manager.store(profiles, profile1);
 
@@ -118,7 +118,7 @@ public class ProfileManagerTest extends TestCase {
 
     public void testDefaultProfile2() throws Exception {
 
-        String title = "Sample";
+        String title = "PMTest";
         String description = "description 11";
         Profile profile1 = new Profile(title);
         profile1.setDescription(description);
@@ -142,7 +142,7 @@ public class ProfileManagerTest extends TestCase {
     
     public void testProfileAvailable() throws Exception {
 
-        String title = "Sample";
+        String title = "PMTest";
         String description = "description 11";
         Profile profile1 = new Profile(title);
         profile1.setDescription(description);
@@ -154,10 +154,10 @@ public class ProfileManagerTest extends TestCase {
             new File(filename).delete();
         }
 
-        Profile profile4 = new Profile("Profile IV");
+        Profile profile4 = new Profile("PMTest Profile IV");
         profile4.setDescription(profile4.getName());
 
-        Profile profile3 = new Profile("Profile III");
+        Profile profile3 = new Profile("PMTest Profile III");
         profile3.setDescription(profile3.getName());
 
         Profile[] profiles = { profile1, profile4, profile3 };
@@ -338,7 +338,7 @@ public class ProfileManagerTest extends TestCase {
 
         ProfileManager profileManager = new ProfileManager();
 
-        String title = "Sample";
+        String title = "PMTest";
         String description = "description 11";
         Profile profile1 = new Profile(title);
         profile1.setDescription(description);

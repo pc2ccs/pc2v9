@@ -955,5 +955,12 @@ public interface IInternalContest {
      * Send a refresh all event to all listeners.
      */
     void fireAllRefreshEvents();
+
+    /**
+     * Copied all current login and connection established information.
+     * 
+     * @param newContest contest to copy information to.
+     */
+    void cloneAllLoginAndConnections(InternalContest newContest);
     
 }

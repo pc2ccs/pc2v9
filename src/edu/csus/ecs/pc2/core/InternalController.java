@@ -313,13 +313,13 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         try {
             packet.setContestIdentifier(contest.getContestIdentifier().toString());
             connectionManager.send(packet, connectionHandlerID);
+            
+            outgoingPacket(packet);
+            
         } catch (TransportException e) {
             info("Unable to send to " + connectionHandlerID + " packet " + packet);
             e.printStackTrace();
         }
-
-        outgoingPacket(packet);
-
     }
 
     /**
@@ -344,6 +344,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             try {
                 packet.setContestIdentifier(contest.getContestIdentifier().toString());
                 connectionManager.send(packet, connectionHandlerID);
+                
+                outgoingPacket(packet);
             } catch (TransportException e) {
                 log.log(Log.SEVERE, "Exception sending packet to site " + siteNumber + " " + packet, e);
             }
