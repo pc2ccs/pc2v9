@@ -397,6 +397,14 @@ public class ContestTimesPane extends JPanePlugin {
         public void loginDenied(LoginEvent event) {
           
         }
+        
+        public void loginRefreshAll(LoginEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                }
+            });
+        }
     }
 
     /**

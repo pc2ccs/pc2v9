@@ -34,6 +34,10 @@ public class LoginEvent {
          *  A client was not allowed to login
          */
         LOGIN_DENIED,
+        /**
+         * Refresh all on change of profile or reset.
+         */
+        REFRESH_ALL,
     }
 
     private Action action = Action.NEW_LOGIN;

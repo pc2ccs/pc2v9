@@ -132,6 +132,11 @@ public class ServerModule implements UIPlugin {
             // TODO Auto-generated method stub
 
         }
+
+        public void loginRefreshAll(LoginEvent event) {
+            // TODO Auto-generated method stub
+            
+        }
     }
 
     /**

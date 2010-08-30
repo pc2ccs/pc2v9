@@ -602,6 +602,11 @@ public class LoginFrame extends JFrame implements UIPlugin {
             setStatusMessage(event.getMessage());
             bAlreadyLoggingIn = false;
         }
+        
+        public void loginRefreshAll(LoginEvent event) {
+            // TODO Auto-generated method stub
+            
+        }
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {

@@ -693,6 +693,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         public void loginDenied(LoginEvent event) {
             securityException = new SecurityException("Login denied " + event.getMessage());
         }
+        
+        public void loginRefreshAll(LoginEvent event) {
+            // TODO Auto-generated method stub
+        }
     }
 
     public IInternalContest clientLogin(IInternalContest internalContest, String loginName, String password) throws Exception {

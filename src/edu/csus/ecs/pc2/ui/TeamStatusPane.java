@@ -430,6 +430,10 @@ public class TeamStatusPane extends JPanePlugin {
         public void loginDenied(LoginEvent event) {
             populateGUI();
         }
+        
+        public void loginRefreshAll(LoginEvent event) {
+            populateGUI();
+        }
     }
 
     /**

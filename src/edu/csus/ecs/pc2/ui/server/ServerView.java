@@ -193,6 +193,10 @@ public class ServerView extends JFrame implements UIPlugin {
         public void loginDenied(LoginEvent event) {
             logDebugMessage("Login Event " + event.getAction() + " " + event.getClientId());
         }
+        
+        public void loginRefreshAll(LoginEvent event) {
+            logDebugMessage("Login Event " + event.getAction() + " " + event.getClientId());
+        }
     }
 
     /**

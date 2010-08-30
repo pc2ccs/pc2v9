@@ -248,6 +248,16 @@ public class LoginsPane extends JPanePlugin {
         public void loginDenied(LoginEvent event) {
             // updateLoginList(event.getClientId(), event.getConnectionHandlerID());
         }
+        
+        public void loginRefreshAll(LoginEvent event) {
+            
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                }
+            });
+            
+        }
     }
 
     /**

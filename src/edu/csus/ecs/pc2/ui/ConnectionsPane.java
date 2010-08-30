@@ -203,6 +203,16 @@ public class ConnectionsPane extends JPanePlugin {
         public void connectionDropped(final ConnectionEvent event) {
             removeConnectionRow(event.getConnectionHandlerID());
         }
+
+        public void connectionRefreshAll(ConnectionEvent connectionEvent) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                }
+            });
+        }
+        
+        
     }
 
     /**

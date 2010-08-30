@@ -31,7 +31,11 @@ public class ConnectionEvent {
         /**
          * Connection Dropped
          */
-        DROPPED,
+        DROPPED, 
+        /**
+         * Refresh all on change of profile or reset.
+         */
+        REFRESH_ALL,
     }
 
     private Action action;

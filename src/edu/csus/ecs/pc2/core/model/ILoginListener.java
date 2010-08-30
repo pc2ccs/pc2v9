@@ -28,4 +28,11 @@ public interface ILoginListener {
      * @param event
      */
     void loginDenied (LoginEvent event);
+    
+    /**
+     * Refresh all logins.
+     * 
+     * @param event
+     */
+    void loginRefreshAll (LoginEvent event);
 }

@@ -2411,8 +2411,7 @@ public class InternalContest implements IInternalContest {
         LanguageEvent languageEvent = new LanguageEvent(LanguageEvent.Action.REFRESH_ALL, null);
         fireLanguageListener(languageEvent);
 
-        // FIXME add REFRESH_ALL event
-        LoginEvent loginEvent = null;
+        LoginEvent loginEvent = new LoginEvent(LoginEvent.Action.REFRESH_ALL, null, null);
         fireLoginListener(loginEvent);
 
         JudgementEvent judgementEvent = new JudgementEvent(JudgementEvent.Action.REFRESH_ALL, null);
@@ -2421,8 +2420,7 @@ public class InternalContest implements IInternalContest {
         SiteEvent siteEvent = new SiteEvent(SiteEvent.Action.REFRESH_ALL, null);
         fireSiteListener(siteEvent);
 
-        // FIXME add REFRESH_ALL event
-        ConnectionEvent connectionEvent = null;
+        ConnectionEvent connectionEvent = new ConnectionEvent(ConnectionEvent.Action.REFRESH_ALL, null);
         fireConnectionListener(connectionEvent);
 
         BalloonSettingsEvent balloonSettingsEvent = new BalloonSettingsEvent(BalloonSettingsEvent.Action.REFRESH_ALL, null);

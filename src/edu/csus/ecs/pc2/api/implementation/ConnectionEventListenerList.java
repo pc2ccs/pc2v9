@@ -82,5 +82,9 @@ public class ConnectionEventListenerList {
             fireConnectionListener(connectionEvent);
 
         }
+
+        public void connectionRefreshAll(ConnectionEvent connectionEvent) {
+            // FIXME implement API code
+        }
     }
 }

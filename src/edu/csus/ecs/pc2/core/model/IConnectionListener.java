@@ -27,4 +27,11 @@ public interface IConnectionListener {
      */
     void connectionDropped(ConnectionEvent connectionEvent);
 
+    /**
+     * Refresh all connections on profile switch or reset.
+     * 
+     * @param connectionEvent
+     */
+    void connectionRefreshAll (ConnectionEvent connectionEvent);
+
 }
