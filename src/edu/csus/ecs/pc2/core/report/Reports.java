@@ -47,9 +47,9 @@ public final class Reports {
     }
 
     /**
-     * Return list of IReports.
+     * Return list of all defined reports.
      * 
-     * @return
+     * @return list of IReports
      */
     public static IReport[] getReports() {
         Vector<IReport> reports = new Vector<IReport>();
@@ -116,20 +116,39 @@ public final class Reports {
 
     }
 
+    /**
+     * Prints usage to stdout.
+     */
     public static void usage() {
 
         String[] lines = { "Usage: [options] reportName|## [[reportName|##][...]]", //
                 "", // 
-                "--profile name    - profile name, default uses current profile", // 
+                "--profile name - profile name, default uses current profile.  name may be a ## from --listp listing", // 
                 "--contestPassword padd  - password needed to decrypt pc2 data", // 
-                "--list - list names of reports (and the report numbers)", // 
-                "--dir name - alternate base directory name, by default uses profile dir name", // 
-                "--site ## - specify the site number", // 
-                "--listp - list all profile names", // 
+                "--list         - list names of reports (and the report numbers)", // 
+                "--dir name     - alternate base directory name, by default uses profile dir name", // 
+                "--site ##      - specify the site number", // 
+                "--listp        - list all profile names with numbers", // 
                 "", // 
                 "reportName - name of report to print (or report number)",//
                 "##         - number of report to print (numbers found using --list)", //
                 "", //
+                "$ pc2reports --listp", //
+                "1 - Id: Contest-1526060434834405723 description: Real Contest name: Contest", //
+                "2 - Id: Contest 3--613094433664018852 description: Real Contest 3 name: Contest 3", //
+                "", //
+                "Default name  : Contest", //
+                "  Profile ID  : Contest-1526060434834405723", //
+                "  Description : Real Contest", //
+                "  Path        : profiles\\Pdf812e23-4234-46ee-ad3c-4011c8cb885e", //
+                "", //
+                "Each of these will print the same report:", //
+                "$ pc2report --contestPassword newpass --profile Contest 3--613094433664018852 'Fastest Solution Summary'", //
+                "$ pc2report --contestPassword newpass --profile 2 'Fastest Solution Summary'", //
+                "$ pc2report --contestPassword newpass --profile Contest 3--613094433664018852 9", //
+                "$ pc2report --contestPassword newpass --profile 2 9", //
+                "", //
+                
                 "Precedence for directory: --dir, --profile, then default profile dir", //
                 "", //
         };
@@ -143,6 +162,12 @@ public final class Reports {
 
     }
 
+    /**
+     * Get an integer for the input string.
+     * 
+     * @param s a string containing an integer
+     * @return 0 if can not parse string otherwise converts the string contents to an integer.
+     */
     protected static int getInteger(String s) {
 
         try {
@@ -153,6 +178,16 @@ public final class Reports {
         }
     }
 
+    /**
+     * Gets the report for the input arg (integer).
+     * 
+     * Looks up the report by number and returns the report for that
+     * input integer.
+     * 
+     * @param arg a string containing an integer.
+     * @return reporrt for input integer (from arg)
+     * @throws Exception 
+     */
     public static IReport getReport(String arg) throws Exception {
 
         int reportNumber = getInteger(arg);
@@ -181,6 +216,15 @@ public final class Reports {
         return selectedReport;
     }
 
+    /**
+     * Returns a filename for the input report.
+     * 
+     * The report filename has the name of the report {@link IReport#getReportTitle()} and
+     * the current time in form MM.dd.SSS (SimpleDateFormat)
+     * 
+     * @param selectedReport
+     * @return a filename for the input report
+     */
     public String getReportFileName(IReport selectedReport) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM.dd.SSS");
         // "yyMMdd HHmmss.SSS");
@@ -196,7 +240,7 @@ public final class Reports {
      /**
      * Print a report.
      * 
-     * @param arg
+     * @param arg either number or name for the report
      */
     private void printReport(String arg) {
 
@@ -281,6 +325,12 @@ public final class Reports {
         }
     }
 
+    /**
+     * Get a more English name for the FileSecurityException.
+     * 
+     * @param fse
+     * @return a more English name for the input fse.
+     */
     private String getFSEMsg(FileSecurityException fse) {
 
         if (FileSecurity.FAILED_TO_DECRYPT.equals(fse.getLocalizedMessage())) {
@@ -301,7 +351,7 @@ public final class Reports {
     /**
      * Write filename to stdout.
      * 
-     * @param filename
+     * @param filename filename to echo to stdout
      */
     private void catfile(String filename) {
 
@@ -333,6 +383,10 @@ public final class Reports {
         this.directory = directory;
     }
 
+    /**
+     * Main starting point for Reports
+     * @param args command line arguments
+     */
     public static void main(String[] args) {
 
         String[] requireArguementArgs = { "--contestPassword", //
@@ -379,6 +433,8 @@ public final class Reports {
             System.exit(2);
         }
         
+        profileName = lookupProfileName (profileName);
+        
         Reports reports = new Reports(profileName, password.toCharArray());
 
         reports.setSiteNumber(number);
@@ -390,6 +446,41 @@ public final class Reports {
 
     }
 
+    /**
+     * Looks up profile # in profile list.
+     * 
+     * If the input name is a integer only will return the profile
+     * id (ContestId) that cooresponds to the profile in the profiles.properties
+     * list.
+     * 
+     * @param name
+     * @return
+     */
+    private static String lookupProfileName(String name) {
+
+        if (name.matches("^\\d+$")) {
+            
+            // If only a digit, look it up in the profiles list
+            
+            try {
+                Profile[] list = new ProfileManager().load();
+
+                int profileNumber = getInteger(name);
+                if (list.length > 0 && profileNumber - 1 < list.length) {
+                    return list[profileNumber - 1].getContestId();
+                }
+
+            } catch (Exception e) {
+                return name;
+            }
+        }
+        return name;
+    }
+
+    /**
+     * List all profiles to stdout.
+     * 
+     */
     private static void listProfiles() {
 
         try {
@@ -399,21 +490,26 @@ public final class Reports {
                     return;
             }
             Profile [] list = new ProfileManager().load();
-
-            for (Profile profile : list){
-                System.out.println("Id: " + profile.getContestId()+" description: "+profile.getDescription());
+            
+            if (list.length > 0){
+                int i = 1;
+                for (Profile profile : list){
+                    System.out.println(i + " - Id: " + profile.getContestId()+" description: "+profile.getDescription()+" name: "+profile.getName());
+                    i++;
+                }
+                System.out.println();
             }
-
+            
             Profile profile = new ProfileManager().getDefaultProfile();
-            System.out.println("Default name : "+ profile.getName()+"\n  Description: "+profile.getDescription()+"\n  Path       : "+profile.getProfilePath());
+            if (profile != null){
+                System.out.println("Default name  : " + profile.getName() + "\n  Profile ID  : " + profile.getContestId() + "\n  Description : " + profile.getDescription() + "\n  Path        : "
+                        + profile.getProfilePath());
+            }
             
         } catch (IOException e) {
             e.printStackTrace(System.err);
         } catch (ProfileLoadException e) {
             e.printStackTrace(System.err);
         }
-        
-        
-        
     }
 }
