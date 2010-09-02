@@ -1312,7 +1312,7 @@ public class DefaultScoringAlgorithmTest extends TestCase {
      * @throws ClassNotFoundException 
      * @throws IOException 
      */
-    private void addTheRun(InternalContest contest, String runInfoLine) {
+    public void addTheRun(IInternalContest contest, String runInfoLine) {
 
         // get 5th judge
         ClientId judgeId = contest.getAccounts(Type.JUDGE).elementAt(4).getClientId();
@@ -1324,7 +1324,6 @@ public class DefaultScoringAlgorithmTest extends TestCase {
         Judgement noJudgement = contest.getJudgements()[1];
         
         String[] data = runInfoLine.split(",");
-        
         
         // Line is: runId,teamId,problemLetter,elapsed,solved[,sendToTeamsYN]
 

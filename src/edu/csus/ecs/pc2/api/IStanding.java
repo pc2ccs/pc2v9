@@ -57,4 +57,14 @@ public interface IStanding {
      * active PC<sup>2</sup> scoring algorithm
      */
     int getRank();
+    
+    /**
+     * Get the submission and scoring details for each problem.
+     * 
+     * The array is in the order: site, client, problem 
+     * 
+     * @return an array of information about the problem submission and scoring.
+     */
+    IProblemDetails[] getProblemDetails();
+
 }

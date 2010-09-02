@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.api.implementation;
 
+import java.util.Arrays;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.api.IClarification;
@@ -11,6 +12,7 @@ import edu.csus.ecs.pc2.api.IGroup;
 import edu.csus.ecs.pc2.api.IJudgement;
 import edu.csus.ecs.pc2.api.ILanguage;
 import edu.csus.ecs.pc2.api.IProblem;
+import edu.csus.ecs.pc2.api.IProblemDetails;
 import edu.csus.ecs.pc2.api.IRun;
 import edu.csus.ecs.pc2.api.ISite;
 import edu.csus.ecs.pc2.api.IStanding;
@@ -257,5 +259,11 @@ public class Contest implements IContest, UIPlugin {
         clarificationListenerList.setContestAndController(contest, controller);
         configurationListenerList.setContest(contest);
         connectionEventListenerList.setContestAndController(contest, controller, this);
+    }
+
+    public IProblemDetails[] getProblemDetails() {
+        IProblemDetails[] list = generateStandings.getProblemDetails(contest, log);
+        Arrays.sort(list, new ProblemDetailsComparator());
+        return list;
     }
 }

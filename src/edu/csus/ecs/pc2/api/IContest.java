@@ -357,4 +357,11 @@ public interface IContest {
      */
     int getServerPort();
     
+    /**
+     * Get all the problem details.
+     * 
+     * @return problem details for all teams sorted by site, team and then problem.
+     */
+    IProblemDetails[] getProblemDetails();
+
 }

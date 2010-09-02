@@ -22,6 +22,7 @@ public final class AllTests {
         //$JUnit-BEGIN$
         suite.addTestSuite(RunImplementationTest.class);
         suite.addTestSuite(TeamImplementationTest.class);
+        suite.addTestSuite(StandingImplementationTest.class);
         
         //$JUnit-END$
         return suite;
