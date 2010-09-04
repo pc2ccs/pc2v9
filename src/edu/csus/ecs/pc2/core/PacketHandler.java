@@ -131,6 +131,10 @@ public class PacketHandler {
                 // RUN submitted by team to server
                 runSubmission(packet, fromId);
                 break;
+            case RUN_SUBMISSION_CONFIRM_SERVER:
+                // RUN send from one server to another 
+                handleRunSubmissionConfirmationServer (packet, fromId);
+                break;
             case CLARIFICATION_SUBMISSION:
                 // Clarification submitted by team to server
                 confirmSubmission(packet, fromId);
@@ -353,6 +357,25 @@ public class PacketHandler {
         info("handlePacket end " + packet);
     }
 
+    private void handleRunSubmissionConfirmationServer(Packet packet, ClientId fromId) throws IOException, ClassNotFoundException, FileSecurityException  {
+            Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
+            RunFiles runFiles = (RunFiles) PacketFactory.getObjectValue(packet, PacketFactory.RUN_FILES);
+            
+            contest.addRun(run, runFiles);
+            
+            if (isServer()) {
+                Packet confirmPacket = PacketFactory.createRunSubmissionConfirm(contest.getClientId(), fromId, run);
+                sendToJudgesAndOthers(confirmPacket, false);
+            } else {
+                if (Utilities.isDebugMode()){
+                    Exception ex = new Exception("Non server was send a "+packet.getType()+" packet");
+                    ex.printStackTrace();
+                    logException("Unexpected packet on client", ex);
+                }
+            }
+        
+    }
+
     /**
      * Handle switch packet.
      * 
@@ -361,7 +384,6 @@ public class PacketHandler {
      * @throws ProfileException 
      * @throws FileSecurityException 
      */
-    // FIXME code handleSwitchProfile
     private void handleSwitchProfile(Packet packet, ConnectionHandlerID connectionHandlerID) throws ProfileException, FileSecurityException {
 
         // inProfile the original profile
@@ -812,9 +834,11 @@ public class PacketHandler {
 
         // Send to clients and servers
         if (isServer()) {
-            sendToJudgesAndOthers(confirmPacket, true);
+            sendToJudgesAndOthers(confirmPacket, false);
+            Packet dupSubmissionPacket = PacketFactory.createRunSubmissionConfirmation(contest.getClientId(), fromId, run, runFiles);
+            controller.sendToServers(dupSubmissionPacket);
         }
-        
+
     }
 
     private void confirmSubmission(Packet packet, ClientId fromId) {

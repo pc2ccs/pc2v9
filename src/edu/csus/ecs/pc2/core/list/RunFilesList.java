@@ -181,7 +181,29 @@ public class RunFilesList implements Serializable {
             }
         }
     }
+    
+    /**
+     * Check whether run files for run are present.
+     * 
+     * Determines whether there is access to run files.
+     * 
+     * @param run
+     * @return true if RunFiles available
+     * @throws IOException
+     * @throws ClassNotFoundException
+     * @throws FileSecurityException
+     */
+    public boolean isRunFilesPresent(Run run) throws IOException, ClassNotFoundException, FileSecurityException {
 
+        if (writeToDisk) {
+            String filename = getFileName(run.getSiteNumber(), run.getNumber());
+            return new File(filename).isFile();
+        } else if (cacheRunFiles) {
+            return getRunFiles(run.getSiteNumber(), run.getNumber()) != null;
+        } else {
+            return  (singleRunFiles != null && run.getElementId().equals(singleRunFiles.getRunId()));
+        }
+    }
     /**
      * Get a key for an input run.
      * 

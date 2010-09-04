@@ -2775,7 +2775,12 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
         boolean loadedConfiguration = false;
         if (saveCofigurationToDisk) {
-            loadedConfiguration = contest.readConfiguration(siteNum, getLog());
+            try {
+                loadedConfiguration = contest.readConfiguration(siteNum, getLog());
+            } catch (Exception e) {
+                logException(e);
+                return false;
+            }
         }
         return loadedConfiguration;
     }

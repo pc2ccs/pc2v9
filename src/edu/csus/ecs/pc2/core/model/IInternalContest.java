@@ -159,6 +159,18 @@ public interface IInternalContest {
     void addRun(Run run, RunFiles runFiles, ClientId whoCheckedOutRunId) throws IOException, ClassNotFoundException, FileSecurityException;
 
     /**
+     * Add/archive run and runfiles.
+     * 
+     * @param run
+     * @param runFiles
+     * @throws IOException
+     * @throws ClassNotFoundException
+     * @throws FileSecurityException
+     */
+    void addRun(Run run, RunFiles runFiles) throws IOException, ClassNotFoundException, FileSecurityException;
+
+
+    /**
      * Add new accounts.
      * 
      * @see edu.csus.ecs.pc2.core.list.AccountList#generateNewAccounts(edu.csus.ecs.pc2.core.model.ClientType.Type, int, int, edu.csus.ecs.pc2.core.list.AccountList.PasswordType, int, boolean)
@@ -895,7 +907,7 @@ public interface IInternalContest {
      */
     IStorage getStorage();
 
-    boolean readConfiguration(int siteNumber, Log log);
+    boolean readConfiguration(int siteNumber, Log log) throws IOException, ClassNotFoundException, FileSecurityException;
     
     /**
      * Clone a contest settings/submissions based on settings.
@@ -962,5 +974,13 @@ public interface IInternalContest {
      * @param newContest contest to copy information to.
      */
     void cloneAllLoginAndConnections(InternalContest newContest);
+
+    /**
+     * Are RunFiles present?
+     * 
+     * @param run
+     * @return true if RunFiles are available.
+     */
+    boolean isRunFilesPresent(Run run) throws IOException, ClassNotFoundException, FileSecurityException;
     
 }

@@ -666,6 +666,16 @@ public final class PacketType implements Serializable {
          * Causes client to reset/change profile (409 packet).
          */
         UPDATE_CLIENT_PROFILE,
+        /**
+         * This is a run confirmation with RunFiles.
+         * 
+         * After a {@link #RUN_SUBMISSION} this packet will be
+         * send to all servers then each server will send out
+         * a {@link #RUN_SUBMISSION_CONFIRM} to the clients.
+         * 
+         * @see #RUN_SUBMISSION
+         */
+        RUN_SUBMISSION_CONFIRM_SERVER
     }
 
     /**

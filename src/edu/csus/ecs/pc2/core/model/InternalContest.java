@@ -231,16 +231,35 @@ public class InternalContest implements IInternalContest {
     }
 
     public void initializeSubmissions(int siteNum) {
+        try{
+            initializeSubmissions(siteNum, true);
+        } catch (Exception e) {
+            logException("Trouble loading clarifications from disk ", e);
+        }
+    }
+    
+    /**
+     * Load submission and other information from disk.
+     * 
+     * @param siteNum
+     * @param uncheckoutSubmissions - changes all checked out submissions to un-checkedout
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
+     */
+    public void initializeSubmissions(int siteNum, boolean uncheckoutSubmissions) throws IOException, ClassNotFoundException, FileSecurityException {
 
+        configurationIO = new ConfigurationIO(storage);
+        
         runList = new RunList(storage);
         runFilesList = new RunFilesList(storage);
         runResultFilesList = new RunResultsFileList(storage);
         clarificationList = new ClarificationList(storage);
-        configurationIO = new ConfigurationIO(storage);
         
-        resetRunStatus(siteNum);
+        if (uncheckoutSubmissions){
 
-        try {
+            resetRunStatus(siteNum);
+
             clarificationList.loadFromDisk(siteNum);
             Clarification[] clarList = clarificationList.getList();
             for (int i = 0; i < clarList.length; i++) {
@@ -249,10 +268,7 @@ public class InternalContest implements IInternalContest {
                     clarificationList.updateClarification(clarList[i], ClarificationStates.NEW, null);
                 }
             }
-        } catch (Exception e) {
-            logException("Trouble loading clarifications from disk ", e);
         }
-
     }
 
     /**
@@ -703,6 +719,13 @@ public class InternalContest implements IInternalContest {
         fireRunListener(runEvent);
     }
 
+    public void addRun(Run run, RunFiles runFiles) throws IOException, ClassNotFoundException, FileSecurityException {
+        runList.add(run);
+        runFilesList.add(run, runFiles);
+        RunEvent runEvent = new RunEvent(RunEvent.Action.ADDED, run, runFiles, null);
+        fireRunListener(runEvent);
+    }
+    
     public void availableRun(Run run) throws IOException, ClassNotFoundException, FileSecurityException {
         runList.add(run);
         RunEvent runEvent = new RunEvent(RunEvent.Action.RUN_AVAILABLE, run, null, null);
@@ -1263,6 +1286,10 @@ public class InternalContest implements IInternalContest {
     
     public RunFiles getRunFiles(Run run) throws IOException, ClassNotFoundException, FileSecurityException {
         return runFilesList.getRunFiles(run);
+    }
+    
+    public boolean isRunFilesPresent(Run run) throws IOException, ClassNotFoundException, FileSecurityException {
+        return runFilesList.isRunFilesPresent(run);
     }
 
     public void addRunJudgement(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles, ClientId whoJudgedItId) throws IOException, ClassNotFoundException, FileSecurityException {
@@ -2071,10 +2098,10 @@ public class InternalContest implements IInternalContest {
         return configurationIO.store(this, log);
     }
 
-    public boolean readConfiguration(int siteNum, Log log) {
+    public boolean readConfiguration(int siteNum, Log log, boolean uncheckoutSubmissions) throws IOException, ClassNotFoundException, FileSecurityException {
         
         boolean loadedConfiguration = configurationIO.loadFromDisk(siteNum, this, log);
-        initializeSubmissions(siteNum);
+        initializeSubmissions(siteNum, uncheckoutSubmissions);
         // Initialize contest time if necessary
         ContestTime contestTime = getContestTime(siteNum);
         if (contestTime == null) {
@@ -2082,6 +2109,9 @@ public class InternalContest implements IInternalContest {
             addContestTime(contestTime);
         }
         return loadedConfiguration;
+    }
+    public boolean readConfiguration(int siteNum, Log log) throws IOException, ClassNotFoundException, FileSecurityException {
+        return readConfiguration(siteNum, log, true);
     }
 
     public void setStorage(IStorage storage) {

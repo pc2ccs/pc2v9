@@ -397,6 +397,13 @@ public final class PacketFactory {
         return packet;
     }
 
+    public static Packet createMessage(ClientId source, ClientId destination, String message, Exception ex) {
+        Properties prop = new Properties();
+        prop.put(MESSAGE_STRING, message);
+        prop.put(EXCEPTION, ex);
+        Packet packet = new Packet(Type.MESSAGE, source, destination, prop);
+        return packet;
+    }
     /**
      * Create a packet of {@link PacketType.Type#RUN_SUBMISSION}.
      * 
@@ -412,6 +419,15 @@ public final class PacketFactory {
         prop.put(RUN_FILES, runFiles);
         Packet packet = new Packet(Type.RUN_SUBMISSION, source, destination, prop);
         return packet;
+    }
+    
+    public static Packet createRunSubmissionConfirmation(ClientId source, ClientId destination, Run run, RunFiles runFiles) {
+        Properties prop = new Properties();
+        prop.put(RUN, run);
+        prop.put(RUN_FILES, runFiles);
+        Packet packet = new Packet(Type.RUN_SUBMISSION_CONFIRM_SERVER, source, destination, prop);
+        return packet;
+        
     }
 
     /**
