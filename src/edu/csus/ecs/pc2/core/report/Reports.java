@@ -13,7 +13,6 @@ import edu.csus.ecs.pc2.core.InternalController;
 import edu.csus.ecs.pc2.core.ParseArguments;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
-import edu.csus.ecs.pc2.core.model.ConfigurationIO;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Profile;
@@ -39,6 +38,9 @@ public final class Reports {
     private int siteNumber = 1;
 
     private String directory = null;
+    
+    private boolean usingProfile = true;
+
 
     public Reports(String profileName, char[] charArray) {
         super();
@@ -129,6 +131,7 @@ public final class Reports {
                 "--dir name     - alternate base directory name, by default uses profile dir name", // 
                 "--site ##      - specify the site number", // 
                 "--listp        - list all profile names with numbers", // 
+                "--noProfile - do not use profile directory use pre version 9.2 location", //
                 "", // 
                 "reportName - name of report to print (or report number)",//
                 "##         - number of report to print (numbers found using --list)", //
@@ -249,30 +252,33 @@ public final class Reports {
         try {
 
             if (getDirectory() == null) {
-
-                ProfileManager manager = new ProfileManager();
-                Profile profile = null;
                 
-                if (getProfileName() == null){
-                    profile = manager.getDefaultProfile();
-                    System.err.println("Using default profile is: "+profile.getName()+" "+profile.getProfilePath());
-                } else {
-                    Profile [] profiles = manager.load();
-                    for (Profile checkProfile : profiles){
-                        if (checkProfile.getContestId().equals(getProfileName())){
-                            profile = checkProfile;
+                if (isUsingProfile()){
+                    ProfileManager manager = new ProfileManager();
+                    Profile profile = null;
+                    
+                    if (getProfileName() == null){
+                        profile = manager.getDefaultProfile();
+                        System.err.println("Using default profile is: "+profile.getName()+" "+profile.getProfilePath());
+                    } else {
+                        Profile [] profiles = manager.load();
+                        for (Profile checkProfile : profiles){
+                            if (checkProfile.getContestId().equals(getProfileName())){
+                                profile = checkProfile;
+                            }
+                        }
+                        if (profile == null){
+                            System.err.println("No profile named "+getProfileName()+" in "+ProfileManager.PROFILE_INDEX_FILENAME);
+                            return;
                         }
                     }
-                    if (profile == null){
-                        System.err.println("No profile named "+getProfileName()+" in "+ProfileManager.PROFILE_INDEX_FILENAME);
-                        return;
-                    }
+                    
+                    System.err.println("Using profile "+profile.getName()+" "+profile.getProfilePath());
+                    dirName = profile.getProfilePath();
+                } else {
+                    dirName = ".";
                 }
-                
-                System.err.println("Using profile "+profile.getName()+" "+profile.getProfilePath());
-            
 
-                dirName = profile.getProfilePath();
             } else {
                 dirName = getDirectory();
             }
@@ -288,18 +294,19 @@ public final class Reports {
             security.verifyPassword(getPassword());
             IStorage storage = security;
 
-            ConfigurationIO configurationIO = new ConfigurationIO(storage);
-
             if (getSiteNumber() == 0){
                 setSiteNumber(1);
             }
             InternalContest contest = new InternalContest();
             Log log = new Log("pc2reports.log");
-
-            if (!configurationIO.loadFromDisk(getSiteNumber(), contest, log)) {
-                System.err.println("Unable to read contest data from disk");
-                return;
-            }
+            
+            contest.setStorage(storage);
+            
+//            contest.loginDenied(clientId, connectionHandlerID, message)
+            
+            contest.initializeSubmissions(getSiteNumber(), false);
+            
+//            contest.
 
             IReport report = getReport(arg);
 
@@ -422,8 +429,11 @@ public final class Reports {
 
         String password = arguments.getOptValue("--contestPassword");
         String profileName = arguments.getOptValue("--profile");
+        
+        
+        
 
-        int number = getInteger(arguments.getOptValue("--siteNumber"));
+        int number = getInteger(arguments.getOptValue("--site"));
         if (number == 0) {
             number = 1;
         }
@@ -437,6 +447,7 @@ public final class Reports {
         
         Reports reports = new Reports(profileName, password.toCharArray());
 
+        reports.setUsingProfile(!arguments.isOptPresent("--noProfile"));
         reports.setSiteNumber(number);
 
         for (int i = 0; i < arguments.getArgCount(); i++) {
@@ -458,7 +469,7 @@ public final class Reports {
      */
     private static String lookupProfileName(String name) {
 
-        if (name.matches("^\\d+$")) {
+        if (name != null && name.matches("^\\d+$")) {
             
             // If only a digit, look it up in the profiles list
             
@@ -475,6 +486,15 @@ public final class Reports {
             }
         }
         return name;
+    }
+    
+
+    public boolean isUsingProfile() {
+        return usingProfile;
+    }
+
+    public void setUsingProfile(boolean usingProfile) {
+        this.usingProfile = usingProfile;
     }
 
     /**

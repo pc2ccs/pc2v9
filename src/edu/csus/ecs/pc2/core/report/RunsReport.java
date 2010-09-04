@@ -121,38 +121,34 @@ public class RunsReport implements IReport {
             printWriter.println("    Judgement was _not_ sent to team.");
         }
 
-        if (isThisSite(run.getSiteNumber())) {
-
-            try {
-
-                // TODO getRunFiles should throw an exception which is handled by this and other methods.
+        try {
+            if (!contest.isRunFilesPresent(run)) {
+                printWriter.println("    No submitted files found.");
+            } else {
                 RunFiles runFiles = contest.getRunFiles(run);
-                if (runFiles == null) {
-                    printWriter.println("    No submitted files found.");
+                SerializedFile mainFile = runFiles.getMainFile();
+                int bytes = 0;
+                if (mainFile.getBuffer() != null) {
+                    bytes = mainFile.getBuffer().length;
+                }
+                printWriter.println("      main file '" + mainFile.getName() + "' " + bytes + " bytes");
+                if (runFiles.getOtherFiles() == null) {
+                    printWriter.println("                no additional submitted files");
                 } else {
-                    SerializedFile mainFile = runFiles.getMainFile();
-                    int bytes = 0;
-                    if (mainFile.getBuffer() != null) {
-                        bytes = mainFile.getBuffer().length;
-                    }
-                    printWriter.println("      main file '" + mainFile.getName() + "' " + bytes + " bytes");
-                    if (runFiles.getOtherFiles() == null) {
-                        printWriter.println("                no additional submitted files");
-                    } else {
-                        printWriter.println("                " + runFiles.getOtherFiles().length + " additional submitted files");
+                    printWriter.println("                " + runFiles.getOtherFiles().length + " additional submitted files");
 
-                        if (runFiles.getOtherFiles().length > 0) {
-                            for (SerializedFile serializedFile : runFiles.getOtherFiles()) {
-                                bytes = 0;
-                                if (serializedFile.getBuffer() != null) {
-                                    bytes = serializedFile.getBuffer().length;
-                                }
-                                printWriter.println("                '" + serializedFile.getName() + "' " + bytes + " bytes");
+                    if (runFiles.getOtherFiles().length > 0) {
+                        for (SerializedFile serializedFile : runFiles.getOtherFiles()) {
+                            bytes = 0;
+                            if (serializedFile.getBuffer() != null) {
+                                bytes = serializedFile.getBuffer().length;
                             }
+                            printWriter.println("                '" + serializedFile.getName() + "' " + bytes + " bytes");
                         }
                     }
                 }
-            } catch (java.lang.NullPointerException nullPointerException) {
+            }
+        } catch (java.lang.NullPointerException nullPointerException) {
                 printWriter.println("    No submitted files found (not on server?).");
             } catch (Exception ex) {
 
@@ -168,10 +164,6 @@ public class RunsReport implements IReport {
                     ex.printStackTrace(printWriter);
                 }
             }
-        } else {
-            printWriter.println("    No submitted files found (Run from site " + run.getSiteNumber() + ")");
-        }
-        
         
         if (run.getAllJudgementRecords().length > 0){
 
