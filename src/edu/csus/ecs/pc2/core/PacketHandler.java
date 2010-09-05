@@ -1254,6 +1254,15 @@ public class PacketHandler {
         }
 
     }
+    
+    private void insureProfileDirectory(Profile profile) {
+        
+        String profileDirectory = profile.getProfilePath();
+        
+        if (! new File(profileDirectory).isDirectory()){
+            new File(profileDirectory).mkdirs();
+        }
+    }
 
     private void loginSuccess(Packet packet, ConnectionHandlerID connectionHandlerID, ClientId fromId) throws IOException, ClassNotFoundException, FileSecurityException {
 
@@ -1269,7 +1278,18 @@ public class PacketHandler {
                     System.exit(44);
                 }
                 
-                FileSecurity fileSecurity = new FileSecurity("db." + clientId.getSiteNumber());
+                Profile theProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE);
+                if (theProfile == null) {
+                    StaticLog.getLog().log(Log.SEVERE, "FATAL ERROR - Profile is null");
+                    System.err.println("FATAL ERROR - Profile is null ");
+                    System.exit(44);
+                }
+                
+                insureProfileDirectory(theProfile);
+                
+                String baseDirectoryName = theProfile.getProfilePath() + File.separator + "db." + clientId.getSiteNumber();
+
+                FileSecurity fileSecurity = new FileSecurity(baseDirectoryName);
                 controller.initializeStorage(fileSecurity);
 
                 try {

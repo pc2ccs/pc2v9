@@ -1997,10 +1997,14 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         parseArguments = new ParseArguments(stringArray, requireArguementArgs);
         
         if (parseArguments.isOptPresent("--server")) {
-            theProfile = getCurrentProfile();
-            String profilePath = theProfile.getProfilePath();
-            insureProfileDirectory(theProfile);
-            startLog(profilePath, "pc2.startup", null, null);
+            if (! isContactingRemoteServer()) {
+                theProfile = getCurrentProfile();
+                String profilePath = theProfile.getProfilePath();
+                insureProfileDirectory(theProfile);
+                startLog(profilePath, "pc2.startup", null, null);
+            } else {
+                startLog(null, "pc2.startup", null, null);
+            }
         } else {
             startLog(null, "pc2.startup", null, null);
         }
@@ -2068,12 +2072,21 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         
         if (parseArguments.isOptPresent("--server")) {
             
+   
+            
             info("Starting Server Transport...");
             connectionManager.startServerTransport(this);
             serverModule = true;
 
             contactingRemoteServer = false;
             setServerRemoteHostAndPort(parseArguments.getOptValue("--remoteServer"));
+            
+            if (!isContactingRemoteServer()) {
+                theProfile = getCurrentProfile();
+                String profilePath = theProfile.getProfilePath();
+                insureProfileDirectory(theProfile);
+                startLog(profilePath, "pc2.startup", null, null);
+            }
             
             try {
                 setServerPort(parseArguments.getOptValue("--port"));
