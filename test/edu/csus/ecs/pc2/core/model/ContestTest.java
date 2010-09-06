@@ -17,6 +17,8 @@ import junit.framework.TestCase;
 
 // $HeadURL$
 public class ContestTest extends TestCase {
+    
+    private boolean debugMode = false;
 
     public ContestTest(String arg0) {
         super(arg0);
@@ -86,7 +88,9 @@ public class ContestTest extends TestCase {
         
         try {
             contest.checkoutRun(submittedRun, judgeId, false, false);
-            System.out.println(judgeId+" checked out"+submittedRun);
+            if (debugMode){
+                System.out.println(judgeId+" checked out "+submittedRun);
+            }
         } catch (RunUnavailableException e) {
             e.printStackTrace();
             assertTrue ("Failed to checkout run, should have checked out run to "+judgeId, false);
@@ -99,7 +103,9 @@ public class ContestTest extends TestCase {
             assertTrue ("Checked out run, should have not checked out run ", false);
         } catch (RunUnavailableException e) {
             // Test passes if reaches here
-            System.out.println("Ok. Expecting exception "+e.getMessage());
+            if (debugMode) {
+                System.out.println("Ok. Expecting exception " + e.getMessage());
+            }
         }
         
         try {

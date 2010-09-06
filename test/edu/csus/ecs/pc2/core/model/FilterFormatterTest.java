@@ -16,6 +16,8 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 
 // $HeadURL$
 public class FilterFormatterTest extends TestCase {
+    
+    private boolean debugMode = false;
 
     public static void main(String[] args) {
     }
@@ -122,7 +124,9 @@ public class FilterFormatterTest extends TestCase {
         s = filterFormatter.format("%#P", contest, filter);
         assertEquals("Number of problems", s, filter.getProblemIdList().length + "");
 
-        printAllSpecifiers("Yea", contest, filter);
+        if (debugMode) {
+            printAllSpecifiers("Yea", contest, filter);
+        }
     }
 
     void printAllSpecifiers(String prefix, IInternalContest contest, Filter filter) {
