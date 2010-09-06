@@ -64,6 +64,43 @@ public class ProfileManager {
     public Profile[] load() throws IOException, ProfileLoadException {
         return load(PROFILE_INDEX_FILENAME);
     }
+    
+    /**
+     * Add a new profile to existing profiles.
+     * 
+     * Will create and set as default the new profile if not
+     * profiles are stored in the profiles.properties file.      
+     * @param filename
+     * @param profile
+     * @throws IOException
+     * @throws ProfileLoadException
+     */
+    public void add (String filename, Profile profile) throws IOException, ProfileLoadException{
+        
+        if (hasDefaultProfile()) {
+            
+            Profile[] profiles = load(filename);
+            Profile defaultProfile = getDefaultProfile(filename);
+            store(filename, profiles, defaultProfile);
+            
+        } else {
+            storeDefaultProfile(filename, profile);
+        }
+    }
+    
+    /**
+     * Add a new profile to existing profiles.
+     * 
+     * Will create and set as default the new profile if not
+     * profiles are stored in the profiles.properties file. 
+     * 
+     * @param profile
+     * @throws IOException
+     * @throws ProfileLoadException
+     */
+    public void add (Profile profile) throws IOException, ProfileLoadException{
+        add (PROFILE_INDEX_FILENAME, profile);
+    }
 
     /**
      * Determines whether the input profile can be read using contest password.
@@ -121,12 +158,15 @@ public class ProfileManager {
         }
     }
     
+    public boolean hasDefaultProfile (){
+        return hasDefaultProfile(PROFILE_INDEX_FILENAME);
+    }
     /**
      * Is there a default profile defined ?
      * @return
      */
-    public boolean hasDefaultProfile (){
-        if (new File(PROFILE_INDEX_FILENAME).exists()) {
+    public boolean hasDefaultProfile (String filename){
+        if (new File(filename).exists()) {
             try {
                 return getDefaultProfile() != null;
             } catch (Exception e) {
@@ -287,6 +327,10 @@ public class ProfileManager {
     }
     
     public boolean storeDefaultProfile(Profile defaultProfile) throws IOException {
+        return storeDefaultProfile(PROFILE_INDEX_FILENAME, defaultProfile);
+    }
+    
+    public boolean storeDefaultProfile(String filename, Profile defaultProfile) throws IOException {
         Profile[] profiles = null;
 
         try {
@@ -296,7 +340,7 @@ public class ProfileManager {
             profiles[0] = defaultProfile;
         }
 
-        return this.store(PROFILE_INDEX_FILENAME, profiles, defaultProfile);
+        return this.store(filename, profiles, defaultProfile);
     }
 
 

@@ -535,9 +535,11 @@ public class PacketHandler {
          * This clones the existing contest based on the settings,
          * including copying and saving all settings on disk.
          */
-        contest.clone(newContest, newProfile, "", settings);
+        contest.clone(newContest, addedProfile, "", settings);
         
         contest.storeConfiguration(controller.getLog());
+
+        storeProfiles();
         
         if (switchProfileNow ){
             // FIXME if switchProfileNow MUST somehow switch profile.
@@ -547,6 +549,7 @@ public class PacketHandler {
             sendToJudgesAndOthers(addPacket, true);
         }
     }
+
 
     private void handleServerSettings(Packet packet, ConnectionHandlerID connectionHandlerID) {
         loadSettingsFromRemoteServer(packet, connectionHandlerID);
@@ -1969,6 +1972,8 @@ public class PacketHandler {
             
             contest.storeConfiguration(controller.getLog());
             
+            storeProfiles();
+            
             boolean sendToOtherServers = isThisSite(packet.getSourceId().getSiteNumber());
 
             if (updatePacket != null) {
@@ -3065,7 +3070,8 @@ public class PacketHandler {
         
         addProfilesToModel(packet);
         
-        updateProfileProperties();
+        System.err.println("debug22 store profiles # profiles "+contest.getProfiles().length);
+        storeProfiles();
 
         try {
             Problem generalProblem = (Problem) PacketFactory.getObjectValue(packet, PacketFactory.GENERAL_PROBLEM);
@@ -3113,24 +3119,81 @@ public class PacketHandler {
     }
 
     /**
-     * Update or create Profile properties file.
-     * 
+     * Merge profiles.properties and model/contest and store to disk.
+     * <br><br>
+     * Merges the contest profile list and the list of profiles stored
+     * to the profiles.properties file.
+     * <br><br>
+     * Creates the profiles.properties file if needed.
      */
-    private void updateProfileProperties() {
+    private void storeProfiles() {
 
         ProfileManager manager = new ProfileManager();
 
-        Profile[] profiles = contest.getProfiles();
-
         try {
 
-            if (profiles.length > 0) {
-                manager.store(profiles, contest.getProfile());
-            } else {
-                manager.storeDefaultProfile(contest.getProfile());
+            Vector<Profile> profileVector = new Vector<Profile>();
+
+            System.out.println("debug 22 storeProfiles");
+
+            Profile[] list = new Profile[0];
+
+            if (manager.hasDefaultProfile()) {
+                list = manager.load();
             }
-        } catch (IOException e) {
-            logException("Unable to store profiles into properties file", e);
+
+            if (list.length == 1 && contest.getProfiles().length == 1) {
+                manager.storeDefaultProfile(contest.getProfile());
+            } else {
+
+                int i;
+                /**
+                 * Merge profiles.properties and the profiles in the model/contest.
+                 */
+                for (i = 0; i < list.length; i++) {
+                    Profile profile = list[i];
+
+                    boolean found = false;
+                    for (Profile contestProfile : contest.getProfiles()) {
+                        if (!found && contestProfile.getProfilePath().equals(profile.getProfilePath())) {
+                            profileVector.add(contestProfile);
+                            found = true;
+                        }
+                    }
+
+                    if (!found) {
+                        profileVector.add(profile);
+                    }
+                }
+
+                /**
+                 * Merge profiles in the model/contest into list (vector) thus far.
+                 */
+                
+                list = contest.getProfiles();
+                for (i = 0; i < list.length; i++) {
+                    Profile profile = list[i];
+
+                    boolean found = false;
+                    for (i = 0; i < profileVector.size(); i++) {
+                        Profile profile2 = profileVector.elementAt(i);
+                        if (!found && profile.getProfilePath().equals(profile2.getProfilePath())) {
+                            found = true;
+                        }
+                    }
+                    
+                    if (!found) {
+                        profileVector.add(profile);
+                    }
+                }
+
+                Profile[] newList = (Profile[]) profileVector.toArray(new Profile[profileVector.size()]);
+
+                manager.store(newList, contest.getProfile());
+            }
+        } catch (Exception e) {
+            logException("Problem saving/loading profiles from profile properties file", e);
+            e.printStackTrace();
         }
 
     }
@@ -3577,5 +3640,6 @@ public class PacketHandler {
 
     public void logException(String s, Exception exception) {
         controller.getLog().log(Log.INFO, s, exception);
+        exception.printStackTrace(); // debug22 FIXME
     }
 }
