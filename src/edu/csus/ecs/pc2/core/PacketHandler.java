@@ -3064,6 +3064,8 @@ public class PacketHandler {
         addBalloonSettingsToModel(packet);
         
         addProfilesToModel(packet);
+        
+        updateProfileProperties();
 
         try {
             Problem generalProblem = (Problem) PacketFactory.getObjectValue(packet, PacketFactory.GENERAL_PROBLEM);
@@ -3106,6 +3108,29 @@ public class PacketHandler {
             }
         } catch (Exception e) {
             controller.getLog().log(Log.WARNING, "Exception logged ", e);
+        }
+
+    }
+
+    /**
+     * Update or create Profile properties file.
+     * 
+     */
+    private void updateProfileProperties() {
+
+        ProfileManager manager = new ProfileManager();
+
+        Profile[] profiles = contest.getProfiles();
+
+        try {
+
+            if (profiles.length > 0) {
+                manager.store(profiles, contest.getProfile());
+            } else {
+                manager.storeDefaultProfile(contest.getProfile());
+            }
+        } catch (IOException e) {
+            logException("Unable to store profiles into properties file", e);
         }
 
     }
