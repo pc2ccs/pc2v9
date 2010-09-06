@@ -225,9 +225,9 @@ public class RunsReport implements IReport {
 
     }
     
-    private boolean isThisSite(int siteNumber) {
-        return contest.getSiteNumber() == siteNumber;
-    }
+//    private boolean isThisSite(int siteNumber) {
+//        return contest.getSiteNumber() == siteNumber;
+//    }
 
     public void writeReport(PrintWriter printWriter) {
         

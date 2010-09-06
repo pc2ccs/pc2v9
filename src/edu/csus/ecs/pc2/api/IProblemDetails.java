@@ -19,7 +19,8 @@ public interface IProblemDetails {
 
     /**
      * The client for this problem data.
-     * @return
+     * 
+     * @return the client info for this problem details.
      */
     IClient getClient();
 
@@ -32,21 +33,21 @@ public interface IProblemDetails {
     /**
      * The number of attempts for this problem.
      * 
-     * @return
+     * @return number of attempts for this problem.
      */
     long getAttempts();
 
     /**
      * The Problem Number for this problem
      * 
-     * @return
+     * @return the number of the problem in the contest (numbers start at 1)
      */
     int getProblemId();
 
     /**
      * The solution time for this problem
      * 
-     * @return
+     * @return number of elapsed minutes when problem was solved.
      */
     long getSolutionTime();
 
@@ -54,7 +55,7 @@ public interface IProblemDetails {
      * 
      * In Version 8, this was ProblemScoreData.getScore()
      * 
-     * @return
+     * @return number of penalty points
      */
     long getPenaltyPoints();
 
