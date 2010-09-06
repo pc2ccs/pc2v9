@@ -13,9 +13,12 @@ import edu.csus.ecs.pc2.core.InternalController;
 import edu.csus.ecs.pc2.core.ParseArguments;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ConfigurationIO;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Profile;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.security.FileSecurity;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.profile.ProfileLoadException;
@@ -38,9 +41,8 @@ public final class Reports {
     private int siteNumber = 1;
 
     private String directory = null;
-    
-    private boolean usingProfile = true;
 
+    private boolean usingProfile = true;
 
     public Reports(String profileName, char[] charArray) {
         super();
@@ -151,7 +153,7 @@ public final class Reports {
                 "$ pc2report --contestPassword newpass --profile Contest 3--613094433664018852 9", //
                 "$ pc2report --contestPassword newpass --profile 2 9", //
                 "", //
-                
+
                 "Precedence for directory: --dir, --profile, then default profile dir", //
                 "", //
         };
@@ -189,7 +191,7 @@ public final class Reports {
      * 
      * @param arg a string containing an integer.
      * @return reporrt for input integer (from arg)
-     * @throws Exception 
+     * @throws Exception
      */
     public static IReport getReport(String arg) throws Exception {
 
@@ -240,7 +242,7 @@ public final class Reports {
 
     }
 
-     /**
+    /**
      * Print a report.
      * 
      * @param arg either number or name for the report
@@ -252,28 +254,28 @@ public final class Reports {
         try {
 
             if (getDirectory() == null) {
-                
-                if (isUsingProfile()){
+
+                if (isUsingProfile()) {
                     ProfileManager manager = new ProfileManager();
                     Profile profile = null;
-                    
-                    if (getProfileName() == null){
+
+                    if (getProfileName() == null) {
                         profile = manager.getDefaultProfile();
-                        System.err.println("Using default profile is: "+profile.getName()+" "+profile.getProfilePath());
+                        System.err.println("Using default profile is: " + profile.getName() + " " + profile.getProfilePath());
                     } else {
-                        Profile [] profiles = manager.load();
-                        for (Profile checkProfile : profiles){
-                            if (checkProfile.getContestId().equals(getProfileName())){
+                        Profile[] profiles = manager.load();
+                        for (Profile checkProfile : profiles) {
+                            if (checkProfile.getContestId().equals(getProfileName())) {
                                 profile = checkProfile;
                             }
                         }
-                        if (profile == null){
-                            System.err.println("No profile named "+getProfileName()+" in "+ProfileManager.PROFILE_INDEX_FILENAME);
+                        if (profile == null) {
+                            System.err.println("No profile named " + getProfileName() + " in " + ProfileManager.PROFILE_INDEX_FILENAME);
                             return;
                         }
                     }
-                    
-                    System.err.println("Using profile "+profile.getName()+" "+profile.getProfilePath());
+
+                    System.err.println("Using profile " + profile.getName() + " " + profile.getProfilePath());
                     dirName = profile.getProfilePath();
                 } else {
                     dirName = ".";
@@ -294,19 +296,25 @@ public final class Reports {
             security.verifyPassword(getPassword());
             IStorage storage = security;
 
-            if (getSiteNumber() == 0){
+            ConfigurationIO configurationIO = new ConfigurationIO(storage);
+
+            if (getSiteNumber() == 0) {
                 setSiteNumber(1);
             }
             InternalContest contest = new InternalContest();
             Log log = new Log("pc2reports.log");
-            
+
             contest.setStorage(storage);
-            
-//            contest.loginDenied(clientId, connectionHandlerID, message)
-            
+
             contest.initializeSubmissions(getSiteNumber(), false);
-            
-//            contest.
+
+            if (!configurationIO.loadFromDisk(getSiteNumber(), contest, log)) {
+                System.err.println("Unable to read contest data from disk");
+                return;
+            }
+
+            ClientId clientId = new ClientId(getSiteNumber(), Type.ADMINISTRATOR, 1);
+            contest.setClientId(clientId);
 
             IReport report = getReport(arg);
 
@@ -429,9 +437,6 @@ public final class Reports {
 
         String password = arguments.getOptValue("--contestPassword");
         String profileName = arguments.getOptValue("--profile");
-        
-        
-        
 
         int number = getInteger(arguments.getOptValue("--site"));
         if (number == 0) {
@@ -442,9 +447,9 @@ public final class Reports {
             System.err.println("Contest Password (--contestPassword) is required");
             System.exit(2);
         }
-        
-        profileName = lookupProfileName (profileName);
-        
+
+        profileName = lookupProfileName(profileName);
+
         Reports reports = new Reports(profileName, password.toCharArray());
 
         reports.setUsingProfile(!arguments.isOptPresent("--noProfile"));
@@ -470,9 +475,9 @@ public final class Reports {
     private static String lookupProfileName(String name) {
 
         if (name != null && name.matches("^\\d+$")) {
-            
+
             // If only a digit, look it up in the profiles list
-            
+
             try {
                 Profile[] list = new ProfileManager().load();
 
@@ -487,7 +492,6 @@ public final class Reports {
         }
         return name;
     }
-    
 
     public boolean isUsingProfile() {
         return usingProfile;
@@ -504,28 +508,28 @@ public final class Reports {
     private static void listProfiles() {
 
         try {
-            
-            if (! new File (ProfileManager.PROFILE_INDEX_FILENAME).exists()){
-                System.err.println("No profiles exist (Profile properties files does not exist: "+ProfileManager.PROFILE_INDEX_FILENAME+" )"); 
-                    return;
+
+            if (!new File(ProfileManager.PROFILE_INDEX_FILENAME).exists()) {
+                System.err.println("No profiles exist (Profile properties files does not exist: " + ProfileManager.PROFILE_INDEX_FILENAME + " )");
+                return;
             }
-            Profile [] list = new ProfileManager().load();
-            
-            if (list.length > 0){
+            Profile[] list = new ProfileManager().load();
+
+            if (list.length > 0) {
                 int i = 1;
-                for (Profile profile : list){
-                    System.out.println(i + " - Id: " + profile.getContestId()+" description: "+profile.getDescription()+" name: "+profile.getName());
+                for (Profile profile : list) {
+                    System.out.println(i + " - Id: " + profile.getContestId() + " description: " + profile.getDescription() + " name: " + profile.getName());
                     i++;
                 }
                 System.out.println();
             }
-            
+
             Profile profile = new ProfileManager().getDefaultProfile();
-            if (profile != null){
+            if (profile != null) {
                 System.out.println("Default name  : " + profile.getName() + "\n  Profile ID  : " + profile.getContestId() + "\n  Description : " + profile.getDescription() + "\n  Path        : "
                         + profile.getProfilePath());
             }
-            
+
         } catch (IOException e) {
             e.printStackTrace(System.err);
         } catch (ProfileLoadException e) {
