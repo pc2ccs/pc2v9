@@ -90,7 +90,7 @@ public class ElementId implements Serializable {
             boolean eq = otherId.num == num
                     && savedCounter == otherId.savedCounter;
             if (eq) {
-                eq = name == name;
+                eq = name == otherId.name;
             }
 
             return eq;

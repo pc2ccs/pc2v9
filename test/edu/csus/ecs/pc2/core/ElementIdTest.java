@@ -66,5 +66,22 @@ public class ElementIdTest extends TestCase {
         
 //        System.err.println("testConstructor tested : "+number);
     }
+    
+    /**
+     * Test equals().
+     */
+    public void testEqual(){
+        
+        
+        ElementId id = new ElementId("name");
+        ElementId id2 = new ElementId("name");
+        
+        assertNotSame(id, id2);
+        assertEquals(id, id);
+        
+        assertTrue(id.equals(id));
+        assertFalse(id.equals(id2));
+        
+    }
 
 }
