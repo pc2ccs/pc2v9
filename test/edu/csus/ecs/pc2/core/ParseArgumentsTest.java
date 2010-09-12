@@ -4,7 +4,7 @@ import junit.framework.TestCase;
 
 /**
  * Test for Parse Arguments.
- *  
+ * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -15,7 +15,8 @@ public class ParseArgumentsTest extends TestCase {
     public void testNull() {
 
         try {
-            @SuppressWarnings("unused") ParseArguments parseArguments = new ParseArguments(null);
+            @SuppressWarnings("unused")
+            ParseArguments parseArguments = new ParseArguments(null);
         } catch (IllegalArgumentException e) {
             nullFakeRoutine("Passed test threw IllegalArgumentException");
         }
@@ -23,7 +24,8 @@ public class ParseArgumentsTest extends TestCase {
     }
 
     public void testEmpty() {
-        @SuppressWarnings("unused") ParseArguments parseArguments = new ParseArguments(new String[0]);
+        @SuppressWarnings("unused")
+        ParseArguments parseArguments = new ParseArguments(new String[0]);
     }
 
     /**
@@ -32,6 +34,33 @@ public class ParseArgumentsTest extends TestCase {
      */
     private void nullFakeRoutine(String reason) {
         // TODO Auto-generated method stub
+
+    }
+    
+    /**
+     * main test routine for ParseArgs <br>
+     *
+     * @param args
+     *            java.lang.String[]
+     */
+    public static void main(String[] args) {
+        ParseArguments pa = new ParseArguments();
+        pa.loadArgs(args);
+        pa.dumpArgs(System.out);
+        System.out.println();
+        
+        String [] reqArgs = { "--l", "--file" };
+
+        System.out.print("Using required arguments:");
+        for (String s : reqArgs){
+            System.out.print(" "+s);
+        }
+        System.out.println();
+        
+        pa = new ParseArguments();
+        pa.setRequireArgOpts(reqArgs);
+        pa.loadArgs(args);
+        pa.dumpArgs(System.out);
 
     }
 

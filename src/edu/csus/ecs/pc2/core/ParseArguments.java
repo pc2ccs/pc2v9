@@ -4,11 +4,10 @@ import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.Properties;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.Vector;
 
 /**
@@ -83,22 +82,29 @@ public class ParseArguments {
         super();
         loadArgs(args);
     }
+    
+    /**
+     * Return string array of arg list keys.
+     * 
+     * @return sorted keys for arglist
+     */
+    private String[] getSortedKeys() {
+        String[] keys = (String[]) argHash.keySet().toArray(new String[argHash.keySet().size()]);
+        Arrays.sort(keys);
+        return keys;
+    }
 
     /**
      * Dumps the args to pw.
      */
-    @SuppressWarnings("unchecked")
     public void dumpArgs(java.io.PrintStream pw) {
         pw.println();
         pw.println("There are " + argHash.size() + " options ");
 
-        TreeSet ts = new TreeSet();
-        ts.addAll(argHash.keySet());
+        String [] keys = getSortedKeys();
+     
+        for (String key : keys) {
 
-        Iterator it = ts.iterator();
-
-        while (it.hasNext()) {
-            String key = (String) it.next();
             Object obj = argHash.get(key);
             String value = "<null>";
 
@@ -125,18 +131,13 @@ public class ParseArguments {
     /**
      * List all options and arguments
      */
-    @SuppressWarnings("unchecked")
     public void dumpArgs(java.io.PrintWriter pw) {
         pw.println();
         pw.println("There are " + argHash.size() + " options ");
 
-        TreeSet ts = new TreeSet();
-        ts.addAll(argHash.keySet());
-
-        Iterator it = ts.iterator();
-
-        while (it.hasNext()) {
-            String key = (String) it.next();
+        String [] keys = getSortedKeys();
+        
+        for (String key : keys) {
             Object obj = argHash.get(key);
             String value = "<null>";
 
