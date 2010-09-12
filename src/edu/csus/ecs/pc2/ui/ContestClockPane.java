@@ -20,7 +20,7 @@ import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay.DisplayTimes;
 
 /**
- * A Pane that shows contest time.
+ * A Pane that shows contest time with a big display.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -30,6 +30,8 @@ import edu.csus.ecs.pc2.ui.ContestClockDisplay.DisplayTimes;
 // TODO test site change
 // TODO test if sites are added or removed, does pull down update ?
 // TODO test if both elapsed and remaining can be displayed
+// FIXME add contest time listener
+
 // $HeadURL$
 public class ContestClockPane extends JPanePlugin {
 
@@ -218,7 +220,7 @@ public class ContestClockPane extends JPanePlugin {
             contestClockDisplay.addLabeltoUpdateList(clockLabel, DisplayTimes.REMAINING_TIME, siteNumber);
             currentSiteNumber = siteNumber;
 
-        } else if (currentSiteNumber != currentSiteNumber) {
+        } else if (siteNumber != currentSiteNumber) {
             // changed from old site to new site
 
             contestClockDisplay.removeLabelFromUpdateList(clockLabel, currentSiteNumber);
