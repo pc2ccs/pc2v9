@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
+import java.util.Arrays;
 import java.util.Vector;
 
 import javax.swing.JButton;
@@ -13,6 +14,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.list.JPluginPaneNameComparator;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
@@ -213,8 +215,13 @@ public class PluginLoadPane extends JPanePlugin {
         plugins.add(new SubmissionBiffPane());
         plugins.add(new TeamStatusPane());
         plugins.add(new ViewPropertiesPane());
+        plugins.add(new PacketMonitorPane());
         
-        return (JPanePlugin[]) plugins.toArray(new JPanePlugin[plugins.size()]);
+        JPanePlugin [] pluginList = (JPanePlugin[]) plugins.toArray(new JPanePlugin[plugins.size()]);
+        
+        Arrays.sort(pluginList, new JPluginPaneNameComparator());
+        
+        return pluginList;
     }
 
     private void loadPluginList() {

@@ -445,6 +445,9 @@ public class InternalContest implements IInternalContest {
                 loginListenerList.elementAt(i).loginRemoved(loginEvent);
             } else if (loginEvent.getAction() == LoginEvent.Action.LOGIN_DENIED) {
                 loginListenerList.elementAt(i).loginDenied(loginEvent);
+            } else if (loginEvent.getAction() == LoginEvent.Action.REFRESH_ALL) {
+                loginListenerList.elementAt(i).loginRefreshAll(loginEvent);
+                
             } else {
                 throw new UnsupportedOperationException("Unknown login action " + loginEvent.getAction());
             }
@@ -494,6 +497,8 @@ public class InternalContest implements IInternalContest {
                 connectionListenerList.elementAt(i).connectionEstablished(connectionEvent);
             } else if (connectionEvent.getAction() == ConnectionEvent.Action.DROPPED) {
                 connectionListenerList.elementAt(i).connectionDropped(connectionEvent);
+            } else if (connectionEvent.getAction() == ConnectionEvent.Action.REFRESH_ALL) {
+                connectionListenerList.elementAt(i).connectionRefreshAll(connectionEvent);
             } else {
                 throw new UnsupportedOperationException("Unknown connection action " + connectionEvent.getAction());
             }

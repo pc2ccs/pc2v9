@@ -15,6 +15,7 @@ import javax.swing.JOptionPane;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.archive.PacketArchiver;
 import edu.csus.ecs.pc2.core.exception.ContestSecurityException;
+import edu.csus.ecs.pc2.core.exception.ProfileException;
 import edu.csus.ecs.pc2.core.log.EvaluationLog;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
@@ -1512,6 +1513,26 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             }
 
             packetHandler.handlePacket(packet, connectionHandlerID);
+            
+        } catch (ProfileException profileException) {
+            
+            if (profileException.getMessage().indexOf("FileSecurityException") != -1){
+                
+                if (profileException.getMessage().indexOf(FileSecurity.FAILED_TO_DECRYPT) != -1){
+                    
+                    // Invalid contest password 
+                    
+                    Packet messagePacket = PacketFactory.createMessage(getServerClientId(), packet.getSourceId(), "Invalid contest password");
+                    sendToClient(messagePacket);
+                    
+                    logException("Invalid contest password", profileException);
+                } else {
+                    Packet messagePacket = PacketFactory.createMessage(getServerClientId(), packet.getSourceId(), "Unable to change profile");
+                    sendToClient(messagePacket);
+                    
+                    logException("Unable to change profile", profileException);
+                }
+            }
 
         } catch (ContestSecurityException contestSecurityException) {
 
@@ -3079,6 +3100,16 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         if (StaticLog.getLog() != null) {
             StaticLog.getLog().log(Log.WARNING, "Exception", e);
         } else {
+            e.printStackTrace(System.err);
+        }
+    }
+    
+    private void logException(String message, Exception e) {
+
+        if (StaticLog.getLog() != null) {
+            StaticLog.getLog().log(Log.WARNING, "Exception - "+message, e);
+        } else {
+            System.err.println("Exception - "+message);
             e.printStackTrace(System.err);
         }
     }

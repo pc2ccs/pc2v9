@@ -411,9 +411,6 @@ public class PacketHandler {
             }
 
         } catch (Exception e) {
-
-            // TODO: handle exception
-            e.printStackTrace(System.err);
             logException("Failure in switch profile", e);
         }
     }
@@ -467,15 +464,19 @@ public class PacketHandler {
         ContestLoginSuccessData data = createContestLoginSuccessData(contest, getServerClientId(), contestPassword);
         Packet packet = PacketFactory.createUpdateProfileClientPacket(getServerClientId(), PacketFactory.ALL_SERVERS, currentProfile, switchToProfile, data);
 
+        // Servers get the same packet
         controller.sendToServers(packet);
 
         data = createContestLoginSuccessData(contest, getServerClientId(), null);
         packet = PacketFactory.createUpdateProfileClientPacket(getServerClientId(), PacketFactory.ALL_SERVERS, currentProfile, switchToProfile, data);
 
+        // Judges get packet with data files
         sendToJudgesAndOthers(packet, false);
 
         ClientId[] teams = contest.getLocalLoggedInClients(ClientType.Type.TEAM);
         for (ClientId clientId : teams) {
+            
+            // Team's get their specific data in their packet (their runs, their clars, no judges data files)
             data = createContestLoginSuccessData(contest, clientId, null);
             packet = PacketFactory.createUpdateProfileClientPacket(getServerClientId(), clientId, currentProfile, switchToProfile, data);
             controller.sendToClient(packet);
@@ -495,7 +496,7 @@ public class PacketHandler {
 
         if (isServer()){
             
-            Profile inProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE);
+            Profile inProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.NEW_PROFILE);
             Profile updatedProfile = contest.updateProfile(inProfile);
             Packet addPacket = PacketFactory.createUpdateSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, updatedProfile);
             sendToJudgesAndOthers(addPacket, true);
@@ -3199,22 +3200,25 @@ public class PacketHandler {
     }
 
     private void setProfileIntoModel(Packet packet) {
-        
+
         try {
-            
-            String contestId =  (String) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_IDENTIFIER);
+
+            String contestId = (String) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_IDENTIFIER);
             contest.setContestIdentifier(contestId);
 
+            Profile newProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.NEW_PROFILE);
             Profile profile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE);
-            if (profile != null) {
+
+            if (newProfile != null) {
+                contest.setProfile(newProfile);
+            } else if (profile != null) {
                 contest.setProfile(profile);
             }
-            
+
         } catch (Exception e) {
-            // TODO: log handle exception
-            controller.getLog().log(Log.WARNING, "Exception logged ", e);
+            logException("Unable to load profile into model ", e);
         }
-        
+
     }
 
     private void addLanguagesToModel(Packet packet) {

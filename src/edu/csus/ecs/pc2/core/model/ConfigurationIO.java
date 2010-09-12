@@ -485,7 +485,7 @@ public class ConfigurationIO {
         public boolean loadFromDisk(String filename) throws IOException, ClassNotFoundException, FileSecurityException {
             Object readObject = storage.load(filename);
             if (readObject instanceof Hashtable) {
-                configItemHash = (Hashtable) readObject;
+                configItemHash = (Hashtable<String, Object>) readObject;
                 return true;
             }
             return false;
