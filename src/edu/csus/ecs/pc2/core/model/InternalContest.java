@@ -16,6 +16,7 @@ import edu.csus.ecs.pc2.core.exception.ProfileCloneException;
 import edu.csus.ecs.pc2.core.exception.RunUnavailableException;
 import edu.csus.ecs.pc2.core.exception.UnableToUncheckoutRunException;
 import edu.csus.ecs.pc2.core.list.AccountList;
+import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
 import edu.csus.ecs.pc2.core.list.BalloonSettingsList;
 import edu.csus.ecs.pc2.core.list.ClarificationList;
 import edu.csus.ecs.pc2.core.list.ClientSettingsList;
@@ -34,7 +35,6 @@ import edu.csus.ecs.pc2.core.list.ProfilesList;
 import edu.csus.ecs.pc2.core.list.RunFilesList;
 import edu.csus.ecs.pc2.core.list.RunList;
 import edu.csus.ecs.pc2.core.list.RunResultsFileList;
-import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
@@ -95,6 +95,8 @@ public class InternalContest implements IInternalContest {
 
     private Vector<IGroupListener> groupListenerList = new Vector<IGroupListener>();
 
+    private Vector<IMessageListener> messageListenerList = new Vector<IMessageListener>();
+    
     /**
      * Contains name of client (judge or admin) who checks out the run.
      */
@@ -369,6 +371,14 @@ public class InternalContest implements IInternalContest {
     public void removeJudgementListener(IJudgementListener judgementListener) {
         judgementListenerList.remove(judgementListener);
     }
+    
+    public void addMessageListener(IMessageListener messageListener) {
+        messageListenerList.addElement(messageListener);
+    }
+
+    public void removeMessageListener(IMessageListener messageListener) {
+        messageListenerList.removeElement(messageListener);
+    }
 
     private void fireRunListener(RunEvent runEvent) {
         for (int i = 0; i < runListenerList.size(); i++) {
@@ -520,7 +530,17 @@ public class InternalContest implements IInternalContest {
         }
     }
 
+    private void fireMessageListener(MessageEvent messageEvent) {
 
+        for (int i = 0; i < messageListenerList.size(); i++) {
+
+            if (messageEvent.getAction() == MessageEvent.Action.ADDED) {
+                messageListenerList.elementAt(i).messageAdded(messageEvent);
+            } else if (messageEvent.getAction() == MessageEvent.Action.DELETED) {
+                messageListenerList.elementAt(i).messageRemoved(messageEvent);
+            }
+        }
+    }
 
     public void addLocalLogin(ClientId inClientId, ConnectionHandlerID connectionHandlerID) {
         localLoginList.add(inClientId, connectionHandlerID);
@@ -2519,4 +2539,11 @@ public class InternalContest implements IInternalContest {
         }
         
     }
+
+    public void addMessage(MessageEvent.Area area, ClientId source, ClientId destination, String message) {
+        MessageEvent messageEvent = new MessageEvent(MessageEvent.Action.ADDED, area, message, source, destination);
+        fireMessageListener(messageEvent);
+    }
+
+
 }

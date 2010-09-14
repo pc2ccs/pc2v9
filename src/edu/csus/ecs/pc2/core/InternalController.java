@@ -845,13 +845,14 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             }
 
             info("initialized controller Site " + contest.getSiteNumber());
+            loadProfiles(contest);
             contest.storeConfiguration(getLog());
         } else {
             if (saveCofigurationToDisk) {
                 contest.initializeSubmissions(contest.getSiteNumber());
             }
             info("Loaded configuration from disk");
-            checkProfile("debug 22 loaded");
+            loadProfiles(contest);
         }
         
         theProfile = contest.getProfile();
@@ -1527,11 +1528,16 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                     
                     logException("Invalid contest password", profileException);
                 } else {
-                    Packet messagePacket = PacketFactory.createMessage(getServerClientId(), packet.getSourceId(), "Unable to change profile");
+                    Packet messagePacket = PacketFactory.createMessage(getServerClientId(), packet.getSourceId(), "Unable to change profile ");
                     sendToClient(messagePacket);
                     
                     logException("Unable to change profile", profileException);
                 }
+            } else {
+                Packet messagePacket = PacketFactory.createMessage(getServerClientId(), packet.getSourceId(), "Unable to change profile ");
+                sendToClient(messagePacket);
+                
+                logException("Unable to change profile", profileException);
             }
 
         } catch (ContestSecurityException contestSecurityException) {
@@ -1972,7 +1978,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
             contest.setClientId(clientId);
 
-            checkProfile("StartMAINU(");
+            if (Utilities.isDebugMode()){
+                checkProfile("StartMAINU("); // FIXME remove checkProfile
+            }
             
             startLog(getBaseProfileDirectoryName(Log.LOG_DIRECTORY_NAME), stripChar(clientId.toString(), ' '), clientId.getName(), clientId.getName());
 
@@ -2304,7 +2312,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             
         } catch (Exception e) {
             e.printStackTrace(System.err);
-            fatalError("Unable to start pc2 unable to create new Profile");
+            fatalError("Unable to start pc2 unable to create initial Profile");
             return null;  // known unreachable code, but compiler complains.
         }
     }

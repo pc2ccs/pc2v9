@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Vector;
 
+import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IStorage;
 import edu.csus.ecs.pc2.core.exception.ClarificationUnavailableException;
 import edu.csus.ecs.pc2.core.exception.ContestSecurityException;
@@ -297,6 +298,10 @@ public interface IInternalContest {
     void addJudgementListener(IJudgementListener judgementListener);
 
     void removeJudgementListener(IJudgementListener judgementListener);
+
+    void addMessageListener(IMessageListener messageListener);
+
+    void removeMessageListener(IMessageListener messageListener);
 
     void addSiteListener(ISiteListener siteListener);
 
@@ -982,5 +987,14 @@ public interface IInternalContest {
      * @return true if RunFiles are available.
      */
     boolean isRunFilesPresent(Run run) throws IOException, ClassNotFoundException, FileSecurityException;
+
+    /**
+     * A message has come from source to destination.
+     * 
+     * @param source
+     * @param destination
+     * @param message
+     */
+    void addMessage(MessageEvent.Area area, ClientId source, ClientId destination, String message);
     
 }

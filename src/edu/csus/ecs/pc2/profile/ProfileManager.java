@@ -139,9 +139,6 @@ public class ProfileManager {
             }
 
             FileSecurity fileSecurity = new FileSecurity(profilePath);
-            if (fileSecurity == null) {
-                throw new ProfileException("Unable to intialize FileSecurity for path " + profilePath);
-            }
 
             try {
                 boolean validPassword = fileSecurity.verifyPassword(contestPassword);

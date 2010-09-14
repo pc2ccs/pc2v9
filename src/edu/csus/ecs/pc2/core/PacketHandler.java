@@ -37,6 +37,7 @@ import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
+import edu.csus.ecs.pc2.core.model.MessageEvent;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.ProblemDataFilesList;
@@ -384,34 +385,29 @@ public class PacketHandler {
      * @throws ProfileException 
      * @throws FileSecurityException 
      */
-    private void handleSwitchProfile(Packet packet, ConnectionHandlerID connectionHandlerID) throws ProfileException, FileSecurityException {
+    private void handleSwitchProfile(Packet packet, ConnectionHandlerID connectionHandlerID) throws ProfileException {
 
         // inProfile the original profile
         // Profile inProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE);
 
-        try {
 
-            Profile newProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.NEW_PROFILE);
-            String contestPassword = (String) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_PASSWORD);
+        Profile newProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.NEW_PROFILE);
+        String contestPassword = (String) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_PASSWORD);
 
-            if (contestPassword == null) {
-                // Use existing contest password if no contest password specified.
-                contestPassword = contest.getContestPassword();
-            }
+        if (contestPassword == null) {
+            // Use existing contest password if no contest password specified.
+            contestPassword = contest.getContestPassword();
+        }
 
-            ProfileManager manager = new ProfileManager();
+        ProfileManager manager = new ProfileManager();
 
-            if (manager.isProfileAvailable(newProfile, contestPassword.toCharArray())) {
+        if (manager.isProfileAvailable(newProfile, contestPassword.toCharArray())) {
 
-                IInternalContest newContest = switchProfile(contest, newProfile, contestPassword.toCharArray());
-                contest = newContest;
-                
-            } else {
-                throw new ProfileException("Can not switch profiles, invalid contest password");
-            }
+            IInternalContest newContest = switchProfile(contest, newProfile, contestPassword.toCharArray());
+            contest = newContest;
 
-        } catch (Exception e) {
-            logException("Failure in switch profile", e);
+        } else {
+            throw new ProfileException("Can not switch profiles, invalid contest password");
         }
     }
 
@@ -1244,18 +1240,34 @@ public class PacketHandler {
         }
     }
 
-    private void handleMessagePacket(Packet packet) {
-
-        if (isThisSite(packet.getDestinationId().getSiteNumber())) {
-            if (!packet.getDestinationId().getClientType().equals(ClientType.Type.SERVER)) {
-                controller.sendToClient(packet);
+    private void handleMessagePacket(Packet packet) throws Exception {
+        
+        if (isServer()){
+            if (isThisSite(packet.getDestinationId().getSiteNumber())) {
+                if (!packet.getDestinationId().getClientType().equals(ClientType.Type.SERVER)) {
+                    controller.sendToClient(packet);
+                }
+            } else {
+                String message = (String) PacketFactory.getObjectValue(packet, PacketFactory.MESSAGE_STRING);
+                Packet messagePacket = PacketFactory.createMessage(contest.getClientId(), packet.getDestinationId(), message);
+                int siteNumber = packet.getDestinationId().getSiteNumber();
+                controller.sendToRemoteServer(siteNumber, messagePacket);
             }
         } else {
             String message = (String) PacketFactory.getObjectValue(packet, PacketFactory.MESSAGE_STRING);
-            Packet messagePacket = PacketFactory.createMessage(contest.getClientId(), packet.getDestinationId(), message);
-            int siteNumber = packet.getDestinationId().getSiteNumber();
-            controller.sendToRemoteServer(siteNumber, messagePacket);
+            if (message == null){
+                throw new Exception ("Message null in packet "+packet);
+            } else {
+                // TODO add the MessageEvent.Area to the message packet
+                
+                if (message.contains("Profile")){
+                    contest.addMessage(MessageEvent.Area.PROFILES, packet.getSourceId(), packet.getDestinationId(), message);
+                } else {
+                    contest.addMessage(MessageEvent.Area.OTHER, packet.getSourceId(), packet.getDestinationId(), message);
+                }
+            }
         }
+
 
     }
     
@@ -2896,6 +2908,23 @@ public class PacketHandler {
             controller.getLog().log(Log.WARNING, "Exception logged ", e);
         }
     }
+    
+    /**
+     * Get maximum run id for the input site
+     * @param runs
+     * @param remoteSiteNumber
+     * @return
+     */
+    private int getLastRunId(Run[] runs, int siteNumber) {
+        int maxRunId = 0;
+        
+        for (Run run : runs){
+            if (run.getSiteNumber() == siteNumber){
+                maxRunId = Math.max(run.getNumber(), maxRunId);
+            }
+        }
+        return maxRunId;
+    }
 
     /**
      * @param packet
@@ -2912,12 +2941,43 @@ public class PacketHandler {
                         contest.updateRun(run, packet.getSourceId());
                     }
                 }
+
+                int localLastRunId = getLastRunId(contest.getRuns(), remoteSiteNumber);
+                int lastRemoteRunId = getLastRunId(runs, remoteSiteNumber);
+
+                if (localLastRunId < lastRemoteRunId) {
+
+                    // FIXME remove
+                    String s = "Send a packet to site " + remoteSiteNumber + " to send runFiles " + localLastRunId + " thru " + lastRemoteRunId;
+                    System.out.println(s);
+                    controller.getLog().info(s);
+                    sendRunFilesRequestToServer(remoteSiteNumber, localLastRunId);
+                }
+
             }
         } catch (Exception e) {
             // TODO: log handle exception
             e.printStackTrace();
             controller.getLog().log(Log.WARNING, "Exception logged ", e);
         }
+    }
+
+    /**
+     * Send a request to remote server for RunFiles.
+     * 
+     * This sends a packet that request that any run id which is lastRunId or greater be sent to this server. <br>
+     * 
+     * @param siteNumber
+     *            site number to request RunFiles from
+     * @param lastRunId
+     *            last run id on this site
+     */
+    private void sendRunFilesRequestToServer(int siteNumber, int lastRunId) {
+
+        // FIXME send packet to request RunFiles from remote server.
+        String s = "FIXME will send a packet to site " + siteNumber + " to send runFiles " + lastRunId + " and all run ids larger";
+        System.out.println(s);
+        controller.getLog().info(s);
     }
 
     private void addRemoteContestTimesToModel(Packet packet, int remoteSiteNumber) {
