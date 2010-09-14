@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Random;
 
 /**
@@ -90,7 +91,7 @@ public class ElementId implements Serializable {
             boolean eq = otherId.num == num
                     && savedCounter == otherId.savedCounter;
             if (eq) {
-                eq = name == otherId.name;
+                eq = Arrays.equals(name, otherId.name);
             }
 
             return eq;

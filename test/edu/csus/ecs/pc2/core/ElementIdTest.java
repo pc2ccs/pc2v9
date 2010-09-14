@@ -1,9 +1,12 @@
 package edu.csus.ecs.pc2.core;
 
+import java.io.Serializable;
 import java.util.HashMap;
+import java.util.UUID;
 
 import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.model.ElementId;
+import edu.csus.ecs.pc2.core.security.FileStorage;
 
 /**
  * Unit tests for ElementId.
@@ -67,10 +70,22 @@ public class ElementIdTest extends TestCase {
 //        System.err.println("testConstructor tested : "+number);
     }
     
+    private Serializable serializeObject (Serializable serializable) throws Exception {
+        
+        FileStorage fileStorage = new FileStorage(".");
+        
+        UUID id = UUID.randomUUID();
+        String fileName = "EIT"+id.toString();
+        
+        fileStorage.writeObjectToFile(fileName, serializable);
+        return fileStorage.load(fileName);
+    }
+    
     /**
      * Test equals().
+     * @throws Exception 
      */
-    public void testEqual(){
+    public void testEqual() throws Exception{
         
         
         ElementId id = new ElementId("name");
@@ -81,6 +96,12 @@ public class ElementIdTest extends TestCase {
         
         assertTrue(id.equals(id));
         assertFalse(id.equals(id2));
+        
+        Object object = serializeObject (id);
+        
+        ElementId newId = (ElementId) object;
+        
+        assertEquals(id, newId);
         
     }
 
