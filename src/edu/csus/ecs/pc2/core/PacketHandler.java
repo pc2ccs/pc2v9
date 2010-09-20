@@ -461,13 +461,25 @@ public class PacketHandler {
         Packet packet = PacketFactory.createUpdateProfileClientPacket(getServerClientId(), PacketFactory.ALL_SERVERS, currentProfile, switchToProfile, data);
 
         // Servers get the same packet
-        controller.sendToServers(packet);
+        
+        // FIXME code individual clients sending
+        sendClonePacketToUsers(packet, ClientType.Type.SERVER);
 
         data = createContestLoginSuccessData(contest, getServerClientId(), null);
         packet = PacketFactory.createUpdateProfileClientPacket(getServerClientId(), PacketFactory.ALL_SERVERS, currentProfile, switchToProfile, data);
+        
+        ClientType.Type[] typeList = { //
+                ClientType.Type.ADMINISTRATOR, //
+                ClientType.Type.JUDGE, //
+                ClientType.Type.SCOREBOARD, //
+                // ClientType.Type.EXECUTOR , //
+                // ClientType.Type.SPECTATOR, //
+                // ClientType.Type.OTHER , //
+        };
 
-        // Judges get packet with data files
-        sendToJudgesAndOthers(packet, false);
+        for (ClientType.Type type : typeList) {
+            sendClonePacketToUsers(packet, type);
+        }
 
         ClientId[] teams = contest.getLocalLoggedInClients(ClientType.Type.TEAM);
         for (ClientId clientId : teams) {
@@ -475,6 +487,20 @@ public class PacketHandler {
             // Team's get their specific data in their packet (their runs, their clars, no judges data files)
             data = createContestLoginSuccessData(contest, clientId, null);
             packet = PacketFactory.createUpdateProfileClientPacket(getServerClientId(), clientId, currentProfile, switchToProfile, data);
+            controller.sendToClient(packet);
+        }
+    }
+
+    /**
+     * Send cloned pack to logged in users.
+     * 
+     * @param packet packet to send
+     * @param type class of user to send to.
+     */
+    private void sendClonePacketToUsers(Packet packet, edu.csus.ecs.pc2.core.model.ClientType.Type type) {
+        ClientId[] users = contest.getLocalLoggedInClients(type);
+        for (ClientId clientId : users) {
+            packet = PacketFactory.clonePacket(getServerClientId(), clientId, packet);
             controller.sendToClient(packet);
         }
     }
@@ -503,6 +529,7 @@ public class PacketHandler {
             
             contest.resetData();
             loadDataIntoModel(packet, connectionHandlerID);
+            contest.fireAllRefreshEvents();
         }
     }
 
@@ -658,6 +685,8 @@ public class PacketHandler {
         if (isServer()) {
 
             ClientId adminClientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+            
+            // FIXMEchange this to use profiles
           
             /**
              * This clears all submissions and more.
@@ -687,12 +716,12 @@ public class PacketHandler {
             sendToJudgesAndOthers(newContestTimePacket, isThisSite(packet.getSourceId()));
             
         } else {
-            PacketFactory.dumpPacket(controller.getLog(), packet, "debug 22 - resetContest"); // TODO debug remove this
-            
             // Set Contest Profile
             contest.setProfile(profile);
             
             resetContestData(eraseProblems, eraseLanguages);
+            
+            contest.fireAllRefreshEvents();
         }
     }
     
@@ -1338,6 +1367,8 @@ public class PacketHandler {
 
             info(" handlePacket original LOGIN_SUCCESS before ");
             loadDataIntoModel(packet, connectionHandlerID);
+            otherLoginActivities(packet, connectionHandlerID);
+            startEvalLog();
             info(" handlePacket original LOGIN_SUCCESS after -- all settings loaded ");
 
             if (isServer()) {
@@ -1374,6 +1405,19 @@ public class PacketHandler {
             // If logged in client, should not get another LOGIN_SUCCESS
             Exception ex = new Exception("Client " + contest.getClientId() + " received unexpected packet, not logged in but got a " + packet);
             controller.getLog().log(Log.WARNING, ex.getMessage(), ex);
+        }
+    }
+
+    private void startEvalLog() {
+        try {
+            if (evaluationLog == null && isServer()) {
+                Utilities.insureDir(Log.LOG_DIRECTORY_NAME);
+                // this not only opens the log but registers this class to handle all run events.
+                evaluationLog = new EvaluationLog(Log.LOG_DIRECTORY_NAME + File.separator + "evals.log", contest, controller);
+                evaluationLog.getEvalLog().println("# Log opened " + new Date());
+            }
+        } catch (Exception e) {
+            controller.getLog().log(Log.WARNING, "Exception logged ", e);
         }
     }
 
@@ -3026,18 +3070,14 @@ public class PacketHandler {
      */
     private void loadDataIntoModel(Packet packet, ConnectionHandlerID connectionHandlerID) throws IOException, ClassNotFoundException, FileSecurityException {
 
-        ClientId clientId = null;
-
-        try {
-            clientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-            if (clientId != null) {
-                contest.setClientId(clientId);
-            }
-        } catch (Exception e) {
-            logException("Exception logged ", e);
+//        ClientId who = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+        ClientId who = (ClientId) packet.getDestinationId();
+        
+        if (who != null) {
+            contest.setClientId(who);
         }
 
-        controller.setSiteNumber(clientId.getSiteNumber());
+        controller.setSiteNumber(who.getSiteNumber());
         
         setProfileIntoModel (packet);
 
@@ -3144,6 +3184,9 @@ public class PacketHandler {
             // TODO: log handle exception
             controller.getLog().log(Log.WARNING, "Exception logged in General Problem ", e);
         }
+    }
+
+    private void otherLoginActivities(Packet packet, ConnectionHandlerID connectionHandlerID) {
 
         if (contest.isLoggedIn()) {
 
@@ -3166,17 +3209,6 @@ public class PacketHandler {
             contest.loginDenied(packet.getDestinationId(), connectionHandlerID, message);
         }
 
-        try {
-            if (evaluationLog == null && isServer()) {
-                Utilities.insureDir(Log.LOG_DIRECTORY_NAME);
-                // this not only opens the log but registers this class to handle all run events.
-                evaluationLog = new EvaluationLog(Log.LOG_DIRECTORY_NAME + File.separator + "evals.log", contest, controller);
-                evaluationLog.getEvalLog().println("# Log opened " + new Date());
-            }
-        } catch (Exception e) {
-            controller.getLog().log(Log.WARNING, "Exception logged ", e);
-        }
-
     }
 
     /**
@@ -3194,8 +3226,6 @@ public class PacketHandler {
         try {
 
             Vector<Profile> profileVector = new Vector<Profile>();
-
-            System.out.println("debug 22 storeProfiles");
 
             Profile[] list = new Profile[0];
 

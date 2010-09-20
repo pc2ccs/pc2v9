@@ -113,6 +113,7 @@ public class PluginLoadPane extends JPanePlugin {
             
             PluginWrapper wrapper = (PluginWrapper) getPluginComboBox().getSelectedItem();
             getController().register (wrapper.getPlugin());
+            wrapper.getPlugin().setContestAndController(getContest(), getController());
             parentTabbedPane.add(wrapper.getPlugin(), wrapper.getPlugin().getPluginTitle());
         } else {
             JOptionPane.showMessageDialog(this, "Programming error: no tab specified");

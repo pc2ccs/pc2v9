@@ -14,6 +14,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -33,6 +34,10 @@ import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.ILoginListener;
 import edu.csus.ecs.pc2.core.model.LoginEvent;
+import edu.csus.ecs.pc2.core.model.Profile;
+import edu.csus.ecs.pc2.core.model.ProfileComparatorByName;
+import edu.csus.ecs.pc2.profile.ProfileLoadException;
+import edu.csus.ecs.pc2.profile.ProfileManager;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.LogWindow;
 import edu.csus.ecs.pc2.ui.UIPlugin;
@@ -137,6 +142,59 @@ public class StartupContestFrame extends JFrame implements UIPlugin {
 
         VersionInfo versionInfo = new VersionInfo();
         versionTitleLabel.setText("PC^2 version " + versionInfo.getVersionNumber() + " " + versionInfo.getBuildNumber());
+        
+        populateProfileComboBox();
+    }
+
+    private void populateProfileComboBox() {
+
+        getProfilesComboBox().removeAllItems();
+
+        ProfileManager manager = new ProfileManager();
+
+        int comboIndex = 0;
+
+        if (manager.hasDefaultProfile()) {
+
+            Profile[] profiles = new Profile[0];
+            try {
+                profiles = manager.load();
+                Profile currentProfile = manager.getDefaultProfile();
+
+                Arrays.sort(profiles, new ProfileComparatorByName());
+
+                int idx = 0;
+                for (Profile profile : profiles) {
+
+                    getProfilesComboBox().addItem(profile);
+                    if (profile.getProfilePath().equals(currentProfile.getProfilePath())) {
+                        comboIndex = idx;
+                    }
+                    idx++;
+                }
+
+            } catch (IOException e) {
+                fatalError("Unable to load profile list ", e);
+            } catch (ProfileLoadException e) {
+                fatalError("Unable to load profile list ", e);
+            }
+
+        } else {
+            Profile profile = ProfileManager.createNewProfile();
+            getProfilesComboBox().addItem(profile);
+
+        }
+
+        getProfilesComboBox().setSelectedIndex(comboIndex);
+    }
+
+    private void fatalError(String string, Exception e) {
+        
+        // FIXME log this exception
+        setStatusMessage(string+", check logs");
+        e.printStackTrace(System.err);
+        
+        System.exit(4);
     }
 
     private void overRideLookAndFeel() {
@@ -248,7 +306,24 @@ public class StartupContestFrame extends JFrame implements UIPlugin {
 
     protected void attemptToLogin() {
 
-        // FIXME Auto-generated method stub
+        setStatusMessage("");
+        if (getContestPassword() == null || getContestPassword().length() < 1) {
+            setStatusMessage("Enter enter a contest password");
+        } else {
+
+            if (getContestPassword().toLowerCase().startsWith("log")) {
+                logWindow.setVisible(true);
+                return;
+            }
+
+            if (bAlreadyLoggingIn) {
+                return;
+            }
+
+            bAlreadyLoggingIn = true;
+
+        }
+    
 
     }
 
@@ -300,11 +375,11 @@ public class StartupContestFrame extends JFrame implements UIPlugin {
     protected void attemptToLoginReference() {
 
         setStatusMessage("");
-        if (getLoginName() == null || getLoginName().length() < 1) {
+        if (getContestPassword() == null || getContestPassword().length() < 1) {
             setStatusMessage("Please enter a login");
         } else {
 
-            if (getLoginName().toLowerCase().startsWith("log")) {
+            if (getContestPassword().toLowerCase().startsWith("log")) {
                 logWindow.setVisible(true);
                 return;
             }
@@ -315,17 +390,6 @@ public class StartupContestFrame extends JFrame implements UIPlugin {
 
             bAlreadyLoggingIn = true;
 
-            try {
-                setStatusMessage("Logging in...");
-                FrameUtilities.waitCursor(this);
-                controller.login(getLoginName(), getPassword());
-            } catch (Exception e) {
-                // TODO: log handle exception
-                setStatusMessage(e.getMessage());
-                StaticLog.info("Login not successful: " + e.getMessage());
-                System.err.println("Login not successful: " + e.getMessage());
-                bAlreadyLoggingIn = false;
-            }
         }
     }
 
@@ -553,7 +617,7 @@ public class StartupContestFrame extends JFrame implements UIPlugin {
      * 
      * @return the login name
      */
-    private String getLoginName() {
+    private String getContestPassword() {
         return contestPasswordTextField.getPassword().toString();
     }
 

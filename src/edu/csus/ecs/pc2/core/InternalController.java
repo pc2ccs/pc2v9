@@ -2306,7 +2306,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 Profile newProfile = ProfileManager.createNewProfile();
                 newProfile.setSiteNumber(1);
                 manager.storeDefaultProfile(newProfile);
-                System.err.println("debug 22 -- created and stored new profile "+newProfile);
                 return newProfile;
             }
             
@@ -3068,7 +3067,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     }
 
     public void register(UIPlugin plugin) {
-        pluginList.register(uiPlugin);
+        pluginList.register(plugin);
     }
     
     public UIPlugin[] getPluginList() {
@@ -3092,14 +3091,12 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         for (UIPlugin plugin : getPluginList()) {
 
             try {
-                if (plugin != null) {
-                    plugin.setContestAndController(inContest, inController);
-                }
+                plugin.setContestAndController(inContest, inController);
             } catch (Exception e) {
                 logException(e);
             }
         }
-        
+
         loadProfiles(inContest);
     }
 

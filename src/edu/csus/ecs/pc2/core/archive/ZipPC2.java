@@ -3,9 +3,12 @@ package edu.csus.ecs.pc2.core.archive;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.text.FieldPosition;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.GregorianCalendar;
@@ -170,6 +173,7 @@ public class ZipPC2 {
         addFileToList("pc2export.dat");
 
     }
+    
 
     /**
      * Compares its arguments and returns an interger less than, equal to, or greater than zero, depending on whether s1 is
@@ -481,44 +485,46 @@ public class ZipPC2 {
     }
 
     /**
+     * 
+     * @author Douglas A. Lane
+     */
+    
+    // $HeadURL$
+    protected class StringIgnoreCaseComparator implements Comparator<String>, Serializable {
+
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 8901841329708366388L;
+
+        public int compare(String s1, String s2) {
+            return s1.toLowerCase().compareTo(s2.toLowerCase());
+        }
+    }
+
+    /**
      * Returns a sorted list of files to archive
      *
      * @return java.lang.String[]
      */
     private String[] sortFileList() {
         Enumeration<String> enumeration = filesToInclude.elements();
-        String[] sortArray = new String[filesToInclude.size()];
+        String[] strings = new String[filesToInclude.size()];
         int i = 0;
-        String o = null;
         while (enumeration.hasMoreElements()) {
-            o = enumeration.nextElement();
-            if (o == null) {
+            String s = enumeration.nextElement();
+            if (s == null) {
                 continue;
             }
-            sortArray[i++] = o;
+            strings[i++] = s;
         }
-        if (sortArray == null) {
-            return null;
+        if (strings.length <= 1) {
+            return strings;
         }
-        if (sortArray.length <= 1) {
-            return sortArray;
-        }
-        boolean swapped;
-        do {
-            swapped = false;
-            for (i = 0; i < sortArray.length - 1; i++) {
-                String a, b;
-                a = sortArray[i];
-                b = sortArray[i + 1];
-                if (compareStrings(a, b) > 0) {
-                    String temp = sortArray[i];
-                    sortArray[i] = sortArray[i + 1];
-                    sortArray[i + 1] = temp;
-                    swapped = true;
-                }
-            }
-        } while (swapped);
-        return sortArray;
+
+        Arrays.sort(strings, new StringIgnoreCaseComparator());
+
+        return strings;
     }
 
     /**

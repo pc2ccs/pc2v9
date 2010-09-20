@@ -625,10 +625,8 @@ public class RunsPanel extends JPanePlugin {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 runListBox.removeAllRows();
-                System.out.println("debug 22 clearAllRuns");
             }
         });
-        
     }
 
     private void resetRunsListBoxColumns() {

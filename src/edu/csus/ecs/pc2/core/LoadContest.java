@@ -214,11 +214,9 @@ public class LoadContest {
         Problem problem = createProblem(contest, problemName);
         Account account = createAccount(contest, siteNumber, teamNumber, teamName);
 
-//        System.out.println(" debug 22 " + account.getDisplayName());
-
         Run run = new Run(account.getClientId(), language, problem);
 
-        // Add Judgement
+        // Add Judgment
 
         boolean solved = false;
         

@@ -1434,8 +1434,6 @@ public class ContestTestFrame extends JFrame {
     }
     
     public String loginShortcutName(String loginName) {
-        System.out.println("debug 22 "+loginName); // debug 22
-        
         if (loginName.equals("t")) {
             loginName = "team1";
         }
@@ -1462,8 +1460,6 @@ public class ContestTestFrame extends JFrame {
             loginName = "team" + number;
         }
         
-        System.out.println(" now is: "+loginName); // debug 22
-
         return loginName;
     }
 

@@ -2008,9 +2008,6 @@ public class InternalContest implements IInternalContest {
         } catch (FileSecurityException e) {
             logException(e);
         }
-        
-        fireAllRefreshEvents();
-        
     }
 
     public boolean isSendAdditionalRunStatusMessages() {
@@ -2187,20 +2184,20 @@ public class InternalContest implements IInternalContest {
         // Save settings that created this new contest/profile so we can
         // send them to other servers/clients as needed.
         contest.setProfileCloneSettings(settings);
-
-        contest.setClientId(getClientId());
-        contest.setSiteNumber(getClientId().getSiteNumber());
-
-        for (Site site : getSites()) {
-            contest.updateSite(site);
-        }
-
+        
         if (contest.getAccounts(Type.SERVER) == null) {
             contest.generateNewAccounts(Type.SERVER.toString(), 1, true);
         }
 
         if (contest.getAccounts(Type.ADMINISTRATOR) != null) {
             contest.generateNewAccounts(ClientType.Type.ADMINISTRATOR.toString(), 1, true);
+        }
+
+        contest.setClientId(getClientId());
+        contest.setSiteNumber(getClientId().getSiteNumber());
+
+        for (Site site : getSites()) {
+            contest.updateSite(site);
         }
 
         newProfile.setName(settings.getName());

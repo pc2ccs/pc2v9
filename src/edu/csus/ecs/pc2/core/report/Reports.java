@@ -14,11 +14,11 @@ import edu.csus.ecs.pc2.core.ParseArguments;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ConfigurationIO;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Profile;
-import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.security.FileSecurity;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.profile.ProfileLoadException;
@@ -75,6 +75,7 @@ public final class Reports {
         reports.add(new StandingsReport());
         reports.add(new LoginReport());
         reports.add(new ProfilesReport());
+        reports.add(new PluginsReport());
 
         reports.add(new RunsReport());
         reports.add(new ClarificationsReport());
