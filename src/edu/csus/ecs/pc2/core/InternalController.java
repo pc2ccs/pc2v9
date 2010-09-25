@@ -1528,7 +1528,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                     
                     logException("Invalid contest password", profileException);
                 } else {
-                    Packet messagePacket = PacketFactory.createMessage(getServerClientId(), packet.getSourceId(), "Unable to change profile ");
+                    Packet messagePacket = PacketFactory.createMessage(getServerClientId(), packet.getSourceId(), "Unable to change profile "+profileException.getMessage());
                     sendToClient(messagePacket);
                     
                     logException("Unable to change profile", profileException);
@@ -3139,5 +3139,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     
     public void setLog(Log log) {
         this.log = log;
+    }
+    
+    public boolean isUsingGUI() {
+        return usingGUI;
     }
 }

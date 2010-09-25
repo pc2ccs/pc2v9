@@ -14,6 +14,9 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IniFile;
+import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
@@ -24,6 +27,7 @@ import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
 import edu.csus.ecs.pc2.ui.LogWindow;
 import edu.csus.ecs.pc2.ui.OptionsPanel;
+import edu.csus.ecs.pc2.ui.PacketMonitorPane;
 import edu.csus.ecs.pc2.ui.RunsPanel;
 import edu.csus.ecs.pc2.ui.SubmissionBiffPane;
 import edu.csus.ecs.pc2.ui.SubmitClarificationPane;
@@ -221,6 +225,16 @@ public class JudgeView extends JFrame implements UIPlugin {
                 getMainTabbedPane().setSelectedComponent(submitClarificationPane);
                 getMainTabbedPane().doLayout();
                 getMainTabbedPane().setSelectedComponent(newRunsPane);
+
+                if (Utilities.isDebugMode()){
+                    
+                    try {
+                        PacketMonitorPane pane = new PacketMonitorPane();
+                        addUIPlugin(getMainTabbedPane(), "Packets", pane);
+                    } catch (Exception e) {
+                        logException(e);
+                    }
+                }
 
             }
         });
@@ -441,4 +455,14 @@ public class JudgeView extends JFrame implements UIPlugin {
         return clockPane;
     }
 
+    private void logException(Exception e) {
+
+        if (StaticLog.getLog() != null) {
+            StaticLog.getLog().log(Log.WARNING, "Exception", e);
+            e.printStackTrace(System.err);
+        } else {
+            e.printStackTrace(System.err);
+        }
+    }
+    
 } // @jve:decl-index=0:visual-constraint="10,10"

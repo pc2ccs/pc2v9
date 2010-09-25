@@ -598,4 +598,8 @@ public class PrintController implements IInternalController {
     public void removePacketListener(IPacketListener packetListener) {
         System.out.println("method removePacketListener");
     }
+
+    public boolean isUsingGUI() {
+        return false;
+    }
 }

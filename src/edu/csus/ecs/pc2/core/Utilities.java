@@ -2,17 +2,31 @@ package edu.csus.ecs.pc2.core;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.text.CharacterIterator;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.text.StringCharacterIterator;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.Vector;
+
+import javax.swing.JOptionPane;
+
+import edu.csus.ecs.pc2.VersionInfo;
+import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.report.IReport;
+import edu.csus.ecs.pc2.ui.FrameUtilities;
+import edu.csus.ecs.pc2.ui.MultipleFileViewer;
 
 /**
  * Various common routines.
@@ -399,5 +413,89 @@ public final class Utilities {
         } else {
             return path.substring(0, lastIndex);
         }
+    }
+
+    public static String getReportFilename (IReport selectedReport) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM.dd.SSS");
+        // "yyMMdd HHmmss.SSS");
+        String reportName = selectedReport.getReportTitle();
+        
+        while (reportName.indexOf(' ') > -1){
+            reportName = reportName.replace(" ", "_");
+        }
+        return "report."+ reportName+ "." + simpleDateFormat.format(new Date()) + ".txt";
+
+    }
+    
+    public static void viewReport(IReport report, String title, IInternalContest contest, IInternalController controller) {
+
+        String filename = getReportFilename(report);
+
+        report.setContestAndController(contest, controller);
+
+        PrintWriter printWriter = null;
+        try {
+            printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
+        } catch (FileNotFoundException e1) {
+            JOptionPane.showMessageDialog(null, "Unable to open file " + filename);
+        }
+
+        try {
+
+            /**
+             * Create/write standardized header for all reports
+             */
+
+            printWriter.println(new VersionInfo().getSystemName());
+            printWriter.println(new VersionInfo().getSystemVersionInfo());
+            ContestInformation contestInformation = contest.getContestInformation();
+            String contestTitle = "(Contest title not defined)";
+            if (contestInformation != null) {
+                contestTitle = contestInformation.getContestTitle();
+            }
+            printWriter.println("Contest Title: " + contestTitle);
+            printWriter.print("On: " + Utilities.getL10nDateTime());
+            GregorianCalendar resumeTime = contest.getContestTime().getResumeTime();
+            if (resumeTime == null) {
+                printWriter.print("  Contest date/time: never started");
+            } else {
+                printWriter.print("  Contest date/time: " + resumeTime.getTime());
+
+            }
+            printWriter.println();
+            printWriter.println();
+            printWriter.println("** " + report.getReportTitle() + " Report");
+            printWriter.println();
+//            if (filter != null) {
+//                String filterInfo = filter.toString();
+//                if (filter.isFilterOn() && (!filterInfo.equals(""))) {
+//                    printWriter.println("Filter: " + filterInfo);
+//                    printWriter.println();
+//                }
+//            }
+
+            try {
+                report.writeReport(printWriter);
+            } catch (Exception e) {
+                printWriter.println("Exception in report: " + e.getMessage());
+                e.printStackTrace(printWriter);
+            }
+
+            report.printFooter(printWriter);
+
+            printWriter.close();
+            printWriter = null;
+
+        } catch (Exception e) {
+            controller.getLog().log(Log.INFO, "Exception creating report", e);
+            printWriter.println("Exception creating report " + e.getMessage());
+        }
+
+        MultipleFileViewer multipleFileViewer = new MultipleFileViewer(controller.getLog());
+        multipleFileViewer.addFilePane(title, filename);
+        multipleFileViewer.setTitle("PC^2 Report (Build " + new VersionInfo().getBuildNumber() + ")");
+        FrameUtilities.centerFrameFullScreenHeight(multipleFileViewer);
+        multipleFileViewer.setVisible(true);
+
     }
 }

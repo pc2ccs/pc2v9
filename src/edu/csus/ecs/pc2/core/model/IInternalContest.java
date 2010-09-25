@@ -827,7 +827,14 @@ public interface IInternalContest {
      * Resets next run Id and next Clarification id.
      * 
      */
-    void resetData();
+    void resetSubmissionData();
+    
+    /**
+     * Clear all data except submissions.
+     * 
+     * clears accounts, languages, problems, etc.
+     */
+    void resetConfigurationData();
 
     /**
      * Send run compiling, executing and validating status.

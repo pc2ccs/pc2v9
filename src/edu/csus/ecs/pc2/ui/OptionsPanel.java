@@ -120,9 +120,12 @@ public class OptionsPanel extends JPanePlugin {
     }
     
     private void updateGUIperPermissions() {
-        getShowBiffWindow().setVisible(isAllowed(Permission.Type.JUDGE_RUN));
-        getShowSecurityAlertWindowButton().setVisible(isAllowedToViewSecurityWindow());
-        getChangePasswordButton().setVisible(isAllowed(Permission.Type.CHANGE_PASSWORD));
+        
+        if (getController().isUsingGUI()){
+            getShowBiffWindow().setVisible(isAllowed(Permission.Type.JUDGE_RUN));
+            getShowSecurityAlertWindowButton().setVisible(isAllowedToViewSecurityWindow());
+            getChangePasswordButton().setVisible(isAllowed(Permission.Type.CHANGE_PASSWORD));
+        }
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
@@ -139,7 +142,10 @@ public class OptionsPanel extends JPanePlugin {
                 submissionBiffFrame.setShowNoRunsTitle(true);
                 submissionBiffFrame.setFontSize(56);
                 submissionBiffFrame.setContestAndController(getContest(), getController());
-                FrameUtilities.setFramePosition(submissionBiffFrame, HorizontalPosition.RIGHT, VerticalPosition.TOP);
+                
+                if (getController().isUsingGUI()){
+                    FrameUtilities.setFramePosition(submissionBiffFrame, HorizontalPosition.RIGHT, VerticalPosition.TOP);
+                }
                 
                 getContest().addSecurityMessageListener(new SecurityMessageListenerImplementation());
                 
@@ -175,7 +181,9 @@ public class OptionsPanel extends JPanePlugin {
      */
     protected void showLog(boolean showLogWindow) {
         try {
-            logWindow.setVisible(showLogWindow);
+            if (getController().isUsingGUI()){
+                logWindow.setVisible(showLogWindow);
+            }
         } catch (Exception e) {
             getLog().log(Log.WARNING, "Exception showing log window", e);
         }
@@ -202,7 +210,9 @@ public class OptionsPanel extends JPanePlugin {
      */
     protected void showSecurityLog(boolean showLogWindow) {
         try {
-            securityLogWindow.setVisible(showLogWindow);
+            if (getController().isUsingGUI()){
+                securityLogWindow.setVisible(showLogWindow);
+            }
         } catch (Exception e) {
             getLog().log(Log.WARNING, "Exception showing security log window", e);
         }
@@ -277,7 +287,9 @@ public class OptionsPanel extends JPanePlugin {
     }
 
     protected void showBiffWindow() {
-        submissionBiffFrame.setVisible(true);
+        if (getController().isUsingGUI()){
+            submissionBiffFrame.setVisible(true);
+        }
     }
 
     /**

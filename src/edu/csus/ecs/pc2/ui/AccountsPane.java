@@ -262,6 +262,8 @@ public class AccountsPane extends JPanePlugin {
 
     public void reloadAccountList() {
 
+        getRunsListBox().removeAllRows();
+        
         Account[] accounts = getAllAccounts();
 
         // TODO bulk load these record

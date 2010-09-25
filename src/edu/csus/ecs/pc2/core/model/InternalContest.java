@@ -1964,7 +1964,7 @@ public class InternalContest implements IInternalContest {
         return runResultFilesList.getRunResultFiles(run);
     }
 
-    public void resetData() {
+    public void resetSubmissionData() {
         
         synchronized (runCheckOutList){
             // FIXME on all client Run listeners (elsewhere) need to uncheckout too 
@@ -2008,6 +2008,60 @@ public class InternalContest implements IInternalContest {
         } catch (FileSecurityException e) {
             logException(e);
         }
+    }
+    
+    public void resetConfigurationData() {
+
+        // GROUPS
+        groupList = new GroupList();
+        groupDisplayList = new GroupDisplayList();
+
+        // ACCOUNTS
+        accountList = new AccountList();
+
+        // JUDGEMENTS
+        judgementDisplayList = new JudgementDisplayList();
+        judgementList = new JudgementList();
+
+        // PROBLEMS
+        problemList = new ProblemList();
+        problemDataFilesList = new ProblemDataFilesList();
+        problemDisplayList = new ProblemDisplayList();
+
+        // LANGUAGES
+        languageList = new LanguageList();
+        languageDisplayList = new LanguageDisplayList();
+
+        // CONTEST TIME
+        contestTimeList = new ContestTimeList();
+
+        // CONTEST INFORMATION
+        contestInformation = new ContestInformation();
+
+        // CLIENT SETTINGS
+        clientSettingsList = new ClientSettingsList();
+
+        // BALLOON SETTINGS
+        balloonSettingsList = new BalloonSettingsList();
+
+        // General Clarification
+
+        generalProblem = null;
+
+        // SITES
+        siteList = new SiteList();
+
+        // OTHER SETTINGS
+        profileCloneSettings = null;
+
+        // not runs - use resetSubmissionsData
+        // not clars - use resetSubmissionsData
+
+        // LoginList localLoginList = new LoginList();
+        // LoginList remoteLoginList = new LoginList();
+        // ConnectionHandlerList localConnectionHandlerList = new ConnectionHandlerList();
+        // ConnectionHandlerList remoteConnectionHandlerList = new ConnectionHandlerList();
+
     }
 
     public boolean isSendAdditionalRunStatusMessages() {
@@ -2186,11 +2240,12 @@ public class InternalContest implements IInternalContest {
         contest.setProfileCloneSettings(settings);
         
         if (contest.getAccounts(Type.SERVER) == null) {
-            contest.generateNewAccounts(Type.SERVER.toString(), 1, true);
+            contest.addAccount(getAccount(getClientId()));
         }
 
         if (contest.getAccounts(Type.ADMINISTRATOR) != null) {
-            contest.generateNewAccounts(ClientType.Type.ADMINISTRATOR.toString(), 1, true);
+            ClientId adminId = new ClientId(getClientId().getSiteNumber(), Type.ADMINISTRATOR, 1);
+            contest.addAccount(getAccount(adminId));
         }
 
         contest.setClientId(getClientId());
@@ -2451,6 +2506,8 @@ public class InternalContest implements IInternalContest {
 
     public void fireAllRefreshEvents() {
 
+        // FIXME double check that all Events are being refreshed
+        
         RunEvent runEvent = new RunEvent(RunEvent.Action.REFRESH_ALL, null, null, null);
         fireRunListener(runEvent);
 
@@ -2481,7 +2538,6 @@ public class InternalContest implements IInternalContest {
         AccountEvent accountEvent = new AccountEvent(AccountEvent.Action.REFRESH_ALL, getAccounts());
         fireAccountListener(accountEvent);
 
-        // FIXME add REFRESH_ALL event
         PasswordChangeEvent passwordChangeEvent = null;
         firePasswordChangeListener(passwordChangeEvent);
 

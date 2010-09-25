@@ -234,6 +234,12 @@ public interface IInternalController {
     void updateRun(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles);
 
     void sendServerLoginRequest(int inSiteNumber) throws Exception;
+    
+    /**
+     * Is this controller using GUI. 
+     * @return true if using GUI, false if using text only
+     */
+    boolean isUsingGUI();
 
     void updateSite(Site newSite);
 

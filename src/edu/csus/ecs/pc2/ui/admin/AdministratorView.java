@@ -61,10 +61,10 @@ import edu.csus.ecs.pc2.ui.ContestClockDisplay.DisplayTimes;
  * Administrator GUI.
  * 
  * @author pc2@ecs.csus.edu
+ * @version $Id$
  */
 
 // $HeadURL$
-// $Id$
 public class AdministratorView extends JFrame implements UIPlugin, ChangeListener {
 
     private static final long serialVersionUID = 1L;

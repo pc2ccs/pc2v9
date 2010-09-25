@@ -457,15 +457,13 @@ public class PacketHandler {
      */
     private void sendOutChangeProfileToAll(IInternalContest newContest, Profile currentProfile, Profile switchToProfile, String contestPassword) {
 
-        ContestLoginSuccessData data = createContestLoginSuccessData(contest, getServerClientId(), contestPassword);
+        ContestLoginSuccessData data = createContestLoginSuccessData(newContest, getServerClientId(), contestPassword);
         Packet packet = PacketFactory.createUpdateProfileClientPacket(getServerClientId(), PacketFactory.ALL_SERVERS, currentProfile, switchToProfile, data);
 
         // Servers get the same packet
-        
-        // FIXME code individual clients sending
         sendClonePacketToUsers(packet, ClientType.Type.SERVER);
 
-        data = createContestLoginSuccessData(contest, getServerClientId(), null);
+        data = createContestLoginSuccessData(newContest, getServerClientId(), null);
         packet = PacketFactory.createUpdateProfileClientPacket(getServerClientId(), PacketFactory.ALL_SERVERS, currentProfile, switchToProfile, data);
         
         ClientType.Type[] typeList = { //
@@ -485,7 +483,7 @@ public class PacketHandler {
         for (ClientId clientId : teams) {
             
             // Team's get their specific data in their packet (their runs, their clars, no judges data files)
-            data = createContestLoginSuccessData(contest, clientId, null);
+            data = createContestLoginSuccessData(newContest, clientId, null);
             packet = PacketFactory.createUpdateProfileClientPacket(getServerClientId(), clientId, currentProfile, switchToProfile, data);
             controller.sendToClient(packet);
         }
@@ -516,22 +514,26 @@ public class PacketHandler {
      */
     private void handleUpdateClientProfile(Packet packet, ConnectionHandlerID connectionHandlerID) throws IOException, ClassNotFoundException, FileSecurityException {
 
-        if (isServer()){
-            
+        if (isServer()) {
+
             Profile inProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.NEW_PROFILE);
             Profile updatedProfile = contest.updateProfile(inProfile);
             Packet addPacket = PacketFactory.createUpdateSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, updatedProfile);
             sendToJudgesAndOthers(addPacket, true);
-            
+
         } else {
-            
+
             // This is a update/new profile so all data is reset then re-added from this packet
-            
-            contest.resetData();
+
+            contest.resetSubmissionData();
+            contest.resetConfigurationData();
             loadDataIntoModel(packet, connectionHandlerID);
             contest.fireAllRefreshEvents();
         }
     }
+    
+    
+
 
     private void handleCloneProfile(Packet packet, ConnectionHandlerID connectionHandlerID) throws IOException, ClassNotFoundException, FileSecurityException, ProfileCloneException {
         
@@ -689,9 +691,9 @@ public class PacketHandler {
             // FIXMEchange this to use profiles
           
             /**
-             * This clears all submissions and more.
+             * This clears all submission data and counters.
              */
-            contest.resetData();
+            contest.resetSubmissionData();
 
             // set elapsed to zero
             ContestTime contestTime = contest.getContestTime();
@@ -742,7 +744,7 @@ public class PacketHandler {
 
     private void resetContestData(Boolean eraseProblems, Boolean eraseLanguages) { 
 
-        contest.resetData();
+        contest.resetSubmissionData();
 
         if (eraseProblems != null && eraseProblems.booleanValue()) {
             for (Problem problem : contest.getProblems()) {

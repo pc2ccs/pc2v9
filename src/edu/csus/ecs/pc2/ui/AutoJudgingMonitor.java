@@ -565,7 +565,7 @@ public class AutoJudgingMonitor implements UIPlugin {
      * @param clientSettings
      */
     public void updateClientSettings(ClientSettings clientSettings) {
-        if (clientSettings.getClientId().equals(contest.getClientId())) {
+        if (clientSettings.isAutoJudging() && (clientSettings.getClientId().equals(contest.getClientId()))) {
             startAutoJudging();
         }
     }
