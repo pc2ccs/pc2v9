@@ -57,7 +57,6 @@ import edu.csus.ecs.pc2.ui.EditFilterPane.ListNames;
  */
 
 // $HeadURL$
-// $Id$
 public class ClarificationsPane extends JPanePlugin {
 
     /**
@@ -74,8 +73,6 @@ public class ClarificationsPane extends JPanePlugin {
     private JButton takeButton = null;
 
     private JButton editButton = null;
-
-    private JButton generateClarificationButton = null;
 
     private JButton filterButton = null;
 
@@ -232,7 +229,6 @@ public class ClarificationsPane extends JPanePlugin {
             clarificationButtonPane.add(getTakeButton(), null);
             clarificationButtonPane.add(getFilterButton(), null);
             clarificationButtonPane.add(getEditButton(), null);
-            clarificationButtonPane.add(getGenerateClarificationButton(), null);
         }
         return clarificationButtonPane;
     }
@@ -797,27 +793,6 @@ public class ClarificationsPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes generateClarificationButton
-     * 
-     * @return javax.swing.JButton
-     */
-    private JButton getGenerateClarificationButton() {
-        if (generateClarificationButton == null) {
-            generateClarificationButton = new JButton();
-            generateClarificationButton.setText("Generate New Clar");
-            generateClarificationButton.setToolTipText("Generate a New Clarification");
-            generateClarificationButton.setMnemonic(java.awt.event.KeyEvent.VK_N);
-            generateClarificationButton.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    // TODO code generate new clar
-                    showMessage("Generate New Clar not implemented, yet");
-                }
-            });
-        }
-        return generateClarificationButton;
-    }
-
-    /**
      * This method initializes filterButton
      * 
      * @return javax.swing.JButton
@@ -895,14 +870,12 @@ public class ClarificationsPane extends JPanePlugin {
             editButton.setVisible(false);
             giveButton.setVisible(false);
             takeButton.setVisible(false);
-            generateClarificationButton.setVisible(isAllowed(Permission.Type.GENERATE_NEW_CLARIFICATION));
 
         } else {
             requestButton.setVisible(isAllowed(Permission.Type.ANSWER_CLARIFICATION));
             editButton.setVisible(isAllowed(Permission.Type.EDIT_CLARIFICATION));
             giveButton.setVisible(isAllowed(Permission.Type.GIVE_CLARIFICATION));
             takeButton.setVisible(isAllowed(Permission.Type.TAKE_CLARIFICATION));
-            generateClarificationButton.setVisible(isAllowed(Permission.Type.GENERATE_NEW_CLARIFICATION));
         }
     }
 
