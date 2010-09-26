@@ -173,51 +173,6 @@ public class ZipPC2 {
         addFileToList("pc2export.dat");
 
     }
-    
-
-    /**
-     * Compares its arguments and returns an interger less than, equal to, or greater than zero, depending on whether s1 is
-     * lexigographically less than, equal to, or greater than s2
-     *
-     * @return int
-     * @param s1
-     *            java.lang.String
-     * @param s2
-     *            java.lang.String
-     */
-    private int compareStrings(String s1, String s2) {
-        if (s1 == null) {
-            if (s2 == null) {
-                return (0);
-            } else {
-                return (1);
-            }
-        } else if (s2 == null) {
-            return (-1);
-        }
-        String ls1 = s1.toLowerCase();
-        String ls2 = s2.toLowerCase();
-        int s1Length = ls1.length();
-        int s2Length = ls2.length();
-        byte[] s1Bytes = ls1.getBytes();
-        byte[] s2Bytes = ls2.getBytes();
-        for (int i = 0; i < s1Length; i++) {
-            if (i >= s2Length) { // s1 is longer than s2
-                return (1);
-            }
-            if (s1Bytes[i] > s2Bytes[i]) {
-                return (1);
-            } else if (s1Bytes[i] < s2Bytes[i]) {
-                return (-1);
-            }
-        }
-        if (s1Length < s2Length) {
-            return (-1);
-        } else {
-            // the strings matched
-            return 0;
-        }
-    }
 
     /**
      * Creates archive based on list of files created by buildFileList()

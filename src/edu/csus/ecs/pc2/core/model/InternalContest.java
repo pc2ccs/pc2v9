@@ -2245,7 +2245,12 @@ public class InternalContest implements IInternalContest {
 
         if (contest.getAccounts(Type.ADMINISTRATOR) != null) {
             ClientId adminId = new ClientId(getClientId().getSiteNumber(), Type.ADMINISTRATOR, 1);
-            contest.addAccount(getAccount(adminId));
+            Account account = getAccount(adminId);
+            if (account != null) {
+                contest.addAccount(account);
+            } else {
+                contest.generateNewAccounts(ClientType.Type.ADMINISTRATOR.toString(), 1, true);
+            }
         }
 
         contest.setClientId(getClientId());
