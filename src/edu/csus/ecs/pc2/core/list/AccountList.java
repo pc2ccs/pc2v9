@@ -283,10 +283,6 @@ public class AccountList extends BaseElementList {
             }
         }
 
-        if (account == null) {
-            throw new SecurityException("No such account");
-        }
-
         if (!account.isAllowed(Permission.Type.LOGIN)) {
             throw new SecurityException("Account inactive");
         }

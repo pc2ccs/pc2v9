@@ -65,7 +65,7 @@ public class StandingImplementationTest extends TestCase {
 
         for (IStanding standing : standings) {
             IProblemDetails[] detailList = standing.getProblemDetails();
-            if (debugMode && standing.getNumProblemsSolved() > 0) {
+            if (isDebugMode() && standing.getNumProblemsSolved() > 0) {
                 System.out.println("  Standings, rank =" + standing.getRank() + " " + standing.getNumProblemsSolved() + " " + " s" + standing.getClient().getSiteNumber() + " "
                         + standing.getClient().getLoginName() + " " + detailList.length + " detail rows");
             }
@@ -74,7 +74,7 @@ public class StandingImplementationTest extends TestCase {
                 String loginName = detail.getClient().getLoginName() ;
                 int problemNumber = detail.getProblemId();
                 
-                if (debugMode && (detail.getAttempts() > 0 || standing.getNumProblemsSolved() > 0)) {
+                if (isDebugMode() && (detail.getAttempts() > 0 || standing.getNumProblemsSolved() > 0)) {
                     System.out.println(detail.getClient().getLoginName() + ", prob=" + detail.getProblemId() + ", att=" + //
                             detail.getAttempts() + ", time=" + detail.getSolutionTime() + ", pts=" + detail.getPenaltyPoints());
                 }
@@ -116,4 +116,7 @@ public class StandingImplementationTest extends TestCase {
         }
     }
 
+    public boolean isDebugMode() {
+        return debugMode;
+    }
 }

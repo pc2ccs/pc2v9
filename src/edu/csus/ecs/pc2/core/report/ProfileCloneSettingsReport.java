@@ -44,12 +44,7 @@ public class ProfileCloneSettingsReport implements IReport {
         settings.setDescription("desCriptION");
         settings.setNewContestPassword("newPass".toCharArray());
 
-        if (settings == null) {
-            printWriter.println("   No settings saved - this profile was not cloned from another profile");
-        } else {
-            printCloneSettings(printWriter, settings);
-        }
-
+        printCloneSettings(printWriter, settings);
     }
 
     public void printCloneSettings(PrintWriter printWriter, ProfileCloneSettings settings) {

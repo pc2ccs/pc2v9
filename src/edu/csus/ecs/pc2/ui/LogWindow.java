@@ -84,19 +84,17 @@ public class LogWindow extends JFrame implements UIPlugin {
 
         if (fields.length > 5) {
             // fill in reverse order because inserts rows at top
-            for (int i = fields.length - 1; i > 4; i--) {
-                String[] newRow = new String[5];
-                newRow[0] = "";
-                newRow[1] = "";
-                newRow[2] = "";
-                newRow[3] = "";
-                newRow[4] = fields[i];
-                return newRow;
-            }
+            String[] newRow = new String[5];
+            newRow[0] = "";
+            newRow[1] = "";
+            newRow[2] = "";
+            newRow[3] = "";
+            newRow[4] = fields[4];
+            return newRow;
 
             // then print actual log message
-            String[] row = { fields[0], fields[1], fields[2], fields[3], fields[4] };
-            return row;
+//            String[] row = { fields[0], fields[1], fields[2], fields[3], fields[4] };
+//            return row;
         } else {
             return fields;
         }

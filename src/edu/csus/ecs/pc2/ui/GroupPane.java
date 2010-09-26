@@ -186,11 +186,7 @@ public class GroupPane extends JPanePlugin {
             checkGroup.setDisplayName(getDisplayNameTextField().getText());
         }
 
-        if (checkGroup == null) {
-            checkGroup = new Group(displayNameTextField.getText());
-        } else {
-            checkGroup.setDisplayName(displayNameTextField.getText());
-        }
+        checkGroup.setDisplayName(displayNameTextField.getText());
 
         if (getSiteComboBox().getSelectedIndex() > 0) {
             Site site = (Site) getSiteComboBox().getSelectedItem();

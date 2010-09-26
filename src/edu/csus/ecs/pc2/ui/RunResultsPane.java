@@ -233,17 +233,10 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
         String validationTime = "<HTML>Validation time (ms): <FONT COLOR=BLUE>";
         String validationAnswer = "<HTML>Judgement: <FONT COLOR=BLUE>";
 
-        if (runResults != null) {
-            successMsg += getYesNo(!runResults.failedInValidating());
-            resultCode += runResults.getValidationResultCode();
-            validationTime += runResults.getValidateTimeMS();
-            validationAnswer += getJudgement(runResults);
-        } else {
-            successMsg += " -- ";
-            resultCode += " -- ";
-            validationTime += " -- ";
-            validationAnswer += " -- ";
-        }
+        successMsg += getYesNo(!runResults.failedInValidating());
+        resultCode += runResults.getValidationResultCode();
+        validationTime += runResults.getValidateTimeMS();
+        validationAnswer += getJudgement(runResults);
 
         successMsg += "</FONT></HTML>";
         resultCode += "</FONT></HTML>";
@@ -255,12 +248,7 @@ public class RunResultsPane extends JPanePlugin implements Serializable {
         validationTimeLabel.setText(validationTime);
         validationAnswerLabel.setText(validationAnswer);
 
-        if (runResults != null) {
-            showValidationOutputButton.setEnabled(true);
-        } else {
-            showValidationOutputButton.setEnabled(false);
-        }
-
+        showValidationOutputButton.setEnabled(true);
     }
 
     /**

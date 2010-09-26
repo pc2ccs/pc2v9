@@ -509,9 +509,6 @@ public class ProblemPane extends JPanePlugin {
                 if (serializedFile == null || !serializedFile.getAbsolutePath().equals(fileName)) {
                     // they've added a new file
                     serializedFile = new SerializedFile(fileName);
-                    if (serializedFile == null) {
-                        throw new InvalidFieldValue("Unable to find/load " + fileName);
-                    }
                     checkFileFormat(serializedFile);
                 } else {
                     serializedFile = freshenIfNeeded(serializedFile, fileName);
@@ -547,9 +544,6 @@ public class ProblemPane extends JPanePlugin {
                 if (serializedFile == null || !serializedFile.getAbsolutePath().equals(fileName)) {
                     // they've added a new file
                     serializedFile = new SerializedFile(fileName);
-                    if (serializedFile == null) {
-                        throw new InvalidFieldValue("Unable to find/load " + fileName);
-                    }
                     checkFileFormat(serializedFile);
                 } else {
                     serializedFile = freshenIfNeeded(serializedFile, fileName);
@@ -635,9 +629,6 @@ public class ProblemPane extends JPanePlugin {
                 if (serializedFile == null || !serializedFile.getAbsolutePath().equals(fileName)) {
                     // they've added a new file
                     serializedFile = new SerializedFile(fileName);
-                    if (serializedFile == null) {
-                        throw new InvalidFieldValue("Unable to find/load " + fileName);
-                    }
                     checkFileFormat(serializedFile);
                 } else {
                     serializedFile = freshenIfNeeded(serializedFile, fileName);
@@ -1844,9 +1835,6 @@ public class ProblemPane extends JPanePlugin {
     
                 if (result == JOptionPane.YES_OPTION) {
                     serializedFile = new SerializedFile(serializedFile.getAbsolutePath());
-                    if (serializedFile == null) {
-                        throw new InvalidFieldValue("Unable to find/load " + fileName);
-                    }
                     checkFileFormat(serializedFile);
                     return serializedFile;
                 } else if (result == JOptionPane.CANCEL_OPTION) {

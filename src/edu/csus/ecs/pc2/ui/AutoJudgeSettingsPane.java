@@ -417,16 +417,9 @@ public class AutoJudgeSettingsPane extends JPanePlugin {
             }
         }
         
-        if (clientSettings2 != null) {
-            getAddButton().setVisible(false);
-            getUpdateButton().setVisible(true);
-
-        } else {
-
-            getAddButton().setVisible(true);
-            getUpdateButton().setVisible(false);
-        }
-
+        getAddButton().setVisible(false);
+        getUpdateButton().setVisible(true);
+        
         getProblemListMCLB().autoSizeAllColumns();
         populatingGUI = false;
     }

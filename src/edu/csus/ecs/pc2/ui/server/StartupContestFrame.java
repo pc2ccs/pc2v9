@@ -691,7 +691,6 @@ public class StartupContestFrame extends JFrame implements UIPlugin {
      * @return the login name
      */
     public String getContestPassword() {
-        String s = passwordTextFieldValue(contestPasswordTextField);
         return passwordTextFieldValue(contestPasswordTextField);
     }
 
