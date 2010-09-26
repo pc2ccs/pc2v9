@@ -411,7 +411,7 @@ public class LoginFrame extends JFrame implements UIPlugin {
         if (iconURL == null) {
             if (imgFile.exists()) {
                 try {
-                    iconURL = imgFile.toURL();
+                    iconURL = imgFile.toURI().toURL();
                 } catch (MalformedURLException e) {
                     iconURL = null;
                     StaticLog.log("LoginFrame.loadImageIconFromFile("+inFileName+")", e);
