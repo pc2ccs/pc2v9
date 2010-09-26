@@ -79,7 +79,7 @@ public class RunFilesListTest extends TestCase {
          */
 
         String filename = "hello.java";
-        RunFiles secondRunFiles = new RunFiles(secondRun, "samps/"+filename);
+        RunFiles secondRunFiles = new RunFiles(secondRun, testDir+filename);
         filesList.add(secondRun, secondRunFiles);
 
         runFiles2 = filesList.getRunFiles(theRun);
