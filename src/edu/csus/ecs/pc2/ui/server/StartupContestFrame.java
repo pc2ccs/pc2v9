@@ -45,6 +45,9 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
 /**
  * Contest Password and Profile login screen.
  * 
+ * To return control and information on Login, the Runnable will
+ * be invoked.
+ * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -55,7 +58,7 @@ public class StartupContestFrame extends JFrame implements UIPlugin {
     /**
      * 
      */
-    private static final long serialVersionUID = 5334555559411755127L;
+    private static final long serialVersionUID = -6411954024217366004L;
 
     private IInternalContest contest;
 
@@ -104,6 +107,15 @@ public class StartupContestFrame extends JFrame implements UIPlugin {
     private JComboBox profilesComboBox = null;
 
     private JLabel profileTitleLabel = null;
+    
+    private Runnable runnable = null;
+
+
+
+    /**
+     * Show the confirmation text field ?.
+     */
+    private boolean showConfirmPassword = true;
 
     /**
      * This method initializes
@@ -142,8 +154,38 @@ public class StartupContestFrame extends JFrame implements UIPlugin {
 
         VersionInfo versionInfo = new VersionInfo();
         versionTitleLabel.setText("PC^2 version " + versionInfo.getVersionNumber() + " " + versionInfo.getBuildNumber());
-        
+
         populateProfileComboBox();
+    }
+
+    /**
+     * Shows description as toString().
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+
+    // $HeadURL$
+    protected class ProfileWrapper {
+        private Profile profile;
+
+        public ProfileWrapper(Profile profile) {
+            super();
+            this.profile = profile;
+        }
+
+        public Profile getProfile() {
+            return profile;
+        }
+
+        public void setProfile(Profile profile) {
+            this.profile = profile;
+        }
+
+        @Override
+        public String toString() {
+            return profile.getDescription();
+        }
     }
 
     private void populateProfileComboBox() {
@@ -156,6 +198,8 @@ public class StartupContestFrame extends JFrame implements UIPlugin {
 
         if (manager.hasDefaultProfile()) {
 
+            showConfirmPassword = false;
+
             Profile[] profiles = new Profile[0];
             try {
                 profiles = manager.load();
@@ -166,7 +210,7 @@ public class StartupContestFrame extends JFrame implements UIPlugin {
                 int idx = 0;
                 for (Profile profile : profiles) {
 
-                    getProfilesComboBox().addItem(profile);
+                    getProfilesComboBox().addItem(new ProfileWrapper(profile));
                     if (profile.getProfilePath().equals(currentProfile.getProfilePath())) {
                         comboIndex = idx;
                     }
@@ -180,20 +224,25 @@ public class StartupContestFrame extends JFrame implements UIPlugin {
             }
 
         } else {
+            showConfirmPassword = true;
             Profile profile = ProfileManager.createNewProfile();
-            getProfilesComboBox().addItem(profile);
+            getProfilesComboBox().addItem(new ProfileWrapper(profile));
 
         }
 
         getProfilesComboBox().setSelectedIndex(comboIndex);
+
+        getConfirmPasswordTextField().setVisible(showConfirmPassword);
+        passwordTitleLabel.setVisible(showConfirmPassword);
+
     }
 
     private void fatalError(String string, Exception e) {
-        
+
         // FIXME log this exception
-        setStatusMessage(string+", check logs");
+        setStatusMessage(string + ", check logs");
         e.printStackTrace(System.err);
-        
+
         System.exit(4);
     }
 
@@ -307,24 +356,39 @@ public class StartupContestFrame extends JFrame implements UIPlugin {
     protected void attemptToLogin() {
 
         setStatusMessage("");
+
         if (getContestPassword() == null || getContestPassword().length() < 1) {
             setStatusMessage("Enter enter a contest password");
-        } else {
-
-            if (getContestPassword().toLowerCase().startsWith("log")) {
-                logWindow.setVisible(true);
-                return;
-            }
-
-            if (bAlreadyLoggingIn) {
-                return;
-            }
-
-            bAlreadyLoggingIn = true;
-
+            return;
         }
-    
+        
+        if (getContestPassword().toLowerCase().startsWith("log")) {
+            logWindow.setVisible(true);
+            return;
+        }
 
+        if (showConfirmPassword) {
+            if (getConfirmPassword() == null || getConfirmPassword().length() < 1) {
+                setStatusMessage("Enter enter a confirmation password");
+                return;
+            }
+
+            if (!getContestPassword().equals(getConfirmPassword())) {
+                setStatusMessage("Contest and Confirmation passwords do not match");
+                return;
+            }
+        }
+
+        if (bAlreadyLoggingIn) {
+            return;
+        }
+
+        bAlreadyLoggingIn = true;
+
+        /**
+         * Run call back.
+         */
+        runnable.run();
     }
 
     /**
@@ -612,22 +676,32 @@ public class StartupContestFrame extends JFrame implements UIPlugin {
         FrameUtilities.regularCursor(this);
     }
 
+    private String passwordTextFieldValue(JPasswordField field){
+        char [] fieldValue = field.getPassword();
+        if (fieldValue.length == 0){
+            return null;
+        } else {
+            return new String(fieldValue);
+        }
+    }
+    
     /**
-     * Fetch Login name for client.
+     * Fetch Contest Password.
      * 
      * @return the login name
      */
-    private String getContestPassword() {
-        return contestPasswordTextField.getPassword().toString();
+    public String getContestPassword() {
+        String s = passwordTextFieldValue(contestPasswordTextField);
+        return passwordTextFieldValue(contestPasswordTextField);
     }
 
     /**
-     * fetch password for client.
+     * Fetch confirmation for contest password.
      * 
-     * @return the password
+     * @return confirmation password
      */
-    private String getPassword() {
-        return new String(confirmPasswordTextField.getPassword());
+    private String getConfirmPassword() {
+        return passwordTextFieldValue(confirmPasswordTextField);
     }
 
     /**
@@ -680,8 +754,19 @@ public class StartupContestFrame extends JFrame implements UIPlugin {
         getLoginButton().setEnabled(false);
     }
 
-    public static void main(String[] args) {
-        new StartupContestFrame().setVisible(true);
+ 
+    public Profile getSelectedProfile() {
+        ProfileWrapper wrapper = (ProfileWrapper) getProfilesComboBox().getSelectedItem();
+        if (wrapper != null) {
+            return wrapper.getProfile();
+        }
+        return null;
     }
+    
+    public void setRunnable(Runnable runnable) {
+        this.runnable = runnable;
+    }
+    
+
 
 } // @jve:decl-index=0:visual-constraint="10,10"
