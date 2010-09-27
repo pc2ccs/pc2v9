@@ -23,15 +23,19 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
+import edu.csus.ecs.pc2.core.model.BalloonSettings;
+import edu.csus.ecs.pc2.core.model.BalloonSettingsEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
 import edu.csus.ecs.pc2.core.model.DisplayTeamName;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
+import edu.csus.ecs.pc2.core.model.IBalloonSettingsListener;
 import edu.csus.ecs.pc2.core.model.IContestInformationListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.ILanguageListener;
@@ -44,10 +48,9 @@ import edu.csus.ecs.pc2.core.model.LanguageEvent;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemEvent;
 import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.RunUtilities;
-import edu.csus.ecs.pc2.core.model.ClientType.Type;
-import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.report.ExtractRuns;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.security.Permission;
@@ -206,8 +209,7 @@ public class RunsPanel extends JPanePlugin {
             int idx = 0;
 
             if (usingFullColumns) {
-                // Object[] fullColumns = { "Site", "Team", "Run Id", "Time", "Status", "Suppressed", "Problem", "Judge", "Language", "OS" };
-
+//              Object[] fullColumns = { "Site", "Team", "Run Id", "Time", "Status", "Suppressed", "Problem", "Judge", "Balloon", "Language", "OS" };
                 s[idx++] = getSiteTitle("" + run.getSubmitter().getSiteNumber());
                 s[idx++] = getTeamDisplayName(run);
                 s[idx++] = new Long(run.getNumber()).toString();
@@ -216,26 +218,29 @@ public class RunsPanel extends JPanePlugin {
                 s[idx++] = isJudgementSuppressed(run);
                 s[idx++] = getProblemTitle(run.getProblemId());
                 s[idx++] = getJudgesTitle(run, judgeId, showJudgesInfo, autoJudgedRun);
+                s[idx++] = getBalloonColor(run);
                 s[idx++] = getLanguageTitle(run.getLanguageId());
                 s[idx++] = run.getSystemOS();
             } else if (showJudgesInfo) {
-                // Object[] fullColumnsNoJudge = { "Site", "Team", "Run Id", "Time", "Status", "Problem", "Language", "OS" };
+//              Object[] fullColumnsNoJudge = { "Site", "Team", "Run Id", "Time", "Status", "Problem", "Balloon", "Language", "OS" };
                 s[idx++] = getSiteTitle("" + run.getSubmitter().getSiteNumber());
                 s[idx++] = getTeamDisplayName(run);
                 s[idx++] = new Long(run.getNumber()).toString();
                 s[idx++] = new Long(run.getElapsedMins()).toString();
                 s[idx++] = getJudgementResultString(run);
                 s[idx++] = getProblemTitle(run.getProblemId());
+                s[idx++] = getBalloonColor(run);
                 s[idx++] = getLanguageTitle(run.getLanguageId());
                 s[idx++] = run.getSystemOS();
 
             } else if (usingTeamColumns) {
-                // Object[] teamColumns = { "Site", "Run Id", "Problem", "Time", "Status", "Language"};
+//              Object[] teamColumns = { "Site", "Run Id", "Problem", "Time", "Status", "Balloon", "Language" };
                 s[idx++] = getSiteTitle("" + run.getSubmitter().getSiteNumber());
                 s[idx++] = new Long(run.getNumber()).toString();
                 s[idx++] = getProblemTitle(run.getProblemId());
                 s[idx++] = new Long(run.getElapsedMins()).toString();
                 s[idx++] = getJudgementResultString(run);
+                s[idx++] = getBalloonColor(run);
                 s[idx++] = getLanguageTitle(run.getLanguageId());
             } else {
                 log.log(Log.INFO, "In RunPanes no mclb columns set");
@@ -246,6 +251,28 @@ public class RunsPanel extends JPanePlugin {
             StaticLog.getLog().log(Log.INFO, "Exception in buildRunRow()", exception);
         }
         return null;
+    }
+
+    /**
+     * Return balloon color if problem solved.
+     * 
+     * @param run
+     * @return
+     */
+    private String getBalloonColor(Run run) {
+
+        if (run.isSolved()) {
+            BalloonSettings balloonSettings = getContest().getBalloonSettings(run.getSiteNumber());
+
+            if (balloonSettings != null) {
+                String colorName = balloonSettings.getColor(run.getProblemId());
+                if (colorName != null) {
+                    return colorName;
+                }
+            }
+        }
+
+        return "";
     }
 
     /**
@@ -634,9 +661,9 @@ public class RunsPanel extends JPanePlugin {
         runListBox.removeAllRows();
         runListBox.removeAllColumns();
 
-        Object[] fullColumns = { "Site", "Team", "Run Id", "Time", "Status", "Suppressed", "Problem", "Judge", "Language", "OS" };
-        Object[] fullColumnsNoJudge = { "Site", "Team", "Run Id", "Time", "Status", "Problem", "Language", "OS" };
-        Object[] teamColumns = { "Site", "Run Id", "Problem", "Time", "Status", "Language" };
+        Object[] fullColumns = { "Site", "Team", "Run Id", "Time", "Status", "Suppressed", "Problem", "Judge", "Balloon", "Language", "OS" };
+        Object[] fullColumnsNoJudge = { "Site", "Team", "Run Id", "Time", "Status", "Problem", "Balloon", "Language", "OS" };
+        Object[] teamColumns = { "Site", "Run Id", "Problem", "Time", "Status", "Balloon", "Language" };
 
         usingTeamColumns = false;
         usingFullColumns = false;
@@ -662,18 +689,19 @@ public class RunsPanel extends JPanePlugin {
 
         if (isTeam(getContest().getClientId())) {
 
-            // Object[] teamColumns = { "Site", "Run Id", "Problem", "Time", "Status", "Language"};
+//            Object[] teamColumns = { "Site", "Run Id", "Problem", "Time", "Status", "Balloon", "Language" };
 
             runListBox.setColumnSorter(idx++, sorter, 3); // Site
             runListBox.setColumnSorter(idx++, numericStringSorter, 2); // Run Id
             runListBox.setColumnSorter(idx++, sorter, 4); // Problem
             runListBox.setColumnSorter(idx++, numericStringSorter, 1); // Time
             runListBox.setColumnSorter(idx++, sorter, 5); // Status
-            runListBox.setColumnSorter(idx++, sorter, 6); // Language
+            runListBox.setColumnSorter(idx++, sorter, 6); // Balloon Color
+            runListBox.setColumnSorter(idx++, sorter, 7); // Language
 
         } else if (showJudgesInfo) {
 
-            // Object[] fullColumns = { "Site", "Team", "Run Id", "Time", "Status", "Problem", "Judge", "Language", "OS" };
+//            Object[] fullColumns = { "Site", "Team", "Run Id", "Time", "Status", "Suppressed", "Problem", "Judge", "Balloon", "Language", "OS" };
 
             runListBox.setColumnSorter(idx++, sorter, 3); // Site
             runListBox.setColumnSorter(idx++, accountNameSorter, 2); // Team
@@ -682,18 +710,21 @@ public class RunsPanel extends JPanePlugin {
             runListBox.setColumnSorter(idx++, sorter, 5); // Status
             runListBox.setColumnSorter(idx++, sorter, 6); // Problem
             runListBox.setColumnSorter(idx++, accountNameSorter, 7); // Judge
-            runListBox.setColumnSorter(idx++, sorter, 8); // Language
-            runListBox.setColumnSorter(idx++, sorter, 9); // OS
+            runListBox.setColumnSorter(idx++, sorter, 8); // Balloon Color
+            runListBox.setColumnSorter(idx++, sorter, 9); // Language
+            runListBox.setColumnSorter(idx++, sorter, 10); // OS
 
         } else {
 
-            // Object[] fullColumnsNoJudge = { "Site", "Team", "Run Id", "Time", "Status", "Problem", "Language", "OS" };
+//            Object[] fullColumnsNoJudge = { "Site", "Team", "Run Id", "Time", "Status", "Problem", "Balloon", "Language", "OS" };
+            
             runListBox.setColumnSorter(idx++, sorter, 2); // Site
             runListBox.setColumnSorter(idx++, sorter, 3); // Team
             runListBox.setColumnSorter(idx++, numericStringSorter, 1); // Run Id
             runListBox.setColumnSorter(idx++, numericStringSorter, 4); // Time
             runListBox.setColumnSorter(idx++, sorter, 5); // Status
             runListBox.setColumnSorter(idx++, sorter, 6); // Problem
+            runListBox.setColumnSorter(idx++, sorter, 7); // Balloon Color
             runListBox.setColumnSorter(idx++, sorter, 8); // Language
             runListBox.setColumnSorter(idx++, sorter, 9); // OS
         }
@@ -942,6 +973,7 @@ public class RunsPanel extends JPanePlugin {
         getContest().addProblemListener(new ProblemListenerImplementation());
         getContest().addLanguageListener(new LanguageListenerImplementation());
         getContest().addContestInformationListener(new ContestInformationListenerImplementation());
+        getContest().addBalloonSettingsListener(new BalloonSettingsListenerImplementation());
         
         getEditFilterFrame().setContestAndController(inContest, inController);
 
@@ -971,9 +1003,9 @@ public class RunsPanel extends JPanePlugin {
     private JPanel getMessagePanel() {
         if (messagePanel == null) {
             rowCountLabel = new JLabel();
-            rowCountLabel.setText("###");
+            rowCountLabel.setText("### of ###");
             rowCountLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-            rowCountLabel.setPreferredSize(new java.awt.Dimension(45,16));
+            rowCountLabel.setPreferredSize(new java.awt.Dimension(100,16));
             messageLabel = new JLabel();
             messageLabel.setText("");
             messageLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 14));
@@ -1771,6 +1803,29 @@ public class RunsPanel extends JPanePlugin {
         filterFrameTitle = title;
         if (editFilterFrame != null){
             editFilterFrame.setTitle(title);
+        }
+    }
+    
+    /**
+     * @author pc2@ecs.csus.edu
+     *
+     */
+    public class BalloonSettingsListenerImplementation implements IBalloonSettingsListener {
+
+        public void balloonSettingsAdded(BalloonSettingsEvent event) {
+            reloadRunList();
+        }
+
+        public void balloonSettingsChanged(BalloonSettingsEvent event) {
+            reloadRunList();
+        }
+
+        public void balloonSettingsRemoved(BalloonSettingsEvent event) {
+            reloadRunList();
+        }
+
+        public void balloonSettingsRefreshAll(BalloonSettingsEvent balloonSettingsEvent) {
+            reloadRunList();
         }
     }
 
