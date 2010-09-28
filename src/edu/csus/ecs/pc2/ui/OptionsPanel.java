@@ -42,8 +42,6 @@ public class OptionsPanel extends JPanePlugin {
      */
     private static final long serialVersionUID = -7331492559860531233L;
 
-    private LogWindow logWindow;
-
     private LogWindow securityLogWindow = null;
 
     private ReportFrame reportFrame;
@@ -160,33 +158,15 @@ public class OptionsPanel extends JPanePlugin {
         return "Options Pane";
     }
 
-    public LogWindow getLogWindow() {
-        return logWindow;
-    }
-
-    /**
-     * Sets log window.
-     *
-     * @see #showLog(boolean)
-     * @param logWindow
-     */
-    public void setLogWindow(LogWindow logWindow) {
-        this.logWindow = logWindow;
-    }
-
     /**
      * Displays or hides log window.
      * 
      * @param showLogWindow
      */
     protected void showLog(boolean showLogWindow) {
-        try {
-            if (getController().isUsingGUI()){
-                logWindow.setVisible(showLogWindow);
-            }
-        } catch (Exception e) {
-            getLog().log(Log.WARNING, "Exception showing log window", e);
-        }
+
+        getController().showLogWindow(showLogWindow);
+
     }
 
     private Logger getLog() {

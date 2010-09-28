@@ -1,5 +1,7 @@
 package edu.csus.ecs.pc2.ui.board;
 
+import java.awt.BorderLayout;
+import java.awt.Frame;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.ByteArrayInputStream;
@@ -8,10 +10,15 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.xml.transform.TransformerConfigurationException;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -21,26 +28,17 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
-import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.util.XSLTransformer;
 import edu.csus.ecs.pc2.ui.BalloonColorListPane;
 import edu.csus.ecs.pc2.ui.BalloonPane;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
-import edu.csus.ecs.pc2.ui.LogWindow;
 import edu.csus.ecs.pc2.ui.OptionsPanel;
 import edu.csus.ecs.pc2.ui.PacketMonitorPane;
 import edu.csus.ecs.pc2.ui.StandingsPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
-import javax.swing.JPanel;
-import java.awt.BorderLayout;
-import java.awt.Frame;
-
-import javax.swing.JLabel;
-import javax.swing.SwingConstants;
-import javax.swing.JButton;
-import javax.xml.transform.TransformerConfigurationException;
 
 /**
  * This class is the default scoreboard view (frame).
@@ -60,8 +58,6 @@ public class ScoreboardView extends JFrame implements UIPlugin {
     private IInternalContest contest;
 
     private IInternalController controller;
-
-    private LogWindow logWindow = null;
 
     private JTabbedPane mainTabbedPane = null;
 
@@ -174,11 +170,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
             public void run() {
                 setTitle("PC^2 " + contest.getTitle() + " Build " + new VersionInfo().getBuildNumber());
 
-                if (logWindow == null) {
-                    logWindow = new LogWindow();
-                }
-                logWindow.setContestAndController(contest, controller);
-                logWindow.setTitle("Log " + contest.getClientId().toString());
+                controller.startLogWindow(contest);
                 
                 setFrameTitle(contest.getContestTime().isContestRunning());
 
@@ -193,7 +185,6 @@ public class ScoreboardView extends JFrame implements UIPlugin {
                 addUIPlugin(getMainTabbedPane(), "Balloon Test", balloonHandler);
                 OptionsPanel optionsPanel = new OptionsPanel();
                 addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
-                optionsPanel.setLogWindow(logWindow);
 
                 if (Utilities.isDebugMode()){
                     

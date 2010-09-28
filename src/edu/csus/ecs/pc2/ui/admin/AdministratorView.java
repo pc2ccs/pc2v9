@@ -83,8 +83,6 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
     private JButton exitButton = null;
 
-    private LogWindow logWindow = null;
-    
     private LogWindow securityAlertLogWindow = null;
 
     private JPanel clockPane = null;
@@ -152,11 +150,8 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                if (logWindow == null) {
-                    logWindow = new LogWindow();
-                }
-                logWindow.setContestAndController(contest, controller);
-                logWindow.setTitle("Log " + contest.getClientId().toString());
+                
+                controller.startLogWindow(contest);
                 
                 initializeSecurityAlertWindow(contest);
              
@@ -248,7 +243,6 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
                 OptionsPanel optionsPanel = new OptionsPanel();
                 addUIPlugin(getRunContestTabbedPane(), "Options", optionsPanel);
-                optionsPanel.setLogWindow(logWindow);
                 optionsPanel.setSecurityLogWindow(securityAlertLogWindow);
                 
                 if (Utilities.isDebugMode()){
@@ -420,7 +414,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
     }
 
     protected void showLog(boolean showLogWindow) {
-        logWindow.setVisible(showLogWindow);
+        controller.showLogWindow(showLogWindow);
     }
 
     /**

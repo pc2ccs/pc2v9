@@ -22,9 +22,11 @@ import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.BalloonSettings;
 import edu.csus.ecs.pc2.core.model.Clarification;
+import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
@@ -37,19 +39,17 @@ import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.LoginEvent;
 import edu.csus.ecs.pc2.core.model.PacketEvent;
+import edu.csus.ecs.pc2.core.model.PacketEvent.Action;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.model.RunExecutionStatus;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Site;
-import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
-import edu.csus.ecs.pc2.core.model.ClientType.Type;
-import edu.csus.ecs.pc2.core.model.PacketEvent.Action;
-import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.packet.PacketFactory;
 import edu.csus.ecs.pc2.core.packet.PacketType;
@@ -67,6 +67,7 @@ import edu.csus.ecs.pc2.profile.ProfileManager;
 import edu.csus.ecs.pc2.ui.CountDownMessage;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.LoadUIClass;
+import edu.csus.ecs.pc2.ui.LogWindow;
 import edu.csus.ecs.pc2.ui.LoginFrame;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 import edu.csus.ecs.pc2.ui.UIPluginList;
@@ -280,6 +281,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     private UIPluginList pluginList = new UIPluginList();
 
     private Profile theProfile = null;
+    
+    private LogWindow logWindow = null;
     
     public InternalController(IInternalContest contest) {
         super();
@@ -3088,16 +3091,26 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     public void updateContestController(IInternalContest inContest, IInternalController inController) {
 
+        ClientId clientId = inContest.getClientId();
+        String id = clientId.getName();
+        startLog(getBaseProfileDirectoryName(Log.LOG_DIRECTORY_NAME), stripChar(clientId.toString(), ' '), id, clientId.getName());
+
         for (UIPlugin plugin : getPluginList()) {
 
             try {
                 plugin.setContestAndController(inContest, inController);
+                
+                inController.getLog().info("plugin.setContestAndController for "+plugin.getPluginTitle());
+                
             } catch (Exception e) {
                 logException(e);
             }
         }
 
         loadProfiles(inContest);
+        
+        packetHandler = new PacketHandler(this, contest);
+
     }
 
     private void logException(Exception e) {
@@ -3143,5 +3156,42 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     
     public boolean isUsingGUI() {
         return usingGUI;
+    }
+
+    public LogWindow startLogWindow(IInternalContest inContest) {
+
+        if (!isUsingGUI()) {
+            /**
+             * Do not show LogWindow if not in GUI mode.
+             */
+            return null;
+        }
+
+        if (logWindow == null) {
+            logWindow = new LogWindow();
+        } else {
+            logWindow.dispose();
+            logWindow = new LogWindow();
+        }
+
+        logWindow.setContestAndController(inContest, this);
+        logWindow.setTitle("Log " + inContest.getClientId().toString());
+        
+        return logWindow;
+    }
+
+    public void showLogWindow(boolean showWindow) {
+        
+        if (isUsingGUI()) {
+            logWindow.setVisible(showWindow);
+        }
+    }
+
+    public boolean isLogWindowVisible() {
+        if (isUsingGUI()) {
+            logWindow.isVisible();
+        }
+        
+        return false;
     }
 }

@@ -23,9 +23,9 @@ import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.ui.ClarificationsPane;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay;
+import edu.csus.ecs.pc2.ui.ContestClockDisplay.DisplayTimes;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
-import edu.csus.ecs.pc2.ui.LogWindow;
 import edu.csus.ecs.pc2.ui.OptionsPanel;
 import edu.csus.ecs.pc2.ui.PacketMonitorPane;
 import edu.csus.ecs.pc2.ui.RunsPanel;
@@ -33,7 +33,6 @@ import edu.csus.ecs.pc2.ui.SubmissionBiffPane;
 import edu.csus.ecs.pc2.ui.SubmitClarificationPane;
 import edu.csus.ecs.pc2.ui.SubmitRunPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
-import edu.csus.ecs.pc2.ui.ContestClockDisplay.DisplayTimes;
 
 /**
  * Judge GUI.
@@ -55,8 +54,6 @@ public class JudgeView extends JFrame implements UIPlugin {
     private IInternalController controller;
 
     private JTabbedPane mainTabbedPane = null;
-
-    private LogWindow logWindow = null;
 
     private JPanel messagePane = null;
 
@@ -175,11 +172,8 @@ public class JudgeView extends JFrame implements UIPlugin {
         SwingUtilities.invokeLater(new Runnable() {
 
             public void run() {
-                if (logWindow == null) {
-                    logWindow = new LogWindow();
-                }
-                logWindow.setContestAndController(contest, controller);
-                logWindow.setTitle("Log " + contest.getClientId().toString());
+                
+                controller.startLogWindow(contest);
 
                 contest.addContestTimeListener(new ContestTimeListenerImplementation());
 
@@ -211,7 +205,6 @@ public class JudgeView extends JFrame implements UIPlugin {
 
                 OptionsPanel optionsPanel = new OptionsPanel();
                 addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
-                optionsPanel.setLogWindow(logWindow);
 
                 contestClockDisplay = new ContestClockDisplay(controller.getLog(), contest.getContestTime(), contest.getSiteNumber(), true, null);
                 contestClockDisplay.addLabeltoUpdateList(clockLabel, DisplayTimes.REMAINING_TIME, contest.getSiteNumber());
@@ -246,7 +239,7 @@ public class JudgeView extends JFrame implements UIPlugin {
     }
 
     protected void showLog(boolean showLogWindow) {
-        logWindow.setVisible(showLogWindow);
+        controller.showLogWindow(showLogWindow);
     }
 
     /**

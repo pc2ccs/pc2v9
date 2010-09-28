@@ -70,8 +70,6 @@ public class ServerView extends JFrame implements UIPlugin {
 
     private JTabbedPane mainTabbedPane = null;
 
-    private LogWindow logWindow = null;
-
     private Log log = null;
 
     private JPanel messagePanel = null;
@@ -358,11 +356,7 @@ public class ServerView extends JFrame implements UIPlugin {
 
         updateFrameTitle(model.getContestTime().isContestRunning());
 
-        if (logWindow == null) {
-            logWindow = new LogWindow();
-        }
-        logWindow.setContestAndController(model, controller);
-        logWindow.setTitle("Log " + model.getClientId().toString());
+        controller.startLogWindow(model);
         
         initializeSecurityAlertWindow(inContest);
 
@@ -392,7 +386,6 @@ public class ServerView extends JFrame implements UIPlugin {
 
         OptionsPanel optionsPanel = new OptionsPanel();
         addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
-        optionsPanel.setLogWindow(logWindow);
         optionsPanel.setSecurityLogWindow(securityAlertLogWindow);
         
         try {
@@ -439,7 +432,7 @@ public class ServerView extends JFrame implements UIPlugin {
     }
 
     protected void showLog(boolean showLogWindow) {
-        logWindow.setVisible(showLogWindow);
+        controller.showLogWindow(showLogWindow);
     }
 
     protected void addUIPlugin(JTabbedPane tabbedPane, String tabTitle, JPanePlugin plugin) {

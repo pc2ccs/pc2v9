@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Vector;
 
-import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IStorage;
 import edu.csus.ecs.pc2.core.exception.ClarificationUnavailableException;
 import edu.csus.ecs.pc2.core.exception.ContestSecurityException;
@@ -927,7 +926,7 @@ public interface IInternalContest {
      * Does not switch profiles - just makes a copy of it based on the
      * current profile and the ProfileCloneSettings.
      * <P>
-     * To switch profiles see/use {@link IInternalController#cloneProfile(Profile, ProfileCloneSettings, boolean)};
+     * To switch profiles see/use {@link edu.csus.ecs.pc2.core.model.IInternalController#cloneProfile(Profile, ProfileCloneSettings, boolean)};
      * 
      * @param contest
      * @param newProfile

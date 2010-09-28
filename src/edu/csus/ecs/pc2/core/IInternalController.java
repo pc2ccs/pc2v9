@@ -28,6 +28,7 @@ import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
+import edu.csus.ecs.pc2.ui.LogWindow;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
@@ -522,4 +523,21 @@ public interface IInternalController {
     void incomingPacket (Packet packet);
     
     void outgoingPacket (Packet packet);
+    
+    /**
+     * Start Log Window.
+     * 
+     * Only starts if {@link #isUsingGUI()} returns true;
+     * 
+     * @param contest
+     */
+    LogWindow startLogWindow(IInternalContest contest);
+
+    /**
+     * Show log Window.
+     * @param showWindow set LogWindow visible.
+     */
+    void showLogWindow(boolean showWindow);
+    
+    boolean isLogWindowVisible();
 }

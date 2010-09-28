@@ -20,15 +20,14 @@ import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.ui.ClarificationsPane;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay;
+import edu.csus.ecs.pc2.ui.ContestClockDisplay.DisplayTimes;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
-import edu.csus.ecs.pc2.ui.LogWindow;
 import edu.csus.ecs.pc2.ui.OptionsPanel;
 import edu.csus.ecs.pc2.ui.RunsPanel;
 import edu.csus.ecs.pc2.ui.SubmitClarificationPane;
 import edu.csus.ecs.pc2.ui.SubmitRunPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
-import edu.csus.ecs.pc2.ui.ContestClockDisplay.DisplayTimes;
 
 /**
  * Team Client View/GUI.
@@ -53,8 +52,6 @@ public class TeamView extends JFrame implements UIPlugin {
     private JPanel mainViewPane = null;
 
     private JTabbedPane mainTabbedPane = null;
-
-    private LogWindow logWindow = null;
 
     private JPanel northPane = null;
 
@@ -232,11 +229,8 @@ public class TeamView extends JFrame implements UIPlugin {
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                if (logWindow == null) {
-                    logWindow = new LogWindow();
-                }
-                logWindow.setContestAndController(contest, teamController);
-                logWindow.setTitle("Log " + contest.getClientId().toString());
+                
+                teamController.startLogWindow(contest);
         
                 contest.addContestTimeListener(new ContestTimeListenerImplementation());
         
@@ -255,7 +249,6 @@ public class TeamView extends JFrame implements UIPlugin {
         
                 OptionsPanel optionsPanel = new OptionsPanel();
                 addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
-                optionsPanel.setLogWindow(logWindow);
 
                 updateFrameTitle(contest.getContestTime().isContestRunning());
                 

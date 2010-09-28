@@ -428,8 +428,14 @@ public class PacketHandler {
         IStorage storage = manager.getProfileStorage(newProfile, contestPassword);
 
         ConfigurationIO configurationIO = new ConfigurationIO(storage);
+        
+        /**
+         * Open new log for new Profile
+         */
 
         InternalContest newContest = new InternalContest();
+        
+        newContest.setClientId(contest.getClientId());
         newContest.setSiteNumber(contest.getSiteNumber());
 
         configurationIO.loadFromDisk(contest.getSiteNumber(), newContest, controller.getLog());

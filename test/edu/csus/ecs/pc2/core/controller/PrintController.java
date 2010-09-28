@@ -27,6 +27,7 @@ import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
+import edu.csus.ecs.pc2.ui.LogWindow;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
@@ -600,6 +601,23 @@ public class PrintController implements IInternalController {
     }
 
     public boolean isUsingGUI() {
+        return false;
+    }
+
+    public LogWindow startLogWindow(IInternalContest contest) {
+        System.out.println("method startLogWindow");
+        System.out.println("    contest                : " + contest);
+        return null;
+    }
+
+    public void showLogWindow(boolean showWindow) {
+        System.out.println("method showLogWindow");
+        System.out.println("    showWindow            : " + showWindow);
+        
+    }
+
+    public boolean isLogWindowVisible() {
+        System.out.println("method isLogWindowVisible");
         return false;
     }
 }

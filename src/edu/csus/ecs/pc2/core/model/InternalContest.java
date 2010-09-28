@@ -252,13 +252,15 @@ public class InternalContest implements IInternalContest {
     public void initializeSubmissions(int siteNum, boolean uncheckoutSubmissions) throws IOException, ClassNotFoundException, FileSecurityException {
 
         configurationIO = new ConfigurationIO(storage);
-        
+
         runList = new RunList(storage);
+        runList.loadFromDisk(siteNum);
         runFilesList = new RunFilesList(storage);
         runResultFilesList = new RunResultsFileList(storage);
         clarificationList = new ClarificationList(storage);
-        
-        if (uncheckoutSubmissions){
+        clarificationList.loadFromDisk(siteNum);
+
+        if (uncheckoutSubmissions) {
 
             resetRunStatus(siteNum);
 
@@ -280,8 +282,6 @@ public class InternalContest implements IInternalContest {
     private void resetRunStatus(int siteNum) {
 
         try {
-            runList.loadFromDisk(siteNum);
-
             Run[] runs = runList.getList();
             for (int i = 0; i < runs.length; i++) {
                 RunStates status = runs[i].getStatus();
