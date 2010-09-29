@@ -28,19 +28,14 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.VersionInfo;
-import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IniFile;
-import edu.csus.ecs.pc2.core.log.StaticLog;
-import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.model.ILoginListener;
-import edu.csus.ecs.pc2.core.model.LoginEvent;
 import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.model.ProfileComparatorByName;
+import edu.csus.ecs.pc2.core.security.FileSecurity;
+import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.profile.ProfileLoadException;
 import edu.csus.ecs.pc2.profile.ProfileManager;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
-import edu.csus.ecs.pc2.ui.LogWindow;
-import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
  * Contest Password and Profile login screen.
@@ -53,16 +48,12 @@ import edu.csus.ecs.pc2.ui.UIPlugin;
  */
 
 // $HeadURL$
-public class StartupContestFrame extends JFrame implements UIPlugin {
+public class StartupContestFrame extends JFrame {
 
     /**
      * 
      */
     private static final long serialVersionUID = -6411954024217366004L;
-
-    private IInternalContest contest;
-
-    private IInternalController controller;
 
     private JPanel centerPane = null;
 
@@ -86,8 +77,6 @@ public class StartupContestFrame extends JFrame implements UIPlugin {
 
     private JLabel mainTitleBottomLabel = null;
 
-    private LogWindow logWindow = null;
-
     private JPanel mainPanel;
 
     private JPanel westPanel;
@@ -109,8 +98,8 @@ public class StartupContestFrame extends JFrame implements UIPlugin {
     private JLabel profileTitleLabel = null;
     
     private Runnable runnable = null;
-
-
+    
+    private int siteNumber = 1;
 
     /**
      * Show the confirmation text field ?.
@@ -204,6 +193,10 @@ public class StartupContestFrame extends JFrame implements UIPlugin {
             try {
                 profiles = manager.load();
                 Profile currentProfile = manager.getDefaultProfile();
+                
+                if (! new File(currentProfile.getProfilePath()).isDirectory()){
+                    System.err.println("No such directory: "+currentProfile.getProfilePath());
+                }
 
                 Arrays.sort(profiles, new ProfileComparatorByName());
 
@@ -362,11 +355,6 @@ public class StartupContestFrame extends JFrame implements UIPlugin {
             return;
         }
         
-        if (getContestPassword().toLowerCase().startsWith("log")) {
-            logWindow.setVisible(true);
-            return;
-        }
-
         if (showConfirmPassword) {
             if (getConfirmPassword() == null || getConfirmPassword().length() < 1) {
                 setStatusMessage("Enter enter a confirmation password");
@@ -384,11 +372,51 @@ public class StartupContestFrame extends JFrame implements UIPlugin {
         }
 
         bAlreadyLoggingIn = true;
+        
+        try {
+        
+            if (! showConfirmPassword){
+                confirmContestPassword (getSelectedProfile(), getContestPassword());
+            }
+            /**
+             * Run call back.
+             */
+            runnable.run();
+            
+        } catch (Exception e) {
+//            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Incorrect contest password try again", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            bAlreadyLoggingIn = false;
+        }
+    }
 
-        /**
-         * Run call back.
-         */
-        runnable.run();
+    private String getBaseProfileDirectoryName(Profile profile, String dirname) {
+        
+        if (profile != null) {
+            return profile.getProfilePath() + File.separator + dirname;
+        } else {
+            return dirname;
+        }
+    }
+    private void confirmContestPassword(Profile selectedProfile, String contestPassword) throws Exception {
+        
+        String baseDirectoryName = getBaseProfileDirectoryName(selectedProfile, "db." + getSiteNumber());
+
+        if (!new File(baseDirectoryName).isDirectory()) {
+            throw new Exception("Missing profile db directory " + baseDirectoryName);
+        }
+
+        try {
+            FileSecurity fileSecurity = new FileSecurity(baseDirectoryName);
+            fileSecurity.verifyPassword(contestPassword.toCharArray());
+            fileSecurity = null;
+        } catch (FileSecurityException fileSecurityException){
+            throw new Exception("Invalid contest password");
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new Exception("Bad Trouble dude "+e.getLocalizedMessage());
+        }
     }
 
     /**
@@ -404,7 +432,11 @@ public class StartupContestFrame extends JFrame implements UIPlugin {
             contestPasswordTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyPressed(java.awt.event.KeyEvent e) {
                     if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                        confirmPasswordTextField.requestFocus();
+                        if (showConfirmPassword){
+                            confirmPasswordTextField.requestFocus();
+                        } else {
+                            attemptToLogin();
+                        }
                     }
                 }
             });
@@ -431,30 +463,6 @@ public class StartupContestFrame extends JFrame implements UIPlugin {
             });
         }
         return loginButton;
-    }
-
-    /**
-     * User hit ok, attempt to login.
-     */
-    protected void attemptToLoginReference() {
-
-        setStatusMessage("");
-        if (getContestPassword() == null || getContestPassword().length() < 1) {
-            setStatusMessage("Please enter a login");
-        } else {
-
-            if (getContestPassword().toLowerCase().startsWith("log")) {
-                logWindow.setVisible(true);
-                return;
-            }
-
-            if (bAlreadyLoggingIn) {
-                return;
-            }
-
-            bAlreadyLoggingIn = true;
-
-        }
     }
 
     /**
@@ -519,7 +527,7 @@ public class StartupContestFrame extends JFrame implements UIPlugin {
                     iconURL = imgFile.toURI().toURL();
                 } catch (MalformedURLException e) {
                     iconURL = null;
-                    StaticLog.log("LoginFrame.loadImageIconFromFile(" + inFileName + ")", e);
+                    logError("StartupContestFrame.loadImageIconFromFile(" + inFileName + ")", e);
                 }
             }
         }
@@ -527,12 +535,22 @@ public class StartupContestFrame extends JFrame implements UIPlugin {
             if (verifyImage(inFileName, iconURL)) {
                 icon = new ImageIcon(iconURL);
             } else {
-                StaticLog.warning(inFileName + "(" + iconURL.toString() + ") checksum failed");
+                logError(inFileName + "(" + iconURL.toString() + ") checksum failed");
             }
         }
         return icon;
     }
 
+    private void logError(String string, Exception e) {
+        System.err.println(string);
+        e.printStackTrace(System.err);
+    }
+
+    private void logError(String string) {
+        System.err.println(string);
+    }
+
+    
     private boolean verifyImage(String inFileName, URL url) {
         // these are the real checksums
         byte[] csusChecksum = { -78, -82, -33, 125, 3, 20, 3, -51, 53, -82, -66, -19, -96, 82, 39, -92, 16, 52, 17, 127 };
@@ -589,9 +607,9 @@ public class StartupContestFrame extends JFrame implements UIPlugin {
             }
             return (matchedBytes == verifyChecksum.length);
         } catch (IOException e) {
-            StaticLog.log("verifyImage(" + inFileName + ")", e);
+            logError("verifyImage(" + inFileName + ")", e);
         } catch (NoSuchAlgorithmException e) {
-            StaticLog.log("verifyImage(" + inFileName + ")", e);
+            logError("verifyImage(" + inFileName + ")", e);
         }
 
         return false;
@@ -703,52 +721,6 @@ public class StartupContestFrame extends JFrame implements UIPlugin {
         return passwordTextFieldValue(confirmPasswordTextField);
     }
 
-    /**
-     * A login listener
-     * 
-     * @author pc2@ecs.csus.edu
-     * 
-     */
-    public class LoginListenerImplementation implements ILoginListener {
-
-        public void loginAdded(LoginEvent event) {
-            // TODO log this.
-            // System.err.println("Login " + event.getAction() + " " + event.getClientId());
-        }
-
-        public void loginRemoved(LoginEvent event) {
-            // TODO log this.
-            // System.err.println("Login " + event.getAction() + " " + event.getClientId());
-        }
-
-        public void loginDenied(LoginEvent event) {
-            setStatusMessage(event.getMessage());
-            bAlreadyLoggingIn = false;
-        }
-
-        public void loginRefreshAll(LoginEvent event) {
-            // TODO Auto-generated method stub
-
-        }
-    }
-
-    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
-        this.contest = inContest;
-        this.controller = inController;
-        // initialize logWindow so it can add itself as a listener and
-        // start populating the mclb
-        logWindow = new LogWindow();
-        logWindow.setContestAndController(contest, controller);
-
-        contest.addLoginListener(new LoginListenerImplementation());
-
-        setVisible(true);
-    }
-
-    public String getPluginTitle() {
-        return "Login";
-    }
-
     public void disableLoginButton() {
         getLoginButton().setEnabled(false);
     }
@@ -767,5 +739,12 @@ public class StartupContestFrame extends JFrame implements UIPlugin {
     }
     
 
+    public int getSiteNumber() {
+        return siteNumber;
+    }
+
+    public void setSiteNumber(int siteNumber) {
+        this.siteNumber = siteNumber;
+    }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
