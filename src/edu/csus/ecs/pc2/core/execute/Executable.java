@@ -905,6 +905,7 @@ public class Executable {
                     theChar = in.read();
                 }
 
+                fileReader.close();
                 pwOut.close();
                 outs.close();
             }
