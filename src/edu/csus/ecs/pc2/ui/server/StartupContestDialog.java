@@ -19,7 +19,7 @@ import java.util.Arrays;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JFrame;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -48,12 +48,12 @@ import edu.csus.ecs.pc2.ui.FrameUtilities;
  */
 
 // $HeadURL$
-public class StartupContestFrame extends JFrame {
+public class StartupContestDialog extends JDialog {
 
     /**
      * 
      */
-    private static final long serialVersionUID = -6411954024217366004L;
+    private static final long serialVersionUID = -8322972123417494060L;
 
     private JPanel centerPane = null;
 
@@ -97,8 +97,6 @@ public class StartupContestFrame extends JFrame {
 
     private JLabel profileTitleLabel = null;
     
-    private Runnable runnable = null;
-    
     private int siteNumber = 1;
 
     /**
@@ -110,7 +108,7 @@ public class StartupContestFrame extends JFrame {
      * This method initializes
      * 
      */
-    public StartupContestFrame() {
+    public StartupContestDialog(){
         super();
         initialize();
         overRideLookAndFeel();
@@ -130,11 +128,6 @@ public class StartupContestFrame extends JFrame {
         this.setTitle("PC^2 Contest Startup Login");
         this.setContentPane(getMainPanel());
 
-        this.addWindowListener(new java.awt.event.WindowAdapter() {
-            public void windowClosing(java.awt.event.WindowEvent e) {
-                System.exit(0);
-            }
-        });
         this.addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent e) {
                 promptBeforeExit();
@@ -376,15 +369,11 @@ public class StartupContestFrame extends JFrame {
         try {
         
             if (! showConfirmPassword){
-                confirmContestPassword (getSelectedProfile(), getContestPassword());
+                confirmContestPassword (getProfile(), getContestPassword());
+                dispose();
             }
-            /**
-             * Run call back.
-             */
-            runnable.run();
             
         } catch (Exception e) {
-//            e.printStackTrace();
             JOptionPane.showMessageDialog(this, e.getMessage(), "Incorrect contest password try again", JOptionPane.ERROR_MESSAGE);
         } finally {
             bAlreadyLoggingIn = false;
@@ -414,7 +403,7 @@ public class StartupContestFrame extends JFrame {
         } catch (FileSecurityException fileSecurityException){
             throw new Exception("Invalid contest password");
         } catch (Exception e) {
-            e.printStackTrace();
+            e.printStackTrace(); // debug 22
             throw new Exception("Bad Trouble dude "+e.getLocalizedMessage());
         }
     }
@@ -726,7 +715,7 @@ public class StartupContestFrame extends JFrame {
     }
 
  
-    public Profile getSelectedProfile() {
+    public Profile getProfile() {
         ProfileWrapper wrapper = (ProfileWrapper) getProfilesComboBox().getSelectedItem();
         if (wrapper != null) {
             return wrapper.getProfile();
@@ -734,11 +723,6 @@ public class StartupContestFrame extends JFrame {
         return null;
     }
     
-    public void setRunnable(Runnable runnable) {
-        this.runnable = runnable;
-    }
-    
-
     public int getSiteNumber() {
         return siteNumber;
     }
@@ -746,5 +730,6 @@ public class StartupContestFrame extends JFrame {
     public void setSiteNumber(int siteNumber) {
         this.siteNumber = siteNumber;
     }
+    
 
 } // @jve:decl-index=0:visual-constraint="10,10"

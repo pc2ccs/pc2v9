@@ -71,6 +71,7 @@ import edu.csus.ecs.pc2.ui.LogWindow;
 import edu.csus.ecs.pc2.ui.LoginFrame;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 import edu.csus.ecs.pc2.ui.UIPluginList;
+import edu.csus.ecs.pc2.ui.server.StartupContestDialog;
 
 /**
  * Implementation of InternalContest InternalController.
@@ -785,12 +786,13 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             initializeStorage(fileSecurity);
             
             if (contest.getContestPassword() == null) {
+                
                 if (usingGUI){
-                    String password = JOptionPane.showInputDialog(null, "Enter Contest Password");
-                    if (password == null || password.trim().length() == 0) {
-                        fatalError ("You must supply a password, exiting.");
-                    }
+                    StartupContestDialog startDialog = new StartupContestDialog();
+                    String password = startDialog.getContestPassword();
                     contest.setContestPassword(password);
+                    theProfile = startDialog.getProfile();
+                    
                 } else {
 
                     if (! isContactingRemoteServer()) {
