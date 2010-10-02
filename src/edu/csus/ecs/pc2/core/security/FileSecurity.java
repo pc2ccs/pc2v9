@@ -629,6 +629,10 @@ public class FileSecurity implements IStorage {
    public boolean isReadyToReadWrite() {
        return readyToReadWrite;
    }
+
+    public static String getContestKeyFileName() {
+        return CONTEST_KEY_FILENAME;
+    }
    
 }
 

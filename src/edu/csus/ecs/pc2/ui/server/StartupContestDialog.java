@@ -178,10 +178,9 @@ public class StartupContestDialog extends JDialog {
         ProfileManager manager = new ProfileManager();
 
         int comboIndex = 0;
+        
 
         if (manager.hasDefaultProfile()) {
-
-            showConfirmPassword = false;
 
             Profile[] profiles = new Profile[0];
             try {
@@ -203,6 +202,13 @@ public class StartupContestDialog extends JDialog {
                     }
                     idx++;
                 }
+                
+                /**
+                 * Only show confirm if there has not been a contest key file created.
+                 */
+                String baseDirectoryName = getBaseProfileDirectoryName(currentProfile, "db." + getSiteNumber());
+                String contestKeyFilename = baseDirectoryName+ File.separator +  FileSecurity.getContestKeyFileName();
+                showConfirmPassword = ! new File(contestKeyFilename).exists();
 
             } catch (IOException e) {
                 fatalError("Unable to load profile list ", e);
@@ -345,13 +351,13 @@ public class StartupContestDialog extends JDialog {
         setStatusMessage("");
 
         if (getContestPassword() == null || getContestPassword().length() < 1) {
-            setStatusMessage("Enter enter a contest password");
+            setStatusMessage("Enter a contest password");
             return;
         }
         
         if (showConfirmPassword) {
             if (getConfirmPassword() == null || getConfirmPassword().length() < 1) {
-                setStatusMessage("Enter enter a confirmation password");
+                setStatusMessage("Enter a confirmation password");
                 return;
             }
 
@@ -371,6 +377,8 @@ public class StartupContestDialog extends JDialog {
         
             if (! showConfirmPassword){
                 confirmContestPassword (getProfile(), getContestPassword());
+                dispose();
+            } else {
                 dispose();
             }
             
@@ -402,12 +410,21 @@ public class StartupContestDialog extends JDialog {
             fileSecurity.verifyPassword(contestPassword.toCharArray());
             fileSecurity = null;
         } catch (FileSecurityException fileSecurityException){
-            throw new Exception("Invalid contest password");
+            if (fileSecurityException.getMessage().equals(FileSecurity.FAILED_TO_DECRYPT)) {
+
+                throw new Exception("Incorrect contest password, try again");
+
+            } else if (!fileSecurityException.getMessage().equals(FileSecurity.KEY_FILE_NOT_FOUND)) {
+
+                fileSecurityException.printStackTrace();
+                throw new Exception("Trouble determining contest password (" + fileSecurityException.getMessage() + ")");
+            }
         } catch (Exception e) {
             e.printStackTrace(); // debug 22
             throw new Exception("Bad Trouble dude "+e.getLocalizedMessage());
         }
     }
+    
 
     /**
      * This method initializes jTextField
