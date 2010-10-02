@@ -1,10 +1,15 @@
 package edu.csus.ecs.pc2.ui.server;
 
-import java.awt.Dialog.ModalityType;
-
 import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.model.Profile;
 
+/**
+ * Test for  StartupContestDialog.
+ * @author pc2@ecs.csus.edu
+ * @version $Id$
+ */
+
+// $HeadURL$
 public class StartupContestDialogTest extends TestCase {
 
     protected void setUp() throws Exception {
@@ -17,7 +22,6 @@ public class StartupContestDialogTest extends TestCase {
     
     public static void main(String[] args) {
         StartupContestDialog dialog = new StartupContestDialog();
-        dialog.setModalityType(ModalityType.APPLICATION_MODAL);
         dialog.setVisible(true);
         
         String password = dialog.getContestPassword();

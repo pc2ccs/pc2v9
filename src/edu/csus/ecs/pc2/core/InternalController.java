@@ -789,6 +789,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 
                 if (usingGUI){
                     StartupContestDialog startDialog = new StartupContestDialog();
+                  
+                    startDialog.setVisible(true);
                     String password = startDialog.getContestPassword();
                     contest.setContestPassword(password);
                     theProfile = startDialog.getProfile();

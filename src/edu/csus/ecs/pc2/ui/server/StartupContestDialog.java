@@ -112,6 +112,7 @@ public class StartupContestDialog extends JDialog {
         super();
         initialize();
         overRideLookAndFeel();
+        setModal(true);
         FrameUtilities.centerFrame(this);
     }
 
