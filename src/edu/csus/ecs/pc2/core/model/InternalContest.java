@@ -331,9 +331,10 @@ public class InternalContest implements IInternalContest {
             addContestTime(contestTime);
         }
 
-        if (getAccounts(Type.SERVER) == null || getAccounts(Type.SERVER, siteNum).size() == 0) {
-            generateNewAccounts(Type.SERVER.toString(), 1, true);
-        }
+        // No need to generate a server account
+//        if (getAccounts(Type.SERVER) == null || getAccounts(Type.SERVER, siteNum).size() == 0) {
+//            generateNewAccounts(Type.SERVER.toString(), 1, true);
+//        }
 
         if (getAccounts(Type.ADMINISTRATOR) == null || getAccounts(Type.ADMINISTRATOR, siteNum).size() == 0) {
             generateNewAccounts(ClientType.Type.ADMINISTRATOR.toString(), 1, true);
@@ -2555,8 +2556,9 @@ public class InternalContest implements IInternalContest {
         AccountEvent accountEvent = new AccountEvent(AccountEvent.Action.REFRESH_ALL, getAccounts());
         fireAccountListener(accountEvent);
 
-        PasswordChangeEvent passwordChangeEvent = null;
-        firePasswordChangeListener(passwordChangeEvent);
+        // Keep firePasswordChangeListener for referene, unused, unneeded.
+//        PasswordChangeEvent passwordChangeEvent = null;
+//        firePasswordChangeListener(passwordChangeEvent);
 
         ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.REFRESH_ALL, null);
         fireClarificationListener(clarificationEvent);

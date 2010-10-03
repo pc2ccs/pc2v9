@@ -423,7 +423,9 @@ public class PacketHandler {
     private IInternalContest switchProfile(IInternalContest currentContest, Profile newProfile, char[] contestPassword) throws ProfileException {
 
         ProfileManager manager = new ProfileManager();
-        
+
+//        Utilities.viewReport(new InternalDumpReport(), "debug22 before", contest, controller);
+
         IStorage storage = manager.getProfileStorage(newProfile, contestPassword);
 
         /**
@@ -431,11 +433,11 @@ public class PacketHandler {
          */
 
         IInternalContest newContest = new InternalContest();
-        
+
         newContest.setClientId(contest.getClientId());
         newContest.setSiteNumber(contest.getSiteNumber());
         newContest.setStorage(storage);
-        
+
         try {
             /**
              * This loads configuration and re-loads submissions and un-checksout submissions.
@@ -443,9 +445,9 @@ public class PacketHandler {
             newContest.readConfiguration(contest.getSiteNumber(), controller.getLog());
         } catch (Exception e) {
             e.printStackTrace(); // debug 22
-            throw new ProfileException(newProfile,"Unable to read configuration ");
+            throw new ProfileException(newProfile, "Unable to read configuration ");
         }
-        
+
         try {
             newContest.storeConfiguration(controller.getLog());
         } catch (Exception e) {
@@ -456,16 +458,20 @@ public class PacketHandler {
          * Remove listeners so that they are no longer referenced
          */
         contest.removeAllListeners(); // remove all listeners
-        
-        contest.cloneAllLoginAndConnections (newContest);
-        
+
+        contest.cloneAllLoginAndConnections(newContest);
+
         controller.setContest(newContest); // replace existing contest
 
-        controller.updateContestController(newContest, controller);
+        controller.updateContestController(newContest, controller); // add all listeners with new contest
+
+        contest = newContest;
 
         contest.fireAllRefreshEvents();
-        
-        sendOutChangeProfileToAll(newContest, currentContest.getProfile(), newProfile, new String(contestPassword));
+
+        sendOutChangeProfileToAll(contest, currentContest.getProfile(), newProfile, new String(contestPassword));
+
+//        Utilities.viewReport(new InternalDumpReport(), "debug22 after", contest, controller);
 
         return newContest;
     }
@@ -545,7 +551,10 @@ public class PacketHandler {
 
             contest.resetSubmissionData();
             contest.resetConfigurationData();
+           
+//            Utilities.viewReport(new InternalDumpReport(), "Admin Dump debug 22 before", contest, controller);
             loadDataIntoModel(packet, connectionHandlerID);
+//            Utilities.viewReport(new InternalDumpReport(), "Admin Dump debug 22 after", contest, controller);
             contest.fireAllRefreshEvents();
         }
     }
@@ -3189,8 +3198,9 @@ public class PacketHandler {
         
         addProfilesToModel(packet);
         
-        System.err.println("debug22 store profiles # profiles "+contest.getProfiles().length);
-        storeProfiles();
+        if (isServer()){
+            storeProfiles();
+        }
 
         try {
             Problem generalProblem = (Problem) PacketFactory.getObjectValue(packet, PacketFactory.GENERAL_PROBLEM);
@@ -3202,6 +3212,8 @@ public class PacketHandler {
             // TODO: log handle exception
             controller.getLog().log(Log.WARNING, "Exception logged in General Problem ", e);
         }
+        
+        System.gc();
     }
 
     private void otherLoginActivities(Packet packet, ConnectionHandlerID connectionHandlerID) {

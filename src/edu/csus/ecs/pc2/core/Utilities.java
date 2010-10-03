@@ -455,7 +455,10 @@ public final class Utilities {
             }
             printWriter.println("Contest Title: " + contestTitle);
             printWriter.print("On: " + Utilities.getL10nDateTime());
-            GregorianCalendar resumeTime = contest.getContestTime().getResumeTime();
+            GregorianCalendar resumeTime = null;
+            if (contest.getContestTime() != null){
+                resumeTime = contest.getContestTime().getResumeTime();
+            }
             if (resumeTime == null) {
                 printWriter.print("  Contest date/time: never started");
             } else {
@@ -466,29 +469,31 @@ public final class Utilities {
             printWriter.println();
             printWriter.println("** " + report.getReportTitle() + " Report");
             printWriter.println();
-//            if (filter != null) {
-//                String filterInfo = filter.toString();
-//                if (filter.isFilterOn() && (!filterInfo.equals(""))) {
-//                    printWriter.println("Filter: " + filterInfo);
-//                    printWriter.println();
-//                }
-//            }
+            // if (filter != null) {
+            // String filterInfo = filter.toString();
+            // if (filter.isFilterOn() && (!filterInfo.equals(""))) {
+            // printWriter.println("Filter: " + filterInfo);
+            // printWriter.println();
+            // }
+            // }
 
             try {
                 report.writeReport(printWriter);
             } catch (Exception e) {
+                printWriter.println();
                 printWriter.println("Exception in report: " + e.getMessage());
                 e.printStackTrace(printWriter);
             }
 
             report.printFooter(printWriter);
 
-            printWriter.close();
-            printWriter = null;
-
         } catch (Exception e) {
             controller.getLog().log(Log.INFO, "Exception creating report", e);
             printWriter.println("Exception creating report " + e.getMessage());
+            e.printStackTrace(printWriter);
+        } finally {
+            printWriter.close();
+            printWriter = null;
         }
 
         MultipleFileViewer multipleFileViewer = new MultipleFileViewer(controller.getLog());

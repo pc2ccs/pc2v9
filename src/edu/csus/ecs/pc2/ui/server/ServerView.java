@@ -22,8 +22,8 @@ import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
-import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.ILoginListener;
 import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.ISiteListener;
@@ -349,6 +349,46 @@ public class ServerView extends JFrame implements UIPlugin {
         });
     }
     
+    protected void registerPlugin (UIPlugin plugin){
+        try {
+            controller.register (plugin);
+            plugin.setContestAndController(model, controller);
+
+        } catch (Exception e) {
+            controller.getLog().log(Log.WARNING, "Exception loading plugin ", e);
+            e.printStackTrace(); // FIXME deubug22
+            JOptionPane.showMessageDialog(this, "Error loading " + plugin.getPluginTitle());
+        }
+    }
+    
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    
+    // $HeadURL$
+    protected class ServerListeners implements UIPlugin {
+
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 3733076435840880891L;
+
+        public void setContestAndController(IInternalContest inContest, IInternalController inController) {
+            
+            inContest.addRunListener(new RunListenerImplementation());
+            inContest.addAccountListener(new AccountListenerImplementation());
+            inContest.addLoginListener(new LoginListenerImplementation());
+            inContest.addSiteListener(new SiteListenerImplementation());
+            inContest.addContestTimeListener(new ContestTimeListenerImplementation());
+        }
+
+        public String getPluginTitle() {
+            return "ServerListeners";
+        }
+    }
+    
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.model = inContest;
         this.controller = inController;
@@ -360,11 +400,8 @@ public class ServerView extends JFrame implements UIPlugin {
         
         initializeSecurityAlertWindow(inContest);
 
-        model.addRunListener(new RunListenerImplementation());
-        model.addAccountListener(new AccountListenerImplementation());
-        model.addLoginListener(new LoginListenerImplementation());
-        model.addSiteListener(new SiteListenerImplementation());
-        model.addContestTimeListener(new ContestTimeListenerImplementation());
+        ServerListeners serverListeners = new ServerListeners();
+        registerPlugin(serverListeners);
         
         SitesPanel sitesPanel = new SitesPanel();
         addUIPlugin(getMainTabbedPane(), "Sites", sitesPanel);
@@ -437,9 +474,14 @@ public class ServerView extends JFrame implements UIPlugin {
 
     protected void addUIPlugin(JTabbedPane tabbedPane, String tabTitle, JPanePlugin plugin) {
 
-        plugin.setParentFrame(this);
-        plugin.setContestAndController(model, controller);
-        tabbedPane.add(plugin, tabTitle);
+        try {
+            plugin.setParentFrame(this);
+            registerPlugin(plugin);
+            tabbedPane.add(plugin, tabTitle);
+        } catch (Exception e) {
+            controller.getLog().log(Log.WARNING, "Exception loading plugin ", e);
+            JOptionPane.showMessageDialog(this, "Error loading " + plugin.getPluginTitle());
+        }
 
     }
 
@@ -450,11 +492,7 @@ public class ServerView extends JFrame implements UIPlugin {
      * @param plugin
      */
     public void addUIPlugin(String tabTitle, JPanePlugin plugin) {
-
-        plugin.setParentFrame(this);
-        plugin.setContestAndController(model, controller);
-        getMainTabbedPane().add(plugin, tabTitle);
-
+        addUIPlugin(getMainTabbedPane(), tabTitle, plugin);
     }
 
     

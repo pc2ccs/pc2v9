@@ -286,7 +286,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     private Profile theProfile = null;
     
     private LogWindow logWindow = null;
-    
+
     public InternalController(IInternalContest contest) {
         super();
         this.contest = contest;
@@ -2469,7 +2469,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         
         log = new Log(directoryName, logFileName);
         StaticLog.setLog(log);
-
+        
         info("");
         info(new VersionInfo().getSystemVersionInfo());
         if (loginName != null) {
@@ -3109,24 +3109,26 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     public void updateContestController(IInternalContest inContest, IInternalController inController) {
 
-        ClientId clientId = inContest.getClientId();
+        this.contest = inContest;
+
+        ClientId clientId = contest.getClientId();
         String id = clientId.getName();
         startLog(getBaseProfileDirectoryName(Log.LOG_DIRECTORY_NAME), stripChar(clientId.toString(), ' '), id, clientId.getName());
+
+        loadProfiles(inContest);
 
         for (UIPlugin plugin : getPluginList()) {
 
             try {
-                plugin.setContestAndController(inContest, inController);
-                
-                inController.getLog().info("plugin.setContestAndController for "+plugin.getPluginTitle());
-                
+                plugin.setContestAndController(contest, inController);
+
+                inController.getLog().info("plugin.setContestAndController for " + plugin.getPluginTitle());
+
             } catch (Exception e) {
                 logException(e);
             }
         }
 
-        loadProfiles(inContest);
-        
         packetHandler = new PacketHandler(this, contest);
 
     }
@@ -3212,4 +3214,5 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         
         return false;
     }
+
 }
