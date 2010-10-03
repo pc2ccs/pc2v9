@@ -184,11 +184,7 @@ public class ProfileSavePane extends JPanePlugin {
     }
 
     private void setDefaultCloneSetting() {
-
         setCheckBoxesSelected(true);
-
-        getCopyProblemsCheckBox().setSelected(false);
-
     }
 
     protected void takeProfileAction(String actionText) throws InvalidFieldValue {
@@ -221,8 +217,42 @@ public class ProfileSavePane extends JPanePlugin {
 
     private void cloneProfile() throws InvalidFieldValue {
         ProfileCloneSettings settings = getProfileCloneSettingsFromFields();
+
+        if (settings.isCopyRuns()) {
+
+            requireSetting(settings.isCopyProblems(), "Must check/copy problems to copy runs");
+
+            requireSetting(settings.isCopyLanguages(), "Must check/copy languages to copy runs");
+
+            requireSetting(settings.isCopyAccounts(), "Must check/copy languages to copy runs");
+
+        }
+
+        if (settings.isCopyClarifications()) {
+
+            requireSetting(settings.isCopyProblems(), "Must check/copy problems to copy clarifications");
+
+            requireSetting(settings.isCopyLanguages(), "Must check/copy languages to copy clarifications");
+
+            requireSetting(settings.isCopyAccounts(), "Must check/copy languages to copy clarifications");
+
+        }
+
         getController().cloneProfile(getContest().getProfile(), settings, false);
         closeWindow();
+    }
+
+    /**
+     * If not found throw InvalidFieldValue exception with message.
+     * 
+     * @param found
+     * @param message
+     * @throws InvalidFieldValue
+     */
+    private void requireSetting(boolean found, String message) throws InvalidFieldValue {
+        if (!found) {
+            throw new InvalidFieldValue(message);
+        }
     }
 
     private ProfileCloneSettings getProfileCloneSettingsFromFields() throws InvalidFieldValue {
