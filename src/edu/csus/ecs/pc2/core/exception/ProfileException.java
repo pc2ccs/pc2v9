@@ -1,5 +1,7 @@
 package edu.csus.ecs.pc2.core.exception;
 
+import edu.csus.ecs.pc2.core.model.Profile;
+
 /**
  * Exceptions for Profiles activities.
  * 
@@ -16,6 +18,9 @@ public class ProfileException extends Exception {
      * 
      */
     private static final long serialVersionUID = -4955153900325717474L;
+    
+    private Profile profile = null;
+
 
     public ProfileException() {
         super();
@@ -37,4 +42,21 @@ public class ProfileException extends Exception {
         // TODO Auto-generated constructor stub
     }
 
-}
+    public ProfileException(Profile profile, Throwable cause) {
+        super(cause);
+        this.profile = profile;
+    }
+
+    public ProfileException(Profile profile, String string) {
+        super(string);
+        this.profile = profile;
+    }
+
+    public ProfileException(Profile profile, String message, Throwable cause) {
+        super(message, cause);
+        this.profile = profile;
+    }
+
+    public Profile getProfile() {
+        return profile;
+    }}

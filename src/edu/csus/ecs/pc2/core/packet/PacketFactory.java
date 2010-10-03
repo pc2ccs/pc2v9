@@ -28,6 +28,7 @@ import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
+import edu.csus.ecs.pc2.core.model.MessageEvent.Area;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Profile;
@@ -322,6 +323,8 @@ public final class PacketFactory {
     public static final String SWITCH_PROFILE =  "SWITCH_PROFILE";
 
     public static final String NEW_PROFILE =  "NEW_PROFILE";
+
+    public static final String MESSAGE_AREA = "MESSAGE_AREA";
     
 
     /**
@@ -392,8 +395,11 @@ public final class PacketFactory {
      * @param destination
      * @param message
      */
-    public static Packet createMessage(ClientId source, ClientId destination, String message) {
-        Packet packet = new Packet(Type.MESSAGE, source, destination, message);
+    public static Packet createMessage(ClientId source, ClientId destination, Area area, String message) {
+        Properties prop = new Properties();
+        prop.put(MESSAGE_STRING, message);
+        prop.put(MESSAGE_AREA, area);
+        Packet packet = new Packet(Type.MESSAGE, source, destination, prop);
         return packet;
     }
 

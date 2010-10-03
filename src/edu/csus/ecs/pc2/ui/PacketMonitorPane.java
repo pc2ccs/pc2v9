@@ -1,21 +1,25 @@
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
+import java.awt.ComponentOrientation;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.KeyEvent;
-import java.util.Enumeration;
-import java.util.Properties;
 
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTree;
 import javax.swing.SwingUtilities;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeSelectionModel;
 
 import com.ibm.webrunner.j2mclb.util.HeapSorter;
 import com.ibm.webrunner.j2mclb.util.NumericStringComparator;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.archive.PacketFormatter;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
@@ -186,6 +190,8 @@ public class PacketMonitorPane extends JPanePlugin {
             Object[] cols = { "Seq", "Type", "##", "Time", "From", "To", "Contents"};
             packetListBox.addColumns(cols);
 
+            packetListBox.setRowHeight(packetListBox.getRowHeight() * 3);
+            
             // Sorts for columns
 
             HeapSorter sorter = new HeapSorter();
@@ -240,32 +246,7 @@ public class PacketMonitorPane extends JPanePlugin {
         });
     }
     
-    String getContentsDescription (Packet packet){
-        String s = "";
-        
-        Object obj = packet.getContent();
-        if (obj instanceof Properties) {
-            Properties prop = (Properties) obj;
-            Enumeration<?> enumeration = prop.keys();
-            
 
-            while (enumeration.hasMoreElements()) {
-                String element = (String) enumeration.nextElement();
-                String className = prop.get(element).getClass().getName();
-                className = className.replaceFirst("edu.csus.ecs.pc2.core.model.", "");
-                s += className + " ";
-                if (prop.size() == 1) {
-                    s += prop.get(element);
-                }
-            }
-        } else {
-
-            s = "  Contains: " + obj.toString() + " " + obj;
-        }
-        
-        return s;
-        
-    }
 
     Object[] createRow(Packet packet) {
 
@@ -288,9 +269,20 @@ public class PacketMonitorPane extends JPanePlugin {
         objArray[3] = new Long(elapsed).toString();
         objArray[4] = getClientName(packet.getSourceId());
         objArray[5] = getClientName(packet.getDestinationId());
-        objArray[6] = getContentsDescription(packet);
-        
+//        objArray[6] = PacketFormatter.summaryFormat(packet);
+        objArray[6] =  getPacketTree (packet);
+
         return objArray;
+    }
+
+    private JScrollPane getPacketTree(Packet packet) {
+        DefaultMutableTreeNode top = new DefaultMutableTreeNode("Packet " + packet.getType());
+        PacketFormatter.buildContentTree(top, packet);
+        JTree tree = new JTree(top, true);
+        tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+        JScrollPane treeView = new JScrollPane(tree);
+        treeView.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+        return treeView;
     }
 
     /**

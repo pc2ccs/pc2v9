@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.Vector;
+import java.util.logging.Level;
 
 import javax.swing.JOptionPane;
 
@@ -38,6 +39,7 @@ import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.LoginEvent;
+import edu.csus.ecs.pc2.core.model.MessageEvent.Area;
 import edu.csus.ecs.pc2.core.model.PacketEvent;
 import edu.csus.ecs.pc2.core.model.PacketEvent.Action;
 import edu.csus.ecs.pc2.core.model.Problem;
@@ -1140,7 +1142,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 ClientId clientId = packet.getSourceId();
 
                 info("receiveObject " + packet);
-
+                
+                incomingPacket(packet);
+                
                 if (packet.getType().equals(PacketType.Type.LOGIN_REQUEST)) {
                     String password = PacketFactory.getStringValue(packet, PacketFactory.PASSWORD);
                     try {
@@ -1524,24 +1528,31 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             
         } catch (ProfileException profileException) {
             
+            log.log(Level.WARNING, "Error switching profile: "+profileException.getMessage(), profileException );
+            Profile exProfile = profileException.getProfile();
+            if (exProfile != null){
+                System.err.println("Exception in profile: "+exProfile.getName()+" path: "+exProfile.getProfilePath()); // debug22
+            }
+            profileException.printStackTrace(); // debug 22
+            
             if (profileException.getMessage().indexOf("FileSecurityException") != -1){
                 
                 if (profileException.getMessage().indexOf(FileSecurity.FAILED_TO_DECRYPT) != -1){
                     
                     // Invalid contest password 
                     
-                    Packet messagePacket = PacketFactory.createMessage(getServerClientId(), packet.getSourceId(), "Invalid contest password");
+                    Packet messagePacket = PacketFactory.createMessage(getServerClientId(), packet.getSourceId(), Area.PROFILES, "Invalid contest password");
                     sendToClient(messagePacket);
                     
                     logException("Invalid contest password", profileException);
                 } else {
-                    Packet messagePacket = PacketFactory.createMessage(getServerClientId(), packet.getSourceId(), "Unable to change profile "+profileException.getMessage());
+                    Packet messagePacket = PacketFactory.createMessage(getServerClientId(), packet.getSourceId(),  Area.PROFILES, "Unable to change profile "+profileException.getMessage());
                     sendToClient(messagePacket);
                     
                     logException("Unable to change profile", profileException);
                 }
             } else {
-                Packet messagePacket = PacketFactory.createMessage(getServerClientId(), packet.getSourceId(), "Unable to change profile ");
+                Packet messagePacket = PacketFactory.createMessage(getServerClientId(), packet.getSourceId(),  Area.PROFILES, "Unable to change profile ");
                 sendToClient(messagePacket);
                 
                 logException("Unable to change profile", profileException);
@@ -1744,6 +1755,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         try {
             if (object instanceof Packet) {
                 Packet packet = (Packet) object;
+                
+                incomingPacket(packet);
+                
                 PacketFactory.dumpPacket(log, packet, "recieveObject");
 
                 // TODO code put the server's connection handler id as 4th parameter

@@ -309,11 +309,13 @@ public class ProfileManagerTest extends TestCase {
      */
     private void createProfileFilesAndDirs(Profile profile, String password) throws FileSecurityException {
         
-        String profileDirectory = profile.getProfilePath();
+        String profileDirectory = profile.getProfilePath() + File.separator + "db."+profile.getSiteNumber();
         
         if (new File(profileDirectory).isDirectory()){
             new Exception("Directory already exists: "+profileDirectory);
         }
+        
+        
         
         new File(profileDirectory).mkdirs();
         

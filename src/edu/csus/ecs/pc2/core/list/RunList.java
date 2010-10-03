@@ -1,7 +1,6 @@
 package edu.csus.ecs.pc2.core.list;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Enumeration;
@@ -253,13 +252,14 @@ public class RunList implements Serializable {
      * 
      */
     @SuppressWarnings("unchecked")
-    public void loadFromDisk(int siteNumber) throws IOException, ClassNotFoundException, FileSecurityException {
+    public boolean loadFromDisk(int siteNumber) throws IOException, ClassNotFoundException, FileSecurityException  {
         String filename = getFileName();
         if (Utilities.isFileThere(filename)) {
             runHash = (Hashtable<String, Run>) storage.load(filename);
             nextRunNumber = lastRunNumber(siteNumber) + 1;
+            return true;
         } else {
-            throw new FileNotFoundException("Unable to load run info from disk for site " + siteNumber);
+            return false;
         }
     }
 

@@ -136,6 +136,8 @@ public class ProfileManager {
             String dbDirectory = profilePath + File.separator + "db." + profile.getSiteNumber();
             if (new File(dbDirectory).isDirectory()) {
                 profilePath = dbDirectory;
+            } else {
+                throw new ProfileException(profile, "Profile DB directory does not exist: " + dbDirectory);
             }
 
             FileSecurity fileSecurity = new FileSecurity(profilePath);
@@ -145,13 +147,13 @@ public class ProfileManager {
                 if (validPassword) {
                     return fileSecurity;
                 } else {
-                    throw new ProfileException("Profile contest password is not correct");
+                    throw new ProfileException(profile, "Profile contest password is not correct");
                 }
             } catch (FileSecurityException e) {
-                throw new ProfileException(e);
+                throw new ProfileException(profile, e);
             }
         } else {
-            throw new ProfileException("Profile directory does not exist: " + profilePath);
+            throw new ProfileException(profile, "Profile directory does not exist: " + profilePath);
         }
     }
     

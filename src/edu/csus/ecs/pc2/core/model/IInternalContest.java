@@ -25,6 +25,12 @@ import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
  */
 
 // $HeadURL$
+/**
+ * @author pc2@ecs.csus.edu
+ * @version $Id$
+ */
+
+// $HeadURL$
 public interface IInternalContest {
 
     /**
@@ -918,6 +924,16 @@ public interface IInternalContest {
      */
     IStorage getStorage();
 
+    /**
+     * Read in configuration, and submissions, unchecks out submissions.
+     * 
+     * @param siteNumber
+     * @param log
+     * @return
+     * @throws IOException
+     * @throws ClassNotFoundException
+     * @throws FileSecurityException
+     */
     boolean readConfiguration(int siteNumber, Log log) throws IOException, ClassNotFoundException, FileSecurityException;
     
     /**
@@ -984,7 +1000,7 @@ public interface IInternalContest {
      * 
      * @param newContest contest to copy information to.
      */
-    void cloneAllLoginAndConnections(InternalContest newContest);
+    void cloneAllLoginAndConnections(IInternalContest newContest);
 
     /**
      * Are RunFiles present?
@@ -1002,5 +1018,5 @@ public interface IInternalContest {
      * @param message
      */
     void addMessage(MessageEvent.Area area, ClientId source, ClientId destination, String message);
-    
+
 }

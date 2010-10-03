@@ -23,15 +23,18 @@ import edu.csus.ecs.pc2.core.list.ContestTimeComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.IMessageListener;
 import edu.csus.ecs.pc2.core.model.IProfileListener;
+import edu.csus.ecs.pc2.core.model.MessageEvent;
+import edu.csus.ecs.pc2.core.model.MessageEvent.Area;
 import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.model.ProfileEvent;
 import edu.csus.ecs.pc2.core.model.Site;
-import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.core.report.ProfileCloneSettingsReport;
 
@@ -467,6 +470,8 @@ public class ProfilesPane extends JPanePlugin {
         });
 
         inContest.addProfileListener(new ProfileListenerImplementation());
+        
+        inContest.addMessageListener(new MessageListenerImplementation());
     }
 
     protected void refreshProfilesList() {
@@ -558,6 +563,30 @@ public class ProfilesPane extends JPanePlugin {
                 }
             });
         }
+    }
+    
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    
+    // $HeadURL$
+    class MessageListenerImplementation implements IMessageListener{
+
+        public void messageAdded(MessageEvent event) {
+            if (event.getArea().equals(Area.PROFILES)){
+                JOptionPane.showMessageDialog(null, event.getMessage());
+            }
+            getController().getLog().warning(event.getMessage());
+        }
+
+        public void messageRemoved(MessageEvent event) {
+            // TODO Auto-generated method stub
+            
+        }
+        
+        
     }
 
     /**

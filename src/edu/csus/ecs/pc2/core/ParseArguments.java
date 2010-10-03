@@ -358,7 +358,7 @@ public class ParseArguments {
             return false;
         }
 
-        return ((String) obj).equals(NULL_VALUE);
+        return ! ((String) obj).equals(NULL_VALUE);
     }
 
     /**

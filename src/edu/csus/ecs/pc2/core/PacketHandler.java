@@ -24,7 +24,6 @@ import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ClientType;
-import edu.csus.ecs.pc2.core.model.ConfigurationIO;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestLoginSuccessData;
 import edu.csus.ecs.pc2.core.model.ContestTime;
@@ -38,6 +37,7 @@ import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.MessageEvent;
+import edu.csus.ecs.pc2.core.model.MessageEvent.Area;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.ProblemDataFilesList;
@@ -107,8 +107,6 @@ public class PacketHandler {
 
         Type packetType = packet.getType();
         
-        controller.incomingPacket(packet);
-
         info("handlePacket start " + packet);
         PacketFactory.dumpPacket(controller.getLog(), packet, "handlePacket");
         if (Utilities.isDebugMode()) {
@@ -425,20 +423,34 @@ public class PacketHandler {
     private IInternalContest switchProfile(IInternalContest currentContest, Profile newProfile, char[] contestPassword) throws ProfileException {
 
         ProfileManager manager = new ProfileManager();
+        
         IStorage storage = manager.getProfileStorage(newProfile, contestPassword);
 
-        ConfigurationIO configurationIO = new ConfigurationIO(storage);
-        
         /**
          * Open new log for new Profile
          */
 
-        InternalContest newContest = new InternalContest();
+        IInternalContest newContest = new InternalContest();
         
         newContest.setClientId(contest.getClientId());
         newContest.setSiteNumber(contest.getSiteNumber());
-
-        configurationIO.loadFromDisk(contest.getSiteNumber(), newContest, controller.getLog());
+        newContest.setStorage(storage);
+        
+        try {
+            /**
+             * This loads configuration and re-loads submissions and un-checksout submissions.
+             */
+            newContest.readConfiguration(contest.getSiteNumber(), controller.getLog());
+        } catch (Exception e) {
+            e.printStackTrace(); // debug 22
+            throw new ProfileException(newProfile,"Unable to read configuration ");
+        }
+        
+        try {
+            newContest.storeConfiguration(controller.getLog());
+        } catch (Exception e) {
+            throw new ProfileException(newProfile, "Unable to store configuration ", e);
+        }
 
         /**
          * Remove listeners so that they are no longer referenced
@@ -552,16 +564,16 @@ public class PacketHandler {
 //        Profile currentProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE);
         
         ProfileCloneSettings settings =  (ProfileCloneSettings) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE_CLONE_SETTINGS);
-    
         boolean switchProfileNow = ((Boolean) PacketFactory.getObjectValue(packet, PacketFactory.SWITCH_PROFILE)).booleanValue();
         
         Profile newProfile = new Profile(settings.getName());
         newProfile.setDescription(settings.getTitle());
-        newProfile.setSiteNumber(contest.getProfile().getSiteNumber());
+        newProfile.setSiteNumber(contest.getSiteNumber());
         
         Profile addedProfile = contest.addProfile(newProfile);
         
         InternalContest newContest = new InternalContest();
+        newContest.setSiteNumber(contest.getSiteNumber());
         
         /**
          * This clones the existing contest based on the settings,
@@ -1286,26 +1298,24 @@ public class PacketHandler {
                 }
             } else {
                 String message = (String) PacketFactory.getObjectValue(packet, PacketFactory.MESSAGE_STRING);
-                Packet messagePacket = PacketFactory.createMessage(contest.getClientId(), packet.getDestinationId(), message);
+                Area area = (Area) PacketFactory.getObjectValue(packet, PacketFactory.MESSAGE_AREA);
+                Packet messagePacket = PacketFactory.createMessage(contest.getClientId(), packet.getDestinationId(), area, message);
                 int siteNumber = packet.getDestinationId().getSiteNumber();
                 controller.sendToRemoteServer(siteNumber, messagePacket);
             }
         } else {
             String message = (String) PacketFactory.getObjectValue(packet, PacketFactory.MESSAGE_STRING);
+            Area area = (Area) PacketFactory.getObjectValue(packet, PacketFactory.MESSAGE_AREA);
             if (message == null){
                 throw new Exception ("Message null in packet "+packet);
             } else {
-                // TODO add the MessageEvent.Area to the message packet
-                
-                if (message.contains("Profile")){
+                if (area.equals(Area.PROFILES)) {
                     contest.addMessage(MessageEvent.Area.PROFILES, packet.getSourceId(), packet.getDestinationId(), message);
                 } else {
                     contest.addMessage(MessageEvent.Area.OTHER, packet.getSourceId(), packet.getDestinationId(), message);
                 }
             }
         }
-
-
     }
     
     private void insureProfileDirectory(Profile profile) {

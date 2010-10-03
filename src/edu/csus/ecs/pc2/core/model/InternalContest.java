@@ -325,18 +325,24 @@ public class InternalContest implements IInternalContest {
             }
         }
 
-        if (getContestTime(siteNum) == null){
+        if (getContestTime(siteNum) == null) {
             ContestTime contestTime = new ContestTime();
             contestTime.setSiteNumber(siteNum);
             addContestTime(contestTime);
         }
 
-        if (getAccounts(Type.SERVER) == null){
+        if (getAccounts(Type.SERVER) == null || getAccounts(Type.SERVER, siteNum).size() == 0) {
             generateNewAccounts(Type.SERVER.toString(), 1, true);
         }
-        
-        if (getAccounts(Type.ADMINISTRATOR) != null){
+
+        if (getAccounts(Type.ADMINISTRATOR) == null || getAccounts(Type.ADMINISTRATOR, siteNum).size() == 0) {
             generateNewAccounts(ClientType.Type.ADMINISTRATOR.toString(), 1, true);
+        }
+
+        if (getAccounts(Type.ADMINISTRATOR).size() == 0) {
+            new Exception("No Admin account created debug 22 ").printStackTrace();
+        } else {
+            System.out.println("Admin account count is: " + getAccounts(Type.ADMINISTRATOR).size());
         }
     }
 
@@ -2186,6 +2192,7 @@ public class InternalContest implements IInternalContest {
         }
         return loadedConfiguration;
     }
+    
     public boolean readConfiguration(int siteNum, Log log) throws IOException, ClassNotFoundException, FileSecurityException {
         return readConfiguration(siteNum, log, true);
     }
@@ -2225,6 +2232,12 @@ public class InternalContest implements IInternalContest {
         
         String databaseDirectoryName = profilePath + File.separator + "db." + contest.getSiteNumber();
 
+        try {
+            new File(databaseDirectoryName).mkdirs();
+        } catch (Exception e) {
+            throw new ProfileCloneException("Unable to create DB dir " + profilePath, e);
+        }
+        
         FileSecurity fileSecurity = new FileSecurity(databaseDirectoryName);
 
         try {
@@ -2243,6 +2256,9 @@ public class InternalContest implements IInternalContest {
             contest.addAccount(getAccount(getClientId()));
         }
 
+        contest.setClientId(getClientId());
+        contest.setSiteNumber(getClientId().getSiteNumber());
+        
         if (contest.getAccounts(Type.ADMINISTRATOR) != null) {
             ClientId adminId = new ClientId(getClientId().getSiteNumber(), Type.ADMINISTRATOR, 1);
             Account account = getAccount(adminId);
@@ -2253,21 +2269,17 @@ public class InternalContest implements IInternalContest {
             }
         }
 
-        contest.setClientId(getClientId());
-        contest.setSiteNumber(getClientId().getSiteNumber());
-
         for (Site site : getSites()) {
             contest.updateSite(site);
         }
 
         newProfile.setName(settings.getName());
-
         newProfile.setDescription(settings.getDescription());
 
         contest.setProfile(newProfile); // This also sets the contest identifier
         
-        for (Profile profile2 : getProfiles()){
-            if (! profile2.equals(newProfile)){
+        for (Profile profile2 : getProfiles()) {
+            if (!profile2.equals(newProfile)) {
                 contest.addProfile(profile2);
             }
         }
@@ -2562,7 +2574,7 @@ public class InternalContest implements IInternalContest {
         fireProfileListener(profileEvent);
     }
 
-    public void cloneAllLoginAndConnections(InternalContest newContest) {
+    public void cloneAllLoginAndConnections(IInternalContest newContest) {
         
         /**
          * Local Logins
@@ -2602,6 +2614,4 @@ public class InternalContest implements IInternalContest {
         MessageEvent messageEvent = new MessageEvent(MessageEvent.Action.ADDED, area, message, source, destination);
         fireMessageListener(messageEvent);
     }
-
-
 }
