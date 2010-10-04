@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core.report;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -10,6 +11,8 @@ import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Profile;
@@ -38,6 +41,8 @@ public class ProfilesReport implements IReport {
 
     private Filter filter = new Filter();
     
+    private boolean usingServer = false;
+    
     private void writeProfile(PrintWriter printWriter, Profile profile) {
         printWriter.println("Profile name  : " + profile.getName());
         printWriter.println("  description : " + profile.getDescription());
@@ -45,6 +50,24 @@ public class ProfilesReport implements IReport {
         printWriter.println("   element id : " + profile.getElementId());
         printWriter.println("   contest id : " + profile.getContestId());
         printWriter.println("         path : " + profile.getProfilePath());
+        
+        if (usingServer) {
+            String dirname = profile.getProfilePath();
+
+            if (!new File(dirname).isDirectory()) {
+                printWriter.println("                Profile directory does NOT exist");
+            } else {
+                printWriter.println("                Profile directory found");
+                dirname = dirname + File.separator + "db." + contest.getSiteNumber();
+                printWriter.println("      db path : " + dirname);
+                if (!new File(dirname).isDirectory()) {
+                    printWriter.println("                DB directory does NOT exist");
+                } else {
+                    printWriter.println("                DB directory found");
+
+                }
+            }
+        }
         
     }
 
@@ -57,6 +80,8 @@ public class ProfilesReport implements IReport {
 
     public void writeReport(PrintWriter printWriter) {
 
+        usingServer = isServer();
+        
         printWriter.println("-- Current Profile");
         writeActiveProfile(printWriter);
 
@@ -147,6 +172,14 @@ public class ProfilesReport implements IReport {
 
     public void setFilter(Filter filter) {
         this.filter = filter;
+    }
+    
+    private boolean isServer() {
+        return contest.getClientId() != null && isServer(contest.getClientId());
+    }
+
+    private boolean isServer(ClientId clientId) {
+        return clientId.getClientType().equals(ClientType.Type.SERVER);
     }
 
 }

@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Rectangle;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -28,6 +29,7 @@ import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.report.AccountPermissionReport;
 import edu.csus.ecs.pc2.core.report.AccountsReport;
@@ -64,7 +66,6 @@ import edu.csus.ecs.pc2.core.report.RunsReport5;
 import edu.csus.ecs.pc2.core.report.SolutionsByProblemReport;
 import edu.csus.ecs.pc2.core.report.StandingsReport;
 import edu.csus.ecs.pc2.ui.EditFilterPane.ListNames;
-import java.awt.Rectangle;
 
 /**
  * Report Pane, allows picking and viewing reports.
@@ -351,6 +352,50 @@ public class ReportPane extends JPanePlugin {
         multipleFileViewer.setVisible(true);
     }
     
+    protected void createHeader(PrintWriter printWriter, IReport report){
+        /**
+         * Create/write standardized header for all reports
+         */
+
+        printWriter.println(new VersionInfo().getSystemName());
+        printWriter.println(new VersionInfo().getSystemVersionInfo());
+        ContestInformation contestInformation = getContest().getContestInformation();
+        String contestTitle = "(Contest title not defined)";
+        if (contestInformation != null) {
+            contestTitle = contestInformation.getContestTitle();
+        }
+        printWriter.println("Contest Title: " + contestTitle);
+        printWriter.print("On: " + Utilities.getL10nDateTime());
+        GregorianCalendar resumeTime = getContest().getContestTime().getResumeTime();
+        if (resumeTime == null) {
+            printWriter.print("  Contest date/time: never started");
+        } else {
+            printWriter.print("  Contest date/time: " + resumeTime.getTime());
+
+        }
+        
+        printWriter.println();
+        Profile profile = getContest().getProfile();
+        if (profile != null) {
+            printWriter.println("Profile: " + profile.getName() + " (" + profile.getDescription() + ")");
+        } else {
+            printWriter.println("Profile: none defined");
+        }
+        
+        printWriter.println();
+        printWriter.println();
+        printWriter.println("** " + report.getReportTitle() + " Report");
+        printWriter.println();
+        if (filter != null) {
+            String filterInfo = filter.toString();
+            if (filter.isFilterOn() && (!filterInfo.equals(""))) {
+                printWriter.println("Filter: " + filterInfo);
+                printWriter.println();
+            }
+        }
+ 
+    }
+    
     public void createReportFile(IReport report, String filename, Filter inFilter) throws IOException {
 
         PrintWriter printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
@@ -358,39 +403,7 @@ public class ReportPane extends JPanePlugin {
 
         try {
 
-            /**
-             * Create/write standardized header for all reports
-             */
-
-            printWriter.println(new VersionInfo().getSystemName());
-            printWriter.println(new VersionInfo().getSystemVersionInfo());
-            ContestInformation contestInformation = getContest().getContestInformation();
-            String contestTitle = "(Contest title not defined)";
-            if (contestInformation != null) {
-                contestTitle = contestInformation.getContestTitle();
-            }
-            printWriter.println("Contest Title: " + contestTitle);
-            printWriter.print("On: " + Utilities.getL10nDateTime());
-            GregorianCalendar resumeTime = getContest().getContestTime().getResumeTime();
-            if (resumeTime == null) {
-                printWriter.print("  Contest date/time: never started");
-            } else {
-                printWriter.print("  Contest date/time: " + resumeTime.getTime());
-
-            }
-            printWriter.println();
-            printWriter.println();
-            printWriter.println("** " + report.getReportTitle() + " Report");
-            printWriter.println();
-            if (filter != null) {
-                String filterInfo = filter.toString();
-                if (filter.isFilterOn() && (!filterInfo.equals(""))) {
-                    printWriter.println("Filter: " + filterInfo);
-                    printWriter.println();
-                }
-            }
-
-            // report.printHeader(printWriter);
+            createHeader(printWriter, report);
 
             try {
                 report.writeReport(printWriter);

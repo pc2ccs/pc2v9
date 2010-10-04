@@ -827,6 +827,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             }
         }
         
+        ProfileManager manager = new ProfileManager();
+        
         boolean loadedConfiguration = readConfigFromDisk(contest.getSiteNumber());
 
         if (!loadedConfiguration) {
@@ -854,14 +856,26 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             }
 
             info("initialized controller Site " + contest.getSiteNumber());
-            loadProfiles(contest);
+            
+            try {
+                manager.mergeProfiles(contest);
+            } catch (Exception e) {
+                logException(e);
+            }
+            
             contest.storeConfiguration(getLog());
         } else {
             if (saveCofigurationToDisk) {
                 contest.initializeSubmissions(contest.getSiteNumber());
             }
             info("Loaded configuration from disk");
-            loadProfiles(contest);
+            
+            try {
+                manager.mergeProfiles(contest);
+            } catch (Exception e) {
+                logException(e);
+            }
+        
         }
         
         theProfile = contest.getProfile();
@@ -2265,47 +2279,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
     }
     
-    /**
-     * Load profiles from disk into contest.
-     * 
-     * @param inContest contest to add profiles to.
-     */
-    private void loadProfiles(IInternalContest inContest) {
 
-        ProfileManager manager = new ProfileManager();
 
-        if (manager.hasDefaultProfile()) {
-            try {
-                Profile[] profiles = manager.load();
-
-                for (Profile profile : profiles) {
-
-                    if (!exists(profile)) {
-                        // Only add if profile is not in current list.
-                        inContest.updateProfile(profile);
-                    }
-                }
-            } catch (Exception e) {
-                logException(e);
-            }
-        }
-    }
-
-    /**
-     * Is Profile already in contest ?.
-     * @param aProfile
-     * @return
-     */
-    private boolean exists(Profile aProfile) {
-        
-        for (Profile profile: contest.getProfiles()){
-            if (aProfile.getName().equals(profile.getName())){
-                return true;
-            }
-        }
-        
-        return false;
-    }
 
     /**
      * Get current profile, create one if needed.
@@ -3115,7 +3090,11 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         String id = clientId.getName();
         startLog(getBaseProfileDirectoryName(Log.LOG_DIRECTORY_NAME), stripChar(clientId.toString(), ' '), id, clientId.getName());
 
-        loadProfiles(inContest);
+        try {
+            new ProfileManager().mergeProfiles(contest);
+        } catch (Exception e) {
+            logException(e);
+        }
 
         for (UIPlugin plugin : getPluginList()) {
 

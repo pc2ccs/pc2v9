@@ -48,6 +48,7 @@ import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.SecurityMessageHandler;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
+import edu.csus.ecs.pc2.profile.ProfileLoadException;
 import edu.csus.ecs.pc2.profile.ProfileManager;
 
 /**
@@ -2398,25 +2399,16 @@ public class InternalContest implements IInternalContest {
          * Updated profiles in .properties/text file.
          * 
          */
-
-        ProfileManager profileManager = new ProfileManager();
-
-        Profile[] currentProfiles = null;
-
         try {
-            currentProfiles = profileManager.load();
-        } catch (Exception e) {
-            logException(e);
-        }
-
-        Profile[] mergedProfiles = profileManager.mergeProfiles(currentProfiles, getProfiles());
-
-        try {
-            // Store profiles to properties file.
-
-            profileManager.store(mergedProfiles, getProfile());
+            ProfileManager profileManager = new ProfileManager();
+            profileManager.mergeProfiles(this);
+            profileManager.store(getProfiles(), getProfile());
         } catch (IOException e) {
             ProfileCloneException exception = new ProfileCloneException("Unable to store profiles in " + ProfileManager.PROFILE_INDEX_FILENAME);
+            exception.setStackTrace(e.getStackTrace());
+            throw exception;
+        } catch (ProfileLoadException e) {
+            ProfileCloneException exception = new ProfileCloneException("Unable to merge profiles");
             exception.setStackTrace(e.getStackTrace());
             throw exception;
         }

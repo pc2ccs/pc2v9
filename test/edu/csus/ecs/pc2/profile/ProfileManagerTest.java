@@ -6,6 +6,8 @@ import java.io.IOException;
 import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.security.FileSecurity;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
@@ -40,10 +42,8 @@ public class ProfileManagerTest extends TestCase {
 
         ProfileManager manager = new ProfileManager();
 
-        String filename = "testwr" + ProfileManager.PROFILE_INDEX_FILENAME;
-        if (new File(filename).isFile()){
-            new File(filename).delete();
-        }
+        String filename = getFullName ("testwr" + ProfileManager.PROFILE_INDEX_FILENAME);
+        removeFile (filename);
 
         Profile profile4 = new Profile("Profile IV");
         profile4.setDescription(profile4.getName());
@@ -98,11 +98,6 @@ public class ProfileManagerTest extends TestCase {
 
         ProfileManager manager = new ProfileManager();
 
-        String filename2 = ProfileManager.PROFILE_INDEX_FILENAME;
-        if (new File(filename2).isFile()) {
-            new File(filename2).delete();
-        }
-
         String password = "foo";
 
         Profile[] profiles = createProfiles("PMTest sample", password, 6);
@@ -125,10 +120,8 @@ public class ProfileManagerTest extends TestCase {
 
         ProfileManager manager = new ProfileManager();
 
-        String filename = "testdp" + ProfileManager.PROFILE_INDEX_FILENAME;
-        if (new File(filename).isFile()) {
-            new File(filename).delete();
-        }
+        String filename = getFullName ("testdp" + ProfileManager.PROFILE_INDEX_FILENAME);
+        removeFile(filename);
         
         Profile [] profiles = { profile1 };
         
@@ -148,11 +141,9 @@ public class ProfileManagerTest extends TestCase {
         profile1.setDescription(description);
 
         ProfileManager manager = new ProfileManager();
-
-        String filename = "testpa" + ProfileManager.PROFILE_INDEX_FILENAME;
-        if (new File(filename).isFile()) {
-            new File(filename).delete();
-        }
+        
+        String filename = getFullName ("testpa" + ProfileManager.PROFILE_INDEX_FILENAME);
+        removeFile(filename);
 
         Profile profile4 = new Profile("PMTest Profile IV");
         profile4.setDescription(profile4.getName());
@@ -214,7 +205,8 @@ public class ProfileManagerTest extends TestCase {
      */
     public void testProfileManager() throws Exception {
 
-        String profilePropertiesFileName = "storeOne.properties";
+        String profilePropertiesFileName = getFullName ("testPM.properties");
+        removeFile(profilePropertiesFileName);
 
         String password = "contest";
 
@@ -271,7 +263,8 @@ public class ProfileManagerTest extends TestCase {
 
         ProfileManager manager = new ProfileManager();
         
-        String profilePropertiesFileName = "storeOne.properties";
+        String profilePropertiesFileName = getFullName ("storeOne.properties");
+        removeFile(profilePropertiesFileName);
 
         String title = "Profile One";
         Profile profile1 = new Profile(title);
@@ -338,7 +331,10 @@ public class ProfileManagerTest extends TestCase {
 
     public void testMergeTwo() throws Exception {
 
-        ProfileManager profileManager = new ProfileManager();
+        String profilePropertiesFileName = getFullName ("mergeTwo.properties");
+        removeFile(profilePropertiesFileName);
+
+        ProfileManager profileManager = new ProfileManager(profilePropertiesFileName);
 
         String title = "PMTest";
         String description = "description 11";
@@ -401,6 +397,104 @@ public class ProfileManagerTest extends TestCase {
         return null;
     }
     
+    protected IInternalContest createConstest(Profile [] profiles, Profile profile){
+        
+        InternalContest contest = new InternalContest();
+        
+        for (Profile p : profiles){
+            contest.addProfile(p);
+        }
+        
+        contest.setProfile(profile);
+        return contest;
+    }
+    
+    protected String getTestDirectoryName(){
+        String testDir = "testing";
+        
+        if (!new File(testDir).isDirectory()) {
+            new File(testDir).mkdirs();
+        }
+
+        return testDir;
+    }
+    
+    protected String getFullName (String filename){
+        return getTestDirectoryName() + File.separator + filename;
+    }
+    
+    public void testMerge() throws Exception {
+        
+        String filename = getFullName( "testm.properties");
+        String filename2 = getFullName( "testM2.properties");
+
+        removeFile (filename);
+        removeFile (filename2);
+     
+        ProfileManager manager1 = new ProfileManager(filename);
+
+        Profile[] profiles1 = createProfiles("PMTtm", "foo", 4);
+
+        Profile[] profiles2 = createProfiles("PMTtm", "foo", 3);
+        
+        manager1.store(profiles1, profiles1[0]);
+
+        IInternalContest contest1 = createConstest(profiles2, profiles2[0]);
+        
+        /**
+         * Merge profiles2 into contest.
+         */
+        manager1.mergeProfiles(contest1);
+        
+        assertEquals(profiles1.length + profiles2.length, contest1.getProfiles().length);
+
+        ProfileManager manager2 = new ProfileManager(filename2);
+        manager2.store(profiles2, profiles2[0]);
+
+        IInternalContest contest2 = createConstest(profiles2, profiles2[0]);
+
+        /**
+         * Merget profiles2 into contest2
+         */
+        manager2.mergeProfiles(contest2);
+
+        assertEquals(profiles2.length, contest2.getProfiles().length);
+
+//        dumpProfiles(profiles1, "1"); System.out.println();
+//        dumpProfiles(contest2.getProfiles(),"contest try 1 ");
+        
+        /**
+         * Merge profiles1 into contest2
+         */
+        manager1.mergeProfiles(contest2);
+        
+//        dumpProfiles(profiles2, "2");
+//        dumpProfiles(contest2.getProfiles(),"contest try 2 ");
+        
+        assertEquals(profiles1.length + profiles2.length, contest2.getProfiles().length);
+        
+    }
+    
+//    private void dumpProfiles(Profile[] profiles, String string) {
+//        
+//        Arrays.sort(profiles, new ProfileComparatorByName());
+//        for (Profile p : profiles){
+//            System.out.println("  "+string+" "+p.getProfilePath()+" "+p.getName());
+//        }
+//        
+//    }
+
+    private void removeFile(String filename) {
+        if (new File(filename).isFile()){
+            new File(filename).delete();
+        }
+    }
+
+    /**
+     * Print default profile properties. 
+     * 
+     * @param args
+     */
     public static void main(String[] args) {
         
         ProfileManager manager = new ProfileManager();

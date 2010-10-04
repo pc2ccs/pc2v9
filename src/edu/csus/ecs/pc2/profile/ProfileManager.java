@@ -12,6 +12,7 @@ import java.util.Vector;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IStorage;
 import edu.csus.ecs.pc2.core.exception.ProfileException;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.security.FileSecurity;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
@@ -38,8 +39,19 @@ public class ProfileManager {
      */
     public static final String PROFILE_INDEX_FILENAME = "profiles.properties";
 
+    private String propertiesFileName = PROFILE_INDEX_FILENAME;
+
     private String delimiter = ",";
+
+    public ProfileManager() {
+        propertiesFileName = PROFILE_INDEX_FILENAME;
+    }
+
     
+    public ProfileManager(String filename) {
+        propertiesFileName = filename;
+    }
+
     /**
      * Create Profile from data in filename.
      * 
@@ -62,7 +74,7 @@ public class ProfileManager {
     }
     
     public Profile[] load() throws IOException, ProfileLoadException {
-        return load(PROFILE_INDEX_FILENAME);
+        return load(propertiesFileName);
     }
     
     /**
@@ -99,7 +111,7 @@ public class ProfileManager {
      * @throws ProfileLoadException
      */
     public void add (Profile profile) throws IOException, ProfileLoadException{
-        add (PROFILE_INDEX_FILENAME, profile);
+        add (propertiesFileName, profile);
     }
 
     /**
@@ -158,7 +170,7 @@ public class ProfileManager {
     }
     
     public boolean hasDefaultProfile (){
-        return hasDefaultProfile(PROFILE_INDEX_FILENAME);
+        return hasDefaultProfile(propertiesFileName);
     }
     /**
      * Is there a default profile defined ?
@@ -177,7 +189,7 @@ public class ProfileManager {
     }
     
     public Profile getDefaultProfile() throws IOException, ProfileLoadException {
-        return getDefaultProfile(PROFILE_INDEX_FILENAME);
+        return getDefaultProfile(propertiesFileName);
     }
     
     public Profile getDefaultProfile(String filename) throws IOException, ProfileLoadException {
@@ -322,11 +334,11 @@ public class ProfileManager {
      * @throws IOException
      */
     public boolean store( Profile[] profiles, Profile defaultProfile) throws IOException {
-        return this.store(PROFILE_INDEX_FILENAME, profiles, defaultProfile);
+        return this.store(propertiesFileName, profiles, defaultProfile);
     }
     
     public boolean storeDefaultProfile(Profile defaultProfile) throws IOException {
-        return storeDefaultProfile(PROFILE_INDEX_FILENAME, defaultProfile);
+        return storeDefaultProfile(propertiesFileName, defaultProfile);
     }
     
     public boolean storeDefaultProfile(String filename, Profile defaultProfile) throws IOException {
@@ -407,10 +419,63 @@ public class ProfileManager {
         return (Profile[]) table.values().toArray(new Profile[table.values().size()]);
     }
     
+    /**
+     * Profile present in contest?.
+     * 
+     * Checked for equality using getProfilePath(), not equals.
+     * 
+     * @param contest
+     * @param aProfile
+     * @return
+     */
+    private boolean exists(IInternalContest contest, Profile aProfile) {
+
+        for (Profile profile : contest.getProfiles()) {
+            if (aProfile.getProfilePath().equals(profile.getProfilePath())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+    
+    /**
+     * Merge profiles.
+     * 
+     * @param contest
+     *            contest to add profiles to.
+     * @throws IOException
+     * @throws ProfileLoadException
+     */
+    public void mergeProfiles(IInternalContest contest) throws IOException, ProfileLoadException {
+
+        if (hasDefaultProfile()) {
+            Profile[] profiles = load();
+
+            for (Profile profile : profiles) {
+                if (! exists(contest, profile)) {
+                    contest.addProfile(profile);
+                // } else { exists - so no update/add
+                }
+            }
+        }
+        // else no profiles to load.
+    }
+
+    
     public static Profile createNewProfile() {
         Profile profile = new Profile("Contest");
         profile.setDescription("Real Contest");
         return profile;
     }
 
+
+    public String getPropertiesFileName() {
+        return propertiesFileName;
+    }
+
+    public void setPropertiesFileName(String propertiesFileName) {
+        this.propertiesFileName = propertiesFileName;
+    }
+    
 }

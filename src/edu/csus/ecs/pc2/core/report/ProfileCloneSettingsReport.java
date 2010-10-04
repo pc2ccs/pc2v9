@@ -38,13 +38,24 @@ public class ProfileCloneSettingsReport implements IReport {
     public void writeReport(PrintWriter printWriter) {
 
         ProfileCloneSettings settings = contest.getProfileCloneSettings();
-
-        printWriter.println(" DEBUG DEBUG ");
-        settings = new ProfileCloneSettings("Name", "Title", "PaSSword".toCharArray());
-        settings.setDescription("desCriptION");
-        settings.setNewContestPassword("newPass".toCharArray());
-
-        printCloneSettings(printWriter, settings);
+        if (settings != null){
+            printCloneSettings(printWriter, settings);
+        } else {
+            printWriter.println("No Profile Clone settings (not a cloned profile)");
+        }
+        
+        printWriter.println();
+        
+        /**
+         * Print all profiles too
+         */
+        
+        printWriter.println();
+        ProfilesReport profilesReport = new ProfilesReport();
+        profilesReport.setContestAndController(contest, controller);
+        profilesReport.writeReport(printWriter);
+        profilesReport = null;
+        
     }
 
     public void printCloneSettings(PrintWriter printWriter, ProfileCloneSettings settings) {
@@ -76,19 +87,7 @@ public class ProfileCloneSettingsReport implements IReport {
         printWriter.println("   Copy Runs           " + settings.isCopyRuns());
         printWriter.println("   Copy Clarifications " + settings.isCopyClarifications());
         
-        printWriter.println();
-        
-        /**
-         * Print all profiles too
-         */
-        
-        printWriter.println();
-        
-        ProfilesReport profilesReport = new ProfilesReport();
-        profilesReport.setContestAndController(contest, controller);
-        profilesReport.writeReport(printWriter);
-        profilesReport = null;
-        
+       
     }
 
     public void printHeader(PrintWriter printWriter) {
