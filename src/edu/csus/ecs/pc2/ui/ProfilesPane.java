@@ -501,6 +501,7 @@ public class ProfilesPane extends JPanePlugin {
 
     private Object[] buildProfileRow(Profile profile) {
 
+//        Object[] cols = { "Name", "Description", "Create Date", "Contest ID", "Path" };
         // Object[] cols = { "Name", "Description", "Create Date" }
 
         int numberColumns = profilesListBox.getColumnCount();
@@ -512,6 +513,8 @@ public class ProfilesPane extends JPanePlugin {
         }
         c[1] = profile.getDescription();
         c[2] = formatter.format(profile.getCreateDate());
+        c[3] = profile.getContestId();
+        c[4] = profile.getProfilePath();
 
         return c;
     }
@@ -647,7 +650,7 @@ public class ProfilesPane extends JPanePlugin {
         if (profilesListBox == null) {
             profilesListBox = new MCLB();
 
-            Object[] cols = { "Name", "Description", "Create Date" };
+            Object[] cols = { "Name", "Description", "Create Date", "Contest ID", "Path" };
             profilesListBox.addColumns(cols);
 
             HeapSorter sorter = new HeapSorter();
@@ -657,6 +660,8 @@ public class ProfilesPane extends JPanePlugin {
             profilesListBox.setColumnSorter(idx++, sorter, 1); // Name
             profilesListBox.setColumnSorter(idx++, sorter, 2); // Description
             profilesListBox.setColumnSorter(idx++, sorter, 3); // Create Date
+            profilesListBox.setColumnSorter(idx++, sorter, 4); // Contest Id
+            profilesListBox.setColumnSorter(idx++, sorter, 5); // Path
 
         }
         return profilesListBox;

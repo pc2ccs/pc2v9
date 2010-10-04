@@ -2325,6 +2325,11 @@ public class InternalContest implements IInternalContest {
         if (settings.isCopyJudgements()) {
             contest.setJudgementList(getJudgements());
         }
+        
+        if (contest.getJudgements().length == 0){
+            Judgement judgement = new Judgement("Yes");
+            contest.addJudgement(judgement);
+        }
 
         if (settings.isCopyLanguages()) {
             for (Language language : getLanguages()) {

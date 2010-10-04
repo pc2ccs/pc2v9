@@ -13,6 +13,7 @@ import edu.csus.ecs.pc2.core.InternalController;
 import edu.csus.ecs.pc2.core.ParseArguments;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ConfigurationIO;
@@ -304,6 +305,7 @@ public final class Reports {
             }
             InternalContest contest = new InternalContest();
             Log log = new Log("pc2reports.log");
+            StaticLog.setLog(log);
 
             contest.setStorage(storage);
 

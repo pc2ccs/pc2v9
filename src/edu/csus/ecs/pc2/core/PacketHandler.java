@@ -468,7 +468,9 @@ public class PacketHandler {
         contest = newContest;
 
         contest.fireAllRefreshEvents();
-
+        
+        storeProfiles();
+        
         sendOutChangeProfileToAll(contest, currentContest.getProfile(), newProfile, new String(contestPassword));
 
 //        Utilities.viewReport(new InternalDumpReport(), "debug22 after", contest, controller);
@@ -477,7 +479,12 @@ public class PacketHandler {
     }
 
     /**
-     * Create and send current profile to all clients
+     * Create and send current profile to all clients and servers.
+     * 
+     * @param newContest
+     * @param currentProfile
+     * @param switchToProfile
+     * @param contestPassword used to encrypt/decrypt config files.
      */
     private void sendOutChangeProfileToAll(IInternalContest newContest, Profile currentProfile, Profile switchToProfile, String contestPassword) {
 
@@ -485,45 +492,86 @@ public class PacketHandler {
         Packet packet = PacketFactory.createUpdateProfileClientPacket(getServerClientId(), PacketFactory.ALL_SERVERS, currentProfile, switchToProfile, data);
 
         // Servers get the same packet
-        sendClonePacketToUsers(packet, ClientType.Type.SERVER);
+        sendClonePacketToUsers(packet, ClientType.Type.SERVER, newContest, false);
 
+        // Create packed for Admin, Judge, boards
         data = createContestLoginSuccessData(newContest, getServerClientId(), null);
         packet = PacketFactory.createUpdateProfileClientPacket(getServerClientId(), PacketFactory.ALL_SERVERS, currentProfile, switchToProfile, data);
-        
+
         ClientType.Type[] typeList = { //
-                ClientType.Type.ADMINISTRATOR, //
+        ClientType.Type.ADMINISTRATOR, //
                 ClientType.Type.JUDGE, //
                 ClientType.Type.SCOREBOARD, //
-                // ClientType.Type.EXECUTOR , //
-                // ClientType.Type.SPECTATOR, //
-                // ClientType.Type.OTHER , //
+        // ClientType.Type.EXECUTOR , //
+        // ClientType.Type.SPECTATOR, //
+        // ClientType.Type.OTHER , //
         };
 
         for (ClientType.Type type : typeList) {
-            sendClonePacketToUsers(packet, type);
+            sendClonePacketToUsers(packet, type, newContest, true);
         }
 
+        /**
+         * Handle new profile/config packets for teams on this server.
+         */
         ClientId[] teams = contest.getLocalLoggedInClients(ClientType.Type.TEAM);
+
+        info("debug22 Send to "+teams.length+" teams."); // debug22
+
         for (ClientId clientId : teams) {
             
-            // Team's get their specific data in their packet (their runs, their clars, no judges data files)
-            data = createContestLoginSuccessData(newContest, clientId, null);
-            packet = PacketFactory.createUpdateProfileClientPacket(getServerClientId(), clientId, currentProfile, switchToProfile, data);
-            controller.sendToClient(packet);
+            info("debug22 Send to team "+clientId); // debug22
+
+            if (newContest.getAccount(clientId) != null) {
+                // Account exists in new profile/config
+
+                // Team's get their specific data in their packet (their runs, their clars, no judges data files)
+                data = createContestLoginSuccessData(newContest, clientId, null);
+                packet = PacketFactory.createUpdateProfileClientPacket(getServerClientId(), clientId, currentProfile, switchToProfile, data);
+                controller.sendToClient(packet);
+            } else {
+                // Account/user does not exist in new profile/config
+                controller.getLog().info("Not sending UPDATE_CLIENT_PROFILE to client not found in new profile/account list " + clientId);
+                // TODO logoff/disconnect client
+            }
+
         }
     }
 
     /**
-     * Send cloned pack to logged in users.
+     * Send cloned packet to user class (ClientType).
+     * 
+     * Will loop through all logged in users for ClientType and send packet to users.
+     * 
+     * To send to only accounts/user logins that exist in the new profile/contest configuration,
+     * set the confirmUserExists to true.
      * 
      * @param packet packet to send
      * @param type class of user to send to.
+     * @param newContest data used to confirm that account/clientId exists.
+     * @param confirmUserExists - true means confirm that each clientId exists, false means send out without confirmation.
      */
-    private void sendClonePacketToUsers(Packet packet, edu.csus.ecs.pc2.core.model.ClientType.Type type) {
+    private void sendClonePacketToUsers(Packet packet, edu.csus.ecs.pc2.core.model.ClientType.Type type, IInternalContest newContest, boolean confirmUserExists) {
         ClientId[] users = contest.getLocalLoggedInClients(type);
+        
+        info("debug22 Send to "+users.length+" "+type.toString()); // debug22
+        
         for (ClientId clientId : users) {
-            packet = PacketFactory.clonePacket(getServerClientId(), clientId, packet);
-            controller.sendToClient(packet);
+            
+            info("debug22 Send to client "+clientId); // debug22
+            
+            if (!confirmUserExists) {
+                // send unconditional to client
+                packet = PacketFactory.clonePacket(getServerClientId(), clientId, packet);
+                controller.sendToClient(packet);
+            } else if (newContest.getAccount(clientId) != null) {
+                // Account exists in new profile, send it packet
+                packet = PacketFactory.clonePacket(getServerClientId(), clientId, packet);
+                controller.sendToClient(packet);
+            } else {
+                controller.getLog().info("Not sending UPDATE_CLIENT_PROFILE to client not found in new profile/account list " + clientId);
+                // TODO logoff/disconnect client
+            }
         }
     }
 
@@ -3255,63 +3303,16 @@ public class PacketHandler {
 
         try {
 
-            Vector<Profile> profileVector = new Vector<Profile>();
-
-            Profile[] list = new Profile[0];
-
-            if (manager.hasDefaultProfile()) {
-                list = manager.load();
-            }
+            Profile[] list = manager.load();
 
             if (list.length == 1 && contest.getProfiles().length == 1) {
                 manager.storeDefaultProfile(contest.getProfile());
             } else {
-
-                int i;
-                /**
-                 * Merge profiles.properties and the profiles in the model/contest.
-                 */
-                for (i = 0; i < list.length; i++) {
-                    Profile profile = list[i];
-
-                    boolean found = false;
-                    for (Profile contestProfile : contest.getProfiles()) {
-                        if (!found && contestProfile.getProfilePath().equals(profile.getProfilePath())) {
-                            profileVector.add(contestProfile);
-                            found = true;
-                        }
-                    }
-
-                    if (!found) {
-                        profileVector.add(profile);
-                    }
-                }
-
-                /**
-                 * Merge profiles in the model/contest into list (vector) thus far.
-                 */
-                
-                list = contest.getProfiles();
-                for (i = 0; i < list.length; i++) {
-                    Profile profile = list[i];
-
-                    boolean found = false;
-                    for (i = 0; i < profileVector.size(); i++) {
-                        Profile profile2 = profileVector.elementAt(i);
-                        if (!found && profile.getProfilePath().equals(profile2.getProfilePath())) {
-                            found = true;
-                        }
-                    }
-                    
-                    if (!found) {
-                        profileVector.add(profile);
-                    }
-                }
-
-                Profile[] newList = (Profile[]) profileVector.toArray(new Profile[profileVector.size()]);
-
-                manager.store(newList, contest.getProfile());
+                manager.mergeProfiles(contest);
             }
+
+            manager.store(contest.getProfiles(), contest.getProfile());
+
         } catch (Exception e) {
             logException("Problem saving/loading profiles from profile properties file", e);
             e.printStackTrace();
