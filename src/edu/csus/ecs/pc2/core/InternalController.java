@@ -783,10 +783,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             }
             info("initializeServer STARTED this site as Site "+contest.getSiteNumber());
 
-            String baseDirectoryName = getBaseProfileDirectoryName("db." + contest.getSiteNumber());
-            FileSecurity fileSecurity = new FileSecurity(baseDirectoryName);
-            initializeStorage(fileSecurity);
-            
             if (contest.getContestPassword() == null) {
                 
                 if (usingGUI){
@@ -804,6 +800,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                     }
                 }
             }
+
+            String baseDirectoryName = getBaseProfileDirectoryName("db." + contest.getSiteNumber());
+            FileSecurity fileSecurity = new FileSecurity(baseDirectoryName);
+            initializeStorage(fileSecurity);
 
             try {
                 fileSecurity.verifyPassword(contest.getContestPassword().toCharArray());
