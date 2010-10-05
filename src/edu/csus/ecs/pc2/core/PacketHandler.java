@@ -791,9 +791,8 @@ public class PacketHandler {
             settings.setCopyJudgements( true );
             settings.setCopyNotifications( true );
             
-            settings.setCopyLanguages( eraseLanguages );
-            settings.setCopyProblems( eraseProblems );
-            
+            settings.setCopyLanguages( !eraseLanguages );
+            settings.setCopyProblems( !eraseProblems );
             settings.setCopyRuns( false );
             settings.setCopyClarifications( false );
             
