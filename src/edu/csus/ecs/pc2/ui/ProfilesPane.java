@@ -19,14 +19,18 @@ import javax.swing.SwingUtilities;
 import com.ibm.webrunner.j2mclb.util.HeapSorter;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.PermissionGroup;
 import edu.csus.ecs.pc2.core.list.ContestTimeComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
+import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IMessageListener;
 import edu.csus.ecs.pc2.core.model.IProfileListener;
@@ -37,6 +41,8 @@ import edu.csus.ecs.pc2.core.model.ProfileEvent;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.core.report.ProfileCloneSettingsReport;
+import edu.csus.ecs.pc2.core.security.Permission;
+import edu.csus.ecs.pc2.core.security.PermissionList;
 
 /**
  * Profile administration pane.
@@ -91,6 +97,8 @@ public class ProfilesPane extends JPanePlugin {
     private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
 
     private JButton reportButton = null;
+
+    private PermissionList permissionList = new PermissionList();
 
     /**
      * This method initializes
@@ -242,8 +250,8 @@ public class ProfilesPane extends JPanePlugin {
     private JButton getNewButton() {
         if (newButton == null) {
             newButton = new JButton();
-            newButton.setText("New");
-            newButton.setMnemonic(java.awt.event.KeyEvent.VK_N);
+            newButton.setText(ProfileSavePane.CREATE_BUTTON_NAME);
+            newButton.setMnemonic(java.awt.event.KeyEvent.VK_T);
             newButton.setEnabled(true);
             newButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -306,7 +314,7 @@ public class ProfilesPane extends JPanePlugin {
 
     protected void newProfile() {
         getProfileSaveFrame().setTitle("Create new profile");
-        getProfileSaveFrame().setSaveButtonName(ProfileSavePane.NEW_BUTTON_NAME);
+        getProfileSaveFrame().setSaveButtonName(ProfileSavePane.CREATE_BUTTON_NAME);
         getProfileSaveFrame().setVisible(true);
     }
 
@@ -457,6 +465,8 @@ public class ProfilesPane extends JPanePlugin {
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
 
+        initializePermissions();
+        
         getProfileSaveFrame().setContestAndController(inContest, inController);
 
         Profile profile = getContest().getProfile();
@@ -465,6 +475,7 @@ public class ProfilesPane extends JPanePlugin {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 refreshProfilesList();
+                updateGUIperPermissions();
             }
 
         });
@@ -472,6 +483,19 @@ public class ProfilesPane extends JPanePlugin {
         inContest.addProfileListener(new ProfileListenerImplementation());
         
         inContest.addMessageListener(new MessageListenerImplementation());
+        
+        inContest.addAccountListener(new AccountListenerImplementation());
+    }
+    
+    private void updateGUIperPermissions() {
+
+        switchButton.setEnabled(isAllowed(Permission.Type.SWITCH_PROFILE));
+        setButton.setEnabled(isAllowed(Permission.Type.CLONE_PROFILE));
+        newButton.setEnabled(isAllowed(Permission.Type.CLONE_PROFILE));
+        exportButton.setEnabled(isAllowed(Permission.Type.EXPORT_PROFILE));
+        cloneButton.setEnabled(isAllowed(Permission.Type.CLONE_PROFILE));
+        resetContestButton.setEnabled(isAllowed(Permission.Type.RESET_CONTEST));
+        
     }
 
     protected void refreshProfilesList() {
@@ -709,6 +733,79 @@ public class ProfilesPane extends JPanePlugin {
         } catch (IOException e) {
             StaticLog.log("Exception creating report", e);
             JOptionPane.showMessageDialog(this, "Exception in report " + e.getLocalizedMessage());
+        }
+    }
+    
+    private boolean isAllowed(Permission.Type type) {
+        return permissionList.isAllowed(type);
+    }
+
+    private void initializePermissions() {
+        Account account = getContest().getAccount(getContest().getClientId());
+        if (account != null) {
+            permissionList.clearAndLoadPermissions(account.getPermissionList());
+        } else {
+            // Set default conditions
+            permissionList.clearAndLoadPermissions(new PermissionGroup().getPermissionList(getContest().getClientId().getClientType()));
+        }
+    }
+
+    /**
+     * Account listener for permissions.
+     *  
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    
+    // $HeadURL$
+    public class AccountListenerImplementation implements IAccountListener {
+
+        public void accountAdded(AccountEvent accountEvent) {
+            // ignore doesn't affect this pane
+        }
+
+        public void accountModified(AccountEvent event) {
+            // check if is this account
+            Account account = event.getAccount();
+            /**
+             * If this is the account then update the GUI display per the potential change in Permissions.
+             */
+            if (getContest().getClientId().equals(account.getClientId())) {
+                // They modified us!!
+                initializePermissions();
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        updateGUIperPermissions();
+                    }
+                });
+
+            }
+
+        }
+
+        public void accountsAdded(AccountEvent accountEvent) {
+            // ignore, this does not affect this class
+
+        }
+
+        public void accountsModified(AccountEvent accountEvent) {
+            for (Account account : accountEvent.getAccounts()) {
+                /**
+                 * If this is the account then update the GUI display per the potential change in Permissions.
+                 */
+                if (getContest().getClientId().equals(account.getClientId())) {
+                    SwingUtilities.invokeLater(new Runnable() {
+                        public void run() {
+                            initializePermissions();
+                            updateGUIperPermissions();
+                        }
+                    });
+                }
+            }
+        }
+
+        public void accountsRefreshAll(AccountEvent accountEvent) {
+            accountsModified(accountEvent);
         }
     }
 

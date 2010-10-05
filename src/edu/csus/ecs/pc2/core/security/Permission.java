@@ -230,6 +230,19 @@ public class Permission implements Serializable {
          * Reset Contest
          */
         RESET_CONTEST,
+        /**
+         * Switch Profile
+         */
+        SWITCH_PROFILE, 
+        /**
+         * Change, clone, create profile.
+         */
+        CLONE_PROFILE, 
+        /**
+         * Export Profile.
+         */
+        EXPORT_PROFILE,
+        
     };
 
     private Hashtable<Type, String> hash = new Hashtable<Type, String>();
@@ -304,6 +317,11 @@ public class Permission implements Serializable {
         
         hash.put(Type.RESPECT_NOTIFY_TEAM_SETTING, "Apply Notify Team Setting to Board/SA");
         hash.put(Type.RESET_CONTEST, "Reset Contest");
+        
+        hash.put(Type.CLONE_PROFILE, "Clone or change profile");
+        hash.put(Type.EXPORT_PROFILE, "Export profile");
+        hash.put(Type.SWITCH_PROFILE, "Switch profile");
+        hash.put(Type.RESET_CONTEST, "Reset contest/profile");
     }
 
     /**

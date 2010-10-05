@@ -44,19 +44,23 @@ public class PermissionGroup {
         /**
          * Then remove certain permissions
          */
-        administratorPermissionList.removePermission(Type.DISPLAY_ON_SCOREBOARD);
-        serverPermissionList.removePermission(Type.DISPLAY_ON_SCOREBOARD);
-        administratorPermissionList.removePermission(Type.BALLOON_EMAIL);
-        serverPermissionList.removePermission(Type.BALLOON_EMAIL);
-        administratorPermissionList.removePermission(Type.BALLOON_PRINT);
-        serverPermissionList.removePermission(Type.BALLOON_PRINT);
         
-        administratorPermissionList.removePermission(Type.RESPECT_EOC_SUPPRESSION);
-        administratorPermissionList.removePermission(Type.RESPECT_NOTIFY_TEAM_SETTING);
+        Type[] removeAdmin = { Type.BALLOON_EMAIL, Type.BALLOON_PRINT, Type.DISPLAY_ON_SCOREBOARD, Type.RESPECT_EOC_SUPPRESSION, //
+                Type.RESPECT_NOTIFY_TEAM_SETTING };
         
-        serverPermissionList.removePermission(Type.RESET_CONTEST);
+   
+        for (Type type : removeAdmin) {
+            administratorPermissionList.removePermission(type);
+        }
         
-
+        Type[] removeServer = { Type.BALLOON_EMAIL, Type.BALLOON_PRINT, Type.DISPLAY_ON_SCOREBOARD, Type.RESET_CONTEST, //
+                Type.CLONE_PROFILE, Type.EXPORT_PROFILE, Type.SWITCH_PROFILE, Type.RESET_CONTEST };
+        
+        
+        for (Type type : removeServer) {
+            serverPermissionList.removePermission(type);
+        }
+        
         /**
          * Team permissions
          */
@@ -121,7 +125,6 @@ public class PermissionGroup {
         scoreboardPermissionList.addPermission(Type.LOGIN);
         scoreboardPermissionList.addPermission(Type.VIEW_STANDINGS);
         scoreboardPermissionList.addPermission(Type.VIEW_SUMMARY_ATTEMPTS_GRID);
-
     }
 
     /**

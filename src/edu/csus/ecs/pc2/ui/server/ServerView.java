@@ -41,6 +41,7 @@ import edu.csus.ecs.pc2.ui.OptionsPanel;
 import edu.csus.ecs.pc2.ui.PacketMonitorPane;
 import edu.csus.ecs.pc2.ui.PlaybackPane;
 import edu.csus.ecs.pc2.ui.PluginLoadPane;
+import edu.csus.ecs.pc2.ui.ProfilesPane;
 import edu.csus.ecs.pc2.ui.ReportPane;
 import edu.csus.ecs.pc2.ui.SitesPanel;
 import edu.csus.ecs.pc2.ui.UIPlugin;
@@ -417,6 +418,9 @@ public class ServerView extends JFrame implements UIPlugin {
 
         ReportPane reportPane = new ReportPane();
         addUIPlugin(getMainTabbedPane(), "Reports", reportPane);
+
+        ProfilesPane profilePane = new ProfilesPane();
+        addUIPlugin(getMainTabbedPane(), "Profile", profilePane);
         
         PlaybackPane playbackPane = new PlaybackPane();
         addUIPlugin("Replay", playbackPane);
@@ -424,6 +428,7 @@ public class ServerView extends JFrame implements UIPlugin {
         OptionsPanel optionsPanel = new OptionsPanel();
         addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
         optionsPanel.setSecurityLogWindow(securityAlertLogWindow);
+        
         
         try {
             if (Utilities.isDebugMode()){

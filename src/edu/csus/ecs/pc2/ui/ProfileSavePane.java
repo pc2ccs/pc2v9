@@ -38,7 +38,7 @@ public class ProfileSavePane extends JPanePlugin {
 
     public static final String EXPORT_BUTTON_NAME = "Export"; // @jve:decl-index=0:
 
-    public static final String NEW_BUTTON_NAME = "New"; // @jve:decl-index=0:
+    public static final String CREATE_BUTTON_NAME = "Create"; // @jve:decl-index=0:
 
     private JPanel buttonPanel = null;
 
@@ -137,7 +137,7 @@ public class ProfileSavePane extends JPanePlugin {
     private JButton getSaveButton() {
         if (saveButton == null) {
             saveButton = new JButton();
-            saveButton.setText("Clone");
+            saveButton.setText(CLONE_BUTTON_NAME);
             saveButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     try {
@@ -193,7 +193,7 @@ public class ProfileSavePane extends JPanePlugin {
             cloneProfile();
         } else if (actionText.equalsIgnoreCase(EXPORT_BUTTON_NAME)) {
             exportProfile();
-        } else if (actionText.equalsIgnoreCase(NEW_BUTTON_NAME)) {
+        } else if (actionText.equalsIgnoreCase(CREATE_BUTTON_NAME)) {
             createNewProfile();
         } else {
             throw new InvalidFieldValue("Unknown Save button name: " + actionText);
@@ -498,7 +498,7 @@ public class ProfileSavePane extends JPanePlugin {
             setDefaultCloneSetting();
         } else if (buttonNameText.equalsIgnoreCase(EXPORT_BUTTON_NAME)) {
             setDefaultCloneSetting();
-        } else if (buttonNameText.equalsIgnoreCase(NEW_BUTTON_NAME)) {
+        } else if (buttonNameText.equalsIgnoreCase(CREATE_BUTTON_NAME)) {
             clearAllSettings();
             getCheckBoxPane().setVisible(false);
         } else {
