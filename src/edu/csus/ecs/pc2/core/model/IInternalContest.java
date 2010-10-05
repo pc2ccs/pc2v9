@@ -945,13 +945,12 @@ public interface IInternalContest {
      * To switch profiles see/use {@link edu.csus.ecs.pc2.core.model.IInternalController#cloneProfile(Profile, ProfileCloneSettings, boolean)};
      * 
      * @param contest
-     * @param newProfile
-     * @param profileBasePath
+     * @param newProfile 
      * @param settings
-     * @return
+     * @return cloned contest
      * @throws ProfileCloneException
      */
-    IInternalContest clone(IInternalContest contest, Profile newProfile, String profileBasePath, ProfileCloneSettings settings) throws ProfileCloneException;
+    IInternalContest clone(IInternalContest contest, Profile newProfile, ProfileCloneSettings settings) throws ProfileCloneException;
 
     /**
      * Get settings used to clone/create this profile.

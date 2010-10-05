@@ -2216,7 +2216,7 @@ public class InternalContest implements IInternalContest {
         return storage;
     }
 
-    public IInternalContest clone(IInternalContest contest, Profile newProfile, String profileBasePath, ProfileCloneSettings settings) throws ProfileCloneException {
+    public IInternalContest clone(IInternalContest contest, Profile newProfile, ProfileCloneSettings settings) throws ProfileCloneException {
 
         // TODO check for existing profile
 
@@ -2361,6 +2361,14 @@ public class InternalContest implements IInternalContest {
                     throw new ProfileCloneException("Can not copy runs if languages not copied too");
                 }
             }
+            
+            try {
+                Run [] runs = contest.getRuns();
+                System.out.println("debug22 Cloned "+runs.length+" runs");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            
         }
 
         if (settings.isCopyClarifications()) {

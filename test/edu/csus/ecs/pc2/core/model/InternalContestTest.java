@@ -7,6 +7,7 @@ import java.util.Vector;
 import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.security.FileSecurity;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
@@ -67,6 +68,16 @@ public class InternalContestTest extends TestCase {
     private static final String CONFIG_CLIENTID = "CLIENTID";
     
     private SampleContest sampleContest = new SampleContest();
+    
+    protected String getTestDirectoryName(){
+        String testDir = "testing";
+        
+        if (!new File(testDir).isDirectory()) {
+            new File(testDir).mkdirs();
+        }
+
+        return testDir;
+    }
 
     public boolean isDebugMode() {
         return debugMode;
@@ -125,7 +136,7 @@ public class InternalContestTest extends TestCase {
         Profile profile4 = createProfile("Profile 4");
         ProfileCloneSettings cloneSettings = new ProfileCloneSettings("clone4", "new title", contest3.getContestPassword().toCharArray());
         
-        IInternalContest contest4 = contest3.clone(contest3, profile4, "contest4", cloneSettings);
+        IInternalContest contest4 = contest3.clone(contest3, profile4, cloneSettings);
 
         /**
          * Should compare well
@@ -176,20 +187,80 @@ public class InternalContestTest extends TestCase {
         settings.setCopyAccounts(true);
         settings.setCopyContestSettings(true);
 
-        String profileBasePath = "";
-
         Profile profile2 = createProfile("Profile Two");
 
-        IInternalContest contest2 = contest1.clone(contest1, profile2, profileBasePath, settings);
+        IInternalContest contest2 = contest1.clone(contest1, profile2, settings);
 
         Profile profile3 = createProfile("Profile Three");
         // createProfileFilesAndDirs(profile, password);
 
-        IInternalContest contest3 = contest2.clone(contest2, profile3, profileBasePath, settings);
+        IInternalContest contest3 = contest2.clone(contest2, profile3, settings);
 
         contestsEqual("testCloneComplete", contest1, contest3, true);
     }
 
+    
+    public void testRunsClone() throws Exception {
+
+        String password = "foo";
+
+        ProfileCloneSettings settings = new ProfileCloneSettings("testRunsClone", "testRunsClone title", password.toCharArray());
+        settings.setCopyProblems(true);
+        settings.setCopyAccounts(true);
+        settings.setCopyLanguages(true);
+        settings.setCopyRuns(true);
+
+        int numRuns = 5;
+
+        String logName = getTestDirectoryName() + "TestRunClone.log";
+        Log log = new Log(logName);
+
+        Profile originalProfile = new Profile("Original");
+        String profileDir = ProfileTest.createProfileFilesAndDirs(originalProfile, password);
+
+        FileSecurity security = new FileSecurity(profileDir);
+        security.saveSecretKey(password.toCharArray());
+
+        IInternalContest contest = sampleContest.createContest(1, 8, 22, 12, true);
+        contest.setContestPassword(password);
+        contest.setStorage(security);
+        contest.storeConfiguration(log);
+
+        Profile newProfile = new Profile("Cloned Profile");
+        newProfile.setProfilePath(getTestDirectoryName() + File.separator + newProfile.getProfilePath());
+        if (debugMode){
+            System.out.println("Profile clone 1 at "+newProfile.getProfilePath());
+        }
+         ProfileTest.createProfileFilesAndDirs(newProfile, password);
+        IInternalContest newContest = contest.clone(contest, newProfile, settings);
+
+        /**
+         * Test clone with no runs
+         */
+        
+        Run[] runs = newContest.getRuns();
+        assertEquals("Runs created", runs.length, 0);
+        
+        /**
+         * Test clone with 5 (numRuns) runs.
+         */
+
+        Profile newProfile2 = new Profile("Cloned Profile");
+        newProfile2.setProfilePath(getTestDirectoryName() + File.separator + newProfile2.getProfilePath());
+        if (debugMode){
+            System.out.println("Profile clone 2 at "+newProfile2.getProfilePath());
+        }
+        ProfileTest.createProfileFilesAndDirs(newProfile2, password);
+        IInternalContest newContest2 = contest.clone(contest, newProfile2, settings);
+
+        Run[] sampleRuns = sampleContest.createRandomRuns(contest, numRuns, true, true, true);
+        for (Run run : sampleRuns) {
+            contest.addRun(run);
+        }
+        Run[] runs2 = newContest2.getRuns();
+        assertEquals("Runs created", runs2.length, numRuns);
+
+    }
     /**
      * Compares the contests and returns differences.
      * 

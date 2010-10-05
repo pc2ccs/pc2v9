@@ -254,7 +254,9 @@ public class RunList implements Serializable {
     @SuppressWarnings("unchecked")
     public boolean loadFromDisk(int siteNumber) throws IOException, ClassNotFoundException, FileSecurityException  {
         String filename = getFileName();
+        System.err.println("debug22 - loadFromDisk "+filename);
         if (Utilities.isFileThere(filename)) {
+            System.err.println("debug22 - found file reading "+filename);
             runHash = (Hashtable<String, Run>) storage.load(filename);
             nextRunNumber = lastRunNumber(siteNumber) + 1;
             return true;

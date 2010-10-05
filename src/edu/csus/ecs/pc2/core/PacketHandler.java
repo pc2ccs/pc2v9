@@ -391,6 +391,9 @@ public class PacketHandler {
 
         Profile newProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.NEW_PROFILE);
         String contestPassword = (String) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_PASSWORD);
+        if (newProfile.getSiteNumber() == 0){
+            newProfile.setSiteNumber(contest.getSiteNumber());
+        }
 
         if (contestPassword == null) {
             // Use existing contest password if no contest password specified.
@@ -423,19 +426,15 @@ public class PacketHandler {
     private IInternalContest switchProfile(IInternalContest currentContest, Profile newProfile, char[] contestPassword) throws ProfileException {
 
         ProfileManager manager = new ProfileManager();
-
-//        Utilities.viewReport(new InternalDumpReport(), "debug22 before", contest, controller);
-
-        IStorage storage = manager.getProfileStorage(newProfile, contestPassword);
-
-        /**
-         * Open new log for new Profile
-         */
-
+        
         IInternalContest newContest = new InternalContest();
 
         newContest.setClientId(contest.getClientId());
-        newContest.setSiteNumber(contest.getSiteNumber());
+        if (newContest.getSiteNumber() == 0){
+            newContest.setSiteNumber(contest.getSiteNumber());
+        }
+        
+        IStorage storage = manager.getProfileStorage(newProfile, contestPassword);
         newContest.setStorage(storage);
 
         try {
@@ -636,7 +635,7 @@ public class PacketHandler {
          * This clones the existing contest based on the settings,
          * including copying and saving all settings on disk.
          */
-        contest.clone(newContest, addedProfile, "", settings);
+        contest.clone(newContest, addedProfile, settings);
         
         contest.storeConfiguration(controller.getLog());
 
@@ -3653,6 +3652,7 @@ public class PacketHandler {
         ClientSettings[] clientSettings = null;
         Account[] accounts = null;
         Site[] sites = null;
+        Profile [] profiles = null;
 
         if (inContest.getClientSettings(clientId) == null) {
             ClientSettings clientSettings2 = new ClientSettings(clientId);
@@ -3677,6 +3677,9 @@ public class PacketHandler {
             for (int i = 0; i < realSites.length; i++) {
                 sites[i] = new Site(realSites[i].getDisplayName(), realSites[i].getSiteNumber());
             }
+            Profile profile = inContest.getProfile();
+            profiles = new Profile[1];
+            profiles[0] = profile;
         } else {
             runs = inContest.getRuns();
             clarifications = inContest.getClarifications();
@@ -3684,6 +3687,7 @@ public class PacketHandler {
             clientSettings = inContest.getClientSettingsList();
             accounts = getAllAccounts();
             sites = inContest.getSites();
+            profiles = inContest.getProfiles();
         }
 
         ContestLoginSuccessData contestLoginSuccessData = new ContestLoginSuccessData();
