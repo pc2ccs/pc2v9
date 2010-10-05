@@ -154,6 +154,7 @@ public class ProfilesPane extends JPanePlugin {
             switchButton.setPreferredSize(new java.awt.Dimension(100, 26));
             switchButton.setSelected(false);
             switchButton.setText("Switch");
+            switchButton.setToolTipText("Switch to a different profile");
             switchButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     switchSelectedProfile();
@@ -175,6 +176,7 @@ public class ProfilesPane extends JPanePlugin {
             setButton.setMnemonic(java.awt.event.KeyEvent.VK_S);
             setButton.setBounds(new Rectangle(556, 54, 100, 26));
             setButton.setText("Set");
+            setButton.setToolTipText("Update the profile name and description");
             setButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     renameProfile();
@@ -253,6 +255,7 @@ public class ProfilesPane extends JPanePlugin {
             newButton.setText(ProfileSavePane.CREATE_BUTTON_NAME);
             newButton.setMnemonic(java.awt.event.KeyEvent.VK_T);
             newButton.setEnabled(true);
+            newButton.setToolTipText("Create a new (blank) profile");
             newButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     newProfile();
@@ -273,6 +276,7 @@ public class ProfilesPane extends JPanePlugin {
             exportButton.setText("Export");
             exportButton.setMnemonic(java.awt.event.KeyEvent.VK_X);
             exportButton.setEnabled(false);
+            exportButton.setToolTipText("Export profile information");
             exportButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     exportProfile();
@@ -293,6 +297,7 @@ public class ProfilesPane extends JPanePlugin {
             cloneButton.setText("Clone");
             cloneButton.setMnemonic(java.awt.event.KeyEvent.VK_C);
             cloneButton.setEnabled(true);
+            cloneButton.setToolTipText("Create a copy of the current profile");
             cloneButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     cloneProfile();
@@ -400,7 +405,9 @@ public class ProfilesPane extends JPanePlugin {
     private JButton getResetContestButton() {
         if (resetContestButton == null) {
             resetContestButton = new JButton();
+            resetContestButton.setMnemonic(java.awt.event.KeyEvent.VK_S);
             resetContestButton.setText("Reset");
+            resetContestButton.setToolTipText("Reset Contest - clear runs, clars, reset contest time");
             resetContestButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     resetContest();
@@ -716,6 +723,8 @@ public class ProfilesPane extends JPanePlugin {
         if (reportButton == null) {
             reportButton = new JButton();
             reportButton.setText("Report");
+            reportButton.setMnemonic(java.awt.event.KeyEvent.VK_R);
+            reportButton.setToolTipText("Display Profiles Report");
             reportButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     createReport(new ProfileCloneSettingsReport());

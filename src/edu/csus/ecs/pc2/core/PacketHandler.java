@@ -79,6 +79,7 @@ public class PacketHandler {
      */
     private EvaluationLog evaluationLog = null;
 
+
     public PacketHandler(IInternalController controller, IInternalContest contest) {
         this.controller = controller;
         this.contest = contest;
@@ -609,7 +610,7 @@ public class PacketHandler {
     
 
 
-    private void handleCloneProfile(Packet packet, ConnectionHandlerID connectionHandlerID) throws IOException, ClassNotFoundException, FileSecurityException, ProfileCloneException {
+    private void handleCloneProfile(Packet packet, ConnectionHandlerID connectionHandlerID) throws IOException, ClassNotFoundException, FileSecurityException, ProfileCloneException, ProfileException {
         
         // FIXME code security check only Admins can change profiles
         
@@ -644,6 +645,8 @@ public class PacketHandler {
         if (switchProfileNow ){
             // FIXME if switchProfileNow MUST somehow switch profile.
             System.err.println("Would have switched profile now to "+newProfile.getName());
+            switchProfile(contest, newProfile, contest.getContestPassword().toCharArray());
+            
         } else {
             Packet addPacket = PacketFactory.createAddSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, addedProfile);
             sendToJudgesAndOthers(addPacket, true);
@@ -697,8 +700,9 @@ public class PacketHandler {
      * @param packet
      * @param connectionHandlerID
      * @throws ContestSecurityException
+     * @throws ProfileCloneException 
      */
-    private void resetClient(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
+    private void resetClient(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException, ProfileCloneException {
 
         ClientId sourceId = packet.getSourceId();
         
@@ -723,8 +727,9 @@ public class PacketHandler {
      * @param packet
      * @param connectionHandlerID
      * @throws ContestSecurityException
+     * @throws ProfileCloneException 
      */
-    private void resetAllSites(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException {
+    private void resetAllSites(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException, ProfileCloneException {
         
         ClientId adminClientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
         
@@ -740,20 +745,9 @@ public class PacketHandler {
         
         // Reset and send to all local clients
         resetContest(packet, newProfile);
-
-        // send to sites
-        Boolean eraseProblems = (Boolean) PacketFactory.getObjectValue(packet, PacketFactory.DELETE_PROBLEM_DEFINITIONS);
-        Boolean eraseLanguages = (Boolean) PacketFactory.getObjectValue(packet, PacketFactory.DELETE_LANGUAGE_DEFINITIONS);
-        Packet resetPacket = PacketFactory.createResetContestPacket(contest.getClientId(), PacketFactory.ALL_SERVERS, adminClientId, newProfile, eraseProblems, eraseLanguages);
-        controller.sendToServers(resetPacket);
-        
-        // Send updated contest clock
-        
-        Packet newContestTimePacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), contest.getContestTime());
-        controller.sendToServers(newContestTimePacket);
     }
 
-    private void resetContest(Packet packet, Profile profile) {
+    private void resetContest(Packet packet, Profile profile) throws ProfileCloneException {
         
         Boolean eraseProblems = (Boolean) PacketFactory.getObjectValue(packet, PacketFactory.DELETE_PROBLEM_DEFINITIONS);
         Boolean eraseLanguages = (Boolean) PacketFactory.getObjectValue(packet, PacketFactory.DELETE_LANGUAGE_DEFINITIONS);
@@ -762,34 +756,50 @@ public class PacketHandler {
 
             ClientId adminClientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
             
-            // FIXMEchange this to use profiles
-          
+            if (! isAllowed(adminClientId, Permission.Type.SWITCH_PROFILE)){
+                info("permission is not granted to "+adminClientId+" to reset");
+            } else {
+                info("permission is granted to "+adminClientId+" to reset");
+            }
+            
+            Profile currentProfile = contest.getProfile();
+            
             /**
              * This clears all submission data and counters.
              */
-            contest.resetSubmissionData();
 
-            // set elapsed to zero
-            ContestTime contestTime = contest.getContestTime();
-            contestTime.setElapsedMins(0);
-            contest.updateContestTime(contestTime);
-
-            resetContestData(eraseProblems, eraseLanguages);
-
-            // Set Contest Profile
-            contest.setProfile(profile);
+            IInternalContest newContest = new InternalContest();
+            newContest.setClientId(contest.getClientId());
+            if (newContest.getSiteNumber() == 0){
+                newContest.setSiteNumber(contest.getSiteNumber());
+            }
             
-            // send out to all clients
-            Packet resetPacket = PacketFactory.createResetContestPacket(contest.getClientId(), PacketFactory.ALL_SERVERS, adminClientId, profile, eraseProblems, eraseLanguages);
+            
+            String title = contest.getContestInformation().getContestTitle();
+            
+            String password = contest.getContestPassword();
+            ProfileCloneSettings settings = new ProfileCloneSettings(profile.getName(), title, password.toCharArray());
+            
+            settings.setResetContestTimes( true );
+            settings.setCopyAccounts( true );
+            settings.setCopyContestSettings( true );
+            settings.setCopyGroups( true );
+            settings.setCopyJudgements( true );
+            settings.setCopyNotifications( true );
+            
+            settings.setCopyLanguages( eraseLanguages );
+            settings.setCopyProblems( eraseProblems );
+            
+            settings.setCopyRuns( false );
+            settings.setCopyClarifications( false );
 
-            // send reset to all 
-            controller.sendToTeams(resetPacket);
-            sendToJudgesAndOthers(resetPacket, isThisSite(packet.getSourceId()));
-
-            // Send contest clock update to all 
-            Packet newContestTimePacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), contest.getContestTime());
-            controller.sendToTeams(newContestTimePacket);
-            sendToJudgesAndOthers(newContestTimePacket, isThisSite(packet.getSourceId()));
+            contest.clone(newContest, profile, settings);
+            
+            // Set Contest Profile
+            newContest.setProfile(profile);
+            
+            sendOutChangeProfileToAll(contest, currentProfile, profile, password);
+ 
             
         } else {
             // Set Contest Profile

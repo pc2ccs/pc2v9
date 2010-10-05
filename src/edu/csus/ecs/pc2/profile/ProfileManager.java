@@ -434,6 +434,9 @@ public class ProfileManager {
             if (aProfile.getProfilePath().equals(profile.getProfilePath())) {
                 return true;
             }
+            if (aProfile.getContestId().equals(profile.getContestId())) {
+                return true;
+            }
         }
 
         return false;

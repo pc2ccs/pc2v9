@@ -97,7 +97,7 @@ public final class PacketFormatter {
             } else if (object instanceof Run) {
                 string = "(Run) " + (Run) object;
             } else if (object instanceof Clarification) {
-                string = "(Clarification) " + (Run) object;
+                string = "(Clarification) " + (Clarification) object;
             } else {
                 string = "Object:" + object.toString();
             }
@@ -146,11 +146,11 @@ public final class PacketFormatter {
             
             child = new DefaultMutableTreeNode("description = "+profile.getDescription());
             node.add(child);
-
-            child = new DefaultMutableTreeNode("contest Id = "+profile.getContestId());
+       
+            child = new DefaultMutableTreeNode("path = "+profile.getProfilePath());
             node.add(child);
             
-            child = new DefaultMutableTreeNode("path = "+profile.getProfilePath());
+            child = new DefaultMutableTreeNode("contest Id = "+profile.getContestId());
             node.add(child);
             
             child = new DefaultMutableTreeNode("ElementId: "+profile.getElementId().toString());
@@ -180,40 +180,85 @@ public final class PacketFormatter {
             return node;
         }
         
-        if (object instanceof GregorianCalendar){
-            
-            GregorianCalendar calendar = (GregorianCalendar) object;
-            long secondsOffset = calendar.getTime().getTime() / 1000;
-            DefaultMutableTreeNode node = new DefaultMutableTreeNode("Date offset: "+secondsOffset);
-            return node;
-            
-        }        
-        if (object instanceof Language){
-            
+        if (object instanceof Profile []){
+
+            Profile [] profiles = (Profile []) object;
+            DefaultMutableTreeNode node = new DefaultMutableTreeNode("Profile list: " + profiles.length+" profiles");
             DefaultMutableTreeNode child;
             
-            Language language = (Language) object;
-            DefaultMutableTreeNode node = new DefaultMutableTreeNode("Language: "+language.getDisplayName());
-            
-            child = new DefaultMutableTreeNode("ElementId: "+language.getElementId().toString());
-            node.add(child);
-            
-            return node;
-        }
-        
-        if (object instanceof Problem){
-            
-            DefaultMutableTreeNode child;
-            
-            Problem problem = (Problem) object;
-            DefaultMutableTreeNode node = new DefaultMutableTreeNode("Problem: "+problem.getDisplayName());
-            
-            child = new DefaultMutableTreeNode("ElementId: "+problem.getElementId().toString());
-            node.add(child);
-            
+            for (Profile profile : profiles){
+                
+                child = createTree(profile);
+                node.add(child);
+            }
+
             return node;
         }
 
+        if (object instanceof GregorianCalendar) {
+
+            GregorianCalendar calendar = (GregorianCalendar) object;
+            long secondsOffset = calendar.getTime().getTime() / 1000;
+            DefaultMutableTreeNode node = new DefaultMutableTreeNode("Date offset: " + secondsOffset);
+            return node;
+
+        }
+        if (object instanceof Language) {
+
+            DefaultMutableTreeNode child;
+
+            Language language = (Language) object;
+            DefaultMutableTreeNode node = new DefaultMutableTreeNode("Language: " + language.getDisplayName());
+
+            child = new DefaultMutableTreeNode("ElementId: " + language.getElementId().toString());
+            node.add(child);
+
+            return node;
+        }
+
+        if (object instanceof Problem) {
+
+            DefaultMutableTreeNode child;
+
+            Problem problem = (Problem) object;
+            DefaultMutableTreeNode node = new DefaultMutableTreeNode("Problem: " + problem.getDisplayName());
+
+            child = new DefaultMutableTreeNode("ElementId: " + problem.getElementId().toString());
+            node.add(child);
+
+            return node;
+        }
+
+        if (object instanceof Language[]) {
+
+            Language[] languages = (Language[]) object;
+            DefaultMutableTreeNode node = new DefaultMutableTreeNode("Language list: " + languages.length + " languages");
+            DefaultMutableTreeNode child;
+
+            for (Language language : languages) {
+
+                child = createTree(language);
+                node.add(child);
+            }
+
+            return node;
+        }
+
+        if (object instanceof Problem[]) {
+
+            Problem[] problems = (Problem[]) object;
+            DefaultMutableTreeNode node = new DefaultMutableTreeNode("Problem list: " + problems.length + " languages");
+            DefaultMutableTreeNode child;
+
+            for (Problem problem : problems) {
+
+                child = createTree(problem);
+                node.add(child);
+            }
+
+            return node;
+        }
+        
         return null;
     }
 }

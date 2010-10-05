@@ -2289,13 +2289,15 @@ public class InternalContest implements IInternalContest {
         contest.setContestPassword(new String(settings.getContestPassword()));
 
         contest.setGeneralProblem(getGeneralProblem());
-
-        for (ContestTime contestTime : getContestTimes()) {
-            ContestTime contestTime2 = clone(contestTime);
-            if (settings.isResetContestTimes()) {
-                contestTime2.setElapsedMins(0);
+        
+        if (settings.isResetContestTimes()){
+            for (ContestTime contestTime : getContestTimes()) {
+                ContestTime contestTime2 = clone(contestTime);
+                if (settings.isResetContestTimes()) {
+                    contestTime2.setElapsedMins(0);
+                }
+                contest.updateContestTime(contestTime2);
             }
-            contest.updateContestTime(contestTime2);
         }
 
         if (settings.isCopyAccounts()) {
