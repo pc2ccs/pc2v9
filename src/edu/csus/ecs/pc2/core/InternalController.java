@@ -1966,39 +1966,39 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         throw new SecurityException("Could not find site " + inSiteNumber + " in site list, there are " + contest.getSites().length + " sites.");
     }
     
-    private void checkProfile(String s) {
-
-        Profile aProfile = contest.getProfile();
-        Profile check = null;
-        if (aProfile == null) {
-            System.err.println("checkProfile: did NOT match " + s + " " + aProfile + " " + check);
-            return;
-        }
-
-        ProfileManager manager = new ProfileManager();
-
-        if (manager.hasDefaultProfile()) {
-            try {
-                check = manager.getDefaultProfile();
-            } catch (Exception e) {
-                e.printStackTrace(System.err);
-            }
-        }
-        
-        if (check == null) {
-            System.err.println("checkProfile: did NOT match " + s + " " + aProfile + " " + check);
-            return;
-        }
-
-        if (!aProfile.getProfilePath().equals(check.getProfilePath())) {
-            System.err.println("checkProfile: did NOT match " + s + " " + aProfile + " " + check);
-            System.err.println("checkProfile: paths         " + s + " " + aProfile.getProfilePath() + " " + check.getProfilePath());
-        } else {
-            System.err.println("checkProfile: DOES match " + s + " " + aProfile + " " + check);
-        }
-        System.err.println();
-        System.err.flush();
-    }
+//    private void checkProfile(String s) {
+//
+//        Profile aProfile = contest.getProfile();
+//        Profile check = null;
+//        if (aProfile == null) {
+//            System.err.println("checkProfile: did NOT match " + s + " " + aProfile + " " + check);
+//            return;
+//        }
+//
+//        ProfileManager manager = new ProfileManager();
+//
+//        if (manager.hasDefaultProfile()) {
+//            try {
+//                check = manager.getDefaultProfile();
+//            } catch (Exception e) {
+//                e.printStackTrace(System.err);
+//            }
+//        }
+//        
+//        if (check == null) {
+//            System.err.println("checkProfile: did NOT match " + s + " " + aProfile + " " + check);
+//            return;
+//        }
+//
+//        if (!aProfile.getProfilePath().equals(check.getProfilePath())) {
+//            System.err.println("checkProfile: did NOT match " + s + " " + aProfile + " " + check);
+//            System.err.println("checkProfile: paths         " + s + " " + aProfile.getProfilePath() + " " + check.getProfilePath());
+//        } else {
+//            System.err.println("checkProfile: DOES match " + s + " " + aProfile + " " + check);
+//        }
+//        System.err.println();
+//        System.err.flush();
+//    }
     
 
     /**
@@ -2013,10 +2013,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
             contest.setClientId(clientId);
 
-            if (Utilities.isDebugMode()){
-                checkProfile("StartMAINU("); // FIXME remove checkProfile
-            }
-            
             startLog(getBaseProfileDirectoryName(Log.LOG_DIRECTORY_NAME), stripChar(clientId.toString(), ' '), clientId.getName(), clientId.getName());
 
             boolean isServer = clientId.getClientType().equals(ClientType.Type.SERVER);

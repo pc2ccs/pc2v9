@@ -248,7 +248,7 @@ public final class PacketFormatter {
         if (object instanceof Problem[]) {
 
             Problem[] problems = (Problem[]) object;
-            DefaultMutableTreeNode node = new DefaultMutableTreeNode("Problem list: " + problems.length + " languages");
+            DefaultMutableTreeNode node = new DefaultMutableTreeNode("Problem list: " + problems.length + " problems");
             DefaultMutableTreeNode child;
 
             for (Problem problem : problems) {

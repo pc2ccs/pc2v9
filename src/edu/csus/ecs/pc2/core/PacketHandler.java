@@ -437,6 +437,8 @@ public class PacketHandler {
         
         IStorage storage = manager.getProfileStorage(newProfile, contestPassword);
         newContest.setStorage(storage);
+        
+        newContest.setContestPassword(new String(contestPassword));
 
         try {
             /**
@@ -516,12 +518,8 @@ public class PacketHandler {
          */
         ClientId[] teams = contest.getLocalLoggedInClients(ClientType.Type.TEAM);
 
-        info("debug22 Send to "+teams.length+" teams."); // debug22
-
         for (ClientId clientId : teams) {
             
-            info("debug22 Send to team "+clientId); // debug22
-
             if (newContest.getAccount(clientId) != null) {
                 // Account exists in new profile/config
 
@@ -554,12 +552,7 @@ public class PacketHandler {
     private void sendClonePacketToUsers(Packet packet, edu.csus.ecs.pc2.core.model.ClientType.Type type, IInternalContest newContest, boolean confirmUserExists) {
         ClientId[] users = contest.getLocalLoggedInClients(type);
         
-        info("debug22 Send to "+users.length+" "+type.toString()); // debug22
-        
         for (ClientId clientId : users) {
-            
-            info("debug22 Send to client "+clientId); // debug22
-            
             if (!confirmUserExists) {
                 // send unconditional to client
                 packet = PacketFactory.clonePacket(getServerClientId(), clientId, packet);
@@ -622,6 +615,12 @@ public class PacketHandler {
         
         ProfileCloneSettings settings =  (ProfileCloneSettings) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE_CLONE_SETTINGS);
         boolean switchProfileNow = ((Boolean) PacketFactory.getObjectValue(packet, PacketFactory.SWITCH_PROFILE)).booleanValue();
+        
+        cloneContest (settings, switchProfileNow);
+        
+    }
+    
+    private void cloneContest (ProfileCloneSettings settings, boolean switchProfileNow) throws ProfileCloneException, ProfileException, IOException, ClassNotFoundException, FileSecurityException {
         
         Profile newProfile = new Profile(settings.getName());
         newProfile.setDescription(settings.getTitle());
@@ -701,8 +700,13 @@ public class PacketHandler {
      * @param connectionHandlerID
      * @throws ContestSecurityException
      * @throws ProfileCloneException 
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
+     * @throws ProfileException 
      */
-    private void resetClient(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException, ProfileCloneException {
+    private void resetClient(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException, ProfileCloneException, ProfileException, IOException, ClassNotFoundException,
+            FileSecurityException {
 
         ClientId sourceId = packet.getSourceId();
         
@@ -721,15 +725,19 @@ public class PacketHandler {
     /**
      * Handles a reset all contest from admin.
      * 
-     * Checks security that allows this client (Admin hopefully) to reset this
-     * site and then send reset to all other sites.
+     * Checks security that allows this client (Admin hopefully) to reset this site and then send reset to all other sites.
      * 
      * @param packet
      * @param connectionHandlerID
      * @throws ContestSecurityException
-     * @throws ProfileCloneException 
+     * @throws ProfileCloneException
+     * @throws FileSecurityException
+     * @throws ClassNotFoundException
+     * @throws IOException
+     * @throws ProfileException
      */
-    private void resetAllSites(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException, ProfileCloneException {
+    private void resetAllSites(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException, 
+       ProfileCloneException, ProfileException, IOException, ClassNotFoundException, FileSecurityException {
         
         ClientId adminClientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
         
@@ -747,7 +755,7 @@ public class PacketHandler {
         resetContest(packet, newProfile);
     }
 
-    private void resetContest(Packet packet, Profile profile) throws ProfileCloneException {
+    private void resetContest(Packet packet, Profile profile) throws ProfileCloneException, ProfileException, IOException, ClassNotFoundException, FileSecurityException {
         
         Boolean eraseProblems = (Boolean) PacketFactory.getObjectValue(packet, PacketFactory.DELETE_PROBLEM_DEFINITIONS);
         Boolean eraseLanguages = (Boolean) PacketFactory.getObjectValue(packet, PacketFactory.DELETE_LANGUAGE_DEFINITIONS);
@@ -762,8 +770,6 @@ public class PacketHandler {
                 info("permission is granted to "+adminClientId+" to reset");
             }
             
-            Profile currentProfile = contest.getProfile();
-            
             /**
              * This clears all submission data and counters.
              */
@@ -775,8 +781,7 @@ public class PacketHandler {
             }
             
             
-            String title = contest.getContestInformation().getContestTitle();
-            
+            String title = contest.getProfile().getDescription();
             String password = contest.getContestPassword();
             ProfileCloneSettings settings = new ProfileCloneSettings(profile.getName(), title, password.toCharArray());
             
@@ -792,16 +797,14 @@ public class PacketHandler {
             
             settings.setCopyRuns( false );
             settings.setCopyClarifications( false );
-
-            contest.clone(newContest, profile, settings);
             
-            // Set Contest Profile
-            newContest.setProfile(profile);
-            
-            sendOutChangeProfileToAll(contest, currentProfile, profile, password);
+            cloneContest (settings, true);
  
             
         } else {
+            
+            // TODO remove this unused code (with profiles no longer used)
+            
             // Set Contest Profile
             contest.setProfile(profile);
             
@@ -2266,6 +2269,8 @@ public class PacketHandler {
         if (isServer()) {
 
             contest.storeConfiguration(controller.getLog());
+            
+            storeProfiles();
             
             boolean sendToOtherServers = isThisSite(packet.getSourceId().getSiteNumber());
             

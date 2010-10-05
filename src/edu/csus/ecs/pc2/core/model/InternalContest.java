@@ -218,7 +218,7 @@ public class InternalContest implements IInternalContest {
     
     private IStorage storage = null;
 
-    private String contestPassword;
+    private String contestPassword = null;
 
     private ProfileCloneSettings profileCloneSettings = null;
 
@@ -2363,14 +2363,6 @@ public class InternalContest implements IInternalContest {
                     throw new ProfileCloneException("Can not copy runs if languages not copied too");
                 }
             }
-            
-            try {
-                Run [] runs = contest.getRuns();
-                System.out.println("debug22 Cloned "+runs.length+" runs");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            
         }
 
         if (settings.isCopyClarifications()) {
@@ -2533,6 +2525,9 @@ public class InternalContest implements IInternalContest {
 
         // FIXME double check that all Events are being refreshed
         
+        ProfileEvent profileEvent = new ProfileEvent(ProfileEvent.Action.REFRESH_ALL, null);
+        fireProfileListener(profileEvent);
+        
         RunEvent runEvent = new RunEvent(RunEvent.Action.REFRESH_ALL, null, null, null);
         fireRunListener(runEvent);
 
@@ -2579,8 +2574,6 @@ public class InternalContest implements IInternalContest {
         GroupEvent groupEvent = new GroupEvent(GroupEvent.Action.REFRESH_ALL, null);
         fireGroupListener(groupEvent);
 
-        ProfileEvent profileEvent = new ProfileEvent(ProfileEvent.Action.REFRESH_ALL, null);
-        fireProfileListener(profileEvent);
     }
 
     public void cloneAllLoginAndConnections(IInternalContest newContest) {

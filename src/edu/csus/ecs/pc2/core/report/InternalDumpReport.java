@@ -366,11 +366,29 @@ public class InternalDumpReport implements IReport {
             e.printStackTrace(printWriter);
             exceptionCount++;
         }
+        
+        try {
+            printContestPassword (printWriter);
+        } catch (Exception e) {
+            printWriter.println("Exception in report: " + e.getMessage());
+            e.printStackTrace(printWriter);
+            exceptionCount++;
+        }
 
         if (exceptionCount > 0) {
             printWriter.println();
             printWriter.println(" There were " + exceptionCount + " exceptions.");
         }
+    }
+
+    private void printContestPassword(PrintWriter printWriter) {
+       
+        Profile profile = contest.getProfile();
+        String password = contest.getContestPassword();
+
+        printWriter.println("Profile name  : " + profile.getName());
+        printWriter.println("  description : " + profile.getDescription());
+        printWriter.println("     password : " + password);
     }
 
     private void writeProfile(PrintWriter printWriter, Profile profile) {

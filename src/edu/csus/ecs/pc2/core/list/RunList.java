@@ -254,9 +254,7 @@ public class RunList implements Serializable {
     @SuppressWarnings("unchecked")
     public boolean loadFromDisk(int siteNumber) throws IOException, ClassNotFoundException, FileSecurityException  {
         String filename = getFileName();
-        System.err.println("debug22 - loadFromDisk "+filename);
         if (Utilities.isFileThere(filename)) {
-            System.err.println("debug22 - found file reading "+filename);
             runHash = (Hashtable<String, Run>) storage.load(filename);
             nextRunNumber = lastRunNumber(siteNumber) + 1;
             return true;
@@ -308,7 +306,9 @@ public class RunList implements Serializable {
     public void clone(IStorage storage2) {
         try {
             if (saveToDisk) {
-                storage2.store(getFileName(), runHash);
+                if (runHash.size() > 0){
+                    storage2.store(getFileName(), runHash);
+                }
             }
         } catch (Exception e) {
             logException("Unable to copy run info files " + getFileName() + " to " + storage2.getDirectoryName(), e);
