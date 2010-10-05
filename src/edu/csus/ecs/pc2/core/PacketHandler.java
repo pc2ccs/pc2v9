@@ -780,8 +780,7 @@ public class PacketHandler {
                 newContest.setSiteNumber(contest.getSiteNumber());
             }
             
-            
-            String title = contest.getProfile().getDescription();
+            String title = profile.getDescription();
             String password = contest.getContestPassword();
             ProfileCloneSettings settings = new ProfileCloneSettings(profile.getName(), title, password.toCharArray());
             
@@ -797,6 +796,8 @@ public class PacketHandler {
             
             settings.setCopyRuns( false );
             settings.setCopyClarifications( false );
+            
+            settings.setContestPassword(contest.getContestPassword().toCharArray());
             
             cloneContest (settings, true);
  

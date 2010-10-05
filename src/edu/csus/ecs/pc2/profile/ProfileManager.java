@@ -456,9 +456,12 @@ public class ProfileManager {
             Profile[] profiles = load();
 
             for (Profile profile : profiles) {
-                if (! exists(contest, profile)) {
-                    contest.addProfile(profile);
-                // } else { exists - so no update/add
+                if (!exists(contest, profile)) {
+                    if (new File(profile.getProfilePath()).isDirectory()) {
+                        contest.addProfile(profile);
+                    }
+                    // } else { exists - so no update/add
+
                 }
             }
         }

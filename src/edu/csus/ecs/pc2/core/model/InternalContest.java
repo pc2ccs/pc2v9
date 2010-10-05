@@ -340,12 +340,6 @@ public class InternalContest implements IInternalContest {
         if (getAccounts(Type.ADMINISTRATOR) == null || getAccounts(Type.ADMINISTRATOR, siteNum).size() == 0) {
             generateNewAccounts(ClientType.Type.ADMINISTRATOR.toString(), 1, true);
         }
-
-        if (getAccounts(Type.ADMINISTRATOR).size() == 0) {
-            new Exception("No Admin account created debug 22 ").printStackTrace();
-        } else {
-            System.out.println("Admin account count is: " + getAccounts(Type.ADMINISTRATOR).size());
-        }
     }
 
     public void addRunListener(IRunListener runListener) {
