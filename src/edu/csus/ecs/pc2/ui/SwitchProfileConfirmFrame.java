@@ -40,7 +40,7 @@ public class SwitchProfileConfirmFrame extends JFrame implements UIPlugin {
      */
     private void initialize() {
         this.setSize(new Dimension(387, 194));
-        this.setTitle("Swtich Profiles");
+        this.setTitle("Switch Profile");
         this.setContentPane(getProfileSavePane());
 
         FrameUtilities.centerFrame(this);
@@ -69,6 +69,7 @@ public class SwitchProfileConfirmFrame extends JFrame implements UIPlugin {
     }
 
     public void setProfile(Profile profile) {
+        this.setTitle("Switch Profile to "+profile.getName()+" ("+profile.getDescription()+")");
         getProfileSavePane().setProfile(profile);
     }
 

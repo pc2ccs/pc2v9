@@ -14,6 +14,7 @@ import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.packet.Packet;
+import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
 
 /**
  * Methods to format packet contents.
@@ -255,6 +256,45 @@ public final class PacketFormatter {
                 child = createTree(problem);
                 node.add(child);
             }
+
+            return node;
+        }
+        
+        if (object instanceof ProfileCloneSettings) {
+
+            DefaultMutableTreeNode child;
+
+            ProfileCloneSettings settings = (ProfileCloneSettings) object;
+            DefaultMutableTreeNode node = new DefaultMutableTreeNode("Clone Settings: " + settings.getName());
+
+            // public char[] getContestPassword());
+            // public char[] getNewContestPassword());
+
+            child = new DefaultMutableTreeNode("Name: " + settings.getName());
+            node.add(child);
+            child = new DefaultMutableTreeNode("Title: " + settings.getTitle());
+            node.add(child);
+
+            child = new DefaultMutableTreeNode("CopyRuns = =" + settings.isCopyRuns());
+            node.add(child);
+            child = new DefaultMutableTreeNode("CopyClarifications = =" + settings.isCopyClarifications());
+            node.add(child);
+            child = new DefaultMutableTreeNode("ResetContestTimes = " + settings.isResetContestTimes());
+            node.add(child);
+            child = new DefaultMutableTreeNode("CopyAccounts = " + settings.isCopyAccounts());
+            node.add(child);
+            child = new DefaultMutableTreeNode("CopyContestSettings = =" + settings.isCopyContestSettings());
+            node.add(child);
+            child = new DefaultMutableTreeNode("CopyGroups = =" + settings.isCopyGroups());
+            node.add(child);
+            child = new DefaultMutableTreeNode("CopyJudgements = =" + settings.isCopyJudgements());
+            node.add(child);
+            child = new DefaultMutableTreeNode("CopyLanguages = =" + settings.isCopyLanguages());
+            node.add(child);
+            child = new DefaultMutableTreeNode("CopyNotifications = =" + settings.isCopyNotifications());
+            node.add(child);
+            child = new DefaultMutableTreeNode("CopyProblems = =" + settings.isCopyProblems());
+            node.add(child);
 
             return node;
         }

@@ -99,6 +99,9 @@ public class ProfilesPane extends JPanePlugin {
     private JButton reportButton = null;
 
     private PermissionList permissionList = new PermissionList();
+    
+    private SwitchProfileConfirmFrame switchFrame = null;
+
 
     /**
      * This method initializes
@@ -328,6 +331,13 @@ public class ProfilesPane extends JPanePlugin {
         getProfileSaveFrame().setSaveButtonName(ProfileSavePane.EXPORT_BUTTON_NAME);
         getProfileSaveFrame().setVisible(true);
     }
+    
+    public SwitchProfileConfirmFrame getSwitchFrame() {
+        if (switchFrame == null){
+            switchFrame = new SwitchProfileConfirmFrame();
+        }
+        return switchFrame;
+    }
 
     protected void switchSelectedProfile() {
         int selectedIndex = getProfilesListBox().getSelectedIndex();
@@ -349,13 +359,8 @@ public class ProfilesPane extends JPanePlugin {
             return;
         }
         
-        int result = FrameUtilities.yesNoCancelDialog(null, "Are you sure you want to switch to profile "+selectedProfile.getName()+" ?", "Switch Profile");
-
-        if (result == JOptionPane.YES_OPTION) {
-            // FIXME - on switch must prompt for password - defaulting to foo
-            getController().switchProfile(getContest().getProfile(), selectedProfile, "foo");
-        }
-        
+        getSwitchFrame().setProfile(selectedProfile);
+        getSwitchFrame().setVisible(true);
     }
 
     private Profile getProfile(ElementId elementId) {
@@ -475,6 +480,7 @@ public class ProfilesPane extends JPanePlugin {
         initializePermissions();
         
         getProfileSaveFrame().setContestAndController(inContest, inController);
+        getSwitchFrame().setContestAndController(getContest(), getController());
 
         Profile profile = getContest().getProfile();
         updateProfileInformation(profile);
