@@ -546,7 +546,7 @@ public class ProfilesPane extends JPanePlugin {
 
         c[0] = profile.getName();
         if (profile.equals(getContest().getProfile())) {
-            c[0] = "(Current) " + profile.getName();
+            c[0] = "(Active) " + profile.getName();
         }
         c[1] = profile.getDescription();
         c[2] = formatter.format(profile.getCreateDate());
