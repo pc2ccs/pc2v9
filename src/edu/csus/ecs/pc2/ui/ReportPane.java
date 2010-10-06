@@ -22,6 +22,7 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.list.ReportNameByComparator;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -207,6 +208,7 @@ public class ReportPane extends JPanePlugin {
         reports.add(new InternalDumpReport());
 
         listOfReports = (IReport[]) reports.toArray(new IReport[reports.size()]);
+        Arrays.sort(listOfReports, new ReportNameByComparator());
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
