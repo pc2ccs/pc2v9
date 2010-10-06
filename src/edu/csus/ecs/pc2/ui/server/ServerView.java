@@ -420,7 +420,7 @@ public class ServerView extends JFrame implements UIPlugin {
         addUIPlugin(getMainTabbedPane(), "Reports", reportPane);
 
         ProfilesPane profilePane = new ProfilesPane();
-        addUIPlugin(getMainTabbedPane(), "Profile", profilePane);
+        addUIPlugin(getMainTabbedPane(), "Profiles", profilePane);
         
         PlaybackPane playbackPane = new PlaybackPane();
         addUIPlugin("Replay", playbackPane);
