@@ -490,6 +490,9 @@ public class ProfileSavePane extends JPanePlugin {
         }
         getContestTitleTextField().setText(title);
 
+        getContestPasswordTextField().setText("");
+        getContestPasswordConfirmTextField().setText("");
+
         getCheckBoxPane().setVisible(true);
 
         String buttonNameText = getSaveButton().getText();
