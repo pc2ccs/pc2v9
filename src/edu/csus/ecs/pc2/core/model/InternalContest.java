@@ -2263,6 +2263,11 @@ public class InternalContest implements IInternalContest {
             } else {
                 contest.generateNewAccounts(ClientType.Type.ADMINISTRATOR.toString(), 1, true);
             }
+            // without this AJ throws an null pointer exception
+            ClientSettings clientSettings = getClientSettings(adminId); 
+            if (clientSettings != null) {
+                contest.addClientSettings(clientSettings);
+            }
         }
 
         for (Site site : getSites()) {
@@ -2303,6 +2308,12 @@ public class InternalContest implements IInternalContest {
             }
 
             contest.addAccounts(getAccounts());
+            for (Account account : getAccounts()) {
+                ClientSettings clientSettings = getClientSettings(account.getClientId());
+                if (clientSettings != null) {
+                    contest.addClientSettings(clientSettings);
+                }
+            }
 
             if (! settings.isCopyGroups()) {
                 for (Account account : contest.getAccounts()) {
