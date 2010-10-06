@@ -470,8 +470,8 @@ public class ProfileManager {
 
     
     public static Profile createNewProfile() {
-        Profile profile = new Profile("Contest");
-        profile.setDescription("Real Contest");
+        Profile profile = new Profile("Default");
+        profile.setDescription("Default Contest");
         return profile;
     }
 
