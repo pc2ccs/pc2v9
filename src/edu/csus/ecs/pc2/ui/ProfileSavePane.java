@@ -220,22 +220,20 @@ public class ProfileSavePane extends JPanePlugin {
 
         if (settings.isCopyRuns()) {
 
-            requireSetting(settings.isCopyProblems(), "Must check/copy problems to copy runs");
+            requireSetting(settings.isCopyProblems(), "Must copy problems to copy runs");
 
-            requireSetting(settings.isCopyLanguages(), "Must check/copy languages to copy runs");
+            requireSetting(settings.isCopyLanguages(), "Must copy languages to copy runs");
 
-            requireSetting(settings.isCopyAccounts(), "Must check/copy languages to copy runs");
+            requireSetting(settings.isCopyAccounts(), "Must copy accounts to copy runs");
 
+            requireSetting(settings.isCopyJudgements(), "Must copy judgements to copy runs");
         }
 
         if (settings.isCopyClarifications()) {
 
-            requireSetting(settings.isCopyProblems(), "Must check/copy problems to copy clarifications");
+            requireSetting(settings.isCopyProblems(), "Must copy problems to copy clarifications");
 
-            requireSetting(settings.isCopyLanguages(), "Must check/copy languages to copy clarifications");
-
-            requireSetting(settings.isCopyAccounts(), "Must check/copy languages to copy clarifications");
-
+            requireSetting(settings.isCopyAccounts(), "Must copy accounts to copy clarifications");
         }
 
         getController().cloneProfile(getContest().getProfile(), settings, false);
@@ -279,7 +277,7 @@ public class ProfileSavePane extends JPanePlugin {
         }
         
         if (! (new String(password).equals(new String(confirmPassword)))){
-            throw new InvalidFieldValue("Contest password does not match.");
+            throw new InvalidFieldValue("Contest password and Confirm password do not match.");
         }
 
         ProfileCloneSettings settings = new ProfileCloneSettings(name, title, password);
