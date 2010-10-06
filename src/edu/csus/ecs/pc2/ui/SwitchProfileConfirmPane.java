@@ -208,6 +208,7 @@ public class SwitchProfileConfirmPane extends JPanePlugin {
     public void setProfile(Profile profile) {
         getContestPasswordTextField().setText("");
         this.profile = profile;
+        getContestPasswordTextField().requestFocus();
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
