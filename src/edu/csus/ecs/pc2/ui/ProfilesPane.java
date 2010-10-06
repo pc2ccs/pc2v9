@@ -28,7 +28,6 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ContestTime;
-import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -351,8 +350,8 @@ public class ProfilesPane extends JPanePlugin {
             return;
         }
 
-        ElementId elementId = (ElementId) getProfilesListBox().getKeys()[selectedIndex];
-        Profile selectedProfile = getProfile(elementId);
+        String profilePath = (String) getProfilesListBox().getKeys()[selectedIndex];
+        Profile selectedProfile = getProfile(profilePath);
 
         if (selectedProfile.equals(getContest().getProfile())) {
             showMessage("Currently using profile '" + selectedProfile.getName() + "' (no need to switch)");
@@ -363,10 +362,10 @@ public class ProfilesPane extends JPanePlugin {
         getSwitchFrame().setVisible(true);
     }
 
-    private Profile getProfile(ElementId elementId) {
+    private Profile getProfile(String profilePath) {
 
         for (Profile profile : getContest().getProfiles()) {
-            if (profile.getElementId().equals(elementId)) {
+            if (profile.getProfilePath().equals(profilePath)) {
                 return profile;
             }
         }
@@ -523,7 +522,7 @@ public class ProfilesPane extends JPanePlugin {
 
                 for (Profile profile : profiles) {
                     Object[] objects = buildProfileRow(profile);
-                    getProfilesListBox().addRow(objects, profile.getElementId());
+                    getProfilesListBox().addRow(objects, profile.getProfilePath());
                 }
                 getProfilesListBox().autoSizeAllColumns();
                 getSwitchButton().setEnabled(true);
@@ -708,9 +707,9 @@ public class ProfilesPane extends JPanePlugin {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 Object[] objects = buildProfileRow(profile);
-                int rowNumber = profilesListBox.getIndexByKey(profile.getElementId());
+                int rowNumber = profilesListBox.getIndexByKey(profile.getProfilePath());
                 if (rowNumber == -1) {
-                    profilesListBox.addRow(objects, profile.getElementId());
+                    profilesListBox.addRow(objects, profile.getProfilePath());
                 } else {
                     profilesListBox.replaceRow(objects, rowNumber);
                 }
