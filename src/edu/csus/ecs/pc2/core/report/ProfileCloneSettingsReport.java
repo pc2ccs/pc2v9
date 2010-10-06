@@ -60,21 +60,11 @@ public class ProfileCloneSettingsReport implements IReport {
 
     public void printCloneSettings(PrintWriter printWriter, ProfileCloneSettings settings) {
         
-        printWriter.println("   Name        : " + settings.getName());
-        printWriter.println("   Description : " + settings.getDescription());
+        printWriter.println("               Name : " + settings.getName());
+        printWriter.println("        Description : " + settings.getDescription());
         printWriter.println();
+        printWriter.println("Cloned from profile : " + settings.getSourceProfile());
 
-        if (settings.getContestPassword() == null) {
-            printWriter.println("   Contest pass: <null> ");
-        } else {
-            printWriter.println("   Contest pass: " + new String(settings.getContestPassword()));
-        }
-
-        if (settings.getNewContestPassword() == null) {
-            printWriter.println("   New password: <null>");
-        } else {
-            printWriter.println("   New password: " + new String(settings.getNewContestPassword()));
-        }
         printWriter.println();
 
         printWriter.println("   Copy Accounts       " + settings.isCopyAccounts());
@@ -137,7 +127,7 @@ public class ProfileCloneSettingsReport implements IReport {
     }
 
     public String getReportTitle() {
-        return "Profile Clone Settings";
+        return "Active Profile Clone Settings";
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {

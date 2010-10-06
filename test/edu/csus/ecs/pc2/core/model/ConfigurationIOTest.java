@@ -59,7 +59,8 @@ public class ConfigurationIOTest extends TestCase {
 
         char[] pass = contestPassword.toCharArray();
 
-        ProfileCloneSettings settings = new ProfileCloneSettings("name", "title", pass);
+        Profile origProfile = new Profile("Orig profile");
+        ProfileCloneSettings settings = new ProfileCloneSettings("name", "title", pass, origProfile);
         settings.setCopyGroups(true);
         settings.setResetContestTimes(true);
 

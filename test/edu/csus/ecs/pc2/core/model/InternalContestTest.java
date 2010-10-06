@@ -134,7 +134,8 @@ public class InternalContestTest extends TestCase {
         IInternalContest contest3 = sampleContest.createContest(3, 3, 20, 12, true);
 
         Profile profile4 = createProfile("Profile 4");
-        ProfileCloneSettings cloneSettings = new ProfileCloneSettings("clone4", "new title", contest3.getContestPassword().toCharArray());
+        Profile origProfile = new Profile("Orig profile");
+        ProfileCloneSettings cloneSettings = new ProfileCloneSettings("clone4", "new title", contest3.getContestPassword().toCharArray(), origProfile);
         
         IInternalContest contest4 = contest3.clone(contest3, profile4, cloneSettings);
 
@@ -183,7 +184,8 @@ public class InternalContestTest extends TestCase {
         Profile profile1 = createProfile("Profile One");
         contest1.setProfile(profile1);
 
-        ProfileCloneSettings settings = new ProfileCloneSettings("name", "title", password.toCharArray());
+        Profile origProfile = new Profile("Orig profile");
+        ProfileCloneSettings settings = new ProfileCloneSettings("name", "title", password.toCharArray(), origProfile);
         settings.setCopyAccounts(true);
         settings.setCopyContestSettings(true);
 
@@ -204,7 +206,8 @@ public class InternalContestTest extends TestCase {
 
         String password = "foo";
 
-        ProfileCloneSettings settings = new ProfileCloneSettings("testRunsClone", "testRunsClone title", password.toCharArray());
+        Profile origProfile = new Profile("Orig profile");
+        ProfileCloneSettings settings = new ProfileCloneSettings("testRunsClone", "testRunsClone title", password.toCharArray(), origProfile);
         settings.setCopyProblems(true);
         settings.setCopyAccounts(true);
         settings.setCopyLanguages(true);

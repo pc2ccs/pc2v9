@@ -2,6 +2,8 @@ package edu.csus.ecs.pc2.profile;
 
 import java.io.Serializable;
 
+import edu.csus.ecs.pc2.core.model.Profile;
+
 /**
  * A collection of settings to clone a Profile.
  * 
@@ -46,12 +48,16 @@ public class ProfileCloneSettings implements Serializable {
     private boolean copyClarifications = false;
 
     private boolean resetContestTimes = true;
+    
+    private Profile sourceProfile = null;
 
-    public ProfileCloneSettings(String name, String title, char[] contestPassword) {
+
+    public ProfileCloneSettings(String name, String title, char[] contestPassword, Profile originalProfile) {
         super();
         this.name = name;
         this.title = title;
         this.contestPassword = contestPassword;
+        this.sourceProfile = originalProfile;
     }
 
     public String getName() {
@@ -176,5 +182,9 @@ public class ProfileCloneSettings implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Profile getSourceProfile() {
+        return sourceProfile;
     }
 }

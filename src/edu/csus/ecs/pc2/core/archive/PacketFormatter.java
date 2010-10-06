@@ -8,6 +8,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Profile;
@@ -217,6 +218,16 @@ public final class PacketFormatter {
             return node;
         }
 
+        if (object instanceof Judgement) {
+
+            DefaultMutableTreeNode child;
+            Judgement judgement = (Judgement) object;
+            DefaultMutableTreeNode node = new DefaultMutableTreeNode("Judgement: " + judgement.getDisplayName());
+            child = new DefaultMutableTreeNode("ElementId: " + judgement.getElementId().toString());
+            node.add(child);
+
+            return node;
+        }
         if (object instanceof Problem) {
 
             DefaultMutableTreeNode child;
@@ -237,8 +248,22 @@ public final class PacketFormatter {
             DefaultMutableTreeNode child;
 
             for (Language language : languages) {
-
                 child = createTree(language);
+                node.add(child);
+            }
+
+            return node;
+        }
+        
+        if (object instanceof Judgement[]) {
+
+            Judgement[] judgements = (Judgement[]) object;
+            DefaultMutableTreeNode node = new DefaultMutableTreeNode("Judgement list: " + judgements.length + " judgements");
+            DefaultMutableTreeNode child;
+
+            for (Judgement judgement : judgements) {
+
+                child = createTree(judgement);
                 node.add(child);
             }
 

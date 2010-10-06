@@ -33,7 +33,7 @@ public class ProfileSavePane extends JPanePlugin {
      * 
      */
     private static final long serialVersionUID = -6767667140640583963L;
-
+    
     public static final String CLONE_BUTTON_NAME = "Clone"; // @jve:decl-index=0:
 
     public static final String EXPORT_BUTTON_NAME = "Export"; // @jve:decl-index=0:
@@ -217,6 +217,10 @@ public class ProfileSavePane extends JPanePlugin {
 
     private void cloneProfile() throws InvalidFieldValue {
         ProfileCloneSettings settings = getProfileCloneSettingsFromFields();
+        
+        if (isDupProfileName(settings.getName())) {
+            throw new InvalidFieldValue("Profile named " + settings.getName() + " already exists");
+        }
 
         if (settings.isCopyRuns()) {
 
@@ -235,9 +239,18 @@ public class ProfileSavePane extends JPanePlugin {
 
             requireSetting(settings.isCopyAccounts(), "Must copy accounts to copy clarifications");
         }
-
+        
         getController().cloneProfile(getContest().getProfile(), settings, false);
         closeWindow();
+    }
+
+    private boolean isDupProfileName(String name) {
+        for (Profile profile : getContest().getProfiles()) {
+            if (name.trim().equals(profile.getName().trim())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -280,7 +293,7 @@ public class ProfileSavePane extends JPanePlugin {
             throw new InvalidFieldValue("Contest password and Confirm password do not match.");
         }
 
-        ProfileCloneSettings settings = new ProfileCloneSettings(name, title, password);
+        ProfileCloneSettings settings = new ProfileCloneSettings(name, title, password, getContest().getProfile());
         
         settings.setDescription(description);
         
@@ -441,7 +454,7 @@ public class ProfileSavePane extends JPanePlugin {
             copyRunsCheckBox = new JCheckBox();
             copyRunsCheckBox.setSelected(true);
             copyRunsCheckBox.setBounds(new Rectangle(15, 115, 192, 21));
-            copyRunsCheckBox.setText("Copy runs");
+            copyRunsCheckBox.setText("Runs");
         }
         return copyRunsCheckBox;
     }
@@ -456,7 +469,7 @@ public class ProfileSavePane extends JPanePlugin {
             copyLanguagesCheckBox = new JCheckBox();
             copyLanguagesCheckBox.setSelected(true);
             copyLanguagesCheckBox.setBounds(new Rectangle(15, 46, 192, 21));
-            copyLanguagesCheckBox.setText("Copy languages");
+            copyLanguagesCheckBox.setText("Languages");
         }
         return copyLanguagesCheckBox;
     }
@@ -471,14 +484,14 @@ public class ProfileSavePane extends JPanePlugin {
             copyProblemsCheckBox = new JCheckBox();
             copyProblemsCheckBox.setSelected(false);
             copyProblemsCheckBox.setBounds(new Rectangle(15, 13, 192, 21));
-            copyProblemsCheckBox.setText("Copy problems");
+            copyProblemsCheckBox.setText("Problems");
         }
         return copyProblemsCheckBox;
     }
 
     public void populateGUI(Profile profile) {
 
-        getProfileNameTextField().setText(profile.getName());
+        getProfileNameTextField().setText("Copy of "+profile.getName());
         getProfileDescriptionTextField().setText(profile.getDescription());
 
         ContestInformation contestInformation = getContest().getContestInformation();
@@ -562,7 +575,7 @@ public class ProfileSavePane extends JPanePlugin {
     private JCheckBox getCopyClarificationsCheckBox() {
         if (copyClarificationsCheckBox == null) {
             copyClarificationsCheckBox = new JCheckBox();
-            copyClarificationsCheckBox.setText("Copy clarifications");
+            copyClarificationsCheckBox.setText("Clarifications");
             copyClarificationsCheckBox.setBounds(new Rectangle(15, 79, 192, 24));
             copyClarificationsCheckBox.setSelected(true);
         }
@@ -577,7 +590,7 @@ public class ProfileSavePane extends JPanePlugin {
     private JCheckBox getCopyAccountsCheckBox() {
         if (copyAccountsCheckBox == null) {
             copyAccountsCheckBox = new JCheckBox();
-            copyAccountsCheckBox.setText("Copy accounts");
+            copyAccountsCheckBox.setText("Accounts");
             copyAccountsCheckBox.setBounds(new Rectangle(252, 11, 192, 24));
             copyAccountsCheckBox.setSelected(true);
         }
@@ -592,7 +605,7 @@ public class ProfileSavePane extends JPanePlugin {
     private JCheckBox getCopyGroupsCheckBox() {
         if (copyGroupsCheckBox == null) {
             copyGroupsCheckBox = new JCheckBox();
-            copyGroupsCheckBox.setText("Copy groups");
+            copyGroupsCheckBox.setText("Groups");
             copyGroupsCheckBox.setBounds(new Rectangle(252, 44, 192, 24));
             copyGroupsCheckBox.setSelected(true);
         }
@@ -607,7 +620,7 @@ public class ProfileSavePane extends JPanePlugin {
     private JCheckBox getCopyJudgementsCheckbox() {
         if (copyJudgementsCheckbox == null) {
             copyJudgementsCheckbox = new JCheckBox();
-            copyJudgementsCheckbox.setText("Copy judgements");
+            copyJudgementsCheckbox.setText("Judgements");
             copyJudgementsCheckbox.setBounds(new Rectangle(252, 79, 192, 24));
             copyJudgementsCheckbox.setSelected(true);
         }
@@ -622,7 +635,7 @@ public class ProfileSavePane extends JPanePlugin {
     private JCheckBox getCopyContestSettingsCheckBox() {
         if (copyContestSettingsCheckBox == null) {
             copyContestSettingsCheckBox = new JCheckBox();
-            copyContestSettingsCheckBox.setText("Copy contest settings");
+            copyContestSettingsCheckBox.setText("Contest settings");
             copyContestSettingsCheckBox.setBounds(new Rectangle(252, 146, 192, 24));
             copyContestSettingsCheckBox.setSelected(true);
         }
@@ -662,7 +675,7 @@ public class ProfileSavePane extends JPanePlugin {
         if (copyNotificationsCheckBox == null) {
             copyNotificationsCheckBox = new JCheckBox();
             copyNotificationsCheckBox.setBounds(new Rectangle(252, 113, 192, 24));
-            copyNotificationsCheckBox.setText("Copy notifications");
+            copyNotificationsCheckBox.setText("Notifications");
             copyNotificationsCheckBox.setSelected(true);
         }
         return copyNotificationsCheckBox;

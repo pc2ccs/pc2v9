@@ -501,12 +501,12 @@ public class ProfilesPane extends JPanePlugin {
     
     private void updateGUIperPermissions() {
 
-        switchButton.setEnabled(isAllowed(Permission.Type.SWITCH_PROFILE));
-        setButton.setEnabled(isAllowed(Permission.Type.CLONE_PROFILE));
-        newButton.setEnabled(isAllowed(Permission.Type.CLONE_PROFILE));
-        exportButton.setEnabled(isAllowed(Permission.Type.EXPORT_PROFILE));
-        cloneButton.setEnabled(isAllowed(Permission.Type.CLONE_PROFILE));
-        resetContestButton.setEnabled(isAllowed(Permission.Type.RESET_CONTEST));
+        switchButton.setVisible(isAllowed(Permission.Type.SWITCH_PROFILE));
+        setButton.setVisible(isAllowed(Permission.Type.CLONE_PROFILE));
+        newButton.setVisible(isAllowed(Permission.Type.CLONE_PROFILE));
+        exportButton.setVisible(isAllowed(Permission.Type.EXPORT_PROFILE));
+        cloneButton.setVisible(isAllowed(Permission.Type.CLONE_PROFILE));
+        resetContestButton.setVisible(isAllowed(Permission.Type.RESET_CONTEST));
         
     }
 

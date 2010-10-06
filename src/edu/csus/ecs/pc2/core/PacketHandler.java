@@ -782,7 +782,7 @@ public class PacketHandler {
             
             String title = profile.getDescription();
             String password = contest.getContestPassword();
-            ProfileCloneSettings settings = new ProfileCloneSettings(profile.getName(), title, password.toCharArray());
+            ProfileCloneSettings settings = new ProfileCloneSettings(profile.getName(), title, password.toCharArray(), contest.getProfile());
             
             settings.setResetContestTimes( true );
             settings.setCopyAccounts( true );
