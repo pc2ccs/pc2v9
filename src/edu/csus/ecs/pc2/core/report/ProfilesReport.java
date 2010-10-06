@@ -15,6 +15,7 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Pluralize;
 import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.model.ProfileComparatorByName;
 
@@ -82,14 +83,14 @@ public class ProfilesReport implements IReport {
 
         usingServer = isServer();
         
-        printWriter.println("-- Current Profile");
+        printWriter.println("-- Active Profile");
         writeActiveProfile(printWriter);
 
         Profile[] profiles = contest.getProfiles();
         Arrays.sort(profiles, new ProfileComparatorByName());
 
         printWriter.println();
-        printWriter.println("-- " + profiles.length + " profiles --");
+        printWriter.println("-- " + profiles.length + " "+Pluralize.simplePluralize("Profile", profiles.length)+" --");
 
         for (Profile profile : profiles) {
             printWriter.println();

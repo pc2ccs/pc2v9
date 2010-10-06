@@ -32,6 +32,7 @@ import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementNotification;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.NotificationSetting;
+import edu.csus.ecs.pc2.core.model.Pluralize;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.model.ProfileComparatorByName;
@@ -407,7 +408,7 @@ public class InternalDumpReport implements IReport {
     private void printProfile(PrintWriter printWriter) {
 
         printWriter.println();
-        printWriter.println("-- Current Profile --");
+        printWriter.println("-- Active Profile --");
         
         writeActiveProfile(printWriter);
         printWriter.println();
@@ -415,7 +416,7 @@ public class InternalDumpReport implements IReport {
         Profile [] profiles = contest.getProfiles();
         Arrays.sort(profiles, new ProfileComparatorByName());
         
-        printWriter.println("-- " + profiles.length + " Profiles --");
+        printWriter.println("-- " + profiles.length + " "+Pluralize.simplePluralize("Profile", profiles.length)+" --");
 
         for (Profile profile : profiles){
             printWriter.println();
