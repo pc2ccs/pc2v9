@@ -412,7 +412,7 @@ public class ProfilesPane extends JPanePlugin {
             resetContestButton = new JButton();
             resetContestButton.setMnemonic(java.awt.event.KeyEvent.VK_S);
             resetContestButton.setText("Reset");
-            resetContestButton.setToolTipText("Reset Contest - clear runs, clars, reset contest time");
+            resetContestButton.setToolTipText("Reset active contest profile - clear runs, clars, reset contest time");
             resetContestButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     resetContest();
