@@ -20,6 +20,7 @@ import com.ibm.webrunner.j2mclb.util.HeapSorter;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.PermissionGroup;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.list.ContestTimeComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
@@ -102,6 +103,8 @@ public class ProfilesPane extends JPanePlugin {
     
     private SwitchProfileConfirmFrame switchFrame = null;
 
+    private boolean usingExtraColumns = false;
+
 
     /**
      * This method initializes
@@ -117,6 +120,9 @@ public class ProfilesPane extends JPanePlugin {
      * 
      */
     private void initialize() {
+        
+        usingExtraColumns = Utilities.isDebugMode();
+        
         profileNameLabel = new JLabel();
         profileNameLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         profileNameLabel.setBounds(new Rectangle(51, 29, 134, 23));
@@ -138,6 +144,8 @@ public class ProfilesPane extends JPanePlugin {
         this.add(getTopPanel(), BorderLayout.NORTH);
         FrameUtilities.centerFrame(this);
 
+       
+        
     }
 
     public String getPluginTitle() {
@@ -538,8 +546,8 @@ public class ProfilesPane extends JPanePlugin {
 
     private Object[] buildProfileRow(Profile profile) {
 
-//        Object[] cols = { "Name", "Description", "Create Date", "Contest ID", "Path" };
-        // Object[] cols = { "Name", "Description", "Create Date" }
+//        Object[] defaultColumns = { "Name", "Description", "Create Date" };
+//        Object[] fullColumns = { "Name", "Description", "Create Date", "Contest ID", "Path" };
 
         int numberColumns = profilesListBox.getColumnCount();
         Object[] c = new String[numberColumns];
@@ -550,8 +558,11 @@ public class ProfilesPane extends JPanePlugin {
         }
         c[1] = profile.getDescription();
         c[2] = formatter.format(profile.getCreateDate());
-        c[3] = profile.getContestId();
-        c[4] = profile.getProfilePath();
+        
+        if (usingExtraColumns){
+            c[3] = profile.getContestId();
+            c[4] = profile.getProfilePath();
+        }
 
         return c;
     }
@@ -687,7 +698,14 @@ public class ProfilesPane extends JPanePlugin {
         if (profilesListBox == null) {
             profilesListBox = new MCLB();
 
-            Object[] cols = { "Name", "Description", "Create Date", "Contest ID", "Path" };
+            Object[] defaultColumns = { "Name", "Description", "Create Date" };
+            Object[] fullColumns = { "Name", "Description", "Create Date", "Contest ID", "Path" };
+
+            Object[] cols = defaultColumns;
+            if (usingExtraColumns) {
+                cols = fullColumns;
+            }
+
             profilesListBox.addColumns(cols);
 
             HeapSorter sorter = new HeapSorter();
@@ -697,8 +715,11 @@ public class ProfilesPane extends JPanePlugin {
             profilesListBox.setColumnSorter(idx++, sorter, 1); // Name
             profilesListBox.setColumnSorter(idx++, sorter, 2); // Description
             profilesListBox.setColumnSorter(idx++, sorter, 3); // Create Date
-            profilesListBox.setColumnSorter(idx++, sorter, 4); // Contest Id
-            profilesListBox.setColumnSorter(idx++, sorter, 5); // Path
+
+            if (usingExtraColumns) {
+                profilesListBox.setColumnSorter(idx++, sorter, 4); // Contest Id
+                profilesListBox.setColumnSorter(idx++, sorter, 5); // Path
+            }
 
         }
         return profilesListBox;
