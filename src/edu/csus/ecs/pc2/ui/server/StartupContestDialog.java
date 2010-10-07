@@ -30,12 +30,12 @@ import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.profile.ProfileLoadException;
 import edu.csus.ecs.pc2.profile.ProfileManager;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
+import javax.swing.JScrollPane;
 
 /**
  * Contest Password and Profile login screen.
  * 
- * To return control and information on Login, the Runnable will
- * be invoked.
+ * To return control and information on Login, the Runnable will be invoked.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -76,7 +76,7 @@ public class StartupContestDialog extends JDialog {
     private JComboBox profilesComboBox = null;
 
     private JLabel profileTitleLabel = null;
-    
+
     private int siteNumber = 1;
 
     /**
@@ -84,13 +84,21 @@ public class StartupContestDialog extends JDialog {
      */
     private boolean showConfirmPassword = true;
 
-    private JTextPane warningTextPane = null;
+    private JTextPane topTextPane = null;
+
+    private JScrollPane descriptionScrollpane = null;
+
+    private final String descriptiveText = "<html><center><font size=\"+1\"><b>The Contest Password</b><br>  In order to insure contest security, "
+            + " all contest data is   protected by a master password. Before anyone can restart a   contest or access sensitive data they will be asked to enter "
+            + "  this contest master password.  This screen is the place where you set (and confirm) the value of the contest master password.   "
+            + "(Note that the contest master password is independent of the   passwords needed to login to any specific contest   account -- "
+            + "Server, Admin, Team, Judge, etc.)</font></center></html>";
 
     /**
      * This method initializes
      * 
      */
-    public StartupContestDialog(){
+    public StartupContestDialog() {
         super();
         initialize();
         overRideLookAndFeel();
@@ -103,7 +111,7 @@ public class StartupContestDialog extends JDialog {
      * 
      */
     private void initialize() {
-        this.setSize(new Dimension(500, 415));
+        this.setSize(new Dimension(532, 545));
         this.setPreferredSize(new Dimension(500, 430));
         this.setMinimumSize(new java.awt.Dimension(500, 430));
         this.setBackground(new java.awt.Color(253, 255, 255));
@@ -149,7 +157,7 @@ public class StartupContestDialog extends JDialog {
 
         @Override
         public String toString() {
-            return profile.getName() + " ("+profile.getDescription()+")";
+            return profile.getName() + " (" + profile.getDescription() + ")";
         }
     }
 
@@ -160,7 +168,6 @@ public class StartupContestDialog extends JDialog {
         ProfileManager manager = new ProfileManager();
 
         int comboIndex = 0;
-        
 
         if (manager.hasDefaultProfile()) {
 
@@ -168,9 +175,9 @@ public class StartupContestDialog extends JDialog {
             try {
                 profiles = manager.load();
                 Profile currentProfile = manager.getDefaultProfile();
-                
-                if (! new File(currentProfile.getProfilePath()).isDirectory()){
-                    System.err.println("No such directory: "+currentProfile.getProfilePath());
+
+                if (!new File(currentProfile.getProfilePath()).isDirectory()) {
+                    System.err.println("No such directory: " + currentProfile.getProfilePath());
                 }
 
                 Arrays.sort(profiles, new ProfileComparatorByName());
@@ -184,13 +191,13 @@ public class StartupContestDialog extends JDialog {
                     }
                     idx++;
                 }
-                
+
                 /**
                  * Only show confirm if there has not been a contest key file created.
                  */
                 String baseDirectoryName = getBaseProfileDirectoryName(currentProfile, "db." + getSiteNumber());
-                String contestKeyFilename = baseDirectoryName+ File.separator +  FileSecurity.getContestKeyFileName();
-                showConfirmPassword = ! new File(contestKeyFilename).exists();
+                String contestKeyFilename = baseDirectoryName + File.separator + FileSecurity.getContestKeyFileName();
+                showConfirmPassword = !new File(contestKeyFilename).exists();
 
             } catch (IOException e) {
                 fatalError("Unable to load profile list ", e);
@@ -318,7 +325,7 @@ public class StartupContestDialog extends JDialog {
             setStatusMessage("Enter a contest password");
             return;
         }
-        
+
         if (showConfirmPassword) {
             if (getConfirmPassword() == null || getConfirmPassword().length() < 1) {
                 setStatusMessage("Enter a confirmation password");
@@ -336,16 +343,16 @@ public class StartupContestDialog extends JDialog {
         }
 
         bAlreadyLoggingIn = true;
-        
+
         try {
-        
-            if (! showConfirmPassword){
-                confirmContestPassword (getProfile(), getContestPassword());
+
+            if (!showConfirmPassword) {
+                confirmContestPassword(getProfile(), getContestPassword());
                 dispose();
             } else {
                 dispose();
             }
-            
+
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, e.getMessage(), "Incorrect contest password try again", JOptionPane.ERROR_MESSAGE);
         } finally {
@@ -354,15 +361,16 @@ public class StartupContestDialog extends JDialog {
     }
 
     private String getBaseProfileDirectoryName(Profile profile, String dirname) {
-        
+
         if (profile != null) {
             return profile.getProfilePath() + File.separator + dirname;
         } else {
             return dirname;
         }
     }
+
     private void confirmContestPassword(Profile selectedProfile, String contestPassword) throws Exception {
-        
+
         String baseDirectoryName = getBaseProfileDirectoryName(selectedProfile, "db." + getSiteNumber());
 
         if (!new File(baseDirectoryName).isDirectory()) {
@@ -373,7 +381,7 @@ public class StartupContestDialog extends JDialog {
             FileSecurity fileSecurity = new FileSecurity(baseDirectoryName);
             fileSecurity.verifyPassword(contestPassword.toCharArray());
             fileSecurity = null;
-        } catch (FileSecurityException fileSecurityException){
+        } catch (FileSecurityException fileSecurityException) {
             if (fileSecurityException.getMessage().equals(FileSecurity.FAILED_TO_DECRYPT)) {
 
                 throw new Exception("Incorrect contest password, try again");
@@ -385,10 +393,9 @@ public class StartupContestDialog extends JDialog {
             }
         } catch (Exception e) {
             e.printStackTrace(); // debug 22
-            throw new Exception("Bad Trouble dude "+e.getLocalizedMessage());
+            throw new Exception("Bad Trouble dude " + e.getLocalizedMessage());
         }
     }
-    
 
     /**
      * This method initializes jTextField
@@ -403,7 +410,7 @@ public class StartupContestDialog extends JDialog {
             contestPasswordTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyPressed(java.awt.event.KeyEvent e) {
                     if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                        if (showConfirmPassword){
+                        if (showConfirmPassword) {
                             confirmPasswordTextField.requestFocus();
                         } else {
                             attemptToLogin();
@@ -476,7 +483,7 @@ public class StartupContestDialog extends JDialog {
             northPanel = new JPanel();
             northPanel.setLayout(new BorderLayout());
             northPanel.setBackground(java.awt.Color.white);
-            northPanel.add(getWarningTextPane(), BorderLayout.CENTER);
+            northPanel.add(getDescriptionScrollpane(), BorderLayout.NORTH);
         }
         return northPanel;
     }
@@ -512,15 +519,15 @@ public class StartupContestDialog extends JDialog {
         FrameUtilities.regularCursor(this);
     }
 
-    private String passwordTextFieldValue(JPasswordField field){
-        char [] fieldValue = field.getPassword();
-        if (fieldValue.length == 0){
+    private String passwordTextFieldValue(JPasswordField field) {
+        char[] fieldValue = field.getPassword();
+        if (fieldValue.length == 0) {
             return null;
         } else {
             return new String(fieldValue);
         }
     }
-    
+
     /**
      * Fetch Contest Password.
      * 
@@ -543,7 +550,6 @@ public class StartupContestDialog extends JDialog {
         getLoginButton().setEnabled(false);
     }
 
- 
     public Profile getProfile() {
         ProfileWrapper wrapper = (ProfileWrapper) getProfilesComboBox().getSelectedItem();
         if (wrapper != null) {
@@ -551,7 +557,7 @@ public class StartupContestDialog extends JDialog {
         }
         return null;
     }
-    
+
     public int getSiteNumber() {
         return siteNumber;
     }
@@ -561,20 +567,32 @@ public class StartupContestDialog extends JDialog {
     }
 
     /**
-     * This method initializes warningTextPane	
-     * 	
-     * @return javax.swing.JTextPane	
+     * This method initializes topTextPane
+     * 
+     * @return javax.swing.JTextPane
      */
-    private JTextPane getWarningTextPane() {
-        if (warningTextPane == null) {
-            warningTextPane = new JTextPane();
-            warningTextPane.setPreferredSize(new Dimension(6, 78));
-            warningTextPane.setEditorKit(new HTMLEditorKit());
-            warningTextPane.setText("<html>\n <head>\n\n  </head>\n  <body>\n <font size=\"+1\">\n <center><br>It is very important that you remember the contest password,<br>You will be locked out of the contest if you lose this password</center></body>\n</html>");
-            warningTextPane.setEditable(false);
+    private JTextPane getTopTextPane() {
+        if (topTextPane == null) {
+            topTextPane = new JTextPane();
+            topTextPane.setPreferredSize(new Dimension(6, 210));
+            topTextPane.setEditorKit(new HTMLEditorKit());
+            topTextPane.setText(descriptiveText);
+            topTextPane.setEditable(false);
         }
-        return warningTextPane;
+        return topTextPane;
     }
-    
+
+    /**
+     * This method initializes descriptionScrollpane
+     * 
+     * @return javax.swing.JScrollPane
+     */
+    private JScrollPane getDescriptionScrollpane() {
+        if (descriptionScrollpane == null) {
+            descriptionScrollpane = new JScrollPane();
+            descriptionScrollpane.setViewportView(getTopTextPane());
+        }
+        return descriptionScrollpane;
+    }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
