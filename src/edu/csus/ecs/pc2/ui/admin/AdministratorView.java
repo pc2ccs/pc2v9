@@ -150,33 +150,28 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                
+
                 controller.startLogWindow(contest);
-                
+
                 initializeSecurityAlertWindow(contest);
-             
+
                 // set the tab names and other characteristics for the main tabs
                 int fontSize = getMainTabbedPanel().getFont().getSize();
-                getMainTabbedPanel().setFont( getMainTabbedPanel().getFont().deriveFont(Font.BOLD, fontSize+6));
+                getMainTabbedPanel().setFont(getMainTabbedPanel().getFont().deriveFont(Font.BOLD, fontSize + 6));
                 getMainTabbedPanel().setTitleAt(0, "Configure Contest");
-                getMainTabbedPanel().setForegroundAt(0, ACTIVE_TAB_COLOR );
+                getMainTabbedPanel().setForegroundAt(0, ACTIVE_TAB_COLOR);
                 getMainTabbedPanel().setTitleAt(1, "Run Contest");
-                getMainTabbedPanel().setForegroundAt(1, INACTIVE_TAB_COLOR );
+                getMainTabbedPanel().setForegroundAt(1, INACTIVE_TAB_COLOR);
 
-                // add UI components involved with Configuration to the ConfigureContest tabbed pane
+                /**
+                 * add UI components involved with Configuration to the ConfigureContest tabbed pane
+                 */
+
                 AccountsPane accountsPane = new AccountsPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Accounts", accountsPane);
 
-                if (Utilities.isDebugMode()){
-                    PacketExplorerPane explorerPane = new PacketExplorerPane();
-                    addUIPlugin(getConfigureContestTabbedPane(), "Packets", explorerPane);
-                }
-                
                 AutoJudgesPane autoJudgesPane = new AutoJudgesPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Auto Judge", autoJudgesPane);
-
-                //GenerateAccountsPane generateAccountsPane = new GenerateAccountsPane();
-                //addUIPlugin(getConfigureContestTabbedPane(), "Generate", generateAccountsPane);
 
                 GroupsPane groupsPane = new GroupsPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Groups", groupsPane);
@@ -189,16 +184,18 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
                 LanguagesPane languagesPane = new LanguagesPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Languages", languagesPane);
-                
-                ReportPane reportPaneC = new ReportPane();
-                addUIPlugin(getConfigureContestTabbedPane(), "Reports", reportPaneC);
 
                 BalloonSettingsPane balloonSettingsPane = new BalloonSettingsPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Notifications", balloonSettingsPane);
 
                 // XXX bug 417 hide for 9.1 release
-//                EOCNotificationsPane eocNotificationsPane = new EOCNotificationsPane();
-//                addUIPlugin(getConfigureContestTabbedPane(), "End of Contest Control", eocNotificationsPane);
+                // EOCNotificationsPane eocNotificationsPane = new EOCNotificationsPane();
+                // addUIPlugin(getConfigureContestTabbedPane(), "End of Contest Control", eocNotificationsPane);
+
+                if (Utilities.isDebugMode()) {
+                    PacketExplorerPane explorerPane = new PacketExplorerPane();
+                    addUIPlugin(getConfigureContestTabbedPane(), "Packets", explorerPane);
+                }
 
                 ProblemsPane problemsPane = new ProblemsPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Problems", problemsPane);
@@ -206,54 +203,43 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 ProfilesPane profilesPane = new ProfilesPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Profiles", profilesPane);
 
-                ContestTimesPane contestTimesPane = new ContestTimesPane();
-                addUIPlugin(getConfigureContestTabbedPane(), "Times", contestTimesPane);
+                ReportPane reportPaneC = new ReportPane();
+                addUIPlugin(getConfigureContestTabbedPane(), "Reports", reportPaneC);
 
                 ContestInformationPane contestInformationPane = new ContestInformationPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Settings", contestInformationPane);
 
+                ContestTimesPane contestTimesPane = new ContestTimesPane();
+                addUIPlugin(getConfigureContestTabbedPane(), "Times", contestTimesPane);
 
-                // add UI components involved with Running the contest to the RunContest tabbed pane
-                RunsPanel runsPane = new RunsPanel();
-                addUIPlugin(getRunContestTabbedPane(), "Runs", runsPane);
-
-                ClarificationsPane clarificationsPane = new ClarificationsPane();
-                addUIPlugin(getRunContestTabbedPane(), "Clarifications", clarificationsPane);
+                /**
+                 * add UI components involved with Running the contest to the RunContest tabbed pane
+                 */
 
                 ConnectionsPane connectionsPane = new ConnectionsPane();
                 addUIPlugin(getRunContestTabbedPane(), "Connections", connectionsPane);
 
+                ClarificationsPane clarificationsPane = new ClarificationsPane();
+                addUIPlugin(getRunContestTabbedPane(), "Clarifications", clarificationsPane);
+
                 LoginsPane loginsPane = new LoginsPane();
                 addUIPlugin(getRunContestTabbedPane(), "Logins", loginsPane);
-
-                ReportPane reportPane = new ReportPane();
-                addUIPlugin(getRunContestTabbedPane(), "Reports", reportPane);
-
-                SitesPanel sitesPanel = new SitesPanel();
-                addUIPlugin(getRunContestTabbedPane(), "Sites", sitesPanel);
-
-                StandingsHTMLPane standingsHTMLPane = new StandingsHTMLPane("full.xsl");
-                addUIPlugin(getRunContestTabbedPane(), "Standings HTML", standingsHTMLPane);
-
-                StandingsPane standingsPane = new StandingsPane();
-                addUIPlugin(getRunContestTabbedPane(), "Standings", standingsPane);
-
-                TeamStatusPane teamStatusPane = new TeamStatusPane();
-                addUIPlugin(getRunContestTabbedPane(), "Team Status", teamStatusPane);
 
                 OptionsPanel optionsPanel = new OptionsPanel();
                 addUIPlugin(getRunContestTabbedPane(), "Options", optionsPanel);
                 optionsPanel.setSecurityLogWindow(securityAlertLogWindow);
-                
-                if (Utilities.isDebugMode()){
-                    
+
+                if (Utilities.isDebugMode()) {
                     try {
                         PacketMonitorPane pane = new PacketMonitorPane();
                         addUIPlugin(getRunContestTabbedPane(), "Packets", pane);
                     } catch (Exception e) {
                         logException(e);
                     }
-                    
+
+                }
+
+                if (Utilities.isDebugMode()) {
                     try {
                         PluginLoadPane pane = new PluginLoadPane();
                         pane.setParentTabbedPane(getRunContestTabbedPane());
@@ -261,16 +247,35 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                     } catch (Exception e) {
                         logException(e);
                     }
-                    
+
                 }
 
-                //ContestClockPane contestClockPane = new ContestClockPane();
-                //addUIPlugin(getConfigureContestTabbedPane(), "Big Clock", contestClockPane);
+                ReportPane reportPane = new ReportPane();
+                addUIPlugin(getRunContestTabbedPane(), "Reports", reportPane);
+
+                RunsPanel runsPane = new RunsPanel();
+                addUIPlugin(getRunContestTabbedPane(), "Runs", runsPane);
+
+                SitesPanel sitesPanel = new SitesPanel();
+                addUIPlugin(getRunContestTabbedPane(), "Sites", sitesPanel);
+
+                StandingsPane standingsPane = new StandingsPane();
+                addUIPlugin(getRunContestTabbedPane(), "Standings", standingsPane);
+
+                StandingsHTMLPane standingsHTMLPane = new StandingsHTMLPane("full.xsl");
+                addUIPlugin(getRunContestTabbedPane(), "Standings HTML", standingsHTMLPane);
+
+                TeamStatusPane teamStatusPane = new TeamStatusPane();
+                addUIPlugin(getRunContestTabbedPane(), "Team Status", teamStatusPane);
+
+                /**
+                 * Clock and frame title.
+                 */
 
                 contestClockDisplay = new ContestClockDisplay(controller.getLog(), contest.getContestTime(), contest.getSiteNumber(), false, null);
                 contestClockDisplay.setContestAndController(contest, controller);
                 contestClockDisplay.addLabeltoUpdateList(clockLabel, DisplayTimes.REMAINING_TIME, contest.getSiteNumber());
-                
+
                 contest.addContestTimeListener(new ContestTimeListenerImplementation());
 
                 FrameUtilities.setFrameTitle(thisFrame, contest.getTitle(), contest.getContestTime().isContestRunning(), new VersionInfo());

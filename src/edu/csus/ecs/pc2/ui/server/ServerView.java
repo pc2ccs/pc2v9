@@ -363,6 +363,9 @@ public class ServerView extends JFrame implements UIPlugin {
     }
     
     /**
+     * Listeners for server view.
+     * 
+     * This provides a way to refresh the server view on refresh.
      * 
      * @author pc2@ecs.csus.edu
      * @version $Id$
@@ -403,49 +406,59 @@ public class ServerView extends JFrame implements UIPlugin {
 
         ServerListeners serverListeners = new ServerListeners();
         registerPlugin(serverListeners);
+
+        ConnectionsPane connectionsPane = new ConnectionsPane();
+        addUIPlugin(getMainTabbedPane(), "Connections", connectionsPane);
+
+        if (Utilities.isDebugMode()) {
+            try {
+                LoadContestPane loadContestPane = new LoadContestPane();
+                addUIPlugin(getMainTabbedPane(), "Load v8", loadContestPane);
+            } catch (Exception e) {
+                logException(e);
+            }
+        }
         
+        LoginsPane loginsPane = new LoginsPane();
+        addUIPlugin(getMainTabbedPane(), "Logins", loginsPane);
+
+        OptionsPanel optionsPanel = new OptionsPanel();
+        addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
+        optionsPanel.setSecurityLogWindow(securityAlertLogWindow);
+
+        if (Utilities.isDebugMode()) {
+            try {
+                PacketMonitorPane packetMonitorPane = new PacketMonitorPane();
+                addUIPlugin(getMainTabbedPane(), "Packets", packetMonitorPane);
+            } catch (Exception e) {
+                logException(e);
+            }
+        }            
+
+        if (Utilities.isDebugMode()) {
+            try {
+                PluginLoadPane pane = new PluginLoadPane();
+                pane.setParentTabbedPane(getMainTabbedPane());
+                addUIPlugin(getMainTabbedPane(), "Plugin Load", pane);
+            } catch (Exception e) {
+                logException(e);
+            }
+        }            
+
+        ProfilesPane profilePane = new ProfilesPane();
+        addUIPlugin(getMainTabbedPane(), "Profiles", profilePane);
+
+        PlaybackPane playbackPane = new PlaybackPane();
+        addUIPlugin(getMainTabbedPane(), "Replay", playbackPane);
+        
+        ReportPane reportPane = new ReportPane();
+        addUIPlugin(getMainTabbedPane(), "Reports", reportPane);
+
         SitesPanel sitesPanel = new SitesPanel();
         addUIPlugin(getMainTabbedPane(), "Sites", sitesPanel);
 
         ContestTimesPane contestTimesPane = new ContestTimesPane();
         addUIPlugin(getMainTabbedPane(), "Times", contestTimesPane);
-
-        LoginsPane loginsPane = new LoginsPane();
-        addUIPlugin(getMainTabbedPane(), "Logins", loginsPane);
-
-        ConnectionsPane connectionsPane = new ConnectionsPane();
-        addUIPlugin(getMainTabbedPane(), "Connections", connectionsPane);
-
-        ReportPane reportPane = new ReportPane();
-        addUIPlugin(getMainTabbedPane(), "Reports", reportPane);
-
-        ProfilesPane profilePane = new ProfilesPane();
-        addUIPlugin(getMainTabbedPane(), "Profiles", profilePane);
-        
-        PlaybackPane playbackPane = new PlaybackPane();
-        addUIPlugin("Replay", playbackPane);
-
-        OptionsPanel optionsPanel = new OptionsPanel();
-        addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
-        optionsPanel.setSecurityLogWindow(securityAlertLogWindow);
-        
-        
-        try {
-            if (Utilities.isDebugMode()){
-                LoadContestPane loadContestPane = new LoadContestPane();
-                addUIPlugin(getMainTabbedPane(), "Load v8", loadContestPane);
-                
-                PluginLoadPane pane = new PluginLoadPane();
-                pane.setParentTabbedPane(getMainTabbedPane());
-                addUIPlugin(getMainTabbedPane(), "Plugin Load", pane);
-            }
-            
-        } catch (Exception e) {
-            logException(e);
-        }
-        
-        PacketMonitorPane packetMonitorPane = new PacketMonitorPane();
-        addUIPlugin(getMainTabbedPane(), "Packets", packetMonitorPane);
     }
 
     private void logException(Exception e) {
@@ -490,17 +503,6 @@ public class ServerView extends JFrame implements UIPlugin {
 
     }
 
-    /**
-     * Add a UI Plugin to the tabbed pane.
-     * 
-     * @param tabTitle
-     * @param plugin
-     */
-    public void addUIPlugin(String tabTitle, JPanePlugin plugin) {
-        addUIPlugin(getMainTabbedPane(), tabTitle, plugin);
-    }
-
-    
     /**
      * This method initializes messagePanel
      * 
