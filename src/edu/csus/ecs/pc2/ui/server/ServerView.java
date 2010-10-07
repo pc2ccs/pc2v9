@@ -30,6 +30,7 @@ import edu.csus.ecs.pc2.core.model.ISiteListener;
 import edu.csus.ecs.pc2.core.model.LoginEvent;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.SiteEvent;
+import edu.csus.ecs.pc2.plugin.ContestSummaryReports;
 import edu.csus.ecs.pc2.ui.ConnectionsPane;
 import edu.csus.ecs.pc2.ui.ContestTimesPane;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
@@ -135,6 +136,15 @@ public class ServerView extends JFrame implements UIPlugin {
         int result = FrameUtilities.yesNoCancelDialog(null, "Are you sure you want to exit PC^2?", "Exit PC^2 Server Module");
 
         if (result == JOptionPane.YES_OPTION) {
+
+            ContestSummaryReports contestReports = new ContestSummaryReports();
+            contestReports.setContestAndController(model, controller);
+            
+            if (contestReports.isLateInContest()){
+                contestReports.generateReports();
+                controller.getLog().info("Reports Generated to "+contestReports.getReportDirectory());
+            }
+            
             log.info("Server "+model.getSiteNumber()+" halted");
             System.exit(0);
         }

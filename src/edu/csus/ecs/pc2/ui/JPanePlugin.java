@@ -112,4 +112,8 @@ public abstract class JPanePlugin extends JPanel implements UIPlugin {
         FrameUtilities.centerFrameFullScreenHeight(multipleFileViewer);
         multipleFileViewer.setVisible(true);
     }
+    
+    public void logException(String message, Exception ex){
+        controller.getLog().log(Log.WARNING, message,ex);
+    }
 }

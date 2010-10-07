@@ -16,6 +16,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
@@ -66,7 +67,10 @@ import edu.csus.ecs.pc2.core.report.RunsReport;
 import edu.csus.ecs.pc2.core.report.RunsReport5;
 import edu.csus.ecs.pc2.core.report.SolutionsByProblemReport;
 import edu.csus.ecs.pc2.core.report.StandingsReport;
+import edu.csus.ecs.pc2.plugin.ContestSummaryReports;
 import edu.csus.ecs.pc2.ui.EditFilterPane.ListNames;
+import java.awt.FlowLayout;
+import java.awt.event.KeyEvent;
 
 /**
  * Report Pane, allows picking and viewing reports.
@@ -83,7 +87,7 @@ public class ReportPane extends JPanePlugin {
      */
     private static final long serialVersionUID = -5165297328068331675L;
 
-    private JPanel jPanel = null;
+    private JPanel topPane = null;
 
     private JPanel buttonPane = null;
 
@@ -124,6 +128,8 @@ public class ReportPane extends JPanePlugin {
 
     private JCheckBox xmlOutputCheckbox = null;
 
+    private JButton generateSummaryButton = null;
+
     public String getReportDirectory() {
         return reportDirectory;
     }
@@ -154,7 +160,7 @@ public class ReportPane extends JPanePlugin {
     private void initialize() {
         this.setLayout(new BorderLayout());
         this.setSize(new java.awt.Dimension(505, 291));
-        this.add(getJPanel(), java.awt.BorderLayout.NORTH);
+        this.add(getTopPane(), java.awt.BorderLayout.NORTH);
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
         this.add(getMainPane(), java.awt.BorderLayout.CENTER);
 
@@ -261,21 +267,21 @@ public class ReportPane extends JPanePlugin {
     }
 
     /**
-     * This method initializes jPanel
+     * This method initializes topPane
      * 
      * @return javax.swing.JPanel
      */
-    private JPanel getJPanel() {
-        if (jPanel == null) {
+    private JPanel getTopPane() {
+        if (topPane == null) {
             messageLabel = new JLabel();
             messageLabel.setText("");
             messageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-            jPanel = new JPanel();
-            jPanel.setLayout(new BorderLayout());
-            jPanel.setPreferredSize(new java.awt.Dimension(30, 30));
-            jPanel.add(messageLabel, java.awt.BorderLayout.CENTER);
+            topPane = new JPanel();
+            topPane.setLayout(new BorderLayout());
+            topPane.setPreferredSize(new java.awt.Dimension(30, 30));
+            topPane.add(messageLabel, java.awt.BorderLayout.CENTER);
         }
-        return jPanel;
+        return topPane;
     }
 
     /**
@@ -285,9 +291,13 @@ public class ReportPane extends JPanePlugin {
      */
     private JPanel getButtonPane() {
         if (buttonPane == null) {
+            FlowLayout flowLayout = new FlowLayout();
+            flowLayout.setHgap(45);
             buttonPane = new JPanel();
+            buttonPane.setLayout(flowLayout);
             buttonPane.setPreferredSize(new java.awt.Dimension(45, 45));
             buttonPane.add(getViewReportButton(), null);
+            buttonPane.add(getGenerateSummaryButton(), null);
         }
         return buttonPane;
     }
@@ -612,8 +622,8 @@ public class ReportPane extends JPanePlugin {
     private JCheckBox getBreakdownBySiteCheckbox() {
         if (breakdownBySiteCheckbox == null) {
             breakdownBySiteCheckbox = new JCheckBox();
-            breakdownBySiteCheckbox.setBounds(new java.awt.Rectangle(21,80,187,21));
-            breakdownBySiteCheckbox.setMnemonic(java.awt.event.KeyEvent.VK_F);
+            breakdownBySiteCheckbox.setBounds(new Rectangle(21, 80, 152, 21));
+            breakdownBySiteCheckbox.setMnemonic(KeyEvent.VK_S);
             breakdownBySiteCheckbox.setToolTipText("Break down by site");
             breakdownBySiteCheckbox.setText("Breakdown by site");
             breakdownBySiteCheckbox.addActionListener(new java.awt.event.ActionListener() {
@@ -712,7 +722,7 @@ public class ReportPane extends JPanePlugin {
             filterLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
             filterPane = new JPanel();
             filterPane.setLayout(new BorderLayout());
-            filterPane.setBounds(new java.awt.Rectangle(233,76,231,93));
+            filterPane.setBounds(new Rectangle(185, 76, 279, 128));
             filterPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Filter", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION,
                     null, null));
             filterPane.add(getFilterButtonPane(), java.awt.BorderLayout.SOUTH);
@@ -743,6 +753,7 @@ public class ReportPane extends JPanePlugin {
         if (editReportFilter == null) {
             editReportFilter = new JButton();
             editReportFilter.setText("Edit Filter");
+            editReportFilter.setMnemonic(KeyEvent.VK_F);
             editReportFilter.setToolTipText("Edit Filter");
             editReportFilter.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -793,10 +804,43 @@ public class ReportPane extends JPanePlugin {
     private JCheckBox getXmlOutputCheckbox() {
         if (xmlOutputCheckbox == null) {
             xmlOutputCheckbox = new JCheckBox();
-            xmlOutputCheckbox.setBounds(new Rectangle(21, 118, 187, 21));
+            xmlOutputCheckbox.setBounds(new Rectangle(21, 118, 152, 21));
+            xmlOutputCheckbox.setMnemonic(KeyEvent.VK_X);
             xmlOutputCheckbox.setText("XML Output");
         }
         return xmlOutputCheckbox;
+    }
+
+    /**
+     * This method initializes generateSummaryButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getGenerateSummaryButton() {
+        if (generateSummaryButton == null) {
+            generateSummaryButton = new JButton();
+            generateSummaryButton.setText("Generate Summary");
+            generateSummaryButton.setMnemonic(KeyEvent.VK_G);
+            generateSummaryButton.setToolTipText("Generate Summary Reports");
+            generateSummaryButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    generateSummaryReport();
+                }
+            });
+        }
+        return generateSummaryButton;
+    }
+
+    protected void generateSummaryReport() {
+        try {
+            ContestSummaryReports contestReports = new ContestSummaryReports();
+            contestReports.setContestAndController(getContest(), getController());
+            contestReports.generateReports();
+            JOptionPane.showMessageDialog(this, "Reports Generated to "+contestReports.getReportDirectory());
+        } catch (Exception e) {
+            logException("Unable to produce reports", e);
+            JOptionPane.showMessageDialog(this, "Unable to produce reports " + e.getMessage());
+        }
     }
     
 } // @jve:decl-index=0:visual-constraint="10,10"
