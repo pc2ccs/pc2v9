@@ -38,7 +38,7 @@ public class ProfileSavePane extends JPanePlugin {
 
     public static final String EXPORT_BUTTON_NAME = "Export"; // @jve:decl-index=0:
 
-    public static final String CREATE_BUTTON_NAME = "Create"; // @jve:decl-index=0:
+    public static final String CREATE_BUTTON_NAME = "Ok"; // @jve:decl-index=0:
 
     private JPanel buttonPanel = null;
 

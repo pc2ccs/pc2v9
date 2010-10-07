@@ -42,6 +42,7 @@ import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.core.report.ProfileCloneSettingsReport;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
+import java.awt.event.KeyEvent;
 
 /**
  * Profile administration pane.
@@ -237,9 +238,9 @@ public class ProfilesPane extends JPanePlugin {
             buttonPane.setLayout(flowLayout);
             buttonPane.setPreferredSize(new java.awt.Dimension(35, 35));
             buttonPane.add(getNewButton(), null);
-            buttonPane.add(getResetContestButton(), null);
             buttonPane.add(getCloneButton(), null);
             buttonPane.add(getSwitchButton(), null);
+            buttonPane.add(getResetContestButton(), null);
             buttonPane.add(getExportButton(), null);
             buttonPane.add(getReportButton(), null);
         }
@@ -254,8 +255,8 @@ public class ProfilesPane extends JPanePlugin {
     private JButton getNewButton() {
         if (newButton == null) {
             newButton = new JButton();
-            newButton.setText(ProfileSavePane.CREATE_BUTTON_NAME);
-            newButton.setMnemonic(java.awt.event.KeyEvent.VK_T);
+            newButton.setText("New");
+            newButton.setMnemonic(KeyEvent.VK_N);
             newButton.setEnabled(true);
             newButton.setToolTipText("Create a new (blank) profile");
             newButton.addActionListener(new java.awt.event.ActionListener() {
