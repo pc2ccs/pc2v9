@@ -18,6 +18,10 @@ import javax.swing.SwingConstants;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
+import javax.swing.BorderFactory;
+import javax.swing.border.TitledBorder;
+import java.awt.Font;
+import java.awt.Color;
 
 /**
  * Save/export profile settings.
@@ -105,7 +109,7 @@ public class ProfileSavePane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new Dimension(488, 402));
+        this.setSize(new Dimension(488, 480));
         this.add(getButtonPanel(), java.awt.BorderLayout.SOUTH);
 
         this.add(getCenterPane(), BorderLayout.CENTER);
@@ -396,6 +400,7 @@ public class ProfileSavePane extends JPanePlugin {
             centerPane.add(getContestPasswordConfirmTextField(), null);
             centerPane.add(confirmPasswordLabel, null);
             centerPane.add(getCheckBoxPane(), null);
+            centerPane.add(getResetContestTimeCheckBox(), null);
         }
         return centerPane;
     }
@@ -410,7 +415,8 @@ public class ProfileSavePane extends JPanePlugin {
             resetContestTimeCheckBox = new JCheckBox();
             resetContestTimeCheckBox.setToolTipText("Set elapsed time to zero");
             resetContestTimeCheckBox.setSelected(true);
-            resetContestTimeCheckBox.setBounds(new Rectangle(15, 148, 192, 21));
+            resetContestTimeCheckBox.setSize(new Dimension(192, 21));
+            resetContestTimeCheckBox.setLocation(new Point(33, 416));
             resetContestTimeCheckBox.setText("Reset Contest Times");
         }
         return resetContestTimeCheckBox;
@@ -453,7 +459,7 @@ public class ProfileSavePane extends JPanePlugin {
         if (copyRunsCheckBox == null) {
             copyRunsCheckBox = new JCheckBox();
             copyRunsCheckBox.setSelected(true);
-            copyRunsCheckBox.setBounds(new Rectangle(15, 115, 192, 21));
+            copyRunsCheckBox.setBounds(new Rectangle(33, 56, 132, 21));
             copyRunsCheckBox.setText("Runs");
         }
         return copyRunsCheckBox;
@@ -468,7 +474,7 @@ public class ProfileSavePane extends JPanePlugin {
         if (copyLanguagesCheckBox == null) {
             copyLanguagesCheckBox = new JCheckBox();
             copyLanguagesCheckBox.setSelected(true);
-            copyLanguagesCheckBox.setBounds(new Rectangle(15, 46, 192, 21));
+            copyLanguagesCheckBox.setBounds(new Rectangle(264, 25, 160, 21));
             copyLanguagesCheckBox.setText("Languages");
         }
         return copyLanguagesCheckBox;
@@ -483,7 +489,7 @@ public class ProfileSavePane extends JPanePlugin {
         if (copyProblemsCheckBox == null) {
             copyProblemsCheckBox = new JCheckBox();
             copyProblemsCheckBox.setSelected(false);
-            copyProblemsCheckBox.setBounds(new Rectangle(15, 13, 192, 21));
+            copyProblemsCheckBox.setBounds(new Rectangle(33, 25, 132, 21));
             copyProblemsCheckBox.setText("Problems");
         }
         return copyProblemsCheckBox;
@@ -505,6 +511,7 @@ public class ProfileSavePane extends JPanePlugin {
         getContestPasswordConfirmTextField().setText("");
 
         getCheckBoxPane().setVisible(true);
+        getResetContestTimeCheckBox().setVisible(true);
 
         String buttonNameText = getSaveButton().getText();
 
@@ -515,6 +522,7 @@ public class ProfileSavePane extends JPanePlugin {
         } else if (buttonNameText.equalsIgnoreCase(CREATE_BUTTON_NAME)) {
             clearAllSettings();
             getCheckBoxPane().setVisible(false);
+            getResetContestTimeCheckBox().setVisible(false);
         } else {
             showMessage("Unable to take action: " + buttonNameText);
         }
@@ -576,7 +584,7 @@ public class ProfileSavePane extends JPanePlugin {
         if (copyClarificationsCheckBox == null) {
             copyClarificationsCheckBox = new JCheckBox();
             copyClarificationsCheckBox.setText("Clarifications");
-            copyClarificationsCheckBox.setBounds(new Rectangle(15, 79, 192, 24));
+            copyClarificationsCheckBox.setBounds(new Rectangle(33, 84, 132, 24));
             copyClarificationsCheckBox.setSelected(true);
         }
         return copyClarificationsCheckBox;
@@ -591,7 +599,7 @@ public class ProfileSavePane extends JPanePlugin {
         if (copyAccountsCheckBox == null) {
             copyAccountsCheckBox = new JCheckBox();
             copyAccountsCheckBox.setText("Accounts");
-            copyAccountsCheckBox.setBounds(new Rectangle(252, 11, 192, 24));
+            copyAccountsCheckBox.setBounds(new Rectangle(264, 53, 160, 24));
             copyAccountsCheckBox.setSelected(true);
         }
         return copyAccountsCheckBox;
@@ -606,7 +614,7 @@ public class ProfileSavePane extends JPanePlugin {
         if (copyGroupsCheckBox == null) {
             copyGroupsCheckBox = new JCheckBox();
             copyGroupsCheckBox.setText("Groups");
-            copyGroupsCheckBox.setBounds(new Rectangle(252, 44, 192, 24));
+            copyGroupsCheckBox.setBounds(new Rectangle(264, 84, 160, 24));
             copyGroupsCheckBox.setSelected(true);
         }
         return copyGroupsCheckBox;
@@ -621,7 +629,7 @@ public class ProfileSavePane extends JPanePlugin {
         if (copyJudgementsCheckbox == null) {
             copyJudgementsCheckbox = new JCheckBox();
             copyJudgementsCheckbox.setText("Judgements");
-            copyJudgementsCheckbox.setBounds(new Rectangle(252, 79, 192, 24));
+            copyJudgementsCheckbox.setBounds(new Rectangle(264, 115, 160, 24));
             copyJudgementsCheckbox.setSelected(true);
         }
         return copyJudgementsCheckbox;
@@ -636,7 +644,7 @@ public class ProfileSavePane extends JPanePlugin {
         if (copyContestSettingsCheckBox == null) {
             copyContestSettingsCheckBox = new JCheckBox();
             copyContestSettingsCheckBox.setText("Contest settings");
-            copyContestSettingsCheckBox.setBounds(new Rectangle(252, 146, 192, 24));
+            copyContestSettingsCheckBox.setBounds(new Rectangle(264, 177, 160, 24));
             copyContestSettingsCheckBox.setSelected(true);
         }
         return copyContestSettingsCheckBox;
@@ -651,12 +659,13 @@ public class ProfileSavePane extends JPanePlugin {
         if (checkBoxPane == null) {
             checkBoxPane = new JPanel();
             checkBoxPane.setLayout(null);
-            checkBoxPane.setBounds(new Rectangle(3, 186, 477, 176));
+            checkBoxPane.setBounds(new Rectangle(3, 186, 477, 222));
+            checkBoxPane.setBorder(BorderFactory.createTitledBorder(null, "Copy:", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, new Font("Dialog", Font.BOLD, 12), new Color(51,
+                    51, 51)));
             checkBoxPane.add(getCopyLanguagesCheckBox(), null);
             checkBoxPane.add(getCopyProblemsCheckBox(), null);
             checkBoxPane.add(getCopyClarificationsCheckBox(), null);
             checkBoxPane.add(getCopyRunsCheckBox(), null);
-            checkBoxPane.add(getResetContestTimeCheckBox(), null);
             checkBoxPane.add(getCopyContestSettingsCheckBox(), null);
             checkBoxPane.add(getCopyJudgementsCheckbox(), null);
             checkBoxPane.add(getCopyGroupsCheckBox(), null);
@@ -674,7 +683,7 @@ public class ProfileSavePane extends JPanePlugin {
     private JCheckBox getCopyNotificationsCheckBox() {
         if (copyNotificationsCheckBox == null) {
             copyNotificationsCheckBox = new JCheckBox();
-            copyNotificationsCheckBox.setBounds(new Rectangle(252, 113, 192, 24));
+            copyNotificationsCheckBox.setBounds(new Rectangle(264, 146, 160, 24));
             copyNotificationsCheckBox.setText("Notifications");
             copyNotificationsCheckBox.setSelected(true);
         }
