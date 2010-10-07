@@ -88,11 +88,17 @@ public class StartupContestDialog extends JDialog {
 
     private JScrollPane descriptionScrollpane = null;
 
-    private final String descriptiveText = "<html><center><font size=\"+1\"><b>The Contest Password</b><br>  In order to insure contest security, "
+    private final String firstLoginText = "<html><center><font size=\"+1\"><b>The Contest Password</b><br>  In order to insure contest security, "
             + " all contest data is   protected by a master password. Before anyone can restart a   contest or access sensitive data they will be asked to enter "
             + "  this contest master password.  This screen is the place where you set (and confirm) the value of the contest master password.   "
             + "(Note that the contest master password is independent of the   passwords needed to login to any specific contest   account -- "
-            + "Server, Admin, Team, Judge, etc.)</font></center></html>";
+            + "Server, Admin, Team, Judge, etc.)</font></center></html>";  //  @jve:decl-index=0:
+
+    private final String subsequentLoginText = "<html><center><font size=\"+1\">This server has been started previously.  </font></center><font size=\"+1\">" + "<br>" //
+            + "To restart the server you must: <br>" + //
+            "(1) choose a \"contest profile\" to be used (choose \"default\" if you're not sure or if no other profile(s) have been created),<br>" + //
+            " and<br>" +  "(2) enter the Contest Master Password which was specified when the server was first started<br>" + //
+            "</font></html>";  //  @jve:decl-index=0:
 
     /**
      * This method initializes
@@ -214,8 +220,15 @@ public class StartupContestDialog extends JDialog {
 
         getProfilesComboBox().setSelectedIndex(comboIndex);
 
+        profileTitleLabel.setVisible(! showConfirmPassword);
+        getProfilesComboBox().setVisible(! showConfirmPassword);
+
         getConfirmPasswordTextField().setVisible(showConfirmPassword);
         passwordTitleLabel.setVisible(showConfirmPassword);
+        
+        if (! showConfirmPassword){
+            topTextPane.setText(subsequentLoginText);
+        }
 
     }
 
@@ -576,7 +589,7 @@ public class StartupContestDialog extends JDialog {
             topTextPane = new JTextPane();
             topTextPane.setPreferredSize(new Dimension(6, 210));
             topTextPane.setEditorKit(new HTMLEditorKit());
-            topTextPane.setText(descriptiveText);
+            topTextPane.setText(firstLoginText);
             topTextPane.setEditable(false);
         }
         return topTextPane;
