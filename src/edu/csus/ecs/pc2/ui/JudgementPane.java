@@ -150,10 +150,7 @@ public class JudgementPane extends JPanePlugin {
             return;
         }
         
-        if (! name.startsWith("No - ")){
-            name = "No - " + name;
-            newJudgement.setDisplayName(name);
-        }
+        newJudgement.setDisplayName(name);
 
         getController().addNewJudgement(newJudgement);
 
@@ -203,10 +200,7 @@ public class JudgementPane extends JPanePlugin {
         Judgement newJudgement = getJudgementFromFields();
 
         String name = newJudgement.getDisplayName().trim();
-        if (! name.startsWith("No - ")){
-            name = "No - " + name;
-            newJudgement.setDisplayName(name);
-        }
+        newJudgement.setDisplayName(name);
 
 //        dumpJudgement (newJudgement);
         
