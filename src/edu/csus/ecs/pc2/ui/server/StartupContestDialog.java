@@ -122,7 +122,7 @@ public class StartupContestDialog extends JDialog {
         this.setMinimumSize(new java.awt.Dimension(500, 430));
         this.setBackground(new java.awt.Color(253, 255, 255));
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
-        this.setTitle("PC^2 Profile Selection ");
+        this.setTitle("Set Contest Master Password");
         this.setContentPane(getMainPanel());
 
         this.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -228,6 +228,7 @@ public class StartupContestDialog extends JDialog {
         
         if (! showConfirmPassword){
             topTextPane.setText(subsequentLoginText);
+            setTitle("Enter Contest Master Password");
         }
 
     }

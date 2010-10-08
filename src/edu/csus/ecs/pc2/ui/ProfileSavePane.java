@@ -431,7 +431,7 @@ public class ProfileSavePane extends JPanePlugin {
         if (profileNameTextField == null) {
             profileNameTextField = new JTextField();
             profileNameTextField.setPreferredSize(new Dimension(6, 22));
-            profileNameTextField.setSize(new Dimension(124, 25));
+            profileNameTextField.setSize(new Dimension(273, 25));
             profileNameTextField.setLocation(new Point(184, 11));
         }
         return profileNameTextField;

@@ -319,13 +319,17 @@ public class ProfilesPane extends JPanePlugin {
     }
 
     protected void cloneProfile() {
-        getProfileSaveFrame().setTitle("Clone/Copy existing profile: " + getProfileName());
+        getProfileSaveFrame().setTitle("Clone active profile: " + getProfileName() + " (" +getProfileDescription()+")");
         getProfileSaveFrame().setSaveButtonName(ProfileSavePane.CLONE_BUTTON_NAME);
         getProfileSaveFrame().setVisible(true);
     }
 
     private String getProfileName() {
         return getContest().getProfile().getName();
+    }
+    
+    private String getProfileDescription(){
+        return getContest().getProfile().getDescription();
     }
 
     protected void newProfile() {

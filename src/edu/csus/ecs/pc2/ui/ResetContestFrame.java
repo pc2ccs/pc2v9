@@ -14,9 +14,11 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Profile;
 
 /**
  * Reset Contest Dialog.
@@ -143,15 +145,31 @@ public class ResetContestFrame extends JFrame implements UIPlugin {
 
     protected void confirmReset() {
 
-        String stopMessage = "Reset will erase all runs and clarifications, and will reset the contest time.\n" + "Are you sure you want to reset this site?";
+        boolean resetProblemDefs = getRemoveProblemDefsCheckBox().isSelected();
+        boolean resetLanguageDefs = getRemoveLanguageDefintions().isSelected();
 
-        if (JOptionPane.YES_OPTION == JOptionPane.showConfirmDialog(this, stopMessage)) {
+        String problemText = "";
+        String languageText = "";
+        
+        if (resetProblemDefs){
+            problemText = " problems,";
+        }
+        
+        if (resetLanguageDefs){
+            languageText = " languages,";
+        }
 
-            boolean resetProblemDefs = getRemoveProblemDefsCheckBox().isSelected();
-            boolean resetLanguageDefs = getRemoveLanguageDefintions().isSelected();
+        String stopMessage = "Reset will erase all runs," + problemText + languageText + //
+                " and clarifications, and will reset the contest time.\n" + //
+                "Are you sure you want to reset this Contest Active Profile?";
+
+        String title = "Confirm Reset Active Profile: "+contest.getProfile().getName();
+
+        int result = FrameUtilities.yesNoCancelDialog(this, stopMessage, title);
+        
+        if (result == JOptionPane.YES_OPTION) {
 
             controller.resetContest(contest.getClientId(), resetProblemDefs, resetLanguageDefs);
-
             setVisible(false);
         }
     }
@@ -207,8 +225,16 @@ public class ResetContestFrame extends JFrame implements UIPlugin {
         this.contest = inContest;
         this.controller = inController;
         
-        getRemoveLanguageDefintions().setSelected(false);
-        getRemoveProblemDefsCheckBox().setSelected(false);
+        Profile profile = contest.getProfile();
+        final String newTitle = "Reset Profile: "+profile.getName()+" ("+profile.getDescription()+")"; 
+
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                getRemoveLanguageDefintions().setSelected(false);
+                getRemoveProblemDefsCheckBox().setSelected(false);
+                setTitle(newTitle);
+            }
+        });        
         
     }
 
