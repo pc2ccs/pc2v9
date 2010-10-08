@@ -121,8 +121,8 @@ public class ServerView extends JFrame implements UIPlugin {
     }
     
     private void overRideLookAndFeel(){
-        // TODO eventually move this method to on location 
-        String value = IniFile.getValue("client.plaf");
+        
+        String value = IniFile.getValue("server.plaf");
         if (value != null && value.equalsIgnoreCase("java")){
             FrameUtilities.setJavaLookAndFeel();
         }
