@@ -34,11 +34,6 @@ import edu.csus.ecs.pc2.core.log.Log;
 public class VersionInfo {
 
     /**
-     * svn id tag.
-     */
-    public static final String SVN_ID = "$Id$";
-
-    /**
      * Name of file that contains version information.
      */
     private static final String VERSION_FILENAME = "VERSION";
@@ -89,6 +84,12 @@ public class VersionInfo {
                 System.exit(2);
             }
         }
+        
+        String tempVerString = getVersionNumber();
+        tempVerString = tempVerString.replaceFirst("beta", "");
+        tempVerString = tempVerString.replaceFirst("DEBUG", "2");
+        setVersionNumber(tempVerString);
+        
     }
 
     /**
@@ -172,7 +173,7 @@ public class VersionInfo {
         System.out.println();
         System.out.println(sri.getContactEMail());
         System.out.println();
-        System.out.println("(This class: " + SVN_ID + ")");
+        System.out.println("(This class: $Id$)");
         System.out.println();
 
         System.exit(0);
