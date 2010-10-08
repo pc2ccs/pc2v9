@@ -17,6 +17,7 @@ import edu.csus.ecs.pc2.core.report.ContestSettingsReport;
 import edu.csus.ecs.pc2.core.report.EvaluationReport;
 import edu.csus.ecs.pc2.core.report.FastestSolvedReport;
 import edu.csus.ecs.pc2.core.report.FastestSolvedSummaryReport;
+import edu.csus.ecs.pc2.core.report.HTMLReport;
 import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.core.report.LanguagesReport;
 import edu.csus.ecs.pc2.core.report.ListRunLanguages;
@@ -81,6 +82,7 @@ public class ContestSummaryReports extends Plugin {
         reports.add(new ProblemsReport());
         reports.add(new LanguagesReport());
 
+        reports.add(new HTMLReport());
         reports.add(new EvaluationReport());
 
         reports.add(new OldRunsReport());

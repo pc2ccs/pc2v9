@@ -1,7 +1,9 @@
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.Rectangle;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -49,6 +51,7 @@ import edu.csus.ecs.pc2.core.report.ExtractPlaybackLoadFilesReport;
 import edu.csus.ecs.pc2.core.report.FastestSolvedReport;
 import edu.csus.ecs.pc2.core.report.FastestSolvedSummaryReport;
 import edu.csus.ecs.pc2.core.report.GroupsReport;
+import edu.csus.ecs.pc2.core.report.HTMLReport;
 import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.core.report.InternalDumpReport;
 import edu.csus.ecs.pc2.core.report.JudgementNotificationsReport;
@@ -69,8 +72,6 @@ import edu.csus.ecs.pc2.core.report.SolutionsByProblemReport;
 import edu.csus.ecs.pc2.core.report.StandingsReport;
 import edu.csus.ecs.pc2.plugin.ContestSummaryReports;
 import edu.csus.ecs.pc2.ui.EditFilterPane.ListNames;
-import java.awt.FlowLayout;
-import java.awt.event.KeyEvent;
 
 /**
  * Report Pane, allows picking and viewing reports.
@@ -212,6 +213,8 @@ public class ReportPane extends JPanePlugin {
         reports.add(new ProfileCloneSettingsReport());
         
         reports.add(new InternalDumpReport());
+        
+        reports.add(new HTMLReport());
 
         listOfReports = (IReport[]) reports.toArray(new IReport[reports.size()]);
         Arrays.sort(listOfReports, new ReportNameByComparator());
