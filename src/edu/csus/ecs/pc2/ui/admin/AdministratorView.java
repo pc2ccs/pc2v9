@@ -32,6 +32,7 @@ import edu.csus.ecs.pc2.ui.BalloonSettingsPane;
 import edu.csus.ecs.pc2.ui.ClarificationsPane;
 import edu.csus.ecs.pc2.ui.ConnectionsPane;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay;
+import edu.csus.ecs.pc2.ui.ContestClockDisplay.DisplayTimes;
 import edu.csus.ecs.pc2.ui.ContestInformationPane;
 import edu.csus.ecs.pc2.ui.ContestTimesPane;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
@@ -55,7 +56,6 @@ import edu.csus.ecs.pc2.ui.StandingsHTMLPane;
 import edu.csus.ecs.pc2.ui.StandingsPane;
 import edu.csus.ecs.pc2.ui.TeamStatusPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
-import edu.csus.ecs.pc2.ui.ContestClockDisplay.DisplayTimes;
 
 /**
  * Administrator GUI.
@@ -268,6 +268,9 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 TeamStatusPane teamStatusPane = new TeamStatusPane();
                 addUIPlugin(getRunContestTabbedPane(), "Team Status", teamStatusPane);
 
+                setSelectedTab (getRunContestTabbedPane(), "Runs");
+                setSelectedTab (getConfigureContestTabbedPane(), "Accounts");
+                
                 /**
                  * Clock and frame title.
                  */
@@ -286,6 +289,25 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
      });
     }
     
+    /**
+     * Set the tab for the input name.
+     * 
+     * @param tabbedPane
+     * @param name
+     */
+    protected void setSelectedTab(JTabbedPane tabbedPane, String name) {
+        
+        for (int i = 0; i < tabbedPane.getComponentCount(); i ++){
+            String tabTitle = tabbedPane.getTitleAt(i);
+//            System.err.println("For "+tabbedPane.getName()+" found "+tabTitle);
+            if (tabTitle != null && name.equals(tabTitle)){
+//                System.err.println("For "+tabbedPane.getName()+"   selected "+name);
+                tabbedPane.setSelectedIndex(i);
+            }
+        }
+    }
+
+
     private void logException(Exception e) {
 
         if (StaticLog.getLog() != null) {

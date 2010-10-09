@@ -469,6 +469,26 @@ public class ServerView extends JFrame implements UIPlugin {
 
         ContestTimesPane contestTimesPane = new ContestTimesPane();
         addUIPlugin(getMainTabbedPane(), "Times", contestTimesPane);
+        
+        setSelectedTab(getMainTabbedPane(), "Sites");
+    }
+    
+    /**
+     * Set the tab for the input name.
+     * 
+     * @param tabbedPane
+     * @param name
+     */
+    protected void setSelectedTab(JTabbedPane tabbedPane, String name) {
+        
+        for (int i = 0; i < tabbedPane.getComponentCount(); i ++){
+            String tabTitle = tabbedPane.getTitleAt(i);
+//            System.err.println("For "+tabbedPane.getName()+" found "+tabTitle);
+            if (tabTitle != null && name.equals(tabTitle)){
+//                System.err.println("For "+tabbedPane.getName()+"   selected "+name);
+                tabbedPane.setSelectedIndex(i);
+            }
+        }
     }
 
     private void logException(Exception e) {
