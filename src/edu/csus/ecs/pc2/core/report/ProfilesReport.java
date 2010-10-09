@@ -49,7 +49,7 @@ public class ProfilesReport implements IReport {
         printWriter.println("  description : " + profile.getDescription());
         printWriter.println("  create date : " + profile.getCreateDate().toString());
         printWriter.println("   element id : " + profile.getElementId());
-        printWriter.println("       hidden : " + profile.isHidden());
+        printWriter.println("       active : " + profile.isActive());
         printWriter.println("   contest id : " + profile.getContestId());
         printWriter.println("         path : " + profile.getProfilePath());
         

@@ -619,7 +619,7 @@ public class PacketHandler {
     private void cloneContest (ProfileCloneSettings settings, boolean switchProfileNow) throws ProfileCloneException, ProfileException, IOException, ClassNotFoundException, FileSecurityException {
         
         Profile newProfile = new Profile(settings.getName());
-        newProfile.setDescription(settings.getTitle());
+        newProfile.setDescription(settings.getDescription());
         newProfile.setSiteNumber(contest.getSiteNumber());
         
         Profile addedProfile = contest.addProfile(newProfile);
@@ -690,35 +690,6 @@ public class PacketHandler {
     }
 
     /**
-     * Reset a client or server.
-     * 
-     * @param packet
-     * @param connectionHandlerID
-     * @throws ContestSecurityException
-     * @throws ProfileCloneException 
-     * @throws FileSecurityException 
-     * @throws ClassNotFoundException 
-     * @throws IOException 
-     * @throws ProfileException 
-     */
-    private void resetClientFF(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException, ProfileCloneException, ProfileException, IOException, ClassNotFoundException,
-            FileSecurityException {
-
-        ClientId sourceId = packet.getSourceId();
-        
-        if (isServer(sourceId)){
-            // Only servers are allowed to reset client or other server contest
-            Profile profile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE);
-            resetContest(packet, profile);
-        } else {
-            /**
-             * Some non-server tried to send a reset to a client or server.
-             */
-            throw new ContestSecurityException(sourceId, connectionHandlerID, sourceId + " not allowed to " + Permission.Type.RESET_CONTEST);
-        }
-    }
-
-    /**
      * Handles a reset all contest from admin.
      * 
      * Checks security that allows this client (Admin hopefully) to reset this site and then send reset to all other sites.
@@ -757,6 +728,20 @@ public class PacketHandler {
         }
     }
 
+    /**
+     * Reset the contest.
+     * 
+     * Clone current profile, prepend with the name "Backup of " and mark inactive,
+     * then switch to the newly cloned profile.
+     * 
+     * @param packet
+     * @param profile
+     * @throws ProfileCloneException
+     * @throws ProfileException
+     * @throws IOException
+     * @throws ClassNotFoundException
+     * @throws FileSecurityException
+     */
     private void resetContest(Packet packet, Profile profile) throws ProfileCloneException, ProfileException, IOException, ClassNotFoundException, FileSecurityException {
         
         Boolean eraseProblems = (Boolean) PacketFactory.getObjectValue(packet, PacketFactory.DELETE_PROBLEM_DEFINITIONS);
@@ -776,7 +761,7 @@ public class PacketHandler {
              * Hide the current copy of this profile, give it a new name.
              */
             Profile updatedProfile = contest.getProfile();
-            updatedProfile.setHidden(true);
+            updatedProfile.setActive (false);
             updatedProfile.setName("Backup "+updatedProfile.getName());
             contest.setProfile(updatedProfile);
             contest.updateProfile(updatedProfile);
@@ -794,9 +779,12 @@ public class PacketHandler {
                 newContest.setSiteNumber(contest.getSiteNumber());
             }
             
-            String title = profile.getDescription();
+            String title = contest.getContestInformation().getContestTitle();
+            String description = profile.getDescription();
             String password = contest.getContestPassword();
-            ProfileCloneSettings settings = new ProfileCloneSettings(profile.getName(), title, password.toCharArray(), contest.getProfile());
+            ProfileCloneSettings settings = new ProfileCloneSettings(profile.getName(), description, password.toCharArray(), contest.getProfile());
+            
+            settings.setContestTitle(title);
             
             settings.setResetContestTimes( true );
             settings.setCopyAccounts( true );

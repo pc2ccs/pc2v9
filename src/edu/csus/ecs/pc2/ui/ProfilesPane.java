@@ -536,7 +536,7 @@ public class ProfilesPane extends JPanePlugin {
             if (profiles.length > 0) {
 
                 for (Profile profile : profiles) {
-                    boolean showit = showHidden || (!profile.isHidden());
+                    boolean showit = showHidden || profile.isActive();
                     if (showit) {
                         Object[] objects = buildProfileRow(profile);
                         getProfilesListBox().addRow(objects, profile.getProfilePath());

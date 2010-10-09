@@ -86,8 +86,9 @@ public class ConfigurationIOTest extends TestCase {
 
         assertEquals(contest.getSiteNumber(), siteNumber);
 
-        assertEquals(settings.getTitle(), settings2.getTitle());
         assertEquals(settings.getName(), settings2.getName());
+        assertEquals(settings.getDescription(), settings2.getDescription());
+        assertEquals(settings.getContestTitle(), settings2.getContestTitle());
 
         assertEquals(settings.isCopyGroups(), settings2.isCopyGroups());
         assertEquals(settings.isResetContestTimes(), settings2.isResetContestTimes());

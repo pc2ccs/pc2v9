@@ -20,8 +20,8 @@ public class ProfileCloneSettings implements Serializable {
     private static final long serialVersionUID = 3414081250056286867L;
 
     private String name = "";
-
-    private String title = "";
+    
+    private String contestTitle;
     
     private String description = "";
 
@@ -52,10 +52,10 @@ public class ProfileCloneSettings implements Serializable {
     private Profile sourceProfile = null;
 
 
-    public ProfileCloneSettings(String name, String title, char[] contestPassword, Profile originalProfile) {
+    public ProfileCloneSettings(String name, String description, char[] contestPassword, Profile originalProfile) {
         super();
         this.name = name;
-        this.title = title;
+        this.description = description;
         this.contestPassword = contestPassword;
         this.sourceProfile = originalProfile;
     }
@@ -66,14 +66,6 @@ public class ProfileCloneSettings implements Serializable {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
     }
 
     public char[] getContestPassword() {
@@ -186,5 +178,13 @@ public class ProfileCloneSettings implements Serializable {
 
     public Profile getSourceProfile() {
         return sourceProfile;
+    }
+
+    public String getContestTitle() {
+        return contestTitle;
+    }
+    
+    public void setContestTitle(String contestTitle) {
+        this.contestTitle = contestTitle;
     }
 }

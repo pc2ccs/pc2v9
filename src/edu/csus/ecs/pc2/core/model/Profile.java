@@ -30,8 +30,6 @@ public class Profile implements IElementObject, Serializable {
 
     private Properties properties = new Properties();
     
-    private boolean hidden = false;
-    
     /**
      * 
      */
@@ -64,6 +62,11 @@ public class Profile implements IElementObject, Serializable {
         return elementId;
     }
 
+    /**
+     * Is this active, can this be shown/used?
+     * 
+     * @return true if shown, false if hidden/unused.
+     */
     public boolean isActive() {
         return active;
     }
@@ -231,14 +234,6 @@ public class Profile implements IElementObject, Serializable {
 
     public void setProperty(String key, String value) {
         properties.setProperty(key, value);
-    }
-    
-    public boolean isHidden() {
-        return hidden;
-    }
-    
-    public void setHidden(boolean hidden) {
-        this.hidden = hidden;
     }
     
 }

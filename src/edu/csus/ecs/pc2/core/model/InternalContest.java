@@ -2385,7 +2385,7 @@ public class InternalContest implements IInternalContest {
 
         ContestInformation newContestInformation = contest.getContestInformation();
 
-        newContestInformation.setContestTitle(settings.getTitle());
+        newContestInformation.setContestTitle(settings.getContestTitle());
         contest.updateContestInformation(newContestInformation);
         
         Log tempLog = new Log("profileClone");

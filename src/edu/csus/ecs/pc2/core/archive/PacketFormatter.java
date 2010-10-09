@@ -297,7 +297,7 @@ public final class PacketFormatter {
 
             child = new DefaultMutableTreeNode("Name: " + settings.getName());
             node.add(child);
-            child = new DefaultMutableTreeNode("Title: " + settings.getTitle());
+            child = new DefaultMutableTreeNode("Title: " + settings.getContestTitle());
             node.add(child);
 
             child = new DefaultMutableTreeNode("CopyRuns = =" + settings.isCopyRuns());

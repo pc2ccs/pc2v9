@@ -282,6 +282,8 @@ public class ProfileSavePane extends JPanePlugin {
 
         String title = getContestTitleTextField().getText();
         
+        checkField (title, "Enter a contest title");
+        
         char[] password = getContestPasswordTextField().getPassword();
         char[] confirmPassword = getContestPasswordConfirmTextField().getPassword();
 
@@ -297,10 +299,9 @@ public class ProfileSavePane extends JPanePlugin {
             throw new InvalidFieldValue("Contest password and Confirm password do not match.");
         }
 
-        ProfileCloneSettings settings = new ProfileCloneSettings(name, title, password, getContest().getProfile());
+        ProfileCloneSettings settings = new ProfileCloneSettings(name, description, password, getContest().getProfile());
         
-        settings.setDescription(description);
-        
+        settings.setContestTitle(title);
         settings.setCopyAccounts(getCopyAccountsCheckBox().isSelected());
         settings.setCopyClarifications(getCopyClarificationsCheckBox().isSelected());
         settings.setCopyContestSettings(getCopyContestSettingsCheckBox().isSelected());
