@@ -30,6 +30,8 @@ public class Profile implements IElementObject, Serializable {
 
     private Properties properties = new Properties();
     
+    private boolean hidden = false;
+    
     /**
      * 
      */
@@ -229,6 +231,14 @@ public class Profile implements IElementObject, Serializable {
 
     public void setProperty(String key, String value) {
         properties.setProperty(key, value);
+    }
+    
+    public boolean isHidden() {
+        return hidden;
+    }
+    
+    public void setHidden(boolean hidden) {
+        this.hidden = hidden;
     }
     
 }

@@ -1968,24 +1968,16 @@ public final class PacketFactory {
         return createPacket(PacketType.Type.RUN_EXECUTION_STATUS, source, destination, prop);
     }
 
-    public static Packet createResetAllSitesPacket(ClientId source, ClientId destination, ClientId clientResettingContest, boolean eraseProblems, boolean eraseLanguages) {
-        Properties prop = new Properties();
-        prop.put(CLIENT_ID, clientResettingContest);
-        prop.put(DELETE_PROBLEM_DEFINITIONS, new Boolean(eraseProblems));
-        prop.put(DELETE_LANGUAGE_DEFINITIONS, new Boolean(eraseLanguages));
-        return createPacket(PacketType.Type.RESET_ALL_CONTESTS, source, destination, prop);
-      
-    }
-    
-    public static Packet createResetContestPacket(ClientId source, ClientId destination, ClientId clientResettingContest, Profile newProfile, boolean eraseProblems, boolean eraseLanguages) {
+    public static Packet createResetAllSitesPacket(ClientId source, ClientId destination, ClientId clientResettingContest, Profile newProfile, boolean eraseProblems, boolean eraseLanguages) {
         Properties prop = new Properties();
         prop.put(CLIENT_ID, clientResettingContest);
         prop.put(DELETE_PROBLEM_DEFINITIONS, new Boolean(eraseProblems));
         prop.put(DELETE_LANGUAGE_DEFINITIONS, new Boolean(eraseLanguages));
         prop.put(PROFILE, newProfile);
-        return createPacket(PacketType.Type.RESET_CLIENT, source, destination, prop);
+        return createPacket(PacketType.Type.RESET_ALL_CONTESTS, source, destination, prop);
+      
     }
-
+    
     public static Packet createCloneProfilePacket(ClientId source, ClientId destination, Profile profile2, ProfileCloneSettings settings, boolean switchNow) {
         Properties prop = new Properties();
         prop.put(CLIENT_ID, source);

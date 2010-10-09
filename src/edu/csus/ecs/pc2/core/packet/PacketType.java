@@ -578,10 +578,6 @@ public final class PacketType implements Serializable {
          */
         START_ALL_CLOCKS,
         /**
-         * Send from server to other server or clients. 
-         */
-        RESET_CLIENT,
-        /**
          * Reset all site's clars/runs/clock.
          */
         RESET_ALL_CONTESTS,

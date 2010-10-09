@@ -2992,7 +2992,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     }
 
     public void resetContest(ClientId clientResettingContest, boolean eraseProblems, boolean eraseLanguages) {
-        Packet sendPacket = PacketFactory.createResetAllSitesPacket(contest.getClientId(), getServerClientId(), clientResettingContest, eraseProblems, eraseLanguages);
+        Profile currentProfile = contest.getProfile();
+        Packet sendPacket = PacketFactory.createResetAllSitesPacket(contest.getClientId(), getServerClientId(), clientResettingContest, currentProfile, eraseProblems, eraseLanguages);
         sendToLocalServer(sendPacket);
     }
 

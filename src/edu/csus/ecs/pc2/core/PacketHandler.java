@@ -334,10 +334,6 @@ public class PacketHandler {
                 resetAllSites(packet, connectionHandlerID);
                 break;
                 
-            case RESET_CLIENT:
-                resetClient(packet, connectionHandlerID);
-                break;
-                
             case CLONE_PROFILE:
                 handleCloneProfile (packet, connectionHandlerID);
                 break;
@@ -705,7 +701,7 @@ public class PacketHandler {
      * @throws IOException 
      * @throws ProfileException 
      */
-    private void resetClient(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException, ProfileCloneException, ProfileException, IOException, ClassNotFoundException,
+    private void resetClientFF(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException, ProfileCloneException, ProfileException, IOException, ClassNotFoundException,
             FileSecurityException {
 
         ClientId sourceId = packet.getSourceId();
@@ -736,23 +732,29 @@ public class PacketHandler {
      * @throws IOException
      * @throws ProfileException
      */
-    private void resetAllSites(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException, 
-       ProfileCloneException, ProfileException, IOException, ClassNotFoundException, FileSecurityException {
-        
+    private void resetAllSites(Packet packet, ConnectionHandlerID connectionHandlerID) throws ContestSecurityException, ProfileCloneException, ProfileException, IOException, ClassNotFoundException,
+            FileSecurityException {
+
+        ClientId sourceId = packet.getSourceId();
+
         ClientId adminClientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
-        
+
         // check permission
         securityCheck(Permission.Type.RESET_CONTEST, adminClientId, connectionHandlerID);
-        
-        // Create a new Profile with a new Contest Id
-        Profile profile = contest.getProfile();
-        Profile newProfile = new Profile(profile.getName());
-        newProfile.setDescription(profile.getDescription());
-        newProfile.setName (profile.getName());
-        contest.setProfile(newProfile);
-        
-        // Reset and send to all local clients
-        resetContest(packet, newProfile);
+
+        if (isServer()) {
+            // Only servers are allowed to reset client or other server contest
+            Profile profile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE);
+
+            // TODO insure that the profile that they are resettings is THIS profile
+
+            resetContest(packet, profile);
+        } else {
+            /**
+             * Some non-server tried to send a reset to a client or server.
+             */
+            throw new ContestSecurityException(sourceId, connectionHandlerID, sourceId + " not allowed to " + Permission.Type.RESET_CONTEST);
+        }
     }
 
     private void resetContest(Packet packet, Profile profile) throws ProfileCloneException, ProfileException, IOException, ClassNotFoundException, FileSecurityException {
@@ -769,6 +771,18 @@ public class PacketHandler {
             } else {
                 info("permission is granted to "+adminClientId+" to reset");
             }
+            
+            /**
+             * Hide the current copy of this profile, give it a new name.
+             */
+            Profile updatedProfile = contest.getProfile();
+            updatedProfile.setHidden(true);
+            updatedProfile.setName("Backup "+updatedProfile.getName());
+            contest.setProfile(updatedProfile);
+            contest.updateProfile(updatedProfile);
+            
+            Packet updatePacket = PacketFactory.createUpdateSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, updatedProfile);
+            sendToJudgesAndOthers(updatePacket, true);
             
             /**
              * This clears all submission data and counters.
@@ -799,7 +813,6 @@ public class PacketHandler {
             settings.setContestPassword(contest.getContestPassword().toCharArray());
             
             cloneContest (settings, true);
- 
             
         } else {
             

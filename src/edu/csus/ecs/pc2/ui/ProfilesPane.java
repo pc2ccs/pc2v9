@@ -104,6 +104,8 @@ public class ProfilesPane extends JPanePlugin {
     private SwitchProfileConfirmFrame switchFrame = null;
 
     private boolean usingExtraColumns = false;
+    
+    private boolean showHidden = false;
 
 
     /**
@@ -534,8 +536,11 @@ public class ProfilesPane extends JPanePlugin {
             if (profiles.length > 0) {
 
                 for (Profile profile : profiles) {
-                    Object[] objects = buildProfileRow(profile);
-                    getProfilesListBox().addRow(objects, profile.getProfilePath());
+                    boolean showit = showHidden || (!profile.isHidden());
+                    if (showit) {
+                        Object[] objects = buildProfileRow(profile);
+                        getProfilesListBox().addRow(objects, profile.getProfilePath());
+                    }
                 }
                 getProfilesListBox().autoSizeAllColumns();
                 getSwitchButton().setEnabled(true);
@@ -847,6 +852,14 @@ public class ProfilesPane extends JPanePlugin {
         public void accountsRefreshAll(AccountEvent accountEvent) {
             accountsModified(accountEvent);
         }
+    }
+    
+    public boolean isShowHidden() {
+        return showHidden;
+    }
+    
+    public void setShowHidden(boolean showHidden) {
+        this.showHidden = showHidden;
     }
 
 } // @jve:decl-index=0:visual-constraint="25,9"
