@@ -2341,8 +2341,12 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             
             String loginName = parseArguments.getOptValue(LOGIN_OPTION_STRING);
             
+            if (! parseArguments.isOptPresent(LOGIN_OPTION_STRING)){
+                fatalError("Must specify "+LOGIN_OPTION_STRING+" option and login name when using "+NO_GUI_STRING);
+            }
+            
             if (loginName == null){
-                fatalError("Must specify "+LOGIN_OPTION_STRING+" when using "+NO_GUI_STRING);
+                fatalError("Missing login name after "+LOGIN_OPTION_STRING);
             }
             
             ClientId client = null;
