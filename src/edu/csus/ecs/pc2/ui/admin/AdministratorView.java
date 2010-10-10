@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.Frame;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -146,7 +145,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.contest = inContest;
         this.controller = inController;
-        final Frame thisFrame = this;
+        final JFrame thisFrame = this;
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -278,6 +277,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 contestClockDisplay = new ContestClockDisplay(controller.getLog(), contest.getContestTime(), contest.getSiteNumber(), false, null);
                 contestClockDisplay.setContestAndController(contest, controller);
                 contestClockDisplay.addLabeltoUpdateList(clockLabel, DisplayTimes.REMAINING_TIME, contest.getSiteNumber());
+                contestClockDisplay.setClientFrame(thisFrame);
 
                 contest.addContestTimeListener(new ContestTimeListenerImplementation());
 
@@ -577,11 +577,21 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
     }
 
-    public void setFrameTitle(final boolean contestRunning) {
-        final Frame thisFrame = this;
+    private void setFrameTitle(final boolean contestStarted) {
+        final JFrame thisFrame = this;
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                FrameUtilities.setFrameTitle(thisFrame, contest.getTitle(), contestRunning, new VersionInfo());
+                
+                FrameUtilities.setFrameTitle(thisFrame, contest.getTitle(), contestStarted, new VersionInfo());
+                if (contestStarted) {
+                    contestClockDisplay.fireClockStateChange(contest.getContestTime());
+                } else {
+                    clockLabel.setText("STOPPED");
+                }
+
+                if (contestClockDisplay.getClientFrame() == null) {
+                    contestClockDisplay.setClientFrame(thisFrame);
+                }
             }
         });
 

@@ -1,7 +1,6 @@
 package edu.csus.ecs.pc2.ui.board;
 
 import java.awt.BorderLayout;
-import java.awt.Frame;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.ByteArrayInputStream;
@@ -33,6 +32,8 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.util.XSLTransformer;
 import edu.csus.ecs.pc2.ui.BalloonColorListPane;
 import edu.csus.ecs.pc2.ui.BalloonPane;
+import edu.csus.ecs.pc2.ui.ContestClockDisplay;
+import edu.csus.ecs.pc2.ui.ContestClockDisplay.DisplayTimes;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
 import edu.csus.ecs.pc2.ui.OptionsPanel;
@@ -69,9 +70,9 @@ public class ScoreboardView extends JFrame implements UIPlugin {
 
     private JPanel mainViewPane = null;
 
-    private JPanel northLabel = null;
+    private JPanel northPane = null;
 
-    private JLabel timeLabel = null;
+    private JLabel clockLabel = null;
 
     private JLabel messageLabel = null;
 
@@ -83,6 +84,10 @@ public class ScoreboardView extends JFrame implements UIPlugin {
 
     private JButton refreshButton = null;
     
+    private ContestClockDisplay contestClockDisplay = null;
+
+    private JPanel clockPanel = null;
+    
     /**
      * This method initializes
      * 
@@ -92,11 +97,14 @@ public class ScoreboardView extends JFrame implements UIPlugin {
         initialize();
     }
 
+
     /**
      * 
      * @author pc2@ecs.csus.edu
-     * 
+     * @version $Id$
      */
+    
+    // $HeadURL$
     public class PropertyChangeListenerImplementation implements PropertyChangeListener {
 
         public void propertyChange(PropertyChangeEvent evt) {
@@ -165,6 +173,9 @@ public class ScoreboardView extends JFrame implements UIPlugin {
 
         log = controller.getLog();
         log.info("Using XSL from directory "+xslDir);
+        
+        contestClockDisplay = new ContestClockDisplay(controller.getLog(), contest.getContestTime(), contest.getSiteNumber(), true, null);
+        contestClockDisplay.addLabeltoUpdateList(clockLabel, DisplayTimes.REMAINING_TIME, contest.getSiteNumber());
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -331,7 +342,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
             mainViewPane = new JPanel();
             mainViewPane.setLayout(new BorderLayout());
             mainViewPane.add(getMainTabbedPane(), java.awt.BorderLayout.CENTER);
-            mainViewPane.add(getNorthLabel(), java.awt.BorderLayout.NORTH);
+            mainViewPane.add(getNorthPane(), java.awt.BorderLayout.NORTH);
         }
         return mainViewPane;
     }
@@ -341,20 +352,23 @@ public class ScoreboardView extends JFrame implements UIPlugin {
      * 
      * @return javax.swing.JPanel
      */
-    private JPanel getNorthLabel() {
-        if (northLabel == null) {
+    private JPanel getNorthPane() {
+        if (northPane == null) {
             messageLabel = new JLabel();
             messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
             messageLabel.setText("JLabel");
-            timeLabel = new JLabel();
-            timeLabel.setText("STOPPED ");
-            northLabel = new JPanel();
-            northLabel.setLayout(new BorderLayout());
-            northLabel.add(timeLabel, java.awt.BorderLayout.WEST);
-            northLabel.add(messageLabel, java.awt.BorderLayout.CENTER);
-            northLabel.add(getEastPane(), java.awt.BorderLayout.EAST);
+            clockLabel = new JLabel();
+            clockLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 16));
+            clockLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+            clockLabel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+            clockLabel.setText("STOPPED ");
+            northPane = new JPanel();
+            northPane.setLayout(new BorderLayout());
+            northPane.add(messageLabel, java.awt.BorderLayout.CENTER);
+            northPane.add(getEastPane(), java.awt.BorderLayout.EAST);
+            northPane.add(getClockPanel(), BorderLayout.WEST);
         }
-        return northLabel;
+        return northPane;
     }
 
     /**
@@ -392,20 +406,26 @@ public class ScoreboardView extends JFrame implements UIPlugin {
     }
 
     private void setFrameTitle(final boolean contestStarted) {
-        final Frame thisFrame = this;
-        
+        final JFrame thisFrame = this;
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
+                
                 FrameUtilities.setFrameTitle(thisFrame, contest.getTitle(), contestStarted, new VersionInfo());
                 if (contestStarted) {
-                    timeLabel.setText("");
+                    contestClockDisplay.fireClockStateChange(contest.getContestTime());
                 } else {
-                    timeLabel.setText("STOPPED");
+                    clockLabel.setText("STOPPED");
+                }
+
+                if (contestClockDisplay.getClientFrame() == null) {
+                    contestClockDisplay.setClientFrame(thisFrame);
                 }
             }
         });
+
         FrameUtilities.regularCursor(this);
     }
+
     
     protected boolean isThisSite (int siteNumber){
         return contest.getSiteNumber() == siteNumber;
@@ -496,6 +516,21 @@ public class ScoreboardView extends JFrame implements UIPlugin {
         } else {
             e.printStackTrace(System.err);
         }
+    }
+
+    /**
+     * This method initializes clockPanel
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getClockPanel() {
+        if (clockPanel == null) {
+            clockPanel = new JPanel();
+            clockPanel.setPreferredSize(new java.awt.Dimension(85,34));
+            clockPanel.setLayout(new BorderLayout());
+            clockPanel.add(clockLabel, BorderLayout.CENTER);
+        }
+        return clockPanel;
     }
     
 } // @jve:decl-index=0:visual-constraint="10,10"
