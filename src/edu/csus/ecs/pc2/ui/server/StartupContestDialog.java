@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -128,6 +129,12 @@ public class StartupContestDialog extends JDialog {
         this.addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent e) {
                 promptBeforeExit();
+            }
+            @Override
+            public void windowOpened(WindowEvent e) {
+                super.windowOpened(e);
+                System.err.println("Request Focus");
+                getContestPasswordTextField().requestFocus();
             }
         });
 
