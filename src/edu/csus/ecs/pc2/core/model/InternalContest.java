@@ -2621,4 +2621,8 @@ public class InternalContest implements IInternalContest {
         MessageEvent messageEvent = new MessageEvent(MessageEvent.Action.ADDED, area, message, source, destination);
         fireMessageListener(messageEvent);
     }
+
+    public void updateRunFiles(Run run, RunFiles runFiles) throws IOException, ClassNotFoundException, FileSecurityException {
+        runFilesList.add(run, runFiles);
+    }
 }

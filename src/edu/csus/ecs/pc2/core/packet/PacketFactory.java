@@ -325,6 +325,10 @@ public final class PacketFactory {
     public static final String NEW_PROFILE =  "NEW_PROFILE";
 
     public static final String MESSAGE_AREA = "MESSAGE_AREA";
+
+    public static final String RUN_ID = "RUN_ID";
+
+    public static final String RUN_FILES_LIST = "RUN_FILES_LIST";
     
 
     /**
@@ -2032,6 +2036,22 @@ public final class PacketFactory {
             StaticLog.log("Exception in createUpdateProfileClientPacket ", e);
             throw new SecurityException(e.getMessage());
         }
+    }
+
+    public static Packet createFetchRunFilesPacket(ClientId source, ClientId destination, int lastRunId) {
+        Properties prop = new Properties();
+        prop.put(RUN_ID, new Integer(lastRunId));
+        prop.put(CLIENT_ID, source);
+        Packet packet = new Packet(Type.FETCH_RUN_FILES, source, destination, prop);
+        return packet;
+    }
+
+    public static Packet createRunFilesPacket(ClientId source, ClientId destination, RunFiles[] files) {
+        Properties prop = new Properties();
+        prop.put(CLIENT_ID, source);
+        prop.put(RUN_FILES_LIST, files);
+        Packet packet = new Packet(Type.UPDATE_RUN_FILES, source, destination, prop);
+        return packet;
     }
 
 }

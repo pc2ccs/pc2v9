@@ -83,7 +83,7 @@ public interface IInternalController {
      * 
      * @param confirmPacket
      */
-    void sendToClient(Packet confirmPacket);
+    void sendToClient(Packet packet);
 
     /**
      * Send to all logged in servers.

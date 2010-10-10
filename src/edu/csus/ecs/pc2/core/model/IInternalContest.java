@@ -1018,4 +1018,11 @@ public interface IInternalContest {
      */
     void addMessage(MessageEvent.Area area, ClientId source, ClientId destination, String message);
 
+    /**
+     * Add or update Run files.
+     * @param run
+     * @param runFiles
+     */
+    void updateRunFiles(Run run, RunFiles runFiles) throws IOException, ClassNotFoundException, FileSecurityException;
+
 }

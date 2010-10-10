@@ -671,7 +671,16 @@ public final class PacketType implements Serializable {
          * 
          * @see #RUN_SUBMISSION
          */
-        RUN_SUBMISSION_CONFIRM_SERVER
+        RUN_SUBMISSION_CONFIRM_SERVER,
+        /**
+         * Request run file (team source files) from another server.  The
+         * return is {@link #UPDATE_RUN_FILES}.
+         */
+        FETCH_RUN_FILES,
+        /**
+         * Requested run files for {@link #FETCH_RUN_FILES}.
+         */
+        UPDATE_RUN_FILES
     }
 
     /**

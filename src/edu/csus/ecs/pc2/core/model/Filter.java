@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
@@ -1005,6 +1006,43 @@ public class Filter implements Serializable {
         }
         return count;
     }
-    
+
+    /**
+     * Returns list of runs for current filter.
+     * 
+     * @param runs
+     * @return list of runs which match this filter.
+     */
+    public Run[] getRuns(Run[] runs) {
+
+        Vector<Run> listOfRuns = new Vector<Run>();
+
+        for (Run run : runs) {
+            if (matches(run)) {
+                listOfRuns.add(run);
+            }
+        }
+
+        return (Run[]) listOfRuns.toArray(new Run[listOfRuns.size()]);
+    }
+
+    /**
+     * Returns list of clarifications for current filter.
+     * 
+     * @param clarifications
+     * @return list of clarifications which match this filter.
+     */
+    public Clarification[] getClarifications(Clarification[] clarifications) {
+
+        Vector<Clarification> list = new Vector<Clarification>();
+
+        for (Clarification clarification : clarifications) {
+            if (matches(clarification)) {
+                list.add(clarification);
+            }
+        }
+
+        return (Clarification[]) list.toArray(new Clarification[list.size()]);
+    }
     
 }

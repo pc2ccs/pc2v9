@@ -346,6 +346,13 @@ public class PacketHandler {
                 handleUpdateClientProfile(packet, connectionHandlerID);
                 break;
                 
+            case FETCH_RUN_FILES:
+                handleFetchRunFiles(packet, connectionHandlerID);
+
+            case UPDATE_RUN_FILES:
+                handleRunFiles(packet, connectionHandlerID);
+                break;
+                
             default:
                 Exception exception = new Exception("PacketHandler.handlePacket Unhandled packet " + packet);
                 controller.getLog().log(Log.WARNING, "Unhandled Packet ", exception);
@@ -576,7 +583,13 @@ public class PacketHandler {
     private void handleUpdateClientProfile(Packet packet, ConnectionHandlerID connectionHandlerID) throws IOException, ClassNotFoundException, FileSecurityException {
 
         if (isServer()) {
+            
+            /**
+             * Switch Profile or create new Profile on the server 
+             */
 
+            // FIXME code       switchSecondaryServerProfile; 
+            
             Profile inProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.NEW_PROFILE);
             Profile updatedProfile = contest.updateProfile(inProfile);
             Packet addPacket = PacketFactory.createUpdateSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, updatedProfile);
@@ -595,9 +608,37 @@ public class PacketHandler {
             contest.fireAllRefreshEvents();
         }
     }
-    
-    
 
+    /**
+     * RunFiles from a remote site, add these to this site.
+     * 
+     * @param packet
+     * @param connectionHandlerID
+     */
+    private void handleRunFiles(Packet packet, ConnectionHandlerID connectionHandlerID) {
+
+        RunFiles[] files = (RunFiles[]) PacketFactory.getObjectValue(packet, PacketFactory.RUN_FILES);
+
+        for (RunFiles runFiles : files) {
+            try {
+                Run run = contest.getRun(runFiles.getRunId());
+                if (!isThisSite(run.getSiteNumber())) {
+                    contest.updateRunFiles(run, runFiles);
+                } else {
+                    throw new Exception("Will not update local run files " + run);
+                }
+            } catch (Exception e) {
+                logException("Unable to save run files", e);
+            }
+        }
+    }
+    
+    private void handleFetchRunFiles(Packet packet, ConnectionHandlerID connectionHandlerID) {
+        
+        int siteNumber = packet.getSourceId().getSiteNumber();
+        int lastRunId = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.RUN_ID);
+        sendRunFilesToServer(siteNumber, lastRunId);
+    }
 
     private void handleCloneProfile(Packet packet, ConnectionHandlerID connectionHandlerID) throws IOException, ClassNotFoundException, FileSecurityException, ProfileCloneException, ProfileException {
         
@@ -3080,11 +3121,6 @@ public class PacketHandler {
                 int lastRemoteRunId = getLastRunId(runs, remoteSiteNumber);
 
                 if (localLastRunId < lastRemoteRunId) {
-
-                    // FIXME remove
-                    String s = "Send a packet to site " + remoteSiteNumber + " to send runFiles " + localLastRunId + " thru " + lastRemoteRunId;
-                    System.out.println(s);
-                    controller.getLog().info(s);
                     sendRunFilesRequestToServer(remoteSiteNumber, localLastRunId);
                 }
 
@@ -3108,10 +3144,64 @@ public class PacketHandler {
      */
     private void sendRunFilesRequestToServer(int siteNumber, int lastRunId) {
 
-        // FIXME send packet to request RunFiles from remote server.
-        String s = "FIXME will send a packet to site " + siteNumber + " to send runFiles " + lastRunId + " and all run ids larger";
-        System.out.println(s);
-        controller.getLog().info(s);
+        ClientId remoteServerId = new ClientId(siteNumber, ClientType.Type.SERVER, 0);
+        Packet fetchPacket = PacketFactory.createFetchRunFilesPacket (contest.getClientId(), remoteServerId, lastRunId);
+        controller.sendToClient(fetchPacket);
+    }
+
+    /**
+     * Send run files to other site server.
+     * 
+     * @param siteNumber
+     * @param lastRunId
+     */
+    private void sendRunFilesToServer(int siteNumber, int lastRunId) {
+
+        Run[] runs = getLocalRunsStartingAt(lastRunId);
+        RunFiles[] files = getRunFiles(runs);
+        ClientId remoteServerId = new ClientId(siteNumber, ClientType.Type.SERVER, 0);
+        Packet runFilesPacket = PacketFactory.createRunFilesPacket(contest.getClientId(), remoteServerId, files);
+        controller.sendToClient(runFilesPacket);
+    }
+
+    private RunFiles[] getRunFiles(Run[] runs) {
+        
+        Vector<RunFiles> runFilesList = new Vector<RunFiles>();
+
+        for (Run run : runs) {
+            try {
+                RunFiles runfiles = contest.getRunFiles(run);
+                runFilesList.add(runfiles);
+            } catch (Exception e) {
+                logException("Unable to get RunFiles for run "+run, e);
+            }
+        }
+
+        return (RunFiles[]) runFilesList.toArray(new RunFiles[runFilesList.size()]);
+    }
+
+    /**
+     * Returns local run list starting at run lastRunId. 
+     * 
+     * @param lastRunId
+     * @return
+     */
+    private Run[] getLocalRunsStartingAt(int lastRunId) {
+
+        Filter filter = new Filter();
+        filter.setSiteNumber(contest.getSiteNumber());
+
+        Run[] runs = filter.getRuns(contest.getRuns());
+
+        Vector<Run> listOfRuns = new Vector<Run>();
+
+        for (Run run : runs) {
+            if (run.getNumber() > lastRunId) {
+                listOfRuns.add(run);
+            }
+        }
+
+        return (Run[]) listOfRuns.toArray(new Run[listOfRuns.size()]);
     }
 
     private void addRemoteContestTimesToModel(Packet packet, int remoteSiteNumber) {
@@ -3318,9 +3408,12 @@ public class PacketHandler {
 
         try {
 
-            Profile[] list = manager.load();
+            Profile[] list = new Profile[0];
+            if (manager.hasDefaultProfile()){
+                list = manager.load();
+            }
 
-            if (list.length == 1 && contest.getProfiles().length == 1) {
+            if (list.length <= 1 && contest.getProfiles().length == 1) {
                 manager.storeDefaultProfile(contest.getProfile());
             } else {
                 manager.mergeProfiles(contest);
