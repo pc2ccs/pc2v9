@@ -44,6 +44,7 @@ import edu.csus.ecs.pc2.core.report.ProfileCloneSettingsReport;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
 import java.awt.event.KeyEvent;
+import javax.swing.JCheckBox;
 
 /**
  * Profile administration pane.
@@ -106,6 +107,8 @@ public class ProfilesPane extends JPanePlugin {
     private boolean usingExtraColumns = false;
     
     private boolean showHidden = false;
+
+    private JCheckBox showHiddenProfilesCheckbox = null;
 
 
     /**
@@ -253,6 +256,7 @@ public class ProfilesPane extends JPanePlugin {
             buttonPane.add(getResetContestButton(), null);
             buttonPane.add(getExportButton(), null);
             buttonPane.add(getReportButton(), null);
+            buttonPane.add(getShowHiddenProfilesCheckbox(), null);
         }
         return buttonPane;
     }
@@ -860,6 +864,31 @@ public class ProfilesPane extends JPanePlugin {
     
     public void setShowHidden(boolean showHidden) {
         this.showHidden = showHidden;
+    }
+
+    /**
+     * This method initializes showHiddenProfilesCheckbox
+     * 
+     * @return javax.swing.JCheckBox
+     */
+    private JCheckBox getShowHiddenProfilesCheckbox() {
+        if (showHiddenProfilesCheckbox == null) {
+            showHiddenProfilesCheckbox = new JCheckBox();
+            showHiddenProfilesCheckbox.setText("Show Backups");
+            showHiddenProfilesCheckbox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    toggleShowHiddenProfiles();
+                }
+            });
+        }
+        return showHiddenProfilesCheckbox;
+    }
+
+    protected void toggleShowHiddenProfiles() {
+
+        showHidden = getShowHiddenProfilesCheckbox().isSelected();
+        refreshProfilesList();
+        
     }
 
 } // @jve:decl-index=0:visual-constraint="25,9"
