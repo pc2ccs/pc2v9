@@ -13,6 +13,8 @@ import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.RunFiles;
+import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
@@ -281,6 +283,47 @@ public final class PacketFormatter {
                 child = createTree(problem);
                 node.add(child);
             }
+
+            return node;
+        }
+        
+        if (object instanceof RunFiles[]) {
+
+            RunFiles[] list = (RunFiles[]) object;
+            DefaultMutableTreeNode node = new DefaultMutableTreeNode("RunFiles list: " + list.length + " problems");
+            DefaultMutableTreeNode child;
+
+            for (RunFiles runFiles : list) {
+                child = createTree(runFiles);
+                node.add(child);
+            }
+
+            return node;
+        }
+        
+        if (object instanceof RunFiles) {
+
+            DefaultMutableTreeNode child;
+
+            RunFiles runfiles = (RunFiles) object;
+            String mainFileName = runfiles.getMainFile().getName();
+
+            DefaultMutableTreeNode node = new DefaultMutableTreeNode("RunFiles: " + mainFileName + " for " + runfiles.getRunId());
+
+            SerializedFile mainFile = runfiles.getMainFile();
+
+            child = new DefaultMutableTreeNode("mainfile file: " + mainFile.getName() + " " + mainFile.getBuffer().length + " bytes");
+            node.add(child);
+
+            for (SerializedFile file : runfiles.getOtherFiles()) {
+                child = new DefaultMutableTreeNode("additional file: " + file.getName() + " " + file.getBuffer().length + " bytes");
+                node.add(child);
+            }
+
+            child = new DefaultMutableTreeNode("RunID: " + runfiles.getRunId().toString());
+            node.add(child);
+            child = new DefaultMutableTreeNode("ElementId: " + runfiles.getElementId().toString());
+            node.add(child);
 
             return node;
         }

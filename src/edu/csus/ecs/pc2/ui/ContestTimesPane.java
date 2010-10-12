@@ -502,7 +502,7 @@ public class ContestTimesPane extends JPanePlugin {
             ElementId contestTimeElementId = (ElementId) contestTimeListBox.getKeys()[selectedSites[i]];
             ContestTime contestTime = getContest().getContestTime(contestTimeElementId);
             if (contestTime != null) {
-                showMessage("START site " + contestTime.getSiteNumber());
+//                showMessage("START site " + contestTime.getSiteNumber());
                 getController().startContest(contestTime.getSiteNumber());
             }
         }
@@ -541,7 +541,7 @@ public class ContestTimesPane extends JPanePlugin {
             ElementId contestTimeElementId = (ElementId) contestTimeListBox.getKeys()[selectedSites[i]];
             ContestTime contestTime = getContest().getContestTime(contestTimeElementId);
             if (contestTime != null) {
-                showMessage("STOP site " + contestTime.getSiteNumber());
+//                showMessage("STOP site " + contestTime.getSiteNumber());
                 getController().stopContest(contestTime.getSiteNumber());
             }
         }
@@ -657,7 +657,7 @@ public class ContestTimesPane extends JPanePlugin {
     }
 
     protected void startAllClocks() {
-        showMessage("START ALL sites");
+//        showMessage("START ALL sites");
         getController().startAllContestTimes();
     }
 
@@ -682,12 +682,14 @@ public class ContestTimesPane extends JPanePlugin {
     }
 
     protected void stopAllContestTimes() {
-        int result = FrameUtilities.yesNoCancelDialog(getParentFrame(), "Are you sure you want to stop all contest clocks?", "Confirm stop all clocks");
+//        int result = FrameUtilities.yesNoCancelDialog(getParentFrame(), "Are you sure you want to stop all contest clocks?", "Confirm stop all clocks");
 
-        if (result == JOptionPane.YES_OPTION) {
-            showMessage("STOP ALL sites");
+//        if (result == JOptionPane.YES_OPTION) {
+//            showMessage("STOP ALL sites");
+        
             getController().stopAllContestTimes();
-        }
+            
+//        }
     }
 
     /**

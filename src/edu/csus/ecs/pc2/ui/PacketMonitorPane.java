@@ -17,6 +17,7 @@ import javax.swing.tree.TreeSelectionModel;
 
 import com.ibm.webrunner.j2mclb.util.HeapSorter;
 import com.ibm.webrunner.j2mclb.util.NumericStringComparator;
+import com.ibm.webrunner.j2mclb.util.TableModel;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.archive.PacketFormatter;
@@ -57,6 +58,8 @@ public class PacketMonitorPane extends JPanePlugin {
     private JButton clearButton = null;
     
     private long sequenceNumber = 1;
+    
+    private int maxLines = 500;
 
     /**
      * This method initializes
@@ -233,9 +236,13 @@ public class PacketMonitorPane extends JPanePlugin {
     void addRow(final Packet packet) {
 
         SwingUtilities.invokeLater(new Runnable() {
+
             public void run() {
                 
                 Object [] row = createRow(packet);
+                
+                truncateTo(maxLines);
+                
                 packetListBox.insertRow(row, 0);
                 packetListBox.autoSizeAllColumns();
                 
@@ -343,6 +350,27 @@ public class PacketMonitorPane extends JPanePlugin {
             });
         }
         return clearButton;
+    }
+    
+    private void truncateTo(int numLines) {
+        TableModel tableModel = getPacketListBox().getModel();
+        if (tableModel.getRowCount() > numLines) {
+            int lastRow = tableModel.getRowCount();
+            for (int i = lastRow; i >= numLines; i--) {
+                tableModel.removeRow(i);
+            }
+        }
+    }
+    
+    public int getMaxLines() {
+        return maxLines;
+    }
+    
+    public void setMaxLines(int maxLines) {
+        if (maxLines < 10) {
+            throw new IllegalArgumentException("Max lines must be 10 or greater " + maxLines + " invalid)");
+        }
+        this.maxLines = maxLines;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
