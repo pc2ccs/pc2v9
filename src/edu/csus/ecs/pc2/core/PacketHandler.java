@@ -403,12 +403,24 @@ public class PacketHandler {
             // Use existing contest password if no contest password specified.
             contestPassword = contest.getContestPassword();
         }
-
+        
+        if (!new File(newProfile.getProfilePath()).isDirectory()) {
+            /**
+             * Profile does not exist on this server, so must try to switch on originating server.
+             */
+            if (newProfile.getSiteNumber() != contest.getSiteNumber()) {
+                ClientId remoteServerId = new ClientId(newProfile.getSiteNumber(), ClientType.Type.SERVER, 0);
+                Packet forwardPacket = PacketFactory.clonePacket(getServerClientId(), remoteServerId, packet);
+                controller.sendToClient(forwardPacket);
+                return;
+            }
+        }
+        
         ProfileManager manager = new ProfileManager();
 
         if (manager.isProfileAvailable(newProfile, contestPassword.toCharArray())) {
 
-            IInternalContest newContest = switchProfile(contest, newProfile, contestPassword.toCharArray());
+            IInternalContest newContest = switchProfile(contest, newProfile, contestPassword.toCharArray(), true);
             contest = newContest;
 
         } else {
@@ -424,10 +436,16 @@ public class PacketHandler {
      * @param currentContest contest switch from 
      * @param newProfile profile to switch to
      * @param contestPassword contest password for newProfile
-     * @return
+     * @param sendToOtherServers true if this is the first server switching profiles, false if not
+     * @param packet 
+     * @return new contest based on newProfile
      * @throws ProfileException
      */
-    private IInternalContest switchProfile(IInternalContest currentContest, Profile newProfile, char[] contestPassword) throws ProfileException {
+    protected IInternalContest switchProfile(IInternalContest currentContest, Profile newProfile, char[] contestPassword, boolean sendToOtherServers) throws ProfileException {
+        return switchProfile( currentContest,  newProfile,  contestPassword,  sendToOtherServers, null);
+    }
+    
+    protected IInternalContest switchProfile(IInternalContest currentContest, Profile newProfile, char[] contestPassword, boolean sendToOtherServers, Packet packet) throws ProfileException {
 
         ProfileManager manager = new ProfileManager();
         
@@ -465,23 +483,34 @@ public class PacketHandler {
         contest.removeAllListeners(); // remove all listeners
 
         contest.cloneAllLoginAndConnections(newContest);
-
+        
         controller.setContest(newContest); // replace existing contest
 
         controller.updateContestController(newContest, controller); // add all listeners with new contest
 
         contest = newContest;
+        
+        if (packet != null){
+            /**
+             * Load configuration information from remoteServer
+             */
+            
+            updateSitesToModel(packet);
+            
+            // This will load information and also re-log us into other servers
+            // to get the most up to date information from those servers. 
+            loadSettingsFromRemoteServer (packet, null);
+        }
 
         contest.fireAllRefreshEvents();
         
         storeProfiles();
         
-        sendOutChangeProfileToAll(contest, currentContest.getProfile(), newProfile, new String(contestPassword));
-
-//        Utilities.viewReport(new InternalDumpReport(), "debug22 after", contest, controller);
+        sendOutChangeProfileToAll(contest, currentContest.getProfile(), newProfile, new String(contestPassword), sendToOtherServers);
 
         return newContest;
     }
+
 
     /**
      * Create and send current profile to all clients and servers.
@@ -490,8 +519,9 @@ public class PacketHandler {
      * @param currentProfile
      * @param switchToProfile
      * @param contestPassword used to encrypt/decrypt config files.
+     * @param b 
      */
-    private void sendOutChangeProfileToAll(IInternalContest newContest, Profile currentProfile, Profile switchToProfile, String contestPassword) {
+    protected void sendOutChangeProfileToAll(IInternalContest newContest, Profile currentProfile, Profile switchToProfile, String contestPassword, boolean b) {
 
         ContestLoginSuccessData data = createContestLoginSuccessData(newContest, getServerClientId(), contestPassword);
         Packet packet = PacketFactory.createUpdateProfileClientPacket(getServerClientId(), PacketFactory.ALL_SERVERS, currentProfile, switchToProfile, data);
@@ -579,21 +609,50 @@ public class PacketHandler {
      * @throws IOException
      * @throws ClassNotFoundException
      * @throws FileSecurityException
+     * @throws ProfileException 
+     * @throws ProfileCloneException 
      */
-    private void handleUpdateClientProfile(Packet packet, ConnectionHandlerID connectionHandlerID) throws IOException, ClassNotFoundException, FileSecurityException {
+    private void handleUpdateClientProfile(Packet packet, ConnectionHandlerID connectionHandlerID) throws IOException, ClassNotFoundException, FileSecurityException, ProfileException,
+            ProfileCloneException {
 
         if (isServer()) {
             
             /**
              * Switch Profile or create new Profile on the server 
              */
-
-            // FIXME code       switchSecondaryServerProfile; 
             
-            Profile inProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.NEW_PROFILE);
-            Profile updatedProfile = contest.updateProfile(inProfile);
-            Packet addPacket = PacketFactory.createUpdateSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, updatedProfile);
-            sendToJudgesAndOthers(addPacket, true);
+            //  switch/load new profile storage
+            
+            Profile newProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.NEW_PROFILE);
+            String contestPassword = (String) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_PASSWORD);
+            
+            if (newProfile.getSiteNumber() == 0){
+                newProfile.setSiteNumber(contest.getSiteNumber());
+            }
+
+            if (contestPassword == null) {
+                // Use existing contest password if no contest password specified.
+                contestPassword = contest.getContestPassword();
+            }
+
+            ProfileManager manager = new ProfileManager();
+            
+            /**
+             * If profile directory is not there, then this needs to
+             * create the profile directory and DB directory.
+             */
+            
+            manager.insureProfileFileExist(newProfile, contestPassword);
+            
+            if (manager.isProfileAvailable(newProfile, contestPassword.toCharArray())) {
+
+                IInternalContest newContest = switchProfile(contest, newProfile, contestPassword.toCharArray(), false, packet);
+                contest = newContest;
+
+            } else {
+                throw new ProfileException("Can not switch profiles, invalid contest password");
+            }
+            
 
         } else {
 
@@ -608,6 +667,8 @@ public class PacketHandler {
             contest.fireAllRefreshEvents();
         }
     }
+
+
 
     /**
      * RunFiles from a remote site, add these to this site.
@@ -681,7 +742,7 @@ public class PacketHandler {
         if (switchProfileNow ){
             // FIXME if switchProfileNow MUST somehow switch profile.
             System.err.println("Would have switched profile now to "+newProfile.getName());
-            switchProfile(contest, newProfile, contest.getContestPassword().toCharArray());
+            switchProfile(contest, newProfile, contest.getContestPassword().toCharArray(), true);
             
         } else {
             Packet addPacket = PacketFactory.createAddSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, addedProfile);
@@ -2966,8 +3027,6 @@ public class PacketHandler {
 
         addRemoteContestTimesToModel(packet, remoteSiteNumber);
 
-        // updateSitesToModel(packet);
-
         addRemoteRunsToModel(packet, remoteSiteNumber);
 
         addRemoteClarificationsToModel(packet, remoteSiteNumber);
@@ -3660,14 +3719,35 @@ public class PacketHandler {
             Site[] sites = (Site[]) PacketFactory.getObjectValue(packet, PacketFactory.SITE_LIST);
             if (sites != null) {
                 for (Site site : sites) {
-                    info("addSitesToModel " + site);
                     contest.updateSite(site);
                 }
             }
         } catch (Exception e) {
-            // TODO: log handle exception
             controller.getLog().log(Log.WARNING, "Exception logged ", e);
         }
+    }
+    
+
+    /**
+     * Update sites in model.
+     * 
+     * There may be the case where more servers are defined
+     * on a switch of a profile.
+     * 
+     * @param packet
+     */
+    private void updateSitesToModel(Packet packet) {
+        try {
+            Site[] sites = (Site[]) PacketFactory.getObjectValue(packet, PacketFactory.SITE_LIST);
+            if (sites != null) {
+                for (Site site : sites) {
+                    info("updateSitesToModel " + site);
+                    contest.updateSite(site);
+                }
+            }
+        } catch (Exception e) {
+            controller.getLog().log(Log.WARNING, "Exception logged ", e);
+        } 
     }
 
     /**

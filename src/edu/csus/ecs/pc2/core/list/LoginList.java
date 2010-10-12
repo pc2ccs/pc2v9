@@ -63,11 +63,11 @@ public class LoginList implements Serializable {
      * @param connectionHandlerID
      */
     public void add(ClientId clientId, ConnectionHandlerID connectionHandlerID) {
-        if (connectionHandlerID == null) {
-            throw new IllegalArgumentException("connection Id is null");
-        }
         if (clientId == null) {
-            throw new IllegalArgumentException("clientId is null");
+            throw new IllegalArgumentException("clientId is null, connectionHandlerID="+connectionHandlerID);
+        }
+        if (connectionHandlerID == null) {
+            throw new IllegalArgumentException("connection Id is null, clientId="+clientId);
         }
         synchronized (clientHandlerHash) {
 

@@ -11,6 +11,7 @@ import java.util.Vector;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IStorage;
+import edu.csus.ecs.pc2.core.exception.ProfileCloneException;
 import edu.csus.ecs.pc2.core.exception.ProfileException;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Profile;
@@ -484,4 +485,54 @@ public class ProfileManager {
         this.propertiesFileName = propertiesFileName;
     }
     
+    
+    /**
+     * Insure that profile exists and create contest key file.
+     * 
+     * @param newProfile
+     * @param password
+     * @throws FileSecurityException
+     * @throws ProfileCloneException 
+     */
+    public void insureProfileFileExist(Profile newProfile, String password) throws FileSecurityException, ProfileCloneException {
+
+        int siteNumber = newProfile.getSiteNumber();
+
+        String profilePath = newProfile.getProfilePath();
+        if (!new File(profilePath).isDirectory()) {
+
+            /**
+             * Create Profile dir
+             */
+
+            try {
+                new File(profilePath).mkdirs();
+            } catch (Exception e) {
+                throw new ProfileCloneException("Unable to create profile dir " + profilePath, e);
+            }
+
+            if (!new File(profilePath).isDirectory()) {
+                throw new ProfileCloneException("Unable to use profile dir " + profilePath);
+            }
+
+            String databaseDirectoryName = profilePath + File.separator + "db." + siteNumber;
+
+            /**
+             * Create database directory
+             */
+
+            try {
+                new File(databaseDirectoryName).mkdirs();
+            } catch (Exception e) {
+                throw new ProfileCloneException("Unable to create DB dir " + profilePath, e);
+            }
+
+            /**
+             * Create storage/security files.
+             */
+            FileSecurity fileSecurity = new FileSecurity(databaseDirectoryName);
+            fileSecurity.saveSecretKey(password.toCharArray());
+            fileSecurity = null;
+        }
+    }
 }

@@ -2596,7 +2596,7 @@ public class InternalContest implements IInternalContest {
          */
 
         for (ClientId clientId : remoteLoginList.getClientIdList()) {
-            newContest.addRemoteLogin(clientId, localLoginList.getConnectionHandleID(clientId));
+            newContest.addRemoteLogin(clientId, remoteLoginList.getConnectionHandleID(clientId));
         }
 
         /**
