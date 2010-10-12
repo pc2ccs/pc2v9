@@ -2287,6 +2287,9 @@ public class InternalContest implements IInternalContest {
 
         contest.setContestPassword(new String(settings.getContestPassword()));
 
+        if (getGeneralProblem() == null){
+            setGeneralProblem(new Problem("General"));
+        }
         contest.setGeneralProblem(getGeneralProblem());
         
         if (settings.isResetContestTimes()){

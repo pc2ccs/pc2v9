@@ -470,6 +470,10 @@ public class PacketHandler {
             e.printStackTrace(); // debug 22
             throw new ProfileException(newProfile, "Unable to read configuration ");
         }
+        
+        if (newContest.getProfile() == null){
+            newContest.setProfile(newProfile);
+        }
 
         try {
             newContest.storeConfiguration(controller.getLog());
@@ -3476,9 +3480,8 @@ public class PacketHandler {
                 manager.storeDefaultProfile(contest.getProfile());
             } else {
                 manager.mergeProfiles(contest);
+                manager.store(contest.getProfiles(), contest.getProfile());
             }
-
-            manager.store(contest.getProfiles(), contest.getProfile());
 
         } catch (Exception e) {
             logException("Problem saving/loading profiles from profile properties file", e);
