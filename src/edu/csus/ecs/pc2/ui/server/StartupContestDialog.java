@@ -98,7 +98,7 @@ public class StartupContestDialog extends JDialog {
     private final String subsequentLoginText = "<html><center><font size=\"+1\">This server has been started previously.  </font></center><font size=\"+1\">" + "<br>" //
             + "To restart the server you must: <br>" + //
             "(1) choose a \"contest profile\" to be used (choose \"default\" if you're not sure or if no other profile(s) have been created),<br>" + //
-            " and<br>" +  "(2) enter the Contest Master Password which was specified when the server was first started<br>" + //
+            " and<br>" +  "(2) enter the Contest Master Password which was specified when the server was first started.<br>" + //
             "</font></html>";  //  @jve:decl-index=0:
 
     /**
@@ -133,7 +133,6 @@ public class StartupContestDialog extends JDialog {
             @Override
             public void windowOpened(WindowEvent e) {
                 super.windowOpened(e);
-                System.err.println("Request Focus");
                 getContestPasswordTextField().requestFocus();
             }
         });
