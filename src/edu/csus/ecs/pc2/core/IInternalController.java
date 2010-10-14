@@ -540,4 +540,11 @@ public interface IInternalController {
     void showLogWindow(boolean showWindow);
     
     boolean isLogWindowVisible();
+
+    /**
+     * Log an exception.
+     * @param string
+     * @param e
+     */
+    void logWarning(String string, Exception e);
 }

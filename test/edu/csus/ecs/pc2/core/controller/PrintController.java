@@ -620,4 +620,12 @@ public class PrintController implements IInternalController {
         System.out.println("method isLogWindowVisible");
         return false;
     }
+
+    public void logWarning(String string, Exception e) {
+        System.out.println("method logWarning");
+        System.out.println("    message               : " + string);
+        System.out.println("    exception             : " + e.getMessage());
+        e.printStackTrace();
+        
+    }
 }

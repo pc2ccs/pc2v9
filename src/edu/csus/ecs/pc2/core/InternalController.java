@@ -1639,7 +1639,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      */
     public void connectionDropped(ConnectionHandlerID connectionHandlerID)  {
 
-        getLog().log(Log.INFO, "connection Dropped for " + connectionHandlerID, new Exception("connection Dropped for " + connectionHandlerID));
+//        getLog().log(Log.INFO, "connection Dropped for " + connectionHandlerID, new Exception("connection Dropped for " + connectionHandlerID));
+        info("connection Dropped for " + connectionHandlerID);
         ClientId clientId = contest.getLoginClientId(connectionHandlerID);
         if (clientId != null) {
             getLog().log(Log.INFO, "connection Dropped for " + connectionHandlerID + " which is " + clientId);
@@ -3193,6 +3194,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
         
         return false;
+    }
+
+    public void logWarning(String string, Exception e) {
+        log.log(Log.WARNING, string, e);
     }
 
 }
