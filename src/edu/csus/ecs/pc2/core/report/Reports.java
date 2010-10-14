@@ -102,6 +102,8 @@ public final class Reports {
         reports.add(new JudgementNotificationsReport());
 
         reports.add(new ProfileCloneSettingsReport());
+        
+        reports.add(new  SitesReport());
 
         reports.add(new InternalDumpReport());
 

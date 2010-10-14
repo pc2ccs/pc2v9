@@ -239,6 +239,19 @@ public class InternalDumpReport implements IReport {
     public void writeReport(PrintWriter printWriter) {
 
         int exceptionCount = 0;
+        
+        if (contest == null){
+            printWriter.println();
+            printWriter.println(" Warning contest is null ");
+        }
+
+        if (controller == null){
+            printWriter.println();
+            printWriter.println(" Warning controller is null ");
+        } else if (controller.getLog() == null) {
+            printWriter.println();
+            printWriter.println(" Warning controller log is null ");
+        }
 
         try {
             printProfile(printWriter);
