@@ -2045,6 +2045,14 @@ public final class PacketFactory {
         Packet packet = new Packet(Type.FETCH_RUN_FILES, source, destination, prop);
         return packet;
     }
+    
+    public static Packet createFetchContestInfoPacket(ClientId source, ClientId destination) {
+        Properties prop = new Properties();
+        prop.put(CLIENT_ID, source);
+        Packet packet = new Packet(Type.FETCH_CONTEST_INFO, source, destination, prop);
+        return packet;
+    }
+
 
     public static Packet createRunFilesPacket(ClientId source, ClientId destination, RunFiles[] files) {
         Properties prop = new Properties();

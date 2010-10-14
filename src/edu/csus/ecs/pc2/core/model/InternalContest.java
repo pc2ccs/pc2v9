@@ -2286,11 +2286,6 @@ public class InternalContest implements IInternalContest {
         }
 
         contest.setContestPassword(new String(settings.getContestPassword()));
-
-        if (getGeneralProblem() == null){
-            setGeneralProblem(new Problem("General"));
-        }
-        contest.setGeneralProblem(getGeneralProblem());
         
         if (settings.isResetContestTimes()){
             for (ContestTime contestTime : getContestTimes()) {
@@ -2352,6 +2347,9 @@ public class InternalContest implements IInternalContest {
                 ProblemDataFiles problemDataFiles = contest.getProblemDataFile(problem);
                 contest.addProblem(problem, problemDataFiles);
             }
+            contest.setGeneralProblem(getGeneralProblem());
+        } else {
+            contest.setGeneralProblem(new Problem("General"));
         }
 
         if (settings.isCopyRuns()) {

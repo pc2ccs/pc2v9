@@ -494,7 +494,7 @@ public class ProfileManager {
      * @throws FileSecurityException
      * @throws ProfileCloneException 
      */
-    public void insureProfileFileExist(Profile newProfile, String password) throws FileSecurityException, ProfileCloneException {
+    public boolean createProfilesPathandFiles (Profile newProfile, String password) throws FileSecurityException, ProfileCloneException {
 
         int siteNumber = newProfile.getSiteNumber();
 
@@ -533,6 +533,11 @@ public class ProfileManager {
             FileSecurity fileSecurity = new FileSecurity(databaseDirectoryName);
             fileSecurity.saveSecretKey(password.toCharArray());
             fileSecurity = null;
+            
+            return true;
+            
+        } else {
+            return false;
         }
     }
 }

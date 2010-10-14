@@ -680,7 +680,12 @@ public final class PacketType implements Serializable {
         /**
          * Requested run files for {@link #FETCH_RUN_FILES}.
          */
-        UPDATE_RUN_FILES
+        UPDATE_RUN_FILES,
+        /**
+         * Fetch contest info as if one had just logged in,
+         * used in switching profiles.
+         */
+        FETCH_CONTEST_INFO
     }
 
     /**
