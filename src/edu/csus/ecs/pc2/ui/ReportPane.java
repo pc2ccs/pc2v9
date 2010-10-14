@@ -381,7 +381,11 @@ public class ReportPane extends JPanePlugin {
         }
         printWriter.println("Contest Title: " + contestTitle);
         printWriter.print("On: " + Utilities.getL10nDateTime());
-        GregorianCalendar resumeTime = getContest().getContestTime().getResumeTime();
+        
+        GregorianCalendar resumeTime = null;
+        if (getContest() != null) {
+            resumeTime = getContest().getContestTime().getResumeTime();
+        }
         if (resumeTime == null) {
             printWriter.print("  Contest date/time: never started");
         } else {
@@ -390,7 +394,11 @@ public class ReportPane extends JPanePlugin {
         }
         
         printWriter.println();
-        Profile profile = getContest().getProfile();
+        Profile profile = null;
+        if (getContest() != null) {
+            profile = getContest().getProfile();
+        }
+      
         if (profile != null) {
             printWriter.println("Profile: " + profile.getName() + " (" + profile.getDescription() + ")");
         } else {
@@ -421,6 +429,10 @@ public class ReportPane extends JPanePlugin {
             createHeader(printWriter, report);
 
             try {
+                if (report instanceof ExtractPlaybackLoadFilesReport){
+                    ((ExtractPlaybackLoadFilesReport) report).setReportFilename(filename);
+                    ((ExtractPlaybackLoadFilesReport) report).setReportDirectory(getReportDirectory());
+                }
                 report.writeReport(printWriter);
             } catch (Exception e) {
                 printWriter.println("Exception in report: " + e.getMessage());

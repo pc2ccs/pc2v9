@@ -54,7 +54,6 @@ public class ExtractPlaybackLoadFilesReport implements IReport {
     
     private String universalFileSeparator = "/";
 
-
     private void writeRow(PrintWriter printWriter, Run run) throws Exception {
 
         RunFiles runFiles = contest.getRunFiles(run);
@@ -123,6 +122,10 @@ public class ExtractPlaybackLoadFilesReport implements IReport {
     public void writeReport(PrintWriter printWriter) {
 
         printWriter.println();
+        
+        if (reportFilename == null){
+            throw new IllegalArgumentException("reportFilename is null");
+        }
 
         Run[] runs = contest.getRuns();
 
@@ -144,15 +147,8 @@ public class ExtractPlaybackLoadFilesReport implements IReport {
         
         for (Run run : runs) {
             try {
-                if (isThisSite(run.getSiteNumber())){
-                    writeRow(printWriter, run);
-                } else {
-                    printWriter.println("# Remote run site "+run.getSiteNumber()+" not extracted "+run);
-                    failedRunExtract.add("Remote run: " + run);
-                    nonExtractedRuns++;
-                }
+                writeRow(printWriter, run);
             } catch (Exception e) {
-                e.printStackTrace();
                 failedRunExtract.add("Failed run: " + run);
                 nonExtractedRuns++;
                 printWriter.println("# error extracting run " + run + " " + e.getMessage());
@@ -176,10 +172,6 @@ public class ExtractPlaybackLoadFilesReport implements IReport {
         printWriter.println("# EOF "+getReportTitle()); 
         printWriter.println("# ------------------------------------------------------------");
 
-    }
-
-    private boolean isThisSite(int siteNumber) {
-        return siteNumber == contest.getSiteNumber();
     }
 
     protected String removeUpTo(String source, String targetString) {
@@ -263,5 +255,12 @@ public class ExtractPlaybackLoadFilesReport implements IReport {
     public void setFilter(Filter filter) {
         this.filter = filter;
     }
-
+    
+    public void setReportFilename(String reportFilename) {
+        this.reportFilename = reportFilename;
+    }
+    
+    public void setReportDirectory(String reportDirectory) {
+        this.reportDirectory = reportDirectory;
+    }
 }
