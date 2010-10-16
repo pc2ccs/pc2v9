@@ -110,6 +110,24 @@ public class RunFilesList implements Serializable {
     private String getFileName(int siteNumber, int runNumber) {
         return getDirectoryName() + File.separator + "s" + siteNumber + "r" + runNumber + ".files";
     }
+    
+    /**
+     * For the input site returns the lsat run id (int) found.
+     * 
+     * @param siteNumber
+     * @return
+     */
+    public int getLastRunFilesRunId(int siteNumber) {
+
+        for (int i = 1; i < Integer.MAX_VALUE; i++) {
+            String filename = getFileName(siteNumber, i);
+            if (!new File(filename).exists()) {
+                return i - 1;
+            }
+        }
+
+        return 0;
+    }
 
     private String getFileName(Run run) {
         return getFileName(run.getSiteNumber(), run.getNumber());

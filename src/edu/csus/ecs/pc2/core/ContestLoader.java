@@ -595,15 +595,15 @@ public class ContestLoader {
      * @param contest
      * @param controller
      * @param packet
-     * @param remoteSiteNumber
+     * @param localSiteNumber this site, will not add runs from this site
      */
-    public void addRemoteRunsToModel(IInternalContest contest, IInternalController controller, Packet packet, int remoteSiteNumber) {
+    public void addRemoteRunsToModel(IInternalContest contest, IInternalController controller, Packet packet) {
 
         try {
             Run[] runs = (Run[]) PacketFactory.getObjectValue(packet, PacketFactory.RUN_LIST);
             if (runs != null) {
                 for (Run run : runs) {
-                    if (remoteSiteNumber == run.getSiteNumber()) {
+                    if (! isThisSite(contest, run.getSiteNumber())) {
                         contest.updateRun(run, packet.getSourceId());
                     }
                 }

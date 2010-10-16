@@ -314,9 +314,14 @@ public final class PacketFormatter {
 
             child = new DefaultMutableTreeNode("mainfile file: " + mainFile.getName() + " " + mainFile.getBuffer().length + " bytes");
             node.add(child);
-
-            for (SerializedFile file : runfiles.getOtherFiles()) {
-                child = new DefaultMutableTreeNode("additional file: " + file.getName() + " " + file.getBuffer().length + " bytes");
+            
+            if (runfiles.getOtherFiles() != null){
+                for (SerializedFile file : runfiles.getOtherFiles()) {
+                    child = new DefaultMutableTreeNode("additional file: " + file.getName() + " " + file.getBuffer().length + " bytes");
+                    node.add(child);
+                }
+            } else {
+                child = new DefaultMutableTreeNode("additional file: null ");
                 node.add(child);
             }
 

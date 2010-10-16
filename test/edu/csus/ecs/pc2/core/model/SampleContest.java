@@ -33,6 +33,10 @@ public class SampleContest {
     private boolean debugMode = false;
 
     private Random random = new Random();
+    
+    public static final int DEFAULT_PORT_NUMBER = 50002;
+
+    private int defaultPortNumber = DEFAULT_PORT_NUMBER;
 
     /**
      * Create a new Site class instance.
@@ -56,7 +60,7 @@ public class SampleContest {
         }
 
         if (portNumber == 0) {
-            portNumber = 50002 + (siteNumber - 1) * 1000;
+            portNumber = defaultPortNumber + (siteNumber - 1) * 1000;
         }
         props.put(Site.PORT_KEY, "" + portNumber);
 
@@ -212,27 +216,37 @@ public class SampleContest {
 
     }
 
+    /**
+     * Get all sites' teams.
+     * @param contest
+     * @return
+     */
     protected Account[] getTeamAccounts(IInternalContest contest) {
-        // this sites team accounts
         Vector<Account> accountVector = contest.getAccounts(ClientType.Type.TEAM);
-
         Account[] accounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
         Arrays.sort(accounts, new AccountComparator());
 
         return accounts;
     }
-
+    
     /**
-     * Generate a number of new runs.
+     * Get site's teams.
      * 
      * @param contest
-     * @param numberRuns
-     * @param randomTeam
-     * @param randomProblem
-     * @param randomLanguage
+     * @param siteNumber
      * @return
      */
-    public Run[] createRandomRuns(IInternalContest contest, int numberRuns, boolean randomTeam, boolean randomProblem, boolean randomLanguage) {
+    protected Account[] getTeamAccounts(IInternalContest contest, int siteNumber) {
+        Vector<Account> accountVector = contest.getAccounts(ClientType.Type.TEAM, siteNumber);
+        Account[] accounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
+        Arrays.sort(accounts, new AccountComparator());
+
+        return accounts;
+    }
+    
+        
+
+    public Run[] createRandomRuns(IInternalContest contest, int numberRuns, boolean randomTeam, boolean randomProblem, boolean randomLanguage, int siteNumber) {
 
         Run[] runs = new Run[numberRuns];
 
@@ -241,6 +255,15 @@ public class SampleContest {
         Problem[] problems = contest.getProblems();
 
         int numRuns = contest.getRuns().length;
+        
+        if (siteNumber != 0){
+            accounts = getTeamAccounts(contest, siteNumber);
+        }
+        
+        if (accounts.length == 0){
+            new Exception("No accounts for site "+siteNumber).printStackTrace();
+            return new Run[0];
+        }
 
         for (int i = 0; i < numberRuns; i++) {
             Problem problem = problems[0];
@@ -268,6 +291,21 @@ public class SampleContest {
             runs[i] = run;
         }
         return runs;
+        
+    }
+
+    /**
+     * Generate a number of new runs.
+     * 
+     * @param contest
+     * @param numberRuns
+     * @param randomTeam
+     * @param randomProblem
+     * @param randomLanguage
+     * @return
+     */
+    public Run[] createRandomRuns(IInternalContest contest, int numberRuns, boolean randomTeam, boolean randomProblem, boolean randomLanguage) {
+        return createRandomRuns( contest,  numberRuns,  randomTeam,  randomProblem,  randomLanguage, 0);
     }
 
     /**
@@ -487,7 +525,7 @@ public class SampleContest {
   
     
     /**
-     * 
+     * Print the report to the filename.
      * @param filename
      * @param selectedReport
      * @param filter
@@ -513,5 +551,13 @@ public class SampleContest {
 
     public Judgement getYesJudgement(IInternalContest contest) {
         return contest.getJudgements()[0];
+    }
+    
+    public int getDefaultPortNumber() {
+        return defaultPortNumber;
+    }
+    
+    public void setDefaultPortNumber(int defaultPortNumber) {
+        this.defaultPortNumber = defaultPortNumber;
     }
 }

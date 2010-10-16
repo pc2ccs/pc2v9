@@ -14,6 +14,7 @@ import edu.csus.ecs.pc2.core.exception.RunUnavailableException;
 import edu.csus.ecs.pc2.core.exception.UnableToUncheckoutRunException;
 import edu.csus.ecs.pc2.core.list.ClientIdComparator;
 import edu.csus.ecs.pc2.core.list.JudgementNotificationsList;
+import edu.csus.ecs.pc2.core.list.RunFilesList;
 import edu.csus.ecs.pc2.core.log.EvaluationLog;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
@@ -261,15 +262,9 @@ public class PacketHandler {
      * @param fromId
      * @param packet
      * @param connectionHandlerID
-     * @throws IOException
-     * @throws ClassNotFoundException
-     * @throws FileSecurityException
-     * @throws ContestSecurityException
-     * @throws ProfileException
-     * @throws ProfileCloneException
+     * @throws Exception 
      */
-    private void handleOtherPacketTypes(Type packetType, ClientId fromId, Packet packet, ConnectionHandlerID connectionHandlerID) throws IOException, ClassNotFoundException, FileSecurityException,
-            ContestSecurityException, ProfileException, ProfileCloneException {
+    private void handleOtherPacketTypes(Type packetType, ClientId fromId, Packet packet, ConnectionHandlerID connectionHandlerID) throws Exception {
 
         switch (packetType) {
 
@@ -375,7 +370,7 @@ public class PacketHandler {
                 handleFetchRunFiles(packet, connectionHandlerID);
 
             case UPDATE_RUN_FILES:
-                handleRunFiles(packet, connectionHandlerID);
+                handleRunFilesList(packet, connectionHandlerID);
                 break;
 
             case FETCH_CONTEST_INFO:
@@ -807,23 +802,30 @@ public class PacketHandler {
      * 
      * @param packet
      * @param connectionHandlerID
+     * @throws Exception 
      */
-    private void handleRunFiles(Packet packet, ConnectionHandlerID connectionHandlerID) {
+    private void handleRunFilesList(Packet packet, ConnectionHandlerID connectionHandlerID) throws Exception {
 
-        RunFiles[] files = (RunFiles[]) PacketFactory.getObjectValue(packet, PacketFactory.RUN_FILES);
+        RunFiles[] files = (RunFiles[]) PacketFactory.getObjectValue(packet, PacketFactory.RUN_FILES_LIST);
+        
+        if (files != null) {
 
-        for (RunFiles runFiles : files) {
-            try {
-                Run run = contest.getRun(runFiles.getRunId());
-                if (!isThisSite(run.getSiteNumber())) {
-                    contest.updateRunFiles(run, runFiles);
-                } else {
-                    throw new Exception("Will not update local run files " + run);
+            for (RunFiles runFiles : files) {
+                try {
+                    Run run = contest.getRun(runFiles.getRunId());
+                    if (!isThisSite(run.getSiteNumber())) {
+                        contest.updateRunFiles(run, runFiles);
+                    } else {
+                        throw new Exception("Will not update local run files " + run);
+                    }
+                } catch (Exception e) {
+                    controller.logWarning("Unable to save run files", e);
                 }
-            } catch (Exception e) {
-                controller.logWarning("Unable to save run files", e);
             }
+        } else {
+            throw new Exception("RUN_FILES are null from packet "+packet);
         }
+        
     }
     
     private void handleFetchContestInfo(Packet packet, ConnectionHandlerID connectionHandlerID) {
@@ -887,8 +889,6 @@ public class PacketHandler {
         storeProfiles();
         
         if (switchProfileNow ){
-            // FIXME if switchProfileNow MUST somehow switch profile.
-            System.err.println("Would have switched profile now to "+newProfile.getName());
             switchProfile(contest, newProfile, contest.getContestPassword().toCharArray(), true);
             
         } else {
@@ -1732,6 +1732,8 @@ public class PacketHandler {
 
                 // Send settings packet to the server we logged into
                 controller.sendToClient(createContestSettingsPacket(packet.getSourceId()));
+                
+                sendRequestForRunfFiles (packet, packet.getSourceId().getSiteNumber());
             }
 
         } else if (isServer(packet.getDestinationId())) {
@@ -1746,6 +1748,7 @@ public class PacketHandler {
             ContestLoader loader = new ContestLoader();
             loadSettingsFromRemoteServer(loader, packet, connectionHandlerID);
             loader = null;
+         
 
             controller.sendToClient(createContestSettingsPacket(packet.getSourceId()));
 
@@ -3044,11 +3047,13 @@ public class PacketHandler {
      */
     private void loadSettingsFromRemoteServer(ContestLoader loader, Packet packet, ConnectionHandlerID connectionHandlerID) {
         
+        System.out.println("debug 22 loadSettingsFromRemoteServer ");
+
         int remoteSiteNumber = packet.getSourceId().getSiteNumber();
 
         loader.addRemoteContestTimesToModel(contest, controller, packet, remoteSiteNumber);
 
-        loader.addRemoteRunsToModel(contest, controller, packet, remoteSiteNumber);
+        loader.addRemoteRunsToModel(contest, controller, packet);
         
         sendRequestForRunfFiles (packet, remoteSiteNumber);
 
@@ -3079,17 +3084,24 @@ public class PacketHandler {
      * @param remoteSiteNumber
      */
     private void sendRequestForRunfFiles(Packet packet, int remoteSiteNumber) {
-        
+
         Run[] runs = (Run[]) PacketFactory.getObjectValue(packet, PacketFactory.RUN_LIST);
         if (runs != null) {
 
-            int localLastRunId = getLastRunId(contest.getRuns(), remoteSiteNumber);
+            RunFilesList list = new RunFilesList(contest.getStorage());
+            int localLastRunId = list.getLastRunFilesRunId(remoteSiteNumber);
             int lastRemoteRunId = getLastRunId(runs, remoteSiteNumber);
+
+            System.out.println("debug 22 sendRequestForRunfFiles for site " + remoteSiteNumber + " loc # " + localLastRunId + " rem # " + lastRemoteRunId);
 
             if (localLastRunId < lastRemoteRunId) {
                 sendRunFilesRequestToServer(remoteSiteNumber, localLastRunId);
-            }
+            } else {
 
+                System.out.println("debug 22 sendRequestForRunfFiles NO need to fetch");
+            }
+        } else {
+            new Exception("No runs at all from site " + packet.getSourceId().getSiteNumber()).printStackTrace(); // debug 22
         }
     }
     
@@ -3125,6 +3137,7 @@ public class PacketHandler {
 
         ClientId remoteServerId = new ClientId(siteNumber, ClientType.Type.SERVER, 0);
         Packet fetchPacket = PacketFactory.createFetchRunFilesPacket (contest.getClientId(), remoteServerId, lastRunId);
+        System.out.println("Send req for run files "+fetchPacket);
         controller.sendToClient(fetchPacket);
     }
 
@@ -3136,6 +3149,7 @@ public class PacketHandler {
      */
     private void sendRunFilesToServer(int siteNumber, int lastRunId) {
 
+        System.out.println("debug22 sendRunFilesToServer Fetch from ite "+siteNumber+" get from run id "+lastRunId); 
         Run[] runs = getLocalRunsStartingAt(lastRunId);
         RunFiles[] files = getRunFiles(runs);
         ClientId remoteServerId = new ClientId(siteNumber, ClientType.Type.SERVER, 0);
