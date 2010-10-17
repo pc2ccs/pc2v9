@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.Vector;
@@ -425,6 +426,7 @@ public class AccountsPane extends JPanePlugin {
         if (addButton == null) {
             addButton = new JButton();
             addButton.setText("Add");
+            addButton.setMnemonic(KeyEvent.VK_A);
             addButton.setEnabled(true);
             addButton.setToolTipText("Add new account");
             addButton.addActionListener(new java.awt.event.ActionListener() {
@@ -450,6 +452,7 @@ public class AccountsPane extends JPanePlugin {
         if (editButton == null) {
             editButton = new JButton();
             editButton.setText("Edit");
+            editButton.setMnemonic(KeyEvent.VK_E);
             editButton.setToolTipText("Edit account");
             editButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -488,6 +491,7 @@ public class AccountsPane extends JPanePlugin {
         if (filterButton == null) {
             filterButton = new JButton();
             filterButton.setText("Filter");
+            filterButton.setMnemonic(KeyEvent.VK_F);
             filterButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     filterAccounts();
@@ -512,6 +516,7 @@ public class AccountsPane extends JPanePlugin {
         if (loadButton == null) {
             loadButton = new JButton();
             loadButton.setText("Load");
+            loadButton.setMnemonic(KeyEvent.VK_L);
             loadButton.setToolTipText("Load Account Information from file");
             loadButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -634,6 +639,7 @@ public class AccountsPane extends JPanePlugin {
         if (generateAccountsButton == null) {
             generateAccountsButton = new JButton();
             generateAccountsButton.setText("Generate");
+            generateAccountsButton.setMnemonic(KeyEvent.VK_G);
             generateAccountsButton.setToolTipText("Generate multiple new accounts");
             generateAccountsButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -654,6 +660,7 @@ public class AccountsPane extends JPanePlugin {
             saveButton = new JButton();
             saveButton.setToolTipText("Save Account Information to file");
             saveButton.setText("Save");
+            saveButton.setMnemonic(KeyEvent.VK_S);
             saveButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     saveAccountsToDisk();

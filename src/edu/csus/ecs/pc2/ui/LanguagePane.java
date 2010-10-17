@@ -160,6 +160,7 @@ public class LanguagePane extends JPanePlugin {
             addButton = new JButton();
             addButton.setText("Add");
             addButton.setEnabled(false);
+            addButton.setMnemonic(java.awt.event.KeyEvent.VK_A);
             addButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     addLanguage();
@@ -171,20 +172,26 @@ public class LanguagePane extends JPanePlugin {
 
     protected void addLanguage() {
 
-        Language newLanguage = getLanguageFromFields();
+        try {
+            Language newLanguage = getLanguageFromFields();
 
-        getController().addNewLanguage(newLanguage);
+            getController().addNewLanguage(newLanguage);
 
-        cancelButton.setText("Close");
-        addButton.setEnabled(false);
-        updateButton.setEnabled(false);
+            cancelButton.setText("Close");
+            addButton.setEnabled(false);
+            updateButton.setEnabled(false);
 
-        if (getParentFrame() != null) {
-            getParentFrame().setVisible(false);
+            if (getParentFrame() != null) {
+                getParentFrame().setVisible(false);
+            }
+
+        } catch (InvalidFieldValue e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Invalid Language field", JOptionPane.ERROR_MESSAGE);
+            return;
         }
     }
 
-    private Language getLanguageFromFields() {
+    private Language getLanguageFromFields() throws InvalidFieldValue {
         if (language == null) {
             language = new Language(displayNameTextField.getText());
         } else {
@@ -196,8 +203,25 @@ public class LanguagePane extends JPanePlugin {
         language.setProgramExecuteCommandLine(programExecutionCommandLineTextField.getText());
 
         language.setActive(!getDeleteLanguageCheckbox().isSelected());
+        
+        checkForEmptyField (language.getDisplayName(), "Enter a language name");
+        checkForEmptyField (language.getCompileCommandLine(), "Enter a compiler command line");
+        checkForEmptyField (language.getProgramExecuteCommandLine(), "Enter a execute command line");
 
         return language;
+    }
+    
+    /**
+     * Check for empty value, if empty throw exception if value missing.
+     * 
+     * @param value
+     * @param comment
+     * @throws InvalidFieldValue
+     */
+    private void checkForEmptyField(String value, String comment)  throws InvalidFieldValue {
+        if (value == null || value.trim().length() == 0){
+            throw new InvalidFieldValue(comment);
+        }
     }
 
     /**
@@ -222,16 +246,22 @@ public class LanguagePane extends JPanePlugin {
 
     protected void updateLanguage() {
 
-        Language newLanguage = getLanguageFromFields();
+        try {
+            Language newLanguage = getLanguageFromFields();
 
-        getController().updateLanguage(newLanguage);
+            getController().updateLanguage(newLanguage);
 
-        cancelButton.setText("Close");
-        addButton.setEnabled(false);
-        updateButton.setEnabled(false);
+            cancelButton.setText("Close");
+            addButton.setEnabled(false);
+            updateButton.setEnabled(false);
 
-        if (getParentFrame() != null) {
-            getParentFrame().setVisible(false);
+            if (getParentFrame() != null) {
+                getParentFrame().setVisible(false);
+            }
+
+        } catch (InvalidFieldValue e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Invalid Language field", JOptionPane.ERROR_MESSAGE);
+            return;
         }
     }
 
@@ -504,7 +534,24 @@ public class LanguagePane extends JPanePlugin {
 
         if (language != null) {
 
-            Language newLanguage = getLanguageFromFields();
+            Language newLanguage = null;
+            try {
+                newLanguage = getLanguageFromFields();
+            } catch (InvalidFieldValue e) {
+                
+                // TODO there has to be a better way to ignore this exception
+                // without CheckStyle complaining.
+                
+                /**
+                 * getLanguageFromFields throws an InvalidFieldValue but in
+                 * this case we ignore it because we don't care, if there
+                 * are invalid fields that is ok at this point in the code.
+                 * If there are problems getting the language then clearly
+                 * the edited and original are different.
+                 */
+                
+                e.printStackTrace();
+            }
 
             enableButton |= language.isSameAs(newLanguage);
 

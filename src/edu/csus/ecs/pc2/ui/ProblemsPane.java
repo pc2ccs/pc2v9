@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.event.KeyEvent;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -231,15 +232,15 @@ public class ProblemsPane extends JPanePlugin {
             }
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception logged ", e);
-            showMessage("Unable to clone problem, check log");
+            showMessage("Unable to clone problem, check log ("+e.getMessage()+")");
         }
     }
  
     private String promptForProblemName(String problemName) {
         String s = (String)JOptionPane.showInputDialog(
                 this,
-                "Copying from problem "+problemName+" to:\n",
-                "Copy Destination Dialog",
+                "Enter new name:\n",
+                "Copying problem '"+problemName+"'",
                 JOptionPane.QUESTION_MESSAGE,
                 null,
                 null,
@@ -288,6 +289,7 @@ public class ProblemsPane extends JPanePlugin {
         if (addButton == null) {
             addButton = new JButton();
             addButton.setText("Add");
+            addButton.setMnemonic(KeyEvent.VK_A);
             addButton.setToolTipText("Add new Problem definition");
             addButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -312,6 +314,7 @@ public class ProblemsPane extends JPanePlugin {
         if (copyButton == null) {
             copyButton = new JButton();
             copyButton.setText("Copy");
+            copyButton.setMnemonic(KeyEvent.VK_C);
             copyButton.setToolTipText("Copy settings from an existing problem to a new problem");
             copyButton.setActionCommand("Copy");
             copyButton.addActionListener(new java.awt.event.ActionListener() {
@@ -332,6 +335,7 @@ public class ProblemsPane extends JPanePlugin {
         if (editButton == null) {
             editButton = new JButton();
             editButton.setText("Edit");
+            editButton.setMnemonic(KeyEvent.VK_E);
             editButton.setToolTipText("Edit existing Problem definition");
             editButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -358,7 +362,7 @@ public class ProblemsPane extends JPanePlugin {
             editProblemFrame.setVisible(true);
         } catch (Exception e) {
             log.log(Log.WARNING, "Exception logged ", e);
-            showMessage("Unable to edit problem, check log");
+            showMessage("Unable to edit problem, check log ("+e.getMessage()+")");
         }
     }
 
@@ -381,12 +385,7 @@ public class ProblemsPane extends JPanePlugin {
     }
 
     private void showMessage(final String string) {
-
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                messageLabel.setText(string);
-            }
-        });
+        JOptionPane.showMessageDialog(this, string, "Problems pane message", JOptionPane.INFORMATION_MESSAGE);
     }
 
     /**

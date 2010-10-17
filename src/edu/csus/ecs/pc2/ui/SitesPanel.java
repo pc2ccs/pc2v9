@@ -1,13 +1,17 @@
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.event.KeyEvent;
 import java.util.Arrays;
 import java.util.Properties;
 
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
@@ -20,12 +24,9 @@ import edu.csus.ecs.pc2.core.model.ISiteListener;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.SiteEvent;
 import edu.csus.ecs.pc2.core.model.SiteList;
-import javax.swing.JLabel;
-import javax.swing.SwingConstants;
-import java.awt.Dimension;
 
 /**
- * View, Add and change site's settings.
+ * View, Add and change sites' settings.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -56,6 +57,8 @@ public class SitesPanel extends JPanePlugin {
     private JLabel messageLabel = null;
 
     private JButton reconnectButton = null;
+    
+    public static final int DEFAULT_LISTENING_PORT = 50002;
 
     /**
      * This method initializes
@@ -101,6 +104,14 @@ public class SitesPanel extends JPanePlugin {
             siteButtonPanel.add(getUpdateSiteButton(), null);
             siteButtonPanel.add(getCancelSiteEditButton(), null);
             siteButtonPanel.add(getReconnectButton(), null);
+            siteButtonPanel.addMouseListener(new java.awt.event.MouseAdapter() {
+                public void mouseClicked(java.awt.event.MouseEvent e) {
+                    if (e.isShiftDown()) {
+                        addNewSite();
+                    }
+                }
+            });
+
         }
         return siteButtonPanel;
     }
@@ -155,22 +166,43 @@ public class SitesPanel extends JPanePlugin {
         if (addSiteButton == null) {
             addSiteButton = new JButton();
             addSiteButton.setText("Add Site");
+            addSiteButton.setMnemonic(KeyEvent.VK_A);
             addSiteButton.setToolTipText("Add a new Site");
             addSiteButton.setText("Add Site");
             addSiteButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    addNewSite();
+                    addNewTestSite();
                 }
             });
         }
         return addSiteButton;
     }
 
-    protected void addNewSite() {
-        Site newSite = createSite(siteListBox.getRowCount() + 1);
+    /**
+     * Add new site with localhost and incremented listening port.
+     * 
+     * Listening port = <code> {@link #DEFAULT_LISTENING_PORT} + (siteNum - 1) * 1000</code>
+     * 
+     */
+    protected void addNewTestSite() {
+        int nextSiteNumber = siteListBox.getRowCount() + 1;
+        int port = DEFAULT_LISTENING_PORT + (nextSiteNumber - 1) * 1000;
+        Site newSite = createSite(nextSiteNumber, "localhost", port);
         addSiteRow(newSite);
         enableUpdateButtons(true);
     }
+    
+    /**
+     * Add new site with no host and default listening port.
+     */
+    protected void addNewSite() {
+        int nextSiteNumber = siteListBox.getRowCount() + 1;
+        int port = DEFAULT_LISTENING_PORT;
+        Site newSite = createSite(nextSiteNumber, "", port);
+        addSiteRow(newSite);
+        enableUpdateButtons(true);
+    }
+
 
     /**
      * This method initializes updateSiteButton
@@ -181,6 +213,7 @@ public class SitesPanel extends JPanePlugin {
         if (updateSiteButton == null) {
             updateSiteButton = new JButton();
             updateSiteButton.setText("Apply");
+            updateSiteButton.setMnemonic(KeyEvent.VK_P);
             updateSiteButton.setToolTipText("Apply all site changes");
             updateSiteButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -359,6 +392,7 @@ public class SitesPanel extends JPanePlugin {
         if (cancelSiteEditButton == null) {
             cancelSiteEditButton = new JButton();
             cancelSiteEditButton.setText("Cancel");
+            cancelSiteEditButton.setMnemonic(KeyEvent.VK_C);
             cancelSiteEditButton.setToolTipText("Undo changes");
             cancelSiteEditButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -443,11 +477,10 @@ public class SitesPanel extends JPanePlugin {
         return textField;
     }
 
-    private Site createSite(int nextSiteNumber) {
+    private Site createSite(int nextSiteNumber, String hostName, int port) {
         Site site = new Site("Site " + nextSiteNumber, nextSiteNumber);
         Properties props = new Properties();
-        props.put(Site.IP_KEY, "localhost");
-        int port = 50002 + (nextSiteNumber - 1) * 1000;
+        props.put(Site.IP_KEY, hostName);
         props.put(Site.PORT_KEY, "" + port);
         site.setConnectionInfo(props);
         site.setPassword("site" + nextSiteNumber);
@@ -593,6 +626,7 @@ public class SitesPanel extends JPanePlugin {
         if (reconnectButton == null) {
             reconnectButton = new JButton();
             reconnectButton.setText("Reconnect");
+            reconnectButton.setMnemonic(KeyEvent.VK_R);
             reconnectButton.setToolTipText("Reconnect the selected site");
             reconnectButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {

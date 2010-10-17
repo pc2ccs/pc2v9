@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.event.KeyEvent;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -237,6 +238,7 @@ public class LanguagesPane extends JPanePlugin {
         if (addButton == null) {
             addButton = new JButton();
             addButton.setText("Add");
+            addButton.setMnemonic(KeyEvent.VK_A);
             addButton.setToolTipText("Add a new Language definition");
             addButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -261,6 +263,7 @@ public class LanguagesPane extends JPanePlugin {
         if (editButton == null) {
             editButton = new JButton();
             editButton.setText("Edit");
+            editButton.setMnemonic(KeyEvent.VK_E);
             editButton.setToolTipText("Edit existing Language definition");
             editButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
