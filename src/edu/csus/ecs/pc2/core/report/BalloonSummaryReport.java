@@ -63,7 +63,7 @@ public class BalloonSummaryReport implements IReport {
                         for (int i = 0; i < probs.size(); i++) {
                             Problem problem = probs.elementAt(i);
                             
-                            if (filter.matchesProblem(problem)){
+                            if (filter.matches(problem)){
                                 if (problem.getElementId().equals(run.getProblemId())) {
                                     found = true;
                                 }
@@ -97,7 +97,7 @@ public class BalloonSummaryReport implements IReport {
 
         for (Account account : accounts) {
             
-            if (filter.matchesAccount(account)){
+            if (filter.matches(account)){
                 
                 ClientId clientId = account.getClientId();
                 solvedProbs = solvedProblems(runs, clientId);

@@ -184,7 +184,7 @@ public class ListRunLanguages implements IReport {
         for (Language language : languages) {
             theIndex = langLookup.get(language.getElementId()).intValue();
             
-            if (filter.matchesLanguage(language)){
+            if (filter.matches(language)){
                 printWriter.println("Language " + language);
                 ClientId[] clientIds = summaryCounts.getClients(language.getElementId());
                 printWriter.print("      " + clientIds.length + " teams: ");

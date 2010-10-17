@@ -35,7 +35,6 @@ public class SampleContest {
     private Random random = new Random();
     
     public static final int DEFAULT_PORT_NUMBER = 50002;
-
     private int defaultPortNumber = DEFAULT_PORT_NUMBER;
 
     /**
@@ -73,7 +72,7 @@ public class SampleContest {
     public IInternalContest createContest(int siteNumber, int numSites, int numTeams, int numJudges, boolean initAsServer) {
 
         String contestPassword = "Password 101";
-        Profile profile = new Profile("Automatic Profile");
+        Profile profile = new Profile("Default.");
         return createContest(siteNumber, numSites, numTeams, numJudges, initAsServer, profile, contestPassword);
     }
 
@@ -91,7 +90,7 @@ public class SampleContest {
      */
     public IInternalContest createContest(int siteNumber, int numSites, int numTeams, int numJudges, boolean initAsServer, Profile profile, String contestPassword) {
 
-        String[] languages = { "Java", "C++", "C", "APL" };
+        String[] languages = { LanguageAutoFill.JAVATITLE, LanguageAutoFill.DEFAULTTITLE, LanguageAutoFill.GNUCPPTITLE, LanguageAutoFill.PERLTITLE, LanguageAutoFill.MSCTITLE, "APL" };
         String[] problems = { "Sumit", "Quadrangles", "Routing", "Faulty Towers", "London Bridge", "Finnigans Bluff" };
         String[] judgements = { "Stupid programming error", "Misread problem statement", "Almost there", "You have no clue", "Give up and go home", "Consider switching to another major",
                 "How did you get into this place ?", "Contact Staff - you have no hope" };
@@ -107,6 +106,10 @@ public class SampleContest {
 
         for (String langName : languages) {
             Language language = new Language(langName);
+            String [] values = LanguageAutoFill.getAutoFillValues(langName);
+            if (values[0].trim().length() != 0){
+                fillLanguage (language, values);
+            }
             language.setSiteNumber(siteNumber);
             contest.addLanguage(language);
         }
@@ -116,8 +119,11 @@ public class SampleContest {
             problem.setSiteNumber(siteNumber);
             contest.addProblem(problem);
         }
+        
+        Problem generalProblem = new Problem("General.");
+        contest.setGeneralProblem(generalProblem);
 
-        Judgement judgementYes = new Judgement("Yes");
+        Judgement judgementYes = new Judgement("Yes.");
         contest.addJudgement(judgementYes);
 
         for (String judgementName : judgements) {
@@ -144,6 +150,18 @@ public class SampleContest {
         contest.setProfile(profile);
         contest.setContestPassword(contestPassword);
         return contest;
+    }
+
+    private void fillLanguage(Language language, String[] values) {
+//        values array
+//        0 Title for Language 
+//        1 Compiler Command Line 
+//        2 Executable Identifier Mask 
+//        3 Execute command line 
+
+        language.setCompileCommandLine(values[1]);
+        language.setExecutableIdentifierMask(values[2]);
+        language.setProgramExecuteCommandLine(values[3]);
     }
 
     /**
@@ -179,7 +197,6 @@ public class SampleContest {
         }
 
         return controller;
-
     }
 
     /**
@@ -189,12 +206,16 @@ public class SampleContest {
      */
     public void populateContest(IInternalContest contest) {
 
-        String[] languages = { "Java", "C", "APL" };
+        String[] languages = { "Java", LanguageAutoFill.JAVATITLE, LanguageAutoFill.DEFAULTTITLE, LanguageAutoFill.GNUCPPTITLE, LanguageAutoFill.PERLTITLE, LanguageAutoFill.MSCTITLE, "APL" };
         String[] problems = { "Sumit", "Quadrangles", "Routing" };
         String[] judgements = { "No no", "No no no", "No - judges are confused" };
 
         for (String langName : languages) {
             Language language = new Language(langName);
+            String [] values = LanguageAutoFill.getAutoFillValues(langName);
+            if (values[0].trim().length() != 0){
+                fillLanguage (language, values);
+            }            
             contest.addLanguage(language);
         }
 
@@ -389,7 +410,51 @@ public class SampleContest {
         contest.addRun(newRun);
         return newRun;
     }
+    
+    public Site createSite(int nextSiteNumber, String hostName, int port) {
+        return createSite(nextSiteNumber, hostName, port, null);
+    }
+    
+    public Site createSite(int nextSiteNumber, String hostName, int port, String siteName) {
+        if (siteName == null){
+            siteName = new String("Site " + nextSiteNumber);
+        }
+        Site site = new Site("Site " + nextSiteNumber, nextSiteNumber);
+        Properties props = new Properties();
+        props.put(Site.IP_KEY, hostName);
+        props.put(Site.PORT_KEY, "" + port);
+        site.setConnectionInfo(props);
+        site.setPassword("site" + nextSiteNumber);
+        return site;
+    }
+    
+    public Site createSite (IInternalContest contest, String siteName){
+        int nextSiteNumber = contest.getSites().length + 1;
+        int newPortNumber = DEFAULT_PORT_NUMBER + (nextSiteNumber - 1) * 1000;
+        Site site = createSite(nextSiteNumber, "localhost", newPortNumber, siteName);
+        return site;
+    }
 
+    public Site[] createSites(IInternalContest contest, int count) {
+        Site[] sites = new Site[count];
+        for (int i = 0; i < count; i++) {
+            int nextSiteNumber = contest.getSites().length + i + 1;
+            int newPortNumber = DEFAULT_PORT_NUMBER + (nextSiteNumber - 1) * 1000;
+            Site site = createSite(nextSiteNumber, "localhost", newPortNumber, null);
+            sites[i] = site;
+        }
+        return sites;
+    }
+
+    public Profile[] createProfiles(IInternalContest contest, int count) {
+        Profile[] profiles = new Profile[count];
+        for (int i = 0; i < count; i++) {
+            int nextProfileNumber = contest.getProfiles().length + i + 1;
+            Profile profile = new Profile("Profile " + nextProfileNumber);
+            profiles[i] = profile;
+        }
+        return profiles;
+    }
 
     /**
      * add a judged run to list of runs in a contest.

@@ -17,6 +17,7 @@ public final class AllTests {
         //$JUnit-BEGIN$
         suite.addTestSuite(LoadAccountsTest.class);
         suite.addTestSuite(LoadICPCDataTest.class);
+        suite.addTestSuite(ContestXMLTest.class);
         //$JUnit-END$
         return suite;
     }

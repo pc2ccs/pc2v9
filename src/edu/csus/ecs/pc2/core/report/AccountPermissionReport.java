@@ -66,7 +66,7 @@ public class AccountPermissionReport implements IReport {
 
         for (Account account : accounts) {
 
-            if (filter.matchesAccount(account)) {
+            if (filter.matches(account)) {
 
                 Type clientType = account.getClientId().getClientType();
                 if (!previousClientType.equals(clientType)) {

@@ -186,7 +186,7 @@ public class InternalDumpReport implements IReport {
         Arrays.sort(accounts, new AccountComparator());
         
         for (Account account : accounts) {
-            if (filter.matchesAccount(account)){
+            if (filter.matches(account)){
                 printWriter.print("   Site " + account.getSiteNumber());
                 printWriter.format(" %-15s", account.getClientId().getName());
                 printWriter.println(" id=" + account.getElementId());

@@ -7,7 +7,7 @@ import java.io.PrintWriter;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
-import edu.csus.ecs.pc2.core.imports.Contest;
+import edu.csus.ecs.pc2.core.imports.ContestXML;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -37,7 +37,7 @@ public class ContestReport implements IReport {
     
 
     public void writeReport(PrintWriter printWriter) throws IOException {
-        Contest xmlContest = new Contest();
+        ContestXML xmlContest = new ContestXML();
         String xmlString = xmlContest.toXML(contest, filter);
         printWriter.println(xmlString);
     }
@@ -91,7 +91,7 @@ public class ContestReport implements IReport {
     }
 
     public String createReportXML(Filter inFilter) throws IOException {
-        Contest xmlContest = new Contest();
+        ContestXML xmlContest = new ContestXML();
         return xmlContest.toXML(contest, inFilter);
     }
 

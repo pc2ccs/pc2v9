@@ -480,7 +480,7 @@ public class EditFilterPane extends JPanePlugin {
             Problem problem = getContest().getGeneralProblem();
             WrapperJCheckBox wrapperJCheckBox = new WrapperJCheckBox(problem);
             if (filter.isFilteringProblems()) {
-                wrapperJCheckBox.setSelected(filter.matchesProblem(problem));
+                wrapperJCheckBox.setSelected(filter.matches(problem));
             }
             problemListModel.addElement(wrapperJCheckBox);
         }
@@ -488,7 +488,7 @@ public class EditFilterPane extends JPanePlugin {
         for (Problem problem : getContest().getProblems()) {
             WrapperJCheckBox wrapperJCheckBox = new WrapperJCheckBox(problem);
             if (filter.isFilteringProblems()) {
-                wrapperJCheckBox.setSelected(filter.matchesProblem(problem));
+                wrapperJCheckBox.setSelected(filter.matches(problem));
             }
             problemListModel.addElement(wrapperJCheckBox);
         }
@@ -497,7 +497,7 @@ public class EditFilterPane extends JPanePlugin {
         for (Language language : getContest().getLanguages()) {
             WrapperJCheckBox wrapperJCheckBox = new WrapperJCheckBox(language);
             if (filter.isFilteringLanguages()) {
-                wrapperJCheckBox.setSelected(filter.matchesLanguage(language));
+                wrapperJCheckBox.setSelected(filter.matches(language));
             }
             languageListModel.addElement(wrapperJCheckBox);
         }
@@ -508,7 +508,7 @@ public class EditFilterPane extends JPanePlugin {
         for (Site site : sites) {
             WrapperJCheckBox wrapperJCheckBox = new WrapperJCheckBox(site, site.getSiteNumber()+" "+site.getDisplayName());
             if (filter.isFilteringSites()) {
-                wrapperJCheckBox.setSelected(filter.matchesSite(site));
+                wrapperJCheckBox.setSelected(filter.matches(site));
             }
             sitesListModel.addElement(wrapperJCheckBox);
         }
@@ -517,7 +517,7 @@ public class EditFilterPane extends JPanePlugin {
         for (Judgement judgement : getContest().getJudgements()) {
             WrapperJCheckBox wrapperJCheckBox = new WrapperJCheckBox(judgement);
             if (filter.isFilteringJudgements()) {
-                wrapperJCheckBox.setSelected(filter.matchesJudgement(judgement));
+                wrapperJCheckBox.setSelected(filter.matches(judgement));
             }
             judgementListModel.addElement(wrapperJCheckBox);
         }
@@ -529,7 +529,7 @@ public class EditFilterPane extends JPanePlugin {
         for (RunStates runState : runStates) {
             WrapperJCheckBox wrapperJCheckBox = new WrapperJCheckBox(runState);
             if (filter.isFilteringRunStates()) {
-                wrapperJCheckBox.setSelected(filter.matchesRunState(runState));
+                wrapperJCheckBox.setSelected(filter.matches(runState));
             }
             runStatesListModel.addElement(wrapperJCheckBox);
         }
@@ -539,7 +539,7 @@ public class EditFilterPane extends JPanePlugin {
         for (ClarificationStates clarificationState : clarificationStates) {
             WrapperJCheckBox wrapperJCheckBox = new WrapperJCheckBox(clarificationState);
             if (filter.isFilteringClarificationStates()) {
-                wrapperJCheckBox.setSelected(filter.matchesClarificationState(clarificationState));
+                wrapperJCheckBox.setSelected(filter.matches(clarificationState));
             }
             clarificationStatesListModel.addElement(wrapperJCheckBox);
         }
@@ -608,7 +608,7 @@ public class EditFilterPane extends JPanePlugin {
                 wrapperJCheckBox = new WrapperJCheckBox(account.getClientId());
             }
             if (inFilter.isFilteringAccounts()) {
-                wrapperJCheckBox.setSelected(inFilter.matchesAccount(account));
+                wrapperJCheckBox.setSelected(inFilter.matches(account));
             }
             teamListModel.addElement(wrapperJCheckBox);
         }

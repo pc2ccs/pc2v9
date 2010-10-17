@@ -287,6 +287,14 @@ public class Filter implements Serializable {
      * 
      * @param judgement
      */
+    public boolean matches(Judgement judgement) {
+        return matchesJudgement(judgement.getElementId());
+    }
+    /**
+     * 
+     * @param judgement
+     * @deprecated use {@link #matches(Judgement)}
+     */
     public boolean matchesJudgement(Judgement judgement) {
         return matchesJudgement(judgement.getElementId());
     }
@@ -348,8 +356,13 @@ public class Filter implements Serializable {
      * Return true if problem filter ON and matches a problem in the filter list.
      * 
      * @param problem
+     * @deprecated use {@link #matches(Problem)}
      */
     public boolean matchesProblem(Problem problem) {
+        return matches(problem);
+    }
+    
+    public boolean matches(Problem problem) {
         return matchesProblem(problem.getElementId());
     }
 
@@ -425,8 +438,14 @@ public class Filter implements Serializable {
      * Return true if language filter ON and matches a language in the filter list.
      * 
      * @param language
+     * @deprecated use {@link #matches(Language)}
      */
+    
     public boolean matchesLanguage(Language language) {
+        return matchesLanguage(language.getElementId());
+    }
+    
+    public boolean matches(Language language) {
         return matchesLanguage(language.getElementId());
     }
 
@@ -486,16 +505,32 @@ public class Filter implements Serializable {
      * Return true if site filter ON and matches a site in the filter list.
      * 
      * @param site
+     * @deprecated use {@link #matches(Site)}
      */
     public boolean matchesSite(Site site) {
+        return matches(site);
+    }
+    
+    public boolean matches(Site site) {
         return matchesSites(site.getSiteNumber());
     }
 
+    /**
+     * 
+     * @param account
+     * @return
+     * @deprecated use {@link #matches(Account)}
+     */
     public boolean matchesAccount(Account account) {
+        return matches(account);
+    }
+    
+    
+    public boolean matches(Account account) {
         if (filteringAccounts) {
             if (matchesAccount(account.getClientId())) {
                 return true;
-            } else if (matchesClientType(account.getClientId().getClientType())) {
+            } else if (matches(account.getClientId().getClientType())) {
                 return true;
             }
             return false;
@@ -504,7 +539,7 @@ public class Filter implements Serializable {
         }
     }
 
-    private boolean matchesClientType(Type type) {
+    private boolean matches(Type type) {
         if (filteringAccounts) {
             return clientTypeHash.containsKey(type);
         } else {
@@ -745,7 +780,17 @@ public class Filter implements Serializable {
         filteringRunStates = true;
     }
 
+    /**
+     * 
+     * @param runStates
+     * @return
+     * @deprecated use {@link #matches(RunStates)}
+     */
     public boolean matchesRunState(RunStates runStates) {
+        return matches(runStates);
+    }
+
+    public boolean matches(RunStates runStates) {
         if (filteringRunStates) {
             return runStateHash.containsKey(runStates);
         } else {
@@ -753,6 +798,7 @@ public class Filter implements Serializable {
         }
     }
 
+    
     public boolean matchesElapsedTime(Run run) {
         return matchesElapsedTimeSubmission(run);
     }
@@ -822,8 +868,16 @@ public class Filter implements Serializable {
         }
         return runStates;
     }
-
+    /**
+     * 
+     * @param clarificationStates
+     * @return
+     * @deprecated use {@link #matches(ClarificationStates)}
+     */
     public boolean matchesClarificationState(ClarificationStates clarificationStates) {
+        return matches(clarificationStates);
+    }
+    public boolean matches(ClarificationStates clarificationStates) {
         if (filteringClarificationStates) {
             return clarificationStateHash.containsKey(clarificationStates);
         } else {
@@ -1046,3 +1100,4 @@ public class Filter implements Serializable {
     }
     
 }
+

@@ -148,7 +148,7 @@ public class ContestAnalysisReport implements IReport {
 
             int siteNum = i + 1;
 
-            if (filter.matchesSite(contest.getSite(siteNum))){
+            if (filter.matches(contest.getSite(siteNum))){
                 printWriter.format("%2d %-15s ", siteNum, contest.getSite(siteNum).getDisplayName());
 
                 printWriter.format("%4d runs (%2d unjudged, %2d deleted)", numRuns[i], numUnjudgedRuns[i], numRunsDeleted[i]);

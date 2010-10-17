@@ -43,20 +43,20 @@ public class FilterTest extends TestCase {
         filter.addProblem(problemInFilter);
         assertTrue ("Problem Filter should be enabled ", filter.isFilteringProblems());
         
-        assertTrue("Problem "+problemInFilter+" should be found in filter ", filter.matchesProblem(problemInFilter));
+        assertTrue("Problem "+problemInFilter+" should be found in filter ", filter.matches(problemInFilter));
 
         filter.addProblem(problems[0]);
         
-        assertTrue("Problem "+problemInFilter+" should be found in filter ", filter.matchesProblem(problemInFilter));
-        assertFalse("Problem "+notInFilterProblem+" should not be found in filter ", filter.matchesProblem(notInFilterProblem));
+        assertTrue("Problem "+problemInFilter+" should be found in filter ", filter.matches(problemInFilter));
+        assertFalse("Problem "+notInFilterProblem+" should not be found in filter ", filter.matches(notInFilterProblem));
         
         filter.removeProblem(problemInFilter);
-        assertFalse("Problem "+problemInFilter+" should not be found in filter ", filter.matchesProblem(problemInFilter));
+        assertFalse("Problem "+problemInFilter+" should not be found in filter ", filter.matches(problemInFilter));
 
         filter.addProblem(problemInFilter);
         filter.addProblem(problemInFilter);
         
-        assertTrue("Problem "+problemInFilter+" should be found in filter ", filter.matchesProblem(problemInFilter));
+        assertTrue("Problem "+problemInFilter+" should be found in filter ", filter.matches(problemInFilter));
         
     }
 
@@ -125,16 +125,16 @@ public class FilterTest extends TestCase {
         ClientId clientId = new ClientId(1,ClientType.Type.TEAM, 4);
         Account account = new Account(clientId, "pass", 1);
         
-        assertTrue("Match on ClientType Team ", filter.matchesAccount(account));
+        assertTrue("Match on ClientType Team ", filter.matches(account));
         
         ClientId judgeId = new ClientId(1,ClientType.Type.JUDGE, 4);
         account = new Account(judgeId, "pass", 1);
 
-        assertFalse("Match on ClientType Team for "+account, filter.matchesAccount(account));
+        assertFalse("Match on ClientType Team for "+account, filter.matches(account));
         
         filter = new Filter();
         filter.addAccount(account);
         
-        assertTrue("Match on Account "+account, filter.matchesAccount(account));
+        assertTrue("Match on Account "+account, filter.matches(account));
     }
 }
