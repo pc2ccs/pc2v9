@@ -3,6 +3,8 @@ package edu.csus.ecs.pc2.ui;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.awt.Rectangle;
+import java.awt.event.WindowEvent;
 import java.io.File;
 
 import javax.swing.ButtonGroup;
@@ -25,7 +27,6 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
-import java.awt.Rectangle;
 
 /**
  * Add/Edit Problem Pane.
@@ -168,6 +169,8 @@ public class ProblemPane extends JPanePlugin {
 
     private JCheckBox deleteProblemCheckBox = null;
 
+    private boolean listenersAdded = false;
+
     /**
      * This method initializes
      * 
@@ -197,11 +200,17 @@ public class ProblemPane extends JPanePlugin {
 
         log = getController().getLog();
 
-        addWindowCloserListener();
+        addWindowListeners();
 
     }
-
-    private void addWindowCloserListener() {
+    
+    private void addWindowListeners() {
+        
+        if (listenersAdded){
+            // No need to add the listeners twice or more.
+            return;
+        }
+        
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 if (getParentFrame() != null) {
@@ -209,7 +218,15 @@ public class ProblemPane extends JPanePlugin {
                         public void windowClosing(java.awt.event.WindowEvent e) {
                             handleCancelButton();
                         }
+                        @Override
+                        public void windowOpened(WindowEvent e) {
+                            getProblemNameTextField().requestFocus();
+                        }
+                        public void windowActivated(WindowEvent e) {
+                            getProblemNameTextField().requestFocus();
+                        };
                     });
+                    listenersAdded = true;
                 }
             }
         });
@@ -1120,7 +1137,7 @@ public class ProblemPane extends JPanePlugin {
      * 
      * @return javax.swing.JTextField
      */
-    private JTextField getProblemNameTextField() {
+    protected JTextField getProblemNameTextField() {
         if (problemNameTextField == null) {
             problemNameTextField = new JTextField();
             problemNameTextField.setPreferredSize(new java.awt.Dimension(120, 20));
