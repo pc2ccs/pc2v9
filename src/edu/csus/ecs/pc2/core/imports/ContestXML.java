@@ -1,7 +1,9 @@
 package edu.csus.ecs.pc2.core.imports;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
@@ -59,14 +61,16 @@ public class ContestXML {
     public static final String FILTER_TAG = "filter";
 
     public static final String PROFILES_TAG = "profiles";
-    
+
     public static final String BALLOON_COLORS_LIST_TAG = "ballonlist";
-    
+
     public static final String BALLOON_COLOR_TAG = "ballooncolors";
 
     public static final String SITES_TAG = "site";
-    
+
     public static final String VERSION_TAG = "version";
+
+    public static final String FILE_INFO_TAG = "fileinfo";
 
     public String toXML(IInternalContest contest) throws IOException {
         return toXML(contest, new Filter());
@@ -77,6 +81,8 @@ public class ContestXML {
         XMLMemento mementoRoot = XMLMemento.createWriteRoot(CONTEST_TAG);
 
         addVersionInfo (mementoRoot, contest);
+        
+        addFileInfo (mementoRoot);
         
         IMemento parent = mementoRoot.createChild(SETTINGS_TAG);
         ContestInformation contestInformation = contest.getContestInformation();
@@ -165,8 +171,23 @@ public class ContestXML {
         return mementoRoot.saveToString();
     }
 
+    public IMemento addFileInfo(XMLMemento mementoRoot) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm.ss.SSS");
+        String dateString = simpleDateFormat.format(new Date());
+        
+        simpleDateFormat = new SimpleDateFormat("EEE MMMM d, yyy H:mm:ss.SSS z");
+        // "yyyy-MM-dd HH:mm.ss.SSS");
+        String fullDateString = simpleDateFormat.format(new Date());
 
-    private IMemento addVersionInfo(XMLMemento mementoRoot, IInternalContest contest) {
+        VersionInfo versionInfo = new VersionInfo();
+        IMemento memento = mementoRoot.createChild(FILE_INFO_TAG);
+        memento.putString("date", dateString);
+        memento.putString("fulldate", fullDateString);
+        memento.putString("version", versionInfo.getSystemVersionInfo());
+        return memento;
+    }
+    
+    public IMemento addVersionInfo(XMLMemento mementoRoot, IInternalContest contest) {
         VersionInfo versionInfo = new VersionInfo();
         IMemento memento = mementoRoot.createChild(VERSION_TAG);
         memento.putString("pc2build", versionInfo.getBuildNumber());
@@ -224,7 +245,7 @@ public class ContestXML {
         return 0;
     }
 
-    private IMemento addBalloonColorMemento(IMemento mementoRoot, IInternalContest contest, int siteNumber) {
+    public IMemento addBalloonColorMemento(IMemento mementoRoot, IInternalContest contest, int siteNumber) {
 
         BalloonSettings balloonSettings = contest.getBalloonSettings(siteNumber);
 

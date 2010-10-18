@@ -65,7 +65,11 @@ public class StandingsReport implements IReport {
         printWriter.println();
         DefaultScoringAlgorithm defaultScoringAlgorithm = new DefaultScoringAlgorithm();
         String xmlString = defaultScoringAlgorithm.getStandings(contest, new Properties(), controller.getLog());
+        printWriter.println("-- Start XML --");
         printWriter.println(xmlString);
+        printWriter.println();
+        printWriter.println("-- End XML --");
+        
         printWriter.println();
         formatXML(printWriter, xmlString);
         printWriter.println();
@@ -196,5 +200,4 @@ public class StandingsReport implements IReport {
     public void setFilter(Filter filter) {
         this.filter = filter;
     }
-
 }

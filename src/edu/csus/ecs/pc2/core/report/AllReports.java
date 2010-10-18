@@ -3,10 +3,13 @@ package edu.csus.ecs.pc2.core.report;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
+import java.util.Vector;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.list.ReportNameByComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -34,36 +37,79 @@ public class AllReports implements IReport {
     
     private Filter filter;
     
+    public IReport [] getAllReports(){
+        Vector <IReport> reports = new Vector <IReport> ();
+        
+        reports.add(new AccountsReport());
+        reports.add(new BalloonSummaryReport());
+
+//        reports.add(new AllReports());
+        reports.add(new ContestSettingsReport());
+        reports.add(new ContestReport());
+
+        reports.add(new ContestAnalysisReport());
+        reports.add(new SolutionsByProblemReport());
+        reports.add(new ListRunLanguages());
+        
+        reports.add(new FastestSolvedSummaryReport());
+        reports.add(new FastestSolvedReport());
+
+        reports.add(new StandingsReport());
+        reports.add(new LoginReport());
+        reports.add(new ProfilesReport());
+        reports.add(new PluginsReport());
+        
+        reports.add(new RunsReport());
+        reports.add(new ClarificationsReport());
+        reports.add(new ProblemsReport());
+        reports.add(new LanguagesReport());
+
+        reports.add(new JudgementReport());
+        reports.add(new RunsByTeamReport());
+        reports.add(new BalloonSettingsReport());
+        reports.add(new ClientSettingsReport());
+        reports.add(new GroupsReport());
+
+        reports.add(new EvaluationReport());
+
+        reports.add(new OldRunsReport());
+        reports.add(new RunsReport5());
+
+        reports.add(new AccountPermissionReport());
+        reports.add(new BalloonDeliveryReport());
+        reports.add(new ExtractPlaybackLoadFilesReport());
+        
+        reports.add(new RunJudgementNotificationsReport());
+        reports.add(new JudgementNotificationsReport());
+        
+        reports.add(new ProfileCloneSettingsReport());
+        reports.add(new SitesReport());
+        
+        reports.add(new InternalDumpReport());
+        
+        reports.add(new HTMLReport());
+
+        IReport [] listOfReports = (IReport[]) reports.toArray(new IReport[reports.size()]);
+        Arrays.sort(listOfReports, new ReportNameByComparator());
+        return listOfReports;
+    }
+    
+    private IReport [] getXMLReports(){
+        Vector <IReport> reports = new Vector <IReport> ();
+        
+        reports.add(new ContestReport());
+        reports.add(new StandingsReport());
+
+        IReport [] listOfReports = (IReport[]) reports.toArray(new IReport[reports.size()]);
+        Arrays.sort(listOfReports, new ReportNameByComparator());
+        return listOfReports;
+    }
+    
     public void writeReport(PrintWriter printWriter) {
         
-        IReport[] listOfReports;
-        
-        listOfReports = new IReport[14];
-        int repNo = 0;
-        
-        listOfReports[repNo++] = new ContestAnalysisReport();
-        listOfReports[repNo++] = new SolutionsByProblemReport();
-        listOfReports[repNo++] = new ListRunLanguages();
-        listOfReports[repNo++] = new FastestSolvedReport();
-        
-        listOfReports[repNo++] = new RunsByTeamReport();
-        
-        listOfReports[repNo++] = new RunsReport();
-        
-        listOfReports[repNo++] = new ProblemsReport();
-        listOfReports[repNo++] = new LanguagesReport();
-        listOfReports[repNo++] = new AccountsReport();
-        
-        listOfReports[repNo++] = new ClarificationsReport();
-        listOfReports[repNo++] = new OldRunsReport();
-        
-        listOfReports[repNo++] = new ProfilesReport();
-        
-        listOfReports[repNo++] = new BalloonSummaryReport();
+        IReport [] reports = getAllReports();
 
-        listOfReports[repNo++] = new JudgementReport();
-
-        for (IReport report : listOfReports) {
+        for (IReport report : reports) {
             try {
 
                 if (report != null){
@@ -78,6 +124,33 @@ public class AllReports implements IReport {
                 e.printStackTrace(printWriter);
             }
         }
+        
+        reports = getXMLReports();
+
+        for (IReport report : reports) {
+            try {
+
+                if (report != null){
+                    report.setContestAndController(contest, controller);
+                    
+                    printWriter.println("**** " + report.getReportTitle()+" Report");
+                    printWriter.println();
+                    String xmlString = report.createReportXML(filter);
+                    
+                    printWriter.println("-- Start XML --");
+                    printWriter.println(xmlString);
+                    printWriter.println();
+                    printWriter.println("-- End XML --");
+                    printWriter.println();
+                }
+                
+            } catch (Exception e) {
+                printWriter.println("Exception in report: " + e.getMessage());
+                e.printStackTrace(printWriter);
+            }
+        }
+        
+        
     }
 
     public void printHeader(PrintWriter printWriter) {

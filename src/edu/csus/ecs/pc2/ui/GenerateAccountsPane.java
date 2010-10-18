@@ -23,6 +23,7 @@ import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.SiteEvent;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import java.awt.FlowLayout;
+import java.awt.event.KeyEvent;
 
 /**
  * Generate accounts pane.
@@ -173,7 +174,7 @@ public class GenerateAccountsPane extends JPanePlugin {
                 genAdminLabel.setText("Administrators (" + number + ")");
 
                 generateButton.setText("Generate Accounts for Site " + theSiteNumber);
-
+                generateButton.setMnemonic(KeyEvent.VK_G);
             }
         });
     }

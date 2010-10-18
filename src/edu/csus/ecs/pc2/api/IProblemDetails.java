@@ -26,7 +26,7 @@ public interface IProblemDetails {
 
     /**
      * A Contest Problem.
-     * @return
+     * @return the problem for these details.
      */
     IProblem getProblem();
 

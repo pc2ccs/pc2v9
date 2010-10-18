@@ -39,7 +39,10 @@ public class ContestReport implements IReport {
     public void writeReport(PrintWriter printWriter) throws IOException {
         ContestXML xmlContest = new ContestXML();
         String xmlString = xmlContest.toXML(contest, filter);
+        printWriter.println("-- Start XML --");
         printWriter.println(xmlString);
+        printWriter.println();
+        printWriter.println("-- End XML --");
     }
 
     public void printHeader(PrintWriter printWriter) {
@@ -96,7 +99,7 @@ public class ContestReport implements IReport {
     }
 
     public String getReportTitle() {
-        return "Contest";
+        return "Contest XML";
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
@@ -106,7 +109,7 @@ public class ContestReport implements IReport {
     }
 
     public String getPluginTitle() {
-        return "Contest Report";
+        return "Contest XML Report";
     }
 
     public Filter getFilter() {

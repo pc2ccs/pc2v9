@@ -25,6 +25,7 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.imports.ContestXML;
 import edu.csus.ecs.pc2.core.list.ReportNameByComparator;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -71,6 +72,8 @@ import edu.csus.ecs.pc2.core.report.RunsReport5;
 import edu.csus.ecs.pc2.core.report.SitesReport;
 import edu.csus.ecs.pc2.core.report.SolutionsByProblemReport;
 import edu.csus.ecs.pc2.core.report.StandingsReport;
+import edu.csus.ecs.pc2.core.util.IMemento;
+import edu.csus.ecs.pc2.core.util.XMLMemento;
 import edu.csus.ecs.pc2.plugin.ContestSummaryReports;
 import edu.csus.ecs.pc2.ui.EditFilterPane.ListNames;
 
@@ -349,7 +352,7 @@ public class ReportPane extends JPanePlugin {
         return viewReportButton;
     }
 
-    public String getFileName(IReport selectedReport) {
+    public String getFileName(IReport selectedReport, String extension) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM.dd.SSS");
         // "yyMMdd HHmmss.SSS");
         String reportName = selectedReport.getReportTitle();
@@ -357,7 +360,7 @@ public class ReportPane extends JPanePlugin {
         while (reportName.indexOf(' ') > -1){
             reportName = reportName.replace(" ", "_");
         }
-        return "report."+ reportName+ "." + simpleDateFormat.format(new Date()) + ".txt";
+        return "report."+ reportName+ "." + simpleDateFormat.format(new Date()) + "." + extension;
 
     }
 
@@ -469,7 +472,14 @@ public class ReportPane extends JPanePlugin {
                 }
             }
             
-            String filename = getFileName(selectedReport);
+            boolean writeXML = getXmlOutputCheckbox().isSelected();
+            
+            String extension = "txt";
+            if ( writeXML ) {
+                extension = "xml";
+            }
+            String filename = getFileName(selectedReport, extension);
+            
             File reportDirectoryFile = new File(getReportDirectory());
             if (reportDirectoryFile.exists()) {
                 if (reportDirectoryFile.isDirectory()) {
@@ -488,8 +498,9 @@ public class ReportPane extends JPanePlugin {
              * Using setFilter because createReportFile may not set the filter
              */
             
+            
             selectedReport.setFilter(filter);
-            if (getXmlOutputCheckbox().isSelected()){
+            if (writeXML){
                 createXMLFile(selectedReport, filename, filter);
             } else {
                 createReportFile(selectedReport, filename, filter);
@@ -498,12 +509,30 @@ public class ReportPane extends JPanePlugin {
             viewFile(filename, selectedReport.getReportTitle());
 
         } catch (Exception e) {
-            log.log(Log.WARNING, "Exception logged ", e);
-            showMessage("Unable to output report, check logs");
+            log.log(Log.WARNING, "Exception outputting a report ", e);
+            showMessage("Unable to output report, check logs "+e.getMessage());
     } finally {
         FrameUtilities.regularCursor(this);
     }
 
+    }
+    
+    public String notImplementedXML (IReport report) throws IOException{
+        
+        ContestXML contestXML = new ContestXML();
+        
+        XMLMemento mementoRoot = XMLMemento.createWriteRoot(ContestXML.CONTEST_TAG);
+
+        IMemento memento = mementoRoot.createChild("message");
+        memento.putString("name", "Not implemented");
+        memento.putString("reportName", report.getReportTitle());
+        
+        contestXML.addVersionInfo (mementoRoot, getContest());
+        
+        contestXML.addFileInfo (mementoRoot);
+        
+        return mementoRoot.saveToString();
+       
     }
     
     private void createXMLFile(IReport report, String filename, Filter inFilter) {
@@ -520,6 +549,14 @@ public class ReportPane extends JPanePlugin {
                 
                 String xmlString = report.createReportXML(inFilter);
                 printWriter.println(xmlString);
+
+            } catch (SecurityException e) {
+                if (e.getMessage().equals("Not implemented")) {
+                    printWriter.println(notImplementedXML(report));
+                } else {
+                    printWriter.println("Exception in report: " + e.getMessage());
+                    e.printStackTrace(printWriter);
+                }
                 
             } catch (Exception e) {
                 printWriter.println("Exception in report: " + e.getMessage());
@@ -558,8 +595,16 @@ public class ReportPane extends JPanePlugin {
                     selectedReport = report;
                 }
             }
-
-            String filename = getFileName(selectedReport);
+            
+            boolean writeXML = getXmlOutputCheckbox().isSelected();
+            
+            String extension = "txt";
+            if ( writeXML ) {
+                extension = "xml";
+            }
+            
+            String filename = getFileName(selectedReport, extension);
+            
             File reportDirectoryFile = new File(getReportDirectory());
             if (reportDirectoryFile.exists()) {
                 if (reportDirectoryFile.isDirectory()) {

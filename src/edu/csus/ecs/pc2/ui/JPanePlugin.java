@@ -89,7 +89,7 @@ public abstract class JPanePlugin extends JPanel implements UIPlugin {
         ReportPane reportPane = new ReportPane();
         reportPane.setContestAndController(contest, controller);
 
-        String filename = reportPane.getFileName(report);
+        String filename = reportPane.getFileName(report, "txt");
         
         File reportDirectoryFile = new File(reportPane.getReportDirectory());
         if (reportDirectoryFile.exists()) {
