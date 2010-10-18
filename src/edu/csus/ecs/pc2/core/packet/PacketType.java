@@ -696,7 +696,12 @@ public final class PacketType implements Serializable {
          * Return status of server, is it running profile supplied
          * in {@link Type#REQUEST_SERVER_STATUS}
          */
-        SERVER_STATUS
+        SERVER_STATUS,
+        /**
+         * Sent to servers to synchronize (re-login) to all other
+         * servers, the final step to switch profiles.
+         */
+        SWITCH_SYNCHRONIZE_PROFILE
     }
 
     /**

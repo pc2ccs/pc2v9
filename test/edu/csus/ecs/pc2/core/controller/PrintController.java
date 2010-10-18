@@ -628,4 +628,9 @@ public class PrintController implements IInternalController {
         e.printStackTrace();
         
     }
+
+    public void syncProfileSubmissions(Profile profile) {
+        System.out.println("method syncProfileSubmissions");
+        System.out.println("    profile                : " + profile);  
+    }
 }

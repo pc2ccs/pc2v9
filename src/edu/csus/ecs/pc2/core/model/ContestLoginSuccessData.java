@@ -20,7 +20,8 @@ public class ContestLoginSuccessData implements Serializable {
     private Account [] accounts;
     private BalloonSettings [] balloonSettingsArray;
     private Clarification[] clarifications;
-    private ClientId[] loggedInUsers;
+    private ClientId[] localLoggedInUsers;
+    private ClientId[] remoteLoggedInUsers;
     private ClientSettings[] clientSettings;
     private ConnectionHandlerID[] connectionHandlerIDs;
     private ContestTime[] contestTimes;
@@ -148,18 +149,7 @@ public class ContestLoginSuccessData implements Serializable {
     public void setLanguages(Language[] languages) {
         this.languages = languages;
     }
-    /**
-     * @return Returns the loggedInUsers.
-     */
-    public ClientId[] getLoggedInUsers() {
-        return loggedInUsers;
-    }
-    /**
-     * @param loggedInUsers The loggedInUsers to set.
-     */
-    public void setLoggedInUsers(ClientId[] loggedInUsers) {
-        this.loggedInUsers = loggedInUsers;
-    }
+
     /**
      * @return Returns the problemDataFiles.
      */
@@ -256,5 +246,18 @@ public class ContestLoginSuccessData implements Serializable {
     }
     public void setContestInformation(ContestInformation information2) {
         this.information = information2;
+    }
+    
+    public ClientId[] getLocalLoggedInUsers() {
+        return localLoggedInUsers;
+    }
+    public void setLocalLoggedInUsers(ClientId[] localLoggedInUsers) {
+        this.localLoggedInUsers = localLoggedInUsers;
+    }
+    public ClientId[] getRemoteLoggedInUsers() {
+        return remoteLoggedInUsers;
+    }
+    public void setRemoteLoggedInUsers(ClientId[] remoteLoggedInUsers) {
+        this.remoteLoggedInUsers = remoteLoggedInUsers;
     }
 }

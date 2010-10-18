@@ -81,4 +81,8 @@ public class SwitchProfileStatusFrame extends JFrame implements UIPlugin {
         getSwitchProfileStatusPane().setCurrentContestPassword(password);
     }
 
+    public void resetProfileStatusList() {
+        getSwitchProfileStatusPane().resetProfileStatusList();
+    }
+
 } // @jve:decl-index=0:visual-constraint="10,10"

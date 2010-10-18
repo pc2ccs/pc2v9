@@ -122,7 +122,12 @@ public final class PacketFactory {
     /**
      * Array of ClientIds of logged in users.
      */
-    public static final String LOGGED_IN_USERS = "LOGGED_IN_USERS";
+    public static final String LOCAL_LOGGED_IN_USERS = "LOCAL_LOGGED_IN_USERS";
+    
+    /**
+     * Array of ClientIds of logged in users.
+     */
+    public static final String REMOTE_LOGGED_IN_USERS = "REMOTE_LOGGED_IN_USERS";
 
     /**
      * Site Number
@@ -1102,7 +1107,8 @@ public final class PacketFactory {
         prop.put(SITE_LIST, data.getSites());
         prop.put(RUN_LIST, data.getRuns());
         prop.put(CLARIFICATION_LIST, data.getClarifications());
-        prop.put(LOGGED_IN_USERS, data.getLoggedInUsers());
+        prop.put(LOCAL_LOGGED_IN_USERS, data.getLocalLoggedInUsers());
+        prop.put(REMOTE_LOGGED_IN_USERS, data.getRemoteLoggedInUsers());
         prop.put(CONNECTION_HANDLE_ID_LIST, data.getConnectionHandlerIDs());
         prop.put(ACCOUNT_ARRAY, data.getAccounts());
         prop.put(PROBLEM_DATA_FILES, data.getProblemDataFiles());
@@ -2065,7 +2071,7 @@ public final class PacketFactory {
         return packet;
     }
     
-    public static Packet createRequestServerStatus(ClientId source, ClientId destination, Profile currentProfile) {
+    public static Packet createRequestServerStatusPacket(ClientId source, ClientId destination, Profile currentProfile) {
         Properties prop = new Properties();
         prop.put(CLIENT_ID, source);
         prop.put(PROFILE, currentProfile);
@@ -2074,7 +2080,7 @@ public final class PacketFactory {
         return packet;
     }
 
-    public static Packet createServerStatus(ClientId source, ClientId destination,Profile currentProfile, Status status, Site site ) {
+    public static Packet createServerStatusPacket(ClientId source, ClientId destination,Profile currentProfile, Status status, Site site ) {
         Properties prop = new Properties();
         prop.put(CLIENT_ID, source);
         prop.put(PROFILE, currentProfile);
@@ -2084,4 +2090,13 @@ public final class PacketFactory {
         return packet;
     }
 
+    public static Packet createSwitchSynchronizePacket(ClientId source, ClientId destination,Profile profile) {
+        Properties prop = new Properties();
+        prop.put(CLIENT_ID, source);
+        prop.put(PROFILE, profile);
+        Packet packet = new Packet(Type.SWITCH_SYNCHRONIZE_PROFILE, source, destination, prop);
+        return packet;
+    }
+
+    
 }

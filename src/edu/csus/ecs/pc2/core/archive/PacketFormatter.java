@@ -198,6 +198,21 @@ public final class PacketFormatter {
 
             return node;
         }
+        
+        if (object instanceof ClientId []){
+
+            ClientId [] clientIds = (ClientId []) object;
+            DefaultMutableTreeNode node = new DefaultMutableTreeNode("Client list: " + clientIds.length+" profiles");
+            DefaultMutableTreeNode child;
+            
+            for (ClientId clientId : clientIds){
+                
+                child = createTree(clientId);
+                node.add(child);
+            }
+
+            return node;
+        }
 
         if (object instanceof GregorianCalendar) {
 
@@ -207,6 +222,23 @@ public final class PacketFormatter {
             return node;
 
         }
+        
+        if (object instanceof ClientId){
+
+            DefaultMutableTreeNode child;
+
+            ClientId clientId = (ClientId) object;
+            DefaultMutableTreeNode node = new DefaultMutableTreeNode("Client Id: " + clientId.getClientType().toString() + " "+clientId.getClientNumber());
+            
+            child = new DefaultMutableTreeNode("  Triplet: " + clientId.getTripletKey());
+            node.add(child);
+            
+            child = new DefaultMutableTreeNode("     Site: " + clientId.getSiteNumber());
+            node.add(child);
+
+            return node;
+        }
+        
         if (object instanceof Language) {
 
             DefaultMutableTreeNode child;

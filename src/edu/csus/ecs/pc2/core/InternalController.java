@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.core;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.Serializable;
 import java.lang.management.ManagementFactory;
 import java.security.MessageDigest;
@@ -1194,8 +1195,35 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                      */
 
                     securityCheck(packet, connectionHandlerID);
+                    
+                    String remoteContestId = packet.getContestIdentifier();
+                    String localContestId = contest.getContestIdentifier();
+                    
+                    if (remoteContestId.equals(localContestId)) {
+                        processPacket(packet, connectionHandlerID);
+                    } else {
 
-                    processPacket(packet, connectionHandlerID);
+                        switch (packet.getType()) {
+                            case REQUEST_SERVER_STATUS:
+                            case SERVER_STATUS:
+                                processPacket(packet, connectionHandlerID);
+                                break;
+
+                            default:
+                                /**
+                                 * Non-matching contest Ids - do not process packet
+                                 */
+                                
+                                // FIXME remove show message dialog
+                                JOptionPane.showMessageDialog(null, "Contest Ids do not match for packet # " + packet.getPacketNumber() + "\n" + packet);
+                                
+                                logWarning("Packet contestId does not match for "+packet+" local:"+localContestId+" remote:"+remoteContestId);
+                                
+                                processPacket(packet, connectionHandlerID);
+                                break;
+                        }
+                    }
+
                 } else {
                     // Security Failure??
 
@@ -3196,8 +3224,41 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         return false;
     }
 
+    public void logWarning(String string) {
+        log.log(Log.WARNING, string);
+        System.err.println("Warning: "+string);
+        }
+    
     public void logWarning(String string, Exception e) {
         log.log(Log.WARNING, string, e);
+        System.err.println("Warning: "+string);
+        printStackTraceTop(e, System.err, 5);
+    }
+    
+    public void logSevere(String string, Exception e) {
+        log.log(Log.SEVERE, string, e);
+        System.err.println("Severe Error: "+string);
+        printStackTraceTop(e, System.err, 5);
+    }
+
+    private void printStackTraceTop(Throwable throwable, PrintStream printStream, int count) {
+
+        printStream.println("Exception " + throwable.getClass().getName() + ": " + throwable.getMessage());
+
+        StackTraceElement[] elements = throwable.getStackTrace();
+        for (int i = 0; i < count; i++) {
+            StackTraceElement stackTraceElement = elements[i];
+            String sourceName = "(Unknown Source)";
+            if (stackTraceElement.getFileName() != null) {
+                sourceName = "(" + stackTraceElement.getFileName() + ":" + stackTraceElement.getLineNumber() + ")";
+            }
+            printStream.println("     at " + stackTraceElement.getClassName() + "." + stackTraceElement.getMethodName() + " " + sourceName);
+        }
+    }
+
+    public void syncProfileSubmissions(Profile profile) {
+        Packet packet = PacketFactory.createSwitchSynchronizePacket(contest.getClientId(), getServerClientId(), profile);
+        sendToLocalServer(packet);
     }
 
 }

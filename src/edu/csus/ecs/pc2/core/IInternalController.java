@@ -547,4 +547,6 @@ public interface IInternalController {
      * @param e
      */
     void logWarning(String string, Exception e);
+
+    void syncProfileSubmissions(Profile profile);
 }

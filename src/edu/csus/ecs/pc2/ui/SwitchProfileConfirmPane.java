@@ -206,20 +206,16 @@ public class SwitchProfileConfirmPane extends JPanePlugin {
 
         String password = new String(getContestPasswordTextField().getPassword());
 
-        if (getContest().getSites().length == 1) {
-            // Only one site - switch it now.
-            getController().switchProfile(getContest().getProfile(), profile, password);
-            closeWindow();
-        } else {
-            getStatusFrame().setProfile(profile);
-            getStatusFrame().setNewContestPassword(password);
-            getStatusFrame().setCurrentContestPassword(getContest().getContestPassword());
+        getStatusFrame().setProfile(profile);
+        //            getStatusFrame().setProfile(getContest().getProfile()); // FIXME test code remove this 
+        getStatusFrame().setNewContestPassword(password);
+        getStatusFrame().setCurrentContestPassword(getContest().getContestPassword());
+        getStatusFrame().resetProfileStatusList();
 
-            // getController().switchProfile(getContest().getProfile(), profile, password);
+        // getController().switchProfile(getContest().getProfile(), profile, password);
 
-            closeWindow();
-            statusFrame.setVisible(true);
-        }
+        closeWindow();
+        getStatusFrame().setVisible(true);
 
     }
     

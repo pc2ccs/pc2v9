@@ -26,8 +26,11 @@ import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.ILoginListener;
+import edu.csus.ecs.pc2.core.model.IMessageListener;
 import edu.csus.ecs.pc2.core.model.ISiteListener;
 import edu.csus.ecs.pc2.core.model.LoginEvent;
+import edu.csus.ecs.pc2.core.model.MessageEvent;
+import edu.csus.ecs.pc2.core.model.MessageEvent.Area;
 import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.model.ProfileChangeStatus;
 import edu.csus.ecs.pc2.core.model.ProfileChangeStatus.Status;
@@ -37,7 +40,8 @@ import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.packet.PacketFactory;
 
 /**
- * 
+ * Pane that allows user to get profile status and switch profile.
+ *  
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -64,7 +68,7 @@ public class SwitchProfileStatusPane extends JPanePlugin {
 
     private JButton cancelButton = null;
 
-    private Profile profile;
+    private Profile targetProfile;  //  @jve:decl-index=0:
 
     private String newContestPassword; // @jve:decl-index=0:
 
@@ -97,20 +101,18 @@ public class SwitchProfileStatusPane extends JPanePlugin {
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
 
-        profileStatusList = new ProfileChangeStatusList();
-        for (Site site : inContest.getSites()) {
-            profileStatusList.add(new ProfileChangeStatus(site));
-        }
+        resetProfileStatusList();
 
         currentContestPassword = inContest.getContestPassword();
 
         Site thisSite = getContest().getSite(getContest().getSiteNumber());
         updateCurrentSiteStatus(profileStatusList.get(thisSite));
         
-        reloadListBox();
+   
 
         getContest().addSiteListener(new SiteListenerImplementation());
         getContest().addLoginListener(new LoginListenerImplementation());
+        getContest().addMessageListener(new MessageListenerImplementation());
     }
 
     private void reloadListBox() {
@@ -120,7 +122,11 @@ public class SwitchProfileStatusPane extends JPanePlugin {
 
         for (ProfileChangeStatus status : list) {
             updateRow(status);
+            
+            System.err.println("debug22 - reloadListBox "+status);
+
         }
+        
     }
 
     public void updateRow(final ProfileChangeStatus status) {
@@ -147,6 +153,7 @@ public class SwitchProfileStatusPane extends JPanePlugin {
             siteListBox.replaceRow(objects, row);
         }
         siteListBox.autoSizeAllColumns();
+        enableGoButton();
     }
 
     @Override
@@ -170,6 +177,33 @@ public class SwitchProfileStatusPane extends JPanePlugin {
             buttonPanel.add(getCancelButton(), null);
         }
         return buttonPanel;
+    }
+    
+    /**
+     * If all sites are ready and connected enable switchNowButton button.
+     * 
+     */
+    private void enableGoButton (){
+        int numberReady = 0;
+        int numberConnected = 0;
+
+        for (ProfileChangeStatus status : profileStatusList.getList()) {
+            
+            if (isLocalLoggedIn(status.getSiteNumber()) || isThisSite(status.getSiteNumber())){
+                numberConnected ++;
+                if (status.getStatus().equals(Status.READY)){ 
+                    numberReady ++;
+                }
+            }
+        }
+        
+        System.err.println("debug22 - enableGo "+numberConnected+ " vs. "+numberReady);
+        
+        getSwitchNowButton().setEnabled(numberReady == numberConnected);
+    }
+
+    private boolean isThisSite(int siteNumber) {
+        return siteNumber == getContest().getSiteNumber();
     }
 
     /**
@@ -307,7 +341,7 @@ public class SwitchProfileStatusPane extends JPanePlugin {
 
         try {
             ClientId serverId = new ClientId(site.getSiteNumber(), Type.SERVER, 0);
-            if (site.getSiteNumber() == getContest().getSiteNumber()){
+            if (isThisSite(site.getSiteNumber())){
                 obj[5] = "N/A";
                 obj[6] = "";
             } else if (getContest().isLocalLoggedIn(serverId)) {
@@ -328,7 +362,7 @@ public class SwitchProfileStatusPane extends JPanePlugin {
     }
 
     public void setProfile(Profile profile) {
-        this.profile = profile;
+        this.targetProfile = profile;
 
     }
 
@@ -343,15 +377,19 @@ public class SwitchProfileStatusPane extends JPanePlugin {
     protected void startProfileServerSync() {
 
         // Send out a switch profile for now.
-
-        getController().switchProfile(getContest().getProfile(), profile, newContestPassword);
+        getController().switchProfile(getContest().getProfile(), targetProfile, newContestPassword);
+        
+        // huh
+        
+        getController().syncProfileSubmissions (targetProfile);
+        
         closeWindow();
     }
 
     protected void revertToPreviousProfile() {
 
-        // FIXME code revert, this should be fun.
-        JOptionPane.showMessageDialog(this, "Would have reverted to profile " + "xx" + " with pass " + currentContestPassword);
+        // FIXME code revert profile, this should be fun.
+        JOptionPane.showMessageDialog(this, "Would have reverted to profile " + getContest().getProfile() + " with contest pass = " + getContest().getContestPassword());
         
         closeWindow();
     }
@@ -364,19 +402,33 @@ public class SwitchProfileStatusPane extends JPanePlugin {
             JOptionPane.showMessageDialog(this, "Select a site", "Must select a site to request", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
-
+        
+        if (selectedSites.length == 1){
+            ProfileChangeStatus profileStatus = (ProfileChangeStatus) siteListBox.getKeys()[selectedSites[0]];
+            
+            if (isThisSite(profileStatus.getSiteNumber())){
+                updateCurrentSiteStatus (profileStatus);
+                reloadListBox();
+                return;
+            }
+            
+            if (! isLocalLoggedIn (profileStatus.getSiteNumber())){
+                JOptionPane.showMessageDialog(this, "Site " + profileStatus.getSiteNumber() + " not available/logged in", "Can not refresh", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+        }
+        
         for (int i : selectedSites) {
             
             ProfileChangeStatus profileStatus = (ProfileChangeStatus) siteListBox.getKeys()[i];
 
-            if (profileStatus.getSiteNumber() == getContest().getSiteNumber()){
-                
+            if (isThisSite(profileStatus.getSiteNumber())){
                 updateCurrentSiteStatus (profileStatus);
                 reloadListBox();
             } else {
                 try {
                     ClientId remoteServerId = new ClientId(profileStatus.getSiteNumber(), ClientType.Type.SERVER, 0);
-                    Packet packet = PacketFactory.createRequestServerStatus(getContest().getClientId(), remoteServerId, profile);
+                    Packet packet = PacketFactory.createRequestServerStatusPacket(getContest().getClientId(), remoteServerId, targetProfile);
                     getController().sendToLocalServer(packet);
                 } catch (Exception e) {
                     getController().getLog().log(Level.WARNING, "Unable to send request status packet to server " + i, e);
@@ -386,15 +438,17 @@ public class SwitchProfileStatusPane extends JPanePlugin {
         }
     }
 
+    private boolean isLocalLoggedIn(int siteNumber) {
+        ClientId serverId = new ClientId(siteNumber, Type.SERVER, 0);
+        return getContest().isLocalLoggedIn(serverId);
+    }
+
     private void updateCurrentSiteStatus(ProfileChangeStatus profileStatus) {
         profileStatus.setStatus(Status.NOTREADY);
-        if (getContest().getProfile().equals(profile)){
+        if (getContest().getProfile().equals(targetProfile)){
             profileStatus.setStatus(Status.READY);
         }
         profileStatus.setProfile(getContest().getProfile());
-        profileStatusList.updateStatus(profileStatus, profileStatus.getStatus());
-
-        
     }
 
     /**
@@ -412,6 +466,8 @@ public class SwitchProfileStatusPane extends JPanePlugin {
             profileChangeStatus.setStatus(event.getProfileStatus());
             profileChangeStatus.setProfile(event.getProfile());
             profileStatusList.update(profileChangeStatus);
+            
+            System.err.println("debug22 - siteProfileStatusChanged "+profileChangeStatus);
             
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
@@ -471,6 +527,18 @@ public class SwitchProfileStatusPane extends JPanePlugin {
         
     }
     
+    public void resetProfileStatusList() {
+        profileStatusList = new ProfileChangeStatusList(); 
+        for (Site site : getContest().getSites()) {
+            profileStatusList.add(new ProfileChangeStatus(site));
+        }
+        
+        Site site = getContest().getSite(getContest().getSiteNumber());
+        updateCurrentSiteStatus(profileStatusList.get(site));
+        
+        reloadListBox();
+    }
+    
     /**
      * Login Listener for use by ServerView.
      * 
@@ -510,5 +578,26 @@ public class SwitchProfileStatusPane extends JPanePlugin {
         }
     }
 
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    
+    // $HeadURL$
+    class MessageListenerImplementation implements IMessageListener{
+
+        public void messageAdded(MessageEvent event) {
+            if (event.getArea().equals(Area.PROFILES)){
+                JOptionPane.showMessageDialog(null, event.getMessage(),"Switch Profile Message", JOptionPane.INFORMATION_MESSAGE);
+            }
+            getController().getLog().warning(event.getMessage());
+        }
+
+        public void messageRemoved(MessageEvent event) {
+            // TODO Auto-generated method stub
+            
+        }
+    }
     
 } // @jve:decl-index=0:visual-constraint="10,10"

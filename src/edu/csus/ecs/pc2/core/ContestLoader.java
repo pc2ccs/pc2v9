@@ -345,31 +345,65 @@ public class ContestLoader {
     public void addLoginsToModel(IInternalContest contest, IInternalController controller, Packet packet) {
 
         try {
-            ClientId[] clientIds = (ClientId[]) PacketFactory.getObjectValue(packet, PacketFactory.LOGGED_IN_USERS);
+            ClientId[] clientIds = (ClientId[]) PacketFactory.getObjectValue(packet, PacketFactory.REMOTE_LOGGED_IN_USERS);
             if (clientIds != null) {
                 for (ClientId clientId : clientIds) {
-                    if (isServer(contest)) {
-                        // Is a server, only add remote logins
+                    
+                    try {
+                        if (isServer(contest)) {
+                            // Is a server, only add remote logins
 
-                        if (!contest.isLocalLoggedIn(clientId) && !isThisSite(contest, clientId)) {
-                            // Only add into remote list on server, if they are not already logged in
+                            if (!contest.isLocalLoggedIn(clientId) && !isThisSite(contest, clientId)) {
+                                // Only add into remote list on server, if they are not already logged in
+                                // TODO someday soon load logins with their connectionIds
+                                ConnectionHandlerID fakeId = new ConnectionHandlerID("FauxSite" + clientId.getSiteNumber() + clientId);
+
+                                contest.addRemoteLogin(clientId, fakeId);
+                            }
+
+                        } else {
+                            // Not a server InternalController - add everything
+
                             // TODO someday soon load logins with their connectionIds
                             ConnectionHandlerID fakeId = new ConnectionHandlerID("FauxSite" + clientId.getSiteNumber() + clientId);
-
                             contest.addRemoteLogin(clientId, fakeId);
                         }
+                    } catch (Exception e) {
+                        controller.logWarning("Exception in adding login to model ", e);
+                    }
+                }
+            }
+            
+            clientIds = (ClientId[]) PacketFactory.getObjectValue(packet, PacketFactory.LOCAL_LOGGED_IN_USERS);
+            if (clientIds != null) {
+                for (ClientId clientId : clientIds) {
+                    
+                    try {
+                        if (isServer(contest)) {
+                            // Is a server, only add remote logins
 
-                    } else {
-                        // Not a server InternalController - add everything
+                            if (!contest.isLocalLoggedIn(clientId) && !isThisSite(contest, clientId)) {
+                                // Only add into remote list on server, if they are not already logged in
+                                // TODO someday soon load logins with their connectionIds
+                                ConnectionHandlerID fakeId = new ConnectionHandlerID("FauxSite" + clientId.getSiteNumber() + clientId);
 
-                        // TODO someday soon load logins with their connectionIds
-                        ConnectionHandlerID fakeId = new ConnectionHandlerID("FauxSite" + clientId.getSiteNumber() + clientId);
-                        contest.addRemoteLogin(clientId, fakeId);
+                                contest.addRemoteLogin(clientId, fakeId);
+                            }
+
+                        } else {
+                            // Not a server InternalController - add everything
+
+                            // TODO someday soon load logins with their connectionIds
+                            ConnectionHandlerID fakeId = new ConnectionHandlerID("FauxSite" + clientId.getSiteNumber() + clientId);
+                            contest.addLocalLogin(clientId, fakeId);
+                        }
+                    } catch (Exception e) {
+                        controller.logWarning("Exception in adding login to model ", e);
                     }
                 }
             }
         } catch (Exception e) {
-            controller.logWarning("Exception logged ", e);
+            controller.logWarning("Exception in adding logins to model ", e);
         }
 
     }
@@ -560,32 +594,61 @@ public class ContestLoader {
 
         try {
 
-            ClientId[] clientIds = (ClientId[]) PacketFactory.getObjectValue(packet, PacketFactory.LOGGED_IN_USERS);
+            ClientId[] clientIds = (ClientId[]) PacketFactory.getObjectValue(packet, PacketFactory.LOCAL_LOGGED_IN_USERS);
             if (clientIds != null) {
                 for (ClientId clientId : clientIds) {
-                    if (isServer(clientId)) {
+                    try {
+                        if (isServer(clientId)) {
+                            if (!contest.isLocalLoggedIn(clientId)) {
 
-                        if (!contest.isLocalLoggedIn(clientId)) {
+                                if (!isThisSite(contest, clientId)) {
 
-                            if (!isThisSite(contest, clientId)) {
+                                    // Only add into remote list on server, if they are not already logged in
 
-                                // Only add into remote list on server, if they are not already logged in
-
-                                // TODO someday soon load logins with their connectionIds
-                                ConnectionHandlerID fakeId = new ConnectionHandlerID("FauxSite" + clientId.getSiteNumber() + clientId);
-
-                                contest.addRemoteLogin(clientId, fakeId);
+                                    // TODO someday soon load logins with their connectionIds
+                                    ConnectionHandlerID fakeId = new ConnectionHandlerID("FauxSite" + clientId.getSiteNumber() + clientId);
+                                    contest.addRemoteLogin(clientId, fakeId);
+                                }
                             }
+                        } else if (remoteSiteNumber == clientId.getSiteNumber()) {
+                            // TODO someday soon load logins with their connectionIds
+                            ConnectionHandlerID fakeId = new ConnectionHandlerID("FauxSite" + clientId.getSiteNumber() + "-" + clientId);
+                            contest.addLocalLogin(clientId, fakeId);
                         }
-                    } else if (remoteSiteNumber == clientId.getSiteNumber()) {
-                        // TODO someday soon load logins with their connectionIds
-                        ConnectionHandlerID fakeId = new ConnectionHandlerID("FauxSite" + clientId.getSiteNumber() + "-" + clientId);
-                        contest.addRemoteLogin(clientId, fakeId);
+                    } catch (Exception e) {
+                        controller.logWarning("Exception while adding remote login ", e);
+                    }
+                }
+            }
+            
+            clientIds = (ClientId[]) PacketFactory.getObjectValue(packet, PacketFactory.REMOTE_LOGGED_IN_USERS);
+            if (clientIds != null) {
+                for (ClientId clientId : clientIds) {
+                    try {
+                        if (isServer(clientId)) {
+                            if (!contest.isLocalLoggedIn(clientId)) {
+
+                                if (!isThisSite(contest, clientId)) {
+
+                                    // Only add into remote list on server, if they are not already logged in
+
+                                    // TODO someday soon load logins with their connectionIds
+                                    ConnectionHandlerID fakeId = new ConnectionHandlerID("FauxSite" + clientId.getSiteNumber() + clientId);
+                                    contest.addRemoteLogin(clientId, fakeId);
+                                }
+                            }
+                        } else if (remoteSiteNumber == clientId.getSiteNumber()) {
+                            // TODO someday soon load logins with their connectionIds
+                            ConnectionHandlerID fakeId = new ConnectionHandlerID("FauxSite" + clientId.getSiteNumber() + "-" + clientId);
+                            contest.addRemoteLogin(clientId, fakeId);
+                        }
+                    } catch (Exception e) {
+                        controller.logWarning("Exception while adding remote login ", e);
                     }
                 }
             }
         } catch (Exception e) {
-            controller.logWarning("Exception logged ", e);
+            controller.logWarning("Exception while adding remote logins ", e);
         }
     }
 

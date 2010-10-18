@@ -385,6 +385,10 @@ public class PacketHandler {
             case SERVER_STATUS:
                 handleServerStatus(packet, connectionHandlerID);
                 break;
+                
+            case SWITCH_SYNCHRONIZE_PROFILE:
+                handleSynchronizeProfile (packet, connectionHandlerID);
+                break;
 
             default:
                 Exception exception = new Exception("PacketHandler.handlePacket Unhandled packet " + packet);
@@ -393,6 +397,23 @@ public class PacketHandler {
         }
 
         info("handlePacket end " + packet);
+    }
+
+    private void handleSynchronizeProfile(Packet packet, ConnectionHandlerID connectionHandlerID) {
+
+        if (isThisSite(packet.getSourceId())) {
+
+            Packet clonePacket = PacketFactory.clonePacket(getServerClientId(), PacketFactory.ALL_SERVERS, packet);
+            controller.sendToServers(clonePacket);
+
+        }
+
+        /**
+         * As a sever request contest info
+         */
+        
+        Packet requestInfoPacket = PacketFactory.createFetchContestInfoPacket(getServerClientId(), PacketFactory.ALL_SERVERS);
+        controller.sendToServers(requestInfoPacket);
     }
 
     private void handleRunSubmissionConfirmationServer(Packet packet, ClientId fromId) throws IOException, ClassNotFoundException, FileSecurityException  {
@@ -1854,11 +1875,11 @@ public class PacketHandler {
         if (isServer()) {
 
             if (clientToLogoffId != null) {
-                if (contest.isRemoteLoggedIn(clientToLogoffId)) {
-                    // send logoff to other site
-                    controller.sendToRemoteServer(clientToLogoffId.getSiteNumber(), packet);
-                } else {
+                if (contest.isLocalLoggedIn(clientToLogoffId)) {
                     controller.removeConnection(connectionHandlerID);
+                } else if (! isServer(clientToLogoffId)) {
+                    // send client logoff to other site
+                    controller.sendToRemoteServer(clientToLogoffId.getSiteNumber(), packet);
                 }
 
             } else if (connectionHandlerID != null) {
@@ -3343,15 +3364,37 @@ public class PacketHandler {
      * 
      * @return array of clientId's.
      */
-    private ClientId[] getAllLoggedInUsers() {
+    private ClientId[] getAllRemoteLoggedInUsers() {
 
         Vector<ClientId> clientList = new Vector<ClientId>();
 
-        dumpServerLoginLists("getAllLoggedInUsers");
+        for (ClientType.Type ctype : ClientType.Type.values()) {
+
+            ClientId[] users = contest.getRemoteLoggedInClients(ctype);
+            for (ClientId clientId : users) {
+                clientList.addElement(clientId);
+            }
+        }
+        if (clientList.size() == 0) {
+            return new ClientId[0];
+        } else {
+            ClientId[] clients = (ClientId[]) clientList.toArray(new ClientId[clientList.size()]);
+            return clients;
+        }
+    }
+
+    /**
+     * Return an array of all logged in users.
+     * 
+     * @return array of clientId's.
+     */
+    private ClientId[] getAllLocalLoggedInUsers() {
+
+        Vector<ClientId> clientList = new Vector<ClientId>();
 
         for (ClientType.Type ctype : ClientType.Type.values()) {
 
-            ClientId[] users = contest.getAllLoggedInClients(ctype);
+            ClientId[] users = contest.getLocalLoggedInClients(ctype);
             for (ClientId clientId : users) {
                 clientList.addElement(clientId);
             }
@@ -3428,7 +3471,8 @@ public class PacketHandler {
         contestLoginSuccessData.setGroups(inContest.getGroups());
         contestLoginSuccessData.setJudgements(inContest.getJudgements());
         contestLoginSuccessData.setLanguages(inContest.getLanguages());
-        contestLoginSuccessData.setLoggedInUsers(getAllLoggedInUsers());
+        contestLoginSuccessData.setRemoteLoggedInUsers(getAllRemoteLoggedInUsers());
+        contestLoginSuccessData.setLocalLoggedInUsers(getAllLocalLoggedInUsers());
         contestLoginSuccessData.setProblemDataFiles(problemDataFiles);
         contestLoginSuccessData.setProblems(inContest.getProblems());
         contestLoginSuccessData.setRuns(runs);
@@ -3507,7 +3551,7 @@ public class PacketHandler {
             
             remoteServerId = new ClientId(packet.getSourceId().getSiteNumber(), ClientType.Type.SERVER, 0);
             Site site = contest.getSite(contest.getSiteNumber());
-            Packet statusPacket = PacketFactory.createServerStatus(getServerClientId(), remoteServerId, contest.getProfile(), status, site);
+            Packet statusPacket = PacketFactory.createServerStatusPacket(getServerClientId(), remoteServerId, contest.getProfile(), status, site);
             controller.sendToClient(statusPacket);
         } else {
             /**
