@@ -32,6 +32,7 @@ import edu.csus.ecs.pc2.core.model.MessageEvent.Area;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Profile;
+import edu.csus.ecs.pc2.core.model.ProfileChangeStatus.Status;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunExecutionStatus;
 import edu.csus.ecs.pc2.core.model.RunFiles;
@@ -329,6 +330,8 @@ public final class PacketFactory {
     public static final String RUN_ID = "RUN_ID";
 
     public static final String RUN_FILES_LIST = "RUN_FILES_LIST";
+
+    public static final String PROFILE_STATUS = "PROFILE_STATUS";
     
 
     /**
@@ -2059,6 +2062,25 @@ public final class PacketFactory {
         prop.put(CLIENT_ID, source);
         prop.put(RUN_FILES_LIST, files);
         Packet packet = new Packet(Type.UPDATE_RUN_FILES, source, destination, prop);
+        return packet;
+    }
+    
+    public static Packet createRequestServerStatus(ClientId source, ClientId destination, Profile currentProfile) {
+        Properties prop = new Properties();
+        prop.put(CLIENT_ID, source);
+        prop.put(PROFILE, currentProfile);
+        prop.put(SITE_NUMBER, new Integer(destination.getSiteNumber()));
+        Packet packet = new Packet(Type.REQUEST_SERVER_STATUS, source, destination, prop);
+        return packet;
+    }
+
+    public static Packet createServerStatus(ClientId source, ClientId destination,Profile currentProfile, Status status, Site site ) {
+        Properties prop = new Properties();
+        prop.put(CLIENT_ID, source);
+        prop.put(PROFILE, currentProfile);
+        prop.put(SITE, site);
+        prop.put(PROFILE_STATUS, status);
+        Packet packet = new Packet(Type.SERVER_STATUS, source, destination, prop);
         return packet;
     }
 

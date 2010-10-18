@@ -9,7 +9,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Profile;
 
 /**
- * Frame for Profile Save.
+ * Frame for Profile Status Pane aka SwitchProfileStatusPane.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$

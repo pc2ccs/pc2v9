@@ -12,6 +12,7 @@ import edu.csus.ecs.pc2.core.exception.RunUnavailableException;
 import edu.csus.ecs.pc2.core.exception.UnableToUncheckoutRunException;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.ProfileChangeStatus.Status;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.security.ISecurityMessageListener;
 import edu.csus.ecs.pc2.core.security.Permission;
@@ -80,6 +81,15 @@ public interface IInternalContest {
     void connectionDropped(ConnectionHandlerID connectionHandlerID);
 
     void updateSite(Site site);
+    
+    /**
+     * Update whether Site is running a particular profile or not.
+     * 
+     * @param site
+     * @param inProfile
+     * @param status 
+     */
+    void updateSiteStatus(Site site, Profile inProfile, Status status);
 
     void updateLanguage(Language language);
 

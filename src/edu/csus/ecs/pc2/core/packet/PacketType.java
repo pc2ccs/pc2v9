@@ -685,7 +685,18 @@ public final class PacketType implements Serializable {
          * Fetch contest info as if one had just logged in,
          * used in switching profiles.
          */
-        FETCH_CONTEST_INFO
+        FETCH_CONTEST_INFO,
+        /**
+         * Request profile status for server.
+         * 
+         *  Is the server running the profile specified?
+         */
+        REQUEST_SERVER_STATUS,
+        /**
+         * Return status of server, is it running profile supplied
+         * in {@link Type#REQUEST_SERVER_STATUS}
+         */
+        SERVER_STATUS
     }
 
     /**

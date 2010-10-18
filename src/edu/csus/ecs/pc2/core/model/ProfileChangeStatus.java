@@ -49,6 +49,8 @@ public class ProfileChangeStatus implements IElementObject, Serializable {
     private Status status = Status.NOTREADY;
 
     private boolean active = true;
+    
+    private Profile profile = null;
 
     private Date date = null;
 
@@ -109,5 +111,13 @@ public class ProfileChangeStatus implements IElementObject, Serializable {
     public void setStatus(Status status) {
         this.status = status;
         date = new Date();
+    }
+    
+    public void setProfile(Profile profile) {
+        this.profile = profile;
+    }
+    
+    public Profile getProfile() {
+        return profile;
     }
 }

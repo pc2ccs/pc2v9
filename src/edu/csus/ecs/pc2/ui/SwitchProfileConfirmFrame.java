@@ -9,7 +9,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Profile;
 
 /**
- * Frame for Profile Save.
+ * Frame to enter contest password for profile switch.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -41,7 +41,7 @@ public class SwitchProfileConfirmFrame extends JFrame implements UIPlugin {
     private void initialize() {
         this.setSize(new Dimension(387, 194));
         this.setTitle("Switch Profile");
-        this.setContentPane(getProfileSavePane());
+        this.setContentPane(getSwitchProfileConfirmPane());
 
         FrameUtilities.centerFrame(this);
 
@@ -52,7 +52,7 @@ public class SwitchProfileConfirmFrame extends JFrame implements UIPlugin {
      * 
      * @return edu.csus.ecs.pc2.ui.ProfileSavePane
      */
-    private SwitchProfileConfirmPane getProfileSavePane() {
+    private SwitchProfileConfirmPane getSwitchProfileConfirmPane () {
         if (switchProfileConfirmPane == null) {
             switchProfileConfirmPane = new SwitchProfileConfirmPane();
             switchProfileConfirmPane.setParentFrame(this);
@@ -61,16 +61,16 @@ public class SwitchProfileConfirmFrame extends JFrame implements UIPlugin {
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
-        getProfileSavePane().setContestAndController(inContest, inController);
+        getSwitchProfileConfirmPane().setContestAndController(inContest, inController);
     }
 
     public String getPluginTitle() {
-        return "SwitchProfileConfirmPane";
+        return "SwitchProfileConfirm Frame";
     }
 
     public void setProfile(Profile profile) {
         this.setTitle("Switch Profile to "+profile.getName()+" ("+profile.getDescription()+")");
-        getProfileSavePane().setProfile(profile);
+        getSwitchProfileConfirmPane().setProfile(profile);
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

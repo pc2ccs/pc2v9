@@ -41,6 +41,7 @@ import edu.csus.ecs.pc2.core.model.MessageEvent.Area;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Profile;
+import edu.csus.ecs.pc2.core.model.ProfileChangeStatus.Status;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunExecutionStatus;
 import edu.csus.ecs.pc2.core.model.RunFiles;
@@ -375,6 +376,14 @@ public class PacketHandler {
 
             case FETCH_CONTEST_INFO:
                 handleFetchContestInfo(packet, connectionHandlerID);
+                break;
+                
+            case REQUEST_SERVER_STATUS:
+                handleRequestServerStatus (packet, connectionHandlerID);
+                break;
+                
+            case SERVER_STATUS:
+                handleServerStatus(packet, connectionHandlerID);
                 break;
 
             default:
@@ -3454,6 +3463,60 @@ public class PacketHandler {
         Packet loginSuccessPacket = PacketFactory.createLoginSuccess(contest.getClientId(), clientId, contest.getContestTime(), contest.getSiteNumber(), contest.getContestInformation(), data);
 
         return loginSuccessPacket;
+    }
+    
+    /**
+     * Got a status from the other server.
+     * @param packet
+     * @param connectionHandlerID
+     */
+    private void handleServerStatus(Packet packet, ConnectionHandlerID connectionHandlerID) {
+        
+        Site site = (Site) PacketFactory.getObjectValue(packet, PacketFactory.SITE);
+        Profile inProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE);
+        Status status = (Status) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE_STATUS);
+        
+        contest.updateSiteStatus(site, inProfile, status);
+        System.out.println("debug 22 - handleServerStatus GOT  "+packet);
+        
+        if (isServer()){
+            System.out.println("debug 22 - handleServerStatus send packet to judges and others "+packet);
+            sendToJudgesAndOthers(packet, false);
+        }
+    }
+
+    /**
+     * Handle incoming request on a server.
+     * 
+     * @param packet
+     * @param connectionHandlerID
+     */
+    private void handleRequestServerStatus(Packet packet, ConnectionHandlerID connectionHandlerID) {
+        
+        int targetSiteNumber = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
+        ClientId remoteServerId = new ClientId(targetSiteNumber, ClientType.Type.SERVER, 0);
+        
+        if (isThisSite(targetSiteNumber)){
+
+            Profile expectedProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE);
+            
+            Status status = Status.NOTREADY;
+            if (contest.getProfile().equals(expectedProfile)){
+                status = Status.READY;
+            }
+            
+            remoteServerId = new ClientId(packet.getSourceId().getSiteNumber(), ClientType.Type.SERVER, 0);
+            Site site = contest.getSite(contest.getSiteNumber());
+            Packet statusPacket = PacketFactory.createServerStatus(getServerClientId(), remoteServerId, contest.getProfile(), status, site);
+            controller.sendToClient(statusPacket);
+        } else {
+            /**
+             * Send to target server.
+             */
+            Packet clonePacket = PacketFactory.clonePacket(getServerClientId(), remoteServerId, packet);
+            controller.sendToClient(clonePacket);
+        }
+
     }
 
     /**

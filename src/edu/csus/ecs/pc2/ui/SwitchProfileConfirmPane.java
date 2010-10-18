@@ -13,11 +13,12 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.SwingConstants;
 
+import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Profile;
 
 /**
- * Switch Profile Pane.
- * 
+ * Enter contest password for profile switch.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -47,7 +48,8 @@ public class SwitchProfileConfirmPane extends JPanePlugin {
 
     private Profile profile = null;
     
-    private SwitchProfileStatusFrame statusFrame = new SwitchProfileStatusFrame();
+    private SwitchProfileStatusFrame statusFrame = null;
+    
 
     /**
      * This method initializes
@@ -69,6 +71,13 @@ public class SwitchProfileConfirmPane extends JPanePlugin {
 
     }
 
+    @Override
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
+        // TODO Auto-generated method stub
+        super.setContestAndController(inContest, inController);
+        getStatusFrame().setContestAndController(inContest, inController);
+    }
+    
     @Override
     public String getPluginTitle() {
         // TODO Auto-generated method stub
@@ -202,9 +211,9 @@ public class SwitchProfileConfirmPane extends JPanePlugin {
             getController().switchProfile(getContest().getProfile(), profile, password);
             closeWindow();
         } else {
-            statusFrame.setProfile(profile);
-            statusFrame.setNewContestPassword(password);
-            statusFrame.setCurrentContestPassword(getContest().getContestPassword());
+            getStatusFrame().setProfile(profile);
+            getStatusFrame().setNewContestPassword(password);
+            getStatusFrame().setCurrentContestPassword(getContest().getContestPassword());
 
             // getController().switchProfile(getContest().getProfile(), profile, password);
 
@@ -225,4 +234,11 @@ public class SwitchProfileConfirmPane extends JPanePlugin {
         getContestPasswordTextField().requestFocus();
     }
 
+    public SwitchProfileStatusFrame getStatusFrame() {
+        if (statusFrame == null){
+            statusFrame = new SwitchProfileStatusFrame();
+        }
+        return statusFrame;
+    }
+    
 } // @jve:decl-index=0:visual-constraint="10,10"

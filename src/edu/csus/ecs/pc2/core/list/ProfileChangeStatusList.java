@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.core.list;
 
 import edu.csus.ecs.pc2.core.model.ProfileChangeStatus;
+import edu.csus.ecs.pc2.core.model.Site;
 
 /**
  * Maintain a list of {@#link ProfileChangeStatus}.
@@ -20,6 +21,10 @@ public class ProfileChangeStatusList extends ElementList {
     public void add(ProfileChangeStatus profileChangeStatus) {
         super.add(profileChangeStatus);
 
+    }
+    
+    public ProfileChangeStatus get(Site site) {
+        return (ProfileChangeStatus) super.get(site);
     }
 
     public ProfileChangeStatus[] getList() {

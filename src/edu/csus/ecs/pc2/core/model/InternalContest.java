@@ -40,6 +40,7 @@ import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.PasswordChangeEvent.Action;
+import edu.csus.ecs.pc2.core.model.ProfileChangeStatus.Status;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.security.FileSecurity;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
@@ -608,6 +609,10 @@ public class InternalContest implements IInternalContest {
         fireSiteListener(siteEvent);
     }
     
+    public void updateSiteStatus(Site site, Profile inProfile, Status status) {
+        SiteEvent siteEvent = new SiteEvent(SiteEvent.Action.STATUS_CHANGE, site, inProfile, status);
+        fireSiteListener(siteEvent);
+    }
 
     public void addAccount(Account account) {
         accountList.add(account);
