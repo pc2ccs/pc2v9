@@ -46,7 +46,8 @@ public class SwitchProfileConfirmPane extends JPanePlugin {
     private JPasswordField contestPasswordTextField = null;
 
     private Profile profile = null;
-
+    
+    private SwitchProfileStatusFrame statusFrame = new SwitchProfileStatusFrame();
 
     /**
      * This method initializes
@@ -191,13 +192,26 @@ public class SwitchProfileConfirmPane extends JPanePlugin {
         }
         return contestPasswordTextField;
     }
-
+    
     protected void switchProfile() {
-        
+
         String password = new String(getContestPasswordTextField().getPassword());
-        getController().switchProfile(getContest().getProfile(), profile, password);        
-        closeWindow();
-        
+
+        if (getContest().getSites().length == 1) {
+            // Only one site - switch it now.
+            getController().switchProfile(getContest().getProfile(), profile, password);
+            closeWindow();
+        } else {
+            statusFrame.setProfile(profile);
+            statusFrame.setNewContestPassword(password);
+            statusFrame.setCurrentContestPassword(getContest().getContestPassword());
+
+            // getController().switchProfile(getContest().getProfile(), profile, password);
+
+            closeWindow();
+            statusFrame.setVisible(true);
+        }
+
     }
     
     
