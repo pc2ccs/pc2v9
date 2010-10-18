@@ -19,10 +19,12 @@ import com.ibm.webrunner.j2mclb.util.NumericStringComparator;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.list.ProfileChangeStatusList;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.ISiteListener;
 import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.model.ProfileChangeStatus;
 import edu.csus.ecs.pc2.core.model.ProfileChangeStatus.Status;
 import edu.csus.ecs.pc2.core.model.Site;
+import edu.csus.ecs.pc2.core.model.SiteEvent;
 
 /**
  * 
@@ -316,4 +318,75 @@ public class SwitchProfileStatusPane extends JPanePlugin {
 
     }
 
+    /**
+     * Listen for site profile changes.
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    
+    // $HeadURL$
+    protected class SiteListenerImplementation implements ISiteListener{
+
+        public void siteProfileStatusChanged(SiteEvent event) {
+            ProfileChangeStatus profileChangeStatus = (ProfileChangeStatus) statusList.get(event.getSite());
+            statusList.updateStatus(profileChangeStatus, event.getProfileStatus());
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                }
+            });
+        }
+        
+        public void siteAdded(SiteEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                }
+            });
+        }
+
+        public void siteRemoved(SiteEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                }
+            });
+            
+        }
+
+        public void siteChanged(SiteEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                }
+            });
+        }
+
+        public void siteLoggedOn(SiteEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                }
+            });
+        }
+
+        public void siteLoggedOff(SiteEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                }
+            });
+        }
+
+        public void sitesRefreshAll(SiteEvent siteEvent) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                }
+            });
+        }
+        
+    }
+    
 } // @jve:decl-index=0:visual-constraint="10,10"

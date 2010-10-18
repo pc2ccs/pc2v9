@@ -535,6 +535,10 @@ public class SitesPanel extends JPanePlugin {
      */
     public class SiteListenerImplementation implements ISiteListener {
 
+        public void siteProfileStatusChanged(SiteEvent event) {
+            // TODO this UI does not use a change in profile status 
+        }
+
         public void siteAdded(SiteEvent event) {
             StaticLog.unclassified("Site " + event.getAction() + " " + event.getSite());
             updateSiteList(event.getSite());

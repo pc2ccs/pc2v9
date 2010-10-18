@@ -247,6 +247,10 @@ public class ServerView extends JFrame implements UIPlugin {
      */
     public class SiteListenerImplementation implements ISiteListener {
 
+        public void siteProfileStatusChanged(SiteEvent event) {
+            // TODO this UI does not use a change in profile status 
+        }
+
         public void siteAdded(SiteEvent event) {
             logDebugMessage("Site Event Event " + event.getAction() + " " + event.getSite());
         }

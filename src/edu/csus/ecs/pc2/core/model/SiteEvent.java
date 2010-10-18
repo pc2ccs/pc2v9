@@ -1,5 +1,7 @@
 package edu.csus.ecs.pc2.core.model;
 
+import edu.csus.ecs.pc2.core.model.ProfileChangeStatus.Status;
+
 
 /**
  * A site event.
@@ -41,6 +43,10 @@ public class SiteEvent {
          */
         CHANGED, 
         /**
+         * 
+         */
+        STATUS_CHANGE,
+        /**
          * Reload/Refresh sites.
          */
         REFRESH_ALL,
@@ -49,11 +55,23 @@ public class SiteEvent {
     private Action action = Action.ADDED;
 
     private Site site;
+    
+    private Profile profile;
+    
+    private Status profileStatus = Status.UNDEFINED;
 
     public SiteEvent(Action action, Site site) {
         super();
         this.action = action;
         this.site = site;
+    }
+    
+    public SiteEvent(Action action, Site site, Profile profile, Status profileStatus) {
+        super();
+        this.action = action;
+        this.site = site;
+        this.profile = profile;
+        this.profileStatus = profileStatus;
     }
 
     public SiteEvent(Site site) {
@@ -76,5 +94,12 @@ public class SiteEvent {
     public void setSite(Site site) {
         this.site = site;
     }
+    
+    public Profile getProfile() {
+        return profile;
+    }
 
+    public Status getProfileStatus() {
+        return profileStatus;
+    }
 }

@@ -496,6 +496,8 @@ public class InternalContest implements IInternalContest {
                 siteListenerList.elementAt(i).siteLoggedOff(siteEvent);
             } else if (siteEvent.getAction() == SiteEvent.Action.REFRESH_ALL) {
                 siteListenerList.elementAt(i).sitesRefreshAll(siteEvent);
+            } else if (siteEvent.getAction() == SiteEvent.Action.STATUS_CHANGE) {
+                siteListenerList.elementAt(i).siteProfileStatusChanged(siteEvent);
             } else {
                 siteListenerList.elementAt(i).siteAdded(siteEvent);
             }

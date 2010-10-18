@@ -323,6 +323,10 @@ public class ContestTimesPane extends JPanePlugin {
      */
     public class SiteListenerImplementation implements ISiteListener {
 
+        public void siteProfileStatusChanged(SiteEvent event) {
+            // TODO this UI does not use a change in profile status 
+        }
+
         protected void updateSiteInfo(int siteNumber) {
             ContestTime contestTime = getContest().getContestTime(siteNumber);
             if (contestTime != null) {

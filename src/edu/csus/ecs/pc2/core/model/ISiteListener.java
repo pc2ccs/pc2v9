@@ -39,6 +39,13 @@ public interface ISiteListener {
      * @param event
      */
     void siteLoggedOff(SiteEvent event);
+    
+    /**
+     * Profile status for this site. 
+     * 
+     * @param event
+     */
+    void siteProfileStatusChanged (SiteEvent event);
 
     /**
      * Reload/refresh sites.

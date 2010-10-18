@@ -147,6 +147,10 @@ public class ServerModule implements UIPlugin {
      */
     public class SiteListenerImplementation implements ISiteListener {
 
+        public void siteProfileStatusChanged(SiteEvent event) {
+            // TODO this UI does not use a change in profile status 
+        }
+
         public void siteAdded(SiteEvent event) {
             logSiteInfo(event.getAction().toString(), event.getSite());
         }

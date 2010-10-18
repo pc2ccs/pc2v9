@@ -360,5 +360,9 @@ public class BalloonColorListPane extends JPanePlugin {
                 }
             });
         }
+
+        public void siteProfileStatusChanged(SiteEvent event) {
+            // TODO this UI does not use a change in profile status 
+        }
     }
 } // @jve:decl-index=0:visual-constraint="10,10"
