@@ -36,7 +36,6 @@ import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
-import edu.csus.ecs.pc2.core.model.MessageEvent;
 import edu.csus.ecs.pc2.core.model.MessageEvent.Area;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
@@ -386,10 +385,15 @@ public class PacketHandler {
                 handleSynchronizeRemoteData(packet, connectionHandlerID);
                 break;
                 
-            case REQUEST_REMOTE_DATA: 
+            case REQUEST_REMOTE_DATA:
+                // Update remote data from other server.
                 handleRequestRemoteData(packet, connectionHandlerID);
                 break;
-                
+
+            case UPDATE_REMOTE_DATA:
+                loginSuccess(packet, connectionHandlerID, fromId);
+                break;
+           
             default:
                 Exception exception = new Exception("PacketHandler.handlePacket Unhandled packet " + packet);
                 controller.getLog().log(Log.WARNING, "Unhandled Packet ", exception);
@@ -422,7 +426,8 @@ public class PacketHandler {
        
         ClientId remoteServerId = new ClientId(packet.getSourceId().getSiteNumber(), ClientType.Type.SERVER, 0);
         Packet requestedPacket = createLoginSuccessPacket(remoteServerId, contest.getContestPassword());
-        controller.sendToClient(requestedPacket);
+        Packet remoteDataPacket = PacketFactory.clonePacket(Type.UPDATE_REMOTE_DATA, getServerClientId(), remoteServerId, requestedPacket);
+        controller.sendToClient(remoteDataPacket);
         
 //        String message = "debug22 handleRequestRemoteData "+ packet;
 //        Packet messPacket = PacketFactory.createMessage(getServerClientId(), packet.getSourceId(), message, new Exception(message));
@@ -1668,28 +1673,29 @@ public class PacketHandler {
     private void handleMessagePacket(Packet packet) throws Exception {
         
         if (isServer()){
+
+            String message = (String) PacketFactory.getObjectValue(packet, PacketFactory.MESSAGE_STRING);
+            Area area = (Area) PacketFactory.getObjectValue(packet, PacketFactory.MESSAGE_AREA);
+
             if (isThisSite(packet.getDestinationId().getSiteNumber())) {
                 if (!packet.getDestinationId().getClientType().equals(ClientType.Type.SERVER)) {
                     controller.sendToClient(packet);
                 }
             } else {
-                String message = (String) PacketFactory.getObjectValue(packet, PacketFactory.MESSAGE_STRING);
-                Area area = (Area) PacketFactory.getObjectValue(packet, PacketFactory.MESSAGE_AREA);
                 Packet messagePacket = PacketFactory.createMessage(contest.getClientId(), packet.getDestinationId(), area, message);
                 int siteNumber = packet.getDestinationId().getSiteNumber();
                 controller.sendToRemoteServer(siteNumber, messagePacket);
             }
+            
+            contest.addMessage(area, packet.getSourceId(), packet.getDestinationId(), message);
+            
         } else {
             String message = (String) PacketFactory.getObjectValue(packet, PacketFactory.MESSAGE_STRING);
             Area area = (Area) PacketFactory.getObjectValue(packet, PacketFactory.MESSAGE_AREA);
             if (message == null){
                 throw new Exception ("Message null in packet "+packet);
             } else {
-                if (area.equals(Area.PROFILES)) {
-                    contest.addMessage(MessageEvent.Area.PROFILES, packet.getSourceId(), packet.getDestinationId(), message);
-                } else {
-                    contest.addMessage(MessageEvent.Area.OTHER, packet.getSourceId(), packet.getDestinationId(), message);
-                }
+                contest.addMessage(area, packet.getSourceId(), packet.getDestinationId(), message);
             }
         }
     }

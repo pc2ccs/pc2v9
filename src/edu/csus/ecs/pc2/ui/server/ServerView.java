@@ -38,6 +38,7 @@ import edu.csus.ecs.pc2.ui.JPanePlugin;
 import edu.csus.ecs.pc2.ui.LoadContestPane;
 import edu.csus.ecs.pc2.ui.LogWindow;
 import edu.csus.ecs.pc2.ui.LoginsPane;
+import edu.csus.ecs.pc2.ui.MessageMonitorPane;
 import edu.csus.ecs.pc2.ui.OptionsPanel;
 import edu.csus.ecs.pc2.ui.PacketMonitorPane;
 import edu.csus.ecs.pc2.ui.PlaybackPane;
@@ -436,6 +437,15 @@ public class ServerView extends JFrame implements UIPlugin {
         LoginsPane loginsPane = new LoginsPane();
         addUIPlugin(getMainTabbedPane(), "Logins", loginsPane);
 
+        if (Utilities.isDebugMode()) {
+            try {
+                MessageMonitorPane messageMonitorPane = new MessageMonitorPane();
+                addUIPlugin(getMainTabbedPane(), "Messages", messageMonitorPane);
+            } catch (Exception e) {
+                logException(e);
+            }
+        }
+
         OptionsPanel optionsPanel = new OptionsPanel();
         addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
         optionsPanel.setSecurityLogWindow(securityAlertLogWindow);
@@ -535,6 +545,17 @@ public class ServerView extends JFrame implements UIPlugin {
             JOptionPane.showMessageDialog(this, "Error loading " + plugin.getPluginTitle());
         }
 
+    }
+    
+    protected void addUIPlugin(String tabTitle, JPanePlugin plugin) {
+        try {
+            plugin.setParentFrame(this);
+            registerPlugin(plugin);
+            getMainTabbedPane().add(plugin, tabTitle);
+        } catch (Exception e) {
+            controller.getLog().log(Log.WARNING, "Exception loading plugin ", e);
+            JOptionPane.showMessageDialog(this, "Error loading " + plugin.getPluginTitle());
+        }    
     }
 
     /**

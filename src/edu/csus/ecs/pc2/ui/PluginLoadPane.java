@@ -217,6 +217,7 @@ public class PluginLoadPane extends JPanePlugin {
         plugins.add(new TeamStatusPane());
         plugins.add(new ViewPropertiesPane());
         plugins.add(new PacketMonitorPane());
+        plugins.add(new MessageMonitorPane());
         
         JPanePlugin [] pluginList = (JPanePlugin[]) plugins.toArray(new JPanePlugin[plugins.size()]);
         

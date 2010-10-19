@@ -705,7 +705,15 @@ public final class PacketType implements Serializable {
          * Sent to servers to synchronize (re-login) to all other
          * servers, the final step to switch profiles.
          */
-        SYNCHRONIZE_REMOTE_DATA
+        SYNCHRONIZE_REMOTE_DATA,
+        /**
+         * Same as LOGIN SUCCESS.
+         * 
+         * Needed because LOGIN_SUCESS can only be sent to a server
+         * or client once on login.  On switch the remote data must
+         * be send to the server requesting it.
+         */
+        UPDATE_REMOTE_DATA
     }
 
     /**

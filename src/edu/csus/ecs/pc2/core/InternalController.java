@@ -1207,6 +1207,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                             case UPDATE_CLIENT_PROFILE:
                             case REQUEST_SERVER_STATUS:
                             case MESSAGE:
+                            case REQUEST_REMOTE_DATA:
                             case SERVER_STATUS:
                                 processPacket(packet, connectionHandlerID);
                                 break;
@@ -2741,7 +2742,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 log.log(Log.INFO, "forceConnectionDrop: " + connectionHandlerID);
                 connectionManager.unregisterConnection(connectionHandlerID);
                 contest.connectionDropped(connectionHandlerID);
-            } else {
+            } else if (contest.isConnectedToRemoteSite(connectionHandlerID)) {
                 // must be another server, send to all servers
                 
                 Packet forceDiscoPacket = PacketFactory.createForceLogoff(contest.getClientId(), PacketFactory.ALL_SERVERS, connectionHandlerID);

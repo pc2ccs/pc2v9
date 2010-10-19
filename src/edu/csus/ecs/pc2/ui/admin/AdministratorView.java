@@ -42,6 +42,7 @@ import edu.csus.ecs.pc2.ui.JudgementsPanel;
 import edu.csus.ecs.pc2.ui.LanguagesPane;
 import edu.csus.ecs.pc2.ui.LogWindow;
 import edu.csus.ecs.pc2.ui.LoginsPane;
+import edu.csus.ecs.pc2.ui.MessageMonitorPane;
 import edu.csus.ecs.pc2.ui.OptionsPanel;
 import edu.csus.ecs.pc2.ui.PacketExplorerPane;
 import edu.csus.ecs.pc2.ui.PacketMonitorPane;
@@ -223,6 +224,15 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
                 LoginsPane loginsPane = new LoginsPane();
                 addUIPlugin(getRunContestTabbedPane(), "Logins", loginsPane);
+                
+                if (Utilities.isDebugMode()) {
+                    try {
+                        MessageMonitorPane messageMonitorPane = new MessageMonitorPane();
+                        addUIPlugin(getRunContestTabbedPane(), "Messages", messageMonitorPane);
+                    } catch (Exception e) {
+                        logException(e);
+                    }
+                }
 
                 OptionsPanel optionsPanel = new OptionsPanel();
                 addUIPlugin(getRunContestTabbedPane(), "Options", optionsPanel);

@@ -1878,6 +1878,21 @@ public final class PacketFactory {
     public static Packet clonePacket(ClientId source, ClientId destination, Packet packet) {
         return createPacket(packet.getType(), source, destination, (Properties) packet.getContent());
     }
+    
+    /**
+     * Clone packet and change packet type.
+     * 
+     * Can reassign type, source, and destination with affecting contents.
+     * 
+     * @param type
+     * @param source
+     * @param destination
+     * @param packet
+     * @return
+     */
+    public static Packet clonePacket(PacketType.Type type, ClientId source, ClientId destination, Packet packet) {
+        return createPacket(type, source, destination, (Properties) packet.getContent());
+    }
 
     public static Packet createUpdateSetting(ClientId source, ClientId destination, Judgement judgement) {
         Properties prop = new Properties();
