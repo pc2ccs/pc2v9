@@ -1204,7 +1204,9 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                     } else {
 
                         switch (packet.getType()) {
+                            case UPDATE_CLIENT_PROFILE:
                             case REQUEST_SERVER_STATUS:
+                            case MESSAGE:
                             case SERVER_STATUS:
                                 processPacket(packet, connectionHandlerID);
                                 break;
@@ -1214,8 +1216,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                                  * Non-matching contest Ids - do not process packet
                                  */
                                 
-                                // FIXME remove show message dialog
-                                JOptionPane.showMessageDialog(null, "Contest Ids do not match for packet # " + packet.getPacketNumber() + "\n" + packet);
+                                // FIXME debug22 remove show message dialog
+                                JOptionPane.showMessageDialog(null, "Site "+contest.getSiteNumber()+" Contest Ids do not match for packet # " + packet.getPacketNumber() + "\n" + packet);
                                 
                                 logWarning("Packet contestId does not match for "+packet+" local:"+localContestId+" remote:"+remoteContestId);
                                 
@@ -1575,7 +1577,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             if (exProfile != null){
                 System.err.println("Exception in profile: "+exProfile.getName()+" path: "+exProfile.getProfilePath()); // FIXME debug22
             }
-            profileException.printStackTrace(); // debug 22
+            profileException.printStackTrace(); // FIXME debug 22
             
             if (profileException.getMessage().indexOf("FileSecurityException") != -1){
                 
@@ -1594,7 +1596,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                     logException("Unable to change profile", profileException);
                 }
             } else {
-                Packet messagePacket = PacketFactory.createMessage(getServerClientId(), packet.getSourceId(),  Area.PROFILES, "Unable to change profile ");
+                Packet messagePacket = PacketFactory.createMessage(getServerClientId(), packet.getSourceId(),  Area.PROFILES, "Unable to change profile "+profileException.getMessage());
                 sendToClient(messagePacket);
                 
                 logException("Unable to change profile", profileException);

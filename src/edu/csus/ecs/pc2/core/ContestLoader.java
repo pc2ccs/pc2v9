@@ -844,7 +844,7 @@ public class ContestLoader {
 
         addSitesToModel(contest, controller, packet);
 
-        if (isServer(contest)) {
+        if (isServer(contest) && contest.getSiteNumber() == 0) {
             // Load local settings and initialize settings if necessary
             controller.initializeServer();
         }

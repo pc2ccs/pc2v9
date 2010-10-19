@@ -68,8 +68,12 @@ public class SwitchProfileStatusPane extends JPanePlugin {
 
     private Profile targetProfile;  //  @jve:decl-index=0:
 
+    // TODO used with revert
+    @SuppressWarnings("unused")
     private String newContestPassword; // @jve:decl-index=0:
 
+    // TODO used with revert
+    @SuppressWarnings("unused")
     private String currentContestPassword; // @jve:decl-index=0:
     
     private SimpleDateFormat formatter = new SimpleDateFormat(" HH:mm:ss MM-dd");  //  @jve:decl-index=0:
@@ -192,8 +196,6 @@ public class SwitchProfileStatusPane extends JPanePlugin {
             }
         }
         getSwitchNowButton().setEnabled(numberReady == numberConnected);
-        
-        getSwitchNowButton().setEnabled(true); // FIXME remove this testing code.
         
     }
 
@@ -563,6 +565,7 @@ public class SwitchProfileStatusPane extends JPanePlugin {
     }
 
     /**
+     * Listener for profile messages.
      * 
      * @author pc2@ecs.csus.edu
      * @version $Id$
@@ -579,7 +582,7 @@ public class SwitchProfileStatusPane extends JPanePlugin {
         }
 
         public void messageRemoved(MessageEvent event) {
-            // TODO Auto-generated method stub
+            // no action
             
         }
     }

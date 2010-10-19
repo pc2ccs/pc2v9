@@ -127,8 +127,9 @@ public class ConfigurationIO {
                     Integer diskSiteNumber = (Integer) configuration.get(key.toString());
                     
                     if (diskSiteNumber.intValue() != siteNumber) {
-                        System.err.println("FATAL ERROR Attempted to load site "+siteNumber+" from Site "+diskSiteNumber);
-                        log.info("FATAL ERROR Attempted to load site "+siteNumber+" from Site "+diskSiteNumber);
+                        Exception exception = new Exception("FATAL ERROR Attempted to load site "+siteNumber+" from Site "+diskSiteNumber);
+                        System.err.println(exception.getMessage());
+                        log.log(Log.SEVERE, exception.getMessage(), exception);
                         System.exit(22);
                     }
                     

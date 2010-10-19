@@ -75,15 +75,13 @@ public class SwitchProfileConfirmPane extends JPanePlugin {
 
     @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
-        // TODO Auto-generated method stub
         super.setContestAndController(inContest, inController);
         getStatusFrame().setContestAndController(inContest, inController);
     }
     
     @Override
     public String getPluginTitle() {
-        // TODO Auto-generated method stub
-        return null;
+        return "Switch Profile Confirm Pane";
     }
 
     /**
@@ -219,16 +217,13 @@ public class SwitchProfileConfirmPane extends JPanePlugin {
             
         } else {
             getStatusFrame().setProfile(profile);
-            //            getStatusFrame().setProfile(getContest().getProfile()); // FIXME test code remove this 
             getStatusFrame().setNewContestPassword(password);
             getStatusFrame().setCurrentContestPassword(getContest().getContestPassword());
             getStatusFrame().resetProfileStatusList();
             closeWindow();
             getStatusFrame().setVisible(true);
             
-            // FIXME uncomment this when ready to switch profiles.
-//            getController().switchProfile(getContest().getProfile(), profile, password);
-            
+            getController().switchProfile(getContest().getProfile(), profile, password);
         }
     }
     
