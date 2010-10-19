@@ -374,10 +374,6 @@ public class PacketHandler {
                 handleRunFilesList(packet, connectionHandlerID);
                 break;
 
-            case FETCH_CONTEST_INFO:
-                handleFetchContestInfo(packet, connectionHandlerID);
-                break;
-                
             case REQUEST_SERVER_STATUS:
                 handleRequestServerStatus (packet, connectionHandlerID);
                 break;
@@ -386,10 +382,14 @@ public class PacketHandler {
                 handleServerStatus(packet, connectionHandlerID);
                 break;
                 
-            case SWITCH_SYNCHRONIZE_PROFILE:
-                handleSynchronizeProfile (packet, connectionHandlerID);
+            case SYNCHRONIZE_REMOTE_DATA: 
+                handleSynchronizeRemoteData(packet, connectionHandlerID);
                 break;
-
+                
+            case REQUEST_REMOTE_DATA: 
+                handleRequestRemoteData(packet, connectionHandlerID);
+                break;
+                
             default:
                 Exception exception = new Exception("PacketHandler.handlePacket Unhandled packet " + packet);
                 controller.getLog().log(Log.WARNING, "Unhandled Packet ", exception);
@@ -399,21 +399,36 @@ public class PacketHandler {
         info("handlePacket end " + packet);
     }
 
-    private void handleSynchronizeProfile(Packet packet, ConnectionHandlerID connectionHandlerID) {
+    /**
+     * Send a packet to all servers to request remote data.
+     * 
+     * This will start the process for a server to synchronize
+     * its remote data by sending a request to all servers. 
+     * 
+     * @param packet
+     * @param connectionHandlerID
+     */
+    private void handleSynchronizeRemoteData(Packet packet, ConnectionHandlerID connectionHandlerID) {
+        Packet requestPacket = PacketFactory.createRequestRemoteDataPacket(getServerClientId(), PacketFactory.ALL_SERVERS);
+        controller.sendToServers(requestPacket);
+    }
 
-        if (isThisSite(packet.getSourceId())) {
+    /**
+     * 
+     * @param packet
+     * @param connectionHandlerID
+     */
+    private void handleRequestRemoteData(Packet packet, ConnectionHandlerID connectionHandlerID) {
+       
+        // FIXME use this code to send packet back to them.
+//        ClientId remoteServerId = new ClientId(packet.getSourceId().getSiteNumber(), ClientType.Type.SERVER, 0);
+//        Packet requestedPacket = createLoginSuccessPacket(remoteServerId, contest.getContestPassword());
+//        controller.sendToClient(requestedPacket);
 
-            Packet clonePacket = PacketFactory.clonePacket(getServerClientId(), PacketFactory.ALL_SERVERS, packet);
-            controller.sendToServers(clonePacket);
-
-        }
-
-        /**
-         * As a sever request contest info
-         */
         
-        Packet requestInfoPacket = PacketFactory.createFetchContestInfoPacket(getServerClientId(), PacketFactory.ALL_SERVERS);
-        controller.sendToServers(requestInfoPacket);
+        String message = "debug22 handleRequestRemoteData "+ packet;
+        Packet messPacket = PacketFactory.createMessage(getServerClientId(), packet.getSourceId(), message, new Exception(message));
+        controller.sendToAdministrators(messPacket);
     }
 
     private void handleRunSubmissionConfirmationServer(Packet packet, ClientId fromId) throws IOException, ClassNotFoundException, FileSecurityException  {
@@ -478,6 +493,8 @@ public class PacketHandler {
 
             IInternalContest newContest = switchProfile(contest, newProfile, contestPassword.toCharArray(), true);
             contest = newContest;
+            
+            sendStatusToServers (packet, newProfile);
 
         } else {
             throw new ProfileException("Can not switch profiles, invalid contest password");
@@ -501,6 +518,17 @@ public class PacketHandler {
         return switchProfile( currentContest,  newProfile,  contestPassword,  sendToOtherServers, null);
     }
     
+    /**
+     * Switch profile on this server then send out switch to all local clients. 
+     *  
+     * @param currentContest
+     * @param newProfile
+     * @param contestPassword
+     * @param sendToOtherServers
+     * @param packet
+     * @return
+     * @throws ProfileException
+     */
     protected IInternalContest switchProfile(IInternalContest currentContest, Profile newProfile, char[] contestPassword, boolean sendToOtherServers, Packet packet) throws ProfileException {
 
         ProfileManager manager = new ProfileManager();
@@ -574,7 +602,7 @@ public class PacketHandler {
         
         storeProfiles();
         
-        sendOutChangeProfileToAll(contest, currentContest.getProfile(), newProfile, new String(contestPassword), sendToOtherServers);
+        sendOutChangeProfileToAllClients(contest, currentContest.getProfile(), newProfile, new String(contestPassword));
 
         return newContest;
     }
@@ -589,13 +617,16 @@ public class PacketHandler {
      * @param contestPassword used to encrypt/decrypt config files.
      * @param b 
      */
-    protected void sendOutChangeProfileToAll(IInternalContest newContest, Profile currentProfile, Profile switchToProfile, String contestPassword, boolean b) {
+    protected void sendOutChangeProfileToAllClients(IInternalContest newContest, Profile currentProfile, Profile switchToProfile, String contestPassword) {
 
-        ContestLoginSuccessData data = createContestLoginSuccessData(newContest, getServerClientId(), contestPassword);
-        Packet packet = PacketFactory.createUpdateProfileClientPacket(getServerClientId(), PacketFactory.ALL_SERVERS, currentProfile, switchToProfile, data);
+        ContestLoginSuccessData data ;
+        Packet packet ;
+        
+//        ContestLoginSuccessData data = createContestLoginSuccessData(newContest, getServerClientId(), contestPassword);
+//        Packet packet = PacketFactory.createUpdateProfileClientPacket(getServerClientId(), PacketFactory.ALL_SERVERS, currentProfile, switchToProfile, data);
 
         // Servers get the same packet
-        sendClonePacketToUsers(packet, ClientType.Type.SERVER, newContest, false);
+//        sendClonePacketToUsers(packet, ClientType.Type.SERVER, newContest, false);
 
         // Create packed for Admin, Judge, boards
         data = createContestLoginSuccessData(newContest, getServerClientId(), null);
@@ -730,6 +761,8 @@ public class PacketHandler {
 
                 IInternalContest newContest = switchProfile(contest, newProfile, contestPassword.toCharArray(), false, packet);
                 contest = newContest;
+                
+                sendStatusToServers (packet, newProfile);
 
             } else {
                 throw new ProfileException("Can not switch profiles, invalid contest password");
@@ -855,21 +888,6 @@ public class PacketHandler {
         } else {
             throw new Exception("RUN_FILES are null from packet "+packet);
         }
-        
-    }
-    
-    private void handleFetchContestInfo(Packet packet, ConnectionHandlerID connectionHandlerID) {
-        
-        if (isServer()){
-            
-            if (contest.isLocalLoggedIn(packet.getSourceId())){
-                // they are tlogged in send them it.
-                
-                Packet loginSuccessPacket = createLoginSuccessPacket(packet.getSourceId() , contest.getContestPassword());
-                controller.sendToClient(loginSuccessPacket);
-            }
-            
-        } // else not a server should not get this packet
         
     }
     
@@ -3500,11 +3518,11 @@ public class PacketHandler {
      * @param clientId
      * @return Packet containing contest settings
      */
-    public Packet createLoginSuccessPacket(ClientId clientId, String contestSecurityPassword) {
+    public Packet createLoginSuccessPacket(ClientId targetClientId, String contestSecurityPassword) {
 
-        ContestLoginSuccessData data = createContestLoginSuccessData(contest, clientId, contestSecurityPassword);
+        ContestLoginSuccessData data = createContestLoginSuccessData(contest, targetClientId, contestSecurityPassword);
 
-        Packet loginSuccessPacket = PacketFactory.createLoginSuccess(contest.getClientId(), clientId, contest.getContestTime(), contest.getSiteNumber(), contest.getContestInformation(), data);
+        Packet loginSuccessPacket = PacketFactory.createLoginSuccess(contest.getClientId(), targetClientId, contest.getContestTime(), contest.getSiteNumber(), contest.getContestInformation(), data);
 
         return loginSuccessPacket;
     }
@@ -3541,18 +3559,10 @@ public class PacketHandler {
         ClientId remoteServerId = new ClientId(targetSiteNumber, ClientType.Type.SERVER, 0);
         
         if (isThisSite(targetSiteNumber)){
-
+            
             Profile expectedProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE);
-            
-            Status status = Status.NOTREADY;
-            if (contest.getProfile().equals(expectedProfile)){
-                status = Status.READY;
-            }
-            
-            remoteServerId = new ClientId(packet.getSourceId().getSiteNumber(), ClientType.Type.SERVER, 0);
-            Site site = contest.getSite(contest.getSiteNumber());
-            Packet statusPacket = PacketFactory.createServerStatusPacket(getServerClientId(), remoteServerId, contest.getProfile(), status, site);
-            controller.sendToClient(statusPacket);
+            sendStatusToServers(packet, expectedProfile);
+ 
         } else {
             /**
              * Send to target server.
@@ -3561,6 +3571,26 @@ public class PacketHandler {
             controller.sendToClient(clonePacket);
         }
 
+    }
+
+    /**
+     * Send a status packe to all logged in servers.
+     * 
+     * @param packet
+     * @param expectedProfile
+     */
+    private void sendStatusToServers(Packet packet, Profile expectedProfile) {
+        
+        Status status = Status.NOTREADY;
+        if (contest.getProfile().equals(expectedProfile)){
+            status = Status.READY;
+        }
+        
+        ClientId remoteServerId = new ClientId(packet.getSourceId().getSiteNumber(), ClientType.Type.SERVER, 0);
+        Site site = contest.getSite(contest.getSiteNumber());
+        Packet statusPacket = PacketFactory.createServerStatusPacket(getServerClientId(), remoteServerId, contest.getProfile(), status, site);
+        
+        controller.sendToServers(statusPacket);
     }
 
     /**

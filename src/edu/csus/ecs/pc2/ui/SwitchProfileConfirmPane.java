@@ -14,6 +14,8 @@ import javax.swing.JPasswordField;
 import javax.swing.SwingConstants;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Profile;
 
@@ -202,21 +204,32 @@ public class SwitchProfileConfirmPane extends JPanePlugin {
         return contestPasswordTextField;
     }
     
+    /**
+     * Switch profile or if multi site show them the status frame.
+     */
     protected void switchProfile() {
 
         String password = new String(getContestPasswordTextField().getPassword());
 
-        getStatusFrame().setProfile(profile);
-        //            getStatusFrame().setProfile(getContest().getProfile()); // FIXME test code remove this 
-        getStatusFrame().setNewContestPassword(password);
-        getStatusFrame().setCurrentContestPassword(getContest().getContestPassword());
-        getStatusFrame().resetProfileStatusList();
-
-        // getController().switchProfile(getContest().getProfile(), profile, password);
-
-        closeWindow();
-        getStatusFrame().setVisible(true);
-
+        ClientId [] servers = getContest().getAllLoggedInClients(Type.SERVER);
+        
+        if (servers.length == 0){
+            getController().switchProfile(getContest().getProfile(), profile, password);
+            closeWindow();
+            
+        } else {
+            getStatusFrame().setProfile(profile);
+            //            getStatusFrame().setProfile(getContest().getProfile()); // FIXME test code remove this 
+            getStatusFrame().setNewContestPassword(password);
+            getStatusFrame().setCurrentContestPassword(getContest().getContestPassword());
+            getStatusFrame().resetProfileStatusList();
+            closeWindow();
+            getStatusFrame().setVisible(true);
+            
+            // FIXME uncomment this when ready to switch profiles.
+//            getController().switchProfile(getContest().getProfile(), profile, password);
+            
+        }
     }
     
     

@@ -548,5 +548,13 @@ public interface IInternalController {
      */
     void logWarning(String string, Exception e);
 
+    /**
+     * Send Sync Submissions packet.
+     * 
+     * Send a packet to tell all servers to sync up their
+     * submission and other local data with all servers.
+     * 
+     * @param profile
+     */
     void syncProfileSubmissions(Profile profile);
 }

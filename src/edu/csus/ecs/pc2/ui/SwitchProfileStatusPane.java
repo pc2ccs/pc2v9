@@ -49,8 +49,6 @@ import edu.csus.ecs.pc2.core.packet.PacketFactory;
 // $HeadURL$
 public class SwitchProfileStatusPane extends JPanePlugin {
 
-    // FIXME code toggle of button depending on status
-
     /**
      * 
      */
@@ -122,9 +120,6 @@ public class SwitchProfileStatusPane extends JPanePlugin {
 
         for (ProfileChangeStatus status : list) {
             updateRow(status);
-            
-            System.err.println("debug22 - reloadListBox "+status);
-
         }
         
     }
@@ -196,10 +191,10 @@ public class SwitchProfileStatusPane extends JPanePlugin {
                 }
             }
         }
-        
-        System.err.println("debug22 - enableGo "+numberConnected+ " vs. "+numberReady);
-        
         getSwitchNowButton().setEnabled(numberReady == numberConnected);
+        
+        getSwitchNowButton().setEnabled(true); // FIXME remove this testing code.
+        
     }
 
     private boolean isThisSite(int siteNumber) {
@@ -375,15 +370,7 @@ public class SwitchProfileStatusPane extends JPanePlugin {
     }
 
     protected void startProfileServerSync() {
-
-        // Send out a switch profile for now.
-        getController().switchProfile(getContest().getProfile(), targetProfile, newContestPassword);
-        
-        // huh
-        
         getController().syncProfileSubmissions (targetProfile);
-        
-        closeWindow();
     }
 
     protected void revertToPreviousProfile() {
@@ -466,9 +453,6 @@ public class SwitchProfileStatusPane extends JPanePlugin {
             profileChangeStatus.setStatus(event.getProfileStatus());
             profileChangeStatus.setProfile(event.getProfile());
             profileStatusList.update(profileChangeStatus);
-            
-            System.err.println("debug22 - siteProfileStatusChanged "+profileChangeStatus);
-            
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
                     reloadListBox();

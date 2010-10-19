@@ -2055,13 +2055,12 @@ public final class PacketFactory {
         return packet;
     }
     
-    public static Packet createFetchContestInfoPacket(ClientId source, ClientId destination) {
+    public static Packet createRequestRemoteDataPacket(ClientId source, ClientId destination) {
         Properties prop = new Properties();
         prop.put(CLIENT_ID, source);
-        Packet packet = new Packet(Type.FETCH_CONTEST_INFO, source, destination, prop);
+        Packet packet = new Packet(Type.REQUEST_REMOTE_DATA, source, destination, prop);
         return packet;
     }
-
 
     public static Packet createRunFilesPacket(ClientId source, ClientId destination, RunFiles[] files) {
         Properties prop = new Properties();
@@ -2094,7 +2093,7 @@ public final class PacketFactory {
         Properties prop = new Properties();
         prop.put(CLIENT_ID, source);
         prop.put(PROFILE, profile);
-        Packet packet = new Packet(Type.SWITCH_SYNCHRONIZE_PROFILE, source, destination, prop);
+        Packet packet = new Packet(Type.SYNCHRONIZE_REMOTE_DATA, source, destination, prop);
         return packet;
     }
 

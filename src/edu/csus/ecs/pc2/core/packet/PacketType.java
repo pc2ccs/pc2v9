@@ -681,11 +681,13 @@ public final class PacketType implements Serializable {
          * Requested run files for {@link #FETCH_RUN_FILES}.
          */
         UPDATE_RUN_FILES,
+        
         /**
-         * Fetch contest info as if one had just logged in,
-         * used in switching profiles.
+         * Request to fetch remote submission and other data.
+         * 
+         * Returns a LOGIN_SUCCESS as if the server had just logged in.
          */
-        FETCH_CONTEST_INFO,
+        REQUEST_REMOTE_DATA,
         /**
          * Request profile status for server.
          * 
@@ -698,10 +700,12 @@ public final class PacketType implements Serializable {
          */
         SERVER_STATUS,
         /**
+         * The "Go" packet - cause all servers to sync remote data.
+         * 
          * Sent to servers to synchronize (re-login) to all other
          * servers, the final step to switch profiles.
          */
-        SWITCH_SYNCHRONIZE_PROFILE
+        SYNCHRONIZE_REMOTE_DATA
     }
 
     /**
