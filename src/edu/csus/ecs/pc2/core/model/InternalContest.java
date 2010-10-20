@@ -2185,6 +2185,12 @@ public class InternalContest implements IInternalContest {
 
     public boolean readConfiguration(int siteNum, Log log, boolean uncheckoutSubmissions) throws IOException, ClassNotFoundException, FileSecurityException {
         
+        String settingsFilename = configurationIO.getFileName();
+        
+        if (! new File(settingsFilename).exists()){
+            throw new FileNotFoundException("Profile/config file missing "+settingsFilename);
+        }
+        
         boolean loadedConfiguration = configurationIO.loadFromDisk(siteNum, this, log);
         initializeSubmissions(siteNum, uncheckoutSubmissions);
         // Initialize contest time if necessary

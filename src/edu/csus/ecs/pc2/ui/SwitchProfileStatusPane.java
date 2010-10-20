@@ -432,13 +432,15 @@ public class SwitchProfileStatusPane extends JPanePlugin {
     private void updateCurrentSiteStatus() {
         
         Site currentSite = getContest().getSite(getContest().getSiteNumber());
-        ProfileChangeStatus profileStatus = profileStatusList.get(currentSite);
-        
-        profileStatus.setStatus(Status.NOTREADY);
-        if (getContest().getProfile().equals(targetProfile)){
-            profileStatus.setStatus(Status.READY);
+        if (currentSite != null){
+            ProfileChangeStatus profileStatus = profileStatusList.get(currentSite);
+
+            profileStatus.setStatus(Status.NOTREADY);
+            if (getContest().getProfile().equals(targetProfile)){
+                profileStatus.setStatus(Status.READY);
+            }
+            profileStatus.setProfile(getContest().getProfile());
         }
-        profileStatus.setProfile(getContest().getProfile());
     }
 
     /**
@@ -516,6 +518,7 @@ public class SwitchProfileStatusPane extends JPanePlugin {
     }
     
     public void resetProfileStatusList() {
+        
         profileStatusList = new ProfileChangeStatusList(); 
         for (Site site : getContest().getSites()) {
             profileStatusList.add(new ProfileChangeStatus(site));

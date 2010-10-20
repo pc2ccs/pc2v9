@@ -98,10 +98,6 @@ public final class PacketFormatter {
                 string = "(ClientId) " + (ClientId) object;
             } else if (object instanceof Integer) {
                 string = "(Integer) " + (Integer) object;
-            } else if (object instanceof Run) {
-                string = "(Run) " + (Run) object;
-            } else if (object instanceof Clarification) {
-                string = "(Clarification) " + (Clarification) object;
             } else {
                 string = "Object:" + object.toString();
             }
@@ -140,6 +136,12 @@ public final class PacketFormatter {
         
     }
 
+    /**
+     * Create tree. 
+     * 
+     * @param object
+     * @return null if no object tree found/created.
+     */
     private static DefaultMutableTreeNode createTree(Object object) {
         
         if (object instanceof Profile){
@@ -262,6 +264,74 @@ public final class PacketFormatter {
 
             return node;
         }
+        
+        return createOtherTrees (object);
+        
+    }
+    
+    /**
+     * Create tree. 
+     * 
+     * @param object
+     * @return null if no object tree found/created.
+     */
+    private static DefaultMutableTreeNode createOtherTrees(Object object) {
+        
+        if (object instanceof Run) {
+
+            DefaultMutableTreeNode child;
+
+            Run run = (Run) object;
+            DefaultMutableTreeNode node = new DefaultMutableTreeNode("Run: " + run);
+
+            child = new DefaultMutableTreeNode("      Team: " + run.getSubmitter());
+            node.add(child);
+            child = new DefaultMutableTreeNode("   elapsed: " + run.getElapsedMins());
+            node.add(child);
+            child = new DefaultMutableTreeNode("    Solved: " + run.isSolved());
+            node.add(child);
+            child = new DefaultMutableTreeNode("   Problem: " + run.getProblemId());
+            node.add(child);
+            child = new DefaultMutableTreeNode("    Judged: " + run.isJudged());
+            node.add(child);
+            child = new DefaultMutableTreeNode(" Send2Team: " + run.isSendToTeams());
+            node.add(child);
+            child = new DefaultMutableTreeNode("    Deleted: " + run.isDeleted());
+            node.add(child);
+            child = new DefaultMutableTreeNode("   Language: " + run.getLanguageId());
+            node.add(child);
+            child = new DefaultMutableTreeNode("  ElementId: " + run.isDeleted());
+            node.add(child);
+
+            return node;
+        }
+
+        
+        if (object instanceof Clarification) {
+
+            DefaultMutableTreeNode child;
+
+            Clarification clarification = (Clarification) object;
+            DefaultMutableTreeNode node = new DefaultMutableTreeNode("Clarification: " + clarification);
+
+            child = new DefaultMutableTreeNode("      Team: " + clarification.getSubmitter());
+            node.add(child);
+            child = new DefaultMutableTreeNode("   elapsed: " + clarification.getElapsedMins());
+            node.add(child);
+            child = new DefaultMutableTreeNode("   Problem: " + clarification.getProblemId());
+            node.add(child);
+            child = new DefaultMutableTreeNode("  Answered: " + clarification.isAnswered());
+            node.add(child);
+            child = new DefaultMutableTreeNode("   For All: " + clarification.isSendToAll());
+            node.add(child);
+            child = new DefaultMutableTreeNode("  ElementId: " + clarification.isDeleted());
+            node.add(child);
+
+            return node;
+        }
+
+
+        
         if (object instanceof Problem) {
 
             DefaultMutableTreeNode child;
@@ -289,6 +359,34 @@ public final class PacketFormatter {
             return node;
         }
         
+        if (object instanceof Run[]) {
+
+            Run[] runs = (Run[]) object;
+            DefaultMutableTreeNode node = new DefaultMutableTreeNode("Run list: " + runs.length + " runs");
+            DefaultMutableTreeNode child;
+
+            for (Run run : runs) {
+                child = createTree(run);
+                node.add(child);
+            }
+
+            return node;
+        }
+
+        if (object instanceof Clarification[]) {
+
+            Clarification[] clarifications = (Clarification[]) object;
+            DefaultMutableTreeNode node = new DefaultMutableTreeNode("Clarification list: " + clarifications.length + " runs");
+            DefaultMutableTreeNode child;
+
+            for (Clarification clarification : clarifications) {
+                child = createTree(clarification);
+                node.add(child);
+            }
+
+            return node;
+        }
+      
         if (object instanceof Judgement[]) {
 
             Judgement[] judgements = (Judgement[]) object;

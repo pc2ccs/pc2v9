@@ -831,12 +831,16 @@ public class ContestLoader {
     void loadDataIntoModel(IInternalContest contest, IInternalController controller, Packet packet, ConnectionHandlerID connectionHandlerID) throws IOException, ClassNotFoundException,
             FileSecurityException {
 
-        // ClientId who = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+        ClientId whoPacket = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
         ClientId who = (ClientId) packet.getDestinationId();
 
         if (who != null) {
             contest.setClientId(who);
         }
+        
+        System.out.println("debug 22 - loadDataIntoModel packet "+packet);
+        System.out.println("debug 22 - loadDataIntoModel CLIENT_ID "+whoPacket);
+        System.out.println("debug 22 - loadDataIntoModel getDestinationId "+who);
 
         controller.setSiteNumber(who.getSiteNumber());
 
@@ -844,9 +848,9 @@ public class ContestLoader {
 
         addSitesToModel(contest, controller, packet);
 
-        if (isServer(contest) && contest.getSiteNumber() == 0) {
+        if (isServer(contest)) {
             // Load local settings and initialize settings if necessary
-            controller.initializeServer();
+            controller.initializeServer(contest);
         }
 
         addLanguagesToModel(contest, controller, packet);

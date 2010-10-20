@@ -775,23 +775,23 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         
     }
 
-    public void initializeServer() throws IOException, ClassNotFoundException, FileSecurityException {
+    public void initializeServer(IInternalContest inContest) throws IOException, ClassNotFoundException, FileSecurityException {
 
-        if (contest.getSites().length == 0) {
+        if (inContest.getSites().length == 0) {
 
-            if (contest.getSiteNumber() == 0) {
-                contest.setSiteNumber(1);
+            if (inContest.getSiteNumber() == 0) {
+                inContest.setSiteNumber(1);
             }
-            info("initializeServer STARTED this site as Site "+contest.getSiteNumber());
+            info("initializeServer STARTED this site as Site "+inContest.getSiteNumber());
 
-            if (contest.getContestPassword() == null) {
+            if (inContest.getContestPassword() == null) {
                 
                 if (usingGUI){
                     StartupContestDialog startDialog = new StartupContestDialog();
                   
                     startDialog.setVisible(true);
                     String password = startDialog.getContestPassword();
-                    contest.setContestPassword(password);
+                    inContest.setContestPassword(password);
                     theProfile = startDialog.getProfile();
                     
                 } else {
@@ -802,18 +802,18 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 }
             }
 
-            String baseDirectoryName = getBaseProfileDirectoryName("db." + contest.getSiteNumber());
+            String baseDirectoryName = getBaseProfileDirectoryName("db." + inContest.getSiteNumber());
             FileSecurity fileSecurity = new FileSecurity(baseDirectoryName);
             initializeStorage(fileSecurity);
 
             try {
-                fileSecurity.verifyPassword(contest.getContestPassword().toCharArray());
+                fileSecurity.verifyPassword(inContest.getContestPassword().toCharArray());
 
             } catch (FileSecurityException fileSecurityException) {
                 if (fileSecurityException.getMessage().equals(FileSecurity.KEY_FILE_NOT_FOUND)) {
 
                     try {
-                        fileSecurity.saveSecretKey(contest.getContestPassword().toCharArray());
+                        fileSecurity.saveSecretKey(inContest.getContestPassword().toCharArray());
                     } catch (Exception e) {
                         StaticLog.getLog().log(Log.SEVERE, "FATAL ERROR ", e);
                         fatalError("Unable to save contest password, " + e.getMessage() + " check logs");
@@ -830,70 +830,71 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         
         ProfileManager manager = new ProfileManager();
         
-        boolean loadedConfiguration = readConfigFromDisk(contest.getSiteNumber());
+        boolean loadedConfiguration = readConfigFromDisk(inContest.getSiteNumber());
 
         if (!loadedConfiguration) {
             // No configuration on disk, initialize settings.
 
             log.info("initializing controller with default settings");
 
-            if (contest.getSite(1) == null) {
-                Site site = createFirstSite(contest.getSiteNumber(), "localhost", port);
-                contest.addSite(site);
+            if (inContest.getSite(1) == null) {
+                Site site = createFirstSite(inContest.getSiteNumber(), "localhost", port);
+                inContest.addSite(site);
             }
 
-            contest.initializeStartupData(contest.getSiteNumber());
+            inContest.initializeStartupData(inContest.getSiteNumber());
 
-            contest.initializeSubmissions(contest.getSiteNumber());
+            inContest.initializeSubmissions(inContest.getSiteNumber());
 
             loadJudgements();
 
-            if (contest.getGeneralProblem() == null) {
-                contest.setGeneralProblem(new Problem("General"));
+            if (inContest.getGeneralProblem() == null) {
+                inContest.setGeneralProblem(new Problem("General"));
             }
             
-            if (contest.getProfile() == null){
-                contest.setProfile(theProfile);
+            if (inContest.getProfile() == null){
+                inContest.setProfile(theProfile);
             }
 
-            info("initialized controller Site " + contest.getSiteNumber());
+            info("initialized controller Site " + inContest.getSiteNumber());
             
             try {
-                manager.mergeProfiles(contest);
+                manager.mergeProfiles(inContest);
             } catch (Exception e) {
                 logException(e);
             }
             
-            contest.storeConfiguration(getLog());
+            inContest.storeConfiguration(getLog());
         } else {
             if (saveCofigurationToDisk) {
-                contest.initializeSubmissions(contest.getSiteNumber());
+                inContest.initializeSubmissions(inContest.getSiteNumber());
             }
             info("Loaded configuration from disk");
             
             try {
-                manager.mergeProfiles(contest);
+                manager.mergeProfiles(inContest);
             } catch (Exception e) {
                 logException(e);
             }
         
         }
         
-        theProfile = contest.getProfile();
+        theProfile = inContest.getProfile();
         
         try {
             if (evaluationLog == null) {
                 String logDirectory = getBaseProfileDirectoryName(Log.LOG_DIRECTORY_NAME);
                 Utilities.insureDir(logDirectory);
                 // this not only opens the log but registers this class to handle all run events.
-                evaluationLog = new EvaluationLog(logDirectory + File.separator + "evals.log", contest, this);
+                evaluationLog = new EvaluationLog(logDirectory + File.separator + "evals.log", inContest, this);
                 evaluationLog.getEvalLog().println("# Log opened " + new Date());
                 info("evals.log is opened at " + logDirectory);
             }
         } catch (Exception e) {
             getLog().log(Log.WARNING, "Exception logged ", e);
         }
-    }
+
+}
 
     private void insureProfileDirectory(Profile profile) {
         
@@ -965,7 +966,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     private ClientId authenticateFirstServer(int siteNum, String password) {
 
         try {
-            initializeServer();
+            initializeServer(contest);
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

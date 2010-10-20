@@ -211,8 +211,7 @@ public class PrintController implements IInternalController {
         return 0;
     }
 
-    public void initializeServer() {
-
+    public void initializeServer(IInternalContest contest) {
         System.out.println("method initializeServer");
     }
 

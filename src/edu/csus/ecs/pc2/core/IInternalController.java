@@ -392,12 +392,13 @@ public interface IInternalController {
 
     /**
      * Load contest settings from disk and initialize InternalContest.
+     * @param contest 
      * 
      * @throws FileSecurityException
      * @throws ClassNotFoundException
      * @throws IOException
      */
-    void initializeServer() throws IOException, ClassNotFoundException, FileSecurityException;
+    void initializeServer(IInternalContest contest) throws IOException, ClassNotFoundException, FileSecurityException;
     
     void initializeStorage (IStorage storage);
 

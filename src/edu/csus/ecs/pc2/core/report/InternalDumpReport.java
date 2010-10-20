@@ -252,6 +252,15 @@ public class InternalDumpReport implements IReport {
             printWriter.println();
             printWriter.println(" Warning controller log is null ");
         }
+        
+        try {
+            printWriter.println();
+            printWriter.println("This is site "+contest.getSiteNumber());
+        } catch (Exception e) {
+            printWriter.println("Exception in report: " + e.getMessage());
+            e.printStackTrace(printWriter);
+            exceptionCount++;
+        }
 
         try {
             printProfile(printWriter);

@@ -469,8 +469,9 @@ public class PacketHandler {
 
         Profile newProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.NEW_PROFILE);
         String contestPassword = (String) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_PASSWORD);
+        
         if (newProfile.getSiteNumber() == 0){
-            newProfile.setSiteNumber(contest.getSiteNumber());
+            throw new ProfileException("Profile site number is zero, must be a valid site number");
         }
 
         if (contestPassword == null) {
@@ -549,8 +550,12 @@ public class PacketHandler {
             newContest.setSiteNumber(contest.getSiteNumber());
         }
         
+        info("switchProfile start - to "+newProfile+" as Site "+contest.getSiteNumber()+" as user "+newContest.getClientId());
+        
         IStorage storage = manager.getProfileStorage(newProfile, contestPassword);
         newContest.setStorage(storage);
+        
+        info("switchProfile save config to "+storage.getDirectoryName());
         
         newContest.setContestPassword(new String(contestPassword));
 
@@ -612,6 +617,8 @@ public class PacketHandler {
         storeProfiles();
         
         sendOutChangeProfileToAllClients(contest, currentContest.getProfile(), newProfile, new String(contestPassword), sendToServers);
+        
+        info("switchProfile start - to "+newProfile+" as Site "+contest.getSiteNumber()+" as user "+newContest.getClientId());
 
         return newContest;
     }
@@ -1767,10 +1774,10 @@ public class PacketHandler {
                 contest.setContestPassword(uberSecretatPassworden);
             }
 
-            // FIXME debug22 contest.setSiteNumber
-//            contest.setSiteNumber(clientId.getSiteNumber());
+            System.out.println("debug 22 before: "+contest.getSiteNumber()+" after " + clientId.getSiteNumber());
+            contest.setSiteNumber(clientId.getSiteNumber());
             
-            info(" handlePacket original LOGIN_SUCCESS before (Site  " + contest.getSiteNumber() + ")");
+            info(" debug 22 loginSuccess original LOGIN_SUCCESS before loadDataIntoModel (Site  " + contest.getSiteNumber() + ")");
        
             ContestLoader loader = new ContestLoader();
             loader.loadDataIntoModel(contest, controller, packet, connectionHandlerID);
