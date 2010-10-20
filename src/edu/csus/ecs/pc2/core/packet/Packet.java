@@ -30,7 +30,7 @@ public class Packet implements Serializable {
     /**
      * 
      */
-    private static final long serialVersionUID = 1201529987796311669L;
+    private static final long serialVersionUID = 2586415213109586805L;
 
     private ClientId sourceId = null;
 
@@ -46,6 +46,8 @@ public class Packet implements Serializable {
     
     private int packetNumber = 0;
     
+    private int originalPacketNumber = 0;
+    
     private String hostAddress = "(unset)";
 
     private String hostName = "(unset)";
@@ -60,6 +62,7 @@ public class Packet implements Serializable {
         this.type = type;
         packetCounter++;
         packetNumber = packetCounter;
+        originalPacketNumber = packetCounter;
         setIP();
     }
 
@@ -77,6 +80,7 @@ public class Packet implements Serializable {
         this.type = type;
         packetCounter++;
         packetNumber = packetCounter;
+        originalPacketNumber = packetCounter;
         setIP();
     }
 
@@ -160,5 +164,12 @@ public class Packet implements Serializable {
     public void setContestIdentifier(String contestIdentifier) {
         this.contestIdentifier = contestIdentifier;
     }
-
+    
+    public int getOriginalPacketNumber() {
+        return originalPacketNumber;
+    }
+    
+    public void setOriginalPacketNumber(int originalPacketNumber) {
+        this.originalPacketNumber = originalPacketNumber;
+    }
 }

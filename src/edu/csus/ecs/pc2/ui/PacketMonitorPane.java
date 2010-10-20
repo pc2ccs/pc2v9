@@ -190,10 +190,10 @@ public class PacketMonitorPane extends JPanePlugin {
     private MCLB getPacketListBox() {
         if (packetListBox == null) {
             packetListBox = new MCLB();
-            Object[] cols = { "Seq", "Type", "##", "Time", "From", "To", "Contents"};
+            Object[] cols = { "Seq", "Type", "##", "Orig", "Time", "From", "To", "Contents"};
             packetListBox.addColumns(cols);
 
-            packetListBox.setRowHeight(packetListBox.getRowHeight() * 3);
+            packetListBox.setRowHeight(packetListBox.getRowHeight() * 4);
             
             // Sorts for columns
 
@@ -203,34 +203,67 @@ public class PacketMonitorPane extends JPanePlugin {
 
             HeapSorter reverseNumericSorter = new HeapSorter();
             reverseNumericSorter.setComparator(new ReverseNumericStringComparator());
+            
+            int idx = 0;
 
             // Seq
-            setColumnSorter(packetListBox, 0, reverseNumericSorter, 1);
+            setColumnSorter(packetListBox, idx++, reverseNumericSorter, 1);
 
             // Type
-            setColumnSorter(packetListBox, 1, sorter, 2);
+            setColumnSorter(packetListBox, idx++, sorter, 2);
 
+            // Packet Number
+            setColumnSorter(packetListBox, idx++, numericStringSorter, 3);
+
+            // Original Packet Number
+            setColumnSorter(packetListBox, idx++, numericStringSorter, 4);
+            
             // Time
-            setColumnSorter(packetListBox, 2, numericStringSorter, 3);
-
-            // Time
-            setColumnSorter(packetListBox, 3, numericStringSorter, 4);
-
+            setColumnSorter(packetListBox, idx++, numericStringSorter, 5);
+            
             // From
-            setColumnSorter(packetListBox, 4, sorter, 5);
+            setColumnSorter(packetListBox, idx++, sorter, 6);
 
             // To
-            setColumnSorter(packetListBox, 5, sorter, 6);
+            setColumnSorter(packetListBox, idx++, sorter, 7);
             
             // Contents
-            setColumnSorter(packetListBox, 6, sorter, 7);
+            setColumnSorter(packetListBox, idx++, sorter, 8);
 
             packetListBox.autoSizeAllColumns();
 
             cols = null;
+            
+            packetListBox.addMouseListener(new java.awt.event.MouseAdapter() {
+                public void mouseClicked(java.awt.event.MouseEvent e) {
+                    if (e.getClickCount() > 1) {
+                        showSelectedRowsPacket();
+                    }
+                }
+            });
 
         }
         return packetListBox;
+    }
+
+    protected void showSelectedRowsPacket() {
+        
+//        Object[] cols = { "Seq", "Type", "##", "Orig", "Time", "From", "To", "Contents"};
+        
+        try {
+            int selectedRow = getPacketListBox().getSelectedIndex();
+            Packet packet = (Packet) getPacketListBox().getKeys()[selectedRow];
+            
+            Object [] selectedColumns = getPacketListBox().getSelectedRow();
+            JScrollPane scroll = (JScrollPane) selectedColumns[7];
+            
+            PacketViewerFrame frame = new PacketViewerFrame (packet, scroll);
+            frame.setVisible(true);
+            
+        } catch (Exception e) {
+            getController().logWarning("Unable to show packet ", e);
+        }
+        
     }
 
     void addRow(final Packet packet) {
@@ -239,11 +272,11 @@ public class PacketMonitorPane extends JPanePlugin {
 
             public void run() {
                 
-                Object [] row = createRow(packet);
+                Object [] row = buildPacketRow(packet);
                 
                 truncateTo(maxLines);
                 
-                packetListBox.insertRow(row, 0);
+                packetListBox.insertRow(row, packet, 0);
                 packetListBox.autoSizeAllColumns();
                 
                 // FIXME remove from list box if > 100
@@ -253,14 +286,12 @@ public class PacketMonitorPane extends JPanePlugin {
         });
     }
     
-
-
-    Object[] createRow(Packet packet) {
+    Object[] buildPacketRow(Packet packet) {
 
         Object[] objArray = new Object[packetListBox.getColumnCount()];
 
         objArray[0] = new Long(sequenceNumber++).toString();
-        
+
         long elapsed = 0;
         Run run = (Run) PacketFactory.getObjectValue(packet, PacketFactory.RUN);
         if (run != null) {
@@ -272,12 +303,14 @@ public class PacketMonitorPane extends JPanePlugin {
         }
 
         objArray[1] = packet.getType().toString();
-        objArray[2] = new Long(packet.getPacketNumber()).toString();
-        objArray[3] = new Long(elapsed).toString();
-        objArray[4] = getClientName(packet.getSourceId());
-        objArray[5] = getClientName(packet.getDestinationId());
-//        objArray[6] = PacketFormatter.summaryFormat(packet);
-        objArray[6] =  getPacketTree (packet);
+        objArray[2] = Integer.toString(packet.getPacketNumber());
+        // Object[] cols = { "Seq", "Type", "##", "Orig", "Time", "From", "To", "Contents"};
+        objArray[3] = Integer.toString(packet.getOriginalPacketNumber());
+
+        objArray[4] = Long.toString(elapsed);
+        objArray[5] = getClientName(packet.getSourceId());
+        objArray[6] = getClientName(packet.getDestinationId());
+        objArray[7] = getPacketTree(packet);
 
         return objArray;
     }

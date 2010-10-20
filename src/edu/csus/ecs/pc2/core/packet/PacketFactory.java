@@ -1876,7 +1876,9 @@ public final class PacketFactory {
      * @return copy of the input packet
      */
     public static Packet clonePacket(ClientId source, ClientId destination, Packet packet) {
-        return createPacket(packet.getType(), source, destination, (Properties) packet.getContent());
+        Packet newPacket = createPacket(packet.getType(), source, destination, (Properties) packet.getContent());
+        newPacket.setOriginalPacketNumber(packet.getOriginalPacketNumber());
+        return newPacket;
     }
     
     /**
@@ -1891,7 +1893,9 @@ public final class PacketFactory {
      * @return
      */
     public static Packet clonePacket(PacketType.Type type, ClientId source, ClientId destination, Packet packet) {
-        return createPacket(type, source, destination, (Properties) packet.getContent());
+        Packet newPacket = createPacket(type, source, destination, (Properties) packet.getContent());
+        newPacket.setOriginalPacketNumber(packet.getOriginalPacketNumber());
+        return newPacket;
     }
 
     public static Packet createUpdateSetting(ClientId source, ClientId destination, Judgement judgement) {

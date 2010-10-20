@@ -306,7 +306,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 packet.setContestIdentifier(contest.getContestIdentifier().toString());
             }
             connectionManager.send(packet);
-            
             outgoingPacket(packet);
             
         } catch (TransportException e) {
@@ -321,7 +320,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         try {
             packet.setContestIdentifier(contest.getContestIdentifier().toString());
             connectionManager.send(packet, connectionHandlerID);
-            
             outgoingPacket(packet);
             
         } catch (TransportException e) {
@@ -352,8 +350,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             try {
                 packet.setContestIdentifier(contest.getContestIdentifier().toString());
                 connectionManager.send(packet, connectionHandlerID);
-                
                 outgoingPacket(packet);
+                
             } catch (TransportException e) {
                 log.log(Log.SEVERE, "Exception sending packet to site " + siteNumber + " " + packet, e);
             }
@@ -1639,8 +1637,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     private void sendLoginFailure(ClientId destinationId, ConnectionHandlerID connectionHandlerID, String message) {
         Packet packet = PacketFactory.createLoginDenied(contest.getClientId(), destinationId, message);
         sendToClient(connectionHandlerID, packet);
-        
-        outgoingPacket(packet);
     }
 
     /**
@@ -1891,9 +1887,12 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     public void sendToServers(Packet packet) {
         
-        outgoingPacket(packet);
-
         ClientId[] clientIds = contest.getLocalLoggedInClients(ClientType.Type.SERVER);
+        
+        if (clientIds.length > 0){
+            outgoingPacket(packet);
+        }
+        
         for (ClientId clientId : clientIds) {
             ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(clientId);
             boolean isThisServer = isThisSite(clientId.getSiteNumber());
@@ -1912,6 +1911,11 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     private void sendPacketToClients(Packet packet, ClientType.Type type) {
 
         ClientId[] clientIds = contest.getLocalLoggedInClients(type);
+        
+        if (clientIds.length > 0){
+            outgoingPacket(packet);
+        }
+        
         for (ClientId clientId : clientIds) {
             if (isThisSite(clientId.getSiteNumber())) {
                 ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(clientId);
@@ -1931,25 +1935,17 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     public void sendToJudges(Packet packet) {
         sendPacketToClients(packet, ClientType.Type.JUDGE);
         sendPacketToClients(packet, ClientType.Type.SPECTATOR);
-        outgoingPacket(packet);
-
     }
 
     public void sendToSpectators(Packet packet) {
         sendPacketToClients(packet, ClientType.Type.SPECTATOR);
-        outgoingPacket(packet);
-
     }
     public void sendToAdministrators(Packet packet) {
         sendPacketToClients(packet, ClientType.Type.ADMINISTRATOR);
-        outgoingPacket(packet);
-
     }
 
     public void sendToScoreboards(Packet packet) {
         sendPacketToClients(packet, ClientType.Type.SCOREBOARD);
-        outgoingPacket(packet);
-
     }
 
     public void sendToTeams(Packet packet) {
@@ -1976,7 +1972,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         }
         if (!abort) {
             sendPacketToClients(packet, ClientType.Type.TEAM);
-            outgoingPacket(packet);
         }
     }
 
