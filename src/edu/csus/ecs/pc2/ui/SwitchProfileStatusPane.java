@@ -27,6 +27,7 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.ILoginListener;
 import edu.csus.ecs.pc2.core.model.IMessageListener;
+import edu.csus.ecs.pc2.core.model.IProfileListener;
 import edu.csus.ecs.pc2.core.model.ISiteListener;
 import edu.csus.ecs.pc2.core.model.LoginEvent;
 import edu.csus.ecs.pc2.core.model.MessageEvent;
@@ -34,6 +35,7 @@ import edu.csus.ecs.pc2.core.model.MessageEvent.Area;
 import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.model.ProfileChangeStatus;
 import edu.csus.ecs.pc2.core.model.ProfileChangeStatus.Status;
+import edu.csus.ecs.pc2.core.model.ProfileEvent;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.SiteEvent;
 import edu.csus.ecs.pc2.core.packet.Packet;
@@ -112,6 +114,8 @@ public class SwitchProfileStatusPane extends JPanePlugin {
         getContest().addSiteListener(new SiteListenerImplementation());
         getContest().addLoginListener(new LoginListenerImplementation());
         getContest().addMessageListener(new MessageListenerImplementation());
+        getContest().addProfileListener(new ProfileListenerImplementation());
+
     }
 
     private void reloadListBox() {
@@ -140,6 +144,7 @@ public class SwitchProfileStatusPane extends JPanePlugin {
      * @param login
      */
     private void updateStatusRow(ProfileChangeStatus status) {
+        
         int row = siteListBox.getIndexByKey(status);
         if (row == -1) {
             Object[] objects = buildSiteStatusRow(status);
@@ -580,7 +585,7 @@ public class SwitchProfileStatusPane extends JPanePlugin {
 
         public void messageAdded(MessageEvent event) {
             if (event.getArea().equals(Area.PROFILES)){
-                JOptionPane.showMessageDialog(null, event.getMessage(),"Switch Profile Message", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(null, event.getMessage(),"Switch Profile Message for Site "+getContest().getSiteNumber(), JOptionPane.INFORMATION_MESSAGE);
             }
             getController().getLog().warning(event.getMessage());
         }
@@ -588,6 +593,30 @@ public class SwitchProfileStatusPane extends JPanePlugin {
         public void messageRemoved(MessageEvent event) {
             // no action
             
+        }
+    }
+    
+
+    /**
+     * Profile Listener Implementation
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    protected class ProfileListenerImplementation implements IProfileListener {
+
+        public void profileAdded(ProfileEvent event) {
+        }
+
+        public void profileChanged(ProfileEvent event) {
+            reloadListBox();
+        }
+
+        public void profileRemoved(ProfileEvent event) {
+        }
+
+        public void profileRefreshAll(ProfileEvent profileEvent) {
+            updateCurrentSiteStatus();
         }
     }
     
