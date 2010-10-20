@@ -987,6 +987,7 @@ public class ProblemPane extends JPanePlugin {
         getIgnoreCaseCheckBox().setSelected(true);
         externalValidatorLabel.setText("");
         externalValidatorLabel.setToolTipText("");
+        ignoreCaseCheckBox.setSelected(false);
 
         if (inProblem.isValidatedProblem()) {
 

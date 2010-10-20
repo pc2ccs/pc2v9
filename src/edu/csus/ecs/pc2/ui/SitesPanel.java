@@ -107,7 +107,7 @@ public class SitesPanel extends JPanePlugin {
             siteButtonPanel.addMouseListener(new java.awt.event.MouseAdapter() {
                 public void mouseClicked(java.awt.event.MouseEvent e) {
                     if (e.isShiftDown()) {
-                        addNewSite();
+                        addNewTestSite();
                     }
                 }
             });
@@ -171,7 +171,7 @@ public class SitesPanel extends JPanePlugin {
             addSiteButton.setText("Add Site");
             addSiteButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    addNewTestSite();
+                    addNewSite();
                 }
             });
         }

@@ -11,6 +11,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -25,6 +26,8 @@ import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.IProfileListener;
+import edu.csus.ecs.pc2.core.model.ProfileEvent;
 import edu.csus.ecs.pc2.ui.AccountsPane;
 import edu.csus.ecs.pc2.ui.AutoJudgesPane;
 import edu.csus.ecs.pc2.ui.BalloonSettingsPane;
@@ -56,6 +59,7 @@ import edu.csus.ecs.pc2.ui.StandingsHTMLPane;
 import edu.csus.ecs.pc2.ui.StandingsPane;
 import edu.csus.ecs.pc2.ui.TeamStatusPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
+import java.awt.Dimension;
 
 /**
  * Administrator GUI.
@@ -101,6 +105,12 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
     private static final Color ACTIVE_TAB_COLOR = Color.BLUE;
     private static final Color INACTIVE_TAB_COLOR = Color.GRAY ;
+
+    private JPanel centerPane = null;
+
+    private JPanel aMessagePane = null;
+
+    private JLabel messageLabel = null;
     
     /**
      * This method initializes
@@ -148,6 +158,10 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
         this.controller = inController;
         final JFrame thisFrame = this;
 
+        updateProfileLabel();
+        
+        contest.addProfileListener(new ProfileListenerImplementation());
+        
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
 
@@ -395,9 +409,9 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
             topPanel = new JPanel();
             topPanel.setLayout(new BorderLayout());
             topPanel.setPreferredSize(new java.awt.Dimension(45, 45));
-            topPanel.add(getClockPane(), java.awt.BorderLayout.CENTER);
             topPanel.add(getExitButtonPane(), java.awt.BorderLayout.EAST);
             topPanel.add(getPadPane(), java.awt.BorderLayout.WEST);
+            topPanel.add(getCenterPane(), BorderLayout.CENTER);
         }
         return topPanel;
     }
@@ -462,11 +476,13 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
     private JPanel getClockPane() {
         if (clockPane == null) {
             clockLabel = new JLabel();
-            clockLabel.setText("JLabel");
+            clockLabel.setText("STOPPED");
+            clockLabel.setPreferredSize(new Dimension(100, 24));
             clockLabel.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 18));
             clockPane = new JPanel();
             clockPane.setLayout(new BorderLayout());
-            clockPane.add(clockLabel, java.awt.BorderLayout.CENTER);
+            clockPane.setPreferredSize(new java.awt.Dimension(85,34));
+            clockPane.add(clockLabel, BorderLayout.WEST);
         }
         return clockPane;
     }
@@ -541,6 +557,42 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
             throw new RuntimeException ("Unexpected ChangeEvent: " + e);
         }
     }
+
+    /**
+     * This method initializes centerPane
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getCenterPane() {
+        if (centerPane == null) {
+            centerPane = new JPanel();
+            centerPane.setLayout(new BorderLayout());
+            centerPane.add(getClockPane(), BorderLayout.WEST);
+            centerPane.add(getAMessagePane(), BorderLayout.CENTER);
+        }
+        return centerPane;
+    }
+
+    /**
+     * This method initializes aMessagePane
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getAMessagePane() {
+        if (aMessagePane == null) {
+            messageLabel = new JLabel();
+            messageLabel.setText("Active Profile is: \"Practice\"");
+            messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            messageLabel.setFont(new Font("Dialog", Font.BOLD, 18));
+            messageLabel.setForeground(new Color(0, 186, 0));
+            messageLabel.setHorizontalTextPosition(SwingConstants.CENTER);
+            aMessagePane = new JPanel();
+            aMessagePane.setLayout(new BorderLayout());
+            aMessagePane.add(messageLabel, BorderLayout.CENTER);
+        }
+        return aMessagePane;
+    }
+
     public static void main(String[] args) {
         AdministratorView administratorView = new AdministratorView();
         administratorView.setVisible(true);
@@ -607,5 +659,53 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
         FrameUtilities.regularCursor(this);
     }
+    
+    private void updateProfileLabel() {
+
+        int numberProfiles = contest.getProfiles().length;
+
+        String s = "";
+
+        if (numberProfiles > 1) {
+            s = "Active Profile is: \"" + contest.getProfile().getName() + "\"";
+        }
+        final String message = s;
+
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                messageLabel.setText(message);
+            }
+        });
+    }
+    
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    
+    // $HeadURL$
+    protected class ProfileListenerImplementation implements IProfileListener {
+
+        public void profileAdded(ProfileEvent event) {
+            updateProfileLabel();
+        }
+
+        public void profileChanged(ProfileEvent event) {
+            updateProfileLabel();
+        }
+
+        public void profileRemoved(ProfileEvent event) {
+            // ignore
+            
+        }
+
+        public void profileRefreshAll(ProfileEvent profileEvent) {
+            updateProfileLabel();
+        }
+    }
+        
+
+
 
 } // @jve:decl-index=0:visual-constraint="10,10"

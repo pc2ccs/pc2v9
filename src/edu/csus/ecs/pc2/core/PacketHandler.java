@@ -564,7 +564,7 @@ public class PacketHandler {
             newContest.readConfiguration(contest.getSiteNumber(), controller.getLog());
         } catch (Exception e) {
             e.printStackTrace(); // debug 22
-            throw new ProfileException(newProfile, "Unable to read configuration ");
+            throw new ProfileException(newProfile, "Unable to read configuration ", e);
         }
         
         if (newContest.getProfile() == null){
@@ -756,24 +756,22 @@ public class PacketHandler {
             ProfileManager manager = new ProfileManager();
             
             if (manager.createProfilesPathandFiles(newProfile, contestPassword)) {
-                
+
                 /**
-                 * If the profiles paths need to be created, then we need
-                 * to create the profile.
+                 * If the profiles paths need to be created, then we need to create the profile.
                  */
-                
-                IStorage storage = createStorage (newProfile, contestPassword);
-                
+
+                IStorage storage = createStorage(newProfile, contestPassword);
+
                 int siteNumber = contest.getSiteNumber();
-                IInternalContest contest2= initializeContest (storage, siteNumber);
-                
-                
-                createProfileFromPacket (newProfile, contest2, packet, connectionHandlerID);
-                
+                IInternalContest contest2 = initializeContest(storage, siteNumber);
+
+                createProfileFromPacket(newProfile, contest2, packet, connectionHandlerID);
+
                 /**
                  * Then save the new contest information.
                  */
-
+                contest2.storeConfiguration(controller.getLog());
             } 
             
             if (manager.isProfileAvailable(newProfile, contestPassword.toCharArray())) {

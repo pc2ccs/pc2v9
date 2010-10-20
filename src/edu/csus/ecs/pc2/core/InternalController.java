@@ -1218,8 +1218,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                                  * Non-matching contest Ids - do not process packet
                                  */
                                 
-                                // FIXME debug22 remove show message dialog
-                                JOptionPane.showMessageDialog(null, "Site "+contest.getSiteNumber()+" Contest Ids do not match for packet # " + packet.getPacketNumber() + "\n" + packet);
+                                contest.addMessage(Area.INCOMING_PACKET, getServerClientId(), getServerClientId(), 
+                                        "Packet contestId does not match for "+packet+" local:"+localContestId+" remote:"+remoteContestId);
                                 
                                 logWarning("Packet contestId does not match for "+packet+" local:"+localContestId+" remote:"+remoteContestId);
                                 

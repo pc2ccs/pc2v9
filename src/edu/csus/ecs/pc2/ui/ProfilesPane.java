@@ -170,7 +170,7 @@ public class ProfilesPane extends JPanePlugin {
             switchButton.setPreferredSize(new java.awt.Dimension(100, 26));
             switchButton.setSelected(false);
             switchButton.setText("Switch");
-            switchButton.setToolTipText("Switch to a different profile");
+            switchButton.setToolTipText("Switch to the selected profile");
             switchButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     switchSelectedProfile();
@@ -314,7 +314,7 @@ public class ProfilesPane extends JPanePlugin {
             cloneButton.setText("Clone");
             cloneButton.setMnemonic(java.awt.event.KeyEvent.VK_C);
             cloneButton.setEnabled(true);
-            cloneButton.setToolTipText("Create a copy of the current profile");
+            cloneButton.setToolTipText("Create a copy of the active profile");
             cloneButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     cloneProfile();
@@ -426,7 +426,7 @@ public class ProfilesPane extends JPanePlugin {
             resetContestButton = new JButton();
             resetContestButton.setMnemonic(java.awt.event.KeyEvent.VK_S);
             resetContestButton.setText("Reset");
-            resetContestButton.setToolTipText("Reset active contest profile - clear runs, clars, reset contest time");
+            resetContestButton.setToolTipText("Reset the active contest profile - clear runs, clars, reset contest time");
             resetContestButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     resetContest();

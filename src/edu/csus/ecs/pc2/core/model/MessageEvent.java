@@ -40,6 +40,10 @@ public class MessageEvent {
          */
         PROFILES,
         /**
+         * If there is something wrong with an incoming packet. 
+         */
+        INCOMING_PACKET,
+        /**
          * 
          */
         OTHER,

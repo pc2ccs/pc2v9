@@ -231,10 +231,11 @@ public class SwitchProfileConfirmPane extends JPanePlugin {
     public Profile getProfile() {
         return profile;
     }
-
+    
     public void setProfile(Profile profile) {
         getContestPasswordTextField().setText("");
         this.profile = profile;
+        contestPasswordLabel.setText("Enter Contest Password for "+profile.getName());
         getContestPasswordTextField().requestFocus();
     }
 

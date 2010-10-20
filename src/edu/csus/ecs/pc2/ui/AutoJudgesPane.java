@@ -247,6 +247,7 @@ public class AutoJudgesPane extends JPanePlugin {
                     autoJudgeListBox.replaceRow(objects, rowNumber);
                 }
                 autoJudgeListBox.autoSizeAllColumns();
+                autoJudgeListBox.sort();
             }
         });
     }
