@@ -174,13 +174,13 @@ public class ProfileSavePane extends JPanePlugin {
     private void setCheckBoxesSelected(boolean selected) {
 
         getCopyAccountsCheckBox().setSelected(selected);
-        getCopyClarificationsCheckBox().setSelected(selected);
+        getCopyClarificationsCheckBox().setSelected(! selected);
         getCopyContestSettingsCheckBox().setSelected(selected);
         getCopyGroupsCheckBox().setSelected(selected);
         getCopyJudgementsCheckbox().setSelected(selected);
         getCopyLanguagesCheckBox().setSelected(selected);
-        getCopyProblemsCheckBox().setSelected(selected);
-        getCopyRunsCheckBox().setSelected(selected);
+        getCopyProblemsCheckBox().setSelected(! selected);
+        getCopyRunsCheckBox().setSelected(! selected);
         getCopyNotificationsCheckBox().setSelected(selected);
         getResetContestTimeCheckBox().setSelected(selected);
 

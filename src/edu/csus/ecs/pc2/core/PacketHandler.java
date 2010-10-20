@@ -49,7 +49,6 @@ import edu.csus.ecs.pc2.core.model.RunUtilities;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.packet.PacketFactory;
-import edu.csus.ecs.pc2.core.packet.PacketType;
 import edu.csus.ecs.pc2.core.packet.PacketType.Type;
 import edu.csus.ecs.pc2.core.security.FileSecurity;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
@@ -466,12 +465,11 @@ public class PacketHandler {
         // inProfile the original profile
         // Profile inProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE);
 
-
         Profile newProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.NEW_PROFILE);
         String contestPassword = (String) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_PASSWORD);
         
         if (newProfile.getSiteNumber() == 0){
-            throw new ProfileException("Profile site number is zero, must be a valid site number");
+            newProfile.setSiteNumber(contest.getSiteNumber());
         }
 
         if (contestPassword == null) {
@@ -859,7 +857,7 @@ public class PacketHandler {
      * 
      * @param newProfile the profile to store/load/create.
      * @param contest2 the contest where settings will be loaded.
-     * @param packet a {@link PacketType.Type#UPDATE_CLIENT_PROFILE}.
+     * @param packet a {@link edu.csus.ecs.pc2.core.packet.PacketType.Type#UPDATE_CLIENT_PROFILE}.
      * @param connectionHandlerID 
      * @throws FileSecurityException 
      * @throws ClassNotFoundException 
@@ -1083,7 +1081,7 @@ public class PacketHandler {
              */
             Profile updatedProfile = contest.getProfile();
             updatedProfile.setActive (false);
-            updatedProfile.setName("Backup "+updatedProfile.getName());
+            updatedProfile.setName("Backup of "+updatedProfile.getName());
             
             /**
              * This clears all submission data and counters.
@@ -2536,6 +2534,9 @@ public class PacketHandler {
             contest.updateProfile(profile);
             if (contest.getProfile().equals(profile)){
                 contest.setProfile(profile);
+            }
+            if (isServer()){
+                storeProfiles();
             }
         }
 

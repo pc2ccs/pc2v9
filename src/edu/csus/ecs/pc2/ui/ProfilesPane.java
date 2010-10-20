@@ -130,8 +130,8 @@ public class ProfilesPane extends JPanePlugin {
         
         profileNameLabel = new JLabel();
         profileNameLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        profileNameLabel.setBounds(new Rectangle(51, 29, 134, 23));
-        profileNameLabel.setText("Profile Name");
+        profileNameLabel.setBounds(new Rectangle(51, 29, 189, 23));
+        profileNameLabel.setText("Active Profile Name");
         profileNameLabel.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent e) {
                 if (e.getClickCount() > 1 && e.isControlDown() && e.isShiftDown()) {
@@ -210,7 +210,7 @@ public class ProfilesPane extends JPanePlugin {
     private JTextField getProfileTextField() {
         if (profileTextField == null) {
             profileTextField = new JTextField();
-            profileTextField.setBounds(new Rectangle(202, 25, 303, 30));
+            profileTextField.setBounds(new Rectangle(257, 25, 248, 30));
             profileTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableSetButton();
@@ -228,8 +228,8 @@ public class ProfilesPane extends JPanePlugin {
     private JPanel getCenterPane() {
         if (centerPane == null) {
             profileDescriptionLabel = new JLabel();
-            profileDescriptionLabel.setText("Description");
-            profileDescriptionLabel.setBounds(new Rectangle(51, 78, 134, 23));
+            profileDescriptionLabel.setText("Active Profile Description");
+            profileDescriptionLabel.setBounds(new Rectangle(51, 78, 189, 23));
             profileDescriptionLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             centerPane = new JPanel();
             centerPane.setLayout(new BorderLayout());
@@ -324,11 +324,7 @@ public class ProfilesPane extends JPanePlugin {
         return cloneButton;
     }
 
-    protected void cloneProfile() {
-        getProfileSaveFrame().setTitle("Clone active profile: " + getProfileName() + " (" +getProfileDescription()+")");
-        getProfileSaveFrame().setSaveButtonName(ProfileSavePane.CLONE_BUTTON_NAME);
-        getProfileSaveFrame().setVisible(true);
-    }
+
 
     private String getProfileName() {
         return getContest().getProfile().getName();
@@ -661,7 +657,7 @@ public class ProfilesPane extends JPanePlugin {
     private JTextField getProfileDescriptionTextField() {
         if (profileDescriptionTextField == null) {
             profileDescriptionTextField = new JTextField();
-            profileDescriptionTextField.setBounds(new Rectangle(202, 75, 303, 29));
+            profileDescriptionTextField.setBounds(new Rectangle(257, 75, 248, 29));
             profileDescriptionTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableSetButton();
@@ -889,6 +885,12 @@ public class ProfilesPane extends JPanePlugin {
         showHidden = getShowHiddenProfilesCheckbox().isSelected();
         refreshProfilesList();
         
+    }
+
+    protected void cloneProfile() {
+        getProfileSaveFrame().setTitle("Clone active profile: " + getProfileName() + " (" +getProfileDescription()+")");
+        getProfileSaveFrame().setSaveButtonName(ProfileSavePane.CLONE_BUTTON_NAME);
+        getProfileSaveFrame().setVisible(true);
     }
 
 } // @jve:decl-index=0:visual-constraint="25,9"
