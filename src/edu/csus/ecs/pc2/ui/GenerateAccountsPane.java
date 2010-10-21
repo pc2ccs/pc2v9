@@ -15,6 +15,7 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
+import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -348,6 +349,11 @@ public class GenerateAccountsPane extends JPanePlugin {
             return 0;
         }
     }
+    
+    private boolean isLocalLoggedIn(int siteNumber) {
+        ClientId serverId = new ClientId(siteNumber, Type.SERVER, 0);
+        return getContest().isLocalLoggedIn(serverId) || getContest().isRemoteLoggedIn(serverId);
+    }
 
     protected void generateAccounts() {
 
@@ -364,6 +370,14 @@ public class GenerateAccountsPane extends JPanePlugin {
             if (index > -1) {
                 Site site = (Site) getSiteSelectionComboBox().getSelectedItem();
                 theSiteNumber = site.getSiteNumber();
+            }
+            
+            if (theSiteNumber != getContest().getSiteNumber()) {
+                if (!isLocalLoggedIn(theSiteNumber)) {
+                    JOptionPane.showMessageDialog(this, "Not currently connected to Site " + theSiteNumber + ", connect to that server and try again", "Not connected to site " + theSiteNumber,
+                            JOptionPane.INFORMATION_MESSAGE);
+                    return;
+                }
             }
 
             int count = getIntegerValue(adminCountTextField.getText());
