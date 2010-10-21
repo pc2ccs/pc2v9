@@ -233,11 +233,6 @@ public class ContestXML {
         String firstPart = versionNumber.trim().replaceFirst(" .*", ""); // remove last part
         String [] parts = firstPart.split("[.]");
         
-//        System.out.println("debug 22 = "+firstPart);
-//        for (String s : parts){
-//            System.out.println("debug 22 part = "+s);
-//        }
-        
         if (i < parts.length){
             return getIntegerValue (parts[i]);
         }

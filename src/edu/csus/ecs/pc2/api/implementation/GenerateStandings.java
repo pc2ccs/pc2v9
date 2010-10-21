@@ -153,7 +153,6 @@ public class GenerateStandings {
 
                     ClientId clientId = new ClientId(siteNumber, Type.TEAM, clientNumber);
 
-//                    System.out.println("debug 22 Client is " + clientId);
                     IClient client = new ClientImplementation(clientId, contest);
 
                     IProblemDetails[] clientProblemDetails = getClientProblemDetails(contest, client, node);

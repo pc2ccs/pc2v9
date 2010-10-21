@@ -35,6 +35,10 @@ public class ProfileChangeStatus implements IElementObject, Serializable {
          */
         UNDEFINED,
         /**
+         * 
+         */
+        NOT_CONNECTED,
+        /**
          * Site is ready to sync with other sites.
          */
         READY,
@@ -46,7 +50,7 @@ public class ProfileChangeStatus implements IElementObject, Serializable {
 
     private Site site;
 
-    private Status status = Status.NOTREADY;
+    private Status status = Status.NOT_CONNECTED;
 
     private boolean active = true;
     

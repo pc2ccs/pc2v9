@@ -412,7 +412,6 @@ public class StartupContestDialog extends JDialog {
                 throw new Exception("Trouble determining contest password (" + fileSecurityException.getMessage() + ")");
             }
         } catch (Exception e) {
-            e.printStackTrace(); // debug 22
             throw new Exception("Bad Trouble dude " + e.getLocalizedMessage());
         }
     }

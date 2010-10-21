@@ -17,6 +17,16 @@ import edu.csus.ecs.pc2.core.security.FileStorage;
 
 // $HeadURL$
 public class RunListTest extends TestCase {
+    
+    protected String getTestDirectoryName(){
+        String testDir = "testing";
+        
+        if (!new File(testDir).isDirectory()) {
+            new File(testDir).mkdirs();
+        }
+
+        return testDir;
+    }
 
     protected void setUp() throws Exception {
         super.setUp();
@@ -28,9 +38,9 @@ public class RunListTest extends TestCase {
 
     public void testClear() throws Exception {
 
-        String testDir = "test" + File.separator + "runlistclear";
-
+        String testDir = getTestDirectoryName() + File.separator + "runlistclear";
         new File(testDir).mkdirs();
+        
         FileStorage storage = new FileStorage(testDir);
         RunList runList = new RunList(storage);
 

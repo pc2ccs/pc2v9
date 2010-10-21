@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.UUID;
@@ -17,6 +18,16 @@ import edu.csus.ecs.pc2.core.security.FileStorage;
 
 // $HeadURL$
 public class ElementIdTest extends TestCase {
+    
+    protected String getTestDirectoryName(){
+        String testDir = "testing";
+        
+        if (!new File(testDir).isDirectory()) {
+            new File(testDir).mkdirs();
+        }
+
+        return testDir;
+    }
 
     /*
      * Test method for 'edu.csus.ecs.pc2.core.ElementId.hashCode()'
@@ -72,10 +83,10 @@ public class ElementIdTest extends TestCase {
     
     private Serializable serializeObject (Serializable serializable) throws Exception {
         
-        FileStorage fileStorage = new FileStorage(".");
+        FileStorage fileStorage = new FileStorage(getTestDirectoryName() + File.separator);
         
         UUID id = UUID.randomUUID();
-        String fileName = "EIT"+id.toString();
+        String fileName = getTestDirectoryName() + File.separator + "EIT" + id.toString();
         
         fileStorage.writeObjectToFile(fileName, serializable);
         return fileStorage.load(fileName);

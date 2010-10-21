@@ -836,8 +836,6 @@ public class RunsPanel extends JPanePlugin {
 
         // TODO bulk load these records, this is closer only do the count,size,sort at end
         
-//        System.out.println("debug22 Filter is "+filter);
-        
         if (filter.isFilterOn()){
             getFilterButton().setForeground(Color.BLUE);
             getFilterButton().setToolTipText("Edit filter - filter ON");
@@ -857,7 +855,6 @@ public class RunsPanel extends JPanePlugin {
                 }
             }
 
-//            System.out.println("debug22 matches "+filter.matches(run)+" run is "+run);
             if (filter != null) {
                 if (!filter.matches(run)) {
                     removeRunRow(run);

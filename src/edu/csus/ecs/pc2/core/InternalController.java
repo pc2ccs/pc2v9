@@ -1573,11 +1573,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         } catch (ProfileException profileException) {
             
             log.log(Level.WARNING, "Error switching profile: "+profileException.getMessage(), profileException );
-            Profile exProfile = profileException.getProfile();
-            if (exProfile != null){
-                System.err.println("Exception in profile: "+exProfile.getName()+" path: "+exProfile.getProfilePath()); // FIXME debug22
-            }
-            profileException.printStackTrace(); // FIXME debug 22
             
             if (profileException.getMessage().indexOf("FileSecurityException") != -1){
                 

@@ -56,6 +56,7 @@ import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
 import edu.csus.ecs.pc2.profile.ProfileManager;
+import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
  * Process all incoming packets.
@@ -427,10 +428,6 @@ public class PacketHandler {
         Packet requestedPacket = createLoginSuccessPacket(remoteServerId, contest.getContestPassword());
         Packet remoteDataPacket = PacketFactory.clonePacket(Type.UPDATE_REMOTE_DATA, getServerClientId(), remoteServerId, requestedPacket);
         controller.sendToClient(remoteDataPacket);
-        
-//        String message = "debug22 handleRequestRemoteData "+ packet;
-//        Packet messPacket = PacketFactory.createMessage(getServerClientId(), packet.getSourceId(), message, new Exception(message));
-//        controller.sendToAdministrators(messPacket);
     }
 
     private void handleRunSubmissionConfirmationServer(Packet packet, ClientId fromId) throws IOException, ClassNotFoundException, FileSecurityException  {
@@ -563,15 +560,12 @@ public class PacketHandler {
              */
             newContest.readConfiguration(contest.getSiteNumber(), controller.getLog());
         } catch (Exception e) {
-            e.printStackTrace(); // debug 22
             throw new ProfileException(newProfile, "Unable to read configuration ", e);
         }
         
         if (newContest.getProfile() == null){
             newContest.setProfile(newProfile);
         }
-        
-//        Utilities.viewReport(new ProblemsReport(), "debug 22 Report - Site "+newContest.getSiteNumber(), newContest, controller);
         
         try {
             newContest.storeConfiguration(controller.getLog());
@@ -792,12 +786,46 @@ public class PacketHandler {
 
             contest.resetSubmissionData();
             contest.resetConfigurationData();
-           
+  
+            // TODO huh
+//            unRegisterPlugins();
+            
             ContestLoader loader = new ContestLoader();
             loader.loadDataIntoModel(contest, controller, packet, connectionHandlerID);
             loader = null;
             
+//            reRegisterPlugins();
+            
             contest.fireAllRefreshEvents();
+        }
+    }
+
+    /**
+     * Remove all listeners from model.
+     */
+    @SuppressWarnings("unused") // FIXME 
+    private void unRegisterPlugins() {
+        contest.removeAllListeners(); 
+
+
+    }
+
+    /**
+     * Add all listeners into model.
+     */
+  @SuppressWarnings("unused") // FIXME 
+  private void reRegisterPlugins() {
+
+        for (UIPlugin plugin : controller.getPluginList()) {
+
+            try {
+                plugin.setContestAndController(contest, controller);
+
+                controller.getLog().info("plugin.setContestAndController for " + plugin.getPluginTitle());
+
+            } catch (Exception e) {
+                controller.logWarning("Problem registering plugin "+plugin.getPluginTitle(), e);
+            }
         }
     }
 
@@ -1770,11 +1798,7 @@ public class PacketHandler {
                 contest.setContestPassword(uberSecretatPassworden);
             }
 
-            System.out.println("debug 22 before: "+contest.getSiteNumber()+" after " + clientId.getSiteNumber());
             contest.setSiteNumber(clientId.getSiteNumber());
-            
-            info(" debug 22 loginSuccess original LOGIN_SUCCESS before loadDataIntoModel (Site  " + contest.getSiteNumber() + ")");
-       
             ContestLoader loader = new ContestLoader();
             loader.loadDataIntoModel(contest, controller, packet, connectionHandlerID);
             loader = null;
@@ -3163,9 +3187,7 @@ public class PacketHandler {
                 sendRunFilesRequestToServer(remoteSiteNumber, localLastRunId);
             } // else { no files to fetch
             
-        } else {
-            new Exception("No runs at all from site " + packet.getSourceId().getSiteNumber()).printStackTrace(); // debug 22
-        }
+        } // else no runs from that site, ok.
     }
     
     /**
@@ -3212,7 +3234,6 @@ public class PacketHandler {
      */
     private void sendRunFilesToServer(int siteNumber, int lastRunId) {
 
-//        System.out.println("debug22 sendRunFilesToServer Fetch from ite "+siteNumber+" get from run id "+lastRunId); 
         Run[] runs = getLocalRunsStartingAt(lastRunId);
         RunFiles[] files = getRunFiles(runs);
         ClientId remoteServerId = new ClientId(siteNumber, ClientType.Type.SERVER, 0);
@@ -3573,15 +3594,12 @@ public class PacketHandler {
         int targetSiteNumber = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
         ClientId remoteServerId = new ClientId(targetSiteNumber, ClientType.Type.SERVER, 0);
         
-        System.out.println("debug22 - handleRequestServerStatus send to site "+targetSiteNumber+" this site is "+contest.getSiteNumber());
-        
         if (isThisSite(targetSiteNumber)){
             
             Profile expectedProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE);
             sendStatusToServers(packet, expectedProfile);
  
         } else {
-            System.out.println("debug22 - handleRequestServerStatus forward to site "+targetSiteNumber);
             /**
              * Send to target server.
              */
@@ -3599,8 +3617,6 @@ public class PacketHandler {
      */
     private void sendStatusToServers(Packet packet, Profile expectedProfile) {
         
-        System.out.println("debug22 - sendStatusToServers send to site "+packet);
-        
         Status status = Status.NOTREADY;
         if (contest.getProfile().equals(expectedProfile)){
             status = Status.READY;
@@ -3611,8 +3627,6 @@ public class PacketHandler {
         Packet statusPacket = PacketFactory.createServerStatusPacket(getServerClientId(), remoteServerId, contest.getProfile(), status, site);
         
         controller.sendToServers(statusPacket);
-        
-        System.out.println("debug22 - sendStatusToServers send to site "+packet);
     }
 
     /**

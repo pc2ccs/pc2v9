@@ -20,6 +20,16 @@ public class FileSecurityTest extends TestCase {
     static {
         insureDirectoriesRemoved();
     }
+    
+    protected static String  getTestDirectoryName(){
+        String testDir = "testing";
+        
+        if (!new File(testDir).isDirectory()) {
+            new File(testDir).mkdirs();
+        }
+
+        return testDir;
+    }
 
     public FileSecurityTest() {
         super();
@@ -35,18 +45,20 @@ public class FileSecurityTest extends TestCase {
         boolean ableToRemoveDirectories = true;
 
         String[] dirNames = { "fileSecVPDir", "fileSecVPDirGCD", "getSecretK", "getSecretKTwo" };
-        for (String name : dirNames) {
+        for (String filename : dirNames) {
+            String name = getTestDirectoryName() + File.separator + filename;
             ableToRemoveDirectories = ableToRemoveDirectories && insureDirRemoved(name);
             // System.err.println("debug removing directory "+ableToRemoveDirectories+" "+name);
         }
 
         if (!ableToRemoveDirectories) {
-            System.err.println("Warning could not clear all directories created by previous test");
-            for (String name : dirNames) {
+            for (String filename : dirNames) {
+                String name = getTestDirectoryName() + File.separator + filename;
                 if (new File(name).exists()) {
-                    System.err.println("Dir " + name + " still exists");
+                    System.err.println("Unable to remove directory: "+name);
                 }
             }
+            fail("Could not clear all directories created by previous test");
         }
 
     }
@@ -83,7 +95,7 @@ public class FileSecurityTest extends TestCase {
 
     public void testSaveWriteRead() {
         
-        String testDir = ".";
+        String testDir = getTestDirectoryName();
         
         FileSecurity fileSecurity = new FileSecurity(testDir);
 
@@ -121,7 +133,7 @@ public class FileSecurityTest extends TestCase {
 
     public void testVerifyPassword() {
 
-        String dirname = "fileSecVPDir";
+        String dirname = getTestDirectoryName() + File.separator + "fileSecVPDir";
 
         FileSecurity fileSecurity = new FileSecurity(dirname);
 
@@ -145,6 +157,9 @@ public class FileSecurityTest extends TestCase {
 
     public void testVerifyPasswordNegative() {
 
+        /**
+         * Purposefully bad directory do not change name
+         */
         String dirname = "/baddirname";
 
         FileSecurity fileSecurity = new FileSecurity(dirname);
@@ -169,6 +184,9 @@ public class FileSecurityTest extends TestCase {
 
     public void testWriteSealedFileNegative() {
 
+        /**
+         * Purposefully bad directory do not change name
+         */
         String badDirName = "/baddirname"; // save to bad directory
 
         FileSecurity fileSecurity = new FileSecurity(badDirName);
@@ -189,7 +207,7 @@ public class FileSecurityTest extends TestCase {
      * Test method for 'edu.csus.ecs.pc2.core.security.FileSecurity.getContestDirectory()'
      */
     public void testGetContestDirectory() {
-        String dirname = "fileSecVPDirGCD" + File.separator;
+        String dirname = getTestDirectoryName() + File.separator + "fileSecVPDirGCD" + File.separator;
 
         FileSecurity security = new FileSecurity(dirname);
         assertEquals("getContestDirectory", dirname, security.getContestDirectory());
@@ -215,7 +233,7 @@ public class FileSecurityTest extends TestCase {
      */
     public void testGetPassword() {
 
-        String dirname = "fileSecVPDir";
+        String dirname = getTestDirectoryName() + File.separator + "fileSecVPDir";
 
         try {
             FileSecurity security = new FileSecurity(dirname);
@@ -234,17 +252,11 @@ public class FileSecurityTest extends TestCase {
 
     }
 
-    @SuppressWarnings("unused")
-    private void failTest(String string) {
-        System.err.println("Failed TEST " + string);
-        assertTrue(false);
-    }
-
     private void failTest(String string, Exception e) {
         System.err.println("Failed TEST " + string);
         System.err.flush();
         e.printStackTrace(System.err);
-        assertTrue(false);
+        fail(string);
     }
 
 }

@@ -2538,6 +2538,7 @@ public class InternalContest implements IInternalContest {
         profileListenerList.removeAllElements();
         runListenerList.removeAllElements();
         siteListenerList.removeAllElements();
+        messageListenerList.removeAllElements();
     }
 
     public void fireAllRefreshEvents() {

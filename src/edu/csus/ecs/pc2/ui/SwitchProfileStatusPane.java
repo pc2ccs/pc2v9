@@ -526,7 +526,11 @@ public class SwitchProfileStatusPane extends JPanePlugin {
         
         profileStatusList = new ProfileChangeStatusList(); 
         for (Site site : getContest().getSites()) {
-            profileStatusList.add(new ProfileChangeStatus(site));
+            ProfileChangeStatus status = new ProfileChangeStatus(site);
+            if (isLocalLoggedIn(site.getSiteNumber())){
+                status.setStatus(Status.NOTREADY);
+            }
+            profileStatusList.add(status);
         }
         
         updateCurrentSiteStatus();

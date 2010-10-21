@@ -26,6 +26,16 @@ public class ConfigurationIOTest extends TestCase {
     protected void tearDown() throws Exception {
         super.tearDown();
     }
+    
+    protected String getTestDirectoryName(){
+        String testDir = "testing";
+        
+        if (!new File(testDir).isDirectory()) {
+            new File(testDir).mkdirs();
+        }
+
+        return testDir;
+    }
 
     /**
      * Create testing directory and initialize storage.
@@ -47,7 +57,7 @@ public class ConfigurationIOTest extends TestCase {
         IInternalContest contest = new InternalContest();
         contest.setSiteNumber(siteNumber);
 
-        String configDirName = "configio" + File.separator + "testdir" + getRandNumber();
+        String configDirName = getTestDirectoryName() + File.separator + "configio" + File.separator + "testdir" + getRandNumber();
 
         IStorage storage = createStorage(configDirName);
 
@@ -111,7 +121,7 @@ public class ConfigurationIOTest extends TestCase {
 
     /**
      * 
-     * @return randome number
+     * @return random number
      */
     private int getRandNumber() {
         Random r = new Random();

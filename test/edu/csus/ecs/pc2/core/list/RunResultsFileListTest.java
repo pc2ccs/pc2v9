@@ -28,8 +28,15 @@ public class RunResultsFileListTest extends TestCase {
 
 
     private int siteNumber = 45;
+    
+    protected String getTestDirectoryName(){
+        String testDir = "testing";
+        
+        if (!new File(testDir).isDirectory()) {
+            new File(testDir).mkdirs();
+        }
 
-    public static void main(String[] args) {
+        return testDir;
     }
 
     protected void setUp() throws Exception {
@@ -118,9 +125,9 @@ public class RunResultsFileListTest extends TestCase {
 
         RunResultFiles runResultFiles = new RunResultFiles(run, problem.getElementId(), judgementRecord, executionData);
         
-        String dirname = "runResFileListTest";
+        String dirname = getTestDirectoryName() + File.separator + "runResFileListTest";
         new File(dirname).mkdirs();
-        
+       
         // write to disk
         
         FileStorage fileStorage = new FileStorage(dirname);

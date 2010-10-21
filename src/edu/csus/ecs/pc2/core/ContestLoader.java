@@ -831,17 +831,13 @@ public class ContestLoader {
     void loadDataIntoModel(IInternalContest contest, IInternalController controller, Packet packet, ConnectionHandlerID connectionHandlerID) throws IOException, ClassNotFoundException,
             FileSecurityException {
 
-        ClientId whoPacket = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
+//        ClientId whoPacket = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
         ClientId who = (ClientId) packet.getDestinationId();
 
         if (who != null) {
             contest.setClientId(who);
         }
         
-        System.out.println("debug 22 - loadDataIntoModel packet "+packet);
-        System.out.println("debug 22 - loadDataIntoModel CLIENT_ID "+whoPacket);
-        System.out.println("debug 22 - loadDataIntoModel getDestinationId "+who);
-
         controller.setSiteNumber(who.getSiteNumber());
 
         setProfileIntoModel(contest, controller, packet);
