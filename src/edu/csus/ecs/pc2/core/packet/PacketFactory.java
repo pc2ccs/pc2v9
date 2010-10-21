@@ -415,9 +415,10 @@ public final class PacketFactory {
         return packet;
     }
 
-    public static Packet createMessage(ClientId source, ClientId destination, String message, Exception ex) {
+    public static Packet createMessage(ClientId source, ClientId destination, Area area, String message, Exception ex) {
         Properties prop = new Properties();
         prop.put(MESSAGE_STRING, message);
+        prop.put(MESSAGE_AREA, area);
         prop.put(EXCEPTION, ex);
         Packet packet = new Packet(Type.MESSAGE, source, destination, prop);
         return packet;

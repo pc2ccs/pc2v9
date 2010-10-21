@@ -375,9 +375,11 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             } else {
                 try {
                     packetArchiver.writeNextPacket(packet);
-                    info("Unable to send packet to " + toClientId + " not logged in.  Packet saved in: " + packetArchiver.getLastArchiveFilename());
+                    logWarning("Unable to send packet to " + toClientId + " not logged in.  Packet saved in: " + packetArchiver.getLastArchiveFilename());
+                    sendMessage (Area.OTHER, "Unable to send packet to " + toClientId + " not logged in. "+packet);
                 } catch (Exception e) {
-                    info("Unable to send packet to " + toClientId + " could not save packet", e);
+                    logWarning("Unable to send packet to " + toClientId + " could not save packet", e);
+                    sendMessage (Area.OTHER, "Unable to send packet to " + toClientId + " not logged in. "+packet, e);
                 }
             }
 
@@ -399,6 +401,26 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         // }
 
         info("sendToClient af to " + packet.getDestinationId() + " " + packet);
+    }
+
+    private void sendMessage(Area area, String message) {
+        Packet messPacket = PacketFactory.createMessage(getServerClientId(), PacketFactory.ALL_SERVERS, area, message);
+        sendToServers(messPacket);
+    }
+    
+    private void sendMessage(Area area, String message, Exception ex) {
+        Packet messPacket = PacketFactory.createMessage(getServerClientId(), PacketFactory.ALL_SERVERS, area, message, ex);
+        sendToServers(messPacket);
+    }
+    
+    protected void sendToServersAndAdmins(Packet packet) {
+        if (isServer()) {
+            sendToAdministrators(packet);
+            sendToServers(packet);
+        } else {
+            Exception ex = new Exception("User " + packet.getSourceId() + " tried to send packet to judges and others");
+            logWarning("Warning - tried to send packet to others (as non server) " + packet, ex);
+        }
     }
 
     public void submitRun(Problem problem, Language language, String filename, SerializedFile[] otherFiles) throws Exception {

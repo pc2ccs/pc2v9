@@ -25,9 +25,11 @@ import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.ILoginListener;
+import edu.csus.ecs.pc2.core.model.IProfileListener;
 import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.ISiteListener;
 import edu.csus.ecs.pc2.core.model.LoginEvent;
+import edu.csus.ecs.pc2.core.model.ProfileEvent;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.SiteEvent;
 import edu.csus.ecs.pc2.plugin.ContestSummaryReports;
@@ -47,6 +49,7 @@ import edu.csus.ecs.pc2.ui.ProfilesPane;
 import edu.csus.ecs.pc2.ui.ReportPane;
 import edu.csus.ecs.pc2.ui.SitesPanel;
 import edu.csus.ecs.pc2.ui.UIPlugin;
+import java.awt.Font;
 
 /**
  * GUI for Server.
@@ -84,6 +87,8 @@ public class ServerView extends JFrame implements UIPlugin {
     private JButton exitButton = null;
 
     private LogWindow securityAlertLogWindow = null;
+    
+    private VersionInfo versionInfo = new VersionInfo();
 
     /**
      * This method initializes
@@ -117,8 +122,9 @@ public class ServerView extends JFrame implements UIPlugin {
         FrameUtilities.centerFrameTop(this);
         setVisible(true);
         
-        VersionInfo versionInfo = new VersionInfo();
         showMessage("Version "+versionInfo.getVersionNumber()+" (Build "+versionInfo.getBuildNumber()+")");
+        
+
     }
     
     private void overRideLookAndFeel(){
@@ -401,6 +407,7 @@ public class ServerView extends JFrame implements UIPlugin {
             inContest.addLoginListener(new LoginListenerImplementation());
             inContest.addSiteListener(new SiteListenerImplementation());
             inContest.addContestTimeListener(new ContestTimeListenerImplementation());
+            inContest.addProfileListener(new ProfileListenerImplementation());
         }
 
         public String getPluginTitle() {
@@ -416,6 +423,8 @@ public class ServerView extends JFrame implements UIPlugin {
         updateFrameTitle(model.getContestTime().isContestRunning());
 
         controller.startLogWindow(model);
+        
+        updateProfileLabel();
         
         initializeSecurityAlertWindow(inContest);
 
@@ -521,7 +530,6 @@ public class ServerView extends JFrame implements UIPlugin {
         }
         securityAlertLogWindow.setContestAndController(inContest, controller);
         securityAlertLogWindow.setTitle("Contest Security Alerts " + inContest.getClientId().toString());
-        VersionInfo versionInfo = new VersionInfo();
         securityAlertLogWindow.getLog().info("Security Log Started "+versionInfo.getSystemVersionInfo());
     }
 
@@ -569,6 +577,7 @@ public class ServerView extends JFrame implements UIPlugin {
             borderLayout.setHgap(5);
             messageLabel = new JLabel();
             messageLabel.setText("");
+            messageLabel.setFont(new Font("Dialog", Font.BOLD, 14));
             messageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
             messagePanel = new JPanel();
             messagePanel.setLayout(borderLayout);
@@ -625,5 +634,54 @@ public class ServerView extends JFrame implements UIPlugin {
         });
 
     }
+    
+    private void updateProfileLabel() {
+
+        int numberProfiles = model.getProfiles().length;
+
+        String s = "";
+
+        if (numberProfiles > 1) {
+            s = "Active Profile is: \"" + model.getProfile().getName() + "\"";
+        }
+        final String message = s;
+
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                messageLabel.setText(message);
+                messageLabel.setToolTipText("Version "+versionInfo.getVersionNumber()+" (Build "+versionInfo.getBuildNumber()+")");
+            }
+        });
+    }
+
+    
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    
+    // $HeadURL$
+    protected class ProfileListenerImplementation implements IProfileListener {
+
+        public void profileAdded(ProfileEvent event) {
+            updateProfileLabel();
+        }
+
+        public void profileChanged(ProfileEvent event) {
+            updateProfileLabel();
+        }
+
+        public void profileRemoved(ProfileEvent event) {
+            // ignore
+            
+        }
+
+        public void profileRefreshAll(ProfileEvent profileEvent) {
+            updateProfileLabel();
+        }
+    }
+        
+
 
 } // @jve:decl-index=0:visual-constraint="10,10"
