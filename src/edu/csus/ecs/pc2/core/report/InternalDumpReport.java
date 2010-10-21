@@ -261,6 +261,17 @@ public class InternalDumpReport implements IReport {
             e.printStackTrace(printWriter);
             exceptionCount++;
         }
+        
+        
+        try {
+            printWriter.println();
+            printWriter.println("Contest hash is            "+contest);
+            printWriter.println("Controller hash is         "+controller);
+        } catch (Exception e) {
+            printWriter.println("Exception in report: " + e.getMessage());
+            e.printStackTrace(printWriter);
+            exceptionCount++;
+        }
 
         try {
             printProfile(printWriter);

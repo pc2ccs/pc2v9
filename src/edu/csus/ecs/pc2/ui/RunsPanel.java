@@ -510,7 +510,7 @@ public class RunsPanel extends JPanePlugin {
         }
         
         public void refreshRuns(RunEvent event) {
-            clearAllRuns();
+            reloadRunList();
         }
 
         public void runChanged(RunEvent event) {

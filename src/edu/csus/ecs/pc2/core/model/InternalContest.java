@@ -2578,7 +2578,7 @@ public class InternalContest implements IInternalContest {
         AccountEvent accountEvent = new AccountEvent(AccountEvent.Action.REFRESH_ALL, getAccounts());
         fireAccountListener(accountEvent);
 
-        // Keep firePasswordChangeListener for referene, unused, unneeded.
+        // Keep firePasswordChangeListener for reference, unused, unneeded.
 //        PasswordChangeEvent passwordChangeEvent = null;
 //        firePasswordChangeListener(passwordChangeEvent);
 
@@ -2593,6 +2593,10 @@ public class InternalContest implements IInternalContest {
 
         GroupEvent groupEvent = new GroupEvent(GroupEvent.Action.REFRESH_ALL, null);
         fireGroupListener(groupEvent);
+
+        // there is no REFRESH_ALL for MessageEvent
+//        MessageEvent messageEvent = new MessageEvent(MessageEvent.Action.REFRESH_ALL);
+//        fireMessageListener(messageEvent);
 
     }
 

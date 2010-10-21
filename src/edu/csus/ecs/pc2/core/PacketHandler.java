@@ -576,18 +576,21 @@ public class PacketHandler {
         /**
          * Remove listeners so that they are no longer referenced
          */
-        contest.removeAllListeners(); // remove all listeners
+        contest.removeAllListeners(); // remove all listeners from old contest/profile
 
         contest.cloneAllLoginAndConnections(newContest);
         
-        // Load/merge new contest
+        System.out.println("debug 22  contest hash before "+contest);
         
-        controller.setContest(newContest); // replace existing contest
+        /*
+         * Set new contest and add all listeners.
+         */
+        controller.updateContestController(newContest, controller);
 
-        controller.updateContestController(newContest, controller); // add all listeners with new contest
+        contest = newContest; // set contest in this (PacketHandler);
 
-        contest = newContest;
-        
+        System.out.println("debug 22  contest hash after  "+contest);
+
         if (packet != null){
             /**
              * Load configuration information from remoteServer
@@ -612,7 +615,7 @@ public class PacketHandler {
         
         info("switchProfile start - to "+newProfile+" as Site "+contest.getSiteNumber()+" as user "+newContest.getClientId());
 
-        return newContest;
+        return contest;
     }
 
 
@@ -787,23 +790,32 @@ public class PacketHandler {
             contest.resetSubmissionData();
             contest.resetConfigurationData();
   
-            // TODO huh
-//            unRegisterPlugins();
+            unRegisterPlugins();
             
             ContestLoader loader = new ContestLoader();
             loader.loadDataIntoModel(contest, controller, packet, connectionHandlerID);
             loader = null;
             
-//            reRegisterPlugins();
+            reRegisterPlugins();
+            
+            info("handleUpdateClientProfile fireAllRefreshEvents start");
+            long start = new Date().getTime();
+            
+            System.err.println("debug22 handleUpdateClientProfile fireAllRefreshEvents start "+new Date());
             
             contest.fireAllRefreshEvents();
+            
+            long elapsed = (new Date().getTime() - start) / 1000;
+            
+            System.err.println("debug22 handleUpdateClientProfile fireAllRefreshEvents done "+new Date());
+            System.err.println("debug22 handleUpdateClientProfile fireAllRefreshEvents elapsed "+elapsed);
+            
         }
     }
 
     /**
      * Remove all listeners from model.
      */
-    @SuppressWarnings("unused") // FIXME 
     private void unRegisterPlugins() {
         contest.removeAllListeners(); 
 
@@ -813,7 +825,6 @@ public class PacketHandler {
     /**
      * Add all listeners into model.
      */
-  @SuppressWarnings("unused") // FIXME 
   private void reRegisterPlugins() {
 
         for (UIPlugin plugin : controller.getPluginList()) {

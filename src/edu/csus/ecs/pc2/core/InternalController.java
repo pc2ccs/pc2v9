@@ -3130,8 +3130,8 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     public void updateContestController(IInternalContest inContest, IInternalController inController) {
 
-        this.contest = inContest;
-
+        setContest(inContest);
+        
         ClientId clientId = contest.getClientId();
         String id = clientId.getName();
         startLog(getBaseProfileDirectoryName(Log.LOG_DIRECTORY_NAME), stripChar(clientId.toString(), ' '), id, clientId.getName());
@@ -3148,6 +3148,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 plugin.setContestAndController(contest, inController);
 
                 inController.getLog().info("plugin.setContestAndController for " + plugin.getPluginTitle());
+                System.out.println("debug 22 plugin.setContestAndController for " + plugin.getPluginTitle());
 
             } catch (Exception e) {
                 logException(e);

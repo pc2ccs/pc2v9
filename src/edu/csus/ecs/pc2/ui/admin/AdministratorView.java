@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.ui.admin;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 
@@ -59,7 +60,6 @@ import edu.csus.ecs.pc2.ui.StandingsHTMLPane;
 import edu.csus.ecs.pc2.ui.StandingsPane;
 import edu.csus.ecs.pc2.ui.TeamStatusPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
-import java.awt.Dimension;
 
 /**
  * Administrator GUI.
@@ -75,7 +75,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
     private IInternalContest contest;
 
-    private IInternalController controller;
+    private IInternalController controller;  //  @jve:decl-index=0:
 
     private JPanel jPanel = null;
 
@@ -152,6 +152,35 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
             FrameUtilities.setNativeLookAndFeel();
         }
     }
+    
+    /**
+     * Listeners for admin view.
+     * 
+     * This provides a way to refresh the admin view on refresh.
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    
+    // $HeadURL$
+    protected class AdminListeners implements UIPlugin {
+
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 3733076435840880891L;
+
+        public void setContestAndController(IInternalContest inContest, IInternalController inController) {
+            
+            inContest.addProfileListener(new ProfileListenerImplementation());
+        }
+
+        public String getPluginTitle() {
+            return "AdminListeners";
+        }
+    }
+
+
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.contest = inContest;
@@ -160,7 +189,8 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
         updateProfileLabel();
         
-        contest.addProfileListener(new ProfileListenerImplementation());
+        AdminListeners adminListeners = new AdminListeners();
+        controller.register(adminListeners);
         
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
