@@ -50,6 +50,7 @@ import edu.csus.ecs.pc2.ui.ReportPane;
 import edu.csus.ecs.pc2.ui.SitesPanel;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 import java.awt.Font;
+import java.awt.event.KeyEvent;
 
 /**
  * GUI for Server.
@@ -63,9 +64,9 @@ public class ServerView extends JFrame implements UIPlugin {
 
     public static final String SVN_ID = "$Id$";
 
-    private IInternalContest model = null;
+    private IInternalContest model = null;  //  @jve:decl-index=0:
 
-    private IInternalController controller = null;
+    private IInternalController controller = null;  //  @jve:decl-index=0:
 
     /**
      * 
@@ -408,6 +409,11 @@ public class ServerView extends JFrame implements UIPlugin {
             inContest.addSiteListener(new SiteListenerImplementation());
             inContest.addContestTimeListener(new ContestTimeListenerImplementation());
             inContest.addProfileListener(new ProfileListenerImplementation());
+            
+            setModel(inContest);
+            setController(inController);
+            
+            populateUI();
         }
 
         public String getPluginTitle() {
@@ -416,15 +422,17 @@ public class ServerView extends JFrame implements UIPlugin {
     }
     
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
-        this.model = inContest;
-        this.controller = inController;
+        
+        setModel(inContest);
+        setController(inController);
+        
         this.log = controller.getLog();
+        
+        populateUI();
 
-        updateFrameTitle(model.getContestTime().isContestRunning());
 
         controller.startLogWindow(model);
         
-        updateProfileLabel();
         
         initializeSecurityAlertWindow(inContest);
 
@@ -496,6 +504,23 @@ public class ServerView extends JFrame implements UIPlugin {
         setSelectedTab(getMainTabbedPane(), "Sites");
     }
     
+    /**
+     * Update frame title and profile label.
+     * 
+     */
+    private void populateUI() {
+        updateFrameTitle(model.getContestTime().isContestRunning());
+        updateProfileLabel();
+    }
+
+    public void setModel(IInternalContest inContest) {
+        this.model = inContest;
+    }
+    
+    public void setController(IInternalController controller) {
+        this.controller = controller;
+    }
+
     /**
      * Set the tab for the input name.
      * 
@@ -579,6 +604,14 @@ public class ServerView extends JFrame implements UIPlugin {
             messageLabel.setText("");
             messageLabel.setFont(new Font("Dialog", Font.BOLD, 14));
             messageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+            messageLabel.addMouseListener(new java.awt.event.MouseAdapter() {
+                public void mouseClicked(java.awt.event.MouseEvent e) {
+                    if (e.getClickCount() > 1){
+                        System.out.println("debug 22 profile is "+model.getProfile().getName());
+                        updateProfileLabel();
+                    }
+                }
+            });
             messagePanel = new JPanel();
             messagePanel.setLayout(borderLayout);
             messagePanel.setPreferredSize(new java.awt.Dimension(40, 40));
@@ -615,6 +648,7 @@ public class ServerView extends JFrame implements UIPlugin {
         if (exitButton == null) {
             exitButton = new JButton();
             exitButton.setText("Exit");
+            exitButton.setMnemonic(KeyEvent.VK_X);
             exitButton.setToolTipText("Click here to Shutdown PC^2");
             exitButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
