@@ -208,10 +208,12 @@ public class JudgeView extends JFrame implements UIPlugin {
 
                 contestClockDisplay = new ContestClockDisplay(controller.getLog(), contest.getContestTime(), contest.getSiteNumber(), true, null);
                 contestClockDisplay.addLabeltoUpdateList(clockLabel, DisplayTimes.REMAINING_TIME, contest.getSiteNumber());
-
+                controller.register(contestClockDisplay);
+                
                 SubmissionBiffPane submissionBiffPane = new SubmissionBiffPane();
                 getJudgeBiffPane().add(submissionBiffPane, java.awt.BorderLayout.CENTER);
                 submissionBiffPane.setContestAndController(contest, controller);
+                controller.register(submissionBiffPane);
                 
                 setVisible(true);           
                 //TODO This needs to be resolved. The submitClarifcaitonPane is bleeding through the other tabs

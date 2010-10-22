@@ -254,7 +254,8 @@ public class TeamView extends JFrame implements UIPlugin {
                 
                 contestClockDisplay = new ContestClockDisplay(teamController.getLog(), contest.getContestTime(), contest.getSiteNumber(), isTeam(), null);
                 contestClockDisplay.addLabeltoUpdateList(clockLabel, DisplayTimes.REMAINING_TIME, contest.getSiteNumber());
-
+                teamController.register(contestClockDisplay);
+                
                 setVisible(true);
                 //TODO This needs to be resolved. The submitClarifcaitonPane is bleeding through the other tabs
                 getMainTabbedPane().setSelectedComponent(submitClarificationPane);

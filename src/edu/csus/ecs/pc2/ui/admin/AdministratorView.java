@@ -334,7 +334,8 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 contestClockDisplay.setClientFrame(thisFrame);
 
                 contest.addContestTimeListener(new ContestTimeListenerImplementation());
-
+                controller.register(contestClockDisplay);
+                
                 FrameUtilities.setFrameTitle(thisFrame, contest.getTitle(), contest.getContestTime().isContestRunning(), new VersionInfo());
                 setVisible(true);
             }

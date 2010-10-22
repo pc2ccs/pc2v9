@@ -176,6 +176,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
         
         contestClockDisplay = new ContestClockDisplay(controller.getLog(), contest.getContestTime(), contest.getSiteNumber(), true, null);
         contestClockDisplay.addLabeltoUpdateList(clockLabel, DisplayTimes.REMAINING_TIME, contest.getSiteNumber());
+        controller.register(contestClockDisplay);
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
