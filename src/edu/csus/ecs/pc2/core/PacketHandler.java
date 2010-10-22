@@ -455,9 +455,11 @@ public class PacketHandler {
      * @param packet
      * @param connectionHandlerID
      * @throws ProfileException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      * @throws FileSecurityException 
      */
-    private void handleSwitchProfile(Packet packet, ConnectionHandlerID connectionHandlerID) throws ProfileException {
+    private void handleSwitchProfile(Packet packet, ConnectionHandlerID connectionHandlerID) throws ProfileException, IOException, ClassNotFoundException, FileSecurityException {
 
         // inProfile the original profile
         // Profile inProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE);
@@ -516,8 +518,12 @@ public class PacketHandler {
      * @param packet 
      * @return new contest based on newProfile
      * @throws ProfileException
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
-    protected IInternalContest switchProfile(IInternalContest currentContest, Profile newProfile, char[] contestPassword, boolean sendToOtherServers) throws ProfileException {
+    protected IInternalContest switchProfile(IInternalContest currentContest, Profile newProfile, char[] contestPassword, boolean sendToOtherServers) throws ProfileException, IOException,
+            ClassNotFoundException, FileSecurityException {
         return switchProfile( currentContest,  newProfile,  contestPassword,  sendToOtherServers, null, sendToOtherServers);
     }
     
@@ -532,9 +538,12 @@ public class PacketHandler {
      * @param sendToServers 
      * @return
      * @throws ProfileException
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
      */
     protected IInternalContest switchProfile(IInternalContest currentContest, Profile newProfile, char[] contestPassword, boolean sendToOtherServers, Packet packet, boolean sendToServers)
-            throws ProfileException {
+            throws ProfileException, IOException, ClassNotFoundException, FileSecurityException {
 
         ProfileManager manager = new ProfileManager();
         
@@ -605,6 +614,7 @@ public class PacketHandler {
             ContestLoader loader = new ContestLoader();
             loadSettingsFromRemoteServer (loader, packet, null);
             loader = null;
+            contest.storeConfiguration(controller.getLog());
         }
 
         contest.fireAllRefreshEvents();
@@ -1854,6 +1864,7 @@ public class PacketHandler {
             loadSettingsFromRemoteServer(loader, packet, connectionHandlerID);
             loader = null;
          
+            contest.storeConfiguration(controller.getLog());
 
             controller.sendToClient(createContestSettingsPacket(packet.getSourceId()));
 
@@ -3166,6 +3177,10 @@ public class PacketHandler {
         loader.addRemoteClarificationsToModel(contest, controller, packet, remoteSiteNumber);
 
         loader.addRemoteAccountsToModel(contest, controller, packet, remoteSiteNumber);
+        
+        loader.loadIfMissingAccountToModel(contest,controller, packet, edu.csus.ecs.pc2.core.model.ClientType.Type.TEAM);
+        loader.loadIfMissingAccountToModel(contest,controller, packet, edu.csus.ecs.pc2.core.model.ClientType.Type.JUDGE);
+        loader.loadIfMissingAccountToModel(contest,controller, packet, edu.csus.ecs.pc2.core.model.ClientType.Type.SCOREBOARD);
 
         // difficult to know which site these connections are for...
         // addConnectionIdsToModel(packet);

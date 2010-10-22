@@ -3,12 +3,14 @@ package edu.csus.ecs.pc2.core;
 import java.io.IOException;
 import java.util.GregorianCalendar;
 
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.BalloonSettings;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.Group;
@@ -503,6 +505,62 @@ public class ContestLoader {
             controller.logWarning("Exception logged ", e);
         }
 
+    }
+    
+    /**
+     * Load accounts from packet if no accounts exist.
+     * 
+     * Checks for existing accounts on the 
+     * 
+     * @param contest
+     * @param controller
+     * @param packet
+     * @param type
+     */
+    
+    public void loadIfMissingAccountToModel(IInternalContest contest, IInternalController controller, Packet packet, Type type) {
+        
+        try {
+            
+            int siteNumber = contest.getSiteNumber();
+            
+            int count = contest.getAccounts(type, siteNumber).size();
+            
+            int numAdded = 0;
+            
+            if (count == 0){
+                
+                /**
+                 * No accounts found will replace them with ones from the packet.
+                 */
+                
+                Account[] accounts = (Account[]) PacketFactory.getObjectValue(packet, PacketFactory.ACCOUNT_ARRAY);
+                if (accounts != null) {
+                    for (Account account : accounts) {
+                        if (siteNumber == account.getSiteNumber()) {
+                            if (account.getClientId().getClientType().equals(type)) {
+                                if (contest.getAccount(account.getClientId()) == null) {
+                                    contest.updateAccount(account);
+                                    numAdded++;
+//                                    System.out.println("debug 22 Added " + numAdded + " " + type + " " + account.getClientId());
+                                }
+                            }
+                        }
+                    }
+                }
+                controller.getLog().log(Log.INFO, "Loaded "+numAdded+" "+type+" Accounts for site "+siteNumber);
+                
+            } else {
+                controller.getLog().log(Log.INFO, "No accounts loaded "+count+" accounts exists for site "+siteNumber);
+            }
+            
+            System.out.println("debug 22 - Site "+siteNumber+" "+type+" already exist = "+count+" loaded "+numAdded);
+            System.out.println();
+            
+        } catch (Exception e) {
+            controller.logWarning("Exception logged ", e);
+        }
+    
     }
 
     /**
