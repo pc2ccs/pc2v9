@@ -1822,11 +1822,17 @@ public class PacketHandler {
             contest.setSiteNumber(clientId.getSiteNumber());
             ContestLoader loader = new ContestLoader();
             loader.loadDataIntoModel(contest, controller, packet, connectionHandlerID);
-            loader = null;
             
             if (isServer()) {
+                
                 storeProfiles();
+                
+                loader.loadIfMissingAccountToModel(contest,controller, packet, edu.csus.ecs.pc2.core.model.ClientType.Type.TEAM);
+                loader.loadIfMissingAccountToModel(contest,controller, packet, edu.csus.ecs.pc2.core.model.ClientType.Type.JUDGE);
+                loader.loadIfMissingAccountToModel(contest,controller, packet, edu.csus.ecs.pc2.core.model.ClientType.Type.SCOREBOARD);
+
             }
+            loader = null;
 
             otherLoginActivities(packet, connectionHandlerID);
             startEvalLog();
