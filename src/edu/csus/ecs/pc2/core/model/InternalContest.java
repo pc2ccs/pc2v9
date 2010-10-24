@@ -2060,6 +2060,9 @@ public class InternalContest implements IInternalContest {
         // SITES
         siteList = new SiteList();
 
+        // PROFILES
+        profileList = new ProfilesList();
+        
         // OTHER SETTINGS
         profileCloneSettings = null;
 
