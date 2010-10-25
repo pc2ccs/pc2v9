@@ -1,10 +1,12 @@
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
+import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.security.FileSecurity;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
-import junit.framework.TestCase;
 
 /**
  * 
@@ -14,6 +16,12 @@ import junit.framework.TestCase;
 
 // $HeadURL$
 public class ProfileTest extends TestCase {
+    
+//    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd-HHmmssSSS");
+//    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH_mm_ss.SSS-ddMMMyyyy");
+    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd-HHmmss");
+//    "++%Y%m%d-%H%M%S"
+
 
     protected void setUp() throws Exception {
         super.setUp();
@@ -87,5 +95,33 @@ public class ProfileTest extends TestCase {
         } catch (Exception e) {
             assertFalse("Profile should fail with a IllegalArgumentException exception", true);
         }
+    }
+    
+    private String createProfilePath(String basepath) {
+        // profiles/P2ef182be-b8ed-42c0-88ca-19dfef3419c3/archive
+        if (basepath == null || basepath.trim().length() == 0) {
+            basepath = "";
+        } else if (basepath.substring(basepath.length() - 1).equals(File.separator)) {
+            basepath += File.separator;
+        }
+        String dateString = simpleDateFormat.format(new Date());
+        return basepath + "profiles" + File.separator + "P" + dateString;
+    }
+    
+    public static void main(String[] args) throws InterruptedException {
+        
+        Profile profile = new Profile("Default");
+        
+        System.out.println(profile.getProfilePath());
+        
+        ProfileTest profileTest = new ProfileTest();
+        
+        for (int i= 0; i < 12; i++){
+        String s = profileTest.createProfilePath("");
+        System.out.println(s);
+           Thread.sleep(4000);
+        }
+       
+        
     }
 }
