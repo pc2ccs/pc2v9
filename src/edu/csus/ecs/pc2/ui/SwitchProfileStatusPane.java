@@ -119,23 +119,23 @@ public class SwitchProfileStatusPane extends JPanePlugin {
     }
 
     private void reloadListBox() {
-        siteListBox.removeAllRows();
+        
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+        
+                siteListBox.removeAllRows();
 
-        ProfileChangeStatus[] list = profileStatusList.getList();
-        
-        for (ProfileChangeStatus status : list) {
-            updateRow(status);
-        }
-        
+                ProfileChangeStatus[] list = profileStatusList.getList();
+
+                for (ProfileChangeStatus status : list) {
+                    updateRow(status);
+                }
+            }
+        });
     }
 
     public void updateRow(final ProfileChangeStatus status) {
-
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                updateStatusRow(status);
-            }
-        });
+        updateStatusRow(status);
     }
 
     /**
@@ -145,15 +145,17 @@ public class SwitchProfileStatusPane extends JPanePlugin {
      */
     private void updateStatusRow(ProfileChangeStatus status) {
         
-        int row = siteListBox.getIndexByKey(status);
+        Integer key = new Integer(status.getSiteNumber());
+        int row = siteListBox.getIndexByKey(key);
         if (row == -1) {
             Object[] objects = buildSiteStatusRow(status);
-            siteListBox.addRow(objects, status);
+            siteListBox.addRow(objects, key);
         } else {
             Object[] objects = buildSiteStatusRow(status);
             siteListBox.replaceRow(objects, row);
         }
         siteListBox.autoSizeAllColumns();
+        siteListBox.sort();
         enableGoButton();
     }
 
@@ -192,7 +194,7 @@ public class SwitchProfileStatusPane extends JPanePlugin {
             
             if (isLocalLoggedIn(status.getSiteNumber()) || isThisSite(status.getSiteNumber())){
                 numberConnected ++;
-                if (status.getStatus().equals(Status.READY)){ 
+                if (status.getStatus().equals(Status.READY_TO_SWITCH)){ 
                     numberReady ++;
                 }
             }
@@ -313,11 +315,23 @@ public class SwitchProfileStatusPane extends JPanePlugin {
 
         JLabel label = new JLabel(status.getStatus().toString());
 
-        if (status.getStatus().equals(Status.READY)) {
-            label.setForeground(Color.GREEN);
-        } else {
-            label.setForeground(Color.RED);
+        Color newColor = Color.RED;
+
+        switch (status.getStatus()) {
+            case SWITCHED:
+                newColor = Color.GREEN;
+                break;
+            case READY_TO_SWITCH:
+                newColor = Color.GREEN;
+                break;
+            case NOTREADY:
+            case NOT_CONNECTED:
+            default:
+                newColor = Color.RED;
+                break;
         }
+        
+        label.setForeground(newColor);
 
         obj[2] = label;
 
@@ -378,10 +392,8 @@ public class SwitchProfileStatusPane extends JPanePlugin {
     }
 
     protected void revertToPreviousProfile() {
-
         // FIXME code revert profile, this should be fun.
-        JOptionPane.showMessageDialog(this, "Would have reverted to profile " + getContest().getProfile() + " with contest pass = " + getContest().getContestPassword());
-        
+        JOptionPane.showMessageDialog(this, "debug 22 Would have reverted to profile '" + getContest().getProfile().getName() + "' with contest pass = '" + currentContestPassword + "'");
         closeWindow();
     }
 
@@ -395,30 +407,30 @@ public class SwitchProfileStatusPane extends JPanePlugin {
         }
         
         if (selectedSites.length == 1){
-            ProfileChangeStatus profileStatus = (ProfileChangeStatus) siteListBox.getKeys()[selectedSites[0]];
+            Integer siteNumber = (Integer) siteListBox.getKeys()[selectedSites[0]];
             
-            if (isThisSite(profileStatus.getSiteNumber())){
+            if (isThisSite(siteNumber)){
                 updateCurrentSiteStatus ();
-                updateRow(profileStatus);
+                updateStatusRow(siteNumber);
                 return;
             }
             
-            if (! isLocalLoggedIn (profileStatus.getSiteNumber())){
-                JOptionPane.showMessageDialog(this, "Site " + profileStatus.getSiteNumber() + " not available/logged in", "Can not refresh", JOptionPane.INFORMATION_MESSAGE);
+            if (! isLocalLoggedIn (siteNumber)){
+                JOptionPane.showMessageDialog(this, "Site " + siteNumber + " not available/logged in", "Can not refresh", JOptionPane.INFORMATION_MESSAGE);
                 return;
             }
         }
         
         for (int i : selectedSites) {
             
-            ProfileChangeStatus profileStatus = (ProfileChangeStatus) siteListBox.getKeys()[i];
+            Integer siteNumber = (Integer) siteListBox.getKeys()[i];
 
-            if (isThisSite(profileStatus.getSiteNumber())){
+            if (isThisSite(siteNumber)){
                 updateCurrentSiteStatus ();
-                updateRow(profileStatus);
+                updateStatusRow(siteNumber);
             } else {
                 try {
-                    ClientId remoteServerId = new ClientId(profileStatus.getSiteNumber(), ClientType.Type.SERVER, 0);
+                    ClientId remoteServerId = new ClientId(siteNumber, ClientType.Type.SERVER, 0);
                     Packet packet = PacketFactory.createRequestServerStatusPacket(getContest().getClientId(), remoteServerId, targetProfile);
                     getController().sendToLocalServer(packet);
                 } catch (Exception e) {
@@ -433,7 +445,15 @@ public class SwitchProfileStatusPane extends JPanePlugin {
         ClientId serverId = new ClientId(siteNumber, Type.SERVER, 0);
         return getContest().isLocalLoggedIn(serverId);
     }
-
+    
+    private void updateStatusRow(int siteNumber) {
+        Site currentSite = getContest().getSite(getContest().getSiteNumber());
+        if (currentSite != null){
+            ProfileChangeStatus profileStatus = profileStatusList.get(currentSite);
+            updateStatusRow(profileStatus);
+        }
+    }
+        
     private void updateCurrentSiteStatus() {
         
         Site currentSite = getContest().getSite(getContest().getSiteNumber());
@@ -442,7 +462,7 @@ public class SwitchProfileStatusPane extends JPanePlugin {
 
             profileStatus.setStatus(Status.NOTREADY);
             if (getContest().getProfile().equals(targetProfile)){
-                profileStatus.setStatus(Status.READY);
+                profileStatus.setStatus(Status.READY_TO_SWITCH);
             }
             profileStatus.setProfile(getContest().getProfile());
         }
@@ -467,6 +487,7 @@ public class SwitchProfileStatusPane extends JPanePlugin {
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
                     updateRow(status);
+                    enableGoButton();
                 }
             });
         }
@@ -513,11 +534,7 @@ public class SwitchProfileStatusPane extends JPanePlugin {
         }
 
         public void sitesRefreshAll(SiteEvent siteEvent) {
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    reloadListBox();
-                }
-            });
+            // no action
         }
         
     }
@@ -563,17 +580,11 @@ public class SwitchProfileStatusPane extends JPanePlugin {
         }
 
         public void loginDenied(LoginEvent event) {
-            // updateLoginList(event.getClientId(), event.getConnectionHandlerID());
+            // no action
         }
         
         public void loginRefreshAll(LoginEvent event) {
-            
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    reloadListBox();
-                }
-            });
-            
+            // no action
         }
     }
 

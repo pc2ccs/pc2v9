@@ -41,11 +41,17 @@ public class ProfileChangeStatus implements IElementObject, Serializable {
         /**
          * Site is ready to sync with other sites.
          */
-        READY,
+        READY_TO_SWITCH,
         /**
          * Site is not ready.
          */
         NOTREADY,
+        /**
+         * Profile has switched.
+         * 
+         * Contest and Submission data are sync'd with all other sites.
+         */
+        SWITCHED, 
     }
 
     private Site site;

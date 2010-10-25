@@ -3656,7 +3656,7 @@ public class PacketHandler {
         
         Status status = Status.NOTREADY;
         if (contest.getProfile().equals(expectedProfile)){
-            status = Status.READY;
+            status = Status.READY_TO_SWITCH;
         }
         
         ClientId remoteServerId = new ClientId(packet.getSourceId().getSiteNumber(), ClientType.Type.SERVER, 0);
