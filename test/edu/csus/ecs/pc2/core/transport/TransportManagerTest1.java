@@ -3,9 +3,12 @@ package edu.csus.ecs.pc2.core.transport;
 import java.io.Serializable;
 import java.util.Date;
 
+import junit.framework.TestCase;
+
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.packet.PacketFactory;
@@ -18,10 +21,18 @@ import edu.csus.ecs.pc2.core.packet.PacketFactory;
  */
 
 // $HeadURL$
-public class TransportManagerTest1 {
+public class TransportManagerTest1 extends TestCase {
 
-    private Log log = new Log("TransManTest1");
+    private Log log = null;
+    
+    @Override
+    protected void setUp() throws Exception {
+        // TODO Auto-generated method stub
+        super.setUp();
+        String dirname = SampleContest.getTestDirectoryName("tmt1");
+        log = new Log(dirname, "TransManTest1");
 
+    }
     /**
      * 
      * @author pc2@ecs.csus.edu
@@ -50,7 +61,7 @@ public class TransportManagerTest1 {
      * @param port
      */
     public void doTest(String server, int port) {
-
+        
         Utilities.setDebugMode(true);
 
         // Login as client using transport manager
@@ -72,7 +83,7 @@ public class TransportManagerTest1 {
             ClientId serverId = new ClientId(0, Type.SERVER, 0);
 
             info("Logging in as " + clientId);
-            Packet packet = PacketFactory.createLogin(clientId, clientId.getName(), serverId, true);
+            Packet packet = PacketFactory.createLoginRequest(clientId, clientId.getName(), clientId.getName(), serverId);
 
             transportManager.send(packet);
 
@@ -81,7 +92,17 @@ public class TransportManagerTest1 {
         }
 
     }
+    
+    public void testCreateLoginRequest(){
+        ClientId clientId = new ClientId(0, Type.JUDGE, 4);
+        ClientId serverId = new ClientId(0, Type.SERVER, 0);
 
+        info("Logging in as " + clientId);
+        Packet packet = PacketFactory.createLoginRequest(clientId, clientId.getName(), clientId.getName(), serverId);
+
+        assertNotNull("Packet should not be null", packet);
+    }
+    
     private void info(String s) {
         getLog().info(s);
         if (Utilities.isDebugMode()) {
