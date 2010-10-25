@@ -1047,11 +1047,13 @@ public final class PacketFactory {
      * @param destination
      * @param connectionHandlerID
      * @param loggedInClientId
+     * @param settings 
      */
-    public static Packet createLogin(ClientId source, ClientId destination, ConnectionHandlerID connectionHandlerID, ClientId loggedInClientId) {
+    public static Packet createLogin(ClientId source, ClientId destination, ConnectionHandlerID connectionHandlerID, ClientId loggedInClientId, ClientSettings settings) {
         Properties prop = new Properties();
         prop.put(CLIENT_ID, loggedInClientId);
         prop.put(CONNECTION_HANDLE_ID, connectionHandlerID);
+        prop.put(CLIENT_SETTINGS, settings);
         Packet packet = new Packet(Type.LOGIN, source, destination, prop);
         return packet;
     }
@@ -1825,23 +1827,6 @@ public final class PacketFactory {
         prop.put(PacketType.CONTEST_TIME, inContestTime);
         Packet packet = new Packet(Type.UPDATE_SETTING, source, destination, prop);
         return packet;
-    }
-
-
-    /**
-     * Create packet for {@link PacketType.Type#LOGIN_REQUEST}.
-     * 
-     * @param source
-     * @param password
-     * @param destination
-     * @param sendSettings
-     */
-    public static Packet createLogin(ClientId source, String password, ClientId destination, boolean sendSettings) {
-        Properties prop = new Properties();
-        prop.put(LOGIN, source.getClientType() + "" + source.getClientNumber());
-        prop.put(PASSWORD, password);
-        prop.put(SEND_SETTINGS, new Boolean(sendSettings));
-        return createPacket(PacketType.Type.LOGIN_REQUEST, source, destination, prop);
     }
 
     public static Packet createAddSetting(ClientId source, ClientId destination, Account[] accounts) {

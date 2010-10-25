@@ -20,6 +20,8 @@ public class ClientSettings implements IElementObject {
      */
     private static final long serialVersionUID = 2225749134503510088L;
 
+    public static final String LOGIN_DATE = "LoginDate";
+
     private ClientId clientId;
 
     private ElementId elementId;

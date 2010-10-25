@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Vector;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -16,14 +17,13 @@ import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
-import edu.csus.ecs.pc2.core.list.AccountList;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
-import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClarificationEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.IClarificationListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -35,6 +35,7 @@ import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.SiteEvent;
+import edu.csus.ecs.pc2.core.security.Permission;
 
 /**
  * Team Status Pane.
@@ -65,13 +66,13 @@ public class TeamStatusPane extends JPanePlugin {
 
     public static final java.awt.Color NO_CONTACT_COLOR = java.awt.Color.red;
 
-    public static final java.awt.Color HAS_LOGGED_IN_COLOR = java.awt.Color.pink;
+    public static final java.awt.Color HAS_LOGGED_IN_COLOR = java.awt.Color.pink;  //  @jve:decl-index=0:
 
     public static final java.awt.Color HAS_SUBMITTED_RUNS_ONLY_COLOR = java.awt.Color.blue;
 
     public static final java.awt.Color HAS_SUBMITTED_CLARS_ONLY_COLOR = java.awt.Color.orange;
 
-    public static final java.awt.Color HAS_SUBMITTED_RUNS_AND_CLARS_COLOR = java.awt.Color.green;
+    public static final java.awt.Color HAS_SUBMITTED_RUNS_AND_CLARS_COLOR = java.awt.Color.green;  //  @jve:decl-index=0:
 
     private JPanel teamStatusPane = null;
 
@@ -110,6 +111,8 @@ public class TeamStatusPane extends JPanePlugin {
      * invocation of populateGUI.
      */
     private boolean populatingGUI = false;
+
+    private JCheckBox showTeamsCheckBox = null;
 
     /**
      * This method initializes
@@ -222,6 +225,11 @@ public class TeamStatusPane extends JPanePlugin {
         }
     }
 
+    /**
+     * Repopulate Grid, optionally populate with info.
+     * 
+     * @param populate update status'
+     */
     private void repopulateGrid(boolean populate) {
 
         boolean allSites = false;
@@ -242,9 +250,6 @@ public class TeamStatusPane extends JPanePlugin {
         gridLayout.setHgap(5);
         centerPane.setLayout(gridLayout);
 
-        AccountList accountList = new AccountList();
-        accountList.generateNewAccounts(ClientType.Type.TEAM, 25, 1, PasswordType.JOE, 1, true);
-
         Vector<Account> vectorAccounts;
         if (allSites) {
             vectorAccounts = getContest().getAccounts(ClientType.Type.TEAM);
@@ -255,9 +260,21 @@ public class TeamStatusPane extends JPanePlugin {
         }
         Account[] accounts = (Account[]) vectorAccounts.toArray(new Account[vectorAccounts.size()]);
         Arrays.sort(accounts, new AccountComparator());
+        
+        boolean showTeamsOnBoardOnly = getShowTeamsCheckBox().isSelected();
 
         int counter = 0;
         for (Account account : accounts) {
+            
+            if (showTeamsOnBoardOnly) {
+                if (!account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD)) {
+                    continue;
+                }
+                if (!account.isAllowed(Permission.Type.LOGIN)) {
+                    continue;
+                }
+            }
+            
             counter++;
             JLabel teamLabel = new JLabel();
             ClientId clientId = account.getClientId();
@@ -314,12 +331,32 @@ public class TeamStatusPane extends JPanePlugin {
             outColor = HAS_SUBMITTED_RUNS_ONLY_COLOR;
         } else if (clarifications.length > 0) {
             outColor = HAS_SUBMITTED_CLARS_ONLY_COLOR;
-        } else if (getContest().isLocalLoggedIn(clientId)) {
+        } else if (hasLoggedIn(clientId)) {
             outColor = HAS_LOGGED_IN_COLOR;
         }
 
         return outColor;
     }
+
+    /**
+     * Is client logged in ?
+     * @param clientId
+     * @return
+     */
+    private boolean hasLoggedIn(ClientId clientId) {
+        
+        if (getContest().isLocalLoggedIn(clientId) || getContest().isRemoteLoggedIn(clientId)){
+            return true;
+        }
+
+        ClientSettings settings = getContest().getClientSettings(clientId);
+        if (settings != null) {
+            return settings.getProperty(ClientSettings.LOGIN_DATE) != null;
+        }
+        
+        return false;
+    }
+
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
@@ -469,6 +506,7 @@ public class TeamStatusPane extends JPanePlugin {
             buttonPane.add(getClearButton(), null);
             buttonPane.add(getReloadButton(), null);
             buttonPane.add(getSiteComboBox(), null);
+            buttonPane.add(getShowTeamsCheckBox(), null);
         }
         return buttonPane;
     }
@@ -593,5 +631,25 @@ public class TeamStatusPane extends JPanePlugin {
             });
         }
         return siteComboBox;
+    }
+
+    /**
+     * This method initializes showTeamsCheckBox
+     * 
+     * @return javax.swing.JCheckBox
+     */
+    private JCheckBox getShowTeamsCheckBox() {
+        if (showTeamsCheckBox == null) {
+            showTeamsCheckBox = new JCheckBox();
+            showTeamsCheckBox.setText("Show enabled teams");
+            showTeamsCheckBox.setToolTipText("Show only teams who can login and are on the scoreboard");
+            showTeamsCheckBox.setSelected(true);
+            showTeamsCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    populateGUI();
+                }
+            });
+        }
+        return showTeamsCheckBox;
     }
 } // @jve:decl-index=0:visual-constraint="10,10"

@@ -1199,7 +1199,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
                         // Send login notification to users.
 
-                        Packet loginConfirmedPacket = PacketFactory.createLogin(contest.getClientId(), PacketFactory.ALL_SERVERS, connectionHandlerID, clientId);
+                        Packet loginConfirmedPacket = PacketFactory.createLogin(contest.getClientId(), PacketFactory.ALL_SERVERS, connectionHandlerID, clientId, getClientSettings(clientId));
                         sendToAdministrators(loginConfirmedPacket);
                         sendToJudges(loginConfirmedPacket);
                         sendToServers(loginConfirmedPacket);
@@ -1333,6 +1333,34 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             info("Exception in receiveObject ", e);
         }
         info("receiveObject end   got " + object.getClass().getName());
+    }
+
+    /**
+     * Creates and saves a ClientSettings.
+     * 
+     * @param clientId
+     * @return
+     */
+    private ClientSettings getClientSettings(ClientId clientId) {
+
+        ClientSettings clientSettings = contest.getClientSettings(clientId);
+
+        if (clientSettings == null) {
+            clientSettings = new ClientSettings(clientId);
+            clientSettings.put(ClientSettings.LOGIN_DATE, new Date().toString());
+            contest.addClientSettings(clientSettings);
+            try {
+                contest.storeConfiguration(log);
+            } catch (IOException e) {
+                info("Exception saving ClientSettings for " + clientId, e);
+            } catch (ClassNotFoundException e) {
+                info("Exception saving ClientSettings for " + clientId, e);
+            } catch (FileSecurityException e) {
+                info("Exception saving ClientSettings for " + clientId, e);
+            }
+        }
+
+        return clientSettings;
     }
 
     /**

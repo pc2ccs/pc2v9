@@ -2074,6 +2074,7 @@ public class PacketHandler {
         if (contest.isLoggedIn()) {
             ClientId whoLoggedIn = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
             ConnectionHandlerID connectionHandlerID = (ConnectionHandlerID) PacketFactory.getObjectValue(packet, PacketFactory.CONNECTION_HANDLE_ID);
+            ClientSettings clientSettings = (ClientSettings) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_SETTINGS);
 
             if (isServer()) {
                 info("LOGIN from other site " + whoLoggedIn);
@@ -2092,13 +2093,16 @@ public class PacketHandler {
                             contest.addRemoteLogin(whoLoggedIn, connectionHandlerID);
                             sendToJudgesAndOthers(packet, false);
                         }
+                        contest.addClientSettings(clientSettings);
                     }
+                    
                 } else {
                     controller.getLog().log(Log.DEBUG, "LOGIN packet, server site " + whoLoggedIn + " logged onto " + packet.getSourceId() + ", already logged in on this site");
                 }
 
             } else {
                 contest.addLogin(whoLoggedIn, connectionHandlerID);
+                contest.addClientSettings(clientSettings);
             }
         } else {
             info("Note: got a LOGIN packet before this site was logged in " + packet);
@@ -3515,8 +3519,9 @@ public class PacketHandler {
 
         if (inContest.getClientSettings(clientId) == null) {
             ClientSettings clientSettings2 = new ClientSettings(clientId);
-            clientSettings2.put("LoginDate", new Date().toString());
+            clientSettings2.put(ClientSettings.LOGIN_DATE, new Date().toString());
             inContest.addClientSettings(clientSettings2);
+
         }
 
         /**
