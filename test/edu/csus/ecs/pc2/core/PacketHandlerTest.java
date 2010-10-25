@@ -12,6 +12,7 @@ import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.packet.PacketFactory;
+import edu.csus.ecs.pc2.core.security.FileStorage;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 import edu.csus.ecs.pc2.core.util.JUnitUtilities;
 
@@ -33,7 +34,13 @@ public class PacketHandlerTest extends TestCase {
         super.setUp();
         SampleContest sampleContest = new SampleContest();
         contest = sampleContest.createContest(2, 4, 12, 6, true);
-        controller = sampleContest.createController(contest, true, false);
+        
+        String testDirectory = SampleContest.getTestDirectoryName("pht");
+        
+        FileStorage storage = new FileStorage(testDirectory);
+        contest.setStorage(storage);
+        
+        controller = sampleContest.createController(contest, testDirectory, true, false);
 
         // Directory where test data is
         String testDir = "testdata";
@@ -99,7 +106,7 @@ public class PacketHandlerTest extends TestCase {
 
         }
 
-        // Security Leve OFF
+        // Security Level OFF
         controller.setSecurityLevel(InternalController.SECURITY_NONE_LEVEL);
 
         packet = PacketFactory.createRunRequest(teamId, serverId, run, teamId, false, false);
@@ -107,8 +114,9 @@ public class PacketHandlerTest extends TestCase {
         try {
 
             ConnectionHandlerID connectionHandlerID = new ConnectionHandlerID("Client " + teamId.toString());
-            PacketHandler packetHandler = new PacketHandler(controller, contest);
+            contest.addLogin(teamId, connectionHandlerID);
 
+            PacketHandler packetHandler = new PacketHandler(controller, contest);
             packetHandler.handlePacket(packet, connectionHandlerID);
 
             // success

@@ -26,6 +26,8 @@ import edu.csus.ecs.pc2.core.model.IProfileListener;
 import edu.csus.ecs.pc2.core.model.ProfileEvent;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.packet.PacketFactory;
+import edu.csus.ecs.pc2.ui.FrameUtilities.HorizontalPosition;
+import edu.csus.ecs.pc2.ui.FrameUtilities.VerticalPosition;
 
 /**
  * Packet Viewer.
@@ -120,11 +122,12 @@ public class PacketViewerFrame extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new Dimension(590, 239));
+        this.setSize(new Dimension(590, 429));
         this.setContentPane(getMainPane());
         this.setTitle("Packet Viewer");
 
-        FrameUtilities.centerFrame(this);
+        FrameUtilities.centerFrameFullScreenHeight(this);
+        FrameUtilities.setFramePosition(this, HorizontalPosition.RIGHT, VerticalPosition.CENTER);
 
         this.addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent e) {

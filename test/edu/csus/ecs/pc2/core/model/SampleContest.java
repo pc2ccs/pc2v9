@@ -14,6 +14,7 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
+import edu.csus.ecs.pc2.core.security.FileStorage;
 
 /**
  * Create Sample InternalContest and InternalController.
@@ -163,6 +164,10 @@ public class SampleContest {
         language.setExecutableIdentifierMask(values[2]);
         language.setProgramExecuteCommandLine(values[3]);
     }
+    
+    public IInternalController createController(IInternalContest contest, boolean isServer, boolean isRemote) {
+        return createController(contest, null, isServer, isRemote);
+    }
 
     /**
      * Create a InternalController.
@@ -173,9 +178,10 @@ public class SampleContest {
      *            is this a server controller ?
      * @param isRemote
      *            is this a remote site ?
+     * @param storageDirectory where this controller would save its packets.
      * @return
      */
-    public IInternalController createController(IInternalContest contest, boolean isServer, boolean isRemote) {
+    public IInternalController createController(IInternalContest contest, String storageDirectory, boolean isServer, boolean isRemote) {
 
         // Start site 1
         InternalController controller = new InternalController(contest);
@@ -191,6 +197,12 @@ public class SampleContest {
 
             // set InternalContest back to original site number
             contest.setSiteNumber(siteNumber);
+            
+            if (storageDirectory != null){
+                FileStorage storage = new FileStorage(storageDirectory);
+                contest.setStorage(storage);
+                controller.initializeStorage(storage);
+            }
         } else {
             controller.start(null);
 
@@ -198,7 +210,29 @@ public class SampleContest {
 
         return controller;
     }
+    
+    public static String getTestDirectoryName(){
+        String testDir = "testing";
+        
+        if (!new File(testDir).isDirectory()) {
+            new File(testDir).mkdirs();
+        }
 
+        return testDir;
+    }
+    
+    public static String getTestDirectoryName(String subDirName) {
+        String testDir = getTestDirectoryName() + File.separator + subDirName;
+
+        if (!new File(testDir).isDirectory()) {
+            new File(testDir).mkdirs();
+        }
+
+        return testDir;
+    }
+
+
+    
     /**
      * Populate Language, Problems and Judgements.
      * 
