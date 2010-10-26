@@ -601,6 +601,12 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
         if (clientId.getClientType().equals(Type.SERVER)) {
 
+            if (!serverModule) {
+                SecurityException securityException = new SecurityException("Cannot login as server, check logs");
+                getLog().log(Log.WARNING, "Cannot login as server, must start this module with --server command line option");
+                throw securityException;
+            }
+
             if (isContactingRemoteServer()) {
 
                 // remoteHostName and remoteHostPort set using huh
@@ -622,12 +628,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 sendLoginRequestFromServerToServer(connectionManager, remoteServerConnectionHandlerID, clientId, password);
 
             } else {
-
-                if (!serverModule) {
-                    SecurityException securityException = new SecurityException("Cannot login as server, check logs");
-                    getLog().log(Log.WARNING, "Cannot login as server, must start this module with --server command line option");
-                    throw securityException;
-                }
 
                 contest.setSiteNumber(clientId.getSiteNumber());
                 log.log(Log.DEBUG, "Site Number is set as " + contest.getSiteNumber() + " (0 means unset)");
