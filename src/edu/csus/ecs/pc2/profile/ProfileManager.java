@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
@@ -15,6 +16,7 @@ import edu.csus.ecs.pc2.core.exception.ProfileCloneException;
 import edu.csus.ecs.pc2.core.exception.ProfileException;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Profile;
+import edu.csus.ecs.pc2.core.model.ProfileComparatorByName;
 import edu.csus.ecs.pc2.core.security.FileSecurity;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 
@@ -451,30 +453,57 @@ public class ProfileManager {
     }
     
     /**
-     * Profile present in contest?.
-     * 
-     * Checked for equality using getProfilePath(), not equals.
+     * Find matching profile in contest.
      * 
      * @param contest
      * @param aProfile
-     * @return
+     * @return profile that matches, else null
      */
-    private boolean exists(IInternalContest contest, Profile aProfile) {
+    protected Profile findProfile(IInternalContest contest, Profile aProfile) {
 
         for (Profile profile : contest.getProfiles()) {
             if (aProfile.getProfilePath().equals(profile.getProfilePath())) {
-                return true;
-            }
-            if (aProfile.getContestId().equals(profile.getContestId())) {
-                return true;
+                return profile;
             }
         }
-
-        return false;
+        return null;
     }
+    
+    public static void dumpProfiles(String name, Profile[] profiles) {
+        System.out.println(" dumpProfiles - " + name);
+        Arrays.sort(profiles, new ProfileComparatorByName());
+        for (Profile profile : profiles) {
+            dumpProfile(null, profile);
+        }
+    }
+    
+    public static void dumpProfile(String name, Profile profile) {
+
+        if (name != null) {
+            System.out.println("dumpProfile - " + name);
+        }
+        System.out.printf("%-15s %6s %02d %-30s %-20s", profile.getName(), Boolean.toString(profile.isActive()), profile.getSiteNumber(), profile.getContestId(), profile.getDescription());
+        System.out.println(" Path=" + profile.getProfilePath());
+
+        // Longer/Prettier version.
+        // System.out.println("profile name  : " + profile.getName());
+        // System.out.println("  description : " + profile.getDescription());
+        // System.out.println("  create date : " + profile.getCreateDate().toString());
+        // System.out.println("  site number : " + profile.getSiteNumber());
+        // System.out.println("   element id : " + profile.getElementId());
+        // System.out.println("       active : " + profile.isActive());
+        // System.out.println("   contest id : " + profile.getContestId());
+        // System.out.println("         path : " + profile.getProfilePath());
+
+    }
+    
     
     /**
      * Merge profiles.
+     * 
+     * Loops through profiles.properties file and adds and updates
+     * all profiles - except the current profile.  The current profile's
+     * authoritative information is in the contest/model.
      * 
      * @param contest
      *            contest to add profiles to.
@@ -487,18 +516,30 @@ public class ProfileManager {
             Profile[] profiles = load();
 
             for (Profile profile : profiles) {
-                if (!exists(contest, profile)) {
-                    if (new File(profile.getProfilePath()).isDirectory()) {
-                        contest.addProfile(profile);
-                    }
-                    // } else { exists - so no update/add
 
+                // Matching contest profile
+                Profile match = findProfile(contest, profile);
+                /**
+                 * For the match update the profile in contest with the potentially new profile information.
+                 */
+                if (match != null) {
+
+                    /**
+                     * do not update anything from the current profile from the profile.properties file.
+                     */
+                    if (!contest.getProfile().isSameAs(match)) {
+                        match.setDescription(profile.getDescription());
+                        match.setActive(profile.isActive());
+                        match.setName(profile.getName());
+                        contest.updateProfile(match);
+                    }
+                } else {
+                    contest.addProfile(profile);
                 }
             }
         }
-        // else no profiles to load.
+        // else no profiles to load/update
     }
-
     
     public static Profile createNewProfile() {
         Profile profile = new Profile("Default");

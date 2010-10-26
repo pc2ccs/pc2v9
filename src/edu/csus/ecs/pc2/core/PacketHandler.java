@@ -2663,8 +2663,6 @@ public class PacketHandler {
 
             contest.storeConfiguration(controller.getLog());
             
-            storeProfiles();
-            
             boolean sendToOtherServers = isThisSite(packet.getSourceId().getSiteNumber());
             
             if (oneUpdatePacket != null) {

@@ -382,7 +382,46 @@ public class ProfileManagerTest extends TestCase {
         for (Profile profile : allProfiles) {
             assertNotNull("Profile present", findProfile(profiles, profile));
         }
+    }
+    
+    public void testMergeThree() throws Exception {
+        
+        String filename = getFullName( "testm3.properties");
+        removeFile (filename);
 
+        String testdirName = getTestDirectoryName();
+        
+        int numProfilesGenerated = 8;
+        
+        SampleContest sample = new SampleContest();
+
+        IInternalContest contest = sample.createContest(3, 3, 3, 3, true);
+        contest.setStorage(new FileStorage(testdirName));
+        Profile[] addedProfiles = sample.createProfiles(contest, numProfilesGenerated - 1);
+        for (Profile profile3 : addedProfiles) {
+            contest.updateProfile(profile3);
+        }
+        
+        Profile [] theList = contest.getProfiles();
+
+        ProfileManager manager1 = new ProfileManager(filename);
+        manager1.store(theList, contest.getProfile());
+
+        Profile savedProfile = contest.getProfile();
+
+        InternalContest contest2 = new InternalContest();
+        contest2.setSiteNumber(savedProfile.getSiteNumber());
+        contest2.setProfile(savedProfile);
+        
+        manager1.mergeProfiles(contest2);
+        
+        for (Profile profileFive : contest2.getProfiles()){
+            Profile [] matches = findMatches(profileFive, theList);
+            if (matches.length != 1){
+                fail ("Could not find profile in list "+profileFive.getName());
+            } 
+            
+        }
     }
 
     /**
@@ -455,6 +494,43 @@ public class ProfileManagerTest extends TestCase {
         // System.out.println("         path : " + profile.getProfilePath());
 
     } 
+    
+    /**
+     * Tests whether if the default profile is changed.
+     * @throws Exception
+     */
+    public void testMergeFour() throws Exception {
+        
+        String filename = getFullName( "testm4.properties");
+        removeFile (filename);
+
+        String testdirName = getTestDirectoryName();
+        
+        int numProfilesGenerated = 8;
+        
+        SampleContest sample = new SampleContest();
+        
+        IInternalContest contest = sample.createContest(3, 3, 3, 3, true);
+        contest.setStorage(new FileStorage(testdirName));
+        Profile [] addedProfiles = sample.createProfiles(contest, numProfilesGenerated-1);
+        for (Profile profile3 : addedProfiles){
+            contest.updateProfile(profile3);
+        }
+        
+        ProfileManager manager1 = new ProfileManager(filename);
+        manager1.store(contest.getProfiles(), contest.getProfile());
+        
+        String name = "DE FOOT PROFILE";
+        contest.getProfile().setName(name);
+        contest.getProfile().setDescription(name + " Describet!");
+        
+        ProfileManager manager2 = new ProfileManager(filename);
+        manager2.mergeProfiles(contest);
+        
+        assertEquals("Profile name should be ", name, contest.getProfile().getName());
+        
+        
+    }
     
     public void testSave() throws IOException, ProfileLoadException {
         
