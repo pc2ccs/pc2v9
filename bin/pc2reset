@@ -7,11 +7,16 @@
 
 . `dirname $0`/pc2env
 
-if [ -d logs -a -d packets ] ; then
+# clients have a logs directory or servers have a profiles directory
+if [ -d logs -o -d profiles ] ; then
     `dirname $0`/pc2zip
-    rm -fr logs packets reports db db.* execute*
+    if [ -d archive ]; then
+	rm -fr logs packets reports execute* profiles profiles.properties
+    else
+	echo Could not find archive directory, was pc2zip successful?
+    fi
 else
-    echo Not in directory to reset, should be run from dir with logs and packets
+    echo Not in directory to reset, should be run from dir with logs or profiles
 fi 
 
 
