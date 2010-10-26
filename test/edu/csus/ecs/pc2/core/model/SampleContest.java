@@ -480,11 +480,19 @@ public class SampleContest {
         return sites;
     }
 
+    /**
+     * Create profiles but do not add profiles to contest.
+     * 
+     * @param contest
+     * @param count
+     * @return
+     */
     public Profile[] createProfiles(IInternalContest contest, int count) {
         Profile[] profiles = new Profile[count];
         for (int i = 0; i < count; i++) {
             int nextProfileNumber = contest.getProfiles().length + i + 1;
             Profile profile = new Profile("Profile " + nextProfileNumber);
+            profile.setDescription("Created Profile "+nextProfileNumber);
             profiles[i] = profile;
         }
         return profiles;

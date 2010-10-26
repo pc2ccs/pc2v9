@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.profile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -9,8 +10,11 @@ import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Profile;
+import edu.csus.ecs.pc2.core.model.ProfileComparatorByName;
+import edu.csus.ecs.pc2.core.model.SampleContest;
 import edu.csus.ecs.pc2.core.security.FileSecurity;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
+import edu.csus.ecs.pc2.core.security.FileStorage;
 
 /**
  * Tests for ProfileManager.
@@ -23,7 +27,7 @@ import edu.csus.ecs.pc2.core.security.FileSecurityException;
 public class ProfileManagerTest extends TestCase {
 
     private boolean debugFlag = false;
-
+    
     protected void setUp() throws Exception {
         super.setUp();
         StaticLog.setLog(new Log("PMT.log"));
@@ -255,8 +259,6 @@ public class ProfileManagerTest extends TestCase {
             Profile foundProfile = findProfile(loadedProfiles, profile);
             compareProfiles (profile, foundProfile);
         }
-        
-        
     }
 
     public void testStoreOne() throws Exception {
@@ -285,11 +287,14 @@ public class ProfileManagerTest extends TestCase {
 
     private void compareProfiles(Profile profile1, Profile profile2) {
         
-//        assertEquals(profile1.getContestId(), profile2.getContestId());
-//        assertEquals(profile1.getDescription(), profile2.getDescription());
+        assertEquals(profile1.getContestId(), profile2.getContestId());
+        assertEquals(profile1.getDescription(), profile2.getDescription());
         assertEquals(profile1.getName(), profile2.getName());
-//        assertEquals(profile1.getSiteNumber(), profile2.getSiteNumber());
+        assertEquals(profile1.getSiteNumber(), profile2.getSiteNumber());
         assertEquals(profile1.getProfilePath(), profile2.getProfilePath());
+        assertEquals(profile1.isActive(), profile2.isActive());
+        
+        assertTrue("Profiles should be same ", profile1.isSameAs(profile2));
         
     }
 
@@ -423,6 +428,118 @@ public class ProfileManagerTest extends TestCase {
         return getTestDirectoryName() + File.separator + filename;
     }
     
+    protected void dumpProfiles(String name, Profile[] profiles) {
+        System.out.println("dumpProfile - " + name);
+        Arrays.sort(profiles, new ProfileComparatorByName());
+        for (Profile profile : profiles) {
+            dumpProfile(null, profile);
+        }
+    }
+    
+    protected void dumpProfile(String name, Profile profile) {
+
+        if (name != null) {
+            System.out.println("dumpProfile - " + name);
+        }
+        System.out.printf("%-15s %6s %02d %-30s %-20s", profile.getName(), Boolean.toString(profile.isActive()), profile.getSiteNumber(), profile.getContestId(), profile.getDescription());
+        System.out.println(" Path=" + profile.getProfilePath());
+
+        // Longer/Prettier version.
+        // System.out.println("profile name  : " + profile.getName());
+        // System.out.println("  description : " + profile.getDescription());
+        // System.out.println("  create date : " + profile.getCreateDate().toString());
+        // System.out.println("  site number : " + profile.getSiteNumber());
+        // System.out.println("   element id : " + profile.getElementId());
+        // System.out.println("       active : " + profile.isActive());
+        // System.out.println("   contest id : " + profile.getContestId());
+        // System.out.println("         path : " + profile.getProfilePath());
+
+    } 
+    
+    public void testSave() throws IOException, ProfileLoadException {
+        
+        String filename = getFullName( "testm.properties");
+        String filename2 = getFullName( "testM2.properties");
+
+        removeFile (filename);
+        removeFile (filename2);
+
+        String testdirName = getTestDirectoryName();
+        
+        int numProfilesGenerated = 8;
+        
+        SampleContest sample = new SampleContest();
+        
+        IInternalContest contest = sample.createContest(3, 3, 3, 3, true);
+        contest.setStorage(new FileStorage(testdirName));
+        Profile [] addedProfiles = sample.createProfiles(contest, numProfilesGenerated-1);
+        for (Profile profile3 : addedProfiles){
+            contest.updateProfile(profile3);
+        }
+        
+        ProfileManager manager1 = new ProfileManager(filename);
+
+        Profile[] profiles1 = contest.getProfiles();
+        assertEquals("Should have "+numProfilesGenerated+" profiles ", numProfilesGenerated, profiles1.length);
+        
+        // Set profile #2 as inactive
+        profiles1[1].setActive(false);
+        profiles1[2].setActive(false);
+        
+        manager1.store(profiles1, profiles1[0]);
+        
+        manager1 = null;
+        manager1 = new ProfileManager(filename);
+        
+        Profile [] profiles = manager1.load();
+        
+        assertEquals("Should be "+numProfilesGenerated, profiles1.length, profiles.length);
+        
+        if (debugFlag){
+            dumpProfiles("Contest profiles", profiles1);
+            dumpProfiles("Loaded profiles", profiles);
+        }
+        
+        for (Profile profile : profiles){
+            Profile [] matches = findMatches(profile, profiles1);
+            if (matches.length != 1){
+                fail ("Could not find profile in list "+profile.getName());
+            }
+        }
+    }
+    
+    private Profile[] findMatches(Profile inProfile, Profile[] profiles) {
+
+        int matches = 0;
+        Profile aMatch = null;
+
+        for (Profile profile : profiles) {
+            if (profile.isSameAs(inProfile)) {
+                matches++;
+                aMatch = profile;
+            }
+        }
+
+        if (matches == 0) {
+            return new Profile[0];
+        }
+
+        Profile[] foundProfiles = new Profile[matches];
+        if (matches == 1) {
+            foundProfiles[0] = aMatch;
+        } else {
+            int idx = 0;
+            for (Profile profile : profiles) {
+                if (profile.isSameAs(inProfile)) {
+                    idx++;
+                    foundProfiles[idx] = profile;
+                }
+            }
+        }
+
+        return foundProfiles;
+    }
+
     public void testMerge() throws Exception {
         
         String filename = getFullName( "testm.properties");

@@ -40,6 +40,8 @@ public class ProfileManager {
      */
     public static final String PROFILE_INDEX_FILENAME = "profiles.properties";
 
+    private static final String ACTIVE_PREFIX = "active=";
+
     private String propertiesFileName = PROFILE_INDEX_FILENAME;
 
     private String delimiter = ",";
@@ -248,12 +250,16 @@ public class ProfileManager {
         // 0 "<title>",
         // 1 "<description>",
         // 2 "<profile path>",
-        // 3 <client_type>[=first]
+        // 3 active=<true|false>
 
         String title = stripQuote(fields[0]);
         String description = stripQuote(fields[1]);
         String path = stripQuote(fields[2]);
-        // String extraInfo = fields[3];
+        String activeField = null;
+
+        if (fields.length > 3) {
+            activeField = fields[3];
+        }
 
         if (title == null || title.length() == 0) {
             throw new ProfileLoadException("No title found in: " + profileLine);
@@ -267,6 +273,15 @@ public class ProfileManager {
 
         if (path == null || path.length() == 0) {
             throw new ProfileLoadException("No path found in: " + profileLine);
+        }
+        
+        if (activeField == null) {
+            profile.setActive(true);
+        } else if (activeField.startsWith(ACTIVE_PREFIX)) {
+            String newValue = activeField.replaceFirst(ACTIVE_PREFIX, "");
+            profile.setActive(Boolean.parseBoolean(newValue));
+        } else {
+            assert false : "Invalid " + ACTIVE_PREFIX + " field, " + ACTIVE_PREFIX + " not found";
         }
 
         profile.setProfilePath(path);
@@ -371,14 +386,15 @@ public class ProfileManager {
         VersionInfo versionInfo = new VersionInfo();
 
         for (Profile profile : profiles) {
-            // <prof_id>="<title>","<description>","<profile path>",<client_type>[=first]
-            String line = quoteString(profile.getName()) + delimiter + quoteString(profile.getDescription()) + delimiter + quoteString(profile.getProfilePath()) + delimiter;
+            String line = createProfileLine(profile);
+            
             properties.put(profile.getElementId().toString(), line);
         }
         
         // Add default profile into list if it isn't already there.
         if (! properties.containsKey(defaultProfile.getElementId().toString())){
-            String line = quoteString(defaultProfile.getName()) + delimiter + quoteString(defaultProfile.getDescription()) + delimiter + quoteString(defaultProfile.getProfilePath()) + delimiter;
+            String line = createProfileLine(defaultProfile);
+            
             properties.put(defaultProfile.getElementId().toString(), line);
         }
 
@@ -390,7 +406,21 @@ public class ProfileManager {
         return true;
     }
 
+    /**
+     * For a profile create a line.
+     * @param profile
+     * @return
+     */
+    private String createProfileLine(Profile profile) {
+        // <prof_id>="<title>","<description>","<profile path>",active=<true|false>,<client_type>[=first]
+        return quoteString(profile.getName()) + delimiter + quoteString(profile.getDescription()) + delimiter + quoteString(profile.getProfilePath()) + delimiter + ACTIVE_PREFIX + profile.isActive()
+                + delimiter;
+    }
+
+
     private String quoteString(String name) {
+        // TODO handle " in line, someday.
+        
         return "\"" + name + "\"";
     }
 

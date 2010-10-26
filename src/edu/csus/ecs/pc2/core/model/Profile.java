@@ -202,6 +202,12 @@ public class Profile implements IElementObject, Serializable {
 
     }
 
+    /**
+     * Are most fields identical?.
+     * 
+     * @param profile
+     * @return true if some fields are identical, false if not.
+     */
     public boolean isSameAs(Profile profile) {
 
         try {
@@ -218,6 +224,10 @@ public class Profile implements IElementObject, Serializable {
             }
 
             if (!stringSame(profilePath, profile.getProfilePath())) {
+                return false;
+            }
+            
+            if (profile.isActive() != active){
                 return false;
             }
 
