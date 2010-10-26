@@ -131,7 +131,7 @@ public class ZipPC2 {
          * List of file extensions to pack.
          */
         String[] simpleFileExtensions = { "log", "html", "ini", "set", "tab",
-                "tpl" };
+                "tpl", "properties" };
 
         File file = new File(".");
         String[] dirEntryList = file.list();
@@ -161,6 +161,8 @@ public class ZipPC2 {
             } else if (dirEntryName.equalsIgnoreCase("old")) {
                 addDirToList(dirEntryName);
             } else if (dirEntryName.equalsIgnoreCase("data")) {
+                addDirToList(dirEntryName);
+            } else if (dirEntryName.equalsIgnoreCase("profiles")) {
                 addDirToList(dirEntryName);
             }
         }
