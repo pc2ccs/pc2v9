@@ -207,6 +207,19 @@ public class ProfileSavePane extends JPanePlugin {
 
     private void createNewProfile() throws InvalidFieldValue {
         ProfileCloneSettings settings = getProfileCloneSettingsFromFields();
+
+        settings.setCopyLanguages(false);
+        settings.setCopyProblems(false);
+
+        settings.setResetContestTimes(false);
+        settings.setCopyAccounts(false);
+        settings.setCopyContestSettings(false);
+        settings.setCopyGroups(false);
+        settings.setCopyJudgements(false);
+        settings.setCopyNotifications(false);
+        settings.setCopyRuns(false);
+        settings.setCopyClarifications(false);
+        
         getController().cloneProfile(getContest().getProfile(), settings, false);
         closeWindow();
 

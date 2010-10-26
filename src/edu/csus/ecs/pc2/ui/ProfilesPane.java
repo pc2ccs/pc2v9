@@ -706,21 +706,46 @@ public class ProfilesPane extends JPanePlugin {
         }
         return profilesListBox;
     }
+    
+    
+    /**
+     * Remove run from grid.
+     * 
+     * @param run
+     */
+    private void removeProfilesRow(final Profile profile) {
 
-    public void updateProfileRow(final Profile profile) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                Object[] objects = buildProfileRow(profile);
+
                 int rowNumber = profilesListBox.getIndexByKey(profile.getProfilePath());
-                if (rowNumber == -1) {
-                    profilesListBox.addRow(objects, profile.getProfilePath());
-                } else {
-                    profilesListBox.replaceRow(objects, rowNumber);
+                if (rowNumber != -1) {
+                    profilesListBox.removeRow(rowNumber);
                 }
-                profilesListBox.autoSizeAllColumns();
-                profilesListBox.sort();
             }
         });
+    }
+
+    public void updateProfileRow(final Profile profile) {
+
+        if (! profile.isActive()) {
+            removeProfilesRow(profile);
+        } else {
+
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    Object[] objects = buildProfileRow(profile);
+                    int rowNumber = profilesListBox.getIndexByKey(profile.getProfilePath());
+                    if (rowNumber == -1) {
+                        profilesListBox.addRow(objects, profile.getProfilePath());
+                    } else {
+                        profilesListBox.replaceRow(objects, rowNumber);
+                    }
+                    profilesListBox.autoSizeAllColumns();
+                    profilesListBox.sort();
+                }
+            });
+        }
     }
 
     /**

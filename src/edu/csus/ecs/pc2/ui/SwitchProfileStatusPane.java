@@ -74,8 +74,6 @@ public class SwitchProfileStatusPane extends JPanePlugin {
     @SuppressWarnings("unused")
     private String newContestPassword; // @jve:decl-index=0:
 
-    // TODO used with revert
-    @SuppressWarnings("unused")
     private String currentContestPassword; // @jve:decl-index=0:
     
     private SimpleDateFormat formatter = new SimpleDateFormat(" HH:mm:ss MM-dd");  //  @jve:decl-index=0:

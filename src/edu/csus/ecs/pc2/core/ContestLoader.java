@@ -510,30 +510,35 @@ public class ContestLoader {
     /**
      * Load accounts from packet if no accounts exist.
      * 
-     * Checks for existing accounts on the 
+     * Checks whether there are any accounts of type in contest.  If
+     * there are no accounts then will load all accounts of that type
+     * into contest/model.
      * 
-     * @param contest
+     * @param contest model/data for the contest
      * @param controller
-     * @param packet
-     * @param type
+     * @param packet input packet with accounts
+     * @param type kind of accounts to check for/add
      */
     
     public void loadIfMissingAccountToModel(IInternalContest contest, IInternalController controller, Packet packet, Type type) {
-        
+
         try {
-            
+
             int siteNumber = contest.getSiteNumber();
-            
+
+            /**
+             * Number of accounts of account type type :)
+             */
             int count = contest.getAccounts(type, siteNumber).size();
-            
+
             int numAdded = 0;
-            
-            if (count == 0){
-                
+
+            if (count == 0) {
+
                 /**
                  * No accounts found will replace them with ones from the packet.
                  */
-                
+
                 Account[] accounts = (Account[]) PacketFactory.getObjectValue(packet, PacketFactory.ACCOUNT_ARRAY);
                 if (accounts != null) {
                     for (Account account : accounts) {
@@ -542,25 +547,21 @@ public class ContestLoader {
                                 if (contest.getAccount(account.getClientId()) == null) {
                                     contest.updateAccount(account);
                                     numAdded++;
-//                                    System.out.println("debug 22 Added " + numAdded + " " + type + " " + account.getClientId());
                                 }
                             }
                         }
                     }
                 }
-                controller.getLog().log(Log.INFO, "Loaded "+numAdded+" "+type+" Accounts for site "+siteNumber);
-                
+                controller.getLog().log(Log.INFO, "Loaded " + numAdded + " " + type + " Accounts for site " + siteNumber);
+
             } else {
-                controller.getLog().log(Log.INFO, "No accounts loaded "+count+" accounts exists for site "+siteNumber);
+                controller.getLog().log(Log.INFO, "No accounts loaded " + count + " accounts exists for site " + siteNumber);
             }
-            
-            System.out.println("debug 22 - Site "+siteNumber+" "+type+" already exist = "+count+" loaded "+numAdded);
-            System.out.println();
-            
+
         } catch (Exception e) {
             controller.logWarning("Exception logged ", e);
         }
-    
+
     }
 
     /**

@@ -424,10 +424,14 @@ public class PacketHandler {
      */
     private void handleRequestRemoteData(Packet packet, ConnectionHandlerID connectionHandlerID) {
        
-        ClientId remoteServerId = new ClientId(packet.getSourceId().getSiteNumber(), ClientType.Type.SERVER, 0);
+        int targetSiteId = packet.getSourceId().getSiteNumber();
+        info("Start send remote data to site "+targetSiteId);
+
+        ClientId remoteServerId = new ClientId(targetSiteId, ClientType.Type.SERVER, 0);
         Packet requestedPacket = createLoginSuccessPacket(remoteServerId, contest.getContestPassword());
         Packet remoteDataPacket = PacketFactory.clonePacket(Type.UPDATE_REMOTE_DATA, getServerClientId(), remoteServerId, requestedPacket);
         controller.sendToClient(remoteDataPacket);
+        info("Sent remote data to site "+targetSiteId);
     }
 
     private void handleRunSubmissionConfirmationServer(Packet packet, ClientId fromId) throws IOException, ClassNotFoundException, FileSecurityException  {
@@ -549,6 +553,8 @@ public class PacketHandler {
         
         IInternalContest newContest = new InternalContest();
 
+        info("Start switching to profile "+contest.getProfile().getName()+" contest id = "+contest.getContestIdentifier());
+        
         newContest.setClientId(contest.getClientId());
         if (newContest.getSiteNumber() == 0){
             newContest.setSiteNumber(contest.getSiteNumber());
@@ -623,7 +629,8 @@ public class PacketHandler {
         
         sendOutChangeProfileToAllClients(contest, currentContest.getProfile(), newProfile, new String(contestPassword), sendToServers);
         
-        info("switchProfile start - to "+newProfile+" as Site "+contest.getSiteNumber()+" as user "+newContest.getClientId());
+        info("switchProfile done - to "+newProfile+" as Site "+contest.getSiteNumber()+" as user "+newContest.getClientId());
+        info("Switched to profile "+contest.getProfile().getName()+" contest id = "+contest.getContestIdentifier());
 
         return contest;
     }
@@ -961,6 +968,7 @@ public class PacketHandler {
         int siteNumber = packet.getSourceId().getSiteNumber();
         int lastRunId = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.RUN_ID);
         sendRunFilesToServer(siteNumber, lastRunId);
+        info("Send Sync RunFiles to site "+siteNumber);
     }
 
     private void handleCloneProfile(Packet packet, ConnectionHandlerID connectionHandlerID) throws IOException, ClassNotFoundException, FileSecurityException, ProfileCloneException, ProfileException {
@@ -985,6 +993,8 @@ public class PacketHandler {
         Profile newProfile = new Profile(settings.getName());
         newProfile.setDescription(settings.getDescription());
         newProfile.setSiteNumber(contest.getSiteNumber());
+
+        info("Start clone to profile "+newProfile.getName());
         
         Profile addedProfile = contest.addProfile(newProfile);
         
@@ -1008,6 +1018,8 @@ public class PacketHandler {
             Packet addPacket = PacketFactory.createAddSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, addedProfile);
             sendToJudgesAndOthers(addPacket, true);
         }
+        
+        info("Done clone to profile "+newProfile.getName());
     }
 
 
@@ -3175,6 +3187,7 @@ public class PacketHandler {
     private void loadSettingsFromRemoteServer(ContestLoader loader, Packet packet, ConnectionHandlerID connectionHandlerID) {
         
         int remoteSiteNumber = packet.getSourceId().getSiteNumber();
+        info("Start loading settings from remote site "+remoteSiteNumber);
 
         loader.addRemoteContestTimesToModel(contest, controller, packet, remoteSiteNumber);
 
@@ -3196,6 +3209,8 @@ public class PacketHandler {
         loader.addRemoteAllClientSettingsToModel(contest, controller, packet, remoteSiteNumber);
 
         loader.addRemoteLoginsToModel(contest, controller, packet, remoteSiteNumber);
+        
+        info("Done loading settings from remote site "+remoteSiteNumber);
     }
 
     /**

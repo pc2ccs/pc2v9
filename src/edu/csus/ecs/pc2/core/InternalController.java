@@ -896,7 +896,11 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             } catch (Exception e) {
                 logException(e);
             }
-        
+           
+            if (saveCofigurationToDisk) {
+                // save newly merged profiles
+                inContest.storeConfiguration(getLog());
+            }
         }
         
         theProfile = inContest.getProfile();
@@ -1956,10 +1960,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     private void sendPacketToClients(Packet packet, ClientType.Type type) {
 
         ClientId[] clientIds = contest.getLocalLoggedInClients(type);
-        
-        if (clientIds.length > 0){
-            outgoingPacket(packet);
-        }
         
         for (ClientId clientId : clientIds) {
             if (isThisSite(clientId.getSiteNumber())) {
@@ -3176,7 +3176,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 plugin.setContestAndController(contest, inController);
 
                 inController.getLog().info("plugin.setContestAndController for " + plugin.getPluginTitle());
-                System.out.println("debug 22 plugin.setContestAndController for " + plugin.getPluginTitle());
+                
+                if (Utilities.isDebugMode()){
+                    System.out.println("plugin.setContestAndController for " + plugin.getPluginTitle());
+                }
 
             } catch (Exception e) {
                 logException(e);
