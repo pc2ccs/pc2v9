@@ -7,6 +7,7 @@ import javax.swing.JFrame;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Profile;
+import javax.swing.WindowConstants;
 
 /**
  * Frame for Profile Status Pane aka SwitchProfileStatusPane.
@@ -39,7 +40,8 @@ public class SwitchProfileStatusFrame extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new Dimension(557, 264));
+        this.setSize(new Dimension(705, 264));
+        this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setContentPane(getSwitchProfileStatusPane());
         this.setTitle("Switch Profile");
         FrameUtilities.centerFrame(this);

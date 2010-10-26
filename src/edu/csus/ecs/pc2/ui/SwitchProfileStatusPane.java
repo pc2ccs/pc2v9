@@ -247,8 +247,9 @@ public class SwitchProfileStatusPane extends JPanePlugin {
     private JButton getSwitchNowButton() {
         if (switchNowButton == null) {
             switchNowButton = new JButton();
-            switchNowButton.setText("Switch");
-            switchNowButton.setMnemonic(KeyEvent.VK_W);
+            switchNowButton.setText("Complete");
+            switchNowButton.setMnemonic(KeyEvent.VK_T);
+            switchNowButton.setToolTipText("Complete last step for switch, sync submissions");
             switchNowButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     startProfileServerSync();
@@ -387,6 +388,7 @@ public class SwitchProfileStatusPane extends JPanePlugin {
 
     protected void startProfileServerSync() {
         getController().syncProfileSubmissions (targetProfile);
+        closeWindow();
     }
 
     protected void revertToPreviousProfile() {
