@@ -728,7 +728,7 @@ public class ProfilesPane extends JPanePlugin {
 
     public void updateProfileRow(final Profile profile) {
 
-        if (! profile.isActive()) {
+        if (! profile.isActive() && !isShowHidden() ) {
             removeProfilesRow(profile);
         } else {
 
