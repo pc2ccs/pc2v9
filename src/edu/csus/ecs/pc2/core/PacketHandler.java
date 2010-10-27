@@ -627,9 +627,10 @@ public class PacketHandler {
         
         storeProfiles();
         
-        sendOutChangeProfileToAllClients(contest, currentContest.getProfile(), newProfile, new String(contestPassword), sendToServers);
+        // newProfile might not have the correct elementId, so use contest.getProfile() to get the real one.
+        sendOutChangeProfileToAllClients(contest, currentContest.getProfile(), contest.getProfile(), new String(contestPassword), sendToServers);
         
-        info("switchProfile done - to "+newProfile+" as Site "+contest.getSiteNumber()+" as user "+newContest.getClientId());
+        info("switchProfile done - to "+contest.getProfile()+" as Site "+contest.getSiteNumber()+" as user "+newContest.getClientId());
         info("Switched to profile "+contest.getProfile().getName()+" contest id = "+contest.getContestIdentifier());
 
         return contest;
