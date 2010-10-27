@@ -1475,7 +1475,7 @@ public class PacketHandler {
                     controller.sendToServers(updatePacket);
                 }
             } catch (Exception e) {
-                sendPasswordResultsBackToClient(clientId, false, "Current password does not match, try again");
+                sendPasswordResultsBackToClient(clientId, false, "Login password does not match, try again");
             }
         }
     }
