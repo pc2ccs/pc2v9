@@ -2755,8 +2755,10 @@ public class PacketHandler {
         if (isServer()) {
 
             if (!isThisSite(run)) {
+                ClientId destinationId = new ClientId(run.getSiteNumber(), ClientType.Type.SERVER, 0);
+                Packet cancelPacket = PacketFactory.clonePacket(contest.getClientId(), destinationId, packet);
+                controller.sendToRemoteServer(run.getSiteNumber(), cancelPacket);
 
-                controller.sendToRemoteServer(run.getSiteNumber(), packet);
 
             } else {
 
