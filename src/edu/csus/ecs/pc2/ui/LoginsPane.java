@@ -12,16 +12,19 @@ import com.ibm.webrunner.j2mclb.util.HeapSorter;
 import com.ibm.webrunner.j2mclb.util.NumericStringComparator;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.ILoginListener;
 import edu.csus.ecs.pc2.core.model.LoginEvent;
+import edu.csus.ecs.pc2.core.report.LoginReport;
 import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import java.awt.event.KeyEvent;
 
 /**
  * View Logins.
@@ -49,6 +52,8 @@ public class LoginsPane extends JPanePlugin {
     private JPanel messagePanel = null;
 
     private JLabel messageLabel = null;
+
+    private JButton reportButton = null;
 
     /**
      * This method initializes
@@ -84,12 +89,13 @@ public class LoginsPane extends JPanePlugin {
     private JPanel getLoginButtonPanel() {
         if (loginButtonPane == null) {
             FlowLayout flowLayout = new FlowLayout();
-            flowLayout.setHgap(15);
+            flowLayout.setHgap(35);
             flowLayout.setVgap(5);
             loginButtonPane = new JPanel();
             loginButtonPane.setLayout(flowLayout);
             loginButtonPane.setPreferredSize(new java.awt.Dimension(35, 35));
             loginButtonPane.add(getLogoffButton(), null);
+            loginButtonPane.add(getReportButton(), null);
         }
         return loginButtonPane;
     }
@@ -293,6 +299,7 @@ public class LoginsPane extends JPanePlugin {
         if (logoffButton == null) {
             logoffButton = new JButton();
             logoffButton.setText("Logoff");
+            logoffButton.setMnemonic(KeyEvent.VK_L);
             logoffButton.setToolTipText("Logoff the selected user");
             logoffButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -341,6 +348,26 @@ public class LoginsPane extends JPanePlugin {
                 messageLabel.setText(message);
             }
         });
+    }
+
+    /**
+     * This method initializes reportButton
+     * 
+     * @return javax.swing.JButton
+     */
+   private JButton getReportButton() {
+        if (reportButton == null) {
+            reportButton = new JButton();
+            reportButton.setText("Report");
+            reportButton.setMnemonic(KeyEvent.VK_R);
+            reportButton.setToolTipText("Show Logins Report");
+            reportButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    Utilities.viewReport(new LoginReport(), "Logins Report", getContest(), getController());
+                }
+            });
+        }
+        return reportButton;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

@@ -285,6 +285,7 @@ public class ContestXML {
         memento.putInteger("number", site.getSiteNumber());
         memento.putString("pc2id", site.getElementId().toString());
         memento.putString("name", site.getDisplayName());
+        memento.putString("password", site.getPassword());
         
         String hostName = site.getConnectionInfo().getProperty(Site.IP_KEY);
         String portStr = site.getConnectionInfo().getProperty(Site.PORT_KEY);

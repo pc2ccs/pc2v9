@@ -600,7 +600,10 @@ public class SwitchProfileStatusPane extends JPanePlugin {
 
         public void messageAdded(MessageEvent event) {
             if (event.getArea().equals(Area.PROFILES)){
-                JOptionPane.showMessageDialog(null, event.getMessage(),"Switch Profile Message for Site "+getContest().getSiteNumber(), JOptionPane.INFORMATION_MESSAGE);
+                String message = event.getMessage();
+                if (message.toLowerCase().indexOf("contest password") > -1) { // debug22
+                    JOptionPane.showMessageDialog(null, message, "Switch Profile Message for Site " + getContest().getSiteNumber(), JOptionPane.INFORMATION_MESSAGE);
+                }
             }
             getController().getLog().warning(event.getMessage());
         }

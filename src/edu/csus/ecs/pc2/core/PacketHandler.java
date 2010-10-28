@@ -500,6 +500,7 @@ public class PacketHandler {
 
         if (manager.isProfileAvailable(newProfile, contestPassword.toCharArray())) {
 
+            PacketFactory.dumpPacket(System.out, packet, "handleSwitchProfile switchProfile"); // debug 22
             IInternalContest newContest = switchProfile(contest, newProfile, contestPassword.toCharArray(), true);
             contest = newContest;
             
@@ -548,7 +549,13 @@ public class PacketHandler {
      */
     protected IInternalContest switchProfile(IInternalContest currentContest, Profile newProfile, char[] contestPassword, boolean sendToOtherServers, Packet packet, boolean sendToServers)
             throws ProfileException, IOException, ClassNotFoundException, FileSecurityException {
-
+        
+        if (contest.getProfile().getName().equals(newProfile.getName())){
+            PacketFactory.dumpPacket(System.out, packet, "switch packet, tried to switch to same profile");
+//            JOptionPane.showMessageDialog(null, "switch packet, tried to switch to same profile");
+            throw new ProfileException("Attempted to switch to the same profile: "+newProfile.getName());
+        }
+        
         ProfileManager manager = new ProfileManager();
         
         IInternalContest newContest = new InternalContest();
@@ -791,6 +798,7 @@ public class PacketHandler {
             
             if (manager.isProfileAvailable(newProfile, contestPassword.toCharArray())) {
 
+                PacketFactory.dumpPacket(System.out, packet, "handleUpdateClientProfile switchProfile");
                 IInternalContest newContest = switchProfile(contest, newProfile, contestPassword.toCharArray(), false, packet, false);
                 contest = newContest;
                 
@@ -3675,9 +3683,8 @@ public class PacketHandler {
             status = Status.READY_TO_SWITCH;
         }
         
-        ClientId remoteServerId = new ClientId(packet.getSourceId().getSiteNumber(), ClientType.Type.SERVER, 0);
         Site site = contest.getSite(contest.getSiteNumber());
-        Packet statusPacket = PacketFactory.createServerStatusPacket(getServerClientId(), remoteServerId, contest.getProfile(), status, site);
+        Packet statusPacket = PacketFactory.createServerStatusPacket(getServerClientId(), PacketFactory.ALL_SERVERS, contest.getProfile(), status, site);
         
         controller.sendToServers(statusPacket);
     }

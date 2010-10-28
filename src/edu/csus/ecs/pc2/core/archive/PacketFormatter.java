@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.core.archive;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.GregorianCalendar;
 import java.util.Properties;
@@ -116,6 +117,8 @@ public final class PacketFormatter {
                 string = "(String) " + (String) object;
             } else if (object instanceof Integer) {
                 string = "(Integer) " + (Integer) object;
+            } else if (object instanceof Date) {
+                string = "(Date) " + (Date) object;
             } else {
                 string = "Object:" + object.toString();
             }
@@ -137,6 +140,9 @@ public final class PacketFormatter {
             
             String [] keys = (String[]) prop.keySet().toArray(new String[prop.keySet().size()]);
             Arrays.sort(keys);
+            
+            subNode = new DefaultMutableTreeNode(new ObjectWrapper("Created", packet.getCreateDate()));
+            node.add(subNode);
             
             for (String name : keys){
                 subNode = createTree (name+" ", prop.get(name));

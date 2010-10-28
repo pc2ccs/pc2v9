@@ -145,12 +145,16 @@ public class ServerView extends JFrame implements UIPlugin {
 
         if (result == JOptionPane.YES_OPTION) {
 
-            ContestSummaryReports contestReports = new ContestSummaryReports();
-            contestReports.setContestAndController(model, controller);
+            try {
+                ContestSummaryReports contestReports = new ContestSummaryReports();
+                contestReports.setContestAndController(model, controller);
             
-            if (contestReports.isLateInContest()){
-                contestReports.generateReports();
-                controller.getLog().info("Reports Generated to "+contestReports.getReportDirectory());
+                if (contestReports.isLateInContest()){
+                    contestReports.generateReports();
+                    controller.getLog().info("Reports Generated to "+contestReports.getReportDirectory());
+                }
+            } catch (Exception e) {
+                log.log(Log.WARNING,"Unable to create reports ", e);
             }
             
             log.info("Server "+model.getSiteNumber()+" halted");

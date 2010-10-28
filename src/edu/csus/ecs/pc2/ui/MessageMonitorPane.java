@@ -208,7 +208,7 @@ public class MessageMonitorPane extends JPanePlugin {
     class MessageListenerImplementation implements IMessageListener {
 
         public void messageAdded(MessageEvent event) {
-
+            addMessageRow(event);
         }
 
         public void messageRemoved(MessageEvent event) {

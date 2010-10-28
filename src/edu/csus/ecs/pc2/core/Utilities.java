@@ -454,7 +454,7 @@ public final class Utilities {
                 contestTitle = contestInformation.getContestTitle();
             }
             printWriter.println("Contest Title: " + contestTitle);
-            printWriter.print("On: " + Utilities.getL10nDateTime());
+            printWriter.println("On: " + Utilities.getL10nDateTime());
             GregorianCalendar resumeTime = null;
             if (contest.getContestTime() != null){
                 resumeTime = contest.getContestTime().getResumeTime();
@@ -468,6 +468,7 @@ public final class Utilities {
             printWriter.println();
             printWriter.println();
             printWriter.println("** " + report.getReportTitle() + " Report");
+            printWriter.println("Site "+contest.getSiteNumber());
             printWriter.println();
             // if (filter != null) {
             // String filterInfo = filter.toString();

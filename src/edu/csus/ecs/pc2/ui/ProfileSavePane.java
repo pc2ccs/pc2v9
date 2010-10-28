@@ -144,15 +144,20 @@ public class ProfileSavePane extends JPanePlugin {
             saveButton.setText(CLONE_BUTTON_NAME);
             saveButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    try {
-                        takeProfileAction(saveButton.getText());
-                    } catch (InvalidFieldValue e1) {
-                        JOptionPane.showMessageDialog(null, e1.getMessage());
-                    }
+                    processSaveButton();
                 }
             });
         }
         return saveButton;
+    }
+
+    protected void processSaveButton() {
+        try {
+            takeProfileAction(saveButton.getText());
+        } catch (InvalidFieldValue e1) {
+            JOptionPane.showMessageDialog(null, e1.getMessage());
+        }
+
     }
 
     public void setSaveButtonName(String buttonNameText) {
@@ -585,6 +590,13 @@ public class ProfileSavePane extends JPanePlugin {
         if (contestPasswordConfirmTextField == null) {
             contestPasswordConfirmTextField = new JPasswordField();
             contestPasswordConfirmTextField.setBounds(new Rectangle(184, 151, 124, 25));
+            contestPasswordConfirmTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyPressed(java.awt.event.KeyEvent e) {
+                    if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
+                        processSaveButton();
+                    }
+                }
+            });
         }
         return contestPasswordConfirmTextField;
     }

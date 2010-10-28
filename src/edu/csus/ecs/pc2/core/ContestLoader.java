@@ -662,7 +662,7 @@ public class ContestLoader {
 
                                 if (!isThisSite(contest, clientId)) {
 
-                                    // Only add into remote list on server, if they are not already logged in
+                                    // Only add server into remote list on server, if they are not already logged in
 
                                     // TODO someday soon load logins with their connectionIds
                                     ConnectionHandlerID fakeId = new ConnectionHandlerID("FauxSite" + clientId.getSiteNumber() + clientId);
@@ -671,8 +671,11 @@ public class ContestLoader {
                             }
                         } else if (remoteSiteNumber == clientId.getSiteNumber()) {
                             // TODO someday soon load logins with their connectionIds
+                            
+                            // Add only clients from remoteServer into model as remote logins
+                            
                             ConnectionHandlerID fakeId = new ConnectionHandlerID("FauxSite" + clientId.getSiteNumber() + "-" + clientId);
-                            contest.addLocalLogin(clientId, fakeId);
+                            contest.addRemoteLogin(clientId, fakeId);
                         }
                     } catch (Exception e) {
                         controller.logWarning("Exception while adding remote login ", e);
@@ -689,7 +692,7 @@ public class ContestLoader {
 
                                 if (!isThisSite(contest, clientId)) {
 
-                                    // Only add into remote list on server, if they are not already logged in
+                                    // Only add site into remote list on server, if they are not already logged in
 
                                     // TODO someday soon load logins with their connectionIds
                                     ConnectionHandlerID fakeId = new ConnectionHandlerID("FauxSite" + clientId.getSiteNumber() + clientId);
@@ -698,6 +701,9 @@ public class ContestLoader {
                             }
                         } else if (remoteSiteNumber == clientId.getSiteNumber()) {
                             // TODO someday soon load logins with their connectionIds
+                            
+                            // Add only clients from remoteServer into model as remote logins
+                            
                             ConnectionHandlerID fakeId = new ConnectionHandlerID("FauxSite" + clientId.getSiteNumber() + "-" + clientId);
                             contest.addRemoteLogin(clientId, fakeId);
                         }

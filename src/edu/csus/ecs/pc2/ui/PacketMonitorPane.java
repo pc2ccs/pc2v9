@@ -19,8 +19,10 @@ import com.ibm.webrunner.j2mclb.util.HeapSorter;
 import com.ibm.webrunner.j2mclb.util.NumericStringComparator;
 import com.ibm.webrunner.j2mclb.util.TableModel;
 
+import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.archive.PacketFormatter;
+import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
@@ -60,6 +62,10 @@ public class PacketMonitorPane extends JPanePlugin {
     private long sequenceNumber = 1;
     
     private int maxLines = 500;
+    
+    private Log packetLog = null; // debug 22 remove
+    
+    private IPacketListener listener = null;
 
     /**
      * This method initializes
@@ -142,19 +148,49 @@ public class PacketMonitorPane extends JPanePlugin {
 
         getParentFrame().setTitle(getParentFrame().getTitle() + " " + moduleInfo);
 
-        inController.addPacketListener(new IPacketListener() {
+        if (packetLog == null) { 
 
-            public void packetReceived(PacketEvent event) {
-//                PacketFactory.dumpPacket(System.out, event.getPacket(), "PacketMonitorPane " + event.getAction().toString());
-                addRow(event.getPacket());
-            }
+            System.err.println("debug 22 - started log: " + "packetMonitorPane." + inContest.getClientId().getName());
+            getController().getLog().info("debug 22 - started log: " + "packetMonitorPane." + inContest.getClientId().getName());
 
-            public void packetSent(PacketEvent event) {
-//                PacketFactory.dumpPacket(System.out, event.getPacket(), "PacketMonitorPane " + event.getAction().toString());
-                addRow(event.getPacket());
-            }
-        });
+            packetLog = new Log("packetMonitorPane." + inContest.getClientId().getName());
+            packetLog.info("");
+            packetLog.info(new VersionInfo().getSystemVersionInfo());
+            packetLog.info("");
+        }
 
+        if (listener == null) {
+            listener = new PacketListenerImplementation();
+            inController.addPacketListener(listener);
+        }
+    }
+
+    /**
+     * format packet line for log.
+     * 
+     * @param direction
+     * @param packet
+     * @return log line.
+     */
+    protected String formatLogLine(String direction, Packet packet) {
+
+        StringBuffer buf = new StringBuffer();
+        
+        buf.append(sequenceNumber);
+        buf.append(' ');
+        buf.append(direction);
+        buf.append(' ');
+        buf.append(packet.getPacketNumber());
+        buf.append(' ');
+        buf.append(packet.getOriginalPacketNumber());
+        buf.append(' ');
+        buf.append(packet.getType().toString());
+        buf.append(' ');
+        buf.append(getClientName(packet.getSourceId()));
+        buf.append(' ');
+        buf.append(getClientName(packet.getDestinationId()));
+
+        return new String(buf);
     }
 
     /**
@@ -405,5 +441,30 @@ public class PacketMonitorPane extends JPanePlugin {
         }
         this.maxLines = maxLines;
     }
+    
+    /**
+     * Packet Listener implementation.
+     *  
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    
+    // $HeadURL$
+    protected class PacketListenerImplementation implements IPacketListener {
 
+        public void packetReceived(PacketEvent event) {
+            // PacketFactory.dumpPacket(System.out, event.getPacket(), "PacketMonitorPane " + event.getAction().toString());
+            packetLog.info(formatLogLine("in ", event.getPacket())); // debug 22
+            addRow(event.getPacket());
+        }
+
+        public void packetSent(PacketEvent event) {
+            // PacketFactory.dumpPacket(System.out, event.getPacket(), "PacketMonitorPane " + event.getAction().toString());
+            packetLog.info(formatLogLine("out", event.getPacket())); // debug 22
+            addRow(event.getPacket());
+        }
+
+    }
+
+    
 } // @jve:decl-index=0:visual-constraint="10,10"
