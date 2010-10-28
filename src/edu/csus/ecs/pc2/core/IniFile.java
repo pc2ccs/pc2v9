@@ -68,6 +68,10 @@ public class IniFile {
         load();
     }
 
+    public void loadFile() {
+        load();
+    }
+    
     /**
      * returns true if key is in file.
      * 
