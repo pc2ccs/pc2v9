@@ -2360,7 +2360,7 @@ public class InternalContest implements IInternalContest {
 
         if (settings.isCopyProblems()) {
             for (Problem problem : getProblems()) {
-                ProblemDataFiles problemDataFiles = contest.getProblemDataFile(problem);
+                ProblemDataFiles problemDataFiles = getProblemDataFile(problem);
                 contest.addProblem(problem, problemDataFiles);
             }
             contest.setGeneralProblem(getGeneralProblem());
