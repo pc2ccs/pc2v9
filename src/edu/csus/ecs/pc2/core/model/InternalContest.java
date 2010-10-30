@@ -2400,7 +2400,12 @@ public class InternalContest implements IInternalContest {
             }
         }
 
-        ContestInformation newContestInformation = contest.getContestInformation();
+        ContestInformation newContestInformation;
+        if (settings.isCopyContestSettings()) {
+            newContestInformation =  getContestInformation();
+        } else {
+            newContestInformation = new ContestInformation();
+        }
 
         newContestInformation.setContestTitle(settings.getContestTitle());
         contest.updateContestInformation(newContestInformation);
