@@ -684,15 +684,12 @@ public class ClarificationsPane extends JPanePlugin {
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
-        answerClarificationFrame.setContestAndController(inContest, inController);
 
         displayTeamName = new DisplayTeamName();
         displayTeamName.setContestAndController(inContest, inController);
 
         initializePermissions();
-        
-        getEditFilterFrame().setContestAndController(inContest, inController);
-
+ 
         getContest().addClarificationListener(new ClarificationListenerImplementation());
         getContest().addAccountListener(new AccountListenerImplementation());
         getContest().addProblemListener(new ProblemListenerImplementation());
@@ -701,6 +698,11 @@ public class ClarificationsPane extends JPanePlugin {
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
+                
+                getEditFilterFrame().setContestAndController(getContest(), getController());
+                
+                answerClarificationFrame.setContestAndController(getContest(), getController());
+ 
                 updateGUIperPermissions();
                 resetClarsListBoxColumns();
                 reloadListBox();

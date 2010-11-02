@@ -230,13 +230,18 @@ public class ReportPane extends JPanePlugin {
 
         this.log = getController().getLog();
         
-        getEditFilterFrame().setContestAndController(inContest, inController);
-        refreshGUI();
-        
         if (isServer()) {
             String reportDir = getReportDirectory();
             setReportDirectory(inContest.getProfile().getProfilePath() + File.separator + reportDir);
         }
+        
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                getEditFilterFrame().setContestAndController(getContest(), getController());
+                refreshGUI();
+            }
+        });
+        
     }
     
     private boolean isServer() {

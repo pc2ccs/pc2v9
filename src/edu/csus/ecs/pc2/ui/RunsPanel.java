@@ -156,6 +156,7 @@ public class RunsPanel extends JPanePlugin {
     
     private JudgementNotificationsList judgementNotificationsList = null;
     
+    private boolean displayConfirmation = true;
 
     /**
      * This method initializes
@@ -534,6 +535,10 @@ public class RunsPanel extends JPanePlugin {
          * caller's part will cause other clients to see the Run Response dialog...
          */
         private void showResponseToTeam(RunEvent event) {
+            
+            if (! displayConfirmation){
+                return;
+            }
 
             Run theRun = event.getRun();
             String problemName = getContest().getProblem(theRun.getProblemId()).toString();
@@ -955,27 +960,29 @@ public class RunsPanel extends JPanePlugin {
         
         extractRuns = new ExtractRuns(inContest);
 
-        editRunFrame.setContestAndController(getContest(), getController());
-        viewJudgementsFrame.setContestAndController(getContest(), getController());
-        if (isAllowed(Permission.Type.JUDGE_RUN)) {
-            selectJudgementFrame.setContestAndController(getContest(), getController());
-        }
-
-        if (bUseAutoJudgemonitor) {
-            autoJudgingMonitor.setContestAndController(getContest(), getController());
-        }
-
         getContest().addRunListener(new RunListenerImplementation());
         getContest().addAccountListener(new AccountListenerImplementation());
         getContest().addProblemListener(new ProblemListenerImplementation());
         getContest().addLanguageListener(new LanguageListenerImplementation());
         getContest().addContestInformationListener(new ContestInformationListenerImplementation());
         getContest().addBalloonSettingsListener(new BalloonSettingsListenerImplementation());
-        
-        getEditFilterFrame().setContestAndController(inContest, inController);
-
+     
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
+                
+                editRunFrame.setContestAndController(getContest(), getController());
+                viewJudgementsFrame.setContestAndController(getContest(), getController());
+                if (isAllowed(Permission.Type.JUDGE_RUN)) {
+                    selectJudgementFrame.setContestAndController(getContest(), getController());
+                }
+
+                if (bUseAutoJudgemonitor) {
+                    autoJudgingMonitor.setContestAndController(getContest(), getController());
+                }
+                
+                getEditFilterFrame().setContestAndController(getContest(), getController());
+
+                
                 updateGUIperPermissions();
                 resetRunsListBoxColumns();
                 reloadRunList();
@@ -1483,6 +1490,14 @@ public class RunsPanel extends JPanePlugin {
             showMessage("Unable to view run, check log");
         }
 
+    }
+    
+    public boolean isDisplayConfirmation() {
+        return displayConfirmation;
+    }
+    
+    public void setDisplayConfirmation(boolean displayConfirmation) {
+        this.displayConfirmation = displayConfirmation;
     }
 
     /**
