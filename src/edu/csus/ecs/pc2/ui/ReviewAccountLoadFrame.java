@@ -200,6 +200,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 messageLabel.setText(string);
+                messageLabel.setToolTipText(string);
                 messageLabel.setForeground(color);
             }
         });
