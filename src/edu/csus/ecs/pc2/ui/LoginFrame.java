@@ -90,7 +90,7 @@ public class LoginFrame extends JFrame implements UIPlugin {
 
     private JLabel spacerLabel = null;
 
-    private boolean bAlreadyLoggingIn = false;
+    private Boolean bAlreadyLoggingIn = false;
 
     /**
      * This method initializes
@@ -332,12 +332,13 @@ public class LoginFrame extends JFrame implements UIPlugin {
                 logWindow.setVisible(true);
                 return;
             }
-
-            if (bAlreadyLoggingIn) {
-                return;
-            }
             
-            bAlreadyLoggingIn = true;
+            synchronized (bAlreadyLoggingIn) {
+                if (bAlreadyLoggingIn) {
+                    return;
+                }
+                bAlreadyLoggingIn = true;
+            }
             
             try {
                 setStatusMessage("Logging in...");
