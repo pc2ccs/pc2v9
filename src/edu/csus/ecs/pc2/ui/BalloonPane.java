@@ -281,7 +281,7 @@ public class BalloonPane extends JPanePlugin {
                     return;
                 }
             }
-            getTestMCLB().addRow(row);
+            getTestMCLB().addRow(row,getContest().getSite(siteID));
         } catch (Exception e) {
             log.info("Problem adding test balloon row for site "+siteID);
             log.throwing(getClass().getName(), "addTestRow("+siteID+")", e);
@@ -355,7 +355,8 @@ public class BalloonPane extends JPanePlugin {
             int siteTested = 0;
             for (int i = 1; i < getTestMCLB().getRowCount() ; i++){
                 Object[] row=getTestMCLB().getRow(i);
-                final int site = i;
+                Site key=(Site)getTestMCLB().getRowKey(i);
+                final int site = key.getSiteNumber();
                 final boolean testEmail = ((JCheckBox)row[EMAIL_COLUMN]).isSelected();
                 final boolean testPrint = ((JCheckBox)row[FILE_PRINT_COLUMN]).isSelected();
                 if (testEmail || testPrint) {
