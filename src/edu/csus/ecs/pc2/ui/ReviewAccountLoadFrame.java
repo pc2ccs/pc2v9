@@ -294,12 +294,12 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
             s[0] = getSiteTitle("" + account.getSiteNumber());
             s[1] = clientId.getClientType().toString().toLowerCase();
             s[2] = "" + clientId.getClientNumber();
-            if (getTeamDisplayName(accountOrig).equalsIgnoreCase(getTeamDisplayName(account))) {
+            if (getTeamDisplayName(accountOrig).equals(getTeamDisplayName(account))) {
                 s[3] = getTeamDisplayName(account);
             } else {
                 s[3] = CHANGE_BEGIN + getTeamDisplayName(account) + CHANGE_END;
             }
-            if (accountOrig.getPassword().equalsIgnoreCase(account.getPassword())) {
+            if (accountOrig.getPassword().equals(account.getPassword())) {
                 s[4] = account.getPassword();
             } else {
                 s[4] = CHANGE_BEGIN + account.getPassword() + CHANGE_END;
