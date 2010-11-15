@@ -484,7 +484,7 @@ public class BalloonSettingPane extends JPanePlugin {
         if (savedMailProperties == null) {
             savedMailProperties = BalloonSettings.getDefaultMailProperties();
         }
-        changedMailProperties = savedMailProperties;
+        changedMailProperties = (Properties) savedMailProperties.clone();
     }
 
     /**
