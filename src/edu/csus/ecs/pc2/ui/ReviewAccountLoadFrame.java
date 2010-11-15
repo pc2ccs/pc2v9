@@ -20,9 +20,13 @@ import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Pluralize;
 import edu.csus.ecs.pc2.core.imports.LoadAccounts;
 import edu.csus.ecs.pc2.core.security.Permission;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
+
+import java.awt.Dimension;
 
 /**
  * Review Account Load Frame
@@ -69,6 +73,8 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
     private JButton cancelButton = null;
 
     private String loadedFileName;
+
+    private JCheckBox showAllAccountsCheckBox = null;
     
     /**
      * This method initializes
@@ -113,6 +119,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
             buttonPane.setPreferredSize(new java.awt.Dimension(35, 35));
             buttonPane.add(getAcceptButton(), null);
             buttonPane.add(getCancelButton(), null);
+            buttonPane.add(getShowAllAccountsCheckBox(), null);
         }
         return buttonPane;
     }
@@ -241,25 +248,35 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
         log.info("Attempting to load accounts from file: "+filename);
         LoadAccounts loadAccounts = new LoadAccounts();
         getAcceptButton().setEnabled(false);
+        getShowAllAccountsCheckBox().setSelected(false);
         try {
             accounts = loadAccounts.fromTSVFile(filename, getAllAccounts(), contest.getGroups());
-            if (accounts != null) {
-                // TODO sort accounts
-                Arrays.sort(accounts, new AccountComparator());
-                for (Account account : accounts) {
-                    updateAccountRow(account);
-                }
-                log.info("found " + accounts.length + " account(s)");
-                if (accounts.length > 0) {
-                    getAcceptButton().setEnabled(true);
-                }
-            }
+            refreshList();
         } catch (Exception e) {
             log.warning(e.getMessage());
             showErrorMessage(e.getMessage());
         }
         FrameUtilities.centerFrameTop(this);
         setVisible(true);
+    }
+
+    private void refreshList() {
+        if (accounts != null) {
+            int count=0;
+            getAccountListBox().removeAllRows();
+            Arrays.sort(accounts, new AccountComparator());
+            for (Account account : accounts) {
+                Account accountOrig = contest.getAccount(account.getClientId());
+                if (getShowAllAccountsCheckBox().isSelected() || !accountOrig.isSameAs(account)) {
+                    updateAccountRow(account);
+                    count++;
+                }
+            }
+            log.info("found " + count + " "+Pluralize.simplePluralize("account", count));
+            if (count > 0) {
+                getAcceptButton().setEnabled(true);
+            }
+        }
     }
     
     private void showErrorMessage(String msg){
@@ -436,5 +453,24 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
 
     protected void handleCancel() {
         this.dispose();
+    }
+
+    /**
+     * This method initializes showAllAccountsCheckBox
+     * 
+     * @return javax.swing.JCheckBox
+     */
+    private JCheckBox getShowAllAccountsCheckBox() {
+        if (showAllAccountsCheckBox == null) {
+            showAllAccountsCheckBox = new JCheckBox();
+            showAllAccountsCheckBox.setText("Included unchanged accounts");
+            showAllAccountsCheckBox.setPreferredSize(new Dimension(250, 24));
+            showAllAccountsCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    refreshList();
+                }
+            });
+        }
+        return showAllAccountsCheckBox;
     }
 } // @jve:decl-index=0:visual-constraint="46,36"

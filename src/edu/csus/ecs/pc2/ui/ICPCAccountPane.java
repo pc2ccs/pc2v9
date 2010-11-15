@@ -29,6 +29,8 @@ import com.ibm.webrunner.j2mclb.util.HeapSorter;
 import com.ibm.webrunner.j2mclb.util.NumericStringComparator;
 
 import java.awt.FlowLayout;
+import javax.swing.JCheckBox;
+import java.awt.Dimension;
 
 /**
  * @author pc2@ecs.csus.edu
@@ -57,7 +59,9 @@ public class ICPCAccountPane extends JPanePlugin {
     
     private String displayChoice = "SHORTSCHOOLNAME";
     
-    private Vector<Account> updatedAccountVector = new Vector<Account>();  
+    private Vector<Account> updatedAccountVector = new Vector<Account>();  //  @jve:decl-index=0:
+
+    private JCheckBox showAllCheckBox = null;  
     /**
      * @author pc2@ecs.csus.edu
      *
@@ -223,7 +227,7 @@ public class ICPCAccountPane extends JPanePlugin {
      * @param newDisplayName
      */
     private void updateDisplayName(Account account2, ICPCAccount icpcAccount, String newDisplayName) {
-        if (!account2.getDisplayName().equals(newDisplayName)) {
+        if (showAllCheckBox.isSelected() || !account2.getDisplayName().equals(newDisplayName)) {
             // TODO would be nice if Account had a deep clone, actually we just need
             // a deep clone of the string fields
             Account account = new Account(account2.getClientId(), account2.getPassword(), account2.getClientId().getSiteNumber());
@@ -236,7 +240,6 @@ public class ICPCAccountPane extends JPanePlugin {
             account.setLongSchoolName(new String(account2.getLongSchoolName()));
             account.setShortSchoolName(new String(account2.getShortSchoolName()));
             if (account.isSameAs(account2)) {
-                account.setDisplayName(newDisplayName);
                 if (icpcAccount != null) {
                     account.setExternalId(icpcAccount.getExternalId());
                     account.setExternalName(icpcAccount.getExternalName());
@@ -244,7 +247,11 @@ public class ICPCAccountPane extends JPanePlugin {
                     account.setShortSchoolName(icpcAccount.getShortSchoolName());
                     account.setGroupId(icpcAccount.getGroupId());
                 }
-                updatedAccountVector.add(account);
+                String oldDisplayName = account.getDisplayName();
+                account.setDisplayName(newDisplayName);
+                if (!newDisplayName.equals(oldDisplayName)) {
+                    updatedAccountVector.add(account);
+                }
                 getAccountListBox().addRow(buildAccountRow(account2, newDisplayName));
             } else {
                 getController().getLog().info("clone failed isSameAs test "+account+" vs "+account2);
@@ -336,6 +343,7 @@ public class ICPCAccountPane extends JPanePlugin {
             buttonPanel.setLayout(flowLayout);
             buttonPanel.add(getUpdateButton(), null);
             buttonPanel.add(getCancelButton(), null);
+            buttonPanel.add(getShowAllCheckBox(), null);
         }
         return buttonPanel;
     }
@@ -437,6 +445,26 @@ public class ICPCAccountPane extends JPanePlugin {
      */
     public void setIcpcAccounts(ICPCAccount[] icpcAccounts) {
         this.icpcAccounts = icpcAccounts;
+    }
+
+    /**
+     * This method initializes showAllCheckBox
+     * 
+     * @return javax.swing.JCheckBox
+     */
+    private JCheckBox getShowAllCheckBox() {
+        if (showAllCheckBox == null) {
+            showAllCheckBox = new JCheckBox();
+            showAllCheckBox.setText("Included unchanged accounts");
+            showAllCheckBox.setPreferredSize(new Dimension(250, 24));
+            showAllCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    changeDisplayName(displayChoice);
+                }
+            });
+
+        }
+        return showAllCheckBox;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
