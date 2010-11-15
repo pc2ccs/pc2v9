@@ -32,6 +32,8 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IProblemListener;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemEvent;
+import edu.csus.ecs.pc2.core.security.Permission;
+import edu.csus.ecs.pc2.core.security.PermissionList;
 
 /**
  * A grid of auto judging settings.
@@ -61,6 +63,8 @@ public class AutoJudgesPane extends JPanePlugin {
     private EditAutoJudgeSettingFrame editAutoJudgeSettingFrame = new EditAutoJudgeSettingFrame();
 
     private Log log;
+
+    private PermissionList permissionList = new PermissionList();
 
     /**
      * This method initializes
@@ -98,6 +102,8 @@ public class AutoJudgesPane extends JPanePlugin {
         getContest().addClientSettingsListener(new ClientSettingsListenerImplementation());
         getContest().addProblemListener(new ProblemListenerImplementation());
         getContest().addAccountListener(new AccountListenerImplementation());
+        
+        initializePermissions();
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -108,10 +114,18 @@ public class AutoJudgesPane extends JPanePlugin {
 
         showMessage("");
     }
+    
+    private boolean isAllowed(Permission.Type type) {
+        return permissionList.isAllowed(type);
+    }
 
-    protected void updateGUIperPermissions() {
-        // TODO code updateGUIperPermissions
+    private void initializePermissions() {
+        Account account = getContest().getAccount(getContest().getClientId());
+        permissionList.clearAndLoadPermissions(account.getPermissionList());
+    }
 
+    private void updateGUIperPermissions() {
+        editButton.setVisible(isAllowed(Permission.Type.EDIT_AJ_SETTINGS));
     }
 
     protected void reloadAutoJudgeList() {
@@ -412,6 +426,7 @@ public class AutoJudgesPane extends JPanePlugin {
     }
     
     /**
+     * Account Listener Implementation.
      * 
      * @author pc2@ecs.csus.edu
      * @version $Id$
@@ -442,6 +457,21 @@ public class AutoJudgesPane extends JPanePlugin {
                     }
                 }
             });
+            
+            // check if is this account
+            Account account = event.getAccount();
+            /**
+             * If this is the account then update the GUI display per the potential change in Permissions.
+             */
+            if (getContest().getClientId().equals(account.getClientId())) {
+                // They modified us!!
+                initializePermissions();
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        updateGUIperPermissions();
+                    }
+                });
+            }
         }
 
         public void accountsAdded(final AccountEvent accountEvent) {
@@ -458,19 +488,38 @@ public class AutoJudgesPane extends JPanePlugin {
         }
 
         public void accountsModified(final AccountEvent accountEvent) {
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    for(Account account : accountEvent.getAccounts()) {
-                        ClientId clientId = account.getClientId();
-                        if (isJudge(clientId)) {
+            
+            Account[] accounts = accountEvent.getAccounts();
+            for (Account account : accounts) {
+
+                final ClientId clientId = account.getClientId();
+                if (isJudge(clientId)) {
+                    SwingUtilities.invokeLater(new Runnable() {
+                        public void run() {
                             updateAutoJudgeRow(clientId);
                         }
-                    }
+                    });
                 }
-            });
+                
+                /**
+                 * If this is the account then update the GUI display per the potential change in Permissions.
+                 */
+                if (getContest().getClientId().equals(account.getClientId())) {
+                    // They modified us!!
+                    initializePermissions();
+                    SwingUtilities.invokeLater(new Runnable() {
+                        public void run() {
+                            updateGUIperPermissions();
+                        }
+                    });
+                }
+            }
         }
 
         public void accountsRefreshAll(AccountEvent accountEvent) {
+            
+            initializePermissions();
+            
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
                     updateGUIperPermissions();
@@ -479,7 +528,6 @@ public class AutoJudgesPane extends JPanePlugin {
             });
 
             showMessage("");
-            
         }
         
     }

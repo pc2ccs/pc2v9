@@ -526,6 +526,8 @@ public class ProfilesPane extends JPanePlugin {
         exportButton.setVisible(isAllowed(Permission.Type.EXPORT_PROFILE));
         cloneButton.setVisible(isAllowed(Permission.Type.CLONE_PROFILE));
         resetContestButton.setVisible(isAllowed(Permission.Type.RESET_CONTEST));
+        reportButton.setVisible(isAllowed(Permission.Type.CLONE_PROFILE));
+        
         loadButton.setVisible(isAllowed(Permission.Type.CLONE_PROFILE) && Utilities.isDebugMode());
     }
 

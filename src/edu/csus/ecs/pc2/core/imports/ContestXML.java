@@ -71,6 +71,8 @@ public class ContestXML {
     public static final String VERSION_TAG = "version";
 
     public static final String FILE_INFO_TAG = "fileinfo";
+    
+    private boolean showPasswords = true;
 
     public String toXML(IInternalContest contest) throws IOException {
         return toXML(contest, new Filter());
@@ -379,7 +381,9 @@ public class ContestXML {
         accountMemento.putInteger("number", clientId.getClientNumber());
         accountMemento.putInteger("site", clientId.getSiteNumber());
 
-        accountMemento.putString("password", account.getPassword());
+        if (showPasswords) {
+            accountMemento.putString("password", account.getPassword());
+        }
 
         accountMemento.putBoolean("allowlogin", account.isAllowed(Permission.Type.LOGIN));
         accountMemento.putBoolean("showonscoreboard", account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD));
@@ -463,6 +467,14 @@ public class ContestXML {
         memento.putString("judgement", contest.getJudgement(judgementRecord.getJudgementId()).toString());
         memento.putString("pc2id", judgementRecord.getJudgementId().toString());
         return memento;
+    }
+    
+    public void setShowPasswords(boolean showPasswords) {
+        this.showPasswords = showPasswords;
+    }
+    
+    public boolean isShowPasswords() {
+        return showPasswords;
     }
 }
 

@@ -1,5 +1,12 @@
 package edu.csus.ecs.pc2.ui;
 
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.event.KeyEvent;
+import java.io.File;
+import java.util.HashMap;
+import java.util.Vector;
+
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -10,19 +17,16 @@ import edu.csus.ecs.pc2.core.imports.ICPCImportData;
 import edu.csus.ecs.pc2.core.imports.LoadICPCData;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.GroupEvent;
+import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IGroupListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-
-import java.awt.FlowLayout;
-import java.io.File;
-import java.util.HashMap;
-import java.util.Vector;
-import java.awt.event.KeyEvent;
-import java.awt.Dimension;
+import edu.csus.ecs.pc2.core.security.Permission;
+import edu.csus.ecs.pc2.core.security.PermissionList;
 
 /**
  * This Pane has 2 buttons, one for loading the ICPC tab files for PC^2 and a 2nd button
@@ -52,6 +56,8 @@ public class ICPCPane extends JPanePlugin {
     private Log log;
 
     private JButton importSitesButton = null;
+    
+    private PermissionList permissionList = new PermissionList();
 
     /**
      * Group Listener for ICPC Pane.
@@ -308,18 +314,33 @@ public class ICPCPane extends JPanePlugin {
         super.setContestAndController(inContest, inController);
 
         log = getController().getLog();
-        // getContest().addAccountListener(new AccountListenerImplementation());
+        getContest().addAccountListener(new AccountListenerImplementation());
         getContest().addGroupListener(new GroupListenerImplementation());
 
-        // initializePermissions();
+        initializePermissions();
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 // wait for groups before enabling accounts
                 getImportAccountsButton().setEnabled(getContest().getGroups() != null);
-                // updateGUIperPermissions();
+                updateGUIperPermissions();
             }
         });
+    }
+
+    private boolean isAllowed(Permission.Type type) {
+        return permissionList.isAllowed(type);
+    }
+
+    private void initializePermissions() {
+        Account account = getContest().getAccount(getContest().getClientId());
+        permissionList.clearAndLoadPermissions(account.getPermissionList());
+    }
+
+    private void updateGUIperPermissions() {
+        changeDisplayFormatButton.setEnabled(isAllowed(Permission.Type.EDIT_ACCOUNT));
+        importSitesButton.setEnabled(isAllowed(Permission.Type.EDIT_ACCOUNT));
+        importAccountsButton.setEnabled(isAllowed(Permission.Type.EDIT_ACCOUNT));
     }
 
     /**
@@ -343,5 +364,71 @@ public class ICPCPane extends JPanePlugin {
         }
         return importSitesButton;
     }
+    
+    /**
+     * Account Listener Implementation.
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    public class AccountListenerImplementation implements IAccountListener {
+
+        public void accountAdded(AccountEvent accountEvent) {
+            // ignored
+        }
+
+        public void accountModified(AccountEvent accountEvent) {
+            // check if is this account
+            Account account = accountEvent.getAccount();
+            /**
+             * If this is the account then update the GUI display per the potential change in Permissions.
+             */
+            if (getContest().getClientId().equals(account.getClientId())) {
+                // They modified us!!
+                initializePermissions();
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        updateGUIperPermissions();
+                    }
+                });
+
+            }
+        }
+
+        public void accountsAdded(AccountEvent accountEvent) {
+            // ignore
+        }
+
+        public void accountsModified(AccountEvent accountEvent) {
+            Account[] accounts = accountEvent.getAccounts();
+            for (Account account : accounts) {
+
+                /**
+                 * If this is the account then update the GUI display per the potential change in Permissions.
+                 */
+                if (getContest().getClientId().equals(account.getClientId())) {
+                    // They modified us!!
+                    initializePermissions();
+                    SwingUtilities.invokeLater(new Runnable() {
+                        public void run() {
+                            updateGUIperPermissions();
+                        }
+                    });
+                }
+            }
+        }
+
+        public void accountsRefreshAll(AccountEvent accountEvent) {
+
+            initializePermissions();
+
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    updateGUIperPermissions();
+                }
+            });
+        }
+    }
+    
 
 } // @jve:decl-index=0:visual-constraint="10,10"

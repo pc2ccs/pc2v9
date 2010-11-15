@@ -18,13 +18,17 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.BalloonSettings;
 import edu.csus.ecs.pc2.core.model.BalloonSettingsEvent;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ElementId;
+import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IBalloonSettingsListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Site;
+import edu.csus.ecs.pc2.core.security.Permission;
+import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.core.security.Permission.Type;
 
 /**
@@ -59,6 +63,8 @@ public class BalloonSettingsPane extends JPanePlugin {
     private EditBalloonSettingsFrame editBalloonSettingsFrame = null;
 
     private JButton copyButton = null;
+    
+    private PermissionList permissionList = new PermissionList();
 
     /**
      * This method initializes
@@ -216,12 +222,31 @@ public class BalloonSettingsPane extends JPanePlugin {
         editBalloonSettingsFrame.setContestAndController(inContest, inController);
 
         getContest().addBalloonSettingsListener(new BalloonSettingsListenerImplementation());
+        getContest().addAccountListener(new AccountListenerImplementation());
+        
+        initializePermissions();
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
+                updateGUIperPermissions();
                 reloadListBox();
             }
         });
+    }
+
+    private boolean isAllowed(Permission.Type type) {
+        return permissionList.isAllowed(type);
+    }
+
+    private void initializePermissions() {
+        Account account = getContest().getAccount(getContest().getClientId());
+        permissionList.clearAndLoadPermissions(account.getPermissionList());
+    }
+
+    private void updateGUIperPermissions() {
+        addButton.setVisible(isAllowed(Permission.Type.ADD_NOTIFICATIONS));
+        editButton.setVisible(isAllowed(Permission.Type.EDIT_NOTIFICATIONS));
+        copyButton.setVisible(isAllowed(Permission.Type.EDIT_NOTIFICATIONS));
     }
 
     /**
@@ -455,5 +480,71 @@ public class BalloonSettingsPane extends JPanePlugin {
 
         return s;
     }
+    
+    /**
+     * Account Listener Implementation.
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    public class AccountListenerImplementation implements IAccountListener {
+
+        public void accountAdded(AccountEvent accountEvent) {
+            // ignored
+        }
+
+        public void accountModified(AccountEvent accountEvent) {
+            // check if is this account
+            Account account = accountEvent.getAccount();
+            /**
+             * If this is the account then update the GUI display per the potential change in Permissions.
+             */
+            if (getContest().getClientId().equals(account.getClientId())) {
+                // They modified us!!
+                initializePermissions();
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        updateGUIperPermissions();
+                    }
+                });
+
+            }
+        }
+
+        public void accountsAdded(AccountEvent accountEvent) {
+            // ignore
+        }
+
+        public void accountsModified(AccountEvent accountEvent) {
+            Account[] accounts = accountEvent.getAccounts();
+            for (Account account : accounts) {
+
+                /**
+                 * If this is the account then update the GUI display per the potential change in Permissions.
+                 */
+                if (getContest().getClientId().equals(account.getClientId())) {
+                    // They modified us!!
+                    initializePermissions();
+                    SwingUtilities.invokeLater(new Runnable() {
+                        public void run() {
+                            updateGUIperPermissions();
+                        }
+                    });
+                }
+            }
+        }
+
+        public void accountsRefreshAll(AccountEvent accountEvent) {
+
+            initializePermissions();
+
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    updateGUIperPermissions();
+                }
+            });
+        }
+    }
+    
 
 } // @jve:decl-index=0:visual-constraint="10,10"

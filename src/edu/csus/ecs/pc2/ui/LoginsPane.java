@@ -14,12 +14,15 @@ import com.ibm.webrunner.j2mclb.util.NumericStringComparator;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.ILoginListener;
 import edu.csus.ecs.pc2.core.model.LoginEvent;
 import edu.csus.ecs.pc2.core.report.LoginReport;
+import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 import javax.swing.JButton;
@@ -227,8 +230,18 @@ public class LoginsPane extends JPanePlugin {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 reloadListBox();
+                updateGUIperPermissions();
             }
         });
+    }
+    
+    private boolean isAllowed(Permission.Type type) {
+        return permissionList.isAllowed(type);
+    }
+
+    private void updateGUIperPermissions() {
+        logoffButton.setVisible(isAllowed(Permission.Type.FORCE_LOGOFF_CLIENT));
+        reportButton.setVisible(isAllowed(Permission.Type.FORCE_LOGOFF_CLIENT));
     }
 
     /**
@@ -369,5 +382,70 @@ public class LoginsPane extends JPanePlugin {
         }
         return reportButton;
     }
+   
+   /**
+    * Account Listener Implementation.
+    * 
+    * @author pc2@ecs.csus.edu
+    * @version $Id$
+    */
+   public class AccountListenerImplementation implements IAccountListener {
+
+       public void accountAdded(AccountEvent accountEvent) {
+           // ignored
+       }
+
+       public void accountModified(AccountEvent accountEvent) {
+           // check if is this account
+           Account account = accountEvent.getAccount();
+           /**
+            * If this is the account then update the GUI display per the potential change in Permissions.
+            */
+           if (getContest().getClientId().equals(account.getClientId())) {
+               // They modified us!!
+               initializePermissions();
+               SwingUtilities.invokeLater(new Runnable() {
+                   public void run() {
+                       updateGUIperPermissions();
+                   }
+               });
+
+           }
+       }
+
+       public void accountsAdded(AccountEvent accountEvent) {
+           // ignore
+       }
+
+       public void accountsModified(AccountEvent accountEvent) {
+           Account[] accounts = accountEvent.getAccounts();
+           for (Account account : accounts) {
+
+               /**
+                * If this is the account then update the GUI display per the potential change in Permissions.
+                */
+               if (getContest().getClientId().equals(account.getClientId())) {
+                   // They modified us!!
+                   initializePermissions();
+                   SwingUtilities.invokeLater(new Runnable() {
+                       public void run() {
+                           updateGUIperPermissions();
+                       }
+                   });
+               }
+           }
+       }
+
+       public void accountsRefreshAll(AccountEvent accountEvent) {
+
+           initializePermissions();
+
+           SwingUtilities.invokeLater(new Runnable() {
+               public void run() {
+                   updateGUIperPermissions();
+               }
+           });
+       }
+   }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

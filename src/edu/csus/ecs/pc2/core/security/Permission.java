@@ -98,6 +98,10 @@ public class Permission implements Serializable {
         /**
          * 
          */
+        ADD_LANGUAGE,
+        /**
+         * 
+         */
         EDIT_LANGUAGE,
         /**
          * 
@@ -242,7 +246,34 @@ public class Permission implements Serializable {
          * Export Profile.
          */
         EXPORT_PROFILE,
-        
+        /**
+         * 
+         */
+        ADD_GROUPS,
+        /**
+         * 
+         */
+        EDIT_GROUPS,
+        /**
+         * 
+         */
+        EDIT_AJ_SETTINGS,
+        /**
+         * 
+         */
+        ADD_JUDGEMENTS,
+        /**
+         * 
+         */
+        ADD_NOTIFICATIONS,
+        /**
+         * 
+         */
+        EDIT_NOTIFICATIONS,
+        /**
+         * 
+         */
+        VIEW_PASSWORDS,
     };
 
     private Hashtable<Type, String> hash = new Hashtable<Type, String>();
@@ -272,8 +303,8 @@ public class Permission implements Serializable {
         hash.put(Type.TEST_RUN, "Test run");
         hash.put(Type.VIEW_CLARIFICATIONS, "View Clarifications");
         hash.put(Type.VIEW_RUNS, "View Runs");
-        hash.put(Type.ADD_PROBLEM, "Add a problem");
-        hash.put(Type.ADD_SITE, "Add a site");
+        hash.put(Type.ADD_PROBLEM, "Add problem");
+        hash.put(Type.ADD_SITE, "Add site");
         hash.put(Type.ADD_SETTINGS, "Add general settings");
         hash.put(Type.ANSWER_CLARIFICATION, "Answer a clarification");
         hash.put(Type.EDIT_LANGUAGE, "Edit a language");
@@ -322,6 +353,16 @@ public class Permission implements Serializable {
         hash.put(Type.EXPORT_PROFILE, "Export profile");
         hash.put(Type.SWITCH_PROFILE, "Switch profile");
         hash.put(Type.RESET_CONTEST, "Reset contest/profile");
+        
+        hash.put(Type.ADD_LANGUAGE,"Add Language");
+        hash.put(Type.EXPORT_PROFILE, "Export Profile");
+        hash.put(Type.ADD_GROUPS, "Add Groups");
+        hash.put(Type.EDIT_GROUPS,"Edit Groups");
+        hash.put(Type.EDIT_AJ_SETTINGS,"Edit Auto Judge Settings");
+        hash.put(Type.ADD_JUDGEMENTS,"Add Judgement");
+        hash.put(Type.ADD_NOTIFICATIONS,"Add Notification");
+        hash.put(Type.EDIT_NOTIFICATIONS,"Edit Notification");
+        hash.put(Type.VIEW_PASSWORDS,"View Passwords");
     }
 
     /**

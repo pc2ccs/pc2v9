@@ -13,14 +13,12 @@ import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
-import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Site;
-import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.security.Permission;
 
 /**
@@ -127,9 +125,8 @@ public class AccountsReport implements IReport {
                     
                     printWriter.format("%22s"," ");
                     printWriter.print("'"+account.getDisplayName()+"' ");
-                    ClientId clientId = contest.getClientId();
                     
-                    if (clientId.getClientType().equals(Type.ADMINISTRATOR) || clientId.getClientType().equals(Type.SERVER)) {
+                    if (contest.isAllowed (edu.csus.ecs.pc2.core.security.Permission.Type.VIEW_PASSWORDS)) {
                         printWriter.print("password '" + account.getPassword() + "' ");
                     }
                     
@@ -161,7 +158,7 @@ public class AccountsReport implements IReport {
             }
         }
     }
-
+    
     public void printHeader(PrintWriter printWriter) {
         printWriter.println(new VersionInfo().getSystemName());
         printWriter.println("Date: " + Utilities.getL10nDateTime());

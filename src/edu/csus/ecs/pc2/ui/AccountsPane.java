@@ -287,11 +287,11 @@ public class AccountsPane extends JPanePlugin {
 
     private void updateGUIperPermissions() {
 
-        if (isAllowed(Permission.Type.ADD_ACCOUNT)) {
-            addButton.setVisible(isAllowed(Permission.Type.ADD_ACCOUNT));
-        }
-
+        addButton.setVisible(isAllowed(Permission.Type.ADD_ACCOUNT));
         editButton.setVisible(isAllowed(Permission.Type.EDIT_ACCOUNT));
+        loadButton.setVisible(isAllowed(Permission.Type.EDIT_ACCOUNT));
+        saveButton.setVisible(isAllowed(Permission.Type.EDIT_ACCOUNT));
+        generateAccountsButton.setVisible(isAllowed(Permission.Type.ADD_ACCOUNT));
 
         // TODO once filter is working make this visible.
         getFilterButton().setVisible(false);

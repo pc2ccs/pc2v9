@@ -29,10 +29,13 @@ import edu.csus.ecs.pc2.core.imports.ContestXML;
 import edu.csus.ecs.pc2.core.list.ReportNameByComparator;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.Filter;
+import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.model.Site;
@@ -72,6 +75,9 @@ import edu.csus.ecs.pc2.core.report.RunsReport5;
 import edu.csus.ecs.pc2.core.report.SitesReport;
 import edu.csus.ecs.pc2.core.report.SolutionsByProblemReport;
 import edu.csus.ecs.pc2.core.report.StandingsReport;
+import edu.csus.ecs.pc2.core.security.Permission;
+import edu.csus.ecs.pc2.core.security.PermissionList;
+import edu.csus.ecs.pc2.core.security.Permission.Type;
 import edu.csus.ecs.pc2.core.util.IMemento;
 import edu.csus.ecs.pc2.core.util.XMLMemento;
 import edu.csus.ecs.pc2.plugin.ContestSummaryReports;
@@ -134,6 +140,8 @@ public class ReportPane extends JPanePlugin {
     private JCheckBox xmlOutputCheckbox = null;
 
     private JButton generateSummaryButton = null;
+    
+    private PermissionList permissionList = new PermissionList();
 
     public String getReportDirectory() {
         return reportDirectory;
@@ -235,13 +243,32 @@ public class ReportPane extends JPanePlugin {
             setReportDirectory(inContest.getProfile().getProfilePath() + File.separator + reportDir);
         }
         
+        getContest().addAccountListener(new AccountListenerImplementation());
+        
+        initializePermissions();
+        
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 getEditFilterFrame().setContestAndController(getContest(), getController());
                 refreshGUI();
+                updateGUIperPermissions();
             }
         });
         
+    }
+    
+    private boolean isAllowed(Permission.Type type) {
+        return permissionList.isAllowed(type);
+    }
+
+    private void initializePermissions() {
+        Account account = getContest().getAccount(getContest().getClientId());
+        permissionList.clearAndLoadPermissions(account.getPermissionList());
+    }
+
+    private void updateGUIperPermissions() {
+        generateSummaryButton.setEnabled(isAllowed(Permission.Type.EDIT_ACCOUNT));
+        viewReportButton.setEnabled(isAllowed(Permission.Type.EDIT_ACCOUNT));
     }
     
     private boolean isServer() {
@@ -525,7 +552,8 @@ public class ReportPane extends JPanePlugin {
     public String notImplementedXML (IReport report) throws IOException{
         
         ContestXML contestXML = new ContestXML();
-        
+        contestXML.setShowPasswords(getContest().isAllowed(Type.VIEW_PASSWORDS));
+
         XMLMemento mementoRoot = XMLMemento.createWriteRoot(ContestXML.CONTEST_TAG);
 
         IMemento memento = mementoRoot.createChild("message");
@@ -909,5 +937,71 @@ public class ReportPane extends JPanePlugin {
             JOptionPane.showMessageDialog(this, "Unable to produce reports " + e.getMessage());
         }
     }
+
+    /**
+     * Account Listener Implementation.
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    public class AccountListenerImplementation implements IAccountListener {
+
+        public void accountAdded(AccountEvent accountEvent) {
+            // ignored
+        }
+
+        public void accountModified(AccountEvent accountEvent) {
+            // check if is this account
+            Account account = accountEvent.getAccount();
+            /**
+             * If this is the account then update the GUI display per the potential change in Permissions.
+             */
+            if (getContest().getClientId().equals(account.getClientId())) {
+                // They modified us!!
+                initializePermissions();
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        updateGUIperPermissions();
+                    }
+                });
+
+            }
+        }
+
+        public void accountsAdded(AccountEvent accountEvent) {
+            // ignore
+        }
+
+        public void accountsModified(AccountEvent accountEvent) {
+            Account[] accounts = accountEvent.getAccounts();
+            for (Account account : accounts) {
+
+                /**
+                 * If this is the account then update the GUI display per the potential change in Permissions.
+                 */
+                if (getContest().getClientId().equals(account.getClientId())) {
+                    // They modified us!!
+                    initializePermissions();
+                    SwingUtilities.invokeLater(new Runnable() {
+                        public void run() {
+                            updateGUIperPermissions();
+                        }
+                    });
+                }
+            }
+        }
+
+        public void accountsRefreshAll(AccountEvent accountEvent) {
+
+            initializePermissions();
+
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    updateGUIperPermissions();
+                }
+            });
+        }
+    }
+   
     
 } // @jve:decl-index=0:visual-constraint="10,10"
