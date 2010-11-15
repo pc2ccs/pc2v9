@@ -23,6 +23,7 @@
     <property name="dist.dir" location="dist" />
     <!-- this should change one the location of mclb.jar changes -->
     <property name="vendor.lib.dir" location="${basedir}/vendor/lib"/>
+    <property name="packagelistloc.dir" location="${basedir}/vendor/api-1.5.0/"/>
     <property name="scripts.dir" location="${basedir}/bin"/>
     <property name="samps.dir" location="${basedir}/samps"/>
     <!-- used in javadocs linkoffline, this is the location on
@@ -219,11 +220,15 @@
 
     <target name="javadocs-api" description="Creates API javadocs">
         <mkdir dir="${docs.api.dir}" />
-    	<javadoc access="protected" additionalparam="-link  http://java.sun.com/j2se/1.5.0/docs/api/" author="true" classpath="vendor/lib/mclb.jar" 
-    	destdir="${docs.api.dir}" doctitle="PC&amp;sup2; Version 9 API" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" overview="api_overview.html" packagenames="edu.csus.ecs.pc2.api,edu.csus.ecs.pc2.api.exceptions,edu.csus.ecs.pc2.api.listener" source="1.5" sourcepath="src" splitindex="true" use="true" version="true" useexternalfile="true"/>
+	<javadoc access="protected" additionalparam="-link  http://java.sun.com/j2se/1.5.0/docs/api/" author="true" classpath="vendor/lib/mclb.jar" 
+    destdir="${docs.api.dir}" doctitle="PC&amp;sup2; Version 9 API" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" overview="api_overview.html" packagenames="edu.csus.ecs.pc2.api,edu.csus.ecs.pc2.api.exceptions,edu.csus.ecs.pc2.api.listener" source="1.5" sourcepath="src" splitindex="true" use="true" version="true" useexternalfile="true">
+	    <link offline="true" href="http://java.sun.com/j2se/1.5.0/docs/api/" packagelistloc="${packagelistloc.dir}"/> 
+        </javadoc>
     </target>
     <target name="javadocs" description="Creates project javadocs">
         <mkdir dir="${docs.dir}/api-full" />
-        <javadoc sourcepath="${src.dir}" destdir="${docs.dir}/api-full" defaultexcludes="yes" packagenames="edu.csus.ecs.pc2.*" doctitle="PC^2 Version 9 Java Documentation" Use="yes" SplitIndex="yes" linkoffline="http://java.sun.com/j2se/1.5.0/docs/api/ ${api.url}" classpathref="project.classpath"/>
+        <javadoc sourcepath="${src.dir}" destdir="${docs.dir}/api-full" defaultexcludes="yes" packagenames="edu.csus.ecs.pc2.*" doctitle="PC^2 Version 9 Java Documentation" Use="yes" SplitIndex="yes" linkoffline="http://java.sun.com/j2se/1.5.0/docs/api/ ${api.url}" classpathref="project.classpath">
+	    <link offline="true" href="http://java.sun.com/j2se/1.5.0/docs/api/" packagelistloc="${packagelistloc.dir}"/> 
+        </javadoc>
     </target>
 </project>
