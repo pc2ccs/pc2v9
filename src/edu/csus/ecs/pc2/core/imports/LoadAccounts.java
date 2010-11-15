@@ -45,6 +45,13 @@ public class LoadAccounts {
     
     private int permPasswordColumn = -1;
 
+    /*
+     * These correspond to columns found in the icpc data
+     */
+    private int longSchoolNameColumnn = -1;
+    private int shortSchoolNameColumn = -1;
+    private int teamNameColumn = -1;
+    
     private HashMap<ClientId, Account> existingAccountsMap = new HashMap<ClientId, Account>();
     
     /**
@@ -92,6 +99,15 @@ public class LoadAccounts {
         }
         if (externalIdColumn != -1 && values.length > externalIdColumn) {
             account.setExternalId(values[externalIdColumn]);
+        }
+        if (longSchoolNameColumnn != -1 && values.length > longSchoolNameColumnn) {
+            account.setLongSchoolName(values[longSchoolNameColumnn]);
+        }
+        if (shortSchoolNameColumn != -1 && values.length > shortSchoolNameColumn) {
+            account.setShortSchoolName(values[shortSchoolNameColumn]);
+        }
+        if (teamNameColumn != -1 && values.length > teamNameColumn) {
+            account.setExternalName(values[teamNameColumn]);
         }
         if (groups.size() > 0) {
             if (groupColumn != -1 && values.length > groupColumn && values[groupColumn].length() > 0) {
@@ -234,6 +250,15 @@ public class LoadAccounts {
                 }
                 if (columns[i].equalsIgnoreCase("permpassword")) {
                     permPasswordColumn = i;
+                }
+                if (columns[i].equalsIgnoreCase("longschoolname")) {
+                    longSchoolNameColumnn = i;
+                }
+                if (columns[i].equalsIgnoreCase("shortschoolname")) {
+                    shortSchoolNameColumn = i;
+                }
+                if (columns[i].equalsIgnoreCase("teamname")) {
+                    teamNameColumn = i;
                 }
             }
             if (accountColumn == -1 || siteColumn == -1) {

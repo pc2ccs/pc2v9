@@ -133,7 +133,7 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
         if (accountListBox == null) {
             accountListBox = new MCLB();
 
-            Object[] cols = { "Site", "Type", "Account Id", "Display Name", "Password", "Permissions", "Group", "Alias"};
+            Object[] cols = { "Site", "Type", "Account Id", "Display Name", "Password", "Permissions", "Group", "Alias", "ICPC Id", "Short School Name","Long School Name", "Team Name"};
             accountListBox.addColumns(cols);
 
             /**
@@ -368,6 +368,28 @@ public class ReviewAccountLoadFrame extends JFrame implements UIPlugin {
                         }
                     }
                 }
+            }
+            // afk icpc teamId
+            if (accountOrig.getExternalId().equals(account.getExternalId())) {
+                s[8] = account.getExternalId();
+            } else {
+                s[8] = CHANGE_BEGIN + account.getExternalId() + CHANGE_END;
+            }
+            if (accountOrig.getShortSchoolName().equals(account.getShortSchoolName())) {
+                s[9] = account.getShortSchoolName();
+            } else {
+                s[9] = CHANGE_BEGIN + account.getShortSchoolName() + CHANGE_END;
+            }
+            if (accountOrig.getLongSchoolName().equals(account.getLongSchoolName())) {
+                s[10] = account.getLongSchoolName();
+            } else {
+                s[10] = CHANGE_BEGIN + account.getLongSchoolName() + CHANGE_END;
+            }
+            // afk icpc teamName
+            if (accountOrig.getExternalName().equals(account.getExternalName())) {
+                s[11] = account.getExternalName();
+            } else {
+                s[11] = CHANGE_BEGIN + account.getExternalName() + CHANGE_END;
             }
             return s;
         } catch (Exception exception) {

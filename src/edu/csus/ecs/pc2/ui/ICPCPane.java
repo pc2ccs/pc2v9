@@ -277,18 +277,29 @@ public class ICPCPane extends JPanePlugin {
     }
 
     protected void changeDisplayFormat() {
-        if (importData == null) {
-//            importData = new ICPCImportData(getContest().getAccounts(Type.TEAM), getContest().getGroups(), getContest().getContestInformation().getContestTitle());
+        boolean gotData = false;
+        try {
+            Vector<Account> teams = getContest().getAccounts(ClientType.Type.TEAM);
+            for (Account account : teams) {
+                if(account != null) {
+                    if (account.getLongSchoolName() != null && !account.getLongSchoolName().isEmpty()) {
+                        gotData = true;
+                        break;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.throwing("ICPCPane", "changeDisplayFormat", e);
+        }
+        if (importData == null && !gotData) {
             JOptionPane.showMessageDialog(this, "Please 'Import Accounts' icpc account data first.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        if (importData.getAccounts() != null) {
+        if (importData != null && importData.getAccounts() != null) {
             getICPCAccountFrame().setICPCAccounts(importData.getAccounts());
-            getICPCAccountFrame().setContestAndController(getContest(), getController());
-            getICPCAccountFrame().setVisible(true);
-        } else {
-            JOptionPane.showMessageDialog(this, "No accounts loaded.", "Warning", JOptionPane.WARNING_MESSAGE);
         }
+        getICPCAccountFrame().setContestAndController(getContest(), getController());
+        getICPCAccountFrame().setVisible(true);
     }
 
     /**
