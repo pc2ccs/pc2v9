@@ -245,18 +245,22 @@ public class LoadAccounts {
         lineCount++;
         while (line != null) {
             try {
-                if (line.startsWith("#")) {
+                // skip comments & line blanks
+                if (line.startsWith("#") || line.equals("")) {
                     line = in.readLine();
                     lineCount++;
                     continue;
                 }
                 String[] values = TabSeparatedValueParser.parseLine(line);
-                Account account = getAccount(values);
-                if (account == null) {
-                    String msg = filename + ":" + lineCount + ": " + " please create the account first (" + values[accountColumn] + ")";
-                    throw new IllegalTSVFormatException(msg);
+                // skip lines with no account too
+                if (!values[accountColumn].equals("")) {
+                    Account account = getAccount(values);
+                    if (account == null) {
+                        String msg = filename + ":" + lineCount + ": " + " please create the account first (" + values[accountColumn] + ")";
+                        throw new IllegalTSVFormatException(msg);
+                    }
+                    accountMap.put(account.getClientId(), account);
                 }
-                accountMap.put(account.getClientId(), account);
             } catch (IllegalTSVFormatException e2) {
                 // already a properly formatted exception
                 throw e2;

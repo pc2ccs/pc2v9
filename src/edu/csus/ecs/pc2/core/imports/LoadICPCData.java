@@ -137,12 +137,19 @@ public final class LoadICPCData {
         lineCount++;
         while (line != null) {
             try {
-                if (line.startsWith("#")) {
+                // skip comments and blank lines
+                if (line.startsWith("#") || line.equals("")) {
                     line = in.readLine();
                     lineCount++;
                     continue;
                 }
                 String[] values = TabSeparatedValueParser.parseLine(line);
+                // if 2nd field is empty, must be a empty line....
+                if (values[1].equals("")) {
+                    line = in.readLine();
+                    lineCount++;
+                    continue;
+                }
                 switch (fileType) {
                     case 11:
                         accounts.add(processTeam(values));
