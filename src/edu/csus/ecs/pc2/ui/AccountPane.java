@@ -21,6 +21,7 @@ import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.PermissionGroup;
+import edu.csus.ecs.pc2.core.list.PermissionSortByName;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -488,28 +489,17 @@ public class AccountPane extends JPanePlugin {
         getGroupComboBox().setSelectedIndex(selectedIndex);
     }
 
-    private String[] getPermissionDescriptions() {
-        String[] permissionListNames = new String[Permission.Type.values().length];
-
-        int i = 0;
-        for (Type type : Permission.Type.values()) {
-            permissionListNames[i] = permission.getDescription(type);
-            i++;
-        }
-
-        Arrays.sort(permissionListNames);
-
-        return permissionListNames;
-    }
-
     private void populatePermissions(Account inAccount) {
 
         defaultListModel.removeAllElements();
+        
+        Permission.Type[] types = Permission.Type.values();
+        Arrays.sort(types, new PermissionSortByName());
 
         if (inAccount == null) {
 
-            for (String name : getPermissionDescriptions()) {
-                JCheckBox checkBox = new JCheckBox(name);
+            for (Type type : types) {
+                JCheckBox checkBox = new JCheckBox(permission.getDescription(type));
                 defaultListModel.addElement(checkBox);
             }
             getPermissionsJList().setSelectedIndex(-1);
@@ -517,7 +507,7 @@ public class AccountPane extends JPanePlugin {
         } else {
 
             int count = 0;
-            for (Type type : Permission.Type.values()) {
+            for (Type type : types) {
                 if (account.isAllowed(type)) {
                     count++;
                 }
@@ -527,7 +517,7 @@ public class AccountPane extends JPanePlugin {
                 int[] indexes = new int[count];
                 count = 0;
                 int idx = 0;
-                for (Type type : Permission.Type.values()) {
+                for (Type type : types) {
                     JCheckBox checkBox = new JCheckBox(permission.getDescription(type));
                     defaultListModel.addElement(checkBox);
                     if (account.isAllowed(type)) {
@@ -539,7 +529,7 @@ public class AccountPane extends JPanePlugin {
                 getPermissionsJList().setSelectedIndices(indexes);
                 getPermissionsJList().ensureIndexIsVisible(0);
             } else {
-                for (Type type : Permission.Type.values()) {
+                for (Type type : types) {
                     JCheckBox checkBox = new JCheckBox(permission.getDescription(type));
                     defaultListModel.addElement(checkBox);
                 }

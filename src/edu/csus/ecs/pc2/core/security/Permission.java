@@ -257,9 +257,9 @@ public class Permission implements Serializable {
      */
     private void loadDescription() {
 
-        hash.put(Type.BALLOON_EMAIL, "Allowed to e-mail balloons");
-        hash.put(Type.BALLOON_OUTPUT_SHUTOFF, "Allowed to shutoff output");
-        hash.put(Type.BALLOON_PRINT, "Allowed to print balloons");
+        hash.put(Type.BALLOON_EMAIL, "E-mail balloons");
+        hash.put(Type.BALLOON_OUTPUT_SHUTOFF, "Shutoff output");
+        hash.put(Type.BALLOON_PRINT, "Print balloons");
         hash.put(Type.CHANGE_PASSWORD, "Change password");
         hash.put(Type.ADD_ACCOUNT, "Add Accounts");
         hash.put(Type.EDIT_ACCOUNT, "Edit Accounts");
@@ -267,9 +267,9 @@ public class Permission implements Serializable {
         hash.put(Type.EDIT_PERMISSIONS, "Edit Runs");
         hash.put(Type.EXECUTE_RUN, "Execute but not judge runs");
         hash.put(Type.JUDGE_RUN, "Judge runs");
-        hash.put(Type.LOGIN, "Allowed to login");
+        hash.put(Type.LOGIN, "Login");
         hash.put(Type.REJUDGE_RUN, "Re-judge runs");
-        hash.put(Type.TEST_RUN, "can test run");
+        hash.put(Type.TEST_RUN, "Test run");
         hash.put(Type.VIEW_CLARIFICATIONS, "View Clarifications");
         hash.put(Type.VIEW_RUNS, "View Runs");
         hash.put(Type.ADD_PROBLEM, "Add a problem");
@@ -289,7 +289,7 @@ public class Permission implements Serializable {
         hash.put(Type.VIEW_SUMMARY_ATTEMPTS_GRID, "View Summary Attempts Grid");
         hash.put(Type.FORCE_LOGOFF_CLIENT, "Force client logoff");
         hash.put(Type.FORCE_LOGOFF_SERVER, "Force server logoff");
-        hash.put(Type.DISPLAY_ON_SCOREBOARD, "Can be shown on scoreboard displays");
+        hash.put(Type.DISPLAY_ON_SCOREBOARD, "Shown on scoreboard displays");
         
         hash.put(Type.GIVE_RUN, "Give runs to judges");
         hash.put(Type.TAKE_RUN, "Take runs from judges");
@@ -306,19 +306,19 @@ public class Permission implements Serializable {
         hash.put(Type.STOP_CONTEST_CLOCK, "Stop contest clock");
         
         hash.put(Type.EDIT_CONTEST_CLOCK, "Edit Contest Clock/Times");
-        hash.put(Type.ALLOWED_TO_RECONNECT_SERVER, "Allowed to reconnect to server");
+        hash.put(Type.ALLOWED_TO_RECONNECT_SERVER, "Reconnect server");
 
-        hash.put(Type.ALLOWED_TO_AUTO_JUDGE, "Allowed to auto judge");
+        hash.put(Type.ALLOWED_TO_AUTO_JUDGE, "Auto judge");
 
         hash.put(Type.VIEW_SECURITY_ALERTS, "View Security Alerts Log/View");
 
-        hash.put(Type.ALLOWED_TO_FETCH_RUN, "Allowed to fetch run (not checkout)");
+        hash.put(Type.ALLOWED_TO_FETCH_RUN, "Fetch run (not checkout)");
         hash.put(Type.RESPECT_EOC_SUPPRESSION, "Apply End of Contest Controls");
         
         hash.put(Type.RESPECT_NOTIFY_TEAM_SETTING, "Apply Notify Team Setting to Board/SA");
         hash.put(Type.RESET_CONTEST, "Reset Contest");
         
-        hash.put(Type.CLONE_PROFILE, "Clone or change profile");
+        hash.put(Type.CLONE_PROFILE, "Clone or switch profile");
         hash.put(Type.EXPORT_PROFILE, "Export profile");
         hash.put(Type.SWITCH_PROFILE, "Switch profile");
         hash.put(Type.RESET_CONTEST, "Reset contest/profile");
