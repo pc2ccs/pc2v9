@@ -134,6 +134,8 @@ public abstract class JPanePlugin extends JPanel implements UIPlugin {
         PermissionList list = null;
         if (account == null) {
             list = new PermissionGroup().getPermissionList(id.getClientType());
+        } else {
+            list = account.getPermissionList();
         }
         return list;
     }
