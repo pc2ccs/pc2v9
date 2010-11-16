@@ -8,10 +8,14 @@ import javax.swing.JPanel;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.PermissionGroup;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.report.IReport;
+import edu.csus.ecs.pc2.core.security.PermissionList;
 
 /**
  * Base class for UIPlugin panes.
@@ -116,4 +120,22 @@ public abstract class JPanePlugin extends JPanel implements UIPlugin {
     public void logException(String message, Exception ex){
         controller.getLog().log(Log.WARNING, message,ex);
     }
+    
+    /**
+     * Return permission list for this client.
+     * 
+     * @return list of permissions that this client has.
+     */
+    public PermissionList getPermissionList() {
+        ClientId id = getContest().getClientId();
+
+        Account account = getContest().getAccount(id);
+
+        PermissionList list = null;
+        if (account == null) {
+            list = new PermissionGroup().getPermissionList(id.getClientType());
+        }
+        return list;
+    }
+
 }
