@@ -5,14 +5,14 @@ import java.util.Comparator;
 import edu.csus.ecs.pc2.core.security.Permission.Type;
 
 /**
- * Sort by permission name (toString()).
+ * Sort by permission enum name (toString()).
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
 
 // $HeadURL$
-public class PermissionSortByName implements Comparator<Type> {
+public class PermissionComparator implements Comparator<Type> {
 
     public int compare(Type type1, Type type2) {
         

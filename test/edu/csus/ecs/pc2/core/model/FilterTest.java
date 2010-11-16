@@ -1,7 +1,8 @@
 package edu.csus.ecs.pc2.core.model;
 
-import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import junit.framework.TestCase;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.security.Permission;
 
 /**
  * Test Filter class.
@@ -136,5 +137,54 @@ public class FilterTest extends TestCase {
         filter.addAccount(account);
         
         assertTrue("Match on Account "+account, filter.matches(account));
+    }
+    
+    public void testAccountFiltering() throws Exception {
+
+        int numTeams = 3;
+        int numJudges = 12;
+        int numAdmins = 1;
+
+        SampleContest sample = new SampleContest();
+        IInternalContest contest = sample.createContest(3, 3, numTeams, numJudges, true);
+        contest.generateNewAccounts(Type.ADMINISTRATOR.toString(), numAdmins, true);
+        // IInternalController controller = sample.createController(contest, true, false);
+
+        Account[] accounts = contest.getAccounts();
+
+        Filter filter = new Filter();
+        assertEquals("Filtered Accounts should match", accounts.length, filter.countAccounts(accounts));
+
+        // All accounts from site 3 no matches
+        filter.addSite(1);
+        assertEquals("Filtered Accounts should match", 0, filter.countAccounts(accounts));
+
+        filter.addSite(3);
+        assertEquals("Filtered Accounts should match", accounts.length, filter.countAccounts(accounts));
+
+        filter.clearSiteList();
+
+        filter.addPermission(Permission.Type.SUBMIT_RUN);
+
+//        for (Account account : accounts) {
+//            if (filter.matches(account)) {
+//                System.out.println("Matches " + account);
+//            }
+//        }
+
+        assertEquals("Filtered Accounts should match", numTeams + numAdmins, filter.countAccounts(accounts));
+
+        filter.clearPermissionsList();
+        filter.addPermission(Permission.Type.EDIT_RUN);
+        assertEquals("Filtered Accounts should match", numAdmins, filter.countAccounts(accounts));
+
+        filter.addPermission(Permission.Type.JUDGE_RUN);
+        filter.addPermission(Permission.Type.ADD_SITE);
+        assertEquals("Filtered Accounts should match", numAdmins, filter.countAccounts(accounts));
+
+        filter.clearPermissionsList();
+        filter.addPermission(Permission.Type.JUDGE_RUN);
+        assertEquals("Filtered Accounts should match", numAdmins + numJudges, filter.countAccounts(accounts));
+
     }
 }

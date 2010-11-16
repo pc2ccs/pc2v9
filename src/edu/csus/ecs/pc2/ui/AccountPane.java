@@ -26,7 +26,7 @@ import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.PermissionGroup;
-import edu.csus.ecs.pc2.core.list.PermissionSortByName;
+import edu.csus.ecs.pc2.core.list.PermissionComparator;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -500,7 +500,7 @@ public class AccountPane extends JPanePlugin {
         defaultListModel.removeAllElements();
         
         Permission.Type[] types = Permission.Type.values();
-        Arrays.sort(types, new PermissionSortByName());
+        Arrays.sort(types, new PermissionComparator());
 
         if (inAccount == null) {
 

@@ -18,10 +18,13 @@ import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
+import edu.csus.ecs.pc2.core.list.PermissionByDescriptionComparator;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
 import edu.csus.ecs.pc2.core.model.DisplayTeamName;
@@ -32,10 +35,9 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
-import edu.csus.ecs.pc2.core.model.Site;
-import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
-import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
+import edu.csus.ecs.pc2.core.model.Site;
+import edu.csus.ecs.pc2.core.security.Permission;
 
 /**
  * Edit Filter GUI.
@@ -106,6 +108,8 @@ public class EditFilterPane extends JPanePlugin {
 
     private DefaultListModel sitesListModel = new DefaultListModel();
 
+    private DefaultListModel permissionsListModel = new DefaultListModel();
+    
     private JPanel timeRangePane = null;
 
     private JLabel fromTimeLabel = null;
@@ -116,7 +120,7 @@ public class EditFilterPane extends JPanePlugin {
 
     private JTextField toTimeTextField = null;
     
-    private DisplayTeamName displayTeamName = null;
+    private DisplayTeamName displayTeamName = null;  //  @jve:decl-index=0:
 
     private boolean isJudgeModule = false;
     
@@ -130,10 +134,34 @@ public class EditFilterPane extends JPanePlugin {
 
     private JPanel sitesPane = null;  //  @jve:decl-index=0:visual-constraint="649,76"
 
+    private JPanel permissionsPane = null;  
+
     private JScrollPane sitesScroll = null;
+    
+    private JScrollPane permissionScroll = null;
 
     private JCheckBoxJList siteListBox = null;
+    
+    private JCheckBoxJList permissionListBox = null;
+    
+    private JPanel accountsPane = null;
 
+    private DefaultListModel accountListModel = new DefaultListModel();
+
+    private JCheckBoxJList accountListBox = null;
+    
+    private JScrollPane accountScroll = null;
+
+    private JPanel clientTypePane = null;
+
+    private JScrollPane clientTypeScroll = null;
+    
+    private DefaultListModel clientTypeListModel = new DefaultListModel();
+
+    private JCheckBoxJList clientTypesListBox;  //  @jve:decl-index=0:
+
+    private Permission permission = new Permission();
+    
     /**
      * JList names in EditFilterPane.
      * 
@@ -165,7 +193,11 @@ public class EditFilterPane extends JPanePlugin {
         /**
          * Accounts JList.
          */
-        ACCOUNTS,
+        ALL_ACCOUNTS,
+        /**
+         * 
+         */
+        TEAM_ACCOUNTS,
         /**
          * Elapsed Time (both From and To) 
          */
@@ -174,6 +206,14 @@ public class EditFilterPane extends JPanePlugin {
          * Sites.
          */
         SITES,
+        /**
+         * 
+         */
+        PERMISSIONS,
+        /**
+         * 
+         */
+        CLIENT_TYPES,
     }
 
     public EditFilterPane() {
@@ -316,6 +356,23 @@ public class EditFilterPane extends JPanePlugin {
         }
         return teamsPane;
     }
+    
+    /**
+     * This method initializes teamFrame
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getAccountsPane() {
+        if (accountsPane == null) {
+            accountsPane = new JPanel();
+            accountsPane.setLayout(new BorderLayout());
+            accountsPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Accounts", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+                    javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
+            accountsPane.setName("accountFrame");
+            accountsPane.add(getAccountScroll(), java.awt.BorderLayout.CENTER);
+        }
+        return accountsPane;
+    }
 
     /**
      * This method initializes judgementFrame
@@ -346,7 +403,8 @@ public class EditFilterPane extends JPanePlugin {
             listsPanel = new JPanel();
             listsPanel.setLayout(gridLayout);
             
-            listsPanel.add(getTimeRangePane(), null);
+            // TODO remove this
+//            listsPanel.add(getTimeRangePane(), null);
         }
         return listsPanel;
     }
@@ -392,6 +450,18 @@ public class EditFilterPane extends JPanePlugin {
         return teamsScroll;
     }
 
+    /**
+     * This method initializes teamsScroll
+     * 
+     * @return javax.swing.JScrollPane
+     */
+    private JScrollPane getAccountScroll() {
+        if (accountScroll == null) {
+            accountScroll = new JScrollPane();
+            accountScroll.setViewportView(getAccountListBox());
+        }
+        return accountScroll;
+    }
     /**
      * This method initializes problemsScroll
      * 
@@ -441,6 +511,19 @@ public class EditFilterPane extends JPanePlugin {
         }
         return teamListBox;
     }
+    
+    /**
+     * This method initializes teamListBox
+     * 
+     * @return javax.swing.JTextArea
+     */
+    private JCheckBoxJList getAccountListBox() {
+        if (accountListBox == null) {
+            accountListBox = new JCheckBoxJList(accountListModel);
+        }
+        return accountListBox;
+    }
+    
 
     /**
      * This method initializes problemsListBox
@@ -512,6 +595,27 @@ public class EditFilterPane extends JPanePlugin {
             }
             sitesListModel.addElement(wrapperJCheckBox);
         }
+        
+        
+        permissionsListModel.removeAllElements();
+        Permission.Type[] types = Permission.Type.values();
+        Arrays.sort(types, new PermissionByDescriptionComparator());
+        for (Permission.Type type : types) {
+            WrapperJCheckBox wrapperJCheckBox = new WrapperJCheckBox(type, permission.getDescription(type));
+            if (filter.isFilteringPermissions()) {
+                wrapperJCheckBox.setSelected(filter.matches(type));
+            }
+            permissionsListModel.addElement(wrapperJCheckBox);
+        }
+        
+        clientTypeListModel.removeAllElements();
+        for (Type type : Type.values()) {
+            WrapperJCheckBox wrapperJCheckBox = new WrapperJCheckBox(type);
+            if (filter.isFilteringAccounts()) {
+                wrapperJCheckBox.setSelected(filter.matches(type));
+            }
+            clientTypeListModel.addElement(wrapperJCheckBox);
+        }
 
         judgementListModel.removeAllElements();
         for (Judgement judgement : getContest().getJudgements()) {
@@ -523,7 +627,9 @@ public class EditFilterPane extends JPanePlugin {
         }
         
         loadTeamNames (filter);
-
+        
+        loadAccountNames(filter);
+        
         runStatesListModel.removeAllElements();
         RunStates[] runStates = RunStates.values();
         for (RunStates runState : runStates) {
@@ -614,6 +720,28 @@ public class EditFilterPane extends JPanePlugin {
         }
     }
 
+    private void loadAccountNames(Filter inFilter) {
+        Account[] accounts = getContest().getAccounts();
+        Arrays.sort(accounts, new AccountComparator());
+
+        accountListModel.removeAllElements();
+        WrapperJCheckBox wrapperJCheckBox = null;
+
+        for (Account account : accounts) {
+            if (displayTeamName != null) {
+                wrapperJCheckBox = new WrapperJCheckBox(account.getClientId(), displayTeamName);
+            } else {
+                wrapperJCheckBox = new WrapperJCheckBox(account.getClientId());
+            }
+            if (inFilter.isFilteringAccounts()) {
+                wrapperJCheckBox.setSelected(inFilter.matches(account));
+            }
+            accountListModel.addElement(wrapperJCheckBox);
+        }
+    }
+
+
+    
     @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
 
@@ -665,6 +793,16 @@ public class EditFilterPane extends JPanePlugin {
                 filter.addAccount((ClientId) object);
             }
         }
+        
+        enumeration = accountListModel.elements();
+        while (enumeration.hasMoreElements()) {
+            WrapperJCheckBox element = (WrapperJCheckBox) enumeration.nextElement();
+            if (element.isSelected()) {
+                Object object = element.getContents();
+                filter.addAccount((ClientId) object);
+            }
+        }
+        
 
         filter.clearRunStatesList();
         enumeration = runStatesListModel.elements();
@@ -703,6 +841,26 @@ public class EditFilterPane extends JPanePlugin {
             if (element.isSelected()) {
                 Object object = element.getContents();
                 filter.addSite((Site) object);
+            }
+        }
+        
+        filter.clearPermissionsList();
+        enumeration = permissionsListModel.elements();
+        while (enumeration.hasMoreElements()) {
+            WrapperJCheckBox element = (WrapperJCheckBox) enumeration.nextElement();
+            if (element.isSelected()) {
+                Object object = element.getContents();
+                filter.addPermission((Permission.Type) object);
+            }
+        }
+        
+        filter.clearClientTypesList();
+        enumeration = clientTypeListModel.elements();
+        while (enumeration.hasMoreElements()) {
+            WrapperJCheckBox element = (WrapperJCheckBox) enumeration.nextElement();
+            if (element.isSelected()) {
+                Object object = element.getContents();
+                filter.addClientType((Type) object);
             }
         }
 
@@ -793,10 +951,12 @@ public class EditFilterPane extends JPanePlugin {
      * 
      * @param listName
      */
-    
     public void addList (ListNames listName){
         switch (listName) {
-            case ACCOUNTS:
+            case ALL_ACCOUNTS:
+                listsPanel.add(getAccountsPane(), 0);
+                break;
+            case TEAM_ACCOUNTS:
                 listsPanel.add(getTeamsPane(), 0);
                 break;
             case LANGUAGES:
@@ -815,10 +975,16 @@ public class EditFilterPane extends JPanePlugin {
               listsPanel.add(getClarificationStatesPane(), 0);
                 break;
             case TIME_RANGE:
-                listsPanel.add(getClarificationStatesPane(), 0);
+                listsPanel.add(getTimeRangePane(), 0);
                 break;
             case SITES:
                 listsPanel.add(getSitesPane(), 0);
+                break;
+            case PERMISSIONS:
+                listsPanel.add(getPermissionsPane(), 0);
+                break;
+            case CLIENT_TYPES:
+                listsPanel.add(getClientTypePane(), 0);
                 break;
             default:
                 throw new InvalidParameterException("Invalid listNames: " + listName);
@@ -980,6 +1146,76 @@ public class EditFilterPane extends JPanePlugin {
         }
         return sitesPane;
     }
+    
+    
+    public JPanel getClientTypePane() {
+        if (clientTypePane == null) {
+            clientTypePane = new JPanel();
+            clientTypePane.setLayout(new BorderLayout());
+            clientTypePane.setName("clientTypePane");
+            clientTypePane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "ClientType", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+                    javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Dialog", java.awt.Font.BOLD, 12), new java.awt.Color(51, 51, 51)));
+            clientTypePane.setSize(new java.awt.Dimension(251, 151));
+            clientTypePane.add(getClientTypeScroll(), java.awt.BorderLayout.CENTER);
+        }
+
+        return clientTypePane;
+    }
+
+    private JScrollPane getClientTypeScroll() {
+        if (clientTypeScroll == null) {
+            clientTypeScroll = new JScrollPane();
+            clientTypeScroll.setViewportView(getClientTypesListBox());
+        }
+        return clientTypeScroll;
+    }
+
+    private JCheckBoxJList getClientTypesListBox () {
+        if (clientTypesListBox == null) {
+            clientTypesListBox = new JCheckBoxJList(clientTypeListModel);
+        }
+        return clientTypesListBox;
+    }
+
+    
+    
+    public JPanel getPermissionsPane() {
+        if (permissionsPane == null) {
+            permissionsPane = new JPanel();
+            permissionsPane.setLayout(new BorderLayout());
+            permissionsPane.setName("permissionsPane");
+            permissionsPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Permissions", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+                    javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Dialog", java.awt.Font.BOLD, 12), new java.awt.Color(51, 51, 51)));
+            permissionsPane.setSize(new java.awt.Dimension(251, 151));
+            permissionsPane.add(getPermissionsScroll(), java.awt.BorderLayout.CENTER);
+        }
+
+        return permissionsPane;
+    }
+    
+    /**
+     * @return javax.swing.JScrollPane
+     */
+    private JScrollPane getPermissionsScroll() {
+        if (permissionScroll == null) {
+            permissionScroll = new JScrollPane();
+            permissionScroll.setViewportView(getPermissionsListBox());
+        }
+        return permissionScroll;
+    }
+    
+    /**
+     * This method initializes permissionListBox
+     * 
+     * @return edu.csus.ecs.pc2.ui.JCheckBoxJList
+     */
+    private JCheckBoxJList getPermissionsListBox() {
+        if (permissionListBox == null) {
+            permissionListBox = new JCheckBoxJList(permissionsListModel);
+        }
+        return permissionListBox;
+    }
+    
 
     /**
      * This method initializes siteSCroll

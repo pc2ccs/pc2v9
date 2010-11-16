@@ -3,22 +3,26 @@ package edu.csus.ecs.pc2.core.report;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.list.PermissionByDescriptionComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
-import edu.csus.ecs.pc2.core.model.Site;
-import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
+import edu.csus.ecs.pc2.core.model.Site;
+import edu.csus.ecs.pc2.core.security.Permission;
 
 /**
  * Print All Filter Information.
@@ -41,13 +45,10 @@ public class FilterReport implements IReport {
 
     private Log log;
 
-    private Filter filter;
+    private Filter filter = new Filter();
 
     public void writeReport(PrintWriter printWriter) {
-
-        // find any filters in contes and dump them here.
-
-        throw new UnsupportedOperationException(); // TODO code
+        writeReportDetailed(printWriter, filter);
     }
 
     public void writeReportDetailed(PrintWriter printWriter, Filter inFilter) {
@@ -57,7 +58,7 @@ public class FilterReport implements IReport {
         printWriter.println("              Filter: " + inFilter);
 
         printWriter.println("           Filter On: " + inFilter.isFilterOn());
-        printWriter.println("     Filter problems: " + inFilter.isFilteringSites());
+        printWriter.println("        Filter sites: " + inFilter.isFilteringSites());
         printWriter.println("     Filter problems: " + inFilter.isFilteringProblems());
         printWriter.println("      Filter clients: " + inFilter.isFilteringAccounts());
         printWriter.println("      Filter on time: " + inFilter.isFilteringElapsedTime());
@@ -114,8 +115,6 @@ public class FilterReport implements IReport {
 
         printWriter.println();
 
-
-
         elementIds = inFilter.getLanguageIdList();
         printWriter.println("-- " + elementIds.length + " Languages filtered --");
         for (ElementId elementId : elementIds) {
@@ -125,6 +124,24 @@ public class FilterReport implements IReport {
             } else {
                 printWriter.println("   " + language);
             }
+        }
+
+        printWriter.println();
+
+        Permission.Type[] permissionsList = inFilter.getPermissionsList();
+        Arrays.sort(permissionsList, new PermissionByDescriptionComparator());
+        printWriter.println("-- " + elementIds.length + " permissions filtered --");
+        Permission permission = new Permission();
+        for (Permission.Type type : permissionsList) {
+            printWriter.println("   " + permission.getDescription(type) + " (" + type + ")");
+        }
+
+        printWriter.println();
+
+        Type[] types = inFilter.getClientTypes();
+        printWriter.println("-- " + types.length + " client types filtered --");
+        for (Type type : types) {
+            printWriter.println("   " + type);
         }
 
         printWriter.println();
@@ -163,7 +180,7 @@ public class FilterReport implements IReport {
 
         printWriter.println();
         
-        ClarificationStates [] clarificationStatesList = inFilter.getClarificationStatesList();
+        ClarificationStates[] clarificationStatesList = inFilter.getClarificationStatesList();
         printWriter.println("-- " + clarificationStatesList.length + " Clarirification states filtered --");
         for (ClarificationStates clarificationStates : clarificationStatesList) {
             printWriter.println("   " + clarificationStates);

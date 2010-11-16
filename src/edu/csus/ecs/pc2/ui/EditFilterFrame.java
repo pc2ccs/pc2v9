@@ -1,19 +1,21 @@
 package edu.csus.ecs.pc2.ui;
 
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.event.KeyEvent;
+import java.io.PrintWriter;
+
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import java.awt.BorderLayout;
-import javax.swing.JButton;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.model.DisplayTeamName;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.report.FilterReport;
 import edu.csus.ecs.pc2.ui.EditFilterPane.ListNames;
-
-import java.awt.FlowLayout;
-import java.io.PrintWriter;
 
 /**
  * Edit a filter.
@@ -47,11 +49,13 @@ public class EditFilterFrame extends JFrame implements UIPlugin {
 
     private IInternalContest contest;
 
-    private IInternalController controller;
+    private IInternalController controller;  //  @jve:decl-index=0:
 
     private Runnable refreshCallback = null;
 
     private JButton okButton = null;
+
+    private JButton reportButton = null;
 
     /**
      * This method initializes
@@ -117,6 +121,7 @@ public class EditFilterFrame extends JFrame implements UIPlugin {
             buttonPane.setLayout(flowLayout);
             buttonPane.add(getOkButton(), null);
             buttonPane.add(getApplyButton(), null);
+            buttonPane.add(getReportButton(), null);
             buttonPane.add(getCloseButton(), null);
         }
         return buttonPane;
@@ -225,6 +230,8 @@ public class EditFilterFrame extends JFrame implements UIPlugin {
 
         editFilterPane.setContestAndController(inContest, inController);
         editFilterPane.setFilter(filter);
+    
+        getReportButton().setVisible(Utilities.isDebugMode());
     }
 
     public String getPluginTitle() {
@@ -281,6 +288,31 @@ public class EditFilterFrame extends JFrame implements UIPlugin {
      */
     public void setFilteringClarifications(boolean filteringClarifications) {
         editFilterPane.setFilteringClarifications(filteringClarifications);
+    }
+
+    /**
+     * This method initializes reportButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getReportButton() {
+        if (reportButton == null) {
+            reportButton = new JButton();
+            reportButton.setText("Report");
+            reportButton.setMnemonic(KeyEvent.VK_R);
+            reportButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    showReport();
+                }
+            });
+        }
+        return reportButton;
+    }
+    
+    protected void showReport() {
+        FilterReport report = new FilterReport();
+        report.setFilter(getEditFilterPane().getFilter());
+        Utilities.viewReport(report, "Edit Filter Report", contest, controller);
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

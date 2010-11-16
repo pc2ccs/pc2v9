@@ -820,7 +820,8 @@ public class ClarificationsPane extends JPanePlugin {
         
         if (! isTeam(getContest().getClientId())) {
             getEditFilterFrame().addList(ListNames.CLARIFICATION_STATES);
-            getEditFilterFrame().addList(ListNames.ACCOUNTS);
+            getEditFilterFrame().addList(ListNames.TEAM_ACCOUNTS);
+            getEditFilterFrame().addList(ListNames.SITES);
         }
             
         getEditFilterFrame().setFilter(filter);

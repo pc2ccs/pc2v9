@@ -1186,10 +1186,11 @@ public class RunsPanel extends JPanePlugin {
         getEditFilterFrame().addList(ListNames.LANGUAGES);
               
         if (! usingTeamColumns) {
-            getEditFilterFrame().addList(ListNames.ACCOUNTS);
+            getEditFilterFrame().addList(ListNames.TEAM_ACCOUNTS);
             getEditFilterFrame().addList(ListNames.RUN_STATES);
         }
 
+        getEditFilterFrame().addList(ListNames.SITES);
         getEditFilterFrame().setFilter(filter);
         getEditFilterFrame().validate();
         getEditFilterFrame().setVisible(true);

@@ -9,6 +9,7 @@ import java.util.Vector;
 import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
+import edu.csus.ecs.pc2.core.security.Permission;
 
 /**
  * A filter for runs, clarifications by site, clients, problems, languages.
@@ -118,6 +119,13 @@ public class Filter implements Serializable {
      * filtering on problem (problem id)
      */
     private boolean filteringProblems = false;
+    
+    /**
+     * collection of problem ids
+     */
+    private Hashtable<Permission.Type, Date> permissionsHash = new Hashtable<Permission.Type, Date>();
+    
+    private boolean filteringPermissions = false;
 
     /**
      * collection of language ids
@@ -351,6 +359,16 @@ public class Filter implements Serializable {
         problemIdHash.put(elementId, new Date());
         filteringProblems = true;
     }
+    
+    /**
+     * Add a permission type to match against.
+     * 
+     * @param type
+     */
+    public void addPermission(Permission.Type type) {
+        permissionsHash.put(type, new Date());
+        filteringPermissions = true;
+    }
 
     /**
      * Return true if problem filter ON and matches a problem in the filter list.
@@ -378,11 +396,23 @@ public class Filter implements Serializable {
             return true;
         }
     }
+    
+    public boolean matches(Permission.Type type) {
+        if (filteringPermissions) {
+            return permissionsHash.containsKey(type);
+        } else {
+            return true;
+        }
+    }
+    
+ 
+    public void setUsingPermissionFilter (boolean turnOn){
+        filteringPermissions = turnOn;
+    }
 
     public void setUsingLanguageFilter(boolean turnOn) {
         filteringLanguages = turnOn;
     }
-    
 
     /**
      * Turn the sites filter on or off.
@@ -402,6 +432,15 @@ public class Filter implements Serializable {
 
     public boolean isFilteringSites() {
         return filteringSites;
+    }
+    
+    /**
+     * Is filtering using permissions list.
+     * 
+     * @return true if filter languages.
+     */
+    public boolean isFilteringPermissions() {
+        return filteringPermissions;
     }
     
     /**
@@ -527,21 +566,70 @@ public class Filter implements Serializable {
     
     
     public boolean matches(Account account) {
+        
+        ClientId clientId = account.getClientId();
+        
+        if (! matchesSites(clientId.getSiteNumber())) {
+            return false;
+        }
+        
+        if (! matchesPermission(account)) {
+            return false;
+        }
+        
         if (filteringAccounts) {
-            if (matchesAccount(account.getClientId())) {
-                return true;
-            } else if (matches(account.getClientId().getClientType())) {
-                return true;
+            if (matches(clientId)) {
+                return matches(clientId.getClientType());
             }
             return false;
         } else {
             return true;
         }
     }
+    
+    public Permission.Type[] getPermissionsList() {
+        Permission.Type[] permList = new Permission.Type[permissionsHash.size()];
+        Enumeration<Permission.Type> enumeration = permissionsHash.keys();
+        int i = 0;
+        while (enumeration.hasMoreElements()) {
+            Permission.Type element = (Permission.Type) enumeration.nextElement();
+            permList[i] = element;
+            i++;
+        }
+        return permList;
+    }
 
-    private boolean matches(Type type) {
+    private boolean matchesPermission(Account account) {
+        
+        if (filteringPermissions) {
+
+            Enumeration<Permission.Type> enumeration = permissionsHash.keys();
+            while (enumeration.hasMoreElements()) {
+                Permission.Type type = (Permission.Type) enumeration.nextElement();
+                if (!account.isAllowed(type)) {
+                    return false;
+                }
+            }
+
+            return true;
+
+        } else {
+            return true;
+        }
+    }
+
+    public boolean matches(Type type) {
         if (filteringAccounts) {
-            return clientTypeHash.containsKey(type);
+            if (clientTypeHash.size() == 0) {
+                return true;
+            } else {
+                if (clientTypeHash.containsKey(Type.ALL)) {
+                    return true;
+                } else {
+                    return clientTypeHash.containsKey(type);
+                }
+
+            }
         } else {
             return false;
         }
@@ -556,8 +644,13 @@ public class Filter implements Serializable {
     public boolean matchesAccount(ClientId clientId) {
         if (filteringAccounts) {
             // System.out.println(new FilterFormatter().getClientsShortList(getAccountList()));
+            
             if (matchesSites(clientId)) {
-                return clientIdHash.containsKey(clientId);
+                if (clientIdHash.size() == 0) {
+                    return true;
+                } else {
+                    return clientIdHash.containsKey(clientId);
+                }
             } else {
                 return false;
             }
@@ -585,6 +678,10 @@ public class Filter implements Serializable {
         filteringAccounts = false;
         clientIdHash = new Hashtable<ClientId, Date>();
     }
+    
+    public void clearClientTypesList() {
+        clientTypeHash = new Hashtable<ClientType.Type, Date>();
+    }
 
     /**
      * Clear problem and turn problem filtering off.
@@ -593,6 +690,10 @@ public class Filter implements Serializable {
     public void clearProblemList() {
         filteringProblems = false;
         problemIdHash = new Hashtable<ElementId, Date>();
+    }
+    
+    public void clearPermissionsList() {
+        permissionsHash = new Hashtable<Permission.Type, Date>();
     }
     
     /**
@@ -632,6 +733,38 @@ public class Filter implements Serializable {
         if (problemIdHash.containsKey(problem.getElementId())) {
             problemIdHash.remove(problem.getElementId());
             // TODO add setUsingProblemFilter(false); 
+        }
+    }
+    
+    /**
+     * Remove permission from the permission filter.
+     * @param permission
+     */
+    public void removePermission(Permission.Type type) {
+        if (permissionsHash.containsKey(type)) {
+            permissionsHash.remove(type);
+        }
+    }
+    
+    /**
+     * Remove language from the language filter.
+     * 
+     * @param language
+     */
+    public void removeLanguage(Language language) {
+        if (languageIdHash.containsKey(language.getElementId())) {
+            languageIdHash.remove(language.getElementId());
+        }
+    }
+
+    /**
+     * Remove permission from the permission filter.
+     * 
+     * @param permission
+     */
+    public void removePermission(Permission type) {
+        if (permissionsHash.containsKey(type)) {
+            permissionsHash.remove(type);
         }
     }
     
@@ -703,8 +836,6 @@ public class Filter implements Serializable {
         }
         return elementIds;
     }
-
-
     
     /**
      * Get list of ClientIds for the accounts in the filter list.
@@ -721,6 +852,24 @@ public class Filter implements Serializable {
             i++;
         }
         return clientIds;
+    }
+    
+    /**
+     * Get list of Types in filter.
+     * 
+     * @return
+     */
+    public ClientType.Type[] getClientTypes() {
+        ClientType.Type[] types = new ClientType.Type[clientTypeHash.size()];
+        Enumeration<ClientType.Type> enumeration = clientTypeHash.keys();
+        int i = 0;
+        while (enumeration.hasMoreElements()) {
+            ClientType.Type value = (ClientType.Type) enumeration.nextElement();
+            types[i] = value;
+            i++;
+        }
+        return types;
+        
     }
     
     public void setUsingRunStatesFilter(boolean turnOn) {
@@ -922,6 +1071,9 @@ public class Filter implements Serializable {
             if (filteringAccounts) {
                 filterInfo += " account(s))";
             }
+            if (filteringPermissions) {
+                filterInfo += " permissions(s))";
+            }
 
             return filterInfo;
         } else {
@@ -984,6 +1136,7 @@ public class Filter implements Serializable {
         if (filterEnabled) {
             return filteringSites || filteringAccounts || filteringClarificationStates || filteringProblems 
                 || filteringJudgements || filteringLanguages || filteringElapsedTime || filteringRunStates
+                || filteringPermissions
                 || thisSiteOnly;
         } else {
             return false;
@@ -1039,7 +1192,7 @@ public class Filter implements Serializable {
     public int countAccounts (Account [] accounts) {
         int count = 0;
         for (Account account : accounts) {
-            if (matchesAccount(account)) {
+            if (matches(account)) {
                 count++;
             }
         }
@@ -1060,7 +1213,7 @@ public class Filter implements Serializable {
         }
         return count;
     }
-
+    
     /**
      * Returns list of runs for current filter.
      * 
@@ -1098,6 +1251,7 @@ public class Filter implements Serializable {
 
         return (Clarification[]) list.toArray(new Clarification[list.size()]);
     }
+
     
 }
 

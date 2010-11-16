@@ -863,7 +863,7 @@ public class ReportPane extends JPanePlugin {
         // Added in reverse order (right to left)
         getEditFilterFrame().addList(ListNames.LANGUAGES);
         getEditFilterFrame().addList(ListNames.PROBLEMS);
-        getEditFilterFrame().addList(ListNames.ACCOUNTS);
+        getEditFilterFrame().addList(ListNames.TEAM_ACCOUNTS);
         getEditFilterFrame().addList(ListNames.RUN_STATES);
         getEditFilterFrame().addList(ListNames.JUDGEMENTS);
         getEditFilterFrame().addList(ListNames.SITES);

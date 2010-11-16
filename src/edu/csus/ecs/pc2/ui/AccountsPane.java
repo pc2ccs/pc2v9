@@ -7,6 +7,7 @@ import java.awt.FlowLayout;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Vector;
 
 import javax.swing.JButton;
@@ -29,11 +30,14 @@ import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.report.FilterReport;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
+import edu.csus.ecs.pc2.ui.EditFilterPane.ListNames;
 
 /**
  * Account Pane list.
@@ -75,7 +79,7 @@ public class AccountsPane extends JPanePlugin {
 
     private JLabel messageLabel = null;
 
-    private PermissionList permissionList = new PermissionList();
+    private PermissionList permissionList = new PermissionList();  //  @jve:decl-index=0:
 
     private EditAccountFrame editAccountFrame = new EditAccountFrame();
 
@@ -90,6 +94,16 @@ public class AccountsPane extends JPanePlugin {
     private JButton generateAccountsButton = null;
 
     private JButton saveButton = null;
+    
+    private EditFilterFrame editFilterFrame = null;
+    
+    /**
+     * User filter
+     */
+    private Filter filter = new Filter();
+
+
+    private String filterFrameTitle = "Account filter";
 
     /**
      * This method initializes
@@ -268,12 +282,45 @@ public class AccountsPane extends JPanePlugin {
         Account[] accounts = getAllAccounts();
 
         // TODO bulk load these record
-
+        
         for (Account account : accounts) {
-            updateAccountRow(account, false);
+            if (! filter.isFilterOn() ){
+                updateAccountRow(account, false);
+            } else if (filter.matches(account)) {
+                updateAccountRow(account, false);
+            }
         }
+        
+        if (filter.isFilterOn()){
+            getFilterButton().setForeground(Color.BLUE);
+            getFilterButton().setToolTipText("Edit filter - filter ON");
+        } else {
+            getFilterButton().setForeground(Color.BLACK);
+            getFilterButton().setToolTipText("Edit filter");
+        }
+        
         getRunsListBox().autoSizeAllColumns();
         getRunsListBox().sort();
+    }
+    
+    protected void dumpFilter(Filter filter2) {
+
+        try {
+            System.out.println("dumpFilter " + filter2);
+            System.out.flush();
+
+            FilterReport filterReport = new FilterReport();
+            filterReport.setContestAndController(getContest(), getController());
+
+            PrintWriter printWriter = new PrintWriter(System.out);
+            filterReport.writeReportDetailed(printWriter, filter2);
+            printWriter.flush();
+            printWriter = null;
+
+            System.out.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private boolean isAllowed(Permission.Type type) {
@@ -293,8 +340,7 @@ public class AccountsPane extends JPanePlugin {
         saveButton.setVisible(isAllowed(Permission.Type.EDIT_ACCOUNT));
         generateAccountsButton.setVisible(isAllowed(Permission.Type.ADD_ACCOUNT));
 
-        // TODO once filter is working make this visible.
-        getFilterButton().setVisible(false);
+        getFilterButton().setVisible(true);
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
@@ -308,6 +354,8 @@ public class AccountsPane extends JPanePlugin {
         editAccountFrame.setContestAndController(inContest, inController);
         generateAccountsFrame.setContestAndController(inContest, inController);
 
+        getEditFilterFrame().setContestAndController(inContest, inController);
+        
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 reloadAccountList();
@@ -494,17 +542,33 @@ public class AccountsPane extends JPanePlugin {
             filterButton.setMnemonic(KeyEvent.VK_F);
             filterButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    filterAccounts();
+                    showFilterAccountsFrame();
                 }
             });
         }
         return filterButton;
     }
-
-    protected void filterAccounts() {
-        // TODO Auto-generated method stub
-
-        showMessage("Would have filtered ");
+    
+    public EditFilterFrame getEditFilterFrame() {
+        if (editFilterFrame == null){
+            Runnable callback = new Runnable(){
+                public void run() {
+                    reloadAccountList();
+                }
+            };
+            editFilterFrame = new EditFilterFrame(filter, filterFrameTitle,  callback);
+        }
+        return editFilterFrame;
+    }
+    
+    protected void showFilterAccountsFrame() {
+        getEditFilterFrame().addList(ListNames.SITES);
+        getEditFilterFrame().addList(ListNames.CLIENT_TYPES);
+        getEditFilterFrame().addList(ListNames.ALL_ACCOUNTS);
+        getEditFilterFrame().addList(ListNames.PERMISSIONS);
+        getEditFilterFrame().setFilter(filter);
+        getEditFilterFrame().validate();
+        getEditFilterFrame().setVisible(true);
     }
 
     /**

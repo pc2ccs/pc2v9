@@ -282,7 +282,7 @@ public class ICPCPane extends JPanePlugin {
             Vector<Account> teams = getContest().getAccounts(ClientType.Type.TEAM);
             for (Account account : teams) {
                 if(account != null) {
-                    if (account.getLongSchoolName() != null && !account.getLongSchoolName().isEmpty()) {
+                    if (account.getLongSchoolName() != null && !isEmpty(account.getLongSchoolName())) {
                         gotData = true;
                         break;
                     }
@@ -300,6 +300,10 @@ public class ICPCPane extends JPanePlugin {
         }
         getICPCAccountFrame().setContestAndController(getContest(), getController());
         getICPCAccountFrame().setVisible(true);
+    }
+
+    private boolean isEmpty(String longSchoolName) {
+        return longSchoolName == null || longSchoolName.trim().length() == 0;
     }
 
     /**
