@@ -82,6 +82,7 @@ import edu.csus.ecs.pc2.core.util.IMemento;
 import edu.csus.ecs.pc2.core.util.XMLMemento;
 import edu.csus.ecs.pc2.plugin.ContestSummaryReports;
 import edu.csus.ecs.pc2.ui.EditFilterPane.ListNames;
+import java.awt.Dimension;
 
 /**
  * Report Pane, allows picking and viewing reports.
@@ -172,7 +173,7 @@ public class ReportPane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new java.awt.Dimension(505, 291));
+        this.setSize(new Dimension(525, 291));
         this.add(getTopPane(), java.awt.BorderLayout.NORTH);
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
         this.add(getMainPane(), java.awt.BorderLayout.CENTER);
@@ -716,7 +717,7 @@ public class ReportPane extends JPanePlugin {
     private JCheckBox getBreakdownBySiteCheckbox() {
         if (breakdownBySiteCheckbox == null) {
             breakdownBySiteCheckbox = new JCheckBox();
-            breakdownBySiteCheckbox.setBounds(new Rectangle(21, 80, 152, 21));
+            breakdownBySiteCheckbox.setBounds(new Rectangle(21, 80, 175, 21));
             breakdownBySiteCheckbox.setMnemonic(KeyEvent.VK_S);
             breakdownBySiteCheckbox.setToolTipText("Break down by site");
             breakdownBySiteCheckbox.setText("Breakdown by site");
@@ -750,7 +751,7 @@ public class ReportPane extends JPanePlugin {
         if (reportChoicePane == null) {
             reportChoicePane = new JPanel();
             reportChoicePane.setLayout(new BorderLayout());
-            reportChoicePane.setBounds(new java.awt.Rectangle(22,9,445,53));
+            reportChoicePane.setBounds(new Rectangle(22, 9, 482, 53));
             reportChoicePane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Reports", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
                     javax.swing.border.TitledBorder.DEFAULT_POSITION, null, null));
             reportChoicePane.add(getReportsComboBox(), java.awt.BorderLayout.CENTER);
@@ -816,7 +817,7 @@ public class ReportPane extends JPanePlugin {
             filterLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
             filterPane = new JPanel();
             filterPane.setLayout(new BorderLayout());
-            filterPane.setBounds(new Rectangle(185, 76, 279, 128));
+            filterPane.setBounds(new Rectangle(223, 76, 279, 128));
             filterPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Filter", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION,
                     null, null));
             filterPane.add(getFilterButtonPane(), java.awt.BorderLayout.SOUTH);
