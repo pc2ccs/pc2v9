@@ -19,6 +19,7 @@ import edu.csus.ecs.pc2.core.model.IProblemListener;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemEvent;
 import java.awt.Dimension;
+import java.awt.Point;
 
 /**
  * Submit Clarification Pane.
@@ -140,9 +141,10 @@ public class SubmitClarificationPane extends JPanePlugin {
     private JButton getSubmitClarificationButton() {
         if (submitClarificationButton == null) {
             submitClarificationButton = new JButton();
-            submitClarificationButton.setBounds(new java.awt.Rectangle(20,219,158,34));
             submitClarificationButton.setText("Submit Clarification");
-            submitClarificationButton.setPreferredSize(new Dimension(175, 26));
+            submitClarificationButton.setPreferredSize(new Dimension(200, 26));
+            submitClarificationButton.setLocation(new Point(20, 219));
+            submitClarificationButton.setSize(new Dimension(200, 34));
             submitClarificationButton.setToolTipText("Click this button to submit your Clarification");
             submitClarificationButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
