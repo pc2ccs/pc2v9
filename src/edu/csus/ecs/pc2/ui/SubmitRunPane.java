@@ -35,6 +35,7 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
 import java.awt.FlowLayout;
+import java.awt.Dimension;
 
 /**
  * A submit run pane.
@@ -913,7 +914,7 @@ public class SubmitRunPane extends JPanePlugin {
     private JPanel getAdditonalFilesButtonPane() {
         if (additonalFilesButtonPane == null) {
             FlowLayout flowLayout = new FlowLayout();
-            flowLayout.setHgap(120);
+            flowLayout.setHgap(100);
             additonalFilesButtonPane = new JPanel();
             additonalFilesButtonPane.setLayout(flowLayout);
             additonalFilesButtonPane.add(getAddAdditionalFilesButton(), null);
@@ -931,6 +932,7 @@ public class SubmitRunPane extends JPanePlugin {
         if (addAdditionalFilesButton == null) {
             addAdditionalFilesButton = new JButton();
             addAdditionalFilesButton.setText("Add");
+            addAdditionalFilesButton.setPreferredSize(new Dimension(100, 26));
             addAdditionalFilesButton.setToolTipText("Add an additional file");
             addAdditionalFilesButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -982,6 +984,7 @@ public class SubmitRunPane extends JPanePlugin {
         if (removeAdditionalFilesButton == null) {
             removeAdditionalFilesButton = new JButton();
             removeAdditionalFilesButton.setText("Remove");
+            removeAdditionalFilesButton.setPreferredSize(new Dimension(100, 26));
             removeAdditionalFilesButton.setToolTipText("remove selected additional file");
             removeAdditionalFilesButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -1031,7 +1034,7 @@ public class SubmitRunPane extends JPanePlugin {
             additionalFilesMCLB.addColumns(cols);
             
             cols = null;
-            additionalFilesMCLB.autoSizeAllColumns();
+            additionalFilesMCLB.getColumnInfo(0).setWidth(400);
             
         }
         return additionalFilesMCLB;
