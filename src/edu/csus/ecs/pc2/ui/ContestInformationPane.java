@@ -138,9 +138,9 @@ public class ContestInformationPane extends JPanePlugin {
     private JPanel getCenterPane() {
         if (centerPane == null) {
             labelMaxFileSize = new JLabel();
-            labelMaxFileSize.setBounds(new Rectangle(21, 173, 175, 27));
+            labelMaxFileSize.setBounds(new Rectangle(21, 173, 200, 27));
             labelMaxFileSize.setHorizontalAlignment(SwingConstants.RIGHT);
-            labelMaxFileSize.setText("Maximum output size (in K)");
+            labelMaxFileSize.setText("Maximum output size (in kB)");
             contestTitleLabel = new JLabel();
             contestTitleLabel.setBounds(new java.awt.Rectangle(55, 21, 134, 27));
             contestTitleLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
@@ -191,7 +191,7 @@ public class ContestInformationPane extends JPanePlugin {
     private JTextField getContestTitleTextField() {
         if (contestTitleTextField == null) {
             contestTitleTextField = new JTextField();
-            contestTitleTextField.setBounds(new java.awt.Rectangle(204, 21, 287, 27));
+            contestTitleTextField.setBounds(new java.awt.Rectangle(204, 21, 340, 27));
             contestTitleTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
@@ -660,7 +660,7 @@ public class ContestInformationPane extends JPanePlugin {
         if (maxFieldSizeInKTextField == null) {
             maxFieldSizeInKTextField = new JTextField();
             maxFieldSizeInKTextField.setDocument(new IntegerDocument());
-            maxFieldSizeInKTextField.setBounds(new Rectangle(208, 172, 122, 29));
+            maxFieldSizeInKTextField.setBounds(new Rectangle(233, 172, 122, 29));
             maxFieldSizeInKTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableUpdateButton();
@@ -678,7 +678,7 @@ public class ContestInformationPane extends JPanePlugin {
     private JButton getScoringPropertiesButton() {
         if (scoringPropertiesButton == null) {
             scoringPropertiesButton = new JButton();
-            scoringPropertiesButton.setBounds(new Rectangle(345, 173, 172, 30));
+            scoringPropertiesButton.setBounds(new Rectangle(370, 173, 200, 30));
             scoringPropertiesButton.setToolTipText("Edit Scoring Properties");
             scoringPropertiesButton.setText("Edit Scoring Properties");
             scoringPropertiesButton.addActionListener(new java.awt.event.ActionListener() {
