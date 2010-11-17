@@ -270,7 +270,9 @@ public class LoginFrame extends JFrame implements UIPlugin {
             passwordTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyPressed(java.awt.event.KeyEvent e) {
                     if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
-                        attemptToLogin();
+                        if (getLoginButton().isEnabled()) {
+                            attemptToLogin();
+                        } // else server probably was not reachable
                     }
                 }
             });
