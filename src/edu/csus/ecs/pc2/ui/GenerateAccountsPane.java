@@ -25,6 +25,8 @@ import edu.csus.ecs.pc2.core.model.SiteEvent;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import java.awt.FlowLayout;
 import java.awt.event.KeyEvent;
+import java.awt.Point;
+import java.awt.Dimension;
 
 /**
  * Generate accounts pane.
@@ -196,8 +198,9 @@ public class GenerateAccountsPane extends JPanePlugin {
             siteLabel.setBounds(new java.awt.Rectangle(79, 8, 48, 20));
             siteLabel.setText("Site");
             genStartNumberLabel = new JLabel();
-            genStartNumberLabel.setBounds(new java.awt.Rectangle(81, 198, 166, 19));
             genStartNumberLabel.setText("Start Account Number at");
+            genStartNumberLabel.setSize(new Dimension(200, 19));
+            genStartNumberLabel.setLocation(new Point(81, 198));
             genScoreboardLabel = new JLabel();
             genScoreboardLabel.setBounds(new java.awt.Rectangle(81, 129, 166, 19));
             genScoreboardLabel.setText("Scoreboards");
