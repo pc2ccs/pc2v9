@@ -32,6 +32,7 @@ import edu.csus.ecs.pc2.profile.ProfileLoadException;
 import edu.csus.ecs.pc2.profile.ProfileManager;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import javax.swing.JScrollPane;
+import java.awt.Point;
 
 /**
  * Contest Password and Profile login screen.
@@ -297,7 +298,8 @@ public class StartupContestDialog extends JDialog {
             versionTitleLabel.setText("Version XX. XX YYYY vv 22");
             nameTitleLabel = new JLabel();
             nameTitleLabel.setText("Contest Password");
-            nameTitleLabel.setBounds(new Rectangle(48, 68, 124, 15));
+            nameTitleLabel.setLocation(new Point(48, 68));
+            nameTitleLabel.setSize(new Dimension(150, 15));
             nameTitleLabel.setPreferredSize(new java.awt.Dimension(45, 16));
             centerPane = new JPanel();
             centerPane.setLayout(null);
@@ -450,7 +452,8 @@ public class StartupContestDialog extends JDialog {
         if (loginButton == null) {
             loginButton = new JButton();
             loginButton.setMnemonic(KeyEvent.VK_C);
-            loginButton.setBounds(new Rectangle(50, 180, 95, 26));
+            loginButton.setLocation(new Point(50, 180));
+            loginButton.setSize(new Dimension(105, 26));
             loginButton.setText("Continue");
             loginButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -471,7 +474,8 @@ public class StartupContestDialog extends JDialog {
         if (exitButton == null) {
             exitButton = new JButton();
             exitButton.setMnemonic(KeyEvent.VK_X);
-            exitButton.setBounds(new Rectangle(336, 181, 95, 26));
+            exitButton.setLocation(new Point(336, 181));
+            exitButton.setSize(new Dimension(105, 26));
             exitButton.setText("Exit");
             exitButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
