@@ -703,10 +703,7 @@ public class SubmitRunPane extends JPanePlugin {
     }
 
     private void initializePermissions() {
-        Account account = getContest().getAccount(getContest().getClientId());
-        if (account != null) {
-            permissionList.clearAndLoadPermissions(account.getPermissionList());
-        }
+        permissionList.clearAndLoadPermissions(getPermissionList());
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {

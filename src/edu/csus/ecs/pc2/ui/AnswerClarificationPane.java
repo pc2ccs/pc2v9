@@ -18,13 +18,12 @@ import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
-import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.DisplayTeamName;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
 
@@ -438,10 +437,7 @@ public class AnswerClarificationPane extends JPanePlugin {
     }
 
     private void initializePermissions() {
-        Account account = getContest().getAccount(getContest().getClientId());
-        if (account != null) {
-            permissionList.clearAndLoadPermissions(account.getPermissionList());
-        }
+        permissionList.clearAndLoadPermissions(getPermissionList());
     }
 
     private void updateGUIperPermissions() {

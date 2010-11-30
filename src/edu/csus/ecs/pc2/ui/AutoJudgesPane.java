@@ -120,8 +120,7 @@ public class AutoJudgesPane extends JPanePlugin {
     }
 
     private void initializePermissions() {
-        Account account = getContest().getAccount(getContest().getClientId());
-        permissionList.clearAndLoadPermissions(account.getPermissionList());
+        permissionList.clearAndLoadPermissions(getPermissionList());
     }
 
     private void updateGUIperPermissions() {

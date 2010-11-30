@@ -128,13 +128,12 @@ public class JudgementsPanel extends JPanePlugin {
     }
 
     private void initializePermissions() {
-        Account account = getContest().getAccount(getContest().getClientId());
-        permissionList.clearAndLoadPermissions(account.getPermissionList());
+        permissionList.clearAndLoadPermissions(getPermissionList());
     }
 
     private void updateGUIperPermissions() {
         addButton.setVisible(isAllowed(Permission.Type.ADD_JUDGEMENTS));
-        editButton.setVisible(isAllowed(Permission.Type.EDIT_SETTINGS));
+        editButton.setVisible(isAllowed(Permission.Type.EDIT_JUDGEMENTS));
     }
 
     protected void reloadJudgementList() {

@@ -16,7 +16,6 @@ import com.ibm.webrunner.j2mclb.util.HeapSorter;
 import com.ibm.webrunner.j2mclb.util.NumericStringComparator;
 
 import edu.csus.ecs.pc2.core.IInternalController;
-import edu.csus.ecs.pc2.core.PermissionGroup;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.list.JudgementNotificationsList;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -899,13 +898,7 @@ public class RunsPanel extends JPanePlugin {
     }
 
     private void initializePermissions() {
-        Account account = getContest().getAccount(getContest().getClientId());
-        if (account != null) {
-            permissionList.clearAndLoadPermissions(account.getPermissionList());
-        } else {
-            // Set default conditions
-            permissionList.clearAndLoadPermissions(new PermissionGroup().getPermissionList(getContest().getClientId().getClientType()));
-        }
+        permissionList.clearAndLoadPermissions(getPermissionList());
     }
 
     private void updateGUIperPermissions() {

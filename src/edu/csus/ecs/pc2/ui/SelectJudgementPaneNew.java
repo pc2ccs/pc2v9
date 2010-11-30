@@ -25,9 +25,9 @@ import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.execute.Executable;
 import edu.csus.ecs.pc2.core.execute.ExecutionData;
 import edu.csus.ecs.pc2.core.log.Log;
-import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.DisplayTeamName;
 import edu.csus.ecs.pc2.core.model.ElementId;
@@ -40,11 +40,10 @@ import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
-import edu.csus.ecs.pc2.core.model.ClientType.Type;
-import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.ui.judge.JudgeView;
@@ -1072,10 +1071,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     }
 
     private void initializePermissions() {
-        Account account = getContest().getAccount(getContest().getClientId());
-        if (account != null) {
-            permissionList.clearAndLoadPermissions(account.getPermissionList());
-        }
+        permissionList.clearAndLoadPermissions(getPermissionList());
     }
 
     /**

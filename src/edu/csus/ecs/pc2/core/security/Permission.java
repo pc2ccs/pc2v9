@@ -120,10 +120,6 @@ public class Permission implements Serializable {
          */
         EDIT_SITE,
         /**
-         * Able to edit settings in general.
-         */
-        EDIT_SETTINGS,
-        /**
          * Read-only execute a run, but not judge run.
          */
         EXECUTE_RUN,
@@ -265,6 +261,10 @@ public class Permission implements Serializable {
         /**
          * 
          */
+        EDIT_JUDGEMENTS,
+        /**
+         * 
+         */
         ADD_NOTIFICATIONS,
         /**
          * 
@@ -310,7 +310,6 @@ public class Permission implements Serializable {
         hash.put(Type.EDIT_LANGUAGE, "Edit a language");
         hash.put(Type.EDIT_PROBLEM, "Edit a problem");
         hash.put(Type.EDIT_SITE, "Edit a site");
-        hash.put(Type.EDIT_SETTINGS, "Edit general settings");
         hash.put(Type.EDIT_RUN, "Edit a run");
         hash.put(Type.EDIT_CLARIFICATION, "Edit a clarification");
         hash.put(Type.SUBMIT_CLARIFICATION, "Submit a clarification");
@@ -363,6 +362,9 @@ public class Permission implements Serializable {
         hash.put(Type.ADD_NOTIFICATIONS,"Add Notification");
         hash.put(Type.EDIT_NOTIFICATIONS,"Edit Notification");
         hash.put(Type.VIEW_PASSWORDS,"View Passwords");
+        
+        hash.put(Type.EDIT_JUDGEMENTS,"Edit Judgement");
+        
     }
 
     /**

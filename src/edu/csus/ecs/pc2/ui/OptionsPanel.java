@@ -13,11 +13,11 @@ import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IChangePasswordListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.PasswordChangeEvent;
-import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.security.ISecurityMessageListener;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
@@ -111,10 +111,7 @@ public class OptionsPanel extends JPanePlugin {
     
     
     private void initializePermissions() {
-        Account account = getContest().getAccount(getContest().getClientId());
-        if (account != null) {
-            permissionList.clearAndLoadPermissions(account.getPermissionList());
-        }
+        permissionList.clearAndLoadPermissions(getPermissionList());
     }
     
     private void updateGUIperPermissions() {

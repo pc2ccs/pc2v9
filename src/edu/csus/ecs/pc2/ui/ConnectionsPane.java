@@ -15,9 +15,14 @@ import com.ibm.webrunner.j2mclb.util.HeapSorter;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ConnectionEvent;
+import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IConnectionListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.security.Permission;
+import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
 /**
@@ -46,6 +51,8 @@ public class ConnectionsPane extends JPanePlugin {
     private JLabel messageLabel = null;
     
     private Log log = null;
+
+    private PermissionList permissionList = new PermissionList();
 
     /**
      * This method initializes
@@ -173,16 +180,32 @@ public class ConnectionsPane extends JPanePlugin {
             }
         });
     }
+    
+    private boolean isAllowed(Permission.Type type) {
+        return permissionList.isAllowed(type);
+    }
+    
+    private void initializePermissions() {
+        permissionList.clearAndLoadPermissions(getPermissionList());
+    }
+    
+    private void updateGUIperPermissions() {
+        connectionsListBox.setVisible(isAllowed(Permission.Type.FORCE_LOGOFF_CLIENT));
+    }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
 
         getContest().addConnectionListener(new ConnectionListenerImplementation());
-        
+        getContest().addAccountListener(new AccountListenerImplementation());
+           
         log = getController().getLog();
+        
+        initializePermissions();
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
+                updateGUIperPermissions();
                 reloadListBox();
             }
         });
@@ -295,6 +318,74 @@ public class ConnectionsPane extends JPanePlugin {
             messagePane.add(messageLabel, java.awt.BorderLayout.CENTER);
         }
         return messagePane;
+    }
+    
+    /**
+     * Account Listener
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    
+    // $HeadURL$
+    public class AccountListenerImplementation implements IAccountListener {
+
+
+        public void accountAdded(AccountEvent accountEvent) {
+            // ignored
+        }
+
+        public void accountModified(AccountEvent accountEvent) {
+            // check if is this account
+            Account account = accountEvent.getAccount();
+            /**
+             * If this is the account then update the GUI display per the potential change in Permissions.
+             */
+            if (getContest().getClientId().equals(account.getClientId())) {
+                // They modified us!!
+                initializePermissions();
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        updateGUIperPermissions();
+                    }
+                });
+
+            }
+        }
+
+        public void accountsAdded(AccountEvent accountEvent) {
+            // ignore
+        }
+
+        public void accountsModified(AccountEvent accountEvent) {
+            Account[] accounts = accountEvent.getAccounts();
+            for (Account account : accounts) {
+
+                /**
+                 * If this is the account then update the GUI display per the potential change in Permissions.
+                 */
+                if (getContest().getClientId().equals(account.getClientId())) {
+                    // They modified us!!
+                    initializePermissions();
+                    SwingUtilities.invokeLater(new Runnable() {
+                        public void run() {
+                            updateGUIperPermissions();
+                        }
+                    });
+                }
+            }
+        }
+
+        public void accountsRefreshAll(AccountEvent accountEvent) {
+
+            initializePermissions();
+
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    updateGUIperPermissions();
+                }
+            });
+        }
+    
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

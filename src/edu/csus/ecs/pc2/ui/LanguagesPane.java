@@ -194,6 +194,7 @@ public class LanguagesPane extends JPanePlugin {
         editLanguageFrame.setContestAndController(inContest, inController);
         
         getContest().addLanguageListener(new LanguageListenerImplementation());
+        getContest().addAccountListener(new AccountListenerImplementation());
         
         log = getController().getLog();
         
@@ -213,8 +214,7 @@ public class LanguagesPane extends JPanePlugin {
     }
 
     private void initializePermissions() {
-        Account account = getContest().getAccount(getContest().getClientId());
-        permissionList.clearAndLoadPermissions(account.getPermissionList());
+        permissionList.clearAndLoadPermissions(getPermissionList());
     }
 
     private void updateGUIperPermissions() {

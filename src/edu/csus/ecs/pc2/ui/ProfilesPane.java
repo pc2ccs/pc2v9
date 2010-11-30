@@ -22,7 +22,6 @@ import javax.swing.SwingUtilities;
 import com.ibm.webrunner.j2mclb.util.HeapSorter;
 
 import edu.csus.ecs.pc2.core.IInternalController;
-import edu.csus.ecs.pc2.core.PermissionGroup;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.list.ContestTimeComparator;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -30,8 +29,8 @@ import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
-import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
@@ -793,13 +792,7 @@ public class ProfilesPane extends JPanePlugin {
     }
 
     private void initializePermissions() {
-        Account account = getContest().getAccount(getContest().getClientId());
-        if (account != null) {
-            permissionList.clearAndLoadPermissions(account.getPermissionList());
-        } else {
-            // Set default conditions
-            permissionList.clearAndLoadPermissions(new PermissionGroup().getPermissionList(getContest().getClientId().getClientType()));
-        }
+        permissionList.clearAndLoadPermissions(getPermissionList());
     }
 
     /**

@@ -383,13 +383,21 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
     }
     
     private void initializePermissions(IInternalContest theContest, ClientId clientId) {
-        Account account = theContest.getAccount(clientId);
-        if (account != null) {
-            permissionList.clearAndLoadPermissions(account.getPermissionList());
+        permissionList.clearAndLoadPermissions(getPermissionList(theContest));
+    }
+
+    private PermissionList getPermissionList(IInternalContest theContest) {
+        ClientId id = theContest.getClientId();
+
+        Account account = theContest.getAccount(id);
+
+        PermissionList list = null;
+        if (account == null) {
+            list = new PermissionGroup().getPermissionList(id.getClientType());
         } else {
-            // Set default conditions
-            permissionList.clearAndLoadPermissions(new PermissionGroup().getPermissionList(clientId.getClientType()));
+            list = account.getPermissionList();
         }
+        return list;
     }
 
     /**
