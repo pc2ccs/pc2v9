@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core.model;
 
+import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
@@ -33,10 +34,14 @@ public class ContestTime implements IElementObject {
 
     /**
      * Resume time, used in calculating elapsed time.
-     * 
      */
     private GregorianCalendar resumeTime = null;
 
+    /**
+     * First Time contest is started.
+     */
+    private GregorianCalendar contestStartTime = null;
+ 
     /**
      * serverTransmitTime is set by the server and is used to calculate clock differential between client & server clocks
      */
@@ -50,6 +55,11 @@ public class ContestTime implements IElementObject {
      * Elapsed seconds since start of contest.
      */
     private long elapsedSecs = 0;
+    
+    /**
+     * Elapsed milli-seconds since start of contest.
+     */
+    private long elapsedMS = 0;
 
     private long contestLengthSecs = DEFAULT_CONTEST_LENGTH_SECONDS;
 
@@ -179,14 +189,24 @@ public class ContestTime implements IElementObject {
     }
 
     /**
-     * @return elapsed time in minute.
+     * @return elapsed time in minutes.
      */
     public long getElapsedMins() {
         return getElapsedSecs() / 60;
     }
 
+    /**
+     * @return elapsed time in seconds.
+     */
     public long getElapsedSecs() {
         return elapsedSecs + secsSinceContestStart();
+    }
+    
+    /**
+     * @return elapsed time in milliseconds.
+     */
+    public long getElapsedMS() {
+        return elapsedMS + msSinceContestStart();
     }
 
     /**
@@ -236,12 +256,25 @@ public class ContestTime implements IElementObject {
 
     private long secsSinceContestStart() {
         if (contestRunning) {
+            long milliDiff = msSinceContestStart();
+            long totalSeconds = milliDiff / 1000;
+            return totalSeconds;
+        } else {
+            return 0;
+        }
+    }
+    
+    /**
+     * Milliseconds since start of contest
+     * @return MS since start of contest.
+     */
+    private long msSinceContestStart() {
+        if (contestRunning) {
             TimeZone tz = TimeZone.getTimeZone("GMT");
             GregorianCalendar cal = new GregorianCalendar(tz);
 
             long milliDiff = cal.getTime().getTime() - resumeTime.getTime().getTime();
-            long totalSeconds = milliDiff / 1000;
-            return totalSeconds;
+            return milliDiff;
         } else {
             return 0;
         }
@@ -277,6 +310,12 @@ public class ContestTime implements IElementObject {
     }
 
     public void startContestClock() {
+        
+        if (contestStartTime == null) {
+            TimeZone tz = TimeZone.getTimeZone("GMT");
+            contestStartTime = new GregorianCalendar(tz);
+        }
+        
         if (!contestRunning) {
             forceContestStartTimeResync();
             contestRunning = true;
@@ -420,5 +459,9 @@ public class ContestTime implements IElementObject {
         localClockOffset = 0;
         elapsedSecs = 0;
         contestRunning = false;
+    }
+
+    public Calendar getContestStartTime() {
+        return contestStartTime;
     }
 }
