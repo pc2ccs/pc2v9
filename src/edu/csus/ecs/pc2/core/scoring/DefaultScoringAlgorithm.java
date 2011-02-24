@@ -57,11 +57,11 @@ public class DefaultScoringAlgorithm implements IScoringAlgorithm {
      */
     private static final long serialVersionUID = -2471349413867745412L;
 
-    private static final String POINTS_PER_NO = "Points per No";
+    public static final String POINTS_PER_NO = "Points per No";
 
-    private static final String POINTS_PER_YES_MINUTE = "Points per Minute (for 1st yes)";
+    public static final String POINTS_PER_YES_MINUTE = "Points per Minute (for 1st yes)";
 
-    private static final String BASE_POINTS_PER_YES = "Base Points per Yes";
+    public static final String BASE_POINTS_PER_YES = "Base Points per Yes";
 
     /**
      * properties.
