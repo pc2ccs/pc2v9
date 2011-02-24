@@ -33,6 +33,7 @@ import java.util.List;
  * <p>
  * This interface is not intended to be implemented by clients.
  * </p>
+ * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -219,4 +220,40 @@ public interface IMemento {
      *            the value
      */
     void putString(String key, String value);
+
+    /**
+     * Create an element with a value.
+     * 
+     * {@link #createChild(String)} and {@link #createChild(String, String)} do not create an XML element with a value.
+     * <P>
+     * For example <code>createChild("name", "Jenny")</code> will create the following XML:
+     * 
+     * <pre> &lt;name IMemento.internal.id="Jenny&gt;</pre>
+     * 
+     * This method places a value into the element, for example to create and element use the following <code> createChildNode("name", "Jenny")</code>
+     * 
+     * <pre> &lt;name&gt;Jenny&lt;/name&gt;</pre>
+     * 
+     * @see #getValue()
+     * @param name
+     *            name for element
+     * @param value
+     *            value for XML element
+     * @return
+     */
+    IMemento createChildNode(String name, String value);
+
+    /**
+     * Get value/String for element.
+     * 
+     * Returns the value for the element. Ex.
+     * 
+     * <pre> &lt;name&gt;Troy&lt;/name&gt; </pre>
+     * 
+     * <code> getValue() </code> would return: Troy
+     * <P>
+     * @see #createChildNode(String, String)
+     * @return value for element, if no value set then returns null.
+     */
+    String getValue();
 }

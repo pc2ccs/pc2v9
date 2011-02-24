@@ -79,6 +79,18 @@ public final class XMLMemento implements IMemento {
         element.appendChild(child);
         return new XMLMemento(factory, child);
     }
+    
+    /**
+     * @see IMemento#createChildNode(java.lang.String, java.lang.String)
+     */
+    public IMemento createChildNode(String type, String value) {
+        
+        Element child = factory.createElement(type);
+        child.appendChild(factory.createTextNode(value));
+        element.appendChild(child);
+        return new XMLMemento(factory, child);
+    }
+
 
     /**
      * @see IMemento#createChild(String, String)
@@ -475,5 +487,15 @@ public final class XMLMemento implements IMemento {
      */
     public void putBoolean(String key, boolean value) {
         element.setAttribute(key, Boolean.toString(value));
+    }
+
+    /**
+     * @see edu.csus.ecs.pc2.core.util.IMemento#getValue()
+     */
+    public String getValue() {
+
+        NodeList list = element.getChildNodes();
+        Node node = (Node) list.item(0);
+        return node.getNodeValue();
     }
 }
