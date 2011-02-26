@@ -15,6 +15,7 @@ import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.security.FileStorage;
+import edu.csus.ecs.pc2.core.util.JUnitUtilities;
 
 /**
  * Create Sample InternalContest and InternalController.
@@ -589,6 +590,35 @@ public class SampleContest {
         return contest.getRun(run.getElementId());
 
     }
+    
+    private boolean isSolved (IInternalContest contest, ElementId judgementId) {
+        return contest.getJudgements()[0].getElementId().equals(judgementId);
+    }
+    
+    /**
+     * Add a judgement to a run.
+     * 
+     * @param contest
+     * @param run
+     * @param judgement
+     * @param judgeId
+     * @return run with judgement.
+     * @throws IOException
+     * @throws ClassNotFoundException
+     * @throws FileSecurityException
+     */
+    public Run addJudgement (IInternalContest contest, Run run, Judgement judgement, ClientId judgeId) throws IOException, ClassNotFoundException, FileSecurityException {
+        
+        ElementId judgementId = judgement.getElementId();
+        boolean solved = isSolved(contest, judgementId);
+        
+        JudgementRecord judgementRecord = new JudgementRecord(judgementId, judgeId, solved, false);
+
+        checkOutRun(contest, run, judgeId);
+        contest.addRunJudgement(run, judgementRecord, null, judgeId);
+
+        return contest.getRun(run.getElementId());
+    }
 
     private void checkOutRun(IInternalContest contest, Run run, ClientId judgeId) {
         try {
@@ -667,4 +697,51 @@ public class SampleContest {
     public void setDefaultPortNumber(int defaultPortNumber) {
         this.defaultPortNumber = defaultPortNumber;
     }
+
+    public Judgement getRandomJudgement(IInternalContest contest, boolean solved) {
+
+        Judgement[] judgements = contest.getJudgements();
+
+        if (solved) {
+            return judgements[0];
+        } else {
+            int randomJudgement = random.nextInt(judgements.length - 1);
+            return judgements[randomJudgement + 1];
+        }
+    }
+    
+    /**
+     * Return Sumit source file in test area.
+     * 
+     * @see #getSampleFile(String)
+     * @return
+     */
+    public String getSampleFile() {
+        return getSampleFile("Sumit.java");
+    }
+
+    /**
+     * Return full filename in file test directory.
+     * 
+     * Will print Exceptions if test directory is not present or
+     * if no such filename found.
+     * 
+     * @param filename
+     * @return filename with path to test data.
+     */
+    public String getSampleFile(String filename) {
+        String testDir = "testdata";
+        String projectPath = JUnitUtilities.locate(testDir);
+        if (projectPath == null) {
+            new Exception("Unable to locate " + testDir).printStackTrace(System.err);
+        }
+        testDir = projectPath + File.separator + testDir + File.separator;
+        String testfilename = testDir + filename;
+
+        if (!new File(testfilename).isFile()) {
+            new Exception("No sample file found " + testfilename).printStackTrace(System.err);
+        }
+        return testfilename;
+    }
+    
 }

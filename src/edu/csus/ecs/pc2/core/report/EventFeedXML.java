@@ -2,16 +2,17 @@ package edu.csus.ecs.pc2.core.report;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.ClarificationComparator;
 import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Clarification;
-import edu.csus.ecs.pc2.core.model.ClientId;
-import edu.csus.ecs.pc2.core.model.ContestInformation;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.Filter;
+import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
@@ -19,7 +20,6 @@ import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
-import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.util.IMemento;
 import edu.csus.ecs.pc2.core.util.XMLMemento;
 
@@ -34,46 +34,28 @@ import edu.csus.ecs.pc2.core.util.XMLMemento;
 
 // $HeadURL$
 public class EventFeedXML {
-    
-    // TODO move this to package pc2.core ?
 
-    public static final String CONTEST_TAG = "contest";
+    // TODO move EventFeedXML to package pc2.core ?
 
-    public static final String SETTINGS_TAG = "settings";
+    private static final String CONTEST_TAG = "contest";
 
-    public static final String INFO_TAG = "info";
+    private static final String INFO_TAG = "info";
 
-    public static final String PROBLEM_TAG = "problem";
+    private static final String PROBLEM_TAG = "problem";
 
-    public static final String LANGUAGE_TAG = "language";
+    private static final String LANGUAGE_TAG = "language";
 
-    public static final String ACCOUNT_TAG = "account";
+    private static final String TEAM_TAG = "team";
 
-    public static final String CLARIFICATION_TAG = "clarification";
+    private static final String CLARIFICATION_TAG = "clarification";
 
-    public static final String RUN_TAG = "run";
+    private static final String RUN_TAG = "run";
 
-    public static final String JUDGEMENT_TAG = "judgement";
-    
-    public static final String FINALIZE_TAG = "finalize";
+    private static final String JUDGEMENT_TAG = "judgement";
 
-    public static final String JUDGEMENT_RECORD_TAG = "judgement_record";
+    private static final String FINALIZE_TAG = "finalize";
 
-    public static final String FILTER_TAG = "filter";
-
-    public static final String PROFILES_TAG = "profiles";
-
-    public static final String BALLOON_COLORS_LIST_TAG = "ballonlist";
-
-    public static final String BALLOON_COLOR_TAG = "ballooncolors";
-
-    public static final String SITES_TAG = "site";
-
-    public static final String VERSION_TAG = "version";
-
-    public static final String FILE_INFO_TAG = "fileinfo";
-
-    private boolean showPasswords = true;
+    private static final String JUDGEMENT_RECORD_TAG = "judgement_record";
 
     public String toXML(IInternalContest contest) throws IOException {
         return toXML(contest, new Filter());
@@ -83,32 +65,46 @@ public class EventFeedXML {
 
         XMLMemento mementoRoot = XMLMemento.createWriteRoot(CONTEST_TAG);
 
-        IMemento parent = mementoRoot.createChild(SETTINGS_TAG);
-        ContestInformation contestInformation = contest.getContestInformation();
-        addContestInfo(parent, contestInformation);
+        IMemento memento = mementoRoot.createChild(INFO_TAG);
+        addInfoMemento(memento, contest, filter);
+        
 
+        Judgement [] judgements = contest.getJudgements();
+        for (Judgement judgement : judgements) {
+            memento = mementoRoot.createChild(JUDGEMENT_TAG);
+            addMemento(memento, contest, judgement);
+        }
+        
+
+        memento = mementoRoot.createChild(LANGUAGE_TAG);
         Language[] languages = contest.getLanguages();
         int num = 1;
         for (Language language : languages) {
             if (filter.matches(language)) {
-                addLanguageMemento(mementoRoot, num, language);
+                addMemento(memento, contest, language, num);
             }
             num++;
         }
 
+        memento = mementoRoot.createChild(PROBLEM_TAG);
+        num = 1;
         Problem[] problems = contest.getProblems();
         for (Problem problem : problems) {
             if (filter.matches(problem)) {
-                addProblemMemento(mementoRoot, problem);
+                addMemento(memento, contest, problem, num);
             }
+            num++;
         }
 
-        Account[] accounts = contest.getAccounts();
+        Vector<Account> teams = contest.getAccounts(Type.TEAM);
+
+        Account[] accounts = (Account[]) teams.toArray(new Account[teams.size()]);
         Arrays.sort(accounts, new AccountComparator());
 
         for (Account account : accounts) {
             if (filter.matches(account)) {
-                addAccountMemento(mementoRoot, contest, account);
+                memento = mementoRoot.createChild(TEAM_TAG);
+                addMemento(memento, contest, account);
             }
         }
 
@@ -117,7 +113,8 @@ public class EventFeedXML {
 
         for (Run run : runs) {
             if (filter.matches(run)) {
-                addRunMemento(mementoRoot, contest, run);
+                memento = mementoRoot.createChild(RUN_TAG);
+                addMemento(memento, contest, run);
             }
         }
 
@@ -126,7 +123,8 @@ public class EventFeedXML {
 
         for (Clarification clarification : clarifications) {
             if (filter.matches(clarification)) {
-                addClarificationMemento(mementoRoot, contest, clarification);
+                memento = mementoRoot.createChild(CLARIFICATION_TAG);
+                addMemento(memento, contest, clarification);
             }
         }
 
@@ -142,27 +140,17 @@ public class EventFeedXML {
      * @throws IOException
      */
     public XMLMemento createInfoElement(IInternalContest contest, Filter filter) throws IOException {
-        XMLMemento mementoRoot = XMLMemento.createWriteRoot(INFO_TAG);
-        addInfo(mementoRoot, contest);
-        return mementoRoot;
+        XMLMemento memento = XMLMemento.createWriteRoot(INFO_TAG);
+        addInfoMemento(memento, contest, filter);
+        return memento;
     }
 
-    /**
-     * Add Event Feed info tag info.
-     * 
-     * @param mementoRoot
-     * @param contest
-     * @return
-     */
-    protected IMemento addInfo(XMLMemento mementoRoot, IInternalContest contest) {
-
-        IMemento memento = mementoRoot.createChild(INFO_TAG);
-
+    public IMemento addInfoMemento(IMemento memento, IInternalContest contest, Filter filter) throws IOException {
         ContestTime time = contest.getContestTime();
 
-        addChild (memento, "title", contest.getContestInformation().getContestTitle());
-        addChild (memento,"length", time.getContestLengthStr());
-        
+        addChild(memento, "title", contest.getContestInformation().getContestTitle());
+        addChild(memento, "length", time.getContestLengthStr());
+
         addChild(memento, "penalty", DefaultScoringAlgorithm.getDefaultProperties().getProperty(DefaultScoringAlgorithm.POINTS_PER_NO));
         addChild(memento, "started", time.isContestRunning());
 
@@ -170,12 +158,16 @@ public class EventFeedXML {
         if (time.getContestStartTime() != null) {
             formattedSeconds = formatSeconds(time.getContestStartTime().getTimeInMillis());
         }
-        addChild (memento,"started", formattedSeconds);
+        addChild(memento, "started", formattedSeconds);
         return memento;
     }
 
     private IMemento addChild(IMemento mementoRoot, String name, boolean value) {
         return addChild(mementoRoot, name, Boolean.toString(value));
+    }
+
+    private IMemento addChild(IMemento mementoRoot, String name, long value) {
+        return addChild(mementoRoot, name, Long.toString(value));
     }
 
     private IMemento addChild(IMemento mementoRoot, String name, String value) {
@@ -198,130 +190,154 @@ public class EventFeedXML {
         }
     }
 
-    public IMemento addContestInfo(IMemento memento, ContestInformation contestInformation) {
-        memento.putString("title", contestInformation.getContestTitle());
-        memento.putString("url", contestInformation.getContestURL());
-        memento.putLong("maxFileSize", contestInformation.getMaxFileSize());
-        memento.putString("defaultAnswer", contestInformation.getJudgesDefaultAnswer());
-        memento.putString("teamDisplayMode", contestInformation.getTeamDisplayMode().toString());
+    public XMLMemento createElement(IInternalContest contest, Filter filter) throws IOException {
+        XMLMemento memento = XMLMemento.createWriteRoot(LANGUAGE_TAG);
+        addInfoMemento(memento, contest, filter);
         return memento;
     }
-
 
     public XMLMemento createElement(IInternalContest contest, Language language, int id) {
         XMLMemento memento = XMLMemento.createWriteRoot(LANGUAGE_TAG);
-        memento.putInteger("id", id);
-        memento.putString("name", language.toString());
+        addMemento(memento, contest, language, id);
         return memento;
     }
 
-    public IMemento addLanguageMemento(IMemento mementoRoot, int id, Language language) {
-        IMemento memento = mementoRoot.createChild(LANGUAGE_TAG);
+    public IMemento addMemento(IMemento memento, IInternalContest contest, Language language, int id) {
+
+        // <language>
+        // <name>C++</name>
+        // </language>
+
         memento.putInteger("id", id);
-        memento.putString("name", language.toString());
+        addChild(memento, "name", language.toString());
         return memento;
     }
 
     public XMLMemento createElement(IInternalContest contest, Problem problem, int id) {
-        // TODO Auto-generated method stub
-        
-//        <problem id="1" state="enabled">
-//        <label>A</label>
-//        <name>APL Lives!</name>
-//        <balloon-color rgb="#ffff00">yellow</balloon-color>
-//        </problem>
+        XMLMemento memento = XMLMemento.createWriteRoot(PROBLEM_TAG);
+        addMemento(memento, contest, problem, id);
+        return memento;
+    }
 
-        XMLMemento memento = XMLMemento.createWriteRoot(LANGUAGE_TAG);
+    public IMemento addMemento(IMemento memento, IInternalContest contest, Problem problem, int id) {
+
+        // <problem id="1" state="enabled">
+        // <label>A</label>
+        // <name>APL Lives!</name>
+        // <balloon-color rgb="#ffff00">yellow</balloon-color>
+        // </problem>
+
         memento.putInteger("id", id);
         memento.putBoolean("enabled", problem.isActive());
-        
+
         char let = 'A';
-        let += (id -1);
-        
-        memento.createChildNode("label", ""+let);
+        let += (id - 1);
+
+        memento.createChildNode("label", "" + let);
         memento.createChildNode("name", problem.toString());
-        IMemento balloonColor = memento.createChildNode("name", "TODO: color");
-        balloonColor.putString("rgb", "TODO: rgb color");
-        
+        IMemento balloonColor = memento.createChildNode("name", "TODO: color"); // TODO color name
+        balloonColor.putString("rgb", "TODO: rgb color"); // TODO RGB color
+
         return memento;
     }
     
-    public IMemento addProblemMemento(IMemento mementoRoot, Problem problem) {
 
-        // TODO update this code to match Event Feed XML
-        IMemento memento = mementoRoot.createChild(PROBLEM_TAG);
-        memento.putString("name", problem.toString());
-        return memento;
 
-    }
-    
+
     public XMLMemento createElement(IInternalContest contest, Account account) {
-        // TODO Auto-generated method stub
-        return null;
+        XMLMemento memento = XMLMemento.createWriteRoot(TEAM_TAG);
+        addMemento(memento, contest, account);
+        return memento;
     }
 
-    public IMemento addAccountMemento(IMemento mementoRoot, IInternalContest contest, Account account) {
+    public IMemento addMemento(IMemento memento, IInternalContest contest, Account account) {
 
-        // TODO update this code to match Event Feed XML
-        IMemento accountMemento = mementoRoot.createChild(ACCOUNT_TAG);
-        ClientId clientId = account.getClientId();
-        accountMemento.putString("name", account.getDisplayName());
+        // <team id="1" external-id="23412">
+        // <name>American University of Beirut</name>
+        // <nationality>LBN</nationality>
+        // <university>American University of Beirut</university>
+        // <region>Europe</region>
+        // </team>
+
+        memento.putInteger("id", account.getClientId().getClientNumber());
+        memento.putString("external-id", account.getExternalId());
+
+        addChild(memento, "name", account.getDisplayName());
+        addChild(memento, "nationality", "TODO:"); // TODO need to add Account.getNationality();
+
+        String regionName = "";
         if (account.getGroupId() != null) {
-            accountMemento.putString("group", contest.getGroup(account.getGroupId()).toString());
+            Group group = contest.getGroup(account.getGroupId());
+            regionName = group.getDisplayName();
         }
 
-        accountMemento.putString("type", clientId.getClientType().toString());
-        accountMemento.putInteger("number", clientId.getClientNumber());
-        accountMemento.putInteger("site", clientId.getSiteNumber());
-
-        if (showPasswords) {
-            accountMemento.putString("password", account.getPassword());
-        }
-
-        accountMemento.putBoolean("allowlogin", account.isAllowed(Permission.Type.LOGIN));
-        accountMemento.putBoolean("showonscoreboard", account.isAllowed(Permission.Type.DISPLAY_ON_SCOREBOARD));
-        accountMemento.putString("pc2triplet", clientId.getTripletKey());
-
-        return accountMemento;
+        addChild(memento, "region", regionName);
+        return memento;
     }
     
+//    TODO Add Test Case
+//    
+//    public XMLMemento createElement(IInternalContest contest, Testcase testcase) {
+//        XMLMemento memento = XMLMemento.createWriteRoot(CLARIFICATION_TAG);
+//        addMemento(memento, contest, testcase);
+//        return memento;
+//    }
+
     public XMLMemento createElement(IInternalContest contest, Clarification clarification) {
-        // TODO Auto-generated method stub
-        return null;
+        XMLMemento memento = XMLMemento.createWriteRoot(CLARIFICATION_TAG);
+        addMemento(memento, contest, clarification);
+        return memento;
     }
 
+    public IMemento addMemento(IMemento memento, IInternalContest contest, Clarification clarification) {
 
-    public IMemento addClarificationMemento(IMemento mementoRoot, IInternalContest contest, Clarification clarification) {
+        // <clar id="1" team-id="0" problem-id="1">
+        // <answer>The number of pieces will fit in a signed 32-bit integer.
+        // </answer>
+        // <question>What is the upper limit on the number of pieces of chocolate
+        // requested by the friends?</question>
+        // <to-all>true</to-all>
+        // <contest-time>118.48</contest-time>
+        // <timestamp>1265335256.74</timestamp>
+        // </clar>
 
-        // TODO update this code to match Event Feed XML
-        String problemName = contest.getProblem(clarification.getProblemId()).toString();
+        memento.putInteger("id", clarification.getNumber());
+        memento.putInteger("team-id", clarification.getNumber());
 
-        IMemento clarificationMemento = mementoRoot.createChild(CLARIFICATION_TAG);
-        clarificationMemento.putInteger("site", clarification.getSiteNumber());
-        clarificationMemento.putInteger("number", clarification.getNumber());
-        clarificationMemento.putString("problem", problemName);
+        Problem problem = contest.getProblem(clarification.getProblemId());
+        memento.putInteger("problem-id", getProblemIndex(contest, problem));
 
-        clarificationMemento.putString("question", clarification.getQuestion());
-        if (clarification.getAnswer() != null && clarification.isAnswered()) {
-            clarificationMemento.putString("answer", clarification.getAnswer());
-            clarificationMemento.putBoolean("sendToAll", clarification.isSendToAll());
+        String answer = clarification.getAnswer();
+        if (answer == null) {
+            answer = "";
         }
-        clarificationMemento.putString("pc2probid", contest.getProblem(clarification.getProblemId()).getElementId().toString());
+        addChild(memento, "answer", answer);
+        addChild(memento, "question", clarification.getQuestion());
+        addChild(memento, "to-all", clarification.isSendToAll());
+        addChild(memento, "contest-time", formatSeconds(clarification.getElapsedMins() * 1000));
+        addChild(memento, "timestamp", getTimeStamp());
+        return memento;
+    }
 
-        return clarificationMemento;
+    private int getProblemIndex(IInternalContest contest, Problem inProblem) {
+        int idx = 0;
+        for (Problem problem : contest.getProblems()) {
+            if (problem.getElementId().equals(inProblem.getElementId())) {
+                return idx;
+            }
+            idx++;
+        }
 
+        return -1;
     }
 
     public XMLMemento createElement(IInternalContest contest, Run run) {
-        // TODO Auto-generated method stub
-        return null;
+        XMLMemento memento = XMLMemento.createWriteRoot(RUN_TAG);
+        addMemento(memento, contest, run);
+        return memento;
     }
 
-    
-    public IMemento addRunMemento(IMemento mementoRoot, IInternalContest contest, Run run) {
-
-        // TODO update this code to match Event Feed XML
-        
+    public IMemento addMemento(IMemento memento, IInternalContest contest, Run run) {
         // <run time="1265353100290">
         // <id>1410</id>
         // <judged>True</judged>
@@ -335,57 +351,46 @@ public class EventFeedXML {
         // <timestamp>1265353100.29</timestamp>
         // </run>
 
-        IMemento memento = mementoRoot.createChild(RUN_TAG);
-        
-//        String languageName = contest.getLanguage(run.getLanguageId()).toString();
-//        String problemName = contest.getProblem(run.getProblemId()).toString();
-//
-//        IMemento memento = mementoRoot.createChild(RUN_TAG);
-//        memento.putInteger("site", run.getSiteNumber());
-//        memento.putInteger("number", run.getNumber());
-//        memento.putInteger("site", run.getSiteNumber());
-//        memento.putLong("elapsed", run.getElapsedMins());
-//
-//        memento.putString("languageName", languageName);
-//        memento.putString("problemName", problemName);
-//
-//        if (run.isJudged()) {
-//            memento.putBoolean("solved", run.isSolved());
-//        }
-//
-//        JudgementRecord[] judgementRecords = run.getAllJudgementRecords();
-//
-//        if (judgementRecords.length > 0) {
-//            for (int idx = judgementRecords.length - 1; idx >= 0; idx--) {
-//                addJudgementMemento(memento, contest, judgementRecords[idx], idx);
-//            }
-//        }
-//
-//        try {
-//            RunFiles runFiles = contest.getRunFiles(run);
-//            if (runFiles != null) {
-//                String filename = runFiles.getMainFile().getName();
-//                if (filename != null) {
-//                    memento.putString("filename", filename);
-//                }
-//            }
-//        } catch (IOException e) {
-//            memento.putString("no_filename", "(missing)");
-//        } catch (ClassNotFoundException e) {
-//            memento.putString("no_filename", "(missing)");
-//        } catch (FileSecurityException e) {
-//            memento.putString("no_filename", "(missing)");
-//        }
-//
-//        memento.putString("pc2id", run.getElementId().toString());
+        memento.putInteger("id", run.getNumber());
+
+        addChild(memento, "judged", run.isJudged());
+
+        Language language = contest.getLanguage(run.getLanguageId());
+        addChild(memento, "language", language.getDisplayName());
+
+        // TODO What is penalty ??
+        addChild(memento, "penalty", "TODO");
+
+        Problem problem = contest.getProblem(run.getProblemId());
+        addChild(memento, "problem", problem.getDisplayName());
+
+        // TODO replace this with the acronym Judgement.getAcronym();
+        // String judgement = contest.getJudgement(run.getJudgementRecord().getJudgementId()).getAcronym();
+        String judgement = contest.getJudgement(run.getJudgementRecord().getJudgementId()).toString();
+
+        addChild(memento, "result", judgement.toUpperCase().substring(0, 2));
+
+        addChild(memento, "solved", run.isSolved());
+        addChild(memento, "team", run.getSubmitter().getClientNumber());
+        addChild(memento, "timestamp", getTimeStamp());
+
         return memento;
     }
-    
+
+    /**
+     * Return the current time in seconds, with millis mattisa.
+     * 
+     * @return
+     */
+    public String getTimeStamp() {
+        return formatSeconds(System.currentTimeMillis());
+    }
+
     /**
      * @throws IOException
      */
     private String toXML(XMLMemento mementoRoot) throws IOException {
-        return mementoRoot.saveToString();
+        return mementoRoot.saveToString(true);
     }
 
     /**
@@ -398,26 +403,20 @@ public class EventFeedXML {
     public String createStartupXML(IInternalContest contest) {
 
         StringBuffer sb = new StringBuffer("<" + CONTEST_TAG + ">");
-        
-        // TODO fix all 
-        
+
         /**
-         * A general implementation for logging errors needs to be established.
-         * Perhaps something with log4j ?   The goal should be to standardized
-         * logging in such a way that Exceptions are not lost.
+         * A general implementation for logging errors needs to be established. Perhaps something with log4j ? The goal should be to standardized logging in such a way that Exceptions are not lost.
          */
 
-        // TODO add all configuration information
-        
         try {
             sb.append(toXML(createInfoElement(contest, null)));
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        
+
         int idx;
-        
+
         idx = 1;
         for (Language language : contest.getLanguages()) {
             try {
@@ -426,9 +425,9 @@ public class EventFeedXML {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-            idx ++;
+            idx++;
         }
-        
+
         idx = 0;
         for (Problem problem : contest.getProblems()) {
             try {
@@ -437,7 +436,7 @@ public class EventFeedXML {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-            idx ++;
+            idx++;
         }
 
         for (Judgement judgement : contest.getJudgements()) {
@@ -448,11 +447,8 @@ public class EventFeedXML {
                 e.printStackTrace();
             }
         }
-                
 
-        // TODO add all clarifications
-        
-        Clarification [] clarifications  = contest.getClarifications();
+        Clarification[] clarifications = contest.getClarifications();
         for (Clarification clarification : clarifications) {
             try {
                 sb.append(toXML(createElement(contest, clarification)));
@@ -461,13 +457,11 @@ public class EventFeedXML {
                 e.printStackTrace();
             }
         }
-        
-        // TODO add all runs
 
-        Run [] runs = contest.getRuns();
-        Arrays.sort(runs,new RunComparator());
-        
-        for (Run run: runs ) {
+        Run[] runs = contest.getRuns();
+        Arrays.sort(runs, new RunComparator());
+
+        for (Run run : runs) {
             try {
                 sb.append(toXML(createElement(contest, run)));
             } catch (IOException e) {
@@ -478,41 +472,48 @@ public class EventFeedXML {
 
         return sb.toString();
     }
+
+    // TODO add FinalData class
     
-    public String createFinalizeXML (IInternalContest contest) {
+//    public IMemento addMemento(IMemento memento, IInternalContest contest, FinalData finalData) {
+//        
+//    }
         
+    public String createFinalizeXML(IInternalContest contest) {
+
         StringBuffer sb = new StringBuffer();
-        
-        // huh
-        
+
         XMLMemento memento = XMLMemento.createWriteRoot(FINALIZE_TAG);
         
+//        addMemento (memento, contest, finalData);  // TODO add Finalize data
+
         try {
             sb.append(toXML(memento));
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        
+
         sb.append("</");
-        sb.append (CONTEST_TAG);
+        sb.append(CONTEST_TAG);
         sb.append(">");
         return sb.toString();
-        
-
-        
     }
-    
+
     public XMLMemento createElement(IInternalContest contest, Judgement judgement) {
+        XMLMemento memento = XMLMemento.createWriteRoot(JUDGEMENT_TAG);
+        addMemento(memento, contest, judgement);
+        return memento;
+    }
+
+    public IMemento addMemento(IMemento memento, IInternalContest contest, Judgement judgement) {
         // <judgement>
         // <acronym>CE</acronym>
         // <name>Compile Error</name>
         // </judgement>
-        
-        XMLMemento memento = XMLMemento.createWriteRoot(JUDGEMENT_TAG);
         String name = judgement.getDisplayName();
-        
-        addChild(memento, "acronym", "TODO:");         // TODO Need to add Judgement.getAcronym();
+
+        addChild(memento, "acronym", "TODO:"); // TODO Need to add Judgement.getAcronym();
         addChild(memento, "name", name);
         return memento;
     }
@@ -522,11 +523,11 @@ public class EventFeedXML {
         // <acronym>CE</acronym>
         // <name>Compile Error</name>
         // </judgement>
-        
+
         XMLMemento memento = XMLMemento.createWriteRoot(JUDGEMENT_RECORD_TAG);
         String name = contest.getJudgement(judgementRecord.getJudgementId()).getDisplayName();
-        
-        addChild(memento, "acronym", "TODO:");         // TODO Need to add Judgement.getAcronym();
+
+        addChild(memento, "acronym", "TODO:"); // TODO Need to add Judgement.getAcronym();
         addChild(memento, "name", name);
         return memento;
     }

@@ -43,16 +43,14 @@ import org.xml.sax.InputSource;
 /**
  * A Memento is a class independent container for persistence info. It is a reflection of 3 storage requirements.
  * <P>
- * 1) We need the ability to persist an object and restore it. 
- * <br>
- * 2) The class for an object may be absent. If so we would like to skip the object and keep reading. 
- * <br>
- * 3) The class for an object may change.
- * If so the new class should be able to read the old persistence info.
+ * 1) We need the ability to persist an object and restore it. <br>
+ * 2) The class for an object may be absent. If so we would like to skip the object and keep reading. <br>
+ * 3) The class for an object may change. If so the new class should be able to read the old persistence info.
  * <P>
  * We could ask the objects to serialize themselves into an ObjectOutputStream, DataOutputStream, or Hashtable. However all of these approaches fail to meet the second requirement.
  * 
  * Memento supports binary persistance with a version ID.
+ * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -79,18 +77,17 @@ public final class XMLMemento implements IMemento {
         element.appendChild(child);
         return new XMLMemento(factory, child);
     }
-    
+
     /**
      * @see IMemento#createChildNode(java.lang.String, java.lang.String)
      */
     public IMemento createChildNode(String type, String value) {
-        
+
         Element child = factory.createElement(type);
         child.appendChild(factory.createTextNode(value));
         element.appendChild(child);
         return new XMLMemento(factory, child);
     }
-
 
     /**
      * @see IMemento#createChild(String, String)
@@ -187,7 +184,7 @@ public final class XMLMemento implements IMemento {
         }
 
         // Extract each node with given type.
-        ArrayList <Element> list = new ArrayList<Element>(size);
+        ArrayList<Element> list = new ArrayList<Element>(size);
         for (int nX = 0; nX < size; nX++) {
             Node node = nodes.item(nX);
             if (node instanceof Element) {
@@ -278,6 +275,7 @@ public final class XMLMemento implements IMemento {
             return null;
         }
     }
+
     /*
      * @see IMemento
      */
@@ -413,6 +411,20 @@ public final class XMLMemento implements IMemento {
      *             if anything goes wrong
      */
     public void save(OutputStream os) throws IOException {
+        save(os, false);
+    }
+    
+    /**
+     * Save this Memento to a Writer.
+     * 
+     * @param os
+     *            an output stream
+     * @param omitXMLDeclaration
+     *            do not output XML declaration
+     * @throws IOException
+     *             if anything goes wrong
+     */
+    public void save(OutputStream os, boolean omitXMLDeclaration) throws IOException {
         Result result = new StreamResult(os);
         Source source = new DOMSource(factory);
         try {
@@ -420,11 +432,27 @@ public final class XMLMemento implements IMemento {
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             transformer.setOutputProperty(OutputKeys.METHOD, "xml");
             transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+            String yesNoValue = "No";
+            if (omitXMLDeclaration) {
+                yesNoValue = "Yes";
+            }
+            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, yesNoValue);
             transformer.setOutputProperty("{http://xml.apache.org/xalan}indent-amount", "2");
             transformer.transform(source, result);
         } catch (Exception e) {
             throw (IOException) (new IOException().initCause(e));
         }
+    }
+    
+    /**
+     * Saves the memento to a String.
+     * 
+     * @exception java.io.IOException
+     */
+    public String saveToString(boolean omitXMLDeclaration) throws IOException {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        save(outputStream, omitXMLDeclaration);
+        return outputStream.toString();
     }
 
     /**
@@ -433,11 +461,9 @@ public final class XMLMemento implements IMemento {
      * @exception java.io.IOException
      */
     public String saveToString() throws IOException {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        save(outputStream);
-        return outputStream.toString();
+        return saveToString(false);
     }
-    
+
     /**
      * Saves the memento to the given file.
      * 
