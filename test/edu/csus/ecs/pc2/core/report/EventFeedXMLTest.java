@@ -7,11 +7,13 @@ import java.util.Vector;
 import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.ClarificationComparator;
+import edu.csus.ecs.pc2.core.list.GroupComparator;
 import edu.csus.ecs.pc2.core.list.RunComparator;
+import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
-import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.Language;
@@ -36,6 +38,7 @@ public class EventFeedXMLTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+
         SampleContest sample = new SampleContest();
         contest = sample.createContest(1, 1, 22, 12, true);
 
@@ -44,6 +47,19 @@ public class EventFeedXMLTest extends TestCase {
          */
 
         Run[] runs = sample.createRandomRuns(contest, 12, true, true, true);
+
+        Group group1 = new Group("Mississippi");
+        group1.setGroupId(1024);
+        contest.addGroup(group1);
+
+        Group group2 = new Group("Arkansas");
+        group2.setGroupId(2048);
+        contest.addGroup(group2);
+
+        Account[] teams = getTeamAccounts();
+
+        assignTeamGroup(group1, 0, teams.length / 2);
+        assignTeamGroup(group2, teams.length / 2, teams.length - 1);
 
         /**
          * Add Run Judgements.
@@ -56,9 +72,37 @@ public class EventFeedXMLTest extends TestCase {
             RunFiles runFiles = new RunFiles(run, sampleFileName);
 
             contest.acceptRun(run, runFiles);
+
+            run.setElapsedMins((run.getNumber() - 1) * 9);
+
             judgement = sample.getRandomJudgement(contest, run.getNumber() % 2 == 0); // ever other run is judged Yes.
             sample.addJudgement(contest, run, judgement, judgeId);
         }
+    }
+
+    /**
+     * Assign group to team startIdx to endIdx.
+     * 
+     * @param group
+     * @param startIdx
+     * @param endIdx
+     */
+    private void assignTeamGroup(Group group, int startIdx, int endIdx) {
+        Account[] teams = getTeamAccounts();
+        for (int i = startIdx; i < endIdx; i++) {
+            teams[i].setGroupId(group.getElementId());
+        }
+    }
+
+    /**
+     * Return list of accounts sorted by team id.
+     * @return
+     */
+    private Account[] getTeamAccounts() {
+        Vector<Account> teams = contest.getAccounts(Type.TEAM);
+        Account[] accounts = (Account[]) teams.toArray(new Account[teams.size()]);
+        Arrays.sort(accounts, new AccountComparator());
+        return accounts;
     }
 
     public void testContestElement() throws Exception {
@@ -119,6 +163,17 @@ public class EventFeedXMLTest extends TestCase {
     public void testRegionElement() throws Exception {
 
         // TODO tag: region
+
+        System.out.println(" -- testRegionElement ");
+
+        Group[] groups = contest.getGroups();
+        Arrays.sort(groups, new GroupComparator());
+
+        EventFeedXML eventFeedXML = new EventFeedXML();
+        for (Group group : groups) {
+            String xml = toContestXML(eventFeedXML.createElement(contest, group));
+            System.out.println(xml);
+        }
     }
 
     public void testJudgementElement() throws Exception {
@@ -153,10 +208,8 @@ public class EventFeedXMLTest extends TestCase {
         System.out.println(" -- testTeamElement ");
         
         EventFeedXML eventFeedXML = new EventFeedXML();
-        Vector<Account> teams = contest.getAccounts(Type.TEAM);
-
-        Account[] accounts = (Account[]) teams.toArray(new Account[teams.size()]);
-        Arrays.sort(accounts, new AccountComparator());
+        
+        Account[] accounts = getTeamAccounts();
 
         for (Account account : accounts) {
             String xml = toContestXML(eventFeedXML.createElement(contest, account));

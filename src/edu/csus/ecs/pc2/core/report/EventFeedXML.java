@@ -6,6 +6,7 @@ import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.ClarificationComparator;
+import edu.csus.ecs.pc2.core.list.GroupComparator;
 import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Clarification;
@@ -37,25 +38,27 @@ public class EventFeedXML {
 
     // TODO move EventFeedXML to package pc2.core ?
 
-    private static final String CONTEST_TAG = "contest";
+    public static final String CONTEST_TAG = "contest";
 
-    private static final String INFO_TAG = "info";
+    public static final String INFO_TAG = "info";
+    
+    public static final String REGION_TAG = "region";
 
-    private static final String PROBLEM_TAG = "problem";
+    public static final String PROBLEM_TAG = "problem";
 
-    private static final String LANGUAGE_TAG = "language";
+    public static final String LANGUAGE_TAG = "language";
 
-    private static final String TEAM_TAG = "team";
+    public static final String TEAM_TAG = "team";
 
-    private static final String CLARIFICATION_TAG = "clarification";
+    public static final String CLARIFICATION_TAG = "clarification";
 
-    private static final String RUN_TAG = "run";
+    public static final String RUN_TAG = "run";
 
-    private static final String JUDGEMENT_TAG = "judgement";
+    public static final String JUDGEMENT_TAG = "judgement";
 
-    private static final String FINALIZE_TAG = "finalize";
+    public static final String FINALIZE_TAG = "finalize";
 
-    private static final String JUDGEMENT_RECORD_TAG = "judgement_record";
+    public static final String JUDGEMENT_RECORD_TAG = "judgement_record";
 
     public String toXML(IInternalContest contest) throws IOException {
         return toXML(contest, new Filter());
@@ -68,29 +71,34 @@ public class EventFeedXML {
         IMemento memento = mementoRoot.createChild(INFO_TAG);
         addInfoMemento(memento, contest, filter);
         
+        Group[] groups = contest.getGroups();
+        Arrays.sort(groups, new GroupComparator());
+        for (Group group : groups) {
+            memento = mementoRoot.createChild(REGION_TAG);
+            addMemento(memento, contest, group);
+        }
 
         Judgement [] judgements = contest.getJudgements();
         for (Judgement judgement : judgements) {
             memento = mementoRoot.createChild(JUDGEMENT_TAG);
             addMemento(memento, contest, judgement);
-        }
-        
+        }    
 
-        memento = mementoRoot.createChild(LANGUAGE_TAG);
         Language[] languages = contest.getLanguages();
         int num = 1;
         for (Language language : languages) {
             if (filter.matches(language)) {
+                memento = mementoRoot.createChild(LANGUAGE_TAG);
                 addMemento(memento, contest, language, num);
             }
             num++;
         }
 
-        memento = mementoRoot.createChild(PROBLEM_TAG);
         num = 1;
         Problem[] problems = contest.getProblems();
         for (Problem problem : problems) {
             if (filter.matches(problem)) {
+                memento = mementoRoot.createChild(PROBLEM_TAG);
                 addMemento(memento, contest, problem, num);
             }
             num++;
@@ -130,6 +138,8 @@ public class EventFeedXML {
 
         return mementoRoot.saveToString();
     }
+
+
 
     /**
      * create info XML element
@@ -351,27 +361,38 @@ public class EventFeedXML {
         // <timestamp>1265353100.29</timestamp>
         // </run>
 
+        // <run id="1410" team-id="74" problem-id="4">
+        // <language>C++</language>
+        // <judgement>WA</judgement>
+        // <penalty>true</penalty>
+        // <contest-time>17960.74</contest-time>
+        // <timestamp>1265353100.29</timestamp>
+        // </run>
+
         memento.putInteger("id", run.getNumber());
+        memento.putInteger("team-id", run.getSubmitter().getClientNumber());
+        Problem problem = contest.getProblem(run.getProblemId());
+        int problemIndex = getProblemIndex(contest, problem);
+        memento.putInteger("problem-id", problemIndex);
 
         addChild(memento, "judged", run.isJudged());
 
         Language language = contest.getLanguage(run.getLanguageId());
         addChild(memento, "language", language.getDisplayName());
 
-        // TODO What is penalty ??
-        addChild(memento, "penalty", "TODO");
-
-        Problem problem = contest.getProblem(run.getProblemId());
-        addChild(memento, "problem", problem.getDisplayName());
+        addChild(memento, "penalty", "TODO"); // TODO What is penalty ??
 
         // TODO replace this with the acronym Judgement.getAcronym();
         // String judgement = contest.getJudgement(run.getJudgementRecord().getJudgementId()).getAcronym();
         String judgement = contest.getJudgement(run.getJudgementRecord().getJudgementId()).toString();
+        addChild(memento, "judgement", judgement.toUpperCase().substring(0, 2));
 
-        addChild(memento, "result", judgement.toUpperCase().substring(0, 2));
+        // addChild(memento, "result", judgement.toUpperCase().substring(0, 2));
+        // addChild(memento, "solved", run.isSolved());
 
-        addChild(memento, "solved", run.isSolved());
         addChild(memento, "team", run.getSubmitter().getClientNumber());
+        addChild(memento, "elapsed-Mins", run.getElapsedMins());
+        addChild(memento, "contest-time", formatSeconds(run.getElapsedMins() * 60 * 1000)); // TODO run.getElapsedMS
         addChild(memento, "timestamp", getTimeStamp());
 
         return memento;
@@ -476,9 +497,19 @@ public class EventFeedXML {
     // TODO add FinalData class
     
 //    public IMemento addMemento(IMemento memento, IInternalContest contest, FinalData finalData) {
+    // TODO add addMemento(IMemento memento, IInternalContest contest, FinalData finalData)
+    
+    //   <finalized>
+    //   <last-gold>4</last-gold>
+    //   <last-silver>8</last-silver>
+    //   <last-bronze>12</last-bronze>
+    //   <comment>Finalized by John Doe and Jane Doe</comment>
+    //   <timestamp>1265336078.01</timestamp>
+    //   </finalized>
+    
 //        
 //    }
-        
+
     public String createFinalizeXML(IInternalContest contest) {
 
         StringBuffer sb = new StringBuffer();
@@ -498,6 +529,23 @@ public class EventFeedXML {
         sb.append(CONTEST_TAG);
         sb.append(">");
         return sb.toString();
+    }
+    
+    public XMLMemento createElement(IInternalContest contest, Group group) {
+        XMLMemento memento = XMLMemento.createWriteRoot(REGION_TAG);
+        addMemento(memento, contest, group);
+        return memento;
+    }
+    
+    public void addMemento(IMemento memento, IInternalContest contest, Group group) {
+        // TODO Auto-generated method stub
+        
+//        <region external-id="3012">
+//        <name>Europe</name>
+//        </region>
+        
+        memento.putInteger("id", group.getGroupId());
+        addChild(memento, "name", group.getDisplayName());
     }
 
     public XMLMemento createElement(IInternalContest contest, Judgement judgement) {
