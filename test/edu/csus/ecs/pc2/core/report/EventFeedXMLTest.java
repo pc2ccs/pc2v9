@@ -15,6 +15,7 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
@@ -32,6 +33,8 @@ import edu.csus.ecs.pc2.core.util.XMLMemento;
 
 // $HeadURL$
 public class EventFeedXMLTest extends TestCase {
+
+    private final boolean debugMode = false;
 
     private IInternalContest contest = null;
 
@@ -108,6 +111,41 @@ public class EventFeedXMLTest extends TestCase {
     public void testContestElement() throws Exception {
 
         // TODO tag: contest>
+        
+        EventFeedXML eventFeedXML = new EventFeedXML();
+
+        InternalContest internalContest = new InternalContest();
+        
+        /**
+         * Check info tag, if there is no contest data in InternalContest.
+         */
+        String xml = toContestXML(eventFeedXML.createInfoElement(internalContest, null));
+
+        if (debugMode){
+            System.out.println(" -- testContestElement info tag ");
+            System.out.println(xml);
+            System.out.println();
+        }
+        
+        System.out.println(" -- testContestElement info tag ");
+        System.out.println(xml);
+        System.out.println();
+            
+        /**
+         * Check complete EventFeed XML,  if there is no contest data in InternalContest.
+         */
+        xml = eventFeedXML.toXML(internalContest);
+
+        if (debugMode){
+            System.out.println(" -- testContestElement info tag ");
+            System.out.println(xml);
+            System.out.println();
+        }
+        
+        System.out.println(" -- testContestElement info tag ");
+        System.out.println(xml);
+        System.out.println();
+
     }
 
     /**
@@ -120,26 +158,37 @@ public class EventFeedXMLTest extends TestCase {
         EventFeedXML eventFeedXML = new EventFeedXML();
 
         String xml = toContestXML(eventFeedXML.createInfoElement(contest, null));
-        System.out.println(xml);
 
-        System.out.println();
+        if (debugMode){
+            System.out.println(" -- testInfoElement ");
+            System.out.println(xml);
+
+            System.out.println();
+        }
 
         contest.startContest(1);
         xml = toContestXML(eventFeedXML.createInfoElement(contest, null));
-        System.out.println(xml);
+
+        if (debugMode){
+            System.out.println(xml);
+        }
     }
 
     public void testLanguageElement() throws Exception {
 
         // TODO tag: language>
 
-        System.out.println(" -- testLanguageElement ");
+        if (debugMode){
+            System.out.println(" -- testLanguageElement ");
+        }
 
         EventFeedXML eventFeedXML = new EventFeedXML();
         int idx = 1;
         for (Language language : contest.getLanguages()) {
             String xml = toContestXML(eventFeedXML.createElement(contest, language, idx));
-            System.out.println(xml);
+            if (debugMode){
+                System.out.println(xml);
+            }
             idx++;
         }
     }
@@ -164,7 +213,9 @@ public class EventFeedXMLTest extends TestCase {
 
         // TODO tag: region
 
-        System.out.println(" -- testRegionElement ");
+        if (debugMode){
+            System.out.println(" -- testRegionElement ");
+        }
 
         Group[] groups = contest.getGroups();
         Arrays.sort(groups, new GroupComparator());
@@ -172,18 +223,24 @@ public class EventFeedXMLTest extends TestCase {
         EventFeedXML eventFeedXML = new EventFeedXML();
         for (Group group : groups) {
             String xml = toContestXML(eventFeedXML.createElement(contest, group));
-            System.out.println(xml);
+            if (debugMode){
+                System.out.println(xml);
+            }
         }
     }
 
     public void testJudgementElement() throws Exception {
 
-        System.out.println(" -- testJudgementElement ");
+        if (debugMode){
+            System.out.println(" -- testJudgementElement ");
+        }
 
         EventFeedXML eventFeedXML = new EventFeedXML();
         for (Judgement judgement : contest.getJudgements()) {
             String xml = toContestXML(eventFeedXML.createElement(contest, judgement));
-            System.out.println(xml);
+            if (debugMode){
+                System.out.println(xml);
+            }
         }
     }
 
@@ -191,29 +248,37 @@ public class EventFeedXMLTest extends TestCase {
 
         // TODO tag: problem id="1" state="enabled">
 
-        System.out.println(" -- testProblemElement ");
+        if (debugMode){
+            System.out.println(" -- testProblemElement ");
+        }
 
         EventFeedXML eventFeedXML = new EventFeedXML();
         int idx = 1;
         for (Problem problem : contest.getProblems()) {
             String xml = toContestXML(eventFeedXML.createElement(contest, problem, idx));
-            System.out.println(xml);
+            if (debugMode){
+                System.out.println(xml);
+            }
             idx++;
         }
     }
 
     public void testTeamElement() throws Exception {
         // TODO tag: team id="1" external-id="23412">
-        
-        System.out.println(" -- testTeamElement ");
-        
+
+        if (debugMode){
+            System.out.println(" -- testTeamElement ");
+        }
+
         EventFeedXML eventFeedXML = new EventFeedXML();
-        
+
         Account[] accounts = getTeamAccounts();
 
         for (Account account : accounts) {
             String xml = toContestXML(eventFeedXML.createElement(contest, account));
-            System.out.println(xml);
+            if (debugMode){
+                System.out.println(xml);
+            }
         }
     }
 
@@ -221,7 +286,9 @@ public class EventFeedXMLTest extends TestCase {
 
         // TODO tag: clar id="1" team-id="0" problem-id="1">
 
-        System.out.println(" -- testClarElement ");
+        if (debugMode){
+            System.out.println(" -- testClarElement ");
+        }
 
         EventFeedXML eventFeedXML = new EventFeedXML();
         Clarification[] clarifications = contest.getClarifications();
@@ -229,13 +296,17 @@ public class EventFeedXMLTest extends TestCase {
 
         for (Clarification clarification : clarifications) {
             String xml = toContestXML(eventFeedXML.createElement(contest, clarification));
-            System.out.println(xml);
+            if (debugMode){
+                System.out.println(xml);
+            }
         }
     }
 
     public void testRunElement() throws Exception {
 
-        System.out.println(" -- testRunElement ");
+        if (debugMode){
+            System.out.println(" -- testRunElement ");
+        }
 
         // TODO tag: run id="1410" team-id="74" problem-id="4">
         EventFeedXML eventFeedXML = new EventFeedXML();
@@ -244,43 +315,50 @@ public class EventFeedXMLTest extends TestCase {
 
         for (Run run : runs) {
             String xml = toContestXML(eventFeedXML.createElement(contest, run));
-            System.out.println(xml);
+            if (debugMode){
+                System.out.println(xml);
+            }
         }
     }
 
     public void testTestcaseElement() throws Exception {
-        
+
         // TODO tag: testcase run-id="1">
-        System.out.println(" -- testTestcaseElement "); // TODO code
+        System.out.println(" -- testTestcaseElement TODO "); // TODO code testcase
     }
 
     public void testFinalizedElement() throws Exception {
 
-        System.out.println(" -- testFinalizedElement ");
-
         // TODO tag: finalized>
         EventFeedXML eventFeedXML = new EventFeedXML();
         String xml = eventFeedXML.createFinalizeXML(contest);
-        System.out.println(xml);
+        if (debugMode){
+            System.out.println(" -- testFinalizedElement ");
+            System.out.println(xml);
+        }
     }
 
     public void testStartupElement() throws Exception {
 
-        System.out.println(" -- testStartupElement ");
 
         EventFeedXML eventFeedXML = new EventFeedXML();
         String xml = eventFeedXML.createStartupXML(contest);
-        System.out.println(xml);
+
+        if (debugMode){
+            System.out.println(" -- testStartupElement ");
+            System.out.println(xml);
+        }
     }
 
     public void testToXML() throws Exception {
 
-        System.out.println(" -- testToXML ");
-
         EventFeedXML eventFeedXML = new EventFeedXML();
         String xml = eventFeedXML.toXML(contest);
-
-        System.out.println(xml);
+        if (debugMode){
+            System.out.println(" -- testToXML ");
+            System.out.println(xml);
+        }
 
     }
 }
+

@@ -300,7 +300,33 @@ public class SampleContest {
         return accounts;
     }
     
+    /**
+     * Create N runs identical to input run, add elapsed time.
+     * 
+     * @param contest
+     * @param numberRuns
+     * @param run
+     * @return
+     */
+    public Run[] cloneRun(IInternalContest contest, int numberRuns, Run run) {
+
+        Run[] runs = new Run[numberRuns];
+        Problem problem = contest.getProblem(run.getProblemId());
+        Language language = contest.getLanguage(run.getLanguageId());
+        ClientId teamId = run.getSubmitter();
         
+        System.out.println("debug22Z "+run+" "+run.getProblemId()+" "+run.getLanguageId());
+
+        for (int i = 0; i < numberRuns; i++) {
+            Run newRun = new Run(teamId, language, problem);
+            newRun.setElapsedMins(run.getElapsedMins() + 9 + i);
+            newRun.setNumber(contest.getRuns().length);
+            System.out.println("debug22Z "+run+" "+run.getProblemId()+" "+run.getLanguageId());
+            runs[i] = newRun;
+        }
+
+        return runs;
+    }
 
     public Run[] createRandomRuns(IInternalContest contest, int numberRuns, boolean randomTeam, boolean randomProblem, boolean randomLanguage, int siteNumber) {
 

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Vector;
 
+import edu.csus.ecs.pc2.core.XMLUtilities;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.ClarificationComparator;
 import edu.csus.ecs.pc2.core.list.GroupComparator;
@@ -156,49 +157,41 @@ public class EventFeedXML {
     }
 
     public IMemento addInfoMemento(IMemento memento, IInternalContest contest, Filter filter) throws IOException {
+        
+        
+//        <info>
+//        <title>The 2010 World Finals of the ACM International Collegiate Programming Contest</title>
+//        <length>05:00:00</length>
+//        <penalty>20</penalty>
+//        <started>false</started>
+//        <starttime>1265335138.26</starttime>
+//        </info>
+
+        
         ContestTime time = contest.getContestTime();
 
-        addChild(memento, "title", contest.getContestInformation().getContestTitle());
-        addChild(memento, "length", time.getContestLengthStr());
-
-        addChild(memento, "penalty", DefaultScoringAlgorithm.getDefaultProperties().getProperty(DefaultScoringAlgorithm.POINTS_PER_NO));
-        addChild(memento, "started", time.isContestRunning());
-
+        XMLUtilities.addChild(memento, "title", contest.getContestInformation().getContestTitle());
+        
+        String contestLengthString = "0:0:0";
+        boolean running = false;
         String formattedSeconds = "0.0";
-        if (time.getContestStartTime() != null) {
-            formattedSeconds = formatSeconds(time.getContestStartTime().getTimeInMillis());
+        
+        if (time != null) {
+            contestLengthString = time.getContestLengthStr();
+            running = time.isContestRunning();
+            if (time.getContestStartTime() != null) {
+                formattedSeconds = XMLUtilities.formatSeconds(time.getContestStartTime().getTimeInMillis());
+            }
         }
-        addChild(memento, "started", formattedSeconds);
+        
+        XMLUtilities.addChild(memento, "length", contestLengthString); 
+        XMLUtilities.addChild(memento, "penalty", DefaultScoringAlgorithm.getDefaultProperties().getProperty(DefaultScoringAlgorithm.POINTS_PER_NO));
+        XMLUtilities.addChild(memento, "started", running);
+        XMLUtilities.addChild(memento, "starttime", formattedSeconds);
         return memento;
     }
 
-    private IMemento addChild(IMemento mementoRoot, String name, boolean value) {
-        return addChild(mementoRoot, name, Boolean.toString(value));
-    }
 
-    private IMemento addChild(IMemento mementoRoot, String name, long value) {
-        return addChild(mementoRoot, name, Long.toString(value));
-    }
-
-    private IMemento addChild(IMemento mementoRoot, String name, String value) {
-        XMLMemento memento = (XMLMemento) mementoRoot.createChildNode(name, value);
-        return memento;
-    }
-
-    private String formatSeconds(long timeInMillis) {
-        long seconds = timeInMillis / 1000;
-        long fraction = timeInMillis % 1000;
-        return seconds + "." + fraction;
-    }
-
-    @SuppressWarnings("unused")
-    private static int getIntegerValue(String s) {
-        try {
-            return Integer.parseInt(s);
-        } catch (Exception e) {
-            return 0;
-        }
-    }
 
     public XMLMemento createElement(IInternalContest contest, Filter filter) throws IOException {
         XMLMemento memento = XMLMemento.createWriteRoot(LANGUAGE_TAG);
@@ -219,7 +212,7 @@ public class EventFeedXML {
         // </language>
 
         memento.putInteger("id", id);
-        addChild(memento, "name", language.toString());
+        XMLUtilities.addChild(memento, "name", language.toString());
         return memento;
     }
 
@@ -272,8 +265,8 @@ public class EventFeedXML {
         memento.putInteger("id", account.getClientId().getClientNumber());
         memento.putString("external-id", account.getExternalId());
 
-        addChild(memento, "name", account.getDisplayName());
-        addChild(memento, "nationality", "TODO:"); // TODO need to add Account.getNationality();
+        XMLUtilities.addChild(memento, "name", account.getDisplayName());
+        XMLUtilities.addChild(memento, "nationality", "TODO:"); // TODO need to add Account.getNationality();
 
         String regionName = "";
         if (account.getGroupId() != null) {
@@ -281,7 +274,7 @@ public class EventFeedXML {
             regionName = group.getDisplayName();
         }
 
-        addChild(memento, "region", regionName);
+        XMLUtilities.addChild(memento, "region", regionName);
         return memento;
     }
     
@@ -321,11 +314,11 @@ public class EventFeedXML {
         if (answer == null) {
             answer = "";
         }
-        addChild(memento, "answer", answer);
-        addChild(memento, "question", clarification.getQuestion());
-        addChild(memento, "to-all", clarification.isSendToAll());
-        addChild(memento, "contest-time", formatSeconds(clarification.getElapsedMins() * 1000));
-        addChild(memento, "timestamp", getTimeStamp());
+        XMLUtilities.addChild(memento, "answer", answer);
+        XMLUtilities.addChild(memento, "question", clarification.getQuestion());
+        XMLUtilities.addChild(memento, "to-all", clarification.isSendToAll());
+        XMLUtilities.addChild(memento, "contest-time", XMLUtilities.formatSeconds(clarification.getElapsedMins() * 1000));
+        XMLUtilities.addChild(memento, "timestamp", XMLUtilities.getTimeStamp());
         return memento;
     }
 
@@ -375,37 +368,28 @@ public class EventFeedXML {
         int problemIndex = getProblemIndex(contest, problem);
         memento.putInteger("problem-id", problemIndex);
 
-        addChild(memento, "judged", run.isJudged());
+        XMLUtilities.addChild(memento, "judged", run.isJudged());
 
         Language language = contest.getLanguage(run.getLanguageId());
-        addChild(memento, "language", language.getDisplayName());
+        XMLUtilities.addChild(memento, "language", language.getDisplayName());
 
-        addChild(memento, "penalty", "TODO"); // TODO What is penalty ??
+        XMLUtilities.addChild(memento, "penalty", "TODO"); // TODO What is penalty ??
 
-        // TODO replace this with the acronym Judgement.getAcronym();
-        // String judgement = contest.getJudgement(run.getJudgementRecord().getJudgementId()).getAcronym();
-        String judgement = contest.getJudgement(run.getJudgementRecord().getJudgementId()).toString();
-        addChild(memento, "judgement", judgement.toUpperCase().substring(0, 2));
+         String judgement = contest.getJudgement(run.getJudgementRecord().getJudgementId()).getAcronym();
+        XMLUtilities.addChild(memento, "judgement", judgement.toUpperCase().substring(0, 2));
 
-        // addChild(memento, "result", judgement.toUpperCase().substring(0, 2));
-        // addChild(memento, "solved", run.isSolved());
+        // XMLUtilities.addChild(memento, "result", judgement.toUpperCase().substring(0, 2));
+        // XMLUtilities.addChild(memento, "solved", run.isSolved());
 
-        addChild(memento, "team", run.getSubmitter().getClientNumber());
-        addChild(memento, "elapsed-Mins", run.getElapsedMins());
-        addChild(memento, "contest-time", formatSeconds(run.getElapsedMins() * 60 * 1000)); // TODO run.getElapsedMS
-        addChild(memento, "timestamp", getTimeStamp());
+        XMLUtilities.addChild(memento, "team", run.getSubmitter().getClientNumber());
+        XMLUtilities.addChild(memento, "elapsed-Mins", run.getElapsedMins());
+        XMLUtilities.addChild(memento, "contest-time", XMLUtilities.formatSeconds(run.getElapsedMins() * 60 * 1000)); // TODO run.getElapsedMS
+        XMLUtilities.addChild(memento, "timestamp", XMLUtilities.getTimeStamp());
 
         return memento;
     }
 
-    /**
-     * Return the current time in seconds, with millis mattisa.
-     * 
-     * @return
-     */
-    public String getTimeStamp() {
-        return formatSeconds(System.currentTimeMillis());
-    }
+
 
     /**
      * @throws IOException
@@ -545,7 +529,7 @@ public class EventFeedXML {
 //        </region>
         
         memento.putInteger("id", group.getGroupId());
-        addChild(memento, "name", group.getDisplayName());
+        XMLUtilities.addChild(memento, "name", group.getDisplayName());
     }
 
     public XMLMemento createElement(IInternalContest contest, Judgement judgement) {
@@ -561,8 +545,8 @@ public class EventFeedXML {
         // </judgement>
         String name = judgement.getDisplayName();
 
-        addChild(memento, "acronym", "TODO:"); // TODO Need to add Judgement.getAcronym();
-        addChild(memento, "name", name);
+        XMLUtilities.addChild(memento, "acronym", judgement.getAcronym());
+        XMLUtilities.addChild(memento, "name", name);
         return memento;
     }
 
@@ -573,10 +557,10 @@ public class EventFeedXML {
         // </judgement>
 
         XMLMemento memento = XMLMemento.createWriteRoot(JUDGEMENT_RECORD_TAG);
-        String name = contest.getJudgement(judgementRecord.getJudgementId()).getDisplayName();
+        Judgement judgement = contest.getJudgement(judgementRecord.getJudgementId());
 
-        addChild(memento, "acronym", "TODO:"); // TODO Need to add Judgement.getAcronym();
-        addChild(memento, "name", name);
+        XMLUtilities.addChild(memento, "acronym", judgement.getAcronym());
+        XMLUtilities.addChild(memento, "name", judgement.getDisplayName());
         return memento;
     }
 }
