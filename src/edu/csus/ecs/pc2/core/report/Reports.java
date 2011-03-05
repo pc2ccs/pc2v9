@@ -106,6 +106,7 @@ public final class Reports {
         reports.add(new  SitesReport());
         
         reports.add(new EventFeedReport());
+        reports.add(new NotificationsReport());
 
         reports.add(new InternalDumpReport());
 

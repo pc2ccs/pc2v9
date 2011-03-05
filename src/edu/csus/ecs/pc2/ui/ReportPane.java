@@ -64,6 +64,7 @@ import edu.csus.ecs.pc2.core.report.JudgementReport;
 import edu.csus.ecs.pc2.core.report.LanguagesReport;
 import edu.csus.ecs.pc2.core.report.ListRunLanguages;
 import edu.csus.ecs.pc2.core.report.LoginReport;
+import edu.csus.ecs.pc2.core.report.NotificationsReport;
 import edu.csus.ecs.pc2.core.report.OldRunsReport;
 import edu.csus.ecs.pc2.core.report.PluginsReport;
 import edu.csus.ecs.pc2.core.report.ProblemsReport;
@@ -186,6 +187,7 @@ public class ReportPane extends JPanePlugin {
         reports.add(new BalloonSummaryReport());
         
         reports.add(new EventFeedReport());
+        reports.add(new NotificationsReport());
 
         reports.add(new AllReports());
         reports.add(new ContestSettingsReport());
