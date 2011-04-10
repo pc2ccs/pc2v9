@@ -50,11 +50,11 @@ public class ISubmission implements Serializable, IElementObject {
     private int number = 0;
 
     /**
-     * The minute when the run was submitted.
+     * The millisecond when the submissions was submitted.
      * 
      * This field is set by the server when the submission is added on the server.
      */
-    private long elapsedMins;
+    private long elapsedMS;
 
     /**
      * @return Returns the elementId.
@@ -103,15 +103,16 @@ public class ISubmission implements Serializable, IElementObject {
      * @return Returns the elapsedMins.
      */
     public long getElapsedMins() {
-        return elapsedMins;
+        return elapsedMS / 6000;
     }
 
     /**
      * @param elapsedMins
      *            The elapsedMins to set.
+     *            @deprecated Use setElapsedMS
      */
     public void setElapsedMins(long elapsedMins) {
-        this.elapsedMins = elapsedMins;
+        this.elapsedMS = elapsedMins * 6000;
     }
 
     public int versionNumber() {
@@ -140,6 +141,14 @@ public class ISubmission implements Serializable, IElementObject {
 
     public void setElementId(ElementId elementId) {
         this.elementId = elementId;
+    }
+
+    public long getElapsedMS() {
+        return elapsedMS;
+    }
+
+    public void setElapsedMS(long elapsedMS) {
+        this.elapsedMS = elapsedMS;
     }
 
 }

@@ -515,11 +515,11 @@ public class PlaybackManager {
                 RunFiles runFiles = new RunFiles(playbackEvent.getRun(), file, new SerializedFile[0]);
                 Run theRun = playbackEvent.getRun();
 
-                long savedElapsed = theRun.getElapsedMins();
+                long savedElapsed = theRun.getElapsedMS();
                 Run newRun = contest.acceptRun(theRun, runFiles);
 
                 if (savedElapsed > 0) {
-                    newRun.setElapsedMins(savedElapsed);
+                    newRun.setElapsedMS(savedElapsed);
                 }
 
                 sequenceNumber++;

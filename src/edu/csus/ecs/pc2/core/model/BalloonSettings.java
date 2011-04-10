@@ -26,7 +26,16 @@ public class BalloonSettings implements IElementObject {
      */
     private static final String DEFAULT_MAIL_FROM = "nobody@ecs.csus.edu";
 
+    /**
+     * List of balloon colors per problem.
+     * 
+     */
     private Hashtable<ElementId, String> colorList = new Hashtable<ElementId, String>();
+    
+    /**
+     * List of RGB colors per problem.
+     */
+    private Hashtable<ElementId, String> colorListRGB = new Hashtable<ElementId, String>();
 
     private static final long serialVersionUID = 4208771943370594478L;
 
@@ -305,6 +314,7 @@ public class BalloonSettings implements IElementObject {
      */
     private void clearList() {
         colorList = new Hashtable<ElementId, String>();
+        colorListRGB = new Hashtable<ElementId, String>();
     }
 
     /**
@@ -315,11 +325,27 @@ public class BalloonSettings implements IElementObject {
     public void addColor(Problem problem, String colorName) {
         addColor(problem.getElementId(), colorName);
     }
+    
+    /**
+     * Add Balloon color and rgb color for problem.
+     * 
+     * @param problem
+     * @param colorName
+     * @param rgbColor
+     */
+    public void addColor(Problem problem, String colorName, String rgbColor) {
+        addColor(problem.getElementId(), colorName, rgbColor);
+    }
 
     private void addColor(ElementId id, String colorName) {
         colorList.put(id, colorName);
     }
-    
+
+    private void addColor(ElementId id, String colorName, String rgbColor) {
+        colorList.put(id, colorName);
+        colorListRGB.put(id, rgbColor);
+    }
+
     /**
      * Update color in list.
      * @param problem
@@ -333,6 +359,10 @@ public class BalloonSettings implements IElementObject {
         return colorList.get(id);
     }
     
+    /**
+     * Get list of problem ids where color has been set.
+     * @return
+     */
     protected ElementId [] getProblemIDList() {
         return (ElementId[]) colorList.keySet().toArray(new ElementId[colorList.keySet().size()]);
     }
@@ -479,6 +509,7 @@ public class BalloonSettings implements IElementObject {
         BalloonSettings clone = new BalloonSettings("foo", getSiteNumber());
         clone.elementId = elementId;
         clone.colorList = cloneColorList();
+        clone.colorListRGB = cloneColorRGBList();    
         clone.setBalloonClient(getBalloonClient());
         clone.setEmailBalloons(isEmailBalloons());
         clone.setEmailContact(new String(emailContact));
@@ -496,6 +527,18 @@ public class BalloonSettings implements IElementObject {
         }
         clone.setMailProperties(newMailProperties);
         return clone;
+    }
+    
+    
+    
+    private Hashtable<ElementId,String> cloneColorRGBList() {
+        Hashtable<ElementId,String> newHash=new Hashtable<ElementId,String>();
+        Enumeration<ElementId> elementList=colorListRGB.keys();
+        while (elementList.hasMoreElements()) {
+            ElementId key = elementList.nextElement();
+            newHash.put(key,colorListRGB.get(key));
+        }
+        return newHash;
     }
     
     private Hashtable<ElementId,String> cloneColorList() {
@@ -536,5 +579,12 @@ public class BalloonSettings implements IElementObject {
     public void setMailProperties(Properties newMailProperties) {
         this.mailProperties = newMailProperties;
         setMailServer((String)newMailProperties.get(MAIL_HOST));
+    }
+
+    public String getColorRGB(Problem problem) {
+        return getColorRGB(problem.getElementId());        
+    }
+    public String getColorRGB(ElementId id) {
+        return getColorRGB(id);
     }
 }

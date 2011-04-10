@@ -457,7 +457,7 @@ public class SampleContest {
      */
     public Run copyRun (IInternalContest contest, Run run, boolean cloneJudgements) throws IOException, ClassNotFoundException, FileSecurityException{
         Run newRun = new Run(run.getSubmitter(), contest.getLanguage(run.getLanguageId()), contest.getProblem(run.getProblemId()));
-        newRun.setElapsedMins(run.getElapsedMins());
+        newRun.setElapsedMS(run.getElapsedMS());
         newRun.setDeleted(run.isDeleted());
         newRun.setNumber(contest.getRuns().length);
         newRun.setStatus(RunStates.NEW);

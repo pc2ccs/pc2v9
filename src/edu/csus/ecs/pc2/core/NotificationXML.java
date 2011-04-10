@@ -83,8 +83,8 @@ public class NotificationXML {
         XMLUtilities.addChild(memento, "team-id", run.getSubmitter().getClientNumber());
         XMLUtilities.addChild(memento, "team", contest.getAccount(run.getSubmitter()).getDisplayName());
 
-        XMLUtilities.addChild(memento, "time", "TODO: nr"); // TODO which time is this? Contest Time ?
-        // addChild(memento, "contest-time", formatSeconds(run.getElapsedMins() * 60 * 1000)); // TODO run.getElapsedMS
+        XMLUtilities.addChild(memento, "time", XMLUtilities.formatSeconds(contest.getContestTime().getElapsedMS())); 
+        XMLUtilities.addChild(memento, "contest-time", XMLUtilities.formatSeconds(run.getElapsedMS())); 
 
         XMLUtilities.addChild(memento, "timestamp", XMLUtilities.getTimeStamp());
         XMLUtilities.addChild(memento, "nr", "TODO: nr?");
@@ -199,10 +199,10 @@ public class NotificationXML {
 
         XMLUtilities.addChild(memento, "problem-id", "" + let);
         XMLUtilities.addChild(memento, "problem", problem.getDisplayName());
-        XMLUtilities.addChild(memento, "rgb", "TODO: rgb color"); // TODO RGB color
 
         BalloonSettings settings = contest.getBalloonSettings(contest.getSiteNumber());
-        String balloonColor = settings.getColor(problem.getElementId());
+        String balloonColor = settings.getColor(problem);
+        XMLUtilities.addChild(memento, "rgb", settings.getColorRGB(problem));
         XMLUtilities.addChild(memento, "color", balloonColor);
 
         return memento;

@@ -20,7 +20,7 @@ public final class RunUtilities {
     public static Run createNewRun (Run run, IInternalContest contest){
         Run newRun = new Run(run.getSubmitter(), contest.getLanguage(run.getLanguageId()), contest.getProblem(run.getProblemId()));
         newRun.setElementId(run.getElementId());
-        newRun.setElapsedMins(run.getElapsedMins());
+        newRun.setElapsedMS(run.getElapsedMS());
         newRun.setDeleted(run.isDeleted());
         newRun.setNumber(run.getNumber());
         newRun.setStatus(RunStates.NEW);

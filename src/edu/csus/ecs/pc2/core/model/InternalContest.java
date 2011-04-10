@@ -639,7 +639,7 @@ public class InternalContest implements IInternalContest {
      * @throws IOException 
      */
     public Run acceptRun(Run run, RunFiles runFiles) throws IOException, ClassNotFoundException, FileSecurityException {
-        run.setElapsedMins(getContestTime().getElapsedMins());
+        run.setElapsedMS(getContestTime().getElapsedMS());
         run.setSiteNumber(getSiteNumber());
         Run newRun = runList.addNewRun(run); // this set the run number.
         if (runFiles != null) {
@@ -656,7 +656,7 @@ public class InternalContest implements IInternalContest {
      * @return the accepted Clarification
      */
     public Clarification acceptClarification(Clarification clarification) {
-        clarification.setElapsedMins(getContestTime().getElapsedMins());
+        clarification.setElapsedMS(getContestTime().getElapsedMS());
         clarification.setSiteNumber(getSiteNumber());
         Clarification newClarification;
         try {

@@ -385,7 +385,7 @@ public class EventFeedXML {
         Language language = contest.getLanguage(run.getLanguageId());
         XMLUtilities.addChild(memento, "language", language.getDisplayName());
 
-        XMLUtilities.addChild(memento, "penalty", "TODO"); // TODO What is penalty ??
+        XMLUtilities.addChild(memento, "penalty", "TODO"); // TODO CCS What is penalty ??
 
          String judgement = contest.getJudgement(run.getJudgementRecord().getJudgementId()).getAcronym();
         XMLUtilities.addChild(memento, "judgement", judgement.toUpperCase().substring(0, 2));
@@ -395,7 +395,7 @@ public class EventFeedXML {
 
         XMLUtilities.addChild(memento, "team", run.getSubmitter().getClientNumber());
         XMLUtilities.addChild(memento, "elapsed-Mins", run.getElapsedMins());
-        XMLUtilities.addChild(memento, "contest-time", XMLUtilities.formatSeconds(run.getElapsedMins() * 60 * 1000)); // TODO run.getElapsedMS
+        XMLUtilities.addChild(memento, "contest-time", XMLUtilities.formatSeconds(run.getElapsedMS()));
         XMLUtilities.addChild(memento, "timestamp", XMLUtilities.getTimeStamp());
 
         return memento;
@@ -428,7 +428,7 @@ public class EventFeedXML {
         try {
             sb.append(toXML(createInfoElement(contest, null)));
         } catch (IOException e) {
-            // TODO Auto-generated catch block
+            // TODO CCS Auto-generated catch block
             e.printStackTrace();
         }
 
@@ -439,7 +439,7 @@ public class EventFeedXML {
             try {
                 sb.append(toXML(createElement(contest, language, idx)));
             } catch (IOException e) {
-                // TODO Auto-generated catch block
+                // TODO CCS Auto-generated catch block
                 e.printStackTrace();
             }
             idx++;
@@ -450,7 +450,7 @@ public class EventFeedXML {
             try {
                 sb.append(toXML(createElement(contest, problem, idx)));
             } catch (IOException e) {
-                // TODO Auto-generated catch block
+                // TODO CCS Auto-generated catch block
                 e.printStackTrace();
             }
             idx++;
@@ -460,7 +460,7 @@ public class EventFeedXML {
             try {
                 sb.append(toXML(createElement(contest, judgement)));
             } catch (IOException e) {
-                // TODO Auto-generated catch block
+                // TODO CCS Auto-generated catch block
                 e.printStackTrace();
             }
         }
@@ -470,7 +470,7 @@ public class EventFeedXML {
             try {
                 sb.append(toXML(createElement(contest, clarification)));
             } catch (IOException e) {
-                // TODO Auto-generated catch block
+                // TODO CCS Auto-generated catch block
                 e.printStackTrace();
             }
         }
@@ -482,7 +482,7 @@ public class EventFeedXML {
             try {
                 sb.append(toXML(createElement(contest, run)));
             } catch (IOException e) {
-                // TODO Auto-generated catch block
+                // TODO CCS Auto-generated catch block
                 e.printStackTrace();
             }
         }

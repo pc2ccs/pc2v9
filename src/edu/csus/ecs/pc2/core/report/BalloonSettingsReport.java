@@ -77,7 +77,8 @@ public class BalloonSettingsReport implements IReport {
 
                 int counter = 1;
                 for (Problem problem : problems) {
-                    printWriter.println("      ["+counter+"] "+problem.getDisplayName()+" '"+ balloonSetting.getColor(problem)+"'");
+                    printWriter.println("      ["+counter+"] "+problem.getDisplayName()+" '"+ balloonSetting.getColor(problem)+"'" 
+                            + " rgb='"+balloonSetting.getColorRGB(problem)+"'");
                     counter ++;
                 }
                 printWriter.println();
