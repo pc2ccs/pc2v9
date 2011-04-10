@@ -14,6 +14,7 @@ import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.Filter;
+import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
@@ -238,8 +239,8 @@ public class EventFeedXML {
 
         memento.createChildNode("label", "" + let);
         memento.createChildNode("name", problem.toString());
-        IMemento balloonColor = memento.createChildNode("name", "TODO: color"); // TODO color name
-        balloonColor.putString("rgb", "TODO: rgb color"); // TODO RGB color
+        IMemento balloonColor = memento.createChildNode("name", "TODO: color"); // TODO CCS color name
+        balloonColor.putString("rgb", "TODO: rgb color"); // TODO CCS RGB color
 
         return memento;
     }
@@ -266,7 +267,7 @@ public class EventFeedXML {
         memento.putString("external-id", account.getExternalId());
 
         XMLUtilities.addChild(memento, "name", account.getDisplayName());
-        XMLUtilities.addChild(memento, "nationality", "TODO:"); // TODO need to add Account.getNationality();
+        XMLUtilities.addChild(memento, "nationality", "TODO:"); // TODO CCS add Account.getNationality();
 
         String regionName = "";
         if (account.getGroupId() != null) {
@@ -278,7 +279,9 @@ public class EventFeedXML {
         return memento;
     }
     
-//    TODO Add Test Case
+//  TODO CCS add TestCase class
+//  TODO CCS add TestCase [] JudgementRecord.getTestCases();
+    
 //    
 //    public XMLMemento createElement(IInternalContest contest, Testcase testcase) {
 //        XMLMemento memento = XMLMemento.createWriteRoot(CLARIFICATION_TAG);
@@ -341,6 +344,8 @@ public class EventFeedXML {
     }
 
     public IMemento addMemento(IMemento memento, IInternalContest contest, Run run) {
+
+        // OLD
         // <run time="1265353100290">
         // <id>1410</id>
         // <judged>True</judged>
@@ -354,6 +359,13 @@ public class EventFeedXML {
         // <timestamp>1265353100.29</timestamp>
         // </run>
 
+        /**
+         * The run element was simplified and lost a number
+         * of useful tags: solved and judged.
+         */
+        // TODO CCS add solved ?
+        // TODO CCS add judged ?
+        
         // <run id="1410" team-id="74" problem-id="4">
         // <language>C++</language>
         // <judgement>WA</judgement>
@@ -389,8 +401,6 @@ public class EventFeedXML {
         return memento;
     }
 
-
-
     /**
      * @throws IOException
      */
@@ -407,6 +417,8 @@ public class EventFeedXML {
      */
     public String createStartupXML(IInternalContest contest) {
 
+        // TODO CCS write handle exception code
+        
         StringBuffer sb = new StringBuffer("<" + CONTEST_TAG + ">");
 
         /**
@@ -478,34 +490,18 @@ public class EventFeedXML {
         return sb.toString();
     }
 
-    // TODO add FinalData class
-    
-//    public IMemento addMemento(IMemento memento, IInternalContest contest, FinalData finalData) {
-    // TODO add addMemento(IMemento memento, IInternalContest contest, FinalData finalData)
-    
-    //   <finalized>
-    //   <last-gold>4</last-gold>
-    //   <last-silver>8</last-silver>
-    //   <last-bronze>12</last-bronze>
-    //   <comment>Finalized by John Doe and Jane Doe</comment>
-    //   <timestamp>1265336078.01</timestamp>
-    //   </finalized>
-    
-//        
-//    }
-
     public String createFinalizeXML(IInternalContest contest) {
 
         StringBuffer sb = new StringBuffer();
 
         XMLMemento memento = XMLMemento.createWriteRoot(FINALIZE_TAG);
         
-//        addMemento (memento, contest, finalData);  // TODO add Finalize data
+        FinalizeData finalData = createSampFinalData(); // TODO remove when add IInternalContest.getFinalizeData()
+        addMemento (memento, contest, finalData);  // TODO add IInternalContest.getFinalizeData()
 
         try {
             sb.append(toXML(memento));
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
@@ -514,7 +510,43 @@ public class EventFeedXML {
         sb.append(">");
         return sb.toString();
     }
-    
+
+    /**
+     * 
+     * @return
+     */
+    private FinalizeData createSampFinalData() {
+        FinalizeData data = new FinalizeData();
+        int rank = 1;
+        rank += 8;
+        data.setGoldRank(rank);
+        rank += 5;
+        data.setSilverRank(rank);
+        rank += 10;
+        data.setBronzeRank(rank);
+        data.setNumberBronzes(14);
+        data.setComment("Finalized by Director of Operations");
+        return data;
+    }
+
+    private void addMemento(XMLMemento memento, IInternalContest contest, FinalizeData data) {
+
+        // <finalized>
+        // <last-gold>4</last-gold>
+        // <last-silver>8</last-silver>
+        // <last-bronze>12</last-bronze>
+        // <comment>Finalized by John Doe and Jane Doe</comment>
+        // <timestamp>1265336078.01</timestamp>
+        // </finalized>
+
+        XMLUtilities.addChild(memento, "last-gold", data.getGoldRank());
+        XMLUtilities.addChild(memento, "last-silver", data.getSilverRank());
+        XMLUtilities.addChild(memento, "last-bronze", data.getBronzeRank());
+        XMLUtilities.addChild(memento, "number-bronze", data.getNumberBronzes());
+        XMLUtilities.addChild(memento, "comment", data.getComment());
+        XMLUtilities.addChild(memento, "timestamp", XMLUtilities.getTimeStamp());
+    }
+
     public XMLMemento createElement(IInternalContest contest, Group group) {
         XMLMemento memento = XMLMemento.createWriteRoot(REGION_TAG);
         addMemento(memento, contest, group);
@@ -522,11 +554,9 @@ public class EventFeedXML {
     }
     
     public void addMemento(IMemento memento, IInternalContest contest, Group group) {
-        // TODO Auto-generated method stub
-        
-//        <region external-id="3012">
-//        <name>Europe</name>
-//        </region>
+        // <region external-id="3012">
+        //   <name>Europe</name>
+        // </region>
         
         memento.putInteger("id", group.getGroupId());
         XMLUtilities.addChild(memento, "name", group.getDisplayName());
@@ -551,6 +581,7 @@ public class EventFeedXML {
     }
 
     public XMLMemento createElement(IInternalContest contest, JudgementRecord judgementRecord) {
+        // Judgement Record 
         // <judgement>
         // <acronym>CE</acronym>
         // <name>Compile Error</name>
