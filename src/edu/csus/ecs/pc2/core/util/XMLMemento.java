@@ -432,9 +432,9 @@ public final class XMLMemento implements IMemento {
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             transformer.setOutputProperty(OutputKeys.METHOD, "xml");
             transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-            String yesNoValue = "No";
+            String yesNoValue = "no";
             if (omitXMLDeclaration) {
-                yesNoValue = "Yes";
+                yesNoValue = "yes";
             }
             transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, yesNoValue);
             transformer.setOutputProperty("{http://xml.apache.org/xalan}indent-amount", "2");

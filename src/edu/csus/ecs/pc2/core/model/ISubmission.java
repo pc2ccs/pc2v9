@@ -109,7 +109,6 @@ public class ISubmission implements Serializable, IElementObject {
     /**
      * @param elapsedMins
      *            The elapsedMins to set.
-     *            @deprecated Use setElapsedMS
      */
     public void setElapsedMins(long elapsedMins) {
         this.elapsedMS = elapsedMins * 6000;

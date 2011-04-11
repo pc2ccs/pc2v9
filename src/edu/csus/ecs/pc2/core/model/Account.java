@@ -3,9 +3,8 @@ package edu.csus.ecs.pc2.core.model;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
 
-
 /**
- * Login Account.
+ * User/Login Account.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -29,6 +28,9 @@ public class Account implements IElementObject {
 
     private String password;
 
+    /**
+     * Team name.
+     */
     private String displayName;
     
     /**
@@ -38,7 +40,8 @@ public class Account implements IElementObject {
     private String aliasName = "";
     
     /**
-     * An external identifier, ex: an ICPC id
+     * An external identifier, ex: an ICPC id.
+     * 
      */
     private String externalId = "";
     
@@ -49,11 +52,20 @@ public class Account implements IElementObject {
     
     private PermissionList permissionList = new PermissionList();
 
+    /**
+     * Institution short name.
+     */
     private String shortSchoolName = "";
 
+    /**
+     * Institution name.
+     */
     private String longSchoolName = "";
 
     private String externalName = "";
+
+    private String countryCode = "";
+
 
     /**
      * Create an account
@@ -96,6 +108,10 @@ public class Account implements IElementObject {
 
     }
 
+    /**
+     * Get Team name 
+     * @return Team name.
+     */
     public String getDisplayName() {
         return displayName;
     }
@@ -220,6 +236,11 @@ public class Account implements IElementObject {
         this.aliasName = aliasName;
     }
 
+    /**
+     * External id, aka ICPC Reservation Id.
+     * 
+     * @return external id/reservation id.
+     */
     public String getExternalId() {
         return externalId;
     }
@@ -257,13 +278,35 @@ public class Account implements IElementObject {
         return externalName;
     }
 
+    /**
+     * Get Institution name (long).
+     * 
+     * @return Institution name.
+     */
     public String getLongSchoolName() {
         return longSchoolName;
     }
 
+    /**
+     * Get Institution short name.
+     * @return
+     */
     public String getShortSchoolName() {
         return shortSchoolName;
     }
 
-    
+
+    /**
+     * Get Nationality (Country Code).
+     * 
+     * @return Nationality (Country Code).
+     */
+    public String getCountryCode() {
+        return countryCode;
+    }
+
+    public void setCountryCode(String countryCode) {
+        this.countryCode = countryCode;
+    }
+
 }

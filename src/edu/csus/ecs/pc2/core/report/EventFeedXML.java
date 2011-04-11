@@ -12,6 +12,7 @@ import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.BalloonSettings;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.FinalizeData;
@@ -239,8 +240,11 @@ public class EventFeedXML {
 
         memento.createChildNode("label", "" + let);
         memento.createChildNode("name", problem.toString());
-        IMemento balloonColor = memento.createChildNode("name", "TODO: color"); // TODO CCS color name
-        balloonColor.putString("rgb", "TODO: rgb color"); // TODO CCS RGB color
+        
+        BalloonSettings settings = contest.getBalloonSettings(contest.getSiteNumber());
+        String color = settings.getColor(problem);
+        IMemento balloonColor = memento.createChildNode("balloon-color", color); 
+        balloonColor.putString("rgb", settings.getColorRGB(problem)); 
 
         return memento;
     }
@@ -267,7 +271,8 @@ public class EventFeedXML {
         memento.putString("external-id", account.getExternalId());
 
         XMLUtilities.addChild(memento, "name", account.getDisplayName());
-        XMLUtilities.addChild(memento, "nationality", "TODO:"); // TODO CCS add Account.getNationality();
+        XMLUtilities.addChild(memento, "nationality", account.getCountryCode());
+        XMLUtilities.addChild(memento, "university", account.getLongSchoolName());
 
         String regionName = "";
         if (account.getGroupId() != null) {
@@ -279,8 +284,8 @@ public class EventFeedXML {
         return memento;
     }
     
-//  TODO CCS add TestCase class
-//  TODO CCS add TestCase [] JudgementRecord.getTestCases();
+//  TODO CCS add TestCaseResults class
+//  TODO CCS add TestCaseResults [] JudgementRecord.getTestCaseResults();
     
 //    
 //    public XMLMemento createElement(IInternalContest contest, Testcase testcase) {
@@ -360,9 +365,9 @@ public class EventFeedXML {
         // </run>
 
         /**
-         * The run element was simplified and lost a number
-         * of useful tags: solved and judged.
+         * In a newer version of the Event Feed wiki page the run element was simplified and lost a number of useful tags: solved and judged.
          */
+        
         // TODO CCS add solved ?
         // TODO CCS add judged ?
         
