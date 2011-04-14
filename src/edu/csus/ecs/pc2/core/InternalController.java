@@ -3309,4 +3309,14 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         sendToLocalServer(packet);
     }
 
+    public void sendShutdownAllSites() {
+        Packet packet = PacketFactory.createShutdownAllServersPacket(contest.getClientId(), getServerClientId());
+        sendToLocalServer(packet);
+    }
+
+    public void sendShutdownSite(int siteNumber) {
+        Packet packet = PacketFactory.createShutdownPacket(contest.getClientId(), getServerClientId(), siteNumber);
+        sendToLocalServer(packet);
+    }
+
 }

@@ -632,4 +632,13 @@ public class PrintController implements IInternalController {
         System.out.println("method syncProfileSubmissions");
         System.out.println("    profile                : " + profile);  
     }
+
+    public void sendShutdownAllSites() {
+        System.out.println("method sendShutdownAllSites");
+    }
+
+    public void sendShutdownSite(int siteNumber) {
+        System.out.println("method sendShutdownSite");
+        System.out.println("    siteNumber             : " + siteNumber);
+    }
 }

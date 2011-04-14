@@ -9,6 +9,7 @@ import java.util.Properties;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
@@ -28,6 +29,7 @@ import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.SiteEvent;
 import edu.csus.ecs.pc2.core.model.SiteList;
 import edu.csus.ecs.pc2.core.security.Permission;
+import edu.csus.ecs.pc2.core.security.Permission.Type;
 import edu.csus.ecs.pc2.core.security.PermissionList;
 
 /**
@@ -66,6 +68,8 @@ public class SitesPanel extends JPanePlugin {
     public static final int DEFAULT_LISTENING_PORT = 50002;
     
     private PermissionList permissionList = new PermissionList();
+
+    private JButton shutdownButton = null;
 
     /**
      * This method initializes
@@ -111,6 +115,7 @@ public class SitesPanel extends JPanePlugin {
             siteButtonPanel.add(getUpdateSiteButton(), null);
             siteButtonPanel.add(getCancelSiteEditButton(), null);
             siteButtonPanel.add(getReconnectButton(), null);
+            siteButtonPanel.add(getShutdownButton(), null);
             siteButtonPanel.addMouseListener(new java.awt.event.MouseAdapter() {
                 public void mouseClicked(java.awt.event.MouseEvent e) {
                     if (e.isShiftDown()) {
@@ -553,6 +558,7 @@ public class SitesPanel extends JPanePlugin {
         cancelSiteEditButton.setVisible(isAllowed(Permission.Type.EDIT_SITE));
         reconnectButton.setVisible(isAllowed(Permission.Type.EDIT_SITE));
         reconnectButton.setVisible(isAllowed(Permission.Type.EDIT_SITE));
+        shutdownButton.setVisible(isAllowed(Permission.Type.SHUTDOWN_SERVER) || isAllowed(Permission.Type.SHUTDOWN_ALL_SERVERS));
     }
 
     /**
@@ -640,14 +646,25 @@ public class SitesPanel extends JPanePlugin {
         return messagePane;
     }
 
-    private void showMessage(final String string) {
+    private void showMessage(final String message) {
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                messageLabel.setText(string);
+                messageLabel.setText(message);
+                messageLabel.setToolTipText(message);
             }
         });
     }
+    
+    private void showInfoMessage(final String message) {
+
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                JOptionPane.showMessageDialog(getParentFrame(), message, "Info", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+    }
+        
 
     /**
      * This method initializes reconnectButton
@@ -674,7 +691,7 @@ public class SitesPanel extends JPanePlugin {
         int selectedSite = getSiteListBox().getSelectedIndex();
         
         if (selectedSite == -1){
-            showMessage("Select a site to reconnect to");
+            showInfoMessage("Select a site to reconnect to");
             return;
         }
         
@@ -683,14 +700,14 @@ public class SitesPanel extends JPanePlugin {
             Site site = createSiteFromRow(selectedSite);
             
             if (getContest().getSite(site.getSiteNumber()) == null){
-                showMessage("Can not connect to site "+site.getSiteNumber()+", Update Site first");
+                showInfoMessage("Can not connect to site "+site.getSiteNumber()+", Update Site first");
                 return;
             }
 
             getController().sendServerLoginRequest(site.getSiteNumber());
             
         } catch (Exception e) {
-            showMessage("Unable to reconnect site, check log");
+            showInfoMessage("Unable to reconnect site, check log");
             getController().getLog().log(Log.WARNING, "Exception attempting to reconnect to site ", e);
         }
         
@@ -762,7 +779,66 @@ public class SitesPanel extends JPanePlugin {
             });
         }
     }
-   
+
+    /**
+     * This method initializes shutdownButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getShutdownButton() {
+        if (shutdownButton == null) {
+            shutdownButton = new JButton();
+            shutdownButton.setText("Shutdown");
+            shutdownButton.setMnemonic(KeyEvent.VK_S);
+            shutdownButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    handleShutdownAction();
+                }
+            });
+        }
+        return shutdownButton;
+    }
+
+    protected void handleShutdownAction() {
+
+        boolean shutdownAll = false;
+
+        if (isAllowed(Type.SHUTDOWN_ALL_SERVERS)) {
+
+            int result = FrameUtilities.yesNoCancelDialog(this, "Do you want to shutdown all servers?", "Shutdown All?");
+
+            if (result == JOptionPane.YES_OPTION) {
+                shutdownAll = true;
+            } else if (result == JOptionPane.CANCEL_OPTION) {
+                return;
+            }
+
+        }
+
+        if (shutdownAll) {
+
+            getController().sendShutdownAllSites();
+
+        } else {
+
+            int siteNumber = getSiteListBox().getSelectedIndex();
+
+            if (siteNumber == -1) {
+                showInfoMessage("No site selected - select a site to shutdown");
+                return;
+            }
+
+            Site site = getContest().getSite(siteNumber);
+            String siteName = site.getDisplayName();
+
+            int result = FrameUtilities.yesNoCancelDialog(this, "Shutdown Site " + siteNumber + " (" + siteName + ")", "Shutdown Site?");
+
+            if (result == JOptionPane.YES_OPTION) {
+                getController().sendShutdownSite(siteNumber);
+
+            } // else do nothing
+        }
+    } 
     
     
 } // @jve:decl-index=0:visual-constraint="10,10"

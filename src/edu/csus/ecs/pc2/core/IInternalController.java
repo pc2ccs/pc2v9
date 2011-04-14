@@ -558,4 +558,16 @@ public interface IInternalController {
      * @param profile
      */
     void syncProfileSubmissions(Profile profile);
+
+    /**
+     * Send shutdown all servers packet.
+     */
+    void sendShutdownAllSites();
+
+    /**
+     * Send shutdown server packet.
+     * 
+     * @param siteNumber site number to shut down.
+     */
+    void sendShutdownSite(int siteNumber);
 }

@@ -2112,7 +2112,7 @@ public final class PacketFactory {
     public static Packet createShutdownAllServersPacket(ClientId source, ClientId destination) {
         Properties prop = new Properties();
         prop.put(CLIENT_ID, source);
-        Packet packet = new Packet(Type.SHUTDOWN, source, destination, prop);
+        Packet packet = new Packet(Type.SHUTDOWN_ALL, source, destination, prop);
         return packet;
     }
 
