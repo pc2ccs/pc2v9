@@ -338,7 +338,6 @@ public final class PacketFactory {
 
     public static final String PROFILE_STATUS = "PROFILE_STATUS";
     
-
     /**
      * Constructor is private as this is a utility class which should not be extended or invoked.
      */
@@ -2102,5 +2101,19 @@ public final class PacketFactory {
         return packet;
     }
 
-    
+    public static Packet createShutdownPacket(ClientId source, ClientId destination, int siteNumber) {
+        Properties prop = new Properties();
+        prop.put(CLIENT_ID, source);
+        prop.put(SITE_NUMBER, new Integer(siteNumber));
+        Packet packet = new Packet(Type.SHUTDOWN, source, destination, prop);
+        return packet;
+    }
+
+    public static Packet createShutdownAllServersPacket(ClientId source, ClientId destination) {
+        Properties prop = new Properties();
+        prop.put(CLIENT_ID, source);
+        Packet packet = new Packet(Type.SHUTDOWN, source, destination, prop);
+        return packet;
+    }
+
 }

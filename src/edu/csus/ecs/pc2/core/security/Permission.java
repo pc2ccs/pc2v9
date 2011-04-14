@@ -274,6 +274,14 @@ public class Permission implements Serializable {
          * 
          */
         VIEW_PASSWORDS,
+        /**
+         * 
+         */
+        SHUTDOWN_SERVER,
+        /**
+         * 
+         */
+        SHUTDOWN_ALL_SERVERS,
     };
 
     private Hashtable<Type, String> hash = new Hashtable<Type, String>();
@@ -364,6 +372,8 @@ public class Permission implements Serializable {
         hash.put(Type.VIEW_PASSWORDS,"View Passwords");
         
         hash.put(Type.EDIT_JUDGEMENTS,"Edit Judgement");
+        hash.put(Type.SHUTDOWN_SERVER,"Shutdown server");
+        hash.put(Type.SHUTDOWN_ALL_SERVERS,"Shutdown all servers");
         
     }
 

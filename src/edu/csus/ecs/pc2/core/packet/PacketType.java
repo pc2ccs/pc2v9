@@ -480,6 +480,12 @@ public final class PacketType implements Serializable {
          * From server to client <br>
          */
         SHUTDOWN,
+        
+        /**
+         * Shutdown request for all connected servers.
+         * 
+         */
+        SHUTDOWN_ALL,
 
         /**
          * Message for user.
