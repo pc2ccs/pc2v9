@@ -828,6 +828,8 @@ public class SitesPanel extends JPanePlugin {
                 return;
             }
 
+            siteNumber ++;  // selected index starts at zero
+            
             Site site = getContest().getSite(siteNumber);
             String siteName = site.getDisplayName();
 

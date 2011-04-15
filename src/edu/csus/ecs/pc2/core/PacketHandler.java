@@ -54,6 +54,7 @@ import edu.csus.ecs.pc2.core.security.FileSecurity;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
+import edu.csus.ecs.pc2.plugin.ContestSummaryReports;
 import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
 import edu.csus.ecs.pc2.profile.ProfileManager;
 import edu.csus.ecs.pc2.ui.UIPlugin;
@@ -392,6 +393,14 @@ public class PacketHandler {
 
             case UPDATE_REMOTE_DATA:
                 loginSuccess(packet, connectionHandlerID, fromId);
+                break;
+                
+            case SHUTDOWN:
+                handleServerShutdown (packet, connectionHandlerID, fromId);
+                break;
+                
+            case SHUTDOWN_ALL:
+                handleShutdownAllServers (packet, connectionHandlerID, fromId);
                 break;
            
             default:
@@ -3717,5 +3726,87 @@ public class PacketHandler {
         controller.getLog().info(s);
         // System.err.println(Thread.currentThread().getName() + " " + s);
         // System.err.flush();
+    }
+    
+    private void handleShutdownAllServers(Packet packet, ConnectionHandlerID connectionHandlerID, ClientId fromId) {
+
+        ClientId requestor = packet.getSourceId();
+
+        if (isAllowed(requestor, Permission.Type.SHUTDOWN_ALL_SERVERS)) {
+
+            ClientId[] clientIds = contest.getLocalLoggedInClients(ClientType.Type.SERVER);
+
+            for (ClientId clientId : clientIds) {
+                Packet shutdownPacket = PacketFactory.createShutdownPacket(requestor, clientId, clientId.getSiteNumber());
+                controller.sendToClient(shutdownPacket);
+            }
+            
+            shutdownServer(packet);
+
+        } else {
+            throw new SecurityException("User " + requestor + " not allowed to shutdown all servers");
+        }
+
+    }
+
+    private void handleServerShutdown(Packet packet, ConnectionHandlerID connectionHandlerID, ClientId fromId) {
+
+        int siteToShutdown = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
+        ClientId requestor = packet.getSourceId();
+
+        if (isAllowed(requestor, Permission.Type.SHUTDOWN_ALL_SERVERS) || isAllowed(requestor, Permission.Type.SHUTDOWN_SERVER)) {
+
+            if (isThisSite(siteToShutdown)) {
+                shutdownServer(packet);
+            } else {
+                // Send to other site
+                ClientId serverClientId = new ClientId(siteToShutdown, ClientType.Type.SERVER, 0);
+                Packet shutdownPacket = PacketFactory.createShutdownPacket(requestor, serverClientId, serverClientId.getSiteNumber());
+                controller.sendToClient(shutdownPacket);
+            }
+
+        } else {
+            throw new SecurityException("User " + requestor + " not allowed to shutdown Server at site " + siteToShutdown);
+        }
+    }
+
+    
+    /**
+     * 
+     */
+    private void shutdownServer(Packet packet) {
+
+        if (isServer()) {
+            
+            ClientId requestor = packet.getSourceId();
+
+            if (isAllowed(requestor, Permission.Type.SHUTDOWN_ALL_SERVERS) || isAllowed(requestor, Permission.Type.SHUTDOWN_SERVER)) {
+
+                Log log = controller.getLog();
+
+                try {
+                    ContestSummaryReports contestReports = new ContestSummaryReports();
+                    contestReports.setContestAndController(contest, controller);
+
+                    if (contestReports.isLateInContest()) {
+                        contestReports.generateReports();
+                        controller.getLog().info("Reports Generated to " + contestReports.getReportDirectory());
+                    }
+                } catch (Exception e) {
+                    log.log(Log.WARNING, "Unable to create reports ", e);
+                }
+
+                log.info("Server " + contest.getSiteNumber() + " halted by "+requestor);
+                System.exit(0);
+
+            } else {
+                throw new SecurityException("User "+requestor+" not allowed to shutdown Server");
+            }
+        } else {
+            /**
+             * If this is reached then there is a bug elsewhere. This shutdownServer should only be called if this is running as a Server.
+             */
+            throw new SecurityException("Attempted to shutdown non-server client");
+        }
     }
 }
