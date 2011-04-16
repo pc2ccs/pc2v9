@@ -10,6 +10,7 @@ import java.util.Properties;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.IStorage;
+import edu.csus.ecs.pc2.core.PermissionGroup;
 import edu.csus.ecs.pc2.core.exception.ClarificationUnavailableException;
 import edu.csus.ecs.pc2.core.exception.ContestSecurityException;
 import edu.csus.ecs.pc2.core.exception.ProfileCloneException;
@@ -1077,6 +1078,10 @@ public class InternalContest implements IInternalContest {
     public boolean isAllowed(ClientId clientId, Permission.Type type) {
         Account account = getAccount(clientId);
         if (account == null) {
+            ClientType.Type clientType = clientId.getClientType();
+            if (clientType.equals(Type.SERVER)) {
+                return new PermissionGroup().getPermissionList(clientType).isAllowed(type);
+            }
             return false;
         } else {
             return account.isAllowed(type);

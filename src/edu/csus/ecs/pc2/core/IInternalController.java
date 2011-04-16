@@ -570,4 +570,29 @@ public interface IInternalController {
      * @param siteNumber site number to shut down.
      */
     void sendShutdownSite(int siteNumber);
+
+    /**
+     * Shutdown this server.
+     * 
+     * @param clientRequestingShutdown
+     */
+    void shutdownServer(ClientId requestor);
+
+    /**
+     * Shutdown all remote servers.
+     * 
+     * Sends packet to all servers to shutdown.
+     * 
+     * @param requestor
+     */
+    void shutdownRemoteServers(ClientId requestor);
+
+    /**
+     * Shutdown remove server (Server).
+     * 
+     * @param requestor
+     * @param siteNumber
+     */
+    void shutdownServer(ClientId requestor, int siteNumber);
+
 }

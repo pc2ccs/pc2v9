@@ -21,6 +21,8 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
+import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -798,6 +800,16 @@ public class SitesPanel extends JPanePlugin {
         }
         return shutdownButton;
     }
+    
+    /**
+     * Is the input ClientId a server.
+     * 
+     * @param id
+     * @return
+     */
+    private boolean isServer(ClientId id) {
+        return id != null && id.getClientType().equals(ClientType.Type.SERVER);
+    }
 
     protected void handleShutdownAction() {
 
@@ -817,7 +829,13 @@ public class SitesPanel extends JPanePlugin {
 
         if (shutdownAll) {
 
-            getController().sendShutdownAllSites();
+            if (isServer()) {
+                getController().shutdownRemoteServers(getContest().getClientId());
+                getController().shutdownServer(getContest().getClientId());
+
+            } else {
+                getController().sendShutdownAllSites();
+            }
 
         } else {
 
@@ -828,19 +846,26 @@ public class SitesPanel extends JPanePlugin {
                 return;
             }
 
-            siteNumber ++;  // selected index starts at zero
-            
+            siteNumber++; // selected index starts at zero
+
             Site site = getContest().getSite(siteNumber);
             String siteName = site.getDisplayName();
 
-            int result = FrameUtilities.yesNoCancelDialog(this, "Shutdown Site " + siteNumber + " (" + siteName + ")", "Shutdown Site?");
+            int result = FrameUtilities.yesNoCancelDialog(this, "Shutdown Site " + siteNumber + " (" + siteName + ") ?", "Shutdown Site?");
 
             if (result == JOptionPane.YES_OPTION) {
-                getController().sendShutdownSite(siteNumber);
 
+                if (isServer()) {
+                    getController().shutdownServer(getContest().getClientId(), siteNumber);
+                } else {
+                    getController().sendShutdownSite(siteNumber);
+                }
             } // else do nothing
         }
+    }
+
+    private boolean isServer() {
+        return isServer(getContest().getClientId());
     } 
-    
     
 } // @jve:decl-index=0:visual-constraint="10,10"

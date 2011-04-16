@@ -54,7 +54,6 @@ import edu.csus.ecs.pc2.core.security.FileSecurity;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
-import edu.csus.ecs.pc2.plugin.ContestSummaryReports;
 import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
 import edu.csus.ecs.pc2.profile.ProfileManager;
 import edu.csus.ecs.pc2.ui.UIPlugin;
@@ -1147,7 +1146,7 @@ public class PacketHandler {
 
             ClientId adminClientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
             
-            if (! isAllowed(adminClientId, Permission.Type.SWITCH_PROFILE)){
+            if (! contest.isAllowed(adminClientId, Permission.Type.SWITCH_PROFILE)){
                 info("permission is not granted to "+adminClientId+" to reset");
             } else {
                 info("permission is granted to "+adminClientId+" to reset");
@@ -1573,25 +1572,6 @@ public class PacketHandler {
     }
 
     /**
-     * Is Client allowed to use Permission.
-     * 
-     * @param clientId
-     * @param type
-     * @return
-     */
-    protected boolean isAllowed(ClientId clientId, Permission.Type type) {
-        try {
-            Account account = contest.getAccount(clientId);
-            if (account != null) {
-                return account.getPermissionList().isAllowed(type);
-            }
-        } catch (Exception e) {
-            controller.getLog().log(Log.WARNING, "Exception logged ", e);
-        }
-        return false;
-    }
-
-    /**
      * Checks whether client is allowed to do particular activity +(Permission).
      * 
      * This checks the client permissions settings and if the client does not have permission to do the permission (type) throws a security exception.
@@ -1606,7 +1586,7 @@ public class PacketHandler {
             return;
         }
 
-        if (!isAllowed(clientId, type)) {
+        if (!contest.isAllowed(clientId, type)) {
             throw new ContestSecurityException(clientId, connectionHandlerID, clientId + " not allowed to " + type);
         }
     }
@@ -3732,16 +3712,10 @@ public class PacketHandler {
 
         ClientId requestor = packet.getSourceId();
 
-        if (isAllowed(requestor, Permission.Type.SHUTDOWN_ALL_SERVERS)) {
-
-            ClientId[] clientIds = contest.getLocalLoggedInClients(ClientType.Type.SERVER);
-
-            for (ClientId clientId : clientIds) {
-                Packet shutdownPacket = PacketFactory.createShutdownPacket(requestor, clientId, clientId.getSiteNumber());
-                controller.sendToClient(shutdownPacket);
-            }
+        if (contest.isAllowed(requestor, Permission.Type.SHUTDOWN_ALL_SERVERS)) {
             
-            shutdownServer(packet);
+            controller.shutdownRemoteServers (requestor);
+            controller.shutdownServer(packet.getSourceId());
 
         } else {
             throw new SecurityException("User " + requestor + " not allowed to shutdown all servers");
@@ -3754,10 +3728,10 @@ public class PacketHandler {
         int siteToShutdown = (Integer) PacketFactory.getObjectValue(packet, PacketFactory.SITE_NUMBER);
         ClientId requestor = packet.getSourceId();
 
-        if (isAllowed(requestor, Permission.Type.SHUTDOWN_ALL_SERVERS) || isAllowed(requestor, Permission.Type.SHUTDOWN_SERVER)) {
+        if (contest.isAllowed(requestor, Permission.Type.SHUTDOWN_ALL_SERVERS) || contest.isAllowed(requestor, Permission.Type.SHUTDOWN_SERVER)) {
 
             if (isThisSite(siteToShutdown)) {
-                shutdownServer(packet);
+                controller.shutdownServer(packet.getSourceId());
             } else {
                 // Send to other site
                 ClientId serverClientId = new ClientId(siteToShutdown, ClientType.Type.SERVER, 0);
@@ -3771,42 +3745,5 @@ public class PacketHandler {
     }
 
     
-    /**
-     * 
-     */
-    private void shutdownServer(Packet packet) {
-
-        if (isServer()) {
-            
-            ClientId requestor = packet.getSourceId();
-
-            if (isAllowed(requestor, Permission.Type.SHUTDOWN_ALL_SERVERS) || isAllowed(requestor, Permission.Type.SHUTDOWN_SERVER)) {
-
-                Log log = controller.getLog();
-
-                try {
-                    ContestSummaryReports contestReports = new ContestSummaryReports();
-                    contestReports.setContestAndController(contest, controller);
-
-                    if (contestReports.isLateInContest()) {
-                        contestReports.generateReports();
-                        controller.getLog().info("Reports Generated to " + contestReports.getReportDirectory());
-                    }
-                } catch (Exception e) {
-                    log.log(Log.WARNING, "Unable to create reports ", e);
-                }
-
-                log.info("Server " + contest.getSiteNumber() + " halted by "+requestor);
-                System.exit(0);
-
-            } else {
-                throw new SecurityException("User "+requestor+" not allowed to shutdown Server");
-            }
-        } else {
-            /**
-             * If this is reached then there is a bug elsewhere. This shutdownServer should only be called if this is running as a Server.
-             */
-            throw new SecurityException("Attempted to shutdown non-server client");
-        }
-    }
+  
 }

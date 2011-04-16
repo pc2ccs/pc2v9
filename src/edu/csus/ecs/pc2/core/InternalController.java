@@ -65,6 +65,7 @@ import edu.csus.ecs.pc2.core.transport.ITransportManager;
 import edu.csus.ecs.pc2.core.transport.ITwoToOne;
 import edu.csus.ecs.pc2.core.transport.TransportException;
 import edu.csus.ecs.pc2.core.transport.connection.ConnectionManager;
+import edu.csus.ecs.pc2.plugin.ContestSummaryReports;
 import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
 import edu.csus.ecs.pc2.profile.ProfileManager;
 import edu.csus.ecs.pc2.ui.CountDownMessage;
@@ -3317,6 +3318,78 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     public void sendShutdownSite(int siteNumber) {
         Packet packet = PacketFactory.createShutdownPacket(contest.getClientId(), getServerClientId(), siteNumber);
         sendToLocalServer(packet);
+    }
+    
+    /**
+     * 
+     */
+    public void shutdownServer(ClientId requestor) {
+
+        if (isServer()) {
+
+            if (contest.isAllowed(requestor, Permission.Type.SHUTDOWN_ALL_SERVERS) || contest.isAllowed(requestor, Permission.Type.SHUTDOWN_SERVER)) {
+
+                try {
+                    ContestSummaryReports contestReports = new ContestSummaryReports();
+                    contestReports.setContestAndController(contest, this);
+
+                    if (contestReports.isLateInContest()) {
+                        contestReports.generateReports();
+                        log.info("Reports Generated to " + contestReports.getReportDirectory());
+                    }
+                } catch (Exception e) {
+                    log.log(Log.WARNING, "Unable to create reports ", e);
+                }
+
+                log.info("Server " + contest.getSiteNumber() + " halted by " + requestor);
+                System.exit(0);
+
+            } else {
+                throw new SecurityException("User " + requestor + " not allowed to shutdown Server");
+            }
+        } else {
+            /**
+             * If this is reached then there is a bug elsewhere. This shutdownServer should only be called if this is running as a Server.
+             */
+            throw new SecurityException("Attempted to shutdown non-server client");
+        }
+    }
+    
+    public void shutdownRemoteServers(ClientId requestor) {
+
+        if (contest.isAllowed(requestor, Permission.Type.SHUTDOWN_ALL_SERVERS)) {
+
+            ClientId[] clientIds = contest.getLocalLoggedInClients(ClientType.Type.SERVER);
+
+            for (ClientId clientId : clientIds) {
+                Packet shutdownPacket = PacketFactory.createShutdownPacket(requestor, clientId, clientId.getSiteNumber());
+                ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(clientId);
+                sendToClient(connectionHandlerID, shutdownPacket);
+            }
+        } else {
+            throw new SecurityException("User " + requestor + " not allowed to shutdown remote servers");
+        }
+    }
+
+    public void shutdownServer(ClientId requestor, int siteNumber) {
+        
+        if (contest.isAllowed(requestor, Permission.Type.SHUTDOWN_ALL_SERVERS) || contest.isAllowed(requestor, Permission.Type.SHUTDOWN_SERVER)) {
+
+            if (siteNumber == contest.getSiteNumber()) {
+                shutdownServer(requestor); // This site shut it down
+            } else {
+                ClientId serverId = getServerClientId(siteNumber);
+                Packet shutdownPacket = PacketFactory.createShutdownPacket(requestor, serverId, siteNumber);
+                ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(serverId);
+                sendToClient(connectionHandlerID, shutdownPacket);
+            }
+        } else {
+            throw new SecurityException("User " + requestor + " not allowed to shutdown remote servers");
+        }
+    }
+    
+    protected ClientId getServerClientId (int siteNumber) {
+        return new ClientId(siteNumber, Type.SERVER, 0);
     }
 
 }
