@@ -5,10 +5,6 @@ import java.awt.Dimension;
 import javax.swing.JFrame;
 
 import junit.framework.TestCase;
-import edu.csus.ecs.pc2.core.IInternalController;
-import edu.csus.ecs.pc2.core.controller.PrintController;
-import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.model.SampleContest;
 
 /**
  * Test for ResetContestFrame.
@@ -26,11 +22,11 @@ public class ResetContestFrameTest extends TestCase {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         FrameUtilities.centerFrame(frame);
 
-        SampleContest sampleContest = new SampleContest();
-        IInternalContest contest = sampleContest.createContest(1, 1, 12, 12, false);
-        IInternalController controller = new PrintController();
-
-        frame.setContestAndController(contest, controller);
+//        SampleContest sampleContest = new SampleContest();
+//        IInternalContest contest = sampleContest.createContest(1, 1, 12, 12, false);
+//        IInternalController controller = new PrintController();
+//
+//        frame.setContestAndController(contest, controller);
 
         frame.setVisible(true);
     }
