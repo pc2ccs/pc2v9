@@ -3,6 +3,8 @@ package edu.csus.ecs.pc2.core.model;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Random;
 import java.util.Vector;
@@ -35,9 +37,29 @@ public class SampleContest {
     private boolean debugMode = false;
 
     private Random random = new Random();
-    
+
     public static final int DEFAULT_PORT_NUMBER = 50002;
+
     private int defaultPortNumber = DEFAULT_PORT_NUMBER;
+    
+    private static final String[] W3C_COLORS = { "Alice Blue;#F0F8FF", "Antique White;#FAEBD7", "Aqua;#00FFFF", "Aquamarine;#7FFFD4", "Azure;#F0FFFF", "Beige;#F5F5DC", "Bisque;#FFE4C4",
+            "Black;#000000", "Blanched Almond;#FFEBCD", "Blue;#0000FF", "Blue Violet;#8A2BE2", "Brown;#A52A2A", "Burlywood;#DEB887", "Cadet Blue;#5F9EA0", "Chartreuse;#7FFF00", "Chocolate;#D2691E",
+            "Coral;#FF7F50", "Cornflower;#6495ED", "Cornsilk;#FFF8DC", "Crimson;#DC143C", "Cyan;#00FFFF", "Dark Blue;#00008B", "Dark Cyan;#008B8B", "Dark Goldenrod;#B8860B", "Dark Gray;#A9A9A9",
+            "Dark Green;#006400", "Dark Khaki;#BDB76B", "Dark Magenta;#8B008B", "Dark Olive Green;#556B2F", "Dark Orange;#FF8C00", "Dark Orchid;#9932CC", "Dark Red;#8B0000", "Dark Salmon;#E9967A",
+            "Dark Sea Green;#8FBC8F", "Dark Slate Blue;#483D8B", "Dark Slate Gray;#2F4F4F", "Dark Turquoise;#00CED1", "Dark Violet;#9400D3", "Deep Pink;#FF1493", "Deep Sky Blue;#00BFFF",
+            "Dim Gray;#696969", "Dodger Blue;#1E90FF", "Firebrick;#B22222", "Floral White;#FFFAF0", "Forest Green;#228B22", "Fuchsia;#FF00FF", "Gainsboro;#DCDCDC", "Ghost White;#F8F8FF",
+            "Gold;#FFD700", "Goldenrod;#DAA520", "Gray;#7F7F7F", "Green;#007F00", "Green Yellow;#ADFF2F", "Honeydew;#F0FFF0", "Hot Pink;#FF69B4", "Indian Red;#CD5C5C", "Indigo;#4B0082",
+            "Ivory;#FFFFF0", "Khaki;#F0E68C", "Lavender;#E6E6FA", "Lavender Blush;#FFF0F5", "Lawn Green;#7CFC00", "Lemon Chiffon;#FFFACD", "Light Blue;#ADD8E6", "Light Coral;#F08080",
+            "Light Cyan;#E0FFFF", "Light Goldenrod;#FAFAD2", "Light Gray;#D3D3D3", "Light Green;#90EE90", "Light Pink;#FFB6C1", "Light Salmon;#FFA07A", "Light Sea Green;#20B2AA",
+            "Light Sky Blue;#87CEFA", "Light Slate Gray;#778899", "Light Steel Blue;#B0C4DE", "Light Yellow;#FFFFE0", "Lime;#00FF00", "Lime Green;#32CD32", "Linen;#FAF0E6", "Magenta;#FF00FF",
+            "Maroon;#7F0000", "Medium Aquamarine;#66CDAA", "Medium Blue;#0000CD", "Medium Orchid;#BA55D3", "Medium Purple;#9370DB", "Medium Sea Green;#3CB371", "Medium Slate Blue;#7B68EE",
+            "Medium Spring Green;#00FA9A", "Medium Turquoise;#48D1CC", "Medium Violet Red;#C71585", "Midnight Blue;#191970", "Mint Cream;#F5FFFA", "Misty Rose;#FFE4E1", "Moccasin;#FFE4B5",
+            "Navajo White;#FFDEAD", "Navy;#000080", "Old Lace;#FDF5E6", "Olive;#808000", "Olive Drab;#6B8E23", "Orange;#FFA500", "Orange Red;#FF4500", "Orchid;#DA70D6", "Pale Goldenrod;#EEE8AA",
+            "Pale Green;#98FB98", "Pale Turquoise;#AFEEEE", "Pale Violet Red;#DB7093", "Papaya Whip;#FFEFD5", "Peach Puff;#FFDAB9", "Peru;#CD853F", "Pink;#FFC0CB", "Plum;#DDA0DD",
+            "Powder Blue;#B0E0E6", "Purple;#7F007F", "Red;#FF0000", "Rosy Brown;#BC8F8F", "Royal Blue;#4169E1", "Saddle Brown;#8B4513", "Salmon;#FA8072", "Sandy Brown;#F4A460", "Sea Green;#2E8B57",
+            "Seashell;#FFF5EE", "Sienna;#A0522D", "Silver;#C0C0C0", "Sky Blue;#87CEEB", "Slate Blue;#6A5ACD", "Slate Gray;#708090", "Snow;#FFFAFA", "Spring Green;#00FF7F", "Steel Blue;#4682B4",
+            "Tan;#D2B48C", "Teal;#008080", "Thistle;#D8BFD8", "Tomato;#FF6347", "Turquoise;#40E0D0", "Violet;#EE82EE", "Wheat;#F5DEB3", "White;#FFFFFF", "White Smoke;#F5F5F5", "Yellow;#FFFF00",
+            "Yellow Green;#9ACD32" };
 
     /**
      * Create a new Site class instance.
@@ -70,7 +92,7 @@ public class SampleContest {
 
         return site;
     }
-    
+
     public IInternalContest createContest(int siteNumber, int numSites, int numTeams, int numJudges, boolean initAsServer) {
 
         String contestPassword = "Password 101";
@@ -108,9 +130,9 @@ public class SampleContest {
 
         for (String langName : languages) {
             Language language = new Language(langName);
-            String [] values = LanguageAutoFill.getAutoFillValues(langName);
-            if (values[0].trim().length() != 0){
-                fillLanguage (language, values);
+            String[] values = LanguageAutoFill.getAutoFillValues(langName);
+            if (values[0].trim().length() != 0) {
+                fillLanguage(language, values);
             }
             language.setSiteNumber(siteNumber);
             contest.addLanguage(language);
@@ -121,7 +143,7 @@ public class SampleContest {
             problem.setSiteNumber(siteNumber);
             contest.addProblem(problem);
         }
-        
+
         Problem generalProblem = new Problem("General.");
         contest.setGeneralProblem(generalProblem);
 
@@ -148,24 +170,43 @@ public class SampleContest {
             ClientId serverId = new ClientId(siteNumber, Type.SERVER, 0);
             contest.setClientId(serverId);
         }
-        
+
         contest.setProfile(profile);
         contest.setContestPassword(contestPassword);
+        
+        assignColors(contest);
+        
         return contest;
+    }
+    
+    private void assignColors (IInternalContest contest) {
+
+        getNotificationSettings(contest);
+        
+        BalloonSettings balloonSettings = contest.getBalloonSettings(contest.getSiteNumber());
+        
+        int problemNumber = 0;
+        
+        for (Problem problem : contest.getProblems()) {
+            String [] fields = W3C_COLORS[problemNumber].split(";");
+            balloonSettings.addColor(problem, fields[0], fields[1]);
+            problemNumber ++;
+        }
+        
     }
 
     private void fillLanguage(Language language, String[] values) {
-//        values array
-//        0 Title for Language 
-//        1 Compiler Command Line 
-//        2 Executable Identifier Mask 
-//        3 Execute command line 
+        // values array
+        // 0 Title for Language
+        // 1 Compiler Command Line
+        // 2 Executable Identifier Mask
+        // 3 Execute command line
 
         language.setCompileCommandLine(values[1]);
         language.setExecutableIdentifierMask(values[2]);
         language.setProgramExecuteCommandLine(values[3]);
     }
-    
+
     public IInternalController createController(IInternalContest contest, boolean isServer, boolean isRemote) {
         return createController(contest, null, isServer, isRemote);
     }
@@ -179,7 +220,8 @@ public class SampleContest {
      *            is this a server controller ?
      * @param isRemote
      *            is this a remote site ?
-     * @param storageDirectory where this controller would save its packets.
+     * @param storageDirectory
+     *            where this controller would save its packets.
      * @return
      */
     public IInternalController createController(IInternalContest contest, String storageDirectory, boolean isServer, boolean isRemote) {
@@ -198,8 +240,8 @@ public class SampleContest {
 
             // set InternalContest back to original site number
             contest.setSiteNumber(siteNumber);
-            
-            if (storageDirectory != null){
+
+            if (storageDirectory != null) {
                 FileStorage storage = new FileStorage(storageDirectory);
                 contest.setStorage(storage);
                 controller.initializeStorage(storage);
@@ -211,17 +253,17 @@ public class SampleContest {
 
         return controller;
     }
-    
-    public static String getTestDirectoryName(){
+
+    public static String getTestDirectoryName() {
         String testDir = "testing";
-        
+
         if (!new File(testDir).isDirectory()) {
             new File(testDir).mkdirs();
         }
 
         return testDir;
     }
-    
+
     public static String getTestDirectoryName(String subDirName) {
         String testDir = getTestDirectoryName() + File.separator + subDirName;
 
@@ -232,8 +274,6 @@ public class SampleContest {
         return testDir;
     }
 
-
-    
     /**
      * Populate Language, Problems and Judgements.
      * 
@@ -247,10 +287,10 @@ public class SampleContest {
 
         for (String langName : languages) {
             Language language = new Language(langName);
-            String [] values = LanguageAutoFill.getAutoFillValues(langName);
-            if (values[0].trim().length() != 0){
-                fillLanguage (language, values);
-            }            
+            String[] values = LanguageAutoFill.getAutoFillValues(langName);
+            if (values[0].trim().length() != 0) {
+                fillLanguage(language, values);
+            }
             contest.addLanguage(language);
         }
 
@@ -274,6 +314,7 @@ public class SampleContest {
 
     /**
      * Get all sites' teams.
+     * 
      * @param contest
      * @return
      */
@@ -284,7 +325,7 @@ public class SampleContest {
 
         return accounts;
     }
-    
+
     /**
      * Get site's teams.
      * 
@@ -299,7 +340,7 @@ public class SampleContest {
 
         return accounts;
     }
-    
+
     /**
      * Create N runs identical to input run, add elapsed time.
      * 
@@ -314,14 +355,14 @@ public class SampleContest {
         Problem problem = contest.getProblem(run.getProblemId());
         Language language = contest.getLanguage(run.getLanguageId());
         ClientId teamId = run.getSubmitter();
-        
-        System.out.println("debug22Z "+run+" "+run.getProblemId()+" "+run.getLanguageId());
+
+        System.out.println("debug22Z " + run + " " + run.getProblemId() + " " + run.getLanguageId());
 
         for (int i = 0; i < numberRuns; i++) {
             Run newRun = new Run(teamId, language, problem);
             newRun.setElapsedMins(run.getElapsedMins() + 9 + i);
             newRun.setNumber(contest.getRuns().length);
-            System.out.println("debug22Z "+run+" "+run.getProblemId()+" "+run.getLanguageId());
+            System.out.println("debug22Z " + run + " " + run.getProblemId() + " " + run.getLanguageId());
             runs[i] = newRun;
         }
 
@@ -337,13 +378,13 @@ public class SampleContest {
         Problem[] problems = contest.getProblems();
 
         int numRuns = contest.getRuns().length;
-        
-        if (siteNumber != 0){
+
+        if (siteNumber != 0) {
             accounts = getTeamAccounts(contest, siteNumber);
         }
-        
-        if (accounts.length == 0){
-            new Exception("No accounts for site "+siteNumber).printStackTrace();
+
+        if (accounts.length == 0) {
+            new Exception("No accounts for site " + siteNumber).printStackTrace();
             return new Run[0];
         }
 
@@ -373,7 +414,7 @@ public class SampleContest {
             runs[i] = run;
         }
         return runs;
-        
+
     }
 
     /**
@@ -387,7 +428,7 @@ public class SampleContest {
      * @return
      */
     public Run[] createRandomRuns(IInternalContest contest, int numberRuns, boolean randomTeam, boolean randomProblem, boolean randomLanguage) {
-        return createRandomRuns( contest,  numberRuns,  randomTeam,  randomProblem,  randomLanguage, 0);
+        return createRandomRuns(contest, numberRuns, randomTeam, randomProblem, randomLanguage, 0);
     }
 
     /**
@@ -427,9 +468,9 @@ public class SampleContest {
      * @param clientId
      * @param problem
      * @return
-     * @throws FileSecurityException 
-     * @throws ClassNotFoundException 
-     * @throws IOException 
+     * @throws FileSecurityException
+     * @throws ClassNotFoundException
+     * @throws IOException
      */
     public Run createRun(IInternalContest contest, ClientId clientId, Problem problem) throws IOException, ClassNotFoundException, FileSecurityException {
         int numRuns = contest.getRuns().length;
@@ -439,31 +480,29 @@ public class SampleContest {
         contest.addRun(run);
         return run;
     }
-    
+
     /**
-     * Create a copy of the run (not a clone, but close)  and add to contest run list.
+     * Create a copy of the run (not a clone, but close) and add to contest run list.
      * 
-     * This references the input run's JugementRecords instead of
-     * cloning them.  This run will have a different getElementId() and
-     * a getNumber() which represents the next run number.
+     * This references the input run's JugementRecords instead of cloning them. This run will have a different getElementId() and a getNumber() which represents the next run number.
      * 
      * @param contest
      * @param run
      * @param cloneJudgements
      * @return
-     * @throws FileSecurityException 
-     * @throws ClassNotFoundException 
-     * @throws IOException 
+     * @throws FileSecurityException
+     * @throws ClassNotFoundException
+     * @throws IOException
      */
-    public Run copyRun (IInternalContest contest, Run run, boolean cloneJudgements) throws IOException, ClassNotFoundException, FileSecurityException{
+    public Run copyRun(IInternalContest contest, Run run, boolean cloneJudgements) throws IOException, ClassNotFoundException, FileSecurityException {
         Run newRun = new Run(run.getSubmitter(), contest.getLanguage(run.getLanguageId()), contest.getProblem(run.getProblemId()));
         newRun.setElapsedMS(run.getElapsedMS());
         newRun.setDeleted(run.isDeleted());
         newRun.setNumber(contest.getRuns().length);
         newRun.setStatus(RunStates.NEW);
-        
-        if (cloneJudgements){
-            for (JudgementRecord judgementRecord : newRun.getAllJudgementRecords()){
+
+        if (cloneJudgements) {
+            for (JudgementRecord judgementRecord : newRun.getAllJudgementRecords()) {
                 newRun.addJudgement(judgementRecord);
             }
             newRun.setStatus(run.getStatus());
@@ -471,13 +510,13 @@ public class SampleContest {
         contest.addRun(newRun);
         return newRun;
     }
-    
+
     public Site createSite(int nextSiteNumber, String hostName, int port) {
         return createSite(nextSiteNumber, hostName, port, null);
     }
-    
+
     public Site createSite(int nextSiteNumber, String hostName, int port, String siteName) {
-        if (siteName == null){
+        if (siteName == null) {
             siteName = new String("Site " + nextSiteNumber);
         }
         Site site = new Site("Site " + nextSiteNumber, nextSiteNumber);
@@ -488,8 +527,8 @@ public class SampleContest {
         site.setPassword("site" + nextSiteNumber);
         return site;
     }
-    
-    public Site createSite (IInternalContest contest, String siteName){
+
+    public Site createSite(IInternalContest contest, String siteName) {
         int nextSiteNumber = contest.getSites().length + 1;
         int newPortNumber = DEFAULT_PORT_NUMBER + (nextSiteNumber - 1) * 1000;
         Site site = createSite(nextSiteNumber, "localhost", newPortNumber, siteName);
@@ -519,7 +558,7 @@ public class SampleContest {
         for (int i = 0; i < count; i++) {
             int nextProfileNumber = contest.getProfiles().length + i + 1;
             Profile profile = new Profile("Profile " + nextProfileNumber);
-            profile.setDescription("Created Profile "+nextProfileNumber);
+            profile.setDescription("Created Profile " + nextProfileNumber);
             profiles[i] = profile;
         }
         return profiles;
@@ -546,9 +585,9 @@ public class SampleContest {
      * 
      * @param contest
      * @param runInfoLine
-     * @throws FileSecurityException 
-     * @throws ClassNotFoundException 
-     * @throws IOException 
+     * @throws FileSecurityException
+     * @throws ClassNotFoundException
+     * @throws IOException
      */
     public Run addARun(InternalContest contest, String runInfoLine) throws IOException, ClassNotFoundException, FileSecurityException {
 
@@ -616,11 +655,11 @@ public class SampleContest {
         return contest.getRun(run.getElementId());
 
     }
-    
-    private boolean isSolved (IInternalContest contest, ElementId judgementId) {
+
+    private boolean isSolved(IInternalContest contest, ElementId judgementId) {
         return contest.getJudgements()[0].getElementId().equals(judgementId);
     }
-    
+
     /**
      * Add a judgement to a run.
      * 
@@ -633,11 +672,11 @@ public class SampleContest {
      * @throws ClassNotFoundException
      * @throws FileSecurityException
      */
-    public Run addJudgement (IInternalContest contest, Run run, Judgement judgement, ClientId judgeId) throws IOException, ClassNotFoundException, FileSecurityException {
-        
+    public Run addJudgement(IInternalContest contest, Run run, Judgement judgement, ClientId judgeId) throws IOException, ClassNotFoundException, FileSecurityException {
+
         ElementId judgementId = judgement.getElementId();
         boolean solved = isSolved(contest, judgementId);
-        
+
         JudgementRecord judgementRecord = new JudgementRecord(judgementId, judgeId, solved, false);
 
         checkOutRun(contest, run, judgeId);
@@ -652,6 +691,112 @@ public class SampleContest {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Assign a color to a problem.
+     * 
+     * @param contest
+     * @param problem
+     * @param color
+     * @param rgbColor
+     */
+    public void assignColor(IInternalContest contest, Problem problem, String color, String rgbColor) {
+
+        BalloonSettings balloonSettings = contest.getBalloonSettings(contest.getSiteNumber());
+
+        if (balloonSettings == null) {
+            balloonSettings = new BalloonSettings("BalloonSettingsSite" + contest.getSiteNumber(), contest.getSiteNumber());
+        }
+
+        balloonSettings.addColor(problem, color, rgbColor);
+        contest.updateBalloonSettings(balloonSettings);
+    }
+
+
+    /**
+     * 
+     * Creates scoreboard client is missing.
+     *  
+     * @param contest
+     * @return
+     */
+    protected ClientSettings getNotificationSettings(IInternalContest contest) {
+
+        BalloonSettings balloonSettings = contest.getBalloonSettings(contest.getSiteNumber());
+        if (balloonSettings == null) {
+            balloonSettings = new BalloonSettings("ballonSet1", contest.getSiteNumber());
+            Account account = insureAndGetClient(contest, Type.SCOREBOARD);
+            balloonSettings.setBalloonClient(account.getClientId());
+            contest.addBalloonSettings(balloonSettings);
+        }
+        
+        ClientId id = balloonSettings.getBalloonClient();
+
+        ClientSettings clientSettings = contest.getClientSettings(id);
+        if (clientSettings == null) {
+            clientSettings = new ClientSettings(id);
+            contest.updateClientSettings(clientSettings);
+        }
+
+        return clientSettings;
+    }
+
+    /**
+     * Insures at least one client and returns a client.
+     * 
+     * @param contest
+     * @param type
+     * @return account for type
+     */
+    private Account insureAndGetClient(IInternalContest contest, Type type) {
+        Vector<Account> accounts = contest.getAccounts(type, contest.getSiteNumber());
+        Account account = null;
+        if (accounts.size() == 0) {
+            contest.generateNewAccounts(type.toString(), 1, true);
+            account = contest.getAccounts(type, contest.getSiteNumber()).firstElement();
+        } else {
+            account = accounts.firstElement();
+        }
+
+        return account;
+    }
+
+    /**
+     * Returns key for balloon.
+     * 
+     * <pre>
+     * from BalloonHandler.getBalloonKey(who, problemId)
+     * </pre>
+     * 
+     * TODO this should be in a utility class or a static method somewhere dal
+     * 
+     * @param who
+     * @param problemId
+     * @return
+     */
+    public String getBalloonKey(ClientId who, ElementId problemId) {
+        return who.getTripletKey() + " " + problemId.toString();
+    }
+
+    /**
+     * Add a ballon notification.
+     * 
+     * @param contest
+     * @param scoreboardClientId
+     * @param run
+     */
+    public void addBalloonNotification(IInternalContest contest, Run run) {
+
+        ClientSettings settings = getNotificationSettings(contest);
+
+        BalloonDeliveryInfo deliveryInfo = new BalloonDeliveryInfo(run.getSubmitter(), run.getProblemId(), Calendar.getInstance().getTime().getTime());
+
+        String balloonKey = getBalloonKey(run.getSubmitter(), run.getProblemId());
+
+        Hashtable<String, BalloonDeliveryInfo> hashtable = settings.getBalloonList();
+        hashtable.put(balloonKey, deliveryInfo);
+        settings.setBalloonList(hashtable);
     }
 
     private int getIntegerValue(String s) {
@@ -669,9 +814,9 @@ public class SampleContest {
      * @param runs
      * @param filename
      *            name of file to submit
-     * @throws FileSecurityException 
-     * @throws ClassNotFoundException 
-     * @throws IOException 
+     * @throws FileSecurityException
+     * @throws ClassNotFoundException
+     * @throws IOException
      */
     public void addRuns(IInternalContest contest, Run[] runs, String filename) throws IOException, ClassNotFoundException, FileSecurityException {
 
@@ -684,20 +829,19 @@ public class SampleContest {
             contest.acceptRun(run, runFiles);
         }
     }
-    
-  
-    
+
     /**
      * Print the report to the filename.
+     * 
      * @param filename
      * @param selectedReport
      * @param filter
      * @param inContest
      * @param inController
      */
-    public void printReport (String filename, IReport selectedReport, Filter filter, IInternalContest inContest, IInternalController inController){
-        
-        if (filter == null){
+    public void printReport(String filename, IReport selectedReport, Filter filter, IInternalContest inContest, IInternalController inController) {
+
+        if (filter == null) {
             filter = new Filter();
         }
 
@@ -705,7 +849,7 @@ public class SampleContest {
             selectedReport.setContestAndController(inContest, inController);
             selectedReport.setFilter(filter);
             selectedReport.createReportFile(filename, filter);
-            
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -715,11 +859,11 @@ public class SampleContest {
     public Judgement getYesJudgement(IInternalContest contest) {
         return contest.getJudgements()[0];
     }
-    
+
     public int getDefaultPortNumber() {
         return defaultPortNumber;
     }
-    
+
     public void setDefaultPortNumber(int defaultPortNumber) {
         this.defaultPortNumber = defaultPortNumber;
     }
@@ -735,7 +879,7 @@ public class SampleContest {
             return judgements[randomJudgement + 1];
         }
     }
-    
+
     /**
      * Return Sumit source file in test area.
      * 
@@ -749,8 +893,7 @@ public class SampleContest {
     /**
      * Return full filename in file test directory.
      * 
-     * Will print Exceptions if test directory is not present or
-     * if no such filename found.
+     * Will print Exceptions if test directory is not present or if no such filename found.
      * 
      * @param filename
      * @return filename with path to test data.
@@ -769,5 +912,5 @@ public class SampleContest {
         }
         return testfilename;
     }
-    
+
 }

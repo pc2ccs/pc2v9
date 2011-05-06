@@ -1,8 +1,6 @@
 package edu.csus.ecs.pc2.core;
 
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Hashtable;
 import java.util.Vector;
 
 import junit.framework.TestCase;
@@ -10,12 +8,10 @@ import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.ProblemComparator;
 import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.model.Account;
-import edu.csus.ecs.pc2.core.model.BalloonDeliveryInfo;
 import edu.csus.ecs.pc2.core.model.BalloonSettings;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
-import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
@@ -186,8 +182,8 @@ public class NotificationXMLTest extends TestCase {
         /**
          * Add balloon delivery information for run.
          */
-        
-        addDelivery (contest, run);
+
+        sample.addBalloonNotification(contest, run);
         
 //        Run [] runs = sample.cloneRun(contest, 1, run);
 //        Run run2 = runs[0];
@@ -217,27 +213,5 @@ public class NotificationXMLTest extends TestCase {
         
     }
 
-    public String getBalloonKey(ClientId who, ElementId problemId) {
-        return new NotificationXML().getBalloonKey(who, problemId);
-    }
 
-    private BalloonDeliveryInfo addDelivery(IInternalContest contest2, Run run) {
-
-        BalloonDeliveryInfo deliveryInfo = new BalloonDeliveryInfo(run.getSubmitter(), run.getProblemId(), Calendar.getInstance().getTime().getTime());
-
-        String balloonKey = getBalloonKey(run.getSubmitter(), run.getProblemId());
-
-        /**
-         * 
-         */
-        ClientId clientId = contest2.getBalloonSettings(contest2.getSiteNumber()).getBalloonClient();
-        
-        ClientSettings settings = contest2.getClientSettings(clientId);
-
-        Hashtable<String, BalloonDeliveryInfo> hashtable = settings.getBalloonList();
-        hashtable.put(balloonKey, deliveryInfo);
-        settings.setBalloonList(hashtable);
-        
-        return contest2.getClientSettings(clientId).getBalloonList().get(balloonKey);
-    }
 }

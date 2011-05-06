@@ -529,7 +529,6 @@ public class EventFeedXML {
         data.setSilverRank(rank);
         rank += 10;
         data.setBronzeRank(rank);
-        data.setNumberBronzes(14);
         data.setComment("Finalized by Director of Operations");
         return data;
     }
@@ -547,7 +546,6 @@ public class EventFeedXML {
         XMLUtilities.addChild(memento, "last-gold", data.getGoldRank());
         XMLUtilities.addChild(memento, "last-silver", data.getSilverRank());
         XMLUtilities.addChild(memento, "last-bronze", data.getBronzeRank());
-        XMLUtilities.addChild(memento, "number-bronze", data.getNumberBronzes());
         XMLUtilities.addChild(memento, "comment", data.getComment());
         XMLUtilities.addChild(memento, "timestamp", XMLUtilities.getTimeStamp());
     }
