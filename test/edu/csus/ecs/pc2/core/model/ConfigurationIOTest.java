@@ -109,6 +109,102 @@ public class ConfigurationIOTest extends TestCase {
         assertEquals(settings.isCopyAccounts(), settings2.isCopyAccounts());
 
     }
+    
+    public void testSaveFinalizeData() throws Exception {
+        
+        int siteNumber = 5;
+
+        IInternalContest contest = new InternalContest();
+        contest.setSiteNumber(siteNumber);
+
+        String configDirName = getTestDirectoryName() + File.separator + "configio" + File.separator + "testdir" + getRandNumber();
+
+        IStorage storage = createStorage(configDirName);
+
+        Log log = new Log(configDirName, "configioSaveFinalData.log");
+
+        ConfigurationIO configurationIO = new ConfigurationIO(storage);
+        
+        FinalizeData finalizeData = null;
+        
+        contest.setFinalizeData(finalizeData); // null
+        
+        /**
+         * Write configuration.
+         */
+
+        boolean wroteConfig = configurationIO.store(contest, log);    
+        
+        assertTrue("Failed to write configuration, check log in  " + configDirName, wroteConfig);
+        
+        /**
+         * Read configuration.
+         */
+        
+        configurationIO = null;
+
+        configurationIO = new ConfigurationIO(storage);
+
+        contest = new InternalContest();
+        
+        boolean readConfig = configurationIO.loadFromDisk(siteNumber, contest, log);
+
+        assertTrue("Failed to read configuration, check log in  " + configDirName, readConfig);
+        
+        assertNull("Failed, FinalData should be null", contest.getFinalizeData());
+        
+        finalizeData = createSampFinalData();
+        contest.setFinalizeData(finalizeData);
+       
+        wroteConfig = configurationIO.store(contest, log);    
+        
+        assertTrue("Failed to write configuration, check log in  " + configDirName, wroteConfig);
+        
+        configurationIO = null;
+
+        configurationIO = new ConfigurationIO(storage);
+
+        contest = new InternalContest();
+        
+        readConfig = configurationIO.loadFromDisk(siteNumber, contest, log);
+
+        assertTrue("Failed to read configuration, check log in  " + configDirName, readConfig);
+        
+        assertNotNull("Failed, FinalData should NOT be null", contest.getFinalizeData());
+        
+        FinalizeData data2 = contest.getFinalizeData();
+
+        compareData(finalizeData, data2);
+        
+    }
+    
+    /**
+     * Compare Finalize Data's.
+     * 
+     * @param data1
+     * @param data2
+     */
+    private void compareData(FinalizeData data1, FinalizeData data2) {
+        
+        assertEquals("gold rank should be equal ", data1.getGoldRank(), data2.getGoldRank());
+        assertEquals("silver rank should be equal ", data1.getSilverRank(), data2.getSilverRank());
+        assertEquals("bronze rank should be equal ", data1.getBronzeRank(), data2.getBronzeRank());
+        assertTrue("finalize comment should be same ", data1.getComment().equals(data2.getComment()));
+        
+    }
+
+    private FinalizeData createSampFinalData() {
+        FinalizeData data = new FinalizeData();
+        int rank = 1;
+        rank += 8;
+        data.setGoldRank(rank);
+        rank += 5;
+        data.setSilverRank(rank);
+        rank += 10;
+        data.setBronzeRank(rank);
+        data.setComment("Finalized by Director of Operations");
+        return data;
+    }
 
     private void compareArrays(char[] charArray, char[] charArray2) {
 

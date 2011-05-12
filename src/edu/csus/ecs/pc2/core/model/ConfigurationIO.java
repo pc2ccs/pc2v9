@@ -100,6 +100,11 @@ public class ConfigurationIO {
          * Clone/generation settings for this profile
          */
         PROFILE_CLONE_SETTINGS,
+        /**
+         * Finalize Data.
+         */
+        FINALIZE_DATA,
+        
     }
 
     private IStorage storage = null;
@@ -280,6 +285,17 @@ public class ConfigurationIO {
         }
         
         try {
+            key = ConfigKeys.FINALIZE_DATA;
+            if (configuration.containsKey(key)) {
+                FinalizeData finalizeData = (FinalizeData) configuration.get(key.toString());
+                contest.setFinalizeData(finalizeData);
+                log.info("Loaded " + finalizeData + " " + key.toString().toLowerCase());
+            }
+        } catch (Exception e) {
+            log.log(Log.WARNING, "Exception while loading Finalize Data ", e);
+        }
+        
+        try {
             key = ConfigKeys.PROFILE;
             if (configuration.containsKey(key)) {
                 Profile profile = (Profile) configuration.get(key.toString());
@@ -426,6 +442,10 @@ public class ConfigurationIO {
         configuration.add(ConfigKeys.GROUPS, contest.getGroups());
         configuration.add(ConfigKeys.PROFILES, contest.getProfiles());
         configuration.add(ConfigKeys.PROFILE, contest.getProfile());
+        
+        if (contest.getFinalizeData() != null) {
+            configuration.add(ConfigKeys.FINALIZE_DATA, contest.getFinalizeData());
+        }
         
         if (contest.getProfileCloneSettings() != null){
             configuration.add(ConfigKeys.PROFILE_CLONE_SETTINGS, contest.getProfileCloneSettings());

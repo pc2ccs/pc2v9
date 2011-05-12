@@ -224,6 +224,8 @@ public class InternalContest implements IInternalContest {
 
     private ProfileCloneSettings profileCloneSettings = null;
 
+    private FinalizeData finalizeData = null;
+
     private Site createFakeSite(int nextSiteNumber) {
         Site site = new Site("Site " + nextSiteNumber, nextSiteNumber);
         Properties props = new Properties();
@@ -2657,4 +2659,13 @@ public class InternalContest implements IInternalContest {
     public void updateRunFiles(Run run, RunFiles runFiles) throws IOException, ClassNotFoundException, FileSecurityException {
         runFilesList.add(run, runFiles);
     }
+
+    public FinalizeData getFinalizeData() {
+        return finalizeData;
+    }
+
+    public void setFinalizeData(FinalizeData data) {
+        finalizeData = data;
+    }
+    
 }

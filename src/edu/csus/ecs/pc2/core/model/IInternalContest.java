@@ -1035,4 +1035,16 @@ public interface IInternalContest {
      */
     void updateRunFiles(Run run, RunFiles runFiles) throws IOException, ClassNotFoundException, FileSecurityException;
 
+    /**
+     * 
+     * @return null if no data or FinalizeData 
+     */
+    FinalizeData getFinalizeData();
+
+    /**
+     * Set Contest FinalizeData.
+     * @param data
+     */
+    void setFinalizeData(FinalizeData data);
+
 }

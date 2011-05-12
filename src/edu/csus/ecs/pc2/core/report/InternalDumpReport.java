@@ -27,6 +27,7 @@ import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.Filter;
+import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementNotification;
@@ -407,11 +408,37 @@ public class InternalDumpReport implements IReport {
             printWriter.println("Exception in report: " + e.getMessage());
             e.printStackTrace(printWriter);
             exceptionCount++;
+        }    
+        
+        try {
+            printFinalizeData (printWriter);
+        } catch (Exception e) {
+            printWriter.println("Exception in report: " + e.getMessage());
+            e.printStackTrace(printWriter);
+            exceptionCount++;
         }
 
         if (exceptionCount > 0) {
             printWriter.println();
             printWriter.println(" There were " + exceptionCount + " exceptions.");
+        }
+    }
+
+    private void printFinalizeData(PrintWriter printWriter) {
+
+        FinalizeData data = contest.getFinalizeData();
+
+        printWriter.println();
+        printWriter.println("-- Finalized Info -- ");
+
+        if (data != null) {
+            printWriter.println("  gold rank   : " + data.getGoldRank());
+            printWriter.println("  silver rank : " + data.getSilverRank());
+            printWriter.println("  bronze rank : " + data.getBronzeRank());
+            printWriter.println("  comment     : " + data.getComment());
+        } else {
+            printWriter.println("   ** no data ** ");
+
         }
     }
 
