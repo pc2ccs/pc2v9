@@ -164,6 +164,10 @@ public class AnswerClarificationFrame extends JFrame implements UIPlugin {
             String answer = contest.getContestInformation().getJudgesDefaultAnswer();
             getAnswerClarificationPane().setDefaultAnswerText(answer);
         }
+
+        public void finalizeDataChanged(ContestInformationEvent contestInformationEvent) {
+            // Not used
+        }
         
     }
     /**

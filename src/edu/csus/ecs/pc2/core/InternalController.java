@@ -32,6 +32,7 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
+import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.ILoginListener;
@@ -3390,6 +3391,11 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     
     protected ClientId getServerClientId (int siteNumber) {
         return new ClientId(siteNumber, Type.SERVER, 0);
+    }
+
+    public void updateFinalizeData(FinalizeData data) {
+        Packet updateFinalizePacket  = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), data);
+        sendToLocalServer(updateFinalizePacket);
     }
 
 }

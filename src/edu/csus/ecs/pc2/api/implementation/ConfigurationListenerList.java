@@ -392,6 +392,9 @@ public class ConfigurationListenerList {
             // FIXME API code
 
         }
+        public void finalizeDataChanged(ContestInformationEvent contestInformationEvent) {
+            // Not used
+        }
     }
 
       private void fireContestInformationListener(ContestInformationEvent contestInformationEvent) {

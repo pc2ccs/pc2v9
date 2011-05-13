@@ -635,7 +635,11 @@ public class ClarificationsPane extends JPanePlugin {
                 }
             });
         }
-
+        
+        public void finalizeDataChanged(ContestInformationEvent contestInformationEvent) {
+            // Not used
+        }
+        
     }
 
     /**

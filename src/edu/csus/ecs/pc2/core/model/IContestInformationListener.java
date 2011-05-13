@@ -33,4 +33,10 @@ public interface IContestInformationListener {
      * @param contestInformationEvent
      */
     void contestInformationRefreshAll(ContestInformationEvent contestInformationEvent);
+    
+    /**
+     * Update FinalizedData.
+     * @param contestInformationEvent
+     */
+    void finalizeDataChanged (ContestInformationEvent contestInformationEvent);
 }

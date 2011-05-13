@@ -24,6 +24,7 @@ import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestLoginSuccessData;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
+import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
@@ -58,18 +59,6 @@ import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
  * 
  * ClientId whoCheckedOut = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
  * </pre>
- * 
- * List of contents constants:
- * {@link #ACCOUNT}, {@link #ACCOUNT_ARRAY}, {@link #BALLOON_SETTINGS}, {@link #BALLOON_SETTINGS_LIST}, {@link #CLARIFICATION}, {@link #CLARIFICATION_ANSWER}, {@link #CLARIFICATION_LIST},
- * {@link #CLIENT_ID}, {@link #CLIENT_SETTINGS}, {@link #CLIENT_SETTINGS_LIST}, {@link #CLIENT_TYPE}, {@link #CONNECTION_HANDLE_ID}, {@link #CONNECTION_HANDLE_ID_LIST},
- * {@link #CONTEST_INFORMATION}, {@link #CONTEST_LENGTH_TIME}, {@link #CONTEST_PASSWORD}, {@link #CONTEST_TIME}, {@link #CONTEST_TIME_LIST}, {@link #COUNT}, {@link #CREATE_ACCOUNT_ACTIVE},
- * {@link #DEFAULT_CLARIFICATION_ANSWER}, {@link #ELAPSED_TIME}, {@link #EXCEPTION}, {@link #GENERAL_PROBLEM}, {@link #GROUP}, {@link #GROUP_LIST}, {@link #JUDGEMENT}, {@link #JUDGEMENT_LIST},
- * {@link #JUDGEMENT_RECORD}, {@link #LANGUAGE}, {@link #LANGUAGE_DISPLAY_LIST}, {@link #LANGUAGE_LIST}, {@link #LOGGED_IN_USERS}, {@link #LOGIN}, {@link #MESSAGE}, {@link #NEW_PASSWORD},
- * {@link #PACKET}, {@link #PASSWORD}, {@link #PASSWORD_CHANGED}, {@link #PROBLEM}, {@link #PROBLEM_DATA_FILES}, {@link #PROBLEM_DISPLAY_LIST}, {@link #PROBLEM_LIST}, {@link #REMAINING_TIME},
- * {@link #RUN}, {@link #RUN_FILES}, {@link #RUN_LIST}, {@link #RUN_RESULTS_FILE}, {@link #RUN_STATUS}, {@link #SEND_SETTINGS}, {@link #SITE}, {@link #SITE_LIST}, {@link #SITE_NUMBER},
- * {@link #START_COUNT}.
- * 
- * <br>
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -337,6 +326,8 @@ public final class PacketFactory {
     public static final String RUN_FILES_LIST = "RUN_FILES_LIST";
 
     public static final String PROFILE_STATUS = "PROFILE_STATUS";
+    
+    public static final String FINALIZE_DATA = "FINALIZE_DATA";
     
     /**
      * Constructor is private as this is a utility class which should not be extended or invoked.
@@ -1096,6 +1087,9 @@ public final class PacketFactory {
     }
     
     /**
+     * Add Contest Data into a Properties.
+     * 
+     * Can be used in a Packet.
      * 
      * @param prop
      * @param data
@@ -1124,6 +1118,10 @@ public final class PacketFactory {
         prop.put(SITE_NUMBER, new Integer(data.getSiteNumber()));
         prop.put(CONTEST_TIME, data.getContestTime());
         prop.put(CONTEST_INFORMATION, data.getContestInformation());
+        
+        if (data.getFinalizeData() != null) {
+            prop.put(FINALIZE_DATA, data.getFinalizeData());
+        }
         
         if (data.getContestSecurityPassword() != null) {
             prop.put(CONTEST_PASSWORD, data.getContestSecurityPassword());
@@ -1386,6 +1384,15 @@ public final class PacketFactory {
         prop.put(CLIENT_ID, source);
         prop.put(SITE_NUMBER, source.getSiteNumber());
         prop.put(ACCOUNT_ARRAY, accounts);
+        Packet packet = new Packet(Type.UPDATE_SETTING, source, destination, prop);
+        return packet;
+    }
+
+    public static Packet createUpdateSetting(ClientId source, ClientId destination, FinalizeData finalizeData) {
+        Properties prop = new Properties();
+        prop.put(CLIENT_ID, source);
+        prop.put(SITE_NUMBER, source.getSiteNumber());
+        prop.put(FINALIZE_DATA, finalizeData);
         Packet packet = new Packet(Type.UPDATE_SETTING, source, destination, prop);
         return packet;
     }
@@ -1875,7 +1882,7 @@ public final class PacketFactory {
      * @param source
      * @param destination
      * @param packet
-     * @return
+     * @return cloned Packet.
      */
     public static Packet clonePacket(PacketType.Type type, ClientId source, ClientId destination, Packet packet) {
         Packet newPacket = createPacket(type, source, destination, (Properties) packet.getContent());

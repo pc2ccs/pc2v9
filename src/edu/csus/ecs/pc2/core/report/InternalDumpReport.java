@@ -432,6 +432,10 @@ public class InternalDumpReport implements IReport {
         printWriter.println("-- Finalized Info -- ");
 
         if (data != null) {
+            printWriter.println("  certified   : " + data.isCertified());
+            if (data.isCertified()) {
+                printWriter.println("  certify date: " + data.getCertificationDate());
+            }
             printWriter.println("  gold rank   : " + data.getGoldRank());
             printWriter.println("  silver rank : " + data.getSilverRank());
             printWriter.println("  bronze rank : " + data.getBronzeRank());

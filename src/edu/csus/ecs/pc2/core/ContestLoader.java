@@ -13,6 +13,7 @@ import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
+import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.ISubmission;
@@ -32,7 +33,8 @@ import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 /**
  * Load contest data from a {@link Packet} into a model.
  * 
- * Contains methods to load data from packets into models.
+ * The add and set methods will extract contest data from a packet and
+ * load into the contet model (contest).
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -48,7 +50,7 @@ public class ContestLoader {
      * @param controller
      * @param packet
      */
-    public void addAllAccountsToModel(IInternalContest contest, IInternalController controller, Packet packet) {
+    protected void addAllAccountsToModel(IInternalContest contest, IInternalController controller, Packet packet) {
 
         try {
 
@@ -78,7 +80,7 @@ public class ContestLoader {
      * 
      * @param packet
      */
-    public void addAllClarificationsToModel(IInternalContest contest, IInternalController controller, Packet packet) {
+    protected void addAllClarificationsToModel(IInternalContest contest, IInternalController controller, Packet packet) {
 
         try {
             Clarification[] clarifications = (Clarification[]) PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION_LIST);
@@ -106,7 +108,7 @@ public class ContestLoader {
      * @param contest
      * @param packet
      */
-    public void addAllClientSettingsToModel(IInternalContest contest, IInternalController controller, Packet packet) {
+    protected void addAllClientSettingsToModel(IInternalContest contest, IInternalController controller, Packet packet) {
         try {
             ClientSettings[] clientSettings = (ClientSettings[]) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_SETTINGS_LIST);
             if (clientSettings != null) {
@@ -138,7 +140,7 @@ public class ContestLoader {
      * @param controller
      * @param packet
      */
-    public void addAllConnectionIdsToModel(IInternalContest contest, IInternalController controller, Packet packet) {
+    protected void addAllConnectionIdsToModel(IInternalContest contest, IInternalController controller, Packet packet) {
 
         try {
             ConnectionHandlerID[] connectionHandlerIDs = (ConnectionHandlerID[]) PacketFactory.getObjectValue(packet, PacketFactory.CONNECTION_HANDLE_ID_LIST);
@@ -159,7 +161,7 @@ public class ContestLoader {
      * @param controller
      * @param packet
      */
-    public void addAllContestTimesToModel(IInternalContest contest, IInternalController controller, Packet packet) {
+    protected void addAllContestTimesToModel(IInternalContest contest, IInternalController controller, Packet packet) {
         try {
             ContestTime[] contestTimes = (ContestTime[]) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME_LIST);
             if (contestTimes != null) {
@@ -186,7 +188,7 @@ public class ContestLoader {
      * @param contest
      * @param packet
      */
-    public void addAllRunsToModel(IInternalContest contest, IInternalController controller, Packet packet) {
+    protected void addAllRunsToModel(IInternalContest contest, IInternalController controller, Packet packet) {
 
         try {
             Run[] runs = (Run[]) PacketFactory.getObjectValue(packet, PacketFactory.RUN_LIST);
@@ -210,7 +212,7 @@ public class ContestLoader {
      * 
      * @param packet
      */
-    public void addBalloonSettingsToModel(IInternalContest contest, IInternalController controller, Packet packet) {
+    protected void addBalloonSettingsToModel(IInternalContest contest, IInternalController controller, Packet packet) {
         try {
             BalloonSettings[] balloonSettings = (BalloonSettings[]) PacketFactory.getObjectValue(packet, PacketFactory.BALLOON_SETTINGS_LIST);
             if (balloonSettings != null) {
@@ -229,7 +231,7 @@ public class ContestLoader {
      * @param controller
      * @param packet
      */
-    public void addContestInformationToModel(IInternalContest contest, IInternalController controller, Packet packet) {
+    protected void addContestInformationToModel(IInternalContest contest, IInternalController controller, Packet packet) {
         try {
             ContestInformation contestInformation = (ContestInformation) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_INFORMATION);
             if (contestInformation != null) {
@@ -242,13 +244,30 @@ public class ContestLoader {
 
     }
 
+    protected void setFinalizeData (IInternalContest contest, IInternalController controller, Packet packet) {
+        try {
+            
+            FinalizeData finalizeData = (FinalizeData) PacketFactory.getObjectValue(packet, PacketFactory.FINALIZE_DATA);
+            if (finalizeData != null) {
+                contest.setFinalizeData(finalizeData);
+                if (finalizeData.isCertified()) {
+                    controller.getLog().log(Log.INFO, "Contest Certified by '" + finalizeData.getComment() + "'");
+                }
+            }
+
+        } catch (Exception e) {
+            controller.logWarning("Exception logged in load Finalize Data ", e);
+        }
+
+    }
+    
     /**
      * Add general problem into contest.
      * @param contest
      * @param controller
      * @param packet
      */
-    public void addGeneralProblemToModel(IInternalContest contest, IInternalController controller, Packet packet) {
+    protected void addGeneralProblemToModel(IInternalContest contest, IInternalController controller, Packet packet) {
         try {
             Problem generalProblem = (Problem) PacketFactory.getObjectValue(packet, PacketFactory.GENERAL_PROBLEM);
             if (generalProblem != null) {
@@ -267,7 +286,7 @@ public class ContestLoader {
      * @param controller
      * @param packet
      */
-    public void addGroupsToModel(IInternalContest contest, IInternalController controller, Packet packet) {
+    protected void addGroupsToModel(IInternalContest contest, IInternalController controller, Packet packet) {
 
         try {
             Group[] groups = (Group[]) PacketFactory.getObjectValue(packet, PacketFactory.GROUP_LIST);
@@ -292,7 +311,7 @@ public class ContestLoader {
      * @param controller
      * @param packet
      */
-    public void addJudgementsToModel(IInternalContest contest, IInternalController controller, Packet packet) {
+    protected void addJudgementsToModel(IInternalContest contest, IInternalController controller, Packet packet) {
         try {
             Judgement[] judgements = (Judgement[]) PacketFactory.getObjectValue(packet, PacketFactory.JUDGEMENT_LIST);
             if (judgements != null) {
@@ -317,7 +336,7 @@ public class ContestLoader {
      * @param controller
      * @param packet
      */
-    public void addLanguagesToModel(IInternalContest contest, IInternalController controller, Packet packet) {
+    protected void addLanguagesToModel(IInternalContest contest, IInternalController controller, Packet packet) {
 
         try {
             Language[] languages = (Language[]) PacketFactory.getObjectValue(packet, PacketFactory.LANGUAGE_LIST);
@@ -344,7 +363,7 @@ public class ContestLoader {
      * 
      * @param packet
      */
-    public void addLoginsToModel(IInternalContest contest, IInternalController controller, Packet packet) {
+    protected void addLoginsToModel(IInternalContest contest, IInternalController controller, Packet packet) {
 
         try {
             ClientId[] clientIds = (ClientId[]) PacketFactory.getObjectValue(packet, PacketFactory.REMOTE_LOGGED_IN_USERS);
@@ -417,7 +436,7 @@ public class ContestLoader {
      * @param controller
      * @param packet
      */
-    public void addProblemsToModel(IInternalContest contest, IInternalController controller, Packet packet) {
+    protected void addProblemsToModel(IInternalContest contest, IInternalController controller, Packet packet) {
 
         // First add all the problem data files to a list.
 
@@ -469,7 +488,7 @@ public class ContestLoader {
      * @param controller
      * @param packet
      */
-    public void addProfilesToModel(IInternalContest contest, IInternalController controller, Packet packet) {
+    protected void addProfilesToModel(IInternalContest contest, IInternalController controller, Packet packet) {
         try {
             Profile[] profiles = (Profile[]) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE_LIST);
             if (profiles != null) {
@@ -490,7 +509,7 @@ public class ContestLoader {
      * @param packet
      * @param remoteSiteNumber
      */
-    public void addRemoteAccountsToModel(IInternalContest contest, IInternalController controller, Packet packet, int remoteSiteNumber) {
+    protected void addRemoteAccountsToModel(IInternalContest contest, IInternalController controller, Packet packet, int remoteSiteNumber) {
         try {
 
             Account[] accounts = (Account[]) PacketFactory.getObjectValue(packet, PacketFactory.ACCOUNT_ARRAY);
@@ -572,7 +591,7 @@ public class ContestLoader {
      * @param packet
      * @param remoteSiteNumber
      */
-    public void addRemoteAllClientSettingsToModel(IInternalContest contest, IInternalController controller, Packet packet, int remoteSiteNumber) {
+    protected void addRemoteAllClientSettingsToModel(IInternalContest contest, IInternalController controller, Packet packet, int remoteSiteNumber) {
 
         try {
             ClientSettings[] clientSettings = (ClientSettings[]) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_SETTINGS_LIST);
@@ -597,7 +616,7 @@ public class ContestLoader {
      * @param packet
      * @param remoteSiteNumber
      */
-    public void addRemoteClarificationsToModel(IInternalContest contest, IInternalController controller, Packet packet, int remoteSiteNumber) {
+    protected void addRemoteClarificationsToModel(IInternalContest contest, IInternalController controller, Packet packet, int remoteSiteNumber) {
         try {
             Clarification[] clarifications = (Clarification[]) PacketFactory.getObjectValue(packet, PacketFactory.CLARIFICATION_LIST);
             if (clarifications != null) {
@@ -621,7 +640,7 @@ public class ContestLoader {
      * @param packet
      * @param remoteSiteNumber
      */
-    public void addRemoteContestTimesToModel(IInternalContest contest, IInternalController controller, Packet packet, int remoteSiteNumber) {
+    protected void addRemoteContestTimesToModel(IInternalContest contest, IInternalController controller, Packet packet, int remoteSiteNumber) {
         try {
             ContestTime[] contestTimes = (ContestTime[]) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME_LIST);
             if (contestTimes != null) {
@@ -649,7 +668,7 @@ public class ContestLoader {
      * @param packet
      * @param remoteSiteNumber
      */
-    public void addRemoteLoginsToModel(IInternalContest contest, IInternalController controller, Packet packet, int remoteSiteNumber) {
+    protected void addRemoteLoginsToModel(IInternalContest contest, IInternalController controller, Packet packet, int remoteSiteNumber) {
 
         try {
 
@@ -725,7 +744,7 @@ public class ContestLoader {
      * @param packet
      * @param localSiteNumber this site, will not add runs from this site
      */
-    public void addRemoteRunsToModel(IInternalContest contest, IInternalController controller, Packet packet) {
+    protected void addRemoteRunsToModel(IInternalContest contest, IInternalController controller, Packet packet) {
 
         try {
             Run[] runs = (Run[]) PacketFactory.getObjectValue(packet, PacketFactory.RUN_LIST);
@@ -748,7 +767,7 @@ public class ContestLoader {
      * @param controller
      * @param packet
      */
-    public void addSitesToModel(IInternalContest contest, IInternalController controller, Packet packet) {
+    protected void addSitesToModel(IInternalContest contest, IInternalController controller, Packet packet) {
         try {
             Site[] sites = (Site[]) PacketFactory.getObjectValue(packet, PacketFactory.SITE_LIST);
             if (sites != null) {
@@ -768,7 +787,7 @@ public class ContestLoader {
      * @param controller
      * @param packet
      */
-    public void initializeContestTime(IInternalContest contest, IInternalController controller, Packet packet) {
+    protected void initializeContestTime(IInternalContest contest, IInternalController controller, Packet packet) {
 
         if (isServer(contest)) {
             if (contest.getContestTime() == null) {
@@ -845,7 +864,7 @@ public class ContestLoader {
      * @param controller
      * @param packet
      */
-    public void updateContestTimeInModel(IInternalContest contest, IInternalController controller, Packet packet) {
+    protected void updateContestTimeInModel(IInternalContest contest, IInternalController controller, Packet packet) {
 
         try {
             ContestTime contestTime = (ContestTime) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME);
@@ -879,7 +898,7 @@ public class ContestLoader {
     }
 
     /**
-     * Intialize and create a model from the input packets.
+     * Initialize and create a model from the input packets.
      * 
      * This will read a packet and load the data into the contest potentially wiping
      * out existing data. <br>
@@ -893,7 +912,7 @@ public class ContestLoader {
      * @throws ClassNotFoundException
      * @throws FileSecurityException
      */
-    void loadDataIntoModel(IInternalContest contest, IInternalController controller, Packet packet, ConnectionHandlerID connectionHandlerID) throws IOException, ClassNotFoundException,
+    public void loadDataIntoModel(IInternalContest contest, IInternalController controller, Packet packet, ConnectionHandlerID connectionHandlerID) throws IOException, ClassNotFoundException,
             FileSecurityException {
 
 //        ClientId whoPacket = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
@@ -947,6 +966,8 @@ public class ContestLoader {
         addProfilesToModel(contest, controller, packet);
 
         addGeneralProblemToModel(contest, controller, packet);
+        
+        setFinalizeData(contest, controller, packet);
 
     }
 
@@ -957,7 +978,7 @@ public class ContestLoader {
      * @param controller
      * @param packet
      */
-    public void setProfileIntoModel(IInternalContest contest, IInternalController controller, Packet packet) {
+    protected void setProfileIntoModel(IInternalContest contest, IInternalController controller, Packet packet) {
 
         try {
 

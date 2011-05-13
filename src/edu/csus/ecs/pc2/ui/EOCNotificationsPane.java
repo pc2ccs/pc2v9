@@ -378,6 +378,9 @@ public class EOCNotificationsPane extends JPanePlugin {
                 }
             });
         }
+        public void finalizeDataChanged(ContestInformationEvent contestInformationEvent) {
+            // Not used
+        }
 
     }
 

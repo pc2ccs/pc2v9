@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.core.model;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * CCS Finalization Data.
@@ -25,6 +26,10 @@ public class FinalizeData implements Serializable {
     private int bronzeRank;
 
     private String comment;
+    
+    private boolean certified = false;
+    
+    private Date certificationDate = null;
 
     /**
      * @return last rank for gold.
@@ -65,5 +70,37 @@ public class FinalizeData implements Serializable {
 
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    /**
+     * 
+     * @param certified true certifies, false un-certifies.
+     */
+    public void setCertified(boolean certified) {
+        this.certified = certified;
+        if (certified) {
+            certificationDate = new Date();
+        } else {
+            certificationDate = null;
+        }
+        
+    }
+
+    /**
+     * Has is the contest been finalized/certified?.
+     * 
+     * @return true if certified/finalized.
+     */
+    public boolean isCertified() {
+        return certified;
+    }
+
+    /**
+     * Date when certified.
+     * 
+     * @return
+     */
+    public Date getCertificationDate() {
+        return certificationDate;
     }
 }

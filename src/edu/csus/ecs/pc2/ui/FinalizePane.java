@@ -3,18 +3,25 @@ package edu.csus.ecs.pc2.ui;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
 import edu.csus.ecs.pc2.core.model.FinalizeData;
+import edu.csus.ecs.pc2.core.model.IContestInformationListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.report.FinalizeReport;
 
 /**
  * 
@@ -53,6 +60,10 @@ public class FinalizePane extends JPanePlugin {
     private JTextField bronzeRankTextField = null;
 
     private JTextField commentTextField = null;
+
+    private JLabel certificationCommentLabel = null;
+
+    private JButton reportButton = null;
 
     /**
      * This method initializes
@@ -93,6 +104,7 @@ public class FinalizePane extends JPanePlugin {
             buttonPane.setPreferredSize(new Dimension(35, 35));
             buttonPane.add(getUpdateButton(), null);
             buttonPane.add(getFinalizeButton(), null);
+            buttonPane.add(getReportButton(), null);
         }
         return buttonPane;
     }
@@ -101,12 +113,13 @@ public class FinalizePane extends JPanePlugin {
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
 
-        FinalizeData data = getContest().getFinalizeData();
-        if (data == null) {
-            populateDefaults();
-        }
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                reloadFrame();
+            }
+        });
 
-        // TODO CCS add Listenter for changes in FinalizeData
+        getContest().addContestInformationListener(new ContestInformationListenerImplementation());
 
     }
 
@@ -140,7 +153,15 @@ public class FinalizePane extends JPanePlugin {
             getSilverRankTextField().setText(Integer.toString(data.getSilverRank()));
             getBronzeRankTextField().setText(Integer.toString(data.getBronzeRank()));
             getCommentTextField().setText(data.getComment());
+
+            if (data.isCertified()) {
+                certificationCommentLabel.setText("Contest Certified");
+                certificationCommentLabel.setToolTipText("Certified at: " + data.getCertificationDate());
+            }
+
         } else {
+            certificationCommentLabel.setText("Contest not certified");
+            certificationCommentLabel.setToolTipText("");
             populateDefaults();
         }
 
@@ -166,15 +187,20 @@ public class FinalizePane extends JPanePlugin {
         return updateButton;
     }
 
+    /**
+     * Just update the data, do not certify/finalize.
+     */
     protected void updateFinalizeData() {
-        // TODO CCS update data
 
         FinalizeData data = getFromFields();
 
-        getContest().setFinalizeData(data);
-        
-        reloadFrame();
+        FinalizeData contestFinalizedata = getContest().getFinalizeData();
 
+        if (contestFinalizedata != null) {
+            data.setCertified(contestFinalizedata.isCertified());
+        }
+
+        getController().updateFinalizeData(data);
     }
 
     /**
@@ -198,12 +224,49 @@ public class FinalizePane extends JPanePlugin {
     }
 
     protected void finalizeData() {
-        // TODO CCS code
 
-        getGoldRankTextField().setText("0");
-        getSilverRankTextField().setText("0");
-        getBronzeRankTextField().setText("0");
-        getCommentTextField().setText("clear");
+        FinalizeData data = getFromFields();
+
+        try {
+            validateData(data);
+        } catch (InvalidFieldValue e) {
+            showMessage(e.getMessage());
+            return;
+        }
+
+        data.setCertified(true);
+
+        getController().updateFinalizeData(data);
+
+    }
+
+    private void showMessage(String message) {
+        JOptionPane.showMessageDialog(this, message);
+    }
+
+    /**
+     * Validate and error check data.
+     * 
+     * @param data
+     */
+    private void validateData(FinalizeData data) throws InvalidFieldValue {
+
+        if (data.getGoldRank() == 0) {
+            throw new InvalidFieldValue("Gold rank must be greater than zero");
+        }
+
+        if (data.getSilverRank() <= data.getGoldRank()) {
+            throw new InvalidFieldValue("Silver rank must be greater than gold rank.");
+        }
+
+        if (data.getBronzeRank() <= data.getSilverRank()) {
+            throw new InvalidFieldValue("Bronze rank must be greater than silver rank.");
+        }
+
+        if (data.getComment().trim().length() < 1) {
+            throw new InvalidFieldValue("Missing comment, enter a comment");
+        }
+
     }
 
     /**
@@ -213,6 +276,11 @@ public class FinalizePane extends JPanePlugin {
      */
     private JPanel getCenterPane() {
         if (centerPane == null) {
+            certificationCommentLabel = new JLabel();
+            certificationCommentLabel.setBounds(new Rectangle(30, 19, 402, 26));
+            certificationCommentLabel.setFont(new Font("Dialog", Font.BOLD, 14));
+            certificationCommentLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            certificationCommentLabel.setText("Contest Not Certified");
             certifierLabel = new JLabel();
             certifierLabel.setBounds(new Rectangle(53, 171, 125, 22));
             certifierLabel.setText("Who certifies");
@@ -239,6 +307,7 @@ public class FinalizePane extends JPanePlugin {
             centerPane.add(getSilverRankTextField(), null);
             centerPane.add(getBronzeRankTextField(), null);
             centerPane.add(getCommentTextField(), null);
+            centerPane.add(certificationCommentLabel, null);
         }
         return centerPane;
     }
@@ -296,6 +365,61 @@ public class FinalizePane extends JPanePlugin {
             commentTextField.setBounds(new Rectangle(196, 172, 207, 20));
         }
         return commentTextField;
+    }
+
+    /**
+     * Contest Information Listener for Judgement Notifications.
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+
+    // $HeadURL$
+    public class ContestInformationListenerImplementation implements IContestInformationListener {
+
+        public void contestInformationAdded(ContestInformationEvent event) {
+            // not used
+        }
+
+        public void contestInformationChanged(ContestInformationEvent event) {
+            // not used
+        }
+
+        public void contestInformationRemoved(ContestInformationEvent event) {
+            // not used
+        }
+
+        public void contestInformationRefreshAll(ContestInformationEvent contestInformationEvent) {
+            // not used
+        }
+
+        public void finalizeDataChanged(ContestInformationEvent contestInformationEvent) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadFrame();
+                }
+            });
+        }
+
+    }
+
+    /**
+     * This method initializes reportButton
+     * 
+     * @return javax.swing.JButton
+     */
+   private JButton getReportButton() {
+        if (reportButton == null) {
+            reportButton = new JButton();
+            reportButton.setText("Report");
+            reportButton.setMnemonic(KeyEvent.VK_R);
+            reportButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    Utilities.viewReport(new FinalizeReport(), "Finalize Report", getContest(), getController());
+                }
+            });
+        }
+        return reportButton;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

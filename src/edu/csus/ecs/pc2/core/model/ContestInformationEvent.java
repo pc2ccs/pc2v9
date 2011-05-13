@@ -35,12 +35,18 @@ public class ContestInformationEvent {
          * Reload/Refresh all Contest Information.
          */
         REFRESH_ALL,
+        /**
+         * Update Finalize Data
+         */
+        CHANGED_FINALIZED,
 
     }
 
     private Action action;
 
     private ContestInformation contestInformation;
+    
+    private FinalizeData finalizeData;
 
     public ContestInformationEvent(Action action, ContestInformation contestInformation) {
         super();
@@ -48,12 +54,22 @@ public class ContestInformationEvent {
         this.contestInformation = contestInformation;
     }
 
+    public ContestInformationEvent(FinalizeData data){
+        super();
+        this.action = Action.CHANGED_FINALIZED;
+        this.finalizeData = data;
+    }
+    
     public Action getAction() {
         return action;
     }
 
     public ContestInformation getContestInformation() {
         return contestInformation;
+    }
+    
+    public FinalizeData getFinalizeData() {
+        return finalizeData;
     }
 
 }

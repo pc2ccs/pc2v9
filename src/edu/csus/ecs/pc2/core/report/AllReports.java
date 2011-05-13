@@ -85,6 +85,8 @@ public class AllReports implements IReport {
         reports.add(new ProfileCloneSettingsReport());
         reports.add(new SitesReport());
         
+        reports.add(new FinalizeReport());
+        
         reports.add(new InternalDumpReport());
         
         reports.add(new HTMLReport());

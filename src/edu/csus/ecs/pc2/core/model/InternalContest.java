@@ -1755,6 +1755,8 @@ public class InternalContest implements IInternalContest {
                 contestInformationListenerList.elementAt(i).contestInformationRemoved(contestInformationEvent);
             } else if (contestInformationEvent.getAction() == ContestInformationEvent.Action.REFRESH_ALL) {
                 contestInformationListenerList.elementAt(i).contestInformationRefreshAll(contestInformationEvent);
+            } else if (contestInformationEvent.getAction() == ContestInformationEvent.Action.CHANGED_FINALIZED) {
+                contestInformationListenerList.elementAt(i).finalizeDataChanged(contestInformationEvent);
             } else {
                 contestInformationListenerList.elementAt(i).contestInformationChanged(contestInformationEvent);
             }
@@ -2666,6 +2668,8 @@ public class InternalContest implements IInternalContest {
 
     public void setFinalizeData(FinalizeData data) {
         finalizeData = data;
+        ContestInformationEvent event = new ContestInformationEvent(data);
+        fireContestInformationListener(event);
     }
     
 }

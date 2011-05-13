@@ -29,6 +29,7 @@ import edu.csus.ecs.pc2.core.model.ContestLoginSuccessData;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
+import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.ISubmission;
@@ -2668,6 +2669,14 @@ public class PacketHandler {
                 }
             }
         }
+        
+        FinalizeData finalizeData = (FinalizeData) PacketFactory.getObjectValue(packet, PacketFactory.FINALIZE_DATA);
+        if (finalizeData != null) {
+            contest.setFinalizeData(finalizeData);
+            if (finalizeData.isCertified()) {
+                controller.getLog().log(Log.INFO, "Contest Certified by '" + finalizeData.getComment() + "'");
+            }
+        }
 
         if (isServer()) {
 
@@ -3529,6 +3538,7 @@ public class PacketHandler {
         Account[] accounts = null;
         Site[] sites = null;
         Profile [] profiles = null;
+        FinalizeData finalizeData = null;
 
         if (inContest.getClientSettings(clientId) == null) {
             ClientSettings clientSettings2 = new ClientSettings(clientId);
@@ -3565,6 +3575,7 @@ public class PacketHandler {
             accounts = getAllAccounts();
             sites = inContest.getSites();
             profiles = inContest.getProfiles();
+            finalizeData = inContest.getFinalizeData();
         }
 
         ContestLoginSuccessData contestLoginSuccessData = new ContestLoginSuccessData();
@@ -3591,6 +3602,7 @@ public class PacketHandler {
         contestLoginSuccessData.setContestTime(inContest.getContestTime());
         contestLoginSuccessData.setSiteNumber(inContest.getSiteNumber());
         contestLoginSuccessData.setContestInformation(inContest.getContestInformation());
+        contestLoginSuccessData.setFinalizeData(finalizeData);
 
         if (isServer(clientId)) {
             contestLoginSuccessData.setContestSecurityPassword(contestSecurityPassword);

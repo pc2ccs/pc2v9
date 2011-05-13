@@ -40,6 +40,7 @@ public class ContestLoginSuccessData implements Serializable {
     private ContestTime contestTime;
     private int siteNumber;
     private ContestInformation information; 
+    private FinalizeData finalizeData;
 
     /**
      * @return Returns the accounts.
@@ -260,4 +261,11 @@ public class ContestLoginSuccessData implements Serializable {
     public void setRemoteLoggedInUsers(ClientId[] remoteLoggedInUsers) {
         this.remoteLoggedInUsers = remoteLoggedInUsers;
     }
+    public FinalizeData getFinalizeData() {
+        return finalizeData;
+    }
+    public void setFinalizeData(FinalizeData finalizeData) {
+        this.finalizeData = finalizeData;
+    }
+    
 }

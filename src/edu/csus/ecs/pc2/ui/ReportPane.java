@@ -55,6 +55,7 @@ import edu.csus.ecs.pc2.core.report.EventFeedReport;
 import edu.csus.ecs.pc2.core.report.ExtractPlaybackLoadFilesReport;
 import edu.csus.ecs.pc2.core.report.FastestSolvedReport;
 import edu.csus.ecs.pc2.core.report.FastestSolvedSummaryReport;
+import edu.csus.ecs.pc2.core.report.FinalizeReport;
 import edu.csus.ecs.pc2.core.report.GroupsReport;
 import edu.csus.ecs.pc2.core.report.HTMLReport;
 import edu.csus.ecs.pc2.core.report.IReport;
@@ -230,6 +231,8 @@ public class ReportPane extends JPanePlugin {
         
         reports.add(new ProfileCloneSettingsReport());
         reports.add(new SitesReport());
+        
+        reports.add(new FinalizeReport());
         
         reports.add(new InternalDumpReport());
         

@@ -24,6 +24,7 @@ import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.Filter;
+import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.Language;
@@ -829,6 +830,34 @@ public final class PacketFormatter {
             // contestInformation.isPreliminaryJudgementsTriggerNotifications();
             // contestInformation.isPreliminaryJudgementsUsedByBoard();
             // contestInformation.isSendAdditionalRunStatusInformation();
+
+            return node;
+        }
+        
+        if (object instanceof FinalizeData) {
+
+            DefaultMutableTreeNode child;
+
+            FinalizeData finalizeData = (FinalizeData) object;
+
+            String certified = "No";
+            if (finalizeData.isCertified()) {
+                certified = "Yes";
+            }
+
+            DefaultMutableTreeNode node = new DefaultMutableTreeNode(key + "FinalizeData: certified " + certified);
+
+            child = new DefaultMutableTreeNode("Comment: " + finalizeData.getComment());
+            node.add(child);
+            child = new DefaultMutableTreeNode("Certified: " + certified);
+            node.add(child);
+
+            child = new DefaultMutableTreeNode("Gold rank: " + finalizeData.getGoldRank());
+            node.add(child);
+            child = new DefaultMutableTreeNode("Silver rank: " + finalizeData.getSilverRank());
+            node.add(child);
+            child = new DefaultMutableTreeNode("Bronze rank: " + finalizeData.getBronzeRank());
+            node.add(child);
 
             return node;
         }

@@ -99,6 +99,10 @@ public class BalloonHandler implements UIPlugin {
             });
             
         }
+        
+        public void finalizeDataChanged(ContestInformationEvent contestInformationEvent) {
+            // Not used
+        }
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {

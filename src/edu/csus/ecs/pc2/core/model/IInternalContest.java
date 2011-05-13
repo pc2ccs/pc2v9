@@ -755,7 +755,7 @@ public interface IInternalContest {
     void addContestInformation(ContestInformation contestInformation);
 
     void updateContestInformation(ContestInformation contestInformation);
-
+    
     void addContestInformationListener(IContestInformationListener contestInformationListener);
 
     void removeContestInformationListener(IContestInformationListener contestInformationListener);

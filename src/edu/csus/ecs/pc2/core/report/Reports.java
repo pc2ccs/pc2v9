@@ -107,7 +107,9 @@ public final class Reports {
         
         reports.add(new EventFeedReport());
         reports.add(new NotificationsReport());
-
+        
+        reports.add(new FinalizeReport());
+        
         reports.add(new InternalDumpReport());
 
         return (IReport[]) reports.toArray(new IReport[reports.size()]);

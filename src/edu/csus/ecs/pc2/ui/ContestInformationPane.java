@@ -342,6 +342,10 @@ public class ContestInformationPane extends JPanePlugin {
             savedContestInformation = getContest().getContestInformation();
             
         }
+        
+        public void finalizeDataChanged(ContestInformationEvent contestInformationEvent) {
+            // Not used
+        }
 
     }
 

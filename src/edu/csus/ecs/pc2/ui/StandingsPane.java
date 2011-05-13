@@ -396,6 +396,11 @@ public class StandingsPane extends JPanePlugin {
         public void contestInformationRefreshAll(ContestInformationEvent contestInformationEvent) {
             refreshStandings();
         }
+        
+        public void finalizeDataChanged(ContestInformationEvent contestInformationEvent) {
+            refreshStandings();
+        }
+
 
     }
 
