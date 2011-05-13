@@ -38,6 +38,7 @@ import edu.csus.ecs.pc2.ui.ContestClockDisplay;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay.DisplayTimes;
 import edu.csus.ecs.pc2.ui.ContestInformationPane;
 import edu.csus.ecs.pc2.ui.ContestTimesPane;
+import edu.csus.ecs.pc2.ui.FinalizePane;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.GroupsPane;
 import edu.csus.ecs.pc2.ui.ICPCPane;
@@ -228,7 +229,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
                 LanguagesPane languagesPane = new LanguagesPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Languages", languagesPane);
-
+                
                 BalloonSettingsPane balloonSettingsPane = new BalloonSettingsPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Notifications", balloonSettingsPane);
 
@@ -265,6 +266,16 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
                 ClarificationsPane clarificationsPane = new ClarificationsPane();
                 addUIPlugin(getRunContestTabbedPane(), "Clarifications", clarificationsPane);
+                
+                if (Utilities.isDebugMode()) {
+                    // TODO CCS remove debugMode condition eventually
+                    try {
+                        FinalizePane finalizePane = new FinalizePane();
+                        addUIPlugin(getRunContestTabbedPane(), "Finalize", finalizePane);
+                    } catch (Exception e) {
+                        logException(e);
+                    }
+                }
 
                 LoginsPane loginsPane = new LoginsPane();
                 addUIPlugin(getRunContestTabbedPane(), "Logins", loginsPane);
