@@ -115,6 +115,10 @@ public class ClientSettings implements IElementObject {
     }
 
     /**
+     * Returns a list of all notified teams/delivered balloons.
+     * 
+     * String key = clientId.getTripletKey() + problem.getElementId();
+     * 
      * @return Returns the balloonList.
      */
     public Hashtable<String, BalloonDeliveryInfo> getBalloonList() {

@@ -11,6 +11,7 @@ import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.InternalController;
+import edu.csus.ecs.pc2.core.Notification;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
@@ -42,24 +43,25 @@ public class SampleContest {
 
     private int defaultPortNumber = DEFAULT_PORT_NUMBER;
     
-    private static final String[] W3C_COLORS = { "Alice Blue;#F0F8FF", "Antique White;#FAEBD7", "Aqua;#00FFFF", "Aquamarine;#7FFFD4", "Azure;#F0FFFF", "Beige;#F5F5DC", "Bisque;#FFE4C4",
-            "Black;#000000", "Blanched Almond;#FFEBCD", "Blue;#0000FF", "Blue Violet;#8A2BE2", "Brown;#A52A2A", "Burlywood;#DEB887", "Cadet Blue;#5F9EA0", "Chartreuse;#7FFF00", "Chocolate;#D2691E",
-            "Coral;#FF7F50", "Cornflower;#6495ED", "Cornsilk;#FFF8DC", "Crimson;#DC143C", "Cyan;#00FFFF", "Dark Blue;#00008B", "Dark Cyan;#008B8B", "Dark Goldenrod;#B8860B", "Dark Gray;#A9A9A9",
-            "Dark Green;#006400", "Dark Khaki;#BDB76B", "Dark Magenta;#8B008B", "Dark Olive Green;#556B2F", "Dark Orange;#FF8C00", "Dark Orchid;#9932CC", "Dark Red;#8B0000", "Dark Salmon;#E9967A",
-            "Dark Sea Green;#8FBC8F", "Dark Slate Blue;#483D8B", "Dark Slate Gray;#2F4F4F", "Dark Turquoise;#00CED1", "Dark Violet;#9400D3", "Deep Pink;#FF1493", "Deep Sky Blue;#00BFFF",
-            "Dim Gray;#696969", "Dodger Blue;#1E90FF", "Firebrick;#B22222", "Floral White;#FFFAF0", "Forest Green;#228B22", "Fuchsia;#FF00FF", "Gainsboro;#DCDCDC", "Ghost White;#F8F8FF",
-            "Gold;#FFD700", "Goldenrod;#DAA520", "Gray;#7F7F7F", "Green;#007F00", "Green Yellow;#ADFF2F", "Honeydew;#F0FFF0", "Hot Pink;#FF69B4", "Indian Red;#CD5C5C", "Indigo;#4B0082",
-            "Ivory;#FFFFF0", "Khaki;#F0E68C", "Lavender;#E6E6FA", "Lavender Blush;#FFF0F5", "Lawn Green;#7CFC00", "Lemon Chiffon;#FFFACD", "Light Blue;#ADD8E6", "Light Coral;#F08080",
-            "Light Cyan;#E0FFFF", "Light Goldenrod;#FAFAD2", "Light Gray;#D3D3D3", "Light Green;#90EE90", "Light Pink;#FFB6C1", "Light Salmon;#FFA07A", "Light Sea Green;#20B2AA",
-            "Light Sky Blue;#87CEFA", "Light Slate Gray;#778899", "Light Steel Blue;#B0C4DE", "Light Yellow;#FFFFE0", "Lime;#00FF00", "Lime Green;#32CD32", "Linen;#FAF0E6", "Magenta;#FF00FF",
-            "Maroon;#7F0000", "Medium Aquamarine;#66CDAA", "Medium Blue;#0000CD", "Medium Orchid;#BA55D3", "Medium Purple;#9370DB", "Medium Sea Green;#3CB371", "Medium Slate Blue;#7B68EE",
-            "Medium Spring Green;#00FA9A", "Medium Turquoise;#48D1CC", "Medium Violet Red;#C71585", "Midnight Blue;#191970", "Mint Cream;#F5FFFA", "Misty Rose;#FFE4E1", "Moccasin;#FFE4B5",
-            "Navajo White;#FFDEAD", "Navy;#000080", "Old Lace;#FDF5E6", "Olive;#808000", "Olive Drab;#6B8E23", "Orange;#FFA500", "Orange Red;#FF4500", "Orchid;#DA70D6", "Pale Goldenrod;#EEE8AA",
-            "Pale Green;#98FB98", "Pale Turquoise;#AFEEEE", "Pale Violet Red;#DB7093", "Papaya Whip;#FFEFD5", "Peach Puff;#FFDAB9", "Peru;#CD853F", "Pink;#FFC0CB", "Plum;#DDA0DD",
-            "Powder Blue;#B0E0E6", "Purple;#7F007F", "Red;#FF0000", "Rosy Brown;#BC8F8F", "Royal Blue;#4169E1", "Saddle Brown;#8B4513", "Salmon;#FA8072", "Sandy Brown;#F4A460", "Sea Green;#2E8B57",
-            "Seashell;#FFF5EE", "Sienna;#A0522D", "Silver;#C0C0C0", "Sky Blue;#87CEEB", "Slate Blue;#6A5ACD", "Slate Gray;#708090", "Snow;#FFFAFA", "Spring Green;#00FF7F", "Steel Blue;#4682B4",
-            "Tan;#D2B48C", "Teal;#008080", "Thistle;#D8BFD8", "Tomato;#FF6347", "Turquoise;#40E0D0", "Violet;#EE82EE", "Wheat;#F5DEB3", "White;#FFFFFF", "White Smoke;#F5F5F5", "Yellow;#FFFF00",
-            "Yellow Green;#9ACD32" };
+    private Notification notification = new Notification();
+    
+    private static final String[] W3C_COLORS = { "Alice Blue;F0F8FF", "Antique White;FAEBD7", "Aqua;00FFFF", "Aquamarine;7FFFD4", "Azure;F0FFFF", "Beige;F5F5DC", "Bisque;FFE4C4", "Black;000000",
+            "Blanched Almond;FFEBCD", "Blue;0000FF", "Blue Violet;8A2BE2", "Brown;A52A2A", "Burlywood;DEB887", "Cadet Blue;5F9EA0", "Chartreuse;7FFF00", "Chocolate;D2691E", "Coral;FF7F50",
+            "Cornflower;6495ED", "Cornsilk;FFF8DC", "Crimson;DC143C", "Cyan;00FFFF", "Dark Blue;00008B", "Dark Cyan;008B8B", "Dark Goldenrod;B8860B", "Dark Gray;A9A9A9", "Dark Green;006400",
+            "Dark Khaki;BDB76B", "Dark Magenta;8B008B", "Dark Olive Green;556B2F", "Dark Orange;FF8C00", "Dark Orchid;9932CC", "Dark Red;8B0000", "Dark Salmon;E9967A", "Dark Sea Green;8FBC8F",
+            "Dark Slate Blue;483D8B", "Dark Slate Gray;2F4F4F", "Dark Turquoise;00CED1", "Dark Violet;9400D3", "Deep Pink;FF1493", "Deep Sky Blue;00BFFF", "Dim Gray;696969", "Dodger Blue;1E90FF",
+            "Firebrick;B22222", "Floral White;FFFAF0", "Forest Green;228B22", "Fuchsia;FF00FF", "Gainsboro;DCDCDC", "Ghost White;F8F8FF", "Gold;FFD700", "Goldenrod;DAA520", "Gray;7F7F7F",
+            "Green;007F00", "Green Yellow;ADFF2F", "Honeydew;F0FFF0", "Hot Pink;FF69B4", "Indian Red;CD5C5C", "Indigo;4B0082", "Ivory;FFFFF0", "Khaki;F0E68C", "Lavender;E6E6FA",
+            "Lavender Blush;FFF0F5", "Lawn Green;7CFC00", "Lemon Chiffon;FFFACD", "Light Blue;ADD8E6", "Light Coral;F08080", "Light Cyan;E0FFFF", "Light Goldenrod;FAFAD2", "Light Gray;D3D3D3",
+            "Light Green;90EE90", "Light Pink;FFB6C1", "Light Salmon;FFA07A", "Light Sea Green;20B2AA", "Light Sky Blue;87CEFA", "Light Slate Gray;778899", "Light Steel Blue;B0C4DE",
+            "Light Yellow;FFFFE0", "Lime;00FF00", "Lime Green;32CD32", "Linen;FAF0E6", "Magenta;FF00FF", "Maroon;7F0000", "Medium Aquamarine;66CDAA", "Medium Blue;0000CD", "Medium Orchid;BA55D3",
+            "Medium Purple;9370DB", "Medium Sea Green;3CB371", "Medium Slate Blue;7B68EE", "Medium Spring Green;00FA9A", "Medium Turquoise;48D1CC", "Medium Violet Red;C71585", "Midnight Blue;191970",
+            "Mint Cream;F5FFFA", "Misty Rose;FFE4E1", "Moccasin;FFE4B5", "Navajo White;FFDEAD", "Navy;000080", "Old Lace;FDF5E6", "Olive;808000", "Olive Drab;6B8E23", "Orange;FFA500",
+            "Orange Red;FF4500", "Orchid;DA70D6", "Pale Goldenrod;EEE8AA", "Pale Green;98FB98", "Pale Turquoise;AFEEEE", "Pale Violet Red;DB7093", "Papaya Whip;FFEFD5", "Peach Puff;FFDAB9",
+            "Peru;CD853F", "Pink;FFC0CB", "Plum;DDA0DD", "Powder Blue;B0E0E6", "Purple;7F007F", "Red;FF0000", "Rosy Brown;BC8F8F", "Royal Blue;4169E1", "Saddle Brown;8B4513", "Salmon;FA8072",
+            "Sandy Brown;F4A460", "Sea Green;2E8B57", "Seashell;FFF5EE", "Sienna;A0522D", "Silver;C0C0C0", "Sky Blue;87CEEB", "Slate Blue;6A5ACD", "Slate Gray;708090", "Snow;FFFAFA",
+            "Spring Green;00FF7F", "Steel Blue;4682B4", "Tan;D2B48C", "Teal;008080", "Thistle;D8BFD8", "Tomato;FF6347", "Turquoise;40E0D0", "Violet;EE82EE", "Wheat;F5DEB3", "White;FFFFFF",
+            "White Smoke;F5F5F5", "Yellow;FFFF00", "Yellow Green;9ACD32" };
 
     /**
      * Create a new Site class instance.
@@ -181,7 +183,7 @@ public class SampleContest {
     
     private void assignColors (IInternalContest contest) {
 
-        getNotificationSettings(contest);
+        notification.getScoreboardClientSettings(contest); // insure balloon client is created, etc.
         
         BalloonSettings balloonSettings = contest.getBalloonSettings(contest.getSiteNumber());
         
@@ -714,70 +716,9 @@ public class SampleContest {
     }
 
 
-    /**
-     * 
-     * Creates scoreboard client is missing.
-     *  
-     * @param contest
-     * @return
-     */
-    protected ClientSettings getNotificationSettings(IInternalContest contest) {
+ 
 
-        BalloonSettings balloonSettings = contest.getBalloonSettings(contest.getSiteNumber());
-        if (balloonSettings == null) {
-            balloonSettings = new BalloonSettings("ballonSet1", contest.getSiteNumber());
-            Account account = insureAndGetClient(contest, Type.SCOREBOARD);
-            balloonSettings.setBalloonClient(account.getClientId());
-            contest.addBalloonSettings(balloonSettings);
-        }
-        
-        ClientId id = balloonSettings.getBalloonClient();
 
-        ClientSettings clientSettings = contest.getClientSettings(id);
-        if (clientSettings == null) {
-            clientSettings = new ClientSettings(id);
-            contest.updateClientSettings(clientSettings);
-        }
-
-        return clientSettings;
-    }
-
-    /**
-     * Insures at least one client and returns a client.
-     * 
-     * @param contest
-     * @param type
-     * @return account for type
-     */
-    private Account insureAndGetClient(IInternalContest contest, Type type) {
-        Vector<Account> accounts = contest.getAccounts(type, contest.getSiteNumber());
-        Account account = null;
-        if (accounts.size() == 0) {
-            contest.generateNewAccounts(type.toString(), 1, true);
-            account = contest.getAccounts(type, contest.getSiteNumber()).firstElement();
-        } else {
-            account = accounts.firstElement();
-        }
-
-        return account;
-    }
-
-    /**
-     * Returns key for balloon.
-     * 
-     * <pre>
-     * from BalloonHandler.getBalloonKey(who, problemId)
-     * </pre>
-     * 
-     * TODO this should be in a utility class or a static method somewhere dal
-     * 
-     * @param who
-     * @param problemId
-     * @return
-     */
-    public String getBalloonKey(ClientId who, ElementId problemId) {
-        return who.getTripletKey() + " " + problemId.toString();
-    }
 
     /**
      * Add a ballon notification.
@@ -788,11 +729,11 @@ public class SampleContest {
      */
     public void addBalloonNotification(IInternalContest contest, Run run) {
 
-        ClientSettings settings = getNotificationSettings(contest);
+        ClientSettings settings = notification.getScoreboardClientSettings(contest);
 
         BalloonDeliveryInfo deliveryInfo = new BalloonDeliveryInfo(run.getSubmitter(), run.getProblemId(), Calendar.getInstance().getTime().getTime());
 
-        String balloonKey = getBalloonKey(run.getSubmitter(), run.getProblemId());
+        String balloonKey = notification.getBalloonKey(run.getSubmitter(), run.getProblemId());
 
         Hashtable<String, BalloonDeliveryInfo> hashtable = settings.getBalloonList();
         hashtable.put(balloonKey, deliveryInfo);
@@ -913,4 +854,40 @@ public class SampleContest {
         return testfilename;
     }
 
+    
+    /**
+     * Create a notification if needed.
+     * 
+     * Checks for existing notification, only creates
+     * a notification if no notification exists.
+     * 
+     * @param contest2
+     * @param run
+     */
+    public void createNotification(IInternalContest contest2, Run run) {
+
+        BalloonDeliveryInfo info = notification.getNotification(contest2, run);
+
+        if (info == null) {
+            addNotification(contest2, run);
+        }
+    }
+
+    /**
+     * Unconditionally creates a notification.
+     * 
+     * @param contest2
+     * @param run
+     */
+    private void addNotification(IInternalContest contest2, Run run) {
+
+        ClientSettings settings = notification.getScoreboardClientSettings(contest2);
+        Hashtable<String, BalloonDeliveryInfo> balloonList = settings.getBalloonList();
+        String key = notification.getBalloonKey(run.getSubmitter(), run.getProblemId());
+
+        BalloonDeliveryInfo info = new BalloonDeliveryInfo(run.getSubmitter(), run.getProblemId(), Calendar.getInstance().getTime().getTime());
+        balloonList.put(key, info);
+        settings.setBalloonList(balloonList);
+        contest2.updateClientSettings(settings);
+    }
 }

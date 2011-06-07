@@ -28,13 +28,14 @@ public class BalloonSettings implements IElementObject {
 
     /**
      * List of balloon colors per problem.
-     * 
      */
+    // key = Problem.getElementId(), value = color name, e.g. Blue
     private Hashtable<ElementId, String> colorList = new Hashtable<ElementId, String>();
     
     /**
      * List of RGB colors per problem.
      */
+    // key = Problem.getElementId(), value = RGB color name, e.g. 0000FF
     private Hashtable<ElementId, String> colorListRGB = new Hashtable<ElementId, String>();
 
     private static final long serialVersionUID = 4208771943370594478L;
@@ -585,6 +586,6 @@ public class BalloonSettings implements IElementObject {
         return getColorRGB(problem.getElementId());        
     }
     public String getColorRGB(ElementId id) {
-        return getColorRGB(id);
+        return colorListRGB.get(id);
     }
 }

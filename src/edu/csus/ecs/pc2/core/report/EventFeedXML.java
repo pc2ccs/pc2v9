@@ -1,19 +1,29 @@
 package edu.csus.ecs.pc2.core.report;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Hashtable;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.XMLUtilities;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
+import edu.csus.ecs.pc2.core.list.BalloonDeliveryComparator;
 import edu.csus.ecs.pc2.core.list.ClarificationComparator;
 import edu.csus.ecs.pc2.core.list.GroupComparator;
+import edu.csus.ecs.pc2.core.list.ProblemComparator;
 import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.model.Account;
-import edu.csus.ecs.pc2.core.model.Clarification;
-import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.BalloonDeliveryInfo;
 import edu.csus.ecs.pc2.core.model.BalloonSettings;
+import edu.csus.ecs.pc2.core.model.Clarification;
+import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientSettings;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.Group;
@@ -23,7 +33,9 @@ import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.scoring.DefaultScoringAlgorithm;
+import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.util.IMemento;
 import edu.csus.ecs.pc2.core.util.XMLMemento;
 
@@ -62,6 +74,14 @@ public class EventFeedXML {
     public static final String FINALIZE_TAG = "finalize";
 
     public static final String JUDGEMENT_RECORD_TAG = "judgement_record";
+    
+    public static final String BALLOON_TAG = "balloon";
+
+    public static final String BALLOON_LIST_TAG = "balloons";
+    
+    public static final String NOTIFICATION_TAG = "notification";
+
+    private RunComparator runComparator = new RunComparator();
 
     public String toXML(IInternalContest contest) throws IOException {
         return toXML(contest, new Filter());
@@ -138,11 +158,70 @@ public class EventFeedXML {
                 addMemento(memento, contest, clarification);
             }
         }
+        
+        // Create notifications
+        
+        BalloonDeliveryInfo [] deliveries = getBalloonDeliveries ( contest);
+        Arrays.sort (deliveries, new BalloonDeliveryComparator(contest));
+        int notificationSequenceNumber = 1;
+        
+        for (BalloonDeliveryInfo balloonDeliveryInfo : deliveries) {
+            Run run = getFirstSolvedRun (contest, balloonDeliveryInfo.getClientId(), balloonDeliveryInfo.getProblemId());
+            
+            memento = mementoRoot.createChild(NOTIFICATION_TAG);
+            addMemento( memento,  contest, run,  notificationSequenceNumber);
+            notificationSequenceNumber ++;
+        }
 
         return mementoRoot.saveToString();
     }
 
+    /**
+     * return first run for client and problem.
+     * 
+     * @param contest
+     * @param clientId
+     * @param problemId
+     * @return null if none found, else the first run solved.
+     */
+    public Run getFirstSolvedRun(IInternalContest contest, ClientId clientId, ElementId problemId) {
+        Filter filter = new Filter();
+        filter.addAccount(clientId);
+        filter.addProblem(contest.getProblem(problemId));
+        Run[] runs = filter.getRuns(contest.getRuns());
+        Arrays.sort(runs, runComparator);
 
+        if (runs.length > 0) {
+            return runs[0];
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Returns deliveries
+     * @param contest
+     * @return if no deliveries returns an empty array
+     */
+    public BalloonDeliveryInfo[] getBalloonDeliveries(IInternalContest contest) {
+        
+        BalloonDeliveryInfo[] deliveries = new BalloonDeliveryInfo[0];
+
+        BalloonSettings balloonSettings = contest.getBalloonSettings(contest.getSiteNumber());
+        
+        if (balloonSettings == null) {
+            return deliveries;
+        } else {
+
+            ClientSettings settings = new ClientSettings(balloonSettings.getBalloonClient());
+            Hashtable<String, BalloonDeliveryInfo> deliveryHash = settings.getBalloonList();
+
+            ArrayList<BalloonDeliveryInfo> balloonDeliveryArray = Collections.list(deliveryHash.elements());
+            BalloonDeliveryInfo[] balloonDeliveryInfos = (BalloonDeliveryInfo[]) balloonDeliveryArray.toArray(new BalloonDeliveryInfo[balloonDeliveryArray.size()]);
+            
+            return balloonDeliveryInfos;
+        }
+    }
 
     /**
      * create info XML element
@@ -235,10 +314,8 @@ public class EventFeedXML {
         memento.putInteger("id", id);
         memento.putBoolean("enabled", problem.isActive());
 
-        char let = 'A';
-        let += (id - 1);
-
-        memento.createChildNode("label", "" + let);
+        String problemLetter = getProblemLetter(id);
+        memento.createChildNode("label", problemLetter);
         memento.createChildNode("name", problem.toString());
         
         BalloonSettings settings = contest.getBalloonSettings(contest.getSiteNumber());
@@ -249,8 +326,194 @@ public class EventFeedXML {
         return memento;
     }
     
+   
+    /**
+     * For the input number, returns an uppercase letter.
+     * 
+     * 1 = A, 2 = B, etc.
+     * 
+     * @param id problem number, based at one.
+     * @return single upper case letter.
+     */
+    protected String getProblemLetter(int id) {
+        char let = 'A';
+        let += (id - 1);
+        return Character.toString(let);
+    }
 
+    /**
+     * This routine checks and obeys the preliminary judgement rules.
+     * 
+     * @param run
+     * @param sendNotificationsForPreliminary 
+     * @return true if run is judged and the state is valid
+     */
+    public boolean isValidJudgement(Run run, boolean sendNotificationsForPreliminary) {
+        boolean result=false;
+        if (run.getStatus().equals(RunStates.JUDGED)) {
+            // done it's good & simple
+            result = true;
+        } else {
+            // now the ugly stuff, handle being rejudged/preliminary judgements/...
+            if (run.isJudged()) {
+                // good... but why is the state not JUDGED
+                if (run.getStatus().equals(RunStates.MANUAL_REVIEW)) {
+                    if (sendNotificationsForPreliminary) {
+                        result = true;
+                    }
+                } else {
+                    result = true;
+                }
+            }
+        }
+        return result;
+    }
+    
+    /**
+     * Should a balloon be issued for this run?
+     * 
+     * @param run
+     * @param contest 
+     * @return true if valid
+     */
+    public boolean isValidRun(IInternalContest contest, Run run) {
 
+        ContestInformation contestInformation = contest.getContestInformation();
+        boolean sendNotification = contestInformation.isPreliminaryJudgementsTriggerNotifications();
+
+        if ((run.isJudged() && run.isSolved()) && (!run.isDeleted() && isValidJudgement(run, sendNotification))) {
+
+            if (!run.isSendToTeams()) {
+                if (contest.isAllowed(Permission.Type.RESPECT_NOTIFY_TEAM_SETTING)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+   
+    /**
+     * Return list all problems that team has solved.
+     * 
+     * @param contest
+     * @param id
+     * @return
+     */
+    protected Problem [] getSolvedRuns (IInternalContest contest, ClientId id) {
+        
+        Filter filter = new Filter();
+        filter.addAccount(id);
+        
+        Run [] runs = filter.getRuns(contest.getRuns());
+        
+        Vector<Problem> probVector = new Vector<Problem>();
+        for (int i = 0; i < runs.length; i++) {
+            Run run = runs[i];
+            Problem problem = contest.getProblem(run.getProblemId());
+            if (isValidRun(contest, run) && !probVector.contains(problem)) {
+                probVector.add(problem);
+            }
+        }
+        
+        Problem [] problems = (Problem[]) probVector.toArray(new Problem[probVector.size()]);
+        Arrays.sort(problems, new ProblemComparator(contest));
+        return problems;
+    }
+
+    public IMemento addBalloonMemento(IMemento memento, IInternalContest contest, Problem problem) {
+
+        // <balloon problem-id="2">
+        // <label>B</label>
+        // <name>Bulls and bears</name>
+        // <color rgb="ff0000">red</color>
+        // </balloon>
+        
+        int problemIndex = getProblemIndex(contest, problem);
+        memento.putInteger("problem-id", problemIndex);
+
+        XMLUtilities.addChild(memento, "label", getProblemLetter(problemIndex));
+        XMLUtilities.addChild(memento, "name", contest.getProblem(problem.getElementId()).getDisplayName());
+        
+        IMemento colorMemento = XMLUtilities.addChild(memento, "color", getProblemBalloonColor(contest, problem));
+        colorMemento.putString("rgb", getProblemRGB(contest, problem));
+        return memento;
+    }
+
+    private String getProblemRGB(IInternalContest contest, Problem problem) {
+        BalloonSettings settings = contest.getBalloonSettings(contest.getSiteNumber());
+        return settings.getColorRGB(problem);
+    }
+
+    private String getProblemBalloonColor(IInternalContest contest, Problem problem) {
+        BalloonSettings settings = contest.getBalloonSettings(contest.getSiteNumber());
+        return settings.getColor(problem);
+    }
+    
+    public XMLMemento createBalloonElement(IInternalContest contest, Problem problem) {
+        XMLMemento memento = XMLMemento.createWriteRoot(BALLOON_TAG);
+        addBalloonMemento(memento, contest, problem);
+        return memento;
+    }
+
+    public IMemento addMemento(IMemento memento, IInternalContest contest, Run run, int notificationSequenceNumber) {
+
+        // <notification id="214" team-id="34">
+        // <team>U Waterloo</team>
+        // <contest-time>132.04</contest-time>
+        // <timestamp>1298733213.10</timestamp>
+
+        // <balloon problem-id="2">
+        // <label>B</label>
+        // <name>Bulls and bears</name>
+        // <color rgb="ff0000">red</color>
+        // </balloon>
+
+        // <first-by-team>true</first-by-team>
+        
+        ClientId clientId = run.getSubmitter();
+
+        memento.putInteger("id", notificationSequenceNumber);
+        memento.putInteger("team-id", clientId.getClientNumber());
+
+        XMLUtilities.addChild(memento, "contest-time", XMLUtilities.formatSeconds(run.getElapsedMins() * 1000));
+        XMLUtilities.addChild(memento, "timestamp", XMLUtilities.getTimeStamp());
+        XMLUtilities.addChild(memento, "team", contest.getAccount(clientId).getDisplayName());
+
+        Problem[] problems = getSolvedRuns(contest, clientId);
+
+        boolean firstSolvedByteam = problems.length == 1;
+        XMLUtilities.addChild(memento, "first-by-team", firstSolvedByteam);
+        
+        Problem solvedProblem = contest.getProblem(run.getProblemId());
+        
+        IMemento singleBalloon = memento.createChild(BALLOON_TAG);
+        addBalloonMemento(singleBalloon, contest, solvedProblem);
+
+        // <balloons>
+        // <balloon problem-id="4">
+        // <label>D</label>
+        // <name>Down the hill</name>
+        // <color rgb="33cc00">green</color>
+        // </balloon>
+        // <balloon problem-id="6">
+        // <label>F</label>
+        // <name>Failing to make the grade</name>
+        // <color rgb="ffff00">yellow</color>
+        // </balloon>
+        // </balloons>
+        // </notification>
+
+        IMemento balloonsRoot = memento.createChild(BALLOON_LIST_TAG);
+
+        for (Problem problem : problems) {
+            memento = balloonsRoot.createChild(BALLOON_TAG);
+            addBalloonMemento(memento, contest, problem);
+
+        }
+        
+        return memento;
+    }
 
     public XMLMemento createElement(IInternalContest contest, Account account) {
         XMLMemento memento = XMLMemento.createWriteRoot(TEAM_TAG);
@@ -330,11 +593,17 @@ public class EventFeedXML {
         return memento;
     }
 
+    /**
+     * Return the problem index (starting at/base one)).
+     * @param contest
+     * @param inProblem
+     * @return one based number for problem.
+     */
     private int getProblemIndex(IInternalContest contest, Problem inProblem) {
         int idx = 0;
         for (Problem problem : contest.getProblems()) {
             if (problem.getElementId().equals(inProblem.getElementId())) {
-                return idx;
+                return idx + 1;
             }
             idx++;
         }
@@ -595,6 +864,15 @@ public class EventFeedXML {
 
         XMLUtilities.addChild(memento, "acronym", judgement.getAcronym());
         XMLUtilities.addChild(memento, "name", judgement.getDisplayName());
+        return memento;
+    }
+
+    public XMLMemento createElement(IInternalContest contest, BalloonDeliveryInfo balloonDeliveryInfo, int notificationSequenceNumber) {
+
+        XMLMemento memento = XMLMemento.createWriteRoot(NOTIFICATION_TAG);
+        Run run = getFirstSolvedRun (contest, balloonDeliveryInfo.getClientId(), balloonDeliveryInfo.getProblemId());
+        
+        addMemento(memento, contest, run, notificationSequenceNumber);
         return memento;
     }
 }

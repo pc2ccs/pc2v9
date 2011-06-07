@@ -1,18 +1,26 @@
 package edu.csus.ecs.pc2.core.report;
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.Arrays;
 import java.util.Vector;
 
 import junit.framework.TestCase;
+import edu.csus.ecs.pc2.core.Notification;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
+import edu.csus.ecs.pc2.core.list.BalloonDeliveryComparator;
 import edu.csus.ecs.pc2.core.list.ClarificationComparator;
 import edu.csus.ecs.pc2.core.list.GroupComparator;
 import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.BalloonDeliveryInfo;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
+import edu.csus.ecs.pc2.core.model.ContestInformation.TeamDisplayMask;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.InternalContest;
@@ -37,20 +45,26 @@ public class EventFeedXMLTest extends TestCase {
     private final boolean debugMode = false;
 
     private IInternalContest contest = null;
+    
+    private SampleContest sample = new SampleContest();
+    
+    private Notification notification = new Notification();
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
 
-        SampleContest sample = new SampleContest();
-        contest = sample.createContest(1, 1, 22, 12, true);
+        int siteNumber = 1;
+        contest = sample.createContest(siteNumber, 1, 22, 12, true);
 
         /**
          * Add random runs
          */
 
         Run[] runs = sample.createRandomRuns(contest, 12, true, true, true);
-
+        
+        addContestInfo (contest, "Contest Title");
+        
         Group group1 = new Group("Mississippi");
         group1.setGroupId(1024);
         contest.addGroup(group1);
@@ -81,6 +95,15 @@ public class EventFeedXMLTest extends TestCase {
             judgement = sample.getRandomJudgement(contest, run.getNumber() % 2 == 0); // ever other run is judged Yes.
             sample.addJudgement(contest, run, judgement, judgeId);
         }
+    }
+
+    private void addContestInfo(IInternalContest contest2, String title) {
+        ContestInformation info = new ContestInformation();
+        info.setContestTitle(title);
+        info.setContestURL("http://pc2.ecs.csus.edu/pc2");
+        info.setTeamDisplayMode(TeamDisplayMask.LOGIN_NAME_ONLY);
+
+        contest.addContestInformation(info);
     }
 
     /**
@@ -120,16 +143,14 @@ public class EventFeedXMLTest extends TestCase {
          * Check info tag, if there is no contest data in InternalContest.
          */
         String xml = toContestXML(eventFeedXML.createInfoElement(internalContest, null));
+        assertNotNull("Should create contest element", xml);
+        testForValidXML (xml);
 
         if (debugMode){
             System.out.println(" -- testContestElement info tag ");
             System.out.println(xml);
             System.out.println();
         }
-        
-        System.out.println(" -- testContestElement info tag ");
-        System.out.println(xml);
-        System.out.println();
             
         /**
          * Check complete EventFeed XML,  if there is no contest data in InternalContest.
@@ -141,11 +162,7 @@ public class EventFeedXMLTest extends TestCase {
             System.out.println(xml);
             System.out.println();
         }
-        
-        System.out.println(" -- testContestElement info tag ");
-        System.out.println(xml);
-        System.out.println();
-
+        testForValidXML (xml);
     }
 
     /**
@@ -172,6 +189,8 @@ public class EventFeedXMLTest extends TestCase {
         if (debugMode){
             System.out.println(xml);
         }
+        
+        testForValidXML (xml);
     }
 
     public void testLanguageElement() throws Exception {
@@ -189,6 +208,7 @@ public class EventFeedXMLTest extends TestCase {
             if (debugMode){
                 System.out.println(xml);
             }
+            testForValidXML (xml);
             idx++;
         }
     }
@@ -226,6 +246,7 @@ public class EventFeedXMLTest extends TestCase {
             if (debugMode){
                 System.out.println(xml);
             }
+            testForValidXML (xml);
         }
     }
 
@@ -241,8 +262,120 @@ public class EventFeedXMLTest extends TestCase {
             if (debugMode){
                 System.out.println(xml);
             }
+            testForValidXML (xml);
         }
     }
+    
+    public void testCreateBalloonElement() throws Exception {
+
+        if (debugMode){
+            System.out.println(" -- testCreateBalloonElement ");
+        }
+        
+        EventFeedXML eventFeedXML = new EventFeedXML();
+        for (Problem problem : contest.getProblems()) {
+            String xml = toContestXML(eventFeedXML.createBalloonElement(contest, problem));
+            assertNotNull ("Failed to create balloon element for "+problem, xml);
+            if (debugMode){
+                System.out.println(xml);
+            }
+            testForValidXML (xml);
+        }
+    }
+    
+    private Run [] getSortedRuns() {
+        Run[] runs = contest.getRuns();
+        Arrays.sort(runs, new RunComparator());
+        return runs;
+    }
+    
+    public void testNotification() throws Exception {
+
+        // Create notifications
+
+        addNotifications(contest);
+
+        int solved = 0;
+        for (Run run : getSortedRuns()) {
+            if (run.isSolved()) {
+                assertTrue("Expecting Notification for " + run, notification.alreadyHasNotification(contest, run));
+                solved ++;
+            }
+        }
+
+        EventFeedXML evenFeedXML = new EventFeedXML();
+
+        BalloonDeliveryInfo[] deliveries = notification.getBalloonDeliveries(contest);
+        Arrays.sort(deliveries, new BalloonDeliveryComparator(contest));
+        int notificationSequenceNumber = 1;
+        
+        assertEquals("Expected notifications for all solved", solved, deliveries.length);
+        
+        for (BalloonDeliveryInfo balloonDeliveryInfo : deliveries) {
+
+            String xml = toContestXML(evenFeedXML.createElement(contest, balloonDeliveryInfo, notificationSequenceNumber));
+            
+            if (debugMode){
+                System.out.println(xml);
+            }
+            testForValidXML (xml);
+            notificationSequenceNumber++;
+        }
+        
+        assertEquals("Expected notifification for all solved.", notificationSequenceNumber-1, deliveries.length);
+    }
+    
+    /**
+     * For all solved runs insure that each has a notification.
+     * 
+     * @param contest2
+     * @return
+     */
+    private int addNotifications(IInternalContest contest2) {
+        
+        int count = 0;
+        
+        for (Run run : getSortedRuns()) {
+            if (run.isSolved()) {
+
+                if (!notification.alreadyHasNotification(contest2, run)) {
+                    count++;
+                    createNotification(contest2, run);
+                }
+            }
+        }
+        
+        return count;
+    }
+    
+    /**
+     * Create a notification if needed.
+     * 
+     * Checks for existing notification, only creates
+     * a notification if no notification exists.
+     * 
+     * @param contest2
+     * @param run
+     */
+    private void createNotification(IInternalContest contest2, Run run) {
+
+        BalloonDeliveryInfo info = notification.getNotification(contest2, run);
+
+        if (info == null) {
+            /**
+             * Only create notification if needed.
+             */
+            notification.addNotification(contest2, run);
+            assertNotNull("Expecting a delivery info",notification.getNotification(contest2, run));
+        }
+    }
+
+    @SuppressWarnings("unused")
+    private String toString(BalloonDeliveryInfo info) {
+        return "Notification: "+info.getKey()+" "+info.getTimeSent();
+    }
+
+  
 
     public void testProblemElement() throws Exception {
 
@@ -259,6 +392,7 @@ public class EventFeedXMLTest extends TestCase {
             if (debugMode){
                 System.out.println(xml);
             }
+            testForValidXML (xml);
             idx++;
         }
     }
@@ -279,6 +413,7 @@ public class EventFeedXMLTest extends TestCase {
             if (debugMode){
                 System.out.println(xml);
             }
+            testForValidXML (xml);
         }
     }
 
@@ -299,6 +434,7 @@ public class EventFeedXMLTest extends TestCase {
             if (debugMode){
                 System.out.println(xml);
             }
+            testForValidXML (xml);
         }
     }
 
@@ -318,6 +454,7 @@ public class EventFeedXMLTest extends TestCase {
             if (debugMode){
                 System.out.println(xml);
             }
+            testForValidXML (xml);
         }
     }
 
@@ -336,10 +473,10 @@ public class EventFeedXMLTest extends TestCase {
             System.out.println(" -- testFinalizedElement ");
             System.out.println(xml);
         }
+        testForValidXML (xml);
     }
 
     public void testStartupElement() throws Exception {
-
 
         EventFeedXML eventFeedXML = new EventFeedXML();
         String xml = eventFeedXML.createStartupXML(contest);
@@ -348,6 +485,8 @@ public class EventFeedXMLTest extends TestCase {
             System.out.println(" -- testStartupElement ");
             System.out.println(xml);
         }
+        testForValidXML (xml);
+
     }
 
     public void testToXML() throws Exception {
@@ -357,6 +496,70 @@ public class EventFeedXMLTest extends TestCase {
         if (debugMode){
             System.out.println(" -- testToXML ");
             System.out.println(xml);
+        }
+        testForValidXML (xml);
+
+
+    }
+    
+    /**
+     * Test for well formed XML.
+     * 
+     * @param xml
+     */
+    private void testForValidXML(String xml) {
+        
+        assertFalse("Expected XML, found null", xml == null);
+        assertFalse("Expected XML, found empty string", xml.length() == 0);
+        
+//        System.out.println("XML length is "+xml.length());
+        
+        // TODO CCS test for well formed XML
+        
+    }
+
+    protected void startEventFeed(int port) throws IOException {
+
+        ServerSocket server = new ServerSocket(port);
+
+        /**
+         * Check info tag, if there is no contest data in InternalContest.
+         */
+        EventFeedXML eventFeedXML = new EventFeedXML();
+        String xml = eventFeedXML.toXML(contest);
+
+        System.out.println("Opened socket on port " + port);
+
+        while (true) {
+
+            try {
+                Socket connection = server.accept();
+                OutputStreamWriter out = new OutputStreamWriter(connection.getOutputStream());
+                out.write(xml);
+                out.write("<!-- end of stream -->");
+                out.flush();
+                connection.close();
+                System.out.println("Opened and output sample Event Feed");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+    
+    /**
+     * Create socket server on port.
+     * 
+     * @param args
+     */
+    public static void main(String[] args) {
+
+        try {
+            EventFeedXMLTest eventFeedXMLTest = new EventFeedXMLTest();
+            eventFeedXMLTest.setUp();
+            eventFeedXMLTest.startEventFeed(5555);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
     }
