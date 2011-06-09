@@ -1,3 +1,7 @@
+
+This provides an overview of how pc2 transforms the XSLT files
+into HTML used by the ICPC Finals and Pacific Northwest Contest.
+
 The scoreboard module looks 1st for xsl in ./data/xsl, if that directory
 does not exist, it falls back to the data/xsl directory under the 
 pc2 installation directory.
@@ -26,5 +30,8 @@ If wf.index.xsl is placed in the data/xsl directory, an html called
 wf.index.html will be created by the scoreboard module.  Typically
 if you are going to use the world finals ranking system you would
 call this index.xsl/group.xsl (eg remove the "wf." part).
+
+Questions?
+email to pc2@ecs.csus.edu
 
 # $Id$
