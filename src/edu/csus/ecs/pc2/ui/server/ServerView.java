@@ -2,7 +2,9 @@ package edu.csus.ecs.pc2.ui.server;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.Frame;
+import java.awt.event.KeyEvent;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -45,12 +47,9 @@ import edu.csus.ecs.pc2.ui.OptionsPanel;
 import edu.csus.ecs.pc2.ui.PacketMonitorPane;
 import edu.csus.ecs.pc2.ui.PlaybackPane;
 import edu.csus.ecs.pc2.ui.PluginLoadPane;
-import edu.csus.ecs.pc2.ui.ProfilesPane;
 import edu.csus.ecs.pc2.ui.ReportPane;
 import edu.csus.ecs.pc2.ui.SitesPanel;
 import edu.csus.ecs.pc2.ui.UIPlugin;
-import java.awt.Font;
-import java.awt.event.KeyEvent;
 
 /**
  * GUI for Server.
@@ -490,8 +489,8 @@ public class ServerView extends JFrame implements UIPlugin {
             }
         }            
 
-        ProfilesPane profilePane = new ProfilesPane();
-        addUIPlugin(getMainTabbedPane(), "Profiles", profilePane);
+//        ProfilesPane profilePane = new ProfilesPane();
+//        addUIPlugin(getMainTabbedPane(), "Profiles", profilePane);
 
         PlaybackPane playbackPane = new PlaybackPane();
         addUIPlugin(getMainTabbedPane(), "Replay", playbackPane);
