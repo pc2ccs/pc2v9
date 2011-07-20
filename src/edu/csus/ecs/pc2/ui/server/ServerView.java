@@ -108,7 +108,7 @@ public class ServerView extends JFrame implements UIPlugin {
      * 
      */
     private void initialize() {
-        this.setSize(new java.awt.Dimension(518, 400));
+        this.setSize(new java.awt.Dimension(580, 400));
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setTitle("Server View");
         this.setContentPane(getMainViewPane());
@@ -718,7 +718,8 @@ public class ServerView extends JFrame implements UIPlugin {
             updateProfileLabel();
         }
     }
-        
+
+    
 
 
 } // @jve:decl-index=0:visual-constraint="10,10"
