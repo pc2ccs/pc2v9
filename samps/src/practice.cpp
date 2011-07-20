@@ -24,7 +24,7 @@ main ()
 
 	if (filein.fail())
 	{
-		cerr << "Could not read from file sumit.dat " << endl;
+		cerr << "Could not read from file practice.dat " << endl;
 	}
 	else
 	{
