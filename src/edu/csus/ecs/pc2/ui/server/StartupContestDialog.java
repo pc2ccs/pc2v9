@@ -104,10 +104,9 @@ public class StartupContestDialog extends JDialog {
 //    "</font></html>";  //  @jve:decl-index=0:
 
     private final String subsequentLoginText = "<html><center><font size=\"+1\">This server has been started previously.  </font></center><font size=\"+1\">" + "<br>" //
-    + "To restart the server you must: <br>" + //
-    "(1) Enter the Contest Master Password which was specified when the server was first started.<br>" + //
+    + "To restart the server you must enter the Contest Master Password which was specified when the server was first started.<br>" + //
     "</font></html>";  //  @jve:decl-index=0:
-
+    
     /**
      * This method initializes
      * 
