@@ -1,0 +1,22 @@
+#!/bin/sh
+#
+# Purpose: start pc2 submitter
+# Author : pc2@ecs.csus.edu
+# $HeadURL$
+#
+
+. `dirname $0`/pc2env
+
+# MacOS or not
+if [ -f /mach_kernel ]; then
+  # set our dock name (otherwise defaults to Starter)
+  PC2XOPS="-Xdock:name=`basename $0`"
+else
+  PC2XOPS=""
+fi
+
+CLASSNAME=edu.csus.ecs.pc2.ui.team.Submitter
+
+java $PC2XOPS -Xms64M -Xmx768M -cp $libdir/pc2.jar:$mclbdir/mclb.jar $CLASSNAME $*
+
+# eof pc2submit $Id$ 

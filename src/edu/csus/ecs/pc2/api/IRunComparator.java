@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.Comparator;
 
 /**
- * Run Comparator, Order the runs by site # and run #.
+ * IRun Comparator, Order the runs by site # and run #.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -13,8 +13,6 @@ import java.util.Comparator;
 // $HeadURL$
 public class IRunComparator implements Comparator<IRun>, Serializable {
     
-    // TODO Move from test.* into src.* API directory
-
     /**
      * 
      */

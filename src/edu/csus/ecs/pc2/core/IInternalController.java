@@ -601,5 +601,12 @@ public interface IInternalController {
      * @param data 
      */
     void updateFinalizeData(FinalizeData data);
+    
+    /**
+     * Using GUI?.
+     * 
+     * @param usingGUI true means show GUI message, false means do not show GUI messages.
+     */
+    void setUsingGUI(boolean usingGUI);
 
 }

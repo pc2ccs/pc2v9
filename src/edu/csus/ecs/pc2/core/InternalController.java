@@ -3116,10 +3116,12 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             }
         } else {
             System.err.println(message);
-            if (ex != null) {
-                ex.printStackTrace(System.err);
+            if (Utilities.isDebugMode()) {
+                if (ex != null) {
+                    ex.printStackTrace(System.err);
+                }
             }
-            System.err.println("PC^2 Halted");
+            System.err.println("PC^2 Halted - check logs");
         }
 
         System.exit(4);
@@ -3396,6 +3398,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     public void updateFinalizeData(FinalizeData data) {
         Packet updateFinalizePacket  = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), data);
         sendToLocalServer(updateFinalizePacket);
+    }
+    
+    public void setUsingGUI(boolean usingGUI) {
+        this.usingGUI = usingGUI;
     }
 
 }
