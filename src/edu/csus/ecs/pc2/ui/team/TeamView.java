@@ -13,6 +13,9 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.IniFile;
+import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
@@ -24,6 +27,7 @@ import edu.csus.ecs.pc2.ui.ContestClockDisplay.DisplayTimes;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
 import edu.csus.ecs.pc2.ui.OptionsPanel;
+import edu.csus.ecs.pc2.ui.PluginLoadPane;
 import edu.csus.ecs.pc2.ui.RunsPanel;
 import edu.csus.ecs.pc2.ui.SubmitClarificationPane;
 import edu.csus.ecs.pc2.ui.SubmitRunPane;
@@ -249,6 +253,21 @@ public class TeamView extends JFrame implements UIPlugin {
         
                 OptionsPanel optionsPanel = new OptionsPanel();
                 addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
+                
+                if (Utilities.isDebugMode()) {
+                    try {
+                        PluginLoadPane pane = new PluginLoadPane();
+                        pane.setParentTabbedPane(getMainTabbedPane());
+                        addUIPlugin(getMainTabbedPane(), "Plugin Load", pane);
+                    } catch (Exception e) {
+                        if (StaticLog.getLog() != null) {
+                            StaticLog.getLog().log(Log.WARNING, "Exception", e);
+                            e.printStackTrace(System.err);
+                        } else {
+                            e.printStackTrace(System.err);
+                        }
+                    }
+                }          
 
                 updateFrameTitle(contest.getContestTime().isContestRunning());
                 

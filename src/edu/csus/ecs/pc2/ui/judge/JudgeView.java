@@ -28,6 +28,7 @@ import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
 import edu.csus.ecs.pc2.ui.OptionsPanel;
 import edu.csus.ecs.pc2.ui.PacketMonitorPane;
+import edu.csus.ecs.pc2.ui.PluginLoadPane;
 import edu.csus.ecs.pc2.ui.RunsPanel;
 import edu.csus.ecs.pc2.ui.SubmissionBiffPane;
 import edu.csus.ecs.pc2.ui.SubmitClarificationPane;
@@ -209,6 +210,21 @@ public class JudgeView extends JFrame implements UIPlugin {
                 contestClockDisplay = new ContestClockDisplay(controller.getLog(), contest.getContestTime(), contest.getSiteNumber(), true, null);
                 contestClockDisplay.addLabeltoUpdateList(clockLabel, DisplayTimes.REMAINING_TIME, contest.getSiteNumber());
                 controller.register(contestClockDisplay);
+                
+                if (Utilities.isDebugMode()) {
+                    try {
+                        PluginLoadPane pane = new PluginLoadPane();
+                        pane.setParentTabbedPane(getMainTabbedPane());
+                        addUIPlugin(getMainTabbedPane(), "Plugin Load", pane);
+                    } catch (Exception e) {
+                        if (StaticLog.getLog() != null) {
+                            StaticLog.getLog().log(Log.WARNING, "Exception", e);
+                            e.printStackTrace(System.err);
+                        } else {
+                            e.printStackTrace(System.err);
+                        }
+                    }
+                }
                 
                 SubmissionBiffPane submissionBiffPane = new SubmissionBiffPane();
                 getJudgeBiffPane().add(submissionBiffPane, java.awt.BorderLayout.CENTER);
