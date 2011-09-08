@@ -53,6 +53,7 @@ import edu.csus.ecs.pc2.ui.PacketExplorerPane;
 import edu.csus.ecs.pc2.ui.PacketMonitorPane;
 import edu.csus.ecs.pc2.ui.PluginLoadPane;
 import edu.csus.ecs.pc2.ui.ProblemsPane;
+import edu.csus.ecs.pc2.ui.ProfilesPane;
 import edu.csus.ecs.pc2.ui.ReportPane;
 import edu.csus.ecs.pc2.ui.RunsPanel;
 import edu.csus.ecs.pc2.ui.SitesPanel;
@@ -244,8 +245,8 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 ProblemsPane problemsPane = new ProblemsPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Problems", problemsPane);
 
-//                ProfilesPane profilesPane = new ProfilesPane();
-//                addUIPlugin(getConfigureContestTabbedPane(), "Profiles", profilesPane);
+                ProfilesPane profilesPane = new ProfilesPane();
+                addUIPlugin(getConfigureContestTabbedPane(), "Profiles", profilesPane);
 
                 ReportPane reportPaneC = new ReportPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Reports", reportPaneC);
