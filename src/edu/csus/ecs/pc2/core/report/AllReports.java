@@ -87,6 +87,8 @@ public class AllReports implements IReport {
         
         reports.add(new FinalizeReport());
         
+        reports.add(new ExportYamlReport());
+        
         reports.add(new InternalDumpReport());
         
         reports.add(new HTMLReport());
