@@ -5,12 +5,14 @@ import java.io.PrintStream;
 
 import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.export.ExportYAML;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.util.JUnitUtilities;
 
 /**
  * Test for ContestYAMLLoader.
@@ -22,24 +24,29 @@ import edu.csus.ecs.pc2.core.model.Problem;
 // $HeadURL: http://pc2.ecs.csus.edu/repos/v9sandbox/trunk/test/edu/csus/ecs/pc2/imports/ccs/ContestYAMLLoaderTest.java $
 public class ContestYAMLLoaderTest extends TestCase {
 
-//    private boolean debugFlag = false;
+    private boolean debugFlag = true;
 
     private ContestYAMLLoader loader;
 
-    /**
-     * Source for YAML test files.
-     */
-    private static final String TEST_YAML_DIRECTORY = "data" + File.separator + "yaml";
-
-    /**
-     * YAML contest.yaml test file name.
-     */
-    private static final String TEST_CONTEST_YAML_FILENAME = TEST_YAML_DIRECTORY + File.separator + "contest.yaml";
+    private String testDirectory = "testdata" + File.separator + "yaml";
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
         loader = new ContestYAMLLoader();
+
+        String testDir = "testdata";
+        String projectPath = JUnitUtilities.locate(testDir);
+        if (projectPath == null) {
+            projectPath = "."; //$NON-NLS-1$
+            System.err.println("ContestYAMLLoaderTest: Unable to locate " + testDir);
+        }
+        testDirectory = projectPath +  File.separator + "testdata" + File.separator + "yaml";
+
+        if (debugFlag) {
+            System.out.println("ContestYAMLLoaderTest: test directory: " + getYamlTestDirectory());
+            System.out.println("ContestYAMLLoaderTest: test      file: " + getYamlTestFileName());
+        }
     }
 
     @SuppressWarnings("unused")
@@ -66,11 +73,11 @@ public class ContestYAMLLoaderTest extends TestCase {
         IInternalContest contest = loader.fromYaml(null, new String[0], "NAD");
         assertNotNull(contest);
 
-        String[] contents = Utilities.loadFile(TEST_CONTEST_YAML_FILENAME);
-        
-        assertFalse("File missing "+TEST_CONTEST_YAML_FILENAME, contents.length == 0);
+        String[] contents = Utilities.loadFile(getYamlTestFileName());
 
-        contest = loader.fromYaml(null, contents, TEST_YAML_DIRECTORY);
+        assertFalse("File missing " + getYamlTestFileName(), contents.length == 0);
+
+        contest = loader.fromYaml(null, contents, getYamlTestDirectory());
 
         assertNotNull(contest);
 
@@ -111,7 +118,7 @@ public class ContestYAMLLoaderTest extends TestCase {
         IInternalContest contest = loader.fromYaml(null, new String[0], "NAD");
         assertNotNull(contest);
 
-        contest = loader.fromYaml(null, TEST_YAML_DIRECTORY);
+        contest = loader.fromYaml(null, getYamlTestDirectory());
 
         assertNotNull(contest);
 
@@ -176,9 +183,9 @@ public class ContestYAMLLoaderTest extends TestCase {
 
     public void testLoadClarCategories() throws Exception {
 
-        String[] contents = Utilities.loadFile(TEST_CONTEST_YAML_FILENAME);
-        
-        assertFalse("File missing "+TEST_CONTEST_YAML_FILENAME, contents.length == 0);
+        String[] contents = Utilities.loadFile(getYamlTestFileName());
+
+        assertFalse("File missing " + getYamlTestFileName(), contents.length == 0);
 
         String[] answers = loader.getClarificationCategories(contents);
 
@@ -189,9 +196,9 @@ public class ContestYAMLLoaderTest extends TestCase {
     }
 
     public void testGeneralAnswsers() throws Exception {
-        String[] contents = Utilities.loadFile(TEST_CONTEST_YAML_FILENAME);
-        
-        assertFalse("File missing "+TEST_CONTEST_YAML_FILENAME, contents.length == 0);
+        String[] contents = Utilities.loadFile(getYamlTestFileName());
+
+        assertFalse("File missing " + getYamlTestFileName(), contents.length == 0);
 
         String[] strings = loader.getGeneralAnswers(contents);
 
@@ -201,12 +208,12 @@ public class ContestYAMLLoaderTest extends TestCase {
 
     public void testgetSectionLines() throws Exception {
 
-        String contestYamlFilename = "data" + File.separator + "yaml" + File.separator + "contest.yaml";
+        String contestYamlFilename = getYamlTestFileName();
 
         assertTrue("Test file does not exist " + contestYamlFilename, Utilities.isFileThere(contestYamlFilename));
         String[] contents = Utilities.loadFile(contestYamlFilename);
-        
-        assertFalse("File missing "+contestYamlFilename, contents.length == 0);
+
+        assertFalse("File missing " + contestYamlFilename, contents.length == 0);
 
         String key = ContestYAMLLoader.LANGUAGE_KEY;
         String[] sectionLines = loader.getSectionLines(key, contents);
@@ -228,4 +235,13 @@ public class ContestYAMLLoaderTest extends TestCase {
         sectionLines = loader.getSectionLines(key, contents);
         assertEquals(key + " lines.", 18, sectionLines.length);
     }
+
+    String getYamlTestDirectory() {
+        return testDirectory;
+    }
+
+    String getYamlTestFileName() {
+        return getYamlTestDirectory() + File.separator + ExportYAML.CONTEST_FILENAME;
+    }
+
 }

@@ -42,6 +42,7 @@ import edu.csus.ecs.pc2.ui.FinalizePane;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.GroupsPane;
 import edu.csus.ecs.pc2.ui.ICPCPane;
+import edu.csus.ecs.pc2.ui.ImportDataPane;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
 import edu.csus.ecs.pc2.ui.JudgementsPanel;
 import edu.csus.ecs.pc2.ui.LanguagesPane;
@@ -223,6 +224,9 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
                 ICPCPane icpcPane = new ICPCPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "ICPC", icpcPane);
+                
+                ImportDataPane importDataPane = new ImportDataPane();
+                addUIPlugin(getConfigureContestTabbedPane(), "Import CCS", importDataPane);
 
                 JudgementsPanel judgementsPanel = new JudgementsPanel();
                 addUIPlugin(getConfigureContestTabbedPane(), "Judgements", judgementsPanel);

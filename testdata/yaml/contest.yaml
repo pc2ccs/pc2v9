@@ -1,7 +1,7 @@
 # Contest configuration
 # Source: http://scrool.se/icpc/wiki/index.php/Contest_Control_System
-# $HeadURL: http://pc2.ecs.csus.edu/repos/v9sandbox/trunk/data/yaml/contest.yaml $
-# $Id: contest.yaml 226 2011-09-02 05:23:34Z laned $
+# $HeadURL$
+# $Id$
 ---
 name:              ACM-ICPC World Finals 2011
 short-name:        ICPC WF 2011

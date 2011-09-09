@@ -21,6 +21,8 @@ import edu.csus.ecs.pc2.core.model.Problem;
  * @version $Id: ContestYAMLLoader.java 225 2011-09-02 05:22:43Z laned $
  */
 
+// TODO CCS REALLY IMPORTANT USER INTERFACE WORK - MUST SHOW SYNTAX ERRORS AND INPUT FILE PROBLEMS TO USER!!! 
+
 // $HeadURL: http://pc2.ecs.csus.edu/repos/v9sandbox/trunk/src/edu/csus/ecs/pc2/imports/ccs/ContestYAMLLoader.java $
 public class ContestYAMLLoader {
 
@@ -50,6 +52,16 @@ public class ContestYAMLLoader {
 
 //    private static final String DEFAULT_PROBLEM_YAML_FILENAME = "problem.yaml";
 
+    /**
+     * Load contest.yaml from directory.
+     * 
+     * @see #fromYaml(IInternalContest, String[], String)
+     * 
+     * @param contest 
+     * @param diretoryName directory to load files from.
+     * @return contest
+     * @throws Exception
+     */
     public IInternalContest fromYaml(IInternalContest contest, String diretoryName) throws Exception {
         String[] contents = Utilities.loadFile(diretoryName + File.separator + DEFAULT_CONTEST_YAML_FILENAME);
         return fromYaml(contest, contents, diretoryName);
