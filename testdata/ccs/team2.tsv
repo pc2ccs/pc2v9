@@ -1,0 +1,8 @@
+# test.tsv test file 2
+# $HeadURL: http://pc2.ecs.csus.edu/repos/v9sandbox/trunk/testdata/ccs/team2.tsv $
+#
+file_version	1
+1	3232	905	Hoos	University of Virginia	U Virginia	USA
+2	3234	905	Rams	University of Colorado	U Colorado	USA
+10	1234	905	Hornets	Calfornia Univesity at Sacramento	CSUS	USA
+11	1254	905	Wildcats	Calfornia Univesity at Chico	CSUC	USA

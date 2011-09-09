@@ -1,0 +1,9 @@
+# Problem configuration
+# Source: http://scrool.se/icpc/wiki/index.php/Problem_format
+# $HeadURL: http://pc2.ecs.csus.edu/repos/v9sandbox/trunk/data/yaml/typicalproblem.yaml $
+# $Id: typicalproblem.yaml 200 2011-06-24 19:16:12Z laned $
+name: Squares to Circles
+source: ICPC Mid-Atlantic Regional Contest
+author: John von Judge 
+rights_owner: ICPC
+

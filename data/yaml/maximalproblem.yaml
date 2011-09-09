@@ -1,0 +1,21 @@
+# Problem configuration
+# Source: http://scrool.se/icpc/wiki/index.php/Problem_format
+# $HeadURL: http://pc2.ecs.csus.edu/repos/v9sandbox/trunk/data/yaml/maximalproblem.yaml $
+# $Id: maximalproblem.yaml 200 2011-06-24 19:16:12Z laned $
+name: Squares to Circles
+source: ICPC Mid-Atlantic Regional Contest
+author: John von Judge 
+license: cc by-sa  
+rights_owner: ICPC
+
+limits:
+   time_multiplier: 5
+   time_safety_margin: 2
+   memory: 4096  
+   output: 16 
+   compile_time: 240
+   validation_time: 240
+   validation_memory: 3072
+   validation_filesize: 4
+
+validator: space_change_sensitive float_absolute_tolerance 1e-6
