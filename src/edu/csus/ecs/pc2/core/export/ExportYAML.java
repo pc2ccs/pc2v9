@@ -191,8 +191,15 @@ public class ExportYAML {
 
             String name = problem.getDisplayName();
 
-            contestWriter.println("  - letter: " + getProblemLetter(id));
+            String letter = getProblemLetter(id);
+            if (problem.getLetter() != null){
+                letter = problem.getLetter();
+            }
+            contestWriter.println("  - letter: " + letter); 
             String shortName = createProblemShortName(name);
+            if (problem.getShortName() != null && problem.getShortName().trim().length() > 0){
+                shortName = problem.getShortName();
+            }
             contestWriter.println("   short-name: " + shortName);
 
             String colorName = getProblemBalloonColor(contest, problem);

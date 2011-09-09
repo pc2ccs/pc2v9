@@ -1,6 +1,6 @@
 package edu.csus.ecs.pc2.core.model;
 
-
+import edu.csus.ecs.pc2.core.StringUtilities;
 
 /**
  * Single Problem Definition.
@@ -159,6 +159,10 @@ public class Problem implements IElementObject {
      */
     private boolean prelimaryNotification = false;
     
+    private String shortName = "";
+    
+    private String letter = null;
+    
     /**
      * Create a problem with the display name.
      * 
@@ -171,14 +175,6 @@ public class Problem implements IElementObject {
         setSiteNumber(0);
     }
 
-    private String cloneString(String s) {
-        String result = null;
-        if (s != null) {
-            result = new String(s);
-        }
-        return result;
-    }
-
     public Problem copy(String newDisplayName) {
         Problem clone = new Problem(newDisplayName);
         // inherited field
@@ -188,17 +184,17 @@ public class Problem implements IElementObject {
         clone.setDisplayName(newDisplayName);
         // TODO is number really used?
         clone.setNumber(getNumber());
-        // TODO files need the corresponding ProblemDataFile populated...
-        clone.setDataFileName(cloneString(dataFileName));
-        clone.setAnswerFileName(cloneString(answerFileName));
+        // TODO FATAL files need the corresponding ProblemDataFile populated...
+        clone.setDataFileName(StringUtilities.cloneString(dataFileName));
+        clone.setAnswerFileName(StringUtilities.cloneString(answerFileName));
         clone.setActive(isActive());
         clone.setReadInputDataFromSTDIN(isReadInputDataFromSTDIN());
         clone.setTimeOutInSeconds(getTimeOutInSeconds());
         clone.setValidatedProblem(isValidatedProblem());
         clone.setUsingPC2Validator(isUsingPC2Validator());
         clone.setWhichPC2Validator(getWhichPC2Validator());
-        clone.setValidatorCommandLine(cloneString(validatorCommandLine));
-        clone.setValidatorProgramName(cloneString(validatorProgramName));
+        clone.setValidatorCommandLine(StringUtilities.cloneString(validatorCommandLine));
+        clone.setValidatorProgramName(StringUtilities.cloneString(validatorProgramName));
         clone.setInternationalJudgementReadMethod(isInternationalJudgementReadMethod());
 
         // TODO Implement Commands to be executed before a problem is run
@@ -212,6 +208,8 @@ public class Problem implements IElementObject {
         clone.setComputerJudged(isComputerJudged());
         clone.setManualReview(isManualReview());
         clone.setPrelimaryNotification(isPrelimaryNotification());
+        clone.letter = StringUtilities.cloneString(letter);
+        clone.shortName = StringUtilities.cloneString(shortName);
         return clone;
     }
 
@@ -495,26 +493,7 @@ public class Problem implements IElementObject {
         return getElementId().toString().hashCode();
     }
     
-    /**
-     * Compares string, handles if either string is null.
-     * 
-     * @param s1
-     * @param s2
-     * @return true if both null or equal, false otherwise
-     */
-    // TODO move this into a string utility class.
-    private boolean stringSame (String s1, String s2){
-        if (s1 == null && s2 == null) {
-            return true;
-        }
-        
-        if (s1 == null && s2 != null){
-            return false;
-        }
-        
-        return s1.equals(s2);
-            
-    }
+
 
     public boolean isSameAs(Problem problem) {
 
@@ -522,7 +501,7 @@ public class Problem implements IElementObject {
             if (problem == null){
                 return false;
             }
-            if (! stringSame(displayName, problem.getDisplayName())){
+            if (! StringUtilities.stringSame(displayName, problem.getDisplayName())){
                 return false;
             }
             if (isActive() != problem.isActive()) {
@@ -532,10 +511,10 @@ public class Problem implements IElementObject {
                 return false;
             }
 
-            if (! stringSame(dataFileName, problem.getDataFileName())) {
+            if (! StringUtilities.stringSame(dataFileName, problem.getDataFileName())) {
                 return false;
             }
-            if (! stringSame(answerFileName, problem.getAnswerFileName())) {
+            if (! StringUtilities.stringSame(answerFileName, problem.getAnswerFileName())) {
                 return false;
             }
             if (!readInputDataFromSTDIN == problem.isReadInputDataFromSTDIN()) {
@@ -551,10 +530,10 @@ public class Problem implements IElementObject {
             if (whichPC2Validator != problem.getWhichPC2Validator()) {
                 return false;
             }
-            if (! stringSame(validatorProgramName, problem.getValidatorProgramName())) {
+            if (! StringUtilities.stringSame(validatorProgramName, problem.getValidatorProgramName())) {
                 return false;
             }
-            if (! stringSame(validatorCommandLine, problem.getValidatorCommandLine())) {
+            if (! StringUtilities.stringSame(validatorCommandLine, problem.getValidatorCommandLine())) {
                 return false;
             }
             if (ignoreSpacesOnValidation != problem.isIgnoreSpacesOnValidation()) {
@@ -581,6 +560,10 @@ public class Problem implements IElementObject {
             }
             
             if (getSiteNumber() != problem.getSiteNumber()){
+                return false;
+            }
+            
+            if (! StringUtilities.stringSame(shortName, problem.getShortName())){
                 return false;
             }
 
@@ -624,4 +607,39 @@ public class Problem implements IElementObject {
         this.prelimaryNotification = prelimaryNotification;
     }
 
+    /**
+     * Get short name for problem.
+     * 
+     * @return
+     */
+    public String getShortName() {
+        return shortName;
+    }
+    
+    /**
+     * 
+     * @param shortName
+     * @throws Exception
+     */
+    public void setShortName(String shortName) throws Exception {
+        
+        // TODO CCS short name must be checked to not contain invalid directory chars
+        // like / \\ :  etc.
+        
+        this.shortName = shortName;
+    }
+    
+    /**
+     * Get letter for problem.
+     * 
+     * @return
+     */
+    public String getLetter() {
+        return letter;
+    }
+
+    public void setLetter(String letter) {
+        this.letter = letter;
+    }
+    
 }
