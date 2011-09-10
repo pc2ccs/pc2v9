@@ -1074,10 +1074,17 @@ public class Executable {
                 return true;
 
             } else {
-                executionData.setCompileExeFileName("");
-                executionData.setCompileSuccess(false);
-                executionData.setCompileResultCode(2);
-                return false;
+                if (language.isInterpreted()) {
+                    executionData.setCompileExeFileName(runFiles.getMainFile().getName());
+                    executionData.setCompileSuccess(true);
+                    executionData.setCompileResultCode(0);
+                    return true;
+                } else {
+                    executionData.setCompileExeFileName("");
+                    executionData.setCompileSuccess(false);
+                    executionData.setCompileResultCode(2);
+                    return false;
+                }
             }
 
         } catch (Exception e) {
