@@ -10,6 +10,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
@@ -111,7 +112,7 @@ public class LanguagesPane extends JPanePlugin {
         if (languageListBox == null) {
             languageListBox = new MCLB();
 
-            Object[] cols = { "Display Name", "Compiler Command Line", "Exe Name", "Execute Command Line" };
+            Object[] cols = { "Display Name", "Compiler Command Line", "Exe Name", "Execute Command Line", "Interpreted" };
             languageListBox.addColumns(cols);
             
             /**
@@ -158,7 +159,8 @@ public class LanguagesPane extends JPanePlugin {
 
     protected Object[] buildLanguageRow(Language language) {
 
-        // Object[] cols = { "Display Name", "Compiler Command Line", "Exe Name", "Execute Command Line" };
+//        Object[] cols = { "Display Name", "Compiler Command Line", "Exe Name", "Execute Command Line", "Interpreted" };
+
 
         int numberColumns = languageListBox.getColumnCount();
         Object[] c = new String[numberColumns];
@@ -170,6 +172,7 @@ public class LanguagesPane extends JPanePlugin {
         c[1] = language.getCompileCommandLine();
         c[2] = language.getExecutableIdentifierMask();
         c[3] = language.getProgramExecuteCommandLine();
+        c[4] = Utilities.yesNoString(language.isInterpreted());
         return c;
     }
 

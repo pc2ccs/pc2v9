@@ -45,6 +45,8 @@ public class Language implements IElementObject {
      * Command line to execute the program created using compileCommandLine.
      */
     private String programExecuteCommandLine;
+    
+    private boolean interpreted = false;
 
     public Language(String displayName) {
         super();
@@ -166,6 +168,10 @@ public class Language implements IElementObject {
             if (!programExecuteCommandLine.equals(language.getProgramExecuteCommandLine())) {
                 return false;
             }
+            if (interpreted != language.isInterpreted()) {
+                return false;
+            }
+            
             return true;
         } catch (Exception e) {
             // TODO log to static Exception log
@@ -185,5 +191,13 @@ public class Language implements IElementObject {
 
     public void setExecutableIdentifierMask(String executableIdentifierMask) {
         this.executableIdentifierMask = executableIdentifierMask;
+    }
+    
+    public void setInterpreted(boolean interpreted) {
+        this.interpreted = interpreted;
+    }
+    
+    public boolean isInterpreted() {
+        return interpreted;
     }
 }

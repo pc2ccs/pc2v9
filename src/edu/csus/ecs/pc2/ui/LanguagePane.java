@@ -44,7 +44,7 @@ public class LanguagePane extends JPanePlugin {
 
     private JButton cancelButton = null;
 
-    private JPanel jPanel = null;
+    private JPanel mainPanel = null;
 
     private JLabel jLabel = null;
 
@@ -78,6 +78,8 @@ public class LanguagePane extends JPanePlugin {
 
     private JCheckBox deleteLanguageCheckbox = null;
 
+    private JCheckBox interpretedLanguageCheckBox = null;
+
     /**
      * This method initializes
      * 
@@ -93,9 +95,9 @@ public class LanguagePane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new Dimension(517, 251));
+        this.setSize(new Dimension(517, 289));
 
-        this.add(getJPanel(), java.awt.BorderLayout.CENTER);
+        this.add(getMainPanel(), java.awt.BorderLayout.CENTER);
         this.add(getButtonPane(), java.awt.BorderLayout.SOUTH);
 
         loadComboBox();
@@ -199,9 +201,9 @@ public class LanguagePane extends JPanePlugin {
         }
 
         language.setCompileCommandLine(compileCommandLineTextField.getText());
+        language.setInterpreted(getInterpretedLanguageCheckBox().isSelected());
         language.setExecutableIdentifierMask(getExecutableFilenameTextField().getText());
         language.setProgramExecuteCommandLine(programExecutionCommandLineTextField.getText());
-
         language.setActive(!getDeleteLanguageCheckbox().isSelected());
         
         checkForEmptyField (language.getDisplayName(), "Enter a language name");
@@ -314,26 +316,26 @@ public class LanguagePane extends JPanePlugin {
     }
 
     /**
-     * This method initializes jPanel
+     * This method initializes mainPanel
      * 
      * @return javax.swing.JPanel
      */
-    private JPanel getJPanel() {
-        if (jPanel == null) {
+    private JPanel getMainPanel() {
+        if (mainPanel == null) {
             jLabel5 = new JLabel();
             jLabel5.setBounds(new java.awt.Rectangle(67, 13, 129, 20));
             jLabel5.setHorizontalAlignment(SwingConstants.RIGHT);
             jLabel5.setText("Auto Populate with");
             jLabel5.setName("AutoPopulateLabel");
             jLabel4 = new JLabel();
-            jLabel4.setBounds(new java.awt.Rectangle(13, 145, 244, 20));
+            jLabel4.setBounds(new Rectangle(9, 176, 244, 20));
             jLabel4.setName("ProgramExLabel");
             jLabel4.setMaximumSize(new Dimension(2147483647, 2147483647));
             jLabel4.setHorizontalAlignment(SwingConstants.RIGHT);
             jLabel4.setText("Program Execution Command Line");
             jLabel4.setForeground(new Color(0, 0, 0));
             jLabel3 = new JLabel();
-            jLabel3.setBounds(new java.awt.Rectangle(14, 112, 182, 20));
+            jLabel3.setBounds(new Rectangle(14, 113, 182, 20));
             jLabel3.setName("ExeFilenameLabel");
             jLabel3.setMaximumSize(new Dimension(2147483647, 2147483647));
             jLabel3.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -360,24 +362,25 @@ public class LanguagePane extends JPanePlugin {
             jLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             jLabel.setText("Compile Cmd Line");
             jLabel.setForeground(Color.black);
-            jPanel = new JPanel();
-            jPanel.setLayout(null);
-            jPanel.setName("advancedEdit");
-            jPanel.add(jLabel, jLabel.getName());
-            jPanel.add(jLabel1, jLabel1.getName());
-            jPanel.add(jLabel2, jLabel2.getName());
-            jPanel.add(getDisplayNameTextField(), getDisplayNameTextField().getName());
-            jPanel.add(getCompileCommandLineTextField(), getCompileCommandLineTextField().getName());
-            jPanel.add(getExecutableFilenameTextField(), getExecutableFilenameTextField().getName());
-            jPanel.add(jLabel3, jLabel3.getName());
-            jPanel.add(getJTextField3(), getJTextField3().getName());
-            jPanel.add(jLabel4, jLabel4.getName());
-            jPanel.add(getProgramExecutionCommandLineTextField(), getProgramExecutionCommandLineTextField().getName());
-            jPanel.add(jLabel5, jLabel5.getName());
-            jPanel.add(getAutoPopulateLanguageComboBox(), getAutoPopulateLanguageComboBox().getName());
-            jPanel.add(getDeleteLanguageCheckbox(), null);
+            mainPanel = new JPanel();
+            mainPanel.setLayout(null);
+            mainPanel.setName("advancedEdit");
+            mainPanel.add(jLabel, jLabel.getName());
+            mainPanel.add(jLabel1, jLabel1.getName());
+            mainPanel.add(jLabel2, jLabel2.getName());
+            mainPanel.add(getDisplayNameTextField(), getDisplayNameTextField().getName());
+            mainPanel.add(getCompileCommandLineTextField(), getCompileCommandLineTextField().getName());
+            mainPanel.add(getExecutableFilenameTextField(), getExecutableFilenameTextField().getName());
+            mainPanel.add(jLabel3, jLabel3.getName());
+            mainPanel.add(getJTextField3(), getJTextField3().getName());
+            mainPanel.add(jLabel4, jLabel4.getName());
+            mainPanel.add(getProgramExecutionCommandLineTextField(), getProgramExecutionCommandLineTextField().getName());
+            mainPanel.add(jLabel5, jLabel5.getName());
+            mainPanel.add(getAutoPopulateLanguageComboBox(), getAutoPopulateLanguageComboBox().getName());
+            mainPanel.add(getDeleteLanguageCheckbox(), null);
+            mainPanel.add(getInterpretedLanguageCheckBox(), null);
         }
-        return jPanel;
+        return mainPanel;
     }
 
     /**
@@ -429,7 +432,7 @@ public class LanguagePane extends JPanePlugin {
     private JTextField getExecutableFilenameTextField() {
         if (executableFilenameTextField == null) {
             executableFilenameTextField = new JTextField();
-            executableFilenameTextField.setBounds(new java.awt.Rectangle(208, 112, 264, 20));
+            executableFilenameTextField.setBounds(new Rectangle(208, 113, 264, 20));
             executableFilenameTextField.setToolTipText("Form: exe");
             executableFilenameTextField.setName("programExeTextField");
             executableFilenameTextField.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -466,7 +469,7 @@ public class LanguagePane extends JPanePlugin {
     private JTextField getProgramExecutionCommandLineTextField() {
         if (programExecutionCommandLineTextField == null) {
             programExecutionCommandLineTextField = new JTextField();
-            programExecutionCommandLineTextField.setBounds(new java.awt.Rectangle(274, 145, 198, 20));
+            programExecutionCommandLineTextField.setBounds(new Rectangle(270, 176, 198, 20));
             programExecutionCommandLineTextField.setToolTipText("Form: exe");
             programExecutionCommandLineTextField.setName("programCommandLine");
             programExecutionCommandLineTextField.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -517,11 +520,21 @@ public class LanguagePane extends JPanePlugin {
         executableFilenameTextField.setText(values[2]);
         programExecutionCommandLineTextField.setText(values[3]);
 
+        boolean isScript = LanguageAutoFill.isInterpretedLanguage(languageToFill);
+
+        getInterpretedLanguageCheckBox().setSelected(isScript);
+        
+        if (isScript) {
+            executableFilenameTextField.setText("");
+        }
+
+        executableFilenameTextField.setEnabled(! isScript);
+        
         enableUpdateButtons(true);
     }
 
     /**
-     * Enable or disable Update button based on comparison of run to fields.
+     * Enable or disable Update button based on comparison of language to fields.
      * 
      */
     public void enableUpdateButton() {
@@ -554,11 +567,6 @@ public class LanguagePane extends JPanePlugin {
             }
 
             enableButton |= language.isSameAs(newLanguage);
-
-            // enableButton |= (!displayNameTextField.getText().equals(language.getDisplayName()));
-            // enableButton |= (!compileCommandLineTextField.getText().equals(language.getCompileCommandLine()));
-            // enableButton |= (!executableFilenameTextField.getText().equals(language.getExecutableIdentifierMask()));
-            // enableButton |= (!programExecutionCommandLineTextField.getText().equals(language.getProgramExecuteCommandLine()));
 
         } else {
             if (getAddButton().isVisible()) {
@@ -597,6 +605,7 @@ public class LanguagePane extends JPanePlugin {
 
             getAutoPopulateLanguageComboBox().setSelectedIndex(0);
             getDeleteLanguageCheckbox().setSelected(!language2.isActive());
+            getInterpretedLanguageCheckBox().setSelected(language2.isInterpreted());
 
             getAddButton().setVisible(false);
             getUpdateButton().setVisible(true);
@@ -607,7 +616,7 @@ public class LanguagePane extends JPanePlugin {
             executableFilenameTextField.setText("");
             programExecutionCommandLineTextField.setText("");
             getDeleteLanguageCheckbox().setSelected(false);
-
+            getInterpretedLanguageCheckBox().setSelected(false);
             getAutoPopulateLanguageComboBox().setSelectedIndex(0);
 
             getAddButton().setVisible(true);
@@ -639,7 +648,7 @@ public class LanguagePane extends JPanePlugin {
     private JCheckBox getDeleteLanguageCheckbox() {
         if (deleteLanguageCheckbox == null) {
             deleteLanguageCheckbox = new JCheckBox();
-            deleteLanguageCheckbox.setBounds(new Rectangle(276, 179, 224, 21));
+            deleteLanguageCheckbox.setBounds(new Rectangle(272, 210, 224, 21));
             deleteLanguageCheckbox.setText("Hide Language");
             deleteLanguageCheckbox.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -648,6 +657,31 @@ public class LanguagePane extends JPanePlugin {
             });
         }
         return deleteLanguageCheckbox;
+    }
+
+    /**
+     * This method initializes interpretedLanguageCheckBox
+     * 
+     * @return javax.swing.JCheckBox
+     */
+    private JCheckBox getInterpretedLanguageCheckBox() {
+        if (interpretedLanguageCheckBox == null) {
+            interpretedLanguageCheckBox = new JCheckBox();
+            interpretedLanguageCheckBox.setBounds(new Rectangle(209, 143, 275, 21));
+            interpretedLanguageCheckBox.setText("Script or Interpreted Language");
+            interpretedLanguageCheckBox.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    toggleExecutable();
+                }
+            });
+        }
+        return interpretedLanguageCheckBox;
+    }
+
+    protected void toggleExecutable() {
+        boolean intLang = getInterpretedLanguageCheckBox().isSelected();
+        getExecutableFilenameTextField().setEnabled(intLang);
+        enableUpdateButton();
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

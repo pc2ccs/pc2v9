@@ -15,9 +15,7 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 
 /**
  * Count up timer window.
- *
- *
- *
+ * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -27,8 +25,6 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 // TODO rename to ExecutionTimer
 public class ExecuteTimer extends Thread implements
         java.awt.event.ActionListener {
-
-    public static final String SVN_ID = "$Id$";
 
     private long maxTime = 120; // time in seconds when display turns Red
 
@@ -62,21 +58,14 @@ public class ExecuteTimer extends Thread implements
 
     private ClientId clientId;
 
-    /**
-     * Constructor
-     */
-    /* WARNING: THIS METHOD WILL BE REGENERATED. */
-    public ExecuteTimer(ClientId clientId) {
-        super();
-        this.clientId = clientId;
-        initialize();
-    }
-
-    public ExecuteTimer(Log log, int timeLimit, ClientId clientId) {
+    private boolean usingGUI = true;
+    
+    public ExecuteTimer(Log log, int timeLimit, ClientId clientId, boolean useGUI) {
         super();
         this.log = log;
         this.clientId = clientId;
         maxTime = timeLimit;
+        usingGUI = useGUI;
         initialize();
     }
 
@@ -214,7 +203,6 @@ public class ExecuteTimer extends Thread implements
                         .setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
                 ivjExecuteTimerFrame.setTitle("Execution Timer");
                 ivjExecuteTimerFrame.setBounds(125, 30, 253, 143);
-                ivjExecuteTimerFrame.setVisible(true);
                 ivjExecuteTimerFrame.setCursor(new java.awt.Cursor(
                         java.awt.Cursor.DEFAULT_CURSOR));
                 getExecuteTimerFrame().setContentPane(getJFrameContentPane());
@@ -454,7 +442,9 @@ public class ExecuteTimer extends Thread implements
     public void startTimer() {
         setStartTime();
         timer.start();
-        getExecuteTimerFrame().setVisible(true);
+        if (usingGUI) {
+            getExecuteTimerFrame().setVisible(true);
+        }
     }
 
     /**
@@ -485,12 +475,21 @@ public class ExecuteTimer extends Thread implements
      */
     public void stopTimer() {
         timer.stop();
-        getExecuteTimerFrame().setVisible(false);
+        if (usingGUI) {
+            getExecuteTimerFrame().setVisible(false);
+        }
         getExecuteTimerFrame().dispose();
     }
     
     private boolean isTeam (){
         return clientId.getClientType().equals(Type.TEAM);
     }
-
+    
+    public void setUsingGUI(boolean usingGUI) {
+        this.usingGUI = usingGUI;
+    }
+    
+    public boolean isUsingGUI() {
+        return usingGUI;
+    }
 }

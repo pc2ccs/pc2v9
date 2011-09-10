@@ -32,10 +32,18 @@ public final class LanguageAutoFill {
     public static final String KYLIXCPPTITLE = "Kylix C++";
 
     public static final String FPCTITLE = "Free Pascal";
+    
+    public static final String PHPTITLE = "PHP";
+    
+    public static final String PYTHONTITLE = "Python";
+    
+    public static final String RUBYTITLE = "Ruby";
 
-    private static String[] languageList = { DEFAULTTITLE, JAVATITLE,
-            GNUCPPTITLE, GNUCTITLE, PERLTITLE, MSCTITLE, KYLIXTITLE, KYLIXCPPTITLE,
-            FPCTITLE };
+    private static final String INTERPRETER_VALUE = "interpeter";
+
+    private static String[] languageList = { DEFAULTTITLE, JAVATITLE, //
+            GNUCPPTITLE, GNUCTITLE, PERLTITLE, PHPTITLE, PYTHONTITLE, RUBYTITLE, //
+            MSCTITLE, KYLIXTITLE, KYLIXCPPTITLE, FPCTITLE };
 
     /**
      * Constructor is private as this is a utility class which
@@ -54,10 +62,11 @@ public final class LanguageAutoFill {
      * <li>Compiler Command Line
      * <li>Executable Identifier Mask
      * <li>Execute command line
+     * <li>"interpreted" if interpreter.
      * </ol>
      * 
      * @param key
-     * @return array for autopopulating {@link Language}
+     * @return array for auto-populating {@link Language}
      */
     public static String[] getAutoFillValues(String key) {
         /**
@@ -65,52 +74,70 @@ public final class LanguageAutoFill {
          */
 
         /**
-         * Directory seperator, ie / or \ depending on OS.
+         * Directory separator, ie / or \ depending on OS.
          */
         String fs = java.io.File.separator;
 
         if (key.equals(JAVATITLE)) {
-            String[] dVals = { JAVATITLE, "javac {:mainfile}",
-                    "{:basename}.class", "java {:basename}", JAVATITLE };
+            String[] dVals = { JAVATITLE, "javac {:mainfile}", //
+                    "{:basename}.class", "java {:basename}", JAVATITLE, "" };
             return dVals;
         } else if (key.equals(KYLIXCPPTITLE)) {
-            String[] dVals = { KYLIXCPPTITLE, "bc++ -A  {:mainfile}",
-                    "{:basename}", "." + fs + "{:basename}", KYLIXCPPTITLE};
+            String[] dVals = { KYLIXCPPTITLE, "bc++ -A  {:mainfile}", //
+                    "{:basename}", "." + fs + "{:basename}", KYLIXCPPTITLE, "" };
             return dVals;
         } else if (key.equals(MSCTITLE)) {
-            String[] dVals = { MSCTITLE, "cl.exe {:mainfile}",
-                    "{:basename}.exe", "." + fs + "{:basename}.exe", MSCTITLE };
+            String[] dVals = { MSCTITLE, "cl.exe {:mainfile}", //
+                    "{:basename}.exe", "." + fs + "{:basename}.exe", MSCTITLE , ""};
             return dVals;
         } else if (key.equals(GNUCPPTITLE)) {
-            String[] dVals = { GNUCPPTITLE,
-                    "g++ -lm -o {:basename}.exe {:mainfile}", "{:basename}.exe",
-                    "." + fs + "{:basename}.exe", "GNU C++"};
+            String[] dVals = { GNUCPPTITLE, "g++ -lm -o {:basename}.exe {:mainfile}", "{:basename}.exe", //
+                    "." + fs + "{:basename}.exe", "GNU C++", "" };
             return dVals;
         } else if (key.equals(GNUCTITLE)) {
 
-            String[] dVals = { GNUCTITLE, "gcc -lm -o {:basename}.exe {:mainfile}",
-                    "{:basename}.exe", "." + fs + "{:basename}.exe", "GNU C"};
+            String[] dVals = { GNUCTITLE, "gcc -lm -o {:basename}.exe {:mainfile}", //
+                    "{:basename}.exe", "." + fs + "{:basename}.exe", "GNU C", "" };
             return dVals;
         } else if (key.equals(KYLIXTITLE)) {
 
-            String[] dVals = { KYLIXTITLE, "dcc {:mainfile}", "{:basename}",
-                    "." + fs + "{:basename}", KYLIXTITLE };
+            String[] dVals = { KYLIXTITLE, "dcc {:mainfile}", "{:basename}", //
+                    "." + fs + "{:basename}", KYLIXTITLE, "" };
             return dVals;
         } else if (key.equals(FPCTITLE)) {
 
-            String[] dVals = { FPCTITLE, "fpc {:mainfile}", "{:basename}",
-                    "." + fs + "{:basename}", FPCTITLE };
+            String[] dVals = { FPCTITLE, "fpc {:mainfile}", "{:basename}", //
+                    "." + fs + "{:basename}", FPCTITLE, "" };
             return dVals;
         } else if (key.equals(PERLTITLE)) {
 
-            String[] dVals = { PERLTITLE, "compilePerl {:mainfile}", "OK",
-                    "perl {:mainfile}", PERLTITLE };
+            String[] dVals = { PERLTITLE, "perl -c {:mainfile}", "{:noexe}", //
+                    "perl {:mainfile}", PERLTITLE, INTERPRETER_VALUE };
             return dVals;
+
+        } else if (key.equals(PHPTITLE)) {
+
+            String[] dVals = { PHPTITLE, "php -c {:mainfile}", "{:noexe}", //
+                    "php {:mainfile}", PHPTITLE, INTERPRETER_VALUE };
+            return dVals;
+
+        } else if (key.equals(PYTHONTITLE)) {
+
+            String[] dVals = { PYTHONTITLE, "python -c {:mainfile}", "{:noexe}", //
+                    "python {:mainfile}", PYTHONTITLE, INTERPRETER_VALUE };
+            return dVals;
+
+        } else if (key.equals(RUBYTITLE)) {
+
+            String[] dVals = { RUBYTITLE, "ruby -c {:mainfile}", "{:noexe}", //
+                    "ruby {:mainfile}", RUBYTITLE, INTERPRETER_VALUE };
+            return dVals;
+            
         } else {
             // default / DEFAULTTITLE
 
-            String[] dVals = { "", "<Compiler> {:mainfile}", "{:basename}.exe",
-                    "{:basename}.exe", "" };
+            String[] dVals = { "", "<Compiler> {:mainfile}", "{:basename}.exe", 
+                    "{:basename}.exe", "", "" };
 
             return dVals;
         }
@@ -122,6 +149,11 @@ public final class LanguageAutoFill {
      */
     public static String[] getLanguageList() {
         return languageList;
+    }
+    
+    public static boolean isInterpretedLanguage(String key) {
+        String [] values = getAutoFillValues(key);
+        return INTERPRETER_VALUE.equals(values[5]);
     }
 
 }

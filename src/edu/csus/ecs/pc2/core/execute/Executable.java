@@ -133,7 +133,9 @@ public class Executable {
 
     private boolean testRunOnly = false;
 
-    private boolean showMessageToUser;
+    private boolean showMessageToUser = true;
+    
+    private boolean usingGUI = true;
 
     public Executable(IInternalContest inContest, IInternalController inController, Run run, RunFiles runFiles) {
         super();
@@ -267,8 +269,6 @@ public class Executable {
                     }
                 }
             }
-
-            
 
             if (isTestRunOnly()) {
                 // Team, just compile and execute it.
@@ -424,7 +424,10 @@ public class Executable {
     private void showDialogToUser(String string) {
         
         if (showMessageToUser){
-            fileViewer.showMessage(string);
+            if (usingGUI) {
+                fileViewer.showMessage(string);     
+            }
+            log.info(string);
         }
     }
 
@@ -790,7 +793,7 @@ public class Executable {
                 controller.sendExecutingMessage(run);
             }
             
-            executionTimer = new ExecuteTimer(log, problem.getTimeOutInSeconds(), executorId);
+            executionTimer = new ExecuteTimer(log, problem.getTimeOutInSeconds(), executorId, isUsingGUI());
             executionTimer.startTimer();
 
             if (problem.getDataFileName() != null) {
@@ -1008,7 +1011,7 @@ public class Executable {
             PrintWriter stdoutlog = new PrintWriter(new FileOutputStream(prefixExecuteDirname(COMPILER_STDOUT_FILENAME), false), true);
             PrintWriter stderrlog = new PrintWriter(new FileOutputStream(prefixExecuteDirname(COMPILER_STDERR_FILENAME), false), true);
 
-            executionTimer = new ExecuteTimer(log, problem.getTimeOutInSeconds(), executorId);
+            executionTimer = new ExecuteTimer(log, problem.getTimeOutInSeconds(), executorId, isUsingGUI());
             executionTimer.startTimer();
 
             long startSecs = System.currentTimeMillis();
@@ -1549,9 +1552,36 @@ public class Executable {
     public String getExecuteDirectoryNameSuffix() {
         return executeDirectoryNameSuffix;
     }
-
-    // huh
     
+    public void setExecuteDirectoryName(String executeDirectoryName) {
+        this.executeDirectoryName = executeDirectoryName;
+    }
+    
+    /**
+     * Prepend basedirectoryname in front of executedirectory name.
+     * 
+     * @param baseDirectoryName
+     */
+    public void setExecuteBaseDirectoryName (String baseDirectoryName) throws Exception {
+        insureDir(baseDirectoryName);
+        if (! isDirectory(baseDirectoryName)) {
+            throw new IOException ("Could not create directory "+baseDirectoryName);
+        }
+        String dirname = baseDirectoryName + File.separator + executeDirectoryName;
+        insureDir(baseDirectoryName);
+        if (! isDirectory(dirname)) {
+            throw new IOException ("Could not create directory "+dirname);
+        }
+        this.executeDirectoryName = dirname; 
+    }
+
+
+    private boolean isDirectory(String dirname) {
+        return new File(dirname).isDirectory();
+    }
+    
+    
+
     /**
      * This suffix is added to the execute directory nanme.
      * 
@@ -1563,5 +1593,13 @@ public class Executable {
      */
     public void setExecuteDirectoryNameSuffix(String executeDirectoryNameSuffix) {
         this.executeDirectoryNameSuffix = executeDirectoryNameSuffix;
+    }
+    
+    public void setUsingGUI(boolean usingGUI) {
+        this.usingGUI = usingGUI;
+    }
+    
+    public boolean isUsingGUI() {
+        return usingGUI;
     }
 }

@@ -57,6 +57,7 @@ public class LanguagesReport implements IReport {
         printWriter.println("  Language  '" + language + deletedText + "' v" + language.getElementId().getVersionNumber() + " id=" + language.getElementId());
         printWriter.println("    site number         : " + language.getSiteNumber());
         printWriter.println("    compiler command    : " + language.getCompileCommandLine());
+        printWriter.println("    is interpreter      : " + Utilities.yesNoString(language.isInterpreted()));
         printWriter.println("    executable mask     : " + language.getExecutableIdentifierMask());
         printWriter.println("    program execute cmd : " + language.getProgramExecuteCommandLine());
     }
