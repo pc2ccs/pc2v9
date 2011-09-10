@@ -117,13 +117,13 @@ public final class LanguageAutoFill {
 
         } else if (key.equals(PHPTITLE)) {
 
-            String[] dVals = { PHPTITLE, "php -c {:mainfile}", "{:noexe}", //
+            String[] dVals = { PHPTITLE, "php -l {:mainfile}", "{:noexe}", //
                     "php {:mainfile}", PHPTITLE, INTERPRETER_VALUE };
             return dVals;
 
         } else if (key.equals(PYTHONTITLE)) {
 
-            String[] dVals = { PYTHONTITLE, "python -c {:mainfile}", "{:noexe}", //
+            String[] dVals = { PYTHONTITLE, "python -m py_compile {:mainfile}", "{:noexe}", //
                     "python {:mainfile}", PYTHONTITLE, INTERPRETER_VALUE };
             return dVals;
 
