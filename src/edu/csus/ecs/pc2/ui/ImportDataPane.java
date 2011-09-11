@@ -11,9 +11,12 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
 import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
+import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
 
 /**
@@ -117,6 +120,7 @@ public class ImportDataPane extends JPanePlugin {
         getController().getLog().info("Loading contest.yaml from " + filename);
 
         String directoryName = new File(filename).getParent();
+
         try {
             IInternalContest newContest = loader.fromYaml(null, directoryName);
 
@@ -124,25 +128,50 @@ public class ImportDataPane extends JPanePlugin {
 
             int result = FrameUtilities.yesNoCancelDialog(this, "Import" + NL + contestSummary, "Import Contest Settings");
 
-            if (result == JOptionPane.YES_OPTION) {
-                showMessage("Would have imported");
+            if (result != JOptionPane.YES_OPTION) {
+                showMessage("No import done");
+                return;
             }
 
-            // TODO CCS code sending update to server
+            // TODO CCS
 
-            // if (newContest.getContestInformation().getContestTitle() != null) {
-            // // TODO CCS update contest title
-            // }
-            //
-            // for (Language language : newContest.getLanguages()) {
-            // getController().addNewLanguage(language);
-            // }
-            //
-            // for (Problem problem : newContest.getProblems()) {
-            // getController().addNewProblem(problem, problemDataFiles);
-            // }
-            //
-            // getController().addNewAccounts(newContest.getAccounts());
+            if (newContest.getContestInformation().getContestTitle() != null) {
+                ContestInformation contestInformation = getContest().getContestInformation();
+                contestInformation.setContestTitle(newContest.getContestInformation().getContestTitle());
+
+                getController().updateContestInformation(contestInformation);
+                // TODO CCS update contest title
+            }
+
+            // TODO CCS need to update all properties from YAML contest header
+            // TODO CCS update contest length
+            // TODO CCS update contest freeze time
+
+            for (Site site : newContest.getSites()) {
+                Site existingSite = getContest().getSite(site.getSiteNumber());
+                if (existingSite != null) {
+                    System.out.println("Not overwriting site: " + site.getSiteNumber() + " " + site.getDisplayName());
+                } else {
+                    getController().addNewSite(site);
+                }
+            }
+
+            for (Language language : newContest.getLanguages()) {
+                getController().addNewLanguage(language);
+            }
+
+            for (Problem problem : newContest.getProblems()) {
+                ProblemDataFiles problemDataFiles = newContest.getProblemDataFile(problem);
+                if (problemDataFiles != null) {
+                    getController().addNewProblem(problem, problemDataFiles);
+                } else {
+                    getController().addProblem(problem);
+                }
+            }
+
+            getController().addNewAccounts(newContest.getAccounts());
+
+            showMessage("All contest settings sent to server" + NL + contestSummary);
 
         } catch (Exception e) {
 
@@ -157,8 +186,15 @@ public class ImportDataPane extends JPanePlugin {
         Language[] languages = newContest.getLanguages();
         Problem[] problems = newContest.getProblems();
         Account[] accounts = newContest.getAccounts();
+        Site [] sites = newContest.getSites();
 
         StringBuffer sb = new StringBuffer();
+
+        if (sites.length > 0) {
+            sb.append(sites.length);
+            sb.append(" sites");
+            sb.append(NL);
+        }
 
         if (problems.length > 0) {
             sb.append(problems.length);

@@ -59,6 +59,22 @@ problemset:
     color:      white
     rgb:        #ffffff
 
+sites:
+ - number: 1
+     name: Uno Site Arcadia
+       IP: localhost
+     port: 50002
+
+ - number: 2
+     name: Two Turtle Doves Site
+       IP: localhost
+     port: 51002
+
+ - number: 3
+     name: Three Blind Mice Site
+       IP: localhost
+     port: 52002
+
 accounts:
   - account: TEAM
       site: 1

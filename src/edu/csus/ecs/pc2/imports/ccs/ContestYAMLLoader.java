@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.imports.ccs;
 
 import java.io.File;
+import java.util.Properties;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.Utilities;
@@ -13,6 +14,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Site;
 
 /**
  * Create contest from YAML.
@@ -45,6 +47,8 @@ public class ContestYAMLLoader {
     public static final String PROBLEMS_KEY = "problemset";
 
     public static final String ACCOUNTS_KEY = "accounts";
+
+    public static final String SITES_KEY = "sites";
 
     private static final String DELIMIT = ":";
 
@@ -107,15 +111,71 @@ public class ContestYAMLLoader {
             addProblemDefAndFiles(contest, diretoryName, problem, problem.getDisplayName());
         }
 
-        // TODO CCS load categories into contest
-        // String [] categories = loadGeneralClarificationAnswers(yamlLines);
+        Site[] sites  = getSites(yamlLines);
+        for (Site site : sites) {
+            contest.addSite(site);
+        }
 
+//        String[] categories = loadGeneralClarificationAnswers(yamlLines);
+        // TODO CCS load categories into contest
+
+//        String[] answers = getGeneralAnswers(yamlLines);
         // TODO CCS load answers into contest
-        // String[] answers = getGeneralAnswers(yamlLines);
 
         Account[] accounts = getAccounts(yamlLines);
         contest.addAccounts(accounts);
         return contest;
+    }
+    
+    public Site [] getSites (String[] yamlLines) {
+        
+        String[] sectionLines = getSectionLines(SITES_KEY, yamlLines);
+
+        Vector<Site> sitesVector = new Vector<Site>();
+
+        int idx = 1;
+        String[] sequenceLines = getNextSequence(sectionLines, idx);
+
+        while (sequenceLines.length > 0) {
+
+            /*
+             * <pre>
+             * sites:
+             *     - number: 1
+             *         name: Site 1
+             *           IP: localhost
+             *         port: 50002
+             * </pre>
+             */
+            
+            String siteNumberString = getSequenceValue(sequenceLines, "- number");
+            String siteTitle = getSequenceValue(sequenceLines, "name").trim();
+            int siteNumber = Integer.parseInt(siteNumberString.trim());
+            
+            Site site = new Site (siteTitle, siteNumber);
+            
+            String hostName = getSequenceValue(sequenceLines, "IP").trim();
+            String portString = getSequenceValue(sequenceLines, "port").trim();
+            
+            String password = getSequenceValue(sequenceLines, "password");
+            if (password == null) {
+                password = "site"+siteNumberString;
+            }
+            site.setPassword(password.trim());
+            
+            Properties props = new Properties();
+            props.put(Site.IP_KEY, hostName);
+            props.put(Site.PORT_KEY, portString);
+            site.setConnectionInfo(props);
+           
+            sitesVector.addElement(site);
+
+            idx += sequenceLines.length;
+            sequenceLines = getNextSequence(sectionLines, idx);
+        }
+
+        return (Site[]) sitesVector.toArray(new Site[sitesVector.size()]);
+        
     }
 
     private Account[] getAccounts(String[] yamlLines) {
@@ -196,9 +256,16 @@ public class ContestYAMLLoader {
         contest.addProblem(problem);
 
     }
-
-    public String[] getGeneralAnswers(String[] yamlLines) {
-        String[] sectionLines = getSectionLines(DEFAULT_CLARS_KEY, yamlLines);
+  
+    /**
+     * Load list of strings.
+     * 
+     * @param key
+     * @param yamlLines
+     * @return
+     */
+    public String[] loadStringList(String key, String[] yamlLines) {
+        String[] sectionLines = getSectionLines(key, yamlLines);
 
         int idx = 1;
         String[] sequenceLines = getNextSequence(sectionLines, idx);
@@ -216,6 +283,14 @@ public class ContestYAMLLoader {
         }
         return (String[]) outArrays.toArray(new String[outArrays.size()]);
 
+    }
+    
+    public String[] loadGeneralClarificationAnswers(String[] yamlLines) {
+        return loadStringList(CLAR_CATEGORIES_KEY, yamlLines);
+    }
+    
+    public String[] getGeneralAnswers(String[] yamlLines) {
+        return loadStringList(DEFAULT_CLARS_KEY, yamlLines);
     }
 
     /**

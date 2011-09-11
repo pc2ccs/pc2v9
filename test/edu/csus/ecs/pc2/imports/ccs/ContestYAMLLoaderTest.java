@@ -2,16 +2,19 @@ package edu.csus.ecs.pc2.imports.ccs;
 
 import java.io.File;
 import java.io.PrintStream;
+import java.util.Arrays;
 
 import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.export.ExportYAML;
+import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.util.JUnitUtilities;
 
 /**
@@ -24,7 +27,7 @@ import edu.csus.ecs.pc2.core.util.JUnitUtilities;
 // $HeadURL: http://pc2.ecs.csus.edu/repos/v9sandbox/trunk/test/edu/csus/ecs/pc2/imports/ccs/ContestYAMLLoaderTest.java $
 public class ContestYAMLLoaderTest extends TestCase {
 
-    private boolean debugFlag = true;
+    private boolean debugFlag = false;
 
     private ContestYAMLLoader loader;
 
@@ -195,6 +198,37 @@ public class ContestYAMLLoaderTest extends TestCase {
 
     }
 
+    public void testLoadSites() throws Exception {
+        
+        String[] contents = Utilities.loadFile(getYamlTestFileName());
+
+        assertFalse("File missing " + getYamlTestFileName(), contents.length == 0);
+
+        Site [] sites = loader.getSites(contents);
+        Arrays.sort (sites, new SiteComparatorBySiteNumber());
+        
+        assertEquals("Expected 3 sites", 3, sites.length);
+        
+        String[] siteNames = { "Uno Site Arcadia", "Two Turtle Doves Site", "Three Blind Mice Site", };
+        
+        int port = 50002;
+        
+        for (Site site : sites) {
+
+            // - number: 2
+            // name: Two Turtle Doves Site
+            // IP: localhost
+            // port: 51002
+
+            assertEquals("Expected site " + site.getSiteNumber() + " name ", siteNames[site.getSiteNumber()-1], site.getDisplayName());
+            assertEquals("Expected site " + site.getSiteNumber() + " IP ", "localhost", site.getConnectionInfo().get(Site.IP_KEY));
+            assertEquals("Expected site " + site.getSiteNumber() + " port ", Integer.toString(port), site.getConnectionInfo().get(Site.PORT_KEY));
+            assertEquals("Expected site " + site.getSiteNumber() + " password ", "site"+site.getSiteNumber(), site.getPassword());
+            port += 1000;
+        }
+
+    }
+
     public void testGeneralAnswsers() throws Exception {
         String[] contents = Utilities.loadFile(getYamlTestFileName());
 
@@ -234,6 +268,12 @@ public class ContestYAMLLoaderTest extends TestCase {
         key = ContestYAMLLoader.ACCOUNTS_KEY;
         sectionLines = loader.getSectionLines(key, contents);
         assertEquals(key + " lines.", 18, sectionLines.length);
+        
+        key = ContestYAMLLoader.SITES_KEY;
+        sectionLines = loader.getSectionLines(key, contents);
+        assertEquals(key + " lines.", 16, sectionLines.length);
+        
+        
     }
 
     String getYamlTestDirectory() {
