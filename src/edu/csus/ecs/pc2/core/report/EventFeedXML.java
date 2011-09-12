@@ -319,10 +319,12 @@ public class EventFeedXML {
         memento.createChildNode("name", problem.toString());
         
         BalloonSettings settings = contest.getBalloonSettings(contest.getSiteNumber());
-        String color = settings.getColor(problem);
-        IMemento balloonColor = memento.createChildNode("balloon-color", color); 
-        balloonColor.putString("rgb", settings.getColorRGB(problem)); 
-
+        if (settings != null){
+            String color = settings.getColor(problem);
+            IMemento balloonColor = memento.createChildNode("balloon-color", ""+color);
+            String rgbColor = settings.getColorRGB(problem);
+            balloonColor.putString("rgb", ""+rgbColor);
+        }
         return memento;
     }
     
@@ -659,13 +661,17 @@ public class EventFeedXML {
         Language language = contest.getLanguage(run.getLanguageId());
         XMLUtilities.addChild(memento, "language", language.getDisplayName());
 
-        XMLUtilities.addChild(memento, "penalty", "TODO"); // TODO CCS What is penalty ??
+        XMLUtilities.addChild(memento, "penalty", "TODO"); // TODO CCS What ispenalty ??
+        
+        if (run.isJudged()){
+            ElementId judgementId = run.getJudgementRecord().getJudgementId();
+            String judgement = contest.getJudgement(judgementId).getAcronym();
+            XMLUtilities.addChild(memento, "judgement", judgement.toUpperCase().substring(0, 2));
 
-         String judgement = contest.getJudgement(run.getJudgementRecord().getJudgementId()).getAcronym();
-        XMLUtilities.addChild(memento, "judgement", judgement.toUpperCase().substring(0, 2));
-
-        // XMLUtilities.addChild(memento, "result", judgement.toUpperCase().substring(0, 2));
-        // XMLUtilities.addChild(memento, "solved", run.isSolved());
+            // old XML name/values result and solved.
+            // XMLUtilities.addChild(memento, "result", judgement.toUpperCase().substring(0, 2));
+            // XMLUtilities.addChild(memento, "solved", run.isSolved());
+        }
 
         XMLUtilities.addChild(memento, "team", run.getSubmitter().getClientNumber());
         XMLUtilities.addChild(memento, "elapsed-Mins", run.getElapsedMins());
