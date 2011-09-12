@@ -13,6 +13,7 @@ import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
+import edu.csus.ecs.pc2.core.model.LanguageAutoFill;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Site;
 
@@ -318,6 +319,27 @@ public class ContestYAMLLoader {
         }
         return (String[]) outArrays.toArray(new String[outArrays.size()]);
     }
+    
+    /**
+     * Fill in Language fields from LanguageAutoFill fields.
+     * @param language
+     * @param values
+     * @param fullLanguageName
+     */
+    private void fillLanguage(Language language, String[] values, String fullLanguageName) {
+        // values array
+        // 0 Title for Language
+        // 1 Compiler Command Line
+        // 2 Executable Identifier Mask
+        // 3 Execute command line
+        // 5 "interpreted" if interpreter. 
+        
+        language.setCompileCommandLine(values[1]);
+        language.setExecutableIdentifierMask(values[2]);
+        language.setProgramExecuteCommandLine(values[3]);
+        boolean isScript = LanguageAutoFill.isInterpretedLanguage(fullLanguageName);
+        language.setInterpreted(isScript);
+    }
 
     /**
      * Get/create {@link Language}s from YAML lines.
@@ -341,28 +363,45 @@ public class ContestYAMLLoader {
                 syntaxError("Language name field missing in languages section");
             } else {
                 String compilerName = getSequenceValue(sequenceLines, "compiler");
-                String compilerArgs = getSequenceValue(sequenceLines, "compiler-args");
-                String interpreter = getSequenceValue(sequenceLines, "runner");
-                String interpreterArgs = getSequenceValue(sequenceLines, "runner-args");
-
-                // TODO remove debugging output code
-                // System.out.println("Language  : " + name);
-                // System.out.println(" compiler : " + compilerName);
-                // System.out.println("    args  : " + compilerArgs);
-                // System.out.println(" runner   : " + interpreter);
-                // System.out.println("    args  : " + interpreterArgs);
-
+                
                 Language language = new Language(name);
-                language.setCompileCommandLine(compilerName + " " + compilerArgs);
-                language.setExecutableIdentifierMask("a.out");
+                
+                if (compilerName == null || compilerName.trim().length() == 0){
+                    
+                    for (String langName : LanguageAutoFill.getLanguageList()){
+                        if (name.startsWith(langName)){
+                            
+                            String[] values = LanguageAutoFill.getAutoFillValues(name);
+                            fillLanguage(language, values, langName);
+                            languageList.addElement(language);
+                        }
+                    }
+                } else {
+                    
+                    String compilerArgs = getSequenceValue(sequenceLines, "compiler-args");
+                    String interpreter = getSequenceValue(sequenceLines, "runner");
+                    String interpreterArgs = getSequenceValue(sequenceLines, "runner-args");
 
-                String programExecuteCommandLine = interpreter + " " + interpreterArgs;
-                if (interpreter == null) {
-                    programExecuteCommandLine = "a.out";
+                    // TODO remove debugging output code
+                    // System.out.println("Language  : " + name);
+                    // System.out.println(" compiler : " + compilerName);
+                    // System.out.println("    args  : " + compilerArgs);
+                    // System.out.println(" runner   : " + interpreter);
+                    // System.out.println("    args  : " + interpreterArgs);
+
+         
+                    language.setCompileCommandLine(compilerName + " " + compilerArgs);
+                    language.setExecutableIdentifierMask("a.out");
+
+                    String programExecuteCommandLine = interpreter + " " + interpreterArgs;
+                    if (interpreter == null) {
+                        programExecuteCommandLine = "a.out";
+                    }
+                    language.setProgramExecuteCommandLine(programExecuteCommandLine);
+                    
+                    languageList.addElement(language);
                 }
-                language.setProgramExecuteCommandLine(programExecuteCommandLine);
 
-                languageList.addElement(language);
             }
 
             idx += sequenceLines.length;

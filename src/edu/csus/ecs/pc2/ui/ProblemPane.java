@@ -432,6 +432,9 @@ public class ProblemPane extends JPanePlugin {
                 // will be caught and reported when they hit update or add.
                 getController().getLog().log(Log.DEBUG, "Input Problem (but not saving) ", e);
                 enableButton = true;
+            } catch (Exception ex){
+                getController().getLog().log(Log.DEBUG, "Edit Problem ", ex);
+                showMessage("Error, check logs.  "+ex.getMessage());
             }
 
         } else {
@@ -956,20 +959,24 @@ public class ProblemPane extends JPanePlugin {
         problemNameTextField.setText(inProblem.getDisplayName());
         timeOutSecondTextField.setText(inProblem.getTimeOutInSeconds() + "");
         inputDataFileLabel.setText(inProblem.getDataFileName());
-
-        SerializedFile sFile = problemDataFiles.getJudgesDataFile();
-        if (sFile != null) {
-            inputDataFileLabel.setToolTipText(sFile.getAbsolutePath());
-        } else {
-            inputDataFileLabel.setToolTipText("");
+        
+        inputDataFileLabel.setToolTipText("");
+        
+        if (problemDataFiles != null){
+            SerializedFile sFile = problemDataFiles.getJudgesDataFile();
+            if (sFile != null) {
+                inputDataFileLabel.setToolTipText(sFile.getAbsolutePath());
+            }
         }
 
         answerFileNameLabel.setText(inProblem.getAnswerFileName());
-        sFile = problemDataFiles.getJudgesAnswerFile();
-        if (sFile != null) {
-            answerFileNameLabel.setToolTipText(sFile.getAbsolutePath());
-        } else {
-            answerFileNameLabel.setToolTipText("");
+        answerFileNameLabel.setToolTipText("");
+        
+        if (problemDataFiles != null){
+            SerializedFile sFile = problemDataFiles.getJudgesAnswerFile();
+            if (sFile != null) {
+                answerFileNameLabel.setToolTipText(sFile.getAbsolutePath());
+            } 
         }
 
         judgesHaveAnswerFiles.setSelected(inProblem.getAnswerFileName() != null);
@@ -1001,7 +1008,7 @@ public class ProblemPane extends JPanePlugin {
                 useExternalValidatorRadioButton.setSelected(true);
                 externalValidatorLabel.setText(inProblem.getValidatorProgramName());
                 externalValidatorLabel.setToolTipText(inProblem.getValidatorProgramName());
-                sFile = problemDataFiles.getValidatorFile();
+                SerializedFile sFile = problemDataFiles.getValidatorFile();
                 if (sFile != null) {
                     externalValidatorLabel.setToolTipText(sFile.getAbsolutePath());
                 } else {
