@@ -1,10 +1,19 @@
 package edu.csus.ecs.pc2.core;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.StringReader;
+
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
+
+import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.util.IMemento;
 import edu.csus.ecs.pc2.core.util.XMLMemento;
+import edu.csus.ecs.pc2.core.util.XSLTransformer;
 
 /**
- * Utilities for XML.
+ * Utilities for XML and XSLT.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -72,6 +81,88 @@ public final class XMLUtilities {
      */
     public static String getTimeStamp() {
         return formatSeconds(System.currentTimeMillis());
+    }
+    
+    /**
+     * Name of style sheet directory
+     */
+    private static String styleSheetDirectoryName = null;
+
+    public static String getStyleSheetDirectoryName() {
+        if (styleSheetDirectoryName == null) {
+            styleSheetDirectoryName = getDefaultSyleSheetDirectoryName();
+        }
+        return styleSheetDirectoryName;
+    }
+
+    private static String getDefaultSyleSheetDirectoryName() {
+
+        String xslDir = "data" + File.separator + "xsl";
+        File xslDirFile = new File(xslDir);
+        if (!(xslDirFile.canRead() && xslDirFile.isDirectory())) {
+            VersionInfo versionInfo = new VersionInfo();
+            xslDir = versionInfo.locateHome() + File.separator + xslDir;
+        }
+        return xslDir;
+    }
+
+    public static String getXSLTFullPath(String baseFileName) {
+        return getStyleSheetDirectoryName() + File.separator + baseFileName;
+    }
+
+    /**
+     * Transform XML via XSLT and write to output file.
+     * 
+     * @param xmlString
+     *            input XML (from DSA)
+     * @param xsltFileName
+     *            XSLT file name
+     * @param outputFileName
+     *            output file name
+     * @throws Exception
+     */
+    public static void writeFile(String xmlString, String xsltFileName, String outputFileName) throws Exception {
+
+        String xslDir = getStyleSheetDirectoryName();
+
+        File inputDir = new File(xslDir);
+        if (!inputDir.isDirectory()) {
+            throw new Exception("Can not find xslt dir: " + xslDir);
+        }
+
+        XSLTransformer xslTransformer = new XSLTransformer();
+
+        String fullPathFileName = xslDir + File.separator + xsltFileName;
+
+        File xslFile = new File(fullPathFileName);
+
+        FileOutputStream outFile = new FileOutputStream(outputFileName);
+
+        Source inputXML = new StreamSource(new StringReader(xmlString));
+        Source inputStyleSheet = new StreamSource(xslFile);
+
+        xslTransformer.transform(inputStyleSheet, inputXML, outFile);
+    }
+
+    public static String[] transformToArray(String xmlString, String xsltFileName) throws Exception {
+
+        if (!new File(xsltFileName).isFile()) {
+            // file not there use a qualified path.
+
+            xsltFileName = getXSLTFullPath(xsltFileName);
+        }
+
+        File xslFile = new File(xsltFileName);
+
+        // Source inputXML = new StreamSource(new StringReader(xmlString));
+        // Source inputStyleSheet = new StreamSource(xslFile);
+        XSLTransformer xslTransformer = new XSLTransformer();
+
+        String outString = xslTransformer.transformToString(xslFile, xmlString);
+
+        String newline = System.getProperty("line.separator");
+
+        return outString.split(newline);
     }
 
 }
