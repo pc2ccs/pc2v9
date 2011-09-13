@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.ui.team;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Date;
 
@@ -25,9 +26,6 @@ import edu.csus.ecs.pc2.core.model.ClientId;
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
-
-// TODO CCS - add ability to submit additional source files.
-// TODO CCS - add -test
 
 // $HeadURL$
 public class Submitter {
@@ -60,6 +58,8 @@ public class Submitter {
      * Filename for source to be submitted.
      */
     private String submittedFileName;
+
+    private boolean debugMode = false;
 
     protected Submitter() {
 
@@ -116,6 +116,8 @@ public class Submitter {
 
         String[] opts = { "--login", "--password" };
         ParseArguments arguments = new ParseArguments(args, opts);
+        
+        debugMode = arguments.isOptPresent("--debug");
 
         checkArg = arguments.isOptPresent("--check");
 
@@ -211,14 +213,15 @@ public class Submitter {
         String[] usage = { //
         "Usage Submitter [--help|--list|--listruns|--check] --login loginname [--password password] filename [problem [language]]", //
                 "Usage Submitter [-F propfile] [--help|--list|--listruns|--check] filename [problem [language]]", //
-                "", //
+                "Usage Submitter [options] filename1[,filename2[,filename3[,...]]] [problem [language]]", //
+                  "", //
                 "Submit filename for problem and language.  If problem or language", //
                 "not specified the program will guess which problem and language", //
                 "based on the file name.", //
                 "", //
                 "--help   this listing", //
                 "", //
-                "--check  check parameters, list filename, problem and language", //
+                "--check  login and check parameters: list problem, language and files that would be submitted.", //
                 "", //
                 "--list   list problem and languages", //
                 "", //
@@ -262,7 +265,7 @@ public class Submitter {
 
         try {
 
-            checkParams();
+            checkRequiredParams();
 
             serverConnection = new ServerConnection();
 
@@ -288,18 +291,26 @@ public class Submitter {
                     // got a run
                     success = true;
 
-                    System.out.println("Submission confrmation: Run " + run.getNumber() + " problem " + run.getProblem().getName() + " for team " + run.getTeam().getLoginName());
-
-                } // no else
+                    System.out.println("Submission confirmation: Run " + run.getNumber() + ", problem " + run.getProblem().getName() + //
+                            ", for team " + run.getTeam().getDisplayName() + //
+                            " (" + run.getTeam().getLoginName() + ")");
+                } 
+                // no else
                 
                 serverConnection.logoff();
 
             } catch (Exception e) {
-                System.err.println(e.getMessage());
+                System.err.println("Unable to submit run: " + e.getMessage());
+                if (debugMode){
+                    e.printStackTrace();
+                }
             }
-            
+  
         } catch (LoginFailureException e) {
             System.out.println("Unable to login: " + e.getMessage());
+            if (debugMode){
+                e.printStackTrace();
+            }
         }
 
         if (success) {
@@ -314,7 +325,7 @@ public class Submitter {
      * 
      * @throws LoginFailureException
      */
-    private void checkParams() throws LoginFailureException {
+    private void checkRequiredParams() throws LoginFailureException {
 
         if (login == null) {
             throw new LoginFailureException("No login specified");
@@ -355,6 +366,7 @@ public class Submitter {
         long totalTime = new Date().getTime() - startTime;
 
         System.out.println(totalTime + " ms");
+        System.out.println();
 
         if (!done) {
             throw new Exception("Timed out waiting for run submission confirm ");
@@ -368,7 +380,7 @@ public class Submitter {
 
         try {
 
-            checkParams();
+            checkRequiredParams();
 
             serverConnection = new ServerConnection();
 
@@ -381,10 +393,17 @@ public class Submitter {
 
             } catch (Exception e) {
                 e.printStackTrace();
+                if (debugMode){
+                    e.printStackTrace();
+                }
+
             }
 
         } catch (LoginFailureException e1) {
             System.out.println("Unable to login: " + e1.getMessage());
+            if (debugMode){
+                e1.printStackTrace();
+            }
         }
 
     }
@@ -396,12 +415,15 @@ public class Submitter {
     public void listRuns() {
 
         try {
-            checkParams();
+            checkRequiredParams();
 
             serverConnection = new ServerConnection();
 
             contest = serverConnection.login(login, password);
             
+            System.out.println();
+            System.out.println(contest.getContestTitle());
+            System.out.println();
             System.out.println("For: "+contest.getMyClient().getDisplayName()+" ("+contest.getMyClient().getLoginName()+")");
             System.out.println();
 
@@ -420,6 +442,9 @@ public class Submitter {
             }
         } catch (LoginFailureException e1) {
             System.out.println("Unable to login: " + e1.getMessage());
+            if (debugMode){
+                e1.printStackTrace();
+            }
         }
 
     }
@@ -453,20 +478,31 @@ public class Submitter {
         System.out.println();
     }
 
-    private void submitTheRun(String problemTitle2, String languageTitle2, String filename2) throws Exception {
+    /**
+     * Submit run.
+     * 
+     * @param problemTitle2
+     * @param languageTitle2
+     * @param fileNames filename or comma delimited file list
+     * @throws Exception
+     */
+    private void submitTheRun(String problemTitle2, String languageTitle2, String fileNames) throws Exception {
 
         submittedProblem = null;
 
         submittedLanguage = null;
+        
+        String [] allFileNames = fileNames.split(",");
+        String mainFileName = allFileNames[0];
 
         if (languageTitle2 == null) {
-            languageTitle2 = getLanguageFromFilename(filename2);
+            languageTitle2 = getLanguageFromFilename(mainFileName);
         }
 
         ILanguage language = matchLanguage(languageTitle2);
 
         if (languageTitle2 == null) {
-            throw new Exception("Could not determine Language based on filename '" + filename2 + "'");
+            throw new Exception("Could not determine Language based on filename '" + mainFileName + "'");
         }
 
         if (language == null) {
@@ -474,7 +510,7 @@ public class Submitter {
         }
 
         if (problemTitle2 == null) {
-            problemTitle2 = getProblemNameFromFilename(filename2);
+            problemTitle2 = getProblemNameFromFilename(mainFileName);
         }
         if (problemTitle2 != null && problemTitle2.length() == 1) {
             problemTitle2 = getProblemNameFromLetter(problemTitle2.charAt(0));
@@ -483,24 +519,55 @@ public class Submitter {
         IProblem problem = matchProblem(problemTitle2);
 
         if (problemTitle2 == null) {
-            throw new Exception("Could not determine Problem based on filename '" + filename2 + "'");
+            throw new Exception("Could not determine Problem based on filename '" + mainFileName + "'");
         }
 
         if (problem == null) {
             throw new Exception("Could not match problem '" + problemTitle2 + "'");
         }
 
+        String[] additionalFiles = new String[allFileNames.length - 1];
+        if (allFileNames.length > 1) {
+            for (int i = 1; i < allFileNames.length; i++) {
+                additionalFiles[i - 1] = allFileNames[i];
+            }
+        }
+
         if (checkArg) {
 
             System.out.println("For   : " + contest.getMyClient().getLoginName() + " - " + contest.getMyClient().getDisplayName());
-            System.out.println("File  : " + filename2);
+            System.out.println("File  : " + mainFileName);
+
+            for (String name : additionalFiles) {
+                System.out.println(" file : " + name);
+            }
             System.out.println("Prob  : " + problem.getName());
             System.out.println("Lang  : " + language.getName());
-            System.exit(0);
+            System.out.println();
+            
+            boolean success = true;
+            
+            if (! new File(mainFileName).isFile()){
+                System.err.println("Error - file does not exist '"+mainFileName+"'");
+                success = false;
+            }
+            
+            for (String name : additionalFiles) {
+                if (! new File(name).isFile()){
+                    System.err.println("Error - file does not exist '"+name+"'");
+                    success = false;
+                } 
+            }
+            
+            if (success){
+                System.exit(0);
+            } else {
+                System.exit(3);
+            }
 
         } else {
 
-            serverConnection.submitRun(problem, language, filename2, new String[0]);
+            serverConnection.submitRun(problem, language, mainFileName, additionalFiles);
 
             submittedProblem = problem;
             submittedLanguage = language;
@@ -519,6 +586,8 @@ public class Submitter {
      */
     private IProblem matchProblem(String problemTitle2) {
 
+        // check full name
+        
         for (IProblem problem : contest.getProblems()) {
             if (problem.getName().equalsIgnoreCase(problemTitle2)) {
                 return problem;
@@ -527,18 +596,22 @@ public class Submitter {
 
         char let = 'A';
 
+        // check letter
+        
         for (IProblem problem : contest.getProblems()) {
             if (problem.getName().equalsIgnoreCase(Character.toString(let))) {
                 return problem;
             }
             let++;
         }
+        
+        // check start name
 
         for (IProblem problem : contest.getProblems()) {
-            if (problem.getName().startsWith(problemTitle2)) {
+            
+            if (problem.getName().toLowerCase().startsWith(problemTitle2.toLowerCase())) {
                 return problem;
             }
-            let++;
         }
 
         return null;

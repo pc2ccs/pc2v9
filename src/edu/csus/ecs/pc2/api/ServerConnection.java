@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.api;
 
+import java.io.File;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.api.exceptions.LoginFailureException;
@@ -142,10 +143,18 @@ public class ServerConnection {
         if (!account.isAllowed(Permission.Type.SUBMIT_RUN)) {
             throw new Exception("User not allowed to submit run");
         }
-
-        SerializedFile[] list = new SerializedFile[0];
+        
+        if (! new File(mainFileName).isFile()){
+            throw new Exception("File '"+mainFileName+"' no such file (not found)"); 
+        }
+        
+        SerializedFile[] list = new SerializedFile[additionalFileNames.length];
         for (int i = 0; i < additionalFileNames.length; i++) {
-            list[i] = new SerializedFile(additionalFileNames[i]);
+            if (new File(additionalFileNames[i]).isFile()) {
+                list[i] = new SerializedFile(additionalFileNames[i]);
+            } else {
+                throw new Exception("File '" + additionalFileNames[i] + "' no such file (not found)");
+            }
         }
 
         Problem submittedProblem = null;
@@ -171,6 +180,10 @@ public class ServerConnection {
 
         if (submittedLanguage == null) {
             throw new Exception("Could not find any language matching: '" + language.getName());
+        }
+        
+        if (! contest.isContestClockRunning()){
+            throw new Exception("Contest is STOPPED - no runs accepted.");
         }
 
         try {
