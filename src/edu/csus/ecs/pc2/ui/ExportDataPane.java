@@ -14,6 +14,7 @@ import javax.swing.JPanel;
 
 import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
 import edu.csus.ecs.pc2.exports.ccs.ScoreboardFile;
+import edu.csus.ecs.pc2.exports.ccs.Userdata;
 
 /**
  * Export Data Pane.
@@ -104,18 +105,18 @@ public class ExportDataPane extends JPanePlugin {
     }
 
     protected void saveResultsTSVFile() {
-        
+
         // TODO CCS prompt for path to save this file to..
-        
+
         String outfilename = "results.tsv";
         try {
             ResultsFile resultsFile = new ResultsFile();
-            String [] lines = resultsFile.createTSVFileLines(getContest());
-            writeLinesToFile (outfilename, lines);
-            JOptionPane.showMessageDialog(this, "Saved to "+outfilename);
+            String[] lines = resultsFile.createTSVFileLines(getContest());
+            writeLinesToFile(outfilename, lines);
+            JOptionPane.showMessageDialog(this, "Saved to " + outfilename);
 
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Unable to save "+outfilename+" "+e.getMessage());
+            JOptionPane.showMessageDialog(this, "Unable to save " + outfilename + " " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -141,17 +142,17 @@ public class ExportDataPane extends JPanePlugin {
     }
 
     protected void saveScoreboardTSVFile() {
-        
+
         // TODO CCS prompt for path to save this file to..
-        
+
         String outfilename = "scoreboard.tsv";
         try {
             ScoreboardFile scoreboardFile = new ScoreboardFile();
-            String [] lines = scoreboardFile.createTSVFileLines(getContest());
-            writeLinesToFile (outfilename, lines);
-            JOptionPane.showMessageDialog(this, "Saved to "+outfilename);
+            String[] lines = scoreboardFile.createTSVFileLines(getContest());
+            writeLinesToFile(outfilename, lines);
+            JOptionPane.showMessageDialog(this, "Saved to " + outfilename);
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Unable to save "+outfilename+" "+e.getMessage());
+            JOptionPane.showMessageDialog(this, "Unable to save " + outfilename + " " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -186,8 +187,20 @@ public class ExportDataPane extends JPanePlugin {
     }
 
     protected void saveUserDataTSVFile() {
-        // TODO CCS save user data
 
+        // TODO CCS prompt for path to save this file to..
+
+        String outfilename = "userdata.tsv";
+        try {
+            Userdata userdata = new Userdata();
+            String[] lines = userdata.getUserData(getContest());
+            writeLinesToFile(outfilename, lines);
+            JOptionPane.showMessageDialog(this, "Saved to " + outfilename);
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Unable to save " + outfilename + " " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
