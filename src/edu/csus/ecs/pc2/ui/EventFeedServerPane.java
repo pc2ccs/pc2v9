@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.ui;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -16,10 +17,10 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 import edu.csus.ecs.pc2.core.transport.EventFeedServer;
+import java.awt.event.KeyEvent;
 
 /**
  * Event Feed Server Pane.
- * 
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -47,6 +48,8 @@ public class EventFeedServerPane extends JPanePlugin {
 
     private EventFeedServer eventFeedServer = new EventFeedServer(); // @jve:decl-index=0:
 
+    private JLabel eventFeedServerStatusLabel = null;
+
     /**
      * This method initializes
      * 
@@ -66,6 +69,7 @@ public class EventFeedServerPane extends JPanePlugin {
         this.add(getButtonPanel(), BorderLayout.SOUTH);
         this.add(getCenterPanel(), BorderLayout.CENTER);
 
+        enableButtons();
     }
 
     @Override
@@ -100,6 +104,8 @@ public class EventFeedServerPane extends JPanePlugin {
         if (startButton == null) {
             startButton = new JButton();
             startButton.setText("Start");
+            startButton.setMnemonic(KeyEvent.VK_S);
+            startButton.setToolTipText("Start Event Feed Server");
             startButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     startEventServer();
@@ -112,7 +118,13 @@ public class EventFeedServerPane extends JPanePlugin {
     protected void startEventServer() {
 
         if (portTextField.getText() == null) {
-            JOptionPane.showMessageDialog(this, "You must enter a port number");
+            showMessage("You must enter a port number");
+            return;
+        }
+        
+        if (portTextField.getText().length() == 0) {
+            showMessage("You must enter a port number");
+            return;
         }
 
         int port = Integer.parseInt(portTextField.getText());
@@ -120,9 +132,19 @@ public class EventFeedServerPane extends JPanePlugin {
             eventFeedServer.startSocketListener(port, getContest());
         } catch (IOException e) {
             // TODO CCS Log this exception
-            JOptionPane.showMessageDialog(this, "Unable to start: "+e.getMessage());
+            showMessage("Unable to start: "+e.getMessage());
             e.printStackTrace();
         }
+        
+        if (eventFeedServer.isListening()) {
+            eventFeedServerStatusLabel.setText("Event Feed running on port "+eventFeedServer.getPort());
+        }
+        
+        enableButtons();
+    }
+
+    private void showMessage(String string) {
+        JOptionPane.showMessageDialog(this, string);
     }
 
     /**
@@ -134,6 +156,8 @@ public class EventFeedServerPane extends JPanePlugin {
         if (stopButton == null) {
             stopButton = new JButton();
             stopButton.setText("Stop");
+            stopButton.setMnemonic(KeyEvent.VK_T);
+            stopButton.setToolTipText("Stop Event Feed Server");
             stopButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     stopEventServer();
@@ -146,8 +170,18 @@ public class EventFeedServerPane extends JPanePlugin {
     protected void stopEventServer() {
 
         if (eventFeedServer.isListening()) {
-            eventFeedServer.halt();
+            try {
+                eventFeedServer.halt();
+            } catch (IOException e) {
+                // TODO CCS handle exception
+                e.printStackTrace();
+            }
         }
+        if (! eventFeedServer.isListening()) {
+            eventFeedServerStatusLabel.setText("Event Feed NOT running");
+        }
+        
+        enableButtons();
     }
 
     /**
@@ -157,26 +191,38 @@ public class EventFeedServerPane extends JPanePlugin {
      */
     private JPanel getCenterPanel() {
         if (centerPanel == null) {
+            GridBagConstraints gridBagConstraints3 = new GridBagConstraints();
+            gridBagConstraints3.insets = new Insets(18, 17, 22, 17);
+            gridBagConstraints3.gridx = 0;
+            gridBagConstraints3.gridy = 0;
+            gridBagConstraints3.ipadx = 425;
+            gridBagConstraints3.ipady = 17;
+            gridBagConstraints3.gridwidth = 2;
+            GridBagConstraints gridBagConstraints2 = new GridBagConstraints();
+            gridBagConstraints2.fill = GridBagConstraints.VERTICAL;
+            gridBagConstraints2.gridx = 1;
+            gridBagConstraints2.gridy = 1;
+            gridBagConstraints2.ipadx = 51;
+            gridBagConstraints2.weightx = 1.0;
+            gridBagConstraints2.insets = new Insets(23, 9, 96, 199);
             GridBagConstraints gridBagConstraints1 = new GridBagConstraints();
-            gridBagConstraints1.fill = GridBagConstraints.VERTICAL;
-            gridBagConstraints1.gridx = 1;
-            gridBagConstraints1.gridy = 0;
-            gridBagConstraints1.ipadx = 51;
-            gridBagConstraints1.weightx = 1.0;
-            gridBagConstraints1.insets = new Insets(58, 7, 137, 215);
-            GridBagConstraints gridBagConstraints = new GridBagConstraints();
-            gridBagConstraints.insets = new Insets(58, 170, 137, 6);
-            gridBagConstraints.gridy = 0;
-            gridBagConstraints.ipady = -6;
-            gridBagConstraints.gridx = 0;
+            gridBagConstraints1.insets = new Insets(23, 182, 96, 8);
+            gridBagConstraints1.gridy = 1;
+            gridBagConstraints1.ipady = -6;
+            gridBagConstraints1.gridx = 0;
+            eventFeedServerStatusLabel = new JLabel();
+            eventFeedServerStatusLabel.setFont(new Font("Dialog", Font.BOLD, 14));
+            eventFeedServerStatusLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            eventFeedServerStatusLabel.setText("Event Feed NOT running");
             portLabel = new JLabel();
             portLabel.setPreferredSize(new Dimension(52, 26));
             portLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             portLabel.setText("Port");
             centerPanel = new JPanel();
             centerPanel.setLayout(new GridBagLayout());
-            centerPanel.add(portLabel, gridBagConstraints);
-            centerPanel.add(getPortTextField(), gridBagConstraints1);
+            centerPanel.add(portLabel, gridBagConstraints1);
+            centerPanel.add(getPortTextField(), gridBagConstraints2);
+            centerPanel.add(eventFeedServerStatusLabel, gridBagConstraints3);
         }
         return centerPanel;
     }
@@ -192,6 +238,12 @@ public class EventFeedServerPane extends JPanePlugin {
             portTextField.setDocument(new IntegerDocument());
         }
         return portTextField;
+    }
+    
+    private void enableButtons () {
+        boolean serverRunning = eventFeedServer.isListening();
+        getStartButton().setEnabled(! serverRunning);
+        getStopButton().setEnabled(serverRunning);
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

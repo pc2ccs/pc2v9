@@ -1,18 +1,14 @@
 package edu.csus.ecs.pc2.core.transport;
 
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
-import java.net.Socket;
 
 import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.report.EventFeedXML;
 
 /**
  * Event Feed Server.
  * 
- * Module to start a socket server on a port to send event
- * feed XML to client.
+ * Module to start a socket server on a port to send event feed XML to client.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -21,75 +17,71 @@ import edu.csus.ecs.pc2.core.report.EventFeedXML;
 // $HeadURL$
 public class EventFeedServer {
 
-    private boolean listening = true;
-    
     private boolean debugFlag = true;
+
+    private FeederThread feederThread = null;
+
+    private ServerSocket server = null;
+
+    private boolean started = false;
+
+    private int portUsed;
 
     /**
      * Stars and binds a event feed server to a socket.
+     * 
      * @param port
      * @param contest
      * @throws IOException
      */
     public void startSocketListener(int port, IInternalContest contest) throws IOException {
 
-        ServerSocket server = new ServerSocket(port);
-        
-        if (debugFlag){
-            System.out.println("Started socket on port "+port);
+        if (server != null) {
+            throw new IOException("EventFeedServer already running (on port " + portUsed + ")");
         }
 
-        listening = true;
-        
-        while (listening) {
+        this.portUsed = port;
 
-            try {
-                Socket connection = server.accept();
-                OutputStreamWriter out = new OutputStreamWriter(connection.getOutputStream());
-                
-                String eventFeedXML = getEventFeedInitial(contest);
-                out.write(eventFeedXML);
-                
-                out.close();
-                connection.close();
-                if (debugFlag){
-                    System.out.println("Opened and sent event feed.");
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        server = new ServerSocket(portUsed);
+
+        if (debugFlag) {
+            System.out.println("Started socket on port " + portUsed);
         }
 
-    }
+        feederThread = new FeederThread(server, contest);
+        new Thread(feederThread).start();
 
-    private String getEventFeedInitial(IInternalContest contest) {
-        
-        EventFeedXML eventFeedXML = new EventFeedXML();
-        
-        String xmlString = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><contest><error>initiallized in getEventFeedInitial</error></contest>";
-        try {
-            xmlString = eventFeedXML.toXML(contest);
-        } catch (IOException e) {
-            e.printStackTrace(); // TODO CCS log this
-            xmlString = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><contest><exception>"+e.getMessage()+"</exception></contest>";
-        }
-        
-        return xmlString;
-    }
-
-    public boolean isListening() {
-        return listening;
-    }
-
-    public void setListening(boolean listening) {
-        this.listening = listening;
+        started = true;
     }
 
     /**
-     * Halt socket server/listener.
+     * Is Event Feed Server listening/running?.
      * 
+     * @return
      */
-    public void halt() {
-        listening = false;
+    public boolean isListening() {
+        if (started) {
+            return feederThread.isRunning();
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Halt Event Feed Server.
+     * @throws IOException 
+     */
+    public void halt() throws IOException {
+        if (started) {
+            feederThread.halt();
+            feederThread = null;
+            server.close();
+            server = null;
+            started = false;
+        }
+    }
+
+    public int getPort() {
+        return portUsed;
     }
 }
