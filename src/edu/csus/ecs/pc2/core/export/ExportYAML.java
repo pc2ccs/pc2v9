@@ -416,7 +416,7 @@ public class ExportYAML {
      * @return
      */
     private String createProblemShortName(String name) {
-        String newName = name.trim().split(" ")[0].trim().toLowerCase() + (System.nanoTime() % 1000);
+        String newName = name.trim().split(" ")[0].trim().toLowerCase(); //  + (System.nanoTime() % 1000);
         return newName;
     }
 

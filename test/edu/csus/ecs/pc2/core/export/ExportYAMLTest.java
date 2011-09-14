@@ -19,7 +19,7 @@ import edu.csus.ecs.pc2.core.model.SampleContest;
 // $HeadURL: http://pc2.ecs.csus.edu/repos/v9sandbox/trunk/test/edu/csus/ecs/pc2/export/ExportYAMLTest.java $
 public class ExportYAMLTest extends TestCase {
 
-    private boolean debugMode = true;
+    private boolean debugMode = false;
 
     private String baseTestDirectory = "testing";
 
@@ -50,7 +50,7 @@ public class ExportYAMLTest extends TestCase {
 
         IInternalContest contest = sampleContest.createContest(3, 3, 12, 5, true);
 
-        addShortNames(contest);
+//        addShortNames(contest);
 
         Problem[] problems = contest.getProblems();
         
@@ -72,13 +72,13 @@ public class ExportYAMLTest extends TestCase {
         exportYAML = null;
     }
 
-    private void addShortNames(IInternalContest contest) throws Exception {
-
-        int idx = 1;
-        for (Problem problem : contest.getProblems()) {
-            problem.setShortName("short" + idx);
-            idx++;
-        }
-    }
+//    private void addShortNames(IInternalContest contest) throws Exception {
+//
+//        int idx = 1;
+//        for (Problem problem : contest.getProblems()) {
+//            problem.setShortName("short" + idx);
+//            idx++;
+//        }
+//    }
 
 }
