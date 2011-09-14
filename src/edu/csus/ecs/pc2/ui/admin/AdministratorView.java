@@ -38,6 +38,7 @@ import edu.csus.ecs.pc2.ui.ContestClockDisplay;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay.DisplayTimes;
 import edu.csus.ecs.pc2.ui.ContestInformationPane;
 import edu.csus.ecs.pc2.ui.ContestTimesPane;
+import edu.csus.ecs.pc2.ui.EventFeedServerPane;
 import edu.csus.ecs.pc2.ui.ExportDataPane;
 import edu.csus.ecs.pc2.ui.FinalizePane;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
@@ -271,7 +272,16 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
 
                 ClarificationsPane clarificationsPane = new ClarificationsPane();
                 addUIPlugin(getRunContestTabbedPane(), "Clarifications", clarificationsPane);
-                
+
+                if (Utilities.isDebugMode()) {
+                    try {
+                        EventFeedServerPane eventFeedServerPane = new EventFeedServerPane();
+                        addUIPlugin(getRunContestTabbedPane(), "Event Feed Server", eventFeedServerPane);
+                    } catch (Exception e) {
+                        logException(e);
+                    }
+                }
+
                 ExportDataPane exportPane = new ExportDataPane();
                 addUIPlugin(getRunContestTabbedPane(), "Export", exportPane);
                 

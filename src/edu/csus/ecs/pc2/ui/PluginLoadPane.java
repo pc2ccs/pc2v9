@@ -19,7 +19,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
  * Pane to allow user to choose and open/start plugin.
- *
+ * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -37,7 +37,7 @@ public class PluginLoadPane extends JPanePlugin {
     private JButton openNewPluginButton = null;
 
     private JButton addPluginInNewWindow = null;
-    
+
     private JTabbedPane parentTabbedPane = null;
 
     public JTabbedPane getParentTabbedPane() {
@@ -108,11 +108,11 @@ public class PluginLoadPane extends JPanePlugin {
     }
 
     protected void addNewTab() {
-        
-        if (parentTabbedPane != null){
-            
+
+        if (parentTabbedPane != null) {
+
             PluginWrapper wrapper = (PluginWrapper) getPluginComboBox().getSelectedItem();
-            getController().register (wrapper.getPlugin());
+            getController().register(wrapper.getPlugin());
             wrapper.getPlugin().setContestAndController(getContest(), getController());
             parentTabbedPane.add(wrapper.getPlugin(), wrapper.getPlugin().getPluginTitle());
         } else {
@@ -140,9 +140,9 @@ public class PluginLoadPane extends JPanePlugin {
     }
 
     protected void addNewPluginWindow() {
-        
+
         PluginWrapper wrapper = (PluginWrapper) getPluginComboBox().getSelectedItem();
-        
+
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         JPanePlugin plugin = wrapper.getPlugin();
@@ -211,18 +211,19 @@ public class PluginLoadPane extends JPanePlugin {
         plugins.add(new ReportPane());
         plugins.add(new RunsPanel());
         plugins.add(new SitesPanel());
-//        plugins.add(new StandingsHTMLPane());
+        // plugins.add(new StandingsHTMLPane());
         plugins.add(new StandingsPane());
         plugins.add(new SubmissionBiffPane());
         plugins.add(new TeamStatusPane());
         plugins.add(new ViewPropertiesPane());
         plugins.add(new PacketMonitorPane());
         plugins.add(new MessageMonitorPane());
-        
-        JPanePlugin [] pluginList = (JPanePlugin[]) plugins.toArray(new JPanePlugin[plugins.size()]);
-        
+        plugins.add(new EventFeedServerPane());
+
+        JPanePlugin[] pluginList = (JPanePlugin[]) plugins.toArray(new JPanePlugin[plugins.size()]);
+
         Arrays.sort(pluginList, new JPluginPaneNameComparator());
-        
+
         return pluginList;
     }
 

@@ -37,6 +37,7 @@ import edu.csus.ecs.pc2.core.model.SiteEvent;
 import edu.csus.ecs.pc2.plugin.ContestSummaryReports;
 import edu.csus.ecs.pc2.ui.ConnectionsPane;
 import edu.csus.ecs.pc2.ui.ContestTimesPane;
+import edu.csus.ecs.pc2.ui.EventFeedServerPane;
 import edu.csus.ecs.pc2.ui.ExportDataPane;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
@@ -446,7 +447,13 @@ public class ServerView extends JFrame implements UIPlugin {
 
         ConnectionsPane connectionsPane = new ConnectionsPane();
         addUIPlugin(getMainTabbedPane(), "Connections", connectionsPane);
-
+        
+        EventFeedServerPane eventFeedServerPane = new EventFeedServerPane();
+        addUIPlugin(getMainTabbedPane(), "Event Feed Server", eventFeedServerPane);
+        
+        ExportDataPane exportPane = new ExportDataPane();
+        addUIPlugin(getMainTabbedPane(), "Export", exportPane);
+        
         if (Utilities.isDebugMode()) {
             try {
                 LoadContestPane loadContestPane = new LoadContestPane();
@@ -455,9 +462,6 @@ public class ServerView extends JFrame implements UIPlugin {
                 logException(e);
             }
         }
-        
-        ExportDataPane exportPane = new ExportDataPane();
-        addUIPlugin(getMainTabbedPane(), "Export", exportPane);
         
         LoginsPane loginsPane = new LoginsPane();
         addUIPlugin(getMainTabbedPane(), "Logins", loginsPane);
