@@ -136,9 +136,11 @@ public class ResultsFileTest extends TestCase {
         IInternalContest contest = sample.createContest(1, 1, numTeams, 12, true);
 
         assignReservationIds(contest, 2020);
+        
+        contest.setFinalizeData(finalizeData);
 
-        // String[] results = resultsFile.createTSVFileLines(contest); // using getStandingsRecords
-        String[] results = resultsFile.createTSVFileLinesTwo(contest); // using XML
+         String[] results = resultsFile.createTSVFileLines(contest); // using getStandingsRecords
+//        String[] results = resultsFile.createTSVFileLinesTwo(contest); // using XML
 
         assertEquals("Number results file lines ", numTeams + 1, results.length);
 

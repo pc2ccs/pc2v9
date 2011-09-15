@@ -31,7 +31,7 @@ import edu.csus.ecs.pc2.core.util.XMLMemento;
 // $HeadURL$
 public class NotificationXMLTest extends TestCase {
 
-    private final boolean debugMode = true;
+    private final boolean debugMode = false;
 
     private IInternalContest contest = null;
     

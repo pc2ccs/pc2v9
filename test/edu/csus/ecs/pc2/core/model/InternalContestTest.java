@@ -23,7 +23,7 @@ import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
 // $HeadURL$
 public class InternalContestTest extends TestCase {
     
-    private boolean debugMode = true;
+    private boolean debugMode = false;
 
     private static final String CONFIG_ACCOUNTS = "ACCOUNTS";
 

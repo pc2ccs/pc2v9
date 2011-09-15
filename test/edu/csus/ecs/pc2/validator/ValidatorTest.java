@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.validator;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Hashtable;
 import java.util.UUID;
 
@@ -22,35 +23,45 @@ public class ValidatorTest extends TestCase {
 
     private boolean unitDebug = true;
 
-    private String testDataDirectoryName = "testdata" + File.separator + "validator";
+    private String testDataDirectoryName = null;
 
-    private String tempOutputDirectoryName = testDataDirectoryName + File.separator + "output";
+    private String testOutputDirectoryName = null;
+
+    private static final String DATA_DIR_PATH = "testdata" + File.separator + "validator";
+
+    private static final String OUT_DIR_PATH = "testing" + File.separator + "validator" + File.separator + "output";
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        
+
         // Directory where test data is
         String testDir = "testdata";
-        String projectPath=JUnitUtilities.locate(testDir);
+        String projectPath = JUnitUtilities.locate(testDir);
         if (projectPath == null) {
-            throw new Exception("Unable to locate "+testDir);
+            throw new Exception("Unable to locate " + testDir);
         }
-        String testDirectoryName = projectPath + File.separator + testDir;
 
-        File dir = new File(testDirectoryName);
+        testDataDirectoryName = projectPath + File.separator + DATA_DIR_PATH;
+        testOutputDirectoryName = projectPath + File.separator + OUT_DIR_PATH;
         
-        if (dir.exists()) {
-            testDataDirectoryName = testDirectoryName + File.separator + "validator";
-            tempOutputDirectoryName = testDataDirectoryName + File.separator + "output";
-            
-            // Create test output directory
-            Utilities.insureDir(tempOutputDirectoryName);
-        } else {
-            throw new Exception ("Could not find "+testDir+" under "+testDirectoryName);
+        if (! new File(testOutputDirectoryName).isDirectory()) {
+            new File(testOutputDirectoryName).mkdirs();
         }
+
+        Utilities.insureDir(testDataDirectoryName);
+        Utilities.insureDir(testOutputDirectoryName);
+        
+        if (! new File(testDataDirectoryName).isDirectory()) {
+            throw new FileNotFoundException("Could not create dir: "+testDataDirectoryName);
+        }
+        
+        if (! new File(testOutputDirectoryName).isDirectory()) {
+            throw new FileNotFoundException("Could not create dir: "+testOutputDirectoryName);
+        }
+        
     }
-    
+
     /**
      * Return full path and filename to test data directory.
      * 
@@ -79,11 +90,11 @@ public class ValidatorTest extends TestCase {
     }
 
     protected String randomOutputFileName(String prefix) {
-        return tempOutputDirectoryName + File.separator + randomFileName(prefix);
+        return testOutputDirectoryName + File.separator + randomFileName(prefix);
     }
 
     /**
-     * Test all validator options. 
+     * Test all validator options.
      */
     public void testAll() {
 
@@ -120,9 +131,9 @@ public class ValidatorTest extends TestCase {
             validateFileDiff(pc2TestNumber, outcome);
         }
     }
-    
+
     /**
-     * Test all validator options. 
+     * Test all validator options.
      */
     public void testNegativeCases() {
         int[] pc2TestNumbers = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
@@ -143,7 +154,6 @@ public class ValidatorTest extends TestCase {
             runNegativeValidatorTest(outputFilename, answerFilename, expectedOutcome, pc2TestNumber);
         }
     }
-
 
     /**
      * Test two identical files, one line per file.
@@ -320,7 +330,7 @@ public class ValidatorTest extends TestCase {
 
         assertNotSame("Failed negative test -pc2 " + pc2TestNumber, results, judgementString);
     }
-    
+
     /**
      * Run Validator and return results.
      * 

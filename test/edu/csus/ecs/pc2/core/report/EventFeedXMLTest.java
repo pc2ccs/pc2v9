@@ -5,6 +5,7 @@ import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Arrays;
+import java.util.Hashtable;
 import java.util.Vector;
 
 import junit.framework.TestCase;
@@ -294,12 +295,18 @@ public class EventFeedXMLTest extends TestCase {
         // Create notifications
 
         addNotifications(contest);
+        
+        /**
+         * Solved runs is used to only count one solved run per team and problem.
+         */
+        Hashtable<String, Run>solvedRuns = new Hashtable<String, Run>();
 
         int solved = 0;
         for (Run run : getSortedRuns()) {
             if (run.isSolved()) {
                 assertTrue("Expecting Notification for " + run, notification.alreadyHasNotification(contest, run));
-                solved ++;
+                String key = run.getSubmitter().getTripletKey()+":"+run.getProblemId();
+                solvedRuns.put(key, run);
             }
         }
 
@@ -308,6 +315,8 @@ public class EventFeedXMLTest extends TestCase {
         BalloonDeliveryInfo[] deliveries = notification.getBalloonDeliveries(contest);
         Arrays.sort(deliveries, new BalloonDeliveryComparator(contest));
         int notificationSequenceNumber = 1;
+        
+        solved = solvedRuns.keySet().size();
         
         assertEquals("Expected notifications for all solved", solved, deliveries.length);
         

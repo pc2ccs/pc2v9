@@ -39,7 +39,7 @@ public class ServerConnection {
     private Contest contest = null;
 
     /**
-     * Construct a local {@link NewServerConnection} object which can subsequently be used to connect to a currently-running PC<sup>2</sup> server.
+     * Construct a local {@link ServerConnection} object which can subsequently be used to connect to a currently-running PC<sup>2</sup> server.
      * 
      */
     public ServerConnection() {
@@ -51,8 +51,8 @@ public class ServerConnection {
      * {@link edu.csus.ecs.pc2.api.IContest} object which can then be used to obtain information about the contest being controlled by the server. If the login fails the method throws
      * {@link edu.csus.ecs.pc2.api.exceptions.LoginFailureException}, in which case the message contained in the exception can be used to determine the nature of the login failure.
      * <P>
-     * Note that invoking {@link NewServerConnection#login(String, String)} causes an attempt to establish a network connection to a PC<sup>2</sup> server using the connection information specified in
-     * the <code>pc2v9.ini</code> file in the current directory. The PC<sup>2</sup> server must <I>already be running</i> prior to invoking {@link NewServerConnection#login(String, String)}, and the
+     * Note that invoking {@link ServerConnection#login(String, String)} causes an attempt to establish a network connection to a PC<sup>2</sup> server using the connection information specified in
+     * the <code>pc2v9.ini</code> file in the current directory. The PC<sup>2</sup> server must <I>already be running</i> prior to invoking {@link ServerConnection#login(String, String)}, and the
      * <code>pc2v9.ini</code> must specify legitmate server connection information; otherwise, {@link edu.csus.ecs.pc2.api.exceptions.LoginFailureException} is thrown. See the PC<sup>2</sup> Contest
      * Administrator's Guide for information regarding specifying server connection information in <code>pc2v9.ini</code> files.
      * <P>
