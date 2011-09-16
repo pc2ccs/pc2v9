@@ -6,6 +6,13 @@ import java.util.Date;
 /**
  * CCS Finalization Data.
  * 
+ * When a contest is finalized it is "certified" and a result is that
+ * the contest data is locked down, no changes that would change
+ * score results will be allowed.  This condition can be checked
+ * using the {@link #isCertified()} method.
+ * 
+ * <br><br>
+ * 
  * This data contains information about which ranks (teams) get
  * medals, and provides information for the CCS Event Feed XML
  * finalized element.
@@ -73,6 +80,7 @@ public class FinalizeData implements Serializable {
     }
 
     /**
+     * Is contest certified?.
      * 
      * @param certified true certifies, false un-certifies.
      */

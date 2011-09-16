@@ -17,10 +17,15 @@ import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
+import edu.csus.ecs.pc2.core.model.ContestTime;
+import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.IContestInformationListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.report.FinalizeReport;
 
 /**
@@ -155,15 +160,17 @@ public class FinalizePane extends JPanePlugin {
             getCommentTextField().setText(data.getComment());
 
             if (data.isCertified()) {
-                certificationCommentLabel.setText("Contest Certified");
+                certificationCommentLabel.setText("Contest Finzlied (Certified)");
                 certificationCommentLabel.setToolTipText("Certified at: " + data.getCertificationDate());
             }
 
         } else {
-            certificationCommentLabel.setText("Contest not certified");
+            certificationCommentLabel.setText("Contest not finalized");
             certificationCommentLabel.setToolTipText("");
             populateDefaults();
         }
+        
+        enableButtons();
 
     }
 
@@ -216,16 +223,57 @@ public class FinalizePane extends JPanePlugin {
             finalizeButton.setToolTipText("Certify Contest Results");
             finalizeButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    finalizeData();
+                    certifyContest();
                 }
             });
         }
         return finalizeButton;
     }
 
-    protected void finalizeData() {
+    protected void certifyContest() {
 
         FinalizeData data = getFromFields();
+
+        // TODO CCS remove debugMode variable and all conditionals based on the variable.
+        boolean debugMode = false;
+
+        int numberUnjudgedRuns = getNumberUnjudgedRuns();
+        if (numberUnjudgedRuns > 0) {
+            showMessage("Cannot Finalize - " + numberUnjudgedRuns + " unjudged runs");
+
+            if (!debugMode) {
+                return;
+            }
+        }
+
+        int numberUnasweredClars = getNumberUnansweredClars();
+        if (numberUnasweredClars > 0) {
+            showMessage("Cannot Finalize - " + numberUnasweredClars + " un-answered clarifications");
+
+            if (!debugMode) {
+                return;
+            }
+        }
+
+        ContestTime contestTime = getContest().getContestTime();
+
+        if (contestTime.isContestRunning()) {
+
+            showMessage("Cannot Finalize - contest not stopped");
+
+            if (!debugMode) {
+                return;
+            }
+        }
+
+        if (contestTime.getRemainingSecs() > 0) {
+
+            showMessage("Cannot Finalize - contest not over - " + contestTime.getRemainingTimeStr() + " remaining time");
+
+            if (!debugMode) {
+                return;
+            }
+        }
 
         try {
             validateData(data);
@@ -236,8 +284,40 @@ public class FinalizePane extends JPanePlugin {
 
         data.setCertified(true);
 
-        getController().updateFinalizeData(data);
+        int result = FrameUtilities.yesNoCancelDialog(this, "Are you sure you want to finalize?", "Sure, really realy sure?");
+        if (result == JOptionPane.YES_OPTION) {
+            getController().updateFinalizeData(data);
+        }
 
+    }
+
+    private int getNumberUnjudgedRuns() {
+        Run[] runs = getContest().getRuns();
+
+        Filter filter = new Filter();
+        filter.addRunState(RunStates.JUDGED);
+
+        int deletedRuns = 0;
+        for (Run run : runs) {
+            if (run.isDeleted()) {
+                deletedRuns++;
+            }
+        }
+
+        return runs.length - deletedRuns - filter.getRuns(runs).length;
+    }
+
+    private int getNumberUnansweredClars() {
+        Clarification[] clarifications = getContest().getClarifications();
+
+        int count = 0;
+        for (Clarification clarification : clarifications) {
+            if (!clarification.isAnswered()) {
+                count++;
+            }
+        }
+
+        return count;
     }
 
     private void showMessage(String message) {
@@ -408,7 +488,7 @@ public class FinalizePane extends JPanePlugin {
      * 
      * @return javax.swing.JButton
      */
-   private JButton getReportButton() {
+    private JButton getReportButton() {
         if (reportButton == null) {
             reportButton = new JButton();
             reportButton.setText("Report");
@@ -420,6 +500,21 @@ public class FinalizePane extends JPanePlugin {
             });
         }
         return reportButton;
+    }
+    
+    void enableButtons(){
+        
+        boolean certified = false;
+        
+        FinalizeData finalizeData = getContest().getFinalizeData();
+        
+        if (finalizeData != null){
+            certified = finalizeData.isCertified();
+        }
+        
+        getUpdateButton().setEnabled(! certified);
+        getFinalizeButton().setEnabled(! certified);
+        
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
