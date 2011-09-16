@@ -60,7 +60,7 @@ public class ResultsFile {
         Properties properties = getScoringProperties(contest);
 
         // Field Description Example Type
-        // 1 Label file_version fixed string (always same value)
+        // 1 Label results fixed string (always same value)
         // 2 Version number 1 integer
 
         lines.addElement("results" + TAB + "1");
@@ -148,10 +148,6 @@ public class ResultsFile {
     public String[] createTSVFileLinesTwo(IInternalContest contest) throws Exception {
 
         finalizeData = contest.getFinalizeData(); 
-
-        // Field Description Example Type
-        // 1 Label file_version fixed string (always same value)
-        // 2 Version number 1 integer
 
         DefaultScoringAlgorithm scoringAlgorithm = new DefaultScoringAlgorithm();
 

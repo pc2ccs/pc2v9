@@ -8,7 +8,6 @@ import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Vector;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -36,10 +35,6 @@ import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IProfileListener;
-import edu.csus.ecs.pc2.core.model.Language;
-import edu.csus.ecs.pc2.core.model.LanguageAutoFill;
-import edu.csus.ecs.pc2.core.model.Problem;
-import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.model.ProfileEvent;
 import edu.csus.ecs.pc2.core.model.Site;
@@ -47,6 +42,7 @@ import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.core.report.ProfileCloneSettingsReport;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
+import edu.csus.ecs.pc2.core.util.QuickLoad;
 
 /**
  * Profile administration pane.
@@ -923,157 +919,16 @@ public class ProfilesPane extends JPanePlugin {
         
         if (! isAdministrator(getContest().getClientId())){
 
-            JOptionPane.showMessageDialog(this,"You must be an admin to use this feature");
+            JOptionPane.showMessageDialog(this,"You must be an Administrator to use this feature");
             return;
         }
         
-        
-        QuickLoad load = new QuickLoad();
-        load.setContestAndController(getContest(), getController());
-        load = null;
+        QuickLoad loader = new QuickLoad();
+        loader.setContestAndController(getContest(), getController());
+        loader = null;
         
         JOptionPane.showMessageDialog(this,"Contest quick loaded");
     }
     
-    /**
-     * Quick load a contest.
-     * @author pc2@ecs.csus.edu
-     * @version $Id$
-     */
-    
-    // $HeadURL$
-    class QuickLoad implements UIPlugin{
-
-        /**
-         * 
-         */
-        private static final long serialVersionUID = -4248229783309059230L;
-        private IInternalContest contest;
-        private IInternalController controller;
-
-        public void setContestAndController(IInternalContest inContest, IInternalController inController) {
-            contest = inContest;
-            controller = inController;
-            
-            loadContest();
-        }
-        
-        private void loadContest() {
-            
-            if (contest.getLanguages().length == 0){
-                
-                Language language = createLanguage(LanguageAutoFill.JAVATITLE);
-                if (language != null){
-                    controller.addNewLanguage(language);
-                }
-                
-                System.out.println("quickLoad: add "+language);
-                
-                language = createLanguage(LanguageAutoFill.GNUCPPTITLE);
-                if (language != null){
-                    controller.addNewLanguage(language);
-                }
-
-                System.out.println("quickLoad: add "+language);
-
-                language = createLanguage(LanguageAutoFill.PERLTITLE);
-                if (language != null){
-                    controller.addNewLanguage(language);
-                }
-                
-                System.out.println("quickLoad: add "+language);
-
-            }
-            
-            if (contest.getProblems().length == 0) {
-                Problem problem = new Problem("Sumit");
-                Problem problem2 = new Problem("Hello");
-
-                ProblemDataFiles files = new ProblemDataFiles(problem);
-                controller.addNewProblem(problem, files);
-                System.out.println("quickLoad: add "+problem);
-
-                files = new ProblemDataFiles(problem2);
-                controller.addNewProblem(problem2, files);
-                System.out.println("quickLoad: add "+problem);
-            }
-
-            if (siteLoggedIn(1)) {
-                generateAccounts(1, Type.TEAM, 22);
-                generateAccounts(1, Type.JUDGE, 12);
-                generateAccounts(1, Type.SCOREBOARD, 12);
-            }
-
-            if (siteLoggedIn(2)) {
-                generateAccounts(2, Type.TEAM, 22);
-                generateAccounts(2, Type.JUDGE, 2);
-            }
-            if (siteLoggedIn(3)) {
-                generateAccounts(3, Type.TEAM, 33);
-            }
-        }
-        
-        
-        /**
-         * Create language based on auto fill.
-         * 
-         * @see LanguageAutoFill
-         * @param languageName - name from {#link {@link LanguageAutoFill}}.
-         * @return
-         */
-        private Language createLanguage (String languageName) {
-            for (String langName : LanguageAutoFill.getLanguageList()) {
-                if (langName.equals(languageName)) {
-                    // Use auto fill values
-                    String[] values = LanguageAutoFill.getAutoFillValues(langName);
-                    Language language = new Language(langName);
-                    language.setCompileCommandLine(values[1]);
-                    language.setExecutableIdentifierMask(values[2]);
-                    language.setProgramExecuteCommandLine(values[3]);
-                    return language;
-                }
-            }
-            return null;
-        }
-       
-
-        /**
-         * Is this siteNumber connected/logged in.
-         * @param siteNumber
-         * @return
-         */
-        private boolean siteLoggedIn(int siteNumber) {
-
-            if (siteNumber == getContest().getSiteNumber()) {
-                return true;
-            }
-
-            ClientId remoteServerId = new ClientId(siteNumber, ClientType.Type.SERVER, 0);
-            return getContest().isLocalLoggedIn(remoteServerId) || getContest().isRemoteLoggedIn(remoteServerId);
-        }
-
-        /**
-         * Insure that there are count accounts, generate more if needed.
-         * @param siteNumber
-         * @param type
-         * @param count
-         */
-        private void generateAccounts(int siteNumber, Type type, int count) {
-            
-            Vector<Account>  accounts =         getContest().getAccounts(type, siteNumber);
-            
-            int numToGenerate = count - accounts.size();
-            
-            if (numToGenerate > 0){
-                System.out.println("quickLoad: added "+numToGenerate+" "+type.toString()+" at site "+siteNumber);
-                getController().generateNewAccounts(type.toString(), siteNumber, numToGenerate, 1, true);
-            }
-        }
-
-        public String getPluginTitle() {
-            return "Quick Load Contest";
-        }
-        
-    }
-
+ 
 } // @jve:decl-index=0:visual-constraint="25,9"

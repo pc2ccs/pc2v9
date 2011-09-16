@@ -41,10 +41,10 @@ public class ScoreboardFile {
         Properties properties = getScoringProperties(contest);
 
         // Field Description Example Type
-        // 1 Label file_version fixed string (always same value)
+        // 1 Label scoreboard fixed string (always same value)
         // 2 Version number 1 integer
 
-        lines.addElement("file_version" + TAB + "1");
+        lines.addElement("scoreboard" + TAB + "1");
 
         // return ranked teams
         StandingsRecord[] standingsRecords = scoringAlgorithm.getStandingsRecords(contest, properties);
