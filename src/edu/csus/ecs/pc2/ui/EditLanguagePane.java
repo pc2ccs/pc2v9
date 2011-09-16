@@ -29,7 +29,7 @@ import edu.csus.ecs.pc2.core.model.LanguageAutoFill;
  */
 
 // $HeadURL$
-public class LanguagePane extends JPanePlugin {
+public class EditLanguagePane extends JPanePlugin {
 
     /**
      * 
@@ -84,7 +84,7 @@ public class LanguagePane extends JPanePlugin {
      * This method initializes
      * 
      */
-    public LanguagePane() {
+    public EditLanguagePane() {
         super();
         initialize();
     }

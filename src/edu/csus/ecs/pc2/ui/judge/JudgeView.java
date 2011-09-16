@@ -26,10 +26,10 @@ import edu.csus.ecs.pc2.ui.ContestClockDisplay;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay.DisplayTimes;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
-import edu.csus.ecs.pc2.ui.OptionsPanel;
+import edu.csus.ecs.pc2.ui.OptionsPane;
 import edu.csus.ecs.pc2.ui.PacketMonitorPane;
 import edu.csus.ecs.pc2.ui.PluginLoadPane;
-import edu.csus.ecs.pc2.ui.RunsPanel;
+import edu.csus.ecs.pc2.ui.RunsPane;
 import edu.csus.ecs.pc2.ui.SubmissionBiffPane;
 import edu.csus.ecs.pc2.ui.SubmitClarificationPane;
 import edu.csus.ecs.pc2.ui.SubmitRunPane;
@@ -181,13 +181,13 @@ public class JudgeView extends JFrame implements UIPlugin {
                 setFrameTitle(contest.getContestTime().isContestRunning());
                 showMessage("");
 
-                RunsPanel newRunsPane = new RunsPanel(false);
+                RunsPane newRunsPane = new RunsPane(false);
                 newRunsPane.setShowNewRunsOnly(true);
                 newRunsPane.setMakeSoundOnOneRun(true);
                 addUIPlugin(getMainTabbedPane(), "New Runs", newRunsPane);
                 newRunsPane.setFilterFrameTitle("New Runs Filter");
 
-                RunsPanel runsPanel = new RunsPanel();
+                RunsPane runsPanel = new RunsPane();
                 addUIPlugin(getMainTabbedPane(), "All Runs", runsPanel);
                 runsPanel.setFilterFrameTitle("All Runs Filter");
 
@@ -204,7 +204,7 @@ public class JudgeView extends JFrame implements UIPlugin {
                 SubmitClarificationPane submitClarificationPane = new SubmitClarificationPane();
                 addUIPlugin(getMainTabbedPane(), "Generate Clarification", submitClarificationPane);
 
-                OptionsPanel optionsPanel = new OptionsPanel();
+                OptionsPane optionsPanel = new OptionsPane();
                 addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
 
                 contestClockDisplay = new ContestClockDisplay(controller.getLog(), contest.getContestTime(), contest.getSiteNumber(), true, null);

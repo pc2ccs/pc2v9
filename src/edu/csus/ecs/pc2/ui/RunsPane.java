@@ -65,7 +65,7 @@ import edu.csus.ecs.pc2.ui.judge.JudgeView;
  */
 
 // $HeadURL$$
-public class RunsPanel extends JPanePlugin {
+public class RunsPane extends JPanePlugin {
 
     /**
      * 
@@ -161,7 +161,7 @@ public class RunsPanel extends JPanePlugin {
      * This method initializes
      * 
      */
-    public RunsPanel() {
+    public RunsPane() {
         super();
         initialize();
     }
@@ -170,7 +170,7 @@ public class RunsPanel extends JPanePlugin {
      * @param useAutoJudge
      *            if true use
      */
-    public RunsPanel(boolean useAutoJudgeMonitor) {
+    public RunsPane(boolean useAutoJudgeMonitor) {
         super();
         bUseAutoJudgemonitor = useAutoJudgeMonitor;
         initialize();

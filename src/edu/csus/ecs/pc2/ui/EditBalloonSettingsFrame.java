@@ -24,7 +24,7 @@ public class EditBalloonSettingsFrame extends JFrame implements UIPlugin {
 
     private IInternalController controller = null;
 
-    private BalloonSettingPane balloonSettingPane = null;
+    private EditBalloonSettingPane balloonSettingPane = null;
 
     /**
      * This method initializes
@@ -65,9 +65,9 @@ public class EditBalloonSettingsFrame extends JFrame implements UIPlugin {
      * 
      * @return edu.csus.ecs.pc2.ui.BalloonSettingPane
      */
-    private BalloonSettingPane getBalloonSettingPane() {
+    private EditBalloonSettingPane getBalloonSettingPane() {
         if (balloonSettingPane == null) {
-            balloonSettingPane = new BalloonSettingPane();
+            balloonSettingPane = new EditBalloonSettingPane();
         }
         return balloonSettingPane;
     }

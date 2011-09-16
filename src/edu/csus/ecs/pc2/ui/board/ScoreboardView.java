@@ -36,7 +36,7 @@ import edu.csus.ecs.pc2.ui.ContestClockDisplay;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay.DisplayTimes;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
-import edu.csus.ecs.pc2.ui.OptionsPanel;
+import edu.csus.ecs.pc2.ui.OptionsPane;
 import edu.csus.ecs.pc2.ui.PacketMonitorPane;
 import edu.csus.ecs.pc2.ui.PluginLoadPane;
 import edu.csus.ecs.pc2.ui.StandingsPane;
@@ -196,7 +196,7 @@ public class ScoreboardView extends JFrame implements UIPlugin {
                 // TODO replace with addUIPlugin when/if it is graphical
 //                balloonHandler.setContestAndController(contest, controller);
                 addUIPlugin(getMainTabbedPane(), "Balloon Test", balloonHandler);
-                OptionsPanel optionsPanel = new OptionsPanel();
+                OptionsPane optionsPanel = new OptionsPane();
                 addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
                 
                 if (Utilities.isDebugMode()){

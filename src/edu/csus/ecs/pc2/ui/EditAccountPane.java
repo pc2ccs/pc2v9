@@ -48,7 +48,7 @@ import edu.csus.ecs.pc2.core.security.PermissionList;
  */
 
 // $HeadURL$
-public class AccountPane extends JPanePlugin {
+public class EditAccountPane extends JPanePlugin {
 
     /**
      * 
@@ -135,7 +135,7 @@ public class AccountPane extends JPanePlugin {
      * This method initializes
      * 
      */
-    public AccountPane() {
+    public EditAccountPane() {
         super();
         initialize();
     }

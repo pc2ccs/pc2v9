@@ -35,14 +35,14 @@ import edu.csus.ecs.pc2.core.security.Permission.Type;
 import edu.csus.ecs.pc2.core.security.PermissionList;
 
 /**
- * View, Add and change sites' settings.
+ * View/Edit sites' settings.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
 
 // $HeadURL${date}
-public class SitesPanel extends JPanePlugin {
+public class SitesPane extends JPanePlugin {
 
     /**
      * 
@@ -77,7 +77,7 @@ public class SitesPanel extends JPanePlugin {
      * This method initializes
      * 
      */
-    public SitesPanel() {
+    public SitesPane() {
         super();
         initialize();
     }

@@ -51,6 +51,7 @@ import edu.csus.ecs.pc2.core.report.ClientSettingsReport;
 import edu.csus.ecs.pc2.core.report.ContestAnalysisReport;
 import edu.csus.ecs.pc2.core.report.ContestReport;
 import edu.csus.ecs.pc2.core.report.ContestSettingsReport;
+import edu.csus.ecs.pc2.core.report.ContestSummaryReports;
 import edu.csus.ecs.pc2.core.report.EvaluationReport;
 import edu.csus.ecs.pc2.core.report.EventFeedReport;
 import edu.csus.ecs.pc2.core.report.ExportYamlReport;
@@ -85,7 +86,6 @@ import edu.csus.ecs.pc2.core.security.Permission.Type;
 import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.core.util.IMemento;
 import edu.csus.ecs.pc2.core.util.XMLMemento;
-import edu.csus.ecs.pc2.plugin.ContestSummaryReports;
 import edu.csus.ecs.pc2.ui.EditFilterPane.ListNames;
 
 /**

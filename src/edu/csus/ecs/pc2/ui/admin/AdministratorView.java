@@ -46,20 +46,20 @@ import edu.csus.ecs.pc2.ui.GroupsPane;
 import edu.csus.ecs.pc2.ui.ICPCPane;
 import edu.csus.ecs.pc2.ui.ImportDataPane;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
-import edu.csus.ecs.pc2.ui.JudgementsPanel;
+import edu.csus.ecs.pc2.ui.JudgementsPane;
 import edu.csus.ecs.pc2.ui.LanguagesPane;
 import edu.csus.ecs.pc2.ui.LogWindow;
 import edu.csus.ecs.pc2.ui.LoginsPane;
 import edu.csus.ecs.pc2.ui.MessageMonitorPane;
-import edu.csus.ecs.pc2.ui.OptionsPanel;
+import edu.csus.ecs.pc2.ui.OptionsPane;
 import edu.csus.ecs.pc2.ui.PacketExplorerPane;
 import edu.csus.ecs.pc2.ui.PacketMonitorPane;
 import edu.csus.ecs.pc2.ui.PluginLoadPane;
 import edu.csus.ecs.pc2.ui.ProblemsPane;
 import edu.csus.ecs.pc2.ui.ProfilesPane;
 import edu.csus.ecs.pc2.ui.ReportPane;
-import edu.csus.ecs.pc2.ui.RunsPanel;
-import edu.csus.ecs.pc2.ui.SitesPanel;
+import edu.csus.ecs.pc2.ui.RunsPane;
+import edu.csus.ecs.pc2.ui.SitesPane;
 import edu.csus.ecs.pc2.ui.StandingsHTMLPane;
 import edu.csus.ecs.pc2.ui.StandingsPane;
 import edu.csus.ecs.pc2.ui.TeamStatusPane;
@@ -230,7 +230,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 ImportDataPane importDataPane = new ImportDataPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Import CCS", importDataPane);
 
-                JudgementsPanel judgementsPanel = new JudgementsPanel();
+                JudgementsPane judgementsPanel = new JudgementsPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Judgements", judgementsPanel);
 
                 LanguagesPane languagesPane = new LanguagesPane();
@@ -300,7 +300,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                     }
                 }
 
-                OptionsPanel optionsPanel = new OptionsPanel();
+                OptionsPane optionsPanel = new OptionsPane();
                 addUIPlugin(getRunContestTabbedPane(), "Options", optionsPanel);
                 optionsPanel.setSecurityLogWindow(securityAlertLogWindow);
 
@@ -328,10 +328,10 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 ReportPane reportPane = new ReportPane();
                 addUIPlugin(getRunContestTabbedPane(), "Reports", reportPane);
 
-                RunsPanel runsPane = new RunsPanel();
+                RunsPane runsPane = new RunsPane();
                 addUIPlugin(getRunContestTabbedPane(), "Runs", runsPane);
 
-                SitesPanel sitesPanel = new SitesPanel();
+                SitesPane sitesPanel = new SitesPane();
                 addUIPlugin(getRunContestTabbedPane(), "Sites", sitesPanel);
 
                 StandingsPane standingsPane = new StandingsPane();

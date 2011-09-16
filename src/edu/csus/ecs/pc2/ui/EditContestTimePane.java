@@ -25,7 +25,7 @@ import javax.swing.JCheckBox;
  */
 
 // $HeadURL$
-public class ContestTimePane extends JPanePlugin {
+public class EditContestTimePane extends JPanePlugin {
 
     /**
      * 
@@ -66,7 +66,7 @@ public class ContestTimePane extends JPanePlugin {
      * This method initializes
      * 
      */
-    public ContestTimePane() {
+    public EditContestTimePane() {
         super();
         initialize();
     }

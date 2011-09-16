@@ -45,7 +45,7 @@ import edu.csus.ecs.pc2.core.security.FileSecurityException;
  */
 
 // $HeadURL$
-public class RunPane extends JPanePlugin {
+public class EditRunPane extends JPanePlugin {
 
     /**
      * 
@@ -116,7 +116,7 @@ public class RunPane extends JPanePlugin {
      * This method initializes
      * 
      */
-    public RunPane() {
+    public EditRunPane() {
         super();
         initialize();
     }

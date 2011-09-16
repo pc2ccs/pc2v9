@@ -28,7 +28,7 @@ public class EditProblemFrame extends JFrame implements UIPlugin {
 
     private IInternalController controller;
 
-    private ProblemPane problemPane = null;
+    private EditProblemPane problemPane = null;
 
     /**
      * This method initializes
@@ -92,9 +92,9 @@ public class EditProblemFrame extends JFrame implements UIPlugin {
      * 
      * @return edu.csus.ecs.pc2.ui.ProblemPane
      */
-    private ProblemPane getProblemPane() {
+    private EditProblemPane getProblemPane() {
         if (problemPane == null) {
-            problemPane = new ProblemPane();
+            problemPane = new EditProblemPane();
         }
         return problemPane;
     }

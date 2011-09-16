@@ -32,7 +32,7 @@ import edu.csus.ecs.pc2.core.security.PermissionList;
  */
 
 // $HeadURL$
-public class JudgementsPanel extends JPanePlugin {
+public class JudgementsPane extends JPanePlugin {
 
     /**
      * 
@@ -83,7 +83,7 @@ public class JudgementsPanel extends JPanePlugin {
      * This method initializes
      * 
      */
-    public JudgementsPanel() {
+    public JudgementsPane() {
         super();
         initialize();
     }

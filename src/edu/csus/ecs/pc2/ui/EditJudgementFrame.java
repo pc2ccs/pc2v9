@@ -27,7 +27,7 @@ public class EditJudgementFrame extends JFrame implements UIPlugin {
 
     private IInternalController controller;
 
-    private JudgementPane judgementPane = null;
+    private EditJudgementPane judgementPane = null;
 
     /**
      * This method initializes
@@ -79,9 +79,9 @@ public class EditJudgementFrame extends JFrame implements UIPlugin {
      * 
      * @return edu.csus.ecs.pc2.ui.JudgementPane
      */
-    private JudgementPane getJudgementPane() {
+    private EditJudgementPane getJudgementPane() {
         if (judgementPane == null) {
-            judgementPane = new JudgementPane();
+            judgementPane = new EditJudgementPane();
         }
         return judgementPane;
     }

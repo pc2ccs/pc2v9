@@ -30,7 +30,7 @@ public class EditRunFrame extends JFrame implements UIPlugin {
 
     private IInternalController controller;
 
-    private RunPane runPane = null;
+    private EditRunPane runPane = null;
     
     private Run run = null;
 
@@ -92,9 +92,9 @@ public class EditRunFrame extends JFrame implements UIPlugin {
      * 
      * @return edu.csus.ecs.pc2.ui.RunPane
      */
-    private RunPane getRunPane() {
+    private EditRunPane getRunPane() {
         if (runPane == null) {
-            runPane = new RunPane();
+            runPane = new EditRunPane();
         }
         return runPane;
     }

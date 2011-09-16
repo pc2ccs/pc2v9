@@ -36,7 +36,7 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
  */
 
 // $HeadURL$
-public class ProblemPane extends JPanePlugin {
+public class EditProblemPane extends JPanePlugin {
 
     public static final String DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND = "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
 
@@ -175,7 +175,7 @@ public class ProblemPane extends JPanePlugin {
      * This method initializes
      * 
      */
-    public ProblemPane() {
+    public EditProblemPane() {
         super();
         initialize();
     }

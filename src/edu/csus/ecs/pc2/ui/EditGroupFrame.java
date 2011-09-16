@@ -28,7 +28,7 @@ public class EditGroupFrame extends JFrame implements UIPlugin {
 
     private IInternalController controller;
 
-    private GroupPane groupPane = null;
+    private EditGroupPane groupPane = null;
 
     /**
      * This method initializes
@@ -86,9 +86,9 @@ public class EditGroupFrame extends JFrame implements UIPlugin {
      * 
      * @return edu.csus.ecs.pc2.ui.GroupPane
      */
-    private GroupPane getGroupPane() {
+    private EditGroupPane getGroupPane() {
         if (groupPane == null) {
-            groupPane = new GroupPane();
+            groupPane = new EditGroupPane();
         }
         return groupPane;
     }

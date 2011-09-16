@@ -28,7 +28,7 @@ public class EditAccountFrame extends JFrame implements UIPlugin {
 
     private IInternalController controller;
 
-    private AccountPane accountPane = null;
+    private EditAccountPane accountPane = null;
 
     /**
      * This method initializes
@@ -80,9 +80,9 @@ public class EditAccountFrame extends JFrame implements UIPlugin {
      * 
      * @return edu.csus.ecs.pc2.ui.AccountPane
      */
-    private AccountPane getAccountPane() {
+    private EditAccountPane getAccountPane() {
         if (accountPane == null) {
-            accountPane = new AccountPane();
+            accountPane = new EditAccountPane();
         }
         return accountPane;
     }

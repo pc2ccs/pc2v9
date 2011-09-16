@@ -27,7 +27,7 @@ public class EditContestTimeFrame extends JFrame implements UIPlugin {
 
     private IInternalController controller;
 
-    private ContestTimePane contestTimePane = null;
+    private EditContestTimePane contestTimePane = null;
 
     /**
      * This method initializes
@@ -80,9 +80,9 @@ public class EditContestTimeFrame extends JFrame implements UIPlugin {
      * 
      * @return edu.csus.ecs.pc2.ui.ContestTimePane
      */
-    private ContestTimePane getContestTimePane() {
+    private EditContestTimePane getContestTimePane() {
         if (contestTimePane == null) {
-            contestTimePane = new ContestTimePane();
+            contestTimePane = new EditContestTimePane();
         }
         return contestTimePane;
     }

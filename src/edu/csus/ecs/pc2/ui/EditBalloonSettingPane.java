@@ -42,7 +42,7 @@ import java.awt.Dimension;
  */
 
 // $HeadURL$
-public class BalloonSettingPane extends JPanePlugin {
+public class EditBalloonSettingPane extends JPanePlugin {
 
     private static final long serialVersionUID = -1060536964672397704L;
 
@@ -114,7 +114,7 @@ public class BalloonSettingPane extends JPanePlugin {
      * This method initializes
      * 
      */
-    public BalloonSettingPane() {
+    public EditBalloonSettingPane() {
         super();
         initialize();
     }

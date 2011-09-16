@@ -27,7 +27,7 @@ public class EditLanguageFrame extends JFrame implements UIPlugin {
 
     private IInternalController controller;
 
-    private LanguagePane languagePane = null;
+    private EditLanguagePane languagePane = null;
 
     /**
      * This method initializes
@@ -79,9 +79,9 @@ public class EditLanguageFrame extends JFrame implements UIPlugin {
      * 
      * @return edu.csus.ecs.pc2.ui.LanguagePane
      */
-    private LanguagePane getLanguagePane() {
+    private EditLanguagePane getLanguagePane() {
         if (languagePane == null) {
-            languagePane = new LanguagePane();
+            languagePane = new EditLanguagePane();
         }
         return languagePane;
     }

@@ -35,7 +35,7 @@ import edu.csus.ecs.pc2.ui.FrameUtilities.VerticalPosition;
  */
 
 // $HeadURL$
-public class OptionsPanel extends JPanePlugin {
+public class OptionsPane extends JPanePlugin {
 
     /**
      * 
@@ -68,7 +68,7 @@ public class OptionsPanel extends JPanePlugin {
      * This method initializes
      * 
      */
-    public OptionsPanel() {
+    public OptionsPane() {
         super();
         initialize();
     }

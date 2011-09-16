@@ -26,9 +26,9 @@ import edu.csus.ecs.pc2.ui.ContestClockDisplay;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay.DisplayTimes;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
-import edu.csus.ecs.pc2.ui.OptionsPanel;
+import edu.csus.ecs.pc2.ui.OptionsPane;
 import edu.csus.ecs.pc2.ui.PluginLoadPane;
-import edu.csus.ecs.pc2.ui.RunsPanel;
+import edu.csus.ecs.pc2.ui.RunsPane;
 import edu.csus.ecs.pc2.ui.SubmitClarificationPane;
 import edu.csus.ecs.pc2.ui.SubmitRunPane;
 import edu.csus.ecs.pc2.ui.UIPlugin;
@@ -241,7 +241,7 @@ public class TeamView extends JFrame implements UIPlugin {
                 SubmitRunPane submitRunPane = new SubmitRunPane();
                 addUIPlugin(getMainTabbedPane(), "Submit Run", submitRunPane);
         
-                RunsPanel runsPanel = new RunsPanel();
+                RunsPane runsPanel = new RunsPane();
                 runsPanel.setShowJudgesInfo(false);
                 addUIPlugin(getMainTabbedPane(), "View Runs", runsPanel);
         
@@ -251,7 +251,7 @@ public class TeamView extends JFrame implements UIPlugin {
                 ClarificationsPane clarificationsPane = new ClarificationsPane();
                 addUIPlugin(getMainTabbedPane(), "View Clarifications", clarificationsPane);
         
-                OptionsPanel optionsPanel = new OptionsPanel();
+                OptionsPane optionsPanel = new OptionsPane();
                 addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
                 
                 if (Utilities.isDebugMode()) {

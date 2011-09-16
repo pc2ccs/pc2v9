@@ -15,7 +15,7 @@ import edu.csus.ecs.pc2.core.model.Run.RunStates;
 /**
  * Test Runs Pane.
  * 
- * Primarily test {@link RunsPanel#getJudgementResultString(Run)}
+ * Primarily test {@link RunsPane#getJudgementResultString(Run)}
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -71,7 +71,7 @@ public class RunsPanelTest extends TestCase {
         Run theRun = runs[0];
         int noJudgementIndex = 1;
 
-        RunsPanel runsPanel = new RunsPanel();
+        RunsPane runsPanel = new RunsPane();
         runsPanel.setContestAndController(contest, internalController);
 
         String judgementString = runsPanel.getJudgementResultString(theRun);
@@ -154,7 +154,7 @@ public class RunsPanelTest extends TestCase {
         Run theRun = runs[0];
         int noJudgementIndex = 1;
 
-        RunsPanel runsPanel = new RunsPanel();
+        RunsPane runsPanel = new RunsPane();
         runsPanel.setShowJudgesInfo(false);
         runsPanel.setContestAndController(contest, internalController);
 

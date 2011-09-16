@@ -33,7 +33,7 @@ import edu.csus.ecs.pc2.core.model.Site;
  */
 
 // $HeadURL$
-public class GroupPane extends JPanePlugin {
+public class EditGroupPane extends JPanePlugin {
 
     /**
      * 
@@ -74,7 +74,7 @@ public class GroupPane extends JPanePlugin {
      * This method initializes
      * 
      */
-    public GroupPane() {
+    public EditGroupPane() {
         super();
         initialize();
     }

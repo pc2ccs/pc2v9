@@ -27,7 +27,7 @@ import edu.csus.ecs.pc2.core.model.Judgement;
  */
 
 // $HeadURL$
-public class JudgementPane extends JPanePlugin {
+public class EditJudgementPane extends JPanePlugin {
 
     /**
      * 
@@ -62,7 +62,7 @@ public class JudgementPane extends JPanePlugin {
      * This method initializes
      * 
      */
-    public JudgementPane() {
+    public EditJudgementPane() {
         super();
         initialize();
     }

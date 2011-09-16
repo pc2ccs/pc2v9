@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.plugin;
 
 import junit.framework.TestCase;
+import edu.csus.ecs.pc2.core.report.ContestSummaryReports;
 import edu.csus.ecs.pc2.core.report.IReport;
 
 /**

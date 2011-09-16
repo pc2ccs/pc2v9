@@ -1,4 +1,4 @@
-package edu.csus.ecs.pc2.plugin;
+package edu.csus.ecs.pc2.core.report;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,24 +9,6 @@ import java.util.Vector;
 import edu.csus.ecs.pc2.core.Plugin;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Filter;
-import edu.csus.ecs.pc2.core.report.BalloonSummaryReport;
-import edu.csus.ecs.pc2.core.report.ClarificationsReport;
-import edu.csus.ecs.pc2.core.report.ContestAnalysisReport;
-import edu.csus.ecs.pc2.core.report.ContestReport;
-import edu.csus.ecs.pc2.core.report.ContestSettingsReport;
-import edu.csus.ecs.pc2.core.report.EvaluationReport;
-import edu.csus.ecs.pc2.core.report.FastestSolvedReport;
-import edu.csus.ecs.pc2.core.report.FastestSolvedSummaryReport;
-import edu.csus.ecs.pc2.core.report.HTMLReport;
-import edu.csus.ecs.pc2.core.report.IReport;
-import edu.csus.ecs.pc2.core.report.LanguagesReport;
-import edu.csus.ecs.pc2.core.report.ListRunLanguages;
-import edu.csus.ecs.pc2.core.report.OldRunsReport;
-import edu.csus.ecs.pc2.core.report.ProblemsReport;
-import edu.csus.ecs.pc2.core.report.RunsByTeamReport;
-import edu.csus.ecs.pc2.core.report.RunsReport;
-import edu.csus.ecs.pc2.core.report.SolutionsByProblemReport;
-import edu.csus.ecs.pc2.core.report.StandingsReport;
 
 /**
  * Save selected reports to disk.
