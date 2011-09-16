@@ -28,7 +28,7 @@ public final class TeamList {
     // team.tsv
 
     // Field Description Example Type
-    // 1 Label file_version fixed string (always same value)
+    // 1 Label teams fixed string (always same value)
     // 2 Version number 1 integer
     //
     //
@@ -71,10 +71,10 @@ public final class TeamList {
         // validate first line
         String[] fields = firstLine.split("\t");
 
-        // 1 Label file_version fixed string (always same value)
+        // 1 Label teams fixed string (always same value)
         // 2 Version number 1 integer
-        if (!fields[0].trim().equals("file_version")) {
-            throw new InvalidValueException("Expecting file_version got '" + fields[0] + "' in " + filename);
+        if (!fields[0].trim().equals("teams")) {
+            throw new InvalidValueException("Expecting teams got '" + fields[0] + "' in " + filename);
         }
 
         i++;

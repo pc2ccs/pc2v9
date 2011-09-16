@@ -1,7 +1,7 @@
 # group.tsv test file
 # $HeadURL: http://pc2.ecs.csus.edu/repos/v9sandbox/trunk/testdata/ccs/groups.tsv $
 #
-file_version	1
+groups	1
 201	Europe
 202	Africa
 503	Asia

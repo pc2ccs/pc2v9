@@ -20,7 +20,7 @@ public class GroupList {
 
     // The first line has the following format
     // Field Description Example Type
-    // 1 Label file_version fixed string (always same value)
+    // 1 Label groups fixed string (always same value)
     // 2 Version number 1 integer
     //
     // Then follow several lines with the following format (one per team group).
@@ -45,10 +45,10 @@ public class GroupList {
         // validate first line
         String[] fields = firstLine.split("\t");
 
-        // 1 Label file_version fixed string (always same value)
+        // 1 Label groups fixed string (always same value)
         // 2 Version number 1 integer
-        if (!fields[0].trim().equals("file_version")) {
-            throw new InvalidValueException("Expecting file_version got '" + fields[0] + "' in " + filename);
+        if (!fields[0].trim().equals("groups")) {
+            throw new InvalidValueException("Expecting groups got '" + fields[0] + "' in " + filename);
         }
 
         i++;
