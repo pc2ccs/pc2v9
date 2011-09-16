@@ -21,6 +21,8 @@ public final class AllTests {
         TestSuite suite = new TestSuite("Test for edu.csus.ecs.pc2.core.util");
         //$JUnit-BEGIN$
         suite.addTestSuite(ResultsFileTest.class);
+        suite.addTestSuite(TeamdataTest.class);
+        suite.addTestSuite(UserdataTest.class);
         //$JUnit-END$
         return suite;
     }

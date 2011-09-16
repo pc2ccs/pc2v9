@@ -12,8 +12,10 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
 import edu.csus.ecs.pc2.exports.ccs.ScoreboardFile;
+import edu.csus.ecs.pc2.exports.ccs.Teamdata;
 import edu.csus.ecs.pc2.exports.ccs.Userdata;
 
 /**
@@ -40,6 +42,8 @@ public class ExportDataPane extends JPanePlugin {
     private JButton saveScoreboardButton = null;
 
     private JButton saveUserDataButton = null;
+
+    private JButton saveTeamsButton = null;
 
     /**
      * This method initializes
@@ -81,6 +85,7 @@ public class ExportDataPane extends JPanePlugin {
             buttonPane.add(getCreatResultsButton(), null);
             buttonPane.add(getSaveScoreboardButton(), null);
             buttonPane.add(getSaveUserDataButton(), null);
+            buttonPane.add(getSaveTeamsButton(), null);
         }
         return buttonPane;
     }
@@ -113,8 +118,7 @@ public class ExportDataPane extends JPanePlugin {
             ResultsFile resultsFile = new ResultsFile();
             String[] lines = resultsFile.createTSVFileLines(getContest());
             writeLinesToFile(outfilename, lines);
-            JOptionPane.showMessageDialog(this, "Saved to " + outfilename);
-
+            viewFile(outfilename, outfilename);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Unable to save " + outfilename + " " + e.getMessage());
             e.printStackTrace();
@@ -150,7 +154,7 @@ public class ExportDataPane extends JPanePlugin {
             ScoreboardFile scoreboardFile = new ScoreboardFile();
             String[] lines = scoreboardFile.createTSVFileLines(getContest());
             writeLinesToFile(outfilename, lines);
-            JOptionPane.showMessageDialog(this, "Saved to " + outfilename);
+            viewFile(outfilename, outfilename);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Unable to save " + outfilename + " " + e.getMessage());
             e.printStackTrace();
@@ -186,6 +190,22 @@ public class ExportDataPane extends JPanePlugin {
         return saveUserDataButton;
     }
 
+    protected void saveTeamdataTSVFile() {
+
+        // TODO CCS prompt for path to save this file to..
+
+        String outfilename = "teams.tsv";
+        try {
+            Teamdata teamdata = new Teamdata();
+            String[] lines = teamdata.getTeamData(getContest());
+            writeLinesToFile(outfilename, lines);
+            viewFile(outfilename, outfilename);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Unable to save " + outfilename + " " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
     protected void saveUserDataTSVFile() {
 
         // TODO CCS prompt for path to save this file to..
@@ -195,12 +215,39 @@ public class ExportDataPane extends JPanePlugin {
             Userdata userdata = new Userdata();
             String[] lines = userdata.getUserData(getContest());
             writeLinesToFile(outfilename, lines);
-            JOptionPane.showMessageDialog(this, "Saved to " + outfilename);
+            viewFile(outfilename, outfilename);
 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Unable to save " + outfilename + " " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    /**
+     * This method initializes saveTeamsButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getSaveTeamsButton() {
+        if (saveTeamsButton == null) {
+            saveTeamsButton = new JButton();
+            saveTeamsButton.setText("Save Teams");
+            saveTeamsButton.setMnemonic(KeyEvent.VK_T);
+            saveTeamsButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    saveTeamdataTSVFile();
+                }
+            });
+        }
+        return saveTeamsButton;
+    }
+    
+    private void viewFile(String filename, String title) {
+        MultipleFileViewer multipleFileViewer = new MultipleFileViewer(getController().getLog());
+        multipleFileViewer.addFilePane(title, filename);
+        multipleFileViewer.setTitle("PC^2 View File (Build " + new VersionInfo().getBuildNumber() + ")");
+        FrameUtilities.centerFrameFullScreenHeight(multipleFileViewer);
+        multipleFileViewer.setVisible(true);
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
