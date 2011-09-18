@@ -22,6 +22,7 @@ public final class AllTests {
         //$JUnit-BEGIN$
         suite.addTestSuite(ResultsFileTest.class);
         suite.addTestSuite(TeamdataTest.class);
+        suite.addTestSuite(GroupdataTest.class);
         suite.addTestSuite(UserdataTest.class);
         //$JUnit-END$
         return suite;

@@ -13,6 +13,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import edu.csus.ecs.pc2.VersionInfo;
+import edu.csus.ecs.pc2.exports.ccs.Groupdata;
 import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
 import edu.csus.ecs.pc2.exports.ccs.ScoreboardFile;
 import edu.csus.ecs.pc2.exports.ccs.Teamdata;
@@ -44,6 +45,8 @@ public class ExportDataPane extends JPanePlugin {
     private JButton saveUserDataButton = null;
 
     private JButton saveTeamsButton = null;
+
+    private JButton saveGroupButton = null;
 
     /**
      * This method initializes
@@ -86,6 +89,7 @@ public class ExportDataPane extends JPanePlugin {
             buttonPane.add(getSaveScoreboardButton(), null);
             buttonPane.add(getSaveUserDataButton(), null);
             buttonPane.add(getSaveTeamsButton(), null);
+            buttonPane.add(getSaveGroupButton(), null);
         }
         return buttonPane;
     }
@@ -99,6 +103,7 @@ public class ExportDataPane extends JPanePlugin {
         if (creatResultsButton == null) {
             creatResultsButton = new JButton();
             creatResultsButton.setText("Save Results");
+            creatResultsButton.setToolTipText("Save results TSV file");
             creatResultsButton.setMnemonic(KeyEvent.VK_R);
             creatResultsButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -134,6 +139,7 @@ public class ExportDataPane extends JPanePlugin {
         if (saveScoreboardButton == null) {
             saveScoreboardButton = new JButton();
             saveScoreboardButton.setText("Save Scoreboard");
+            saveScoreboardButton.setToolTipText("Save Scoreboard TSV file");
             saveScoreboardButton.setMnemonic(KeyEvent.VK_S);
             saveScoreboardButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -190,6 +196,22 @@ public class ExportDataPane extends JPanePlugin {
         return saveUserDataButton;
     }
 
+    protected void saveGroupdataTSVFile() {
+
+        // TODO CCS prompt for path to save this file to..
+
+        String outfilename = "groups.tsv";
+        try {
+            Groupdata groupData = new Groupdata();
+            String[] lines = groupData.getGroupData(getContest());
+            writeLinesToFile(outfilename, lines);
+            viewFile(outfilename, outfilename);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Unable to save " + outfilename + " " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
     protected void saveTeamdataTSVFile() {
 
         // TODO CCS prompt for path to save this file to..
@@ -232,6 +254,7 @@ public class ExportDataPane extends JPanePlugin {
         if (saveTeamsButton == null) {
             saveTeamsButton = new JButton();
             saveTeamsButton.setText("Save Teams");
+            saveTeamsButton.setToolTipText("Save Teams TSV file");
             saveTeamsButton.setMnemonic(KeyEvent.VK_T);
             saveTeamsButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -241,13 +264,32 @@ public class ExportDataPane extends JPanePlugin {
         }
         return saveTeamsButton;
     }
-    
+
     private void viewFile(String filename, String title) {
         MultipleFileViewer multipleFileViewer = new MultipleFileViewer(getController().getLog());
         multipleFileViewer.addFilePane(title, filename);
         multipleFileViewer.setTitle("PC^2 View File (Build " + new VersionInfo().getBuildNumber() + ")");
         FrameUtilities.centerFrameFullScreenHeight(multipleFileViewer);
         multipleFileViewer.setVisible(true);
+    }
+
+    /**
+     * This method initializes saveGroupButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getSaveGroupButton() {
+        if (saveGroupButton == null) {
+            saveGroupButton = new JButton();
+            saveGroupButton.setText("Save Groups");
+            saveGroupButton.setToolTipText("Save Groups TSV file");
+            saveGroupButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    saveGroupdataTSVFile();
+                }
+            });
+        }
+        return saveGroupButton;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

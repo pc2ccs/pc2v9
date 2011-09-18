@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.text.CharacterIterator;
@@ -503,5 +504,30 @@ public final class Utilities {
         FrameUtilities.centerFrameFullScreenHeight(multipleFileViewer);
         multipleFileViewer.setVisible(true);
 
+    }
+
+    /**
+     * Dump String array.
+     * 
+     * @param out
+     *            stream to output to
+     * @param prefix
+     *            prefix each line with this string
+     * @param lines
+     *            lines to be printed
+     * @param prefixWithLineNumber
+     *            after prefix output linenumber
+     */
+    public static void dumpStringArray(PrintStream out, String prefix, String[] lines, boolean prefixWithLineNumber) {
+
+        int counter = 1;
+        for (String string : lines) {
+            out.print(prefix);
+            if (prefixWithLineNumber) {
+                out.printf("%3d: ", counter);
+            }
+            out.println(string);
+            counter++;
+        }
     }
 }

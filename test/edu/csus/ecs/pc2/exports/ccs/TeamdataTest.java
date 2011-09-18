@@ -23,20 +23,6 @@ import edu.csus.ecs.pc2.core.model.SampleContest;
 public class TeamdataTest extends TestCase {
 
 
-    private static final String[] GIRL_NAMES = { "Abigail", "Aimee", "Alexandra", "Alice", "Alisha", "Amber", "Amelia", "Amelie", "Amy", "Anna", "Ava", "Bethany", "Brooke", "Caitlin", "Charlotte",
-            "Chloe", "Daisy", "Eleanor", "Elizabeth", "Ella", "Ellie", "Emilia", "Emily", "Emma", "Erin", "Esme", "Eva", "Eve", "Evelyn", "Evie", "Faith", "Florence", "Francesca", "Freya", "Georgia",
-            "Grace", "Gracie", "Hannah", "Harriet", "Heidi", "Hollie", "Holly", "Imogen", "Isabel", "Isabella", "Isabelle", "Isla", "Isobel", "Jasmine", "Jessica", "Julia", "Katie", "Keira", "Lacey",
-            "Lauren", "Layla", "Leah", "Lexi", "Lexie", "Libby", "Lilly", "Lily", "Lola", "Lucy", "Lydia", "Maddison", "Madison", "Maisie", "Maria", "Martha", "Matilda", "Maya", "Megan", "Mia",
-            "Millie", "Molly", "Mya", "Niamh", "Nicole", "Olivia", "Paige", "Phoebe", "Poppy", "Rebecca", "Rose", "Rosie", "Ruby", "Sara", "Sarah", "Scarlett", "Sienna", "Skye", "Sofia", "Sophia",
-            "Sophie", "Summer", "Tia", "Tilly", "Zara", "Zoe", };
-
-    private static final String[] BOYS_NAMES = { "Aaron", "Adam", "Aidan", "Aiden", "Alex", "Alexander", "Alfie", "Archie", "Arthur", "Ashton", "Austin", "Bailey", "Ben", "Benjamin", "Bradley",
-            "Brandon", "Callum", "Cameron", "Charles", "Charlie", "Christopher", "Connor", "Daniel", "David", "Dylan", "Edward", "Elliot", "Ellis", "Ethan", "Evan", "Ewan", "Finlay", "Finley",
-            "Freddie", "Frederick", "Gabriel", "George", "Harley", "Harrison", "Harry", "Harvey", "Hayden", "Henry", "Isaac", "Jack", "Jacob", "Jake", "James", "Jamie", "Jayden", "Joe", "Joel",
-            "John", "Joseph", "Joshua", "Jude", "Kai", "Kian", "Kieran", "Kyle", "Leo", "Leon", "Lewis", "Liam", "Logan", "Louie", "Louis", "Luca", "Lucas", "Luke", "Mason", "Matthew", "Max",
-            "Michael", "Mohammad", "Mohammed", "Morgan", "Muhammad", "Nathan", "Noah", "Oliver", "Oscar", "Owen", "Reece", "Reuben", "Rhys", "Riley", "Robert", "Ryan", "Sam", "Samuel", "Sebastian",
-            "Stanley", "Taylor", "Theo", "Thomas", "Toby", "Tyler", "William", "Zachary", };
-
     private SampleContest sample = new SampleContest();
 
     public void testEmpty() throws Exception {
@@ -81,10 +67,10 @@ public class TeamdataTest extends TestCase {
         for (Account account : accounts) {
             switch (account.getClientId().getClientType()) {
                 case TEAM:
-                    account.setDisplayName("Team " + BOYS_NAMES[bi++]);
+                    account.setDisplayName("Team " + SampleContest.BOYS_NAMES[bi++]);
                     break;
                 case JUDGE:
-                    account.setDisplayName("Judge " + GIRL_NAMES[gi++]);
+                    account.setDisplayName("Judge " + SampleContest.GIRL_NAMES[gi++]);
                     break;
                 default:
                     break;
