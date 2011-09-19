@@ -29,6 +29,7 @@ public class ContestLoginSuccessData implements Serializable {
     private Judgement[] judgements;
     private Language[] languages;
     private Problem[] problems;
+    private Category[] categories;
     private ProblemDataFiles[] problemDataFiles;
     private Run[] runs;
     private Site[] sites;
@@ -175,6 +176,14 @@ public class ContestLoginSuccessData implements Serializable {
     public void setProblems(Problem[] problems) {
         this.problems = problems;
     }
+    
+    public Category[] getCategories() {
+        return categories;
+    }
+    public void setCategories(Category[] categories) {
+        this.categories = categories;
+    }
+    
     /**
      * @return Returns the runs.
      */

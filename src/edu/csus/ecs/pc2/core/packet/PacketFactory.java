@@ -253,6 +253,11 @@ public final class PacketFactory {
     public static final String PROBLEM_LIST = "PROBLEM_LIST";
 
     /**
+     * Array of {@link Category}.
+     */
+    public static final String CATEGORY_LIST = "CATEGORY_LIST";
+
+    /**
      * Array of {@link Language}.
      */
     public static final String LANGUAGE_LIST = "LANGUAGE_LIST";
@@ -1097,6 +1102,7 @@ public final class PacketFactory {
     private static void addContestData(Properties prop, ContestLoginSuccessData data) {
         
         prop.put(CONTEST_TIME_LIST, data.getContestTimes());
+
         prop.put(PROBLEM_LIST, data.getProblems());
         prop.put(LANGUAGE_LIST, data.getLanguages());
         prop.put(JUDGEMENT_LIST, data.getJudgements());
@@ -1125,6 +1131,10 @@ public final class PacketFactory {
         
         if (data.getContestSecurityPassword() != null) {
             prop.put(CONTEST_PASSWORD, data.getContestSecurityPassword());
+        }
+        
+        if (data.getCategories() != null){
+            prop.put(CATEGORY_LIST, data.getCategories());
         }
     }
 

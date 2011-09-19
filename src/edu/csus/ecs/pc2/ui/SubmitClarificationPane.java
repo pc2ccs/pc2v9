@@ -160,7 +160,16 @@ public class SubmitClarificationPane extends JPanePlugin {
         Problem problemN = new Problem("Select Problem");
         getProblemComboBox().addItem(problemN);
 
-        getProblemComboBox().addItem(getContest().getGeneralProblem());
+        if (getContest().getCategories().length > 0) {
+            for (Problem problem : getContest().getCategories()) {
+                if (problem.isActive()) {
+                    getProblemComboBox().addItem(problem);
+                }
+            }
+        } else {
+            // TODO remove this legacy code eventually
+            getProblemComboBox().addItem(getContest().getGeneralProblem());
+        }
         
         for (Problem problem : getContest().getProblems()) {
             if (problem.isActive()){

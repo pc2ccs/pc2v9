@@ -54,6 +54,10 @@ public interface IInternalContest {
     void addProblem(Problem problem, ProblemDataFiles problemDataFiles);
 
     void deleteProblem(Problem problem);
+    
+    void addCategory(Category category);
+    
+    void deleteCategory(Category category);
 
     void addContestTime(ContestTime contestTime);
 
@@ -94,6 +98,8 @@ public interface IInternalContest {
     void updateLanguage(Language language);
 
     void updateProblem(Problem problem);
+    
+    void updateCategory(Category category);
 
     void updateProblem(Problem problem, ProblemDataFiles problemDataFiles);
 
@@ -254,6 +260,13 @@ public interface IInternalContest {
      * @return array of Problem
      */
     Problem[] getProblems();
+    
+    /**
+     * Fetch all defined categories, includes non-hidden Problems too.
+     * 
+     * @return array of Category.
+     */
+    Category[] getCategories();
 
     /**
      * Fetch all defined judgements.
@@ -722,6 +735,8 @@ public interface IInternalContest {
     Language getLanguage(ElementId elementId);
 
     Problem getProblem(ElementId elementId);
+    
+    Category getCategory (ElementId elementId);
 
     Judgement getJudgement(ElementId elementId);
 

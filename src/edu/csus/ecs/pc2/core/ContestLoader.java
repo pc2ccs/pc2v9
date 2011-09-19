@@ -6,6 +6,7 @@ import java.util.GregorianCalendar;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.BalloonSettings;
+import edu.csus.ecs.pc2.core.model.Category;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
@@ -329,6 +330,32 @@ public class ContestLoader {
 
     }
 
+    /**
+     * Add/Merge categories into model.
+     * @param contest
+     * @param controller
+     * @param packet
+     */
+    protected void addCategoriesToModel(IInternalContest contest, IInternalController controller, Packet packet) {
+        try {
+            Category[] categories = (Category[]) PacketFactory.getObjectValue(packet, PacketFactory.CATEGORY_LIST);
+            if (categories != null) {
+                for (Category category : categories) {
+                    if (contest.getJudgement(category.getElementId()) != null) {
+                        contest.updateCategory(category);
+                    } else {
+                        contest.addCategory(category);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            controller.logWarning("Exception logged ", e);
+        }
+
+    }
+
+
+    
     /**
      * Add/merge languages into model.
      * 
@@ -936,6 +963,8 @@ public class ContestLoader {
         addLanguagesToModel(contest, controller, packet);
 
         addProblemsToModel(contest, controller, packet);
+        
+        addCategoriesToModel(contest, controller, packet);
 
         addGroupsToModel(contest, controller, packet);
 

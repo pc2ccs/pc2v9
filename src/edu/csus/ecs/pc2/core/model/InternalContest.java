@@ -19,6 +19,8 @@ import edu.csus.ecs.pc2.core.exception.UnableToUncheckoutRunException;
 import edu.csus.ecs.pc2.core.list.AccountList;
 import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
 import edu.csus.ecs.pc2.core.list.BalloonSettingsList;
+import edu.csus.ecs.pc2.core.list.CategoryDisplayList;
+import edu.csus.ecs.pc2.core.list.CategoryList;
 import edu.csus.ecs.pc2.core.list.ClarificationList;
 import edu.csus.ecs.pc2.core.list.ClientSettingsList;
 import edu.csus.ecs.pc2.core.list.ConnectionHandlerList;
@@ -73,6 +75,8 @@ public class InternalContest implements IInternalContest {
     private Vector<IClarificationListener> clarificationListenerList = new Vector<IClarificationListener>();
 
     private Vector<IProblemListener> problemListenerList = new Vector<IProblemListener>();
+    
+    private Vector<ICategoryListener> categoryListenerList = new Vector<ICategoryListener>();
 
     private Vector<ILanguageListener> languageListenerList = new Vector<ILanguageListener>();
     
@@ -172,6 +176,8 @@ public class InternalContest implements IInternalContest {
      * List of all defined problems. Contains deleted problems too.
      */
     private ProblemList problemList = new ProblemList();
+    
+    private CategoryList categoryList = new CategoryList();
 
     private ProblemDataFilesList problemDataFilesList = new ProblemDataFilesList();
 
@@ -179,6 +185,8 @@ public class InternalContest implements IInternalContest {
      * List of all problems displayed to users, in order. Does not contain deleted problems.
      */
     private ProblemDisplayList problemDisplayList = new ProblemDisplayList();
+    
+    private CategoryDisplayList categoryDisplayList = new CategoryDisplayList();
 
     /**
      * List of all languages. Contains deleted problems too.
@@ -344,6 +352,14 @@ public class InternalContest implements IInternalContest {
         if (getAccounts(Type.ADMINISTRATOR) == null || getAccounts(Type.ADMINISTRATOR, siteNum).size() == 0) {
             generateNewAccounts(ClientType.Type.ADMINISTRATOR.toString(), 1, true);
         }
+        
+        if (getCategories().length == 0){
+            
+            String []catNames = {"General", "SysOps", "Operations" };
+            for (String name : catNames){
+                addCategory(new Category(name));
+            }
+        }
     }
 
     public void addRunListener(IRunListener runListener) {
@@ -433,6 +449,23 @@ public class InternalContest implements IInternalContest {
                 problemListenerList.elementAt(i).problemRefreshAll(problemEvent);
             } else {
                 problemListenerList.elementAt(i).problemChanged(problemEvent);
+            }
+        }
+    }
+    
+    private void fireCategoryListener(Category category, CategoryEvent.Action added) {
+        
+        CategoryEvent categoryEvent = new CategoryEvent(CategoryEvent.Action.CHANGED, category);
+        for (int i = 0; i < categoryListenerList.size(); i++) {
+
+            if (categoryEvent.getAction() == CategoryEvent.Action.ADDED) {
+                categoryListenerList.elementAt(i).categoryAdded(categoryEvent);
+            } else if (categoryEvent.getAction() == CategoryEvent.Action.DELETED) {
+                categoryListenerList.elementAt(i).categoryRemoved(categoryEvent);
+            } else if (categoryEvent.getAction() == CategoryEvent.Action.REFRESH_ALL) {
+                categoryListenerList.elementAt(i).categoryRefreshAll(categoryEvent);
+            } else {
+                categoryListenerList.elementAt(i).categoryChanged(categoryEvent);
             }
         }
     }
@@ -592,6 +625,11 @@ public class InternalContest implements IInternalContest {
         fireProblemListener(problemEvent);
     }
     
+    public void addCategory(Category category) {
+       categoryDisplayList.add(category);
+       categoryList.add(category);
+       fireCategoryListener(category, CategoryEvent.Action.ADDED);
+    }
 
     public void addJudgement(Judgement judgement) {
         judgementDisplayList.add(judgement);
@@ -844,6 +882,10 @@ public class InternalContest implements IInternalContest {
 
     public Problem[] getProblems() {
         return problemDisplayList.getList();
+    }
+    
+    public Category[] getCategories() {
+        return categoryDisplayList.getList();
     }
 
     public Language[] getLanguages() {
@@ -1488,6 +1530,13 @@ public class InternalContest implements IInternalContest {
         ProblemEvent problemEvent = new ProblemEvent(ProblemEvent.Action.CHANGED, problem);
         fireProblemListener(problemEvent);
     }
+    
+
+    public void updateCategory(Category category) {
+        categoryList.update(category);
+        categoryDisplayList.update(category);
+        fireCategoryListener(category, CategoryEvent.Action.CHANGED);
+    }
 
     public void updateContestTime(ContestTime contestTime, int inSiteNumber) {
         if (contestTime == null) {
@@ -1547,12 +1596,24 @@ public class InternalContest implements IInternalContest {
     }
 
     public Problem getProblem(ElementId elementId) {
+        
+        // TODO eliminate generalProblem
         if (generalProblem != null && generalProblem.getElementId().equals(elementId)){
             return generalProblem;
         } else {
-            return (Problem) problemList.get(elementId);
+            Problem problem = (Problem) problemList.get(elementId);
+            if (problem == null){
+                problem = getCategory(elementId);
+            }
+            return problem;
         }
     }
+    
+    public Category getCategory(ElementId elementId) {
+        return (Category) categoryList.get(elementId);
+    }
+
+
 
     public Judgement getJudgement(ElementId elementId) {
         return (Judgement) judgementList.get(elementId);
@@ -2095,6 +2156,12 @@ public class InternalContest implements IInternalContest {
         problemDataFilesList.delete(problem);
         ProblemEvent problemEvent = new ProblemEvent(ProblemEvent.Action.DELETED, problem);
         fireProblemListener(problemEvent);
+    }
+    
+    public void deleteCategory(Category category) {
+        categoryDisplayList.removeElement(category);
+        categoryList.delete(category);
+        fireCategoryListener(category, CategoryEvent.Action.DELETED);
     }
 
     public void deleteLanguage(Language language) {
@@ -2671,5 +2738,8 @@ public class InternalContest implements IInternalContest {
         ContestInformationEvent event = new ContestInformationEvent(data);
         fireContestInformationListener(event);
     }
+
+
+
     
 }
