@@ -85,7 +85,7 @@ public class ContestPreloadPane extends JPanePlugin {
         if (contestsListbox == null) {
             contestsListbox = new MCLB();
 
-            String[] cols = { "Description", "Summary", "Directory" };
+            String[] cols = { "Description", "Directory" };
 
             contestsListbox.addColumns(cols);
         }
@@ -94,17 +94,15 @@ public class ContestPreloadPane extends JPanePlugin {
 
     private String[] buildContestRow(String contestFilename, String name) {
         
-//        String[] cols = { "Description", "Summary", "Directory" };
+//        String[] cols = { "Description", "Directory" };
         String[] obj = new String[contestsListbox.getColumnCount()];
         
         ContestYAMLLoader loader = new ContestYAMLLoader();
         try {
             String description = loader.getContestTitle(contestFilename);
-            String summary = "none";
 
             obj[0] = description;
-            obj[1] = summary;
-            obj[2] = name;
+            obj[1] = name;
 
             return obj;
             
