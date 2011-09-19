@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.imports.ccs;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Arrays;
 
@@ -50,6 +51,14 @@ public class ContestYAMLLoaderTest extends TestCase {
             System.out.println("ContestYAMLLoaderTest: test directory: " + getYamlTestDirectory());
             System.out.println("ContestYAMLLoaderTest: test      file: " + getYamlTestFileName());
         }
+    }
+    
+    public void testGetTitle() throws IOException  {
+        
+        String title = loader.getContestTitle(getYamlTestFileName());
+
+        // name: ACM-ICPC World Finals 2011
+        assertEquals("Contest title", "ACM-ICPC World Finals 2011", title);
     }
 
     @SuppressWarnings("unused")

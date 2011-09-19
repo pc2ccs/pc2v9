@@ -1,6 +1,7 @@
 package edu.csus.ecs.pc2.imports.ccs;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -86,6 +87,19 @@ public class ContestYAMLLoader {
         String[] contents = Utilities.loadFile(diretoryName + File.separator + DEFAULT_CONTEST_YAML_FILENAME);
         return fromYaml(contest, contents, diretoryName);
     }
+    
+    /**
+     * Get title from YAML file.
+     * 
+     * @param contestYamlFilename
+     * @return
+     * @throws IOException
+     */
+    public String getContestTitle(String contestYamlFilename ) throws IOException {
+        String[] contents = Utilities.loadFile(contestYamlFilename);
+        String contestTitle = getSequenceValue(contents, CONTEST_NAME_KEY);
+        return contestTitle;
+    }
 
     /**
      * Load/Create contest from YAML lines.
@@ -104,10 +118,17 @@ public class ContestYAMLLoader {
         }
 
         // name: ACM-ICPC World Finals 2011
+        
+        String contestTitle = getSequenceValue(yamlLines, CONTEST_NAME_KEY);
+        if (contestTitle != null) {
+            setTitle(contest, contestTitle);
+        }
+        
 
         for (String line : yamlLines) {
             if (line.startsWith(CONTEST_NAME_KEY + DELIMIT)) {
                 setTitle(contest, line.substring(line.indexOf(DELIMIT) + 1).trim());
+                
             }
         }
 
@@ -619,4 +640,6 @@ public class ContestYAMLLoader {
         ContestInformation contestInformation = contest.getContestInformation();
         contestInformation.setContestTitle(title);
     }
+
+
 }
