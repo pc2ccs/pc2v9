@@ -3,7 +3,7 @@ package edu.csus.ecs.pc2.core.model;
 import edu.csus.ecs.pc2.core.StringUtilities;
 
 /**
- * Single Problem Definition.
+ * Problem Definition.
  * 
  * This contains settings for a problem.  Data files
  * are not in this class, data files are in the {@link edu.csus.ecs.pc2.core.model.ProblemDataFiles}
@@ -22,7 +22,6 @@ public class Problem implements IElementObject {
      * PC<sup>2 Validator Command Line.
      */
     public static final String INTERNAL_VALIDATOR_NAME = "pc2.jar edu.csus.ecs.pc2.validator.Validator";
-
 
     /**
      * 
@@ -57,7 +56,18 @@ public class Problem implements IElementObject {
      * This is the name of the file that the validator will read/use to compare against the submitted run output.
      */
     private String answerFileName = null;
-
+    
+    /**
+     * List of judge's file names, for multiple test cases.
+     *  
+     */
+    private String [] testCaseDataFilenames = new String[0];
+    
+    /**
+     * List of judge's answer file names, for multiple test cases.
+     */
+    private String [] testCaseAnswerFilenames = new String[0];;
+    
     /**
      * 
      */
@@ -210,6 +220,15 @@ public class Problem implements IElementObject {
         clone.setPrelimaryNotification(isPrelimaryNotification());
         clone.letter = StringUtilities.cloneString(letter);
         clone.shortName = StringUtilities.cloneString(shortName);
+        
+        if (getNumberTestCases() > 1){
+            for (int i = 0 ; i < getNumberTestCases(); i++){
+                String datafile = StringUtilities.cloneString(getDataFileName(i + 1));
+                String answerfile = StringUtilities.cloneString(getAnswerFileName(i + 1));
+                clone.addTestCaseFilenames(datafile, answerfile);
+            }
+        }
+        
         return clone;
     }
 
@@ -271,6 +290,14 @@ public class Problem implements IElementObject {
     public String getAnswerFileName() {
         return answerFileName;
     }
+    
+    public String getAnswerFileName(int testCaseNumber) {
+        if (testCaseNumber == 1 && testCaseAnswerFilenames.length == 0){
+            return answerFileName;
+        }
+        return testCaseAnswerFilenames[testCaseNumber - 1];
+    }
+
 
     /**
      * @return Returns the dataFileName.
@@ -278,6 +305,21 @@ public class Problem implements IElementObject {
     public String getDataFileName() {
         return dataFileName;
     }
+
+    /**
+     * Get test case data file name.
+     * 
+     * Test case numbers start at 1.
+     * 
+     * @return returns data file name for test case.
+     */
+    public String getDataFileName(int testCaseNumber) {
+        if (testCaseNumber == 1 && testCaseDataFilenames.length == 0){
+            return dataFileName;
+        }
+        return testCaseDataFilenames[testCaseNumber - 1];
+    }
+
 
     /**
      * @return Returns the ignoreSpacesOnValidation.
@@ -642,4 +684,33 @@ public class Problem implements IElementObject {
         this.letter = letter;
     }
     
+    /**
+     * Add data and answer filenames to list of test cases.
+     *  
+     * @param datafile
+     * @param answerfile
+     */
+    public void addTestCaseFilenames (String datafile, String answerfile){
+        
+        String[] newArray = new String[testCaseDataFilenames.length + 1];
+
+        System.arraycopy(testCaseDataFilenames, 0, newArray, 0, testCaseDataFilenames.length);
+        newArray[testCaseDataFilenames.length] = datafile;
+        testCaseDataFilenames = newArray;
+        
+        newArray = new String[testCaseAnswerFilenames.length + 1];
+
+        System.arraycopy(testCaseAnswerFilenames, 0, newArray, 0, testCaseAnswerFilenames.length);
+        newArray[testCaseAnswerFilenames.length] = answerfile;
+        testCaseAnswerFilenames = newArray;
+    }
+    
+    public int getNumberTestCases (){
+        if (testCaseDataFilenames != null){
+            return testCaseDataFilenames.length;
+        } else {
+            return 1;
+        }
+            
+    }
 }

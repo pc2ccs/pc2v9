@@ -56,9 +56,22 @@ public class ProblemsReport implements IReport {
             deletedText = " [HIDDEN] ";
         }
         
-        printWriter.println("  Problem '" + problem + deletedText + "' ver="+ problem.getElementId().getVersionNumber()+" id=" + problem.getElementId());
+        printWriter.println("  Problem '" + problem + deletedText + "' ver=" + problem.getElementId().getVersionNumber() + " id=" + problem.getElementId());
         printWriter.println("       Data file name   : " + problem.getDataFileName());
         printWriter.println("       Answer file name : " + problem.getAnswerFileName());
+        printWriter.println("       Number test cases: " + problem.getNumberTestCases());
+
+        if (problem.getNumberTestCases() > 1) {
+            for (int i = 0; i < problem.getNumberTestCases(); i++) {
+                int testCaseNumber = i + 1;
+                String datafile = problem.getDataFileName(testCaseNumber);
+                String answerfile = problem.getAnswerFileName(testCaseNumber);
+
+                printWriter.println("       Data File name " + testCaseNumber + " : " + datafile);
+                printWriter.println("     Answer File name " + testCaseNumber + " : " + answerfile);
+            }
+        }
+        
         printWriter.print("   Execution time limit : " + problem.getTimeOutInSeconds() + " seconds");
         if (problem.getTimeOutInSeconds() == 0) {
             printWriter.print(" (no time limit when zero seconds)");

@@ -45,16 +45,16 @@ public class ContestYAMLLoaderTest extends TestCase {
             projectPath = "."; //$NON-NLS-1$
             System.err.println("ContestYAMLLoaderTest: Unable to locate " + testDir);
         }
-        testDirectory = projectPath +  File.separator + "testdata" + File.separator + "yaml";
+        testDirectory = projectPath + File.separator + "testdata" + File.separator + "yaml";
 
         if (debugFlag) {
             System.out.println("ContestYAMLLoaderTest: test directory: " + getYamlTestDirectory());
             System.out.println("ContestYAMLLoaderTest: test      file: " + getYamlTestFileName());
         }
     }
-    
-    public void testGetTitle() throws IOException  {
-        
+
+    public void testGetTitle() throws IOException {
+
         String title = loader.getContestTitle(getYamlTestFileName());
 
         // name: ACM-ICPC World Finals 2011
@@ -155,17 +155,15 @@ public class ContestYAMLLoaderTest extends TestCase {
 
         Problem[] problems = contest.getProblems();
 
-        assertEquals("Number of problems", 5, problems.length);
-
         assertEquals("Expected problem name ", "apl", problems[0].getDisplayName());
         assertEquals("Expected problem name ", "barcodes", problems[1].getDisplayName());
         assertEquals("Expected problem name ", "biobots", problems[2].getDisplayName());
         assertEquals("Expected problem name ", "castles", problems[3].getDisplayName());
         assertEquals("Expected problem name ", "channel", problems[4].getDisplayName());
 
-        Account[] accounts = contest.getAccounts();
+        assertEquals("Number of problems", 5, problems.length);
 
-        assertEquals("Number of accounts", 55, accounts.length);
+        Account[] accounts = contest.getAccounts();
 
         ClientType.Type type = ClientType.Type.TEAM;
         assertEquals("Number of accounts " + type.toString(), 35, getClientCount(contest, type));
@@ -175,6 +173,45 @@ public class ContestYAMLLoaderTest extends TestCase {
         assertEquals("Number of accounts " + type.toString(), 0, getClientCount(contest, type));
         type = ClientType.Type.SCOREBOARD;
         assertEquals("Number of accounts " + type.toString(), 0, getClientCount(contest, type));
+
+        assertEquals("Number of accounts", 55, accounts.length);
+
+    }
+
+    public void testProblemLoader() throws Exception {
+
+        IInternalContest contest = loader.fromYaml(null, getYamlTestDirectory());
+
+        if (debugFlag) {
+            System.out.println("Dir " + getYamlTestDirectory());
+
+            for (Problem problem : contest.getProblems()) {
+                System.out.println(problem.getDisplayName() + " cases " + problem.getNumberTestCases());
+                if (problem.getNumberTestCases() > 1) {
+                    for (int i = 0; i < problem.getNumberTestCases(); i++) {
+                        int testCaseNumber = i + 1;
+                        String datafile = problem.getDataFileName(testCaseNumber);
+                        String answerfile = problem.getAnswerFileName(testCaseNumber);
+
+                        System.out.println("       Data File name " + testCaseNumber + " : " + datafile);
+                        System.out.println("     Answer File name " + testCaseNumber + " : " + answerfile);
+                    }
+                }
+            }
+        }
+
+        String[] basenames = { "bozo", "smart", "sumit" };
+
+        Problem problem = contest.getProblems()[2];
+
+        int idx = 0;
+        for (String name : basenames) {
+
+            assertEquals(problem.getDataFileName(idx + 1), name + ".in");
+            assertEquals(problem.getAnswerFileName(idx + 1), name + ".ans");
+
+            idx++;
+        }
 
     }
 
@@ -208,20 +245,20 @@ public class ContestYAMLLoaderTest extends TestCase {
     }
 
     public void testLoadSites() throws Exception {
-        
+
         String[] contents = Utilities.loadFile(getYamlTestFileName());
 
         assertFalse("File missing " + getYamlTestFileName(), contents.length == 0);
 
-        Site [] sites = loader.getSites(contents);
-        Arrays.sort (sites, new SiteComparatorBySiteNumber());
-        
+        Site[] sites = loader.getSites(contents);
+        Arrays.sort(sites, new SiteComparatorBySiteNumber());
+
         assertEquals("Expected 3 sites", 3, sites.length);
-        
+
         String[] siteNames = { "Uno Site Arcadia", "Two Turtle Doves Site", "Three Blind Mice Site", };
-        
+
         int port = 50002;
-        
+
         for (Site site : sites) {
 
             // - number: 2
@@ -229,10 +266,10 @@ public class ContestYAMLLoaderTest extends TestCase {
             // IP: localhost
             // port: 51002
 
-            assertEquals("Expected site " + site.getSiteNumber() + " name ", siteNames[site.getSiteNumber()-1], site.getDisplayName());
+            assertEquals("Expected site " + site.getSiteNumber() + " name ", siteNames[site.getSiteNumber() - 1], site.getDisplayName());
             assertEquals("Expected site " + site.getSiteNumber() + " IP ", "localhost", site.getConnectionInfo().get(Site.IP_KEY));
             assertEquals("Expected site " + site.getSiteNumber() + " port ", Integer.toString(port), site.getConnectionInfo().get(Site.PORT_KEY));
-            assertEquals("Expected site " + site.getSiteNumber() + " password ", "site"+site.getSiteNumber(), site.getPassword());
+            assertEquals("Expected site " + site.getSiteNumber() + " password ", "site" + site.getSiteNumber(), site.getPassword());
             port += 1000;
         }
 
@@ -277,12 +314,11 @@ public class ContestYAMLLoaderTest extends TestCase {
         key = ContestYAMLLoader.ACCOUNTS_KEY;
         sectionLines = loader.getSectionLines(key, contents);
         assertEquals(key + " lines.", 18, sectionLines.length);
-        
+
         key = ContestYAMLLoader.SITES_KEY;
         sectionLines = loader.getSectionLines(key, contents);
         assertEquals(key + " lines.", 16, sectionLines.length);
-        
-        
+
     }
 
     String getYamlTestDirectory() {
@@ -291,6 +327,30 @@ public class ContestYAMLLoaderTest extends TestCase {
 
     String getYamlTestFileName() {
         return getYamlTestDirectory() + File.separator + ExportYAML.CONTEST_FILENAME;
+    }
+
+    public void testgetFileNames() throws Exception {
+
+        String[] basenames = { "bozo", "smart", "sumit" };
+
+        String shortName = "sumit";
+        String directoryName = getYamlTestDirectory() + File.separator + shortName + File.separator + "data" + File.separator + "secret";
+
+        String[] names = loader.getFileNames(directoryName, ".in");
+        assertEquals("Number of .in files ", 3, names.length);
+
+        String[] ansnames = loader.getFileNames(directoryName, ".ans");
+        assertEquals("Number of .ans files ", 3, ansnames.length);
+
+        int idx = 0;
+        for (String name : basenames) {
+
+            assertEquals(names[idx], name + ".in");
+            assertEquals(ansnames[idx], name + ".ans");
+
+            idx++;
+        }
+
     }
 
 }

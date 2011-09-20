@@ -13,7 +13,4 @@ rights_owner:
 limits: 
    timeout: 120
 
-input: 
-   readFromSTDIN: false
-
 

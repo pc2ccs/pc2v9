@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.imports.ccs;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -146,8 +147,12 @@ public class ContestYAMLLoader {
 
         Problem[] problems = getProblems(yamlLines);
         for (Problem problem : problems) {
-            addProblemDefAndFiles(contest, diretoryName, problem, problem.getDisplayName());
+            addProblemDefAndFiles(contest, diretoryName, problem);
+            
+            // TODO CCS add validator(s)
+            assignDefaultValidator(problem);
         }
+        
 
         Site[] sites = getSites(yamlLines);
         for (Site site : sites) {
@@ -267,11 +272,18 @@ public class ContestYAMLLoader {
         return (Account[]) accountVector.toArray(new Account[accountVector.size()]);
     }
 
-    private void addProblemDefAndFiles(IInternalContest contest, String directoryName, Problem problem, String shortName) throws Exception {
+    /**
+     * Add data contents into problem.
+     * @param contest
+     * @param directoryName
+     * @param problem
+     * @throws Exception
+     */
+    private void addProblemDefAndFiles(IInternalContest contest, String directoryName, Problem problem) throws Exception {
 
         // TODO CCS code loading of problem.yaml file.
 
-        String problemYamlFilename = directoryName + File.separator + shortName + File.separator + DEFAULT_PROBLEM_YAML_FILENAME;
+        String problemYamlFilename = directoryName + File.separator + problem.getShortName() + File.separator + DEFAULT_PROBLEM_YAML_FILENAME;
         String[] contents = Utilities.loadFile(problemYamlFilename);
 
         if (contents.length == 0) {
@@ -283,54 +295,128 @@ public class ContestYAMLLoader {
             problem.setDisplayName(problemName);
         }
 
-        ProblemDataFiles problemDataFiles = new ProblemDataFiles(problem);
-
         // TODO CCS add test case files, oh man.
-
-        // TODO CCS add validator(s)
-        assignDefaultValidator(problem);
 
         String[] sectionLines = getSectionLines(PROBLEM_INPUT_KEY, contents);
 
+        String dataFileBaseDirectory = directoryName + File.separator + problem.getShortName() + File.separator + "data" + File.separator + "secret";
+
+        if (sectionLines.length > 1) {
+//            System.out.println("Using PC2 for "+problem.getDisplayName());
+            loadPc2Problem(contest, dataFileBaseDirectory, problem, sectionLines);
+        } else {
+//            System.out.println("Using CCS for "+problem.getDisplayName());
+            loadCCSProblem(contest, dataFileBaseDirectory, problem);
+        }
+
+    }
+
+    private void loadCCSProblem(IInternalContest contest, String dataFileBaseDirectory, Problem problem) throws Exception {
+        
+        ProblemDataFiles problemDataFiles = new ProblemDataFiles(problem);
+
+        String [] inputFileNames = getFileNames (dataFileBaseDirectory, ".in");
+        
+        String [] answerFileNames = getFileNames (dataFileBaseDirectory, ".ans");
+        
+        if (inputFileNames.length == 0){
+            throw new Exception("No input file names found for "+problem.getDisplayName());
+        }
+        
+        if (answerFileNames.length == 0){
+            throw new Exception("No input file names found for "+problem.getDisplayName());
+        }
+        
+        if (inputFileNames.length == answerFileNames.length){
+            for (int idx = 0 ; idx < inputFileNames.length; idx ++){
+                
+                // TODO CCS check that each <basename>.in file has a matching <basename>.ans file
+                problem.addTestCaseFilenames(inputFileNames[idx], answerFileNames[idx]);
+            }
+        } else {
+            throw new Exception("For "+problem.getShortName()+" not all .in files have .out files "); 
+        }
+
+        // for now, add first test case files
+        addDataFiles (problem, problemDataFiles, dataFileBaseDirectory, inputFileNames[0], answerFileNames[0]);
+        
+        // TODO CCS load multiple file contents into ProblemDataFiles
+        
+        contest.addProblem(problem, problemDataFiles);
+    }
+
+    /**
+     * Get list of filenames with extension in directory, return in sorted order.
+     * 
+     * @param directoryName
+     * @param extension
+     * @return
+     */
+    protected String[] getFileNames(String directoryName, String extension) {
+        
+        Vector<String> list = new Vector<String>();
+        File dir = new File (directoryName);
+        
+        String [] entries = dir.list();
+        Arrays.sort(entries);
+        
+        for (String name : entries){
+            if (name.endsWith(extension)){
+                list.addElement(name);
+            }
+        }
+        
+        return (String[]) list.toArray(new String[list.size()]);
+    }
+
+    private void loadPc2Problem (IInternalContest contest, String dataFileBaseDirectory, Problem problem, String[] sectionLines) throws Exception {
+        
         String dataFileName = getSequenceValue(sectionLines, "datafile");
         String answerFileName = getSequenceValue(sectionLines, "answerfile");
 
-        String dataFileBaseDirectory = directoryName + File.separator + shortName + File.separator + "data" + File.separator + "secret";
-
+        ProblemDataFiles problemDataFiles = new ProblemDataFiles(problem);
+    
         if (dataFileName != null || answerFileName != null) {
-
-            // load judge data file
-            if (dataFileName != null) {
-                String dataFilePath = dataFileBaseDirectory + File.separator + dataFileName;
-                if (fileNotThere(dataFilePath)) {
-                    throw new Exception("Missing data file " + dataFilePath);
-                }
-
-                problem.setDataFileName(dataFileName);
-                problem.setReadInputDataFromSTDIN(false);
-
-                SerializedFile serializedFile = new SerializedFile(dataFilePath);
-                problemDataFiles.setJudgesDataFile(serializedFile);
-            }
-
-            // load judge answer file
-            if (answerFileName != null) {
-                String answerFilePath = dataFileBaseDirectory + File.separator + answerFileName;
-                if (fileNotThere(answerFilePath)) {
-                    throw new Exception("Missing data file " + answerFilePath);
-                }
-
-                problem.setAnswerFileName(answerFileName);
-
-                SerializedFile serializedFile = new SerializedFile(answerFilePath);
-                problemDataFiles.setJudgesAnswerFile(serializedFile);
-            }
+            
+            addDataFiles (problem, problemDataFiles, dataFileBaseDirectory, dataFileName, answerFileName);
 
             contest.addProblem(problem, problemDataFiles);
 
         } else {
             contest.addProblem(problem);
         }
+        
+    }
+
+    private void addDataFiles(Problem problem, ProblemDataFiles problemDataFiles, String dataFileBaseDirectory, String dataFileName, String answerFileName) throws Exception {
+
+        // load judge data file
+        if (dataFileName != null) {
+            String dataFilePath = dataFileBaseDirectory + File.separator + dataFileName;
+            if (fileNotThere(dataFilePath)) {
+                throw new Exception("Missing data file " + dataFilePath);
+            }
+
+            problem.setDataFileName(dataFileName);
+            problem.setReadInputDataFromSTDIN(false);
+
+            SerializedFile serializedFile = new SerializedFile(dataFilePath);
+            problemDataFiles.setJudgesDataFile(serializedFile);
+        }
+
+        // load judge answer file
+        if (answerFileName != null) {
+            String answerFilePath = dataFileBaseDirectory + File.separator + answerFileName;
+            if (fileNotThere(answerFilePath)) {
+                throw new Exception("Missing data file " + answerFilePath);
+            }
+
+            problem.setAnswerFileName(answerFileName);
+
+            SerializedFile serializedFile = new SerializedFile(answerFilePath);
+            problemDataFiles.setJudgesAnswerFile(serializedFile);
+        }
+        
     }
 
     private boolean fileNotThere(String name) {
@@ -514,8 +600,9 @@ public class ContestYAMLLoader {
      * 
      * @param yamlLines
      * @return list of {@link Problem}
+     * @throws Exception 
      */
-    public Problem[] getProblems(String[] yamlLines) {
+    public Problem[] getProblems(String[] yamlLines) throws Exception {
 
         String[] sectionLines = getSectionLines(PROBLEMS_KEY, yamlLines);
 
@@ -539,6 +626,7 @@ public class ContestYAMLLoader {
              */
 
             Problem problem = new Problem(problemTitle);
+            problem.setShortName(problemKeyName);
 
             // String problemLetter = getSequenceValue(sequenceLines, "letter");
             // String colorName = getSequenceValue(sequenceLines, "color");
@@ -554,7 +642,7 @@ public class ContestYAMLLoader {
             // System.out.println(" letter   : " + problemLetter);
             // System.out.println(" color    : " + colorName);
             // System.out.println(" RGB      : " + colorRGB);
-
+            
             problemList.addElement(problem);
 
             idx += sequenceLines.length;
