@@ -1,0 +1,19 @@
+# Problem configuration, version 1.0 
+# PC^2 Version: Version 9.2 20110920 (Tuesday, September 20th 2011 16:50 UTC) Java ver 1.6.0_22 build 891 Windows 7 6.1 (x86) 
+# Created: 2011-09-20 10:20:49 PDT
+# $HeaderURL$
+--- 
+
+name: Biological Robots Solutions
+source: 
+author: 
+license: 
+rights_owner: 
+
+limits: 
+   timeout: 120
+
+input: 
+   readFromSTDIN: false
+
+
