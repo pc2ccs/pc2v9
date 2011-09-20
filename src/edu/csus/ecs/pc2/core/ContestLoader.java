@@ -341,7 +341,7 @@ public class ContestLoader {
             Category[] categories = (Category[]) PacketFactory.getObjectValue(packet, PacketFactory.CATEGORY_LIST);
             if (categories != null) {
                 for (Category category : categories) {
-                    if (contest.getJudgement(category.getElementId()) != null) {
+                    if (contest.getCategory(category.getElementId()) != null) {
                         contest.updateCategory(category);
                     } else {
                         contest.addCategory(category);

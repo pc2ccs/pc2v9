@@ -104,6 +104,10 @@ public class ConfigurationIO {
          * Finalize Data.
          */
         FINALIZE_DATA,
+        /**
+         * 
+         */
+        CATEGORIES,
         
     }
 
@@ -295,6 +299,20 @@ public class ConfigurationIO {
             log.log(Log.WARNING, "Exception while loading Finalize Data ", e);
         }
         
+        
+        try {
+            key = ConfigKeys.CATEGORIES;
+            if (configuration.containsKey(key)) {
+                Category[] categories = (Category[]) configuration.get(key.toString());
+                for (Category category : categories) {
+                    contest.addCategory(category);
+                }
+                log.info("Loaded " + categories.length + " " + key.toString().toLowerCase());
+            }
+        } catch (Exception e) {
+            log.log(Log.WARNING, "Exception while loading judgements ", e);
+        }
+        
         try {
             key = ConfigKeys.PROFILE;
             if (configuration.containsKey(key)) {
@@ -445,6 +463,10 @@ public class ConfigurationIO {
         
         if (contest.getFinalizeData() != null) {
             configuration.add(ConfigKeys.FINALIZE_DATA, contest.getFinalizeData());
+        }
+        
+        if (contest.getCategories() != null) {
+            configuration.add(ConfigKeys.CATEGORIES, contest.getCategories());
         }
         
         if (contest.getProfileCloneSettings() != null){

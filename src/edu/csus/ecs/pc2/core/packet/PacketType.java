@@ -719,7 +719,10 @@ public final class PacketType implements Serializable {
          * or client once on login.  On switch the remote data must
          * be send to the server requesting it.
          */
-        UPDATE_REMOTE_DATA
+        UPDATE_REMOTE_DATA,
+        /**
+         * 
+         */
     }
 
     /**

@@ -6,6 +6,8 @@ import java.util.Hashtable;
 /**
  * User permissions.
  * 
+ * These are lists of user permissions/abilities.
+ * 
  * @see PermissionList
  * @version $Id$
  * @author pc2@ecs.csus.edu
@@ -282,6 +284,14 @@ public class Permission implements Serializable {
          * 
          */
         SHUTDOWN_ALL_SERVERS,
+        /**
+         * 
+         */
+        ADD_CATEGORY, 
+        /**
+         * 
+         */
+        EDIT_CATEGORY,
     };
 
     private Hashtable<Type, String> hash = new Hashtable<Type, String>();
@@ -375,6 +385,8 @@ public class Permission implements Serializable {
         hash.put(Type.SHUTDOWN_SERVER,"Shutdown server");
         hash.put(Type.SHUTDOWN_ALL_SERVERS,"Shutdown all servers");
         
+        hash.put(Type.ADD_CATEGORY,"Add Category");
+        hash.put(Type.EDIT_CATEGORY,"Edit Category");
     }
 
     /**
@@ -386,5 +398,4 @@ public class Permission implements Serializable {
     public String getDescription(Type type) {
         return hash.get(type);
     }
-
 }

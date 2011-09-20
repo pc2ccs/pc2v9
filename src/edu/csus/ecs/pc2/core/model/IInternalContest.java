@@ -306,6 +306,10 @@ public interface IInternalContest {
     void addProblemListener(IProblemListener problemListener);
 
     void removeProblemListener(IProblemListener problemListener);
+    
+    void addCategoryListener(ICategoryListener categoryListener);
+
+    void removeCategoryListener(ICategoryListener categoryListener);
 
     void addLanguageListener(ILanguageListener languageListener);
 

@@ -16,6 +16,7 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.BalloonSettings;
+import edu.csus.ecs.pc2.core.model.Category;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
@@ -292,37 +293,37 @@ public final class PacketFactory {
      */
     public static final String READ_ONLY = "READ_ONLY";
 
-    public static final String  BALLOON_SETTINGS = "BALLOON_SETTINGS";
-    
-    public static final String  EVENT_NAME = "EVENT_NAME";
-    
-    public static final String  MESSAGE = "MESSAGE";
-    
-    public static final String  EXCEPTION = "EXCEPTION";
+    public static final String BALLOON_SETTINGS = "BALLOON_SETTINGS";
+
+    public static final String EVENT_NAME = "EVENT_NAME";
+
+    public static final String MESSAGE = "MESSAGE";
+
+    public static final String EXCEPTION = "EXCEPTION";
 
     public static final String COMPUTER_JUDGE = "COMPUTER_JUDGE";
-    
+
     public static final String FROM_HUMAN = "FROM_HUMAN";
 
     public static final String RUN_STATUS = "RUN_STATUS";
 
     public static final String SERVER_CLOCK_OFFSET = "SERVER_CLOCK_OFFSET";
 
-    public static final String DELETE_PROBLEM_DEFINITIONS =  "DELETE_PROBLEM_DEFINITIONS";
+    public static final String DELETE_PROBLEM_DEFINITIONS = "DELETE_PROBLEM_DEFINITIONS";
 
-    public static final String DELETE_LANGUAGE_DEFINITIONS =  "DELETE_LANGUAGE_DEFINITIONS";
+    public static final String DELETE_LANGUAGE_DEFINITIONS = "DELETE_LANGUAGE_DEFINITIONS";
 
-    public static final String CONTEST_IDENTIFIER =  "CONTEST_IDENTIFIER";
-    
-    public static final String PROFILE =  "PROFILE";
-    
-    public static final String PROFILE_LIST =  "PROFILE_LIST";
+    public static final String CONTEST_IDENTIFIER = "CONTEST_IDENTIFIER";
 
-    public static final String PROFILE_CLONE_SETTINGS =  "PROFILE_CLONE_SETTINGS";
+    public static final String PROFILE = "PROFILE";
 
-    public static final String SWITCH_PROFILE =  "SWITCH_PROFILE";
+    public static final String PROFILE_LIST = "PROFILE_LIST";
 
-    public static final String NEW_PROFILE =  "NEW_PROFILE";
+    public static final String PROFILE_CLONE_SETTINGS = "PROFILE_CLONE_SETTINGS";
+
+    public static final String SWITCH_PROFILE = "SWITCH_PROFILE";
+
+    public static final String NEW_PROFILE = "NEW_PROFILE";
 
     public static final String MESSAGE_AREA = "MESSAGE_AREA";
 
@@ -331,8 +332,11 @@ public final class PacketFactory {
     public static final String RUN_FILES_LIST = "RUN_FILES_LIST";
 
     public static final String PROFILE_STATUS = "PROFILE_STATUS";
-    
+
     public static final String FINALIZE_DATA = "FINALIZE_DATA";
+
+    public static final String CATEGORIES_ARRAY = "CATEGORIES_ARRAY";
+
     
     /**
      * Constructor is private as this is a utility class which should not be extended or invoked.
@@ -2130,6 +2134,15 @@ public final class PacketFactory {
         Properties prop = new Properties();
         prop.put(CLIENT_ID, source);
         Packet packet = new Packet(Type.SHUTDOWN_ALL, source, destination, prop);
+        return packet;
+    }
+
+    public static Packet createUpdateSetting(ClientId source, ClientId destination, Category[] categories) {
+        Properties prop = new Properties();
+        prop.put(CLIENT_ID, source);
+        prop.put(SITE_NUMBER, source.getSiteNumber());
+        prop.put(CATEGORIES_ARRAY, categories);
+        Packet packet = new Packet(Type.UPDATE_SETTING, source, destination, prop);
         return packet;
     }
 

@@ -953,6 +953,13 @@ public class InternalContest implements IInternalContest {
         problemListenerList.remove(problemListener);
     }
 
+    public void addCategoryListener(ICategoryListener categoryListener) {
+        categoryListenerList.addElement(categoryListener);
+    }
+
+    public void removeCategoryListener(ICategoryListener categoryListener) {
+        categoryListenerList.remove(categoryListener);
+    }
 
     public void addLanguageListener(ILanguageListener languageListener) {
         languageListenerList.addElement(languageListener);

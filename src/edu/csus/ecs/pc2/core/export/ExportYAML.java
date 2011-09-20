@@ -13,6 +13,7 @@ import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.BalloonSettings;
+import edu.csus.ecs.pc2.core.model.Category;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -130,12 +131,20 @@ public class ExportYAML {
         // - No comment, read problem statement.
         // - This will be answered during the answers to questions session.
 
-        // TODO CCS write clar categories.
-
         // clar-categories:
         // - General
         // - SysOps
         // - Operations
+
+        Category[] categories = contest.getCategories();
+
+        if (categories.length > 0) {
+            contestWriter.println("clar-categories:");
+            for (Category category : categories) {
+                contestWriter.println(" - " + category.getDisplayName());
+            }
+            contestWriter.println();
+        }
 
         Language[] languages = contest.getLanguages();
 

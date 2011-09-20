@@ -17,6 +17,7 @@ import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.BalloonSettings;
+import edu.csus.ecs.pc2.core.model.Category;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
@@ -637,8 +638,8 @@ public final class PacketFormatter {
 
             return node;
         }
-
-        if (object instanceof Problem[]) {
+        
+      if (object instanceof Problem[]) {
 
             Problem[] problems = (Problem[]) object;
             DefaultMutableTreeNode node = new DefaultMutableTreeNode(key + "Problem list: " + problems.length + " problems");
@@ -1055,6 +1056,11 @@ public final class PacketFormatter {
             return node;
         }
 
+        return moreTreesThree(key, object);
+    }
+    
+    private static DefaultMutableTreeNode moreTreesThree(String key, Object object) {
+
         if (object instanceof ProblemDataFiles) {
 
             DefaultMutableTreeNode child;
@@ -1121,8 +1127,35 @@ public final class PacketFormatter {
 
             return node;
         }
+        
+        if (object instanceof Category[]) {
 
+            Category[] categories = (Category[]) object;
+            DefaultMutableTreeNode node = new DefaultMutableTreeNode(key + "Category list: " + categories.length + " categories");
+            DefaultMutableTreeNode child;
+
+            for (Category category : categories) {
+
+                child = createTree("", category);
+                node.add(child);
+            }
+
+            return node;
+        }
+        
+        if (object instanceof Category) {
+
+            DefaultMutableTreeNode child;
+
+            Category category = (Category) object;
+            DefaultMutableTreeNode node = new DefaultMutableTreeNode(key + "Category: " + category);
+            
+            child = new DefaultMutableTreeNode("Name: " + category.getDisplayName());
+            node.add(child);
+
+            return node;
+        }
+        
         return null;
     }
-    
 }

@@ -6,6 +6,7 @@ import edu.csus.ecs.pc2.core.exception.ContestSecurityException;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.BalloonSettings;
+import edu.csus.ecs.pc2.core.model.Category;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
@@ -608,5 +609,7 @@ public interface IInternalController {
      * @param usingGUI true means show GUI message, false means do not show GUI messages.
      */
     void setUsingGUI(boolean usingGUI);
+    
+    void updateCategories(Category[] categories);
 
 }

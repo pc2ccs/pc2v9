@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core;
 
+import edu.csus.ecs.pc2.core.model.Category;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
@@ -62,11 +63,12 @@ public class ContestImporter {
             }
         }
         
+        theController.addNewAccounts(inContest.getAccounts());
+        
         // TODO CCS Add categories, add updateSettings to be a more
         // generic way to update multiple settings
-//        Category [] categories = inContest.getCategories();
-//        theController.updateSettings(categories);
+        Category [] categories = inContest.getCategories();
+        theController.updateCategories(categories);
 
-        theController.addNewAccounts(inContest.getAccounts());
     }
 }

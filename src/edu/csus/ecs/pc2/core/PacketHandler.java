@@ -3607,6 +3607,10 @@ public class PacketHandler {
         if (isServer(clientId)) {
             contestLoginSuccessData.setContestSecurityPassword(contestSecurityPassword);
         }
+        
+        if (inContest.getCategories() != null){
+            contestLoginSuccessData.setCategories(inContest.getCategories());
+        }
 
         return contestLoginSuccessData;
     }

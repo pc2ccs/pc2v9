@@ -23,6 +23,7 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.BalloonSettings;
+import edu.csus.ecs.pc2.core.model.Category;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -2912,6 +2913,11 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         Packet updatePacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), accounts);
         sendToLocalServer(updatePacket);
     }
+    
+    public void updateCategories(Category[] categories) {
+        Packet updatePacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), categories);
+        sendToLocalServer(updatePacket);
+    }
 
     public void addNewAccount(Account account) {
         Packet addAccountPacket = PacketFactory.createAddSetting(contest.getClientId(), getServerClientId(), account);
@@ -3403,5 +3409,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     public void setUsingGUI(boolean usingGUI) {
         this.usingGUI = usingGUI;
     }
+
 
 }
