@@ -9,6 +9,7 @@ import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.list.AccountList;
 import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
 import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.Category;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -153,7 +154,11 @@ public class ContestYAMLLoader {
             contest.addSite(site);
         }
 
-        // String[] categories = loadGeneralClarificationAnswers(yamlLines);
+        String[] categories = loadGeneralClarificationAnswers(yamlLines);
+        for (String name : categories) {
+            contest.addCategory(new Category(name));
+        }
+         
         // TODO CCS load categories into contest
 
         // String[] answers = getGeneralAnswers(yamlLines);

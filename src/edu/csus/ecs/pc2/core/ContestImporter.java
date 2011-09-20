@@ -61,6 +61,11 @@ public class ContestImporter {
                 theController.addProblem(problem);
             }
         }
+        
+        // TODO CCS Add categories, add updateSettings to be a more
+        // generic way to update multiple settings
+//        Category [] categories = inContest.getCategories();
+//        theController.updateSettings(categories);
 
         theController.addNewAccounts(inContest.getAccounts());
     }
