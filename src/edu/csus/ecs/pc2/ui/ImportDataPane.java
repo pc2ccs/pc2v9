@@ -5,6 +5,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.io.File;
 import java.io.IOException;
+import java.util.Vector;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -13,8 +14,10 @@ import javax.swing.JOptionPane;
 import edu.csus.ecs.pc2.core.ContestImporter;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Category;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
+import edu.csus.ecs.pc2.core.model.Pluralize;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.imports.ccs.ContestYAMLLoader;
@@ -145,50 +148,51 @@ public class ImportDataPane extends JPanePlugin {
         }
     }
 
-  
+    private void addSummaryEntry(StringBuffer buf, int count, String prefix, String entryName) {
+        if (count > 0) {
+            buf.append(count);
+            String pluralized = Pluralize.pluralize(entryName, count);
+            if (prefix.length() > 0) {
+                buf.append(' ');
+                buf.append(prefix);
+            }
+            buf.append(' ');
+            buf.append(pluralized);
+            buf.append(NL);
+        }
+    }
+
+    private void addSummaryEntry(StringBuffer sb, int count, String entryName) {
+        addSummaryEntry(sb, count, "", entryName);
+    }
+
+
     private String getSummary(IInternalContest newContest) throws Exception {
 
         Language[] languages = newContest.getLanguages();
         Problem[] problems = newContest.getProblems();
-        Account[] accounts = newContest.getAccounts();
-        Site [] sites = newContest.getSites();
-        Category [] categories = newContest.getCategories();
+        Site[] sites = newContest.getSites();
+        Category[] categories = newContest.getCategories();
 
         StringBuffer sb = new StringBuffer();
 
-        if (sites.length > 0) {
-            sb.append(sites.length);
-            sb.append(" sites");
-            sb.append(NL);
+        addSummaryEntry(sb, sites.length, "site");
+
+        addSummaryEntry(sb, problems.length, "problem");
+
+        addSummaryEntry(sb, languages.length, "language");
+
+        for (Type type : Type.values()) {
+            Vector<Account> accounts = newContest.getAccounts(type);
+            String accountTypeName = type.toString().toLowerCase();
+            addSummaryEntry(sb, accounts.size(), accountTypeName, " account");
         }
 
-        if (problems.length > 0) {
-            sb.append(problems.length);
-            sb.append(" problems");
-            sb.append(NL);
-        }
-
-        if (languages.length > 0) {
-            sb.append(languages.length);
-            sb.append(" languages");
-            sb.append(NL);
-        }
-
-        if (accounts.length > 0) {
-            sb.append(accounts.length);
-            sb.append(" accounts");
-            sb.append(NL);
-        }
-        
-        if (categories.length > 0) {
-            sb.append(categories.length);
-            sb.append(" clar categories");
-            sb.append(NL);
-        }
+        addSummaryEntry(sb, categories.length, "clar", "category");
 
         return sb.toString();
-
     }
+    
 
     private void showMessage(String string) {
         JOptionPane.showMessageDialog(this, string, "Message", JOptionPane.INFORMATION_MESSAGE);
