@@ -164,8 +164,6 @@ public class ContestYAMLLoader {
             contest.addCategory(new Category(name));
         }
          
-        // TODO CCS load categories into contest
-
         // String[] answers = getGeneralAnswers(yamlLines);
         // TODO CCS load answers into contest
 
@@ -281,8 +279,6 @@ public class ContestYAMLLoader {
      */
     private void addProblemDefAndFiles(IInternalContest contest, String directoryName, Problem problem) throws Exception {
 
-        // TODO CCS code loading of problem.yaml file.
-
         String problemYamlFilename = directoryName + File.separator + problem.getShortName() + File.separator + DEFAULT_PROBLEM_YAML_FILENAME;
         String[] contents = Utilities.loadFile(problemYamlFilename);
 
@@ -295,54 +291,79 @@ public class ContestYAMLLoader {
             problem.setDisplayName(problemName);
         }
 
-        // TODO CCS add test case files, oh man.
-
         String[] sectionLines = getSectionLines(PROBLEM_INPUT_KEY, contents);
 
         String dataFileBaseDirectory = directoryName + File.separator + problem.getShortName() + File.separator + "data" + File.separator + "secret";
 
         if (sectionLines.length > 1) {
-//            System.out.println("Using PC2 for "+problem.getDisplayName());
             loadPc2Problem(contest, dataFileBaseDirectory, problem, sectionLines);
         } else {
-//            System.out.println("Using CCS for "+problem.getDisplayName());
             loadCCSProblem(contest, dataFileBaseDirectory, problem);
         }
 
     }
 
     private void loadCCSProblem(IInternalContest contest, String dataFileBaseDirectory, Problem problem) throws Exception {
-        
+
         ProblemDataFiles problemDataFiles = new ProblemDataFiles(problem);
 
-        String [] inputFileNames = getFileNames (dataFileBaseDirectory, ".in");
-        
-        String [] answerFileNames = getFileNames (dataFileBaseDirectory, ".ans");
-        
-        if (inputFileNames.length == 0){
-            throw new Exception("No input file names found for "+problem.getDisplayName());
-        }
-        
-        if (answerFileNames.length == 0){
-            throw new Exception("No input file names found for "+problem.getDisplayName());
-        }
-        
-        if (inputFileNames.length == answerFileNames.length){
-            for (int idx = 0 ; idx < inputFileNames.length; idx ++){
-                
-                // TODO CCS check that each <basename>.in file has a matching <basename>.ans file
-                problem.addTestCaseFilenames(inputFileNames[idx], answerFileNames[idx]);
-            }
-        } else {
-            throw new Exception("For "+problem.getShortName()+" not all .in files have .out files "); 
+        String[] inputFileNames = getFileNames(dataFileBaseDirectory, ".in");
+
+        String[] answerFileNames = getFileNames(dataFileBaseDirectory, ".ans");
+
+        if (inputFileNames.length == 0) {
+            throw new Exception("No input file names found for " + problem.getDisplayName());
         }
 
-        // for now, add first test case files
-        addDataFiles (problem, problemDataFiles, dataFileBaseDirectory, inputFileNames[0], answerFileNames[0]);
-        
-        // TODO CCS load multiple file contents into ProblemDataFiles
-        
+        if (answerFileNames.length == 0) {
+            throw new Exception("No input file names found for " + problem.getDisplayName());
+        }
+
+        if (inputFileNames.length == answerFileNames.length) {
+
+            SerializedFile[] serializedFileDataFiles = new SerializedFile[inputFileNames.length];
+            SerializedFile[] serializedFileAnswerFiles = new SerializedFile[inputFileNames.length];
+
+            for (int idx = 0; idx < inputFileNames.length; idx++) {
+
+                problem.addTestCaseFilenames(inputFileNames[idx], answerFileNames[idx]);
+
+                String dataFileName = dataFileBaseDirectory + File.separator + inputFileNames[idx];
+
+                String answerFileName = dataFileName.replaceAll(".in$", ".ans");
+                String answerShortFileName = inputFileNames[idx].replaceAll(".in$", ".ans");
+
+                checkForFile(dataFileName, "Missing "+inputFileNames[idx]+" file for " + problem.getShortName());
+                checkForFile(answerFileName, "Missing "+answerShortFileName+" file for " + problem.getShortName());
+
+                serializedFileDataFiles[idx] = new SerializedFile(dataFileName);
+                serializedFileAnswerFiles[idx] = new SerializedFile(answerFileName);
+            }
+
+            problemDataFiles.setJudgesDataFiles(serializedFileDataFiles);
+            problemDataFiles.setJudgesAnswerFiles(serializedFileAnswerFiles);
+
+        } else {
+
+            throw new Exception("  For " + problem.getShortName() + " Missing files -  there are " + inputFileNames.length + " .in files and " + //
+                    answerFileNames.length + " .ans files ");
+        }
+
         contest.addProblem(problem, problemDataFiles);
+    }
+
+    /**
+     * Check for existence of file, if does not exist throw exception with message.
+     * 
+     * @param filename
+     * @param message
+     * @throws Exception 
+     */
+    private void checkForFile(String filename, String message) throws Exception {
+        
+        if (! (new File(filename).isFile())) {
+            throw new Exception (message);
+        }
     }
 
     /**
@@ -566,13 +587,6 @@ public class ContestYAMLLoader {
                     String compilerArgs = getSequenceValue(sequenceLines, "compiler-args");
                     String interpreter = getSequenceValue(sequenceLines, "runner");
                     String interpreterArgs = getSequenceValue(sequenceLines, "runner-args");
-
-                    // TODO remove debugging output code
-                    // System.out.println("Language  : " + name);
-                    // System.out.println(" compiler : " + compilerName);
-                    // System.out.println("    args  : " + compilerArgs);
-                    // System.out.println(" runner   : " + interpreter);
-                    // System.out.println("    args  : " + interpreterArgs);
 
                     language.setCompileCommandLine(compilerName + " " + compilerArgs);
                     language.setExecutableIdentifierMask("a.out");
