@@ -1,23 +1,30 @@
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.KeyEvent;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import edu.csus.ecs.pc2.VersionInfo;
+import edu.csus.ecs.pc2.core.export.ExportYAML;
 import edu.csus.ecs.pc2.exports.ccs.Groupdata;
 import edu.csus.ecs.pc2.exports.ccs.ResultsFile;
 import edu.csus.ecs.pc2.exports.ccs.ScoreboardFile;
 import edu.csus.ecs.pc2.exports.ccs.Teamdata;
 import edu.csus.ecs.pc2.exports.ccs.Userdata;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
 
 /**
  * Export Data Pane.
@@ -48,6 +55,12 @@ public class ExportDataPane extends JPanePlugin {
 
     private JButton saveGroupButton = null;
 
+    private JPanel centerPane = null;
+
+    private JButton exportYamlButton = null;
+
+    private String lastDirectory = ".";
+
     /**
      * This method initializes
      * 
@@ -66,6 +79,7 @@ public class ExportDataPane extends JPanePlugin {
         this.setSize(new Dimension(548, 291));
         this.add(getButtonPane(), BorderLayout.SOUTH);
 
+        this.add(getCenterPane(), BorderLayout.CENTER);
     }
 
     @Override
@@ -118,14 +132,17 @@ public class ExportDataPane extends JPanePlugin {
 
         // TODO CCS prompt for path to save this file to..
 
+        
+        
         String outfilename = "results.tsv";
+        
         try {
             ResultsFile resultsFile = new ResultsFile();
             String[] lines = resultsFile.createTSVFileLines(getContest());
             writeLinesToFile(outfilename, lines);
             viewFile(outfilename, outfilename);
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Unable to save " + outfilename + " " + e.getMessage());
+            FrameUtilities.showMessage(this, "Can not save file", "Unable to save " + outfilename + " " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -198,8 +215,6 @@ public class ExportDataPane extends JPanePlugin {
 
     protected void saveGroupdataTSVFile() {
 
-        // TODO CCS prompt for path to save this file to..
-
         String outfilename = "groups.tsv";
         try {
             Groupdata groupData = new Groupdata();
@@ -213,8 +228,6 @@ public class ExportDataPane extends JPanePlugin {
     }
 
     protected void saveTeamdataTSVFile() {
-
-        // TODO CCS prompt for path to save this file to..
 
         String outfilename = "teams.tsv";
         try {
@@ -290,6 +303,78 @@ public class ExportDataPane extends JPanePlugin {
             });
         }
         return saveGroupButton;
+    }
+
+    /**
+     * This method initializes centerPane
+     * 
+     * @return javax.swing.JPanel
+     */
+    private JPanel getCenterPane() {
+        if (centerPane == null) {
+            GridBagConstraints gridBagConstraints = new GridBagConstraints();
+            gridBagConstraints.gridx = 0;
+            gridBagConstraints.gridy = 0;
+            centerPane = new JPanel();
+            centerPane.setLayout(new GridBagLayout());
+            centerPane.add(getExportYamlButton(), gridBagConstraints);
+        }
+        return centerPane;
+    }
+
+    /**
+     * This method initializes exportYamlButton
+     * 
+     * @return javax.swing.JButton
+     */
+    private JButton getExportYamlButton() {
+        if (exportYamlButton == null) {
+            exportYamlButton = new JButton();
+            exportYamlButton.setText("Export contest.yaml");
+            exportYamlButton.setMnemonic(KeyEvent.VK_X);
+            exportYamlButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    exportContestYaml();
+                }
+            });
+        }
+        return exportYamlButton;
+    }
+    
+    public File selectDirectoryDialog(Component parent, String startDirectory) {
+        
+        JFileChooser chooser = new JFileChooser(startDirectory);
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        int action = chooser.showSaveDialog(parent);
+
+        switch (action) {
+            case JFileChooser.APPROVE_OPTION:
+                File file = chooser.getSelectedFile();
+                lastDirectory = chooser.getCurrentDirectory().toString();
+                return file;
+            case JFileChooser.CANCEL_OPTION:
+            case JFileChooser.ERROR_OPTION:
+            default:
+                break;
+        }
+        return null;
+
+    }
+
+    protected void exportContestYaml() {
+
+        File dir = selectDirectoryDialog(this, lastDirectory);
+        if (dir != null) {
+            ExportYAML exportYAML = new ExportYAML();
+            try {
+                exportYAML.exportFiles(dir.getAbsolutePath(), getContest());
+                String outfilename = dir.getCanonicalPath() + File.separator + ExportYAML.CONTEST_FILENAME;
+                viewFile(outfilename, outfilename);
+            } catch (IOException e) {
+                FrameUtilities.showMessage(this, "Error exporting contest.yaml", "Error exporting YAML " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

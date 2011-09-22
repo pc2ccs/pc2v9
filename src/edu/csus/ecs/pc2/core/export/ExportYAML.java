@@ -312,7 +312,6 @@ public class ExportYAML {
 
         String problemFileName = targetDirectoryName + File.separator + PROBLEM_FILENAME;
 
-        filesWritten.addElement(problemFileName);
         PrintWriter problemWriter = new PrintWriter(new FileOutputStream(problemFileName, false), true);
         // PrintStream problemWriter = System.out;
 
@@ -362,32 +361,36 @@ public class ExportYAML {
 
         String dataFileDirectoryName = targetDirectoryName + File.separator + "data" + File.separator + "secret";
         new File(dataFileDirectoryName).mkdirs();
-
-        ProblemDataFiles dataFiles = contest.getProblemDataFile(problem);
-
-        if (dataFiles != null) {
-
-            String outputFileName;
-
-            SerializedFile file = dataFiles.getJudgesDataFile();
-
-            if (file != null) {
-                problemWriter.println("   datafile: " + problem.getDataFileName());
-                outputFileName = dataFileDirectoryName + File.separator + problem.getDataFileName();
-                createFile(file, outputFileName);
-                filesWritten.addElement(outputFileName);
+        
+        ProblemDataFiles [] dataFileList = contest.getProblemDataFiles();
+        
+        boolean foundProblemFiles = false;
+        
+        for (ProblemDataFiles dataFiles : dataFileList) {
+            
+            
+            if (dataFiles.getProblemId().equals(problem.getElementId())) {
+                
+                for ( SerializedFile serializedFile: dataFiles.getJudgesDataFiles()) {
+                    String  outputFileName = dataFileDirectoryName + File.separator + serializedFile.getName();
+                    createFile(serializedFile, outputFileName);
+                    problemWriter.println("#     wrote (D)" + outputFileName);
+                    filesWritten.addElement(outputFileName);
+                }
+                
+                for (SerializedFile serializedFile : dataFiles.getJudgesAnswerFiles()){
+                    String  outputFileName = dataFileDirectoryName + File.separator + serializedFile.getName();
+                    createFile(serializedFile, outputFileName);
+                    problemWriter.println("#     wrote (A)" + outputFileName);
+                    filesWritten.addElement(outputFileName);
+                }
+                
+                foundProblemFiles = true;
             }
-
-            file = dataFiles.getJudgesAnswerFile();
-            if (file != null) {
-                problemWriter.println("   answerfile: " + problem.getAnswerFileName());
-                outputFileName = dataFileDirectoryName + File.separator + problem.getAnswerFileName();
-                createFile(file, outputFileName);
-                filesWritten.addElement(outputFileName);
-            }
-
-        } else {
-            problemWriter.println("# No data files to write (present/defined)  ");
+        }
+        
+        if (! foundProblemFiles) {
+            problemWriter.println("# No data files to write (present/defined)  ");   
         }
 
         // limits:

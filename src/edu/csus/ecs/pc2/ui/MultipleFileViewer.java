@@ -3,6 +3,7 @@ package edu.csus.ecs.pc2.ui;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -14,23 +15,26 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
+import javax.swing.SwingConstants;
+import javax.swing.WindowConstants;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
+import java.awt.FlowLayout;
 
 /**
  * Multiple File Viewer.
- * 
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
 
-// TODO - recreate using VE.
 // $HeadURL$
 public class MultipleFileViewer extends JFrame implements IFileViewer {
+
+    private static final String NL = System.getProperty("line.separator");
 
     /**
      * 
@@ -39,63 +43,42 @@ public class MultipleFileViewer extends JFrame implements IFileViewer {
 
     public static final String SVN_ID = "$Id$";
 
+    private JButton closeButton = null;
+
+    @SuppressWarnings("unused")
+    private IInternalContest contest;
+
+    @SuppressWarnings("unused")
+    private IInternalController controller;
+
+    private IDiffPanel fileDiffPanel;
+
+    private JLabel informationLabel = null;
+
     private JPanel ivjButtonFrame = null;
 
     private JPanel ivjCenterFrame = null;
 
-    private JButton ivjCloseButton = null;
+    private JButton compareButton = null;
 
     private JTabbedPane ivjFileTabbedPane = null;
 
     private JPanel ivjJFrameContentPane = null;
 
-    /*
-     * Compare button specific
-     */
-
     private String judgeOutputFileName = null;
-
-    private String teamOutputFileName = null;
-
-    private JButton ivjCompareButton = null;
 
     private Log log = null;
 
-    private IvjEventHandler ivjEventHandler = new IvjEventHandler();
+    private JPanel soutPane = null;
 
-    private static final String NL = System.getProperty("line.separator");
+    private String teamOutputFileName = null;
 
-    /**
-     * Event handler
-     * 
-     * @author pc2@ecs.csus.edu
-     */
-    class IvjEventHandler implements java.awt.event.ActionListener {
-        public void actionPerformed(java.awt.event.ActionEvent e) {
-            if (e.getSource() == MultipleFileViewer.this.getCloseButton()) {
-                connEtoC1();
-            }
-            if (e.getSource() == MultipleFileViewer.this.getCompareButton()) {
-                connEtoC2(e);
-            }
-        }
-    }
-
-    /**
-     * MultipleFileViewer constructor comment.
-     */
     public MultipleFileViewer(Log log) {
         super();
         this.log = log;
         initialize();
     }
 
-    /**
-     * MultipleFileViewer constructor comment.
-     * 
-     * @param title
-     *            java.lang.String
-     */
     public MultipleFileViewer(Log log, String title) {
         super(title);
         this.log = log;
@@ -104,249 +87,6 @@ public class MultipleFileViewer extends JFrame implements IFileViewer {
         getCompareButton().setVisible(false);
     }
 
-    public void closeButtonActionEvents() {
-        if (fileDiffPanel != null) {
-            fileDiffPanel.dispose();
-            fileDiffPanel = null;
-        }
-        dispose();
-
-    }
-
-    /**
-     * connEtoC1: (CloseButton.action. --> MultipleFileViewer.closeButtonActionEvents()V)
-     */
-    /* WARNING: THIS METHOD WILL BE REGENERATED. */
-    private void connEtoC1() {
-        try {
-            // user code begin {1}
-            // user code end
-            this.closeButtonActionEvents();
-            // user code begin {2}
-            // user code end
-        } catch (java.lang.Throwable ivjExc) {
-            // user code begin {3}
-            // user code end
-            handleException(ivjExc);
-        }
-    }
-
-    /**
-     * Return the ButtonFrame property value.
-     * 
-     * @return javax.swing.JPanel
-     */
-    /* WARNING: THIS METHOD WILL BE REGENERATED. */
-    private javax.swing.JPanel getButtonFrame() {
-        if (ivjButtonFrame == null) {
-            try {
-                ivjButtonFrame = new javax.swing.JPanel();
-                ivjButtonFrame.setName("ButtonFrame");
-                ivjButtonFrame.setPreferredSize(new java.awt.Dimension(35, 35));
-                ivjButtonFrame.setLayout(new java.awt.FlowLayout());
-                getButtonFrame().add(getCompareButton(), getCompareButton().getName());
-                getButtonFrame().add(getCloseButton(), getCloseButton().getName());
-                // user code begin {1}
-                // user code end
-            } catch (java.lang.Throwable ivjExc) {
-                // user code begin {2}
-                // user code end
-                handleException(ivjExc);
-            }
-        }
-        return ivjButtonFrame;
-    }
-
-    /**
-     * Return the CenterFrame property value.
-     * 
-     * @return javax.swing.JPanel
-     */
-    /* WARNING: THIS METHOD WILL BE REGENERATED. */
-    private javax.swing.JPanel getCenterFrame() {
-        if (ivjCenterFrame == null) {
-            try {
-                ivjCenterFrame = new javax.swing.JPanel();
-                ivjCenterFrame.setName("CenterFrame");
-                ivjCenterFrame.setLayout(new java.awt.BorderLayout());
-                getCenterFrame().add(getFileTabbedPane(), "Center");
-                // user code begin {1}
-                // user code end
-            } catch (java.lang.Throwable ivjExc) {
-                // user code begin {2}
-                // user code end
-                handleException(ivjExc);
-            }
-        }
-        return ivjCenterFrame;
-    }
-
-    /**
-     * Return the CloseButton property value.
-     * 
-     * @return javax.swing.JButton
-     */
-    /* WARNING: THIS METHOD WILL BE REGENERATED. */
-    private javax.swing.JButton getCloseButton() {
-        if (ivjCloseButton == null) {
-            try {
-                ivjCloseButton = new javax.swing.JButton();
-                ivjCloseButton.setName("CloseButton");
-                ivjCloseButton.setMnemonic('c');
-                ivjCloseButton.setText("Close");
-                // user code begin {1}
-                // user code end
-            } catch (java.lang.Throwable ivjExc) {
-                // user code begin {2}
-                // user code end
-                handleException(ivjExc);
-            }
-        }
-        return ivjCloseButton;
-    }
-
-    /**
-     * Return the FileTabbedPane property value.
-     * 
-     * @return javax.swing.JTabbedPane
-     */
-    /* WARNING: THIS METHOD WILL BE REGENERATED. */
-    private javax.swing.JTabbedPane getFileTabbedPane() {
-        if (ivjFileTabbedPane == null) {
-            try {
-                ivjFileTabbedPane = new javax.swing.JTabbedPane();
-                ivjFileTabbedPane.setName("FileTabbedPane");
-                // user code begin {1}
-                // user code end
-            } catch (java.lang.Throwable ivjExc) {
-                // user code begin {2}
-                // user code end
-                handleException(ivjExc);
-            }
-        }
-        return ivjFileTabbedPane;
-    }
-
-    /**
-     * Return the JFrameContentPane property value.
-     * 
-     * @return javax.swing.JPanel
-     */
-    /* WARNING: THIS METHOD WILL BE REGENERATED. */
-    private javax.swing.JPanel getJFrameContentPane() {
-        if (ivjJFrameContentPane == null) {
-            try {
-                ivjJFrameContentPane = new javax.swing.JPanel();
-                ivjJFrameContentPane.setName("JFrameContentPane");
-                ivjJFrameContentPane.setLayout(new java.awt.BorderLayout());
-                getJFrameContentPane().add(getCenterFrame(), "Center");
-                // user code begin {1}
-                ivjJFrameContentPane.add(getSoutPane(), java.awt.BorderLayout.SOUTH);
-                // user code end
-            } catch (java.lang.Throwable ivjExc) {
-                // user code begin {2}
-                // user code end
-                handleException(ivjExc);
-            }
-        }
-        return ivjJFrameContentPane;
-    }
-
-    /**
-     * Called whenever the part throws an exception.
-     * 
-     * @param exception
-     *            java.lang.Throwable
-     */
-
-    private void handleException(java.lang.Throwable exception) {
-
-        /* Uncomment the following lines to print uncaught exceptions to stdout */
-        System.out.println("--------- UNCAUGHT EXCEPTION ---------");
-        exception.printStackTrace(System.out);
-    }
-
-    /**
-     * Initializes connections
-     * 
-     * @exception java.lang.Exception
-     *                The exception description.
-     */
-    /* WARNING: THIS METHOD WILL BE REGENERATED. */
-    private void initConnections() throws java.lang.Exception {
-        // user code begin {1}
-        // user code end
-        getCloseButton().addActionListener(ivjEventHandler);
-        getCompareButton().addActionListener(ivjEventHandler);
-    }
-
-    /**
-     * Initialize the class.
-     */
-    /* WARNING: THIS METHOD WILL BE REGENERATED. */
-    private void initialize() {
-        try {
-            // user code begin {1}
-            // user code end
-            setName("MultipleFileViewer");
-            setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-            setState(0);
-            setSize(594, 546);
-            setTitle("Information");
-            setContentPane(getJFrameContentPane());
-            initConnections();
-        } catch (java.lang.Throwable ivjExc) {
-            handleException(ivjExc);
-        }
-        // user code begin {2}
-        // Center Dialog
-
-        centerFrame();
-        getCompareButton().setVisible(false);
-
-        // user code end
-    }
-
-    public boolean loadFile(JTextArea jPane, String filename) {
-        FileReader fileReader = null;
-        try {
-            jPane.setFont(new Font("Courier", Font.PLAIN, 12));
-
-            String oldTitle = getTitle();
-            setTitle("Loading " + filename + " ... ");
-
-            File viewFile = new File(filename);
-            if (!viewFile.exists()) {
-                // System.out.println("Cannot find file "+ filename );
-                return false;
-
-            }
-
-            fileReader = new FileReader(viewFile);
-            BufferedReader in = new BufferedReader(fileReader);
-            String line = in.readLine();
-            while (line != null) {
-                jPane.append(line);
-                jPane.append("\n");
-                line = in.readLine();
-            }
-            in.close();
-
-            jPane.setCaretPosition(0);
-            setTitle(oldTitle);
-            return true;
-        } catch (Exception e) {
-            System.out.println("MultipleFileViewer class: exception " + e);
-        }
-        return false;
-    }
-
-    /**
-     * MultipleFileViewer constructor comment.
-     * 
-     * @param paneTitle
-     *            java.lang.String
-     */
     public MultipleFileViewer(Log log, String windowTitle, String paneTitle, String messageData, boolean isFile) {
 
         super(windowTitle);
@@ -361,6 +101,52 @@ public class MultipleFileViewer extends JFrame implements IFileViewer {
         }
         getCompareButton().setVisible(false);
 
+    }
+
+    /**
+     * Add file contents with title.
+     * 
+     * @param title
+     * @param inFile
+     * @return if the inFile contains data and is successfully loaded return true, otherwise return false
+     */
+    public boolean addFilePane(String title, SerializedFile inFile) {
+
+        if (inFile == null) {
+            return false;
+        }
+
+        if (inFile.getBuffer().length < 1) {
+            return false;
+        }
+
+        String filename = inFile.getName();
+
+        if (title == null) {
+            title = filename;
+        }
+        if (title.length() < 1) {
+            title = filename;
+        }
+
+        int numtabs = getFileTabbedPane().getTabCount() + 1;
+
+        JTextArea textArea = new JTextArea();
+        textArea.setName("JTextPane" + numtabs);
+        textArea.setBounds(0, 0, 11, 6);
+
+        JScrollPane scrollPane = new JScrollPane();
+        scrollPane.setName("JScrollPane" + numtabs);
+        scrollPane.setViewportView(textArea);
+
+        JPanel jPanel = new JPanel();
+        jPanel.setName("JPanel" + numtabs);
+        jPanel.setLayout(new java.awt.BorderLayout());
+        jPanel.add(scrollPane, "Center");
+
+        ivjFileTabbedPane.insertTab(title, null, jPanel, null, 0);
+
+        return loadFile(textArea, inFile);
     }
 
     /**
@@ -383,76 +169,31 @@ public class MultipleFileViewer extends JFrame implements IFileViewer {
 
         int numtabs = getFileTabbedPane().getTabCount() + 1;
 
-        JTextArea jp = new javax.swing.JTextArea();
-        jp.setName("JTextPane" + numtabs);
-        jp.setBounds(0, 0, 11, 6);
+        JTextArea textArea = new JTextArea();
+        textArea.setName("JTextPane" + numtabs);
+        textArea.setBounds(0, 0, 11, 6);
 
-        JScrollPane jsp = new javax.swing.JScrollPane();
-        jsp.setName("JScrollPane" + numtabs);
-        jsp.setViewportView(jp);
+        JScrollPane scrollPane = new JScrollPane();
+        scrollPane.setName("JScrollPane" + numtabs);
+        scrollPane.setViewportView(textArea);
 
-        JPanel jPanel = new javax.swing.JPanel();
+        JPanel jPanel = new JPanel();
         jPanel.setName("JPanel" + numtabs);
         jPanel.setLayout(new java.awt.BorderLayout());
-        jPanel.add(jsp, "Center");
+        jPanel.add(scrollPane, "Center");
 
         ivjFileTabbedPane.insertTab(title, null, jPanel, null, 0);
 
-        return loadFile(jp, filename);
-    }
-
-    /**
-     * 
-     * @param title
-     * @param inFile
-     * @return if the inFile contains data and is successfully loaded return true, otherwise return false
-     */
-    public boolean addFilePane(String title, SerializedFile inFile) {
-
-        if (inFile == null) {
-            return false;
-        }
-        
-        if (inFile.getBuffer().length < 1) {
-            return false;
-        }
-
-        String filename = inFile.getName();
-
-        if (title == null) {
-            title = filename;
-        }
-        if (title.length() < 1) {
-            title = filename;
-        }
-
-        int numtabs = getFileTabbedPane().getTabCount() + 1;
-
-        JTextArea jp = new javax.swing.JTextArea();
-        jp.setName("JTextPane" + numtabs);
-        jp.setBounds(0, 0, 11, 6);
-
-        JScrollPane jsp = new javax.swing.JScrollPane();
-        jsp.setName("JScrollPane" + numtabs);
-        jsp.setViewportView(jp);
-
-        JPanel jPanel = new javax.swing.JPanel();
-        jPanel.setName("JPanel" + numtabs);
-        jPanel.setLayout(new java.awt.BorderLayout());
-        jPanel.add(jsp, "Center");
-
-        ivjFileTabbedPane.insertTab(title, null, jPanel, null, 0);
-
-        return loadFile(jp, inFile);
+        return loadFile(textArea, filename);
     }
 
     /**
      * Add Text Pane to viewer panes.
      * 
-     * @param title -
-     *            title for tabbed pane
-     * @param inMessage -
-     *            message.
+     * @param title
+     *            - title for tabbed pane
+     * @param inMessage
+     *            - message.
      * @return if the inMessage contains data and is successfully loaded return true, otherwise return false
      */
     public boolean addTextPane(String title, String inMessage) {
@@ -470,117 +211,22 @@ public class MultipleFileViewer extends JFrame implements IFileViewer {
 
         int numtabs = getFileTabbedPane().getTabCount() + 1;
 
-        JTextArea jp = new javax.swing.JTextArea();
-        jp.setName("JTextPane" + numtabs);
-        jp.setBounds(0, 0, 11, 6);
+        JTextArea textArea = new JTextArea();
+        textArea.setName("JTextPane" + numtabs);
+        textArea.setBounds(0, 0, 11, 6);
 
-        JScrollPane jsp = new javax.swing.JScrollPane();
-        jsp.setName("JScrollPane" + numtabs);
-        jsp.setViewportView(jp);
+        JScrollPane scrollPane = new JScrollPane();
+        scrollPane.setName("JScrollPane" + numtabs);
+        scrollPane.setViewportView(textArea);
 
-        JPanel jPanel = new javax.swing.JPanel();
+        JPanel jPanel = new JPanel();
         jPanel.setName("JPanel" + numtabs);
         jPanel.setLayout(new java.awt.BorderLayout());
-        jPanel.add(jsp, "Center");
+        jPanel.add(scrollPane, "Center");
 
         ivjFileTabbedPane.insertTab(title, null, jPanel, null, 0);
 
-        return loadText(jp, inMessage);
-    }
-
-    public void enableCompareButton(boolean value) {
-        getCompareButton().setVisible(value);
-    }
-
-    /**
-     * Return the CompareButton property value.
-     * 
-     * @return javax.swing.JButton
-     */
-    /* WARNING: THIS METHOD WILL BE REGENERATED. */
-    private javax.swing.JButton getCompareButton() {
-        if (ivjCompareButton == null) {
-            try {
-                ivjCompareButton = new javax.swing.JButton();
-                ivjCompareButton.setName("CompareButton");
-                ivjCompareButton.setMnemonic('p');
-                ivjCompareButton.setText("Compare");
-                // user code begin {1}
-                // user code end
-            } catch (java.lang.Throwable ivjExc) {
-                // user code begin {2}
-                // user code end
-                handleException(ivjExc);
-            }
-        }
-        return ivjCompareButton;
-    }
-
-    public boolean loadFile(JTextArea jPane, SerializedFile inFile) {
-        try {
-
-            String filename = inFile.getName();
-
-            jPane.setFont(new Font("Courier", Font.PLAIN, 12));
-
-            String s = new String(inFile.getBuffer());
-
-            String oldTitle = getTitle();
-            setTitle("Loading " + filename + " ... ");
-
-            jPane.append(checkNPCharacters(s));
-            jPane.setCaretPosition(0);
-
-            setTitle(oldTitle);
-            return true;
-        } catch (Exception e) {
-            System.out.println("MultipleFileViewer class: exception " + e);
-        }
-        return false;
-    }
-
-    public boolean loadText(JTextArea jPane, String inMessage) {
-
-        try {
-            jPane.setFont(new Font("Courier", Font.PLAIN, 12));
-
-            jPane.append(inMessage);
-            jPane.setCaretPosition(0);
-
-            return true;
-        } catch (Exception e) {
-            System.out.println("MultipleFileViewer class: exception " + e);
-        }
-        return false;
-    }
-
-    public void showMessage(String inMessage) {
-
-        setTitle("Message");
-
-        addTextPane("Message", inMessage);
-        this.setVisible(true);
-    }
-
-    private IDiffPanel fileDiffPanel;
-
-    private JPanel soutPane = null;
-
-    private JLabel informationLabel = null;
-
-    @SuppressWarnings("unused")
-    private IInternalController controller;
-
-    @SuppressWarnings("unused")
-    private IInternalContest contest;
-
-    /**
-     * Center Frame
-     */
-    private void centerFrame() {
-
-        Dimension screenDim = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setLocation(screenDim.width / 2 - getSize().width / 2, screenDim.height / 2 - getSize().height / 2);
+        return loadText(textArea, inMessage);
     }
 
     public String checkNPCharacters(String s) {
@@ -597,10 +243,16 @@ public class MultipleFileViewer extends JFrame implements IFileViewer {
         return s;
     }
 
-    /**
-     * Comment
-     */
-    public void compareButtonActionPerformed(java.awt.event.ActionEvent actionEvent) {
+    public void closeTheWindow() {
+        if (fileDiffPanel != null) {
+            fileDiffPanel.dispose();
+            fileDiffPanel = null;
+        }
+        dispose();
+
+    }
+
+    public void compareFiles() {
         if (judgeOutputFileName == null && teamOutputFileName == null) {
             log.config("compareButtonActionPerformed:  judge and team files are null");
             return;
@@ -627,26 +279,190 @@ public class MultipleFileViewer extends JFrame implements IFileViewer {
         }
     }
 
-    /**
-     * connEtoC2: (CompareButton.action.actionPerformed(java.awt.event.ActionEvent) -->
-     * MultipleFileViewer.compareButtonActionPerformed(Ljava.awt.event.ActionEvent;)V)
-     * 
-     * @param arg1
-     *            java.awt.event.ActionEvent
-     */
-    /* WARNING: THIS METHOD WILL BE REGENERATED. */
-    private void connEtoC2(java.awt.event.ActionEvent arg1) {
-        try {
-            // user code begin {1}
-            // user code end
-            this.compareButtonActionPerformed(arg1);
-            // user code begin {2}
-            // user code end
-        } catch (java.lang.Throwable ivjExc) {
-            // user code begin {3}
-            // user code end
-            handleException(ivjExc);
+    public void enableCompareButton(boolean value) {
+        getCompareButton().setVisible(value);
+    }
+
+    private JPanel getButtonFrame() {
+        if (ivjButtonFrame == null) {
+            FlowLayout flowLayout = new FlowLayout();
+            flowLayout.setHgap(35);
+            ivjButtonFrame = new JPanel();
+            ivjButtonFrame.setLayout(flowLayout);
+            ivjButtonFrame.setName("ButtonFrame");
+            ivjButtonFrame.setPreferredSize(new java.awt.Dimension(35, 35));
+            getButtonFrame().add(getCompareButton(), getCompareButton().getName());
+            getButtonFrame().add(getCloseButton(), getCloseButton().getName());
         }
+        return ivjButtonFrame;
+    }
+
+    private JPanel getCenterFrame() {
+        if (ivjCenterFrame == null) {
+            ivjCenterFrame = new JPanel();
+            ivjCenterFrame.setName("CenterFrame");
+            ivjCenterFrame.setLayout(new java.awt.BorderLayout());
+            getCenterFrame().add(getFileTabbedPane(), "Center");
+        }
+        return ivjCenterFrame;
+    }
+
+    private JButton getCloseButton() {
+        if (closeButton == null) {
+            closeButton = new JButton();
+            closeButton.setName("CloseButton");
+            closeButton.setMnemonic(KeyEvent.VK_C);
+            closeButton.setText("Close");
+            closeButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    closeTheWindow();
+                }
+            });
+        }
+        return closeButton;
+    }
+
+    private JButton getCompareButton() {
+        if (compareButton == null) {
+            compareButton = new JButton();
+            compareButton.setName("CompareButton");
+            compareButton.setMnemonic('p');
+            compareButton.setText("Compare");
+            compareButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    compareFiles();
+                }
+            });
+        }
+        return compareButton;
+    }
+
+    private JTabbedPane getFileTabbedPane() {
+        if (ivjFileTabbedPane == null) {
+            ivjFileTabbedPane = new JTabbedPane();
+            ivjFileTabbedPane.setName("FileTabbedPane");
+        }
+        return ivjFileTabbedPane;
+    }
+
+    private JPanel getJFrameContentPane() {
+        if (ivjJFrameContentPane == null) {
+            ivjJFrameContentPane = new JPanel();
+            ivjJFrameContentPane.setName("JFrameContentPane");
+            ivjJFrameContentPane.setLayout(new java.awt.BorderLayout());
+            getJFrameContentPane().add(getCenterFrame(), "Center");
+            ivjJFrameContentPane.add(getSouthPane(), BorderLayout.SOUTH);
+        }
+        return ivjJFrameContentPane;
+    }
+
+    public String getPluginTitle() {
+        return "Multi File Viewer";
+    }
+
+    /**
+     * This method initializes soutPane
+     * 
+     * @return JPanel
+     */
+    private JPanel getSouthPane() {
+        if (soutPane == null) {
+            informationLabel = new JLabel();
+            informationLabel.setText("");
+            informationLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            informationLabel.setPreferredSize(new java.awt.Dimension(10, 30));
+            soutPane = new JPanel();
+            soutPane.setLayout(new BorderLayout());
+            soutPane.add(getButtonFrame(), java.awt.BorderLayout.SOUTH);
+            soutPane.add(informationLabel, java.awt.BorderLayout.CENTER);
+        }
+        return soutPane;
+    }
+
+    /**
+     * Initialize the class.
+     */
+    private void initialize() {
+        setName("MultipleFileViewer");
+        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        setState(0);
+        setSize(594, 546);
+        setTitle("Information");
+        setContentPane(getJFrameContentPane());
+
+        FrameUtilities.centerFrame(this);
+        getCompareButton().setVisible(false);
+    }
+
+    public boolean loadFile(JTextArea jPane, SerializedFile inFile) {
+        try {
+
+            String filename = inFile.getName();
+
+            jPane.setFont(new Font("Courier", Font.PLAIN, 12));
+
+            String s = new String(inFile.getBuffer());
+
+            String oldTitle = getTitle();
+            setTitle("Loading " + filename + " ... ");
+
+            jPane.append(checkNPCharacters(s));
+            jPane.setCaretPosition(0);
+
+            setTitle(oldTitle);
+            return true;
+        } catch (Exception e) {
+            System.out.println("MultipleFileViewer class: exception " + e);
+        }
+        return false;
+    }
+
+    public boolean loadFile(JTextArea jPane, String filename) {
+        FileReader fileReader = null;
+        try {
+            jPane.setFont(new Font("Courier", Font.PLAIN, 12));
+
+            String oldTitle = getTitle();
+            setTitle("Loading " + filename + " ... ");
+
+            File viewFile = new File(filename);
+            if (!viewFile.exists()) {
+                return false;
+
+            }
+
+            fileReader = new FileReader(viewFile);
+            BufferedReader in = new BufferedReader(fileReader);
+            String line = in.readLine();
+            while (line != null) {
+                jPane.append(line);
+                jPane.append("\n");
+                line = in.readLine();
+            }
+            in.close();
+
+            jPane.setCaretPosition(0);
+            setTitle(oldTitle);
+            return true;
+        } catch (Exception e) {
+            System.out.println("MultipleFileViewer class: exception " + e);
+        }
+        return false;
+    }
+
+    public boolean loadText(JTextArea jPane, String inMessage) {
+
+        try {
+            jPane.setFont(new Font("Courier", Font.PLAIN, 12));
+
+            jPane.append(inMessage);
+            jPane.setCaretPosition(0);
+
+            return true;
+        } catch (Exception e) {
+            System.out.println("MultipleFileViewer class: exception " + e);
+        }
+        return false;
     }
 
     /**
@@ -675,7 +491,7 @@ public class MultipleFileViewer extends JFrame implements IFileViewer {
 
         setSize(frameDim);
 
-        centerFrame();
+        FrameUtilities.centerFrame(this);
     }
 
     public void setCompareFileNames(String incomingJudgeOutputFileName, String incomingTeamOutputFileName) {
@@ -683,27 +499,13 @@ public class MultipleFileViewer extends JFrame implements IFileViewer {
         teamOutputFileName = incomingTeamOutputFileName;
     }
 
-    /**
-     * This method initializes soutPane
-     * 
-     * @return javax.swing.JPanel
-     */
-    private JPanel getSoutPane() {
-        if (soutPane == null) {
-            informationLabel = new JLabel();
-            informationLabel.setText("");
-            informationLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-            informationLabel.setPreferredSize(new java.awt.Dimension(10, 30));
-            soutPane = new JPanel();
-            soutPane.setLayout(new BorderLayout());
-            soutPane.add(getButtonFrame(), java.awt.BorderLayout.SOUTH);
-            soutPane.add(informationLabel, java.awt.BorderLayout.CENTER);
-        }
-        return soutPane;
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
+        this.contest = inContest;
+        this.controller = inController;
     }
 
     /**
-     * Set text for a ususally not-visible label at bottom of frame.
+     * Set text for a usually not-visible label at bottom of frame.
      * 
      * @param text
      */
@@ -716,17 +518,16 @@ public class MultipleFileViewer extends JFrame implements IFileViewer {
         informationLabel.setText(text);
     }
 
-    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
-        this.contest = inContest;
-        this.controller = inController;
-    }
-
     public void setSelectedIndex(int index) {
         ivjFileTabbedPane.setSelectedIndex(index);
     }
-    
-    public String getPluginTitle() {
-        return "Multi File Viewer";
+
+    public void showMessage(String inMessage) {
+
+        setTitle("Message");
+
+        addTextPane("Message", inMessage);
+        this.setVisible(true);
     }
 
-}  //  @jve:decl-index=0:visual-constraint="10,10"
+} // @jve:decl-index=0:visual-constraint="10,10"

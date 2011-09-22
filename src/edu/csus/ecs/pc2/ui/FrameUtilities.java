@@ -234,21 +234,18 @@ public final class FrameUtilities {
         final JDialog dialog = new JDialog(parentFrame, strTitle, true);
         final JOptionPane optionPane = new JOptionPane(displayString, JOptionPane.INFORMATION_MESSAGE);
         dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-        optionPane.addPropertyChangeListener(
-                new PropertyChangeListener() {
-                    public void propertyChange(PropertyChangeEvent e) {
-                        String prop = e.getPropertyName();
+        optionPane.addPropertyChangeListener(new PropertyChangeListener() {
+            public void propertyChange(PropertyChangeEvent e) {
+                String prop = e.getPropertyName();
 
-                        if (dialog.isVisible() 
-                         && (e.getSource() == optionPane)
-                         && (prop.equals(JOptionPane.VALUE_PROPERTY))) {
-                            //If you were going to check something
-                            //before closing the window, you'd do
-                            //it here.
-                            dialog.setVisible(false);
-                        }
-                    }
-                });
+                if (dialog.isVisible() && (e.getSource() == optionPane) && (prop.equals(JOptionPane.VALUE_PROPERTY))) {
+                    // If you were going to check something
+                    // before closing the window, you'd do
+                    // it here.
+                    dialog.setVisible(false);
+                }
+            }
+        });
         dialog.setContentPane(optionPane);
         dialog.pack();
         centerFrameOver(parentFrame, dialog);
@@ -283,4 +280,13 @@ public final class FrameUtilities {
         frame.setTitle("PC^2 " + moduleName + " [" + clockStateString + "] " + versionNumber + "-" + versionInfo.getBuildNumber());
     }
 
+    /**
+     * Show message to user.
+     * @param component
+     * @param title 
+     * @param message
+     */
+    public static void showMessage(Component component, String title, String message) {
+        JOptionPane.showMessageDialog(component, message, title, JOptionPane.INFORMATION_MESSAGE);
+    }
 }
