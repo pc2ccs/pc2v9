@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.ui;
 
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -10,6 +11,7 @@ import java.util.Vector;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileFilter;
 
 import edu.csus.ecs.pc2.core.ContestImporter;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -192,20 +194,45 @@ public class ImportDataPane extends JPanePlugin {
         return sb.toString();
     }
     
-
     private void showMessage(String string) {
         JOptionPane.showMessageDialog(this, string, "Message", JOptionPane.INFORMATION_MESSAGE);
+    }
+    
+    public File selectYAMLFileDialog(Component parent, String startDirectory) {
+
+        JFileChooser chooser = new JFileChooser(startDirectory);
+        chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        
+//        FileFilter filterXML = new FileNameExtensionFilter( "XML document (*.xml)", "xml");
+//        chooser.addChoosableFileFilter(filterXML);
+        
+        FileFilter filterYAML = new FileNameExtensionFilter( "YAML document (*.yaml)", "yaml");
+        chooser.addChoosableFileFilter(filterYAML);
+        
+        chooser.setAcceptAllFileFilterUsed(false);
+        
+        int action = chooser.showOpenDialog(parent);
+
+        switch (action) {
+            case JFileChooser.APPROVE_OPTION:
+                File file = chooser.getSelectedFile();
+                lastDirectory = chooser.getCurrentDirectory().toString();
+                return file;
+            case JFileChooser.CANCEL_OPTION:
+            case JFileChooser.ERROR_OPTION:
+            default:
+                break;
+        }
+        return null;
+
     }
 
     private String selectFileName(String dirname) throws IOException {
 
         String chosenFile = null;
-
-        JFileChooser chooser = new JFileChooser(dirname);
-        int returnVal = chooser.showOpenDialog(this);
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            lastDirectory = chooser.getCurrentDirectory().toString();
-            chosenFile = chooser.getSelectedFile().getCanonicalFile().toString();
+        File file = selectYAMLFileDialog(this, lastDirectory);
+        if (file != null) {
+            chosenFile = file.getCanonicalFile().toString();
             return chosenFile;
         } else {
             return null;
