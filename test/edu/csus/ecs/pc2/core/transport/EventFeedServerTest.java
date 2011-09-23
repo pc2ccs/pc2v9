@@ -1,9 +1,10 @@
 package edu.csus.ecs.pc2.core.transport;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.ConnectException;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
 import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -25,33 +26,51 @@ public class EventFeedServerTest extends TestCase {
      */
     void readAndPrintSocketInput(Socket socket) {
         try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
-            String str;
-            while ((str = reader.readLine()) != null) {
-                System.out.println(str);
+            InputStreamReader inputReader = new InputStreamReader(socket.getInputStream());
+//            BufferedReader reader = new BufferedReader(inputStReader);
+            
+            int data = inputReader.read();
+            while(data != -1){
+                char theChar = (char) data;
+                System.out.print(theChar);
+                data = inputReader.read();
             }
-            reader.close();
+//
+//            String str;
+//            while ((str = reader.read()) != null) {
+//                System.out.println(str);
+//                System.out.flush();
+//            }
+            System.out.println("debug 22 after while loop");
+//            reader.close();
+            inputReader.close();
+            
         } catch (IOException e) {
             e.printStackTrace();
         }
+        
+        System.out.println("debug 22 readAndPrintSocketInput done");
     }
     
     /**
      * Dump socket.
      */
-    void dumpSocketInput () {
-        try {
-            int port = 4545;
-            Socket socket = new Socket("localhost", port);
-            
-            System.out.println("Reading from locahost "+ port);
-            
-            readAndPrintSocketInput(socket);
-            System.out.println("*EOF* socket read locahost "+ port);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    void dumpSocketInput (int port) {
+            Socket socket;
+            try {
+                socket = new Socket("localhost", port);
+                
+                System.out.println("Reading from locahost "+ port);
+                
+                readAndPrintSocketInput(socket);
+                System.out.println("*EOF* socket read locahost "+ port);
+            } catch (ConnectException e) {
+                System.out.println(e.getMessage());
+            } catch (UnknownHostException e) {
+                System.out.println(e.getMessage());
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+            }
     }
     
     void startServer()  {
@@ -72,7 +91,7 @@ public class EventFeedServerTest extends TestCase {
             }
 
     public static void main(String[] args) throws IOException {
-        new EventFeedServerTest().dumpSocketInput();
+        new EventFeedServerTest().dumpSocketInput(4713);
     }
 
 }

@@ -236,6 +236,7 @@ public class EventFeedServerPane extends JPanePlugin {
         if (portTextField == null) {
             portTextField = new JTextField();
             portTextField.setDocument(new IntegerDocument());
+            portTextField.setText("4713");
         }
         return portTextField;
     }

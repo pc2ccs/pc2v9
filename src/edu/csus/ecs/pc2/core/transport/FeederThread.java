@@ -58,7 +58,7 @@ class FeederThread implements Runnable {
         }
 
         if (debugFlag) {
-            System.out.println("FeederThread stopped");
+            System.out.println("FeederThread done");
         }
     }
 
@@ -72,7 +72,4 @@ class FeederThread implements Runnable {
             eventFeeder.halt();
         }
     }
-
-
-
 }

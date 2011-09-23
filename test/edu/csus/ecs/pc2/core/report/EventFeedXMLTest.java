@@ -22,6 +22,7 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestInformation.TeamDisplayMask;
+import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.InternalContest;
@@ -134,16 +135,17 @@ public class EventFeedXMLTest extends TestCase {
 
     public void testContestElement() throws Exception {
 
-        // TODO tag: contest>
-        
         EventFeedXML eventFeedXML = new EventFeedXML();
 
         InternalContest internalContest = new InternalContest();
         
+        ContestInformation info = new ContestInformation();
+        info.setContestTitle("Title One");
+        
         /**
          * Check info tag, if there is no contest data in InternalContest.
          */
-        String xml = toContestXML(eventFeedXML.createInfoElement(internalContest, null));
+        String xml = toContestXML(eventFeedXML.createInfoElement(internalContest, info));
         assertNotNull("Should create contest element", xml);
         testForValidXML (xml);
 
@@ -174,8 +176,11 @@ public class EventFeedXMLTest extends TestCase {
     public void testInfoElement() throws Exception {
 
         EventFeedXML eventFeedXML = new EventFeedXML();
-
-        String xml = toContestXML(eventFeedXML.createInfoElement(contest, null));
+        
+        ContestInformation info = new ContestInformation();
+        info.setContestTitle("Title One");
+        
+        String xml = toContestXML(eventFeedXML.createInfoElement(contest, info));
 
         if (debugMode){
             System.out.println(" -- testInfoElement ");
@@ -185,7 +190,7 @@ public class EventFeedXMLTest extends TestCase {
         }
 
         contest.startContest(1);
-        xml = toContestXML(eventFeedXML.createInfoElement(contest, null));
+        xml = toContestXML(eventFeedXML.createInfoElement(contest, info));
 
         if (debugMode){
             System.out.println(xml);
@@ -195,8 +200,6 @@ public class EventFeedXMLTest extends TestCase {
     }
 
     public void testLanguageElement() throws Exception {
-
-        // TODO tag: language>
 
         if (debugMode){
             System.out.println(" -- testLanguageElement ");
@@ -407,8 +410,6 @@ public class EventFeedXMLTest extends TestCase {
     }
 
     public void testTeamElement() throws Exception {
-        // TODO tag: team id="1" external-id="23412">
-
         if (debugMode){
             System.out.println(" -- testTeamElement ");
         }
@@ -427,8 +428,6 @@ public class EventFeedXMLTest extends TestCase {
     }
 
     public void testClarElement() throws Exception {
-
-        // TODO tag: clar id="1" team-id="0" problem-id="1">
 
         if (debugMode){
             System.out.println(" -- testClarElement ");
@@ -453,7 +452,6 @@ public class EventFeedXMLTest extends TestCase {
             System.out.println(" -- testRunElement ");
         }
 
-        // TODO tag: run id="1410" team-id="74" problem-id="4">
         EventFeedXML eventFeedXML = new EventFeedXML();
         Run[] runs = contest.getRuns();
         Arrays.sort(runs, new RunComparator());
@@ -475,9 +473,15 @@ public class EventFeedXMLTest extends TestCase {
 
     public void testFinalizedElement() throws Exception {
 
-        // TODO tag: finalized>
         EventFeedXML eventFeedXML = new EventFeedXML();
-        String xml = eventFeedXML.createFinalizeXML(contest);
+        
+        FinalizeData data = new FinalizeData();
+        data.setGoldRank(8);
+        data.setBronzeRank(20);
+        data.setSilverRank(16);
+        data.setComment("Finalized by the Ultimiate Finalizer role");
+        
+        String xml = eventFeedXML.createFinalizeXML(contest, data);
         if (debugMode){
             System.out.println(" -- testFinalizedElement ");
             System.out.println(xml);

@@ -10,15 +10,22 @@ import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClarificationEvent;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ContestInformation;
+import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
+import edu.csus.ecs.pc2.core.model.FinalizeData;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.GroupEvent;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IClarificationListener;
+import edu.csus.ecs.pc2.core.model.IContestInformationListener;
 import edu.csus.ecs.pc2.core.model.IGroupListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.IJudgementListener;
 import edu.csus.ecs.pc2.core.model.ILanguageListener;
 import edu.csus.ecs.pc2.core.model.IProblemListener;
 import edu.csus.ecs.pc2.core.model.IRunListener;
+import edu.csus.ecs.pc2.core.model.Judgement;
+import edu.csus.ecs.pc2.core.model.JudgementEvent;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.LanguageEvent;
 import edu.csus.ecs.pc2.core.model.Problem;
@@ -73,8 +80,9 @@ class EventFeeder implements Runnable {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-
         }
+        
+        System.out.println("EventFeeder done");
     }
 
     private void registerListeners(IInternalContest inContest) {
@@ -85,11 +93,11 @@ class EventFeeder implements Runnable {
         inContest.addProblemListener(new ProblemListener());
         inContest.addLanguageListener(new LanguageListener());
         inContest.addGroupListener(new GroupListener());
+        inContest.addJudgementListener(new JudgementListener());
+        inContest.addContestInformationListener(new ContestInformationListener());
 
         // TODO CCS insure that commented out listeners are not needed.
-        // inContest.addContestInformationListener(new ContestInformationListener());
         // inContest.addContestTimeListener(new ContestTimeListener());
-        // inContest.addJudgementListener(new JudgementListener());
         // inContest.addMessageListener(new MessageListener());
         // inContest.addSiteListener(new SiteListener());
         // inContest.addConnectionListener(new ConnectionListener());
@@ -111,14 +119,12 @@ class EventFeeder implements Runnable {
     // protected class ChangePasswordListener implements IChangePasswordListener {}
     // protected class LoginListener implements ILoginListener {}
     // protected class ContestTimeListener implements IContestTimeListener {}
-    // protected class JudgementListener implements IJudgementListener {}
     // protected class MessageListener implements IMessageListener {}
     // protected class SiteListener implements ISiteListener {}
     // protected class ConnectionListener implements IConnectionListener {}
     // protected class GroupListener implements IGroupListener {}
     // protected class ProfileListener implements IProfileListener {}
     // protected class ClientSettingsListener implements IClientSettingsListener {}
-    // protected class ContestInformationListener implements IContestInformationListener {}
     // protected class BalloonSettingsListener implements IBalloonSettingsListener {}
     // protected class SecurityMessageListener implements ISecurityMessageListener {}
 
@@ -137,16 +143,18 @@ class EventFeeder implements Runnable {
 
     /**
      * Send XML to socket/client.
+     * 
      * @param memento
      */
     protected void sendToSocket(String xmlString) {
-        
-        System.out.println();
-        System.out.println("debug 22 "+xmlString);
-        
+
         try {
             out.write(xmlString);
             out.flush();
+            
+//            System.err.println();
+//            System.err.println("debug 22 " + xmlString);
+            
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -154,11 +162,12 @@ class EventFeeder implements Runnable {
 
     /**
      * Send XML to socket/client.
+     * 
      * @param memento
      */
     private void sendXML(XMLMemento memento) {
         try {
-            out.write(memento.toString());
+            sendToSocket(memento.saveToString(true));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -379,5 +388,69 @@ class EventFeeder implements Runnable {
             // ignore
         }
     }
+    
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
 
+    // $HeadURL$
+    protected class JudgementListener implements IJudgementListener {
+
+        public void judgementAdded(JudgementEvent event) {
+            Judgement judgement = event.getJudgement();
+            sendXML(eventFeedXML.createElement(contest, judgement));
+        }
+
+        public void judgementChanged(JudgementEvent event) {
+            Judgement judgement = event.getJudgement();
+            sendXML(eventFeedXML.createElement(contest, judgement));
+        }
+
+        public void judgementRemoved(JudgementEvent event) {
+            // TODO Auto-generated method stub
+
+        }
+
+        public void judgementRefreshAll(JudgementEvent judgementEvent) {
+            // TODO Auto-generated method stub
+
+        }
+
+    }
+    
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+
+    // $HeadURL$
+    protected class ContestInformationListener implements IContestInformationListener {
+
+        public void contestInformationAdded(ContestInformationEvent event) {
+            ContestInformation info = event.getContestInformation();
+            sendXML(eventFeedXML.createInfoElement(contest, info));
+        }
+
+        public void contestInformationChanged(ContestInformationEvent event) {
+            ContestInformation info = event.getContestInformation();
+            sendXML(eventFeedXML.createInfoElement(contest, info));
+        }
+
+        public void contestInformationRemoved(ContestInformationEvent event) {
+            //
+        }
+
+        public void contestInformationRefreshAll(ContestInformationEvent contestInformationEvent) {
+            // TODO Auto-generated method stub
+
+        }
+
+        public void finalizeDataChanged(ContestInformationEvent contestInformationEvent) {
+            FinalizeData data = contestInformationEvent.getFinalizeData();
+            sendToSocket(eventFeedXML.createFinalizeXML(contest, data));
+        }
+    }
 }

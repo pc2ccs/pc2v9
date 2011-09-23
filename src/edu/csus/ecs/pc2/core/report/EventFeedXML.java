@@ -92,7 +92,7 @@ public class EventFeedXML {
         XMLMemento mementoRoot = XMLMemento.createWriteRoot(CONTEST_TAG);
 
         IMemento memento = mementoRoot.createChild(INFO_TAG);
-        addInfoMemento(memento, contest, filter);
+        addInfoMemento(memento, contest, contest.getContestInformation());
         
         Group[] groups = contest.getGroups();
         Arrays.sort(groups, new GroupComparator());
@@ -172,8 +172,17 @@ public class EventFeedXML {
             addMemento( memento,  contest, run,  notificationSequenceNumber);
             notificationSequenceNumber ++;
         }
+        
+        String finalizeXML = "";
+        
+        FinalizeData finalizeData = contest.getFinalizeData();
+        if (finalizeData != null) {
+            if (finalizeData.isCertified()) {
+                finalizeXML = createFinalizeXML(contest, finalizeData);
+            }
+        }
 
-        return mementoRoot.saveToString();
+        return mementoRoot.saveToString() + finalizeXML;
     }
 
     /**
@@ -233,11 +242,11 @@ public class EventFeedXML {
      */
     public XMLMemento createInfoElement(IInternalContest contest, Filter filter) throws IOException {
         XMLMemento memento = XMLMemento.createWriteRoot(INFO_TAG);
-        addInfoMemento(memento, contest, filter);
+        addInfoMemento(memento, contest, contest.getContestInformation());
         return memento;
     }
 
-    public IMemento addInfoMemento(IMemento memento, IInternalContest contest, Filter filter) throws IOException {
+    public IMemento addInfoMemento(IMemento memento, IInternalContest contest, ContestInformation info)  {
         
         
 //        <info>
@@ -251,7 +260,7 @@ public class EventFeedXML {
         
         ContestTime time = contest.getContestTime();
 
-        XMLUtilities.addChild(memento, "title", contest.getContestInformation().getContestTitle());
+        XMLUtilities.addChild(memento, "title", info.getContestTitle());
         
         String contestLengthString = "0:0:0";
         boolean running = false;
@@ -274,12 +283,12 @@ public class EventFeedXML {
 
 
 
-    public XMLMemento createElement(IInternalContest contest, Filter filter) throws IOException {
-        XMLMemento memento = XMLMemento.createWriteRoot(LANGUAGE_TAG);
-        addInfoMemento(memento, contest, filter);
+    public XMLMemento createInfoElement(IInternalContest contest, ContestInformation info)  {
+        XMLMemento memento = XMLMemento.createWriteRoot(INFO_TAG);
+        addInfoMemento(memento, contest, info);
         return memento;
     }
-
+    
     public XMLMemento createElement(IInternalContest contest, Language language, int id) {
         XMLMemento memento = XMLMemento.createWriteRoot(LANGUAGE_TAG);
         addMemento(memento, contest, language, id);
@@ -706,7 +715,7 @@ public class EventFeedXML {
          */
 
         try {
-            sb.append(toXML(createInfoElement(contest, null)));
+            sb.append(toXML(createInfoElement(contest, contest.getContestInformation())));
         } catch (IOException e) {
             // TODO CCS Auto-generated catch block
             e.printStackTrace();
@@ -770,14 +779,13 @@ public class EventFeedXML {
         return sb.toString();
     }
 
-    public String createFinalizeXML(IInternalContest contest) {
+    public String createFinalizeXML(IInternalContest contest, FinalizeData data) {
 
         StringBuffer sb = new StringBuffer();
 
         XMLMemento memento = XMLMemento.createWriteRoot(FINALIZE_TAG);
         
-        FinalizeData finalData = createSampFinalData(); // TODO remove when add IInternalContest.getFinalizeData()
-        addMemento (memento, contest, finalData);  // TODO add IInternalContest.getFinalizeData()
+        addMemento (memento, contest, data); 
 
         try {
             sb.append(toXML(memento));
@@ -789,23 +797,6 @@ public class EventFeedXML {
         sb.append(CONTEST_TAG);
         sb.append(">");
         return sb.toString();
-    }
-
-    /**
-     * 
-     * @return
-     */
-    private FinalizeData createSampFinalData() {
-        FinalizeData data = new FinalizeData();
-        int rank = 1;
-        rank += 8;
-        data.setGoldRank(rank);
-        rank += 5;
-        data.setSilverRank(rank);
-        rank += 10;
-        data.setBronzeRank(rank);
-        data.setComment("Finalized by Director of Operations");
-        return data;
     }
 
     private void addMemento(XMLMemento memento, IInternalContest contest, FinalizeData data) {
