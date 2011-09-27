@@ -32,8 +32,8 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemEvent;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunEvent;
-import edu.csus.ecs.pc2.core.report.EventFeedXML;
 import edu.csus.ecs.pc2.core.util.XMLMemento;
+import edu.csus.ecs.pc2.exports.ccs.EventFeedXML;
 
 /**
  * Event Feeder runner.

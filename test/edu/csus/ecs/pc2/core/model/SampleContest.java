@@ -14,7 +14,6 @@ import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.InternalController;
-import edu.csus.ecs.pc2.core.Notification;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestInformation.TeamDisplayMask;
@@ -23,6 +22,7 @@ import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.security.FileStorage;
 import edu.csus.ecs.pc2.core.util.JUnitUtilities;
+import edu.csus.ecs.pc2.core.util.NotificationUtilities;
 
 /**
  * Create Sample contest and controller.
@@ -47,7 +47,7 @@ public class SampleContest {
 
     private int defaultPortNumber = DEFAULT_PORT_NUMBER;
 
-    private Notification notification = new Notification();
+    private NotificationUtilities notificationUtilities = new NotificationUtilities();
     
     public static final String DEFAULT_INTERNATIONAL_VALIDATOR_COMMAND = "{:validator} {:infile} {:outfile} {:ansfile} {:resfile} ";
 
@@ -217,7 +217,7 @@ public class SampleContest {
      */
     public void assignColors(IInternalContest contest) {
 
-        notification.getScoreboardClientSettings(contest); // insure balloon client is created, etc.
+        notificationUtilities.getScoreboardClientSettings(contest); // insure balloon client is created, etc.
 
         BalloonSettings balloonSettings = contest.getBalloonSettings(contest.getSiteNumber());
 
@@ -772,11 +772,11 @@ public class SampleContest {
      */
     public void addBalloonNotification(IInternalContest contest, Run run) {
 
-        ClientSettings settings = notification.getScoreboardClientSettings(contest);
+        ClientSettings settings = notificationUtilities.getScoreboardClientSettings(contest);
 
         BalloonDeliveryInfo deliveryInfo = new BalloonDeliveryInfo(run.getSubmitter(), run.getProblemId(), Calendar.getInstance().getTime().getTime());
 
-        String balloonKey = notification.getBalloonKey(run.getSubmitter(), run.getProblemId());
+        String balloonKey = notificationUtilities.getBalloonKey(run.getSubmitter(), run.getProblemId());
 
         Hashtable<String, BalloonDeliveryInfo> hashtable = settings.getBalloonList();
         hashtable.put(balloonKey, deliveryInfo);
@@ -907,7 +907,7 @@ public class SampleContest {
      */
     public void createNotification(IInternalContest contest2, Run run) {
 
-        BalloonDeliveryInfo info = notification.getNotification(contest2, run);
+        BalloonDeliveryInfo info = notificationUtilities.getNotification(contest2, run);
 
         if (info == null) {
             addNotification(contest2, run);
@@ -922,9 +922,9 @@ public class SampleContest {
      */
     private void addNotification(IInternalContest contest2, Run run) {
 
-        ClientSettings settings = notification.getScoreboardClientSettings(contest2);
+        ClientSettings settings = notificationUtilities.getScoreboardClientSettings(contest2);
         Hashtable<String, BalloonDeliveryInfo> balloonList = settings.getBalloonList();
-        String key = notification.getBalloonKey(run.getSubmitter(), run.getProblemId());
+        String key = notificationUtilities.getBalloonKey(run.getSubmitter(), run.getProblemId());
 
         BalloonDeliveryInfo info = new BalloonDeliveryInfo(run.getSubmitter(), run.getProblemId(), Calendar.getInstance().getTime().getTime());
         balloonList.put(key, info);

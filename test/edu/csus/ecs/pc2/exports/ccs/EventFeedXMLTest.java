@@ -1,4 +1,4 @@
-package edu.csus.ecs.pc2.core.report;
+package edu.csus.ecs.pc2.exports.ccs;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -9,7 +9,6 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 import junit.framework.TestCase;
-import edu.csus.ecs.pc2.core.Notification;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.BalloonDeliveryComparator;
 import edu.csus.ecs.pc2.core.list.ClarificationComparator;
@@ -32,7 +31,9 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SampleContest;
+import edu.csus.ecs.pc2.core.util.NotificationUtilities;
 import edu.csus.ecs.pc2.core.util.XMLMemento;
+
 
 /**
  * Test Event Feed XML.
@@ -50,7 +51,7 @@ public class EventFeedXMLTest extends TestCase {
     
     private SampleContest sample = new SampleContest();
     
-    private Notification notification = new Notification();
+    private NotificationUtilities notificationUtilities = new NotificationUtilities();
 
     @Override
     protected void setUp() throws Exception {
@@ -307,7 +308,7 @@ public class EventFeedXMLTest extends TestCase {
         int solved = 0;
         for (Run run : getSortedRuns()) {
             if (run.isSolved()) {
-                assertTrue("Expecting Notification for " + run, notification.alreadyHasNotification(contest, run));
+                assertTrue("Expecting Notification for " + run, notificationUtilities.alreadyHasNotification(contest, run));
                 String key = run.getSubmitter().getTripletKey()+":"+run.getProblemId();
                 solvedRuns.put(key, run);
             }
@@ -315,7 +316,7 @@ public class EventFeedXMLTest extends TestCase {
 
         EventFeedXML evenFeedXML = new EventFeedXML();
 
-        BalloonDeliveryInfo[] deliveries = notification.getBalloonDeliveries(contest);
+        BalloonDeliveryInfo[] deliveries = notificationUtilities.getBalloonDeliveries(contest);
         Arrays.sort(deliveries, new BalloonDeliveryComparator(contest));
         int notificationSequenceNumber = 1;
         
@@ -350,7 +351,7 @@ public class EventFeedXMLTest extends TestCase {
         for (Run run : getSortedRuns()) {
             if (run.isSolved()) {
 
-                if (!notification.alreadyHasNotification(contest2, run)) {
+                if (!notificationUtilities.alreadyHasNotification(contest2, run)) {
                     count++;
                     createNotification(contest2, run);
                 }
@@ -371,14 +372,14 @@ public class EventFeedXMLTest extends TestCase {
      */
     private void createNotification(IInternalContest contest2, Run run) {
 
-        BalloonDeliveryInfo info = notification.getNotification(contest2, run);
+        BalloonDeliveryInfo info = notificationUtilities.getNotification(contest2, run);
 
         if (info == null) {
             /**
              * Only create notification if needed.
              */
-            notification.addNotification(contest2, run);
-            assertNotNull("Expecting a delivery info",notification.getNotification(contest2, run));
+            notificationUtilities.addNotification(contest2, run);
+            assertNotNull("Expecting a delivery info",notificationUtilities.getNotification(contest2, run));
         }
     }
 

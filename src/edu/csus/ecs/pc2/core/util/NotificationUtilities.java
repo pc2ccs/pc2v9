@@ -1,4 +1,4 @@
-package edu.csus.ecs.pc2.core;
+package edu.csus.ecs.pc2.core.util;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -17,14 +17,16 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Run;
 
 /**
- * Various notification utilities.
+ * Notification utilities.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
 
+// TODO CCS Remove this fill gap class.
+
 // $HeadURL$
-public class Notification {
+public class NotificationUtilities {
 
     /**
      * Key for balloon in BalloonList.
@@ -146,5 +148,4 @@ public class Notification {
     public boolean alreadyHasNotification(IInternalContest contest2, Run run) {
         return getNotification(contest2, run) != null;
     }
-
 }

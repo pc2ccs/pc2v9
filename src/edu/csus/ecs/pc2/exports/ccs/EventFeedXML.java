@@ -1,4 +1,4 @@
-package edu.csus.ecs.pc2.core.report;
+package edu.csus.ecs.pc2.exports.ccs;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,6 +31,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
+import edu.csus.ecs.pc2.core.model.Notification;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
@@ -421,9 +422,11 @@ public class EventFeedXML {
         Vector<Problem> probVector = new Vector<Problem>();
         for (int i = 0; i < runs.length; i++) {
             Run run = runs[i];
-            Problem problem = contest.getProblem(run.getProblemId());
-            if (isValidRun(contest, run) && !probVector.contains(problem)) {
-                probVector.add(problem);
+            if (! run.isDeleted()) {
+                Problem problem = contest.getProblem(run.getProblemId());
+                if (isValidRun(contest, run) && !probVector.contains(problem)) {
+                    probVector.add(problem);
+                }
             }
         }
         
@@ -467,6 +470,64 @@ public class EventFeedXML {
         return memento;
     }
 
+    public IMemento addMemento(IMemento memento, IInternalContest contest, Notification notification) {
+        // <notification id="214" team-id="34">
+        // <team>U Waterloo</team>
+        // <contest-time>132.04</contest-time>
+        // <timestamp>1298733213.10</timestamp>
+
+        // <balloon problem-id="2">
+        // <label>B</label>
+        // <name>Bulls and bears</name>
+        // <color rgb="ff0000">red</color>
+        // </balloon>
+
+        // <first-by-team>true</first-by-team>
+        
+        ClientId clientId = notification.getSubmitter();
+
+        memento.putInteger("id", notification.getNumber());
+        memento.putInteger("team-id", clientId.getClientNumber());
+
+        XMLUtilities.addChild(memento, "contest-time", XMLUtilities.formatSeconds(notification.getElapsedMS()));
+        XMLUtilities.addChild(memento, "timestamp", notification.getTimeSent());
+        XMLUtilities.addChild(memento, "team", contest.getAccount(clientId).getDisplayName());
+
+        Problem[] problems = getSolvedRuns(contest, clientId);
+
+        boolean firstSolvedByteam = problems.length == 1;
+        XMLUtilities.addChild(memento, "first-by-team", firstSolvedByteam);
+        
+        Problem solvedProblem = contest.getProblem(notification.getProblemId());
+        
+        IMemento singleBalloon = memento.createChild(BALLOON_TAG);
+        addBalloonMemento(singleBalloon, contest, solvedProblem);
+
+        // <balloons>
+        // <balloon problem-id="4">
+        // <label>D</label>
+        // <name>Down the hill</name>
+        // <color rgb="33cc00">green</color>
+        // </balloon>
+        // <balloon problem-id="6">
+        // <label>F</label>
+        // <name>Failing to make the grade</name>
+        // <color rgb="ffff00">yellow</color>
+        // </balloon>
+        // </balloons>
+        // </notification>
+
+        IMemento balloonsRoot = memento.createChild(BALLOON_LIST_TAG);
+
+        for (Problem problem : problems) {
+            memento = balloonsRoot.createChild(BALLOON_TAG);
+            addBalloonMemento(memento, contest, problem);
+        }
+        
+        return memento; 
+        
+    }
+    
     public IMemento addMemento(IMemento memento, IInternalContest contest, Run run, int notificationSequenceNumber) {
 
         // <notification id="214" team-id="34">
