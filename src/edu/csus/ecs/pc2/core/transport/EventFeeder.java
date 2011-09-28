@@ -36,9 +36,12 @@ import edu.csus.ecs.pc2.core.util.XMLMemento;
 import edu.csus.ecs.pc2.exports.ccs.EventFeedXML;
 
 /**
- * Event Feeder runner.
+ * Sends Event Feed XML to socket.
  * 
- * When run as a Thread will send event XML to client/socket.
+ * Sends startup Event Feed XML to socket.
+ * <br><br>
+ * Registers for contest listeners and upon event sends XML
+ * to socket.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -60,6 +63,15 @@ class EventFeeder implements Runnable {
     private boolean running = true;
 
     private EventFeedXML eventFeedXML = new EventFeedXML();
+    
+    private AccountListener          accountListener = new AccountListener();
+    private RunListener              runListener = new RunListener();
+    private ClarificationListener    clarificationListener = new ClarificationListener();
+    private ProblemListener          problemListener = new ProblemListener();
+    private LanguageListener         languageListener = new LanguageListener();
+    private GroupListener            groupListener = new GroupListener();
+    private JudgementListener        judgementListener = new JudgementListener();
+    private ContestInformationListener   contestInformationListener = new ContestInformationListener();
 
     public EventFeeder(IInternalContest contest, OutputStreamWriter out) {
         this.contest = contest;
@@ -79,6 +91,8 @@ class EventFeeder implements Runnable {
             } catch (InterruptedException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
+                running = false;
+                dispose();
             }
         }
         
@@ -87,14 +101,14 @@ class EventFeeder implements Runnable {
 
     private void registerListeners(IInternalContest inContest) {
 
-        inContest.addAccountListener(new AccountListener());
-        inContest.addRunListener(new RunListener());
-        inContest.addClarificationListener(new ClarificationListener());
-        inContest.addProblemListener(new ProblemListener());
-        inContest.addLanguageListener(new LanguageListener());
-        inContest.addGroupListener(new GroupListener());
-        inContest.addJudgementListener(new JudgementListener());
-        inContest.addContestInformationListener(new ContestInformationListener());
+        inContest.addAccountListener(accountListener);
+        inContest.addRunListener(runListener);
+        inContest.addClarificationListener(clarificationListener);
+        inContest.addProblemListener(problemListener);
+        inContest.addLanguageListener(languageListener);
+        inContest.addGroupListener(groupListener);
+        inContest.addJudgementListener(judgementListener);
+        inContest.addContestInformationListener(contestInformationListener);
 
         // TODO CCS insure that commented out listeners are not needed.
         // inContest.addContestTimeListener(new ContestTimeListener());
@@ -127,18 +141,33 @@ class EventFeeder implements Runnable {
     // protected class ClientSettingsListener implements IClientSettingsListener {}
     // protected class BalloonSettingsListener implements IBalloonSettingsListener {}
     // protected class SecurityMessageListener implements ISecurityMessageListener {}
+    
+    public void dispose(){
+
+        contest.removeAccountListener(accountListener);
+        contest.removeRunListener(runListener);
+        contest.removeClarificationListener(clarificationListener);
+        contest.removeProblemListener(problemListener);
+        contest.removeLanguageListener(languageListener);
+        contest.removeGroupListener(groupListener);
+        contest.removeJudgementListener(judgementListener);
+        contest.removeContestInformationListener(contestInformationListener);
+
+    }
 
     /**
      * Halt this thread.
      */
     public void halt() {
         running = false;
+        dispose();
         
         try {
             out.close();
         } catch (IOException e) {
             e.printStackTrace();  // TODO CCS 
         }
+        
     }
 
     /**

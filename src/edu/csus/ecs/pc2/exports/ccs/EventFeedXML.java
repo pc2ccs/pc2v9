@@ -21,6 +21,7 @@ import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
+import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestTime;
 import edu.csus.ecs.pc2.core.model.ElementId;
@@ -814,6 +815,20 @@ public class EventFeedXML {
                 e.printStackTrace();
             }
         }
+        
+        // TODO ACCOUNT huh
+        
+        Account [] teamAccounts = getTeamAccounts(contest);
+        for (Account account : teamAccounts){
+            
+            try {
+                sb.append(toXML(createElement(contest, account)));
+            } catch (IOException e) {
+                // TODO CCS Auto-generated catch block
+                e.printStackTrace();
+            }
+            
+        }
 
         Clarification[] clarifications = contest.getClarifications();
         for (Clarification clarification : clarifications) {
@@ -838,6 +853,20 @@ public class EventFeedXML {
         }
 
         return sb.toString();
+    }
+
+    /**
+     * Get all sites' teams sorted by site then team number.
+     * 
+     * @param contest
+     * @return
+     */
+    public Account[] getTeamAccounts(IInternalContest inContest) {
+        Vector<Account> accountVector = inContest.getAccounts(ClientType.Type.TEAM);
+        Account[] accounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
+        Arrays.sort(accounts, new AccountComparator());
+
+        return accounts;
     }
 
     public String createFinalizeXML(IInternalContest contest, FinalizeData data) {

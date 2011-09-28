@@ -8,10 +8,11 @@ import java.net.SocketException;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 
 /**
- * Event Feeder Thread.
+ * A Feeder server that services new socket connections.
  * 
- * Create connection to socket, start thread {@link EventFeeder} that
- * sends event feed XML.
+ * Listens for new Event Feed socket connections, starts feeder
+ * thread for each socket.
+ * 
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -40,21 +41,24 @@ class FeederThread implements Runnable {
     }
 
     public void run() {
+        
+        while (running){
 
-        try {
-            Socket connection = server.accept();
-            OutputStreamWriter out = new OutputStreamWriter(connection.getOutputStream());
+            try {
+                Socket connection = server.accept();
+                OutputStreamWriter out = new OutputStreamWriter(connection.getOutputStream());
 
-            eventFeeder = new EventFeeder(contest, out);
-            new Thread(eventFeeder).start();
+                eventFeeder = new EventFeeder(contest, out);
+                new Thread(eventFeeder).start();
 
-            if (debugFlag) {
-                System.out.println("Opened and sent event feed.");
+                if (debugFlag) {
+                    System.out.println("Opened and sent event feed.");
+                }
+            } catch (SocketException ex) {
+                running = false; // NOP, needed to avoid CC warning.
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (SocketException ex) {
-            running = false; // NOP, needed to avoid CC warning.
-        } catch (Exception e) {
-            e.printStackTrace();
         }
 
         if (debugFlag) {

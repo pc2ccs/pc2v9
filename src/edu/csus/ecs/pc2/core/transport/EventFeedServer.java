@@ -8,7 +8,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 /**
  * Event Feed Server.
  * 
- * Module to start a socket server on a port to send event feed XML to client.
+ * Module to start a {@link FeederThread} socket server.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
