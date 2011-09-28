@@ -20,13 +20,14 @@ public final class AllTests {
     public static Test suite() {
         TestSuite suite = new TestSuite("Test for edu.csus.ecs.pc2.core.list");
         //$JUnit-BEGIN$
-        suite.addTestSuite(ProfilesListTest.class);
         suite.addTestSuite(LoginListTest.class);
+        suite.addTestSuite(ProfilesListTest.class);
         suite.addTestSuite(ClarificationListTest.class);
-        suite.addTestSuite(RunListTest.class);
-        suite.addTestSuite(RunResultsFileListTest.class);
+        suite.addTestSuite(NotificationListTest.class);
         suite.addTestSuite(AccountListTest.class);
         suite.addTestSuite(RunFilesListTest.class);
+        suite.addTestSuite(RunListTest.class);
+        suite.addTestSuite(RunResultsFileListTest.class);
         //$JUnit-END$
         return suite;
     }

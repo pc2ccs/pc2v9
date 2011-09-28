@@ -32,6 +32,7 @@ import edu.csus.ecs.pc2.core.list.JudgementList;
 import edu.csus.ecs.pc2.core.list.LanguageDisplayList;
 import edu.csus.ecs.pc2.core.list.LanguageList;
 import edu.csus.ecs.pc2.core.list.LoginList;
+import edu.csus.ecs.pc2.core.list.NotificationList;
 import edu.csus.ecs.pc2.core.list.ProblemDisplayList;
 import edu.csus.ecs.pc2.core.list.ProblemList;
 import edu.csus.ecs.pc2.core.list.ProfilesList;
@@ -77,6 +78,8 @@ public class InternalContest implements IInternalContest {
     private Vector<IProblemListener> problemListenerList = new Vector<IProblemListener>();
     
     private Vector<ICategoryListener> categoryListenerList = new Vector<ICategoryListener>();
+    
+    private Vector<INotificationListener> notificationListenerList = new Vector<INotificationListener>();
 
     private Vector<ILanguageListener> languageListenerList = new Vector<ILanguageListener>();
     
@@ -178,6 +181,8 @@ public class InternalContest implements IInternalContest {
     private ProblemList problemList = new ProblemList();
     
     private CategoryList categoryList = new CategoryList();
+  
+    private NotificationList notificationList = new NotificationList();
 
     private ProblemDataFilesList problemDataFilesList = new ProblemDataFilesList();
 
@@ -271,7 +276,9 @@ public class InternalContest implements IInternalContest {
         runFilesList = new RunFilesList(storage);
         runResultFilesList = new RunResultsFileList(storage);
         clarificationList = new ClarificationList(storage);
+        notificationList = new NotificationList(storage);
         clarificationList.loadFromDisk(siteNum);
+        notificationList.loadFromDisk(siteNum);
 
         if (uncheckoutSubmissions) {
 
@@ -469,6 +476,26 @@ public class InternalContest implements IInternalContest {
             }
         }
     }
+    
+    private void fireNotificationListener(Notification notification, NotificationEvent.Action added) {
+        
+        NotificationEvent notificationEvent = new NotificationEvent(NotificationEvent.Action.CHANGED, notification);
+        for (int i = 0; i < notificationListenerList.size(); i++) {
+
+            if (notificationEvent.getAction() == NotificationEvent.Action.ADDED) {
+                notificationListenerList.elementAt(i).notificationAdded(notificationEvent);
+            } else if (notificationEvent.getAction() == NotificationEvent.Action.DELETED) {
+                notificationListenerList.elementAt(i).notificationRemoved(notificationEvent);
+            } else if (notificationEvent.getAction() == NotificationEvent.Action.REFRESH_ALL) {
+                notificationListenerList.elementAt(i).notificationRefreshAll(notificationEvent);
+            } else {
+                notificationListenerList.elementAt(i).notificationChanged(notificationEvent);
+            }
+        }
+
+
+        
+    }
 
     private void fireLanguageListener(LanguageEvent languageEvent) {
         for (int i = 0; i < languageListenerList.size(); i++) {
@@ -629,6 +656,11 @@ public class InternalContest implements IInternalContest {
        categoryDisplayList.add(category);
        categoryList.add(category);
        fireCategoryListener(category, CategoryEvent.Action.ADDED);
+    }
+    
+    public void addNotification(Notification notification) throws IOException, ClassNotFoundException, FileSecurityException {
+        notificationList.add(notification);
+        fireNotificationListener(notification, NotificationEvent.Action.ADDED);
     }
 
     public void addJudgement(Judgement judgement) {
@@ -2746,7 +2778,49 @@ public class InternalContest implements IInternalContest {
         fireContestInformationListener(event);
     }
 
+    public Notification[] getNotifications() {
+        return notificationList.getList();
+    }
 
+    public void addNotificationListener(INotificationListener notificationListener) {
+        notificationListenerList.add(notificationListener);
+    }
 
-    
+    public void removeNotificationListener(INotificationListener notificationListener) {
+        notificationListenerList.remove(notificationListener);
+    }
+
+    public Notification getNotification(ElementId elementId) {
+        return notificationList.get(elementId);
+    }
+
+    public void updateNotification(Notification notification) throws IOException, ClassNotFoundException, FileSecurityException {
+        notificationList.updateNotification(notification);
+    }
+
+    public Notification getNotification(ClientId submitter, ElementId problemId) {
+        return notificationList.get(submitter, problemId);
+    }
+
+    public Notification acceptNotification(Notification notification) {
+
+        notification.setElapsedMS(getContestTime().getElapsedMS());
+        notification.setSiteNumber(getSiteNumber());
+        
+        try {
+            Notification newNotif = notificationList.addNewNotification(notification);
+            addNotification(newNotif);
+            return newNotif;
+        } catch (IOException e) {
+            logException(e);
+        } catch (ClassNotFoundException e) {
+            logException(e);
+        } catch (FileSecurityException e) {
+            logException(e);
+        }
+
+        return null;
+
+    }
+
 }

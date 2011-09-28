@@ -160,4 +160,8 @@ public class Notification implements IElementObject {
     public ClientId getSenderClientId() {
         return senderClientId;
     }
+    
+    public void setElapsedMS(long elapsedMS) {
+        this.elapsedMS = elapsedMS;
+    }
 }

@@ -26,12 +26,6 @@ import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
  */
 
 // $HeadURL$
-/**
- * @author pc2@ecs.csus.edu
- * @version $Id$
- */
-
-// $HeadURL$
 public interface IInternalContest {
 
     /**
@@ -50,6 +44,21 @@ public interface IInternalContest {
     void deleteLanguage(Language language);
 
     void addProblem(Problem problem);
+    
+    /**
+     * Add Notification into model from remote site.
+     * 
+     * Use {@link #acceptNotification(Notification)} to add {@link Notification}
+     * to this site/server/model.
+     * 
+     * @see #acceptNotification(Notification)
+     * 
+     * @param notification
+     * @throws IOException
+     * @throws ClassNotFoundException
+     * @throws FileSecurityException
+     */
+    void addNotification(Notification notification) throws IOException, ClassNotFoundException, FileSecurityException;
 
     void addProblem(Problem problem, ProblemDataFiles problemDataFiles);
 
@@ -98,6 +107,21 @@ public interface IInternalContest {
     void updateLanguage(Language language);
 
     void updateProblem(Problem problem);
+    
+    /**
+     * Update existing Notification.
+     * 
+     * Use {@link #acceptNotification(Notification)} to add Notification
+     * into this server/model.
+     * 
+     * @see #acceptNotification(Notification)
+     * 
+     * @param notification
+     * @throws IOException
+     * @throws ClassNotFoundException
+     * @throws FileSecurityException
+     */
+    void updateNotification (Notification notification) throws IOException, ClassNotFoundException, FileSecurityException;
     
     void updateCategory(Category category);
 
@@ -154,7 +178,8 @@ public interface IInternalContest {
      * @throws IOException 
      */
     Run acceptRun(Run submittedRun, RunFiles runFiles) throws IOException, ClassNotFoundException, FileSecurityException;
-
+    
+  
     /**
      * Add a run into the runList.
      * 
@@ -261,6 +286,8 @@ public interface IInternalContest {
      */
     Problem[] getProblems();
     
+    Notification [] getNotifications();
+    
     /**
      * Fetch all defined categories, includes non-hidden Problems too.
      * 
@@ -300,10 +327,14 @@ public interface IInternalContest {
     void removeRunListener(IRunListener runListener);
 
     void addClarificationListener(IClarificationListener clarificationListener);
+    
+    void addNotificationListener (INotificationListener notificationListener);
 
     void removeClarificationListener(IClarificationListener clarificationListener);
 
     void addProblemListener(IProblemListener problemListener);
+    
+    void removeNotificationListener (INotificationListener notificationListener);
 
     void removeProblemListener(IProblemListener problemListener);
     
@@ -697,6 +728,16 @@ public interface IInternalContest {
     void updateClarification(Clarification clarification, ClientId whoChangedIt);
 
     /**
+     * Add Notification to model, assign number and time.
+     * 
+     * Sets {@link Notification#setNumber(int)} and {@link Notification#setElapsedMS(long)}.
+     * 
+     * @param notification 
+     * @return
+     */
+    Notification acceptNotification (Notification notification);
+    
+    /**
      * remove clarification from model.
      * 
      * @param clarification
@@ -739,6 +780,8 @@ public interface IInternalContest {
     Language getLanguage(ElementId elementId);
 
     Problem getProblem(ElementId elementId);
+    
+    Notification getNotification(ElementId elementId);
     
     Category getCategory (ElementId elementId);
 
@@ -1066,4 +1109,13 @@ public interface IInternalContest {
      */
     void setFinalizeData(FinalizeData data);
 
+    /**
+     * get notification for team and problem.
+     * 
+     * @param submitter
+     * @param problemId
+     * @return null if no notification
+     */
+    Notification getNotification(ClientId submitter, ElementId problemId);
+    
 }

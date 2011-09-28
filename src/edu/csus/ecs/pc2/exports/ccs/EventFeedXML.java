@@ -924,6 +924,13 @@ public class EventFeedXML {
         XMLUtilities.addChild(memento, "name", judgement.getDisplayName());
         return memento;
     }
+    
+    public XMLMemento createElement(IInternalContest contest, Notification notification) {
+
+        XMLMemento memento = XMLMemento.createWriteRoot(NOTIFICATION_TAG);
+        addMemento(memento, contest, notification);
+        return memento;
+    }
 
     public XMLMemento createElement(IInternalContest contest, BalloonDeliveryInfo balloonDeliveryInfo, int notificationSequenceNumber) {
 
