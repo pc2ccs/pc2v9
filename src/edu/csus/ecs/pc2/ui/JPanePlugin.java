@@ -1,9 +1,14 @@
 package edu.csus.ecs.pc2.ui;
 
+import java.awt.Component;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 
+import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import edu.csus.ecs.pc2.VersionInfo;
@@ -138,6 +143,56 @@ public abstract class JPanePlugin extends JPanel implements UIPlugin {
             list = account.getPermissionList();
         }
         return list;
+    }
+    
+    /**
+     * Show message to user.
+     * 
+     * @param component
+     * @param title
+     * @param message
+     */
+    public void showMessage(Component component, String title, String message) {
+        JOptionPane.showMessageDialog(component, message, title, JOptionPane.INFORMATION_MESSAGE);
+    }
+    
+    /**
+     * Show message to user.
+     * 
+     * @param message
+     */
+    // TODO cleanup - uncomment and use this for all messages
+//    private void showMessage(String message) {
+//        JOptionPane.showMessageDialog(null, message, "Information Message", JOptionPane.INFORMATION_MESSAGE);
+//    }
+
+    /**
+     * Show message to user.
+     * 
+     * @param frame parent frame
+     * @param strTitle title
+     * @param message message
+     */
+    public void showMessage(JFrame frame, String strTitle, String message) {
+        final JDialog dialog = new JDialog(frame, strTitle, true);
+        final JOptionPane optionPane = new JOptionPane(message, JOptionPane.INFORMATION_MESSAGE);
+        dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+        optionPane.addPropertyChangeListener(new PropertyChangeListener() {
+            public void propertyChange(PropertyChangeEvent e) {
+                String prop = e.getPropertyName();
+
+                if (dialog.isVisible() && (e.getSource() == optionPane) && (prop.equals(JOptionPane.VALUE_PROPERTY))) {
+                    // If you were going to check something
+                    // before closing the window, you'd do
+                    // it here.
+                    dialog.setVisible(false);
+                }
+            }
+        });
+        dialog.setContentPane(optionPane);
+        dialog.pack();
+        FrameUtilities.centerFrameOver(parentFrame, dialog);
+        dialog.setVisible(true);
     }
 
 }
