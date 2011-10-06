@@ -30,8 +30,10 @@ public class LoadICPCTSVData implements UIPlugin {
 
     private String groupsFilename = "";
 
+    @SuppressWarnings("unused")
     private IInternalContest contest;
 
+    @SuppressWarnings("unused")
     private IInternalController controller;
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {

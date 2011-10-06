@@ -32,11 +32,11 @@ import edu.csus.ecs.pc2.core.model.ProfileEvent;
 import edu.csus.ecs.pc2.ui.AccountsPane;
 import edu.csus.ecs.pc2.ui.AutoJudgesPane;
 import edu.csus.ecs.pc2.ui.BalloonSettingsPane;
+import edu.csus.ecs.pc2.ui.CategoriesPane;
 import edu.csus.ecs.pc2.ui.ClarificationsPane;
 import edu.csus.ecs.pc2.ui.ConnectionsPane;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay;
 import edu.csus.ecs.pc2.ui.ContestClockDisplay.DisplayTimes;
-import edu.csus.ecs.pc2.ui.CategoriesPane;
 import edu.csus.ecs.pc2.ui.ContestInformationPane;
 import edu.csus.ecs.pc2.ui.ContestPreloadPane;
 import edu.csus.ecs.pc2.ui.ContestTimesPane;
@@ -45,7 +45,7 @@ import edu.csus.ecs.pc2.ui.ExportDataPane;
 import edu.csus.ecs.pc2.ui.FinalizePane;
 import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.GroupsPane;
-import edu.csus.ecs.pc2.ui.ICPCPane;
+import edu.csus.ecs.pc2.ui.ICPCLoadPane;
 import edu.csus.ecs.pc2.ui.ImportDataPane;
 import edu.csus.ecs.pc2.ui.JPanePlugin;
 import edu.csus.ecs.pc2.ui.JudgementsPane;
@@ -232,7 +232,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 GroupsPane groupsPane = new GroupsPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "Groups", groupsPane);
 
-                ICPCPane icpcPane = new ICPCPane();
+                ICPCLoadPane icpcPane = new ICPCLoadPane();
                 addUIPlugin(getConfigureContestTabbedPane(), "ICPC", icpcPane);
                 
                 ImportDataPane importDataPane = new ImportDataPane();

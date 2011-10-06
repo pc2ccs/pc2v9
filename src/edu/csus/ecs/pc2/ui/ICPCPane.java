@@ -29,11 +29,17 @@ import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
 
 /**
+ * ICPC Load CSV files.
+ * 
+ * This has been deprecated, unable to add TSV button in VE, re-did/moved
+ * this class to {@link ICPCLoadPane}.
+ * 
  * This Pane has 2 buttons, one for loading the ICPC tab files for PC^2 and a 2nd button
  * just to change the display name format.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
+ * @deprecated Use {@link ICPCLoadPane}.
  */
 // $HeadURL$
 public class ICPCPane extends JPanePlugin {
