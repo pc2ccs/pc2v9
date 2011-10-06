@@ -1,5 +1,7 @@
 package edu.csus.ecs.pc2.core.model;
 
+import java.util.ArrayList;
+
 /**
  * Clarification.
  * 
@@ -9,6 +11,8 @@ package edu.csus.ecs.pc2.core.model;
  * @version $Id$
  */
 
+// TODO CLEANUP - need to deprecate setAnswer
+
 // $HeadURL$
 public class Clarification extends ISubmission {
 
@@ -16,8 +20,6 @@ public class Clarification extends ISubmission {
      * 
      */
     private static final long serialVersionUID = -6913818225948370496L;
-
-    private boolean deleted = false;
 
     /**
      * Clarification States.
@@ -42,18 +44,16 @@ public class Clarification extends ISubmission {
          */
         ANSWERED,
     }
-
-    private ClientId whoJudgedItId = null;
     
+    private boolean deleted = false;
+
     private ClientId whoCheckedItOutId = null;
 
     private String question = null;
 
-    private String answer = null;
+    private ArrayList<ClarificationAnswer> answerList = new ArrayList<ClarificationAnswer>();
 
     private ClarificationStates state = ClarificationStates.NEW;
-
-    private boolean sendToAll = false;
 
     public Clarification(ClientId submitter, Problem problemId, String question) {
         super();
@@ -84,16 +84,28 @@ public class Clarification extends ISubmission {
      * @return Returns the answer.
      */
     public String getAnswer() {
-        return answer;
+        if (answerList.size() == 0) {
+            return null;
+        } else {
+            return getFirstAnswer().getAnswer();
+        }
+    }
+
+    private ClarificationAnswer getFirstAnswer() {
+        return answerList.get(0);
     }
 
     /**
      * @param answer
      *            The answer to set.
+     * @param client
+     * @param contestTime
+     * @param sendToAll
      */
-    public void setAnswer(String answer) {
-        this.answer = answer;
+    public void setAnswer(String answer, ClientId client, ContestTime contestTime, boolean sendToAll) {
         state = ClarificationStates.ANSWERED;
+        ClarificationAnswer clarificationAnswer = new ClarificationAnswer(answer, client, sendToAll, contestTime);
+        addAnswer(clarificationAnswer);
     }
 
     public boolean isAnswered() {
@@ -117,24 +129,23 @@ public class Clarification extends ISubmission {
     }
 
     public boolean isSendToAll() {
-        return sendToAll;
-    }
-
-    public void setSendToAll(boolean sendToAll) {
-        this.sendToAll = sendToAll;
+        if (answerList.size() == 0) {
+            return false;
+        } else {
+            return getFirstAnswer().isSendToAll();
+        }
     }
 
     public String toString() {
-        return "Clarification " + getNumber() + " " + getState() + " from " + getSubmitter() + " at " + getElapsedMins() + " id="
-                + getElementId();
+        return "Clarification " + getNumber() + " " + getState() + " from " + getSubmitter() + " at " + getElapsedMins() + " id=" + getElementId();
     }
 
     public ClientId getWhoJudgedItId() {
-        return whoJudgedItId;
-    }
-
-    public void setWhoJudgedItId(ClientId whoJudgedItId) {
-        this.whoJudgedItId = whoJudgedItId;
+        if (answerList.size() == 0) {
+            return null;
+        } else {
+            return getFirstAnswer().getAnswerClient();
+        }
     }
 
     public boolean isSameAs(Clarification clarification) {
@@ -143,7 +154,7 @@ public class Clarification extends ISubmission {
                 return false;
             }
 
-            if (!whoJudgedItId.equals(clarification.getWhoJudgedItId())) {
+            if (!getWhoJudgedItId().equals(clarification.getWhoJudgedItId())) {
                 return false;
             }
 
@@ -151,7 +162,7 @@ public class Clarification extends ISubmission {
                 return false;
             }
 
-            if (!answer.equals(clarification.getAnswer())) {
+            if (!getAnswer().equals(clarification.getAnswer())) {
                 return false;
             }
 
@@ -159,13 +170,13 @@ public class Clarification extends ISubmission {
                 return false;
             }
 
-            if (sendToAll != clarification.isSendToAll()) {
+            if (isSendToAll() != clarification.isSendToAll()) {
                 return false;
             }
 
             return true;
         } catch (Exception e) {
-            // TODO log to static Exception log
+            // TODO CLEANUP log to static Exception log
             return false;
         }
     }
@@ -176,5 +187,19 @@ public class Clarification extends ISubmission {
 
     public void setWhoCheckedItOutId(ClientId whoCheckedItOut) {
         this.whoCheckedItOutId = whoCheckedItOut;
+    }
+
+    /**
+     * Add answer to list of answers.
+     * 
+     * @param clarificationAnswer
+     */
+    public void addAnswer(ClarificationAnswer clarificationAnswer) {
+        state = ClarificationStates.ANSWERED;
+        answerList.add(clarificationAnswer);
+    }
+
+    public ClarificationAnswer[] getClarificationAnswers() {
+        return (ClarificationAnswer[]) answerList.toArray(new ClarificationAnswer[answerList.size()]);
     }
 }

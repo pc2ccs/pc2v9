@@ -289,7 +289,7 @@ public class InternalContest implements IInternalContest {
             for (int i = 0; i < clarList.length; i++) {
                 if (clarList[i].getState().equals(ClarificationStates.BEING_ANSWERED)) {
                     StaticLog.info("Changing Clarification " + clarList[i].getElementId() + " from BEING_ANSWERED by " + clarList[i].getWhoCheckedItOutId() + "to NEW");
-                    clarificationList.updateClarification(clarList[i], ClarificationStates.NEW, null);
+                    clarificationList.uncheckoutClarification(clarList[i]);
                 }
             }
         }
@@ -752,7 +752,8 @@ public class InternalContest implements IInternalContest {
         if (clarificationList.get(clarification) != null) {
             Clarification answerClarification;
             try {
-                answerClarification = clarificationList.updateClarification(clarification, ClarificationStates.ANSWERED, whoAnsweredIt, answer, sendToAll);
+                ClarificationAnswer clarificationAnswer = new ClarificationAnswer(answer, whoAnsweredIt, sendToAll, getContestTime());
+                answerClarification = clarificationList.updateClarification(clarification, ClarificationStates.ANSWERED, clarificationAnswer);
                 ClarificationEvent clarificationEvent = new ClarificationEvent(ClarificationEvent.Action.ANSWERED_CLARIFICATION, answerClarification);
                 clarificationEvent.setWhoModifiedClarification(whoAnsweredIt);
                 fireClarificationListener(clarificationEvent);

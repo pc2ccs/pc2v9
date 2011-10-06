@@ -290,6 +290,7 @@ public class ContestTime implements IElementObject {
 
     public void setElapsedSecs(long eSecs) {
         elapsedSecs = eSecs;
+        elapsedMS = eSecs * 1000;
     }
 
     public void setHaltContestAtTimeZero(boolean newHaltContestAtTimeZero) {

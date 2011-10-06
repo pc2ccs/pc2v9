@@ -11,6 +11,7 @@ import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Clarification;
+import edu.csus.ecs.pc2.core.model.ClarificationAnswer;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
@@ -197,15 +198,14 @@ public class ClarificationList implements Serializable {
         }
     }
 
-    public Clarification updateClarification(Clarification clarification, ClarificationStates newState, ClientId sourceId, String answer,
-            boolean sendToAll) throws IOException, ClassNotFoundException, FileSecurityException {
+    public Clarification updateClarification(Clarification clarification, ClarificationStates newState, ClarificationAnswer answer) throws IOException, ClassNotFoundException, FileSecurityException {
         Clarification fetchedClarification = get(clarification);
         if (fetchedClarification != null) {
             fetchedClarification.getElementId().incrementVersionNumber();
             fetchedClarification.setState(newState);
-            fetchedClarification.setAnswer(answer);
-            fetchedClarification.setWhoJudgedItId(sourceId);
-            fetchedClarification.setSendToAll(sendToAll);
+            if (answer != null){
+                fetchedClarification.addAnswer(answer);
+            }
             writeToDisk();
             return fetchedClarification;
         } else {
@@ -299,6 +299,28 @@ public class ClarificationList implements Serializable {
 
     public int getNextClarificationNumber() {
         return nextClarificationNumber;
+    }
+
+    /**
+     * Un-checkout clarification 
+     * @param clarification
+     * @throws FileSecurityException 
+     * @throws ClassNotFoundException 
+     * @throws IOException 
+     */
+    public Clarification uncheckoutClarification(Clarification clarification) throws IOException, ClassNotFoundException, FileSecurityException {
+        
+        Clarification fetchedClarification = get(clarification);
+        if (fetchedClarification != null) {
+            fetchedClarification.getElementId().incrementVersionNumber();
+            fetchedClarification.setState(ClarificationStates.NEW);
+            fetchedClarification.setWhoCheckedItOutId(null);
+            writeToDisk();
+            return fetchedClarification;
+        } else {
+            throw new SecurityException("Unable to find/update clarification "+clarification);
+        }
+        
     }
 
     

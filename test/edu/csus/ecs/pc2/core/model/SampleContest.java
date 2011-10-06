@@ -372,12 +372,14 @@ public class SampleContest {
      * @return
      */
     public Account[] getTeamAccounts(IInternalContest contest) {
-        Vector<Account> accountVector = contest.getAccounts(ClientType.Type.TEAM);
-        Account[] accounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
-        Arrays.sort(accounts, new AccountComparator());
-
-        return accounts;
+        return getAccounts(contest, Type.TEAM);
     }
+    
+    public Account[] getJudgeAccounts(IInternalContest contest) {
+        return getAccounts(contest, Type.JUDGE);
+    }
+    
+    
 
     /**
      * Get site's teams.
@@ -1159,6 +1161,22 @@ public class SampleContest {
         }
 
         contest.updateProblem(problem, dataFiles);
+    }
+
+    public Account[] getAccounts(IInternalContest contest, ClientType.Type type) {
+        Vector<Account> accountVector = contest.getAccounts(type);
+        Account[] accounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
+        Arrays.sort(accounts, new AccountComparator());
+
+        return accounts;
+    }
+    
+    public Account[] getAccounts(IInternalContest contest, ClientType.Type type, int siteNumber) {
+        Vector<Account> accountVector = contest.getAccounts(type, siteNumber);
+        Account[] accounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
+        Arrays.sort(accounts, new AccountComparator());
+
+        return accounts;
     }
 
 }
