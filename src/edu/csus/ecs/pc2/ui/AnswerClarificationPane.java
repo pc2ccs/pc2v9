@@ -19,6 +19,7 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Clarification;
+import edu.csus.ecs.pc2.core.model.ClarificationAnswer;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
@@ -175,13 +176,10 @@ public class AnswerClarificationPane extends JPanePlugin {
         return buttonPane;
     }
 
-    private Clarification getClarificationFromFields() {
-
-        // TODO this should be operating on a cloned Clarification, otherwise we are updating the model
-        clarification.setAnswer(getAnswerTextArea().getText());
-        clarification.setWhoJudgedItId(getContest().getClientId());
-        clarification.setSendToAll(getSendToAllCheckBox().isSelected());
-        return clarification;
+    private ClarificationAnswer getClarificationFromFields() {
+        ClarificationAnswer clarificationAnswer = new ClarificationAnswer(getAnswerTextArea().getText(), getContest().getClientId(), 
+                getSendToAllCheckBox().isSelected(), getContest().getContestTime());
+        return clarificationAnswer;
     }
 
     /**
@@ -213,11 +211,11 @@ public class AnswerClarificationPane extends JPanePlugin {
 
     protected void updateClarification() {
 
-        Clarification newClarification = getClarificationFromFields();
+        clarification.addAnswer(getClarificationFromFields());
 
         enableUpdateButtons(false);
 
-        getController().submitClarificationAnswer(newClarification);
+        getController().submitClarificationAnswer(clarification);
 
         if (getParentFrame() != null) {
             getParentFrame().setVisible(false);
