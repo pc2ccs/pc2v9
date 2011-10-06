@@ -4,7 +4,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.imports.ccs.ICPCCSVLoader;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
@@ -45,15 +48,22 @@ public class LoadICPCTSVData implements UIPlugin {
     public boolean loadFiles(String filename) throws Exception {
 
         if (checkFiles(filename)) {
-            // TODO codethis
-            System.out.println("Should code load files");
-            return true; // TODO replace this with the load files code
-
+            Group [] groups = ICPCCSVLoader.loadGroups(groupsFilename);
+            Account [] accounts = ICPCCSVLoader.loadAccounts(teamsFilename);
+            
+            System.out.println("found "+groups.length+" groups.");
+            System.out.println("found "+accounts.length+" teams.");
+            
+            // TODO 9.3 load groups and teams into model via the controller
+            
+            return true;
         } else {
             return false;
         }
 
     }
+
+
 
     protected boolean checkFiles(String filename) throws Exception {
 

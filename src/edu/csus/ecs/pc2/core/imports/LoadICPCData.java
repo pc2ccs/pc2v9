@@ -18,7 +18,8 @@ import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.util.TabSeparatedValueParser;
 
 /**
- * Load ICPC Data.
+ * Load ICPC CSV Data.
+ * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
