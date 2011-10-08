@@ -3,15 +3,20 @@ package edu.csus.ecs.pc2.core.imports;
 import java.io.File;
 import java.io.FileNotFoundException;
 
+import javax.swing.JOptionPane;
+
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.imports.ccs.ICPCCSVLoader;
+import edu.csus.ecs.pc2.ui.FrameUtilities;
 import edu.csus.ecs.pc2.ui.UIPlugin;
 
 /**
  * Load ICPC TSV files into contest.
+ * 
+ * Read input .tsv files, validate then if valid load into contest.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -36,11 +41,9 @@ public class LoadICPCTSVData implements UIPlugin {
     @SuppressWarnings("unused")
     private IInternalContest contest;
 
-    @SuppressWarnings("unused")
     private IInternalController controller;
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
-        // TODO CODE THIS
         contest = inContest;
         controller = inController;
     }
@@ -48,22 +51,35 @@ public class LoadICPCTSVData implements UIPlugin {
     public boolean loadFiles(String filename) throws Exception {
 
         if (checkFiles(filename)) {
-            Group [] groups = ICPCCSVLoader.loadGroups(groupsFilename);
-            Account [] accounts = ICPCCSVLoader.loadAccounts(teamsFilename);
-            
-            System.out.println("found "+groups.length+" groups.");
-            System.out.println("found "+accounts.length+" teams.");
-            
-            // TODO 9.3 load groups and teams into model via the controller
-            
-            return true;
+
+            Group[] groups = ICPCCSVLoader.loadGroups(groupsFilename);
+            Account[] accounts = ICPCCSVLoader.loadAccounts(teamsFilename);
+
+            String nl = System.getProperty("line.separator");
+
+            String message = "Are you sure you want to add " + nl + accounts.length + " accounts and " + nl + groups.length + " groups?";
+
+            int result = FrameUtilities.yesNoCancelDialog(null, message, "Load TSV files");
+
+            if (result == JOptionPane.YES_OPTION) {
+
+                for (Group group : groups) {
+                    getController().addNewGroup(group);
+                }
+
+                getController().addNewAccounts(accounts);
+                
+                // TODO 9.3 assign groups to sites or try...
+
+                return true;
+            } else {
+                return false;
+            }
+
         } else {
             return false;
         }
-
     }
-
-
 
     protected boolean checkFiles(String filename) throws Exception {
 
@@ -75,11 +91,11 @@ public class LoadICPCTSVData implements UIPlugin {
         if (filename.endsWith(TEAMS_FILENAME)) {
             teamsFilename = filename;
             groupsFilename = filename;
-            groupsFilename.replaceFirst(TEAMS_FILENAME, GROUPS_FILENAME);
+            groupsFilename = groupsFilename.replaceFirst(TEAMS_FILENAME, GROUPS_FILENAME);
         } else if (filename.endsWith(GROUPS_FILENAME)) {
             teamsFilename = filename;
             groupsFilename = filename;
-            teamsFilename.replaceFirst(GROUPS_FILENAME, TEAMS_FILENAME);
+            teamsFilename = teamsFilename.replaceFirst(GROUPS_FILENAME, TEAMS_FILENAME);
         } else {
             throw new Exception("Must select either " + TEAMS_FILENAME + " or " + GROUPS_FILENAME);
         }
@@ -100,6 +116,10 @@ public class LoadICPCTSVData implements UIPlugin {
 
     public String getPluginTitle() {
         return "Load TSV Files";
+    }
+
+    public IInternalController getController() {
+        return controller;
     }
 
 }

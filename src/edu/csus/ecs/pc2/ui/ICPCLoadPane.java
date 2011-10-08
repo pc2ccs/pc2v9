@@ -416,6 +416,7 @@ public class ICPCLoadPane extends JPanePlugin {
     protected void loadTSVFiles() {
         
         LoadICPCTSVData loader = new LoadICPCTSVData();
+        loader.setContestAndController(getContest(), getController());
         
         String filename;
         try {

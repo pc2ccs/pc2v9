@@ -9,7 +9,9 @@ import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.util.TabSeparatedValueParser;
 
 /**
- * CCS Team List.
+ * ICPC CCS TSV File Loader.
+ * 
+ * Loads group and teams.tsv files into Group and Account lists.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
