@@ -5,7 +5,6 @@ import java.util.Vector;
 /**
  * CSV Parser.
  * 
- * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
  */
@@ -24,9 +23,14 @@ public final class CommaSeparatedValueParser {
      * @throws Exception if there was a problem parsing the line
      */
     public static String[] parseLine(String line) throws Exception {
+        
+        if (line == null) {
+            throw new IllegalArgumentException("null String not allowed");
+        }
+        
         String[] array = new String[1];
         array[0] = "";
-        int field = 1;
+        int fieldCount = 1;
         String currentField = "";
         Vector<String> v = new Vector<String>();
         int i;
@@ -45,7 +49,7 @@ public final class CommaSeparatedValueParser {
                     } else {
                         next = line.charAt(i + 1);
                         if (next == COMMA_CHAR) {
-                            // terminating quote of field
+                            // terminating quote of fieldCount
                             inQuote = false;
                         } else {
                             if (next == '"') {
@@ -67,7 +71,7 @@ public final class CommaSeparatedValueParser {
                     } else {
                         // store
                         v.addElement(currentField);
-                        field++;
+                        fieldCount++;
                         currentField = "";
                     }
                 } else { // not a comma
@@ -75,12 +79,12 @@ public final class CommaSeparatedValueParser {
                 }
             }
         }
-        // store the last field
+        // store the last fieldCount
         v.addElement(currentField);
-        array = new String[field];
-        if (field != v.size()) {
+        array = new String[fieldCount];
+        if (fieldCount != v.size()) {
             // TODO review this Exception
-            new Exception("Incorrect number of fields (found " +  field +", but expected " + v.size() + ")");
+            new Exception("Incorrect number of fields (found " +  fieldCount +", but expected " + v.size() + ")");
         }
         Object o;
         for (i = 0; i < v.size(); i++) {

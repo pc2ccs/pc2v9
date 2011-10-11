@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.core.util;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
 /**
  * 
  *  Test Suite for core util.
@@ -20,6 +21,9 @@ public final class AllTests {
         TestSuite suite = new TestSuite("Test for edu.csus.ecs.pc2.core.util");
         //$JUnit-BEGIN$
         suite.addTestSuite(BalloonHandlerTest.class);
+        suite.addTestSuite(CommaSeparatedValueParserTest.class);
+        suite.addTestSuite(TabSeparatedValueParserTest.class);
+        suite.addTestSuite(XMLMementoTest.class);
         //$JUnit-END$
         return suite;
     }
