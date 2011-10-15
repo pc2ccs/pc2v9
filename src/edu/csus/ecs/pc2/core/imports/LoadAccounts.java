@@ -243,7 +243,7 @@ public class LoadAccounts {
                     permLoginColumn = i;
                 }
                 if (columns[i].equalsIgnoreCase("externalid")) {
-                    groupColumn = i;
+                    externalIdColumn = i;
                 }
                 if (columns[i].equalsIgnoreCase("alias")) {
                     aliasColumn = i;
