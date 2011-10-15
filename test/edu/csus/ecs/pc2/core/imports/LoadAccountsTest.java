@@ -120,6 +120,27 @@ public class LoadAccountsTest extends TestCase {
             assertTrue("exception", false);
         }
     }
+    public void testFour() {
+        try {
+            LoadAccounts loadAccounts = new LoadAccounts();
+            Account teamAccount = accountList.getAccount(new ClientId(1, ClientType.Type.TEAM, 1));
+            accountList.update(teamAccount);
+            // 649 is checking group column vs externalid column
+            Group[] groups = new Group[1];
+            groups[0] = new Group("Lower");
+            Account[] accounts = loadAccounts.fromTSVFile(loadDir + "loadaccount" + File.separator + "accounts.649.txt", accountList.getList(), groups);
+            for (int i = 0; i < accounts.length; i++) {
+                if (accounts[i].getClientId().equals(teamAccount.getClientId())) {
+                    assertEquals("group load",groups[0].getElementId(),accounts[i].getGroupId());
+                    assertEquals("externalId load","10", accounts[i].getExternalId());
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            assertTrue("exception", false);
+        }
+    }
     public void checkPermissions(Account[] accounts) {
         for (Account account : accounts) {
             if (account.getClientId().getClientType().equals(ClientType.Type.TEAM)) {

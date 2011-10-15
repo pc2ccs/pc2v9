@@ -1,0 +1,11 @@
+site	account	password	group	externalid
+1	team1	team1	Lower	10
+1	team2	team2
+1	team3	team3
+1	team4	team4
+1	team5	team5
+1	team6	team6
+1	team7	team7
+1	team8	team8
+1	team9	team9
+1	team10	team10
