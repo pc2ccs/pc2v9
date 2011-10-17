@@ -65,17 +65,27 @@ public class LanguageAutoFillTest extends TestCase {
 
             String[] fields = LanguageAutoFill.getAutoFillValues(key);
 
-            System.out.println("Language: " + fields[4]);
+//            System.out.println("Language: " + fields[4]);
             if (fields.length != 6) {
                 System.out.println(" Expecting 6 fields, got " + fields.length);
                 System.exit(4);
             }
-            System.out.println("             " + fields[0]);
-            System.out.println("             " + fields[1]);
-            System.out.println("             " + fields[2]);
-            System.out.println("             " + fields[3]);
-            System.out.println("             " + fields[4]);
-            System.out.println("             " + fields[5]);
+            
+//            System.out.println("             " + fields[0]);
+//            System.out.println("             " + fields[1]);
+//            System.out.println("             " + fields[2]);
+//            System.out.println("             " + fields[3]);
+//            System.out.println("             " + fields[4]);
+//            System.out.println("             " + fields[5]);
+
+            
+            System.out.println(" Title for Language          : " + fields[0]);
+            System.out.println(" Compiler Command Line       : " + fields[1]);
+            System.out.println(" Executable Identifier Mask  : " + fields[2]);
+            System.out.println(" Execute command line        : " + fields[3]);
+            System.out.println(" Interpreted                 : " + fields[5]);
+            
+            
             System.out.println();
         }
     }
