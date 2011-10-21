@@ -575,9 +575,24 @@ public class ContestYAMLLoader {
                 if (compilerName == null || compilerName.trim().length() == 0) {
 
                     for (String langName : LanguageAutoFill.getLanguageList()) {
-                        if (name.startsWith(langName)) {
+                        
+                        // if yaml name matches language name, found language
+                        boolean foundLang = langName.equals(name);
+                        
+                        if ((!foundLang) && langName.indexOf('(') > -1){
+                            /**
+                             * Special case for matching GNU C and GNU C++, 
+                             * so will match start of language name plus a space to 
+                             * avoid GNU C matching GNU C++.
+                             * "GNU C" matches "GNU C (..." and
+                             * "GNU C++" matches "GNU C++ (..."
+                             */
+                            foundLang = langName.startsWith(name+" ");
+                        }
+                        
+                        if (foundLang) {
 
-                            String[] values = LanguageAutoFill.getAutoFillValues(name);
+                            String[] values = LanguageAutoFill.getAutoFillValues(langName);
                             fillLanguage(language, values, langName);
                             languageList.addElement(language);
                         }
