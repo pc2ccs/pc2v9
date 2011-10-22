@@ -196,6 +196,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
         updateProfileLabel();
         
         AdminListeners adminListeners = new AdminListeners();
+        adminListeners.setContestAndController(inContest, inController);
         controller.register(adminListeners);
         
         SwingUtilities.invokeLater(new Runnable() {
@@ -642,7 +643,7 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
     private JPanel getAMessagePane() {
         if (aMessagePane == null) {
             messageLabel = new JLabel();
-            messageLabel.setText("Active Profile is: \"Practice\"");
+            messageLabel.setText("");
             messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
             messageLabel.setFont(new Font("Dialog", Font.BOLD, 18));
             messageLabel.setForeground(new Color(0, 186, 0));
