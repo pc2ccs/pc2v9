@@ -249,12 +249,17 @@ public class ExportYAML {
 
         ClientType.Type[] types = { ClientType.Type.TEAM, ClientType.Type.JUDGE, ClientType.Type.SCOREBOARD, };
 
-        contestWriter.println("accounts:");
+        boolean accountHeader = false;
 
         for (Site site : sites) {
             for (ClientType.Type type : types) {
                 Vector<Account> accounts = contest.getAccounts(type, site.getSiteNumber());
                 if (accounts.size() > 0) {
+                    if (!accountHeader) {
+                        // only print it once, and only if we have some accounts to dump
+                        contestWriter.println("accounts:");
+                        accountHeader=true;
+                    }
                     contestWriter.println("  - account: " + type.toString());
                     contestWriter.println("      site: " + site.getSiteNumber());
                     contestWriter.println("     count: " + accounts.size());
@@ -262,8 +267,10 @@ public class ExportYAML {
                 }
             }
         }
-        contestWriter.println();
-
+        // only add this blank line if we dumped accounts
+        if (accountHeader) {
+            contestWriter.println();
+        }
         contestWriter.println("# EOF Contest Configuration");
 
         contestWriter.flush();
