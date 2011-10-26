@@ -275,7 +275,7 @@ public class ContestPreloadPane extends JPanePlugin {
                 return;
             }
 
-            new ContestImporter().sendContestSettingsToServer(getController(), newContest);
+            new ContestImporter().sendContestSettingsToServer(getController(), getContest(), newContest);
             
             showMessage("All contest settings sent to server" + NL + contestSummary);
 

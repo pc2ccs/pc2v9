@@ -1,5 +1,9 @@
 package edu.csus.ecs.pc2.core;
 
+import java.util.HashMap;
+import java.util.Vector;
+
+import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Category;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -26,7 +30,7 @@ public class ContestImporter {
      * @param theController
      * @param inContest
      */
-    public void sendContestSettingsToServer(IInternalController theController, IInternalContest inContest) {
+    public void sendContestSettingsToServer(IInternalController theController, IInternalContest theContest, IInternalContest inContest) {
         // TODO CCS
 
         if (inContest.getContestInformation().getContestTitle() != null) {
@@ -42,29 +46,106 @@ public class ContestImporter {
         // TODO CCS update contest freeze time
 
         for (Site site : inContest.getSites()) {
-            Site existingSite = inContest.getSite(site.getSiteNumber());
+            Site existingSite = theContest.getSite(site.getSiteNumber());
             if (existingSite != null) {
-                System.out.println("Not overwriting site: " + site.getSiteNumber() + " " + site.getDisplayName());
+                Site updatedSite = existingSite.clone();
+                if (!site.isSameAs(updatedSite)) {
+                    updatedSite.setDisplayName(site.getDisplayName());
+                    updatedSite.setPassword(site.getPassword());
+                    updatedSite.setConnectionInfo(site.getConnectionInfo());
+                    // TODO this field is not in use...
+                    // updatedSite.setConnectionDisplayInfo(site.getConnectionDisplayInfo());
+                    theController.updateSite(updatedSite);
+                }
             } else {
                 theController.addNewSite(site);
             }
         }
 
+        HashMap<String, Language> langHash = new HashMap<String, Language>();
+        for (Language existingLanguage : theContest.getLanguages()) {
+            if (existingLanguage.isActive()) {
+                langHash.put(existingLanguage.getDisplayName(), existingLanguage);
+            }
+        }
         for (Language language : inContest.getLanguages()) {
-            theController.addNewLanguage(language);
+            if (langHash.containsKey(language.getDisplayName())) {
+                Language newLanguage = langHash.get(language.getDisplayName());
+                if (!newLanguage.isSameAs(language)) {
+                    newLanguage.setCompileCommandLine(language.getCompileCommandLine());
+                    newLanguage.setExecutableIdentifierMask(language.getExecutableIdentifierMask());
+                    newLanguage.setProgramExecuteCommandLine(language.getProgramExecuteCommandLine());
+                    theController.updateLanguage(newLanguage);
+                }
+            } else {
+                theController.addNewLanguage(language);
+            }
         }
 
+        HashMap<String, Problem> probHash = new HashMap<String, Problem>();
+        for (Problem existingProblem : theContest.getProblems()) {
+            if (existingProblem.isActive()) {
+                probHash.put(existingProblem.getDisplayName(), existingProblem);
+            }
+        }
         for (Problem problem : inContest.getProblems()) {
             ProblemDataFiles problemDataFiles = inContest.getProblemDataFile(problem);
-            if (problemDataFiles != null) {
-                theController.addNewProblem(problem, problemDataFiles);
+            if (probHash.containsKey(problem.getDisplayName())) {
+                Problem newProblem = probHash.get(problem.getDisplayName());
+                if (!newProblem.isSameAs(problem)) {
+                    newProblem.setAnswerFileName(problem.getAnswerFileName());
+                    newProblem.setComputerJudged(problem.isComputerJudged());
+                    newProblem.setDataFileName(problem.getDataFileName());
+                    newProblem.setHideOutputWindow(problem.isHideOutputWindow());
+                    newProblem.setIgnoreSpacesOnValidation(problem.isIgnoreSpacesOnValidation());
+                    newProblem.setInternationalJudgementReadMethod(problem.isInternationalJudgementReadMethod());
+                    newProblem.setManualReview(problem.isManualReview());
+                    newProblem.setPrelimaryNotification(problem.isPrelimaryNotification());
+                    newProblem.setReadInputDataFromSTDIN(problem.isReadInputDataFromSTDIN());
+                    try {
+                        newProblem.setShortName(problem.getShortName());
+                    } catch (Exception e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                    newProblem.setShowCompareWindow(problem.isShowCompareWindow());
+                    newProblem.setShowValidationToJudges(problem.isShowValidationToJudges());
+                    newProblem.setTimeOutInSeconds(problem.getTimeOutInSeconds());
+                    newProblem.setUsingPC2Validator(problem.isUsingPC2Validator());
+                    newProblem.setValidatedProblem(problem.isValidatedProblem());
+                    newProblem.setValidatorCommandLine(problem.getValidatorCommandLine());
+                    newProblem.setValidatorProgramName(problem.getValidatorProgramName());
+                    newProblem.setWhichPC2Validator(problem.getWhichPC2Validator());
+                }
+                if (problemDataFiles != null) {
+                    theController.updateProblem(newProblem, problemDataFiles);
+                } else {
+                    theController.updateProblem(newProblem);
+                }
             } else {
-                theController.addProblem(problem);
+                if (problemDataFiles != null) {
+                    theController.addNewProblem(problem, problemDataFiles);
+                } else {
+                    theController.addProblem(problem);
+                }
             }
         }
         
-        theController.addNewAccounts(inContest.getAccounts());
+        // account yaml lacks detail, so all we are doing here is ensuring
+        // that the accounts exist.
+        HashMap<String,Account> accountHash = new HashMap<String, Account>();
+        for (Account existingAccount : theContest.getAccounts()) {
+            accountHash.put(existingAccount.getClientId().toString(), existingAccount);
+        }
+        Vector<Account> addAccountsVector = new Vector<Account>();
+        for (Account account : inContest.getAccounts()) {
+            if (!accountHash.containsKey(account.getClientId().toString())) {
+                addAccountsVector.add(account);
+            }
+        }
+        theController.addNewAccounts(addAccountsVector.toArray(new Account[addAccountsVector.size()]));
         
+        // XXX it does not appear that PacketHandler looks at Categories.
         // TODO CCS Add categories, add updateSettings to be a more
         // generic way to update multiple settings
         Category [] categories = inContest.getCategories();
