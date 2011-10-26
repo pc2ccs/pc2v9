@@ -11,6 +11,7 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.ContestImporter;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -114,7 +115,7 @@ public class ContestPreloadPane extends JPanePlugin {
 
     private void loadContestListBox() {
 
-        String dirname = "samps" + File.separator + "contests";
+        String dirname = new VersionInfo().locateHome()+ File.separator + "samps" + File.separator + "contests";
 
         File dir = new File(dirname);
 
