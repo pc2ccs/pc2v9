@@ -143,7 +143,9 @@ public class ContestImporter {
                 addAccountsVector.add(account);
             }
         }
-        theController.addNewAccounts(addAccountsVector.toArray(new Account[addAccountsVector.size()]));
+        if (addAccountsVector.size() > 0) {
+            theController.addNewAccounts(addAccountsVector.toArray(new Account[addAccountsVector.size()]));
+        }
         
         // XXX it does not appear that PacketHandler looks at Categories.
         // TODO CCS Add categories, add updateSettings to be a more
