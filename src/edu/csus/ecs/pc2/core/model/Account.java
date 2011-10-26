@@ -201,6 +201,16 @@ public class Account implements IElementObject {
             if (!shortSchoolName.equals(account.getShortSchoolName())) {
                 return false;
             }
+            if (permissionList == null || account.getPermissionList() == null) {
+                // if only 1 is null then return false
+                if (!(permissionList == null && account.getPermissionList() == null)) {
+                    return false;
+                }
+            } else {
+                if (!permissionList.isSameAs(account.getPermissionList())) {
+                    return false;
+                }
+            }
             return true;
         } catch (Exception e) {
             // TODO log to static exception log
