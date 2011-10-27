@@ -23,6 +23,7 @@ import javax.swing.JOptionPane;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.report.IReport;
@@ -428,56 +429,32 @@ public final class Utilities {
 
     }
     
-    public static void viewReport(IReport report, String title, IInternalContest contest, IInternalController controller) {
+    /**
+     * Create/Write a report to file.
+     * 
+     * @param report
+     *            IReport to write
+     * @param contest
+     * @param controller
+     * @return name of created report file.
+     * @throws FileNotFoundException
+     */
+    public static String createReport(IReport report, IInternalContest contest, IInternalController controller, boolean printHeaderAndFooter) throws FileNotFoundException {
 
         String filename = getReportFilename(report);
 
         report.setContestAndController(contest, controller);
 
         PrintWriter printWriter = null;
-        try {
-            printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
-        } catch (FileNotFoundException e1) {
-            JOptionPane.showMessageDialog(null, "Unable to open file " + filename);
-        }
+        printWriter = new PrintWriter(new FileOutputStream(filename, false), true);
 
         try {
 
-            /**
-             * Create/write standardized header for all reports
-             */
+            if (printHeaderAndFooter) {
 
-            printWriter.println(new VersionInfo().getSystemName());
-            printWriter.println(new VersionInfo().getSystemVersionInfo());
-            ContestInformation contestInformation = contest.getContestInformation();
-            String contestTitle = "(Contest title not defined)";
-            if (contestInformation != null) {
-                contestTitle = contestInformation.getContestTitle();
-            }
-            printWriter.println("Contest Title: " + contestTitle);
-            printWriter.println("On: " + Utilities.getL10nDateTime());
-            GregorianCalendar resumeTime = null;
-            if (contest.getContestTime() != null){
-                resumeTime = contest.getContestTime().getResumeTime();
-            }
-            if (resumeTime == null) {
-                printWriter.print("  Contest date/time: never started");
-            } else {
-                printWriter.print("  Contest date/time: " + resumeTime.getTime());
+                printReportHeader(printWriter, report, contest);
 
             }
-            printWriter.println();
-            printWriter.println();
-            printWriter.println("** " + report.getReportTitle() + " Report");
-            printWriter.println("Site "+contest.getSiteNumber());
-            printWriter.println();
-            // if (filter != null) {
-            // String filterInfo = filter.toString();
-            // if (filter.isFilterOn() && (!filterInfo.equals(""))) {
-            // printWriter.println("Filter: " + filterInfo);
-            // printWriter.println();
-            // }
-            // }
 
             try {
                 report.writeReport(printWriter);
@@ -487,7 +464,11 @@ public final class Utilities {
                 e.printStackTrace(printWriter);
             }
 
-            report.printFooter(printWriter);
+            if (printHeaderAndFooter) {
+
+                report.printFooter(printWriter);
+
+            }
 
         } catch (Exception e) {
             controller.getLog().log(Log.INFO, "Exception creating report", e);
@@ -497,13 +478,64 @@ public final class Utilities {
             printWriter.close();
             printWriter = null;
         }
+        return filename;
+    }
+    
+    private static void printReportHeader(PrintWriter printWriter, IReport report, IInternalContest contest) {
 
-        MultipleFileViewer multipleFileViewer = new MultipleFileViewer(controller.getLog());
-        multipleFileViewer.addFilePane(title, filename);
-        multipleFileViewer.setTitle("PC^2 Report (Build " + new VersionInfo().getBuildNumber() + ")");
-        FrameUtilities.centerFrameFullScreenHeight(multipleFileViewer);
-        multipleFileViewer.setVisible(true);
+        printWriter.println(new VersionInfo().getSystemName());
+        printWriter.println(new VersionInfo().getSystemVersionInfo());
+        ContestInformation contestInformation = contest.getContestInformation();
+        String contestTitle = "(Contest title not defined)";
 
+        if (contestInformation != null) {
+            contestTitle = contestInformation.getContestTitle();
+        }
+        printWriter.println("Contest Title: " + contestTitle);
+        printWriter.println("On: " + Utilities.getL10nDateTime());
+        GregorianCalendar resumeTime = null;
+        if (contest.getContestTime() != null) {
+            resumeTime = contest.getContestTime().getResumeTime();
+        }
+        if (resumeTime == null) {
+            printWriter.print("  Contest date/time: never started");
+        } else {
+            printWriter.print("  Contest date/time: " + resumeTime.getTime());
+
+        }
+        printWriter.println();
+        printWriter.println();
+        printWriter.println("** " + report.getReportTitle() + " Report");
+        printWriter.println("Site " + contest.getSiteNumber());
+        printWriter.println();
+
+    }
+
+    /**
+     * Create and view report.
+     * 
+     * @param report
+     * @param title title for tab in pane for this report
+     * @param contest
+     * @param controller
+     */
+    public static void viewReport(IReport report, String title, IInternalContest contest, IInternalController controller, boolean printHeaderAndFooter) {
+
+        try {
+            String filename = createReport(report, contest, controller, printHeaderAndFooter);
+
+            MultipleFileViewer multipleFileViewer = new MultipleFileViewer(controller.getLog());
+            multipleFileViewer.addFilePane(title, filename);
+            multipleFileViewer.setTitle("PC^2 Report (Build " + new VersionInfo().getBuildNumber() + ")");
+            FrameUtilities.centerFrameFullScreenHeight(multipleFileViewer);
+            multipleFileViewer.setVisible(true);
+        } catch (FileNotFoundException e) {
+
+            JOptionPane.showMessageDialog(null, "Unable to show report: " + e.getMessage());
+            if (StaticLog.getLog() != null) {
+                StaticLog.getLog().log(Log.WARNING, "Unable to show/view report", e);
+            }
+        }
     }
 
     /**
@@ -529,5 +561,33 @@ public final class Utilities {
             out.println(string);
             counter++;
         }
+    }
+
+    public static void debugPrint(String s) {
+        if (debugMode){
+            System.err.println(new Date() + " debug: "+s);
+            System.err.flush();
+        }
+    }
+
+    public static void debugPrint(Exception e) {
+        if (debugMode){
+            System.err.println(new Date() + " debug: Exception "+e.getMessage());
+            e.printStackTrace(System.err);
+            System.err.flush();
+        }
+    }
+
+    /**
+     * View report
+     * 
+     * @see #viewReport(IReport, String, IInternalContest, IInternalController, boolean)
+     * @param report
+     * @param string
+     * @param contest
+     * @param controller
+     */
+    public static void viewReport(IReport report, String string, IInternalContest contest, IInternalController controller) {
+       viewReport(report, string, contest, controller, true);
     }
 }

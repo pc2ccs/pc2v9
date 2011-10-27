@@ -24,6 +24,7 @@ import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.CloneException;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestLoginSuccessData;
 import edu.csus.ecs.pc2.core.model.ContestTime;
@@ -561,7 +562,6 @@ public class PacketHandler {
         
         if (contest.getProfile().getName().equals(newProfile.getName())){
             PacketFactory.dumpPacket(System.out, packet, "switch packet, tried to switch to same profile");
-//            JOptionPane.showMessageDialog(null, "switch packet, tried to switch to same profile");
             throw new ProfileException("Attempted to switch to the same profile: "+newProfile.getName());
         }
         
@@ -609,9 +609,13 @@ public class PacketHandler {
          */
         contest.removeAllListeners(); // remove all listeners from old contest/profile
 
-        contest.cloneAllLoginAndConnections(newContest);
-        
-        System.out.println("debug 22  contest hash before "+contest);
+        try {
+            contest.cloneAllLoginAndConnections(newContest);
+        } catch (CloneException e) {
+            info(e);
+            System.err.println("debug 22 - CloneException ");
+            e.printStackTrace(System.err); // debug 22
+        }
         
         /*
          * Set new contest and add all listeners.
@@ -619,8 +623,6 @@ public class PacketHandler {
         controller.updateContestController(newContest, controller);
 
         contest = newContest; // set contest in this (PacketHandler);
-
-        System.out.println("debug 22  contest hash after  "+contest);
 
         if (packet != null){
             /**
@@ -648,6 +650,10 @@ public class PacketHandler {
         
         info("switchProfile done - to "+contest.getProfile()+" as Site "+contest.getSiteNumber()+" as user "+newContest.getClientId());
         info("Switched to profile "+contest.getProfile().getName()+" contest id = "+contest.getContestIdentifier());
+
+        if ((! controller.isUsingGUI()) || Utilities.isDebugMode()){
+            System.out.println(new Date() + " Switched to profile "+contest.getProfile().getName()+" contest id = "+contest.getContestIdentifier());
+        }
 
         return contest;
     }
@@ -3717,11 +3723,16 @@ public class PacketHandler {
         return isServer(contest.getClientId());
     }
 
+
+    private void info(Exception e) {
+        controller.getLog().log(Log.INFO, e.getMessage(), e);
+        Utilities.debugPrint(e);
+    }
+
+    
     public void info(String s) {
-        // System.err.flush();
         controller.getLog().info(s);
-        // System.err.println(Thread.currentThread().getName() + " " + s);
-        // System.err.flush();
+        Utilities.debugPrint(s);
     }
     
     private void handleShutdownAllServers(Packet packet, ConnectionHandlerID connectionHandlerID, ClientId fromId) {

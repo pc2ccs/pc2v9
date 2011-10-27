@@ -1672,9 +1672,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             sendToServers(violationPacket);
 
         } catch (Exception e) {
-            System.err.println("Exception in processPacket");
+            System.err.println("debug 22Exception in processPacket for "+packet);
             e.printStackTrace(System.err);
             info("Exception in processPacket, check logs ", e);
+            info("Exception in processPacket for "+packet);
         }
 
     }

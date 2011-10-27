@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.core;
 
 import java.io.IOException;
 import java.util.GregorianCalendar;
+import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -67,9 +68,42 @@ public class ContestLoader {
                         contest.updateAccount(account);
                     }
                 }
+                
+                for (Type type : ClientType.Type.values()) {
+                    addMissingLocalAccounts(contest, accounts, type);
+                }
+                
             }
         } catch (Exception e) {
             controller.logWarning("Exception logged ", e);
+        }
+    }
+
+    /**
+     * Create missing accounts if NO account exist in current contest.
+     * 
+     * Intended to insure that local account exist.
+     * 
+     * @param contest
+     * @param accounts
+     * @param type account type
+     */
+    private void addMissingLocalAccounts(IInternalContest contest, Account[] accounts, Type type) {
+
+        if (isServer(contest)) {
+
+            Vector<Account> vector = contest.getAccounts(type, contest.getSiteNumber());
+            if (vector.size() == 0) {
+                // No local accounts for account type, need to add them.
+
+                for (Account account : accounts) {
+                    if (isThisSite(contest, account)) {
+                        if (account.getClientId().getClientType().equals(type)) {
+                            contest.updateAccount(account);
+                        }
+                    }
+                }
+            }
         }
     }
 

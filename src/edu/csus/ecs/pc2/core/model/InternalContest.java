@@ -2450,7 +2450,11 @@ public class InternalContest implements IInternalContest {
                     account.setGroupId(null);
                 }
             }
-        }
+        }  else {
+//             TODO Bug 70
+//             Must create an admin account
+             contest.generateNewAccounts(ClientType.Type.ADMINISTRATOR.toString(), 1, true);
+         }
 
         if (settings.isCopyContestSettings()) {
             /**
@@ -2724,14 +2728,20 @@ public class InternalContest implements IInternalContest {
 
     }
 
-    public void cloneAllLoginAndConnections(IInternalContest newContest) {
+    public void cloneAllLoginAndConnections(IInternalContest newContest) throws CloneException {
+        
+        CloneException ex = null;
         
         /**
          * Local Logins
          */
 
         for (ClientId clientId : localLoginList.getClientIdList()) {
-            newContest.addLocalLogin(clientId, localLoginList.getConnectionHandleID(clientId));
+            try {
+                newContest.addLocalLogin(clientId, localLoginList.getConnectionHandleID(clientId));      
+            } catch (Exception e) {
+                ex = new CloneException(e.getMessage(), e.getCause());
+            }
         }
 
         /**
@@ -2739,7 +2749,11 @@ public class InternalContest implements IInternalContest {
          */
 
         for (ClientId clientId : remoteLoginList.getClientIdList()) {
-            newContest.addRemoteLogin(clientId, remoteLoginList.getConnectionHandleID(clientId));
+            try {
+                newContest.addRemoteLogin(clientId, remoteLoginList.getConnectionHandleID(clientId));
+            } catch (Exception e) {
+                ex = new CloneException(e.getMessage(), e.getCause());
+            }
         }
 
         /**
@@ -2747,7 +2761,11 @@ public class InternalContest implements IInternalContest {
          */
 
         for (ConnectionHandlerID connectionHandlerID : localConnectionHandlerList.getList()) {
-            newContest.connectionEstablished(connectionHandlerID, localConnectionHandlerList.get(connectionHandlerID));
+            try {
+                newContest.connectionEstablished(connectionHandlerID, localConnectionHandlerList.get(connectionHandlerID));
+            } catch (Exception e) {
+                ex = new CloneException(e.getMessage(), e.getCause());
+            }
         }
 
         /**
@@ -2755,7 +2773,15 @@ public class InternalContest implements IInternalContest {
          */
 
         for (ConnectionHandlerID connectionHandlerID : remoteConnectionHandlerList.getList()) {
-            newContest.connectionEstablished(connectionHandlerID, remoteConnectionHandlerList.get(connectionHandlerID));
+            try {
+                newContest.connectionEstablished(connectionHandlerID, remoteConnectionHandlerList.get(connectionHandlerID));
+            } catch (Exception e) {
+                ex = new CloneException(e.getMessage(), e.getCause());
+            }
+        }
+        
+        if (ex != null){
+            throw ex;
         }
         
     }

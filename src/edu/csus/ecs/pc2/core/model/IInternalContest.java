@@ -1071,7 +1071,7 @@ public interface IInternalContest {
      * 
      * @param newContest contest to copy information to.
      */
-    void cloneAllLoginAndConnections(IInternalContest newContest);
+    void cloneAllLoginAndConnections(IInternalContest newContest) throws CloneException;
 
     /**
      * Are RunFiles present?

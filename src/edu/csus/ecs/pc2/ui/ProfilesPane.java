@@ -3,7 +3,9 @@ package edu.csus.ecs.pc2.ui;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Rectangle;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -130,7 +132,6 @@ public class ProfilesPane extends JPanePlugin {
         
         profileNameLabel = new JLabel();
         profileNameLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        profileNameLabel.setBounds(new Rectangle(51, 29, 189, 23));
         profileNameLabel.setText("Active Profile Name");
         profileNameLabel.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent e) {
@@ -190,7 +191,6 @@ public class ProfilesPane extends JPanePlugin {
             setButton = new JButton();
             setButton.setEnabled(false);
             setButton.setMnemonic(java.awt.event.KeyEvent.VK_S);
-            setButton.setBounds(new Rectangle(556, 54, 100, 26));
             setButton.setText("Set");
             setButton.setToolTipText("Update the profile name and description");
             setButton.addActionListener(new java.awt.event.ActionListener() {
@@ -210,7 +210,6 @@ public class ProfilesPane extends JPanePlugin {
     private JTextField getProfileTextField() {
         if (profileTextField == null) {
             profileTextField = new JTextField();
-            profileTextField.setBounds(new Rectangle(257, 25, 248, 30));
             profileTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableSetButton();
@@ -229,7 +228,6 @@ public class ProfilesPane extends JPanePlugin {
         if (centerPane == null) {
             profileDescriptionLabel = new JLabel();
             profileDescriptionLabel.setText("Active Profile Description");
-            profileDescriptionLabel.setBounds(new Rectangle(51, 78, 189, 23));
             profileDescriptionLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             centerPane = new JPanel();
             centerPane.setLayout(new BorderLayout());
@@ -634,7 +632,6 @@ public class ProfilesPane extends JPanePlugin {
     private JTextField getProfileDescriptionTextField() {
         if (profileDescriptionTextField == null) {
             profileDescriptionTextField = new JTextField();
-            profileDescriptionTextField.setBounds(new Rectangle(257, 75, 248, 29));
             profileDescriptionTextField.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyReleased(java.awt.event.KeyEvent e) {
                     enableSetButton();
@@ -663,14 +660,49 @@ public class ProfilesPane extends JPanePlugin {
      */
     private JPanel getTopPanel() {
         if (topPanel == null) {
+            GridBagConstraints gridBagConstraints4 = new GridBagConstraints();
+            gridBagConstraints4.insets = new Insets(1, 26, 40, 187);
+            gridBagConstraints4.gridx = 2;
+            gridBagConstraints4.gridy = 1;
+            gridBagConstraints4.ipadx = 47;
+            gridBagConstraints4.gridheight = 2;
+            GridBagConstraints gridBagConstraints3 = new GridBagConstraints();
+            gridBagConstraints3.fill = GridBagConstraints.VERTICAL;
+            gridBagConstraints3.gridx = 1;
+            gridBagConstraints3.gridy = 2;
+            gridBagConstraints3.ipadx = 244;
+            gridBagConstraints3.ipady = 9;
+            gridBagConstraints3.weightx = 1.0;
+            gridBagConstraints3.insets = new Insets(10, 9, 16, 25);
+            GridBagConstraints gridBagConstraints2 = new GridBagConstraints();
+            gridBagConstraints2.fill = GridBagConstraints.VERTICAL;
+            gridBagConstraints2.gridheight = 2;
+            gridBagConstraints2.gridx = 1;
+            gridBagConstraints2.gridy = 0;
+            gridBagConstraints2.ipadx = 244;
+            gridBagConstraints2.ipady = 10;
+            gridBagConstraints2.weightx = 1.0;
+            gridBagConstraints2.insets = new Insets(25, 9, 10, 25);
+            GridBagConstraints gridBagConstraints1 = new GridBagConstraints();
+            gridBagConstraints1.insets = new Insets(13, 51, 19, 8);
+            gridBagConstraints1.gridy = 2;
+            gridBagConstraints1.ipadx = 46;
+            gridBagConstraints1.ipady = 7;
+            gridBagConstraints1.gridx = 0;
+            GridBagConstraints gridBagConstraints = new GridBagConstraints();
+            gridBagConstraints.insets = new Insets(29, 51, 1, 8);
+            gridBagConstraints.gridy = 0;
+            gridBagConstraints.ipadx = 78;
+            gridBagConstraints.ipady = 7;
+            gridBagConstraints.gridx = 0;
             topPanel = new JPanel();
-            topPanel.setLayout(null);
+            topPanel.setLayout(new GridBagLayout());
             topPanel.setPreferredSize(new Dimension(120, 120));
-            topPanel.add(profileNameLabel, null);
-            topPanel.add(profileDescriptionLabel, null);
-            topPanel.add(getProfileTextField(), null);
-            topPanel.add(getProfileDescriptionTextField(), null);
-            topPanel.add(getSetButton(), null);
+            topPanel.add(profileNameLabel, gridBagConstraints);
+            topPanel.add(profileDescriptionLabel, gridBagConstraints1);
+            topPanel.add(getProfileTextField(), gridBagConstraints2);
+            topPanel.add(getProfileDescriptionTextField(), gridBagConstraints3);
+            topPanel.add(getSetButton(), gridBagConstraints4);
         }
         return topPanel;
     }
