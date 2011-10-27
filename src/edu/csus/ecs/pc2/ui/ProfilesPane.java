@@ -535,11 +535,7 @@ public class ProfilesPane extends JPanePlugin {
             if (profiles.length > 0) {
 
                 for (Profile profile : profiles) {
-                    boolean showit = showHidden || profile.isActive();
-                    if (showit) {
-                        Object[] objects = buildProfileRow(profile);
-                        getProfilesListBox().addRow(objects, profile.getProfilePath());
-                    }
+                    updateProfileRow(profile);
                 }
                 getProfilesListBox().autoSizeAllColumns();
                 getSwitchButton().setEnabled(true);
@@ -764,12 +760,12 @@ public class ProfilesPane extends JPanePlugin {
 
     public void updateProfileRow(final Profile profile) {
 
-        if (! profile.isActive() && !isShowHidden() ) {
-            removeProfilesRow(profile);
-        } else {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                if (!profile.isActive() && !isShowHidden()) {
+                    removeProfilesRow(profile);
+                } else {
 
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
                     Object[] objects = buildProfileRow(profile);
                     int rowNumber = profilesListBox.getIndexByKey(profile.getProfilePath());
                     if (rowNumber == -1) {
@@ -780,8 +776,8 @@ public class ProfilesPane extends JPanePlugin {
                     profilesListBox.autoSizeAllColumns();
                     profilesListBox.sort();
                 }
-            });
-        }
+            }
+        });
     }
 
     /**
