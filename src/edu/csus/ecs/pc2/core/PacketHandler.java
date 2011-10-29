@@ -508,7 +508,7 @@ public class PacketHandler {
         
         ProfileManager manager = new ProfileManager();
 
-        if (manager.isProfileAvailable(newProfile, contestPassword.toCharArray())) {
+        if (manager.isProfileAvailable(newProfile, contest.getSiteNumber(), contestPassword.toCharArray())) {
 
             PacketFactory.dumpPacket(System.out, packet, "handleSwitchProfile switchProfile"); // debug 22
             IInternalContest newContest = switchProfile(contest, newProfile, contestPassword.toCharArray(), true);
@@ -578,7 +578,7 @@ public class PacketHandler {
         
         info("switchProfile start - to "+newProfile+" as Site "+contest.getSiteNumber()+" as user "+newContest.getClientId());
         
-        IStorage storage = manager.getProfileStorage(newProfile, contestPassword);
+        IStorage storage = manager.getProfileStorage(newProfile, contest.getSiteNumber(), contestPassword);
         newContest.setStorage(storage);
         
         info("switchProfile save config to "+storage.getDirectoryName());
@@ -798,7 +798,7 @@ public class PacketHandler {
 
             ProfileManager manager = new ProfileManager();
             
-            if (manager.createProfilesPathandFiles(newProfile, contestPassword)) {
+            if (manager.createProfilesPathandFiles(newProfile, contest.getSiteNumber(), contestPassword)) {
 
                 /**
                  * If the profiles paths need to be created, then we need to create the profile.
@@ -817,7 +817,7 @@ public class PacketHandler {
                 contest2.storeConfiguration(controller.getLog());
             } 
             
-            if (manager.isProfileAvailable(newProfile, contestPassword.toCharArray())) {
+            if (manager.isProfileAvailable(newProfile, contest.getSiteNumber(), contestPassword.toCharArray())) {
 
                 PacketFactory.dumpPacket(System.out, packet, "handleUpdateClientProfile switchProfile");
                 IInternalContest newContest = switchProfile(contest, newProfile, contestPassword.toCharArray(), false, packet, false);
@@ -1779,15 +1779,29 @@ public class PacketHandler {
         }
     }
     
-    private void insureProfileDirectory(Profile profile) {
-        
-        String profileDirectory = profile.getProfilePath();
-        
-        if (! new File(profileDirectory).isDirectory()){
-            new File(profileDirectory).mkdirs();
+    /**
+     * Insure that directory exists.
+     * 
+     * Will use File.mkdirs() if needed to create directory.
+     * 
+     * @param directoryName
+     */
+    private void insureDirectory(String directoryName) {
+        if (!new File(directoryName).isDirectory()) {
+            new File(directoryName).mkdirs();
         }
     }
 
+    /**
+     * Login to server success.
+     * 
+     * @param packet
+     * @param connectionHandlerID
+     * @param fromId
+     * @throws IOException
+     * @throws ClassNotFoundException
+     * @throws FileSecurityException
+     */
     private void loginSuccess(Packet packet, ConnectionHandlerID connectionHandlerID, ClientId fromId) throws IOException, ClassNotFoundException, FileSecurityException {
         
         ClientId clientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
@@ -1810,10 +1824,11 @@ public class PacketHandler {
                     System.exit(44);
                 }
                 
-                insureProfileDirectory(theProfile);
+                insureDirectory(theProfile.getProfilePath());
                 theProfile.setSiteNumber(clientId.getSiteNumber());
                 
                 String baseDirectoryName = theProfile.getProfilePath() + File.separator + "db." + clientId.getSiteNumber();
+                insureDirectory(baseDirectoryName);
 
                 FileSecurity fileSecurity = new FileSecurity(baseDirectoryName);
                 controller.initializeStorage(fileSecurity);

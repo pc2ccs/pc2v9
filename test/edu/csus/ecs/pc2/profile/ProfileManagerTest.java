@@ -88,7 +88,7 @@ public class ProfileManagerTest extends TestCase {
                 System.out.println("Profile> " + profile.getName() + " " + profile.getProfilePath());
             }
             
-            boolean available = manager.isProfileAvailable(profile, password.toCharArray());
+            boolean available = manager.isProfileAvailable(profile, profile.getSiteNumber(), password.toCharArray());
             assertTrue("Profile not available " + profile.getName()+" at "+profile.getProfilePath(),available);
         }
     }
@@ -166,9 +166,9 @@ public class ProfileManagerTest extends TestCase {
         manager.store(filename, profiles, profile1);
 
         // encrypted password files
-        assertTrue(manager.isProfileAvailable(profile1, password.toCharArray()));
-        assertTrue(manager.isProfileAvailable(profile3, password.toCharArray()));
-        assertTrue(manager.isProfileAvailable(profile4, password.toCharArray()));
+        assertTrue(manager.isProfileAvailable(profile1, profile1.getSiteNumber(), password.toCharArray()));
+        assertTrue(manager.isProfileAvailable(profile3, profile1.getSiteNumber(), password.toCharArray()));
+        assertTrue(manager.isProfileAvailable(profile4, profile1.getSiteNumber(), password.toCharArray()));
 
     }
     
@@ -248,7 +248,7 @@ public class ProfileManagerTest extends TestCase {
         manager.store(profilePropertiesFileName, profiles, profile1);
 
         for (Profile profile : profiles) {
-            assertTrue(manager.isProfileAvailable(profile, password.toCharArray()));
+            assertTrue(manager.isProfileAvailable(profile, profile.getSiteNumber(), password.toCharArray()));
         }
         
         Profile[] loadedProfiles = manager.load(profilePropertiesFileName);

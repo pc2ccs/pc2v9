@@ -392,8 +392,8 @@ public class SwitchProfileStatusPane extends JPanePlugin {
     }
 
     protected void revertToPreviousProfile() {
-        // FIXME code revert profile, this should be fun.
-        JOptionPane.showMessageDialog(this, "debug 22 Would have reverted to profile '" + getContest().getProfile().getName() + "' with contest pass = '" + currentContestPassword + "'");
+        // TODO 9.3  code revert profile, this should be fun.
+        JOptionPane.showMessageDialog(this, "Revert to previous profile not implemented ('" + getContest().getProfile().getName() + "')");
         closeWindow();
     }
 
@@ -479,7 +479,13 @@ public class SwitchProfileStatusPane extends JPanePlugin {
     protected class SiteListenerImplementation implements ISiteListener{
 
         public void siteProfileStatusChanged(SiteEvent event) {
-            ProfileChangeStatus profileChangeStatus = (ProfileChangeStatus) profileStatusList.get(event.getSite());
+            ProfileChangeStatus profileChangeStatus = profileStatusList.get(event.getSite());
+            
+            if (profileChangeStatus == null){
+                profileChangeStatus = new ProfileChangeStatus(event.getSite());
+                profileStatusList.updateStatus(profileChangeStatus, event.getProfileStatus());
+            }
+            
             profileChangeStatus.setStatus(event.getProfileStatus());
             profileChangeStatus.setProfile(event.getProfile());
             profileStatusList.update(profileChangeStatus);

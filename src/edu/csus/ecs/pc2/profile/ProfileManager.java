@@ -126,8 +126,8 @@ public class ProfileManager {
      * @return true if profile
      * @throws ProfileException
      */
-    public boolean isProfileAvailable(Profile profile, char[] contestPassword) throws ProfileException {
-        return getProfileStorage(profile, contestPassword) != null;
+    public boolean isProfileAvailable(Profile profile, int siteNumber, char[] contestPassword) throws ProfileException {
+        return getProfileStorage(profile, siteNumber, contestPassword) != null;
     }
     
     /**
@@ -140,7 +140,7 @@ public class ProfileManager {
      * @return
      * @throws ProfileException
      */
-    public IStorage getProfileStorage(Profile profile, char[] contestPassword) throws ProfileException {
+    public IStorage getProfileStorage(Profile profile, int siteNumber, char[] contestPassword) throws ProfileException {
 
         if (profile == null) {
             throw new IllegalArgumentException("Profile can not be null");
@@ -150,7 +150,7 @@ public class ProfileManager {
 
         if (new File(profilePath).isDirectory()) {
 
-            String dbDirectory = profilePath + File.separator + "db." + profile.getSiteNumber();
+            String dbDirectory = profilePath + File.separator + "db." + siteNumber;
             if (new File(dbDirectory).isDirectory()) {
                 profilePath = dbDirectory;
             } else {
@@ -565,9 +565,7 @@ public class ProfileManager {
      * @throws FileSecurityException
      * @throws ProfileCloneException 
      */
-    public boolean createProfilesPathandFiles (Profile newProfile, String password) throws FileSecurityException, ProfileCloneException {
-
-        int siteNumber = newProfile.getSiteNumber();
+    public boolean createProfilesPathandFiles (Profile newProfile, int siteNumber, String password) throws FileSecurityException, ProfileCloneException {
 
         String profilePath = newProfile.getProfilePath();
         if (!new File(profilePath).isDirectory()) {
