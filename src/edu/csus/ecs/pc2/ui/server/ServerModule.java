@@ -17,6 +17,7 @@ import edu.csus.ecs.pc2.core.model.ILoginListener;
 import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.ISiteListener;
 import edu.csus.ecs.pc2.core.model.LoginEvent;
+import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.SiteEvent;
@@ -52,6 +53,8 @@ public class ServerModule implements UIPlugin {
         System.out.println("Date: " + getL10nDateTime());
         System.out.println("Working directory is " + Utilities.getCurrentDirectory());
         System.out.println();
+        
+
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
@@ -64,6 +67,12 @@ public class ServerModule implements UIPlugin {
         contest.addLoginListener(new LoginListenerImplementation());
         contest.addSiteListener(new SiteListenerImplementation());
         contest.addContestTimeListener(new ContestTimeListenerImplementation());
+        
+        Profile profile = inContest.getProfile();
+        if (! inController.isUsingGUI()){
+            System.out.println(new Date()+" Using Profile: "+profile.getName()+" @ "+profile.getProfilePath());
+        }
+        log.info("Using Profile: "+profile.getName()+" @ "+profile.getProfilePath());
 
         ClientId clientId = contest.getClientId();
         Site site = contest.getSite(clientId.getSiteNumber());

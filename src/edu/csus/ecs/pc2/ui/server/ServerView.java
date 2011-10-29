@@ -5,6 +5,7 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Frame;
 import java.awt.event.KeyEvent;
+import java.util.Date;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -31,6 +32,7 @@ import edu.csus.ecs.pc2.core.model.IProfileListener;
 import edu.csus.ecs.pc2.core.model.IRunListener;
 import edu.csus.ecs.pc2.core.model.ISiteListener;
 import edu.csus.ecs.pc2.core.model.LoginEvent;
+import edu.csus.ecs.pc2.core.model.Profile;
 import edu.csus.ecs.pc2.core.model.ProfileEvent;
 import edu.csus.ecs.pc2.core.model.RunEvent;
 import edu.csus.ecs.pc2.core.model.SiteEvent;
@@ -514,8 +516,17 @@ public class ServerView extends JFrame implements UIPlugin {
         addUIPlugin(getMainTabbedPane(), "Times", contestTimesPane);
         
         setSelectedTab(getMainTabbedPane(), "Sites");
+        
+        Profile profile = inContest.getProfile();
+        info("Using Profile: " + profile.getName() + " @ " + profile.getProfilePath());
+
     }
     
+    private void info(String string) {
+        System.out.println(new Date() + " " + string);
+        log.info(string);
+    }
+
     /**
      * Update frame title and profile label.
      * 

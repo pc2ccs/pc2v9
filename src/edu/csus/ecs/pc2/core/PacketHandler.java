@@ -654,6 +654,12 @@ public class PacketHandler {
         if ((! controller.isUsingGUI()) || Utilities.isDebugMode()){
             System.out.println(new Date() + " Switched to profile "+contest.getProfile().getName()+" contest id = "+contest.getContestIdentifier());
         }
+        
+        Profile profile = contest.getProfile();
+        if (! controller.isUsingGUI()){
+            System.out.println(new Date()+" Switch to Profile: "+profile.getName()+" @ "+profile.getProfilePath());
+        }
+        info("Switch to Profile: "+profile.getName()+" @ "+profile.getProfilePath());
 
         return contest;
     }
@@ -826,7 +832,11 @@ public class PacketHandler {
 
         } else {
 
-            // This is a update/new profile so all data is reset then re-added from this packet
+            /**
+             * Client new profile.
+             */
+            
+            // All client data is reset then re-added from this packet
 
             contest.resetSubmissionData();
             contest.resetConfigurationData();
