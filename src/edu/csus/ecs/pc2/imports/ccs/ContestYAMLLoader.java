@@ -16,7 +16,6 @@ import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
-import edu.csus.ecs.pc2.core.model.LanguageAutoFill;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
@@ -526,28 +525,6 @@ public class ContestYAMLLoader {
     }
 
     /**
-     * Fill in Language fields from LanguageAutoFill fields.
-     * 
-     * @param language
-     * @param values
-     * @param fullLanguageName
-     */
-    private void fillLanguage(Language language, String[] values, String fullLanguageName) {
-        // values array
-        // 0 Title for Language
-        // 1 Compiler Command Line
-        // 2 Executable Identifier Mask
-        // 3 Execute command line
-        // 5 "interpreted" if interpreter.
-
-        language.setCompileCommandLine(values[1]);
-        language.setExecutableIdentifierMask(values[2]);
-        language.setProgramExecuteCommandLine(values[3]);
-        boolean isScript = LanguageAutoFill.isInterpretedLanguage(fullLanguageName);
-        language.setInterpreted(isScript);
-    }
-
-    /**
      * Get/create {@link Language}s from YAML lines.
      * 
      * @param yamlLines
@@ -568,52 +545,39 @@ public class ContestYAMLLoader {
             if (name == null) {
                 syntaxError("Language name field missing in languages section");
             } else {
-                String compilerName = getSequenceValue(sequenceLines, "compiler");
-
                 Language language = new Language(name);
+                String compilerName = getSequenceValue(sequenceLines, "compilerCmd");
+                String compilerArgs = getSequenceValue(sequenceLines, "compiler-args");
+                String interpreter = getSequenceValue(sequenceLines, "runner");
+                String interpreterArgs = getSequenceValue(sequenceLines, "runner-args");
+                String exeMask = getSequenceValue(sequenceLines, "exemask");
+                // runner + runner-args, so what is execCmd for ?
+//                String execCmd = getSequenceValue(sequenceLines, "execCmd");
 
-                if (compilerName == null || compilerName.trim().length() == 0) {
-
-                    for (String langName : LanguageAutoFill.getLanguageList()) {
-                        
-                        // if yaml name matches language name, found language
-                        boolean foundLang = langName.equals(name);
-                        
-                        if ((!foundLang) && langName.indexOf('(') > -1){
-                            /**
-                             * Special case for matching GNU C and GNU C++, 
-                             * so will match start of language name plus a space to 
-                             * avoid GNU C matching GNU C++.
-                             * "GNU C" matches "GNU C (..." and
-                             * "GNU C++" matches "GNU C++ (..."
-                             */
-                            foundLang = langName.startsWith(name+" ");
-                        }
-                        
-                        if (foundLang) {
-
-                            String[] values = LanguageAutoFill.getAutoFillValues(langName);
-                            fillLanguage(language, values, langName);
-                            languageList.addElement(language);
-                        }
-                    }
+                if (compilerArgs == null) {
+                    language.setCompileCommandLine(compilerName);
                 } else {
-
-                    String compilerArgs = getSequenceValue(sequenceLines, "compiler-args");
-                    String interpreter = getSequenceValue(sequenceLines, "runner");
-                    String interpreterArgs = getSequenceValue(sequenceLines, "runner-args");
-
                     language.setCompileCommandLine(compilerName + " " + compilerArgs);
-                    language.setExecutableIdentifierMask("a.out");
-
-                    String programExecuteCommandLine = interpreter + " " + interpreterArgs;
-                    if (interpreter == null) {
-                        programExecuteCommandLine = "a.out";
-                    }
-                    language.setProgramExecuteCommandLine(programExecuteCommandLine);
-
-                    languageList.addElement(language);
                 }
+                language.setExecutableIdentifierMask(exeMask);
+                String activeStr = getSequenceValue(sequenceLines, "active");
+                boolean active = true;
+                active = Boolean.parseBoolean(activeStr);
+                language.setActive(active);
+                String programExecuteCommandLine = null;
+                if (interpreter == null) {
+                    programExecuteCommandLine = "a.out";
+                } else {
+                    if (interpreterArgs == null) {
+                        programExecuteCommandLine = interpreter;
+                    } else {
+                        programExecuteCommandLine = interpreter + " " + interpreterArgs;
+                    }
+                }
+                language.setProgramExecuteCommandLine(programExecuteCommandLine);
+
+                // TODO handle interpreted languages, seems it should be in the export
+                languageList.addElement(language);
 
             }
 
