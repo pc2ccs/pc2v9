@@ -130,7 +130,11 @@ public class ExportYAML {
         // default-clars:
         // - No comment, read problem statement.
         // - This will be answered during the answers to questions session.
-
+        contestWriter.println("default-clars:");
+        // TODO CCS this needs to be an array
+        contestWriter.println(" - "+contest.getContestInformation().getJudgesDefaultAnswer());
+        contestWriter.println();
+        
         // clar-categories:
         // - General
         // - SysOps
@@ -209,11 +213,11 @@ public class ExportYAML {
             if (problem.getShortName() != null && problem.getShortName().trim().length() > 0){
                 shortName = problem.getShortName();
             }
-            contestWriter.println("   short-name: " + shortName);
+            contestWriter.println("    short-name: " + shortName);
 
             String colorName = getProblemBalloonColor(contest, problem);
             if (colorName != null) {
-                contestWriter.println("   color: " + colorName);
+                contestWriter.println("    color: " + colorName);
             }
             // else no color, nothing to print.
 
@@ -236,12 +240,13 @@ public class ExportYAML {
         contestWriter.println("sites:");
         for (Site site : sites) {
             contestWriter.println(" - number: " + site.getSiteNumber());
-            contestWriter.println("     name: " + site.getDisplayName());
+            contestWriter.println("   name: " + site.getDisplayName());
+            contestWriter.println("   password: " + site.getPassword());
 
             String hostName = site.getConnectionInfo().getProperty(Site.IP_KEY);
             String portStr = site.getConnectionInfo().getProperty(Site.PORT_KEY);
-            contestWriter.println("       IP: " + hostName);
-            contestWriter.println("     port: " + portStr);
+            contestWriter.println("   IP: " + hostName);
+            contestWriter.println("   port: " + portStr);
             contestWriter.println();
         }
 
@@ -261,8 +266,8 @@ public class ExportYAML {
                         accountHeader=true;
                     }
                     contestWriter.println("  - account: " + type.toString());
-                    contestWriter.println("      site: " + site.getSiteNumber());
-                    contestWriter.println("     count: " + accounts.size());
+                    contestWriter.println("    site: " + site.getSiteNumber());
+                    contestWriter.println("    count: " + accounts.size());
                     contestWriter.println();
                 }
             }
