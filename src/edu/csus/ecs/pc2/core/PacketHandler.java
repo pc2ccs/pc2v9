@@ -1005,7 +1005,7 @@ public class PacketHandler {
         info("Send Sync RunFiles to site "+siteNumber);
     }
 
-    private void handleCloneProfile(Packet packet, ConnectionHandlerID connectionHandlerID) throws IOException, ClassNotFoundException, FileSecurityException, ProfileCloneException, ProfileException {
+    private void handleCloneProfile(Packet packet, ConnectionHandlerID connectionHandlerID) {
         
         // FIXME code security check only Admins can change profiles
         
@@ -1015,14 +1015,20 @@ public class PacketHandler {
 //        prop.put(PROFILE, profile2);
 //        Profile currentProfile = (Profile) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE);
         
-        ProfileCloneSettings settings =  (ProfileCloneSettings) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE_CLONE_SETTINGS);
-        boolean switchProfileNow = ((Boolean) PacketFactory.getObjectValue(packet, PacketFactory.SWITCH_PROFILE)).booleanValue();
-        
-        cloneContest (settings, switchProfileNow);
-        
+        try {
+            ProfileCloneSettings settings =  (ProfileCloneSettings) PacketFactory.getObjectValue(packet, PacketFactory.PROFILE_CLONE_SETTINGS);
+            boolean switchProfileNow = ((Boolean) PacketFactory.getObjectValue(packet, PacketFactory.SWITCH_PROFILE)).booleanValue();
+            
+            Profile newProfile = cloneContest (packet, settings, switchProfileNow);
+            
+            notifyAllOfClonedContest(packet, newProfile, settings);
+        } catch (Exception e) {
+            sendMessage(Area.PROFILES, "Unable to clone profile",e);
+            info(e);
+        }
     }
     
-    private void cloneContest (ProfileCloneSettings settings, boolean switchProfileNow) throws ProfileCloneException, ProfileException, IOException, ClassNotFoundException, FileSecurityException {
+    private Profile cloneContest (Packet packet, ProfileCloneSettings settings, boolean switchProfileNow) {
         
         Profile newProfile = new Profile(settings.getName());
         newProfile.setDescription(settings.getDescription());
@@ -1034,26 +1040,32 @@ public class PacketHandler {
         
         InternalContest newContest = new InternalContest();
         newContest.setSiteNumber(contest.getSiteNumber());
-        
-        /**
-         * This clones the existing contest based on the settings,
-         * including copying and saving all settings on disk.
-         */
-        contest.clone(newContest, addedProfile, settings);
-        
-        contest.storeConfiguration(controller.getLog());
-
-        storeProfiles();
-        
-        if (switchProfileNow ){
-            switchProfile(contest, newProfile, contest.getContestPassword().toCharArray(), true);
+    
+        try {
+            /**
+             * This clones the existing contest based on the settings,
+             * including copying and saving all settings on disk.
+             */
+            contest.clone(newContest, addedProfile, settings);
             
-        } else {
-            Packet addPacket = PacketFactory.createAddSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, addedProfile);
-            sendToJudgesAndOthers(addPacket, true);
+            contest.storeConfiguration(controller.getLog());
+
+            storeProfiles();
+            
+            if (switchProfileNow ){
+                switchProfile(contest, newProfile, contest.getContestPassword().toCharArray(), true);
+            }
+            
+            info("Done clone to profile "+newProfile.getName());
+            
+        } catch (Exception e) {
+            sendMessage(Area.PROFILES, "Unable to clone using packet "+packet,e);
+            info("Failed to clone to profile");
+            info(e);
         }
         
-        info("Done clone to profile "+newProfile.getName());
+        return newProfile;
+    
     }
 
 
@@ -1209,7 +1221,10 @@ public class PacketHandler {
             
             settings.setContestPassword(contest.getContestPassword().toCharArray());
             
-            cloneContest (settings, true);
+            Profile newProfile = cloneContest (packet, settings, true);
+            
+            notifyAllOfClonedContest(packet, newProfile, settings);
+            
             
         } else {
             
@@ -1224,6 +1239,20 @@ public class PacketHandler {
         }
     }
     
+    private void notifyAllOfClonedContest(Packet packet, Profile newProfile, ProfileCloneSettings settings) {
+
+        contest.addProfile(newProfile);
+
+        Packet addPacket = PacketFactory.createAddSetting(contest.getClientId(), PacketFactory.ALL_SERVERS, newProfile);
+        sendToJudgesAndOthers(addPacket, false);
+        
+        if (isThisSite(packet.getSourceId())) {
+            // Only send to other servers if this server originated the clone.
+            controller.sendToServers(packet);
+        }
+
+    }
+
     /**
      * Clear all auto judge problems for this contest site/client.
      * 
@@ -3796,6 +3825,23 @@ public class PacketHandler {
         }
     }
 
-    
-  
+    /**
+     * Send message to all servers.
+     * 
+     * @param area
+     * @param message
+     * @param ex
+     */
+    private void sendMessage(Area area, String message, Exception ex) {
+        contest.addMessage(area, contest.getClientId(), PacketFactory.ALL_SERVERS, message);
+        info(ex);
+        message += " " +ex.getMessage();
+        Packet messPacket = PacketFactory.createMessage(getServerClientId(), PacketFactory.ALL_SERVERS, area, message, ex);
+        if (isServer()){
+            controller.sendToServers(messPacket);
+        } else {
+            controller.sendToLocalServer(messPacket);
+        }
+    }
+
 }
