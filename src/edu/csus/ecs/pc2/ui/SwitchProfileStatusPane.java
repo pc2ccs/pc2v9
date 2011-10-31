@@ -419,17 +419,12 @@ public class SwitchProfileStatusPane extends JPanePlugin {
             
             Integer siteNumber = (Integer) siteListBox.getKeys()[i];
 
-            if (isThisSite(siteNumber)){
-                updateCurrentSiteStatus ();
-                updateStatusRow(siteNumber);
-            } else {
-                try {
-                    ClientId remoteServerId = new ClientId(siteNumber, ClientType.Type.SERVER, 0);
-                    Packet packet = PacketFactory.createRequestServerStatusPacket(getContest().getClientId(), remoteServerId, targetProfile);
-                    getController().sendToLocalServer(packet);
-                } catch (Exception e) {
-                    getController().getLog().log(Level.WARNING, "Unable to send request status packet to server " + i, e);
-                }
+            try {
+                ClientId remoteServerId = new ClientId(siteNumber, ClientType.Type.SERVER, 0);
+                Packet packet = PacketFactory.createRequestServerStatusPacket(getContest().getClientId(), remoteServerId, targetProfile);
+                getController().sendToLocalServer(packet);
+            } catch (Exception e) {
+                getController().getLog().log(Level.WARNING, "Unable to send request status packet to server " + i, e);
             }
 
         }
