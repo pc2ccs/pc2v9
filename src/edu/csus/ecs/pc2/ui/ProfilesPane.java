@@ -368,8 +368,10 @@ public class ProfilesPane extends JPanePlugin {
         Profile selectedProfile = getProfile(profilePath);
 
         if (selectedProfile.equals(getContest().getProfile())) {
-            showMessage("Currently using profile '" + selectedProfile.getName() + "' (no need to switch)");
-            return;
+            int result = FrameUtilities.yesNoCancelDialog(this, "Currently using profile '" + selectedProfile.getName() + "' change to this profile?", "Change profile");
+            if (result != JOptionPane.YES_OPTION) {
+                return;
+            }
         }
         
         getSwitchFrame().setProfile(selectedProfile);

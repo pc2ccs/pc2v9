@@ -78,22 +78,14 @@ public class SwitchProfileStatusPane extends JPanePlugin {
     
     private SimpleDateFormat formatter = new SimpleDateFormat(" HH:mm:ss MM-dd");  //  @jve:decl-index=0:
 
-    /**
-     * This method initializes
-     * 
-     */
     public SwitchProfileStatusPane() {
         super();
         initialize();
     }
 
-    /**
-     * This method initializes this
-     * 
-     */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new Dimension(433, 206));
+        this.setSize(new Dimension(629, 206));
         this.add(getButtonPanel(), BorderLayout.SOUTH);
         this.add(getSiteListBox(), BorderLayout.CENTER);
 
@@ -275,7 +267,7 @@ public class SwitchProfileStatusPane extends JPanePlugin {
             refreshButton.setMnemonic(KeyEvent.VK_R);
             refreshButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    requestStatusFromSelectedSite();
+                    refreshSiteListBox();
                 }
             });
         }
@@ -397,13 +389,15 @@ public class SwitchProfileStatusPane extends JPanePlugin {
         closeWindow();
     }
 
-    protected void requestStatusFromSelectedSite() {
+    protected void refreshSiteListBox() {
 
         int[] selectedSites = siteListBox.getSelectedIndexes();
 
         if (selectedSites.length == 0) {
-            JOptionPane.showMessageDialog(this, "Select a site", "Must select a site to request", JOptionPane.INFORMATION_MESSAGE);
-            return;
+            selectedSites = new int [siteListBox.getRowCount()];
+            for (int i = 0; i < siteListBox.getRowCount(); i ++) {
+                selectedSites[i] = i;
+            }
         }
         
         if (selectedSites.length == 1){
