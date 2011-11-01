@@ -300,27 +300,22 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 LoginsPane loginsPane = new LoginsPane();
                 addUIPlugin(getRunContestTabbedPane(), "Logins", loginsPane);
                 
-                if (Utilities.isDebugMode()) {
-                    try {
-                        MessageMonitorPane messageMonitorPane = new MessageMonitorPane();
-                        addUIPlugin(getRunContestTabbedPane(), "Messages", messageMonitorPane);
-                    } catch (Exception e) {
-                        logException(e);
-                    }
+                try {
+                    MessageMonitorPane messageMonitorPane = new MessageMonitorPane();
+                    addUIPlugin(getRunContestTabbedPane(), "Messages", messageMonitorPane);
+                } catch (Exception e) {
+                    logException(e);
                 }
 
                 OptionsPane optionsPanel = new OptionsPane();
                 addUIPlugin(getRunContestTabbedPane(), "Options", optionsPanel);
                 optionsPanel.setSecurityLogWindow(securityAlertLogWindow);
 
-                if (Utilities.isDebugMode()) {
-                    try {
-                        PacketMonitorPane pane = new PacketMonitorPane();
-                        addUIPlugin(getRunContestTabbedPane(), "Packets", pane);
-                    } catch (Exception e) {
-                        logException(e);
-                    }
-
+                try {
+                    PacketMonitorPane pane = new PacketMonitorPane();
+                    addUIPlugin(getRunContestTabbedPane(), "Packets", pane);
+                } catch (Exception e) {
+                    logException(e);
                 }
 
                 if (Utilities.isDebugMode()) {

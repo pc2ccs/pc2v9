@@ -481,14 +481,12 @@ public class ServerView extends JFrame implements UIPlugin {
         addUIPlugin(getMainTabbedPane(), "Options", optionsPanel);
         optionsPanel.setSecurityLogWindow(securityAlertLogWindow);
 
-        if (Utilities.isDebugMode()) {
-            try {
-                PacketMonitorPane packetMonitorPane = new PacketMonitorPane();
-                addUIPlugin(getMainTabbedPane(), "Packets", packetMonitorPane);
-            } catch (Exception e) {
-                logException(e);
-            }
-        }            
+        try {
+            PacketMonitorPane packetMonitorPane = new PacketMonitorPane();
+            addUIPlugin(getMainTabbedPane(), "Packets", packetMonitorPane);
+        } catch (Exception e) {
+            logException(e);
+        }
 
         if (Utilities.isDebugMode()) {
             try {
