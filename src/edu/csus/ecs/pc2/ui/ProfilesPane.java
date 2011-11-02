@@ -559,7 +559,7 @@ public class ProfilesPane extends JPanePlugin {
         Object[] c = new String[numberColumns];
 
         c[0] = profile.getName();
-        if (profile.equals(getContest().getProfile())) {
+        if (profile.getProfilePath().equals(getContest().getProfile().getProfilePath())) {
             c[0] = "(Active) " + profile.getName();
         }
         c[1] = profile.getDescription();

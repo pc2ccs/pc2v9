@@ -51,6 +51,7 @@ public class ProfileCloneSettings implements Serializable {
     
     private Profile sourceProfile = null;
 
+    private String profilePath = null;
 
     public ProfileCloneSettings(String name, String description, char[] contestPassword, Profile originalProfile) {
         super();
@@ -186,5 +187,13 @@ public class ProfileCloneSettings implements Serializable {
     
     public void setContestTitle(String contestTitle) {
         this.contestTitle = contestTitle;
+    }
+
+    public String getProfilePath() {
+        return profilePath;
+    }
+    
+    public void setProfilePath(String profilePath) {
+        this.profilePath = profilePath;
     }
 }

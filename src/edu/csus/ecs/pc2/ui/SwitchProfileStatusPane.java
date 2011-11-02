@@ -593,11 +593,21 @@ public class SwitchProfileStatusPane extends JPanePlugin {
     // $HeadURL$
     class MessageListenerImplementation implements IMessageListener{
 
+        protected boolean isAdministrator(ClientId clientId) {
+            return clientId.getClientType().equals(ClientType.Type.ADMINISTRATOR);
+        }
+        
         public void messageAdded(MessageEvent event) {
-            if (event.getArea().equals(Area.PROFILES)){
+            if (event.getArea().equals(Area.PROFILES)) {
                 String message = event.getMessage();
                 if (message.toLowerCase().indexOf("contest password") > -1) { // debug22
                     JOptionPane.showMessageDialog(null, message, "Switch Profile Message for Site " + getContest().getSiteNumber(), JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    if (isAdministrator(getContest().getClientId())) {
+                        if (getContest().getClientId().equals(event.getDestination())) {
+                            JOptionPane.showMessageDialog(null, message, message, JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
                 }
             }
             getController().getLog().warning(event.getMessage());

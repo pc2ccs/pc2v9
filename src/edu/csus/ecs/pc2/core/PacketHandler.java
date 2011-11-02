@@ -1020,6 +1020,7 @@ public class PacketHandler {
             boolean switchProfileNow = ((Boolean) PacketFactory.getObjectValue(packet, PacketFactory.SWITCH_PROFILE)).booleanValue();
             
             Profile newProfile = cloneContest (packet, settings, switchProfileNow);
+            settings.setProfilePath(newProfile.getProfilePath());
             
             notifyAllOfClonedContest(packet, newProfile, settings);
         } catch (Exception e) {
@@ -1033,6 +1034,10 @@ public class PacketHandler {
         Profile newProfile = new Profile(settings.getName());
         newProfile.setDescription(settings.getDescription());
         newProfile.setSiteNumber(contest.getSiteNumber());
+        
+        if (settings.getProfilePath() != null){
+            newProfile.setProfilePath(settings.getProfilePath());
+        }
 
         info("Start clone to profile "+newProfile.getName());
         
@@ -1222,6 +1227,7 @@ public class PacketHandler {
             settings.setContestPassword(contest.getContestPassword().toCharArray());
             
             Profile newProfile = cloneContest (packet, settings, true);
+            settings.setProfilePath(newProfile.getProfilePath());
             
             notifyAllOfClonedContest(packet, newProfile, settings);
             
@@ -1831,7 +1837,7 @@ public class PacketHandler {
      * @throws ClassNotFoundException
      * @throws FileSecurityException
      */
-    private void loginSuccess(Packet packet, ConnectionHandlerID connectionHandlerID, ClientId fromId) throws IOException, ClassNotFoundException, FileSecurityException {
+    private synchronized void loginSuccess(Packet packet, ConnectionHandlerID connectionHandlerID, ClientId fromId) throws IOException, ClassNotFoundException, FileSecurityException {
         
         ClientId clientId = (ClientId) PacketFactory.getObjectValue(packet, PacketFactory.CLIENT_ID);
 
@@ -1940,9 +1946,8 @@ public class PacketHandler {
             ContestLoader loader = new ContestLoader();
             loadSettingsFromRemoteServer(loader, packet, connectionHandlerID);
             loader = null;
-         
+            
             contest.storeConfiguration(controller.getLog());
-
             controller.sendToClient(createContestSettingsPacket(packet.getSourceId()));
 
         } else {
@@ -3744,7 +3749,7 @@ public class PacketHandler {
     private void sendStatusToServers(Packet packet, Profile expectedProfile) {
         
         Status status = Status.NOTREADY;
-        if (contest.getProfile().equals(expectedProfile)){
+        if (contest.getProfile().getProfilePath().equals(expectedProfile.getProfilePath())){
             status = Status.READY_TO_SWITCH;
         }
         
