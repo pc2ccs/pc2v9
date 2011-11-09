@@ -20,6 +20,7 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.log.StaticLog;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.BalloonSettings;
+import edu.csus.ecs.pc2.core.model.Category;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
@@ -2741,6 +2742,19 @@ public class PacketHandler {
             if (finalizeData.isCertified()) {
                 controller.getLog().log(Log.INFO, "Contest Certified by '" + finalizeData.getComment() + "'");
             }
+        }
+
+        Category[] categories = (Category[])PacketFactory.getObjectValue(packet, PacketFactory.CATEGORIES_ARRAY);
+        if (categories != null) {
+            for (int i = 0; i < categories.length; i++) {
+                Category category = categories[i];
+                if (contest.getCategory(category.getElementId()) == null) {
+                    contest.addCategory(category);
+                } else {
+                    contest.updateCategory(category);
+                }
+            }
+            sendToTeams = true;
         }
 
         if (isServer()) {

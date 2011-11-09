@@ -360,13 +360,6 @@ public class InternalContest implements IInternalContest {
             generateNewAccounts(ClientType.Type.ADMINISTRATOR.toString(), 1, true);
         }
         
-        if (getCategories().length == 0){
-            
-            String []catNames = {"General", "SysOps", "Operations" };
-            for (String name : catNames){
-                addCategory(new Category(name));
-            }
-        }
     }
 
     public void addRunListener(IRunListener runListener) {

@@ -150,8 +150,21 @@ public class ContestImporter {
         // XXX it does not appear that PacketHandler looks at Categories.
         // TODO CCS Add categories, add updateSettings to be a more
         // generic way to update multiple settings
+        Category[] existingCategories = theContest.getCategories();
+        HashMap<String,Category> cats = new HashMap<String, Category>();
+        for (int i = 0; i < existingCategories.length; i++) {
+            Category category = existingCategories[i];
+            cats.put(category.getDisplayName(), category);
+        }
         Category [] categories = inContest.getCategories();
-        theController.updateCategories(categories);
+        Vector<Category> catAdds = new Vector<Category>();
+        for (int i = 0; i < categories.length; i++) {
+            Category category = categories[i];
+            if (!cats.containsKey(category.getDisplayName())) {
+                catAdds.add(category);
+            }
+        }
+        theController.updateCategories((Category[])catAdds.toArray(new Category[catAdds.size()]));
 
     }
 }

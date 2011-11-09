@@ -989,6 +989,8 @@ public class ContestLoader {
 
         addSitesToModel(contest, controller, packet);
 
+        addCategoriesToModel(contest, controller, packet);
+
         if (isServer(contest)) {
             // Load local settings and initialize settings if necessary
             controller.initializeServer(contest);
@@ -997,8 +999,6 @@ public class ContestLoader {
         addLanguagesToModel(contest, controller, packet);
 
         addProblemsToModel(contest, controller, packet);
-        
-        addCategoriesToModel(contest, controller, packet);
 
         addGroupsToModel(contest, controller, packet);
 
