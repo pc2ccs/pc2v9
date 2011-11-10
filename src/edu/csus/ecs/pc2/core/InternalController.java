@@ -874,12 +874,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             if (inContest.getGeneralProblem() == null) {
                 inContest.setGeneralProblem(new Problem("General"));
             }
-            if (inContest.getCategories().length == 0){
-                String []catNames = {"General", "SysOps", "Operations" };
-                for (String name : catNames){
-                    inContest.addCategory(new Category(name));
-                }
-            }
             
             if (inContest.getProfile() == null){
                 inContest.setProfile(theProfile);
@@ -1000,6 +994,14 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
         try {
             initializeServer(contest);
+            // only the 1st server needs these
+            // XXX is there a better place to initialize them?
+            if (contest.getCategories().length == 0){
+                String []catNames = {"General", "SysOps", "Operations" };
+                for (String name : catNames){
+                    contest.addCategory(new Category(name));
+                }
+            }
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
