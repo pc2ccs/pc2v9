@@ -94,6 +94,8 @@ public class ProfileSavePane extends JPanePlugin {
 
     private JCheckBox copyNotificationsCheckBox = null;
 
+    private JCheckBox copyCategoriesCheckBox = null;
+
     /**
      * This method initializes
      * 
@@ -109,7 +111,7 @@ public class ProfileSavePane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new Dimension(488, 480));
+        this.setSize(new Dimension(526, 524));
         this.add(getButtonPanel(), java.awt.BorderLayout.SOUTH);
 
         this.add(getCenterPane(), BorderLayout.CENTER);
@@ -179,6 +181,7 @@ public class ProfileSavePane extends JPanePlugin {
     private void setCheckBoxesSelected(boolean selected) {
 
         getCopyAccountsCheckBox().setSelected(selected);
+        getCopyCategoriesCheckBox().setSelected(selected);
         getCopyClarificationsCheckBox().setSelected(! selected);
         getCopyContestSettingsCheckBox().setSelected(selected);
         getCopyGroupsCheckBox().setSelected(selected);
@@ -224,6 +227,7 @@ public class ProfileSavePane extends JPanePlugin {
         settings.setCopyNotifications(false);
         settings.setCopyRuns(false);
         settings.setCopyClarifications(false);
+        settings.setCopyCategories(false);
         
         getController().cloneProfile(getContest().getProfile(), settings, false);
         closeWindow();
@@ -322,6 +326,7 @@ public class ProfileSavePane extends JPanePlugin {
         settings.setContestTitle(title);
         settings.setCopyAccounts(getCopyAccountsCheckBox().isSelected());
         settings.setCopyClarifications(getCopyClarificationsCheckBox().isSelected());
+        settings.setCopyCategories(getCopyCategoriesCheckBox().isSelected());
         settings.setCopyContestSettings(getCopyContestSettingsCheckBox().isSelected());
         settings.setCopyGroups(getCopyGroupsCheckBox().isSelected());
         settings.setCopyJudgements(getCopyJudgementsCheckbox().isSelected());
@@ -435,7 +440,7 @@ public class ProfileSavePane extends JPanePlugin {
             resetContestTimeCheckBox.setToolTipText("Set elapsed time to zero");
             resetContestTimeCheckBox.setSelected(true);
             resetContestTimeCheckBox.setSize(new Dimension(192, 21));
-            resetContestTimeCheckBox.setLocation(new Point(33, 416));
+            resetContestTimeCheckBox.setLocation(new Point(28, 451));
             resetContestTimeCheckBox.setText("Reset Contest Times");
         }
         return resetContestTimeCheckBox;
@@ -493,7 +498,7 @@ public class ProfileSavePane extends JPanePlugin {
         if (copyLanguagesCheckBox == null) {
             copyLanguagesCheckBox = new JCheckBox();
             copyLanguagesCheckBox.setSelected(true);
-            copyLanguagesCheckBox.setBounds(new Rectangle(264, 25, 160, 21));
+            copyLanguagesCheckBox.setBounds(new Rectangle(264, 19, 160, 21));
             copyLanguagesCheckBox.setText("Languages");
         }
         return copyLanguagesCheckBox;
@@ -625,7 +630,7 @@ public class ProfileSavePane extends JPanePlugin {
         if (copyAccountsCheckBox == null) {
             copyAccountsCheckBox = new JCheckBox();
             copyAccountsCheckBox.setText("Accounts");
-            copyAccountsCheckBox.setBounds(new Rectangle(264, 53, 160, 24));
+            copyAccountsCheckBox.setBounds(new Rectangle(264, 50, 160, 24));
             copyAccountsCheckBox.setSelected(true);
         }
         return copyAccountsCheckBox;
@@ -655,7 +660,7 @@ public class ProfileSavePane extends JPanePlugin {
         if (copyJudgementsCheckbox == null) {
             copyJudgementsCheckbox = new JCheckBox();
             copyJudgementsCheckbox.setText("Judgements");
-            copyJudgementsCheckbox.setBounds(new Rectangle(264, 115, 160, 24));
+            copyJudgementsCheckbox.setBounds(new Rectangle(264, 118, 160, 24));
             copyJudgementsCheckbox.setSelected(true);
         }
         return copyJudgementsCheckbox;
@@ -670,7 +675,7 @@ public class ProfileSavePane extends JPanePlugin {
         if (copyContestSettingsCheckBox == null) {
             copyContestSettingsCheckBox = new JCheckBox();
             copyContestSettingsCheckBox.setText("Contest settings");
-            copyContestSettingsCheckBox.setBounds(new Rectangle(264, 177, 160, 24));
+            copyContestSettingsCheckBox.setBounds(new Rectangle(264, 186, 160, 24));
             copyContestSettingsCheckBox.setSelected(true);
         }
         return copyContestSettingsCheckBox;
@@ -685,7 +690,7 @@ public class ProfileSavePane extends JPanePlugin {
         if (checkBoxPane == null) {
             checkBoxPane = new JPanel();
             checkBoxPane.setLayout(null);
-            checkBoxPane.setBounds(new Rectangle(3, 186, 477, 222));
+            checkBoxPane.setBounds(new Rectangle(3, 186, 477, 255));
             checkBoxPane.setBorder(BorderFactory.createTitledBorder(null, "Copy:", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, new Font("Dialog", Font.BOLD, 12), new Color(51,
                     51, 51)));
             checkBoxPane.add(getCopyLanguagesCheckBox(), null);
@@ -697,6 +702,7 @@ public class ProfileSavePane extends JPanePlugin {
             checkBoxPane.add(getCopyGroupsCheckBox(), null);
             checkBoxPane.add(getCopyAccountsCheckBox(), null);
             checkBoxPane.add(getCopyNotificationsCheckBox(), null);
+            checkBoxPane.add(getCopyCategoriesCheckBox(), null);
         }
         return checkBoxPane;
     }
@@ -709,11 +715,26 @@ public class ProfileSavePane extends JPanePlugin {
     private JCheckBox getCopyNotificationsCheckBox() {
         if (copyNotificationsCheckBox == null) {
             copyNotificationsCheckBox = new JCheckBox();
-            copyNotificationsCheckBox.setBounds(new Rectangle(264, 146, 160, 24));
+            copyNotificationsCheckBox.setBounds(new Rectangle(264, 152, 160, 24));
             copyNotificationsCheckBox.setText("Notifications");
             copyNotificationsCheckBox.setSelected(true);
         }
         return copyNotificationsCheckBox;
+    }
+
+    /**
+     * This method initializes copyCategoriesCheckBox
+     * 
+     * @return javax.swing.JCheckBox
+     */
+    private JCheckBox getCopyCategoriesCheckBox() {
+        if (copyCategoriesCheckBox == null) {
+            copyCategoriesCheckBox = new JCheckBox();
+            copyCategoriesCheckBox.setBounds(new Rectangle(264, 220, 160, 21));
+            copyCategoriesCheckBox.setSelected(true);
+            copyCategoriesCheckBox.setText("Categories");
+        }
+        return copyCategoriesCheckBox;
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

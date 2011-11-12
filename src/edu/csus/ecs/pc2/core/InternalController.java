@@ -996,12 +996,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             initializeServer(contest);
             // only the 1st server needs these
             // XXX is there a better place to initialize them?
-            if (contest.getCategories().length == 0){
-                String []catNames = {"General", "SysOps", "Operations" };
-                for (String name : catNames){
-                    contest.addCategory(new Category(name));
-                }
-            }
+            contest.setupDefaultCategories();
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

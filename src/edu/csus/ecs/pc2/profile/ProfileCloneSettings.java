@@ -53,6 +53,8 @@ public class ProfileCloneSettings implements Serializable {
 
     private String profilePath = null;
 
+    private boolean copyCategories = false;
+
     public ProfileCloneSettings(String name, String description, char[] contestPassword, Profile originalProfile) {
         super();
         this.name = name;
@@ -195,5 +197,13 @@ public class ProfileCloneSettings implements Serializable {
     
     public void setProfilePath(String profilePath) {
         this.profilePath = profilePath;
+    }
+
+    public void setCopyCategories(boolean copyCategories) {
+        this.copyCategories = copyCategories;
+    }
+
+    public boolean isCopyCategories() {
+        return copyCategories ;
     }
 }

@@ -453,9 +453,9 @@ public class InternalContest implements IInternalContest {
         }
     }
     
-    private void fireCategoryListener(Category category, CategoryEvent.Action added) {
+    private void fireCategoryListener(Category category, CategoryEvent.Action action) {
         
-        CategoryEvent categoryEvent = new CategoryEvent(CategoryEvent.Action.CHANGED, category);
+        CategoryEvent categoryEvent = new CategoryEvent(action, category);
         for (int i = 0; i < categoryListenerList.size(); i++) {
 
             if (categoryEvent.getAction() == CategoryEvent.Action.ADDED) {
@@ -2160,6 +2160,10 @@ public class InternalContest implements IInternalContest {
 
         generalProblem = null;
 
+        // Clarification Categories
+        categoryList = new CategoryList();
+        categoryDisplayList = new CategoryDisplayList();
+        
         // SITES
         siteList = new SiteList();
 
@@ -2323,6 +2327,15 @@ public class InternalContest implements IInternalContest {
         configurationIO = new ConfigurationIO(storage);
     }
 
+    public void setupDefaultCategories() {
+        if (getCategories().length == 0){
+            String []catNames = {"General", "SysOps", "Operations" };
+            for (String name : catNames){
+                addCategory(new Category(name));
+            }
+        }
+    }
+
     public String getContestPassword() {
         return contestPassword;
     }
@@ -2481,6 +2494,13 @@ public class InternalContest implements IInternalContest {
             contest.setGeneralProblem(new Problem("General"));
         }
 
+        if (settings.isCopyCategories()) {
+            for (Category category : getCategories()) {
+                contest.addCategory(category);
+            }
+        } else {
+            contest.setupDefaultCategories();
+        }
         if (settings.isCopyRuns()) {
 
             /**
@@ -2645,6 +2665,7 @@ public class InternalContest implements IInternalContest {
     public void removeAllListeners() {
         accountListenerList.removeAllElements();
         balloonSettingsListenerList.removeAllElements();
+        categoryListenerList.removeAllElements();
         changePasswordListenerList.removeAllElements();
         clarificationListenerList.removeAllElements();
         clientSettingsListenerList.removeAllElements();
@@ -2714,6 +2735,8 @@ public class InternalContest implements IInternalContest {
 
         GroupEvent groupEvent = new GroupEvent(GroupEvent.Action.REFRESH_ALL, null);
         fireGroupListener(groupEvent);
+
+        fireCategoryListener(null, CategoryEvent.Action.REFRESH_ALL);
 
         // there is no REFRESH_ALL for MessageEvent
 //        MessageEvent messageEvent = new MessageEvent(MessageEvent.Action.REFRESH_ALL);

@@ -1117,5 +1117,11 @@ public interface IInternalContest {
      * @return null if no notification
      */
     Notification getNotification(ClientId submitter, ElementId problemId);
+
+    /**
+     * Sets up the default Clarification Categories,
+     * if no categories are present.
+     */
+    void setupDefaultCategories();
     
 }

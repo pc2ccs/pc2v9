@@ -1225,6 +1225,7 @@ public class PacketHandler {
             settings.setCopyRuns( false );
             settings.setCopyClarifications( false );
             
+            settings.setCopyCategories( false );
             settings.setContestPassword(contest.getContestPassword().toCharArray());
             
             Profile newProfile = cloneContest (packet, settings, true);
