@@ -3414,5 +3414,14 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         this.usingGUI = usingGUI;
     }
 
+    public void updateCategory(Category newCategory) {
+        Packet updatePacket = PacketFactory.createUpdateSetting(contest.getClientId(), getServerClientId(), newCategory);
+        sendToLocalServer(updatePacket);
+    }
+
+    public void addNewCategory(Category newCategory) {
+        Packet addNewCategory = PacketFactory.createAddSetting(contest.getClientId(), getServerClientId(), newCategory);
+        sendToLocalServer(addNewCategory);
+    }
 
 }

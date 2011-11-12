@@ -16,6 +16,7 @@ import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.Category;
 import edu.csus.ecs.pc2.core.model.CategoryEvent;
+import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.ICategoryListener;
@@ -51,6 +52,15 @@ public class CategoriesPane extends JPanePlugin {
 
     private PermissionList permissionList = new PermissionList();
 
+    private EditCategoryFrame editCategoryFrame;
+
+    private EditCategoryFrame getEditCategoryFrame() {
+        if (editCategoryFrame == null) {
+            editCategoryFrame = new EditCategoryFrame();
+        }
+        return editCategoryFrame;
+    }
+
     /**
      * This method initializes
      * 
@@ -82,7 +92,7 @@ public class CategoriesPane extends JPanePlugin {
         super.setContestAndController(inContest, inController);
         getContest().addCategoryListener(new CategoryListenerImplementation());
 
-//        getEditCategoryFrame().setContestAndController(inContest, inController);
+        getEditCategoryFrame().setContestAndController(inContest, inController);
 
         initializePermissions();
         
@@ -105,6 +115,28 @@ public class CategoriesPane extends JPanePlugin {
     private void updateGUIperPermissions() {
         addButton.setVisible(isAllowed(Permission.Type.ADD_CATEGORY));
         editButton.setVisible(isAllowed(Permission.Type.EDIT_CATEGORY));
+    }
+
+    /**
+     * Number of clars that match this Category.
+     * 
+     * @param category
+     * @return count of clars that match.
+     */
+    private int numberOfClars(Category category) {
+
+        int count = 0;
+        ElementId elementId = category.getElementId();
+
+        for (Clarification clar : getContest().getClarifications()) {
+            if (clar.isDeleted()) {
+                continue;
+            }
+            if (clar.getProblemId().equals(elementId)) {
+                    count++;
+            }
+        }
+        return count;
     }
 
     protected void reloadCategoriesList() {
@@ -171,14 +203,9 @@ public class CategoriesPane extends JPanePlugin {
     }
 
     protected void addCategory() {
-
-        showMessage("Would have added Category");
-        
-        // TODO CCS add categories UI
-        
-//        editCategoryFrame.setCategory(null);
-//        editCategoryFrame.setDeleteCheckBoxEnabled(true);
-//        editCategoryFrame.setVisible(true);
+        getEditCategoryFrame().setCategory(null);
+        getEditCategoryFrame().setDeleteCheckBoxEnabled(true);
+        getEditCategoryFrame().setVisible(true);
     }
 
     /**
@@ -264,35 +291,22 @@ public class CategoriesPane extends JPanePlugin {
 
         try {
             ElementId elementId = (ElementId) categoryListBox.getKeys()[selectedIndex];
-            Category category = getContest().getCategory(elementId);
+            Category categoryToEdit = getContest().getCategory(elementId);
             
-            showMessage("Would have edited "+category.toString());
-            
-            // TODO CCS edit categories UI
-            
-//            int numberRuns = numberOfRuns(judgementToEdit);
-//            if (numberRuns > 0) {
-//                JOptionPane.showMessageDialog(this, "There are " + numberRuns + " runs which will be changed if this category is changed", "Runs may be changed", JOptionPane.WARNING_MESSAGE);
-//            }
-//
-//            editCategoryFrame.setCategory(judgementToEdit);
-//            editCategoryFrame.setVisible(true);
-//            
+            int numberClars = numberOfClars(categoryToEdit);
+            if (numberClars > 0) {
+                JOptionPane.showMessageDialog(this, "There are " + numberClars + " clarifications which will be changed if this category is changed", 
+                        "Clarifictions may be changed", JOptionPane.WARNING_MESSAGE);
+            }
+
+            getEditCategoryFrame().setCategory(categoryToEdit);
+            getEditCategoryFrame().setVisible(true);
             
         } catch (Exception e) {
             getController().getLog().log(Log.WARNING, "Exception logged ", e);
             showMessage("Unable to edit category, check log");
         }
     }
-
-    // TODO CCS Edit Cat Frame
-//    protected EditCategoryFrame getEditCategoryFrame() {
-//        if (editCategoryFrame == null) {
-//            editCategoryFrame = new EditCategoryFrame();
-//        }
-//        return editCategoryFrame;
-//    }
-    
 
     /**
      * Account Listener Implementation.

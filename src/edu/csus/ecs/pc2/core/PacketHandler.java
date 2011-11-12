@@ -2454,6 +2454,12 @@ public class PacketHandler {
             sendToTeams = true;
         }
 
+        Category category = (Category) PacketFactory.getObjectValue(packet, PacketFactory.CATEGORY);
+        if (category != null) {
+            contest.addCategory(category);
+            sendToTeams = true;
+        }
+
         Judgement judgement = (Judgement) PacketFactory.getObjectValue(packet, PacketFactory.JUDGEMENT);
         if (judgement != null) {
             contest.addJudgement(judgement);
@@ -2617,6 +2623,12 @@ public class PacketHandler {
         Site site = (Site) PacketFactory.getObjectValue(packet, PacketFactory.SITE);
         if (site != null) {
             contest.updateSite(site);
+            sendToTeams = true;
+        }
+
+        Category oneCategory = (Category) PacketFactory.getObjectValue(packet, PacketFactory.CATEGORY);
+        if (oneCategory != null) {
+            contest.updateCategory(oneCategory);
             sendToTeams = true;
         }
 

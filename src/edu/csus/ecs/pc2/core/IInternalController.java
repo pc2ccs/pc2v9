@@ -612,4 +612,8 @@ public interface IInternalController {
     
     void updateCategories(Category[] categories);
 
+    void updateCategory(Category newCategory);
+
+    void addNewCategory(Category newCategory);
+
 }

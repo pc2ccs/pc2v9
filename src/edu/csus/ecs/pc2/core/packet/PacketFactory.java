@@ -337,6 +337,8 @@ public final class PacketFactory {
 
     public static final String CATEGORIES_ARRAY = "CATEGORIES_ARRAY";
 
+    public static final String CATEGORY = "CATEGORY";
+
     
     /**
      * Constructor is private as this is a utility class which should not be extended or invoked.
@@ -2143,6 +2145,19 @@ public final class PacketFactory {
         prop.put(SITE_NUMBER, source.getSiteNumber());
         prop.put(CATEGORIES_ARRAY, categories);
         Packet packet = new Packet(Type.UPDATE_SETTING, source, destination, prop);
+        return packet;
+    }
+
+    public static Packet createUpdateSetting(ClientId source, ClientId destination, Category category) {
+        Properties prop = new Properties();
+        prop.put(CATEGORY, category);
+        return createPacket(PacketType.Type.UPDATE_SETTING, source, destination, prop);
+    }
+
+    public static Packet createAddSetting(ClientId source, ClientId destination, Category category) {
+        Properties prop = new Properties();
+        prop.put(CATEGORY, category);
+        Packet packet = new Packet(Type.ADD_SETTING, source, destination, prop);
         return packet;
     }
 
