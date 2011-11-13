@@ -21,6 +21,7 @@ import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.PermissionByDescriptionComparator;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.Category;
 import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
@@ -559,13 +560,16 @@ public class EditFilterPane extends JPanePlugin {
 
         problemListModel.removeAllElements();
         if (isFilteringClarifications()){
-            // Add General problem is filtering Clarification settings
-            Problem problem = getContest().getGeneralProblem();
-            WrapperJCheckBox wrapperJCheckBox = new WrapperJCheckBox(problem);
-            if (filter.isFilteringProblems()) {
-                wrapperJCheckBox.setSelected(filter.matches(problem));
+            Category[] categories = getContest().getCategories();
+            for (int i = 0; i < categories.length; i++) {
+                Category category = categories[i];
+                WrapperJCheckBox wrapperJCheckBox = new WrapperJCheckBox(category);
+                if (filter.isFilteringProblems()) {
+                    wrapperJCheckBox.setSelected(filter.matches(category));
+                }
+                problemListModel.addElement(wrapperJCheckBox);
+                
             }
-            problemListModel.addElement(wrapperJCheckBox);
         }
         
         for (Problem problem : getContest().getProblems()) {

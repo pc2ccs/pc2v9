@@ -168,9 +168,6 @@ public class SubmitClarificationPane extends JPanePlugin {
                     getProblemComboBox().addItem(problem);
                 }
             }
-        } else {
-            // TODO remove this legacy code eventually
-            getProblemComboBox().addItem(getContest().getGeneralProblem());
         }
         
         for (Problem problem : getContest().getProblems()) {

@@ -2329,7 +2329,7 @@ public class InternalContest implements IInternalContest {
 
     public void setupDefaultCategories() {
         if (getCategories().length == 0){
-            String []catNames = {"General", "SysOps", "Operations" };
+            String []catNames = {"General"};
             for (String name : catNames){
                 addCategory(new Category(name));
             }

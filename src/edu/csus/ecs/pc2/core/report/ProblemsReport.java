@@ -9,6 +9,7 @@ import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.Category;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Problem;
@@ -184,12 +185,16 @@ public class ProblemsReport implements IReport {
             writeProblemDataFiles(printWriter, problemDataFile);
         }
         
-        if (contest.getGeneralProblem() == null){
-            printWriter.println(" General Problem: (not defined) ");
+        Category[] categories = contest.getCategories();
+        if (categories.length > 0) {
+            printWriter.println(" Categories:");
+            for (int i = 0; i < categories.length; i++) {
+                Category category = categories[i];
+                printWriter.println("  "+category);
+            }
         } else {
-            printWriter.println(" General Problem: "+contest.getGeneralProblem().getElementId());
+            printWriter.println(" Categories: (not defined)");
         }
-        
     }
 
     public void printHeader(PrintWriter printWriter) {

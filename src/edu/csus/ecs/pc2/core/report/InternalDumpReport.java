@@ -20,6 +20,7 @@ import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.Category;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
@@ -570,10 +571,15 @@ public class InternalDumpReport implements IReport {
     private void printProblems(PrintWriter printWriter) {
         
         printWriter.println();
-        if (contest.getGeneralProblem() == null){
-            printWriter.println(" General Problem: (not defined) ");
+        Category[] categories = contest.getCategories();
+        if (categories.length > 0) {
+            printWriter.println(" Categories:");
+            for (int i = 0; i < categories.length; i++) {
+                Category category = categories[i];
+                printWriter.println("  "+category);
+            }
         } else {
-            printWriter.println(" General Problem: "+contest.getGeneralProblem().getElementId());
+            printWriter.println(" Categories: (not defined)");
         }
 
         printWriter.println();

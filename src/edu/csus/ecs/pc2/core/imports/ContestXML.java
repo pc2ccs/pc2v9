@@ -12,6 +12,7 @@ import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.BalloonSettings;
+import edu.csus.ecs.pc2.core.model.Category;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
@@ -112,9 +113,12 @@ public class ContestXML {
             }
         }
         
-        Problem generalProblem = contest.getGeneralProblem();
-        if (generalProblem != null && filter.matches(generalProblem)) {
-            addProblemMemento(mementoRoot, generalProblem);
+        Category[] categories = contest.getCategories();
+        for (int i = 0; i < categories.length; i++) {
+            Category category = categories[i];
+            if (category != null && filter.matches(category)) {
+                addProblemMemento(mementoRoot, category);
+            }
         }
 
         Account[] accounts = contest.getAccounts();
