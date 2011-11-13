@@ -5,16 +5,18 @@ import java.util.Arrays;
 import java.util.Vector;
 
 import junit.framework.TestCase;
+import edu.csus.ecs.pc2.core.IStorage;
 import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.security.FileSecurity;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
+import edu.csus.ecs.pc2.core.security.FileStorage;
 import edu.csus.ecs.pc2.profile.ProfileCloneSettings;
 
 /**
- * JUnit for InternalContest.
+ * Tests for InternalContest.
  * 
  * @author pc2@ecs.csus.edu
  * @version $Id$
@@ -93,6 +95,38 @@ public class InternalContestTest extends TestCase {
 
     protected void tearDown() throws Exception {
         super.tearDown();
+    }
+    
+    protected IStorage createStorage(String name, int siteNumber){
+        Profile profile = new Profile(name);
+        profile.setSiteNumber(siteNumber);
+        String testdirName = getTestDirectoryName() + File.separator + profile.getProfilePath();
+        return new FileStorage(testdirName);
+    }
+    
+    /**
+     * Test that General is a default category.
+     */
+    public void testGeneralCategoryCreation() {
+        IInternalContest contest = new InternalContest();
+        int siteNumber = 3;
+        contest.setSiteNumber(siteNumber);
+        
+        contest.setStorage(createStorage("testGeneral", siteNumber));
+  
+        contest.initializeStartupData(siteNumber);
+        contest.initializeSubmissions(siteNumber);
+        
+        Category[] categories = contest.getCategories();
+        
+//        contest.addCategory(new Category("General"));
+//        categories = contest.getCategories();
+        
+        assertEquals("Missing general category", 1, categories.length);
+        
+        Category defaultCat = categories[0];
+        assertEquals("Default cateory not General", "General", defaultCat.getDisplayName());
+
     }
 
     /**
