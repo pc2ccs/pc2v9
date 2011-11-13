@@ -12,7 +12,9 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.CategoryEvent;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
+import edu.csus.ecs.pc2.core.model.ICategoryListener;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IProblemListener;
@@ -327,7 +329,47 @@ public class SubmitClarificationPane extends JPanePlugin {
         }
     }
 
-    
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     *
+     */
+    private class CategoryListenerImplementation implements ICategoryListener {
+
+        public void categoryAdded(CategoryEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadProblems();
+                }
+            });
+        }
+
+        public void categoryChanged(CategoryEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadProblems();
+                }
+            });
+        }
+
+        public void categoryRemoved(CategoryEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadProblems();
+                }
+            });
+        }
+
+        public void categoryRefreshAll(CategoryEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadProblems();
+                }
+            });
+        }
+        
+    }
+
     private boolean isThisSite(int siteNumber) {
         return siteNumber == getContest().getSiteNumber();
     }
@@ -343,6 +385,7 @@ public class SubmitClarificationPane extends JPanePlugin {
         
         getContest().addContestTimeListener(new ContestTimeListenerImplementation());
         getContest().addProblemListener(new ProblemListenerImplementation());
+        getContest().addCategoryListener(new CategoryListenerImplementation());
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {

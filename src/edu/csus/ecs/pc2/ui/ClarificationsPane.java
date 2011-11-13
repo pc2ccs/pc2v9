@@ -25,6 +25,7 @@ import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
+import edu.csus.ecs.pc2.core.model.CategoryEvent;
 import edu.csus.ecs.pc2.core.model.Clarification;
 import edu.csus.ecs.pc2.core.model.ClarificationEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
@@ -35,6 +36,7 @@ import edu.csus.ecs.pc2.core.model.DisplayTeamName;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
+import edu.csus.ecs.pc2.core.model.ICategoryListener;
 import edu.csus.ecs.pc2.core.model.IClarificationListener;
 import edu.csus.ecs.pc2.core.model.IContestInformationListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -699,6 +701,7 @@ public class ClarificationsPane extends JPanePlugin {
         getContest().addProblemListener(new ProblemListenerImplementation());
         getContest().addLanguageListener(new LanguageListenerImplementation());
         getContest().addContestInformationListener(new ContestInformationListenerImplementation());
+        getContest().addCategoryListener(new CategoryListenerImplementation());
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -957,6 +960,43 @@ public class ClarificationsPane extends JPanePlugin {
                 }
             });
         }
+    }
+
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     *
+     */
+    private class CategoryListenerImplementation implements ICategoryListener {
+
+        public void categoryAdded(CategoryEvent event) {
+            // ignored, cannot change listbox
+        }
+
+        public void categoryChanged(CategoryEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                }
+            });
+        }
+
+        public void categoryRemoved(CategoryEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                }
+            });
+        }
+
+        public void categoryRefreshAll(CategoryEvent event) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    reloadListBox();
+                }
+            });
+        }
+        
     }
 
     /**
