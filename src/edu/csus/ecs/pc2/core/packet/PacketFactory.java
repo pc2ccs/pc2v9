@@ -335,8 +335,6 @@ public final class PacketFactory {
 
     public static final String FINALIZE_DATA = "FINALIZE_DATA";
 
-    public static final String CATEGORIES_ARRAY = "CATEGORIES_ARRAY";
-
     public static final String CATEGORY = "CATEGORY";
 
     
@@ -2143,7 +2141,7 @@ public final class PacketFactory {
         Properties prop = new Properties();
         prop.put(CLIENT_ID, source);
         prop.put(SITE_NUMBER, source.getSiteNumber());
-        prop.put(CATEGORIES_ARRAY, categories);
+        prop.put(CATEGORY_LIST, categories);
         Packet packet = new Packet(Type.UPDATE_SETTING, source, destination, prop);
         return packet;
     }

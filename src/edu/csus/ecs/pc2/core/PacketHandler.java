@@ -2757,7 +2757,7 @@ public class PacketHandler {
             }
         }
 
-        Category[] categories = (Category[])PacketFactory.getObjectValue(packet, PacketFactory.CATEGORIES_ARRAY);
+        Category[] categories = (Category[])PacketFactory.getObjectValue(packet, PacketFactory.CATEGORY_LIST);
         if (categories != null) {
             for (int i = 0; i < categories.length; i++) {
                 Category category = categories[i];
