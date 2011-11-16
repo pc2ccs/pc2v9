@@ -127,8 +127,12 @@ public class InternalContestTest extends TestCase {
         assertEquals("Missing general category", 1, categories.length);
         
         Category defaultCat = categories[0];
-        assertEquals("Default cateory not General", "General", defaultCat.getDisplayName());
+        assertEquals("Default category not General", "General", defaultCat.getDisplayName());
 
+        // setup should only be adding if there are no categories
+        contest.setupDefaultCategories();
+        categories = contest.getCategories();
+        assertEquals("Too many categories", 1, categories.length);
     }
 
     /**
