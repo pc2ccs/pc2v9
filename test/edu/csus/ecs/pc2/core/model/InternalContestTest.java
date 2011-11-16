@@ -118,9 +118,11 @@ public class InternalContestTest extends TestCase {
         contest.initializeSubmissions(siteNumber);
         
         Category[] categories = contest.getCategories();
+        assertEquals("No categories expected", 0, categories.length);
         
-//        contest.addCategory(new Category("General"));
-//        categories = contest.getCategories();
+        // normally this is done when the 1st server logins in
+        contest.setupDefaultCategories();
+        categories = contest.getCategories();
         
         assertEquals("Missing general category", 1, categories.length);
         
