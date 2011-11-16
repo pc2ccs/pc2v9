@@ -219,6 +219,8 @@ public class JudgeView extends JFrame implements UIPlugin {
                 //TODO This needs to be resolved. The submitClarifcaitonPane is bleeding through the other tabs
                 getMainTabbedPane().setSelectedComponent(submitClarificationPane);
                 getMainTabbedPane().doLayout();
+                getMainTabbedPane().setSelectedComponent(submitRunPane);
+                getMainTabbedPane().doLayout();
                 getMainTabbedPane().setSelectedComponent(newRunsPane);
 
                 if (Utilities.isDebugMode()){
