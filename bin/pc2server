@@ -15,6 +15,6 @@ else
   PC2XOPS=""
 fi
 
-java $PC2XOPS -Xms64M -Xmx768M -cp $libdir/pc2.jar:$mclbdir/mclb.jar edu.csus.ecs.pc2.Starter --server $*
+java $PC2XOPS -Xms64M -Xmx1600M -cp $libdir/pc2.jar:$mclbdir/mclb.jar edu.csus.ecs.pc2.Starter --server $*
 
 # eof pc2team $Id$ 
