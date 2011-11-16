@@ -562,7 +562,9 @@ public class ContestYAMLLoader {
                 language.setExecutableIdentifierMask(exeMask);
                 String activeStr = getSequenceValue(sequenceLines, "active");
                 boolean active = true;
-                active = Boolean.parseBoolean(activeStr);
+                if (activeStr != null && activeStr.length() > 0) {
+                    active = Boolean.parseBoolean(activeStr);
+                }
                 language.setActive(active);
                 String programExecuteCommandLine = null;
                 if (interpreter == null) {
