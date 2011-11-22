@@ -6,6 +6,7 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagLayout;
 import java.awt.Rectangle;
+import java.awt.event.KeyEvent;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
@@ -21,14 +22,13 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
-import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.playback.PlaybackEvent;
-import edu.csus.ecs.pc2.core.model.playback.PlaybackManager;
 import edu.csus.ecs.pc2.core.model.playback.PlaybackEvent.Action;
-import java.awt.event.KeyEvent;
+import edu.csus.ecs.pc2.core.model.playback.PlaybackManager;
 
 /**
  * Pane for Contest Playback.
@@ -44,6 +44,8 @@ public class PlaybackPane extends JPanePlugin {
      * 
      */
     private static final long serialVersionUID = -1344873174060871842L;
+
+    private static final String RUN_MESSAGE_SUFFIX = " total events/runs)";
 
     private JPanel centerPane = null;
 
@@ -79,6 +81,12 @@ public class PlaybackPane extends JPanePlugin {
 
     private JLabel currentEventLabel = null;
 
+    private JTextField playbackIterationTextField = null;
+
+    private JLabel iterateTitleLabel = null;
+
+    private JLabel totalRunsLabel = null;
+
     /**
      * This method initializes
      * 
@@ -94,13 +102,15 @@ public class PlaybackPane extends JPanePlugin {
      */
     private void initialize() {
         this.setLayout(new BorderLayout());
-        this.setSize(new Dimension(594, 282));
+        this.setSize(new Dimension(594, 304));
         this.add(getCenterPane(), BorderLayout.WEST);
         this.add(getButtonPane(), BorderLayout.SOUTH);
         this.add(getTopPane(), BorderLayout.NORTH);
         this.add(getEventsListBox(), BorderLayout.CENTER);
         
         currentEventLabel.setText("At (start)");
+        
+        updateTotalRuns();
 
         // getTeamReadsFrombuttonGroup().setSelected(getFileRadioButton().getModel(), true);
 
@@ -368,21 +378,28 @@ public class PlaybackPane extends JPanePlugin {
      */
     private JPanel getTopPane() {
         if (topPane == null) {
+            totalRunsLabel = new JLabel();
+            totalRunsLabel.setText("(no runs)");
+            totalRunsLabel.setBounds(new Rectangle(344, 85, 162, 24));
+            iterateTitleLabel = new JLabel();
+            iterateTitleLabel.setText("Number of times to load events");
+            iterateTitleLabel.setBounds(new Rectangle(26, 85, 202, 24));
+            iterateTitleLabel.setHorizontalAlignment(SwingConstants.RIGHT);
             currentEventLabel = new JLabel();
-            currentEventLabel.setBounds(new Rectangle(297, 24, 115, 38));
             currentEventLabel.setHorizontalAlignment(SwingConstants.CENTER);
             currentEventLabel.setFont(new Font("Dialog", Font.BOLD, 16));
-            currentEventLabel.setText("At ###");
+            currentEventLabel.setBounds(new Rectangle(356, 22, 115, 38));
+            currentEventLabel.setText("Not started");
             stopAtLabel = new JLabel();
-            stopAtLabel.setBounds(new Rectangle(26, 46, 146, 24));
             stopAtLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+            stopAtLabel.setBounds(new Rectangle(26, 48, 202, 24));
             stopAtLabel.setText("Stop before event");
             msLabel = new JLabel();
-            msLabel.setBounds(new Rectangle(248, 13, 32, 24));
             msLabel.setText("ms");
+            msLabel.setBounds(new Rectangle(294, 15, 32, 24));
             topPane = new JPanel();
             topPane.setLayout(null);
-            topPane.setPreferredSize(new Dimension(120, 120));
+            topPane.setPreferredSize(new Dimension(160, 160));
             topPane.add(getTimeWarpTextField(), null);
             topPane.add(msLabel, null);
             topPane.add(stopAtLabel, null);
@@ -390,6 +407,9 @@ public class PlaybackPane extends JPanePlugin {
             topPane.add(getEveryMSEventPacing(), null);
             topPane.add(getStepButton(), null);
             topPane.add(currentEventLabel, null);
+            topPane.add(getPlaybackIterationTextField(), null);
+            topPane.add(iterateTitleLabel, null);
+            topPane.add(totalRunsLabel, null);
         }
         return topPane;
     }
@@ -402,7 +422,8 @@ public class PlaybackPane extends JPanePlugin {
     private JTextField getTimeWarpTextField() {
         if (timeWarpTextField == null) {
             timeWarpTextField = new JTextField();
-            timeWarpTextField.setBounds(new Rectangle(190, 13, 38, 24));
+            timeWarpTextField.setBounds(new Rectangle(252, 13, 33, 24));
+            timeWarpTextField.setDocument(new IntegerDocument());
             timeWarpTextField.setText("1000");
         }
         return timeWarpTextField;
@@ -416,8 +437,9 @@ public class PlaybackPane extends JPanePlugin {
     private JTextField getStopEventNumberTextField() {
         if (stopEventNumberTextField == null) {
             stopEventNumberTextField = new JTextField();
-            stopEventNumberTextField.setBounds(new Rectangle(190, 44, 38, 24));
-            stopEventNumberTextField.setText("99");
+            stopEventNumberTextField.setBounds(new Rectangle(252, 48, 33, 24));
+            stopEventNumberTextField.setDocument(new IntegerDocument());
+            stopEventNumberTextField.setText("");
         }
         return stopEventNumberTextField;
     }
@@ -430,9 +452,10 @@ public class PlaybackPane extends JPanePlugin {
     private JRadioButton getEveryMSEventPacing() {
         if (everyMSEventPacing == null) {
             everyMSEventPacing = new JRadioButton();
-            everyMSEventPacing.setBounds(new Rectangle(15, 13, 163, 24));
             everyMSEventPacing.setSelected(true);
-            everyMSEventPacing.setText("Execute each event");
+            everyMSEventPacing.setHorizontalAlignment(SwingConstants.RIGHT);
+            everyMSEventPacing.setBounds(new Rectangle(15, 13, 216, 24));
+            everyMSEventPacing.setText("Execute each event every");
         }
         return everyMSEventPacing;
     }
@@ -454,8 +477,8 @@ public class PlaybackPane extends JPanePlugin {
     private JButton getStepButton() {
         if (stepButton == null) {
             stepButton = new JButton();
-            stepButton.setBounds(new Rectangle(187, 81, 141, 25));
             stepButton.setMnemonic(KeyEvent.VK_R);
+            stepButton.setBounds(new Rectangle(252, 120, 141, 25));
             stepButton.setText("Run one event");
 
             stepButton.addActionListener(new java.awt.event.ActionListener() {
@@ -544,6 +567,8 @@ public class PlaybackPane extends JPanePlugin {
             JOptionPane.showMessageDialog(this, "Unable to load file: " + filename+ " "+e.getMessage());
             e.printStackTrace();
         }
+        
+        updateTotalRuns();
     }
 
     private String getFileName() throws IOException {
@@ -554,6 +579,43 @@ public class PlaybackPane extends JPanePlugin {
         }
         chooser = null;
         return null;
+    }
+
+    /**
+     * This method initializes playbackIterationTextField
+     * 
+     * @return javax.swing.JTextField
+     */
+    private JTextField getPlaybackIterationTextField() {
+        if (playbackIterationTextField == null) {
+            playbackIterationTextField = new JTextField();
+            playbackIterationTextField.setBounds(new Rectangle(252, 85, 73, 24));
+            playbackIterationTextField.setDocument(new IntegerDocument());
+            playbackIterationTextField.setText("1");
+            playbackIterationTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+                @Override
+                public void keyReleased(KeyEvent e) {
+                    super.keyReleased(e);
+                    updateTotalRuns();
+                }
+            });
+        }
+        return playbackIterationTextField;
+    }
+
+    protected void updateTotalRuns() {
+        int loadedCount = getEventsListBox().getRowCount();
+        String message = "(0 " + RUN_MESSAGE_SUFFIX;
+        String countString = getPlaybackIterationTextField().getText();
+        int iterationCount = 0;
+        if (countString.length() > 0) {
+            iterationCount = Integer.parseInt(countString);
+        }
+        int numRuns = loadedCount * iterationCount;
+        if (numRuns > 0) {
+            message = "(" + numRuns + RUN_MESSAGE_SUFFIX;
+        }
+        totalRunsLabel.setText(message);
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"
