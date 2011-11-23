@@ -9,6 +9,7 @@ import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Arrays;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -21,11 +22,18 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
+import com.ibm.webrunner.j2mclb.util.HeapSorter;
+import com.ibm.webrunner.j2mclb.util.NumericStringComparator;
+
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
+import edu.csus.ecs.pc2.core.model.Language;
+import edu.csus.ecs.pc2.core.model.Problem;
+import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.playback.PlaybackEvent;
 import edu.csus.ecs.pc2.core.model.playback.PlaybackEvent.Action;
 import edu.csus.ecs.pc2.core.model.playback.PlaybackManager;
@@ -157,55 +165,105 @@ public class PlaybackPane extends JPanePlugin {
         if (eventsListBox == null) {
             eventsListBox = new MCLB();
 
-            Object[] cols = { "Seq", "Who", "Event", "Id", "When", "State", "Details" };
+            Object[] cols = { "Seq", "Site", "Who", "Event", "Id", "When", "State", "Details" };
             eventsListBox.addColumns(cols);
             cols = null;
+            
+            // Sorters
+            HeapSorter sorter = new HeapSorter();
+            HeapSorter numericStringSorter = new HeapSorter();
+            numericStringSorter.setComparator(new NumericStringComparator());
+            HeapSorter accountNameSorter = new HeapSorter();
+            accountNameSorter.setComparator(new AccountColumnComparator());
+
+            int idx = 0;
+
+            eventsListBox.setColumnSorter(idx++, numericStringSorter, 1); // Seq
+            eventsListBox.setColumnSorter(idx++, sorter, 2); // Site
+            eventsListBox.setColumnSorter(idx++, accountNameSorter, 3); // Who/team
+            eventsListBox.setColumnSorter(idx++, sorter, 4); // Event
+            eventsListBox.setColumnSorter(idx++, numericStringSorter, 5); // id
+            eventsListBox.setColumnSorter(idx++, numericStringSorter, 6); // When
+            eventsListBox.setColumnSorter(idx++, sorter, 7); // State
+            eventsListBox.setColumnSorter(idx++, sorter, 8); // details
+            
         }
         return eventsListBox;
     }
 
     public String[] buildPlayBackRow(PlaybackEvent playbackEvent) {
-        String[] strings = new String[7];
-        
+        String[] strings = new String[eventsListBox.getColumnCount()];
+
+        // Object[] cols = { "Seq", "Site", "Who", "Event", "Id", "When", "State", "Details" };
+
+        strings[0] = "" + playbackEvent.getSequenceId();
+        strings[1] = Integer.toString(playbackEvent.getClientId().getSiteNumber());
+        Site site = getContest().getSite(playbackEvent.getClientId().getSiteNumber());
+        if (site != null) {
+            String name = site.getDisplayName();
+            strings[1] = Integer.toString(playbackEvent.getClientId().getSiteNumber()) + " " + stringElipsis(name, 11) + " ";
+        }
+        strings[2] = playbackEvent.getClientId().getName();
+        strings[3] = playbackEvent.getAction().toString();
+        strings[4] = Integer.toString(playbackEvent.getId());
+        strings[5] = Long.toString(playbackEvent.getEventTime());
+        strings[6] = "" + playbackEvent.getEventStatus();
+
         if (playbackEvent.getAction().equals(PlaybackEvent.Action.RUN_SUBMIT)) {
 
-            // Object[] cols = { "Seq", "Who", "Event", "Id", "When", "State", "Details"};
+            strings[7] = getDetails(playbackEvent);
 
-            strings[0] = "" + playbackEvent.getSequenceId();
-            strings[1] = playbackEvent.getClientId().getName();
-            strings[2] = playbackEvent.getAction().toString();
-            strings[3] = "" + playbackEvent.getId();
-            strings[4] = "" + playbackEvent.getEventTime();
-            strings[5] = "" + playbackEvent.getEventStatus();
         } else if (playbackEvent.getAction().equals(PlaybackEvent.Action.RUN_JUDGEMENT)) {
 
-            // Object[] cols = { "Seq", "Who", "Event", "Id", "When", "State", "Details" };
-
-            strings[0] = "" + playbackEvent.getSequenceId();
-            strings[1] = playbackEvent.getClientId().getName();
-            strings[2] = playbackEvent.getAction().toString();
-            strings[3] = "" + playbackEvent.getId();
-            strings[4] = "" + playbackEvent.getEventTime();
-            strings[5] = "" + playbackEvent.getEventStatus();
             JudgementRecord judgementRecord = playbackEvent.getJudgementRecord();
-            ElementId id =  judgementRecord.getJudgementId();
-            if (id != null){
+            ElementId id = judgementRecord.getJudgementId();
+            if (id != null) {
                 Judgement judgement = getContest().getJudgement(id);
-                strings[6] = judgement.getDisplayName();
+                strings[7] = judgement.getDisplayName();
             } else {
-                strings[6] = "Undefined judgement: "+ id;
+                strings[7] = "Undefined judgement: " + id;
 
             }
         } else {
+            Arrays.fill(strings, "");
             strings[0] = "" + playbackEvent.getSequenceId();
-            strings[1] = "";
-            strings[2] = PlaybackEvent.Action.UNDEFINED.toString();
-            strings[3] = "";
-            strings[4] = "";
-            strings[5] = ""; 
+            strings[3] = PlaybackEvent.Action.UNDEFINED.toString();
         }
 
         return strings;
+    }
+
+    protected String stringElipsis(String name, int maxlen) {
+        if (name.length() > maxlen + 2 && name.length() > 4) {
+            return name.substring(0, maxlen - 3) + "...";
+        } else {
+            return name;
+        }
+    }
+
+    private String getDetails(PlaybackEvent event) {
+
+        Run run = event.getRun();
+
+        String probName = "?";
+        ElementId problemId = run.getProblemId();
+        if (problemId != null) {
+            Problem problem = getContest().getProblem(problemId);
+            if (problem != null) {
+                probName = problem.getDisplayName();
+            }
+        }
+
+        String langName = "?";
+        ElementId languageId = run.getLanguageId();
+        if (languageId != null) {
+            Language language = getContest().getLanguage(languageId);
+            if (language != null) {
+                langName = language.getDisplayName();
+            }
+        }
+
+        return probName + ", " + langName;
     }
 
     public void addSampleEventRows() {
@@ -226,20 +284,6 @@ public class PlaybackPane extends JPanePlugin {
 
     private void autoSizeColumns() {
 
-        for (int i = 0; i < eventsListBox.getColumnCount(); i++) {
-            eventsListBox.autoSizeColumn(i);
-        }
-
-    }
-
-    public void addSampleEventRows2() {
-
-        String[][] cols = { { "1", "team 2", "RUN SUBMIT", "1", "12", "DONE" }, { "2", "judge 4", "RUN JUDGEMENT", "1", "22", "DONE" }, { "3", "team 2", "RUN SUBMIT", "2", "24", "PENDING" },
-                { "4", "team 6", "MYSTERY 101", "2", "32", "PENDING" }, { "5", "team 4", "RUN SUBMIT", "3", "42", "PENDING" } };
-
-        for (String[] colarray : cols) {
-            eventsListBox.addRow(colarray);
-        }
         for (int i = 0; i < eventsListBox.getColumnCount(); i++) {
             eventsListBox.autoSizeColumn(i);
         }
