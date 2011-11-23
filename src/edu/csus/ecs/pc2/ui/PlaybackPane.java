@@ -94,6 +94,8 @@ public class PlaybackPane extends JPanePlugin {
     private JLabel iterateTitleLabel = null;
 
     private JLabel totalRunsLabel = null;
+    
+    private boolean stillRunning = false;
 
     /**
      * This method initializes
@@ -119,9 +121,9 @@ public class PlaybackPane extends JPanePlugin {
         currentEventLabel.setText("At (start)");
         
         updateTotalRuns();
-
+        
+        setRunningButtons(false);
         // getTeamReadsFrombuttonGroup().setSelected(getFileRadioButton().getModel(), true);
-
     }
 
     @Override
@@ -324,7 +326,18 @@ public class PlaybackPane extends JPanePlugin {
             return;
         }
 
-        int lastEventToRunTo = Integer.parseInt(getStopEventNumberTextField().getText());
+        String lastEventString = getStopEventNumberTextField().getText();
+        
+        int lastEventToRunTo = Integer.MAX_VALUE;
+        if (lastEventString.trim().length() > 0) {
+            lastEventToRunTo = Integer.parseInt(lastEventString);
+        }
+        
+        String setIteratorCount = playbackIterationTextField.getText();
+        int playbackIteratorMax = 1;
+        if (setIteratorCount.length() < 1) {
+            playbackIteratorMax = Integer.parseInt(setIteratorCount);
+        }
 
         if (currentEventNumber == lastEventToRunTo) {
             JOptionPane.showMessageDialog(this, "Already before event " + lastEventToRunTo);
@@ -336,43 +349,72 @@ public class PlaybackPane extends JPanePlugin {
         }
 
         final int waitTime = Integer.parseInt(getTimeWarpTextField().getText());
+        
+        final int maxEventSetCount = playbackIteratorMax;
 
         if (lastEventToRunTo > getEventsListBox().getRowCount()) {
             lastEventToRunTo = getEventsListBox().getRowCount();
         }
 
         final int runToStep = lastEventToRunTo;
+        
+        setRunningButtons (true);
 
         new Thread(new Runnable() {
 
             public void run() {
-                for (int i = currentEventNumber; i < runToStep; i++) {
+                
+                setStillRunning(true);
 
-                    PlaybackEvent playbackEvent = (PlaybackEvent) eventsListBox.getKeys()[i - 1];
-                    try {
-                        currentEventLabel.setText("At event " + playbackManager.getSequenceNumber());
-                        playbackManager.executeEvent(playbackEvent, getContest(), getController());
+                for (int setIteratorCount = 0; setIteratorCount < maxEventSetCount && isStillRunning(); setIteratorCount++) {
 
-                        final String[] row = buildPlayBackRow(playbackEvent);
-                        final int rowNumber = i;
+                    for (int i = currentEventNumber; i <= runToStep && isStillRunning(); i++) {
 
-                        SwingUtilities.invokeLater(new Runnable() {
-                            public void run() {
-                                getEventsListBox().replaceRow(row, rowNumber - 1);
-                                autoSizeColumns();
+                        PlaybackEvent playbackEvent = (PlaybackEvent) eventsListBox.getKeys()[i - 1];
+                        try {
+                            currentEventLabel.setText("At event " + playbackManager.getSequenceNumber());
+                            playbackManager.executeEvent(playbackEvent, getContest(), getController());
+
+                            final String[] row = buildPlayBackRow(playbackEvent);
+                            final int rowNumber = i;
+
+                            SwingUtilities.invokeLater(new Runnable() {
+                                public void run() {
+                                    getEventsListBox().replaceRow(row, rowNumber - 1);
+                                    autoSizeColumns();
+                                }
+                            });
+
+                            if (waitTime > 0) {
+                                Thread.sleep(waitTime);
                             }
-                        });
 
-                        if (waitTime > 0) {
-                            Thread.sleep(waitTime);
+                        } catch (Exception e) {
+                            setStillRunning(false);
+                            e.printStackTrace();
                         }
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
                     }
                 }
+                
+                setStillRunning(false);
+                setRunningButtons (false);
+
             }
         }).start();
+    }
+
+    private void setRunningButtons(boolean running) {
+        getStartButton().setEnabled(! running);
+        getStopButton().setEnabled(running);
+        getResetButton().setEnabled(getEventsListBox().getRowCount() > 0);
+    }
+
+    public boolean isStillRunning() {
+        return stillRunning;
+    }
+    
+    public void setStillRunning(boolean stillRunning) {
+        this.stillRunning = stillRunning;
     }
 
     /**
@@ -387,8 +429,17 @@ public class PlaybackPane extends JPanePlugin {
             stopButton.setEnabled(false);
             stopButton.setMnemonic(KeyEvent.VK_UNDEFINED);
             stopButton.setToolTipText("Stop running events");
+            stopButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    stopEventsRunning();
+                }
+            });
         }
         return stopButton;
+    }
+
+    protected void stopEventsRunning() {
+        setStillRunning(false);
     }
 
     /**
@@ -401,7 +452,7 @@ public class PlaybackPane extends JPanePlugin {
             resetButton = new JButton();
             resetButton.setText("Reset");
             resetButton.setEnabled(false);
-            resetButton.setToolTipText("Reset (erase) runs");
+            resetButton.setToolTipText("Reset (erase or clear) events");
             resetButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     deleteAllRuns();
@@ -413,6 +464,7 @@ public class PlaybackPane extends JPanePlugin {
 
     protected void deleteAllRuns() {
         // TODO code deleteAllRuns
+        showMessage(this, "Not implemented", "reset not implemented, yet");
     }
 
     /**
@@ -601,6 +653,7 @@ public class PlaybackPane extends JPanePlugin {
                         getEventsListBox().addRow(row, playbackEvent);
                     }
                     autoSizeColumns();
+                    setRunningButtons(false);
                     JOptionPane.showMessageDialog(this, "Loaded " + playbackEvents.length + " events from " + filename);
 
                 }
