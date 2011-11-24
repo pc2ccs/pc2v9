@@ -92,6 +92,10 @@ public class AllReports implements IReport {
         reports.add(new InternalDumpReport());
         
         reports.add(new HTMLReport());
+        
+        reports.add(new CategoryReport());
+        
+        reports.add(new RunStatisticsReport());
 
         IReport [] listOfReports = (IReport[]) reports.toArray(new IReport[reports.size()]);
         Arrays.sort(listOfReports, new ReportNameByComparator());

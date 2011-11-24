@@ -76,6 +76,7 @@ import edu.csus.ecs.pc2.core.report.ProblemsReport;
 import edu.csus.ecs.pc2.core.report.ProfileCloneSettingsReport;
 import edu.csus.ecs.pc2.core.report.ProfilesReport;
 import edu.csus.ecs.pc2.core.report.RunJudgementNotificationsReport;
+import edu.csus.ecs.pc2.core.report.RunStatisticsReport;
 import edu.csus.ecs.pc2.core.report.RunsByTeamReport;
 import edu.csus.ecs.pc2.core.report.RunsReport;
 import edu.csus.ecs.pc2.core.report.RunsReport5;
@@ -243,6 +244,8 @@ public class ReportPane extends JPanePlugin {
         reports.add(new ExportYamlReport());
         
         reports.add(new CategoryReport());
+        
+        reports.add(new RunStatisticsReport());
 
         listOfReports = (IReport[]) reports.toArray(new IReport[reports.size()]);
         Arrays.sort(listOfReports, new ReportNameByComparator());
