@@ -155,6 +155,8 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     private JButton viewOutputsButton = null;
 
     private GregorianCalendar startTimeCalendar;
+    
+    private long executeTimeMS = 0;
 
     /**
      * This method initializes
@@ -367,6 +369,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         ExecutionData executionData = null;
         if (executable != null) {
             executionData = executable.getExecutionData();
+            judgementRecord.setExecuteSeconds(executionData.getExecuteTimeMS());
         }
 
         newRunResultFiles = new RunResultFiles(newRun, newRun.getProblemId(), judgementRecord, executionData);
@@ -867,7 +870,9 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     }
 
     protected void executeRun() {
-
+        
+        
+        executeTimeMS = 0;
         System.gc();
 
         executable = new Executable(getContest(), getController(), run, runFiles);
@@ -878,6 +883,8 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         }
         setEnabledButtonStatus(false);
         executableFileViewer = executable.execute();
+        
+        executeTimeMS = executable.getExecutionData().getExecuteTimeMS();
 
         // Show validator results, if there are any.
 
@@ -904,6 +911,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                 judgementRecord.setValidatorResultString(results);
 
                 judgementRecord.setSendToTeam(getNotifyTeamCheckBox().isSelected());
+                judgementRecord.setExecuteSeconds(executeTimeMS);
 
                 showValidatorControls(true, judgementRecord);
 

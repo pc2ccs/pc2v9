@@ -30,8 +30,6 @@ public class ViewJudgementsPane extends JPanePlugin implements UIPlugin {
      */
     private static final long serialVersionUID = 2350404181525660056L;
 
-    public static final String SVN_ID = "$Id$";
-
     private JPanel centerPane = null;
 
     private JPanel northPane = null;
@@ -140,7 +138,8 @@ public class ViewJudgementsPane extends JPanePlugin implements UIPlugin {
      * @return
      */
     private Object[] buildJudgmentRow(int rowNumber, Run inRun, JudgementRecord judgementRecord) {
-        // Object[] cols = { "##", "Judgement", "Judge", "Active", "Time", "Final", "TWJ", "TTJ", "Comment for team", "Comment for judge" };
+
+        // Object[] cols = { "##", "Judgement", "Judge", "Active", "Time", "Final", "TWJ", "TTJ", "Comment for team", "Comment for judge", "X time" };
 
         int numberColumns = judgementsListbox.getColumnCount();
         Object[] column = new Object[numberColumns];
@@ -189,7 +188,9 @@ public class ViewJudgementsPane extends JPanePlugin implements UIPlugin {
         } else {
             column[col] = "(None)";
         }
-
+        
+        col++;
+        column[col] = judgementRecord.getExecuteSeconds() +"ms";
         return column;
     }
 
@@ -284,7 +285,7 @@ public class ViewJudgementsPane extends JPanePlugin implements UIPlugin {
     private MCLB getJudgementsListbox() {
         if (judgementsListbox == null) {
             judgementsListbox = new MCLB();
-            Object[] cols = { "##", "Judgement", "Judge", "Active", "Time", "Final", "TWJ", "TTJ", "Comment for team", "Comment for judge" };
+            Object[] cols = { "##", "Judgement", "Judge", "Active", "Time", "Final", "TWJ", "TTJ", "Comment for team", "Comment for judge", "X time" };
             judgementsListbox.addColumns(cols);
             judgementsListbox.autoSizeAllColumns();
         }

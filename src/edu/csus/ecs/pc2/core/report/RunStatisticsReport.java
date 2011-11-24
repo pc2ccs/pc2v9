@@ -95,7 +95,7 @@ public class RunStatisticsReport implements IReport {
                 printWriter.print(" at " + judgementRecord.getWhenJudgedTime());
                 printWriter.println();
                 printWriter.print("     ");
-                printWriter.println(" execute time = " + toSeconds(judgementRecord.getExecuteSeconds()));
+                printWriter.println(" execute time = " + judgementRecord.getExecuteSeconds()+"ms");
 
             }
         }

@@ -311,6 +311,8 @@ public class AutoJudgingMonitor implements UIPlugin {
      * @param runFiles
      */
     private void executeAndAutoJudgeRun() {
+        
+        long executeTimeMS = 0;
 
         setCurrentlyAutoJudging(true);
 
@@ -339,6 +341,8 @@ public class AutoJudgingMonitor implements UIPlugin {
         executable.execute();
 
         ExecutionData executionData = executable.getExecutionData();
+        
+        executeTimeMS = executionData.getExecuteTimeMS();
 
         RunResultFiles runResultFiles = null;
 
@@ -434,6 +438,7 @@ public class AutoJudgingMonitor implements UIPlugin {
             long milliDiff = cal.getTime().getTime() - startTimeCalendar.getTime().getTime();
             long totalSeconds = milliDiff / 1000;
             judgementRecord.setHowLongToJudgeInSeconds(totalSeconds);
+            judgementRecord.setExecuteSeconds(executeTimeMS);
 
             runResultFiles = new RunResultFiles(fetchedRun, fetchedRun.getProblemId(), judgementRecord, executable.getExecutionData());
 
