@@ -7,6 +7,7 @@ import java.util.Properties;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.exception.YamlLoadException;
 import edu.csus.ecs.pc2.core.list.AccountList;
 import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -16,6 +17,7 @@ import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
+import edu.csus.ecs.pc2.core.model.LanguageAutoFill;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
@@ -343,7 +345,6 @@ public class ContestYAMLLoader {
             problemDataFiles.setJudgesAnswerFiles(serializedFileAnswerFiles);
 
         } else {
-
             throw new Exception("  For " + problem.getShortName() + " Missing files -  there are " + inputFileNames.length + " .in files and " + //
                     answerFileNames.length + " .ans files ");
         }
@@ -529,8 +530,9 @@ public class ContestYAMLLoader {
      * 
      * @param yamlLines
      * @return list of {@link Language}s
+     * @throws YamlLoadException 
      */
-    public Language[] getLanguages(String[] yamlLines) {
+    public Language[] getLanguages(String[] yamlLines) throws YamlLoadException {
 
         String[] sectionLines = getSectionLines(LANGUAGE_KEY, yamlLines);
 
@@ -546,40 +548,56 @@ public class ContestYAMLLoader {
                 syntaxError("Language name field missing in languages section");
             } else {
                 Language language = new Language(name);
+                
+                Language lookedupLanguage = LanguageAutoFill.languageLookup (name);
                 String compilerName = getSequenceValue(sequenceLines, "compilerCmd");
-                String compilerArgs = getSequenceValue(sequenceLines, "compiler-args");
-                String interpreter = getSequenceValue(sequenceLines, "runner");
-                String interpreterArgs = getSequenceValue(sequenceLines, "runner-args");
-                String exeMask = getSequenceValue(sequenceLines, "exemask");
-                // runner + runner-args, so what is execCmd for ?
-//                String execCmd = getSequenceValue(sequenceLines, "execCmd");
+                
+                if (compilerName == null && lookedupLanguage != null){
+                    language = lookedupLanguage;
+                    language.setDisplayName(name);
+                 } else if (compilerName == null) {
+                     throw new YamlLoadException("Language \""+name+"\" missing compiler command line");
+                 } else {
+                
+                    String compilerArgs = getSequenceValue(sequenceLines, "compiler-args");
+                    String interpreter = getSequenceValue(sequenceLines, "runner");
+                    String interpreterArgs = getSequenceValue(sequenceLines, "runner-args");
+                    String exeMask = getSequenceValue(sequenceLines, "exemask");
+                    // runner + runner-args, so what is execCmd for ?
+//                    String execCmd = getSequenceValue(sequenceLines, "execCmd");
 
-                if (compilerArgs == null) {
-                    language.setCompileCommandLine(compilerName);
-                } else {
-                    language.setCompileCommandLine(compilerName + " " + compilerArgs);
+                    if (compilerArgs == null) {
+                        language.setCompileCommandLine(compilerName);
+                    } else {
+                        language.setCompileCommandLine(compilerName + " " + compilerArgs);
+                    }
+                    language.setExecutableIdentifierMask(exeMask);
+
+                    String programExecuteCommandLine = null;
+                    if (interpreter == null) {
+                        programExecuteCommandLine = "a.out";
+                    } else {
+                        if (interpreterArgs == null) {
+                            programExecuteCommandLine = interpreter;
+                        } else {
+                            programExecuteCommandLine = interpreter + " " + interpreterArgs;
+                        }
+                    }
+                    language.setProgramExecuteCommandLine(programExecuteCommandLine);
                 }
-                language.setExecutableIdentifierMask(exeMask);
+                
                 String activeStr = getSequenceValue(sequenceLines, "active");
                 boolean active = true;
                 if (activeStr != null && activeStr.length() > 0) {
                     active = Boolean.parseBoolean(activeStr);
                 }
                 language.setActive(active);
-                String programExecuteCommandLine = null;
-                if (interpreter == null) {
-                    programExecuteCommandLine = "a.out";
-                } else {
-                    if (interpreterArgs == null) {
-                        programExecuteCommandLine = interpreter;
-                    } else {
-                        programExecuteCommandLine = interpreter + " " + interpreterArgs;
-                    }
-                }
-                language.setProgramExecuteCommandLine(programExecuteCommandLine);
 
                 // TODO handle interpreted languages, seems it should be in the export
-                languageList.addElement(language);
+                
+                if (valid(language, name)){
+                    languageList.addElement(language);
+                }
 
             }
 
@@ -588,6 +606,20 @@ public class ContestYAMLLoader {
         }
 
         return (Language[]) languageList.toArray(new Language[languageList.size()]);
+    }
+
+    private boolean valid(Language language, String prefix) throws YamlLoadException {
+        checkField(language.getDisplayName(), prefix + " Compiler Display name");
+        checkField(language.getCompileCommandLine(), prefix + " Compile Command line");
+        return true;
+    }
+
+    private void checkField(String field, String fieldName) throws YamlLoadException {
+        if (field == null) {
+            throw new YamlLoadException("Missing " + fieldName);
+        } else if (field.trim().length() == 0) {
+            throw new YamlLoadException("Missing " + fieldName);
+        }
     }
 
     /**

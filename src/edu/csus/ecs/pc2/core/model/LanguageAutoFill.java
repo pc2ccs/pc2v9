@@ -40,6 +40,8 @@ public final class LanguageAutoFill {
     public static final String RUBYTITLE = "Ruby";
 
     private static final String INTERPRETER_VALUE = "interpeter";
+    
+    private static final String NULL_LANGUAGE_NAME = "";
 
     private static String[] languageList = { DEFAULTTITLE, JAVATITLE, //
             GNUCPPTITLE, GNUCTITLE, PERLTITLE, PHPTITLE, PYTHONTITLE, RUBYTITLE, //
@@ -136,7 +138,7 @@ public final class LanguageAutoFill {
         } else {
             // default / DEFAULTTITLE
 
-            String[] dVals = { "", "<Compiler> {:mainfile}", "{:basename}.exe", 
+            String[] dVals = { NULL_LANGUAGE_NAME, "<Compiler> {:mainfile}", "{:basename}.exe", 
                     "{:basename}.exe", "", "" };
 
             return dVals;
@@ -154,6 +156,64 @@ public final class LanguageAutoFill {
     public static boolean isInterpretedLanguage(String key) {
         String [] values = getAutoFillValues(key);
         return INTERPRETER_VALUE.equals(values[5]);
+    }
+    
+    /**
+     * Match name and return Language definition.
+     * @param name
+     * @return null if no language matches
+     */
+    public static Language languageLookup(String languageName) {
+        
+        String [] names = getLanguageList();
+        for (String name : names){
+            if (name.equalsIgnoreCase(languageName)){
+                return createAutoFilledLanguage(name);
+            }
+        }
+        
+        for (String name : names){
+             if (name.length() > languageName.length()){
+                if (name.startsWith(languageName + " ")){
+                    return createAutoFilledLanguage(name);
+                }
+            }
+        }
+        
+        if (languageName.equalsIgnoreCase("C")){
+            return createAutoFilledLanguage(GNUCTITLE);
+        }
+        
+        if (languageName.equalsIgnoreCase("C++")){
+            return createAutoFilledLanguage(GNUCPPTITLE);
+        }
+        
+        return null;
+    }
+
+    /**
+     * Create language from default values.
+     *  
+     * @param name language name from {@link LanguageAutoFill#getLanguageList()} 
+     * @return null if name is not found.
+     */
+    public static Language createAutoFilledLanguage(String name) {
+
+        String[] values = LanguageAutoFill.getAutoFillValues(name);
+        
+        if (! values[0].equals(NULL_LANGUAGE_NAME)){
+            Language language = new Language(values[4]);
+            language.setCompileCommandLine(values[1]);
+            language.setExecutableIdentifierMask(values[2]);
+            language.setProgramExecuteCommandLine(values[3]);
+            boolean isScript = LanguageAutoFill.isInterpretedLanguage(name);
+            language.setInterpreted(isScript);
+            return language;
+        } else {
+            return null;
+        }
+
+     
     }
 
 }

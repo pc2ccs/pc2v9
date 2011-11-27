@@ -281,10 +281,8 @@ public class ContestPreloadPane extends JPanePlugin {
             showMessage("All contest settings sent to server" + NL + contestSummary);
 
         } catch (Exception e) {
-
             logException("Unable to load contest YAML from " + filename, e);
-            e.printStackTrace();
-            showMessage("Problem loading file(s) check log" + e.getMessage());
+            showMessage("Problem loading file(s) - " + e.getMessage());
         }
 
     }
