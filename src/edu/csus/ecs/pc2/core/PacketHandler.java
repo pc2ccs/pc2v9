@@ -2488,6 +2488,12 @@ public class PacketHandler {
             }
             sendToTeams = true;
         }
+        
+        Problem [] problems = (Problem []) PacketFactory.getObjectValue(packet, PacketFactory.PROBLEM_LIST);
+        if (problems != null){
+            addNewProblems (contest, packet, problems);
+            sendToTeams = true;
+        }
 
         ContestTime contestTime = (ContestTime) PacketFactory.getObjectValue(packet, PacketFactory.CONTEST_TIME);
         if (contestTime != null) {
@@ -2603,6 +2609,29 @@ public class PacketHandler {
                     controller.sendToTeams(addPacket);
                 }
             }
+        }
+    }
+
+    /**
+     * Add problems and problem data file list to contest.
+     * 
+     * @param contest2
+     * @param packet contains ProblemDataFiles 
+     * @param problems problems to add
+     */
+    protected void addNewProblems(IInternalContest iContest, Packet packet, Problem[] problems) {
+        ProblemDataFiles[] problemDataFileList = (ProblemDataFiles[]) PacketFactory.getObjectValue(packet, PacketFactory.PROBLEM_DATA_FILES_LIST);
+        int idx = 0;
+        for (Problem problem : problems) {
+            if (problems != null) {
+                ProblemDataFiles problemDataFiles = problemDataFileList[idx];
+                if (problemDataFiles != null) {
+                    iContest.addProblem(problem, problemDataFiles);
+                } else {
+                    iContest.addProblem(problem);
+                }
+            }
+            idx++;
         }
     }
 

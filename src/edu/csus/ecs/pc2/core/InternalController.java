@@ -2808,6 +2808,12 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         sendToLocalServer(updateProblemPacket);
     }
 
+    public void addNewProblem(Problem [] problem, ProblemDataFiles [] problemDataFiles) {
+        Packet updateProblemPacket = PacketFactory.createAddSetting(contest.getClientId(), getServerClientId(), problem, problemDataFiles);
+        sendToLocalServer(updateProblemPacket);
+    }
+
+    
     public void updateRun(Run run, JudgementRecord judgementRecord, RunResultFiles runResultFiles) {
         Packet updateRunPacket = PacketFactory.createRunUpdated(contest.getClientId(), getServerClientId(), run, judgementRecord, runResultFiles, contest.getClientId());
         sendToLocalServer(updateRunPacket);

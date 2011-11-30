@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Vector;
 
@@ -31,8 +32,15 @@ public class ContestImporter {
      * @param inContest
      */
     public void sendContestSettingsToServer(IInternalController theController, IInternalContest theContest, IInternalContest inContest) {
-        // TODO CCS
-
+        
+        // TODO CCS validate incoming contest data
+        // validation has been done
+        // in the past via UI or other code, invalid data should be be allowed
+        // to be added into the contest.
+        
+        // TODO CCS move all merging code outside of sendContestSettingsToServer method, this is
+        // _send_ to server not merge then send to server.
+        
         if (inContest.getContestInformation().getContestTitle() != null) {
             ContestInformation contestInformation = inContest.getContestInformation();
             contestInformation.setContestTitle(inContest.getContestInformation().getContestTitle());
@@ -54,7 +62,15 @@ public class ContestImporter {
                     updatedSite.setPassword(site.getPassword());
                     updatedSite.setConnectionInfo(site.getConnectionInfo());
                     // TODO this field is not in use...
-                    // updatedSite.setConnectionDisplayInfo(site.getConnectionDisplayInfo());
+                    // TODO CCS what does "not in use" mean specifically?
+                    /**
+                     * The ContestLoader loads these value, if they are not being loaded <br>
+                     * (if that is what is meant by "no used") then it should be because <br>
+                     * having invalid (aka missing) site connection is invalid and will <br>
+                     * cause exceptions elsewhere when the invalid data is processed.  No <br>
+                     * code may be in place to report this error. 
+                     */
+                    updatedSite.setConnectionDisplayInfo(site.getConnectionDisplayInfo());
                     theController.updateSite(updatedSite);
                 }
             } else {
@@ -81,55 +97,9 @@ public class ContestImporter {
                 theController.addNewLanguage(language);
             }
         }
+        
+        // TODO CCS design decision, de facto augment/ensure accounts, there should be an option to overwrite
 
-        HashMap<String, Problem> probHash = new HashMap<String, Problem>();
-        for (Problem existingProblem : theContest.getProblems()) {
-            if (existingProblem.isActive()) {
-                probHash.put(existingProblem.getDisplayName(), existingProblem);
-            }
-        }
-        for (Problem problem : inContest.getProblems()) {
-            ProblemDataFiles problemDataFiles = inContest.getProblemDataFile(problem);
-            if (probHash.containsKey(problem.getDisplayName())) {
-                Problem newProblem = probHash.get(problem.getDisplayName());
-                if (!newProblem.isSameAs(problem)) {
-                    newProblem.setAnswerFileName(problem.getAnswerFileName());
-                    newProblem.setComputerJudged(problem.isComputerJudged());
-                    newProblem.setDataFileName(problem.getDataFileName());
-                    newProblem.setHideOutputWindow(problem.isHideOutputWindow());
-                    newProblem.setIgnoreSpacesOnValidation(problem.isIgnoreSpacesOnValidation());
-                    newProblem.setInternationalJudgementReadMethod(problem.isInternationalJudgementReadMethod());
-                    newProblem.setManualReview(problem.isManualReview());
-                    newProblem.setPrelimaryNotification(problem.isPrelimaryNotification());
-                    newProblem.setReadInputDataFromSTDIN(problem.isReadInputDataFromSTDIN());
-                    try {
-                        newProblem.setShortName(problem.getShortName());
-                    } catch (Exception e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                    newProblem.setShowCompareWindow(problem.isShowCompareWindow());
-                    newProblem.setShowValidationToJudges(problem.isShowValidationToJudges());
-                    newProblem.setTimeOutInSeconds(problem.getTimeOutInSeconds());
-                    newProblem.setUsingPC2Validator(problem.isUsingPC2Validator());
-                    newProblem.setValidatedProblem(problem.isValidatedProblem());
-                    newProblem.setValidatorCommandLine(problem.getValidatorCommandLine());
-                    newProblem.setValidatorProgramName(problem.getValidatorProgramName());
-                    newProblem.setWhichPC2Validator(problem.getWhichPC2Validator());
-                }
-                if (problemDataFiles != null) {
-                    theController.updateProblem(newProblem, problemDataFiles);
-                } else {
-                    theController.updateProblem(newProblem);
-                }
-            } else {
-                if (problemDataFiles != null) {
-                    theController.addNewProblem(problem, problemDataFiles);
-                } else {
-                    theController.addProblem(problem);
-                }
-            }
-        }
         
         // account yaml lacks detail, so all we are doing here is ensuring
         // that the accounts exist.
@@ -165,6 +135,74 @@ public class ContestImporter {
             }
         }
         theController.updateCategories((Category[])catAdds.toArray(new Category[catAdds.size()]));
+        
+        // TODO CCS design decision, de facto augment/ensure problems, there should be an option to overwrite
 
+        HashMap<String, Problem> probHash = new HashMap<String, Problem>();
+        for (Problem existingProblem : theContest.getProblems()) {
+            if (existingProblem.isActive()) {
+                probHash.put(existingProblem.getDisplayName(), existingProblem);
+            }
+        }
+        
+        ArrayList<Problem> problemsToAddList = new ArrayList<Problem> ();
+        
+        for (Problem problem : inContest.getProblems()) {
+            if (probHash.containsKey(problem.getDisplayName())) {
+                try {
+                    Problem newProblem = probHash.get(problem.getDisplayName());
+                    if (!newProblem.isSameAs(problem)) {
+                        updateProblemFields (newProblem, problem);
+                    }
+                    problemsToAddList.add(newProblem);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+        
+            } else {
+                problemsToAddList.add(problem);
+            }
+        }
+        
+        if (problemsToAddList.size()> 0){
+            Problem [] list = new Problem[problemsToAddList.size()];
+            problemsToAddList.toArray(list);
+            ProblemDataFiles [] datafiles = new ProblemDataFiles[list.length];
+            int idx = 0;
+            for (Problem problem : list ){
+                datafiles[idx] = inContest.getProblemDataFile(problem);
+                idx ++;
+            }
+            theController.addNewProblem(list, datafiles);
+        }
+       
+        // TODO CCS redesign/write this method, validate at top, add to contest (via controller) at bottom
+        /**
+         * Only send to server via controller when all fields are validated, aka no Exceptions. <br>
+         * Move all theController down to bottom of this method. <br>
+         * Create a single packet to update/add on server.
+         */
+        
+    }
+
+    private void updateProblemFields(Problem newProblem, Problem problem) throws Exception {
+        newProblem.setAnswerFileName(problem.getAnswerFileName());
+        newProblem.setComputerJudged(problem.isComputerJudged());
+        newProblem.setDataFileName(problem.getDataFileName());
+        newProblem.setHideOutputWindow(problem.isHideOutputWindow());
+        newProblem.setIgnoreSpacesOnValidation(problem.isIgnoreSpacesOnValidation());
+        newProblem.setInternationalJudgementReadMethod(problem.isInternationalJudgementReadMethod());
+        newProblem.setManualReview(problem.isManualReview());
+        newProblem.setPrelimaryNotification(problem.isPrelimaryNotification());
+        newProblem.setReadInputDataFromSTDIN(problem.isReadInputDataFromSTDIN());
+        newProblem.setShortName(problem.getShortName());
+        newProblem.setShowCompareWindow(problem.isShowCompareWindow());
+        newProblem.setShowValidationToJudges(problem.isShowValidationToJudges());
+        newProblem.setTimeOutInSeconds(problem.getTimeOutInSeconds());
+        newProblem.setUsingPC2Validator(problem.isUsingPC2Validator());
+        newProblem.setValidatedProblem(problem.isValidatedProblem());
+        newProblem.setValidatorCommandLine(problem.getValidatorCommandLine());
+        newProblem.setValidatorProgramName(problem.getValidatorProgramName());
+        newProblem.setWhichPC2Validator(problem.getWhichPC2Validator());
     }
 }

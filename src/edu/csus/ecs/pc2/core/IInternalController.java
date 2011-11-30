@@ -215,6 +215,8 @@ public interface IInternalController {
     void addNewSite(Site site);
 
     void addNewProblem(Problem problem, ProblemDataFiles problemDataFiles);
+    
+    void addNewProblem(Problem [] problem, ProblemDataFiles [] problemDataFiles);
 
     void addProblem(Problem problem);
 

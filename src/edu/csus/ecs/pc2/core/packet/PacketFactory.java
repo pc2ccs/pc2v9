@@ -254,6 +254,11 @@ public final class PacketFactory {
     public static final String PROBLEM_LIST = "PROBLEM_LIST";
 
     /**
+     * Array of {@link ProblemDataFiles}
+     */
+    public static final String PROBLEM_DATA_FILES_LIST = "PROBLEM_DATA_FILES_LIST";
+
+    /**
      * Array of {@link Category}.
      */
     public static final String CATEGORY_LIST = "CATEGORY_LIST";
@@ -882,6 +887,22 @@ public final class PacketFactory {
         if (problemDataFiles != null) {
             prop.put(PROBLEM_DATA_FILES, problemDataFiles);
         }
+        Packet packet = new Packet(Type.ADD_SETTING, source, destination, prop);
+        return packet;
+    }
+
+    /**
+     * Create a packet for a list of problems.
+     * 
+     * @param source
+     * @param destination
+     * @param problems
+     * @param problemDataFilesList
+     */
+    public static Packet createAddSetting(ClientId source, ClientId destination, Problem[] problems, ProblemDataFiles[] problemDataFilesList) {
+        Properties prop = new Properties();
+        prop.put(PROBLEM_LIST, problems);
+        prop.put(PROBLEM_DATA_FILES_LIST, problemDataFilesList);
         Packet packet = new Packet(Type.ADD_SETTING, source, destination, prop);
         return packet;
     }
