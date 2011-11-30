@@ -369,7 +369,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         ExecutionData executionData = null;
         if (executable != null) {
             executionData = executable.getExecutionData();
-            judgementRecord.setExecuteSeconds(executionData.getExecuteTimeMS());
+            judgementRecord.setExecuteMS(executionData.getExecuteTimeMS());
         }
 
         newRunResultFiles = new RunResultFiles(newRun, newRun.getProblemId(), judgementRecord, executionData);
@@ -911,7 +911,7 @@ public class SelectJudgementPaneNew extends JPanePlugin {
                 judgementRecord.setValidatorResultString(results);
 
                 judgementRecord.setSendToTeam(getNotifyTeamCheckBox().isSelected());
-                judgementRecord.setExecuteSeconds(executeTimeMS);
+                judgementRecord.setExecuteMS(executeTimeMS);
 
                 showValidatorControls(true, judgementRecord);
 

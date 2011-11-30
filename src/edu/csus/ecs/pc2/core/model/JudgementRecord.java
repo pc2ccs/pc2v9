@@ -3,7 +3,8 @@ package edu.csus.ecs.pc2.core.model;
 import java.io.Serializable;
 
 /**
- * A single Judgement from a judge for a Run.
+ * A set of Judgement information for a run.
+ * 
  * <br>
  * This contains all the information about a single judgement, who
  * judged the run, what the judgement was, how long it took to judge,
@@ -71,7 +72,7 @@ public class JudgementRecord implements Serializable {
     /**
      * Number of seconds it took to execute the run.
      */
-    private long executeSeconds = 0;
+    private long executeMS = 0;
 
     /**
      * Comment for team only.
@@ -312,12 +313,19 @@ public class JudgementRecord implements Serializable {
         this.usedValidator = usedValidator;
     }
 
-    public long getExecuteSeconds() {
-        return executeSeconds;
+    /**
+     * get time in ms that it took to execute the team's solution.
+     */
+    public long getExecuteMS() {
+        return executeMS;
     }
-
-    public void setExecuteSeconds(long executeSections) {
-        this.executeSeconds = executeSections;
+    
+    /**
+     * Set time in ms that it took to execute the team's solution.
+     * @param executeMS
+     */
+    public void setExecuteMS(long executeMS) {
+        this.executeMS = executeMS;
     }
     
     public String toString() {

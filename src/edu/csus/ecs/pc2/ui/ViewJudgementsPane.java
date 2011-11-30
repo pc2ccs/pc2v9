@@ -190,7 +190,7 @@ public class ViewJudgementsPane extends JPanePlugin implements UIPlugin {
         }
         
         col++;
-        column[col] = judgementRecord.getExecuteSeconds() +"ms";
+        column[col] = judgementRecord.getExecuteMS() + "ms";
         return column;
     }
 

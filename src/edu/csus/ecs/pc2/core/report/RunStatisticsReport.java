@@ -8,6 +8,7 @@ import java.util.Arrays;
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.export.RunStatisticsXML;
 import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -95,7 +96,7 @@ public class RunStatisticsReport implements IReport {
                 printWriter.print(" at " + judgementRecord.getWhenJudgedTime());
                 printWriter.println();
                 printWriter.print("     ");
-                printWriter.println(" execute time = " + judgementRecord.getExecuteSeconds()+"ms");
+                printWriter.println(" execute time = " + judgementRecord.getExecuteMS() + "ms");
 
             }
         }
@@ -204,8 +205,9 @@ public class RunStatisticsReport implements IReport {
         throw new SecurityException("Not implemented");
     }
 
-    public String createReportXML(Filter inFilter) {
-        throw new SecurityException("Not implemented");
+    public String createReportXML(Filter inFilter) throws IOException {
+        RunStatisticsXML runStatisticsXML = new RunStatisticsXML();
+        return runStatisticsXML.toXML(contest, filter);
     }
 
     public String getReportTitle() {

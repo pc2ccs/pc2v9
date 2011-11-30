@@ -438,7 +438,7 @@ public class AutoJudgingMonitor implements UIPlugin {
             long milliDiff = cal.getTime().getTime() - startTimeCalendar.getTime().getTime();
             long totalSeconds = milliDiff / 1000;
             judgementRecord.setHowLongToJudgeInSeconds(totalSeconds);
-            judgementRecord.setExecuteSeconds(executeTimeMS);
+            judgementRecord.setExecuteMS(executeTimeMS);
 
             runResultFiles = new RunResultFiles(fetchedRun, fetchedRun.getProblemId(), judgementRecord, executable.getExecutionData());
 
