@@ -13,6 +13,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 
+import edu.csus.ecs.pc2.api.exceptions.LoadContestDataException;
 import edu.csus.ecs.pc2.core.ContestImporter;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Category;
@@ -111,8 +112,13 @@ public class ImportDataPane extends JPanePlugin {
 
             if (filename.endsWith("contest.yaml")) {
 
-                checkAndLoadYAML(filename);
-
+                try {
+                    checkAndLoadYAML(filename);
+                } catch (Exception e) {
+                    logException("Error loading contest.xml", e);
+                    showMessage("Error loading contest.xml "+e.getMessage());
+                }
+                
             } else {
                 showMessage("Please select a context.yaml file");
             }
@@ -125,28 +131,40 @@ public class ImportDataPane extends JPanePlugin {
         getController().getLog().info("Loading contest.yaml from " + filename);
 
         String directoryName = new File(filename).getParent();
+        
+        IInternalContest newContest = null;
+        String contestSummary = "";
 
         try {
-            IInternalContest newContest = loader.fromYaml(null, directoryName);
-
-            String contestSummary = getSummary(newContest);
-
-            int result = FrameUtilities.yesNoCancelDialog(this, "Import" + NL + contestSummary, "Import Contest Settings");
-
-            if (result != JOptionPane.YES_OPTION) {
-                showMessage("No import done");
-                return;
-            }
-
-            new ContestImporter().sendContestSettingsToServer(getController(), getContest(), newContest);
-            
-            showMessage("All contest settings sent to server" + NL + contestSummary);
-
+             newContest = loader.fromYaml(null, directoryName);
+             contestSummary = getSummary(newContest);
         } catch (Exception e) {
             logException("Unable to load contest YAML from " + filename, e);
             e.printStackTrace();
             showMessage("Problem loading file(s), check log.  " + e.getMessage());
         }
+        
+        
+        int result = FrameUtilities.yesNoCancelDialog(this, "Import" + NL + contestSummary, "Import Contest Settings");
+
+        if (result != JOptionPane.YES_OPTION) {
+            showMessage("No import done");
+            return;
+        }
+
+        if (newContest != null) {
+            ContestImporter contestImporter = new ContestImporter();
+            try {
+                contestImporter.sendContestSettingsToServer(getController(), getContest(), newContest);
+            } catch (LoadContestDataException e) {
+                logException("LoadContestDataException for " + filename, e);
+                logNoteList(contestImporter.getNoteList());
+                showMessage("Problem loading contest data file(s) - " + e.getMessage());
+            }
+        }
+        
+        showMessage("All contest settings sent to server" + NL + contestSummary);
+        
     }
 
     private void addSummaryEntry(StringBuffer buf, int count, String prefix, String entryName) {

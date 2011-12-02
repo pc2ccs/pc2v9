@@ -43,7 +43,7 @@ public class NoteListTest extends TestCase {
             dumpNoteList(list);
         }
         
-        assertEquals("Number of messages", 3, list.getCount());
+        assertEquals("Number of messages", 3, list.size());
         assertEquals("Number of messages", 1, list.getCount(Type.ERROR));
         assertEquals("Number of messages", 2, list.getCount(Type.INFORMATION));
         assertEquals("Number of messages", 0, list.getCount(Type.WARNING));

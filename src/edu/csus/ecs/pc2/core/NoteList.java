@@ -15,6 +15,8 @@ import edu.csus.ecs.pc2.core.NoteMessage.Type;
 // $HeadURL: http://pc2.ecs.csus.edu/repos/v9sandbox/trunk/src/edu/csus/ecs/pc2/core/NoteList.java $
 public class NoteList {
 
+    public static final String NO_FILENAME = "<no filename>";
+    
     private ArrayList<NoteMessage> notes = new ArrayList<NoteMessage>();
 
     public NoteList() {
@@ -58,13 +60,7 @@ public class NoteList {
         return (NoteMessage[]) notes.toArray(new NoteMessage[notes.size()]);
     }
 
-    /**
-     * Get number of messages.
-     * 
-     * @see #getAll()
-     * @return number of messages.
-     */
-    public int getCount() {
+    public int size(){
         return notes.size();
     }
 
@@ -133,6 +129,19 @@ public class NoteList {
      */
     public void removeAll() {
         notes = new ArrayList<NoteMessage>();
+    }
+
+    public void logError(String string, Exception e) {
+        logError(NO_FILENAME, 0, string, e);
+    }
+    
+    public void logWarning(String string, Exception e) {
+        logWarning(NO_FILENAME, 0, string, e);
+    }
+    
+    public void logInfo(String string, Exception e) {
+        logInfo(NO_FILENAME, 0, string, e);
+        
     }
     
 }

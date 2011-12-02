@@ -13,6 +13,8 @@ import javax.swing.JPanel;
 
 import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.NoteList;
+import edu.csus.ecs.pc2.core.NoteMessage;
 import edu.csus.ecs.pc2.core.PermissionGroup;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
@@ -126,6 +128,41 @@ public abstract class JPanePlugin extends JPanel implements UIPlugin {
         controller.getLog().log(Log.WARNING, message,ex);
     }
     
+    /**
+     * Output notelist to log.
+     * 
+     * @param noteList
+     */
+    public void logNoteList(NoteList noteList) {
+
+        for (NoteMessage noteMessage : noteList.getAll()) {
+
+            String message = noteMessage.getComment();
+            String prefix = "";
+
+            String filename = noteMessage.getFilename();
+            if (filename != null && filename.equals(NoteList.NO_FILENAME)) {
+                prefix = filename + " " + noteMessage.getLineNumber();
+                if (noteMessage.getColumnNumber() != 0) {
+                    prefix += " col " + noteMessage.getColumnNumber();
+                }
+                message = prefix + " " + message;
+            }
+
+            switch (noteMessage.getType()) {
+                case ERROR:
+                    controller.getLog().log(Log.SEVERE, message);
+                    break;
+                case WARNING:
+                    controller.getLog().log(Log.WARNING, message);
+                    break;
+                default:
+                    controller.getLog().log(Log.INFO, message);
+                    break;
+            }
+        }
+    }
+
     /**
      * Return permission list for this client.
      * 

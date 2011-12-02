@@ -12,6 +12,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import edu.csus.ecs.pc2.VersionInfo;
+import edu.csus.ecs.pc2.api.exceptions.LoadContestDataException;
 import edu.csus.ecs.pc2.core.ContestImporter;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.log.Log;
@@ -205,7 +206,7 @@ public class ContestPreloadPane extends JPanePlugin {
     }
     
 
-    private String getSummary(IInternalContest newContest) throws Exception {
+    private String getSummary(IInternalContest newContest) {
 
         Language[] languages = newContest.getLanguages();
         Problem[] problems = newContest.getProblems();
@@ -255,35 +256,45 @@ public class ContestPreloadPane extends JPanePlugin {
             showMessage("Select a contest to load");
             return;
         }
-        
+
         String filename = (String) getContestsListbox().getKeys()[selectedIndex];
-        
+        getController().getLog().info("Loading contest.yaml from " + filename);
+
         File file = new File(filename);
         String directoryName = file.getParent();
-        
+
+        IInternalContest newContest = null;
+
+        String contestSummary = null;
+
         try {
-            
             ContestYAMLLoader loader = new ContestYAMLLoader();
-            
-            IInternalContest newContest = loader.fromYaml(null, directoryName);
-
-            String contestSummary = getSummary(newContest);
-
-            int result = FrameUtilities.yesNoCancelDialog(this, "Import" + NL + contestSummary, "Import Contest Settings");
-
-            if (result != JOptionPane.YES_OPTION) {
-                showMessage("No import done");
-                return;
-            }
-
-            new ContestImporter().sendContestSettingsToServer(getController(), getContest(), newContest);
-            
-            showMessage("All contest settings sent to server" + NL + contestSummary);
+            newContest = loader.fromYaml(null, directoryName);
+            contestSummary = getSummary(newContest);
 
         } catch (Exception e) {
             logException("Unable to load contest YAML from " + filename, e);
-            showMessage("Problem loading file(s) - " + e.getMessage());
+            showMessage("Problem loading contest data file(s) - " + e.getMessage());
         }
+
+        int result = FrameUtilities.yesNoCancelDialog(this, "Import" + NL + contestSummary, "Import Contest Settings");
+
+        if (result != JOptionPane.YES_OPTION) {
+            showMessage("No import done");
+            return;
+        }
+
+        if (newContest != null) {
+            ContestImporter contestImporter = new ContestImporter();
+            try {
+                contestImporter.sendContestSettingsToServer(getController(), getContest(), newContest);
+            } catch (LoadContestDataException e) {
+                logException("LoadContestDataException for " + filename, e);
+                logNoteList(contestImporter.getNoteList());
+                showMessage("Problem loading contest data file(s) - " + e.getMessage());
+            }
+        }
+        showMessage("All contest settings sent to server" + NL + contestSummary);
 
     }
 
