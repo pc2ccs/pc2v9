@@ -9,6 +9,7 @@ import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 
 import javax.swing.ButtonGroup;
@@ -34,6 +35,7 @@ import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.Site;
+import edu.csus.ecs.pc2.core.model.playback.EventStatus;
 import edu.csus.ecs.pc2.core.model.playback.PlaybackEvent;
 import edu.csus.ecs.pc2.core.model.playback.PlaybackEvent.Action;
 import edu.csus.ecs.pc2.core.model.playback.PlaybackManager;
@@ -277,15 +279,7 @@ public class PlaybackPane extends JPanePlugin {
         String[] row = buildPlayBackRow(playbackEvent);
 
         eventsListBox.addRow(row);
-
-        for (int i = 0; i < eventsListBox.getColumnCount(); i++) {
-            eventsListBox.autoSizeColumn(i);
-        }
-
-    }
-
-    private void autoSizeColumns() {
-
+        eventsListBox.autoSizeAllColumns();
         for (int i = 0; i < eventsListBox.getColumnCount(); i++) {
             eventsListBox.autoSizeColumn(i);
         }
@@ -335,7 +329,7 @@ public class PlaybackPane extends JPanePlugin {
         
         String setIteratorCount = playbackIterationTextField.getText();
         int playbackIteratorMax = 1;
-        if (setIteratorCount.length() < 1) {
+        if (setIteratorCount.length() > 0) {
             playbackIteratorMax = Integer.parseInt(setIteratorCount);
         }
 
@@ -364,24 +358,42 @@ public class PlaybackPane extends JPanePlugin {
 
             public void run() {
                 
+                int startEventNumber = currentEventNumber;
+                
                 setStillRunning(true);
 
                 for (int setIteratorCount = 0; setIteratorCount < maxEventSetCount && isStillRunning(); setIteratorCount++) {
+                    
+                    if (setIteratorCount > 0){
+                        resetAllEventAndWait();
+                        startEventNumber = 1;
+                    }
+                    
+                    for (int i = startEventNumber; i <= runToStep && isStillRunning(); i++) {
 
-                    for (int i = currentEventNumber; i <= runToStep && isStillRunning(); i++) {
-
-                        PlaybackEvent playbackEvent = (PlaybackEvent) eventsListBox.getKeys()[i - 1];
+                        final PlaybackEvent playbackEvent = (PlaybackEvent) eventsListBox.getKeys()[i - 1];
+                        final int currentEventNumber = playbackManager.getSequenceNumber() + (setIteratorCount * runToStep);
+                        
                         try {
-                            currentEventLabel.setText("At event " + playbackManager.getSequenceNumber());
+                            SwingUtilities.invokeLater(new Runnable() {
+                                public void run() {
+                                    Integer setInfo = playbackManager.getSequenceNumber();
+                                    if (maxEventSetCount > 1){
+                                        setInfo = currentEventNumber;
+                                    }
+                                    currentEventLabel.setText("At event " + setInfo);
+                                }
+                            });
+
                             playbackManager.executeEvent(playbackEvent, getContest(), getController());
 
-                            final String[] row = buildPlayBackRow(playbackEvent);
                             final int rowNumber = i;
 
                             SwingUtilities.invokeLater(new Runnable() {
                                 public void run() {
+                                    final String[] row = buildPlayBackRow(playbackEvent);
                                     getEventsListBox().replaceRow(row, rowNumber - 1);
-                                    autoSizeColumns();
+                                    getEventsListBox().autoSizeAllColumns();
                                 }
                             });
 
@@ -393,6 +405,7 @@ public class PlaybackPane extends JPanePlugin {
                             setStillRunning(false);
                             e.printStackTrace();
                         }
+                        
                     }
                 }
                 
@@ -401,6 +414,38 @@ public class PlaybackPane extends JPanePlugin {
 
             }
         }).start();
+    }
+
+    /**
+     * Goes through list and rewinds all runs.
+     */
+    protected void resetAllEventAndWait() {
+        
+        Exception ex = null;
+
+        try {
+            SwingUtilities.invokeAndWait(new Runnable() {
+                
+                public void run() {
+                    resetAllEvents();
+                }
+            });
+        } catch (InterruptedException e) {
+            logException("Exception resettting replay", e);
+            ex = e;
+        } catch (InvocationTargetException e) {
+            logException("Exception resettting replay", e);
+            ex = e;
+        }
+        
+        if (ex != null){
+            final Exception throwed = ex;
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    showMessage(null, "Exception resetting replay", "Exception resetting replay: "+throwed.getMessage());
+                }
+            });
+        }
     }
 
     private void setRunningButtons(boolean running) {
@@ -455,16 +500,32 @@ public class PlaybackPane extends JPanePlugin {
             resetButton.setToolTipText("Reset (erase or clear) events");
             resetButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    deleteAllRuns();
+                    resetAllEvents();
                 }
             });
         }
         return resetButton;
     }
 
-    protected void deleteAllRuns() {
-        // TODO code deleteAllRuns
-        showMessage(this, "Not implemented", "reset not implemented, yet");
+    protected void resetAllEvents() {
+        
+        int rowCount = getEventsListBox().getRowCount();
+
+        PlaybackEvent [] playbacks = new PlaybackEvent[rowCount];
+        Object [][] rowValues = new Object[rowCount][eventsListBox.getColumnCount()];
+
+        for (int i = 0; i < rowCount; i++) {
+            PlaybackEvent playbackEvent = (PlaybackEvent) eventsListBox.getKeys()[i];
+            playbackEvent.setSequenceId(i+1);
+            playbackEvent.setEventStatus(EventStatus.PENDING);
+            playbacks[i] = playbackEvent;
+            rowValues[i] = buildPlayBackRow(playbackEvent);
+        }
+        
+        getEventsListBox().removeAllRows();
+        getEventsListBox().addRows(rowValues, playbacks);
+        
+        playbackManager.rewind();
     }
 
     /**
@@ -609,7 +670,7 @@ public class PlaybackPane extends JPanePlugin {
             String[] row = buildPlayBackRow(playbackEvent);
 
             getEventsListBox().replaceRow(row, currentEventNumber - 1);
-            autoSizeColumns();
+            getEventsListBox().autoSizeAllColumns();
             
         } catch (Exception e) {
             e.printStackTrace();
@@ -652,7 +713,7 @@ public class PlaybackPane extends JPanePlugin {
                         String[] row = buildPlayBackRow(playbackEvent);
                         getEventsListBox().addRow(row, playbackEvent);
                     }
-                    autoSizeColumns();
+                    getEventsListBox().autoSizeAllColumns();
                     setRunningButtons(false);
                     JOptionPane.showMessageDialog(this, "Loaded " + playbackEvents.length + " events from " + filename);
 

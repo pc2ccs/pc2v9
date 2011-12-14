@@ -135,21 +135,20 @@ public class PlaybackManager {
                 invalidLines++;
                 if (invalidLines == 1){
                     savedException = e;
+                    System.out.println("Invalid line at: "+lineNumber+" " +s);
                 }
-                System.out.println("Line "+lineNumber+" : " + s);
-                System.out.println("Line "+lineNumber+" : Exception = " + e.getMessage());
-                e.printStackTrace();
             }
         }
         
         if (savedException != null){
             System.out.println("Errors on "+invalidLines+" lines, loading "+filename);
+            savedException.printStackTrace();
             throw savedException;
         }
         
         return (PlaybackEvent[]) events.toArray(new PlaybackEvent[events.size()]);
     }
-
+    
     /**
      * Return int for input string
      * 
@@ -623,6 +622,10 @@ public class PlaybackManager {
 
     public void setSequenceNumber(int sequenceNumber) {
         this.sequenceNumber = sequenceNumber;
+    }
+
+    public void rewind() {
+        sequenceNumber = 1;
     }
 
 }
