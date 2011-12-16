@@ -15,7 +15,7 @@ import javax.swing.SwingUtilities;
  */
 
 // $HeadURL$
-public class AutoJudgeStatusFrame extends javax.swing.JFrame {
+public class AutoJudgeStatusFrame extends javax.swing.JFrame implements AutoJudgeNotifyMessages {
 
     /**
      * 

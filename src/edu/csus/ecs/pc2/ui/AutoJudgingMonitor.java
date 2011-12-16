@@ -20,11 +20,11 @@ import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
+import edu.csus.ecs.pc2.core.model.Run.RunStates;
 import edu.csus.ecs.pc2.core.model.RunEvent;
+import edu.csus.ecs.pc2.core.model.RunEvent.Action;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
-import edu.csus.ecs.pc2.core.model.Run.RunStates;
-import edu.csus.ecs.pc2.core.model.RunEvent.Action;
 import edu.csus.ecs.pc2.ui.judge.JudgeView;
 
 /**
@@ -46,7 +46,9 @@ public class AutoJudgingMonitor implements UIPlugin {
 
     private IInternalController controller;
 
-    private AutoJudgeStatusFrame autoJudgeStatusFrame = new AutoJudgeStatusFrame();
+     private AutoJudgeStatusFrame autoJudgeStatusFrame = null;
+    
+    private AutoJudgeNotifyMessages notifyMessager = null;
 
     private boolean currentlyAutoJudging = false;
 
@@ -73,6 +75,10 @@ public class AutoJudgingMonitor implements UIPlugin {
     private boolean answerReceived = false;
 
     private GregorianCalendar startTimeCalendar;
+    
+    private boolean usingGui = true;
+
+    private boolean judgingRun;
 
     // private edu.csus.ecs.pc2.ui.AutoJudgingMonitor.FetchRunListenerImplemenation fetchRunListenerImplemenation;
 
@@ -80,6 +86,21 @@ public class AutoJudgingMonitor implements UIPlugin {
      * 
      */
     private static final long serialVersionUID = 2774495762012789107L;
+    
+    public AutoJudgingMonitor() {
+        this(true);
+    }
+
+    public AutoJudgingMonitor(boolean useGUI) {
+        usingGui = useGUI;
+        
+        if (usingGui){
+            autoJudgeStatusFrame = new AutoJudgeStatusFrame();
+            notifyMessager = autoJudgeStatusFrame;
+        } else {
+            notifyMessager = new AutoJudgeNotifyMesssageImpl();
+        }
+    }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         contest = inContest;
@@ -87,17 +108,20 @@ public class AutoJudgingMonitor implements UIPlugin {
 
         log = controller.getLog();
 
-        autoJudgeStatusFrame.setAutoJudgeMonitor(this);
+        if (usingGui) {
+            autoJudgeStatusFrame.setAutoJudgeMonitor(this);
+        }
 
         contest.addRunListener(new RunListenerImplementation());
         contest.addClientSettingsListener(new ClientSettingsListenerImplementation());
 
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                autoJudgeStatusFrame.setTitle("Auto Judge Status " + contest.getClientId().getName());
-            }
-        });
-
+        if (usingGui) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    autoJudgeStatusFrame.setTitle("Auto Judge Status " + contest.getClientId().getName());
+                }
+            });
+        }
     }
 
     public String getPluginTitle() {
@@ -294,14 +318,25 @@ public class AutoJudgingMonitor implements UIPlugin {
         runBeingAutoJudged = null;
         fetchedRun = null;
         fetchedRunFiles = null;
-        autoJudgeStatusFrame.updateStatusLabel("Waiting for runs");
-        autoJudgeStatusFrame.updateMessage("(Still waiting)");
+        notifyMessager.updateStatusLabel("Waiting for runs");
+        notifyMessager.updateMessage("(Still waiting)");
         // we must release this before we get to the next attemptToFetchNewRun()
-        JudgeView.setAlreadyJudgingRun(false);
+        setAlreadyJudgingRun(false);
+        
         // and this is what allows us to get into that next attemptToFetchNewRun()
         setCurrentlyAutoJudging(false);
 
         attemptToFetchNextRun();
+    }
+
+    private void setAlreadyJudgingRun(boolean b) {
+        
+        if (usingGui){
+            JudgeView.setAlreadyJudgingRun(b);
+        } else {
+            judgingRun = b;
+        }
+        
     }
 
     /**
@@ -316,14 +351,16 @@ public class AutoJudgingMonitor implements UIPlugin {
 
         setCurrentlyAutoJudging(true);
 
-        autoJudgeStatusFrame.setVisible(true);
-
-        autoJudgeStatusFrame.updateMessage(getRunDescription(fetchedRun));
-        autoJudgeStatusFrame.updateStatusLabel("Received run");
+        if (usingGui){
+            autoJudgeStatusFrame.setVisible(true);
+        }
+        
+        notifyMessager.updateStatusLabel("Received run");
+        notifyMessager.updateMessage(getRunDescription(fetchedRun));
 
         try {
 
-            autoJudgeStatusFrame.updateStatusLabel("Judging run");
+            notifyMessager.updateStatusLabel("Judging run");
 
         } catch (Exception e) {
             info("Exception logged ", e);
@@ -336,7 +373,7 @@ public class AutoJudgingMonitor implements UIPlugin {
         // Suppress pop up messages on errors
         executable.setShowMessageToUser(false);
 
-        autoJudgeStatusFrame.updateMessage(getRunDescription(fetchedRun));
+        notifyMessager.updateMessage(getRunDescription(fetchedRun));
 
         executable.execute();
 
@@ -351,14 +388,14 @@ public class AutoJudgingMonitor implements UIPlugin {
         try {
 
             if (executionData.getExecutionException() != null) {
-                autoJudgeStatusFrame.updateStatusLabel("ERROR - " + executionData.getExecutionException().getMessage());
+                notifyMessager.updateStatusLabel("ERROR - " + executionData.getExecutionException().getMessage());
                 log.log(Log.WARNING, "ERROR - " + executionData.getExecutionException().getMessage(), "ERROR - " + executionData.getExecutionException());
                 // judgementRecord stays null
 
             } else if (!executionData.isCompileSuccess()) {
                 // Compile failed, darn!
 
-                autoJudgeStatusFrame.updateStatusLabel("Run failed to compile");
+                notifyMessager.updateStatusLabel("Run failed to compile");
 
                 ElementId elementId = contest.getJudgements()[1].getElementId();
                 judgementRecord = new JudgementRecord(elementId, contest.getClientId(), false, true, true);
@@ -419,10 +456,10 @@ public class AutoJudgingMonitor implements UIPlugin {
         if (judgementRecord == null) {
 
             info("Problem judging run " + fetchedRun + " unable to create judgement record");
-            autoJudgeStatusFrame.updateStatusLabel("Problem judging run");
+            notifyMessager.updateStatusLabel("Problem judging run");
             // Cancel the run, hope for better luck.
 
-            autoJudgeStatusFrame.updateStatusLabel("Returning run to server");
+            notifyMessager.updateStatusLabel("Returning run to server");
             controller.cancelRun(runBeingAutoJudged);
 
             cleanupLastAutoJudge();
@@ -430,7 +467,7 @@ public class AutoJudgingMonitor implements UIPlugin {
         } else {
 
             info("Sending judgement to server " + fetchedRun);
-            autoJudgeStatusFrame.updateStatusLabel("Sending judgement to server");
+            notifyMessager.updateStatusLabel("Sending judgement to server");
 
             TimeZone tz = TimeZone.getTimeZone("GMT");
             GregorianCalendar cal = new GregorianCalendar(tz);
@@ -477,18 +514,20 @@ public class AutoJudgingMonitor implements UIPlugin {
 
         // need to wait for JudgeView (eg human) too
         // WARNING: must release the JudgeView.alreadyJudgingRun, prior to getting into this
-        Boolean alreadyJudgingRun = JudgeView.getAlreadyJudgingRun(); 
-        synchronized (alreadyJudgingRun) {
-            autoJudgeStatusFrame.updateMessage("(Waiting2)");
-            while(JudgeView.isAlreadyJudgingRun()) {
+        
+        Boolean judgingRunStatus = isAlreadyJudgingRun();
+        
+        synchronized (judgingRunStatus) {
+            notifyMessager.updateMessage("(Waiting 2)");
+            while(isAlreadyJudgingRun()) {
                 try {
-                    alreadyJudgingRun.wait();
+                    judgingRunStatus.wait();
                 } catch (InterruptedException e) {
                     log.throwing("AutoJudgingMonitor", "attempttoFetchNextRun()", e);
                 }
             }
-            JudgeView.setAlreadyJudgingRun(true);
-            autoJudgeStatusFrame.updateMessage("(Waiting)");
+            setAlreadyJudgingRun(true);
+            notifyMessager.updateMessage("(Waiting)");
         }
         if (isRunToBeAutoJudged(nextRun)) {
 
@@ -500,13 +539,21 @@ public class AutoJudgingMonitor implements UIPlugin {
                 executeAndAutoJudgeRun();
             } else {
                 info("Unable to fetch run " + nextRun);
-                JudgeView.setAlreadyJudgingRun(false);
+                setAlreadyJudgingRun(false);
             }
 
         } else {
-            autoJudgeStatusFrame.updateStatusLabel("Waiting for runs");
-            autoJudgeStatusFrame.updateMessage("(Still waiting)");
-            JudgeView.setAlreadyJudgingRun(false);
+            notifyMessager.updateStatusLabel("Waiting for runs");
+            notifyMessager.updateMessage("(Still waiting)");
+            setAlreadyJudgingRun(false);
+        }
+    }
+
+    private boolean isAlreadyJudgingRun() {
+        if (usingGui){
+            return JudgeView.isAlreadyJudgingRun(); 
+        } else {
+            return judgingRun;
         }
     }
 
@@ -514,8 +561,8 @@ public class AutoJudgingMonitor implements UIPlugin {
 
         setCurrentlyAutoJudging(true);
         runBeingAutoJudged = run;
-        autoJudgeStatusFrame.updateStatusLabel("Fetching Run " + run.getNumber() + " (Site " + run.getSiteNumber() + ")");
-        autoJudgeStatusFrame.updateMessage(getRunDescription(run));
+        notifyMessager.updateStatusLabel("Fetching Run " + run.getNumber() + " (Site " + run.getSiteNumber() + ")");
+        notifyMessager.updateMessage(getRunDescription(run));
 
         startTimeCalendar = null;
         controller.checkOutRun(run, false, true);
@@ -556,7 +603,10 @@ public class AutoJudgingMonitor implements UIPlugin {
         public void clientSettingsRefreshAll(ClientSettingsEvent clientSettingsEvent) {
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
+                    if (usingGui){
+
                     autoJudgeStatusFrame.setTitle("Auto Judge Status " + contest.getClientId().getName());
+                    }
                     updateClientSettings(contest.getClientSettings());
                 }
             }); 
@@ -583,8 +633,8 @@ public class AutoJudgingMonitor implements UIPlugin {
         if (isAutoJudgingEnabled()) {
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
-                    autoJudgeStatusFrame.updateStatusLabel("Waiting for runs");
-                    autoJudgeStatusFrame.updateMessage("(Still waiting)");
+                    notifyMessager.updateStatusLabel("Waiting for runs");
+                    notifyMessager.updateMessage("(Still waiting)");
                 }
             });
 
@@ -593,16 +643,20 @@ public class AutoJudgingMonitor implements UIPlugin {
         } else {
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
-                    autoJudgeStatusFrame.updateStatusLabel("Auto-judging is OFF");
-                    autoJudgeStatusFrame.updateMessage("");
+                    notifyMessager.updateStatusLabel("Auto-judging is OFF");
+                    notifyMessager.updateMessage("");
                 }
             });
         }
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                autoJudgeStatusFrame.setVisible(true);
-            }
-        });
+        if (usingGui){
+
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    autoJudgeStatusFrame.setVisible(true);
+                }
+            });
+        }
+
     }
 
     public void stopAutoJudging() {
@@ -617,8 +671,8 @@ public class AutoJudgingMonitor implements UIPlugin {
 
         setAutoJudgeDisabledLocally(true);
 
-        autoJudgeStatusFrame.updateStatusLabel("Auto-judging is OFF");
-        autoJudgeStatusFrame.updateMessage("");
+        notifyMessager.updateStatusLabel("Auto-judging is OFF");
+        notifyMessager.updateMessage("");
     }
 
     public void info(String s) {
@@ -646,4 +700,5 @@ public class AutoJudgingMonitor implements UIPlugin {
     public void setAutoJudgeDisabledLocally(boolean autoJudgeDisabledLocally) {
         this.autoJudgeDisabledLocally = autoJudgeDisabledLocally;
     }
+   
 }

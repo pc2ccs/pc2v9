@@ -132,7 +132,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
     private static final String FILE_OPTION_STRING = "-F";
 
-    private static final String NO_GUI_STRING = "--nogui";
+    private static final String NO_GUI_OPTION_STRING = "--nogui";
 
     /**
      * InternalContest data.
@@ -1675,7 +1675,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             sendToServers(violationPacket);
 
         } catch (Exception e) {
-            System.err.println("debug 22Exception in processPacket for "+packet);
             e.printStackTrace(System.err);
             info("Exception in processPacket, check logs ", e);
             info("Exception in processPacket for "+packet);
@@ -2189,6 +2188,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             startLog(null, "pc2.startup", null, null);
         }
         
+        System.err.println("debug 22 before handleCommandLineOptions");
         handleCommandLineOptions();
 
         for (String arg : stringArray) {
@@ -2390,11 +2390,11 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
 
 
     private void handleCommandLineOptions() {
-        // TODO Auto-generated method stub
+        
         if (parseArguments.isOptPresent("--help")) {
             // -F is the ParseArguements internal option to pre-load command line options from a file
             System.out.println("Usage: Starter [--help] [--server] [--first] [--login <login>] [--password <pass>] [--skipini] ["+INI_FILENAME_OPTION_STRING+" filename] [" 
-                    +  CONTEST_PASSWORD_OPTION + " <pass>] [-F filename] ["+NO_GUI_STRING+"] ["+MAIN_UI_OPTION+" classname]");
+                    +  CONTEST_PASSWORD_OPTION + " <pass>] [-F filename] ["+NO_GUI_OPTION_STRING+"] ["+MAIN_UI_OPTION+" classname]");
             System.exit(0);
         }
         
@@ -2412,18 +2412,18 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             }
         }
         
-        if (parseArguments.isOptPresent(NO_GUI_STRING)) {
+        if (parseArguments.isOptPresent(NO_GUI_OPTION_STRING)) {
             
             usingGUI = false;
             
             // Insure that they have specified required
             // do not check contestPassword here
             
-            String loginName = parseArguments.getOptValue(LOGIN_OPTION_STRING);
-            
             if (! parseArguments.isOptPresent(LOGIN_OPTION_STRING)){
-                fatalError("Must specify "+LOGIN_OPTION_STRING+" option and login name when using "+NO_GUI_STRING);
+                fatalError("Must specify "+LOGIN_OPTION_STRING+" option and login name when using "+NO_GUI_OPTION_STRING);
             }
+            
+            String loginName = parseArguments.getOptValue(LOGIN_OPTION_STRING);
             
             if (loginName == null){
                 fatalError("Missing login name after "+LOGIN_OPTION_STRING);
@@ -2437,13 +2437,16 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
                 fatalError (e.getLocalizedMessage());
             }
             
-            if (! isServer(client)) {
-                fatalError("--nogui can only be used with a server login, login '"+loginName+"' is not a server login.");
+            if (overRideUIName == null) {
+                if (isServer(client)) {
+                    overRideUIName = "edu.csus.ecs.pc2.ui.server.ServerModule";
+                } else if (isJudge(client)) {
+                    overRideUIName = "edu.csus.ecs.pc2.ui.judge.AutoJudgeModule";
+                } else {
+                    fatalError(NO_GUI_OPTION_STRING + " can only be used with a judge or server login, login '" + loginName + "' is not a judge or server login.");
+                }
             }
             
-            if (overRideUIName == null){
-                overRideUIName = "edu.csus.ecs.pc2.ui.server.ServerModule";
-            }
         }
 
         if (parseArguments.isOptPresent(DEBUG_OPTION_STRING)) {
@@ -2480,6 +2483,10 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             overRideUIName = overrideClassName;
         }
   
+    }
+
+    private boolean isJudge(ClientId clientId) {
+        return clientId.getClientType().equals(ClientType.Type.JUDGE);
     }
 
     private ClientId getServerClientId() {
@@ -3114,6 +3121,7 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
      * @param ex
      */
     protected void fatalError(String message, Exception ex) {
+        
         if (log != null) {
             if (ex != null) {
                 log.log(Log.SEVERE, message, ex);
