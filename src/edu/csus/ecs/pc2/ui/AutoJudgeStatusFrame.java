@@ -7,6 +7,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
+
 /**
  * Auto Judge Status Frame.
  * 
@@ -199,6 +202,16 @@ public class AutoJudgeStatusFrame extends javax.swing.JFrame implements AutoJudg
 
     public void setAutoJudgingMonitor(AutoJudgingMonitor autoJudgingMonitor) {
         this.autoJudgingMonitor = autoJudgingMonitor;
+    }
+
+    public void setContestAndController(IInternalContest inContest, IInternalController inController) {
+       
+        // not used
+        
+    }
+
+    public String getPluginTitle() {
+        return "Auto Judge Status Frame";
     }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

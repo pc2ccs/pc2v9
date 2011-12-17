@@ -7,7 +7,7 @@ package edu.csus.ecs.pc2.ui;
  */
 
 // $HeadURL$
-public interface AutoJudgeNotifyMessages {
+public interface AutoJudgeNotifyMessages extends UIPlugin{
 
     void updateStatusLabel(String string);
 

@@ -1,6 +1,9 @@
 package edu.csus.ecs.pc2.ui;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.GregorianCalendar;
+import java.util.Iterator;
 import java.util.TimeZone;
 
 import javax.swing.SwingUtilities;
@@ -8,6 +11,7 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.execute.Executable;
 import edu.csus.ecs.pc2.core.execute.ExecutionData;
+import edu.csus.ecs.pc2.core.list.RunComparator;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ClientSettingsEvent;
@@ -88,7 +92,7 @@ public class AutoJudgingMonitor implements UIPlugin {
     private static final long serialVersionUID = 2774495762012789107L;
     
     public AutoJudgingMonitor() {
-        this(true);
+        this(false);
     }
 
     public AutoJudgingMonitor(boolean useGUI) {
@@ -105,6 +109,8 @@ public class AutoJudgingMonitor implements UIPlugin {
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         contest = inContest;
         controller = inController;
+        
+        notifyMessager.setContestAndController(inContest, inController);
 
         log = controller.getLog();
 
@@ -128,6 +134,8 @@ public class AutoJudgingMonitor implements UIPlugin {
         return "Auto Judging Monitor";
     }
 
+    
+    
     /**
      * Searches run database for run to auto judge.
      * 
@@ -135,12 +143,7 @@ public class AutoJudgingMonitor implements UIPlugin {
      */
     public Run findNextAutoJudgeRun() {
 
-        Filter filter = null;
-
-        ClientSettings clientSettings = contest.getClientSettings();
-        if (clientSettings != null && clientSettings.isAutoJudging()) {
-            filter = clientSettings.getAutoJudgeFilter();
-        }
+        Filter filter = getAutoJudgeFilter();
 
         if (filter == null) {
             info(contest.getClientId() + " has no problems selected to auto judge (filter is null)");
@@ -153,6 +156,7 @@ public class AutoJudgingMonitor implements UIPlugin {
         }
 
         Run[] runs = contest.getRuns();
+        Arrays.sort(runs,new RunComparator());
 
         for (Run run : runs) {
             if (run.getStatus() == RunStates.QUEUED_FOR_COMPUTER_JUDGEMENT) {
@@ -163,6 +167,23 @@ public class AutoJudgingMonitor implements UIPlugin {
         }
 
         return null;
+    }
+
+    /**
+     * get filter which contains problems to be auto judged.
+     * 
+     * @return
+     */
+    private Filter getAutoJudgeFilter() {
+
+        Filter filter = null;
+        
+        ClientSettings clientSettings = contest.getClientSettings();
+        if (clientSettings != null && clientSettings.isAutoJudging()) {
+            filter = clientSettings.getAutoJudgeFilter();
+        }
+        
+        return filter;
     }
 
     /**
@@ -251,7 +272,8 @@ public class AutoJudgingMonitor implements UIPlugin {
         }
         
         public void refreshRuns(RunEvent event) {
-            // FIXME handle refreshRuns
+            stopAutoJudging();
+            startAutoJudging();
         }
 
         public void runChanged(RunEvent event) {
@@ -603,13 +625,13 @@ public class AutoJudgingMonitor implements UIPlugin {
         public void clientSettingsRefreshAll(ClientSettingsEvent clientSettingsEvent) {
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
-                    if (usingGui){
+                    if (usingGui) {
 
-                    autoJudgeStatusFrame.setTitle("Auto Judge Status " + contest.getClientId().getName());
+                        autoJudgeStatusFrame.setTitle("Auto Judge Status " + contest.getClientId().getName());
                     }
                     updateClientSettings(contest.getClientSettings());
                 }
-            }); 
+            });
         }
 
     }
@@ -620,8 +642,14 @@ public class AutoJudgingMonitor implements UIPlugin {
      * @param clientSettings
      */
     public void updateClientSettings(ClientSettings clientSettings) {
-        if (clientSettings.isAutoJudging() && (clientSettings.getClientId().equals(contest.getClientId()))) {
-            startAutoJudging();
+        if (clientSettings.getClientId().equals(contest.getClientId())) {
+            // These are my settings
+            
+            if (clientSettings.isAutoJudging()){
+                startAutoJudging();
+            } else {
+                stopAutoJudging();
+            }
         }
     }
 
@@ -631,22 +659,35 @@ public class AutoJudgingMonitor implements UIPlugin {
     public void startAutoJudging() {
 
         if (isAutoJudgingEnabled()) {
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    notifyMessager.updateStatusLabel("Waiting for runs");
-                    notifyMessager.updateMessage("(Still waiting)");
-                }
-            });
+            if (usingGui){
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        notifyMessager.updateStatusLabel("Waiting for runs");
+                        notifyMessager.updateMessage("(Still waiting)");
+                    }
+                });
+            } else {
+                notifyMessager.updateStatusLabel("Auto-judging is ON");
+                
+                printSelectedProblems();
+                
+                notifyMessager.updateMessage("Waiting for runs");
+            }
 
             attemptToFetchNextRun();
 
         } else {
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    notifyMessager.updateStatusLabel("Auto-judging is OFF");
-                    notifyMessager.updateMessage("");
-                }
-            });
+
+            if (usingGui){
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        notifyMessager.updateStatusLabel("Auto-judging is OFF");
+                        notifyMessager.updateMessage("");
+                    }
+                });
+            } else {
+                notifyMessager.updateStatusLabel("Auto-judging is OFF");
+            }
         }
         if (usingGui){
 
@@ -657,6 +698,30 @@ public class AutoJudgingMonitor implements UIPlugin {
             });
         }
 
+    }
+
+    /**
+     * Print list of problems that are to be auto judged.
+     */
+    private void printSelectedProblems() {
+        Filter filter = getAutoJudgeFilter();
+
+        ArrayList<String> list = new ArrayList<String>();
+
+        for (Problem problem : contest.getProblems()) {
+            if (filter.matches(problem)) {
+                list.add(problem.getDisplayName());
+            }
+        }
+
+        if (list.size() < 1) {
+            System.out.println("No problems selected, will not auto judge any runs");
+        } else {
+            System.out.println("Will auto judge " + list.size() + " problems ");
+            for (Iterator<String> i = list.listIterator(); i.hasNext();) {
+                System.out.println("  " + i.next());
+            }
+        }
     }
 
     public void stopAutoJudging() {
@@ -677,8 +742,10 @@ public class AutoJudgingMonitor implements UIPlugin {
 
     public void info(String s) {
         controller.getLog().warning(s);
-        // System.err.println(Thread.currentThread().getName() + " " + s);
-        // System.err.flush();
+        if (! usingGui){
+            System.out.println(s);
+        }
+      
     }
 
     public void info(String s, Exception exception) {
