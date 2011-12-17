@@ -394,6 +394,7 @@ public class AutoJudgingMonitor implements UIPlugin {
 
         // Suppress pop up messages on errors
         executable.setShowMessageToUser(false);
+        executable.setUsingGUI(usingGui);
 
         notifyMessager.updateMessage(getRunDescription(fetchedRun));
 
