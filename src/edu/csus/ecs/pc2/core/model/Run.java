@@ -3,8 +3,7 @@ package edu.csus.ecs.pc2.core.model;
 import java.util.Vector;
 
 /**
- * A contest submitted run.
- * 
+ * Submitted Run info.
  * 
  * Contains the submitter, problem, language, files and other data for a run.
  * 
@@ -338,7 +337,7 @@ public class Run extends ISubmission {
     }
 
     public String toString() {
-        return "Run " + getNumber() + " " + getStatus() + getElapsedMS() +" ms from " + getSubmitter() + " id " + getElementId().toString();
+        return "Run " + getNumber() + " " + getStatus() + " " + getElapsedMS() +" ms from " + getSubmitter() + " id " + getElementId().toString();
     }
 
     public boolean isSameAs(Run run) {
