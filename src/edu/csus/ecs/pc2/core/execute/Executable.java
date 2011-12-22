@@ -31,6 +31,7 @@ import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.ui.IFileViewer;
 import edu.csus.ecs.pc2.ui.MultipleFileViewer;
+import edu.csus.ecs.pc2.ui.NullViewer;
 
 /**
  * Compile, execute and validate a run.
@@ -219,7 +220,11 @@ public class Executable {
      * @return FileViewer with 1 or more tabs
      */
     public IFileViewer execute(boolean clearDirFirst) {
-        fileViewer = new MultipleFileViewer(log);
+        if (usingGUI) {
+            fileViewer = new MultipleFileViewer(log);
+        } else {
+            fileViewer = new NullViewer();
+        }
 
         try {
             executionData = new ExecutionData();

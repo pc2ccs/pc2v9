@@ -2188,7 +2188,6 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
             startLog(null, "pc2.startup", null, null);
         }
         
-        System.err.println("debug 22 before handleCommandLineOptions");
         handleCommandLineOptions();
 
         for (String arg : stringArray) {
