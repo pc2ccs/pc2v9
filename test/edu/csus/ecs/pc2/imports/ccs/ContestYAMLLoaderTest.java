@@ -113,15 +113,30 @@ public class ContestYAMLLoaderTest extends TestCase {
         // writeRow(System.out, language);
         // }
 
-        Problem[] problems = loader.getProblems(contents);
+        Problem[] problems = loader.getProblems(contents, ContestYAMLLoader.DEFAULT_TIME_OUT);
 
         assertEquals("Number of problems", 5, problems.length);
+        
+        int problemIndex = 0;
 
-        assertEquals("Expected problem name ", "apl", problems[0].getDisplayName());
-        assertEquals("Expected problem name ", "barcodes", problems[1].getDisplayName());
-        assertEquals("Expected problem name ", "biobots", problems[2].getDisplayName());
-        assertEquals("Expected problem name ", "castles", problems[3].getDisplayName());
-        assertEquals("Expected problem name ", "channel", problems[4].getDisplayName());
+        Problem problem = problems[problemIndex++];
+        assertEquals("Expected problem name ", "apl", problem.getDisplayName());
+        assertEquals("Expected default timeout ", ContestYAMLLoader.DEFAULT_TIME_OUT, problem.getTimeOutInSeconds());
+        
+        problem = problems[problemIndex++];
+        assertEquals("Expected problem name ", "barcodes", problem.getDisplayName());
+        
+        problem = problems[problemIndex++];
+        assertEquals("Expected problem name ", "biobots", problem.getDisplayName());
+        
+        problem = problems[problemIndex++];
+        assertEquals("Expected problem name ", "castles", problem.getDisplayName());
+        
+        problem = problems[problemIndex++];
+        assertEquals("Expected problem name ", "channel", problem.getDisplayName());
+        assertEquals("Expected default timeout ", ContestYAMLLoader.DEFAULT_TIME_OUT, problem.getTimeOutInSeconds());
+        assertFalse("Expecting not comptuer judged", problem.isComputerJudged());
+
 
     }
 
@@ -155,11 +170,26 @@ public class ContestYAMLLoaderTest extends TestCase {
 
         Problem[] problems = contest.getProblems();
 
-        assertEquals("Expected problem name ", "apl", problems[0].getDisplayName());
-        assertEquals("Expected problem name ", "barcodes", problems[1].getDisplayName());
-        assertEquals("Expected problem name ", "biobots", problems[2].getDisplayName());
-        assertEquals("Expected problem name ", "castles", problems[3].getDisplayName());
-        assertEquals("Expected problem name ", "channel", problems[4].getDisplayName());
+        int problemIndex = 0;
+
+        Problem problem = problems[problemIndex++];
+        assertEquals("Expected problem name ", "apl", problem.getDisplayName());
+        assertEquals("Expected default timeout ", 20, problem.getTimeOutInSeconds());
+        
+        problem = problems[problemIndex++];
+        assertEquals("Expected problem name ", "barcodes", problem.getDisplayName());
+        
+        problem = problems[problemIndex++];
+        assertEquals("Expected problem name ", "biobots", problem.getDisplayName());
+        
+        problem = problems[problemIndex++];
+        assertEquals("Expected problem name ", "castles", problem.getDisplayName());
+        
+        problem = problems[problemIndex++];
+        assertEquals("Expected problem name ", "channel", problem.getDisplayName());
+        assertEquals("Expected default timeout ", 20, problem.getTimeOutInSeconds());
+        
+        assertTrue("Expecting comptuer judged", problem.isComputerJudged());
 
         assertEquals("Number of problems", 5, problems.length);
 

@@ -56,6 +56,11 @@ public class ContestYAMLLoader {
     public static final String ACCOUNTS_KEY = "accounts";
 
     public static final String SITES_KEY = "sites";
+    
+    /**
+     * Run execution time limit, in seconds.
+     */
+    public static final String TIMEOUT_KEY = "timeout";
 
     private static final String DELIMIT = ":";
 
@@ -74,6 +79,11 @@ public class ContestYAMLLoader {
      * Problem input (data files) key.
      */
     private static final String PROBLEM_INPUT_KEY = "input";
+
+    /**
+     * Default time out for run execution.
+     */
+    public static final int DEFAULT_TIME_OUT = 30;
 
     /**
      * Load contest.yaml from directory.
@@ -127,6 +137,12 @@ public class ContestYAMLLoader {
             setTitle(contest, contestTitle);
         }
         
+        int defaultTimeout = DEFAULT_TIME_OUT;
+        
+        String timeOut = getSequenceValue(yamlLines, TIMEOUT_KEY);
+        if (timeOut != null) {
+            defaultTimeout = Integer.parseInt(timeOut.trim());
+        }
 
         for (String line : yamlLines) {
             if (line.startsWith(CONTEST_NAME_KEY + DELIMIT)) {
@@ -146,12 +162,13 @@ public class ContestYAMLLoader {
             contest.addLanguage(language);
         }
 
-        Problem[] problems = getProblems(yamlLines);
+        Problem[] problems = getProblems(yamlLines, defaultTimeout);
         for (Problem problem : problems) {
             addProblemDefAndFiles(contest, diretoryName, problem);
             
             // TODO CCS add validator(s)
             assignDefaultValidator(problem);
+            problem.setComputerJudged(true);
         }
         
 
@@ -276,6 +293,8 @@ public class ContestYAMLLoader {
      * @param contest
      * @param directoryName
      * @param problem
+     * @param defaultTimeout 
+     * @throws Exception
      * @throws Exception
      */
     private void addProblemDefAndFiles(IInternalContest contest, String directoryName, Problem problem) throws Exception {
@@ -348,7 +367,7 @@ public class ContestYAMLLoader {
             throw new Exception("  For " + problem.getShortName() + " Missing files -  there are " + inputFileNames.length + " .in files and " + //
                     answerFileNames.length + " .ans files ");
         }
-
+        
         contest.addProblem(problem, problemDataFiles);
     }
 
@@ -626,10 +645,11 @@ public class ContestYAMLLoader {
      * Get {@link Problem}s from YAML file.
      * 
      * @param yamlLines
+     * @param seconds timeout for run execution in seconds
      * @return list of {@link Problem}
      * @throws Exception 
      */
-    public Problem[] getProblems(String[] yamlLines) throws Exception {
+    public Problem[] getProblems(String[] yamlLines, int seconds) throws Exception {
 
         String[] sectionLines = getSectionLines(PROBLEMS_KEY, yamlLines);
 
@@ -653,6 +673,9 @@ public class ContestYAMLLoader {
              */
 
             Problem problem = new Problem(problemTitle);
+            
+            problem.setTimeOutInSeconds(seconds);
+            
             problem.setShortName(problemKeyName);
 
             // String problemLetter = getSequenceValue(sequenceLines, "letter");
