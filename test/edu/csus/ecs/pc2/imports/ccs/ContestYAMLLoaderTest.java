@@ -174,7 +174,7 @@ public class ContestYAMLLoaderTest extends TestCase {
 
         Problem problem = problems[problemIndex++];
         assertEquals("Expected problem name ", "apl", problem.getDisplayName());
-        assertEquals("Expected default timeout ", 20, problem.getTimeOutInSeconds());
+        assertEquals("Expected default timeout for "+problem, 20, problem.getTimeOutInSeconds());
         
         problem = problems[problemIndex++];
         assertEquals("Expected problem name ", "barcodes", problem.getDisplayName());
@@ -187,7 +187,7 @@ public class ContestYAMLLoaderTest extends TestCase {
         
         problem = problems[problemIndex++];
         assertEquals("Expected problem name ", "channel", problem.getDisplayName());
-        assertEquals("Expected default timeout ", 20, problem.getTimeOutInSeconds());
+        assertEquals("Expected default timeout for "+problem, 20, problem.getTimeOutInSeconds());
         
         assertTrue("Expecting comptuer judged", problem.isComputerJudged());
 

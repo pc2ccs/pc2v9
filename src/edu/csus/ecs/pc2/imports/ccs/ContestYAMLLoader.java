@@ -62,6 +62,8 @@ public class ContestYAMLLoader {
      */
     public static final String TIMEOUT_KEY = "timeout";
 
+    public static final String LIMITS_KEY = "limits";
+
     private static final String DELIMIT = ":";
 
     private static final String DEFAULT_CONTEST_YAML_FILENAME = "contest.yaml";
@@ -319,6 +321,14 @@ public class ContestYAMLLoader {
             loadPc2Problem(contest, dataFileBaseDirectory, problem, sectionLines);
         } else {
             loadCCSProblem(contest, dataFileBaseDirectory, problem);
+        }
+        
+        sectionLines = getSectionLines(LIMITS_KEY, contents);
+        if (sectionLines.length > 1) {
+            String timeOut = getSequenceValue(sectionLines, TIMEOUT_KEY);
+            if (timeOut != null) {
+                problem.setTimeOutInSeconds(Integer.parseInt(timeOut.trim()));
+            }
         }
 
     }
