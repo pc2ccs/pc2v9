@@ -2,7 +2,9 @@ package edu.csus.ecs.pc2.core.export;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import junit.framework.TestCase;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
@@ -70,6 +72,25 @@ public class ExportYAMLTest extends TestCase {
         exportYAML.exportFiles(testDirectory, contest);
 
         exportYAML = null;
+    }
+    
+    public void testStringJoin() {
+
+        String [] expected = {
+            "a, b, c",
+            "EJB, JPA, Glassfish, NetBeans",
+            "A",
+            "A, b",
+            "a,b",
+            ""
+        };
+        
+        for (int i = 0; i < expected.length; i++) {
+            List<String> list = Arrays.asList(expected[i].split(", "));
+            StringBuffer actual = ExportYAML.join(", ", list);
+            assertEquals("Expected join results ", expected[i], actual.toString());
+        }
+
     }
 
 //    private void addShortNames(IInternalContest contest) throws Exception {

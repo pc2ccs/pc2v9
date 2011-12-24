@@ -5,17 +5,24 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Vector;
 
 import edu.csus.ecs.pc2.VersionInfo;
+import edu.csus.ecs.pc2.core.Utilities;
+import edu.csus.ecs.pc2.core.list.AccountComparator;
 import edu.csus.ecs.pc2.core.list.SiteComparatorBySiteNumber;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.BalloonSettings;
 import edu.csus.ecs.pc2.core.model.Category;
+import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestTime;
+import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
@@ -233,6 +240,34 @@ public class ExportYAML {
 
             contestWriter.println();
         }
+        
+        Vector<Account> accountVector = contest.getAccounts(ClientType.Type.JUDGE);
+        Account[] judgeAccounts = (Account[]) accountVector.toArray(new Account[accountVector.size()]);
+        Arrays.sort(judgeAccounts, new AccountComparator());
+
+        int ajCount = 0;
+        for (Account account : judgeAccounts) {
+
+            ClientSettings clientSettings = contest.getClientSettings(account.getClientId());
+            if (clientSettings != null) {
+
+                if (clientSettings.isAutoJudging() || clientSettings.getAutoJudgeFilter() != null) {
+                    ajCount++;
+                    if (ajCount == 1) {
+                        contestWriter.println("auto-judging:");
+                    }
+
+                    ClientId clientId = account.getClientId();
+
+                    contestWriter.println("  - account: " + clientId.getClientType());
+                    contestWriter.println("    site: " + clientId.getSiteNumber());
+                    contestWriter.println("    number: " + clientId.getClientNumber());
+                    contestWriter.println("    letters: " + getProblemLetters(contest, clientSettings.getAutoJudgeFilter()));
+                    contestWriter.println("    enabled: " + Utilities.yesNoString(clientSettings.isAutoJudging()).toLowerCase());
+                    contestWriter.println();
+                }
+            }
+        }
 
         Site[] sites = contest.getSites();
         Arrays.sort(sites, new SiteComparatorBySiteNumber());
@@ -281,6 +316,39 @@ public class ExportYAML {
         contestWriter.flush();
         contestWriter.close();
         contestWriter = null;
+    }
+
+    private String getProblemLetters(IInternalContest contest, Filter filter) {
+
+        ArrayList<String> list = new ArrayList<String>();
+
+        Problem[] problems = contest.getProblems();
+
+        int id = 1;
+        for (Problem problem : problems) {
+            if (filter.matches(problem)) {
+                list.add(getProblemLetter(id));
+            }
+            id++;
+        }
+
+        StringBuffer buffer = join(", ", list);
+
+        return buffer.toString();
+    }
+
+    protected static StringBuffer join(String delimiter, List<String> list) {
+
+        StringBuffer buffer = new StringBuffer();
+
+        for (int i = 0; i < list.size() - 1; i++) {
+            buffer.append(list.get(i));
+            buffer.append(delimiter);
+        }
+        if (list.size() > 0) {
+            buffer.append(list.get(list.size()-1));
+        }
+        return buffer;
     }
 
     /**
@@ -426,6 +494,14 @@ public class ExportYAML {
         return (String[]) filesWritten.toArray(new String[filesWritten.size()]);
     }
 
+    /**
+     * Get problem letter for input integer.
+     * 
+     * getProblemLetter(1) is 'A'
+     * 
+     * @param id a one based problem number.
+     * @return
+     */
     protected String getProblemLetter(int id) {
         char let = 'A';
         let += (id - 1);
