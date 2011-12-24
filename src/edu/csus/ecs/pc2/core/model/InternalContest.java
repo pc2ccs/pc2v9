@@ -238,6 +238,9 @@ public class InternalContest implements IInternalContest {
     private ProfileCloneSettings profileCloneSettings = null;
 
     private FinalizeData finalizeData = null;
+    
+    // TODO 670 add list for ReplaySetting, add load and save too
+    private ReplaySetting replaySettingTemp = null;
 
     private Site createFakeSite(int nextSiteNumber) {
         Site site = new Site("Site " + nextSiteNumber, nextSiteNumber);
@@ -2864,6 +2867,52 @@ public class InternalContest implements IInternalContest {
 
         return null;
 
+    }
+
+    public void addReplaySetting(ReplaySetting replaySetting) {
+        replaySettingTemp = replaySetting;
+        fireReplaySettingListener(ReplaySettingEvent.Action.ADDED, replaySetting);
+    }
+
+    public void deleteReplaySetting(ReplaySetting replaySetting) {
+        fireReplaySettingListener(ReplaySettingEvent.Action.DELETED, replaySetting);
+        replaySettingTemp = null;
+    }
+
+    public void updateReplaySetting(ReplaySetting replaySetting) {
+        replaySettingTemp = replaySetting;
+        fireReplaySettingListener(ReplaySettingEvent.Action.CHANGED, replaySetting);
+    }
+    
+    private void fireReplaySettingListener(ReplaySettingEvent.Action action, ReplaySetting replaySetting) {  
+        
+        // TODO 670 add listener for ReplaySetting
+        
+//        ReplaySettingEvent event = new ReplaySettingEvent(action, replaySetting);
+           
+    }
+
+    public ReplaySetting[] getReplaySettings() {
+        
+        // TODO 670 add list for ReplaySetting
+        
+        if (replaySettingTemp == null) {
+            // TODO 6670 remove this debugging code
+            replaySettingTemp = new ReplaySetting("debug 22 - Sample Replay Title");
+//            replaySettingTemp.setAutoStart(true);
+//            replaySettingTemp.setIterationCount(42);
+//            replaySettingTemp.setSiteNumber(2);
+//            replaySettingTemp.setStartSequenceNumber(24);
+//            replaySettingTemp.setLoadFileName("c:\\tmp\\site1.replay.txt");
+        }
+        
+        if (replaySettingTemp == null) {
+            return new ReplaySetting[0];
+        } else {
+            ReplaySetting [] list = new ReplaySetting[1];
+            list[0] = replaySettingTemp;
+            return list;
+        }
     }
 
 }

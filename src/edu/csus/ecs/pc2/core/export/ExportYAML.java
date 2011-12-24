@@ -27,6 +27,7 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
+import edu.csus.ecs.pc2.core.model.ReplaySetting;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.Site;
 
@@ -268,7 +269,28 @@ public class ExportYAML {
                 }
             }
         }
+        
+        
+        ReplaySetting [] replaySettings = contest.getReplaySettings();
+        
+        if (replaySettings.length > 0) {
 
+            // TODO 670          Arrays.sort(replaySettings, new ReplaySettingComparator());
+            contestWriter.println("replay:");
+            
+            for (ReplaySetting replaySetting : replaySettings) {
+
+                contestWriter.println("  - title: " + replaySetting.getTitle());
+                contestWriter.println("  - file: " + replaySetting.getLoadFileName());
+                contestWriter.println("  - auto_start: " + Utilities.yesNoString(replaySetting.isAutoStart()).toLowerCase());
+                contestWriter.println("  - iterations: " + replaySetting.getIterationCount());
+                contestWriter.println("  - start_at: " + replaySetting.getStartSequenceNumber());
+                contestWriter.println("  - site: " + replaySetting.getSiteNumber());
+                contestWriter.println();
+
+            }
+        }
+        
         Site[] sites = contest.getSites();
         Arrays.sort(sites, new SiteComparatorBySiteNumber());
 

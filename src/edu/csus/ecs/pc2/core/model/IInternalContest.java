@@ -45,6 +45,8 @@ public interface IInternalContest {
 
     void addProblem(Problem problem);
     
+    void addReplaySetting (ReplaySetting replaySetting);
+    
     /**
      * Add Notification into model from remote site.
      * 
@@ -63,6 +65,8 @@ public interface IInternalContest {
     void addProblem(Problem problem, ProblemDataFiles problemDataFiles);
 
     void deleteProblem(Problem problem);
+    
+    void deleteReplaySetting(ReplaySetting replaySetting);
     
     void addCategory(Category category);
     
@@ -107,6 +111,9 @@ public interface IInternalContest {
     void updateLanguage(Language language);
 
     void updateProblem(Problem problem);
+    
+    void updateReplaySetting(ReplaySetting replaySetting);
+
     
     /**
      * Update existing Notification.
@@ -285,6 +292,8 @@ public interface IInternalContest {
      * @return array of Problem
      */
     Problem[] getProblems();
+    
+    ReplaySetting[] getReplaySettings();
     
     Notification [] getNotifications();
     
