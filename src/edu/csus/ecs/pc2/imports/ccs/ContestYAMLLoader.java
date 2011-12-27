@@ -2,6 +2,7 @@ package edu.csus.ecs.pc2.imports.ccs;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.Vector;
@@ -11,9 +12,12 @@ import edu.csus.ecs.pc2.core.exception.YamlLoadException;
 import edu.csus.ecs.pc2.core.list.AccountList;
 import edu.csus.ecs.pc2.core.list.AccountList.PasswordType;
 import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.AutoJudgeSetting;
 import edu.csus.ecs.pc2.core.model.Category;
+import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
+import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.InternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
@@ -87,6 +91,8 @@ public class ContestYAMLLoader {
      */
     public static final int DEFAULT_TIME_OUT = 30;
 
+    public static final String AUTO_JUDGE_KEY = "auto-judging";
+
     /**
      * Load contest.yaml from directory.
      * 
@@ -139,12 +145,7 @@ public class ContestYAMLLoader {
             setTitle(contest, contestTitle);
         }
         
-        int defaultTimeout = DEFAULT_TIME_OUT;
-        
-        String timeOut = getSequenceValue(yamlLines, TIMEOUT_KEY);
-        if (timeOut != null) {
-            defaultTimeout = Integer.parseInt(timeOut.trim());
-        }
+        int defaultTimeout =  getIntegerValue(getSequenceValue(yamlLines, TIMEOUT_KEY), DEFAULT_TIME_OUT);
 
         for (String line : yamlLines) {
             if (line.startsWith(CONTEST_NAME_KEY + DELIMIT)) {
@@ -173,7 +174,10 @@ public class ContestYAMLLoader {
             problem.setComputerJudged(true);
         }
         
-
+        if ( getSectionLines(AUTO_JUDGE_KEY, yamlLines).length == 0){
+            System.err.println("No "+AUTO_JUDGE_KEY+" section in "+diretoryName);
+        }
+ 
         Site[] sites = getSites(yamlLines);
         for (Site site : sites) {
             contest.addSite(site);
@@ -189,7 +193,26 @@ public class ContestYAMLLoader {
 
         Account[] accounts = getAccounts(yamlLines);
         contest.addAccounts(accounts);
+        
+        AutoJudgeSetting[] autoJudgeSettings = getAutoJudgeSettings(yamlLines, problems);
+
+        for (AutoJudgeSetting auto : autoJudgeSettings) {
+            addAutoJudgeSetting(contest,auto);
+        }
+        
         return contest;
+    }
+
+    private void addAutoJudgeSetting(IInternalContest contest, AutoJudgeSetting auto) throws YamlLoadException {
+        
+//        ClientId clientId = auto.getClientId();
+        
+        Account account = contest.getAccount(auto.getClientId());
+        if (account == null) {
+            throw new YamlLoadException("No such account for auto judge setting, undefined account is "+auto.getClientId());
+        }
+        
+        // TODO 669 code  contest.addAutoJudgeSetting (auto);
     }
 
     public Site[] getSites(String[] yamlLines) {
@@ -209,7 +232,8 @@ public class ContestYAMLLoader {
 
             String siteNumberString = getSequenceValue(sequenceLines, "- number");
             String siteTitle = getSequenceValue(sequenceLines, "name").trim();
-            int siteNumber = Integer.parseInt(siteNumberString.trim());
+            
+            int siteNumber = getIntegerValue(siteNumberString.trim(), 0);
 
             Site site = new Site(siteTitle, siteNumber);
 
@@ -256,15 +280,9 @@ public class ContestYAMLLoader {
             ClientType.Type type = ClientType.Type.valueOf(accountType.trim());
 
             String countString = getSequenceValue(sequenceLines, "count").trim();
-            int count = 1;
-            if (countString.length() != 0) {
-                count = Integer.parseInt(countString);
-            }
+            int count = getIntegerValue(countString, 1);
             String siteString = getSequenceValue(sequenceLines, "site");
-            int siteNumber = 1;
-            if (siteString.length() != 0) {
-                siteNumber = Integer.parseInt(siteString);
-            }
+            int siteNumber = getIntegerValue(siteString, 1);
 
             /**
              * <pre>
@@ -616,10 +634,7 @@ public class ContestYAMLLoader {
                 }
                 
                 String activeStr = getSequenceValue(sequenceLines, "active");
-                boolean active = true;
-                if (activeStr != null && activeStr.length() > 0) {
-                    active = Boolean.parseBoolean(activeStr);
-                }
+                boolean active = getBooleanValue(activeStr, true);
                 language.setActive(active);
 
                 // TODO handle interpreted languages, seems it should be in the export
@@ -712,10 +727,10 @@ public class ContestYAMLLoader {
         return (Problem[]) problemList.toArray(new Problem[problemList.size()]);
     }
 
-    private void syntaxError(String string) {
-
-        new Exception("Syntax error: " + string).printStackTrace();
-
+    private void syntaxError(String string) throws YamlLoadException {
+        YamlLoadException exception = new YamlLoadException("Syntax error: " + string);
+        exception.printStackTrace();
+        throw exception;
     }
 
     private String getSequenceValue(String[] lines, String key) {
@@ -794,5 +809,144 @@ public class ContestYAMLLoader {
         contestInformation.setContestTitle(title);
     }
 
+    public AutoJudgeSetting[] getAutoJudgeSettings (String[] yamlLines, Problem [] problems) throws YamlLoadException {
 
+        String[] sectionLines = getSectionLines(AUTO_JUDGE_KEY, yamlLines);
+        
+        ArrayList<AutoJudgeSetting> ajList = new ArrayList<AutoJudgeSetting>();
+        
+        int idx = 1;
+        String[] sequenceLines = getNextSequence(sectionLines, idx);
+        
+        while (sequenceLines.length > 0) {
+            
+            String accountType = getSequenceValue(sequenceLines, "- account");
+            ClientType.Type type = ClientType.Type.valueOf(accountType.trim());
+
+            String siteString = getSequenceValue(sequenceLines, "site");
+            
+            int siteNumber = getIntegerValue (siteString, 1);
+            
+            // TODO 669 check for syntax errors
+//            syntaxError(AUTO_JUDGE_KEY + " name field missing in languages section");
+            
+            String numberString = getSequenceValue(sequenceLines, "number");
+            String problemLettersString = getSequenceValue(sequenceLines, "letters");
+            
+            String activeStr = getSequenceValue(sequenceLines, "active");
+            boolean active = getBooleanValue(activeStr, true);
+            
+            // TODO 669 code load method
+            int [] numbers = null;
+            if ("all".equalsIgnoreCase(numberString)){
+                throw new YamlLoadException("'all' not allowed for judge number");
+            } else {
+                numbers = getNumberList (numberString.trim());
+            }
+            
+            for (int i = 0; i < numbers.length; i++) {
+                int clientNumber = i + 1;
+
+                String name = accountType.toUpperCase() + clientNumber;
+                
+                AutoJudgeSetting autoJudgeSetting = new AutoJudgeSetting(name);
+                ClientId id = new ClientId(siteNumber, type, clientNumber);
+                autoJudgeSetting.setClientId(id);
+                autoJudgeSetting.setActive(active);
+                
+                Filter filter = new Filter();
+                
+                if ("all".equalsIgnoreCase(problemLettersString.trim())){
+                    for (Problem problem : problems) {
+                        filter.addProblem(problem);
+                    }
+                } else {
+                    for (Problem problem : getProblemsFromLetters(problems, problemLettersString)) {
+                        filter.addProblem(problem);
+                    }
+                }
+
+                autoJudgeSetting.setProblemFilter(filter);
+                ajList.add(autoJudgeSetting);
+            }
+            
+            idx += sequenceLines.length;
+            sequenceLines = getNextSequence(sectionLines, idx);
+        }
+        
+        return (AutoJudgeSetting[]) ajList.toArray(new AutoJudgeSetting[ajList.size()]);
+    }
+
+    protected Problem[] getProblemsFromLetters(Problem[] problems, String problemLettersString) throws YamlLoadException {
+
+        String[] list = problemLettersString.split(",");
+        Problem[] out = new Problem[list.length];
+
+        for (int i = 0; i < list.length; i++) {
+
+            char letter = list[i].trim().toUpperCase().charAt(0);
+            int offset = letter - 'A';
+
+            if (offset < 0 || offset >= problems.length) {
+                throw new YamlLoadException("No problem defined for letter " + letter + " (" + list[i].trim().toUpperCase() + ")");
+            }
+            out[i] = problems[offset];
+        }
+        return out;
+    }
+
+    protected int[] getNumberList(String numberString) {
+
+        String[] list = numberString.split(",");
+        if (list.length == 1) {
+            int[] out = new int[1];
+            out[0] = getIntegerValue(list[0], 0);
+//            if (out[0] < 1) {
+//                // TODO 669 throw invalid number in list exception
+//            }
+            return out;
+        } else {
+            int[] out = new int[list.length];
+            int i = 0;
+            for (String n : list) {
+                out[i] = getIntegerValue(list[0], 0);
+//                if (out[i] < 1) {
+//                    // TODO 669 throw invalid number in list exception
+//                }
+                i++;
+            }
+            return out;
+        }
+    }
+
+    private int getIntegerValue(String string, int defaultNumber) {
+        
+        int number = defaultNumber;
+        
+        if (string != null && string.length() != 0) {
+            number = Integer.parseInt(string);
+        }
+        
+        return number;
+    }
+    
+    private boolean getBooleanValue(String string, boolean defaultBoolean) {
+        
+        boolean value = defaultBoolean;
+
+        if (string != null && string.length() != 0) {
+            string = string.trim();
+            if (string.equalsIgnoreCase("yes")) {
+                value = true;
+            } else if (string.equalsIgnoreCase("no")) {
+                value = false;
+            } else if (string.equalsIgnoreCase("true")) {
+                value = true;
+            } else if (string.equalsIgnoreCase("false")) {
+                value = false;
+            }
+        }
+        
+        return value;
+    }
 }

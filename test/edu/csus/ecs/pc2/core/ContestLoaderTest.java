@@ -75,19 +75,19 @@ public class ContestLoaderTest extends TestCase {
     }
 
     // public void testAddAllClarificationsToModel() {
-    // fail("Not yet implemented"); // TODO
+    // fail("Not yet implemented"); // TODO code this JUnit
     // }
     //
     // public void testAddAllClientSettingsToModel() {
-    // fail("Not yet implemented"); // TODO
+    // fail("Not yet implemented"); // TODO code this JUnit
     // }
     //
     // public void testAddAllConnectionIdsToModel() {
-    // fail("Not yet implemented"); // TODO
+    // fail("Not yet implemented"); // TODO code this JUnit
     // }
     //
     // public void testAddAllContestTimesToModel() {
-    // fail("Not yet implemented"); // TODO
+    // fail("Not yet implemented"); // TODO code this JUnit
     // }
     //
     // /**
@@ -95,15 +95,15 @@ public class ContestLoaderTest extends TestCase {
     // * {@link edu.csus.ecs.pc2.core.ContestLoader#addAllRunsToModel(edu.csus.ecs.pc2.core.model.IInternalContest, edu.csus.ecs.pc2.core.IInternalController, edu.csus.ecs.pc2.core.packet.Packet)}.
     // */
     // public void testAddAllRunsToModel() {
-    // fail("Not yet implemented"); // TODO
+    // fail("Not yet implemented"); // TODO code this JUnit
     // }
     //
     // public void testAddBalloonSettingsToModel() {
-    // fail("Not yet implemented"); // TODO
+    // fail("Not yet implemented"); // TODO code this JUnit
     // }
     //
     // public void testAddContestInformationToModel() {
-    // fail("Not yet implemented"); // TODO
+    // fail("Not yet implemented"); // TODO code this JUnit
     // }
 
     public void testAddGeneralProblemToModel() {
@@ -128,7 +128,7 @@ public class ContestLoaderTest extends TestCase {
     // * {@link edu.csus.ecs.pc2.core.ContestLoader#addGroupsToModel(edu.csus.ecs.pc2.core.model.IInternalContest, edu.csus.ecs.pc2.core.IInternalController, edu.csus.ecs.pc2.core.packet.Packet)}.
     // */
     // public void testAddGroupsToModel() {
-    // fail("Not yet implemented"); // TODO
+    // fail("Not yet implemented"); // TODO code this JUnit
     // }
     //
     // /**
@@ -136,7 +136,7 @@ public class ContestLoaderTest extends TestCase {
     // * {@link edu.csus.ecs.pc2.core.ContestLoader#addJudgementsToModel(edu.csus.ecs.pc2.core.model.IInternalContest, edu.csus.ecs.pc2.core.IInternalController, edu.csus.ecs.pc2.core.packet.Packet)}.
     // */
     // public void testAddJudgementsToModel() {
-    // fail("Not yet implemented"); // TODO
+    // fail("Not yet implemented"); // TODO code this JUnit
     // }
     //
     // /**
@@ -144,7 +144,7 @@ public class ContestLoaderTest extends TestCase {
     // * {@link edu.csus.ecs.pc2.core.ContestLoader#addLanguagesToModel(edu.csus.ecs.pc2.core.model.IInternalContest, edu.csus.ecs.pc2.core.IInternalController, edu.csus.ecs.pc2.core.packet.Packet)}.
     // */
     // public void testAddLanguagesToModel() {
-    // fail("Not yet implemented"); // TODO
+    // fail("Not yet implemented"); // TODO code this JUnit
     // }
     //
     // /**
@@ -152,7 +152,7 @@ public class ContestLoaderTest extends TestCase {
     // * {@link edu.csus.ecs.pc2.core.ContestLoader#addLoginsToModel(edu.csus.ecs.pc2.core.model.IInternalContest, edu.csus.ecs.pc2.core.IInternalController, edu.csus.ecs.pc2.core.packet.Packet)}.
     // */
     // public void testAddLoginsToModel() {
-    // fail("Not yet implemented"); // TODO
+    // fail("Not yet implemented"); // TODO code this JUnit
     // }
 
     /**
@@ -187,27 +187,27 @@ public class ContestLoaderTest extends TestCase {
     // * {@link edu.csus.ecs.pc2.core.ContestLoader#addProfilesToModel(edu.csus.ecs.pc2.core.model.IInternalContest, edu.csus.ecs.pc2.core.IInternalController, edu.csus.ecs.pc2.core.packet.Packet)}.
     // */
     // public void testAddProfilesToModel() {
-    // fail("Not yet implemented"); // TODO
+    // fail("Not yet implemented"); // TODO code this JUnit
     // }
     //
     // public void testAddRemoteAccountsToModel() {
-    // fail("Not yet implemented"); // TODO
+    // fail("Not yet implemented"); // TODO code this JUnit
     // }
     //
     // public void testAddRemoteAllClientSettingsToModel() {
-    // fail("Not yet implemented"); // TODO
+    // fail("Not yet implemented"); // TODO code this JUnit
     // }
     //
     // public void testAddRemoteClarificationsToModel() {
-    // fail("Not yet implemented"); // TODO
+    // fail("Not yet implemented"); // TODO code this JUnit
     // }
     //
     // public void testAddRemoteContestTimesToModel() {
-    // fail("Not yet implemented"); // TODO
+    // fail("Not yet implemented"); // TODO code this JUnit
     // }
     //
     // public void testAddRemoteLoginsToModel() {
-    // fail("Not yet implemented"); // TODO
+    // fail("Not yet implemented"); // TODO code this JUnit
     // }
 
     public void testAddRemoteRunsToModel() throws IOException, ClassNotFoundException, FileSecurityException {
@@ -245,19 +245,19 @@ public class ContestLoaderTest extends TestCase {
     // * {@link edu.csus.ecs.pc2.core.ContestLoader#addSitesToModel(edu.csus.ecs.pc2.core.model.IInternalContest, edu.csus.ecs.pc2.core.IInternalController, edu.csus.ecs.pc2.core.packet.Packet)}.
     // */
     // public void testAddSitesToModel() {
-    // fail("Not yet implemented"); // TODO
+    // fail("Not yet implemented"); // TODO code this JUnit
     // }
     //
     // public void testInitializeContestTime() {
-    // fail("Not yet implemented"); // TODO
+    // fail("Not yet implemented"); // TODO code this JUnit
     // }
     //
     // public void testUpdateContestTimeInModel() {
-    // fail("Not yet implemented"); // TODO
+    // fail("Not yet implemented"); // TODO code this JUnit
     // }
     //
     // public void testLoadDataIntoModel() {
-    // fail("Not yet implemented"); // TODO
+    // fail("Not yet implemented"); // TODO code this JUnit
     // }
     //
     // /**
@@ -265,7 +265,7 @@ public class ContestLoaderTest extends TestCase {
     // * {@link edu.csus.ecs.pc2.core.ContestLoader#setProfileIntoModel(edu.csus.ecs.pc2.core.model.IInternalContest, edu.csus.ecs.pc2.core.IInternalController, edu.csus.ecs.pc2.core.packet.Packet)}.
     // */
     // public void testSetProfileIntoModel() {
-    // fail("Not yet implemented"); // TODO
+    // fail("Not yet implemented"); // TODO code this JUnit
     // }
 
 }
