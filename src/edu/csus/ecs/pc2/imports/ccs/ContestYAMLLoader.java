@@ -15,8 +15,10 @@ import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AutoJudgeSetting;
 import edu.csus.ecs.pc2.core.model.Category;
 import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
+import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.InternalContest;
@@ -193,26 +195,46 @@ public class ContestYAMLLoader {
 
         Account[] accounts = getAccounts(yamlLines);
         contest.addAccounts(accounts);
-        
+
         AutoJudgeSetting[] autoJudgeSettings = getAutoJudgeSettings(yamlLines, problems);
 
         for (AutoJudgeSetting auto : autoJudgeSettings) {
-            addAutoJudgeSetting(contest,auto);
+            addAutoJudgeSetting(contest, auto);
         }
-        
+
         return contest;
     }
 
     private void addAutoJudgeSetting(IInternalContest contest, AutoJudgeSetting auto) throws YamlLoadException {
-        
-//        ClientId clientId = auto.getClientId();
-        
+
         Account account = contest.getAccount(auto.getClientId());
         if (account == null) {
-            throw new YamlLoadException("No such account for auto judge setting, undefined account is "+auto.getClientId());
+            throw new YamlLoadException("No such account for auto judge setting, undefined account is " + auto.getClientId());
         }
-        
-        // TODO 669 code  contest.addAutoJudgeSetting (auto);
+
+        ClientSettings clientSettings = contest.getClientSettings(auto.getClientId());
+        if (clientSettings == null) {
+            clientSettings = new ClientSettings(auto.getClientId());
+        }
+        clientSettings.setAutoJudgeFilter(auto.getProblemFilter());
+        clientSettings.setAutoJudging(auto.isActive());
+
+//        dumpAJSettings(clientSettings.getClientId(), clientSettings.isAutoJudging(), clientSettings.getAutoJudgeFilter());
+
+        contest.addClientSettings(clientSettings);
+    }
+    
+    // TODO 669 remove after debugged
+    @SuppressWarnings("unused")
+    private void dumpAJSettings(ClientId clientId, boolean autoJudging, Filter autoJudgeFilter) {
+        ElementId[] ids = autoJudgeFilter.getProblemIdList();
+        System.out.println("Auto Judge b4  " + clientId + "  " + ids.length + " problems, aj on = " + autoJudging);
+
+        System.out.print("     sent      ");
+        for (ElementId id : ids) {
+            System.out.print(id + " ");
+        }
+        System.out.println();
     }
 
     public Site[] getSites(String[] yamlLines) {

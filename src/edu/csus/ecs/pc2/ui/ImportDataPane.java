@@ -17,6 +17,7 @@ import edu.csus.ecs.pc2.api.exceptions.LoadContestDataException;
 import edu.csus.ecs.pc2.core.ContestImporter;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Category;
+import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
@@ -192,6 +193,7 @@ public class ImportDataPane extends JPanePlugin {
         Problem[] problems = newContest.getProblems();
         Site[] sites = newContest.getSites();
         Category[] categories = newContest.getCategories();
+        ClientSettings [] settings = newContest.getClientSettingsList();
 
         StringBuffer sb = new StringBuffer();
 
@@ -208,6 +210,8 @@ public class ImportDataPane extends JPanePlugin {
         }
 
         addSummaryEntry(sb, categories.length, "clar", "category");
+
+        addSummaryEntry(sb, settings.length, "AJ setting");
 
         return sb.toString();
     }

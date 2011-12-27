@@ -7,7 +7,11 @@ import java.util.Vector;
 import edu.csus.ecs.pc2.api.exceptions.LoadContestDataException;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.Category;
+import edu.csus.ecs.pc2.core.model.ClientId;
+import edu.csus.ecs.pc2.core.model.ClientSettings;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
+import edu.csus.ecs.pc2.core.model.ElementId;
+import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.Problem;
@@ -216,7 +220,9 @@ public class ContestImporter {
         } catch (Exception e) {
             noteList.logError("Error saving Problem Information", e);
         }
-
+        
+        ClientSettings [] settings = inContest.getClientSettingsList();
+        
         if (noteList.size() > 0){
             /**
              * If there are elements in noteList that means there has been
@@ -246,12 +252,35 @@ public class ContestImporter {
             if (addAccountsVector.size() > 0) {
                 theController.addNewAccounts(addAccountsVector.toArray(new Account[addAccountsVector.size()]));
             }
-
+            
+            if (settings.length > 0) {
+                Thread.sleep(2000);  // kludge wait for accounts to be created on server
+//                System.out.println("debug 22 - ContestImporer there are "+settings.length+" settings found");
+                for (ClientSettings setting : settings) {
+//                    dumpAJSettings(setting.getClientId(), setting.isAutoJudging(), setting.getAutoJudgeFilter());
+                    theController.addNewClientSettings(setting);
+                }
+            }
+            
         } catch (Exception e) {
             noteList.logError("Error storing configuration Information", e);
             throw new LoadContestDataException(noteList.size()+" errors in sending contest configuration data");
         }
 
+    }
+
+    // TODO 669 remove after debugged
+    @SuppressWarnings("unused")
+    private void dumpAJSettings(ClientId clientId, boolean autoJudging, Filter autoJudgeFilter) {
+        ElementId[] ids = autoJudgeFilter.getProblemIdList();
+        System.out.println("-----------------------------------------------------------------");
+        System.out.println("debug 22 Auto Judge for " + clientId + "  " + ids.length + " problems, aj on = " + autoJudging);
+
+        System.out.print("debug 22     sent      ");
+        for (ElementId id : ids) {
+            System.out.print(id + " ");
+        }
+        System.out.println();
     }
 
     private void updateProblemFields(Problem newProblem, Problem problem) throws Exception {
