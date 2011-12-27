@@ -56,6 +56,7 @@ import edu.csus.ecs.pc2.ui.MessageMonitorPane;
 import edu.csus.ecs.pc2.ui.OptionsPane;
 import edu.csus.ecs.pc2.ui.PacketExplorerPane;
 import edu.csus.ecs.pc2.ui.PacketMonitorPane;
+import edu.csus.ecs.pc2.ui.PlaybackPane;
 import edu.csus.ecs.pc2.ui.PluginLoadPane;
 import edu.csus.ecs.pc2.ui.ProblemsPane;
 import edu.csus.ecs.pc2.ui.ProfilesPane;
@@ -314,6 +315,13 @@ public class AdministratorView extends JFrame implements UIPlugin, ChangeListene
                 try {
                     PacketMonitorPane pane = new PacketMonitorPane();
                     addUIPlugin(getRunContestTabbedPane(), "Packets", pane);
+                } catch (Exception e) {
+                    logException(e);
+                }
+                
+                try {
+                    PlaybackPane playbackPane = new PlaybackPane();
+                    addUIPlugin(getRunContestTabbedPane(), "Replay", playbackPane);
                 } catch (Exception e) {
                     logException(e);
                 }

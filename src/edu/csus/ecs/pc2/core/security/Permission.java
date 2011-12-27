@@ -291,7 +291,19 @@ public class Permission implements Serializable {
         /**
          * 
          */
-        EDIT_CATEGORY,
+        EDIT_CATEGORY, 
+        /**
+         * Start a replay playback
+         */
+        START_PLAYBACK,
+        /**
+         * Stop a replay playback
+         */
+        STOP_PLAYBACK, 
+        /**
+         * Change settings for a replay playback
+         */
+        EDIT_PLAYBACK,
     };
 
     private Hashtable<Type, String> hash = new Hashtable<Type, String>();
@@ -387,6 +399,10 @@ public class Permission implements Serializable {
         
         hash.put(Type.ADD_CATEGORY,"Add Category");
         hash.put(Type.EDIT_CATEGORY,"Edit Category");
+        
+        hash.put(Type.START_PLAYBACK,"Start Playback");
+        hash.put(Type.STOP_PLAYBACK,"Stop Playback");
+        hash.put(Type.EDIT_PLAYBACK,"Edit Playback Settings");
     }
 
     /**

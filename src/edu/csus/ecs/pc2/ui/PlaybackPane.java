@@ -27,9 +27,12 @@ import com.ibm.webrunner.j2mclb.util.HeapSorter;
 import com.ibm.webrunner.j2mclb.util.NumericStringComparator;
 
 import edu.csus.ecs.pc2.core.IInternalController;
+import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ElementId;
+import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
@@ -41,6 +44,7 @@ import edu.csus.ecs.pc2.core.model.playback.EventStatus;
 import edu.csus.ecs.pc2.core.model.playback.PlaybackEvent;
 import edu.csus.ecs.pc2.core.model.playback.PlaybackEvent.Action;
 import edu.csus.ecs.pc2.core.model.playback.PlaybackManager;
+import edu.csus.ecs.pc2.core.security.Permission;
 
 /**
  * Pane for Contest Playback.
@@ -100,7 +104,7 @@ public class PlaybackPane extends JPanePlugin {
     private JLabel totalRunsLabel = null;
     
     private boolean stillRunning = false;
-
+    
     /**
      * This method initializes
      * 
@@ -126,7 +130,6 @@ public class PlaybackPane extends JPanePlugin {
         
         updateTotalRuns();
         
-        setRunningButtons(false);
         // getTeamReadsFrombuttonGroup().setSelected(getFileRadioButton().getModel(), true);
     }
 
@@ -200,10 +203,14 @@ public class PlaybackPane extends JPanePlugin {
     @Override
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         super.setContestAndController(inContest, inController);
-        initializePermissions();
         
-        // TODO 670 add account listener and updatePermissions method
+        getContest().addAccountListener(new AccountListenerImplementation());
         
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                updateGUIperPermissions();
+            }
+        });
     }
 
     public String[] buildPlayBackRow(PlaybackEvent playbackEvent) {
@@ -458,11 +465,23 @@ public class PlaybackPane extends JPanePlugin {
             });
         }
     }
-
+    
     private void setRunningButtons(boolean running) {
-        getStartButton().setEnabled(! running);
-        getStopButton().setEnabled(running);
-        getResetButton().setEnabled(getEventsListBox().getRowCount() > 0);
+        
+        startButton.setEnabled(isAllowed(Permission.Type.START_PLAYBACK));
+        stopButton.setEnabled(isAllowed(Permission.Type.STOP_PLAYBACK));
+        resetButton.setEnabled(isAllowed(Permission.Type.EDIT_PLAYBACK));
+        loadButton.setEnabled(isAllowed(Permission.Type.EDIT_PLAYBACK));
+        
+        if (isAllowed(Permission.Type.START_PLAYBACK)) {
+            getStartButton().setEnabled(! running);
+        }
+        if (isAllowed(Permission.Type.STOP_PLAYBACK)) {
+            getStopButton().setEnabled(running);
+        }
+        if (isAllowed(Permission.Type.EDIT_PLAYBACK)) {
+            getResetButton().setEnabled(getEventsListBox().getRowCount() > 0);
+        }
     }
 
     public boolean isStillRunning() {
@@ -786,5 +805,77 @@ public class PlaybackPane extends JPanePlugin {
         }
         totalRunsLabel.setText(message);
     }
+    
+    private void updateGUIperPermissions() {
+   
+        setRunningButtons(isStillRunning());
+    }
+
+
+    /**
+     * Account Listener for Playback Pane. 
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    
+    // $HeadURL$
+    public class AccountListenerImplementation implements IAccountListener {
+
+        public void accountAdded(AccountEvent accountEvent) {
+            // ignore, doesn't affect this pane
+        }
+
+        public void accountModified(AccountEvent event) {
+            // check if is this account
+            Account account = event.getAccount();
+            /**
+             * If this is the account then update the GUI display per the potential change in Permissions.
+             */
+            if (getContest().getClientId().equals(account.getClientId())) {
+                // They modified us!!
+                initializePermissions();
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        updateGUIperPermissions();
+                    }
+                });
+            }
+        }
+
+        public void accountsAdded(AccountEvent accountEvent) {
+            // ignore, does not affect this pane
+        }
+
+        public void accountsModified(AccountEvent accountEvent) {
+            // check if it included this account
+            boolean theyModifiedUs = false;
+            for (Account account : accountEvent.getAccounts()) {
+                /**
+                 * If this is the account then update the GUI display per the potential change in Permissions.
+                 */
+                if (getContest().getClientId().equals(account.getClientId())) {
+                    theyModifiedUs = true;
+                    initializePermissions();
+                }
+            }
+            final boolean finalTheyModifiedUs = theyModifiedUs;
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    if (finalTheyModifiedUs) {
+                        updateGUIperPermissions();
+                    }
+                }
+            });
+        }
+
+        public void accountsRefreshAll(AccountEvent accountEvent) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    updateGUIperPermissions();
+                }
+            });
+        }
+    }
+ 
 
 } // @jve:decl-index=0:visual-constraint="10,10"
