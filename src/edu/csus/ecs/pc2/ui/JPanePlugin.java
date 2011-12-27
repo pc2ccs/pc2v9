@@ -15,15 +15,11 @@ import edu.csus.ecs.pc2.VersionInfo;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.NoteList;
 import edu.csus.ecs.pc2.core.NoteMessage;
-import edu.csus.ecs.pc2.core.PermissionGroup;
 import edu.csus.ecs.pc2.core.log.Log;
-import edu.csus.ecs.pc2.core.model.Account;
-import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.core.security.Permission;
-import edu.csus.ecs.pc2.core.security.PermissionList;
 
 /**
  * Base class for UIPlugin panes.
@@ -46,13 +42,9 @@ public abstract class JPanePlugin extends JPanel implements UIPlugin {
     
     private JFrame parentFrame = null;
 
-    private PermissionList permissionList;
-    
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.controller = inController;
         this.contest = inContest;
-        
-        getPermissionList(); // initialize permissions
     }
     
 
@@ -172,42 +164,16 @@ public abstract class JPanePlugin extends JPanel implements UIPlugin {
      * Load permission list.
      * 
      * @see #getPermissionList()
-     * @see #hasPermission(edu.csus.ecs.pc2.core.security.Permission.Type)
+     * @see #isAllowed(edu.csus.ecs.pc2.core.security.Permission.Type)
      */
     public void initializePermissions() {
-        getPermissionList();
+        
+        // TODO 6361 remove this method  everywhere.
+        
     }
 
-    /**
-     * Reload and return permission list for this client.
-     * 
-     * @return list of permissions that this client has.
-     */
-    public PermissionList getPermissionList() {
-        ClientId id = getContest().getClientId();
-
-        Account account = getContest().getAccount(id);
-
-        if (account == null) {
-            permissionList = new PermissionGroup().getPermissionList(id.getClientType());
-        } else {
-            permissionList = account.getPermissionList();
-        }
-        return permissionList;
-    }
-    
-    /**
-     * Does this client have permissions to do action?
-     * 
-     * @param type the action or privilege the client is allowed to do.
-     * @return
-     */
-    public boolean hasPermission(Permission.Type type) {
-        return permissionList.isAllowed(type);
-    }
-    
     public boolean isAllowed(Permission.Type type) {
-        return hasPermission(type);
+        return getContest().isAllowed(type);
     }
         
     
