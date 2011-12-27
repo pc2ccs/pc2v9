@@ -85,7 +85,6 @@ import edu.csus.ecs.pc2.core.report.SolutionsByProblemReport;
 import edu.csus.ecs.pc2.core.report.StandingsReport;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.Permission.Type;
-import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.core.util.IMemento;
 import edu.csus.ecs.pc2.core.util.XMLMemento;
 import edu.csus.ecs.pc2.ui.EditFilterPane.ListNames;
@@ -148,8 +147,6 @@ public class ReportPane extends JPanePlugin {
 
     private JButton generateSummaryButton = null;
     
-    private PermissionList permissionList = new PermissionList();
-
     public String getReportDirectory() {
         return reportDirectory;
     }
@@ -275,14 +272,6 @@ public class ReportPane extends JPanePlugin {
         
     }
     
-    private boolean isAllowed(Permission.Type type) {
-        return permissionList.isAllowed(type);
-    }
-
-    private void initializePermissions() {
-        permissionList.clearAndLoadPermissions(getPermissionList());
-    }
-
     private void updateGUIperPermissions() {
         generateSummaryButton.setEnabled(isAllowed(Permission.Type.EDIT_ACCOUNT));
         viewReportButton.setEnabled(isAllowed(Permission.Type.EDIT_ACCOUNT));

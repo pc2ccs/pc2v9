@@ -45,7 +45,6 @@ import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.RunResultFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.security.Permission;
-import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.ui.judge.JudgeView;
 
 /**
@@ -123,8 +122,6 @@ public class SelectJudgementPaneNew extends JPanePlugin {
     private JLabel elapsedTimeLabel = null;
 
     private JCheckBox notifyTeamCheckBox = null;
-
-    private PermissionList permissionList = new PermissionList();
 
     private JButton acceptValidatorJudgementButton = null;
 
@@ -1062,10 +1059,6 @@ public class SelectJudgementPaneNew extends JPanePlugin {
         return clientId.getName();
     }
 
-    private boolean isAllowed(Permission.Type type) {
-        return permissionList.isAllowed(type);
-    }
-
     private boolean isTeam(ClientId clientId) {
         return clientId == null || clientId.getClientType().equals(Type.TEAM);
     }
@@ -1076,10 +1069,6 @@ public class SelectJudgementPaneNew extends JPanePlugin {
 
     private boolean isJudge() {
         return isJudge(getContest().getClientId());
-    }
-
-    private void initializePermissions() {
-        permissionList.clearAndLoadPermissions(getPermissionList());
     }
 
     /**

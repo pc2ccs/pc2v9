@@ -22,7 +22,6 @@ import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IConnectionListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.security.Permission;
-import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
 
 /**
@@ -51,8 +50,6 @@ public class ConnectionsPane extends JPanePlugin {
     private JLabel messageLabel = null;
     
     private Log log = null;
-
-    private PermissionList permissionList = new PermissionList();
 
     /**
      * This method initializes
@@ -179,14 +176,6 @@ public class ConnectionsPane extends JPanePlugin {
                 connectionsListBox.autoSizeAllColumns();
             }
         });
-    }
-    
-    private boolean isAllowed(Permission.Type type) {
-        return permissionList.isAllowed(type);
-    }
-    
-    private void initializePermissions() {
-        permissionList.clearAndLoadPermissions(getPermissionList());
     }
     
     private void updateGUIperPermissions() {

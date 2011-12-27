@@ -22,6 +22,7 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.Filter;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.report.IReport;
+import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.PermissionList;
 
 /**
@@ -45,9 +46,13 @@ public abstract class JPanePlugin extends JPanel implements UIPlugin {
     
     private JFrame parentFrame = null;
 
+    private PermissionList permissionList;
+    
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {
         this.controller = inController;
         this.contest = inContest;
+        
+        getPermissionList(); // initialize permissions
     }
     
 
@@ -162,9 +167,19 @@ public abstract class JPanePlugin extends JPanel implements UIPlugin {
             }
         }
     }
+    
+    /**
+     * Load permission list.
+     * 
+     * @see #getPermissionList()
+     * @see #hasPermission(edu.csus.ecs.pc2.core.security.Permission.Type)
+     */
+    public void initializePermissions() {
+        getPermissionList();
+    }
 
     /**
-     * Return permission list for this client.
+     * Reload and return permission list for this client.
      * 
      * @return list of permissions that this client has.
      */
@@ -173,14 +188,28 @@ public abstract class JPanePlugin extends JPanel implements UIPlugin {
 
         Account account = getContest().getAccount(id);
 
-        PermissionList list = null;
         if (account == null) {
-            list = new PermissionGroup().getPermissionList(id.getClientType());
+            permissionList = new PermissionGroup().getPermissionList(id.getClientType());
         } else {
-            list = account.getPermissionList();
+            permissionList = account.getPermissionList();
         }
-        return list;
+        return permissionList;
     }
+    
+    /**
+     * Does this client have permissions to do action?
+     * 
+     * @param type the action or privilege the client is allowed to do.
+     * @return
+     */
+    public boolean hasPermission(Permission.Type type) {
+        return permissionList.isAllowed(type);
+    }
+    
+    public boolean isAllowed(Permission.Type type) {
+        return hasPermission(type);
+    }
+        
     
     /**
      * Show message to user.

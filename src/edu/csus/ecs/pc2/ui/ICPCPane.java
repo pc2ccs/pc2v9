@@ -26,7 +26,6 @@ import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IGroupListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.security.Permission;
-import edu.csus.ecs.pc2.core.security.PermissionList;
 
 /**
  * ICPC Load CSV files.
@@ -63,8 +62,6 @@ public class ICPCPane extends JPanePlugin {
 
     private JButton importSitesButton = null;
     
-    private PermissionList permissionList = new PermissionList();
-
     /**
      * Group Listener for ICPC Pane.
      * @author pc2@ecs.csus.edu
@@ -347,14 +344,6 @@ public class ICPCPane extends JPanePlugin {
                 updateGUIperPermissions();
             }
         });
-    }
-
-    private boolean isAllowed(Permission.Type type) {
-        return permissionList.isAllowed(type);
-    }
-
-    private void initializePermissions() {
-        permissionList.clearAndLoadPermissions(getPermissionList());
     }
 
     private void updateGUIperPermissions() {

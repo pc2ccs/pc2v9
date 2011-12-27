@@ -22,7 +22,6 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.ProblemEvent;
 import edu.csus.ecs.pc2.core.security.Permission;
-import edu.csus.ecs.pc2.core.security.PermissionList;
 
 /**
  * View Problems.
@@ -57,8 +56,6 @@ public class ProblemsPane extends JPanePlugin {
 
     private EditProblemFrame editProblemFrame = null;
     
-    private PermissionList permissionList = new PermissionList();
-
     /**
      * This method initializes
      * 
@@ -292,14 +289,6 @@ public class ProblemsPane extends JPanePlugin {
     }
     
     
-    private boolean isAllowed(Permission.Type type) {
-        return permissionList.isAllowed(type);
-    }
-
-    private void initializePermissions() {
-        permissionList.clearAndLoadPermissions(getPermissionList());
-    }
-
     private void updateGUIperPermissions() {
         addButton.setVisible(isAllowed(Permission.Type.ADD_PROBLEM));
         editButton.setVisible(isAllowed(Permission.Type.EDIT_PROBLEM));

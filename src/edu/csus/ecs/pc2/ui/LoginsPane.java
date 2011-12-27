@@ -2,9 +2,12 @@ package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.event.KeyEvent;
 import java.util.Date;
 import java.util.Vector;
 
+import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
@@ -23,11 +26,7 @@ import edu.csus.ecs.pc2.core.model.ILoginListener;
 import edu.csus.ecs.pc2.core.model.LoginEvent;
 import edu.csus.ecs.pc2.core.report.LoginReport;
 import edu.csus.ecs.pc2.core.security.Permission;
-import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.core.transport.ConnectionHandlerID;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import java.awt.event.KeyEvent;
 
 /**
  * View Logins.
@@ -49,8 +48,6 @@ public class LoginsPane extends JPanePlugin {
     private MCLB loginListBox = null;
 
     private JButton logoffButton = null;
-
-    private PermissionList permissionList = new PermissionList();
 
     private JPanel messagePanel = null;
 
@@ -235,10 +232,6 @@ public class LoginsPane extends JPanePlugin {
         });
     }
     
-    private boolean isAllowed(Permission.Type type) {
-        return permissionList.isAllowed(type);
-    }
-
     private void updateGUIperPermissions() {
         logoffButton.setVisible(isAllowed(Permission.Type.FORCE_LOGOFF_CLIENT));
         reportButton.setVisible(isAllowed(Permission.Type.FORCE_LOGOFF_CLIENT));
@@ -294,10 +287,6 @@ public class LoginsPane extends JPanePlugin {
                 updateLoginRow(clientId, connectionHandlerID);
             }
         });
-    }
-
-    private void initializePermissions() {
-        permissionList.clearAndLoadPermissions(getPermissionList());
     }
 
     /**

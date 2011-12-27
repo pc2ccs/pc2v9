@@ -1,6 +1,8 @@
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.io.File;
 
 import javax.swing.JButton;
@@ -21,8 +23,8 @@ import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
-import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.ILanguageListener;
 import edu.csus.ecs.pc2.core.model.IProblemListener;
 import edu.csus.ecs.pc2.core.model.Language;
@@ -33,9 +35,6 @@ import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.RunFiles;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.security.Permission;
-import edu.csus.ecs.pc2.core.security.PermissionList;
-import java.awt.FlowLayout;
-import java.awt.Dimension;
 
 /**
  * A submit run pane.
@@ -78,8 +77,6 @@ public class SubmitRunPane extends JPanePlugin {
     private JButton testButton = null;
 
     private Executable executable = null;
-
-    private PermissionList permissionList = new PermissionList();
 
     private JPanel additionalFilesPane = null;
 
@@ -692,18 +689,10 @@ public class SubmitRunPane extends JPanePlugin {
 
     }
 
-    private boolean isAllowed(Permission.Type type) {
-        return permissionList.isAllowed(type);
-    }
-
     private void updateGUIperPermissions() {
 
         // testButton.setVisible(isAllowed(Permission.Type.JUDGE_RUN));
         submitRunButton.setVisible(isAllowed(Permission.Type.SUBMIT_RUN));
-    }
-
-    private void initializePermissions() {
-        permissionList.clearAndLoadPermissions(getPermissionList());
     }
 
     public void setContestAndController(IInternalContest inContest, IInternalController inController) {

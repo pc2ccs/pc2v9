@@ -103,10 +103,6 @@ public class RunStatisticsReport implements IReport {
 
     }
 
-    private long toSeconds(long ms) {
-        return ms / 1000;
-    }
-
     public void writeReport(PrintWriter printWriter) {
 
         // Runs

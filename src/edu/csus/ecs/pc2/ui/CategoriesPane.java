@@ -22,7 +22,6 @@ import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.ICategoryListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.security.Permission;
-import edu.csus.ecs.pc2.core.security.PermissionList;
 
 /**
  * Show Categories, allow add and edit.
@@ -49,8 +48,6 @@ public class CategoriesPane extends JPanePlugin {
     private JPanel statusPanel = null;
 
     private JButton editButton = null;
-
-    private PermissionList permissionList = new PermissionList();
 
     private EditCategoryFrame editCategoryFrame;
 
@@ -104,14 +101,6 @@ public class CategoriesPane extends JPanePlugin {
         });
     }
     
-    private boolean isAllowed(Permission.Type type) {
-        return permissionList.isAllowed(type);
-    }
-
-    private void initializePermissions() {
-        permissionList.clearAndLoadPermissions(getPermissionList());
-    }
-
     private void updateGUIperPermissions() {
         addButton.setVisible(isAllowed(Permission.Type.ADD_CATEGORY));
         editButton.setVisible(isAllowed(Permission.Type.EDIT_CATEGORY));

@@ -22,7 +22,6 @@ import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementEvent;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.security.Permission;
-import edu.csus.ecs.pc2.core.security.PermissionList;
 
 /**
  * Show Judgements, allow add and edit.
@@ -51,8 +50,6 @@ public class JudgementsPane extends JPanePlugin {
 
     private EditJudgementFrame editJudgementFrame = null;
     
-    private PermissionList permissionList = new PermissionList();
-
     /**
      * 
      * @author pc2@ecs.csus.edu
@@ -123,14 +120,6 @@ public class JudgementsPane extends JPanePlugin {
         });
     }
     
-    private boolean isAllowed(Permission.Type type) {
-        return permissionList.isAllowed(type);
-    }
-
-    private void initializePermissions() {
-        permissionList.clearAndLoadPermissions(getPermissionList());
-    }
-
     private void updateGUIperPermissions() {
         addButton.setVisible(isAllowed(Permission.Type.ADD_JUDGEMENTS));
         editButton.setVisible(isAllowed(Permission.Type.EDIT_JUDGEMENTS));

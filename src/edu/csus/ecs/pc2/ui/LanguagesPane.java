@@ -21,7 +21,6 @@ import edu.csus.ecs.pc2.core.model.ILanguageListener;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.LanguageEvent;
 import edu.csus.ecs.pc2.core.security.Permission;
-import edu.csus.ecs.pc2.core.security.PermissionList;
 
 /**
  * View Languages pane.
@@ -54,8 +53,6 @@ public class LanguagesPane extends JPanePlugin {
     
     private Log log;
     
-    private PermissionList permissionList = new PermissionList();
-
     /**
      * This method initializes
      * 
@@ -212,14 +209,6 @@ public class LanguagesPane extends JPanePlugin {
     }
     
     
-    private boolean isAllowed(Permission.Type type) {
-        return permissionList.isAllowed(type);
-    }
-
-    private void initializePermissions() {
-        permissionList.clearAndLoadPermissions(getPermissionList());
-    }
-
     private void updateGUIperPermissions() {
         addButton.setVisible(isAllowed(Permission.Type.ADD_LANGUAGE));
         editButton.setVisible(isAllowed(Permission.Type.EDIT_LANGUAGE));

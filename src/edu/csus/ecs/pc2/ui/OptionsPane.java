@@ -20,7 +20,6 @@ import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.PasswordChangeEvent;
 import edu.csus.ecs.pc2.core.security.ISecurityMessageListener;
 import edu.csus.ecs.pc2.core.security.Permission;
-import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.core.security.SecurityMessageEvent;
 import edu.csus.ecs.pc2.ui.FrameUtilities.HorizontalPosition;
 import edu.csus.ecs.pc2.ui.FrameUtilities.VerticalPosition;
@@ -56,8 +55,6 @@ public class OptionsPane extends JPanePlugin {
 
     private SubmissionBiffFrame submissionBiffFrame = new SubmissionBiffFrame();
     
-    private PermissionList permissionList = new PermissionList();
-
     private JButton showSecurityAlertWindowButton = null;
 
     private JButton changePasswordButton = null;
@@ -105,15 +102,6 @@ public class OptionsPane extends JPanePlugin {
         packetMonitorFrame.setVisible(true);
     }
 
-    private boolean isAllowed(Permission.Type type) {
-        return permissionList.isAllowed(type);
-    }
-    
-    
-    private void initializePermissions() {
-        permissionList.clearAndLoadPermissions(getPermissionList());
-    }
-    
     private void updateGUIperPermissions() {
         
         if (getController().isUsingGUI()){

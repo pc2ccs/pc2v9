@@ -1,6 +1,8 @@
 package edu.csus.ecs.pc2.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Point;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -12,16 +14,18 @@ import javax.swing.SwingUtilities;
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.Utilities;
 import edu.csus.ecs.pc2.core.log.Log;
+import edu.csus.ecs.pc2.core.model.Account;
+import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.CategoryEvent;
 import edu.csus.ecs.pc2.core.model.ContestTimeEvent;
+import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.ICategoryListener;
 import edu.csus.ecs.pc2.core.model.IContestTimeListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.IProblemListener;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemEvent;
-import java.awt.Dimension;
-import java.awt.Point;
+import edu.csus.ecs.pc2.core.security.Permission;
 
 /**
  * Submit Clarification Pane.
@@ -380,6 +384,8 @@ public class SubmitClarificationPane extends JPanePlugin {
 
         this.log = getController().getLog();
         
+        initializePermissions();
+        getContest().addAccountListener(new AccountListenerImplementation());
         getContest().addContestTimeListener(new ContestTimeListenerImplementation());
         getContest().addProblemListener(new ProblemListenerImplementation());
         getContest().addCategoryListener(new CategoryListenerImplementation());
@@ -393,5 +399,72 @@ public class SubmitClarificationPane extends JPanePlugin {
         
         
     }
+    
+    /**
+     * 
+     * @author pc2@ecs.csus.edu
+     */
+    public class AccountListenerImplementation implements IAccountListener {
+
+        public void accountAdded(AccountEvent accountEvent) {
+            // ignore, doesn't affect this pane
+        }
+
+        public void accountModified(AccountEvent event) {
+            // check if is this account
+            Account account = event.getAccount();
+            /**
+             * If this is the account then update the GUI display per the potential change in Permissions.
+             */
+            if (getContest().getClientId().equals(account.getClientId())) {
+                // They modified us!!
+                initializePermissions();
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        updateGUIperPermissions();
+                    }
+                });
+            }
+        }
+
+        public void accountsAdded(AccountEvent accountEvent) {
+            // ignore, does not affect this pane
+        }
+
+        public void accountsModified(AccountEvent accountEvent) {
+            // check if it included this account
+            boolean theyModifiedUs = false;
+            for (Account account : accountEvent.getAccounts()) {
+                /**
+                 * If this is the account then update the GUI display per the potential change in Permissions.
+                 */
+                if (getContest().getClientId().equals(account.getClientId())) {
+                    theyModifiedUs = true;
+                    initializePermissions();
+                }
+            }
+            final boolean finalTheyModifiedUs = theyModifiedUs;
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    if (finalTheyModifiedUs) {
+                        updateGUIperPermissions();
+                    }
+                }
+            });
+        }
+
+        public void accountsRefreshAll(AccountEvent accountEvent) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    updateGUIperPermissions();
+                }
+            });
+        }
+    }
+    
+    private void updateGUIperPermissions() {
+        submitClarificationButton.setVisible(isAllowed(Permission.Type.SUBMIT_CLARIFICATION));
+    }
+
 
 } // @jve:decl-index=0:visual-constraint="10,10"

@@ -27,9 +27,11 @@ import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.CategoryEvent;
 import edu.csus.ecs.pc2.core.model.Clarification;
+import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
 import edu.csus.ecs.pc2.core.model.ClarificationEvent;
 import edu.csus.ecs.pc2.core.model.ClientId;
 import edu.csus.ecs.pc2.core.model.ClientType;
+import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.ContestInformationEvent;
 import edu.csus.ecs.pc2.core.model.DisplayTeamName;
@@ -45,10 +47,7 @@ import edu.csus.ecs.pc2.core.model.IProblemListener;
 import edu.csus.ecs.pc2.core.model.LanguageEvent;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemEvent;
-import edu.csus.ecs.pc2.core.model.Clarification.ClarificationStates;
-import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.security.Permission;
-import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.ui.EditFilterPane.ListNames;
 
 /**
@@ -77,8 +76,6 @@ public class ClarificationsPane extends JPanePlugin {
     private JButton editButton = null;
 
     private JButton filterButton = null;
-
-    private PermissionList permissionList = new PermissionList();
 
     private JButton requestButton = null;
 
@@ -852,10 +849,6 @@ public class ClarificationsPane extends JPanePlugin {
         return editFilterFrame;
     }
 
-    private boolean isAllowed(Permission.Type type) {
-        return permissionList.isAllowed(type);
-    }
-
     private boolean isTeam(ClientId clientId) {
         return clientId == null || clientId.getClientType().equals(Type.TEAM);
     }
@@ -866,10 +859,6 @@ public class ClarificationsPane extends JPanePlugin {
 
     private boolean isJudge() {
         return isJudge(getContest().getClientId());
-    }
-
-    private void initializePermissions() {
-        permissionList.clearAndLoadPermissions(getPermissionList());
     }
 
     private void updateGUIperPermissions() {

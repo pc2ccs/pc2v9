@@ -28,7 +28,6 @@ import edu.csus.ecs.pc2.core.model.IBalloonSettingsListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.security.Permission;
-import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.core.security.Permission.Type;
 
 /**
@@ -64,8 +63,6 @@ public class BalloonSettingsPane extends JPanePlugin {
 
     private JButton copyButton = null;
     
-    private PermissionList permissionList = new PermissionList();
-
     /**
      * This method initializes
      * 
@@ -232,14 +229,6 @@ public class BalloonSettingsPane extends JPanePlugin {
                 reloadListBox();
             }
         });
-    }
-
-    private boolean isAllowed(Permission.Type type) {
-        return permissionList.isAllowed(type);
-    }
-
-    private void initializePermissions() {
-        permissionList.clearAndLoadPermissions(getPermissionList());
     }
 
     private void updateGUIperPermissions() {

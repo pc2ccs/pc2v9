@@ -26,7 +26,6 @@ import edu.csus.ecs.pc2.core.model.ContestInformation;
 import edu.csus.ecs.pc2.core.model.DisplayTeamName;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.security.Permission;
-import edu.csus.ecs.pc2.core.security.PermissionList;
 
 /**
  * Add/Edit Clarification Pane
@@ -63,8 +62,6 @@ public class AnswerClarificationPane extends JPanePlugin {
     private Log log = null;
 
     private boolean populatingGUI = true;
-
-    private PermissionList permissionList = new PermissionList();
 
     private JCheckBox sendToAllCheckBox = null;
 
@@ -418,10 +415,6 @@ public class AnswerClarificationPane extends JPanePlugin {
         // TODO code extract clarification
     }
 
-    private boolean isAllowed(Permission.Type type) {
-        return permissionList.isAllowed(type);
-    }
-
     private boolean isTeam(ClientId clientId) {
         return clientId == null || clientId.getClientType().equals(Type.TEAM);
     }
@@ -432,10 +425,6 @@ public class AnswerClarificationPane extends JPanePlugin {
     
     private boolean isJudge(){
         return isJudge(getContest().getClientId());
-    }
-
-    private void initializePermissions() {
-        permissionList.clearAndLoadPermissions(getPermissionList());
     }
 
     private void updateGUIperPermissions() {

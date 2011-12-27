@@ -36,7 +36,6 @@ import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.report.FilterReport;
 import edu.csus.ecs.pc2.core.security.Permission;
-import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.ui.EditFilterPane.ListNames;
 
 /**
@@ -78,8 +77,6 @@ public class AccountsPane extends JPanePlugin {
     private JPanel messagePanel = null;
 
     private JLabel messageLabel = null;
-
-    private PermissionList permissionList = new PermissionList();  //  @jve:decl-index=0:
 
     private EditAccountFrame editAccountFrame = new EditAccountFrame();
 
@@ -321,14 +318,6 @@ public class AccountsPane extends JPanePlugin {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    private boolean isAllowed(Permission.Type type) {
-        return permissionList.isAllowed(type);
-    }
-
-    private void initializePermissions() {
-        permissionList.clearAndLoadPermissions(getPermissionList());
     }
 
     private void updateGUIperPermissions() {

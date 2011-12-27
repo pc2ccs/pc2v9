@@ -14,13 +14,12 @@ import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.Account;
 import edu.csus.ecs.pc2.core.model.AccountEvent;
 import edu.csus.ecs.pc2.core.model.ElementId;
-import edu.csus.ecs.pc2.core.model.IAccountListener;
-import edu.csus.ecs.pc2.core.model.IInternalContest;
-import edu.csus.ecs.pc2.core.model.IGroupListener;
 import edu.csus.ecs.pc2.core.model.Group;
 import edu.csus.ecs.pc2.core.model.GroupEvent;
+import edu.csus.ecs.pc2.core.model.IAccountListener;
+import edu.csus.ecs.pc2.core.model.IGroupListener;
+import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.security.Permission;
-import edu.csus.ecs.pc2.core.security.PermissionList;
 
 /**
  * View Groups pane.
@@ -54,8 +53,6 @@ public class GroupsPane extends JPanePlugin {
     
     private Log log;
     
-    private PermissionList permissionList = new PermissionList();
-
     /**
      * This method initializes
      * 
@@ -196,14 +193,6 @@ public class GroupsPane extends JPanePlugin {
         });
     }
     
-    private boolean isAllowed(Permission.Type type) {
-        return permissionList.isAllowed(type);
-    }
-
-    private void initializePermissions() {
-        permissionList.clearAndLoadPermissions(getPermissionList());
-    }
-
     private void updateGUIperPermissions() {
         addButton.setVisible(isAllowed(Permission.Type.ADD_GROUPS));
         editButton.setVisible(isAllowed(Permission.Type.EDIT_GROUPS));

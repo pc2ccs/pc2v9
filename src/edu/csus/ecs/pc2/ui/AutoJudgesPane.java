@@ -33,7 +33,6 @@ import edu.csus.ecs.pc2.core.model.IProblemListener;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemEvent;
 import edu.csus.ecs.pc2.core.security.Permission;
-import edu.csus.ecs.pc2.core.security.PermissionList;
 
 /**
  * A grid of auto judging settings.
@@ -63,8 +62,6 @@ public class AutoJudgesPane extends JPanePlugin {
     private EditAutoJudgeSettingFrame editAutoJudgeSettingFrame = new EditAutoJudgeSettingFrame();
 
     private Log log;
-
-    private PermissionList permissionList = new PermissionList();
 
     /**
      * This method initializes
@@ -115,14 +112,6 @@ public class AutoJudgesPane extends JPanePlugin {
         showMessage("");
     }
     
-    private boolean isAllowed(Permission.Type type) {
-        return permissionList.isAllowed(type);
-    }
-
-    private void initializePermissions() {
-        permissionList.clearAndLoadPermissions(getPermissionList());
-    }
-
     private void updateGUIperPermissions() {
         editButton.setVisible(isAllowed(Permission.Type.EDIT_AJ_SETTINGS));
     }

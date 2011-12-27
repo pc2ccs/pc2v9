@@ -32,7 +32,6 @@ import edu.csus.ecs.pc2.core.model.SiteEvent;
 import edu.csus.ecs.pc2.core.model.SiteList;
 import edu.csus.ecs.pc2.core.security.Permission;
 import edu.csus.ecs.pc2.core.security.Permission.Type;
-import edu.csus.ecs.pc2.core.security.PermissionList;
 
 /**
  * View/Edit sites' settings.
@@ -69,8 +68,6 @@ public class SitesPane extends JPanePlugin {
     
     public static final int DEFAULT_LISTENING_PORT = 50002;
     
-    private PermissionList permissionList = new PermissionList();
-
     private JButton shutdownButton = null;
 
     /**
@@ -545,14 +542,6 @@ public class SitesPane extends JPanePlugin {
         });
     }
     
-
-    private boolean isAllowed(Permission.Type type) {
-        return permissionList.isAllowed(type);
-    }
-
-    private void initializePermissions() {
-        permissionList.clearAndLoadPermissions(getPermissionList());
-    }
 
     private void updateGUIperPermissions() {
         addSiteButton.setVisible(isAllowed(Permission.Type.ADD_SITE));

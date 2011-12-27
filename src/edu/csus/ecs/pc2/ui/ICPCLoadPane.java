@@ -1,8 +1,19 @@
 package edu.csus.ecs.pc2.ui;
 
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.event.KeyEvent;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Vector;
+
+import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
+import javax.swing.filechooser.FileFilter;
 
 import edu.csus.ecs.pc2.core.IInternalController;
 import edu.csus.ecs.pc2.core.imports.ICPCImportData;
@@ -19,19 +30,6 @@ import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IGroupListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
 import edu.csus.ecs.pc2.core.security.Permission;
-import edu.csus.ecs.pc2.core.security.PermissionList;
-
-import java.awt.Component;
-import java.awt.Dimension;
-import javax.swing.JButton;
-import javax.swing.filechooser.FileFilter;
-
-import java.awt.event.KeyEvent;
-import java.awt.FlowLayout;
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Vector;
 
 /**
  * ICPC CMS Import Pane.
@@ -49,8 +47,6 @@ public class ICPCLoadPane extends JPanePlugin {
     private static final long serialVersionUID = 4668437987656812366L;
 
     private Log log;
-
-    private PermissionList permissionList = new PermissionList();
 
     private JButton importAccountsButton = null;
 
@@ -113,14 +109,6 @@ public class ICPCLoadPane extends JPanePlugin {
                 updateGUIperPermissions();
             }
         });
-    }
-
-    private boolean isAllowed(Permission.Type type) {
-        return permissionList.isAllowed(type);
-    }
-
-    private void initializePermissions() {
-        permissionList.clearAndLoadPermissions(getPermissionList());
     }
 
     private void updateGUIperPermissions() {

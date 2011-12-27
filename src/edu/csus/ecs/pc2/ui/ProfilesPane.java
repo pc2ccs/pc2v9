@@ -43,7 +43,6 @@ import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.report.IReport;
 import edu.csus.ecs.pc2.core.report.ProfileCloneSettingsReport;
 import edu.csus.ecs.pc2.core.security.Permission;
-import edu.csus.ecs.pc2.core.security.PermissionList;
 import edu.csus.ecs.pc2.core.util.QuickLoad;
 
 /**
@@ -100,8 +99,6 @@ public class ProfilesPane extends JPanePlugin {
 
     private JButton reportButton = null;
 
-    private PermissionList permissionList = new PermissionList();
-    
     private SwitchProfileConfirmFrame switchFrame = null;
 
     private boolean usingExtraColumns = false;
@@ -813,14 +810,6 @@ public class ProfilesPane extends JPanePlugin {
         }
     }
     
-    private boolean isAllowed(Permission.Type type) {
-        return permissionList.isAllowed(type);
-    }
-
-    private void initializePermissions() {
-        permissionList.clearAndLoadPermissions(getPermissionList());
-    }
-
     /**
      * Account listener for permissions.
      *  
