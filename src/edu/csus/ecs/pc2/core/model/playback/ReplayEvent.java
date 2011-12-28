@@ -16,7 +16,7 @@ import edu.csus.ecs.pc2.core.model.SerializedFile;
  */
 
 // $HeadURL$
-public class PlaybackEvent implements IElementObject {
+public class ReplayEvent implements IElementObject {
 
     /**
      * Actions for playback.
@@ -84,12 +84,12 @@ public class PlaybackEvent implements IElementObject {
      */
     private static final long serialVersionUID = -8414973988906358491L;
 
-    public PlaybackEvent(Action action, ClientId clientId) {
+    public ReplayEvent(Action action, ClientId clientId) {
         this.action = action;
         this.clientId = clientId;
     }
 
-    public PlaybackEvent(Action action, ClientId clientId, Run run) {
+    public ReplayEvent(Action action, ClientId clientId, Run run) {
         this.action = action;
         this.run = run;
         this.submission = run;
@@ -99,7 +99,7 @@ public class PlaybackEvent implements IElementObject {
         eventTime = run.getElapsedMins();
     }
     
-    public PlaybackEvent(Action action, ClientId clientId, Run run, JudgementRecord judgementRecord) {
+    public ReplayEvent(Action action, ClientId clientId, Run run, JudgementRecord judgementRecord) {
         this(action, clientId, run);
         this.judgementRecord = judgementRecord;
     }

@@ -22,7 +22,7 @@ import edu.csus.ecs.pc2.core.model.RunUtilities;
 import edu.csus.ecs.pc2.core.model.SerializedFile;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
-import edu.csus.ecs.pc2.core.model.playback.PlaybackEvent.Action;
+import edu.csus.ecs.pc2.core.model.playback.ReplayEvent.Action;
 import edu.csus.ecs.pc2.core.packet.Packet;
 import edu.csus.ecs.pc2.core.packet.PacketFactory;
 
@@ -80,9 +80,9 @@ public class PlaybackManager {
      * @return
      * @throws Exception 
      */
-    public PlaybackEvent[] loadPlayback(String filename, IInternalContest contest) throws Exception {
+    public ReplayEvent[] loadPlayback(String filename, IInternalContest contest) throws Exception {
 
-        Vector<PlaybackEvent> events = new Vector<PlaybackEvent>();
+        Vector<ReplayEvent> events = new Vector<ReplayEvent>();
 
         if (!new File(filename).exists()) {
             throw new FileNotFoundException(filename);
@@ -98,7 +98,7 @@ public class PlaybackManager {
 //            Run run = new Run(clientId, language, problem);
 //            run.setElapsedMins(i + 45);
 //
-//            PlaybackEvent playbackEvent = new PlaybackEvent(Action.RUN_SUBMIT, clientId, run);
+//            ReplayEvent playbackEvent = new ReplayEvent(Action.RUN_SUBMIT, clientId, run);
 //
 //            events.add(playbackEvent);
 //        }
@@ -123,7 +123,7 @@ public class PlaybackManager {
                     continue;
                 }
                 
-                PlaybackEvent playbackEvent = createPlayBackEvent(lineNumber, contest, s, "[|]", sourceDirectory, events);
+                ReplayEvent playbackEvent = createPlayBackEvent(lineNumber, contest, s, "[|]", sourceDirectory, events);
                 if (playbackEvent != null) {
                     events.add(playbackEvent);
                 } else {
@@ -146,7 +146,7 @@ public class PlaybackManager {
             throw savedException;
         }
         
-        return (PlaybackEvent[]) events.toArray(new PlaybackEvent[events.size()]);
+        return (ReplayEvent[]) events.toArray(new ReplayEvent[events.size()]);
     }
     
     /**
@@ -190,7 +190,7 @@ public class PlaybackManager {
      * @return
      * @throws PlaybackParseException
      */
-    protected PlaybackEvent createPlayBackEvent(int lineNumber, IInternalContest contest, String s, String delimit, String sourceDir, Vector<PlaybackEvent> events) throws PlaybackParseException {
+    protected ReplayEvent createPlayBackEvent(int lineNumber, IInternalContest contest, String s, String delimit, String sourceDir, Vector<ReplayEvent> events) throws PlaybackParseException {
 
         String[] fields = s.split(delimit);
 
@@ -198,7 +198,7 @@ public class PlaybackManager {
             throw new PlaybackParseException("line must have 3 or more fields");
         }
 
-        PlaybackEvent playbackEvent = null;
+        ReplayEvent playbackEvent = null;
 
         Properties properties = mapFieldsNameValuePairs(fields);
 
@@ -207,7 +207,7 @@ public class PlaybackManager {
         Action action = Action.UNDEFINED;
         
         if (command.equalsIgnoreCase(Action.RUN_SUBMIT.toString())){
-            action = PlaybackEvent.Action.RUN_SUBMIT;
+            action = ReplayEvent.Action.RUN_SUBMIT;
             String problemName = getAndCheckValue(properties, PROBLEM_KEY, "Problem name", lineNumber);
             String languageName = getAndCheckValue(properties, LANGUAGE_KEY, "Language name", lineNumber);
             String mainfileName = getAndCheckValue(properties, MAINFILE_KEY, "Main filename", lineNumber);
@@ -255,7 +255,7 @@ public class PlaybackManager {
             run.setElapsedMins(getIntegerValue(elapsedTimeStr));
             run.setNumber(number);
             
-            playbackEvent= new PlaybackEvent(action, clientId, run);
+            playbackEvent= new ReplayEvent(action, clientId, run);
             playbackEvent.setClientId(clientId);
             playbackEvent.setFiles(files);
 
@@ -263,7 +263,7 @@ public class PlaybackManager {
             
         } else if (command.equalsIgnoreCase(Action.RUN_JUDGEMENT.toString())) {
             
-            action = PlaybackEvent.Action.RUN_JUDGEMENT;
+            action = ReplayEvent.Action.RUN_JUDGEMENT;
             String siteId = getAndCheckValue(properties, SITE_KEY, "Site number", lineNumber);
             
             String idStr = getAndCheckValue(properties, ID_KEY, "run/clar number", lineNumber);
@@ -314,7 +314,7 @@ public class PlaybackManager {
             judgementRecord.setPreliminaryJudgement(preliminaryJudged);
             judgementRecord.setSendToTeam(sendToTeam);
             
-            playbackEvent= new PlaybackEvent(action, judgeClientId, run, judgementRecord);
+            playbackEvent= new ReplayEvent(action, judgeClientId, run, judgementRecord);
             playbackEvent.setClientId(clientId);
 
             
@@ -351,7 +351,7 @@ public class PlaybackManager {
      * @param events
      * @return
      */
-    private Run findRun(IInternalContest contest, String siteIdString, int number, Vector<PlaybackEvent> events) {
+    private Run findRun(IInternalContest contest, String siteIdString, int number, Vector<ReplayEvent> events) {
 
         if (events == null){
             return null;
@@ -359,7 +359,7 @@ public class PlaybackManager {
         
         int siteId = getIntegerValue(siteIdString);
         
-        for (PlaybackEvent event : events){
+        for (ReplayEvent event : events){
             if (event.getAction().equals(Action.RUN_SUBMIT)){
                 Run run = event.getRun();
                 if (run.getNumber() == number && (run.getSiteNumber() == siteId)){
@@ -483,7 +483,7 @@ public class PlaybackManager {
         System.out.print(key + "=" + value + DELIMITER + " ");
     }
 
-    private void dump(String message, PlaybackEvent playbackEvent) {
+    private void dump(String message, ReplayEvent playbackEvent) {
 
         Run run = playbackEvent.getRun();
 
@@ -499,7 +499,7 @@ public class PlaybackManager {
         System.out.println();
     }
     
-    public void executeEvent(PlaybackEvent playbackEvent, IInternalContest contest, IInternalController controller) throws Exception {
+    public void executeEvent(ReplayEvent playbackEvent, IInternalContest contest, IInternalController controller) throws Exception {
 
         if (Utilities.isDebugMode()){
           dump("in executeEvent", playbackEvent);

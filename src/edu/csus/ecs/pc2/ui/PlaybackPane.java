@@ -41,8 +41,8 @@ import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.playback.EventStatus;
-import edu.csus.ecs.pc2.core.model.playback.PlaybackEvent;
-import edu.csus.ecs.pc2.core.model.playback.PlaybackEvent.Action;
+import edu.csus.ecs.pc2.core.model.playback.ReplayEvent;
+import edu.csus.ecs.pc2.core.model.playback.ReplayEvent.Action;
 import edu.csus.ecs.pc2.core.model.playback.PlaybackManager;
 import edu.csus.ecs.pc2.core.security.Permission;
 
@@ -213,7 +213,7 @@ public class PlaybackPane extends JPanePlugin {
         });
     }
 
-    public String[] buildPlayBackRow(PlaybackEvent playbackEvent) {
+    public String[] buildPlayBackRow(ReplayEvent playbackEvent) {
         String[] strings = new String[eventsListBox.getColumnCount()];
 
         // Object[] cols = { "Seq", "Site", "Who", "Event", "Id", "When", "State", "Details" };
@@ -231,11 +231,11 @@ public class PlaybackPane extends JPanePlugin {
         strings[5] = Long.toString(playbackEvent.getEventTime());
         strings[6] = "" + playbackEvent.getEventStatus();
 
-        if (playbackEvent.getAction().equals(PlaybackEvent.Action.RUN_SUBMIT)) {
+        if (playbackEvent.getAction().equals(ReplayEvent.Action.RUN_SUBMIT)) {
 
             strings[7] = getDetails(playbackEvent);
 
-        } else if (playbackEvent.getAction().equals(PlaybackEvent.Action.RUN_JUDGEMENT)) {
+        } else if (playbackEvent.getAction().equals(ReplayEvent.Action.RUN_JUDGEMENT)) {
 
             JudgementRecord judgementRecord = playbackEvent.getJudgementRecord();
             ElementId id = judgementRecord.getJudgementId();
@@ -249,7 +249,7 @@ public class PlaybackPane extends JPanePlugin {
         } else {
             Arrays.fill(strings, "");
             strings[0] = "" + playbackEvent.getSequenceId();
-            strings[3] = PlaybackEvent.Action.UNDEFINED.toString();
+            strings[3] = ReplayEvent.Action.UNDEFINED.toString();
         }
 
         return strings;
@@ -263,7 +263,7 @@ public class PlaybackPane extends JPanePlugin {
         }
     }
 
-    private String getDetails(PlaybackEvent event) {
+    private String getDetails(ReplayEvent event) {
 
         Run run = event.getRun();
 
@@ -291,7 +291,7 @@ public class PlaybackPane extends JPanePlugin {
     public void addSampleEventRows() {
 
         ClientId clientId = new ClientId(2, Type.TEAM, 22);
-        PlaybackEvent playbackEvent = new PlaybackEvent(Action.UNDEFINED, clientId);
+        ReplayEvent playbackEvent = new ReplayEvent(Action.UNDEFINED, clientId);
 
         playbackEvent.setSequenceId(eventsListBox.getRowCount());
         String[] row = buildPlayBackRow(playbackEvent);
@@ -389,7 +389,7 @@ public class PlaybackPane extends JPanePlugin {
                     
                     for (int i = startEventNumber; i <= runToStep && isStillRunning(); i++) {
 
-                        final PlaybackEvent playbackEvent = (PlaybackEvent) eventsListBox.getKeys()[i - 1];
+                        final ReplayEvent playbackEvent = (ReplayEvent) eventsListBox.getKeys()[i - 1];
                         final int currentEventNumber = playbackManager.getSequenceNumber() + (setIteratorCount * runToStep);
                         
                         try {
@@ -541,11 +541,11 @@ public class PlaybackPane extends JPanePlugin {
         
         int rowCount = getEventsListBox().getRowCount();
 
-        PlaybackEvent [] playbacks = new PlaybackEvent[rowCount];
+        ReplayEvent [] playbacks = new ReplayEvent[rowCount];
         Object [][] rowValues = new Object[rowCount][eventsListBox.getColumnCount()];
 
         for (int i = 0; i < rowCount; i++) {
-            PlaybackEvent playbackEvent = (PlaybackEvent) eventsListBox.getKeys()[i];
+            ReplayEvent playbackEvent = (ReplayEvent) eventsListBox.getKeys()[i];
             playbackEvent.setSequenceId(i+1);
             playbackEvent.setEventStatus(EventStatus.PENDING);
             playbacks[i] = playbackEvent;
@@ -692,7 +692,7 @@ public class PlaybackPane extends JPanePlugin {
             return;
         }
         
-        PlaybackEvent playbackEvent = (PlaybackEvent) eventsListBox.getKeys()[currentEventNumber - 1];
+        ReplayEvent playbackEvent = (ReplayEvent) eventsListBox.getKeys()[currentEventNumber - 1];
         try {
             currentEventLabel.setText("At event " + playbackManager.getSequenceNumber());
             playbackManager.executeEvent(playbackEvent, getContest(), getController());
@@ -734,11 +734,11 @@ public class PlaybackPane extends JPanePlugin {
             filename = getFileName();
             if (filename != null) {
 
-                PlaybackEvent[] playbackEvents = playbackManager.loadPlayback(filename, getContest());
+                ReplayEvent[] playbackEvents = playbackManager.loadPlayback(filename, getContest());
                 if (playbackEvents == null || playbackEvents.length == 0) {
                     JOptionPane.showMessageDialog(this, "No events found in " + filename);
                 } else {
-                    for (PlaybackEvent playbackEvent : playbackEvents) {
+                    for (ReplayEvent playbackEvent : playbackEvents) {
                         playbackEvent.setSequenceId(eventsListBox.getRowCount()+1);
                         String[] row = buildPlayBackRow(playbackEvent);
                         getEventsListBox().addRow(row, playbackEvent);

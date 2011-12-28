@@ -33,6 +33,7 @@ import edu.csus.ecs.pc2.core.list.LanguageDisplayList;
 import edu.csus.ecs.pc2.core.list.LanguageList;
 import edu.csus.ecs.pc2.core.list.LoginList;
 import edu.csus.ecs.pc2.core.list.NotificationList;
+import edu.csus.ecs.pc2.core.list.PlaybackInfoList;
 import edu.csus.ecs.pc2.core.list.ProblemDisplayList;
 import edu.csus.ecs.pc2.core.list.ProblemList;
 import edu.csus.ecs.pc2.core.list.ProfilesList;
@@ -46,6 +47,7 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.PasswordChangeEvent.Action;
 import edu.csus.ecs.pc2.core.model.ProfileChangeStatus.Status;
 import edu.csus.ecs.pc2.core.model.Run.RunStates;
+import edu.csus.ecs.pc2.core.model.playback.PlaybackManager;
 import edu.csus.ecs.pc2.core.security.FileSecurity;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.security.ISecurityMessageListener;
@@ -82,6 +84,8 @@ public class InternalContest implements IInternalContest {
     private Vector<INotificationListener> notificationListenerList = new Vector<INotificationListener>();
 
     private Vector<ILanguageListener> languageListenerList = new Vector<ILanguageListener>();
+    
+    private Vector<IPlayBackEventListener> playBackEventListenerList = new Vector<IPlayBackEventListener>();
     
     private Vector<IProfileListener> profileListenerList = new Vector<IProfileListener>();
 
@@ -198,6 +202,8 @@ public class InternalContest implements IInternalContest {
      */
     private LanguageList languageList = new LanguageList();
     
+    private PlaybackInfoList playbackInfoList = new PlaybackInfoList();
+    
     /**
      * List of all profiles.
      */
@@ -241,6 +247,8 @@ public class InternalContest implements IInternalContest {
     
     // TODO 670 add list for ReplaySetting, add load and save too
     private ReplaySetting replaySettingTemp = null;
+    
+    private PlaybackManager playbackManager = new PlaybackManager();
 
     private Site createFakeSite(int nextSiteNumber) {
         Site site = new Site("Site " + nextSiteNumber, nextSiteNumber);
@@ -504,6 +512,27 @@ public class InternalContest implements IInternalContest {
                 languageListenerList.elementAt(i).languageRefreshAll(languageEvent);
             } else {
                 languageListenerList.elementAt(i).languageChanged(languageEvent);
+            }
+        }
+    }
+    
+    private void firePlaybackInfosListener(PlayBackEvent.Action action, PlaybackInfo playbackInfo) {
+        
+        PlayBackEvent playBackEvent = new PlayBackEvent(action, playbackInfo);
+        
+        for (int i = 0; i < playBackEventListenerList.size(); i++) {
+            if (playBackEvent.getAction() == PlayBackEvent.Action.ADDED) {
+                playBackEventListenerList.elementAt(i).playbackAdded(playBackEvent);
+            } else if (playBackEvent.getAction() == PlayBackEvent.Action.RESET_REPLAY) {
+                playBackEventListenerList.elementAt(i).playbackEvent(playBackEvent);
+            } else if (playBackEvent.getAction() == PlayBackEvent.Action.START_REPLAY) {
+                playBackEventListenerList.elementAt(i).playbackEvent(playBackEvent);
+            } else if (playBackEvent.getAction() == PlayBackEvent.Action.STOP_REPLAY) {
+                playBackEventListenerList.elementAt(i).playbackEvent(playBackEvent);
+            } else if (playBackEvent.getAction() == PlayBackEvent.Action.REFRESH_ALL) {
+                playBackEventListenerList.elementAt(i).playbackRefreshAll(playBackEvent);
+            } else {
+                playBackEventListenerList.elementAt(i).playbackChanged(playBackEvent);
             }
         }
     }
@@ -996,6 +1025,14 @@ public class InternalContest implements IInternalContest {
 
     public void removeLanguageListener(ILanguageListener languageListener) {
         languageListenerList.remove(languageListener);
+    }
+    
+    public void addLanguageListener(IPlayBackEventListener playBackEventListener) {
+        playBackEventListenerList.addElement(playBackEventListener);
+    }
+
+    public void removeLanguageListener(IPlayBackEventListener playBackEventListener) {
+        playBackEventListenerList.remove(playBackEventListener);
     }
     
     public void addChangePasswordListener(IChangePasswordListener changePasswordListener){
@@ -2913,6 +2950,52 @@ public class InternalContest implements IInternalContest {
             list[0] = replaySettingTemp;
             return list;
         }
+    }
+
+    public void addPlaybackInfo(PlaybackInfo playbackInfo) {
+        playbackInfoList.add(playbackInfo);
+        firePlaybackInfosListener(PlayBackEvent.Action.ADDED, playbackInfo);
+    }
+
+    public void deletePlaybackInfo(PlaybackInfo playbackInfo) {
+        playbackInfoList.delete(playbackInfo);
+        firePlaybackInfosListener(PlayBackEvent.Action.DELETE, playbackInfo);
+    }
+
+    public void refreshPlaybackInfo(PlaybackInfo playbackInfo) {
+        playbackInfoList.delete(playbackInfo);
+        firePlaybackInfosListener(PlayBackEvent.Action.REFRESH_ALL, playbackInfo);
+    }
+
+    public void resetPlaybackInfo(PlaybackInfo playbackInfo) {
+        playbackInfoList.delete(playbackInfo);
+        firePlaybackInfosListener(PlayBackEvent.Action.RESET_REPLAY, playbackInfo);
+    }
+
+    public void startReplayPlaybackInfo(PlaybackInfo playbackInfo) {
+        playbackInfoList.delete(playbackInfo);
+        firePlaybackInfosListener(PlayBackEvent.Action.START_REPLAY, playbackInfo);
+    }
+
+    public void stopReplayPlaybackInfo(PlaybackInfo playbackInfo) {
+        playbackInfoList.delete(playbackInfo);
+        firePlaybackInfosListener(PlayBackEvent.Action.STOP_REPLAY, playbackInfo);
+    }
+
+    public PlaybackInfo[] getPlaybackInfos() {
+        return playbackInfoList.getList();
+    }
+
+    public PlaybackInfo getPlaybackInfo(ElementId elementId) {
+        return (PlaybackInfo) playbackInfoList.get(elementId);
+    }
+
+    public PlaybackManager getPlaybackManager() {
+        return playbackManager;
+    }
+
+    public void setPlaybackManager(PlaybackManager playbackManager) {
+        this.playbackManager = playbackManager;
     }
 
 }

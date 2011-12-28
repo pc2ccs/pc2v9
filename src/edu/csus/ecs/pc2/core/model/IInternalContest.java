@@ -13,6 +13,7 @@ import edu.csus.ecs.pc2.core.exception.UnableToUncheckoutRunException;
 import edu.csus.ecs.pc2.core.log.Log;
 import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ProfileChangeStatus.Status;
+import edu.csus.ecs.pc2.core.model.playback.PlaybackManager;
 import edu.csus.ecs.pc2.core.security.FileSecurityException;
 import edu.csus.ecs.pc2.core.security.ISecurityMessageListener;
 import edu.csus.ecs.pc2.core.security.Permission;
@@ -40,9 +41,9 @@ public interface IInternalContest {
     void setContestPassword(String contestPassword);
 
     void addLanguage(Language language);
-
+    
     void deleteLanguage(Language language);
-
+    
     void addProblem(Problem problem);
     
     void addReplaySetting (ReplaySetting replaySetting);
@@ -109,7 +110,7 @@ public interface IInternalContest {
     void updateSiteStatus(Site site, Profile inProfile, Status status);
 
     void updateLanguage(Language language);
-
+    
     void updateProblem(Problem problem);
     
     void updateReplaySetting(ReplaySetting replaySetting);
@@ -320,6 +321,8 @@ public interface IInternalContest {
      * @return array of Language
      */
     Language[] getLanguages();
+    
+    PlaybackInfo [] getPlaybackInfos();
 
     /**
      * get title for this logged in client.
@@ -354,7 +357,11 @@ public interface IInternalContest {
     void addLanguageListener(ILanguageListener languageListener);
 
     void removeLanguageListener(ILanguageListener languageListener);
+    
+    void addLanguageListener(IPlayBackEventListener playBackEventListener);
 
+    void removeLanguageListener(IPlayBackEventListener playBackEventListener);
+      
     void addChangePasswordListener(IChangePasswordListener changePasswordListener);
 
     void removeChangePasswordListener(IChangePasswordListener changePasswordListener);
@@ -787,6 +794,8 @@ public interface IInternalContest {
     void clarificationNotAvailable(Clarification clar);
 
     Language getLanguage(ElementId elementId);
+    
+    PlaybackInfo getPlaybackInfo(ElementId elementId);
 
     Problem getProblem(ElementId elementId);
     
@@ -1133,4 +1142,20 @@ public interface IInternalContest {
      */
     void setupDefaultCategories();
     
+    void addPlaybackInfo(PlaybackInfo playbackInfo);
+
+    void deletePlaybackInfo(PlaybackInfo playbackInfo);
+
+    void refreshPlaybackInfo(PlaybackInfo playbackInfo);
+
+    void resetPlaybackInfo(PlaybackInfo playbackInfo);
+
+    void startReplayPlaybackInfo(PlaybackInfo playbackInfo);
+
+    void stopReplayPlaybackInfo(PlaybackInfo playbackInfo);
+    
+    PlaybackManager getPlaybackManager();
+    
+    void setPlaybackManager(PlaybackManager playbackManager);
+
 }
