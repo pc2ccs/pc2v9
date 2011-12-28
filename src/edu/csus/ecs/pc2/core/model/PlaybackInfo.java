@@ -39,7 +39,7 @@ public class PlaybackInfo implements IElementObject {
 
     private int currentEventIndex;
 
-    private String filename;
+    private String filename = "";
     
     public PlaybackInfo(String displayName) {
         super();
@@ -95,7 +95,7 @@ public class PlaybackInfo implements IElementObject {
     }
 
     public String toString() {
-        return displayName;
+        return displayName + " started "+isActive()+" seq " + currentEventIndex+" file "+filename;
     }
 
     /**
@@ -152,6 +152,10 @@ public class PlaybackInfo implements IElementObject {
     public boolean isStarted() {
         return started;
     }
+    
+    public void setStarted(boolean started) {
+        this.started = started;
+    }
 
     ReplayEvent[] getReplayList() {
         return (ReplayEvent[]) playbackList.toArray(new ReplayEvent[playbackList.size()]);
@@ -164,4 +168,5 @@ public class PlaybackInfo implements IElementObject {
     public String getFilename() {
         return filename;
     }
+    
 }

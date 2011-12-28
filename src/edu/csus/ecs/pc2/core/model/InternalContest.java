@@ -1027,11 +1027,11 @@ public class InternalContest implements IInternalContest {
         languageListenerList.remove(languageListener);
     }
     
-    public void addLanguageListener(IPlayBackEventListener playBackEventListener) {
+    public void addPlayBackEventListener(IPlayBackEventListener playBackEventListener) {
         playBackEventListenerList.addElement(playBackEventListener);
     }
 
-    public void removeLanguageListener(IPlayBackEventListener playBackEventListener) {
+    public void removePlayBackEventListener(IPlayBackEventListener playBackEventListener) {
         playBackEventListenerList.remove(playBackEventListener);
     }
     

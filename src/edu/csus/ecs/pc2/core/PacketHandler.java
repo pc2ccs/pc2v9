@@ -40,6 +40,7 @@ import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.MessageEvent.Area;
+import edu.csus.ecs.pc2.core.model.PlaybackInfo;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Profile;
@@ -404,7 +405,15 @@ public class PacketHandler {
             case SHUTDOWN_ALL:
                 handleShutdownAllServers (packet, connectionHandlerID, fromId);
                 break;
-           
+                
+            case START_PLAYBACK:
+                handleStartPlayback (packet, connectionHandlerID, fromId);
+                break;
+                
+            case STOP_PLAYBACK:
+                handleStopPlayback (packet, connectionHandlerID, fromId);
+                break;
+          
             default:
                 Exception exception = new Exception("PacketHandler.handlePacket Unhandled packet " + packet);
                 controller.getLog().log(Log.WARNING, "Unhandled Packet ", exception);
@@ -412,6 +421,27 @@ public class PacketHandler {
         }
 
         info("handlePacket end " + packet);
+    }
+
+    private void handleStopPlayback(Packet packet, ConnectionHandlerID connectionHandlerID, ClientId fromId) {
+        // TODO security check
+        // TODO 673 forward this start playback to other servers
+        
+        System.out.println("debug 22 - handleStartPlayback "); // TODO 673
+        
+        PlaybackInfo playbackInfo = (PlaybackInfo) PacketFactory.getObjectValue(packet, PacketFactory.PLAYBACK_INFO);
+        contest.stopReplayPlaybackInfo(playbackInfo);
+    }
+
+    private void handleStartPlayback(Packet packet, ConnectionHandlerID connectionHandlerID, ClientId fromId) {
+        
+        // TODO security check
+        // TODO 673 forward this start playback to other servers
+        
+        System.out.println("debug 22 - handleStartPlayback "); // TODO 673
+        
+        PlaybackInfo playbackInfo = (PlaybackInfo) PacketFactory.getObjectValue(packet, PacketFactory.PLAYBACK_INFO);
+        contest.startReplayPlaybackInfo(playbackInfo);
     }
 
     /**

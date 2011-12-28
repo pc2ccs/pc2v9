@@ -45,6 +45,7 @@ import edu.csus.ecs.pc2.core.model.LoginEvent;
 import edu.csus.ecs.pc2.core.model.MessageEvent.Area;
 import edu.csus.ecs.pc2.core.model.PacketEvent;
 import edu.csus.ecs.pc2.core.model.PacketEvent.Action;
+import edu.csus.ecs.pc2.core.model.PlaybackInfo;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Profile;
@@ -3435,6 +3436,11 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
     public void addNewCategory(Category newCategory) {
         Packet addNewCategory = PacketFactory.createAddSetting(contest.getClientId(), getServerClientId(), newCategory);
         sendToLocalServer(addNewCategory);
+    }
+
+    public void startPlayback(PlaybackInfo playbackInfo) {
+        Packet startPacket = PacketFactory.createStartPlayback(contest.getClientId(), getServerClientId(), playbackInfo);
+        sendToLocalServer(startPacket);
     }
 
 }

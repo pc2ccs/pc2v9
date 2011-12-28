@@ -19,6 +19,7 @@ import edu.csus.ecs.pc2.core.model.IPacketListener;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
+import edu.csus.ecs.pc2.core.model.PlaybackInfo;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Profile;
@@ -617,5 +618,7 @@ public interface IInternalController {
     void updateCategory(Category newCategory);
 
     void addNewCategory(Category newCategory);
+
+    void startPlayback(PlaybackInfo playbackInfo);
 
 }

@@ -34,16 +34,19 @@ import edu.csus.ecs.pc2.core.model.ClientType.Type;
 import edu.csus.ecs.pc2.core.model.ElementId;
 import edu.csus.ecs.pc2.core.model.IAccountListener;
 import edu.csus.ecs.pc2.core.model.IInternalContest;
+import edu.csus.ecs.pc2.core.model.IPlayBackEventListener;
 import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
+import edu.csus.ecs.pc2.core.model.PlayBackEvent;
+import edu.csus.ecs.pc2.core.model.PlaybackInfo;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.Run;
 import edu.csus.ecs.pc2.core.model.Site;
 import edu.csus.ecs.pc2.core.model.playback.EventStatus;
+import edu.csus.ecs.pc2.core.model.playback.PlaybackManager;
 import edu.csus.ecs.pc2.core.model.playback.ReplayEvent;
 import edu.csus.ecs.pc2.core.model.playback.ReplayEvent.Action;
-import edu.csus.ecs.pc2.core.model.playback.PlaybackManager;
 import edu.csus.ecs.pc2.core.security.Permission;
 
 /**
@@ -205,6 +208,7 @@ public class PlaybackPane extends JPanePlugin {
         super.setContestAndController(inContest, inController);
         
         getContest().addAccountListener(new AccountListenerImplementation());
+        getContest().addPlayBackEventListener(new PlayBackEventListener());
         
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -325,6 +329,13 @@ public class PlaybackPane extends JPanePlugin {
     }
 
     protected void startRunningEvents() {
+        
+        if (edu.csus.ecs.pc2.core.model.ClientType.isAdmin(getContest().getClientId())) {
+            PlaybackInfo playbackInfo = new PlaybackInfo("Temp Playback Info");
+            playbackInfo.setStarted(true);
+            getController().startPlayback(playbackInfo);
+            return;
+        }
 
         if (eventsListBox.getRowCount() == 0) {
             JOptionPane.showMessageDialog(this, "No events defined");
@@ -876,6 +887,32 @@ public class PlaybackPane extends JPanePlugin {
             });
         }
     }
- 
+    
+    /**
+     *  PlayBackEvent Listener.
+     *  
+     * @author pc2@ecs.csus.edu
+     * @version $Id$
+     */
+    
+    // $HeadURL$
+    protected class PlayBackEventListener implements IPlayBackEventListener{
+
+        public void playbackChanged(PlayBackEvent playBackEvent) {
+            System.out.println("PlayBackEvent " + playBackEvent.getAction() + " " + playBackEvent.getPlaybackInfo());
+        }
+
+        public void playbackRefreshAll(PlayBackEvent playBackEvent) {
+            playbackChanged(playBackEvent);
+        }
+
+        public void playbackEvent(PlayBackEvent playBackEvent) {
+            playbackChanged(playBackEvent);
+        }
+
+        public void playbackAdded(PlayBackEvent playBackEvent) {
+            playbackChanged(playBackEvent);
+        }
+    }
 
 } // @jve:decl-index=0:visual-constraint="10,10"

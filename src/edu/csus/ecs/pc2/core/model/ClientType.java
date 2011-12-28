@@ -7,7 +7,7 @@ package edu.csus.ecs.pc2.core.model;
  * @version $Id$
  */
 // $HeadURL$
-public class ClientType {
+public final class ClientType {
 
     /**
      * Client Types.
@@ -60,4 +60,11 @@ public class ClientType {
         OTHER
     }
 
+    private ClientType() {
+        
+    }
+    
+    public static boolean isAdmin(ClientId clientId) {
+        return Type.ADMINISTRATOR.equals(clientId.getClientType());
+    }
 }

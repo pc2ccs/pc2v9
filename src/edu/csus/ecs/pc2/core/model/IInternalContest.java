@@ -358,10 +358,10 @@ public interface IInternalContest {
 
     void removeLanguageListener(ILanguageListener languageListener);
     
-    void addLanguageListener(IPlayBackEventListener playBackEventListener);
-
-    void removeLanguageListener(IPlayBackEventListener playBackEventListener);
-      
+    void addPlayBackEventListener(IPlayBackEventListener playBackEventListener);
+    
+    void removePlayBackEventListener(IPlayBackEventListener playBackEventListener);
+    
     void addChangePasswordListener(IChangePasswordListener changePasswordListener);
 
     void removeChangePasswordListener(IChangePasswordListener changePasswordListener);

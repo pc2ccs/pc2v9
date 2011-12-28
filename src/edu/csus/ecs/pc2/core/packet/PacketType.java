@@ -721,8 +721,17 @@ public final class PacketType implements Serializable {
          */
         UPDATE_REMOTE_DATA,
         /**
-         * 
+         * Start Playback 
          */
+        START_PLAYBACK,
+        /**
+         * Stop Playback 
+         */
+        STOP_PLAYBACK,
+        /**
+         * Start Playback 
+         */
+        RESET_PLAYBACK,
     }
 
     /**

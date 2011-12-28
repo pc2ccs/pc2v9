@@ -31,6 +31,7 @@ import edu.csus.ecs.pc2.core.model.Judgement;
 import edu.csus.ecs.pc2.core.model.JudgementRecord;
 import edu.csus.ecs.pc2.core.model.Language;
 import edu.csus.ecs.pc2.core.model.MessageEvent.Area;
+import edu.csus.ecs.pc2.core.model.PlaybackInfo;
 import edu.csus.ecs.pc2.core.model.Problem;
 import edu.csus.ecs.pc2.core.model.ProblemDataFiles;
 import edu.csus.ecs.pc2.core.model.Profile;
@@ -341,6 +342,8 @@ public final class PacketFactory {
     public static final String FINALIZE_DATA = "FINALIZE_DATA";
 
     public static final String CATEGORY = "CATEGORY";
+
+    public static final String PLAYBACK_INFO = "PLAYBACK_INFO";
 
     
     /**
@@ -2177,6 +2180,15 @@ public final class PacketFactory {
         Properties prop = new Properties();
         prop.put(CATEGORY, category);
         Packet packet = new Packet(Type.ADD_SETTING, source, destination, prop);
+        return packet;
+    }
+
+    public static Packet createStartPlayback(ClientId source, ClientId destination, PlaybackInfo playbackInfo) {
+        Properties prop = new Properties();
+        prop.put(CLIENT_ID, source);
+        prop.put(SITE_NUMBER, source.getSiteNumber());
+        prop.put(PLAYBACK_INFO, playbackInfo);
+        Packet packet = new Packet(Type.START_PLAYBACK, source, destination, prop);
         return packet;
     }
 
