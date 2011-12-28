@@ -17,7 +17,7 @@ public class PlaybackInfo implements IElementObject {
     /**
      * 
      */
-    private static final long serialVersionUID = 1379624237544591529L;
+    private static final long serialVersionUID = -2365609088747285735L;
 
     /**
      * Title for the PlaybackInfo.
@@ -155,5 +155,13 @@ public class PlaybackInfo implements IElementObject {
 
     ReplayEvent[] getReplayList() {
         return (ReplayEvent[]) playbackList.toArray(new ReplayEvent[playbackList.size()]);
+    }
+    
+    public void setFilename(String filename) {
+        this.filename = filename;
+    }
+    
+    public String getFilename() {
+        return filename;
     }
 }

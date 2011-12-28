@@ -71,6 +71,7 @@ import edu.csus.ecs.pc2.core.report.ListRunLanguages;
 import edu.csus.ecs.pc2.core.report.LoginReport;
 import edu.csus.ecs.pc2.core.report.NotificationsReport;
 import edu.csus.ecs.pc2.core.report.OldRunsReport;
+import edu.csus.ecs.pc2.core.report.PlaybackDumpReport;
 import edu.csus.ecs.pc2.core.report.PluginsReport;
 import edu.csus.ecs.pc2.core.report.ProblemsReport;
 import edu.csus.ecs.pc2.core.report.ProfileCloneSettingsReport;
@@ -243,6 +244,8 @@ public class ReportPane extends JPanePlugin {
         reports.add(new CategoryReport());
         
         reports.add(new RunStatisticsReport());
+        
+        reports.add(new PlaybackDumpReport());
 
         listOfReports = (IReport[]) reports.toArray(new IReport[reports.size()]);
         Arrays.sort(listOfReports, new ReportNameByComparator());
