@@ -1,5 +1,6 @@
 package edu.csus.ecs.pc2.core.model;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Vector;
 
@@ -46,6 +47,10 @@ public class PlaybackInfo implements IElementObject {
         this.displayName = displayName;
         elementId = new ElementId(displayName);
         setSiteNumber(0);
+    }
+
+    public PlaybackInfo() {
+        this("Playback");
     }
 
     /**
@@ -167,6 +172,15 @@ public class PlaybackInfo implements IElementObject {
     
     public String getFilename() {
         return filename;
+    }
+    
+    public void setPlaybackList(Vector<ReplayEvent> playbackList) {
+        this.playbackList = playbackList;
+    }
+    
+    public void setPlaybackList(ReplayEvent [] list) {
+        this.playbackList = new Vector<ReplayEvent>();
+        playbackList.addAll(Arrays.asList(list));
     }
     
 }

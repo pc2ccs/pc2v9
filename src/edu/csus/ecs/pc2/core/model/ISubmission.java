@@ -51,6 +51,17 @@ public class ISubmission implements Serializable, IElementObject {
      * 
      */
     private int number = 0;
+    
+    /**
+     * Sequence number from originating playback.
+     * Base one number.
+     */
+    private int playbackSequenceNumber = 0;
+    
+    /**
+     * Identifier for which playback settings are used.
+     */
+    private char [] playbackId = new char[0]; 
 
     /**
      * The millisecond when the submissions was submitted.
@@ -155,6 +166,22 @@ public class ISubmission implements Serializable, IElementObject {
     
     public Date getCreateDate() {
         return createDate;
+    }
+
+    public int getPlaybackSequenceNumber() {
+        return playbackSequenceNumber;
+    }
+
+    public void setPlaybackSequenceNumber(int playbackSequenceNumber) {
+        this.playbackSequenceNumber = playbackSequenceNumber;
+    }
+
+    public char[] getPlaybackId() {
+        return playbackId;
+    }
+
+    public void setPlaybackId(char[] playbackId) {
+        this.playbackId = playbackId;
     }
 
 }

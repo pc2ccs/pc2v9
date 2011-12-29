@@ -298,25 +298,35 @@ public class InternalController implements IInternalController, ITwoToOne, IBtoA
         packetHandler = new PacketHandler(this, contest);
     }
 
-    /**
-     * Client send packet to server.
-     * 
-     * @param packet
-     */
     public void sendToLocalServer(Packet packet) {
-        try {
-            log.info("Sending packet to server " + packet);
-            if (contest.getProfile() != null){
-                packet.setContestIdentifier(contest.getContestIdentifier().toString());
+        
+        if (isThisServer(packet.getSourceId())) {
+            ConnectionHandlerID connectionHandlerID = contest.getConnectionHandleID(contest.getClientId());
+            processPacket(packet, connectionHandlerID);
+            log.info("Sent    packet to server " + packet);
+            return;
+        } else {
+            try {
+                log.info("Sending packet to server " + packet);
+                if (contest.getProfile() != null) {
+                    packet.setContestIdentifier(contest.getContestIdentifier().toString());
+                }
+                connectionManager.send(packet);
+                outgoingPacket(packet);
+
+            } catch (TransportException e) {
+                info("Unable to send to Server  " + packet);
+                e.printStackTrace();
             }
-            connectionManager.send(packet);
-            outgoingPacket(packet);
-            
-        } catch (TransportException e) {
-            info("Unable to send to Server  " + packet);
-            e.printStackTrace();
+            log.info("Sent    packet to server " + packet);
         }
-        log.info("Sent    packet to server " + packet);
+    }
+
+    private boolean isThisServer(ClientId sourceId) {
+        if (isServer(sourceId)) {
+            return sourceId.getSiteNumber() == contest.getSiteNumber();
+        }
+        return false;
     }
 
     private void sendToClient(ConnectionHandlerID connectionHandlerID, Packet packet) {

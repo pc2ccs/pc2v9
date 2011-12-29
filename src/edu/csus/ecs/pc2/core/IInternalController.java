@@ -420,6 +420,15 @@ public interface IInternalController {
 
     void setSecurityLevel(int securityLevel);
 
+    /**
+     * Send packet to server.
+     * 
+     * Also can be used to send a packet from  this
+     * server to this server as a consistent interface
+     * to the server (esp from classes like ServerView)
+     * 
+     * @param packet
+     */
     void sendToLocalServer(Packet packet);
 
     /**

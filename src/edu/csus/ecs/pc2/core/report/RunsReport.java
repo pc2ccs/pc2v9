@@ -87,6 +87,9 @@ public class RunsReport implements IReport {
         printWriter.print("jby " + jbyString + "|");
         printWriter.print("jci " + jciString + "|");
         
+        printWriter.print("pbseq " + run.getPlaybackSequenceNumber() + "|");
+        printWriter.print("jci " + new String(run.getPlaybackId()) + "|");
+        
         printWriter.println();
     
     }

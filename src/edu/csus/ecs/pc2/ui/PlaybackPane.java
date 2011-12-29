@@ -108,6 +108,8 @@ public class PlaybackPane extends JPanePlugin {
     
     private boolean stillRunning = false;
     
+    private PlaybackInfo playbackInfo = new PlaybackInfo();
+    
     /**
      * This method initializes
      * 
@@ -331,11 +333,13 @@ public class PlaybackPane extends JPanePlugin {
     protected void startRunningEvents() {
         
         if (edu.csus.ecs.pc2.core.model.ClientType.isAdmin(getContest().getClientId())) {
-            PlaybackInfo playbackInfo = new PlaybackInfo("Temp Playback Info");
+            playbackInfo.setSiteNumber(getContest().getSiteNumber());
             playbackInfo.setStarted(true);
             getController().startPlayback(playbackInfo);
             return;
         }
+        getController().startPlayback(playbackInfo);
+        getContest().startReplayPlaybackInfo(playbackInfo);
 
         if (eventsListBox.getRowCount() == 0) {
             JOptionPane.showMessageDialog(this, "No events defined");
@@ -749,6 +753,11 @@ public class PlaybackPane extends JPanePlugin {
                 if (playbackEvents == null || playbackEvents.length == 0) {
                     JOptionPane.showMessageDialog(this, "No events found in " + filename);
                 } else {
+                    
+                    playbackInfo.setSiteNumber(getContest().getSiteNumber());
+                    playbackInfo.setFilename(filename);
+                    playbackInfo.setPlaybackList(playbackEvents);
+                    
                     for (ReplayEvent playbackEvent : playbackEvents) {
                         playbackEvent.setSequenceId(eventsListBox.getRowCount()+1);
                         String[] row = buildPlayBackRow(playbackEvent);
